@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  python-lint-type-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Pull Git LFS task snapshots
+        run: git lfs pull || true
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+      - name: Set up Go (for Go task validation)
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - name: Set up Node (for TypeScript task validation)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Set up Rust (for Rust task validation)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.87.0"
+          components: clippy, rustfmt
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.21.2
+      - name: Install uv or pip deps (use venv + make for parity)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,test]"
+      - name: Ruff lint + format check
+        run: ruff check . && ruff format --check .
+      - name: Mypy typecheck
+        run: mypy harness backend scripts/ingest_runs.py
+      - name: Pytest (fast, no Docker)
+        run: pytest -m "not slow and not docker" --cov=harness --cov-fail-under=80
+      - name: Validate tasks (gold patches solve, fail-to-pass real, deterministic)
+        run: python scripts/validate_tasks.py tasks/v1
+
+  dashboard-lint-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: 'npm'
+          cache-dependency-path: dashboard/package-lock.json
+      - name: Install dashboard deps
+        run: cd dashboard && npm ci
+      - name: Lint dashboard
+        run: cd dashboard && npm run lint
+      - name: Build dashboard
+        run: cd dashboard && npm run build
+
+  docker-sandbox-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build sandbox base image
+        run: docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
+      - name: Smoke sandbox toolchains
+        run: |
+          docker run --rm vulcanbench/sandbox:base sh -lc '
+            python --version &&
+            pytest --version &&
+            ruff --version &&
+            bandit --version &&
+            radon --version &&
+            go version &&
+            node --version
+          '
+      - name: Build Rust sandbox image
+        run: docker build -t vulcanbench/sandbox:rust -f sandbox/Dockerfile.rust .
+      - name: Smoke Rust sandbox toolchains
+        run: |
+          docker run --rm vulcanbench/sandbox:rust sh -lc '
+            rustc --version &&
+            cargo --version &&
+            cargo clippy --version &&
+            cargo fmt --version &&
+            cargo audit --version
+          '

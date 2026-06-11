@@ -1,0 +1,65 @@
+name: Validate Tasks
+
+on:
+  pull_request:
+    paths:
+      - "tasks/**"
+      - "harness/validate.py"
+      - "scripts/validate_tasks.py"
+  push:
+    branches: [main, master]
+    paths:
+      - "tasks/**"
+
+jobs:
+  validate-micro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.87.0"
+          components: clippy, rustfmt
+      - run: cargo install cargo-audit --version 0.21.2
+      - run: pip install -e ".[dev,test]"
+      - name: Validate micro/small tasks
+        run: python scripts/validate_tasks.py tasks/v1 --filter-scale micro
+
+  validate-large-nightly:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.87.0"
+          components: clippy, rustfmt
+      - run: cargo install cargo-audit --version 0.21.2
+      - run: pip install -e ".[dev,test]"
+      - name: Validate large / navigation-stress tasks
+        run: python scripts/validate_tasks.py tasks/v1 --filter-scale large

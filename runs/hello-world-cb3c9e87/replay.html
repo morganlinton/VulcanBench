@@ -1,0 +1,137 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>MorganBench Replay</title>
+<style>body{font-family:ui-monospace,monospace;background:#0a0a0a;color:#ddd;margin:0;padding:20px} .event{border:1px solid #333;margin:4px 0;padding:8px;border-radius:4px} .step{color:#0f0} .type{color:#0af;font-weight:bold} pre{background:#111;padding:8px;overflow:auto;max-height:300px} .header{position:sticky;top:0;background:#111;padding:10px;z-index:10}</style>
+</head><body>
+<div class="header"><h1>MorganBench Replay</h1><p>Trace: runs/hello-world-cb3c9e87/trace.jsonl | Events: 18</p><button onclick="location.reload()">Reload</button></div>
+<div id="timeline"><div class="event"><span class="step">#1</span> <span class="type">task_start</span> <small>2026-05-29T14:24:37.147392+00:00</small><pre>{
+  "task_id": "hello-world",
+  "metadata": {
+    "id": "hello-world",
+    "category": "synthetic",
+    "languages": [
+      "python"
+    ],
+    "difficulty": "trivial",
+    "created": "2026-05-28",
+    "source": "morganbench-internal",
+    "decontamination_notes": "Synthetic task generated after all model cutoffs. Not from any public repo.",
+    "base_commit": "HEAD"
+  }
+}</pre></div><div class="event"><span class="step">#2</span> <span class="type">llm_request</span> <small>2026-05-29T14:24:37.262930+00:00</small><pre>{
+  "step": 1,
+  "messages": 2
+}</pre></div><div class="event"><span class="step">#3</span> <span class="type">llm_response</span> <small>2026-05-29T14:24:37.263282+00:00</small><pre>{
+  "content": "Reading the issue.",
+  "tool_calls": [
+    {
+      "id": "c1",
+      "name": "read_file",
+      "arguments": {
+        "path": "issue.md"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 50,
+    "completion_tokens": 20
+  }
+}</pre></div><div class="event"><span class="step">#4</span> <span class="type">tool_call</span> <small>2026-05-29T14:24:37.263522+00:00</small><pre>{
+  "tool": "read_file",
+  "args": {
+    "path": "issue.md"
+  },
+  "id": "c1"
+}</pre></div><div class="event"><span class="step">#5</span> <span class="type">tool_observation</span> <small>2026-05-29T14:24:37.263583+00:00</small><pre>{
+  "tool": "read_file",
+  "result": "Write a Python script hello.py that prints exactly \"hello from morganbench\".\nThe script must exist in the workspace root after edits and pass `python hello.py`.\nThis is a trivial synthetic task to validate the full harness pipeline, tracer, and replay.\n",
+  "error": null
+}</pre></div><div class="event"><span class="step">#6</span> <span class="type">llm_request</span> <small>2026-05-29T14:24:37.263658+00:00</small><pre>{
+  "step": 2,
+  "messages": 4
+}</pre></div><div class="event"><span class="step">#7</span> <span class="type">llm_response</span> <small>2026-05-29T14:24:37.263731+00:00</small><pre>{
+  "content": "Creating hello.py with the required output.",
+  "tool_calls": [
+    {
+      "id": "c2",
+      "name": "edit_file",
+      "arguments": {
+        "path": "hello.py",
+        "old_string": "",
+        "new_string": "print(\"hello from morganbench\")\n"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 70,
+    "completion_tokens": 20
+  }
+}</pre></div><div class="event"><span class="step">#8</span> <span class="type">tool_call</span> <small>2026-05-29T14:24:37.264003+00:00</small><pre>{
+  "tool": "edit_file",
+  "args": {
+    "path": "hello.py",
+    "old_string": "",
+    "new_string": "print(\"hello from morganbench\")\n"
+  },
+  "id": "c2"
+}</pre></div><div class="event"><span class="step">#9</span> <span class="type">tool_observation</span> <small>2026-05-29T14:24:37.264059+00:00</small><pre>{
+  "tool": "edit_file",
+  "result": "+ print(\"hello from morganbench\")\n",
+  "error": null
+}</pre></div><div class="event"><span class="step">#10</span> <span class="type">llm_request</span> <small>2026-05-29T14:24:37.264120+00:00</small><pre>{
+  "step": 3,
+  "messages": 6
+}</pre></div><div class="event"><span class="step">#11</span> <span class="type">llm_response</span> <small>2026-05-29T14:24:37.264182+00:00</small><pre>{
+  "content": "Running tests.",
+  "tool_calls": [
+    {
+      "id": "c3",
+      "name": "run_tests",
+      "arguments": {}
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 90,
+    "completion_tokens": 20
+  }
+}</pre></div><div class="event"><span class="step">#12</span> <span class="type">tool_call</span> <small>2026-05-29T14:24:37.660162+00:00</small><pre>{
+  "tool": "run_tests",
+  "args": {},
+  "id": "c3"
+}</pre></div><div class="event"><span class="step">#13</span> <span class="type">tool_observation</span> <small>2026-05-29T14:24:37.660479+00:00</small><pre>{
+  "tool": "run_tests",
+  "result": {
+    "stdout": "\nWARNING: Failed to generate report: No data to report.\n\n\n",
+    "stderr": "/Users/morganlinton/Documents/coding/MorganBench/.venv/lib/python3.14/site-packages/coverage/inorout.py:561: CoverageWarning: Module harness was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.14.1/messages.html#warning-module-not-imported\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n/Users/morganlinton/Documents/coding/MorganBench/.venv/lib/python3.14/site-packages/coverage/control.py:958: CoverageWarning: No data was collected. (no-data-collected); see https://coverage.readthedocs.io/en/7.14.1/messages.html#warning-no-data-collected\n  self._warn(\"No data was collected.\", slug=\"no-data-collected\")\n/Users/morganlinton/Documents/coding/MorganBench/.venv/lib/python3.14/site-packages/pytest_cov/plugin.py:366: CovReportWarning: Failed to generate report: No data to report.\n\n  warnings.warn(CovReportWarning(message), stacklevel=1)\n",
+    "exit_code": 0
+  },
+  "error": null
+}</pre></div><div class="event"><span class="step">#14</span> <span class="type">llm_request</span> <small>2026-05-29T14:24:37.660623+00:00</small><pre>{
+  "step": 4,
+  "messages": 8
+}</pre></div><div class="event"><span class="step">#15</span> <span class="type">llm_response</span> <small>2026-05-29T14:24:37.660753+00:00</small><pre>{
+  "content": "FINISH: implemented and verified.",
+  "tool_calls": [],
+  "usage": {
+    "prompt_tokens": 110,
+    "completion_tokens": 20
+  }
+}</pre></div><div class="event"><span class="step">#16</span> <span class="type">diff</span> <small>2026-05-29T14:24:37.726190+00:00</small><pre>{
+  "patch": "diff --git a/.coverage b/.coverage\nnew file mode 100644\nindex 0000000..e86f907\nBinary files /dev/null and b/.coverage differ\ndiff --git a/hello.py b/hello.py\nnew file mode 100644\nindex 0000000..9c247f3\n--- /dev/null\n+++ b/hello.py\n@@ -0,0 +1 @@\n+print(\"hello from morganbench\")\n"
+}</pre></div><div class="event"><span class="step">#17</span> <span class="type">test_result</span> <small>2026-05-29T14:24:37.783773+00:00</small><pre>{
+  "exit_code": 0,
+  "stdout": "{\"functional\": 1.0, \"details\": [\"exact string present\"]}\n",
+  "stderr": "",
+  "scores": {
+    "functional": 1.0,
+    "details": [
+      "exact string present"
+    ]
+  }
+}</pre></div><div class="event"><span class="step">#18</span> <span class="type">metric_computed</span> <small>2026-05-29T14:24:37.784057+00:00</small><pre>{
+  "functional": 1.0,
+  "efficiency": 0.9434,
+  "quality": null,
+  "security": null,
+  "human_like": null,
+  "total": 0.9887
+}</pre></div></div><script>console.log('self-contained replay ready');</script></body></html>

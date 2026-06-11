@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  # PostgreSQL for the API's optional persistence layer (backend/db.py).
+  # Point the API at it with:
+  #   DATABASE_URL=postgresql+psycopg://vulcanbench:vulcanbench_dev@localhost:5432/vulcanbench
+  db:
+    image: postgres:16-alpine@sha256:79950da386bda7fcc9d57aa9aa9be6c6d7407596a9b8f68014b09a778a9ab316
+    environment:
+      POSTGRES_USER: vulcanbench
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vulcanbench_dev}  # override via .env (see .env.example)
+      POSTGRES_DB: vulcanbench
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vulcanbench"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # MinIO (S3-compatible) for LFS artifacts / dashboard dev storage (Phase 0+)
+  minio:
+    image: minio/minio@sha256:a1a8bd4ac40ad7881a245bab97323e18f971e4d4cba2c2007ec1bedd21cbaba2
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+  # Future: backend (FastAPI) + dashboard (Next.js standalone? or separate)
+  # For v1 local: harness writes to ./runs (shared volume) or posts to API
+  # Example (uncomment when Phase 3 implemented):
+  # backend:
+  #   build: ./backend
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgresql+asyncpg://vulcanbench:vulcanbench_dev@db:5432/vulcanbench
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - .:/app  # dev mount
+
+volumes:
+  pgdata:
+  miniodata:

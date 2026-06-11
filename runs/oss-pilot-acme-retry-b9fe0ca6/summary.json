@@ -1,0 +1,116 @@
+{
+  "run_id": "oss-pilot-acme-retry-b9fe0ca6",
+  "task_id": "oss-pilot-acme-retry",
+  "model": "mock:synthetic",
+  "steps": 22,
+  "scores": {
+    "functional": 0.0,
+    "quality": 1.0,
+    "security": 1.0,
+    "efficiency": 0.9404,
+    "human_like": null,
+    "total": 0.4378,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 1,
+            "violations": 0,
+            "avg_complexity": 0.0,
+            "maintainability_index": 100.0,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 1.0,
+              "maintainability": 1.0
+            },
+            "score": 1.0
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs/oss-pilot-acme-retry-b9fe0ca6/trace.jsonl",
+    "replay_html": "runs/oss-pilot-acme-retry-b9fe0ca6/replay.html"
+  },
+  "finished_at": "2026-06-04T20:55:57.576382+00:00",
+  "total_tokens": 400,
+  "tokens": {
+    "prompt": 320,
+    "completion": 80,
+    "total": 400
+  },
+  "cost_usd": 0.0,
+  "cost_detail": {
+    "agent": 0.0,
+    "judges": 0.0,
+    "total": 0.0,
+    "model_priced": true
+  },
+  "duration_s": 3.222,
+  "started_at": "2026-06-04T20:55:54.353101+00:00",
+  "finished": true,
+  "manifest": {
+    "model": "mock:synthetic",
+    "judge_model": "mock:synthetic",
+    "runtime": {
+      "python": "3.14.3",
+      "platform": "darwin",
+      "host_python": "3.14.3",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.15.15",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.26.3 darwin/arm64",
+      "node": "v22.11.0"
+    },
+    "task": {
+      "repo_scale": "medium",
+      "file_count": 54,
+      "loc": 73
+    }
+  },
+  "task_hash": "63a060a5090a342300286d4802efbc626d443731ff904b59c15324a569cef604",
+  "suite": null,
+  "suite_id": null,
+  "verifier": {
+    "scores": {
+      "functional": 0.0
+    },
+    "fail_to_pass": {
+      "attempts": false,
+      "cap": false
+    },
+    "pass_to_pass": {
+      "imports": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 0/2 passing"
+    ]
+  },
+  "replay_command": "morganbench replay oss-pilot-acme-retry-b9fe0ca6"
+}

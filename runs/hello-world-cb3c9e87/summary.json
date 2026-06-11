@@ -1,0 +1,33 @@
+{
+  "run_id": "hello-world-cb3c9e87",
+  "task_id": "hello-world",
+  "model": "mock:synthetic",
+  "steps": 18,
+  "scores": {
+    "functional": 1.0,
+    "efficiency": 0.9434,
+    "quality": null,
+    "security": null,
+    "human_like": null,
+    "total": 0.9887
+  },
+  "artifacts": {
+    "trace": "runs/hello-world-cb3c9e87/trace.jsonl",
+    "replay_html": "runs/hello-world-cb3c9e87/replay.html"
+  },
+  "finished_at": "2026-05-29T14:24:37.784194+00:00",
+  "total_tokens": 400,
+  "finished": true,
+  "verifier": {
+    "exit_code": 0,
+    "stdout": "{\"functional\": 1.0, \"details\": [\"exact string present\"]}\n",
+    "stderr": "",
+    "scores": {
+      "functional": 1.0,
+      "details": [
+        "exact string present"
+      ]
+    }
+  },
+  "replay_command": "morganbench replay hello-world-cb3c9e87"
+}

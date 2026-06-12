@@ -237,7 +237,34 @@ def test_anthropic_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
         AnthropicProvider("claude-opus-4-8").complete([], [])
 
 
-def test_anthropic_effort_rejected_before_http(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_anthropic_effort_and_no_sampling_params(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant")
-    with pytest.raises(P.ProviderError, match="not supported for Anthropic yet"):
-        AnthropicProvider("claude-opus-4-8").complete([], [], effort="low")
+    seen: dict = {}  # type: ignore[type-arg]
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen.update(payload)
+        return {"content": [{"type": "text", "text": "ok"}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = AnthropicProvider("claude-opus-4-8").complete(
+        [{"role": "user", "content": "hi"}], [], effort="low"
+    )
+    assert resp.content == "ok"
+    assert seen["output_config"] == {"effort": "low"}
+    # Sampling params are rejected with a 400 by Opus 4.7+ — never send them.
+    assert "temperature" not in seen
+    assert "top_p" not in seen
+
+
+def test_anthropic_no_effort_omits_output_config(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant")
+    seen: dict = {}  # type: ignore[type-arg]
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen.update(payload)
+        return {"content": [{"type": "text", "text": "ok"}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    AnthropicProvider("claude-opus-4-8").complete([{"role": "user", "content": "hi"}], [])
+    assert "output_config" not in seen
+    assert "temperature" not in seen

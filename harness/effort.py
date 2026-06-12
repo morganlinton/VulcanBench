@@ -15,6 +15,16 @@ _OPENAI_EFFORT_VALUES = {
     "extra-high": "xhigh",
 }
 
+# Anthropic Messages API `output_config.effort`. `xhigh` is model-dependent
+# (Opus 4.7+); unsupported combinations are rejected by the API with a clear
+# error, mirroring how OpenAI handles model-dependent effort values.
+_ANTHROPIC_EFFORT_VALUES = {
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "extra-high": "xhigh",
+}
+
 
 class EffortNotSupportedError(ValueError):
     """Raised when a provider cannot run a requested effort level."""
@@ -86,5 +96,10 @@ def effort_config(provider: str, requested: str | None) -> EffortConfig | None:
             supported=False,
         )
     if provider_name == "anthropic":
-        raise EffortNotSupportedError("reasoning effort is not supported for Anthropic yet")
+        return EffortConfig(
+            requested=effort,
+            provider="anthropic",
+            provider_value=_ANTHROPIC_EFFORT_VALUES[effort],
+            supported=True,
+        )
     raise EffortNotSupportedError(f"reasoning effort is not supported for provider {provider!r}")

@@ -103,10 +103,13 @@ Specify a model as `provider:model`:
   API when `--effort` is supplied. Needs `OPENAI_API_KEY`.
 - `anthropic:<model>` — Anthropic Messages API. Needs `ANTHROPIC_API_KEY`.
 
-`--effort` accepts `low`, `medium`, `high`, or `extra-high`. `extra-high` maps
-to OpenAI `reasoning.effort="xhigh"` and is opt-in for sweeps because support is
-model-dependent. In v1, real effort control is OpenAI-only; mock runs accept the
-field as no-op metadata, and Anthropic effort is rejected with a clear error.
+`--effort` accepts `low`, `medium`, `high`, or `extra-high`. OpenAI runs map it
+to the Responses API `reasoning.effort` field; Anthropic runs map it to the
+Messages API `output_config.effort` field. `extra-high` maps to `xhigh` on both
+providers and is opt-in for sweeps because support is model-dependent (e.g.
+Claude Opus 4.7+). Mock runs accept the field as no-op metadata. Effort labels
+are each provider's own scale — a cross-provider comparison at the same label
+compares each model at its own setting, not a calibrated equivalence.
 
 ## Sandbox
 

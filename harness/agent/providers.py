@@ -237,7 +237,12 @@ class OpenAIProvider(LLMProvider):
 
 
 class AnthropicProvider(LLMProvider):
-    """Anthropic Messages API."""
+    """Anthropic Messages API.
+
+    Reasoning effort maps to the API's ``output_config.effort`` field. No
+    sampling parameters are sent: ``temperature``/``top_p``/``top_k`` are
+    rejected with a 400 by Opus 4.7 and newer models.
+    """
 
     @property
     def name(self) -> str:
@@ -250,21 +255,27 @@ class AnthropicProvider(LLMProvider):
         timeout_s: float | None = None,
         effort: str | None = None,
     ) -> LLMResponse:
-        if effort is not None:
-            raise ProviderError("reasoning effort is not supported for Anthropic yet")
         timeout = _http_timeout(timeout_s)
         if timeout_s is not None:
-            return self._complete_once(messages, tools, timeout)
-        return self._complete_with_retry(messages, tools, timeout)
+            return self._complete_once(messages, tools, timeout, effort)
+        return self._complete_with_retry(messages, tools, timeout, effort)
 
     @_RETRY
     def _complete_with_retry(
-        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], timeout: float
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
     ) -> LLMResponse:
-        return self._complete_once(messages, tools, timeout)
+        return self._complete_once(messages, tools, timeout, effort)
 
     def _complete_once(
-        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], timeout: float
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
     ) -> LLMResponse:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
@@ -274,9 +285,10 @@ class AnthropicProvider(LLMProvider):
         payload: dict[str, Any] = {
             "model": self.model,
             "max_tokens": 4096,
-            "temperature": 0,
             "messages": converted,
         }
+        if effort is not None:
+            payload["output_config"] = {"effort": effort}
         if system:
             payload["system"] = system
         if tools:

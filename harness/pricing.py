@@ -26,7 +26,10 @@ PRICES: dict[str, dict[str, float]] = {
     "openai:gpt-4.1-mini": {"input": 0.40, "output": 1.60},
     "openai:o3": {"input": 2.00, "output": 8.00},
     "openai:o4-mini": {"input": 1.10, "output": 4.40},
+    "anthropic:claude-fable-5": {"input": 10.00, "output": 50.00},
     "anthropic:claude-opus-4-8": {"input": 5.00, "output": 25.00},
+    "anthropic:claude-opus-4-7": {"input": 5.00, "output": 25.00},
+    "anthropic:claude-opus-4-6": {"input": 5.00, "output": 25.00},
     "anthropic:claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
     "anthropic:claude-haiku-4-5": {"input": 1.00, "output": 5.00},
     # Free / offline.

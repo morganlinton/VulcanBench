@@ -34,6 +34,20 @@ def test_mock_effort_is_noop_metadata() -> None:
     }
 
 
-def test_anthropic_effort_rejected() -> None:
-    with pytest.raises(ValueError, match="not supported for Anthropic yet"):
-        effort_config("anthropic", "medium")
+def test_anthropic_effort_maps_to_output_config_values() -> None:
+    cfg = effort_config("anthropic", "medium")
+    assert cfg is not None
+    assert cfg.as_summary() == {
+        "requested": "medium",
+        "provider": "anthropic",
+        "provider_value": "medium",
+        "supported": True,
+    }
+    xhigh = effort_config("anthropic", "extra-high")
+    assert xhigh is not None
+    assert xhigh.provider_value == "xhigh"
+
+
+def test_unknown_provider_effort_rejected() -> None:
+    with pytest.raises(ValueError, match="not supported for provider"):
+        effort_config("acme", "medium")

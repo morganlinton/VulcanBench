@@ -112,9 +112,16 @@ def assess_human_like(
     return MetricResult(score=round(mean_0_100 / 100.0, 4), details=details)
 
 
+_MAX_PATCH_CHARS = 12_000
+
+
 def _build_messages(
     persona: str, issue: str, patch: str, verifier_summary: str
 ) -> list[dict[str, Any]]:
+    shown = patch
+    if len(patch) > _MAX_PATCH_CHARS:
+        omitted = len(patch) - _MAX_PATCH_CHARS
+        shown = f"{patch[:_MAX_PATCH_CHARS]}\n...[patch truncated: {omitted} chars omitted]"
     return [
         {"role": "system", "content": persona},
         {
@@ -122,7 +129,7 @@ def _build_messages(
             "content": (
                 f"# Issue\n{issue}\n\n"
                 f"# Test outcome\n{verifier_summary}\n\n"
-                f"# Candidate patch\n```diff\n{patch[:12000]}\n```\n\n{_INSTRUCTION}"
+                f"# Candidate patch\n```diff\n{shown}\n```\n\n{_INSTRUCTION}"
             ),
         },
     ]

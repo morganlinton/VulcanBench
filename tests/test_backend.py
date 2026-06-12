@@ -13,6 +13,7 @@ pytest.importorskip("httpx")  # required by Starlette's TestClient
 from fastapi.testclient import TestClient
 
 import backend.app as appmod
+from backend import db
 
 
 def _client(runs_dir: Path) -> TestClient:
@@ -129,3 +130,37 @@ def test_run_patch_endpoint(tmp_path: Path) -> None:
     c = _client(tmp_path)
     assert "diff --git" in c.get("/api/run/r1/patch").json()["patch"]
     assert c.get("/api/run/missing/patch").json()["patch"] == ""
+
+
+def test_write_endpoints_fail_closed_without_token(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("VULCANBENCH_API_TOKEN", raising=False)
+    c = _client(tmp_path)
+    assert c.post("/api/runs", json={"run_id": "r1"}).status_code == 503
+    assert c.post("/api/feedback", json={"comment": "hi"}).status_code == 503
+
+
+def test_write_endpoints_reject_bad_token(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VULCANBENCH_API_TOKEN", "s3cret")
+    c = _client(tmp_path)
+    assert c.post("/api/runs", json={"run_id": "r1"}).status_code == 401
+    bad = {"Authorization": "Bearer wrong"}
+    assert c.post("/api/runs", json={"run_id": "r1"}, headers=bad).status_code == 401
+
+
+def test_write_endpoints_accept_valid_token(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VULCANBENCH_API_TOKEN", "s3cret")
+    db.configure(f"sqlite:///{tmp_path / 't.db'}")
+    try:
+        db.init_db()
+        c = _client(tmp_path)
+        headers = {"Authorization": "Bearer s3cret"}
+        resp = c.post("/api/runs", json={"run_id": "r1", "scores": {}}, headers=headers)
+        assert resp.status_code == 200 and resp.json()["ok"] is True
+        resp = c.post("/api/feedback", json={"comment": "hi"}, headers=headers)
+        assert resp.status_code == 200 and resp.json()["id"] is not None
+    finally:
+        db.configure(None)

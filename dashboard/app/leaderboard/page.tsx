@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { getEffortSensitivity, getLeaderboard, getModelLeaderboard } from "@/lib/api";
+import {
+  API_BASE,
+  backendReachable,
+  getEffortSensitivity,
+  getLeaderboard,
+  getModelLeaderboard,
+} from "@/lib/api";
 
 export const dynamic = "force-dynamic";
-
-const API_LABEL = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 function fmt(n: number | null | undefined): string {
   return n === null || n === undefined ? "—" : n.toFixed(2);
@@ -37,6 +41,7 @@ export default async function Leaderboard({ searchParams }: Props) {
   const view = by === "run" ? "run" : "model";
   const effortFilter = effort || undefined;
   const complexityFilter = task_complexity || undefined;
+  const backendUp = await backendReachable();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-8 font-sans">
@@ -66,6 +71,14 @@ export default async function Leaderboard({ searchParams }: Props) {
           })}
         </div>
 
+        {!backendUp && (
+          <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-300">
+            Backend unreachable at <span className="font-mono">{API_BASE}</span> — the data
+            below may be empty or stale. Start it with{" "}
+            <span className="font-mono">uvicorn backend.app:app --port 8000</span>.
+          </div>
+        )}
+
         {view === "model" ? (
           <ModelTable effort={effortFilter} taskComplexity={complexityFilter} />
         ) : (
@@ -74,7 +87,7 @@ export default async function Leaderboard({ searchParams }: Props) {
 
         <EffortSensitivityTable />
 
-        <p className="mt-4 text-xs text-zinc-500">Live data from the backend ({API_LABEL}).</p>
+        <p className="mt-4 text-xs text-zinc-500">Live data from the backend ({API_BASE}).</p>
       </div>
     </div>
   );

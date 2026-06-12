@@ -12,7 +12,7 @@ One-command local setup and first run (v1).
 
 ```bash
 git clone https://github.com/Zen-Open-Source/VulcanBench.git
-cd vulcanbench
+cd VulcanBench
 make setup
 source .venv/bin/activate
 vulcanbench --help
@@ -29,11 +29,13 @@ npm run dev
 ## Smoke test (offline, free)
 
 `mock:synthetic` is deterministic and free — use it to confirm the harness runs
-end-to-end before spending any tokens:
+end-to-end before spending any tokens. `--sandbox local` skips Docker, which is
+fine here because the mock model's commands are canned (real models default to
+the Docker sandbox):
 
 ```bash
-vulcanbench run --task hello-world --model mock:synthetic
-vulcanbench run --suite v1 --model mock:synthetic --no-judges   # all 16 tasks
+vulcanbench run --task hello-world --model mock:synthetic --sandbox local
+vulcanbench run --suite v1 --model mock:synthetic --no-judges --sandbox local   # all 16 tasks
 ```
 
 ## Your first real run
@@ -52,12 +54,13 @@ export OPENAI_API_KEY=sk-...           # for openai:* models
 export ANTHROPIC_API_KEY=sk-ant-...    # for anthropic:* models
 ```
 
-**3. Start small and cheap** — one task, in Docker, judges off, with a spend cap:
+**3. Start small and cheap** — one task, in Docker (the default), judges off,
+with a spend cap:
 
 ```bash
 vulcanbench run --task py-topo-sort-cycle \
   --model openai:gpt-4o-mini \
-  --sandbox docker --no-judges
+  --no-judges
 vulcanbench replay --run-id <latest>   # self-contained HTML trace of the run
 ```
 

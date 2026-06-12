@@ -1,8 +1,6 @@
 # ARCHITECTURE.md (v1)
 
-See the authoritative implementation plan: `.kilo/plans/1780024121334-silent-circuit.md` (internal, contains full research, dataflow, risks, phases).
-
-## High-Level (from plan section 2)
+## High-Level
 
 ```
 VulcanBench/

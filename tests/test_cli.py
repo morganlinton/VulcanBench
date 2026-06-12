@@ -51,6 +51,8 @@ def test_run_end_to_end(tmp_path: Path) -> None:
             "hello-world",
             "--model",
             "mock:synthetic",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],
@@ -71,6 +73,8 @@ def test_run_no_judges(tmp_path: Path) -> None:
             "--model",
             "mock:synthetic",
             "--no-judges",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],
@@ -130,6 +134,57 @@ def test_run_docker_daemon_down(tmp_path: Path, monkeypatch) -> None:  # type: i
     assert "sandbox error" in result.output.lower()
 
 
+def test_run_auto_refuses_host_fallback_without_opt_in(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def boom():  # type: ignore[no-untyped-def]
+        raise ConnectionError("no daemon")
+
+    monkeypatch.setattr(docker, "from_env", boom)
+    monkeypatch.delenv("VULCANBENCH_ALLOW_HOST_EXEC", raising=False)
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--task",
+            "hello-world",
+            "--model",
+            "mock:synthetic",
+            "--sandbox",
+            "auto",
+            "--output-dir",
+            str(tmp_path),
+        ],
+    )
+    assert result.exit_code == 3
+    assert "VULCANBENCH_ALLOW_HOST_EXEC" in result.output
+
+
+def test_run_auto_falls_back_with_opt_in(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def boom():  # type: ignore[no-untyped-def]
+        raise ConnectionError("no daemon")
+
+    monkeypatch.setattr(docker, "from_env", boom)
+    monkeypatch.setenv("VULCANBENCH_ALLOW_HOST_EXEC", "1")
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--task",
+            "hello-world",
+            "--model",
+            "mock:synthetic",
+            "--no-judges",
+            "--sandbox",
+            "auto",
+            "--output-dir",
+            str(tmp_path),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert "run complete" in result.output
+
+
 def test_run_requires_exactly_one_target(tmp_path: Path) -> None:
     # Neither --task nor --suite.
     r1 = runner.invoke(app, ["run", "--model", "mock:synthetic", "--output-dir", str(tmp_path)])
@@ -163,6 +218,8 @@ def test_run_suite_end_to_end(tmp_path: Path) -> None:
             "--model",
             "mock:synthetic",
             "--no-judges",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],
@@ -184,6 +241,8 @@ def test_run_task_repeat(tmp_path: Path) -> None:
             "--no-judges",
             "--repeat",
             "3",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],
@@ -273,6 +332,8 @@ def test_report_writes_md_and_json(tmp_path: Path) -> None:
             "--model",
             "mock:synthetic",
             "--no-judges",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(runs),
         ],
@@ -314,6 +375,8 @@ def _run_fail_under(task: str, threshold: str, tmp_path: Path):  # type: ignore[
             "--no-judges",
             "--fail-under",
             threshold,
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],
@@ -550,6 +613,8 @@ def test_no_fail_under_exits_zero_even_when_unsolved(tmp_path: Path) -> None:
             "--model",
             "mock:synthetic",
             "--no-judges",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],
@@ -577,6 +642,8 @@ def test_leaderboard_json(tmp_path: Path) -> None:
             "hello-world",
             "--model",
             "mock:synthetic",
+            "--sandbox",
+            "local",
             "--output-dir",
             str(tmp_path),
         ],

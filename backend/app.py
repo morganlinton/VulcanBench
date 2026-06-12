@@ -13,12 +13,13 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, cast
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -46,12 +47,36 @@ async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="VulcanBench API", version="0.1.0", lifespan=_lifespan)
 
+# Reads are public (it's a leaderboard); restrict origins in production with
+# VULCANBENCH_CORS_ORIGINS=https://bench.example.com,https://www.example.com
+_cors_origins = [
+    o.strip() for o in os.environ.get("VULCANBENCH_CORS_ORIGINS", "*").split(",") if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _require_write_token(authorization: str | None = Header(default=None)) -> None:
+    """Guard mutating endpoints with a shared-secret bearer token.
+
+    The token is read per-request so tests (and operators) can rotate it without
+    restarting. Writes fail closed: with no token configured they are disabled.
+    """
+    expected = os.environ.get("VULCANBENCH_API_TOKEN")
+    if not expected:
+        raise HTTPException(
+            status_code=503,
+            detail="writes disabled: set VULCANBENCH_API_TOKEN on the server",
+        )
+    provided = ""
+    if authorization and authorization.startswith("Bearer "):
+        provided = authorization.removeprefix("Bearer ")
+    if not secrets.compare_digest(provided, expected):
+        raise HTTPException(status_code=401, detail="invalid or missing API token")
 
 
 def _rows() -> list[dict[str, Any]]:
@@ -71,7 +96,7 @@ def health() -> dict[str, str]:
     return {"status": "ok", "store": "db" if db.enabled() else "filesystem"}
 
 
-@app.post("/api/runs")
+@app.post("/api/runs", dependencies=[Depends(_require_write_token)])
 def post_run(summary: dict[str, Any]) -> dict[str, Any]:
     """Record a run summary (database only)."""
     if not db.enabled():
@@ -82,7 +107,7 @@ def post_run(summary: dict[str, Any]) -> dict[str, Any]:
     return {"ok": True, "run_id": summary["run_id"]}
 
 
-@app.post("/api/feedback")
+@app.post("/api/feedback", dependencies=[Depends(_require_write_token)])
 def post_feedback(fb: FeedbackIn) -> dict[str, Any]:
     """Record task/run feedback (database only)."""
     if not db.enabled():

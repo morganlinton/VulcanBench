@@ -16,7 +16,7 @@ import os
 from functools import lru_cache
 from typing import Any
 
-# USD per 1,000,000 tokens, as of 2026-05. Keys are exact "provider:model" specs;
+# USD per 1,000,000 tokens, as of 2026-06. Keys are exact "provider:model" specs;
 # lookup also falls back to a "provider:" prefix default. Override with a JSON
 # file at $VULCANBENCH_PRICING ({"openai:gpt-4o": {"input": .., "output": ..}}).
 PRICES: dict[str, dict[str, float]] = {
@@ -26,7 +26,7 @@ PRICES: dict[str, dict[str, float]] = {
     "openai:gpt-4.1-mini": {"input": 0.40, "output": 1.60},
     "openai:o3": {"input": 2.00, "output": 8.00},
     "openai:o4-mini": {"input": 1.10, "output": 4.40},
-    "anthropic:claude-opus-4-8": {"input": 15.00, "output": 75.00},
+    "anthropic:claude-opus-4-8": {"input": 5.00, "output": 25.00},
     "anthropic:claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
     "anthropic:claude-haiku-4-5": {"input": 1.00, "output": 5.00},
     # Free / offline.

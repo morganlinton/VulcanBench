@@ -14,7 +14,7 @@ jobs:
         with:
           lfs: true
       - name: Pull Git LFS task snapshots
-        run: git lfs pull || true
+        run: git lfs pull
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:

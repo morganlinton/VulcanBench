@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { getTasks } from "@/lib/api";
+import { API_BASE, backendReachable, getTasks } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export default async function Tasks() {
   const tasks = await getTasks();
+  const backendUp = await backendReachable();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-8 font-sans">
@@ -16,6 +17,14 @@ export default async function Tasks() {
             <Link href="/" className="text-zinc-400 hover:text-white">← home</Link>
           </div>
         </div>
+
+        {!backendUp && (
+          <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-300">
+            Backend unreachable at <span className="font-mono">{API_BASE}</span> — the data
+            below may be empty or stale. Start it with{" "}
+            <span className="font-mono">uvicorn backend.app:app --port 8000</span>.
+          </div>
+        )}
 
         {tasks.length === 0 ? (
           <div className="border border-white/10 rounded-xl p-8 text-sm text-zinc-400">

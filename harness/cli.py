@@ -1,7 +1,7 @@
 """VulcanBench CLI entrypoint (Typer + Rich).
 
-Phase 0/1.1 stub: --version and --help work immediately.
-Full commands (run, leaderboard, replay, validate-task, list-tasks) implemented iteratively.
+Commands: run, effort-sweep, leaderboard, report, calibrate, replay,
+validate-task, list-tasks. See ``vulcanbench --help``.
 """
 
 from __future__ import annotations
@@ -79,7 +79,12 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     judge_model: str | None = typer.Option(
         None, "--judge-model", help="Model for judges (default: same as --model)"
     ),
-    sandbox: str = typer.Option("local", "--sandbox", help="Where tools run: local|docker|auto"),
+    sandbox: str = typer.Option(
+        "docker",
+        "--sandbox",
+        help="Where tools run: local|docker|auto (default docker; agents execute "
+        "model-written shell commands, so opt into 'local' deliberately)",
+    ),
     image: str | None = typer.Option(
         None,
         "--image",
@@ -314,7 +319,12 @@ def effort_sweep(
     judge_model: str | None = typer.Option(
         None, "--judge-model", help="Model for judges (default: same as --model)"
     ),
-    sandbox: str = typer.Option("local", "--sandbox", help="Where tools run: local|docker|auto"),
+    sandbox: str = typer.Option(
+        "docker",
+        "--sandbox",
+        help="Where tools run: local|docker|auto (default docker; agents execute "
+        "model-written shell commands, so opt into 'local' deliberately)",
+    ),
     image: str | None = typer.Option(
         None,
         "--image",

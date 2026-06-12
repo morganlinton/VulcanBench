@@ -1,5 +1,9 @@
 version: "3.8"
 
+# Local development stack only. This file is NOT a production deployment path:
+# credentials default to dev values and ports bind to localhost. For anything
+# internet-facing, set real secrets via .env and front the services properly.
+
 services:
   # PostgreSQL for the API's optional persistence layer (backend/db.py).
   # Point the API at it with:
@@ -11,7 +15,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vulcanbench_dev}  # override via .env (see .env.example)
       POSTGRES_DB: vulcanbench
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -25,11 +29,11 @@ services:
     image: minio/minio@sha256:a1a8bd4ac40ad7881a245bab97323e18f971e4d4cba2c2007ec1bedd21cbaba2
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}  # override via .env (see .env.example)
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - miniodata:/data
 

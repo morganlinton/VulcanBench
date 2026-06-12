@@ -61,7 +61,12 @@ export default function Submit() {
         <p className="text-sm text-zinc-400 mb-6">
           Tasks are how VulcanBench grows. Fill this in to open a pre-filled GitHub
           issue, then follow{" "}
-          <a className="underline" href={`https://github.com/${REPO}/blob/main/docs/TASK_CONTRIBUTION.md`}>
+          <a
+            className="underline"
+            href={`https://github.com/${REPO}/blob/main/docs/TASK_CONTRIBUTION.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             docs/TASK_CONTRIBUTION.md
           </a>{" "}
           to add the files and run the validator.

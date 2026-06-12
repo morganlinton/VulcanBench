@@ -38,6 +38,7 @@ from harness.redaction import sanitize
 from harness.sandbox.docker_executor import (
     DEFAULT_IMAGE,
     DockerToolExecutor,
+    SandboxError,
     _docker_available,
 )
 from harness.task_metadata import (
@@ -63,6 +64,10 @@ SYSTEM_PROMPT = (
 
 _VALID_TOOLS = {t["function"]["name"] for t in get_openai_tool_schemas()}
 _FINISH_MARKER = "FINISH:"
+
+# Cap on the serialized tool observation fed back to the model; larger outputs
+# are cut with an explicit marker so the model knows it saw a partial result.
+_MAX_OBSERVATION_CHARS = 8_000
 
 
 @dataclass
@@ -455,11 +460,18 @@ def _run_model_loop(
                     "error": observation.get("error"),
                 },
             )
+            content = json.dumps(observation, default=str)
+            if len(content) > _MAX_OBSERVATION_CHARS:
+                omitted = len(content) - _MAX_OBSERVATION_CHARS
+                content = (
+                    f"{content[:_MAX_OBSERVATION_CHARS]}"
+                    f"...[output truncated: {omitted} chars omitted]"
+                )
             messages.append(
                 {
                     "role": "tool",
                     "tool_call_id": tc.id,
-                    "content": json.dumps(observation, default=str)[:8000],
+                    "content": content,
                 }
             )
             if not deadline.ensure_time(collector, f"tool:{tc.name}", step):
@@ -624,8 +636,9 @@ def _make_executor(
     """Build the tool executor for the requested sandbox mode.
 
     ``docker`` errors out if the daemon is unavailable (never silently runs on
-    the host). ``auto`` uses Docker when available and otherwise falls back to
-    local with a loud, recorded warning.
+    the host). ``auto`` uses Docker when available; falling back to local (host)
+    execution requires the explicit ``VULCANBENCH_ALLOW_HOST_EXEC=1`` opt-in,
+    and is always recorded with a loud warning.
     """
     resolved_image = image or task.metadata.get("image") or DEFAULT_IMAGE
     if sandbox == "local":
@@ -640,6 +653,13 @@ def _make_executor(
                 "sandbox", {"mode": "docker", "image": resolved_image, "network": network}
             )
             return DockerToolExecutor(workspace, image=resolved_image, network=network)
+        if os.environ.get("VULCANBENCH_ALLOW_HOST_EXEC") != "1":
+            raise SandboxError(
+                "sandbox 'auto': Docker daemon unavailable. Refusing to run "
+                "model-written commands on the host. Start Docker, pass "
+                "--sandbox local, or set VULCANBENCH_ALLOW_HOST_EXEC=1 to allow "
+                "the fallback."
+            )
         collector.record(
             "sandbox_fallback",
             {"requested": "auto", "using": "local", "reason": "docker daemon unavailable"},

@@ -143,6 +143,18 @@ export interface EffortSensitivity {
   warnings: string[];
 }
 
+// True when the backend answered the health check. Pages use this to
+// distinguish "backend down" from genuinely empty data before rendering
+// fallback values from getJSON.
+export async function backendReachable(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/health`, { cache: "no-store" });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // Fetch JSON from the backend. Returns `fallback` if the backend is unreachable
 // or responds with an error, so the dashboard degrades gracefully when run
 // without the API (e.g. `npm run dev` alone).

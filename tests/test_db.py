@@ -94,18 +94,23 @@ def test_feedback(sqlite_db: None) -> None:
     assert out["id"] is not None
 
 
-def test_post_run_and_feedback_via_api(sqlite_db: None) -> None:
+def test_post_run_and_feedback_via_api(sqlite_db: None, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VULCANBENCH_API_TOKEN", "s3cret")
+    headers = {"Authorization": "Bearer s3cret"}
     c = TestClient(app)
     assert c.get("/api/health").json()["store"] == "db"
-    assert c.post("/api/runs", json=_summary("r9")).json()["ok"] is True
+    assert c.post("/api/runs", json=_summary("r9"), headers=headers).json()["ok"] is True
     # The leaderboard now reflects the DB row.
     aggs = c.get("/api/leaderboard").json()
     assert any(a["model"] == "openai:gpt-4o" for a in aggs)
     assert c.get("/api/run/r9").json()["scores"]["total"] == 0.9
-    assert c.post("/api/feedback", json={"run_id": "r9", "rating": 5}).json()["id"] is not None
+    fb = c.post("/api/feedback", json={"run_id": "r9", "rating": 5}, headers=headers)
+    assert fb.json()["id"] is not None
 
 
-def test_post_run_requires_db() -> None:
+def test_post_run_requires_db(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VULCANBENCH_API_TOKEN", "s3cret")
     db.configure(None)
     c = TestClient(app)
-    assert c.post("/api/runs", json={"run_id": "x"}).status_code == 400
+    headers = {"Authorization": "Bearer s3cret"}
+    assert c.post("/api/runs", json={"run_id": "x"}, headers=headers).status_code == 400

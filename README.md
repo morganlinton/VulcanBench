@@ -42,8 +42,10 @@ by `docker compose up db`.
 ## Example run
 
 ```bash
-# Offline, deterministic (no API key) — drives the real agent loop end to end:
-vulcanbench run --task hello-world --model mock:synthetic
+# Offline, deterministic (no API key) — drives the real agent loop end to end.
+# Real runs default to the Docker sandbox; --sandbox local is fine for the
+# deterministic mock model.
+vulcanbench run --task hello-world --model mock:synthetic --sandbox local
 
 # Any real model via the generic provider interface:
 export OPENAI_API_KEY=...      # or ANTHROPIC_API_KEY=...
@@ -72,8 +74,8 @@ vulcanbench report -o report.md    # shareable Markdown/JSON report (ranking,
 vulcanbench calibrate              # empirical difficulty calibration from recorded runs
 vulcanbench replay <id>
 
-# Run the agent's commands in an isolated container (see Sandbox below):
-vulcanbench run --task hello-world --model openai:gpt-4o --sandbox docker
+# Runs execute in an isolated container by default (see Sandbox below);
+# build the image once with `make sandbox-image`.
 
 # Use it as a CI regression gate (threshold must be in [0, 1]):
 vulcanbench run --suite v1 --model openai:gpt-4o --repeat 5 --fail-under 0.8
@@ -115,17 +117,20 @@ the host:
 # Build the base image once (git, ripgrep, ruff, bandit, radon, pytest):
 docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
 
-vulcanbench run --task hello-world --model openai:gpt-4o --sandbox docker
-# --sandbox local|docker|auto   (default: local)
+vulcanbench run --task hello-world --model openai:gpt-4o
+# --sandbox local|docker|auto   (default: docker)
 # --image vulcanbench/sandbox:base   (default: per-task metadata or vulcanbench/sandbox:base)
 # --network                     (off by default; opt in for dependency installs)
 ```
 
-- `local` (default) runs tools on the host — fast, no Docker required.
-- `docker` runs them in a non-root, **network-off**, resource-limited container
-  (workspace bind-mounted, cleaned up after each run). It errors out if the
-  daemon is unreachable — it never silently falls back to host execution.
-- `auto` uses Docker when available, otherwise falls back to local with a warning.
+- `docker` (default) runs tools in a non-root, **network-off**, resource-limited
+  container (workspace bind-mounted, cleaned up after each run). It errors out
+  if the daemon is unreachable — it never silently falls back to host execution.
+- `local` runs the model's commands directly on the host — fast and Docker-free,
+  but unsandboxed; opt in deliberately (fine for `mock:synthetic` and trusted
+  dev loops).
+- `auto` uses Docker when available. Falling back to host execution additionally
+  requires `VULCANBENCH_ALLOW_HOST_EXEC=1`; otherwise it errors out.
 
 File operations (read/edit/search) always run host-side over the shared mount;
 command execution (`run_command`/`run_tests`/`run_lint`) **and the functional
@@ -178,7 +183,7 @@ one with `python scripts/import_oss_issues.py`. Format details:
 - Docker sandbox runs untrusted command execution in a non-root, network-off,
   resource-limited container
 
-Full details: docs/ARCHITECTURE.md and the plan `.kilo/plans/1780024121334-silent-circuit.md`
+Full details: docs/ARCHITECTURE.md
 
 ## License
 

@@ -8,6 +8,7 @@ attached under ``metric_details`` for the run summary / dashboard.
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -56,6 +57,9 @@ def evaluate_run(
     else:
         security = assess_security(workspace, changed_files, remaining_s=remaining_s)
     _record(collector, "security_detail", security.details)
+
+    _warn_if_unscored("quality", quality)
+    _warn_if_unscored("security", security)
 
     human_like_score: float | None = None
     human_like_details: dict[str, Any]
@@ -108,6 +112,20 @@ def _summarize_verifier(verifier_payload: dict[str, Any], functional: float) -> 
 def _record(collector: TraceCollector | None, event: str, data: dict[str, Any]) -> None:
     if collector is not None:
         collector.record(event, data)
+
+
+def _warn_if_unscored(metric: str, result: MetricResult) -> None:
+    """Make degraded scoring loud: a None score (e.g. analyzer missing from PATH)
+    is recorded in the trace, but operators reading the console should see it too."""
+    if result.score is not None:
+        return
+    reasons = {
+        str(detail["reason"])
+        for detail in (result.details, *result.details.values())
+        if isinstance(detail, dict) and detail.get("reason")
+    }
+    note = "; ".join(sorted(reasons)) or "no reason recorded"
+    print(f"[vulcanbench] WARNING: {metric} score is None ({note})", file=sys.stderr)
 
 
 def _budget_is_exhausted(remaining_s: RemainingSeconds | None) -> bool:

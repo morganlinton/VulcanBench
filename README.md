@@ -4,12 +4,15 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 
-Fully open-source, transparent, community-driven benchmarking for LLMs on realistic software engineering tasks.
+Fully open-source, transparent, community-driven benchmarking for LLMs on
+realistic software engineering tasks. VulcanBench measures how model behavior
+changes across reasoning effort, language, codebase scale, and task complexity.
 
-**v1 MVP** — real tool-calling agent loop (mock/OpenAI/Anthropic), optional
-Docker sandbox, full trace+replay, five-metric scoring (functional, quality,
-security, efficiency, human_like), a local leaderboard, and a Next.js dashboard
-that renders live data from the backend.
+**v1 MVP** — real tool-calling agent loop (mock/OpenAI/Anthropic), normalized
+reasoning-effort sweeps, optional Docker sandbox, full trace+replay,
+five-metric scoring (functional, quality, security, efficiency, human_like), a
+local leaderboard, and a Next.js dashboard that renders live data from the
+backend.
 
 ## One-command setup
 
@@ -53,13 +56,19 @@ vulcanbench run --task hello-world --model anthropic:claude-opus-4-8
 
 # Run a whole suite: repeat for signal, parallelize, and cap the spend.
 vulcanbench run --suite v1 --model openai:gpt-4o --repeat 5 --max-concurrency 4 --max-cost 20.00
+
+# Compare normalized reasoning effort on the same suite/model.
+vulcanbench run --suite v1 --model openai:gpt-4o --effort low
+vulcanbench effort-sweep --suite v1 --model openai:gpt-5.1 --efforts low,medium,high --repeat 3 --sandbox docker
+
 # Fast micro/small sweep vs navigation-heavy medium/large tasks:
 vulcanbench run --suite v1-micro --model openai:gpt-4o
 vulcanbench run --suite v1-large --model openai:gpt-4o --repeat 5 --sandbox docker
 vulcanbench leaderboard            # by model: pass@1 ± stderr, pass@k, cost, latency
 vulcanbench leaderboard --by run   # per-run drill-down
 vulcanbench report -o report.md    # shareable Markdown/JSON report (ranking,
-                                   #   per-task breakdown, environment, drift flags)
+                                   #   effort sensitivity, per-task breakdown,
+                                   #   environment, drift flags)
 vulcanbench calibrate              # empirical difficulty calibration from recorded runs
 vulcanbench replay <id>
 
@@ -88,9 +97,14 @@ artifacts are safe to publish. See `make ci`, `make docker-up`, docs/.
 Specify a model as `provider:model`:
 
 - `mock:synthetic` — deterministic, offline; used by tests and demos.
-- `openai:<model>` — OpenAI Chat Completions (or any OpenAI-compatible endpoint
-  via `OPENAI_BASE_URL`). Needs `OPENAI_API_KEY`.
+- `openai:<model>` — OpenAI Chat Completions for normal runs, or the Responses
+  API when `--effort` is supplied. Needs `OPENAI_API_KEY`.
 - `anthropic:<model>` — Anthropic Messages API. Needs `ANTHROPIC_API_KEY`.
+
+`--effort` accepts `low`, `medium`, `high`, or `extra-high`. `extra-high` maps
+to OpenAI `reasoning.effort="xhigh"` and is opt-in for sweeps because support is
+model-dependent. In v1, real effort control is OpenAI-only; mock runs accept the
+field as no-op metadata, and Anthropic effort is rejected with a clear error.
 
 ## Sandbox
 
@@ -127,9 +141,11 @@ Go, TypeScript, and Rust, plus the `hello-world` demo. Each task ships a startin
 `fail_to_pass`/`pass_to_pass` test commands in `metadata.json`, and a
 `gold_patch.diff` reference solution.
 
-The corpus spans difficulty (`easy` / `medium` / `hard`) and category
-(`bug_fix`, `feature`, `refactor`, `concurrency`) so it discriminates between
-weak and strong models. Examples: an RFC 6901 JSON Pointer resolver
+The corpus spans difficulty (`easy` / `medium` / `hard`), `repo_scale`
+(`micro` / `small` / `medium` / `large`), and `task_complexity` (`localized`,
+`multi_file`, `system`, `architecture`) so it discriminates between weak and
+strong models and shows when higher reasoning effort matters. Examples: an RFC
+6901 JSON Pointer resolver
 (`py-jsonpointer`, hard), a race-free bounded worker pool verified under
 `go test -race` (`go-worker-pool`, hard), and a prototype-pollution-safe deep
 merge (`ts-deep-merge`, hard).
@@ -190,7 +206,10 @@ skip); see the [Models](#models) section. Cost uses a built-in price table
 rather than a guess (`mock` is $0). Empirical difficulty calibration
 (`vulcanbench calibrate`) derives per-task difficulty from observed solve rates
 across models and surfaces disagreements with the hand-labeled `difficulty` in
-the report and dashboard.
+the report and dashboard. Effort-sensitivity reporting compares low/high
+pass@1, total score, cost, latency, and tokens by language, scale, difficulty,
+and complexity, and calls out missing medium/large Python or Rust coverage
+instead of overstating conclusions.
 
 Next up (see [docs/ROADMAP.md](docs/ROADMAP.md)): additional OSS-sourced tasks,
 Java runtime/CI support, and write-through from `vulcanbench run` to the database.

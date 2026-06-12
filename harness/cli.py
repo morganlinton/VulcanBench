@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import math
+import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +21,7 @@ from harness import __version__
 from harness.agent.loop import run_agent
 from harness.agent.providers import ProviderError
 from harness.calibration import calibrate_tasks, calibration_to_markdown
+from harness.effort import DEFAULT_SWEEP_EFFORTS, parse_efforts
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
 from harness.pricing import is_priced
 from harness.report import build_report, to_markdown
@@ -98,6 +101,11 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     fail_under: float | None = typer.Option(
         None, "--fail-under", help="Exit non-zero (4) if pass@1 is below this threshold (CI gate)"
     ),
+    effort: str | None = typer.Option(
+        None,
+        "--effort",
+        help="Normalized reasoning effort: low|medium|high|extra-high",
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only, do not launch sandbox"),
 ) -> None:
     """Run an agent against a task or a whole suite, recording full traces."""
@@ -139,8 +147,10 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         raise typer.Exit(code=1)
     if dry_run:
         target = f"suite={suite}" if suite else f"task={task}"
+        effort_note = f" effort={effort}" if effort else ""
         console.print(
-            f"[yellow]dry-run[/yellow] would run {target} model={model} sandbox={sandbox}"
+            f"[yellow]dry-run[/yellow] would run {target} model={model} "
+            f"sandbox={sandbox}{effort_note}"
         )
         raise typer.Exit()
 
@@ -152,6 +162,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         "image": image,
         "network": network,
         "timeout_s": timeout,
+        "effort": effort,
     }
     pass_at_1: float | None = None
     n_incomplete = 0  # errored + skipped runs (an incomplete suite)
@@ -199,6 +210,7 @@ def _summary_row(summary: dict[str, Any]) -> dict[str, Any]:
         "cost_usd": summary.get("cost_usd"),
         "duration_s": summary.get("duration_s"),
         "total_tokens": summary.get("total_tokens"),
+        "effort": summary.get("effort"),
     }
 
 
@@ -278,6 +290,131 @@ def _run_suite(
     aggregate = result["aggregate"]
     p1 = aggregate[0]["pass_at_1"] if aggregate else None
     return (float(p1) if p1 is not None else None), n_errors + n_skipped
+
+
+@app.command("effort-sweep")
+def effort_sweep(
+    suite: str = typer.Option(..., "--suite", help="Suite to sweep, e.g. v1"),
+    model: str = typer.Option(..., "--model", "-m", help="provider:model e.g. openai:gpt-5.1"),
+    efforts: str = typer.Option(
+        ",".join(DEFAULT_SWEEP_EFFORTS),
+        "--efforts",
+        help="Comma-separated normalized efforts; default low,medium,high",
+    ),
+    repeat: int = typer.Option(1, "--repeat", help="Run each task N times per effort"),
+    output_dir: Path = typer.Option(  # noqa: B008
+        Path("./runs"), "--output-dir", "-o", help="Where to write traces and experiment.json"
+    ),
+    max_steps: int | None = typer.Option(
+        None, "--max-steps", help="Cap agent steps (default: per-task metadata / scale tier)"
+    ),
+    judges: bool = typer.Option(
+        True, "--judges/--no-judges", help="Run the human_like LLM judge ensemble"
+    ),
+    judge_model: str | None = typer.Option(
+        None, "--judge-model", help="Model for judges (default: same as --model)"
+    ),
+    sandbox: str = typer.Option("local", "--sandbox", help="Where tools run: local|docker|auto"),
+    image: str | None = typer.Option(
+        None,
+        "--image",
+        help="Docker image for the sandbox (default: per task or vulcanbench/sandbox:base)",
+    ),
+    network: bool = typer.Option(
+        False, "--network/--no-network", help="Allow network in the docker sandbox"
+    ),
+    max_concurrency: int = typer.Option(
+        1, "--max-concurrency", help="Run suite tasks in parallel for each effort"
+    ),
+    max_cost: float | None = typer.Option(
+        None, "--max-cost", help="USD spend cap per effort (same semantics as run --suite)"
+    ),
+    timeout: float | None = typer.Option(
+        None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Plan only, do not launch sandbox"),
+) -> None:
+    """Run a suite across normalized reasoning-effort levels."""
+    try:
+        effort_list = parse_efforts(efforts)
+    except ValueError as e:
+        console.print(f"[red]error[/red] {e}")
+        raise typer.Exit(code=1) from e
+
+    if repeat < 1:
+        console.print("[red]error[/red] --repeat must be >= 1")
+        raise typer.Exit(code=1)
+    if max_concurrency < 1:
+        console.print("[red]error[/red] --max-concurrency must be >= 1")
+        raise typer.Exit(code=1)
+    if sandbox not in {"local", "docker", "auto"}:
+        console.print(f"[red]error[/red] --sandbox must be local|docker|auto, got {sandbox!r}")
+        raise typer.Exit(code=1)
+    if max_cost is not None and not (math.isfinite(max_cost) and max_cost > 0):
+        console.print(f"[red]error[/red] --max-cost must be a finite number > 0, got {max_cost}")
+        raise typer.Exit(code=1)
+
+    experiment_id = f"experiment-{uuid.uuid4().hex[:8]}"
+    console.print(
+        f"[cyan]effort sweep[/cyan] {suite} with {model}: {', '.join(effort_list)} "
+        f"x{repeat} ({experiment_id})"
+    )
+    if dry_run:
+        console.print("[yellow]dry-run[/yellow] would run one suite invocation per effort")
+        raise typer.Exit()
+
+    suites: list[dict[str, Any]] = []
+    started_at = datetime.now(UTC)
+    try:
+        for effort in effort_list:
+            console.print(f"[cyan]effort[/cyan] {effort}")
+            suites.append(
+                run_suite(
+                    suite,
+                    model,
+                    output_dir=output_dir,
+                    repeat=repeat,
+                    max_concurrency=max_concurrency,
+                    max_cost=max_cost,
+                    effort=effort,
+                    max_steps=max_steps,
+                    judges=judges,
+                    judge_model=judge_model,
+                    sandbox=sandbox,
+                    image=image,
+                    network=network,
+                    timeout_s=timeout,
+                    experiment_id=experiment_id,
+                )
+            )
+    except SandboxError as e:
+        console.print(f"[red]sandbox error[/red] {e}")
+        raise typer.Exit(code=3) from e
+    except ProviderError as e:
+        console.print(f"[red]provider error[/red] {e}")
+        raise typer.Exit(code=2) from e
+    except (ValueError, FileNotFoundError) as e:
+        console.print(f"[red]error[/red] {e}")
+        raise typer.Exit(code=1) from e
+
+    experiment = {
+        "experiment_id": experiment_id,
+        "suite": suite,
+        "model": model,
+        "efforts": effort_list,
+        "repeat": repeat,
+        "max_concurrency": max_concurrency,
+        "max_cost_per_effort": max_cost,
+        "started_at": started_at.isoformat(),
+        "finished_at": datetime.now(UTC).isoformat(),
+        "suites": suites,
+    }
+    experiment_dir = output_dir / experiment_id
+    experiment_dir.mkdir(parents=True, exist_ok=True)
+    (experiment_dir / "experiment.json").write_text(
+        json.dumps(experiment, indent=2), encoding="utf-8"
+    )
+    console.print(f"[green]wrote[/green] {experiment_dir / 'experiment.json'}")
 
 
 @app.command()
@@ -426,7 +563,7 @@ def calibrate(  # noqa: PLR0912
     elif suite:
         rows = [r for r in rows if r.get("suite") == suite]
 
-    if not rows and not include_mock:
+    if not rows and not include_mock and format == "table":
         console.print(
             f"no runs found in {runs_dir} "
             "(try: vulcanbench run --task hello-world --model openai:gpt-4o)"

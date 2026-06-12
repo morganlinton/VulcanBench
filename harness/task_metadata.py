@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 REPO_SCALES = frozenset({"micro", "small", "medium", "large"})
+TASK_COMPLEXITIES = frozenset({"localized", "multi_file", "system", "architecture"})
 SCALE_LOC_BOUNDS: dict[str, tuple[int, int | None]] = {
     "micro": (0, 500),
     "small": (500, 1_000),
@@ -37,6 +38,37 @@ def repo_scale(metadata: dict[str, Any]) -> str:
     if raw in REPO_SCALES:
         return str(raw)
     return "micro"
+
+
+def task_complexity(metadata: dict[str, Any]) -> str:
+    raw = metadata.get("task_complexity")
+    if raw in TASK_COMPLEXITIES:
+        return str(raw)
+    return "localized"
+
+
+def infer_task_complexity_from_gold_patch(patch_text: str) -> str:
+    """Infer task shape from the number of source files touched by a gold patch."""
+    touched: set[str] = set()
+    for line in patch_text.splitlines():
+        if not line.startswith("diff --git "):
+            continue
+        parts = line.split()
+        if len(parts) < 4:
+            continue
+        path = parts[3]
+        if path.startswith("b/"):
+            path = path[2:]
+        suffix = Path(path).suffix.lower()
+        if suffix in CODE_SUFFIXES:
+            touched.add(path)
+
+    n_files = len(touched)
+    if n_files >= 3:
+        return "system"
+    if n_files == 2:
+        return "multi_file"
+    return "localized"
 
 
 def agent_hints(metadata: dict[str, Any]) -> dict[str, Any]:
@@ -132,6 +164,9 @@ def validate_scale_fields(task_root: Path, metadata: dict[str, Any]) -> list[str
     scale = metadata.get("repo_scale")
     if scale is not None and scale not in REPO_SCALES:
         reasons.append(f"repo_scale must be one of {sorted(REPO_SCALES)}")
+    complexity = metadata.get("task_complexity")
+    if complexity is not None and complexity not in TASK_COMPLEXITIES:
+        reasons.append(f"task_complexity must be one of {sorted(TASK_COMPLEXITIES)}")
 
     source = metadata.get("source")
     if source == "oss":

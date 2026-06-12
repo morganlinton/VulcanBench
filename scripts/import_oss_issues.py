@@ -44,6 +44,7 @@ _METADATA_TEMPLATE: dict = {
     "category": "bug_fix",
     "languages": [],
     "difficulty": "medium",
+    "task_complexity": "system",
     "created": "",
     "source": "oss",
     "decontaminated": False,

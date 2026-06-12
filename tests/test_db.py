@@ -24,11 +24,20 @@ def _summary(run_id: str, model: str = "openai:gpt-4o", total: float = 0.9) -> d
         "task_id": "py-ttl-cache-expiry",
         "model": model,
         "suite": "v1",
+        "suite_id": "suite-1",
+        "effort": {
+            "requested": "low",
+            "provider": "openai",
+            "provider_value": "low",
+            "supported": True,
+        },
+        "experiment_id": "experiment-1",
         "steps": 5,
         "total_tokens": 1000,
         "cost_usd": 0.01,
         "duration_s": 3.2,
         "finished_at": "2026-05-30T00:00:00+00:00",
+        "manifest": {"task": {"repo_scale": "small", "task_complexity": "localized"}},
         "scores": {"functional": 1.0, "total": total, "quality": 0.8},
     }
 
@@ -57,6 +66,8 @@ def test_upsert_and_rows(sqlite_db: None) -> None:
     assert {r["run_id"] for r in rows} == {"r1", "r2"}
     r = next(r for r in rows if r["run_id"] == "r1")
     assert r["total"] == 0.9 and r["cost_usd"] == 0.01 and r["suite"] == "v1"
+    assert r["effort_requested"] == "low"
+    assert r["task_complexity"] == "localized"
     assert db.get_summary("r1")["scores"]["quality"] == 0.8
 
 

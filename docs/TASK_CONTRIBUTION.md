@@ -8,7 +8,7 @@ hidden test suite and a reference solution. Every task must pass the validator
 
 ```
 tasks/v1/<task-id>/
-├── metadata.json        # id, category, languages, difficulty, source,
+├── metadata.json        # id, category, languages, difficulty, task_complexity, source,
 │                        #   decontamination_notes, and declarative tests
 ├── issue.md             # the problem statement shown to the agent (no solution)
 ├── repo/                # the STARTING repo state given to the agent
@@ -31,6 +31,7 @@ For **medium/large** OSS slices, see [LARGE_TASK_HANDBOOK.md](LARGE_TASK_HANDBOO
   "category": "bug_fix",                 // bug_fix | feature | refactor | concurrency
   "languages": ["python"],               // python | go | typescript | javascript
   "difficulty": "easy",                  // easy | medium | hard
+  "task_complexity": "localized",        // localized | multi_file | system | architecture
   "created": "2026-05-30",
   "source": "hand-authored",             // or "oss" (then fill provenance below)
   "decontaminated": true,                // REQUIRED bool; hand-authored MUST be true
@@ -46,6 +47,23 @@ For **medium/large** OSS slices, see [LARGE_TASK_HANDBOOK.md](LARGE_TASK_HANDBOO
   }
 }
 ```
+
+### Task complexity
+
+`task_complexity` captures the shape of the engineering work independently from
+the human-labeled expected `difficulty`:
+
+| Value | Meaning |
+|-------|---------|
+| `localized` | Fix is concentrated in one source file |
+| `multi_file` | Fix spans two source files |
+| `system` | Fix spans three or more source files or cross-cutting behavior |
+| `architecture` | Explicit design/API/ownership decision beyond a normal patch |
+
+For existing tasks, VulcanBench infers this deterministically from
+`gold_patch.diff`: one touched source file is `localized`, two is `multi_file`,
+and three or more is `system`. Use `architecture` only for future tasks that are
+authored to test architectural judgment.
 
 ### Optional fields (large / OSS tasks)
 

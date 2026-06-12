@@ -150,6 +150,8 @@ def run_suite(  # noqa: PLR0915 — linear scheduler: validation + budget loop +
             "functional": summary.get("scores", {}).get("functional"),
             "cost_usd": summary.get("cost_usd"),
             "duration_s": summary.get("duration_s"),
+            "effort": summary.get("effort"),
+            "experiment_id": summary.get("experiment_id"),
         }
 
     task_results: list[dict[str, Any]] = []
@@ -204,6 +206,8 @@ def run_suite(  # noqa: PLR0915 — linear scheduler: validation + budget loop +
         "suite_id": suite_id,
         "suite": name,
         "model": model,
+        "effort": run_kwargs.get("effort"),
+        "experiment_id": run_kwargs.get("experiment_id"),
         "repeat": repeat,
         "max_concurrency": max_concurrency,
         "max_cost": max_cost,

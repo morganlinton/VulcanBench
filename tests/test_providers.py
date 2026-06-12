@@ -163,6 +163,46 @@ def test_openai_complete_uses_budgeted_http_timeout(monkeypatch: pytest.MonkeyPa
     assert seen == [3.2]
 
 
+def test_openai_effort_uses_responses_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        seen["payload"] = payload
+        return {
+            "output": [
+                {
+                    "type": "function_call",
+                    "call_id": "c1",
+                    "name": "read_file",
+                    "arguments": '{"path": "a"}',
+                },
+                {
+                    "type": "message",
+                    "content": [{"type": "output_text", "text": "ok"}],
+                },
+            ],
+            "usage": {"input_tokens": 11, "output_tokens": 3},
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = OpenAIProvider("gpt-5.1").complete(
+        [{"role": "user", "content": "hi"}],
+        [{"function": {"name": "read_file", "description": "read", "parameters": {}}}],
+        effort="xhigh",
+    )
+
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert "responses" in seen["url"]
+    assert payload["reasoning"] == {"effort": "xhigh"}
+    assert payload["tools"][0]["name"] == "read_file"
+    assert resp.content == "ok"
+    assert resp.tool_calls[0].arguments == {"path": "a"}
+    assert resp.usage.total == 14
+
+
 def test_openai_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     with pytest.raises(P.ProviderError, match="OPENAI_API_KEY"):
@@ -195,3 +235,9 @@ def test_anthropic_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     with pytest.raises(P.ProviderError, match="ANTHROPIC_API_KEY"):
         AnthropicProvider("claude-opus-4-8").complete([], [])
+
+
+def test_anthropic_effort_rejected_before_http(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant")
+    with pytest.raises(P.ProviderError, match="not supported for Anthropic yet"):
+        AnthropicProvider("claude-opus-4-8").complete([], [], effort="low")

@@ -32,6 +32,8 @@ _METRIC_KEYS = ("functional", "quality", "security", "efficiency", "human_like")
 def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, Any]:
     """Project a run summary onto a compact leaderboard row."""
     scores = s.get("scores", {})
+    manifest_task = (s.get("manifest") or {}).get("task", {})
+    effort = s.get("effort")
     return {
         "run_id": s.get("run_id", fallback_run_id),
         "task_id": s.get("task_id"),
@@ -48,9 +50,15 @@ def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, An
         "duration_s": s.get("duration_s"),
         "suite": s.get("suite"),
         "suite_id": s.get("suite_id"),
+        "effort": effort,
+        "effort_requested": effort.get("requested") if isinstance(effort, dict) else None,
+        "experiment_id": s.get("experiment_id"),
         "task_hash": s.get("task_hash"),
         "finished_at": s.get("finished_at"),
-        "repo_scale": (s.get("manifest") or {}).get("task", {}).get("repo_scale"),
+        "repo_scale": manifest_task.get("repo_scale"),
+        "task_complexity": manifest_task.get("task_complexity"),
+        "languages": manifest_task.get("languages"),
+        "difficulty": manifest_task.get("difficulty"),
     }
 
 

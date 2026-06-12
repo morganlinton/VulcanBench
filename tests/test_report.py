@@ -30,7 +30,25 @@ def _summary(
     task_hash: str | None = None,
     suite: str | None = None,
     python: str = "3.12.0",
+    effort: str | None = None,
+    complexity: str = "localized",
+    repo_scale: str = "small",
+    language: str = "python",
+    difficulty: str = "easy",
+    cost_usd: float = 0.01,
+    duration_s: float = 2.0,
+    total_tokens: int = 100,
 ) -> None:
+    effort_meta = (
+        {
+            "requested": effort,
+            "provider": "mock",
+            "provider_value": None,
+            "supported": False,
+        }
+        if effort
+        else None
+    )
     d = runs_dir / run_id
     d.mkdir(parents=True)
     (d / "summary.json").write_text(
@@ -40,14 +58,21 @@ def _summary(
                 "task_id": task_id,
                 "model": model,
                 "suite": suite,
-                "cost_usd": 0.01,
-                "duration_s": 2.0,
-                "total_tokens": 100,
+                "cost_usd": cost_usd,
+                "duration_s": duration_s,
+                "total_tokens": total_tokens,
                 "task_hash": task_hash,
+                **({"effort": effort_meta} if effort_meta else {}),
                 "manifest": {
                     "model": model,
                     "runtime": {"python": python},
                     "tools": {"git": "git version 2.40"},
+                    "task": {
+                        "repo_scale": repo_scale,
+                        "task_complexity": complexity,
+                        "languages": [language],
+                        "difficulty": difficulty,
+                    },
                 },
                 "scores": {"functional": functional, "total": functional},
             }
@@ -68,6 +93,7 @@ def test_structure(tmp_path: Path) -> None:
         "environment",
         "integrity",
         "calibration",
+        "effort_sensitivity",
     }
     assert rep["generated_at"] == "fixed"
     assert rep["totals"]["n_runs"] == 1
@@ -163,3 +189,43 @@ def test_markdown(tmp_path: Path) -> None:
     assert "## Per-task" in md
     assert "## Environment" in md
     assert "pass@1" in md
+
+
+def test_effort_sensitivity_flags_low_sufficient(tmp_path: Path) -> None:
+    runs = tmp_path / "runs"
+    _summary(runs, "low", model="m", task_id="t1", functional=1.0, effort="low")
+    _summary(runs, "high", model="m", task_id="t1", functional=1.0, effort="high")
+
+    effort = build_report(runs_dir=runs, tasks_root=tmp_path / "tasks")["effort_sensitivity"]
+    assert effort["available"] is True
+    row = effort["strata"][0]
+    assert row["language"] == "python"
+    assert row["task_complexity"] == "localized"
+    assert row["high_minus_low_pass_at_1"] == 0.0
+    assert row["classification"] == "low sufficient"
+
+
+def test_effort_sensitivity_flags_effort_sensitive(tmp_path: Path) -> None:
+    runs = tmp_path / "runs"
+    _summary(runs, "low", model="m", task_id="t1", functional=0.0, effort="low")
+    _summary(
+        runs,
+        "high",
+        model="m",
+        task_id="t1",
+        functional=1.0,
+        effort="high",
+        cost_usd=0.03,
+        duration_s=6.0,
+    )
+
+    row = build_report(runs_dir=runs, tasks_root=tmp_path / "tasks")["effort_sensitivity"][
+        "strata"
+    ][0]
+    assert row["high_minus_low_pass_at_1"] == 1.0
+    assert row["high_cost_ratio"] == 3.0
+    assert row["high_latency_ratio"] == 3.0
+    assert row["classification"] == "effort sensitive"
+
+    md = to_markdown(build_report(runs_dir=runs, tasks_root=tmp_path / "tasks"))
+    assert "## Effort Sensitivity" in md

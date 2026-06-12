@@ -14,7 +14,8 @@ realistic codebases—not single-file toy puzzles.
 
 Set `repo_scale` in `metadata.json`. The harness applies higher default `max_steps`
 and wall-clock budgets for medium/large tasks (overridable via `agent_hints` and
-`test_timeout_s`).
+`test_timeout_s`). Also set `task_complexity` so effort-sensitivity reports can
+separate localized fixes from multi-file, system, and architecture tasks.
 
 ## Selecting upstream issues (OSS-heavy)
 
@@ -101,6 +102,7 @@ the agent/verifier time budget:
 ```json
 {
   "repo_scale": "medium",
+  "task_complexity": "system",
   "base_commit": "abc123...",
   "upstream": {
     "url": "https://github.com/org/repo",

@@ -12,6 +12,13 @@ export interface LeaderboardRow {
   run_id: string;
   task_id: string | null;
   model: string | null;
+  effort: EffortSummary | null;
+  effort_requested: string | null;
+  experiment_id: string | null;
+  repo_scale: string | null;
+  task_complexity: string | null;
+  languages?: string[] | null;
+  difficulty?: string | null;
   total: number | null;
   functional: number | null;
   steps: number | null;
@@ -39,6 +46,8 @@ export interface RunSummary {
   run_id: string;
   task_id: string;
   model: string;
+  effort?: EffortSummary;
+  experiment_id?: string;
   steps: number;
   total_tokens?: number;
   finished?: boolean;
@@ -59,6 +68,7 @@ export interface TaskSummary {
   category: string | null;
   languages: string[];
   difficulty: string | null;
+  task_complexity: string | null;
   source: string | null;
   empirical_difficulty: string | null;
   solve_rate: number | null;
@@ -95,6 +105,44 @@ export interface Calibration {
   summary: { n_tasks: number; n_calibrated: number; n_disagree: number; n_insufficient: number };
 }
 
+export interface EffortSummary {
+  requested: string;
+  provider: string;
+  provider_value: string | null;
+  supported: boolean;
+}
+
+export interface EffortMetrics {
+  n_runs: number;
+  n_tasks: number;
+  pass_at_1: number | null;
+  avg_total: number | null;
+  total_cost: number | null;
+  cost_known: boolean;
+  avg_duration_s: number | null;
+  total_tokens: number;
+}
+
+export interface EffortStratum {
+  model: string;
+  language: string;
+  repo_scale: string;
+  difficulty: string;
+  task_complexity: string;
+  efforts: Record<string, EffortMetrics>;
+  high_minus_low_pass_at_1: number | null;
+  high_minus_low_avg_total: number | null;
+  high_cost_ratio: number | null;
+  high_latency_ratio: number | null;
+  classification: string;
+}
+
+export interface EffortSensitivity {
+  available: boolean;
+  strata: EffortStratum[];
+  warnings: string[];
+}
+
 // Fetch JSON from the backend. Returns `fallback` if the backend is unreachable
 // or responds with an error, so the dashboard degrades gracefully when run
 // without the API (e.g. `npm run dev` alone).
@@ -108,13 +156,40 @@ async function getJSON<T>(path: string, fallback: T): Promise<T> {
   }
 }
 
-export function getLeaderboard(task?: string): Promise<LeaderboardRow[]> {
-  const qs = task ? `?by=run&task=${encodeURIComponent(task)}` : "?by=run";
+function leaderboardQuery(params: Record<string, string | undefined>): string {
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) qs.set(key, value);
+  }
+  const encoded = qs.toString();
+  return encoded ? `?${encoded}` : "";
+}
+
+export function getLeaderboard(
+  task?: string,
+  effort?: string,
+  taskComplexity?: string,
+): Promise<LeaderboardRow[]> {
+  const qs = leaderboardQuery({
+    by: "run",
+    task,
+    effort,
+    task_complexity: taskComplexity,
+  });
   return getJSON<LeaderboardRow[]>(`/api/leaderboard${qs}`, []);
 }
 
-export function getModelLeaderboard(suite?: string): Promise<ModelAggregate[]> {
-  const qs = suite ? `?by=model&suite=${encodeURIComponent(suite)}` : "?by=model";
+export function getModelLeaderboard(
+  suite?: string,
+  effort?: string,
+  taskComplexity?: string,
+): Promise<ModelAggregate[]> {
+  const qs = leaderboardQuery({
+    by: "model",
+    suite,
+    effort,
+    task_complexity: taskComplexity,
+  });
   return getJSON<ModelAggregate[]>(`/api/leaderboard${qs}`, []);
 }
 
@@ -156,5 +231,13 @@ export function getCalibration(suite?: string): Promise<Calibration> {
       tasks: [],
       summary: { n_tasks: 0, n_calibrated: 0, n_disagree: 0, n_insufficient: 0 },
     },
+  );
+}
+
+export function getEffortSensitivity(suite?: string): Promise<EffortSensitivity> {
+  const qs = suite ? `?suite=${encodeURIComponent(suite)}` : "";
+  return getJSON<EffortSensitivity>(
+    `/api/effort-sensitivity${qs}`,
+    { available: false, strata: [], warnings: [] },
   );
 }

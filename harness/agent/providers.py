@@ -8,8 +8,8 @@ Providers implemented:
 
 - ``mock:<name>``      Deterministic, offline. Solves ``hello-world`` and powers
                        tests without network or API keys.
-- ``openai:<model>``   OpenAI Chat Completions API (and any OpenAI-compatible
-                       endpoint via ``OPENAI_BASE_URL``).
+- ``openai:<model>``   OpenAI Chat Completions API by default, and the Responses
+                       API when reasoning effort is supplied.
 - ``anthropic:<model>`` Anthropic Messages API.
 
 Only the Python standard library is used for HTTP so the harness stays
@@ -89,6 +89,7 @@ class LLMProvider(ABC):
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         timeout_s: float | None = None,
+        effort: str | None = None,
     ) -> LLMResponse:
         """Return the next assistant turn given the conversation and tool schemas."""
 
@@ -127,7 +128,12 @@ _RETRY = retry(
 
 
 class OpenAIProvider(LLMProvider):
-    """OpenAI Chat Completions (or any OpenAI-compatible endpoint)."""
+    """OpenAI provider.
+
+    Uses Chat Completions for the legacy/no-effort path. When ``effort`` is
+    supplied, switches to the Responses API so reasoning effort can be passed in
+    the official ``reasoning.effort`` field.
+    """
 
     @property
     def name(self) -> str:
@@ -138,25 +144,37 @@ class OpenAIProvider(LLMProvider):
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         timeout_s: float | None = None,
+        effort: str | None = None,
     ) -> LLMResponse:
         timeout = _http_timeout(timeout_s)
         if timeout_s is not None:
-            return self._complete_once(messages, tools, timeout)
-        return self._complete_with_retry(messages, tools, timeout)
+            return self._complete_once(messages, tools, timeout, effort)
+        return self._complete_with_retry(messages, tools, timeout, effort)
 
     @_RETRY
     def _complete_with_retry(
-        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], timeout: float
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
     ) -> LLMResponse:
-        return self._complete_once(messages, tools, timeout)
+        return self._complete_once(messages, tools, timeout, effort)
 
     def _complete_once(
-        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], timeout: float
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
     ) -> LLMResponse:
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             raise ProviderError("OPENAI_API_KEY is not set")
         base = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+        if effort is not None:
+            return self._responses_complete(base, api_key, messages, tools, timeout, effort)
+
         payload: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
@@ -192,6 +210,31 @@ class OpenAIProvider(LLMProvider):
             raw=body,
         )
 
+    def _responses_complete(
+        self,
+        base: str,
+        api_key: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str,
+    ) -> LLMResponse:
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "input": _to_responses_input(messages),
+            "reasoning": {"effort": effort},
+        }
+        if tools:
+            payload["tools"] = [_openai_tool_to_responses(t) for t in tools]
+            payload["tool_choice"] = "auto"
+        body = _http_post_json(
+            f"{base}/responses",
+            {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            payload,
+            timeout=timeout,
+        )
+        return _parse_responses_body(body)
+
 
 class AnthropicProvider(LLMProvider):
     """Anthropic Messages API."""
@@ -205,7 +248,10 @@ class AnthropicProvider(LLMProvider):
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         timeout_s: float | None = None,
+        effort: str | None = None,
     ) -> LLMResponse:
+        if effort is not None:
+            raise ProviderError("reasoning effort is not supported for Anthropic yet")
         timeout = _http_timeout(timeout_s)
         if timeout_s is not None:
             return self._complete_once(messages, tools, timeout)
@@ -287,8 +333,9 @@ class MockProvider(LLMProvider):
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         timeout_s: float | None = None,
+        effort: str | None = None,
     ) -> LLMResponse:
-        del timeout_s
+        del timeout_s, effort
         # Judge requests (human_like ensemble) carry a sentinel: answer with a
         # fixed JSON score so the metric is deterministic offline.
         if any("VULCANBENCH_JUDGE" in str(m.get("content", "")) for m in messages):
@@ -387,6 +434,82 @@ def _to_anthropic_messages(
         else:
             out.append({"role": role or "user", "content": str(m.get("content", ""))})
     return "\n".join(system_parts), out
+
+
+def _to_responses_input(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Convert the harness' chat-style transcript to Responses API input items."""
+    out: list[dict[str, Any]] = []
+    for m in messages:
+        role = m.get("role")
+        content = str(m.get("content", ""))
+        if role == "system":
+            out.append({"role": "developer", "content": content})
+        elif role in {"user", "assistant"}:
+            if content:
+                out.append({"role": role, "content": content})
+            for tc in m.get("tool_calls") or []:
+                fn = tc.get("function", {})
+                out.append(
+                    {
+                        "type": "function_call",
+                        "call_id": tc.get("id", ""),
+                        "name": fn.get("name", ""),
+                        "arguments": fn.get("arguments", "{}"),
+                    }
+                )
+        elif role == "tool":
+            out.append(
+                {
+                    "type": "function_call_output",
+                    "call_id": m.get("tool_call_id", ""),
+                    "output": content,
+                }
+            )
+        else:
+            out.append({"role": "user", "content": content})
+    return out
+
+
+def _openai_tool_to_responses(tool: dict[str, Any]) -> dict[str, Any]:
+    fn = tool["function"]
+    return {
+        "type": "function",
+        "name": fn["name"],
+        "description": fn.get("description", ""),
+        "parameters": fn.get("parameters", {"type": "object", "properties": {}}),
+    }
+
+
+def _parse_responses_body(body: dict[str, Any]) -> LLMResponse:
+    content_parts: list[str] = []
+    tool_calls: list[ToolInvocation] = []
+    for item in body.get("output") or []:
+        item_type = item.get("type")
+        if item_type == "message":
+            for block in item.get("content") or []:
+                if block.get("type") in {"output_text", "text"}:
+                    content_parts.append(block.get("text", ""))
+        elif item_type == "function_call":
+            tool_calls.append(
+                ToolInvocation(
+                    id=item.get("call_id") or item.get("id", ""),
+                    name=item.get("name", ""),
+                    arguments=_loads_args(item.get("arguments", "{}")),
+                )
+            )
+    if body.get("output_text"):
+        content_parts.append(str(body["output_text"]))
+
+    usage = body.get("usage", {})
+    return LLMResponse(
+        content="\n".join(part for part in content_parts if part) or None,
+        tool_calls=tool_calls,
+        usage=TokenUsage(
+            prompt_tokens=usage.get("input_tokens", usage.get("prompt_tokens", 0)),
+            completion_tokens=usage.get("output_tokens", usage.get("completion_tokens", 0)),
+        ),
+        raw=body,
+    )
 
 
 def _openai_tool_to_anthropic(tool: dict[str, Any]) -> dict[str, Any]:

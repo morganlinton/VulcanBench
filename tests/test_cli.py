@@ -195,6 +195,54 @@ def test_run_task_repeat(tmp_path: Path) -> None:
     assert sum(1 for p in tmp_path.iterdir() if p.is_dir()) == 3
 
 
+def test_effort_sweep_writes_experiment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[str] = []
+
+    def fake_run_suite(name, model, **kwargs):  # type: ignore[no-untyped-def]
+        calls.append(kwargs["effort"])
+        return {
+            "suite_id": f"suite-{kwargs['effort']}",
+            "suite": name,
+            "model": model,
+            "effort": kwargs["effort"],
+            "experiment_id": kwargs["experiment_id"],
+            "repeat": kwargs["repeat"],
+            "max_concurrency": kwargs["max_concurrency"],
+            "tasks": [],
+            "errors": [],
+            "aggregate": [],
+        }
+
+    monkeypatch.setattr(cli_mod, "run_suite", fake_run_suite)
+    result = runner.invoke(
+        app,
+        [
+            "effort-sweep",
+            "--suite",
+            "v1",
+            "--model",
+            "mock:synthetic",
+            "--efforts",
+            "low,high",
+            "--repeat",
+            "2",
+            "--max-concurrency",
+            "3",
+            "--output-dir",
+            str(tmp_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert calls == ["low", "high"]
+    experiment_paths = list(tmp_path.glob("experiment-*/experiment.json"))
+    assert len(experiment_paths) == 1
+    experiment = json.loads(experiment_paths[0].read_text())
+    assert experiment["efforts"] == ["low", "high"]
+    assert experiment["repeat"] == 2
+    assert {s["effort"] for s in experiment["suites"]} == {"low", "high"}
+
+
 def test_run_repeat_zero_rejected(tmp_path: Path) -> None:
     result = runner.invoke(
         app,

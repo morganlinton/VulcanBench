@@ -31,6 +31,20 @@ def _seed(runs: Path, run_id: str, total: float) -> None:
                 "task_id": "hello-world",
                 "model": "mock:synthetic",
                 "steps": 4,
+                "effort": {
+                    "requested": "low" if total < 0.7 else "high",
+                    "provider": "mock",
+                    "provider_value": None,
+                    "supported": False,
+                },
+                "manifest": {
+                    "task": {
+                        "repo_scale": "micro",
+                        "task_complexity": "localized",
+                        "languages": ["python"],
+                        "difficulty": "trivial",
+                    }
+                },
                 "scores": {"functional": 1.0, "total": total},
             }
         )
@@ -65,6 +79,23 @@ def test_leaderboard_by_model_default(tmp_path: Path) -> None:
     assert aggs[0]["n_runs"] == 2
 
 
+def test_leaderboard_filters_effort_and_complexity(tmp_path: Path) -> None:
+    _seed(tmp_path, "low", 0.5)
+    _seed(tmp_path, "high", 0.9)
+    rows = _client(tmp_path).get("/api/leaderboard?by=run&effort=low").json()
+    assert [r["run_id"] for r in rows] == ["low"]
+    rows = _client(tmp_path).get("/api/leaderboard?by=run&task_complexity=localized").json()
+    assert {r["run_id"] for r in rows} == {"low", "high"}
+
+
+def test_effort_sensitivity_endpoint(tmp_path: Path) -> None:
+    _seed(tmp_path, "low", 0.5)
+    _seed(tmp_path, "high", 0.9)
+    body = _client(tmp_path).get("/api/effort-sensitivity").json()
+    assert body["available"] is True
+    assert body["strata"][0]["classification"] == "effort sensitive"
+
+
 def test_run_and_trace(tmp_path: Path) -> None:
     _seed(tmp_path, "r1", 0.9)
     c = _client(tmp_path)
@@ -82,6 +113,7 @@ def test_tasks_list_and_detail(tmp_path: Path) -> None:
     tasks = c.get("/api/tasks").json()
     ids = {t["id"] for t in tasks}
     assert "py-ttl-cache-expiry" in ids
+    assert all("task_complexity" in t for t in tasks)
     detail = c.get("/api/task/py-ttl-cache-expiry").json()
     assert detail["id"] == "py-ttl-cache-expiry"
     assert "TTLCache" in detail["issue"]

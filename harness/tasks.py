@@ -136,8 +136,8 @@ def task_hash(task: Task) -> str:
     against: the starting repo (or snapshot), the issue/prompt (``issue.md``),
     the hidden tests, the declarative ``tests`` spec, the legacy ``verifier.py``
     (if any), and the gold patch. Cosmetic metadata (id, created, source,
-    decontamination_notes, difficulty) is intentionally excluded, so editing a
-    note does not register as task drift, while changing the prompt, any
+    decontamination_notes, difficulty, task_complexity) is intentionally
+    excluded, so editing a note does not register as task drift, while changing the prompt, any
     test/source file, or the scoring logic does.
     """
     h = hashlib.sha256()

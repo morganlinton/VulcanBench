@@ -37,6 +37,41 @@ def test_scan_collects_runs(tmp_path: Path) -> None:
     assert all(r["functional"] == 1.0 for r in rows)
 
 
+def test_scan_projects_effort_and_complexity(tmp_path: Path) -> None:
+    d = tmp_path / "r1"
+    d.mkdir(parents=True)
+    (d / "summary.json").write_text(
+        json.dumps(
+            {
+                "run_id": "r1",
+                "task_id": "hello-world",
+                "model": "mock:synthetic",
+                "effort": {
+                    "requested": "low",
+                    "provider": "mock",
+                    "provider_value": None,
+                    "supported": False,
+                },
+                "experiment_id": "experiment-1",
+                "manifest": {
+                    "task": {
+                        "repo_scale": "micro",
+                        "task_complexity": "localized",
+                        "languages": ["python"],
+                        "difficulty": "trivial",
+                    }
+                },
+                "scores": {"functional": 1.0, "total": 0.9},
+            }
+        )
+    )
+    row = scan_leaderboard(tmp_path)[0]
+    assert row["effort_requested"] == "low"
+    assert row["experiment_id"] == "experiment-1"
+    assert row["task_complexity"] == "localized"
+    assert row["languages"] == ["python"]
+
+
 def test_scan_ignores_dirs_without_summary(tmp_path: Path) -> None:
     (tmp_path / "incomplete").mkdir()
     _write_run(tmp_path, "good", 0.5)

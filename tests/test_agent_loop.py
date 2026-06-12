@@ -72,6 +72,31 @@ def test_run_agent_solves_hello_world(tmp_path: Path) -> None:
     assert (run_dir / "replay.html").exists()
 
 
+def test_run_agent_records_mock_effort_metadata(tmp_path: Path) -> None:
+    res = run_agent(
+        task_id="hello-world",
+        model="mock:synthetic",
+        output_dir=tmp_path,
+        tasks_root=Path("tasks/v1"),
+        judges=False,
+        effort="low",
+        experiment_id="experiment-test",
+    )
+    summary = res["summary"]
+    assert summary["effort"] == {
+        "requested": "low",
+        "provider": "mock",
+        "provider_value": None,
+        "supported": False,
+    }
+    assert summary["experiment_id"] == "experiment-test"
+
+    manifest_task = summary["manifest"]["task"]
+    assert manifest_task["task_complexity"] == "localized"
+    assert manifest_task["languages"] == ["python"]
+    assert manifest_task["difficulty"] == "trivial"
+
+
 def test_run_synthetic_hello_wrapper(tmp_path: Path) -> None:
     res = run_synthetic_hello(Path("tasks/v1/hello-world"), output_dir=tmp_path)
     assert res["summary"]["scores"]["functional"] == 1.0

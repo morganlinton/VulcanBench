@@ -30,6 +30,7 @@ from typing import Any
 from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolCall, ToolProtocol, get_openai_tool_schemas
 from harness.agent.providers import LLMProvider, get_provider
+from harness.effort import effort_config
 from harness.evaluator.evaluate import evaluate_run
 from harness.evaluator.scorer import run_verifier, score_run
 from harness.pricing import cost_usd, is_priced
@@ -46,6 +47,7 @@ from harness.task_metadata import (
     resolve_max_steps,
     resolve_verifier_timeout_s,
     system_prompt_for_task,
+    task_complexity,
 )
 from harness.tasks import Task, load_task, prepare_workspace, run_setup, task_hash
 from harness.tracer.collector import TraceCollector, generate_replay_html
@@ -126,6 +128,8 @@ def run_agent(
     suite: str | None = None,
     suite_id: str | None = None,
     timeout_s: float | None = None,
+    effort: str | None = None,
+    experiment_id: str | None = None,
 ) -> dict[str, Any]:
     """Run one evaluation: agent solves ``task_id`` with ``model``.
 
@@ -138,6 +142,7 @@ def run_agent(
     """
     task = load_task(task_id, tasks_root)
     provider = provider or get_provider(model)
+    effort_meta = effort_config(provider.name, effort)
     effective_max_steps = resolve_max_steps(task.metadata, max_steps)
     effective_timeout = resolve_agent_timeout_s(task.metadata, timeout_s)
 
@@ -176,6 +181,7 @@ def run_agent(
             executor,
             run_id,
             deadline,
+            effort_meta.as_summary() if effort_meta else None,
         )
         patch = _git_diff(workspace)
         changed_files = _git_changed_files(workspace)
@@ -235,6 +241,8 @@ def run_agent(
             "task_hash": task_hash(task),
             "suite": suite,
             "suite_id": suite_id,
+            **({"effort": effort_meta.as_summary()} if effort_meta else {}),
+            **({"experiment_id": experiment_id} if experiment_id else {}),
             "verifier": verifier_payload,
             "replay_command": f"vulcanbench replay {run_id}",
         },
@@ -395,6 +403,7 @@ def _run_model_loop(
     executor: ToolProtocol,
     run_id: str,
     deadline: _RunDeadline,
+    effort: dict[str, Any] | None = None,
 ) -> tuple[int, int, bool]:
     prompt_tokens = 0
     completion_tokens = 0
@@ -403,9 +412,12 @@ def _run_model_loop(
     for step in range(1, max_steps + 1):
         if not deadline.ensure_time(collector, "llm_request", step):
             break
-        collector.record("llm_request", {"step": step, "messages": len(messages)})
+        request_data: dict[str, Any] = {"step": step, "messages": len(messages)}
+        if effort is not None:
+            request_data["effort"] = effort
+        collector.record("llm_request", request_data)
         try:
-            resp = _complete_provider(provider, messages, tools, deadline.remaining_s())
+            resp = _complete_provider(provider, messages, tools, deadline.remaining_s(), effort)
         except Exception:
             if deadline.is_expired():
                 deadline.record_exceeded(collector, "llm_request", step)
@@ -523,6 +535,9 @@ def _task_workspace_stats(task: Task, workspace: Path) -> dict[str, Any]:
     return {
         "task": {
             "repo_scale": repo_scale(task.metadata),
+            "task_complexity": task_complexity(task.metadata),
+            "languages": task.metadata.get("languages", []),
+            "difficulty": task.metadata.get("difficulty"),
             "file_count": stats["file_count"],
             "loc": stats["loc"],
         }
@@ -656,13 +671,19 @@ def _complete_provider(
     messages: list[dict[str, Any]],
     tools: list[dict[str, Any]],
     timeout_s: float | None,
+    effort: dict[str, Any] | None = None,
 ) -> Any:
     params = inspect.signature(provider.complete).parameters
-    accepts_timeout = "timeout_s" in params or any(
-        p.kind == inspect.Parameter.VAR_KEYWORD for p in params.values()
-    )
+    accepts_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in params.values())
+    accepts_timeout = "timeout_s" in params or accepts_kwargs
+    accepts_effort = "effort" in params or accepts_kwargs
+    kwargs: dict[str, Any] = {}
     if accepts_timeout:
-        return provider.complete(messages, tools, timeout_s=timeout_s)
+        kwargs["timeout_s"] = timeout_s
+    if effort is not None and effort.get("supported") and accepts_effort:
+        kwargs["effort"] = effort.get("provider_value")
+    if kwargs:
+        return provider.complete(messages, tools, **kwargs)
     return provider.complete(messages, tools)
 
 

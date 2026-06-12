@@ -26,6 +26,7 @@ from pydantic import BaseModel
 from backend import db
 from harness.calibration import calibrate_tasks
 from harness.leaderboard import aggregate_by_model, filter_rows_by_repo_scale, scan_leaderboard
+from harness.report import build_effort_sensitivity
 from harness.suite import SUITE_ALIASES, load_suite
 from harness.tasks import list_task_ids, load_task
 
@@ -95,6 +96,8 @@ def get_leaderboard(
     task: str | None = None,
     suite: str | None = None,
     repo_scale: str | None = None,
+    effort: str | None = None,
+    task_complexity: str | None = None,
 ) -> list[dict[str, Any]]:
     rows = _rows()
     if suite in SUITE_ALIASES:
@@ -105,6 +108,12 @@ def get_leaderboard(
     if repo_scale:
         scales = {s.strip() for s in repo_scale.split(",") if s.strip()}
         rows = filter_rows_by_repo_scale(rows, scales, TASKS_ROOT)
+    if effort:
+        efforts = {e.strip() for e in effort.split(",") if e.strip()}
+        rows = [r for r in rows if r.get("effort_requested") in efforts]
+    if task_complexity:
+        complexities = {c.strip() for c in task_complexity.split(",") if c.strip()}
+        rows = [r for r in rows if r.get("task_complexity") in complexities]
     if by == "model":
         return aggregate_by_model(rows, suite=None)
     if task:
@@ -156,6 +165,18 @@ def get_calibration(suite: str | None = None) -> dict[str, Any]:
     return calibrate_tasks(rows, TASKS_ROOT)
 
 
+@app.get("/api/effort-sensitivity")
+def get_effort_sensitivity(suite: str | None = None) -> dict[str, Any]:
+    """Effort-sensitivity strata from effort-tagged runs."""
+    rows = _rows()
+    if suite in SUITE_ALIASES:
+        allowed = set(load_suite(suite).task_ids)
+        rows = [r for r in rows if r.get("task_id") in allowed]
+    elif suite:
+        rows = [r for r in rows if r.get("suite") == suite]
+    return build_effort_sensitivity(rows, TASKS_ROOT)
+
+
 @app.get("/api/tasks")
 def get_tasks() -> list[dict[str, Any]]:
     """List the benchmark tasks with their metadata and calibration data."""
@@ -176,6 +197,7 @@ def get_tasks() -> list[dict[str, Any]]:
                 "category": m.get("category"),
                 "languages": m.get("languages", []),
                 "difficulty": m.get("difficulty"),
+                "task_complexity": m.get("task_complexity"),
                 "source": m.get("source"),
                 "empirical_difficulty": entry.get("empirical_difficulty"),
                 "solve_rate": entry.get("solve_rate"),

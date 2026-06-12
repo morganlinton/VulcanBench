@@ -27,6 +27,12 @@ _ROW_FIELDS = (
     "task_id",
     "model",
     "suite",
+    "suite_id",
+    "effort",
+    "effort_requested",
+    "experiment_id",
+    "repo_scale",
+    "task_complexity",
     "total",
     "functional",
     "quality",
@@ -46,6 +52,12 @@ class Run(SQLModel, table=True):
     task_id: str | None = None
     model: str | None = None
     suite: str | None = None
+    suite_id: str | None = None
+    effort: dict[str, Any] | None = Field(default=None, sa_column=Column(SA_JSON))
+    effort_requested: str | None = None
+    experiment_id: str | None = None
+    repo_scale: str | None = None
+    task_complexity: str | None = None
     total: float | None = None
     functional: float | None = None
     quality: float | None = None
@@ -103,11 +115,19 @@ def init_db() -> None:
 
 def _row_from_summary(summary: dict[str, Any]) -> Run:
     scores = summary.get("scores", {})
+    effort = summary.get("effort") if isinstance(summary.get("effort"), dict) else None
+    manifest_task = (summary.get("manifest") or {}).get("task", {})
     return Run(
         run_id=summary.get("run_id", ""),
         task_id=summary.get("task_id"),
         model=summary.get("model"),
         suite=summary.get("suite"),
+        suite_id=summary.get("suite_id"),
+        effort=effort,
+        effort_requested=effort.get("requested") if effort else None,
+        experiment_id=summary.get("experiment_id"),
+        repo_scale=manifest_task.get("repo_scale"),
+        task_complexity=manifest_task.get("task_complexity"),
         total=scores.get("total"),
         functional=scores.get("functional"),
         quality=scores.get("quality"),

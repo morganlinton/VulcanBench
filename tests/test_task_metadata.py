@@ -3,16 +3,40 @@
 from __future__ import annotations
 
 from harness.task_metadata import (
+    infer_task_complexity_from_gold_patch,
     repo_scale,
     resolve_agent_timeout_s,
     resolve_max_steps,
     resolve_verifier_timeout_s,
+    task_complexity,
     validate_scale_fields,
 )
 
 
 def test_repo_scale_default() -> None:
     assert repo_scale({}) == "micro"
+
+
+def test_task_complexity_default_and_valid_values() -> None:
+    assert task_complexity({}) == "localized"
+    assert task_complexity({"task_complexity": "system"}) == "system"
+
+
+def test_infer_task_complexity_from_gold_patch() -> None:
+    assert (
+        infer_task_complexity_from_gold_patch(
+            "diff --git a/a.py b/a.py\n"
+            "diff --git a/b.py b/b.py\n"
+            "diff --git a/README.md b/README.md\n"
+        )
+        == "multi_file"
+    )
+    assert (
+        infer_task_complexity_from_gold_patch(
+            "diff --git a/a.py b/a.py\ndiff --git a/b.ts b/b.ts\ndiff --git a/c.go b/c.go\n"
+        )
+        == "system"
+    )
 
 
 def test_resolve_max_steps_from_hints() -> None:
@@ -59,3 +83,11 @@ def test_validate_scale_rejects_placeholder_commit() -> None:
         },
     )
     assert any("placeholder" in r for r in reasons)
+
+
+def test_validate_scale_rejects_bad_task_complexity() -> None:
+    reasons = validate_scale_fields(
+        __import__("pathlib").Path("."),
+        {"task_complexity": "giant"},
+    )
+    assert any("task_complexity" in r for r in reasons)

@@ -86,6 +86,46 @@ def test_run_suite_repeat(tmp_path: Path) -> None:
     assert result2["aggregate"][0]["n_runs"] == 2
 
 
+def test_run_suite_passes_effort_and_experiment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    base = tmp_path / "tasks"
+    _make_task(base / "demo", "task-a")
+    seen: list[dict[str, object]] = []
+
+    def fake_run_agent(**kwargs):  # type: ignore[no-untyped-def]
+        seen.append(kwargs)
+        return {
+            "run_id": "task-a-x",
+            "replay": "",
+            "summary": {
+                "run_id": "task-a-x",
+                "task_id": "task-a",
+                "model": kwargs["model"],
+                "effort": {"requested": kwargs["effort"]},
+                "experiment_id": kwargs["experiment_id"],
+                "scores": {"functional": 1.0, "total": 1.0},
+                "cost_usd": 0.0,
+                "duration_s": 1.0,
+            },
+        }
+
+    monkeypatch.setattr(suite_mod, "run_agent", fake_run_agent)
+    res = run_suite(
+        "demo",
+        "mock:synthetic",
+        output_dir=tmp_path / "runs",
+        tasks_base=base,
+        effort="low",
+        experiment_id="experiment-1",
+    )
+    assert seen[0]["effort"] == "low"
+    assert seen[0]["experiment_id"] == "experiment-1"
+    assert res["effort"] == "low"
+    assert res["experiment_id"] == "experiment-1"
+    assert res["tasks"][0]["effort"]["requested"] == "low"
+
+
 def _fake_run_agent_costing(cost: float, calls: list[str]):  # type: ignore[no-untyped-def]
     """A run_agent stand-in that returns a fixed per-run cost (no real work)."""
 

@@ -10,6 +10,7 @@ Claims ledger (promise -> proving test):
 - "difficulty spans easy/medium/hard"                  -> test_difficulty_spread
 - "categories incl. refactor & concurrency"            -> test_category_coverage
 - "medium/large navigation tasks for large-codebase"   -> test_repo_scale_coverage
+- "task complexity is labeled"                         -> test_task_complexity_labels
 - "every real task is structurally complete"           -> test_every_real_task_has_required_files
 - "provenance is labeled and the OSS task is honest"   -> test_provenance_labeling
 """
@@ -79,6 +80,13 @@ def test_repo_scale_coverage() -> None:
     assert len(loaded.task_ids) >= M2_MIN_MEDIUM_LARGE
 
 
+def test_task_complexity_labels() -> None:
+    allowed = {"localized", "multi_file", "system", "architecture"}
+    values = {_meta(d).get("task_complexity") for d in _real_task_dirs()}
+    assert values <= allowed
+    assert "localized" in values
+
+
 @pytest.mark.parametrize("task_dir", _real_task_dirs(), ids=lambda d: d.name)
 def test_every_real_task_has_required_files(task_dir: Path) -> None:
     assert (task_dir / "issue.md").exists()
@@ -89,6 +97,7 @@ def test_every_real_task_has_required_files(task_dir: Path) -> None:
     assert has_repo, "missing repo/ or repo_snapshot.tar.gz"
     meta = _meta(task_dir)
     assert isinstance(meta.get("decontaminated"), bool), "decontaminated must be a bool"
+    assert meta.get("task_complexity") in {"localized", "multi_file", "system", "architecture"}
     spec = meta["tests"]
     assert spec.get("fail_to_pass"), "fail_to_pass must be non-empty"
     if meta.get("source") == "oss":

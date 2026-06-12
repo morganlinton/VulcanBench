@@ -1,4 +1,4 @@
-# VulcanBench Makefile - primary developer interface (per plan Phase 0)
+# VulcanBench Makefile - primary developer interface
 SHELL := /bin/bash
 PYTHON := python3
 VENV := .venv
@@ -58,9 +58,9 @@ typecheck: setup ## Strict mypy
 
 ci: lint typecheck test ## Full local CI (lint + types + fast tests)
 
-sandbox-image: ## Build the Docker sandbox image (needed for `--sandbox docker`)
+sandbox-image: ## Build the Docker sandbox image (runs use it by default)
 	docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
-	@echo "✅ Built vulcanbench/sandbox:base — run real models with: --sandbox docker"
+	@echo "✅ Built vulcanbench/sandbox:base — vulcanbench run uses it by default"
 
 docker-up: ## Start local stack (postgres, minio, later dashboard+backend)
 	docker compose up -d --build
@@ -74,6 +74,5 @@ vulcanbench-version: setup ## Smoke: verify CLI entrypoint
 dashboard-dev: ## Start Next.js dashboard (assumes npm install done)
 	cd dashboard && npm run dev
 
-# Future: task validation, etc.
 validate-tasks: setup ## Validate all task definitions (gold-solves, fail-to-pass, determinism)
 	$(VENV_BIN)/python scripts/validate_tasks.py tasks/v1

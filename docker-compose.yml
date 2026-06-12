@@ -24,7 +24,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # MinIO (S3-compatible) for LFS artifacts / dashboard dev storage (Phase 0+)
+  # MinIO (S3-compatible) for LFS artifacts / dashboard dev storage
   minio:
     image: minio/minio@sha256:a1a8bd4ac40ad7881a245bab97323e18f971e4d4cba2c2007ec1bedd21cbaba2
     command: server /data --console-address ":9001"

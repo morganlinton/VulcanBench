@@ -1,8 +1,8 @@
 # VulcanBench — Gap-Closing Backlog
 
 Status as of 2026-05-29. This is the prioritized work needed to take the current
-**vertical-slice skeleton** to the **v1 MVP** described in `docs/SPEC.md` (the
-original spec) and the implementation plan in `.kilo/plans/`.
+**vertical-slice skeleton** to the **v1 MVP** (see `docs/ARCHITECTURE.md` for
+the system design).
 
 Legend: 🟥 blocker for "can actually benchmark a model" · 🟧 needed for an honest
 public v1 · 🟨 polish / completeness · ✅ done in this pass.

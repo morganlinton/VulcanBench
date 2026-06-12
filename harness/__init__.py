@@ -1,7 +1,4 @@
-"""VulcanBench harness package.
-
-v1 MVP per .kilo/plans/1780024121334-silent-circuit.md
-"""
+"""VulcanBench harness package."""
 
 from __future__ import annotations
 

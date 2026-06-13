@@ -157,18 +157,17 @@ def test_security_rust_vulnerabilities(tmp_path: Path, monkeypatch: pytest.Monke
 # --- unsafe delta ---------------------------------------------------------------
 
 
-def test_unsafe_delta_count() -> None:
+def test_unsafe_delta_count(tmp_path: Path) -> None:
     """Count ``unsafe`` keywords in .rs file content."""
-    tmp = Path("/tmp/test_unsafe_delta")
-    (tmp / "safe.rs").write_text("fn foo() {}\n", encoding="utf-8")
-    (tmp / "unsafe.rs").write_text(
+    (tmp_path / "safe.rs").write_text("fn foo() {}\n", encoding="utf-8")
+    (tmp_path / "unsafe.rs").write_text(
         "unsafe fn bar() {}\nunsafe impl Send for X {}\n", encoding="utf-8"
     )
     # _count_unsafe_delta reads workspace/filename
-    assert _count_unsafe_delta(tmp, ["safe.rs"]) == 0
-    assert _count_unsafe_delta(tmp, ["unsafe.rs"]) == 2
+    assert _count_unsafe_delta(tmp_path, ["safe.rs"]) == 0
+    assert _count_unsafe_delta(tmp_path, ["unsafe.rs"]) == 2
     # Non-.rs files are ignored.
-    assert _count_unsafe_delta(tmp, ["safe.rs", "readme.md"]) == 0
+    assert _count_unsafe_delta(tmp_path, ["safe.rs", "readme.md"]) == 0
 
 
 def test_unsafe_delta_penalty() -> None:

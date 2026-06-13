@@ -12,7 +12,7 @@
   "tests": {
     "fail_to_pass": [
       {"name": "two_mut_different", "cmd": "cargo test -p core --test test_borrow test_two_mut_different_indices"},
-      {"name": "two_mut_no_overlap", "cmd": "cargo test -p core --test test_borrow test_two_mut_no_overlap_same_value"}
+      {"name": "two_mut_reversed", "cmd": "cargo test -p core --test test_borrow test_two_mut_reversed_indices"}
     ],
     "pass_to_pass": []
   },
@@ -21,7 +21,5 @@
     "suggested_max_steps": 60,
     "suggested_timeout_s": 600,
     "entry_paths": ["core/src/lib.rs", "utils/src/lib.rs", "Cargo.toml"]
-  },
-  "setup": [{"name": "build-tests", "cmd": "cargo build --tests"}],
-  "setup_timeout_s": 600
+  }
 }

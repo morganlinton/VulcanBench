@@ -1,10 +1,14 @@
 diff --git a/core/src/lib.rs b/core/src/lib.rs
+index 11ed1d3..71e6f02 100644
 --- a/core/src/lib.rs
 +++ b/core/src/lib.rs
-@@ -9,8 +9,8 @@
+@@ -11,10 +11,6 @@ use utils::SplitVec;
  /// FIX: Use `slice::split_at_mut` (or `SplitVec::get_two_mut`) to obtain
  /// two non-overlapping mutable references.
  pub fn get_pair_mut(v: &mut SplitVec<i32>, i: usize, j: usize) -> (&mut i32, &mut i32) {
+-    // This is the broken implementation: it calls get_mut twice, which
+-    // produces overlapping mutable references when i == j or when the
+-    // underlying SplitVec doesn't enforce non-overlap.
 -    let a = v.get_mut(i).unwrap();
 -    let b = v.get_mut(j).unwrap();
 -    (a, b)
@@ -12,9 +16,10 @@ diff --git a/core/src/lib.rs b/core/src/lib.rs
 +        .expect("indices out of bounds or equal")
  }
 diff --git a/utils/src/lib.rs b/utils/src/lib.rs
+index fb3729b..ccf9fac 100644
 --- a/utils/src/lib.rs
 +++ b/utils/src/lib.rs
-@@ -28,4 +28,25 @@
+@@ -32,6 +32,26 @@ impl<T> SplitVec<T> {
      pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
          self.data.get_mut(index)
      }
@@ -40,3 +45,4 @@ diff --git a/utils/src/lib.rs b/utils/src/lib.rs
 +    }
  }
  
+ impl<T: Default> SplitVec<T> {

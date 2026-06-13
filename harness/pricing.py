@@ -19,7 +19,18 @@ from typing import Any
 # USD per 1,000,000 tokens, as of 2026-06. Keys are exact "provider:model" specs;
 # lookup also falls back to a "provider:" prefix default. Override with a JSON
 # file at $VULCANBENCH_PRICING ({"openai:gpt-4o": {"input": .., "output": ..}}).
+# These are a point-in-time snapshot — verify against the provider's pricing page
+# before publishing numbers, and use the override file for anything that must be
+# exact.
 PRICES: dict[str, dict[str, float]] = {
+    "openai:gpt-5.5": {"input": 5.00, "output": 30.00},
+    "openai:gpt-5.5-pro": {"input": 30.00, "output": 180.00},
+    "openai:gpt-5.4": {"input": 2.50, "output": 15.00},
+    "openai:gpt-5.4-mini": {"input": 0.75, "output": 4.50},
+    "openai:gpt-5.4-nano": {"input": 0.20, "output": 1.25},
+    "openai:gpt-5": {"input": 1.25, "output": 10.00},
+    "openai:gpt-5-mini": {"input": 0.25, "output": 2.00},
+    "openai:gpt-5-nano": {"input": 0.05, "output": 0.40},
     "openai:gpt-4o": {"input": 2.50, "output": 10.00},
     "openai:gpt-4o-mini": {"input": 0.15, "output": 0.60},
     "openai:gpt-4.1": {"input": 2.00, "output": 8.00},

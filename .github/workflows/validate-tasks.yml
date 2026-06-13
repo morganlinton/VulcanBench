@@ -33,7 +33,7 @@ jobs:
         with:
           toolchain: "1.87.0"
           components: clippy, rustfmt
-      - run: cargo install cargo-audit --version 0.21.2
+      - run: cargo install cargo-audit --version 0.21.2 --locked
       - run: pip install -e ".[dev,test]"
       - name: Validate micro/small tasks
         run: python scripts/validate_tasks.py tasks/v1 --filter-scale micro
@@ -59,7 +59,7 @@ jobs:
         with:
           toolchain: "1.87.0"
           components: clippy, rustfmt
-      - run: cargo install cargo-audit --version 0.21.2
+      - run: cargo install cargo-audit --version 0.21.2 --locked
       - run: pip install -e ".[dev,test]"
       - name: Validate large / navigation-stress tasks
         run: python scripts/validate_tasks.py tasks/v1 --filter-scale large

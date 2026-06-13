@@ -32,7 +32,7 @@ RUN set -eux; \
       --default-host "${RUST_ARCH}-unknown-linux-gnu"; \
     rm /tmp/rustup-init; \
     rustup component add clippy rustfmt; \
-    cargo install cargo-audit --version "$CARGO_AUDIT_VERSION"; \
+    cargo install cargo-audit --version "$CARGO_AUDIT_VERSION" --locked; \
     rustup default "$RUST_VERSION"; \
     rustc --version; \
     cargo --version; \

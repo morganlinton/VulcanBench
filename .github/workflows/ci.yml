@@ -34,7 +34,9 @@ jobs:
           toolchain: "1.87.0"
           components: clippy, rustfmt
       - name: Install cargo-audit
-        run: cargo install cargo-audit --version 0.21.2
+        # --locked honors cargo-audit's shipped Cargo.lock so transitive deps
+        # can't drift to versions that no longer compile on the pinned toolchain.
+        run: cargo install cargo-audit --version 0.21.2 --locked
       - name: Install uv or pip deps (use venv + make for parity)
         run: |
           python -m pip install --upgrade pip
@@ -72,8 +74,10 @@ jobs:
       - name: Build sandbox base image
         run: docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
       - name: Smoke sandbox toolchains
+        # Use `sh -c`, not `sh -lc`: a login shell re-sources /etc/profile and
+        # resets PATH, dropping the image's /usr/local/go/bin (Go lives there).
         run: |
-          docker run --rm vulcanbench/sandbox:base sh -lc '
+          docker run --rm vulcanbench/sandbox:base sh -c '
             python --version &&
             pytest --version &&
             ruff --version &&
@@ -85,8 +89,10 @@ jobs:
       - name: Build Rust sandbox image
         run: docker build -t vulcanbench/sandbox:rust -f sandbox/Dockerfile.rust .
       - name: Smoke Rust sandbox toolchains
+        # `sh -c` for the same reason as above: the cargo toolchain lives on
+        # /usr/local/cargo/bin, which a login shell would drop from PATH.
         run: |
-          docker run --rm vulcanbench/sandbox:rust sh -lc '
+          docker run --rm vulcanbench/sandbox:rust sh -c '
             rustc --version &&
             cargo --version &&
             cargo clippy --version &&

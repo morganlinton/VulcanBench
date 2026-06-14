@@ -190,7 +190,34 @@ Full details: docs/ARCHITECTURE.md
 
 ## License
 
-Apache 2.0 (see LICENSE).
+Apache 2.0 (see LICENSE and NOTICE).
+
+## Provider terms & data usage
+
+VulcanBench is an independent evaluation harness. A few boundaries keep its use
+consistent with the model providers' terms — please read these before running or
+publishing results.
+
+- **You bring your own keys, under your own agreement.** VulcanBench never
+  bundles or shares API credentials. Each run uses the keys in your environment
+  (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`), so every call is made under *your*
+  account and *your* commercial/API agreement with that provider. You are
+  responsible for staying within your provider's terms and usage policies.
+
+- **Outputs are for evaluation, not training.** Recorded run artifacts (traces,
+  patches, summaries) capture model outputs solely for scoring, inspection, and
+  reproducibility. Both OpenAI and Anthropic prohibit using their outputs to
+  develop or train competing models — do not use VulcanBench artifacts, or any
+  published corpus of them, for that purpose. VulcanBench intentionally has no
+  "export outputs as a training dataset" feature.
+
+- **Trademarks & independence.** "OpenAI" and "GPT" are trademarks of OpenAI;
+  "Anthropic" and "Claude" are trademarks of Anthropic. VulcanBench is not
+  affiliated with, sponsored by, or endorsed by either company. Model and
+  provider names are used only to identify the systems under test.
+
+This is not legal advice; consult the current provider terms for authoritative
+guidance.
 
 ## Status
 

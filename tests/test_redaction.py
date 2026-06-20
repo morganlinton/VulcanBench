@@ -31,6 +31,12 @@ def test_redacts_env_value(monkeypatch: pytest.MonkeyPatch) -> None:
     assert REDACTED in out
 
 
+def test_redacts_api_token_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VULCANBENCH_API_TOKEN", "tok_supersecretvalue123456")
+    out = redact("auth tok_supersecretvalue123456 end")
+    assert "tok_supersecretvalue123456" not in out
+
+
 def test_short_env_value_not_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
     # Avoid masking innocuous short values that happen to match a secret env.
     monkeypatch.setenv("GH_TOKEN", "abc")

@@ -16,6 +16,7 @@ from harness.agent.protocol import (
     SearchCodeArgs,
     ToolProtocol,
 )
+from harness.agent.test_commands import default_test_command
 from harness.evaluator.langs import detect_language
 from harness.evaluator.security import assess_security
 from harness.task_metadata import LIST_FILES_CAP, SEARCH_CODE_CAP
@@ -175,7 +176,8 @@ class LocalToolExecutor(ToolProtocol):
         }
 
     def run_tests(self) -> dict[str, Any]:
-        return self.run_command(RunCommandArgs(cmd="python -m pytest -q --tb=no || true"))
+        cmd = default_test_command(self.workspace)
+        return self.run_command(RunCommandArgs(cmd=cmd))
 
     def run_lint(self) -> dict[str, Any]:
         return self.run_command(RunCommandArgs(cmd="ruff check . || true"))

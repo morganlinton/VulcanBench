@@ -1,0 +1,32 @@
+name: Publish PyPI
+
+# Opt-in: set repository secret PYPI_API_TOKEN, then push a v* tag or run manually.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist/wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+      - name: Verify wheel imports CLI entry point
+        run: |
+          python -m pip install dist/vulcanbench-*.whl
+          vulcanbench --help
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

@@ -54,7 +54,7 @@ fmt: setup ## Auto-format with ruff
 	$(RUFF) check --fix .
 
 typecheck: setup ## Strict mypy
-	$(MYPY) harness backend scripts/ingest_runs.py
+	$(MYPY) harness backend alembic/env.py scripts/ingest_runs.py
 
 ci: lint typecheck test ## Full local CI (lint + types + fast tests)
 
@@ -62,8 +62,8 @@ sandbox-image: ## Build the Docker sandbox image (runs use it by default)
 	docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
 	@echo "✅ Built vulcanbench/sandbox:base — vulcanbench run uses it by default"
 
-docker-up: ## Start local stack (postgres, minio, later dashboard+backend)
-	docker compose up -d --build
+docker-up: ## Start local Postgres (see docker-compose.prod.yml for full stack)
+	docker compose up -d db
 
 docker-down: ## Stop local stack
 	docker compose down -v

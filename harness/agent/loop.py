@@ -33,6 +33,7 @@ from harness.agent.providers import LLMProvider, get_provider
 from harness.effort import effort_config
 from harness.evaluator.evaluate import evaluate_run
 from harness.evaluator.scorer import run_verifier, score_run
+from harness.persistence import maybe_post_run_summary
 from harness.pricing import cost_usd, is_priced
 from harness.redaction import sanitize
 from harness.sandbox.docker_executor import (
@@ -253,6 +254,7 @@ def run_agent(
         },
     )
     generate_replay_html(collector.trace_path, run_dir / "replay.html")
+    maybe_post_run_summary(summary)
     return {"run_id": run_id, "summary": summary, "replay": str(run_dir / "replay.html")}
 
 

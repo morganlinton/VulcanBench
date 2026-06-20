@@ -26,6 +26,7 @@ import docker
 
 from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolProtocol
+from harness.agent.test_commands import default_test_command
 
 if TYPE_CHECKING:
     from harness.agent.protocol import (
@@ -141,7 +142,8 @@ class DockerToolExecutor(ToolProtocol):
         return self._exec(inner)
 
     def run_tests(self) -> dict[str, Any]:
-        return self.run_command(RunCommandArgs(cmd="python -m pytest -q --tb=no || true"))
+        cmd = default_test_command(self.workspace)
+        return self.run_command(RunCommandArgs(cmd=cmd))
 
     def run_lint(self) -> dict[str, Any]:
         return self.run_command(RunCommandArgs(cmd="ruff check . || true"))

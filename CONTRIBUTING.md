@@ -46,7 +46,7 @@ A single task can be validated with:
 
 ```bash
 vulcanbench validate-task tasks/v1/<task-id>
-make validate-tasks   # validates all 50 tasks
+make validate-tasks   # validates all 52 suite tasks (+ hello-world demo skipped)
 ```
 
 All PRs must pass `make ci` before review.
@@ -54,7 +54,7 @@ All PRs must pass `make ci` before review.
 ## Code Style
 
 - **Python** — [Ruff](https://docs.astral.sh/ruff/) (lint + format) and strict [mypy](https://mypy.readthedocs.io/). Zero warnings enforced. Run `make fmt` to auto-fix.
-- **TypeScript/TSX** — ESLint + Prettier inside `dashboard/`. Run `npm run lint` from that directory.
+- **TypeScript/TSX** — ESLint inside `dashboard/`. Run `npm run lint` from that directory.
 - Keep imports at the top of every file. Avoid broad `except Exception: pass` — scope your error handling and log to the trace where possible.
 
 ## Adding a New Task

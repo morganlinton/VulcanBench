@@ -247,4 +247,5 @@ and complexity, and calls out missing medium/large Python or Rust coverage
 instead of overstating conclusions.
 
 Next up (see [docs/ROADMAP.md](docs/ROADMAP.md)): additional OSS-sourced tasks,
-Java runtime/CI support, and write-through from `vulcanbench run` to the database.
+Java runtime/CI support, and provider streaming. Hosted deployment:
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

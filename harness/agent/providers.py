@@ -93,6 +93,11 @@ class LLMProvider(ABC):
     ) -> LLMResponse:
         """Return the next assistant turn given the conversation and tool schemas."""
 
+    @property
+    def supports_streaming(self) -> bool:
+        """Whether this provider implements token streaming (v1: always False)."""
+        return False
+
 
 def _http_post_json(
     url: str, headers: dict[str, str], payload: dict[str, Any], timeout: float = 120

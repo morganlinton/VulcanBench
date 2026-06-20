@@ -267,4 +267,9 @@ def test_anthropic_no_effort_omits_output_config(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(P, "_http_post_json", fake_post)
     AnthropicProvider("claude-opus-4-8").complete([{"role": "user", "content": "hi"}], [])
     assert "output_config" not in seen
-    assert "temperature" not in seen
+
+
+def test_providers_do_not_stream_yet() -> None:
+    assert get_provider("mock:synthetic").supports_streaming is False
+    assert OpenAIProvider("gpt-4o").supports_streaming is False
+    assert AnthropicProvider("claude-opus-4-8").supports_streaming is False

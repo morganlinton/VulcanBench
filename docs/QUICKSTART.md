@@ -35,7 +35,7 @@ the Docker sandbox):
 
 ```bash
 vulcanbench run --task hello-world --model mock:synthetic --sandbox local
-vulcanbench run --suite v1 --model mock:synthetic --no-judges --sandbox local   # all 16 tasks
+vulcanbench run --suite v1-micro --model mock:synthetic --no-judges --sandbox local
 ```
 
 ## Your first real run
@@ -80,9 +80,10 @@ vulcanbench report --suite v1 -o report.md
 >   cheap functional-only runs.
 > - `--max-cost` is a soft cap that stops launching new runs (suite runs only)
 >   and requires a priced model; cost/latency are recorded per run regardless.
-> - Default `--sandbox local` runs the agent's shell commands on **your host**.
->   Prefer `--sandbox docker` (or `auto`) for real models. Override prices any
->   time with `VULCANBENCH_PRICING=/path/to/prices.json`.
+> - Default `--sandbox docker` runs the agent's shell commands in an isolated
+>   container. Use `--sandbox local` only for trusted dev loops (e.g.
+>   `mock:synthetic`). Override prices any time with
+>   `VULCANBENCH_PRICING=/path/to/prices.json`.
 
 See the full example in the README and `docs/ARCHITECTURE.md`. To add your own
 task: `docs/TASK_CONTRIBUTION.md`.

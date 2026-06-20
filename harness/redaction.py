@@ -39,7 +39,8 @@ _SECRET_ENV = (
     "GH_TOKEN",
     "AWS_SECRET_ACCESS_KEY",
     "HF_TOKEN",
-    "VULCANBENCH_API_KEY",
+    "VULCANBENCH_API_TOKEN",
+    "VULCANBENCH_API_KEY",  # legacy alias
 )
 
 _BEARER = re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._-]{16,}")

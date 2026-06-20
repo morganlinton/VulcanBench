@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Extract version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            ## Install
+
+            ```bash
+            git clone https://github.com/Zen-Open-Source/VulcanBench.git
+            cd VulcanBench
+            make setup
+            source .venv/bin/activate
+            vulcanbench --help
+            ```
+
+            Build the sandbox image once:
+
+            ```bash
+            make sandbox-image
+            ```
+
+            See [CHANGELOG.md](https://github.com/Zen-Open-Source/VulcanBench/blob/main/CHANGELOG.md) for full notes.

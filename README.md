@@ -1,6 +1,6 @@
 # VulcanBench
 
-[![CI](https://github.com/Zen-Open-Source/VulcanBench/actions/workflows/ci.yml/badge.svg)](https://github.com/Zen-Open-Source/VulcanBench/actions/workflows/ci.yml)
+[![CI](https://github.com/morganlinton/VulcanBench/actions/workflows/ci.yml/badge.svg)](https://github.com/morganlinton/VulcanBench/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 
@@ -17,7 +17,7 @@ backend.
 ## One-command setup
 
 ```bash
-git clone https://github.com/Zen-Open-Source/VulcanBench.git
+git clone https://github.com/morganlinton/VulcanBench.git
 cd VulcanBench
 make setup
 source .venv/bin/activate

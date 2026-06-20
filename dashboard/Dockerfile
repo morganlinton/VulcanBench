@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 
 ARG NEXT_PUBLIC_API_BASE=http://localhost:8000
-ARG NEXT_PUBLIC_REPO=Zen-Open-Source/VulcanBench
+ARG NEXT_PUBLIC_REPO=morganlinton/VulcanBench
 
 ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE \
     NEXT_PUBLIC_REPO=$NEXT_PUBLIC_REPO

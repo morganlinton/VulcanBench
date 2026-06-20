@@ -30,4 +30,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Install from source: `pip install -e ".[dev,test]"` (task corpus and sandbox Dockerfiles ship in the repo clone, not the PyPI wheel)
 - Hosted deployment: see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
-[0.1.0]: https://github.com/Zen-Open-Source/VulcanBench/releases/tag/v0.1.0
+[0.1.0]: https://github.com/morganlinton/VulcanBench/releases/tag/v0.1.0

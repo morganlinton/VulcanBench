@@ -11,7 +11,7 @@ One-command local setup and first run (v1).
 ## Setup
 
 ```bash
-git clone https://github.com/Zen-Open-Source/VulcanBench.git
+git clone https://github.com/morganlinton/VulcanBench.git
 cd VulcanBench
 make setup
 source .venv/bin/activate

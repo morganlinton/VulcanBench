@@ -27,7 +27,7 @@ Copy `.env.example` to `.env.local` and adjust as needed:
 | Variable               | Default                       | Purpose                              |
 | ---------------------- | ----------------------------- | ------------------------------------ |
 | `NEXT_PUBLIC_API_BASE` | `http://localhost:8000`       | Backend API base URL                 |
-| `NEXT_PUBLIC_REPO`     | `Zen-Open-Source/VulcanBench` | GitHub repo for `/submit` and links  |
+| `NEXT_PUBLIC_REPO`     | `morganlinton/VulcanBench` | GitHub repo for `/submit` and links  |
 
 ## Production
 

@@ -17,7 +17,7 @@ VulcanBench is a fully open-source, community-driven benchmark. Contributions of
 ## Development Setup
 
 ```bash
-git clone https://github.com/Zen-Open-Source/VulcanBench.git
+git clone https://github.com/morganlinton/VulcanBench.git
 cd VulcanBench
 make setup                        # creates .venv, installs all dev + test deps
 source .venv/bin/activate

@@ -6,7 +6,7 @@ export const API_BASE =
 
 // GitHub repo used by the /submit flow (owner/name).
 export const REPO =
-  process.env.NEXT_PUBLIC_REPO ?? "Zen-Open-Source/VulcanBench";
+  process.env.NEXT_PUBLIC_REPO ?? "morganlinton/VulcanBench";
 
 export interface LeaderboardRow {
   run_id: string;

@@ -13,7 +13,7 @@ VulcanBench is currently in active development. Security fixes are applied to th
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
 Report security issues privately via GitHub's built-in mechanism:
-[Report a vulnerability](https://github.com/Zen-Open-Source/VulcanBench/security/advisories/new)
+[Report a vulnerability](https://github.com/morganlinton/VulcanBench/security/advisories/new)
 
 Include as much detail as possible:
 

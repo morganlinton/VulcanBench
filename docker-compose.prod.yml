@@ -42,12 +42,12 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-http://localhost:8000}
-        NEXT_PUBLIC_REPO: ${NEXT_PUBLIC_REPO:-Zen-Open-Source/VulcanBench}
+        NEXT_PUBLIC_REPO: ${NEXT_PUBLIC_REPO:-morganlinton/VulcanBench}
     depends_on:
       - backend
     environment:
       NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-http://localhost:8000}
-      NEXT_PUBLIC_REPO: ${NEXT_PUBLIC_REPO:-Zen-Open-Source/VulcanBench}
+      NEXT_PUBLIC_REPO: ${NEXT_PUBLIC_REPO:-morganlinton/VulcanBench}
     ports:
       - "127.0.0.1:3000:3000"
     restart: unless-stopped

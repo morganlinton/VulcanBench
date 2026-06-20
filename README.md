@@ -4,15 +4,14 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 
-Fully open-source, transparent, community-driven benchmarking for LLMs on
-realistic software engineering tasks. VulcanBench measures how model behavior
-changes across reasoning effort, language, codebase scale, and task complexity.
+Fully open-source benchmarking for LLMs on realistic, multi-file software
+engineering tasks. VulcanBench measures how models perform across reasoning
+effort, language, codebase scale, and task complexity — with full traces,
+reproducible scoring, and a local dashboard.
 
-**v1 MVP** — real tool-calling agent loop (mock/OpenAI/Anthropic), normalized
-reasoning-effort sweeps, optional Docker sandbox, full trace+replay,
-five-metric scoring (functional, quality, security, efficiency, human_like), a
-local leaderboard, and a Next.js dashboard that renders live data from the
-backend.
+**v0.1.0** — 52 gold-verified tasks, tool-calling agent (mock / OpenAI /
+Anthropic), Docker sandbox, five-metric scoring, suite runs, and HTML replay.
+See [docs/QUICKSTART.md](docs/QUICKSTART.md) to get started.
 
 ## One-command setup
 
@@ -186,7 +185,23 @@ one with `python scripts/import_oss_issues.py`. Format details:
 - Docker sandbox runs untrusted command execution in a non-root, network-off,
   resource-limited container
 
-Full details: docs/ARCHITECTURE.md
+Full details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
+[docs/METRICS.md](docs/METRICS.md), [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md)
+
+## Documentation
+
+| Doc | Purpose |
+|-----|---------|
+| [QUICKSTART](docs/QUICKSTART.md) | Setup, smoke test, first real run |
+| [METRICS](docs/METRICS.md) | How the five scores are computed |
+| [DEPLOYMENT](docs/DEPLOYMENT.md) | Hosted API + dashboard (optional) |
+| [CONTRIBUTING](docs/CONTRIBUTING.md) | Add tasks, run CI locally |
+| [ROADMAP](docs/ROADMAP.md) | Planned follow-ups |
+
+Quality and security analyzers run when the relevant toolchains are on your
+host (e.g. `bandit` for Python via the venv; `gosec` for Go if installed).
+Otherwise those metrics report `null` with a reason — never a fabricated score.
+Use `--no-judges` to skip the LLM judge ensemble and cut cost roughly threefold.
 
 ## License
 
@@ -218,34 +233,3 @@ publishing results.
 
 This is not legal advice; consult the current provider terms for authoritative
 guidance.
-
-## Status
-
-Working end to end: real tool-calling agent loop with a generic provider
-interface (mock/OpenAI/Anthropic), an optional Docker sandbox for isolated tool
-execution, git-diff patch capture, and the full five-metric evaluator —
-`functional` (verifier), `quality` (lint + complexity + maintainability),
-`security` (static analysis), `efficiency` (tokens/steps), and `human_like`
-(3-judge LLM ensemble) — plus suite runs (`--suite`) with per-run **cost** and
-**latency**, a **per-model** aggregate leaderboard (avg score, pass rate, cost,
-time), JSONL trace + HTML replay, a read API, and a live dashboard. Core harness
-test coverage is ~86%.
-
-Scoring details: Python is analyzed natively (ruff + radon + bandit); Rust uses
-cargo fmt + clippy (quality) and cargo audit + unsafe-delta penalty (security);
-JS/TS, Go, and Java analyzers run when their toolchains are installed and
-otherwise report `null` with a reason (never a fabricated score). The judge ensemble runs by
-default reusing the run's model (`--judge-model` to override, `--no-judges` to
-skip); see the [Models](#models) section. Cost uses a built-in price table
-(overridable via `VULCANBENCH_PRICING`); unknown models report `cost=null`
-rather than a guess (`mock` is $0). Empirical difficulty calibration
-(`vulcanbench calibrate`) derives per-task difficulty from observed solve rates
-across models and surfaces disagreements with the hand-labeled `difficulty` in
-the report and dashboard. Effort-sensitivity reporting compares low/high
-pass@1, total score, cost, latency, and tokens by language, scale, difficulty,
-and complexity, and calls out missing medium/large Python or Rust coverage
-instead of overstating conclusions.
-
-Next up (see [docs/ROADMAP.md](docs/ROADMAP.md)): additional OSS-sourced tasks,
-Java runtime/CI support, and provider streaming. Hosted deployment:
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

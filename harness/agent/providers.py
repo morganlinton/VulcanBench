@@ -181,7 +181,15 @@ class OpenAIProvider(LLMProvider):
         if effort is not None:
             return self._responses_complete(base, api_key, messages, tools, timeout, effort)
 
-        return _chat_completions_complete(base, api_key, self.model, messages, tools, timeout)
+        return _chat_completions_complete(
+            base,
+            api_key,
+            self.model,
+            messages,
+            tools,
+            timeout,
+            temperature=None if _openai_omits_chat_sampling(self.model) else 0,
+        )
 
     def _responses_complete(
         self,
@@ -566,6 +574,12 @@ def _parse_chat_completions_response(body: dict[str, Any]) -> LLMResponse:
     )
 
 
+def _openai_omits_chat_sampling(model: str) -> bool:
+    """True when Chat Completions rejects non-default ``temperature`` (GPT-5, o-series)."""
+    name = model.strip().lower()
+    return name.startswith(("gpt-5", "o1", "o2", "o3", "o4"))
+
+
 def _chat_completions_complete(
     base: str,
     api_key: str,
@@ -573,12 +587,14 @@ def _chat_completions_complete(
     messages: list[dict[str, Any]],
     tools: list[dict[str, Any]],
     timeout: float,
+    temperature: float | None = 0,
 ) -> LLMResponse:
     payload: dict[str, Any] = {
         "model": model,
         "messages": messages,
-        "temperature": 0,
     }
+    if temperature is not None:
+        payload["temperature"] = temperature
     if tools:
         payload["tools"] = tools
         payload["tool_choice"] = "auto"

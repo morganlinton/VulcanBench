@@ -126,8 +126,10 @@ def test_to_anthropic_messages_conversion() -> None:
 
 def test_openai_complete_parses_tool_calls(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    seen: dict[str, object] = {}
 
     def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["payload"] = payload
         assert "chat/completions" in url
         assert payload["tools"]  # tools forwarded
         return {
@@ -155,6 +157,25 @@ def test_openai_complete_parses_tool_calls(monkeypatch: pytest.MonkeyPatch) -> N
     assert resp.tool_calls[0].name == "read_file"
     assert resp.tool_calls[0].arguments == {"path": "a"}
     assert resp.usage.total == 14
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert payload["temperature"] == 0
+
+
+def test_openai_gpt5_omits_temperature(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["payload"] = payload
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = OpenAIProvider("gpt-5.5").complete([{"role": "user", "content": "hi"}], [])
+    assert resp.content == "ok"
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert "temperature" not in payload
 
 
 def test_openai_complete_uses_budgeted_http_timeout(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -43,6 +43,10 @@ PRICES: dict[str, dict[str, float]] = {
     "anthropic:claude-opus-4-6": {"input": 5.00, "output": 25.00},
     "anthropic:claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
     "anthropic:claude-haiku-4-5": {"input": 1.00, "output": 5.00},
+    "zai:glm-5.2": {"input": 1.40, "output": 4.40},
+    "zai:glm-5.1": {"input": 1.40, "output": 4.40},
+    "zai:glm-5": {"input": 1.00, "output": 3.20},
+    "zai:glm-5-turbo": {"input": 1.20, "output": 4.00},
     # Free / offline.
     "mock:": {"input": 0.0, "output": 0.0},
 }

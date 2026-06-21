@@ -35,6 +35,7 @@ _PATTERNS: tuple[re.Pattern[str], ...] = (
 _SECRET_ENV = (
     "OPENAI_API_KEY",
     "ANTHROPIC_API_KEY",
+    "ZAI_API_KEY",
     "GITHUB_TOKEN",
     "GH_TOKEN",
     "AWS_SECRET_ACCESS_KEY",

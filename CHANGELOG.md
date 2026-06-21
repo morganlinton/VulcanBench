@@ -5,6 +5,15 @@ All notable changes to VulcanBench are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-21
+
+### Added
+
+- **Z.ai provider** (`zai:<model>`): first-class support for GLM models via
+  `ZAI_API_KEY` and OpenAI-compatible Chat Completions (`glm-5.2`, etc.)
+- Built-in token pricing for `zai:glm-5.2`, `zai:glm-5.1`, `zai:glm-5`, and
+  `zai:glm-5-turbo`
+
 ## [0.1.0] - 2026-06-19
 
 ### Added
@@ -30,4 +39,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Install from source: `pip install -e ".[dev,test]"` (task corpus and sandbox Dockerfiles ship in the repo clone, not the PyPI wheel)
 - Hosted deployment: see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
+[0.2.0]: https://github.com/morganlinton/VulcanBench/releases/tag/v0.2.0
 [0.1.0]: https://github.com/morganlinton/VulcanBench/releases/tag/v0.1.0

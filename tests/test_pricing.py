@@ -42,3 +42,8 @@ def test_env_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 def test_provider_prefix_fallback() -> None:
     # mock: prefix matches any mock model even without an exact entry.
     assert pricing.cost_usd("mock:whatever", 100, 100) == 0.0
+
+
+def test_zai_glm_priced() -> None:
+    assert pricing.is_priced("zai:glm-5.2")
+    assert pricing.cost_usd("zai:glm-5.2", 1_000_000, 1_000_000) == 5.80

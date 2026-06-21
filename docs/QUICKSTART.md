@@ -52,6 +52,7 @@ make sandbox-image            # builds vulcanbench/sandbox:base (Python+Go+Node)
 ```bash
 export OPENAI_API_KEY=sk-...           # for openai:* models
 export ANTHROPIC_API_KEY=sk-ant-...    # for anthropic:* models
+export ZAI_API_KEY=...                 # for zai:* models (GLM)
 ```
 
 **3. Start small and cheap** — one task, in Docker (the default), judges off,
@@ -60,6 +61,9 @@ with a spend cap:
 ```bash
 vulcanbench run --task py-topo-sort-cycle \
   --model openai:gpt-4o-mini \
+  --no-judges
+vulcanbench run --task py-topo-sort-cycle \
+  --model zai:glm-5.2 \
   --no-judges
 vulcanbench replay --run-id <latest>   # self-contained HTML trace of the run
 ```

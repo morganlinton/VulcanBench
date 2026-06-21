@@ -9,8 +9,8 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity — with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.1.0** — 52 gold-verified tasks, tool-calling agent (mock / OpenAI /
-Anthropic), Docker sandbox, five-metric scoring, suite runs, and HTML replay.
+**v0.2.0** — 52 gold-verified tasks, tool-calling agent (mock / OpenAI /
+Anthropic / Z.ai), Docker sandbox, five-metric scoring, suite runs, and HTML replay.
 See [docs/QUICKSTART.md](docs/QUICKSTART.md) to get started.
 
 ## One-command setup
@@ -50,6 +50,7 @@ vulcanbench run --task hello-world --model mock:synthetic --sandbox local
 export OPENAI_API_KEY=...      # or ANTHROPIC_API_KEY=...
 vulcanbench run --task hello-world --model openai:gpt-4o
 vulcanbench run --task hello-world --model anthropic:claude-opus-4-8
+vulcanbench run --task hello-world --model zai:glm-5.2
 
 # Each run prints all five metrics + cost, e.g.:
 #   functional=1.0 quality=1.0 security=1.0 human_like=0.8 total=0.974 cost=$0.0
@@ -101,14 +102,17 @@ Specify a model as `provider:model`:
 - `openai:<model>` — OpenAI Chat Completions for normal runs, or the Responses
   API when `--effort` is supplied. Needs `OPENAI_API_KEY`.
 - `anthropic:<model>` — Anthropic Messages API. Needs `ANTHROPIC_API_KEY`.
+- `zai:<model>` — Z.ai (Zhipu) OpenAI-compatible Chat Completions API. Needs
+  `ZAI_API_KEY`. Reasoning effort is not supported; `--effort` is recorded as
+  metadata only.
 
 `--effort` accepts `low`, `medium`, `high`, or `extra-high`. OpenAI runs map it
 to the Responses API `reasoning.effort` field; Anthropic runs map it to the
 Messages API `output_config.effort` field. `extra-high` maps to `xhigh` on both
 providers and is opt-in for sweeps because support is model-dependent (e.g.
-Claude Opus 4.7+). Mock runs accept the field as no-op metadata. Effort labels
-are each provider's own scale — a cross-provider comparison at the same label
-compares each model at its own setting, not a calibrated equivalence.
+Claude Opus 4.7+). Mock and Z.ai runs accept the field as no-op metadata. Effort
+labels are each provider's own scale — a cross-provider comparison at the same
+label compares each model at its own setting, not a calibrated equivalence.
 
 ## Sandbox
 

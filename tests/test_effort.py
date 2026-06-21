@@ -34,6 +34,17 @@ def test_mock_effort_is_noop_metadata() -> None:
     }
 
 
+def test_zai_effort_is_noop_metadata() -> None:
+    cfg = effort_config("zai", "low")
+    assert cfg is not None
+    assert cfg.as_summary() == {
+        "requested": "low",
+        "provider": "zai",
+        "provider_value": None,
+        "supported": False,
+    }
+
+
 def test_anthropic_effort_maps_to_output_config_values() -> None:
     cfg = effort_config("anthropic", "medium")
     assert cfg is not None

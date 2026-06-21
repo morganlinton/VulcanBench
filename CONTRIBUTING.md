@@ -7,6 +7,7 @@ VulcanBench is a fully open-source, community-driven benchmark. Contributions of
 - [Development Setup](#development-setup)
 - [Running Tests](#running-tests)
 - [Code Style](#code-style)
+- [Versioning](#versioning)
 - [Adding a New Task](#adding-a-new-task)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Reporting Issues](#reporting-issues)
@@ -56,6 +57,30 @@ All PRs must pass `make ci` before review.
 - **Python** — [Ruff](https://docs.astral.sh/ruff/) (lint + format) and strict [mypy](https://mypy.readthedocs.io/). Zero warnings enforced. Run `make fmt` to auto-fix.
 - **TypeScript/TSX** — ESLint inside `dashboard/`. Run `npm run lint` from that directory.
 - Keep imports at the top of every file. Avoid broad `except Exception: pass` — scope your error handling and log to the trace where possible.
+
+## Versioning
+
+VulcanBench follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
+While the project is pre-1.0, treat **minor** bumps as the default for new
+user-facing features and **patch** bumps for bug fixes and docs-only changes.
+
+**Bump the version in the same PR as the feature.** When you add a provider,
+CLI command, metric, or other user-visible capability:
+
+1. **`harness/__init__.py`** — update `__version__` (canonical runtime version;
+   used by `vulcanbench --version` and the backend API)
+2. **`pyproject.toml`** — set `version` to the same string (PyPI / packaging)
+3. **`CHANGELOG.md`** — add a dated entry under the new version (`### Added`,
+   `### Changed`, `### Fixed` as appropriate)
+4. **`README.md`** — update the version blurb near the top if it references the
+   release number
+5. **`tests/test_cli.py`** — update the `test_version` assertion to match
+
+`backend/app.py` imports `__version__` from `harness` — no separate edit needed
+there.
+
+Release tags use the `v` prefix (e.g. `v0.2.0`). Do not tag or publish from a
+feature PR unless explicitly requested; maintainers cut releases from `main`.
 
 ## Adding a New Task
 

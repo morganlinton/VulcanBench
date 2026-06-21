@@ -11,6 +11,7 @@ Providers implemented:
 - ``openai:<model>``   OpenAI Chat Completions API by default, and the Responses
                        API when reasoning effort is supplied.
 - ``anthropic:<model>`` Anthropic Messages API.
+- ``zai:<model>``      Z.ai (Zhipu) OpenAI-compatible Chat Completions API.
 
 Only the Python standard library is used for HTTP so the harness stays
 dependency-light; ``tenacity`` provides retry/backoff.
@@ -180,40 +181,7 @@ class OpenAIProvider(LLMProvider):
         if effort is not None:
             return self._responses_complete(base, api_key, messages, tools, timeout, effort)
 
-        payload: dict[str, Any] = {
-            "model": self.model,
-            "messages": messages,
-            "temperature": 0,
-        }
-        if tools:
-            payload["tools"] = tools
-            payload["tool_choice"] = "auto"
-        body = _http_post_json(
-            f"{base}/chat/completions",
-            {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            payload,
-            timeout=timeout,
-        )
-        choice = (body.get("choices") or [{}])[0]
-        msg = choice.get("message", {})
-        tool_calls = [
-            ToolInvocation(
-                id=tc.get("id", ""),
-                name=tc["function"]["name"],
-                arguments=_loads_args(tc["function"].get("arguments", "{}")),
-            )
-            for tc in (msg.get("tool_calls") or [])
-        ]
-        usage = body.get("usage", {})
-        return LLMResponse(
-            content=msg.get("content"),
-            tool_calls=tool_calls,
-            usage=TokenUsage(
-                prompt_tokens=usage.get("prompt_tokens", 0),
-                completion_tokens=usage.get("completion_tokens", 0),
-            ),
-            raw=body,
-        )
+        return _chat_completions_complete(base, api_key, self.model, messages, tools, timeout)
 
     def _responses_complete(
         self,
@@ -397,6 +365,52 @@ class MockProvider(LLMProvider):
         return LLMResponse(content="FINISH: implemented and verified.", usage=usage)
 
 
+class ZaiProvider(LLMProvider):
+    """Z.ai (Zhipu) OpenAI-compatible Chat Completions API.
+
+    Uses ``/chat/completions`` only. Reasoning effort is not supported; pass
+    ``--effort`` for metadata recording but it is ignored at the API layer.
+    """
+
+    @property
+    def name(self) -> str:
+        return "zai"
+
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout_s: float | None = None,
+        effort: str | None = None,
+    ) -> LLMResponse:
+        del effort
+        timeout = _http_timeout(timeout_s)
+        if timeout_s is not None:
+            return self._complete_once(messages, tools, timeout)
+        return self._complete_with_retry(messages, tools, timeout)
+
+    @_RETRY
+    def _complete_with_retry(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+    ) -> LLMResponse:
+        return self._complete_once(messages, tools, timeout)
+
+    def _complete_once(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+    ) -> LLMResponse:
+        api_key = os.environ.get("ZAI_API_KEY")
+        if not api_key:
+            raise ProviderError("ZAI_API_KEY is not set")
+        base = os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4").rstrip("/")
+        return _chat_completions_complete(base, api_key, self.model, messages, tools, timeout)
+
+
 def _loads_args(raw: Any) -> dict[str, Any]:
     if isinstance(raw, dict):
         return raw
@@ -529,6 +543,54 @@ def _parse_responses_body(body: dict[str, Any]) -> LLMResponse:
     )
 
 
+def _parse_chat_completions_response(body: dict[str, Any]) -> LLMResponse:
+    choice = (body.get("choices") or [{}])[0]
+    msg = choice.get("message", {})
+    tool_calls = [
+        ToolInvocation(
+            id=tc.get("id", ""),
+            name=tc["function"]["name"],
+            arguments=_loads_args(tc["function"].get("arguments", "{}")),
+        )
+        for tc in (msg.get("tool_calls") or [])
+    ]
+    usage = body.get("usage", {})
+    return LLMResponse(
+        content=msg.get("content"),
+        tool_calls=tool_calls,
+        usage=TokenUsage(
+            prompt_tokens=usage.get("prompt_tokens", 0),
+            completion_tokens=usage.get("completion_tokens", 0),
+        ),
+        raw=body,
+    )
+
+
+def _chat_completions_complete(
+    base: str,
+    api_key: str,
+    model: str,
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    timeout: float,
+) -> LLMResponse:
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "temperature": 0,
+    }
+    if tools:
+        payload["tools"] = tools
+        payload["tool_choice"] = "auto"
+    body = _http_post_json(
+        f"{base}/chat/completions",
+        {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        payload,
+        timeout=timeout,
+    )
+    return _parse_chat_completions_response(body)
+
+
 def _openai_tool_to_anthropic(tool: dict[str, Any]) -> dict[str, Any]:
     fn = tool["function"]
     return {
@@ -541,6 +603,7 @@ def _openai_tool_to_anthropic(tool: dict[str, Any]) -> dict[str, Any]:
 _PROVIDERS: dict[str, type[LLMProvider]] = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
+    "zai": ZaiProvider,
     "mock": MockProvider,
 }
 

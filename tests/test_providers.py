@@ -11,6 +11,7 @@ from harness.agent.providers import (
     MockProvider,
     OpenAIProvider,
     TokenUsage,
+    ZaiProvider,
     get_provider,
     parse_model_spec,
 )
@@ -21,6 +22,7 @@ from harness.agent.providers import (
     [
         ("openai:gpt-4o", ("openai", "gpt-4o")),
         ("anthropic:claude-opus-4-8", ("anthropic", "claude-opus-4-8")),
+        ("zai:glm-5.2", ("zai", "glm-5.2")),
         ("mock:synthetic", ("mock", "synthetic")),
         ("openai:gpt-4o:extra", ("openai", "gpt-4o:extra")),
     ],
@@ -45,6 +47,13 @@ def test_get_provider_returns_mock() -> None:
     assert isinstance(p, MockProvider)
     assert p.name == "mock"
     assert p.spec == "mock:synthetic"
+
+
+def test_get_provider_returns_zai() -> None:
+    p = get_provider("zai:glm-5.2")
+    assert isinstance(p, ZaiProvider)
+    assert p.name == "zai"
+    assert p.spec == "zai:glm-5.2"
 
 
 def test_token_usage_total() -> None:
@@ -269,7 +278,79 @@ def test_anthropic_no_effort_omits_output_config(monkeypatch: pytest.MonkeyPatch
     assert "output_config" not in seen
 
 
+def test_zai_complete_parses_tool_calls(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ZAI_API_KEY", "zai-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        assert payload["tools"]
+        return {
+            "choices": [
+                {
+                    "message": {
+                        "content": "ok",
+                        "tool_calls": [
+                            {
+                                "id": "c1",
+                                "function": {"name": "read_file", "arguments": '{"path": "a"}'},
+                            }
+                        ],
+                    }
+                }
+            ],
+            "usage": {"prompt_tokens": 11, "completion_tokens": 3},
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = ZaiProvider("glm-5.2").complete(
+        [{"role": "user", "content": "hi"}], [{"function": {"name": "read_file"}}]
+    )
+    assert "chat/completions" in seen["url"]
+    assert resp.content == "ok"
+    assert resp.tool_calls[0].name == "read_file"
+    assert resp.tool_calls[0].arguments == {"path": "a"}
+    assert resp.usage.total == 14
+
+
+def test_zai_complete_uses_custom_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ZAI_API_KEY", "zai-test")
+    monkeypatch.setenv("ZAI_BASE_URL", "https://custom.z.ai/v1")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = ZaiProvider("glm-5.2").complete([], [])
+    assert seen["url"] == "https://custom.z.ai/v1/chat/completions"
+    assert resp.content == "ok"
+
+
+def test_zai_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ZAI_API_KEY", raising=False)
+    with pytest.raises(P.ProviderError, match="ZAI_API_KEY"):
+        ZaiProvider("glm-5.2").complete([], [])
+
+
+def test_zai_ignores_effort(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ZAI_API_KEY", "zai-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = ZaiProvider("glm-5.2").complete([], [], effort="high")
+    assert "chat/completions" in seen["url"]
+    assert "responses" not in str(seen["url"])
+    assert resp.content == "ok"
+
+
 def test_providers_do_not_stream_yet() -> None:
     assert get_provider("mock:synthetic").supports_streaming is False
     assert OpenAIProvider("gpt-4o").supports_streaming is False
     assert AnthropicProvider("claude-opus-4-8").supports_streaming is False
+    assert ZaiProvider("glm-5.2").supports_streaming is False

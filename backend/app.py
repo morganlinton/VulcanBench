@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from backend import db
+from harness import __version__
 from harness.calibration import calibrate_tasks
 from harness.leaderboard import aggregate_by_model, filter_rows_by_repo_scale, scan_leaderboard
 from harness.report import build_effort_sensitivity
@@ -45,7 +46,7 @@ async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
         db.close_db()
 
 
-app = FastAPI(title="VulcanBench API", version="0.1.0", lifespan=_lifespan)
+app = FastAPI(title="VulcanBench API", version=__version__, lifespan=_lifespan)
 
 # Reads are public (it's a leaderboard); restrict origins in production with
 # VULCANBENCH_CORS_ORIGINS=https://bench.example.com,https://www.example.com

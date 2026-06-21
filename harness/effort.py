@@ -88,10 +88,10 @@ def effort_config(provider: str, requested: str | None) -> EffortConfig | None:
             provider_value=_OPENAI_EFFORT_VALUES[effort],
             supported=True,
         )
-    if provider_name == "mock":
+    if provider_name in {"mock", "zai"}:
         return EffortConfig(
             requested=effort,
-            provider="mock",
+            provider=provider_name,
             provider_value=None,
             supported=False,
         )

@@ -908,7 +908,11 @@ def _git_changed_files(workspace: Path) -> list[str]:
 
 
 # Env var each provider needs before judging is worthwhile (mock needs none).
-_JUDGE_KEY_ENV = {"openai": "OPENAI_API_KEY", "anthropic": "ANTHROPIC_API_KEY"}
+_JUDGE_KEY_ENV = {
+    "openai": "OPENAI_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "zai": "ZAI_API_KEY",
+}
 
 
 def _build_judge_provider(

@@ -18,7 +18,9 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PATH=/usr/local/go/bin:$PATH \
+    HOME=/tmp \
     GOPATH=/tmp/go \
+    GOCACHE=/tmp/go-build \
     GOFLAGS=-mod=mod
 
 RUN apt-get update \

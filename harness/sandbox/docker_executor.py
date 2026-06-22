@@ -42,6 +42,14 @@ DEFAULT_IMAGE = os.environ.get("VULCANBENCH_SANDBOX_IMAGE", "vulcanbench/sandbox
 
 _CONTAINER_WORKDIR = "/workspace"
 
+# Writable paths for non-root containers (host UID/GID). Without these, `go test`
+# fails trying to create ~/.cache/go-build under `/` when HOME is unset.
+_SANDBOX_ENV = {
+    "HOME": "/tmp",
+    "GOCACHE": "/tmp/go-build",
+    "GOPATH": "/tmp/go",
+}
+
 
 class SandboxError(RuntimeError):
     """Raised when the sandbox container cannot be created or used."""
@@ -100,6 +108,7 @@ class DockerToolExecutor(ToolProtocol):
                 detach=True,
                 working_dir=_CONTAINER_WORKDIR,
                 volumes={str(self.workspace): {"bind": _CONTAINER_WORKDIR, "mode": "rw"}},
+                environment=_SANDBOX_ENV,
                 network_disabled=not network,
                 mem_limit=mem_limit,
                 nano_cpus=int(cpus * 1_000_000_000),

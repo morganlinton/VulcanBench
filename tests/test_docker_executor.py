@@ -20,6 +20,7 @@ from harness.sandbox.docker_executor import (
     DEFAULT_IMAGE,
     DockerToolExecutor,
     SandboxError,
+    _SANDBOX_ENV,
     _docker_available,
 )
 
@@ -84,6 +85,7 @@ def test_construction_kwargs(tmp_path: Path, fake_docker: FakeClient) -> None:
     assert kw["nano_cpus"] == 2_000_000_000
     assert kw["pids_limit"] == 512
     assert kw["user"] == f"{os.getuid()}:{os.getgid()}"
+    assert kw["environment"] == _SANDBOX_ENV
     assert "no-new-privileges" in kw["security_opt"]
     assert kw["cap_drop"] == ["ALL"]
     ex.close()
@@ -190,6 +192,42 @@ def test_docker_available_false_when_unreachable(monkeypatch: pytest.MonkeyPatch
 def test_docker_available_true(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(docker, "from_env", FakeClient)
     assert _docker_available() is True
+
+
+@pytest.mark.docker
+@pytest.mark.skipif(not _docker_available(), reason="requires a running Docker daemon")
+def test_live_go_test_without_gocache_export(tmp_path: Path) -> None:
+    """Go verification must work when the agent does not export GOCACHE."""
+    if os.environ.get("VULCANBENCH_SANDBOX_IMAGE"):
+        image = os.environ["VULCANBENCH_SANDBOX_IMAGE"]
+    else:
+        image = DEFAULT_IMAGE
+    ws = tmp_path / "goproj"
+    (ws / "stack").mkdir(parents=True)
+    (ws / "go.mod").write_text("module example.com/stackdemo\n\ngo 1.23\n")
+    (ws / "stack" / "stack.go").write_text(
+        "package stack\n\ntype Stack struct{ items []int }\n"
+        "func New() *Stack { return &Stack{} }\n"
+        "func (s *Stack) Push(v int) { s.items = append(s.items, v) }\n"
+        "func (s *Stack) Len() int { return len(s.items) }\n"
+    )
+    (ws / "stack" / "pop.go").write_text(
+        "package stack\n\nfunc (s *Stack) Pop() (int, bool) {\n"
+        "  if len(s.items) == 0 { return 0, false }\n"
+        "  i := len(s.items) - 1\n  v := s.items[i]\n"
+        "  s.items = s.items[:i]\n  return v, true\n}\n"
+    )
+    (ws / "stack" / "pop_test.go").write_text(
+        "package stack\n\nimport \"testing\"\n\n"
+        "func TestPopLIFO(t *testing.T) {\n"
+        "  s := New()\n  s.Push(1)\n  s.Push(2)\n"
+        "  v, ok := s.Pop()\n"
+        "  if !ok || v != 2 { t.Fatalf(\"got %d,%v want 2,true\", v, ok) }\n"
+        "}\n"
+    )
+    with DockerToolExecutor(ws, image=image) as ex:
+        runner = _executor_runner(ex)
+        assert runner("go test -run '^TestPopLIFO$' ./...", ws, 120) == 0
 
 
 @pytest.mark.docker

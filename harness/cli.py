@@ -113,6 +113,11 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         help="Normalized reasoning effort: low|medium|high|extra-high",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only, do not launch sandbox"),
+    use_priors: bool = typer.Option(
+        True,
+        "--priors/--no-priors",
+        help="Use bundled cost priors when local ./runs history is missing (dry-run estimate)",
+    ),
 ) -> None:
     """Run an agent against a task or a whole suite, recording full traces."""
     if (task is None) == (suite is None):
@@ -169,6 +174,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
                     repeat=repeat,
                     judges=judges,
                     runs_dir=output_dir,
+                    use_priors=use_priors,
                 )
                 _print_cost_estimate(plan)
             except ValueError as e:
@@ -262,8 +268,8 @@ def _print_cost_estimate(plan: Any, *, json_output: bool = False) -> None:
         for note in m.notes:
             console.print(f"  [dim]• {m.model}:[/dim] {note}")
     console.print(
-        "\n[dim]Estimates use local ./runs history when available; "
-        "load the recommended amount per provider before starting.[/dim]"
+        "\n[dim]Estimates prefer local ./runs history; bundled priors fill gaps on fresh "
+        "installs. Load the recommended amount per provider before starting.[/dim]"
     )
 
 
@@ -280,6 +286,11 @@ def estimate(
     ),
     runs_dir: Path = typer.Option(  # noqa: B008
         Path("./runs"), "--runs-dir", help="Local runs dir for historical costs"
+    ),
+    use_priors: bool = typer.Option(
+        True,
+        "--priors/--no-priors",
+        help="Use bundled cost priors when local ./runs history is missing",
     ),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON"),
 ) -> None:
@@ -302,6 +313,7 @@ def estimate(
             repeat=repeat,
             judges=judges,
             runs_dir=runs_dir,
+            use_priors=use_priors,
         )
     except (ValueError, FileNotFoundError) as e:
         console.print(f"[red]error[/red] {e}")

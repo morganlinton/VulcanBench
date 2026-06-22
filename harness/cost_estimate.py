@@ -1,9 +1,10 @@
-"""Pre-run cost estimation from local run history.
+"""Pre-run cost estimation from local run history and bundled priors.
 
 Estimates are honest ranges built from completed runs in ``runs_dir`` (excluding
-``mock:*``). When a (model, task) pair has no history, we fall back to the same
-task on other models (scaled by relative list price), then the model's median
-run cost, then a conservative default derived from observed data.
+``mock:*``). When a (model, task) pair has no history, we fall back to bundled
+cost priors, then the same task on other models (scaled by relative list price),
+then the model's median run cost, then a conservative default derived from
+observed data.
 
 These are planning numbers — actual spend varies with model behavior, retries,
 and judges. Use ``recommended_usd`` as a minimum credit buffer, not a hard cap.
@@ -18,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from harness.cost_priors import PriorBuckets, PriorRange, load_cost_priors
 from harness.leaderboard import load_summaries
 from harness.pricing import _rate, is_priced
 from harness.task_metadata import repo_scale
@@ -46,6 +48,11 @@ _PROVIDER_LABEL = {
     "zai": "Z.ai (Zhipu)",
 }
 
+_KNOWN_TASK_SOURCES = frozenset({"exact", "prior_exact"})
+_PRIOR_SOURCES = frozenset(
+    {"prior_exact", "prior_task_scaled", "prior_model_median"}
+)
+
 
 @dataclass
 class RunCostEstimate:
@@ -55,7 +62,7 @@ class RunCostEstimate:
     low_usd: float
     mid_usd: float
     high_usd: float
-    source: str  # exact | task_scaled | model_median | default
+    source: str
 
 
 @dataclass
@@ -150,15 +157,61 @@ def _percentile(values: list[float], p: float) -> float:
     return ordered[f] * (c - k) + ordered[c] * (k - f)
 
 
+def _estimate_from_range(
+    task_id: str, low: float, mid: float, high: float, source: str
+) -> RunCostEstimate:
+    return RunCostEstimate(
+        task_id=task_id,
+        low_usd=round(low, 4),
+        mid_usd=round(mid, 4),
+        high_usd=round(high, 4),
+        source=source,
+    )
+
+
+def _estimate_from_prior(task_id: str, prior: PriorRange, source: str) -> RunCostEstimate:
+    return _estimate_from_range(task_id, prior.low, prior.mid, prior.high, source)
+
+
+def _task_scaled_estimate(
+    task_id: str,
+    model: str,
+    entries: list[tuple[str, float]],
+    source: str,
+) -> RunCostEstimate | None:
+    target_idx = _price_index(model)
+    if not entries or not target_idx:
+        return None
+    scaled: list[float] = []
+    for src_model, c in entries:
+        src_idx = _price_index(src_model)
+        if src_idx and src_idx > 0:
+            scaled.append(c * (target_idx / src_idx))
+    if not scaled:
+        return None
+    return RunCostEstimate(
+        task_id=task_id,
+        low_usd=round(_percentile(scaled, 0.25), 4),
+        mid_usd=round(statistics.median(scaled), 4),
+        high_usd=round(_percentile(scaled, 0.90), 4),
+        source=source,
+    )
+
+
 @dataclass
 class _CostIndex:
     by_model_task: dict[tuple[str, str], list[float]]
     by_task: dict[str, list[float]]
     by_model: dict[str, list[float]]
     by_model_scale: dict[tuple[str, str], list[float]]
+    priors: PriorBuckets = field(default_factory=PriorBuckets.empty)
 
     @classmethod
-    def from_runs(cls, runs_dir: Path) -> _CostIndex:
+    def from_runs(
+        cls,
+        runs_dir: Path,
+        priors: PriorBuckets | None = None,
+    ) -> _CostIndex:
         by_model_task: dict[tuple[str, str], list[float]] = defaultdict(list)
         by_task: dict[str, list[float]] = defaultdict(list)
         by_model: dict[str, list[float]] = defaultdict(list)
@@ -184,6 +237,7 @@ class _CostIndex:
             by_task=dict(by_task),
             by_model=dict(by_model),
             by_model_scale=dict(by_model_scale),
+            priors=priors or PriorBuckets.empty(),
         )
 
     def _default_for_model(self, model: str) -> float:
@@ -206,30 +260,34 @@ class _CostIndex:
                 source="exact",
             )
 
+        prior_direct = self.priors.by_model_task.get((model, task_id))
+        if prior_direct is not None:
+            return _estimate_from_prior(task_id, prior_direct, "prior_exact")
+
         task_entries = [
             (m, c) for (m, t), costs in self.by_model_task.items() if t == task_id for c in costs
         ]
-        target_idx = _price_index(model)
-        if task_entries and target_idx:
-            scaled: list[float] = []
-            for src_model, c in task_entries:
-                src_idx = _price_index(src_model)
-                if src_idx and src_idx > 0:
-                    scaled.append(c * (target_idx / src_idx))
-            if scaled:
-                return RunCostEstimate(
-                    task_id=task_id,
-                    low_usd=round(_percentile(scaled, 0.25), 4),
-                    mid_usd=round(statistics.median(scaled), 4),
-                    high_usd=round(_percentile(scaled, 0.90), 4),
-                    source="task_scaled",
-                )
+        scaled_local = _task_scaled_estimate(task_id, model, task_entries, "task_scaled")
+        if scaled_local is not None:
+            return scaled_local
+
+        prior_task_entries = [
+            (m, p.mid)
+            for (m, t), p in self.priors.by_model_task.items()
+            if t == task_id
+        ]
+        scaled_prior = _task_scaled_estimate(
+            task_id, model, prior_task_entries, "prior_task_scaled"
+        )
+        if scaled_prior is not None:
+            return scaled_prior
 
         try:
             meta = load_task(task_id, tasks_root).metadata
             scale = repo_scale(meta)
         except FileNotFoundError:
             scale = "unknown"
+
         scale_costs = self.by_model_scale.get((model, scale), [])
         if scale_costs:
             return RunCostEstimate(
@@ -239,6 +297,10 @@ class _CostIndex:
                 high_usd=round(_percentile(scale_costs, 0.90), 4),
                 source="model_median",
             )
+
+        prior_scale = self.priors.by_model_scale.get((model, scale))
+        if prior_scale is not None:
+            return _estimate_from_prior(task_id, prior_scale, "prior_model_median")
 
         base = self._default_for_model(model)
         return RunCostEstimate(
@@ -250,8 +312,12 @@ class _CostIndex:
         )
 
 
-def _judge_multiplier(judges: bool) -> float:
-    # Judges default to a 3-model ensemble reusing the run model (~3x agent tokens).
+def _task_judge_mult(judges: bool, source: str, priors: PriorBuckets) -> float:
+    """Scale per-task USD to match requested ``--judges`` setting."""
+    if source.startswith("prior"):
+        if judges:
+            return 1.0 if priors.judges else 3.0
+        return 1.0 / 3.0 if priors.judges else 1.0
     return 3.0 if judges else 1.0
 
 
@@ -264,6 +330,7 @@ def estimate_plan(
     runs_dir: Path = Path("./runs"),
     tasks_root: Path | None = None,
     credit_buffer: float = 1.25,
+    use_priors: bool = True,
 ) -> PlanCostEstimate:
     """Estimate USD for running ``task_ids`` with each model, ``repeat`` times each."""
     if repeat < 1:
@@ -274,8 +341,8 @@ def estimate_plan(
         raise ValueError("at least one task required")
 
     tasks_root = tasks_root or Path("tasks/v1")
-    index = _CostIndex.from_runs(runs_dir)
-    judge_mult = _judge_multiplier(judges)
+    priors = load_cost_priors() if use_priors else PriorBuckets.empty()
+    index = _CostIndex.from_runs(runs_dir, priors=priors)
 
     model_estimates: list[ModelCostEstimate] = []
     for model in models:
@@ -283,24 +350,58 @@ def estimate_plan(
             raise ValueError(f"no built-in pricing for model {model!r}; cannot estimate cost")
 
         per_task = [index.estimate_one(model, tid, tasks_root) for tid in task_ids]
-        n_exact = sum(1 for t in per_task if t.source == "exact")
-        if n_exact >= len(task_ids) * 0.75:
+        n_known = sum(1 for t in per_task if t.source in _KNOWN_TASK_SOURCES)
+        n_local_exact = sum(1 for t in per_task if t.source == "exact")
+        n_prior_only = sum(
+            1 for t in per_task if t.source in _PRIOR_SOURCES and t.source != "prior_exact"
+        )
+        n_prior_exact = sum(1 for t in per_task if t.source == "prior_exact")
+
+        if n_known >= len(task_ids) * 0.75:
             confidence = "high"
-        elif n_exact >= len(task_ids) * 0.25:
+        elif n_known >= len(task_ids) * 0.25:
             confidence = "medium"
         else:
             confidence = "low"
 
-        low = round(sum(t.low_usd for t in per_task) * repeat * judge_mult, 4)
-        mid = round(sum(t.mid_usd for t in per_task) * repeat * judge_mult, 4)
-        high = round(sum(t.high_usd for t in per_task) * repeat * judge_mult, 4)
+        if n_local_exact == 0 and n_prior_exact > 0 and confidence == "high":
+            confidence = "medium"
+
+        low = round(
+            sum(
+                t.low_usd * _task_judge_mult(judges, t.source, priors) for t in per_task
+            )
+            * repeat,
+            4,
+        )
+        mid = round(
+            sum(
+                t.mid_usd * _task_judge_mult(judges, t.source, priors) for t in per_task
+            )
+            * repeat,
+            4,
+        )
+        high = round(
+            sum(
+                t.high_usd * _task_judge_mult(judges, t.source, priors) for t in per_task
+            )
+            * repeat,
+            4,
+        )
         recommended = round(high * credit_buffer, 2)
 
         notes: list[str] = []
-        if judges:
+        if judges and any(_task_judge_mult(True, t.source, priors) > 1.0 for t in per_task):
             notes.append("Includes ~3x agent-token judge ensemble (--judges).")
+        if n_prior_exact > 0 and n_local_exact == 0:
+            notes.append(
+                f"Using bundled cost priors (no local ./runs history for "
+                f"{n_prior_exact} task(s))."
+            )
+        elif n_prior_only > 0:
+            notes.append(f"Partial bundled priors for {n_prior_only} task(s).")
         if confidence == "low":
-            notes.append("Limited local history; defaults are conservative — load extra credit.")
+            notes.append("Limited history; defaults are conservative — load extra credit.")
         unknown = [t.task_id for t in per_task if t.source == "default"]
         if unknown:
             notes.append(f"No history for {len(unknown)} task(s); using defaults.")

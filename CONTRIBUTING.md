@@ -85,6 +85,18 @@ there.
 Release tags use the `v` prefix (e.g. `v0.3.0`). Do not tag or publish from a
 feature PR unless explicitly requested; maintainers cut releases from `main`.
 
+### Regenerating cost priors
+
+Bundled benchmark cost priors (`harness/data/cost_priors.json`) power cold-start
+`vulcanbench estimate` when local `./runs` history is empty. After collecting
+reference runs, regenerate before a release:
+
+```bash
+python scripts/export_cost_priors.py --suite v1-compare --runs-dir ./runs
+```
+
+Override at runtime with `VULCANBENCH_COST_PRIORS=/path/to/priors.json`.
+
 ### Release tweet
 
 After bumping the version, draft a short tweet the maintainer can post as-is or

@@ -79,6 +79,9 @@ vulcanbench report --suite v1 -o report.md
 ```
 
 > **Cost & safety notes**
+> - Estimate spend before a benchmark (uses local `./runs` history when present,
+>   bundled priors on fresh installs):
+>   `vulcanbench estimate --suite v1-compare --model openai:gpt-5.5`
 > - `--judges` is **on by default** (a 3-model `human_like` ensemble reusing the
 >   run model) — it roughly triples token cost/latency. Use `--no-judges` for
 >   cheap functional-only runs.

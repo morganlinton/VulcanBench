@@ -5,6 +5,16 @@ All notable changes to VulcanBench are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-22
+
+### Added
+
+- **Bundled cost priors**: `vulcanbench estimate` and `run --dry-run` use shipped
+  benchmark cost data when local `./runs` history is missing (cold-start installs)
+- **`--no-priors`**: disable bundled priors and fall back to legacy defaults only
+- **`scripts/export_cost_priors.py`**: regenerate `harness/data/cost_priors.json`
+  from local reference runs
+
 ## [0.3.0] - 2026-06-22
 
 ### Added

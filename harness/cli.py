@@ -1,6 +1,6 @@
 """VulcanBench CLI entrypoint (Typer + Rich).
 
-Commands: run, effort-sweep, leaderboard, report, calibrate, replay,
+Commands: run, estimate, effort-sweep, leaderboard, report, calibrate, replay,
 validate-task, list-tasks. See ``vulcanbench --help``.
 """
 
@@ -21,6 +21,7 @@ from harness import __version__
 from harness.agent.loop import run_agent
 from harness.agent.providers import ProviderError
 from harness.calibration import calibrate_tasks, calibration_to_markdown
+from harness.cost_estimate import estimate_plan
 from harness.effort import DEFAULT_SWEEP_EFFORTS, parse_efforts
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
 from harness.pricing import is_priced
@@ -157,6 +158,23 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
             f"[yellow]dry-run[/yellow] would run {target} model={model} "
             f"sandbox={sandbox}{effort_note}"
         )
+        if is_priced(model):
+            try:
+                task_ids = (
+                    load_suite(suite).task_ids
+                    if suite is not None
+                    else [task]  # type: ignore[list-item]
+                )
+                plan = estimate_plan(
+                    models=[model],
+                    task_ids=task_ids,
+                    repeat=repeat,
+                    judges=judges,
+                    runs_dir=output_dir,
+                )
+                _print_cost_estimate(plan)
+            except ValueError as e:
+                console.print(f"[yellow]cost estimate skipped[/yellow]: {e}")
         raise typer.Exit()
 
     run_kwargs = {
@@ -201,6 +219,98 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
             console.print(f"[red]FAIL[/red] pass@1={pass_at_1} < --fail-under {fail_under}")
             raise typer.Exit(code=4)
         console.print(f"[green]PASS[/green] pass@1={pass_at_1} >= --fail-under {fail_under}")
+
+
+def _print_cost_estimate(plan: Any, *, json_output: bool = False) -> None:
+    if json_output:
+        typer.echo(json.dumps(plan.to_dict(), indent=2))
+        return
+
+    n_runs = sum(m.n_runs for m in plan.models)
+    console.print(
+        f"\n[bold]Cost estimate[/bold]  {len(plan.task_ids)} tasks × {plan.repeat} repeat(s)"
+        f" = {n_runs} run(s) per model"
+        + ("  [dim](judges on)[/dim]" if plan.judges else "")
+    )
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Model")
+    table.add_column("Provider / env")
+    table.add_column("Low", justify="right")
+    table.add_column("Mid", justify="right")
+    table.add_column("High", justify="right")
+    table.add_column("Load ≥", justify="right", style="bold green")
+    table.add_column("Conf.")
+    for m in plan.models:
+        table.add_row(
+            m.model,
+            f"{m.provider}\n[dim]{m.env_var}[/dim]",
+            f"${m.low_usd:.2f}",
+            f"${m.mid_usd:.2f}",
+            f"${m.high_usd:.2f}",
+            f"${m.recommended_usd:.2f}",
+            m.confidence,
+        )
+    if len(plan.models) > 1:
+        table.add_row(
+            "[bold]Total[/bold]",
+            "",
+            f"[bold]${plan.low_usd:.2f}[/bold]",
+            f"[bold]${plan.mid_usd:.2f}[/bold]",
+            f"[bold]${plan.high_usd:.2f}[/bold]",
+            f"[bold]${plan.recommended_usd:.2f}[/bold]",
+            "",
+        )
+    console.print(table)
+    for m in plan.models:
+        for note in m.notes:
+            console.print(f"  [dim]• {m.model}:[/dim] {note}")
+    console.print(
+        "\n[dim]Estimates use local ./runs history when available; "
+        "load the recommended amount per provider before starting.[/dim]"
+    )
+
+
+@app.command()
+def estimate(
+    task: str | None = typer.Option(None, "--task", "-t", help="Single task ID"),
+    suite: str | None = typer.Option(None, "--suite", help="Suite name, e.g. v1-compare"),
+    model: list[str] = typer.Option(  # noqa: B008
+        ..., "--model", "-m", help="provider:model (repeat for multiple models)"
+    ),
+    repeat: int = typer.Option(1, "--repeat", help="Planned repeats per task"),
+    judges: bool = typer.Option(
+        True, "--judges/--no-judges", help="Include judge ensemble cost (~3× agent tokens)"
+    ),
+    runs_dir: Path = typer.Option(  # noqa: B008
+        Path("./runs"), "--runs-dir", help="Local runs dir for historical costs"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON"),
+) -> None:
+    """Estimate API spend before running a benchmark."""
+    if (task is None) == (suite is None):
+        console.print("[red]error[/red] pass exactly one of --task or --suite")
+        raise typer.Exit(code=1)
+    if repeat < 1:
+        console.print("[red]error[/red] --repeat must be >= 1")
+        raise typer.Exit(code=1)
+    if task is not None and task not in list_task_ids():
+        console.print(f"[red]unknown task[/red] {task!r}")
+        raise typer.Exit(code=1)
+
+    try:
+        task_ids = load_suite(suite).task_ids if suite is not None else [task]  # type: ignore[list-item]
+        plan = estimate_plan(
+            models=model,
+            task_ids=task_ids,
+            repeat=repeat,
+            judges=judges,
+            runs_dir=runs_dir,
+        )
+    except (ValueError, FileNotFoundError) as e:
+        console.print(f"[red]error[/red] {e}")
+        raise typer.Exit(code=1) from e
+
+    _print_cost_estimate(plan, json_output=json_output)
 
 
 def _summary_row(summary: dict[str, Any]) -> dict[str, Any]:

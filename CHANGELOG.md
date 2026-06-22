@@ -5,6 +5,22 @@ All notable changes to VulcanBench are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-22
+
+### Added
+
+- **`vulcanbench estimate`**: pre-run USD cost ranges per provider/model from local
+  `./runs` history, with recommended credit to load before a benchmark
+- **`run --dry-run`** now prints a cost estimate for priced models
+- **`v1-compare` suite**: 12-task trimmed head-to-head set (Go / Python / TS / Rust)
+
+### Fixed
+
+- **Docker sandbox Go verification**: set writable `HOME` / `GOCACHE` so `go test`
+  scoring works for non-root containers (fixes false `functional=0.0` on Go tasks)
+- **GPT-5 Chat Completions**: omit `temperature` for GPT-5 / o-series models that
+  only accept the API default
+
 ## [0.2.0] - 2026-06-21
 
 ### Added
@@ -39,5 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Install from source: `pip install -e ".[dev,test]"` (task corpus and sandbox Dockerfiles ship in the repo clone, not the PyPI wheel)
 - Hosted deployment: see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
+[0.3.0]: https://github.com/morganlinton/VulcanBench/releases/tag/v0.3.0
 [0.2.0]: https://github.com/morganlinton/VulcanBench/releases/tag/v0.2.0
 [0.1.0]: https://github.com/morganlinton/VulcanBench/releases/tag/v0.1.0

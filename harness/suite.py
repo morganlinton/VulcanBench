@@ -21,7 +21,7 @@ from harness.task_metadata import repo_scale
 from harness.tasks import list_task_ids, load_task
 
 DEFAULT_TASKS_BASE = Path("tasks")
-SUITE_ALIASES = {"v1-micro": "v1", "v1-large": "v1", "v1-rust": "v1"}
+SUITE_ALIASES = {"v1-micro": "v1", "v1-large": "v1", "v1-rust": "v1", "v1-compare": "v1"}
 
 
 @dataclass
@@ -71,8 +71,11 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
         manifest = tasks_root / "suite.json"
         if manifest.exists():
             data = json.loads(manifest.read_text(encoding="utf-8"))
-            key = "micro" if name == "v1-micro" else "large"
-            task_ids = list(data.get(key) or _scale_filter(tasks_root, key))
+            if name == "v1-compare":
+                task_ids = list(data.get("compare") or [])
+            else:
+                key = "micro" if name == "v1-micro" else "large"
+                task_ids = list(data.get(key) or _scale_filter(tasks_root, key))
         else:
             key = "micro" if name == "v1-micro" else "large"
             task_ids = _scale_filter(tasks_root, key)

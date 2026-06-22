@@ -1,0 +1,13 @@
+---
+description: Bump version and provide tweet copy when shipping user-facing VulcanBench features
+alwaysApply: true
+---
+
+# Version & release tweet
+
+When you finish a **user-facing** change (CLI command, provider, suite, scoring fix, etc.):
+
+1. Follow [CONTRIBUTING.md](../CONTRIBUTING.md) **Versioning** — bump `harness/__init__.py`, `pyproject.toml`, `CHANGELOG.md`, `README.md` blurb, `tests/test_cli.py` `test_version`.
+2. **Always give the user ready-to-post tweet copy** in your final reply (see CONTRIBUTING **Release tweet**). Do not skip this when the version was bumped.
+
+Pre-1.0: default to **minor** bump for features, **patch** for fixes-only.

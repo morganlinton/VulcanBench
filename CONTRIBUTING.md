@@ -75,12 +75,40 @@ CLI command, metric, or other user-visible capability:
 4. **`README.md`** — update the version blurb near the top if it references the
    release number
 5. **`tests/test_cli.py`** — update the `test_version` assertion to match
+6. **Tweet copy** — when finishing a user-facing release, include ready-to-post
+   tweet text in the PR description or chat reply (see [Release tweet](#release-tweet)
+   below). Agents working in this repo must do this whenever they bump the version.
 
 `backend/app.py` imports `__version__` from `harness` — no separate edit needed
 there.
 
-Release tags use the `v` prefix (e.g. `v0.2.0`). Do not tag or publish from a
+Release tags use the `v` prefix (e.g. `v0.3.0`). Do not tag or publish from a
 feature PR unless explicitly requested; maintainers cut releases from `main`.
+
+### Release tweet
+
+After bumping the version, draft a short tweet the maintainer can post as-is or
+lightly edit. Put it in the PR body or hand it to the user in chat.
+
+**Format**
+
+- Lead with `VulcanBench vX.Y.Z` and one-line what it is (open-source LLM coding benchmark)
+- 2–4 concrete bullets as short phrases (new command, fix, suite — not internal refactors)
+- Link: `https://github.com/morganlinton/VulcanBench`
+- Stay under ~280 characters when possible; use a thread only if necessary
+- Tone: factual, excited but not hype-y; no hashtag spam (0–2 relevant tags max)
+
+**Example**
+
+```text
+VulcanBench v0.3.0 is out — open-source benchmark for LLMs on real coding tasks.
+
+• vulcanbench estimate — see API spend before you run
+• v1-compare — 12-task head-to-head suite
+• Fixes Go scoring in Docker + GPT-5 temperature
+
+https://github.com/morganlinton/VulcanBench
+```
 
 ## Adding a New Task
 

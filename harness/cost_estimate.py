@@ -176,10 +176,7 @@ class _CostIndex:
             by_model_task[(model, task_id)].append(c)
             by_task[task_id].append(c)
             by_model[model].append(c)
-            scale = (
-                (summary.get("manifest") or {}).get("task", {}).get("repo_scale")
-                or "unknown"
-            )
+            scale = (summary.get("manifest") or {}).get("task", {}).get("repo_scale") or "unknown"
             by_model_scale[(model, scale)].append(c)
 
         return cls(
@@ -190,8 +187,9 @@ class _CostIndex:
         )
 
     def _default_for_model(self, model: str) -> float:
-        if model in self.by_model and self.by_model[model]:
-            return statistics.median(self.by_model[model])
+        costs = self.by_model.get(model)
+        if costs:
+            return statistics.median(costs)
         prefix = _provider(model) + ":"
         if prefix in _DEFAULT_PER_RUN:
             return _DEFAULT_PER_RUN[prefix]
@@ -208,7 +206,9 @@ class _CostIndex:
                 source="exact",
             )
 
-        task_entries = [(m, c) for (m, t), costs in self.by_model_task.items() if t == task_id for c in costs]
+        task_entries = [
+            (m, c) for (m, t), costs in self.by_model_task.items() if t == task_id for c in costs
+        ]
         target_idx = _price_index(model)
         if task_entries and target_idx:
             scaled: list[float] = []
@@ -251,7 +251,7 @@ class _CostIndex:
 
 
 def _judge_multiplier(judges: bool) -> float:
-    # Judges default to a 3-model ensemble reusing the run model (~3× agent tokens).
+    # Judges default to a 3-model ensemble reusing the run model (~3x agent tokens).
     return 3.0 if judges else 1.0
 
 
@@ -291,16 +291,14 @@ def estimate_plan(
         else:
             confidence = "low"
 
-        def _sum(attr: str) -> float:
-            base = sum(getattr(t, attr) for t in per_task) * repeat
-            return round(base * judge_mult, 4)
-
-        low, mid, high = _sum("low_usd"), _sum("mid_usd"), _sum("high_usd")
+        low = round(sum(t.low_usd for t in per_task) * repeat * judge_mult, 4)
+        mid = round(sum(t.mid_usd for t in per_task) * repeat * judge_mult, 4)
+        high = round(sum(t.high_usd for t in per_task) * repeat * judge_mult, 4)
         recommended = round(high * credit_buffer, 2)
 
         notes: list[str] = []
         if judges:
-            notes.append("Includes ~3× agent-token judge ensemble (--judges).")
+            notes.append("Includes ~3x agent-token judge ensemble (--judges).")
         if confidence == "low":
             notes.append("Limited local history; defaults are conservative — load extra credit.")
         unknown = [t.task_id for t in per_task if t.source == "default"]

@@ -17,10 +17,10 @@ import pytest
 from harness.agent.loop import _collect_manifest, _executor_runner
 from harness.agent.protocol import EditFileArgs, ReadFileArgs, RunCommandArgs
 from harness.sandbox.docker_executor import (
+    _SANDBOX_ENV,
     DEFAULT_IMAGE,
     DockerToolExecutor,
     SandboxError,
-    _SANDBOX_ENV,
     _docker_available,
 )
 
@@ -218,11 +218,11 @@ def test_live_go_test_without_gocache_export(tmp_path: Path) -> None:
         "  s.items = s.items[:i]\n  return v, true\n}\n"
     )
     (ws / "stack" / "pop_test.go").write_text(
-        "package stack\n\nimport \"testing\"\n\n"
+        'package stack\n\nimport "testing"\n\n'
         "func TestPopLIFO(t *testing.T) {\n"
         "  s := New()\n  s.Push(1)\n  s.Push(2)\n"
         "  v, ok := s.Pop()\n"
-        "  if !ok || v != 2 { t.Fatalf(\"got %d,%v want 2,true\", v, ok) }\n"
+        '  if !ok || v != 2 { t.Fatalf("got %d,%v want 2,true", v, ok) }\n'
         "}\n"
     )
     with DockerToolExecutor(ws, image=image) as ex:

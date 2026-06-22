@@ -161,9 +161,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         if is_priced(model):
             try:
                 task_ids = (
-                    load_suite(suite).task_ids
-                    if suite is not None
-                    else [task]  # type: ignore[list-item]
+                    load_suite(suite).task_ids if suite is not None else [task]  # type: ignore[list-item]
                 )
                 plan = estimate_plan(
                     models=[model],
@@ -228,9 +226,8 @@ def _print_cost_estimate(plan: Any, *, json_output: bool = False) -> None:
 
     n_runs = sum(m.n_runs for m in plan.models)
     console.print(
-        f"\n[bold]Cost estimate[/bold]  {len(plan.task_ids)} tasks × {plan.repeat} repeat(s)"
-        f" = {n_runs} run(s) per model"
-        + ("  [dim](judges on)[/dim]" if plan.judges else "")
+        f"\n[bold]Cost estimate[/bold]  {len(plan.task_ids)} tasks x {plan.repeat} repeat(s)"
+        f" = {n_runs} run(s) per model" + ("  [dim](judges on)[/dim]" if plan.judges else "")
     )
     table = Table(show_header=True, header_style="bold")
     table.add_column("Model")
@@ -279,7 +276,7 @@ def estimate(
     ),
     repeat: int = typer.Option(1, "--repeat", help="Planned repeats per task"),
     judges: bool = typer.Option(
-        True, "--judges/--no-judges", help="Include judge ensemble cost (~3× agent tokens)"
+        True, "--judges/--no-judges", help="Include judge ensemble cost (~3x agent tokens)"
     ),
     runs_dir: Path = typer.Option(  # noqa: B008
         Path("./runs"), "--runs-dir", help="Local runs dir for historical costs"

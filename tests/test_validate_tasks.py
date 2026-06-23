@@ -80,6 +80,16 @@ _NON_SOLVING_GOLD = (
     "+    return 3\n"
 )
 
+_SOLVING_GOLD = (
+    "diff --git a/m.py b/m.py\n"
+    "--- a/m.py\n"
+    "+++ b/m.py\n"
+    "@@ -1,2 +1,2 @@\n"
+    " def f():\n"
+    "-    return 1\n"
+    "+    return 2\n"
+)
+
 
 @pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
 def test_gold_must_solve(tmp_path: Path) -> None:
@@ -209,3 +219,45 @@ def test_main_returns_zero_on_skips(tmp_path: Path, capsys: pytest.CaptureFixtur
     task.mkdir()
     (task / "metadata.json").write_text(json.dumps({"id": "legacy"}))
     assert validate.main([str(tmp_path)]) == 0
+
+
+def test_main_docker_requires_daemon(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "harness.sandbox.docker_executor._docker_available",
+        lambda: False,
+    )
+    assert validate.main(["tasks/v1", "--sandbox", "docker"]) == 2
+
+
+@pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
+def test_validate_docker_ignores_missing_host_toolchain(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Docker mode runs verifiers in the sandbox image, not on the host PATH."""
+    from harness.agent.loop import _executor_runner
+    from harness.verifier import host_runner
+
+    task = _full_task(tmp_path, gold=_SOLVING_GOLD)
+
+    class FakeExecutor:
+        def __init__(self, workspace: Path) -> None:
+            self.workspace = workspace
+
+        def run_command(self, args: object) -> dict[str, int]:
+            cmd = getattr(args, "cmd", "")
+            timeout = getattr(args, "timeout", None) or 120
+            return {"exit_code": host_runner(cmd, self.workspace, timeout)}
+
+        def close(self) -> None:
+            pass
+
+    def fake_docker_runner(workspace: Path, image: str | None) -> tuple[object, FakeExecutor]:
+        ex = FakeExecutor(workspace)
+        return _executor_runner(ex), ex
+
+    monkeypatch.setattr(validate, "_docker_runner", fake_docker_runner)
+    monkeypatch.setattr(validate.shutil, "which", lambda name: None)
+
+    res = validate.validate_task(task, validate.ValidateOptions(sandbox="docker"))
+    assert res.status == validate.PASS
+    assert "(docker)" in res.reasons[0]

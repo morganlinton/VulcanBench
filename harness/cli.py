@@ -780,9 +780,25 @@ def validate_task(
     path: Path = typer.Argument(  # noqa: B008
         ..., exists=True, file_okay=False, dir_okay=True, help="Path to a task dir or tasks/v1"
     ),
+    sandbox: str = typer.Option(
+        "local",
+        "--sandbox",
+        help="Where to run verifiers: local|docker (docker matches benchmark runs)",
+    ),
+    image: str | None = typer.Option(
+        None, "--image", help="Docker sandbox image when --sandbox docker"
+    ),
 ) -> None:
     """Validate task(s): schema, gold-solves, fail-to-pass-real, determinism."""
-    raise typer.Exit(code=validate_main([str(path)]))
+    if sandbox not in {"local", "docker"}:
+        console.print(f"[red]error[/red] --sandbox must be local|docker, got {sandbox!r}")
+        raise typer.Exit(code=1)
+    argv = [str(path)]
+    if sandbox != "local":
+        argv.extend(["--sandbox", sandbox])
+    if image is not None:
+        argv.extend(["--image", image])
+    raise typer.Exit(code=validate_main(argv))
 
 
 @app.command()

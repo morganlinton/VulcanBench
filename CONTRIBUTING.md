@@ -97,9 +97,21 @@ python scripts/export_cost_priors.py --suite v1-compare --runs-dir ./runs
 
 Override at runtime with `VULCANBENCH_COST_PRIORS=/path/to/priors.json`.
 
-### Release tweet
+### Docker task validation
 
-After bumping the version, draft a short tweet the maintainer can post as-is or
+Before a large benchmark spend, validate gold patches and verifiers inside the
+same Docker sandbox used by `vulcanbench run`:
+
+```bash
+make sandbox-image
+make validate-tasks-docker
+# or: python scripts/validate_tasks.py tasks/v1 --sandbox docker
+```
+
+Host validation (`make validate-tasks`) is faster but does not catch container-only
+issues (e.g. Go `GOCACHE` in non-root sandboxes).
+
+### Release tweet
 lightly edit. Put it in the PR body or hand it to the user in chat.
 
 **Format**

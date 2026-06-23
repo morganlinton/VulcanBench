@@ -5,6 +5,13 @@ All notable changes to VulcanBench are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-06-22
+
+### Added
+
+- **`validate_tasks --sandbox docker`**: run gold-patch verification inside the
+  Docker sandbox (same environment as `vulcanbench run`); `make validate-tasks-docker`
+
 ## [0.4.0] - 2026-06-22
 
 ### Added

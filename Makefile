@@ -76,3 +76,6 @@ dashboard-dev: ## Start Next.js dashboard (assumes npm install done)
 
 validate-tasks: setup ## Validate all task definitions (gold-solves, fail-to-pass, determinism)
 	$(VENV_BIN)/python scripts/validate_tasks.py tasks/v1
+
+validate-tasks-docker: sandbox-image ## Validate all tasks inside Docker (matches benchmark runs)
+	$(VENV_BIN)/python scripts/validate_tasks.py tasks/v1 --sandbox docker

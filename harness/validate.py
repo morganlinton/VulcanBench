@@ -3,7 +3,8 @@
 For each task, in fresh temp workspaces, this checks:
 
 1. schema            — required metadata, declarative tests, repo + gold patch.
-2. toolchain         — SKIP (not fail) when a language's tool is absent.
+2. toolchain         — SKIP (not fail) when a language's tool is absent on the host
+                       (``--sandbox local`` only; Docker mode uses the sandbox image).
 3. gold solves       — apply gold_patch.diff -> functional == 1.0.
 4. fail-to-pass real — without the patch -> functional < 1.0 (not pre-solved).
 5. determinism       — the gold verifier scores identically across runs.
@@ -13,6 +14,9 @@ For each task, in fresh temp workspaces, this checks:
 
 Legacy/demo tasks (no declarative tests and no gold patch) are skipped, not failed.
 ``main()`` returns 1 if any task FAILs (SKIPs do not fail the run).
+
+Use ``--sandbox docker`` to run setup and verifiers inside the same container
+environment as ``vulcanbench run`` (recommended before large benchmark spend).
 """
 
 from __future__ import annotations
@@ -27,10 +31,14 @@ import tarfile
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from harness.task_metadata import validate_scale_fields
+from harness.task_metadata import resolve_verifier_timeout_s, validate_scale_fields
 from harness.tasks import Task, _safe_extract, load_task, prepare_workspace, run_setup
-from harness.verifier import run_declarative_verifier
+from harness.verifier import DEFAULT_TIMEOUT, Runner, run_declarative_verifier
+
+if TYPE_CHECKING:
+    from harness.sandbox.docker_executor import DockerToolExecutor
 
 REQUIRED_META = ["id", "category", "languages", "difficulty", "source", "decontamination_notes"]
 LANG_TOOL = {
@@ -56,6 +64,14 @@ class Result:
     task_id: str
     status: str
     reasons: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class ValidateOptions:
+    """Runtime options for :func:`validate_task`."""
+
+    sandbox: str = "local"  # local | docker
+    image: str | None = None
 
 
 def _apply_gold(workspace: Path, gold_patch: Path) -> bool:
@@ -124,26 +140,50 @@ def _check_decontamination(task: Task) -> str | None:  # noqa: PLR0911
     return None
 
 
-def _functional(task: Task, workspace: Path) -> float:
-    payload = run_declarative_verifier(task, workspace)
+def _functional(task: Task, workspace: Path, runner: Runner | None = None) -> float:
+    timeout = resolve_verifier_timeout_s(task.metadata, DEFAULT_TIMEOUT)
+    payload = run_declarative_verifier(task, workspace, runner=runner, timeout=timeout)
     return float(payload.get("scores", {}).get("functional", 0.0))
 
 
-def _fresh(task: Task, tmp: Path, name: str, apply_gold: bool) -> float:
+def _docker_runner(workspace: Path, image: str | None) -> tuple[Runner, Any]:
+    """Open a Docker sandbox for ``workspace`` and return a verifier runner + executor."""
+    from harness.agent.loop import _executor_runner  # noqa: PLC0415 — shared with agent loop
+    from harness.sandbox.docker_executor import DEFAULT_IMAGE, DockerToolExecutor
+
+    executor: DockerToolExecutor = DockerToolExecutor(workspace, image=image or DEFAULT_IMAGE)
+    return _executor_runner(executor), executor
+
+
+def _fresh(
+    task: Task,
+    tmp: Path,
+    name: str,
+    apply_gold: bool,
+    opts: ValidateOptions,
+) -> float:
     ws = tmp / name
     prepare_workspace(task, ws)
-    # Run setup commands (e.g. cargo build --tests) before applying gold/scoring.
-    if task.setup_commands:
-        run_setup(task, ws)
-    if apply_gold:
-        assert task.gold_patch is not None
-        if not _apply_gold(ws, task.gold_patch):
-            raise RuntimeError("gold patch did not apply cleanly (git apply failed)")
-    return _functional(task, ws)
+    executor: Any | None = None
+    runner: Runner | None = None
+    if opts.sandbox == "docker":
+        runner, executor = _docker_runner(ws, opts.image)
+    try:
+        if task.setup_commands:
+            run_setup(task, ws, runner=runner)
+        if apply_gold:
+            assert task.gold_patch is not None
+            if not _apply_gold(ws, task.gold_patch):
+                raise RuntimeError("gold patch did not apply cleanly (git apply failed)")
+        return _functional(task, ws, runner=runner)
+    finally:
+        if executor is not None:
+            executor.close()
 
 
-def validate_task(task_root: Path) -> Result:  # noqa: PLR0911, PLR0912 — guard-clause style
+def validate_task(task_root: Path, opts: ValidateOptions | None = None) -> Result:  # noqa: PLR0911, PLR0912
     """Validate a single task directory and return a :class:`Result`."""
+    opts = opts or ValidateOptions()
     task_id = task_root.name
     task = load_task(task_id, task_root.parent)
     r = Result(task_id=task_id, status=PASS)
@@ -175,37 +215,40 @@ def validate_task(task_root: Path) -> Result:  # noqa: PLR0911, PLR0912 — guar
     if scale_reasons:
         return Result(task_id, FAIL, scale_reasons)
 
-    # 2. toolchain — skip (do not fail) when a language tool is absent
-    langs = task.metadata.get("languages", [])
-    absent = sorted(
-        {
-            LANG_TOOL[lng]
-            for lng in langs
-            if lng in LANG_TOOL and shutil.which(LANG_TOOL[lng]) is None
-        }
-    )
-    if absent:
-        return Result(task_id, SKIP, [f"toolchain not installed: {absent}"])
+    # 2. toolchain — skip (do not fail) when a host language tool is absent (local mode only).
+    if opts.sandbox == "local":
+        langs = task.metadata.get("languages", [])
+        absent = sorted(
+            {
+                LANG_TOOL[lng]
+                for lng in langs
+                if lng in LANG_TOOL and shutil.which(LANG_TOOL[lng]) is None
+            }
+        )
+        if absent:
+            return Result(task_id, SKIP, [f"toolchain not installed: {absent}"])
 
     try:
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
             # 3. gold solves
-            gold = _fresh(task, tmp, "gold", apply_gold=True)
+            gold = _fresh(task, tmp, "gold", apply_gold=True, opts=opts)
             if gold != 1.0:
                 return Result(task_id, FAIL, [f"gold patch scored functional={gold}, expected 1.0"])
             # 4. fail-to-pass is real (not already solved)
-            base = _fresh(task, tmp, "base", apply_gold=False)
+            base = _fresh(task, tmp, "base", apply_gold=False, opts=opts)
             if base >= 1.0:
                 return Result(task_id, FAIL, [f"task already solved pre-patch (functional={base})"])
             # 5. determinism
             scores = {gold}
             for i in range(DETERMINISM_RUNS - 1):
-                scores.add(_fresh(task, tmp, f"det{i}", apply_gold=True))
+                scores.add(_fresh(task, tmp, f"det{i}", apply_gold=True, opts=opts))
             if len(scores) != 1:
                 return Result(task_id, FAIL, [f"nondeterministic gold scores: {sorted(scores)}"])
+            mode = "docker" if opts.sandbox == "docker" else "local"
             r.reasons.append(
-                f"gold=1.0, pre-patch={base}, deterministic over {DETERMINISM_RUNS} runs"
+                f"gold=1.0, pre-patch={base}, deterministic over {DETERMINISM_RUNS} runs "
+                f"({mode})"
             )
     except (RuntimeError, AssertionError) as e:
         return Result(task_id, FAIL, [str(e)])
@@ -231,6 +274,18 @@ def _filter_roots_by_scale(roots: list[Path], tier: str, tasks_root: Path) -> li
     return [r for r in roots if r.name in allowed]
 
 
+def _docker_preflight(image: str | None) -> int | None:
+    """Return an exit code when Docker mode cannot run, else ``None``."""
+    from harness.sandbox.docker_executor import DEFAULT_IMAGE, _docker_available
+
+    if not _docker_available():
+        print("error: --sandbox docker requires a running Docker daemon", file=sys.stderr)
+        return 2
+    resolved = image or DEFAULT_IMAGE
+    print(f"Validating in Docker sandbox ({resolved}) ...")
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate VulcanBench tasks")
     parser.add_argument("target", nargs="?", default="tasks/v1", help="tasks dir or one task dir")
@@ -240,12 +295,30 @@ def main(argv: list[str] | None = None) -> int:
         default="all",
         help="validate only tasks in suite.json micro/large tier (default: all)",
     )
+    parser.add_argument(
+        "--sandbox",
+        choices=("local", "docker"),
+        default="local",
+        help="where to run setup and verifiers (docker matches vulcanbench run)",
+    )
+    parser.add_argument(
+        "--image",
+        default=None,
+        help="Docker sandbox image when --sandbox docker (default: vulcanbench/sandbox:base)",
+    )
     args = parser.parse_args(argv)
+
+    if args.sandbox == "docker":
+        preflight = _docker_preflight(args.image)
+        if preflight is not None:
+            return preflight
 
     target = Path(args.target)
     if not target.exists():
         print(f"error: {target} does not exist", file=sys.stderr)
         return 2
+
+    opts = ValidateOptions(sandbox=args.sandbox, image=args.image)
 
     roots = iter_task_roots(target)
     if args.filter_scale != "all":
@@ -257,7 +330,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no tasks found under {target}")
         return 0
 
-    results = [validate_task(r) for r in roots]
+    results = [validate_task(r, opts) for r in roots]
     icon = {PASS: "✓", SKIP: "○", FAIL: "✗"}
     for res in results:
         suffix = f" — {'; '.join(res.reasons)}" if res.reasons else ""

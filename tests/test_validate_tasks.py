@@ -9,7 +9,9 @@ from pathlib import Path
 import pytest
 
 from harness import validate
+from harness.agent.loop import _executor_runner
 from harness.tasks import Task
+from harness.verifier import host_runner
 
 
 def _full_task(root: Path, task_id: str = "demo", gold: str = "") -> Path:
@@ -235,9 +237,6 @@ def test_validate_docker_ignores_missing_host_toolchain(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Docker mode runs verifiers in the sandbox image, not on the host PATH."""
-    from harness.agent.loop import _executor_runner
-    from harness.verifier import host_runner
-
     task = _full_task(tmp_path, gold=_SOLVING_GOLD)
 
     class FakeExecutor:
@@ -252,7 +251,9 @@ def test_validate_docker_ignores_missing_host_toolchain(
         def close(self) -> None:
             pass
 
-    def fake_docker_runner(task: Task, workspace: Path, image: str | None) -> tuple[object, FakeExecutor]:
+    def fake_docker_runner(
+        task: Task, workspace: Path, image: str | None
+    ) -> tuple[object, FakeExecutor]:
         ex = FakeExecutor(workspace)
         return _executor_runner(ex), ex
 

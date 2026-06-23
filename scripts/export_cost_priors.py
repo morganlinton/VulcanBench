@@ -94,15 +94,13 @@ def export_priors(
     out_mt: dict[str, dict[str, dict[str, float | int]]] = {}
     for model in sorted(by_model_task):
         out_mt[model] = {
-            task_id: _bucket_stats(costs)
-            for task_id, costs in sorted(by_model_task[model].items())
+            task_id: _bucket_stats(costs) for task_id, costs in sorted(by_model_task[model].items())
         }
 
     out_ms: dict[str, dict[str, dict[str, float | int]]] = {}
     for model in sorted(by_model_scale):
         out_ms[model] = {
-            scale: _bucket_stats(costs)
-            for scale, costs in sorted(by_model_scale[model].items())
+            scale: _bucket_stats(costs) for scale, costs in sorted(by_model_scale[model].items())
         }
 
     return {
@@ -168,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
     args.output.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     print(
         f"wrote {args.output} "
-        f"({n_task_buckets} model×task, {n_scale_buckets} model×scale buckets)"
+        f"({n_task_buckets} model x task, {n_scale_buckets} model x scale buckets)"
     )
     return 0
 

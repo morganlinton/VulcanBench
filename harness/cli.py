@@ -165,9 +165,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         )
         if is_priced(model):
             try:
-                task_ids = (
-                    load_suite(suite).task_ids if suite is not None else [task]  # type: ignore[list-item]
-                )
+                task_ids = _selected_task_ids(task, suite)
                 plan = estimate_plan(
                     models=[model],
                     task_ids=task_ids,
@@ -273,6 +271,14 @@ def _print_cost_estimate(plan: Any, *, json_output: bool = False) -> None:
     )
 
 
+def _selected_task_ids(task: str | None, suite: str | None) -> list[str]:
+    if suite is not None:
+        return load_suite(suite).task_ids
+    if task is None:
+        raise ValueError("task required when suite is not provided")
+    return [task]
+
+
 @app.command()
 def estimate(
     task: str | None = typer.Option(None, "--task", "-t", help="Single task ID"),
@@ -306,7 +312,7 @@ def estimate(
         raise typer.Exit(code=1)
 
     try:
-        task_ids = load_suite(suite).task_ids if suite is not None else [task]  # type: ignore[list-item]
+        task_ids = _selected_task_ids(task, suite)
         plan = estimate_plan(
             models=model,
             task_ids=task_ids,

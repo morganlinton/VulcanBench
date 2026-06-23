@@ -48,6 +48,7 @@ _SANDBOX_ENV = {
     "HOME": "/tmp",
     "GOCACHE": "/tmp/go-build",
     "GOPATH": "/tmp/go",
+    "CARGO_HOME": "/tmp/cargo",
 }
 
 

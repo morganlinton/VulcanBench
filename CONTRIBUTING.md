@@ -103,13 +103,14 @@ Before a large benchmark spend, validate gold patches and verifiers inside the
 same Docker sandbox used by `vulcanbench run`:
 
 ```bash
-make sandbox-image
+make sandbox-image-all
 make validate-tasks-docker
 # or: python scripts/validate_tasks.py tasks/v1 --sandbox docker
 ```
 
 Host validation (`make validate-tasks`) is faster but does not catch container-only
-issues (e.g. Go `GOCACHE` in non-root sandboxes).
+issues (e.g. Go `GOCACHE` in non-root sandboxes). Rust tasks automatically use
+``vulcanbench/sandbox:rust`` in Docker (build with ``make sandbox-image-rust``).
 
 ### Release tweet
 lightly edit. Put it in the PR body or hand it to the user in chat.

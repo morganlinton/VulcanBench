@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from harness import validate
+from harness.tasks import Task
 
 
 def _full_task(root: Path, task_id: str = "demo", gold: str = "") -> Path:
@@ -251,7 +252,7 @@ def test_validate_docker_ignores_missing_host_toolchain(
         def close(self) -> None:
             pass
 
-    def fake_docker_runner(workspace: Path, image: str | None) -> tuple[object, FakeExecutor]:
+    def fake_docker_runner(task: Task, workspace: Path, image: str | None) -> tuple[object, FakeExecutor]:
         ex = FakeExecutor(workspace)
         return _executor_runner(ex), ex
 

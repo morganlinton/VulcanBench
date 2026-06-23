@@ -9,7 +9,7 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity — with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.5.0** — 52 gold-verified tasks, tool-calling agent (mock / OpenAI /
+**v0.5.1** — 52 gold-verified tasks, tool-calling agent (mock / OpenAI /
 Anthropic / Z.ai), Docker sandbox, pre-run cost estimates with bundled priors
 (`vulcanbench estimate`), `v1-compare` suite, five-metric scoring, suite runs,
 and HTML replay.

@@ -37,11 +37,11 @@ from harness.persistence import maybe_post_run_summary
 from harness.pricing import cost_usd, is_priced
 from harness.redaction import sanitize
 from harness.sandbox.docker_executor import (
-    DEFAULT_IMAGE,
     DockerToolExecutor,
     SandboxError,
     _docker_available,
 )
+from harness.sandbox.images import resolve_sandbox_image
 from harness.task_metadata import (
     measure_repo_path,
     repo_scale,
@@ -642,7 +642,7 @@ def _make_executor(
     execution requires the explicit ``VULCANBENCH_ALLOW_HOST_EXEC=1`` opt-in,
     and is always recorded with a loud warning.
     """
-    resolved_image = image or task.metadata.get("image") or DEFAULT_IMAGE
+    resolved_image = resolve_sandbox_image(task, image)
     if sandbox == "local":
         collector.record("sandbox", {"mode": "local"})
         return LocalToolExecutor(workspace)

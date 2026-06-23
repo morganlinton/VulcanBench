@@ -14,7 +14,7 @@ VULCANBENCH := $(VENV_BIN)/vulcanbench
 # the venv. This makes `make ci` behave the same from any shell.
 export PATH := $(abspath $(VENV_BIN)):$(PATH)
 
-.PHONY: help setup clean install dev test lint typecheck fmt ci docker-up docker-down validate-tasks sandbox-image
+.PHONY: help setup clean install dev test lint typecheck fmt ci docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-all
 .DEFAULT_GOAL := help
 
 help: ## Show this help
@@ -58,9 +58,15 @@ typecheck: setup ## Strict mypy
 
 ci: lint typecheck test ## Full local CI (lint + types + fast tests)
 
-sandbox-image: ## Build the Docker sandbox image (runs use it by default)
+sandbox-image: ## Build the Docker sandbox base image (Python, Go, Node)
 	docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
-	@echo "✅ Built vulcanbench/sandbox:base — vulcanbench run uses it by default"
+	@echo "✅ Built vulcanbench/sandbox:base — default for most tasks"
+
+sandbox-image-rust: sandbox-image ## Build Rust sandbox image (extends base)
+	docker build -t vulcanbench/sandbox:rust -f sandbox/Dockerfile.rust .
+	@echo "✅ Built vulcanbench/sandbox:rust — auto-selected for Rust tasks"
+
+sandbox-image-all: sandbox-image sandbox-image-rust ## Build base + Rust sandbox images
 
 docker-up: ## Start local Postgres (see docker-compose.prod.yml for full stack)
 	docker compose up -d db
@@ -77,5 +83,5 @@ dashboard-dev: ## Start Next.js dashboard (assumes npm install done)
 validate-tasks: setup ## Validate all task definitions (gold-solves, fail-to-pass, determinism)
 	$(VENV_BIN)/python scripts/validate_tasks.py tasks/v1
 
-validate-tasks-docker: sandbox-image ## Validate all tasks inside Docker (matches benchmark runs)
+validate-tasks-docker: sandbox-image-all ## Validate all tasks inside Docker (matches benchmark runs)
 	$(VENV_BIN)/python scripts/validate_tasks.py tasks/v1 --sandbox docker

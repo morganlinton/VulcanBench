@@ -83,7 +83,7 @@ vulcanbench report --suite v1 -o report.md
 >   bundled priors on fresh installs):
 >   `vulcanbench estimate --suite v1-compare --model openai:gpt-5.5`
 > - Preflight task health before a full suite spend:
->   `make validate-tasks-docker` (gold + verifiers inside Docker)
+>   `make validate-tasks-docker` (gold + verifiers inside Docker; builds base + Rust images)
 > - `--judges` is **on by default** (a 3-model `human_like` ensemble reusing the
 >   run model) — it roughly triples token cost/latency. Use `--no-judges` for
 >   cheap functional-only runs.

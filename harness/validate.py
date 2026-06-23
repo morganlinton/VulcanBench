@@ -33,6 +33,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from harness.sandbox.docker_executor import DockerToolExecutor
+from harness.sandbox.images import resolve_sandbox_image
 from harness.task_metadata import resolve_verifier_timeout_s, validate_scale_fields
 from harness.tasks import Task, _safe_extract, load_task, prepare_workspace, run_setup
 from harness.verifier import DEFAULT_TIMEOUT, Runner, run_declarative_verifier
@@ -146,12 +148,12 @@ def _functional(task: Task, workspace: Path, runner: Runner | None = None) -> fl
     return float(payload.get("scores", {}).get("functional", 0.0))
 
 
-def _docker_runner(workspace: Path, image: str | None) -> tuple[Runner, Any]:
+def _docker_runner(task: Task, workspace: Path, image: str | None) -> tuple[Runner, Any]:
     """Open a Docker sandbox for ``workspace`` and return a verifier runner + executor."""
     from harness.agent.loop import _executor_runner  # noqa: PLC0415 — shared with agent loop
-    from harness.sandbox.docker_executor import DEFAULT_IMAGE, DockerToolExecutor
 
-    executor: DockerToolExecutor = DockerToolExecutor(workspace, image=image or DEFAULT_IMAGE)
+    resolved = resolve_sandbox_image(task, image)
+    executor: DockerToolExecutor = DockerToolExecutor(workspace, image=resolved)
     return _executor_runner(executor), executor
 
 
@@ -167,7 +169,7 @@ def _fresh(
     executor: Any | None = None
     runner: Runner | None = None
     if opts.sandbox == "docker":
-        runner, executor = _docker_runner(ws, opts.image)
+        runner, executor = _docker_runner(task, ws, opts.image)
     try:
         if task.setup_commands:
             run_setup(task, ws, runner=runner)
@@ -276,13 +278,15 @@ def _filter_roots_by_scale(roots: list[Path], tier: str, tasks_root: Path) -> li
 
 def _docker_preflight(image: str | None) -> int | None:
     """Return an exit code when Docker mode cannot run, else ``None``."""
-    from harness.sandbox.docker_executor import DEFAULT_IMAGE, _docker_available
+    from harness.sandbox.docker_executor import _docker_available  # noqa: PLC0415
 
     if not _docker_available():
         print("error: --sandbox docker requires a running Docker daemon", file=sys.stderr)
         return 2
-    resolved = image or DEFAULT_IMAGE
-    print(f"Validating in Docker sandbox ({resolved}) ...")
+    if image:
+        print(f"Validating in Docker sandbox ({image}) ...")
+    else:
+        print("Validating in Docker sandbox (per-task image selection) ...")
     return None
 
 

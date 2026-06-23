@@ -249,8 +249,7 @@ def validate_task(task_root: Path, opts: ValidateOptions | None = None) -> Resul
                 return Result(task_id, FAIL, [f"nondeterministic gold scores: {sorted(scores)}"])
             mode = "docker" if opts.sandbox == "docker" else "local"
             r.reasons.append(
-                f"gold=1.0, pre-patch={base}, deterministic over {DETERMINISM_RUNS} runs "
-                f"({mode})"
+                f"gold=1.0, pre-patch={base}, deterministic over {DETERMINISM_RUNS} runs ({mode})"
             )
     except (RuntimeError, AssertionError) as e:
         return Result(task_id, FAIL, [str(e)])

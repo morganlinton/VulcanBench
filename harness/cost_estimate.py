@@ -49,9 +49,7 @@ _PROVIDER_LABEL = {
 }
 
 _KNOWN_TASK_SOURCES = frozenset({"exact", "prior_exact"})
-_PRIOR_SOURCES = frozenset(
-    {"prior_exact", "prior_task_scaled", "prior_model_median"}
-)
+_PRIOR_SOURCES = frozenset({"prior_exact", "prior_task_scaled", "prior_model_median"})
 
 
 @dataclass
@@ -249,7 +247,9 @@ class _CostIndex:
             return _DEFAULT_PER_RUN[prefix]
         return _DEFAULT_FALLBACK
 
-    def estimate_one(self, model: str, task_id: str, tasks_root: Path) -> RunCostEstimate:
+    def estimate_one(  # noqa: PLR0911 — ordered fallback chain for estimate sources
+        self, model: str, task_id: str, tasks_root: Path
+    ) -> RunCostEstimate:
         direct = self.by_model_task.get((model, task_id))
         if direct:
             return RunCostEstimate(
@@ -272,9 +272,7 @@ class _CostIndex:
             return scaled_local
 
         prior_task_entries = [
-            (m, p.mid)
-            for (m, t), p in self.priors.by_model_task.items()
-            if t == task_id
+            (m, p.mid) for (m, t), p in self.priors.by_model_task.items() if t == task_id
         ]
         scaled_prior = _task_scaled_estimate(
             task_id, model, prior_task_entries, "prior_task_scaled"
@@ -321,7 +319,7 @@ def _task_judge_mult(judges: bool, source: str, priors: PriorBuckets) -> float:
     return 3.0 if judges else 1.0
 
 
-def estimate_plan(
+def estimate_plan(  # noqa: PLR0912 — validation + confidence calculation stay linear
     *,
     models: list[str],
     task_ids: list[str],
@@ -368,24 +366,15 @@ def estimate_plan(
             confidence = "medium"
 
         low = round(
-            sum(
-                t.low_usd * _task_judge_mult(judges, t.source, priors) for t in per_task
-            )
-            * repeat,
+            sum(t.low_usd * _task_judge_mult(judges, t.source, priors) for t in per_task) * repeat,
             4,
         )
         mid = round(
-            sum(
-                t.mid_usd * _task_judge_mult(judges, t.source, priors) for t in per_task
-            )
-            * repeat,
+            sum(t.mid_usd * _task_judge_mult(judges, t.source, priors) for t in per_task) * repeat,
             4,
         )
         high = round(
-            sum(
-                t.high_usd * _task_judge_mult(judges, t.source, priors) for t in per_task
-            )
-            * repeat,
+            sum(t.high_usd * _task_judge_mult(judges, t.source, priors) for t in per_task) * repeat,
             4,
         )
         recommended = round(high * credit_buffer, 2)
@@ -395,8 +384,7 @@ def estimate_plan(
             notes.append("Includes ~3x agent-token judge ensemble (--judges).")
         if n_prior_exact > 0 and n_local_exact == 0:
             notes.append(
-                f"Using bundled cost priors (no local ./runs history for "
-                f"{n_prior_exact} task(s))."
+                f"Using bundled cost priors (no local ./runs history for {n_prior_exact} task(s))."
             )
         elif n_prior_only > 0:
             notes.append(f"Partial bundled priors for {n_prior_only} task(s).")

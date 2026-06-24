@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Discrimination report**: `vulcanbench report` now includes a model-separation
+  section — per task whether the models split, and per model pair how many tasks
+  tell them apart (McNemar discordant counts), plus retirement candidates that
+  every model passes or fails. Surfaces ties that aggregate pass@1 hides (e.g.
+  two models posting an identical 0.7885 with zero tasks separating them).
 - **Hard, discriminating tasks** to raise the suite's ceiling (52 -> 43 -> 31 ->
   33): `py-expr-eval` (a recursive-descent arithmetic evaluator with a subtle
   operator-precedence/associativity bug — `2 + 3 * 4`, `2 ** 3 ** 2`, `-2 ** 2`)

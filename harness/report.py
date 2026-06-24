@@ -5,6 +5,9 @@ renders it for humans. A report has:
 
 - ``models``      — the per-model ranking (pass@1 ± stderr, pass@k, cost, latency)
 - ``tasks``       — per-task breakdown (per-model attempts / solve rate)
+- ``discrimination`` — how well the suite separates the models: per-task whether
+  they split, and per model pair how many tasks tell them apart (McNemar
+  discordant counts). Surfaces ties that aggregate pass@1 hides.
 - ``environment`` — distinct models / Python / tool versions seen in run manifests
 - ``integrity``   — runs scored against a now-stale task version, and runs
   scored against tasks not known to be decontaminated (``decontaminated: false``)
@@ -45,6 +48,7 @@ def build_report(
 
     models = aggregate_by_model(rows)
     tasks = _per_task(rows)
+    discrimination = build_discrimination(rows)
     environment = _environment(summaries)
     integrity = _integrity(rows, tasks_root)
     calibration = calibrate_tasks(rows, tasks_root)
@@ -62,11 +66,137 @@ def build_report(
         },
         "models": models,
         "tasks": tasks,
+        "discrimination": discrimination,
         "environment": environment,
         "integrity": integrity,
         "calibration": calibration,
         "effort_sensitivity": effort_sensitivity,
     }
+
+
+# A model "passes" a task when its solve rate over the repeats meets this
+# threshold. With a single attempt this is just solved-vs-not.
+DISCRIMINATION_PASS_THRESHOLD = 0.5
+
+
+def _solve_rate(attempts: list[dict[str, Any]]) -> float:
+    if not attempts:
+        return 0.0
+    solved = sum(1 for a in attempts if (a.get("functional") or 0) >= 1.0)
+    return solved / len(attempts)
+
+
+def build_discrimination(
+    rows: list[dict[str, Any]],
+    pass_threshold: float = DISCRIMINATION_PASS_THRESHOLD,
+) -> dict[str, Any]:
+    """Measure how well the suite separates the models under test.
+
+    Aggregate pass@1 hides ties: two models can post the identical headline score
+    while the suite contains no task that actually tells them apart. This reports,
+    per task, whether the models split (some pass, some fail), and per model pair,
+    how many tasks separate them (the McNemar discordant counts). Tasks every
+    model passes or every model fails carry no signal and are retirement
+    candidates.
+    """
+    by_task: dict[Any, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    for r in rows:
+        by_task[r.get("task_id")][r.get("model") or "?"].append(r)
+    models = sorted({r.get("model") or "?" for r in rows})
+
+    if len(models) < 2:
+        return {
+            "available": False,
+            "reason": "need at least 2 models to measure separation",
+            "pass_threshold": pass_threshold,
+            "models": models,
+            "n_tasks": len(by_task),
+            "all_pass": 0,
+            "all_fail": 0,
+            "discriminating": 0,
+            "no_signal_tasks": [],
+            "tasks": [],
+            "model_pairs": [],
+        }
+
+    rate_by_task: dict[Any, dict[str, float]] = {}
+    task_entries: list[dict[str, Any]] = []
+    all_pass = all_fail = discriminating = 0
+    no_signal: list[str] = []
+    for task_id in sorted(by_task, key=str):
+        per_model = {m: round(_solve_rate(a), 4) for m, a in by_task[task_id].items()}
+        rate_by_task[task_id] = per_model
+        statuses = {rate >= pass_threshold for rate in per_model.values()}
+        rates = list(per_model.values())
+        spread = round(max(rates) - min(rates), 4) if rates else 0.0
+        separates = len(statuses) > 1
+        if separates:
+            discriminating += 1
+        elif True in statuses:
+            all_pass += 1
+            no_signal.append(str(task_id))
+        else:
+            all_fail += 1
+            no_signal.append(str(task_id))
+        task_entries.append(
+            {
+                "task_id": task_id,
+                "solve_rates": per_model,
+                "separates": separates,
+                "spread": spread,
+            }
+        )
+
+    pairs = _pairwise_separation(models, rate_by_task, pass_threshold)
+
+    return {
+        "available": True,
+        "pass_threshold": pass_threshold,
+        "models": models,
+        "n_tasks": len(by_task),
+        "all_pass": all_pass,
+        "all_fail": all_fail,
+        "discriminating": discriminating,
+        "no_signal_tasks": sorted(no_signal),
+        "tasks": task_entries,
+        "model_pairs": pairs,
+    }
+
+
+def _pairwise_separation(
+    models: list[str],
+    rate_by_task: dict[Any, dict[str, float]],
+    pass_threshold: float,
+) -> list[dict[str, Any]]:
+    """For each model pair, count tasks where exactly one of them passes."""
+    pairs: list[dict[str, Any]] = []
+    for i, a in enumerate(models):
+        for b in models[i + 1 :]:
+            a_only = b_only = agree = common = 0
+            for per_model in rate_by_task.values():
+                if a not in per_model or b not in per_model:
+                    continue
+                common += 1
+                pa = per_model[a] >= pass_threshold
+                pb = per_model[b] >= pass_threshold
+                if pa == pb:
+                    agree += 1
+                elif pa:
+                    a_only += 1
+                else:
+                    b_only += 1
+            pairs.append(
+                {
+                    "a": a,
+                    "b": b,
+                    "common_tasks": common,
+                    "a_solves_b_fails": a_only,
+                    "b_solves_a_fails": b_only,
+                    "separating": a_only + b_only,
+                    "agree": agree,
+                }
+            )
+    return pairs
 
 
 def _per_task(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -341,6 +471,44 @@ def _fmt(n: Any) -> str:
     return "—" if n is None else (f"{n:.4f}" if isinstance(n, float) else str(n))
 
 
+def _discrimination_markdown(disc: dict[str, Any]) -> list[str]:
+    if not disc.get("available"):
+        return []
+    n = disc["n_tasks"]
+    discriminating = disc["discriminating"]
+    no_signal = disc["all_pass"] + disc["all_fail"]
+    lines = [
+        "",
+        "## Discrimination",
+        "",
+        f"- **{discriminating} of {n}** tasks separate at least one model pair "
+        f"(pass threshold {disc['pass_threshold']}). "
+        f"**{no_signal}** carry no signal: {disc['all_pass']} solved by every model, "
+        f"{disc['all_fail']} failed by every model.",
+    ]
+    pairs = disc.get("model_pairs") or []
+    if pairs:
+        lines += [
+            "",
+            "| Model A | Model B | Common tasks | Separating | A only | B only |",
+            "|---|---|---|---|---|---|",
+        ]
+        for p in pairs:
+            flag = " ⚠️ cannot be told apart" if p["separating"] == 0 else ""
+            lines.append(
+                f"| {p['a']} | {p['b']} | {p['common_tasks']} | "
+                f"{p['separating']}{flag} | {p['a_solves_b_fails']} | {p['b_solves_a_fails']} |"
+            )
+    no_signal_tasks = disc.get("no_signal_tasks") or []
+    if no_signal_tasks:
+        lines += [
+            "",
+            f"_Retirement candidates (no model separated by these {len(no_signal_tasks)} "
+            f"tasks): {', '.join(no_signal_tasks)}._",
+        ]
+    return lines
+
+
 def to_markdown(report: dict[str, Any]) -> str:
     suite = report.get("suite") or "all runs"
     totals = report["totals"]
@@ -384,6 +552,8 @@ def to_markdown(report: dict[str, Any]) -> str:
             f"{_fmt(m['pass_at_1'])} ± {_fmt(m['pass_at_1_stderr'])} | {_fmt(m['pass_at_k'])} | "
             f"{_fmt(m['avg_total'])} | {cost} | {_fmt(m['avg_duration_s'])} |"
         )
+
+    lines += _discrimination_markdown(report.get("discrimination") or {})
 
     effort = report.get("effort_sensitivity") or {}
     if effort.get("available"):

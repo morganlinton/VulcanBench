@@ -71,7 +71,8 @@ vulcanbench run --suite v1-large --model openai:gpt-4o --repeat 5 --sandbox dock
 vulcanbench leaderboard            # by model: pass@1 ± stderr, pass@k, cost, latency
 vulcanbench leaderboard --by run   # per-run drill-down
 vulcanbench report -o report.md    # shareable Markdown/JSON report (ranking,
-                                   #   effort sensitivity, per-task breakdown,
+                                   #   model-separation/discrimination, effort
+                                   #   sensitivity, per-task breakdown,
                                    #   environment, drift flags)
 vulcanbench calibrate              # empirical difficulty calibration from recorded runs
 vulcanbench replay <id>

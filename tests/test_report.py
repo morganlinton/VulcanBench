@@ -90,6 +90,7 @@ def test_structure(tmp_path: Path) -> None:
         "totals",
         "models",
         "tasks",
+        "discrimination",
         "environment",
         "integrity",
         "calibration",

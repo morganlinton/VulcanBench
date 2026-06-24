@@ -203,6 +203,7 @@ Full details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
 | [DEPLOYMENT](docs/DEPLOYMENT.md) | Hosted API + dashboard (optional) |
 | [CONTRIBUTING](docs/CONTRIBUTING.md) | Add tasks, run CI locally |
 | [ROADMAP](docs/ROADMAP.md) | Planned follow-ups |
+| [results/](docs/results/) | Published benchmark snapshots (MD, JSON, PDF) |
 
 Quality and security analyzers run when the relevant toolchains are on your
 host (e.g. `bandit` for Python via the venv; `gosec` for Go if installed).

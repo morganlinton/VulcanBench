@@ -64,6 +64,9 @@ backend = [
   "psycopg[binary]>=3.1",  # sync Postgres driver for the DB store
   "alembic>=1.13.0",
 ]
+reports = [
+  "fpdf2>=2.8.0",
+]
 
 [project.scripts]
 vulcanbench = "harness.cli:app"

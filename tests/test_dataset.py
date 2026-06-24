@@ -93,6 +93,45 @@ def test_task_complexity_labels() -> None:
     assert "localized" in values
 
 
+# --- composition discipline: keep the suite from regressing to easy filler ---
+
+MIN_HARD_TASKS = 5
+MIN_MEDIUM_OR_HARD_FRACTION = 0.6
+MIN_NON_LOCALIZED_TASKS = 2
+
+
+def test_hard_task_floor() -> None:
+    hard = [d for d in _real_task_dirs() if _meta(d).get("difficulty") == "hard"]
+    assert len(hard) >= MIN_HARD_TASKS, (
+        f"expected >={MIN_HARD_TASKS} hard tasks, found {len(hard)} — the suite needs a"
+        " ceiling that separates strong models"
+    )
+
+
+def test_not_dominated_by_easy_tasks() -> None:
+    dirs = _real_task_dirs()
+    med_or_hard = sum(1 for d in dirs if _meta(d).get("difficulty") in {"medium", "hard"})
+    fraction = med_or_hard / len(dirs)
+    assert fraction >= MIN_MEDIUM_OR_HARD_FRACTION, (
+        f"only {fraction:.0%} of tasks are medium/hard (want >="
+        f"{MIN_MEDIUM_OR_HARD_FRACTION:.0%}); trivially-easy tasks waste a run without"
+        " discriminating models"
+    )
+
+
+def test_non_localized_coverage_floor() -> None:
+    # Guard against the navigation-heavy tier silently going to zero. This floor
+    # is low on purpose — growing multi_file/system/architecture coverage is
+    # tracked in the roadmap — but it must not regress.
+    non_localized = sum(
+        1 for d in _real_task_dirs() if _meta(d).get("task_complexity") != "localized"
+    )
+    assert non_localized >= MIN_NON_LOCALIZED_TASKS, (
+        f"expected >={MIN_NON_LOCALIZED_TASKS} non-localized (multi_file/system/architecture)"
+        f" tasks, found {non_localized}"
+    )
+
+
 @pytest.mark.parametrize("task_dir", _real_task_dirs(), ids=lambda d: d.name)
 def test_every_real_task_has_required_files(task_dir: Path) -> None:
     assert (task_dir / "issue.md").exists()

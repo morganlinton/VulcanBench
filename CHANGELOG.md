@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Curation discipline**: added composition guards (`tests/test_dataset.py`) for
+  a hard-task floor, a medium-or-hard majority, and non-localized coverage so the
+  suite can't silently regress to easy filler; documented the discipline
+  (specify behavior, aim above the floor, calibrate-then-retire) in
+  `CONTRIBUTING.md`; and reconciled the README's task-corpus description with the
+  actual composition (predominantly `localized` today, with broader
+  `multi_file`/`system`/`architecture` and larger `repo_scale` coverage tracked
+  as active work rather than claimed as shipped).
 - **Suite v1 pruned to 31 tasks** (from 52) to raise discriminating power. First,
   9 placeholder Python scaffolds (`oss-py-cache-evict`, `oss-py-m2-03/06/09`,
   `oss-py-m3-03/06/09/12/15`) whose issues asked to "correct `run`" with no

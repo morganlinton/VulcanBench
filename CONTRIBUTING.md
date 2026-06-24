@@ -145,6 +145,27 @@ In brief:
 2. Run `vulcanbench validate-task tasks/v1/<task-id>` — the gold patch must solve it (`functional == 1.0`), `fail_to_pass` tests must genuinely fail pre-patch, and scoring must be deterministic.
 3. Open a PR using the task-submission PR template. Include provenance and decontamination notes as required by the validator.
 
+### Curation discipline
+
+A benchmark is only as good as its ability to *separate* models. To keep the
+suite earning its run cost:
+
+- **Specify the expected behavior, not just the bug.** The issue must let the
+  agent infer what "correct" means; the hidden test is never shown. Validation
+  downgrades `PASS -> WARN` for under-specified issues (`harness/spec_check.py`),
+  and `python scripts/check_spec.py` scans offline. An issue that only says "fix
+  `run`" is unsolvable by design, not hard.
+- **Aim above the floor.** Easy single-file fixes anchor the low end, but every
+  strong model passing a task means it discriminates nothing. Favor subtle
+  correctness, concurrency, edge cases, and `multi_file` / `system` navigation.
+  Composition guards in `tests/test_dataset.py` enforce a hard-task floor and a
+  medium-or-hard majority.
+- **Calibrate from runs, then retire dead weight.** Use `vulcanbench calibrate`
+  for empirical difficulty and the discrimination section of `vulcanbench report`
+  to find tasks every model passes or fails (no signal). Prefer `--repeat 5+`
+  so pass@1 has real confidence intervals and a model pair's separation is
+  measured, not assumed.
+
 ## Submitting a Pull Request
 
 1. Fork the repo and create a branch from `main`.

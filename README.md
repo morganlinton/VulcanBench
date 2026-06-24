@@ -155,14 +155,19 @@ Go, TypeScript, and Rust, plus the `hello-world` demo. Each task ships a startin
 `fail_to_pass`/`pass_to_pass` test commands in `metadata.json`, and a
 `gold_patch.diff` reference solution.
 
-The corpus spans difficulty (`easy` / `medium` / `hard`), `repo_scale`
-(`micro` / `small` / `medium` / `large`), and `task_complexity` (`localized`,
-`multi_file`, `system`, `architecture`) so it discriminates between weak and
-strong models and shows when higher reasoning effort matters. Examples: an RFC
-6901 JSON Pointer resolver
-(`py-jsonpointer`, hard), a race-free bounded worker pool verified under
-`go test -race` (`go-worker-pool`, hard), and a prototype-pollution-safe deep
-merge (`ts-deep-merge`, hard).
+The corpus spans three difficulty tiers (`easy` / `medium` / `hard`) across all
+four languages. Most tasks today are `localized` single-file fixes that set a
+floor; a growing set raise the ceiling with genuine subtlety — operator
+precedence and associativity (`py-expr-eval`, hard), a race-free,
+order-preserving parallel map verified under `go test -race`
+(`go-parallel-map`, hard), an RFC 6901 JSON Pointer resolver
+(`py-jsonpointer`, hard), and a prototype-pollution-safe deep merge
+(`ts-deep-merge`, hard). Broader `task_complexity` (`multi_file` / `system` /
+`architecture`) and larger `repo_scale` coverage is active work — see
+[ROADMAP](docs/ROADMAP.md). Because the `task_complexity` and `repo_scale`
+fields are validated against the repo, a task's declared scale is checked, not
+just asserted. `vulcanbench report` includes a discrimination section so you can
+see which tasks actually separate the models you run (and which carry no signal).
 
 ```bash
 make validate-tasks                              # validate every task

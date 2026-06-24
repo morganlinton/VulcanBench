@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Hard, discriminating tasks** to raise the suite's ceiling (52 -> 43 -> 31 ->
+  33): `py-expr-eval` (a recursive-descent arithmetic evaluator with a subtle
+  operator-precedence/associativity bug — `2 + 3 * 4`, `2 ** 3 ** 2`, `-2 ** 2`)
+  and `go-parallel-map` (a bounded-concurrency ordered map that must preserve
+  input order, return the lowest-input-index error, and pass `go test -race`).
 - **Specification gate (`harness/spec_check.py`)**: task validation now flags
   issues that state a defect or location but never describe the expected
   behavior — the failure mode where a hidden test asserts an output the agent

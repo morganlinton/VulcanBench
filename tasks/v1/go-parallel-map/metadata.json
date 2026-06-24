@@ -1,0 +1,28 @@
+{
+  "id": "go-parallel-map",
+  "category": "concurrency",
+  "languages": ["go"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-24",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-24. The bounded-concurrency ordered map, its racy completion-order implementation, and the hidden -race/order/error-ordering tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "order_preserved", "cmd": "go test -race -run '^TestOrderPreserved$' ./..."},
+      {"name": "first_error_by_index", "cmd": "go test -race -run '^TestFirstErrorByInputIndex$' ./..."},
+      {"name": "concurrency_limit", "cmd": "go test -race -run '^TestConcurrencyLimitRespected$' ./..."}
+    ],
+    "pass_to_pass": [
+      {"name": "empty", "cmd": "go test -race -run '^TestEmpty$' ./..."},
+      {"name": "single", "cmd": "go test -race -run '^TestSingle$' ./..."}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["pmap/pmap.go"]
+  }
+}

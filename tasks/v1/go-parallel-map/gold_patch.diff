@@ -1,0 +1,50 @@
+diff --git a/pmap/pmap.go b/pmap/pmap.go
+index 6379fe0..b29627b 100644
+--- a/pmap/pmap.go
++++ b/pmap/pmap.go
+@@ -12,32 +12,33 @@ import (
+ // ctx is forwarded to f so callers can cancel. If one or more calls return an
+ // error, Map returns the error belonging to the lowest input index. A limit
+ // below 1 is treated as 1.
+-//
+-// NOTE: this implementation has bugs — see issue.md.
+ func Map(ctx context.Context, in []int, limit int, f func(context.Context, int) (int, error)) ([]int, error) {
+ 	if limit < 1 {
+ 		limit = 1
+ 	}
+-	var results []int
+-	var firstErr error
++	results := make([]int, len(in))
++	errs := make([]error, len(in))
+ 	sem := make(chan struct{}, limit)
+ 	var wg sync.WaitGroup
+-	for _, x := range in {
++	for i, x := range in {
+ 		sem <- struct{}{}
+ 		wg.Add(1)
+-		go func(x int) {
++		go func(i, x int) {
+ 			defer wg.Done()
+ 			defer func() { <-sem }()
+ 			v, err := f(ctx, x)
+ 			if err != nil {
+-				if firstErr == nil {
+-					firstErr = err
+-				}
++				errs[i] = err
+ 				return
+ 			}
+-			results = append(results, v)
+-		}(x)
++			results[i] = v
++		}(i, x)
+ 	}
+ 	wg.Wait()
+-	return results, firstErr
++	for i := range errs {
++		if errs[i] != nil {
++			return nil, errs[i]
++		}
++	}
++	return results, nil
+ }

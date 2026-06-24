@@ -1,0 +1,34 @@
+{
+  "id": "py-expr-eval",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-24",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-24. The arithmetic mini-language, its buggy single-precedence parser, and the hidden precedence/associativity tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "add_then_mul", "cmd": "python -m pytest test_precedence.py::test_add_then_mul -q"},
+      {"name": "sub_then_mul", "cmd": "python -m pytest test_precedence.py::test_sub_then_mul -q"},
+      {"name": "mul_then_pow", "cmd": "python -m pytest test_precedence.py::test_mul_then_pow -q"},
+      {"name": "pow_right_assoc", "cmd": "python -m pytest test_precedence.py::test_pow_is_right_associative -q"},
+      {"name": "unary_below_power", "cmd": "python -m pytest test_precedence.py::test_unary_minus_below_power -q"},
+      {"name": "add_then_pow", "cmd": "python -m pytest test_precedence.py::test_add_then_pow -q"},
+      {"name": "mixed_chain", "cmd": "python -m pytest test_precedence.py::test_mixed_chain -q"},
+      {"name": "true_div_prec", "cmd": "python -m pytest test_precedence.py::test_true_division_precedence -q"},
+      {"name": "floor_div_prec", "cmd": "python -m pytest test_precedence.py::test_floor_division_precedence -q"},
+      {"name": "mod_prec", "cmd": "python -m pytest test_precedence.py::test_modulo_precedence -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "basic", "cmd": "python -m pytest test_basic.py -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["calc/parser.py"]
+  }
+}

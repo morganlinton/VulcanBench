@@ -1,0 +1,91 @@
+diff --git a/calc/parser.py b/calc/parser.py
+index 8f0082d..78b0d5e 100644
+--- a/calc/parser.py
++++ b/calc/parser.py
+@@ -1,8 +1,20 @@
+ """Recursive-descent parser: token stream -> expression tree.
+ 
+-NOTE: this implementation is buggy. It folds every binary operator at a single
+-precedence level, left to right, so it does not honor the precedence and
+-associativity documented in the README/issue.
++Precedence, lowest to highest:
++
++    + -            (binary, left-associative)
++    * / // %       (left-associative)
++    unary + -      (binds tighter than the binary operators above)
++    **             (right-associative; its exponent is itself a unary factor,
++                    so ``2 ** -1`` is valid and ``-2 ** 2`` is ``-(2 ** 2)``)
++
++Grammar::
++
++    expression := term (("+" | "-") term)*
++    term       := factor (("*" | "/" | "//" | "%") factor)*
++    factor     := ("+" | "-") factor | power
++    power      := atom ("**" factor)?
++    atom       := NUMBER | "(" expression ")"
+ """
+ 
+ from __future__ import annotations
+@@ -11,15 +23,8 @@ from calc.ast_nodes import BinOp, Node, Num, UnaryOp
+ from calc.errors import CalcError
+ from calc.tokens import Token, tokenize
+ 
+-_BINOP = {
+-    "PLUS": "+",
+-    "MINUS": "-",
+-    "STAR": "*",
+-    "SLASH": "/",
+-    "DSLASH": "//",
+-    "PERCENT": "%",
+-    "DSTAR": "**",
+-}
++_TERM_OPS = {"STAR": "*", "SLASH": "/", "DSLASH": "//", "PERCENT": "%"}
++_SUM_OPS = {"PLUS": "+", "MINUS": "-"}
+ _UNARY = {"PLUS": "+", "MINUS": "-"}
+ 
+ 
+@@ -46,20 +51,34 @@ class _Parser:
+         return node
+ 
+     def expression(self) -> Node:
+-        # BUG: all binary operators share one precedence level and fold left to
+-        # right, so e.g. 2 + 3 * 4 parses as (2 + 3) * 4 and 2 ** 3 ** 2 as
+-        # (2 ** 3) ** 2.
+-        node = self.atom()
+-        while self.cur.kind in _BINOP:
+-            op = _BINOP[self.advance().kind]
+-            node = BinOp(op, node, self.atom())
++        node = self.term()
++        while self.cur.kind in _SUM_OPS:
++            op = _SUM_OPS[self.advance().kind]
++            node = BinOp(op, node, self.term())
++        return node
++
++    def term(self) -> Node:
++        node = self.factor()
++        while self.cur.kind in _TERM_OPS:
++            op = _TERM_OPS[self.advance().kind]
++            node = BinOp(op, node, self.factor())
+         return node
+ 
++    def factor(self) -> Node:
++        if self.cur.kind in _UNARY:
++            op = _UNARY[self.advance().kind]
++            return UnaryOp(op, self.factor())
++        return self.power()
++
++    def power(self) -> Node:
++        base = self.atom()
++        if self.cur.kind == "DSTAR":
++            self.advance()
++            return BinOp("**", base, self.factor())
++        return base
++
+     def atom(self) -> Node:
+         tok = self.cur
+-        if tok.kind in _UNARY:
+-            self.advance()
+-            return UnaryOp(_UNARY[tok.kind], self.atom())
+         if tok.kind == "NUMBER":
+             self.advance()
+             return Num(tok.value)

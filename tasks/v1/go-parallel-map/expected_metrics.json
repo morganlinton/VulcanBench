@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Gold writes each result/err into a per-index slot (race-free), bounds concurrency with a semaphore channel, and returns the lowest-input-index error, preserving input order."
+}

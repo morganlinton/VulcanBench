@@ -35,6 +35,8 @@ from typing import TYPE_CHECKING, Any
 
 from harness.sandbox.docker_executor import DockerToolExecutor
 from harness.sandbox.images import resolve_sandbox_image
+from harness.spec_check import WARN as _SPEC_WARN
+from harness.spec_check import static_spec_lint
 from harness.task_metadata import resolve_verifier_timeout_s, validate_scale_fields
 from harness.tasks import Task, _safe_extract, load_task, prepare_workspace, run_setup
 from harness.verifier import DEFAULT_TIMEOUT, Runner, run_declarative_verifier
@@ -58,7 +60,7 @@ _OSS_REF = re.compile(
     r"\b[0-9a-f]{7,40}\b|#\d+|/(issues|pull|commit)/|\b(commit|issue|pull)\b", re.I
 )
 
-PASS, SKIP, FAIL = "PASS", "SKIP", "FAIL"
+PASS, SKIP, FAIL, WARN = "PASS", "SKIP", "FAIL", "WARN"
 
 
 @dataclass
@@ -183,9 +185,28 @@ def _fresh(
             executor.close()
 
 
-def validate_task(task_root: Path, opts: ValidateOptions | None = None) -> Result:  # noqa: PLR0911, PLR0912
-    """Validate a single task directory and return a :class:`Result`."""
+def validate_task(task_root: Path, opts: ValidateOptions | None = None) -> Result:
+    """Validate a single task directory and return a :class:`Result`.
+
+    Runs the functional/provenance checks in :func:`_validate_core`, then — only
+    when those pass — applies the offline specification lint. An otherwise-valid
+    task whose issue states no expected behavior is downgraded ``PASS -> WARN``:
+    the gold patch solves the hidden test, but the agent was never told what
+    "correct" means. ``WARN`` does not fail a validation run (see :func:`main`);
+    confirm it with the reference-model solvability gate before removing a task.
+    """
     opts = opts or ValidateOptions()
+    base = _validate_core(task_root, opts)
+    if base.status != PASS:
+        return base
+    spec = static_spec_lint(load_task(task_root.name, task_root.parent))
+    if spec.status == _SPEC_WARN:
+        return Result(base.task_id, WARN, base.reasons + spec.reasons)
+    return base
+
+
+def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: PLR0911, PLR0912
+    """Functional, schema, and provenance validation for one task directory."""
     task_id = task_root.name
     task = load_task(task_id, task_root.parent)
     r = Result(task_id=task_id, status=PASS)
@@ -335,7 +356,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     results = [validate_task(r, opts) for r in roots]
-    icon = {PASS: "✓", SKIP: "○", FAIL: "✗"}
+    icon = {PASS: "✓", SKIP: "○", FAIL: "✗", WARN: "⚠"}
     for res in results:
         suffix = f" — {'; '.join(res.reasons)}" if res.reasons else ""
         print(f"  {icon[res.status]} {res.status:4} {res.task_id}{suffix}")
@@ -343,5 +364,9 @@ def main(argv: list[str] | None = None) -> int:
     n_pass = sum(r.status == PASS for r in results)
     n_skip = sum(r.status == SKIP for r in results)
     n_fail = sum(r.status == FAIL for r in results)
-    print(f"\n{n_pass} passed, {n_skip} skipped, {n_fail} failed")
+    n_warn = sum(r.status == WARN for r in results)
+    summary = f"\n{n_pass} passed, {n_skip} skipped, {n_warn} warned, {n_fail} failed"
+    print(summary)
+    if n_warn:
+        print("  ⚠ warned tasks are functionally valid but may be under-specified")
     return 1 if n_fail else 0

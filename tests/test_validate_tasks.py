@@ -110,6 +110,26 @@ def test_gold_must_apply(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
+def test_underspecified_issue_warns(tmp_path: Path) -> None:
+    # Functionally valid (gold solves, fail_to_pass fails pre-patch) but the issue
+    # states no expected behavior -> the spec lint downgrades PASS -> WARN.
+    task = _full_task(tmp_path, gold=_SOLVING_GOLD)
+    (task / "issue.md").write_text("# Fix m\n\nCorrect `f` in the module.")
+    res = validate.validate_task(task)
+    assert res.status == validate.WARN
+    assert any("expected behavior" in r for r in res.reasons)
+
+
+@pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
+def test_specified_issue_passes(tmp_path: Path) -> None:
+    # Same task, but an issue that states the target behavior stays PASS.
+    task = _full_task(tmp_path, gold=_SOLVING_GOLD)
+    (task / "issue.md").write_text("# Fix m\n\n`f` must return 2.")
+    res = validate.validate_task(task)
+    assert res.status == validate.PASS
+
+
+@pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
 def test_real_python_tasks_pass() -> None:
     for task_id in ("py-ttl-cache-expiry", "py-csv-export-feature"):
         res = validate.validate_task(Path("tasks/v1") / task_id)

@@ -536,7 +536,7 @@ def _build_tasks() -> None:
                 scale,
                 "def run(x):\n    return x + 1\n",
                 "def run(x):\n    return x * 2\n",
-                f"# Fix {tid}\n\nCorrect `run` in service module.",
+                f"# Fix `{tid}.run`\n\n`run` must double its input.",
             )
         elif lang == "go":
             _go_service(tid, f"m2pkg{i}", scale)
@@ -555,7 +555,7 @@ def _build_tasks() -> None:
                 scale,
                 "def run(x):\n    return x + 1\n",
                 "def run(x):\n    return x * 2\n",
-                f"# Fix pkg{i}\n\nCorrect `run` in service module.",
+                f"# Fix `pkg{i}.run`\n\n`run` must double its input.",
             )
         elif lang == "go":
             _go_service(tid, f"pkg{i}", scale)

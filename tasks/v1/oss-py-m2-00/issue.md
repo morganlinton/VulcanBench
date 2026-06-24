@@ -1,3 +1,3 @@
-# Fix oss-py-m2-00
+# Fix `m2pkg0.run`
 
-Correct `run` in service module.
+`run` must double its input. Fix `m2pkg0/service.py`.

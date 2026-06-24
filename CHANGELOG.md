@@ -5,6 +5,26 @@ All notable changes to VulcanBench are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Specification gate (`harness/spec_check.py`)**: task validation now flags
+  issues that state a defect or location but never describe the expected
+  behavior — the failure mode where a hidden test asserts an output the agent
+  cannot infer. `vulcanbench validate-task` / `make validate-tasks` downgrade
+  such tasks `PASS -> WARN` (warnings do not fail the run); `scripts/check_spec.py`
+  scans the suite offline. A reference-model `solvability_verdict` fails
+  trivially small, localized fixes that a capable model still cannot solve.
+
+### Changed
+
+- **Suite v1 pruned to 43 tasks**: removed 9 placeholder Python scaffolds
+  (`oss-py-cache-evict`, `oss-py-m2-03/06/09`, `oss-py-m3-03/06/09/12/15`) whose
+  issues asked to "correct `run`" with no statement of intended behavior —
+  unsolvable by design, so all three benchmarked models scored 0. Two siblings
+  (`oss-py-m2-00`, `oss-py-m3-00`) were re-specified as honest easy anchors.
+
 ## [0.5.1] - 2026-06-23
 
 ### Fixed

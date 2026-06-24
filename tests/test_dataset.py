@@ -6,7 +6,7 @@ the corpus cannot silently shrink or lose coverage. They do not run the tasks â€
 that is `scripts/validate_tasks.py` (gold-solves / fail-to-pass / determinism).
 
 Claims ledger (promise -> proving test):
-- "50+ real, multi-language tasks"                     -> test_minimum_real_task_count
+- "43 real, multi-language tasks"                      -> test_minimum_real_task_count
 - "difficulty spans easy/medium/hard"                  -> test_difficulty_spread
 - "categories incl. refactor & concurrency"            -> test_category_coverage
 - "medium/large navigation tasks for large-codebase"   -> test_repo_scale_coverage
@@ -22,9 +22,13 @@ from pathlib import Path
 
 import pytest
 
+# Floors, not targets: the suite must not silently shrink below what is shipped.
+# v1 was pruned from 52 to 43 in Unreleased (9 unsolvable placeholder scaffolds
+# removed); the large/navigation tier lost 3 trivial scaffolds that never
+# belonged there (12 -> 9). Raise these when real tasks are added.
 TASKS_ROOT = Path("tasks/v1")
-M3_MIN_REAL_TASKS = 50
-M2_MIN_MEDIUM_LARGE = 12
+M3_MIN_REAL_TASKS = 43
+M2_MIN_MEDIUM_LARGE = 9
 
 
 def _real_task_dirs() -> list[Path]:

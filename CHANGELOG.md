@@ -19,11 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Suite v1 pruned to 43 tasks**: removed 9 placeholder Python scaffolds
-  (`oss-py-cache-evict`, `oss-py-m2-03/06/09`, `oss-py-m3-03/06/09/12/15`) whose
-  issues asked to "correct `run`" with no statement of intended behavior —
-  unsolvable by design, so all three benchmarked models scored 0. Two siblings
-  (`oss-py-m2-00`, `oss-py-m3-00`) were re-specified as honest easy anchors.
+- **Suite v1 pruned to 31 tasks** (from 52) to raise discriminating power. First,
+  9 placeholder Python scaffolds (`oss-py-cache-evict`, `oss-py-m2-03/06/09`,
+  `oss-py-m3-03/06/09/12/15`) whose issues asked to "correct `run`" with no
+  statement of intended behavior — unsolvable by design, so all three benchmarked
+  models scored 0. Then 12 zero-discrimination `Double`/`x*2` one-liners across Go
+  and TypeScript (`oss-go-m2-04/07`, `oss-go-m3-01/07/10/13`, `oss-ty-m2-05/08`,
+  `oss-ty-m3-02/08/11/14`) that every model solved. Two easy anchors per language
+  are kept; `oss-py-m2-00` and `oss-py-m3-00` were re-specified as honest anchors.
 
 ## [0.5.1] - 2026-06-23
 

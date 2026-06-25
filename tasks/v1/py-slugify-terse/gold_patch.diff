@@ -1,0 +1,14 @@
+diff --git a/textkit/slugify.py b/textkit/slugify.py
+index 98efeb6..ea4ba46 100644
+--- a/textkit/slugify.py
++++ b/textkit/slugify.py
+@@ -1,3 +1,8 @@
++import re
++
++
+ def slugify(text):
+     """Turn a title into a URL slug."""
+-    return text.lower().replace(" ", "-")
++    text = text.lower()
++    text = re.sub(r"[^a-z0-9]+", "-", text)
++    return text.strip("-")

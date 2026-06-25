@@ -166,6 +166,22 @@ suite earning its run cost:
   so pass@1 has real confidence intervals and a model pair's separation is
   measured, not assumed.
 
+### Test-graded vs. agentic-graded tasks
+
+Two grading modes, chosen per task via `metadata.grader`:
+
+- **`tests`** (default): hidden `fail_to_pass`/`pass_to_pass` commands. Deterministic
+  and exact — but the `issue.md` must specify the expected behavior (the spec gate
+  enforces this), since the agent can't see the tests.
+- **`agentic`**: an LLM grades the agent's diff against a `metadata.acceptance_criteria`
+  list (plain-English requirements, never shown to the agent). This lets the prompt
+  be **terse and realistic**. The spec gate is skipped for these tasks. Author one
+  with a `repo/`, a terse `issue.md`, a non-empty `acceptance_criteria`, and a
+  `gold_patch.diff`; `validate-task` checks the gold grades correct and an empty
+  change grades incorrect using the offline mock grader. Run it against a strong,
+  independent `--judge-model` so a model isn't grading its own output. Because LLM
+  grading is non-deterministic, keep `tests` for anything needing reproducible scoring.
+
 ## Submitting a Pull Request
 
 1. Fork the repo and create a branch from `main`.

@@ -78,7 +78,9 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         True, "--judges/--no-judges", help="Run the human_like LLM judge ensemble"
     ),
     judge_model: str | None = typer.Option(
-        None, "--judge-model", help="Model for judges (default: same as --model)"
+        None,
+        "--judge-model",
+        help="Model for the judge ensemble and agentic grader (default: same as --model)",
     ),
     sandbox: str = typer.Option(
         "docker",
@@ -436,7 +438,9 @@ def effort_sweep(
         True, "--judges/--no-judges", help="Run the human_like LLM judge ensemble"
     ),
     judge_model: str | None = typer.Option(
-        None, "--judge-model", help="Model for judges (default: same as --model)"
+        None,
+        "--judge-model",
+        help="Model for the judge ensemble and agentic grader (default: same as --model)",
     ),
     sandbox: str = typer.Option(
         "docker",

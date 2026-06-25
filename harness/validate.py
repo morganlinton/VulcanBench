@@ -199,10 +199,70 @@ def validate_task(task_root: Path, opts: ValidateOptions | None = None) -> Resul
     base = _validate_core(task_root, opts)
     if base.status != PASS:
         return base
+    # static_spec_lint is agentic-aware (terse prompts are intentional there).
     spec = static_spec_lint(load_task(task_root.name, task_root.parent))
     if spec.status == _SPEC_WARN:
         return Result(base.task_id, WARN, base.reasons + spec.reasons)
     return base
+
+
+def _validate_agentic(task: Task) -> Result:
+    """Validate an agentic-graded task's wiring with the offline mock grader.
+
+    Checks that the task declares a non-empty ``acceptance_criteria`` list and a
+    non-empty gold patch, then that the deterministic mock grader rates the gold
+    patch correct and an empty (no-op) change incorrect. Real correctness grading
+    happens at run time against a live model; this only proves the task is wired
+    so a non-solution cannot pass.
+    """
+    from harness.agent.providers import get_provider  # noqa: PLC0415 — avoid import cycle
+    from harness.evaluator.agentic_grader import grade_correctness  # noqa: PLC0415
+
+    criteria = task.metadata.get("acceptance_criteria")
+    if not (
+        isinstance(criteria, list)
+        and criteria
+        and all(isinstance(c, str) and c.strip() for c in criteria)
+    ):
+        return Result(
+            task.task_id,
+            FAIL,
+            ["grader=agentic requires a non-empty acceptance_criteria list of strings"],
+        )
+    gold_text = task.gold_patch.read_text(encoding="utf-8") if task.gold_patch else ""
+    if not gold_text.strip():
+        return Result(task.task_id, FAIL, ["gold_patch.diff is empty"])
+
+    mock = get_provider("mock:synthetic")
+    gold_grade = grade_correctness(
+        issue=task.issue,
+        patch=gold_text,
+        acceptance_criteria=criteria,
+        gold_patch=gold_text,
+        provider=mock,
+    )
+    if gold_grade.score != 1.0:
+        return Result(
+            task.task_id, FAIL, [f"gold patch did not grade correct: {gold_grade.details}"]
+        )
+    empty_grade = grade_correctness(
+        issue=task.issue,
+        patch="",
+        acceptance_criteria=criteria,
+        gold_patch=gold_text,
+        provider=mock,
+    )
+    if empty_grade.score != 0.0:
+        return Result(
+            task.task_id,
+            FAIL,
+            ["an empty change graded correct — the grader cannot reject a non-solution"],
+        )
+    return Result(
+        task.task_id,
+        PASS,
+        [f"agentic grader wired: gold passes, empty fails (mock); {len(criteria)} criteria"],
+    )
 
 
 def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: PLR0911, PLR0912
@@ -219,8 +279,9 @@ def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: P
     missing = [k for k in REQUIRED_META if not task.metadata.get(k)]
     if missing:
         return Result(task_id, FAIL, [f"metadata missing/empty: {missing}"])
+    grader_mode = str(task.metadata.get("grader", "tests"))
     spec = task.tests_spec
-    if not spec or not spec.get("fail_to_pass"):
+    if grader_mode != "agentic" and (not spec or not spec.get("fail_to_pass")):
         return Result(task_id, FAIL, ["metadata.tests.fail_to_pass is empty"])
     if task.repo_dir is None and task.snapshot is None:
         return Result(task_id, FAIL, ["no repo/ directory or repo_snapshot.tar.gz"])
@@ -237,6 +298,12 @@ def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: P
     scale_reasons = validate_scale_fields(task_root, task.metadata)
     if scale_reasons:
         return Result(task_id, FAIL, scale_reasons)
+
+    # Agentic-graded tasks have no hidden tests; validate the grader wiring
+    # offline (gold grades correct, an empty change grades incorrect) instead of
+    # the test-based gold-solves / fail-to-pass / determinism checks.
+    if grader_mode == "agentic":
+        return _validate_agentic(task)
 
     # 2. toolchain — skip (do not fail) when a host language tool is absent (local mode only).
     if opts.sandbox == "local":
@@ -270,8 +337,7 @@ def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: P
                 return Result(task_id, FAIL, [f"nondeterministic gold scores: {sorted(scores)}"])
             mode = "docker" if opts.sandbox == "docker" else "local"
             r.reasons.append(
-                f"gold=1.0, pre-patch={base}, deterministic over {DETERMINISM_RUNS} runs "
-                f"({mode})"
+                f"gold=1.0, pre-patch={base}, deterministic over {DETERMINISM_RUNS} runs ({mode})"
             )
     except (RuntimeError, AssertionError) as e:
         return Result(task_id, FAIL, [str(e)])

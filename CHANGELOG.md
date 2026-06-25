@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Agentic grader (opt-in)**: a task can set `metadata.grader: "agentic"` with an
+  `acceptance_criteria` list, and its `functional` score comes from an LLM verdict
+  on the agent's diff (`harness/evaluator/agentic_grader.py`) instead of hidden
+  tests — so the prompt can be terse and realistic (CursorBench-style) while the
+  grader holds the spec. Runs even with `--no-judges`; uses `--judge-model` so a
+  strong, independent model can grade. The spec gate is skipped for agentic tasks;
+  `validate-task` checks the wiring offline (gold grades correct, an empty change
+  grades incorrect). Demo: `tasks/v1/py-slugify-terse`. Test-graded tasks remain
+  the deterministic default.
 - **Discrimination report**: `vulcanbench report` now includes a model-separation
   section — per task whether the models split, and per model pair how many tasks
   tell them apart (McNemar discordant counts), plus retirement candidates that

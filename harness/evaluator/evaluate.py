@@ -13,6 +13,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from harness.evaluator.agentic_grader import grade_correctness
 from harness.evaluator.judges import assess_human_like
 from harness.evaluator.langs import MetricResult
 from harness.evaluator.quality import assess_quality
@@ -42,8 +43,31 @@ def evaluate_run(
     collector: TraceCollector | None = None,
     remaining_s: RemainingSeconds | None = None,
     budget_exceeded: BudgetExceeded | None = None,
+    grader: str = "tests",
+    acceptance_criteria: list[str] | None = None,
+    gold_patch: str = "",
+    grader_provider: LLMProvider | None = None,
 ) -> dict[str, Any]:
-    """Compute all metrics for a run and return the combined score dict."""
+    """Compute all metrics for a run and return the combined score dict.
+
+    When ``grader == "agentic"`` the deterministic test-based ``functional`` is
+    replaced by an LLM correctness verdict over the agent's ``patch`` (see
+    :mod:`harness.evaluator.agentic_grader`). Tasks keep the default ``"tests"``
+    grader unless their metadata opts in.
+    """
+    agentic_detail: dict[str, Any] | None = None
+    if grader == "agentic":
+        functional, agentic_detail = _agentic_functional(
+            functional=functional,
+            issue=issue,
+            patch=patch,
+            acceptance_criteria=acceptance_criteria or [],
+            gold_patch=gold_patch,
+            provider=grader_provider,
+            remaining_s=remaining_s,
+        )
+        _record(collector, "agentic_grade", agentic_detail)
+
     if _budget_is_exhausted(remaining_s):
         _mark_budget_exceeded(budget_exceeded, "quality")
         quality = MetricResult(score=None, details={"reason": "run budget exceeded"})
@@ -97,10 +121,43 @@ def evaluate_run(
                 "quality": quality.details,
                 "security": security.details,
                 "human_like": human_like_details,
+                **({"agentic_grade": agentic_detail} if agentic_detail is not None else {}),
             }
         },
     )
     return scores
+
+
+def _agentic_functional(
+    *,
+    functional: float,
+    issue: str,
+    patch: str,
+    acceptance_criteria: list[str],
+    gold_patch: str,
+    provider: LLMProvider | None,
+    remaining_s: RemainingSeconds | None,
+) -> tuple[float, dict[str, Any]]:
+    """Replace ``functional`` with an agentic correctness verdict.
+
+    Returns the (possibly unchanged) functional score and the grade detail. When
+    no grader provider is available or the grader cannot produce a verdict, the
+    score stays at the incoming value (0.0 for a test-less agentic task) and the
+    reason is recorded — a run only passes when the grader affirmatively says so.
+    """
+    if provider is None:
+        return functional, {"correct": None, "reason": "no grader provider (missing API key)"}
+    result = grade_correctness(
+        issue=issue,
+        patch=patch,
+        acceptance_criteria=acceptance_criteria,
+        gold_patch=gold_patch,
+        provider=provider,
+        remaining_s=remaining_s,
+    )
+    if result.score is None:
+        return functional, result.details
+    return result.score, result.details
 
 
 def _summarize_verifier(verifier_payload: dict[str, Any], functional: float) -> str:

@@ -336,6 +336,18 @@ class MockProvider(LLMProvider):
                 content='{"score": 80, "rationale": "mock judge"}',
                 usage=TokenUsage(prompt_tokens=120, completion_tokens=15),
             )
+        # Agentic-grader requests carry their own sentinel: approve any candidate
+        # that actually changed something (a real diff), so offline grading is
+        # deterministic — gold passes, an empty pre-patch state fails.
+        if any("VULCANBENCH_GRADER" in str(m.get("content", "")) for m in messages):
+            has_change = any("diff --git" in str(m.get("content", "")) for m in messages)
+            return LLMResponse(
+                content=(
+                    f'{{"correct": {"true" if has_change else "false"}, '
+                    '"confidence": 0.9, "reasons": "mock grader"}'
+                ),
+                usage=TokenUsage(prompt_tokens=140, completion_tokens=18),
+            )
         # Decide the next action purely from what has happened so far.
         called = [m for m in messages if m.get("role") == "tool"]
         steps = len(called)

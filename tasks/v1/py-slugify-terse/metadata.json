@@ -1,0 +1,24 @@
+{
+  "id": "py-slugify-terse",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-06-25",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-25. The slugify helper and its acceptance criteria are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "agentic",
+  "acceptance_criteria": [
+    "The returned slug is entirely lowercase.",
+    "Every run of one or more non-alphanumeric characters (spaces, punctuation, symbols, non-ASCII) is replaced by a single hyphen.",
+    "There are no leading or trailing hyphens.",
+    "There are never two or more consecutive hyphens.",
+    "Input that contains no alphanumeric characters returns an empty string."
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 40,
+    "entry_paths": ["textkit/slugify.py"]
+  }
+}

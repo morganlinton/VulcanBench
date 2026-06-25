@@ -174,6 +174,26 @@ make validate-tasks                              # validate every task
 vulcanbench validate-task tasks/v1/<id>          # one task
 ```
 
+### Grading: hidden tests or an agentic grader
+
+By default a task's `functional` score comes from **hidden tests** — deterministic
+and exact, but it requires the issue to fully specify the expected behavior.
+
+A task can instead opt into an **agentic grader** (`metadata.grader: "agentic"`)
+that judges the agent's diff against a list of plain-English `acceptance_criteria`
+(never shown to the agent), so the prompt can be **terse and realistic** — closer
+to how developers actually ask. The grader, not the prompt, holds the spec.
+
+```bash
+# Use a strong, independent grader model to avoid a model grading its own work:
+vulcanbench run --task py-slugify-terse --model openai:gpt-5.5 \
+  --judge-model anthropic:claude-opus-4-8
+```
+
+Agentic grading is non-deterministic, so it is opt-in and never the default;
+tasks that need exact, reproducible scoring keep the test verifier. See
+`tasks/v1/py-slugify-terse` for an example.
+
 Validation proves each task is real: the gold patch must solve it
 (`functional == 1.0`), the `fail_to_pass` tests must genuinely fail *before* the
 fix, and scoring must be deterministic over repeated runs.

@@ -210,6 +210,7 @@ def run_agent(
 
     total_tokens = prompt_tokens + completion_tokens
     judge_provider = _build_judge_provider(judges, judge_model, model, provider, collector)
+    grader_provider = _build_grader_provider(task, judge_model, model, provider, collector)
     scores = _evaluate_with_budget(
         functional=functional,
         total_tokens=total_tokens,
@@ -221,6 +222,8 @@ def run_agent(
         verifier_payload=verifier_payload,
         judges=judges,
         judge_provider=judge_provider,
+        grader_provider=grader_provider,
+        task=task,
         collector=collector,
         deadline=deadline,
     )
@@ -350,11 +353,14 @@ def _evaluate_with_budget(
     verifier_payload: dict[str, Any],
     judges: bool,
     judge_provider: LLMProvider | None,
+    grader_provider: LLMProvider | None,
+    task: Task,
     collector: TraceCollector,
     deadline: _RunDeadline,
 ) -> dict[str, Any]:
     if not deadline.ensure_time(collector, "evaluate"):
         return _budget_exceeded_scores(functional, total_tokens, steps)
+    gold = task.gold_patch.read_text(encoding="utf-8") if task.gold_patch else ""
     scores = evaluate_run(
         functional=functional,
         total_tokens=total_tokens,
@@ -369,6 +375,10 @@ def _evaluate_with_budget(
         collector=collector,
         remaining_s=deadline.remaining_s,
         budget_exceeded=lambda stage: deadline.record_exceeded(collector, stage),
+        grader=str(task.metadata.get("grader", "tests")),
+        acceptance_criteria=task.metadata.get("acceptance_criteria"),
+        gold_patch=gold,
+        grader_provider=grader_provider,
     )
     if deadline.exceeded:
         scores["budget_exceeded"] = True
@@ -943,6 +953,24 @@ def _build_judge_provider(
     if need is not None and not os.environ.get(need):
         return None
     return provider
+
+
+def _build_grader_provider(
+    task: Task,
+    judge_model: str | None,
+    model: str,
+    run_provider: LLMProvider | None,
+    collector: TraceCollector,
+) -> LLMProvider | None:
+    """Resolve the provider for the agentic correctness grader, or ``None``.
+
+    Only built for tasks that opt in with ``metadata.grader == "agentic"``. Unlike
+    the judge ensemble it runs even with ``--no-judges``, because for an
+    agentic-graded task the grader *is* the ``functional`` signal.
+    """
+    if task.metadata.get("grader") != "agentic":
+        return None
+    return _build_judge_provider(True, judge_model, model, run_provider, collector)
 
 
 def _git_env(extra: dict[str, str]) -> dict[str, str]:

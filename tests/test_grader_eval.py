@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+
+import pytest
 
 from harness.agent.providers import LLMResponse, TokenUsage, get_provider
 from harness.evaluator.agentic_grader import grade_correctness
@@ -82,9 +85,33 @@ def test_evaluate_grader_aggregates_metrics() -> None:
     assert report["mean_self_consistency"] == 1.0
 
 
-def test_labeled_cases_have_valid_shape() -> None:
-    cases = load_grader_cases(Path("tasks/v1/py-slugify-terse"))
-    assert any(c["expected"] == "correct" for c in cases)
-    assert any(c["expected"] == "incorrect" for c in cases)
+def _agentic_case_dirs() -> list[Path]:
+    """All agentic tasks that ship labeled grader_cases.json."""
+    out = []
+    for d in sorted(Path("tasks/v1").iterdir()):
+        if not (d / "metadata.json").exists() or not (d / "grader_cases.json").exists():
+            continue
+        meta = json.loads((d / "metadata.json").read_text())
+        if meta.get("grader") == "agentic":
+            out.append(d)
+    return out
+
+
+def test_calibration_sets_exist() -> None:
+    # Grader trust should not rest on a single task.
+    assert len(_agentic_case_dirs()) >= 3
+
+
+@pytest.mark.parametrize("task_dir", _agentic_case_dirs(), ids=lambda d: d.name)
+def test_labeled_cases_well_formed(task_dir: Path) -> None:
+    cases = load_grader_cases(task_dir)
+    assert any(c["expected"] == "correct" for c in cases), f"{task_dir.name}: no correct case"
+    assert any(c["expected"] == "incorrect" for c in cases), f"{task_dir.name}: no incorrect case"
+    gold = next(c for c in cases if c["expected"] == "correct")
     for c in cases:
-        assert c.get("diff", "").strip(), f"case {c.get('name')} has an empty diff"
+        diff = c.get("diff", "")
+        assert diff.strip(), f"{task_dir.name}/{c.get('name')}: empty diff"
+        assert "diff --git" in diff, f"{task_dir.name}/{c.get('name')}: not a unified diff"
+        # Every incorrect variant must actually differ from the gold change.
+        if c["expected"] == "incorrect":
+            assert c["diff"] != gold["diff"], f"{task_dir.name}/{c.get('name')}: identical to gold"

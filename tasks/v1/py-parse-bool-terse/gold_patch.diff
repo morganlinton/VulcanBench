@@ -1,0 +1,19 @@
+diff --git a/boolkit/parse.py b/boolkit/parse.py
+index 6cb4201..908e4b3 100644
+--- a/boolkit/parse.py
++++ b/boolkit/parse.py
+@@ -1,7 +1,12 @@
++_TRUE = {"true", "yes", "1", "on"}
++_FALSE = {"false", "no", "0", "off"}
++
++
+ def parse_bool(s):
+     """Parse a string into a bool."""
+-    if s == "true":
++    key = s.strip().lower()
++    if key in _TRUE:
+         return True
+-    if s == "false":
++    if key in _FALSE:
+         return False
+     raise ValueError(s)

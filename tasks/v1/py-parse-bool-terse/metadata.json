@@ -1,0 +1,27 @@
+{
+  "id": "py-parse-bool-terse",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-06-25",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-25; not derived from any existing repository.",
+  "grader": "agentic",
+  "acceptance_criteria": [
+    "Parsing is case-insensitive, so 'TRUE' and 'True' both work.",
+    "Surrounding whitespace is ignored, so ' yes ' parses.",
+    "true, yes, 1, on parse to True; false, no, 0, off parse to False.",
+    "Any other value raises ValueError."
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 40,
+    "entry_paths": [
+      "boolkit/parse.py"
+    ]
+  }
+}

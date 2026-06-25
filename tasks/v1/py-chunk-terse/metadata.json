@@ -1,0 +1,28 @@
+{
+  "id": "py-chunk-terse",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-06-25",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-25; not derived from any existing repository.",
+  "grader": "agentic",
+  "acceptance_criteria": [
+    "Returns a list of lists with the items grouped in their original order.",
+    "Each chunk has at most `size` items; the final chunk may be shorter.",
+    "An empty input returns an empty list.",
+    "A size of zero or negative raises ValueError.",
+    "The input sequence is not modified."
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 40,
+    "entry_paths": [
+      "listkit/chunk.py"
+    ]
+  }
+}

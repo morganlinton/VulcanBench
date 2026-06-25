@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/boolkit/parse.py b/boolkit/parse.py\nindex 6cb4201..908e4b3 100644\n--- a/boolkit/parse.py\n+++ b/boolkit/parse.py\n@@ -1,7 +1,12 @@\n+_TRUE = {\"true\", \"yes\", \"1\", \"on\"}\n+_FALSE = {\"false\", \"no\", \"0\", \"off\"}\n+\n+\n def parse_bool(s):\n     \"\"\"Parse a string into a bool.\"\"\"\n-    if s == \"true\":\n+    key = s.strip().lower()\n+    if key in _TRUE:\n         return True\n-    if s == \"false\":\n+    if key in _FALSE:\n         return False\n     raise ValueError(s)\n"
+    },
+    {
+      "name": "case_sensitive",
+      "expected": "incorrect",
+      "diff": "diff --git a/boolkit/parse.py b/boolkit/parse.py\nindex 6cb4201..d3b257c 100644\n--- a/boolkit/parse.py\n+++ b/boolkit/parse.py\n@@ -1,7 +1,12 @@\n+_TRUE = {\"true\", \"yes\", \"1\", \"on\"}\n+_FALSE = {\"false\", \"no\", \"0\", \"off\"}\n+\n+\n def parse_bool(s):\n     \"\"\"Parse a string into a bool.\"\"\"\n-    if s == \"true\":\n+    key = s.strip()\n+    if key in _TRUE:\n         return True\n-    if s == \"false\":\n+    if key in _FALSE:\n         return False\n     raise ValueError(s)\n"
+    },
+    {
+      "name": "no_raise_on_unknown",
+      "expected": "incorrect",
+      "diff": "diff --git a/boolkit/parse.py b/boolkit/parse.py\nindex 6cb4201..b453a71 100644\n--- a/boolkit/parse.py\n+++ b/boolkit/parse.py\n@@ -1,7 +1,6 @@\n+_TRUE = {\"true\", \"yes\", \"1\", \"on\"}\n+\n+\n def parse_bool(s):\n     \"\"\"Parse a string into a bool.\"\"\"\n-    if s == \"true\":\n-        return True\n-    if s == \"false\":\n-        return False\n-    raise ValueError(s)\n+    return s.strip().lower() in _TRUE\n"
+    },
+    {
+      "name": "no_strip",
+      "expected": "incorrect",
+      "diff": "diff --git a/boolkit/parse.py b/boolkit/parse.py\nindex 6cb4201..7ea02fb 100644\n--- a/boolkit/parse.py\n+++ b/boolkit/parse.py\n@@ -1,7 +1,12 @@\n+_TRUE = {\"true\", \"yes\", \"1\", \"on\"}\n+_FALSE = {\"false\", \"no\", \"0\", \"off\"}\n+\n+\n def parse_bool(s):\n     \"\"\"Parse a string into a bool.\"\"\"\n-    if s == \"true\":\n+    key = s.lower()\n+    if key in _TRUE:\n         return True\n-    if s == \"false\":\n+    if key in _FALSE:\n         return False\n     raise ValueError(s)\n"
+    }
+  ]
+}

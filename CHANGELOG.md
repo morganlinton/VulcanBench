@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Grader trust + variance controls** for agentic grading: `metadata.grader_samples: N`
+  grades by majority vote over N calls (ties resolve to incorrect) and reports
+  `self_consistency`; `scripts/grader_eval.py` (+ `harness/grader_eval.py`) scores a
+  task's grader against labeled `grader_cases.json` candidates, reporting accuracy,
+  false-pass rate, and self-consistency so a grader is validated before it's trusted.
+  Calibration cases shipped for `py-slugify-terse`.
 - **Agentic grader (opt-in)**: a task can set `metadata.grader: "agentic"` with an
   `acceptance_criteria` list, and its `functional` score comes from an LLM verdict
   on the agent's diff (`harness/evaluator/agentic_grader.py`) instead of hidden

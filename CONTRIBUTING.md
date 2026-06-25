@@ -182,6 +182,13 @@ Two grading modes, chosen per task via `metadata.grader`:
   independent `--judge-model` so a model isn't grading its own output. Because LLM
   grading is non-deterministic, keep `tests` for anything needing reproducible scoring.
 
+  Before relying on an agentic task, **prove its grader is trustworthy**. Add a
+  `grader_cases.json` with labeled candidate diffs (known-correct and known-incorrect)
+  and run `python scripts/grader_eval.py --task tasks/v1/<id> --model <grader> --samples 5`:
+  it reports accuracy, false-pass rate, and self-consistency. A non-zero false-pass rate
+  means the grader rubber-stamps wrong answers — fix the criteria (or the grader model)
+  before shipping. Use `metadata.grader_samples` to grade by majority vote at run time.
+
 ## Submitting a Pull Request
 
 1. Fork the repo and create a branch from `main`.

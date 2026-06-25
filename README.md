@@ -194,6 +194,17 @@ Agentic grading is non-deterministic, so it is opt-in and never the default;
 tasks that need exact, reproducible scoring keep the test verifier. See
 `tasks/v1/py-slugify-terse` for an example.
 
+**Trust the grader before you rely on it.** An LLM grader is only worth using if
+it agrees with ground truth and doesn't flip its verdict run to run. Two tools:
+
+- Set `metadata.grader_samples: N` to grade by **majority vote** over N calls
+  (ties resolve to incorrect); each grade reports its `self_consistency`.
+- `python scripts/grader_eval.py --task tasks/v1/<id> --model <grader> --samples 5`
+  grades a task's labeled `grader_cases.json` (known-correct and known-incorrect
+  changes) and reports **accuracy**, **false-pass rate** (graded correct but
+  actually wrong — the dangerous one), and **self-consistency**. Don't ship an
+  agentic task whose grader posts a non-zero false-pass rate.
+
 Validation proves each task is real: the gold patch must solve it
 (`functional == 1.0`), the `fail_to_pass` tests must genuinely fail *before* the
 fix, and scoring must be deterministic over repeated runs.

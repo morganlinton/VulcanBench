@@ -78,7 +78,7 @@ def test_unparsable_reply_returns_none() -> None:
         issue="t", patch=_DIFF, acceptance_criteria=["x"], gold_patch=_DIFF, provider=provider
     )
     assert res.score is None
-    assert "unparsable" in res.details["reason"]
+    assert "unparsable" in str(res.details.get("failures"))
 
 
 def test_mock_provider_grader_sentinel() -> None:

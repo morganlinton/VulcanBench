@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/textkit/slugify.py b/textkit/slugify.py\nindex 98efeb6..ea4ba46 100644\n--- a/textkit/slugify.py\n+++ b/textkit/slugify.py\n@@ -1,3 +1,8 @@\n+import re\n+\n+\n def slugify(text):\n     \"\"\"Turn a title into a URL slug.\"\"\"\n-    return text.lower().replace(\" \", \"-\")\n+    text = text.lower()\n+    text = re.sub(r\"[^a-z0-9]+\", \"-\", text)\n+    return text.strip(\"-\")\n"
+    },
+    {
+      "name": "forgot_strip",
+      "expected": "incorrect",
+      "diff": "diff --git a/textkit/slugify.py b/textkit/slugify.py\nindex 98efeb6..6d00988 100644\n--- a/textkit/slugify.py\n+++ b/textkit/slugify.py\n@@ -1,3 +1,7 @@\n+import re\n+\n+\n def slugify(text):\n     \"\"\"Turn a title into a URL slug.\"\"\"\n-    return text.lower().replace(\" \", \"-\")\n+    text = text.lower()\n+    return re.sub(r\"[^a-z0-9]+\", \"-\", text)\n"
+    },
+    {
+      "name": "forgot_lowercase",
+      "expected": "incorrect",
+      "diff": "diff --git a/textkit/slugify.py b/textkit/slugify.py\nindex 98efeb6..8cb2095 100644\n--- a/textkit/slugify.py\n+++ b/textkit/slugify.py\n@@ -1,3 +1,7 @@\n+import re\n+\n+\n def slugify(text):\n     \"\"\"Turn a title into a URL slug.\"\"\"\n-    return text.lower().replace(\" \", \"-\")\n+    text = re.sub(r\"[^A-Za-z0-9]+\", \"-\", text)\n+    return text.strip(\"-\")\n"
+    },
+    {
+      "name": "no_collapse",
+      "expected": "incorrect",
+      "diff": "diff --git a/textkit/slugify.py b/textkit/slugify.py\nindex 98efeb6..ec6911a 100644\n--- a/textkit/slugify.py\n+++ b/textkit/slugify.py\n@@ -1,3 +1,8 @@\n+import re\n+\n+\n def slugify(text):\n     \"\"\"Turn a title into a URL slug.\"\"\"\n-    return text.lower().replace(\" \", \"-\")\n+    text = text.lower()\n+    text = re.sub(r\"[^a-z0-9]\", \"-\", text)\n+    return text.strip(\"-\")\n"
+    }
+  ]
+}

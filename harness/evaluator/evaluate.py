@@ -47,6 +47,7 @@ def evaluate_run(
     acceptance_criteria: list[str] | None = None,
     gold_patch: str = "",
     grader_provider: LLMProvider | None = None,
+    grader_samples: int = 1,
 ) -> dict[str, Any]:
     """Compute all metrics for a run and return the combined score dict.
 
@@ -65,6 +66,7 @@ def evaluate_run(
             gold_patch=gold_patch,
             provider=grader_provider,
             remaining_s=remaining_s,
+            samples=grader_samples,
         )
         _record(collector, "agentic_grade", agentic_detail)
 
@@ -137,6 +139,7 @@ def _agentic_functional(
     gold_patch: str,
     provider: LLMProvider | None,
     remaining_s: RemainingSeconds | None,
+    samples: int = 1,
 ) -> tuple[float, dict[str, Any]]:
     """Replace ``functional`` with an agentic correctness verdict.
 
@@ -154,6 +157,7 @@ def _agentic_functional(
         gold_patch=gold_patch,
         provider=provider,
         remaining_s=remaining_s,
+        samples=samples,
     )
     if result.score is None:
         return functional, result.details

@@ -379,6 +379,7 @@ def _evaluate_with_budget(
         acceptance_criteria=task.metadata.get("acceptance_criteria"),
         gold_patch=gold,
         grader_provider=grader_provider,
+        grader_samples=int(task.metadata.get("grader_samples", 1) or 1),
     )
     if deadline.exceeded:
         scores["budget_exceeded"] = True

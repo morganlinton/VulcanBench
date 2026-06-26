@@ -1,0 +1,29 @@
+{
+  "id": "py-url-normalize",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. It implements the public RFC 3986 normalization rules, but the task framing, the specific percent-then-dot-segment ordering, the repo, and the edge-case tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "dot_segments", "cmd": "python -m pytest test_normalize.py::test_dot_segments -q"},
+      {"name": "pct_unreserved", "cmd": "python -m pytest test_normalize.py::test_percent_unreserved_is_decoded -q"},
+      {"name": "pct_reserved", "cmd": "python -m pytest test_normalize.py::test_percent_reserved_is_uppercased_not_decoded -q"},
+      {"name": "pct_dot_interaction", "cmd": "python -m pytest test_normalize.py::test_percent_dot_interaction -q"},
+      {"name": "malformed", "cmd": "python -m pytest test_normalize.py::test_malformed_percent_raises -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "imports", "cmd": "python -m pytest test_normalize.py::test_module_imports -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 70,
+    "entry_paths": ["urlnorm/normalize.py"]
+  }
+}

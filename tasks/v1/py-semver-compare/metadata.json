@@ -1,0 +1,30 @@
+{
+  "id": "py-semver-compare",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. It implements the public Semantic Versioning 2.0.0 precedence rules, but the task framing, repo, and edge-case tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "core_precedence", "cmd": "python -m pytest test_compare.py::test_core_precedence -q"},
+      {"name": "prerelease_lower", "cmd": "python -m pytest test_compare.py::test_prerelease_is_lower_than_release -q"},
+      {"name": "precedence_chain", "cmd": "python -m pytest test_compare.py::test_prerelease_precedence_chain -q"},
+      {"name": "identifier_rules", "cmd": "python -m pytest test_compare.py::test_prerelease_identifier_rules -q"},
+      {"name": "build_ignored", "cmd": "python -m pytest test_compare.py::test_build_metadata_ignored -q"},
+      {"name": "invalid_raises", "cmd": "python -m pytest test_compare.py::test_invalid_raises -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "imports", "cmd": "python -m pytest test_compare.py::test_module_imports -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 70,
+    "entry_paths": ["semver/compare.py"]
+  }
+}

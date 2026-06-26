@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Gold normalizes percent-encoding first (decode unreserved, uppercase the rest, ValueError on malformed) then applies RFC 3986 5.2.4 remove_dot_segments, so encoded dots participate in dot-segment removal. Difficulty comes from many independent edge-case groups: missing any one leaves functional < 1.0."
+}

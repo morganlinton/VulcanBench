@@ -1,0 +1,77 @@
+diff --git a/urlnorm/normalize.py b/urlnorm/normalize.py
+index 9dac77b..8cc9f56 100644
+--- a/urlnorm/normalize.py
++++ b/urlnorm/normalize.py
+@@ -1,3 +1,70 @@
++_UNRESERVED = frozenset(
++    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
++)
++_HEX = frozenset("0123456789abcdefABCDEF")
++
++
++def _normalize_percent(path):
++    out = []
++    i = 0
++    n = len(path)
++    while i < n:
++        c = path[i]
++        if c == "%":
++            if i + 2 >= n or path[i + 1] not in _HEX or path[i + 2] not in _HEX:
++                raise ValueError(f"malformed percent-encoding at index {i}")
++            pair = path[i + 1 : i + 3]
++            decoded = chr(int(pair, 16))
++            if decoded in _UNRESERVED:
++                out.append(decoded)
++            else:
++                out.append("%" + pair.upper())
++            i += 3
++        else:
++            out.append(c)
++            i += 1
++    return "".join(out)
++
++
++def _remove_dot_segments(path):
++    out = []
++    inp = path
++    while inp:
++        if inp.startswith("../"):
++            inp = inp[3:]
++        elif inp.startswith("./"):
++            inp = inp[2:]
++        elif inp.startswith("/./"):
++            inp = "/" + inp[3:]
++        elif inp == "/.":
++            inp = "/"
++        elif inp.startswith("/../"):
++            inp = "/" + inp[4:]
++            if out:
++                out.pop()
++        elif inp == "/..":
++            inp = "/"
++            if out:
++                out.pop()
++        elif inp in (".", ".."):
++            inp = ""
++        else:
++            start = 1 if inp.startswith("/") else 0
++            slash = inp.find("/", start)
++            if slash == -1:
++                out.append(inp)
++                inp = ""
++            else:
++                out.append(inp[:slash])
++                inp = inp[slash:]
++    return "".join(out)
++
++
+ def normalize_path(path):
+-    """Normalize a URL path per RFC 3986 (see issue.md)."""
+-    raise NotImplementedError
++    """Normalize a URL path per RFC 3986.
++
++    Percent-encoding is normalized first (decode unreserved octets, uppercase the
++    hex of the rest), then RFC 3986 section 5.2.4 remove_dot_segments is applied.
++    A malformed percent-encoding raises ValueError.
++    """
++    return _remove_dot_segments(_normalize_percent(path))

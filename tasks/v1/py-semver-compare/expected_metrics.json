@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Gold parses with a strict regex (rejecting leading zeros and malformed input) and implements semver section 11 precedence: prerelease < release, numeric < alphanumeric identifiers, numeric compared numerically, more identifiers wins. Difficulty is in the prerelease identifier rules; missing any test group leaves functional < 1.0."
+}

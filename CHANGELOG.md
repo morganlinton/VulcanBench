@@ -38,10 +38,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `go-parallel-map` (a bounded-concurrency ordered map that must preserve input
   order, return the lowest-input-index error, and pass `go test -race`),
   `py-sliding-window-max` (an O(n) deque solution gated by a performance test, so
-  a correct naive O(n*k) answer is too slow), and `go-ttl-lru-cache` (a
+  a correct naive O(n*k) answer is too slow), `go-ttl-lru-cache` (a
   thread-safe LRU cache with per-entry TTL, verified under `go test -race`, where
-  a correct single-threaded implementation that omits the mutex fails). The hard
-  floor in the dataset guards rose from 5 to 7.
+  a correct single-threaded implementation that omits the mutex fails), and two
+  edge-dense correctness tasks designed to pull frontier models below 100%:
+  `py-url-normalize` (RFC 3986 path normalization, percent decoding before
+  dot-segment removal, with malformed-input handling) and `py-semver-compare`
+  (Semantic Versioning precedence, including the prerelease identifier rules that
+  trip strong models). Their hidden tests are split into many independent
+  edge-case groups, so missing any one leaves the task unsolved. Suite v1 is now
+  37 tasks; the hard floor in the dataset guards rose from 5 to 9.
 - **Specification gate (`harness/spec_check.py`)**: task validation now flags
   issues that state a defect or location but never describe the expected
   behavior — the failure mode where a hidden test asserts an output the agent

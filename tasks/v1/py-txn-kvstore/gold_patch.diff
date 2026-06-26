@@ -1,0 +1,89 @@
+diff --git a/txnkv/journal.py b/txnkv/journal.py
+index 55369cc..0588e15 100644
+--- a/txnkv/journal.py
++++ b/txnkv/journal.py
+@@ -12,23 +12,28 @@ class UndoJournal:
+ 
+     def in_transaction(self):
+         """True if at least one frame is open."""
+-        raise NotImplementedError
++        return bool(self._frames)
+ 
+     def push(self):
+         """Open a new (nested) frame."""
+-        raise NotImplementedError
++        self._frames.append([])
+ 
+     def record(self, undo):
+         """Record an inverse operation into the current frame. If no frame is open
+         (an autocommit mutation), the mutation is durable and nothing is recorded."""
+-        raise NotImplementedError
++        if self._frames:
++            self._frames[-1].append(undo)
+ 
+     def rollback(self):
+         """Undo the current frame: run its inverses in reverse order, then pop it."""
+-        raise NotImplementedError
++        frame = self._frames.pop()
++        for undo in reversed(frame):
++            undo()
+ 
+     def commit(self):
+         """Close the current frame. Its inverses are folded into the parent frame
+         (preserving order) so a later parent rollback also undoes them. At the top
+         level there is no parent, so the changes become durable."""
+-        raise NotImplementedError
++        frame = self._frames.pop()
++        if self._frames:
++            self._frames[-1].extend(frame)
+diff --git a/txnkv/store.py b/txnkv/store.py
+index f0f8c9e..d1f6614 100644
+--- a/txnkv/store.py
++++ b/txnkv/store.py
+@@ -16,28 +16,39 @@ class Store:
+ 
+     def get(self, key):
+         """Return the value for ``key`` or raise ``KeyError`` if absent."""
+-        raise NotImplementedError
++        return self._data[key]
+ 
+     def set(self, key, value):
+         """Set ``key`` to ``value``, recording how to undo it."""
+-        raise NotImplementedError
++        if key in self._data:
++            old = self._data[key]
++            self._journal.record(lambda: self._data.__setitem__(key, old))
++        else:
++            self._journal.record(lambda: self._data.pop(key, None))
++        self._data[key] = value
+ 
+     def delete(self, key):
+         """Delete ``key`` (``KeyError`` if absent), recording how to undo it."""
+-        raise NotImplementedError
++        old = self._data[key]  # KeyError if absent
++        self._journal.record(lambda: self._data.__setitem__(key, old))
++        del self._data[key]
+ 
+     def keys(self):
+         """Return the current set of keys."""
+-        raise NotImplementedError
++        return set(self._data)
+ 
+     def begin(self):
+         """Open a new transaction (transactions may nest)."""
+-        raise NotImplementedError
++        self._journal.push()
+ 
+     def commit(self):
+         """Commit the innermost open transaction. ``RuntimeError`` if none is open."""
+-        raise NotImplementedError
++        if not self._journal.in_transaction():
++            raise RuntimeError("no transaction is open")
++        self._journal.commit()
+ 
+     def rollback(self):
+         """Roll back the innermost open transaction. ``RuntimeError`` if none is open."""
+-        raise NotImplementedError
++        if not self._journal.in_transaction():
++            raise RuntimeError("no transaction is open")
++        self._journal.rollback()

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Second multi-file task** `py-txn-kvstore` (hard, `multi_file`): implement a
+  transactional in-memory key/value store whose `Store` and `UndoJournal` collaborate
+  across two files. The store computes the inverse of each mutation (prior value vs. prior
+  absence) and the journal owns the frame stack, where rollback runs inverses in reverse
+  and a nested commit folds its frame into the parent so an outer rollback still undoes
+  inner-committed work. Validated (gold=1.0, pre-patch=0.0, deterministic); the gold patch
+  spans both files. Suite v1: 40 tasks, 12 hard, 4 non-localized.
 - **First real multi-file task** `py-reactive-sheet` (hard, `multi_file`): implement a
   reactive spreadsheet whose `Sheet` and `DependencyGraph` collaborate across two files,
   requiring transitive topological recomputation, dependency clearing on formula rebind,

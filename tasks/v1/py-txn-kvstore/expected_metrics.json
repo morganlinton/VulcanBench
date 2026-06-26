@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file task: the gold spans txnkv/store.py (data + inverse-op computation: capturing the prior value vs. prior absence for set/delete) and txnkv/journal.py (frame stack where rollback runs inverses in reverse and commit folds the inner frame into its parent preserving order). The difficulty is cross-file: a model must keep the store's inverse-record protocol consistent with the journal's nesting semantics so that an outer rollback undoes inner-committed work and a key that never existed is removed again on rollback."
+}

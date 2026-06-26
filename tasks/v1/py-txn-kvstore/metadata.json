@@ -1,0 +1,33 @@
+{
+  "id": "py-txn-kvstore",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The undo-journal protocol, the two-file split between Store and UndoJournal, and the nested-transaction commit-fold / rollback-reverse tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "autocommit", "cmd": "python -m pytest test_txnkv.py::test_autocommit_without_transaction -q"},
+      {"name": "rollback_value_and_absence", "cmd": "python -m pytest test_txnkv.py::test_rollback_restores_prior_value_and_absence -q"},
+      {"name": "rollback_deleted_key", "cmd": "python -m pytest test_txnkv.py::test_rollback_restores_deleted_key -q"},
+      {"name": "commit_keeps_changes", "cmd": "python -m pytest test_txnkv.py::test_commit_keeps_changes -q"},
+      {"name": "nested_commit_outer_rollback", "cmd": "python -m pytest test_txnkv.py::test_nested_commit_then_outer_rollback_undoes_everything -q"},
+      {"name": "nested_inner_rollback", "cmd": "python -m pytest test_txnkv.py::test_nested_inner_rollback_leaves_outer_intact -q"},
+      {"name": "rollback_reverse_order", "cmd": "python -m pytest test_txnkv.py::test_rollback_replays_multiple_writes_in_reverse -q"},
+      {"name": "commit_without_txn", "cmd": "python -m pytest test_txnkv.py::test_commit_without_transaction_raises -q"},
+      {"name": "keys_reflects_txn", "cmd": "python -m pytest test_txnkv.py::test_keys_reflects_transaction_state -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "construct", "cmd": "python -m pytest test_txnkv.py::test_construct -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "entry_paths": ["txnkv/store.py", "txnkv/journal.py"]
+  }
+}

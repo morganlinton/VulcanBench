@@ -3,15 +3,15 @@
 ``build_report`` produces a structured dict (JSON-serializable); ``to_markdown``
 renders it for humans. A report has:
 
-- ``models``      — the per-model ranking (pass@1 ± stderr, pass@k, cost, latency)
-- ``tasks``       — per-task breakdown (per-model attempts / solve rate)
-- ``discrimination`` — how well the suite separates the models: per-task whether
+- ``models``      - the per-model ranking (pass@1 ± stderr, pass@k, cost, latency)
+- ``tasks``       - per-task breakdown (per-model attempts / solve rate)
+- ``discrimination`` - how well the suite separates the models: per-task whether
   they split, and per model pair how many tasks tell them apart (McNemar
   discordant counts). Surfaces ties that aggregate pass@1 hides.
-- ``environment`` — distinct models / Python / tool versions seen in run manifests
-- ``integrity``   — runs scored against a now-stale task version, and runs
+- ``environment`` - distinct models / Python / tool versions seen in run manifests
+- ``integrity``   - runs scored against a now-stale task version, and runs
   scored against tasks not known to be decontaminated (``decontaminated: false``)
-- ``totals``      — run / model / task counts and total known cost
+- ``totals``      - run / model / task counts and total known cost
 """
 
 from __future__ import annotations
@@ -249,7 +249,7 @@ def _environment(summaries: list[dict[str, Any]]) -> dict[str, Any]:
 def _not_decontaminated_tasks(tasks_root: Path, task_ids: set[Any]) -> set[str]:
     """Task ids whose metadata explicitly marks them not decontaminated.
 
-    Only ``decontaminated: false`` counts — a missing field is treated as
+    Only ``decontaminated: false`` counts - a missing field is treated as
     unknown here (the validator is what *requires* the field at authoring time).
     """
     flagged: set[str] = set()
@@ -468,7 +468,7 @@ def _mean(values: Any) -> float | None:
 
 
 def _fmt(n: Any) -> str:
-    return "—" if n is None else (f"{n:.4f}" if isinstance(n, float) else str(n))
+    return "-" if n is None else (f"{n:.4f}" if isinstance(n, float) else str(n))
 
 
 def _discrimination_markdown(disc: dict[str, Any]) -> list[str]:
@@ -513,7 +513,7 @@ def to_markdown(report: dict[str, Any]) -> str:
     suite = report.get("suite") or "all runs"
     totals = report["totals"]
     lines: list[str] = [
-        f"# VulcanBench report — {suite}",
+        f"# VulcanBench report: {suite}",
         "",
         f"_Generated {report['generated_at']}_",
         "",
@@ -534,7 +534,7 @@ def to_markdown(report: dict[str, Any]) -> str:
             "",
             f"> ⚠️ **{integ['not_decontaminated']} run(s) scored against "
             f"non-decontaminated task(s)** "
-            f"({', '.join(integ['not_decontaminated_tasks'])}) — these tasks derive from "
+            f"({', '.join(integ['not_decontaminated_tasks'])}) - these tasks derive from "
             "public sources that predate model training cutoffs; treat their scores with care.",
         ]
 
@@ -592,8 +592,8 @@ def to_markdown(report: dict[str, Any]) -> str:
 
     env = report["environment"]
     lines += ["", "## Environment", ""]
-    lines.append(f"- Models: {', '.join(env['models']) or '—'}")
-    lines.append(f"- Python: {', '.join(env['python']) or '—'}")
+    lines.append(f"- Models: {', '.join(env['models']) or '-'}")
+    lines.append(f"- Python: {', '.join(env['python']) or '-'}")
     for tool, versions in env["tools"].items():
         lines.append(f"- {tool}: {', '.join(versions)}")
 

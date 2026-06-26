@@ -1,0 +1,2212 @@
+{
+  "generated_at": "2026-06-26T14:03:10.139108+00:00",
+  "suite": "v2",
+  "totals": {
+    "n_runs": 315,
+    "n_models": 3,
+    "n_tasks": 35,
+    "total_cost_usd": 29.646438
+  },
+  "models": [
+    {
+      "model": "openai:gpt-5.5",
+      "n_tasks": 35,
+      "n_runs": 105,
+      "repeats": 3.0,
+      "solved": 105,
+      "pass_at_1": 1.0,
+      "pass_at_1_stderr": 0.0,
+      "pass_at_k": 1.0,
+      "avg_total": 0.9576,
+      "avg_total_stderr": 0.0027,
+      "total_tokens": 1480535,
+      "total_cost": 10.208825,
+      "cost_known": true,
+      "avg_duration_s": 44.7972,
+      "avg_functional": 1.0,
+      "avg_quality": 0.9468,
+      "avg_security": 0.995,
+      "avg_efficiency": 0.7127,
+      "avg_human_like": null
+    },
+    {
+      "model": "anthropic:claude-opus-4-8",
+      "n_tasks": 35,
+      "n_runs": 105,
+      "repeats": 3.0,
+      "solved": 102,
+      "pass_at_1": 0.9714,
+      "pass_at_1_stderr": 0.0286,
+      "pass_at_k": 0.9714,
+      "avg_total": 0.9329,
+      "avg_total_stderr": 0.0101,
+      "total_tokens": 1942924,
+      "total_cost": 11.69598,
+      "cost_known": true,
+      "avg_duration_s": 43.906,
+      "avg_functional": 0.9714,
+      "avg_quality": 0.9295,
+      "avg_security": 0.9967,
+      "avg_efficiency": 0.6592,
+      "avg_human_like": null
+    },
+    {
+      "model": "zai:glm-5.2",
+      "n_tasks": 35,
+      "n_runs": 105,
+      "repeats": 3.0,
+      "solved": 95,
+      "pass_at_1": 0.9048,
+      "pass_at_1_stderr": 0.0376,
+      "pass_at_k": 0.9714,
+      "avg_total": 0.8444,
+      "avg_total_stderr": 0.0259,
+      "total_tokens": 4402873,
+      "total_cost": 7.741633,
+      "cost_known": true,
+      "avg_duration_s": 163.6856,
+      "avg_functional": 0.9048,
+      "avg_quality": 0.9561,
+      "avg_security": 0.9953,
+      "avg_efficiency": 0.4301,
+      "avg_human_like": null
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "go-csv-quoting",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "go-lru-cache",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "go-money-allocate",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "go-parallel-map",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "go-stack-pop-bug",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "go-ttl-lru-cache",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 2,
+          "solve_rate": 0.6667
+        }
+      ]
+    },
+    {
+      "task_id": "go-worker-pool",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-go-errwrap-unwrap",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-go-m2-01",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-go-m3-04",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-go-metrics-labels",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-inflection-titleize",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 1,
+          "solve_rate": 0.3333
+        }
+      ]
+    },
+    {
+      "task_id": "oss-pilot-acme-retry",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-py-config-merge",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-py-ledger-rounding",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-py-m2-00",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-py-m3-00",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-ts-router-params",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-ts-validate-coerce",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-ty-m2-02",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "oss-ty-m3-05",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "py-csv-export-feature",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 2,
+          "solve_rate": 0.6667
+        }
+      ]
+    },
+    {
+      "task_id": "py-expr-eval",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "py-jsonpointer",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "py-retry-refactor",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "py-sliding-window-max",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "py-topo-sort-cycle",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "py-ttl-cache-expiry",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "rs-borrow-split",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 0,
+          "solve_rate": 0.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "rs-feature-gate",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "ts-debounce",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 0,
+          "solve_rate": 0.0
+        }
+      ]
+    },
+    {
+      "task_id": "ts-deep-merge",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 2,
+          "solve_rate": 0.6667
+        }
+      ]
+    },
+    {
+      "task_id": "ts-event-emitter",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 2,
+          "solve_rate": 0.6667
+        }
+      ]
+    },
+    {
+      "task_id": "ts-querystring-bug",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 2,
+          "solve_rate": 0.6667
+        }
+      ]
+    },
+    {
+      "task_id": "ts-schema-validate",
+      "n_runs": 9,
+      "models": [
+        {
+          "model": "anthropic:claude-opus-4-8",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "openai:gpt-5.5",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "zai:glm-5.2",
+          "attempts": 3,
+          "solved": 3,
+          "solve_rate": 1.0
+        }
+      ]
+    }
+  ],
+  "discrimination": {
+    "available": true,
+    "pass_threshold": 0.5,
+    "models": [
+      "anthropic:claude-opus-4-8",
+      "openai:gpt-5.5",
+      "zai:glm-5.2"
+    ],
+    "n_tasks": 35,
+    "all_pass": 32,
+    "all_fail": 0,
+    "discriminating": 3,
+    "no_signal_tasks": [
+      "go-csv-quoting",
+      "go-lru-cache",
+      "go-money-allocate",
+      "go-parallel-map",
+      "go-stack-pop-bug",
+      "go-ttl-lru-cache",
+      "go-worker-pool",
+      "oss-go-errwrap-unwrap",
+      "oss-go-m2-01",
+      "oss-go-m3-04",
+      "oss-go-metrics-labels",
+      "oss-pilot-acme-retry",
+      "oss-py-config-merge",
+      "oss-py-ledger-rounding",
+      "oss-py-m2-00",
+      "oss-py-m3-00",
+      "oss-ts-router-params",
+      "oss-ts-validate-coerce",
+      "oss-ty-m2-02",
+      "oss-ty-m3-05",
+      "py-csv-export-feature",
+      "py-expr-eval",
+      "py-jsonpointer",
+      "py-retry-refactor",
+      "py-sliding-window-max",
+      "py-topo-sort-cycle",
+      "py-ttl-cache-expiry",
+      "rs-feature-gate",
+      "ts-deep-merge",
+      "ts-event-emitter",
+      "ts-querystring-bug",
+      "ts-schema-validate"
+    ],
+    "tasks": [
+      {
+        "task_id": "go-csv-quoting",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "go-lru-cache",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "go-money-allocate",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "go-parallel-map",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "go-stack-pop-bug",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "go-ttl-lru-cache",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 0.6667
+        },
+        "separates": false,
+        "spread": 0.3333
+      },
+      {
+        "task_id": "go-worker-pool",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-go-errwrap-unwrap",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-go-m2-01",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-go-m3-04",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-go-metrics-labels",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-inflection-titleize",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 0.3333
+        },
+        "separates": true,
+        "spread": 0.6667
+      },
+      {
+        "task_id": "oss-pilot-acme-retry",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-py-config-merge",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-py-ledger-rounding",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-py-m2-00",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-py-m3-00",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-ts-router-params",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-ts-validate-coerce",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-ty-m2-02",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "oss-ty-m3-05",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "py-csv-export-feature",
+        "solve_rates": {
+          "zai:glm-5.2": 0.6667,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.3333
+      },
+      {
+        "task_id": "py-expr-eval",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "py-jsonpointer",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "py-retry-refactor",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "py-sliding-window-max",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "py-topo-sort-cycle",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "py-ttl-cache-expiry",
+        "solve_rates": {
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "rs-borrow-split",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 0.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": true,
+        "spread": 1.0
+      },
+      {
+        "task_id": "rs-feature-gate",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "ts-debounce",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": true,
+        "spread": 1.0
+      },
+      {
+        "task_id": "ts-deep-merge",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.6667,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.3333
+      },
+      {
+        "task_id": "ts-event-emitter",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.6667
+        },
+        "separates": false,
+        "spread": 0.3333
+      },
+      {
+        "task_id": "ts-querystring-bug",
+        "solve_rates": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.6667
+        },
+        "separates": false,
+        "spread": 0.3333
+      },
+      {
+        "task_id": "ts-schema-validate",
+        "solve_rates": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      }
+    ],
+    "model_pairs": [
+      {
+        "a": "anthropic:claude-opus-4-8",
+        "b": "openai:gpt-5.5",
+        "common_tasks": 35,
+        "a_solves_b_fails": 0,
+        "b_solves_a_fails": 1,
+        "separating": 1,
+        "agree": 34
+      },
+      {
+        "a": "anthropic:claude-opus-4-8",
+        "b": "zai:glm-5.2",
+        "common_tasks": 35,
+        "a_solves_b_fails": 2,
+        "b_solves_a_fails": 1,
+        "separating": 3,
+        "agree": 32
+      },
+      {
+        "a": "openai:gpt-5.5",
+        "b": "zai:glm-5.2",
+        "common_tasks": 35,
+        "a_solves_b_fails": 2,
+        "b_solves_a_fails": 0,
+        "separating": 2,
+        "agree": 33
+      }
+    ]
+  },
+  "environment": {
+    "models": [
+      "anthropic:claude-opus-4-8",
+      "openai:gpt-5.5",
+      "zai:glm-5.2"
+    ],
+    "python": [
+      "3.14.3",
+      "Python 3.12.13"
+    ],
+    "tools": {
+      "bandit": [
+        "bandit 1.9.4"
+      ],
+      "git": [
+        "git version 2.39.5"
+      ],
+      "go": [
+        "go version go1.23.4 linux/amd64"
+      ],
+      "node": [
+        "v22.11.0"
+      ],
+      "radon": [
+        "6.0.1"
+      ],
+      "ruff": [
+        "ruff 0.15.18"
+      ]
+    }
+  },
+  "integrity": {
+    "stale": 0,
+    "stale_run_ids": [],
+    "unknown": 0,
+    "not_decontaminated": 9,
+    "not_decontaminated_run_ids": [
+      "oss-inflection-titleize-277cdcaf",
+      "oss-inflection-titleize-2a3bc4ff",
+      "oss-inflection-titleize-2eb5d746",
+      "oss-inflection-titleize-3b888a30",
+      "oss-inflection-titleize-4f4f77a0",
+      "oss-inflection-titleize-942cace3",
+      "oss-inflection-titleize-a8f5ad97",
+      "oss-inflection-titleize-d1e4cead",
+      "oss-inflection-titleize-d9f90df1"
+    ],
+    "not_decontaminated_tasks": [
+      "oss-inflection-titleize"
+    ]
+  },
+  "calibration": {
+    "generated_at": "2026-06-26T14:03:10.138862+00:00",
+    "thresholds": {
+      "easy_min": 0.85,
+      "medium_min": 0.4
+    },
+    "criteria": {
+      "min_attempts": 5,
+      "min_models": 2
+    },
+    "excluded": {
+      "mock_runs": 0,
+      "stale_runs": 0,
+      "unknown_task_runs": 0
+    },
+    "tasks": [
+      {
+        "task_id": "go-csv-quoting",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "go-lru-cache",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "go-parallel-map",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "go-ttl-lru-cache",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 0.6667
+        },
+        "solve_rate": 0.8889,
+        "solve_rate_stderr": 0.1111,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "go-worker-pool",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-go-errwrap-unwrap",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-go-metrics-labels",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-pilot-acme-retry",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-py-config-merge",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-py-ledger-rounding",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-ts-router-params",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "oss-ts-validate-coerce",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "py-expr-eval",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "py-jsonpointer",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "py-retry-refactor",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "py-sliding-window-max",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "py-topo-sort-cycle",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "rs-feature-gate",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "ts-deep-merge",
+        "labeled_difficulty": "hard",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.6667,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 0.8889,
+        "solve_rate_stderr": 0.1111,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "ts-event-emitter",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.6667
+        },
+        "solve_rate": 0.8889,
+        "solve_rate_stderr": 0.1111,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": false
+      },
+      {
+        "task_id": "go-money-allocate",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "go-stack-pop-bug",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-go-m2-01",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-go-m3-04",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-inflection-titleize",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 0.3333
+        },
+        "solve_rate": 0.7778,
+        "solve_rate_stderr": 0.2222,
+        "empirical_difficulty": "medium",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-py-m2-00",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "zai:glm-5.2": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-py-m3-00",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-ty-m2-02",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "oss-ty-m3-05",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "py-csv-export-feature",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 0.6667,
+          "openai:gpt-5.5": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 0.8889,
+        "solve_rate_stderr": 0.1111,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "py-ttl-cache-expiry",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "rs-borrow-split",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 0.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0
+        },
+        "solve_rate": 0.6667,
+        "solve_rate_stderr": 0.3333,
+        "empirical_difficulty": "medium",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "ts-debounce",
+        "labeled_difficulty": "medium",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 0.6667,
+        "solve_rate_stderr": 0.3333,
+        "empirical_difficulty": "medium",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "ts-querystring-bug",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "anthropic:claude-opus-4-8": 1.0,
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 0.6667
+        },
+        "solve_rate": 0.8889,
+        "solve_rate_stderr": 0.1111,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "ts-schema-validate",
+        "labeled_difficulty": "easy",
+        "n_attempts": 9,
+        "n_models": 3,
+        "models": [
+          "anthropic:claude-opus-4-8",
+          "openai:gpt-5.5",
+          "zai:glm-5.2"
+        ],
+        "per_model_solve_rate": {
+          "openai:gpt-5.5": 1.0,
+          "zai:glm-5.2": 1.0,
+          "anthropic:claude-opus-4-8": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": "easy",
+        "status": "ok",
+        "agreement": true
+      },
+      {
+        "task_id": "hello-world",
+        "labeled_difficulty": "trivial",
+        "n_attempts": 0,
+        "n_models": 0,
+        "models": [],
+        "per_model_solve_rate": {},
+        "solve_rate": null,
+        "solve_rate_stderr": null,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "py-chunk-terse",
+        "labeled_difficulty": "medium",
+        "n_attempts": 0,
+        "n_models": 0,
+        "models": [],
+        "per_model_solve_rate": {},
+        "solve_rate": null,
+        "solve_rate_stderr": null,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "py-parse-bool-terse",
+        "labeled_difficulty": "medium",
+        "n_attempts": 0,
+        "n_models": 0,
+        "models": [],
+        "per_model_solve_rate": {},
+        "solve_rate": null,
+        "solve_rate_stderr": null,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "py-slugify-terse",
+        "labeled_difficulty": "medium",
+        "n_attempts": 0,
+        "n_models": 0,
+        "models": [],
+        "per_model_solve_rate": {},
+        "solve_rate": null,
+        "solve_rate_stderr": null,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      }
+    ],
+    "summary": {
+      "n_tasks": 39,
+      "n_calibrated": 35,
+      "n_disagree": 20,
+      "n_insufficient": 4
+    }
+  },
+  "effort_sensitivity": {
+    "available": false,
+    "strata": [],
+    "warnings": []
+  }
+}

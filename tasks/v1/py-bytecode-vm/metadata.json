@@ -1,0 +1,33 @@
+{
+  "id": "py-bytecode-vm",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific instruction set, the AST tuple shape, the two-file compiler/VM split, and the short-circuit/backpatching tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "arithmetic", "cmd": "python -m pytest test_vmlang.py::test_arithmetic -q"},
+      {"name": "variables_and_compare", "cmd": "python -m pytest test_vmlang.py::test_variables_and_compare -q"},
+      {"name": "unknown_variable", "cmd": "python -m pytest test_vmlang.py::test_unknown_variable_raises -q"},
+      {"name": "not", "cmd": "python -m pytest test_vmlang.py::test_not -q"},
+      {"name": "if_branch", "cmd": "python -m pytest test_vmlang.py::test_if_selects_branch_by_condition -q"},
+      {"name": "nested_if_jumps", "cmd": "python -m pytest test_vmlang.py::test_nested_if_jump_targets -q"},
+      {"name": "and_or_values", "cmd": "python -m pytest test_vmlang.py::test_and_or_values -q"},
+      {"name": "short_circuit", "cmd": "python -m pytest test_vmlang.py::test_short_circuit_skips_faulty_branch -q"},
+      {"name": "flat_isa", "cmd": "python -m pytest test_vmlang.py::test_compiles_to_flat_isa_instructions -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "construct", "cmd": "python -m pytest test_vmlang.py::test_construct -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "entry_paths": ["vmlang/compiler.py", "vmlang/vm.py"]
+  }
+}

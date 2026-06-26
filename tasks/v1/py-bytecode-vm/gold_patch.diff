@@ -1,0 +1,118 @@
+diff --git a/vmlang/compiler.py b/vmlang/compiler.py
+index 7388ddd..906a5d8 100644
+--- a/vmlang/compiler.py
++++ b/vmlang/compiler.py
+@@ -7,7 +7,60 @@ returned list. Short-circuit ``and``/``or`` and ``if`` require forward jumps who
+ targets are only known once the skipped code has been emitted (backpatching).
+ """
+ 
++_BINOPS = {
++    "+": "ADD", "-": "SUB", "*": "MUL", "/": "DIV",
++    "==": "EQ", "<": "LT", ">": "GT",
++}
++
+ 
+ def compile_expr(ast):
+     """Return a flat list of instructions that computes ``ast`` on the VM stack."""
+-    raise NotImplementedError
++    code = []
++    _emit(ast, code)
++    return code
++
++
++def _emit(node, code):
++    op = node[0]
++    if op == "lit":
++        code.append(("PUSH", node[1]))
++    elif op == "var":
++        code.append(("LOAD", node[1]))
++    elif op == "not":
++        _emit(node[1], code)
++        code.append(("NOT",))
++    elif op in _BINOPS:
++        _emit(node[1], code)
++        _emit(node[2], code)
++        code.append((_BINOPS[op],))
++    elif op == "and":
++        _emit(node[1], code)
++        code.append(("DUP",))
++        jf = len(code)
++        code.append(("JUMP_IF_FALSE", None))  # if left falsy, keep it and skip right
++        code.append(("POP",))
++        _emit(node[2], code)
++        code[jf] = ("JUMP_IF_FALSE", len(code))
++    elif op == "or":
++        _emit(node[1], code)
++        code.append(("DUP",))
++        jf = len(code)
++        code.append(("JUMP_IF_FALSE", None))  # if left falsy, go evaluate right
++        j = len(code)
++        code.append(("JUMP", None))           # left truthy: keep it, skip right
++        code[jf] = ("JUMP_IF_FALSE", len(code))
++        code.append(("POP",))
++        _emit(node[2], code)
++        code[j] = ("JUMP", len(code))
++    elif op == "if":
++        _emit(node[1], code)
++        jf = len(code)
++        code.append(("JUMP_IF_FALSE", None))  # to else branch
++        _emit(node[2], code)
++        j = len(code)
++        code.append(("JUMP", None))           # then branch jumps past else
++        code[jf] = ("JUMP_IF_FALSE", len(code))
++        _emit(node[3], code)
++        code[j] = ("JUMP", len(code))
++    else:
++        raise ValueError(f"unknown AST node: {op!r}")
+diff --git a/vmlang/vm.py b/vmlang/vm.py
+index 5101f05..2683d8b 100644
+--- a/vmlang/vm.py
++++ b/vmlang/vm.py
+@@ -5,7 +5,46 @@ jump operands as absolute indices into the code list. A well-formed program
+ leaves exactly one value on the stack; ``run`` returns it.
+ """
+ 
++import operator
++
++_BINARY = {
++    "ADD": operator.add, "SUB": operator.sub, "MUL": operator.mul,
++    "DIV": operator.truediv, "EQ": operator.eq, "LT": operator.lt, "GT": operator.gt,
++}
++
+ 
+ def run(code, env=None):
+     """Execute ``code`` against variable bindings ``env``; return the result."""
+-    raise NotImplementedError
++    env = env or {}
++    stack = []
++    pc = 0
++    n = len(code)
++    while pc < n:
++        instr = code[pc]
++        op = instr[0]
++        pc += 1
++        if op == "PUSH":
++            stack.append(instr[1])
++        elif op == "LOAD":
++            name = instr[1]
++            if name not in env:
++                raise NameError(name)
++            stack.append(env[name])
++        elif op == "POP":
++            stack.pop()
++        elif op == "DUP":
++            stack.append(stack[-1])
++        elif op == "NOT":
++            stack.append(not stack.pop())
++        elif op in _BINARY:
++            b = stack.pop()
++            a = stack.pop()
++            stack.append(_BINARY[op](a, b))
++        elif op == "JUMP":
++            pc = instr[1]
++        elif op == "JUMP_IF_FALSE":
++            if not stack.pop():
++                pc = instr[1]
++        else:
++            raise ValueError(f"unknown opcode: {op!r}")
++    return stack[-1]

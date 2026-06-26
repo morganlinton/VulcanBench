@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file task: the gold spans vmlang/compiler.py (AST -> flat instruction list, including backpatched forward jumps for if and short-circuit and/or) and vmlang/vm.py (a stack machine that executes that list with jumps as absolute indices). The difficulty is cross-file: the two files share only the documented instruction-set contract, so the compiler's emitted opcodes and jump offsets must line up exactly with the VM's stack discipline. An off-by-one in a backpatched target or a stack-effect mismatch surfaces only when the VM runs the code, and short-circuit correctness requires the compiler and VM to cooperate so the un-selected operand is never executed."
+}

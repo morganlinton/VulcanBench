@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Third multi-file task** `py-bytecode-vm` (hard, `multi_file`): implement a bytecode
+  compiler and a stack VM that share only a documented instruction set. `vmlang/compiler.py`
+  lowers an AST to a flat instruction list (with backpatched forward jumps for `if` and
+  short-circuit `and`/`or`); `vmlang/vm.py` executes that list, treating jump operands as
+  absolute indices. The difficulty is cross-file: the compiler's opcodes and jump offsets
+  must line up exactly with the VM's stack discipline, and short-circuit correctness
+  requires the two halves to cooperate so the un-selected operand is never executed.
+  Validated (gold=1.0, pre-patch=0.0, deterministic); the gold patch spans both files.
+  Suite v1: 41 tasks, 13 hard, 5 non-localized.
 - **Second multi-file task** `py-txn-kvstore` (hard, `multi_file`): implement a
   transactional in-memory key/value store whose `Store` and `UndoJournal` collaborate
   across two files. The store computes the inverse of each mutation (prior value vs. prior

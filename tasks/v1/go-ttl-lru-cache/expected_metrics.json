@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Gold uses container/list for LRU recency, a map to elements, lazy TTL expiry, and a sync.Mutex guarding every operation. A correct single-threaded implementation that omits the mutex fails the concurrent -race test."
+}

@@ -1,0 +1,106 @@
+diff --git a/cachettl/cache.go b/cachettl/cache.go
+index 5156d5c..b645e29 100644
+--- a/cachettl/cache.go
++++ b/cachettl/cache.go
+@@ -1,34 +1,94 @@
+ // Package cachettl is a fixed-capacity, thread-safe LRU cache with per-entry TTL.
+ package cachettl
+ 
+-import "time"
++import (
++	"container/list"
++	"sync"
++	"time"
++)
++
++type entry struct {
++	key     string
++	value   int
++	expires time.Time
++}
+ 
+ // Cache is a thread-safe LRU cache holding at most `capacity` live entries.
+ // Entries expire `ttl` after they were last written.
+-//
+-// NOTE: this is an unimplemented skeleton — see issue.md.
+ type Cache struct {
++	mu       sync.Mutex
+ 	capacity int
+ 	ttl      time.Duration
++	ll       *list.List
++	items    map[string]*list.Element
+ }
+ 
+ // New returns a Cache holding at most capacity entries, each living for ttl.
+ func New(capacity int, ttl time.Duration) *Cache {
+-	return &Cache{capacity: capacity, ttl: ttl}
++	if capacity < 1 {
++		capacity = 1
++	}
++	return &Cache{
++		capacity: capacity,
++		ttl:      ttl,
++		ll:       list.New(),
++		items:    make(map[string]*list.Element),
++	}
+ }
+ 
+ // Get returns the value for key and true if present and not expired; a fresh
+ // read makes key the most recently used. Otherwise it returns (0, false).
+ func (c *Cache) Get(key string) (int, bool) {
+-	return 0, false
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	el, ok := c.items[key]
++	if !ok {
++		return 0, false
++	}
++	ent := el.Value.(*entry)
++	if time.Now().After(ent.expires) {
++		c.remove(el)
++		return 0, false
++	}
++	c.ll.MoveToFront(el)
++	return ent.value, true
+ }
+ 
+ // Put inserts or updates key=value. If that grows the cache past capacity, the
+-// least recently used live entry is evicted.
++// least recently used entry is evicted.
+ func (c *Cache) Put(key string, value int) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	exp := time.Now().Add(c.ttl)
++	if el, ok := c.items[key]; ok {
++		ent := el.Value.(*entry)
++		ent.value = value
++		ent.expires = exp
++		c.ll.MoveToFront(el)
++		return
++	}
++	el := c.ll.PushFront(&entry{key: key, value: value, expires: exp})
++	c.items[key] = el
++	for c.ll.Len() > c.capacity {
++		c.remove(c.ll.Back())
++	}
+ }
+ 
+ // Len returns the number of live (non-expired) entries.
+ func (c *Cache) Len() int {
+-	return 0
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	now := time.Now()
++	n := 0
++	for el := c.ll.Front(); el != nil; el = el.Next() {
++		if !now.After(el.Value.(*entry).expires) {
++			n++
++		}
++	}
++	return n
++}
++
++func (c *Cache) remove(el *list.Element) {
++	c.ll.Remove(el)
++	delete(c.items, el.Value.(*entry).key)
+ }

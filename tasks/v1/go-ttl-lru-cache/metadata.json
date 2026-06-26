@@ -1,0 +1,31 @@
+{
+  "id": "go-ttl-lru-cache",
+  "category": "concurrency",
+  "languages": ["go"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-25",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-25. The TTL+LRU cache spec, skeleton, and the -race/TTL/recency tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "basic", "cmd": "go test -race -run '^TestBasicGetPut$' ./..."},
+      {"name": "lru_eviction", "cmd": "go test -race -run '^TestLRUEviction$' ./..."},
+      {"name": "get_refreshes_recency", "cmd": "go test -race -run '^TestGetRefreshesRecency$' ./..."},
+      {"name": "update_refreshes_recency", "cmd": "go test -race -run '^TestUpdateRefreshesRecency$' ./..."},
+      {"name": "ttl_expiry", "cmd": "go test -race -run '^TestTTLExpiry$' ./..."},
+      {"name": "update_refreshes_ttl", "cmd": "go test -race -run '^TestUpdateRefreshesTTL$' ./..."},
+      {"name": "concurrent_race_free", "cmd": "go test -race -run '^TestConcurrentAccessIsRaceFree$' ./..."}
+    ],
+    "pass_to_pass": [
+      {"name": "empty_len", "cmd": "go test -race -run '^TestEmptyLen$' ./..."}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["cachettl/cache.go"]
+  }
+}

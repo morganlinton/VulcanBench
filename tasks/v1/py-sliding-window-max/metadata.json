@@ -1,0 +1,27 @@
+{
+  "id": "py-sliding-window-max",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-25",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-25. The sliding-window-maximum task and its performance-gated test are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "correctness", "cmd": "python -m pytest test_sliding.py::test_correctness -q"},
+      {"name": "invalid_k", "cmd": "python -m pytest test_sliding.py::test_invalid_k_raises -q"},
+      {"name": "efficient", "cmd": "python -m pytest test_sliding.py::test_large_input_is_efficient -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "imports", "cmd": "python -m pytest test_sliding.py::test_module_imports -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 60,
+    "entry_paths": ["windows/sliding.py"]
+  }
+}

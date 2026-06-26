@@ -33,10 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   every model passes or fails. Surfaces ties that aggregate pass@1 hides (e.g.
   two models posting an identical 0.7885 with zero tasks separating them).
 - **Hard, discriminating tasks** to raise the suite's ceiling (52 -> 43 -> 31 ->
-  33): `py-expr-eval` (a recursive-descent arithmetic evaluator with a subtle
-  operator-precedence/associativity bug — `2 + 3 * 4`, `2 ** 3 ** 2`, `-2 ** 2`)
-  and `go-parallel-map` (a bounded-concurrency ordered map that must preserve
-  input order, return the lowest-input-index error, and pass `go test -race`).
+  35): `py-expr-eval` (a recursive-descent arithmetic evaluator with a subtle
+  operator-precedence/associativity bug — `2 + 3 * 4`, `2 ** 3 ** 2`, `-2 ** 2`),
+  `go-parallel-map` (a bounded-concurrency ordered map that must preserve input
+  order, return the lowest-input-index error, and pass `go test -race`),
+  `py-sliding-window-max` (an O(n) deque solution gated by a performance test, so
+  a correct naive O(n*k) answer is too slow), and `go-ttl-lru-cache` (a
+  thread-safe LRU cache with per-entry TTL, verified under `go test -race`, where
+  a correct single-threaded implementation that omits the mutex fails). The hard
+  floor in the dataset guards rose from 5 to 7.
 - **Specification gate (`harness/spec_check.py`)**: task validation now flags
   issues that state a defect or location but never describe the expected
   behavior — the failure mode where a hidden test asserts an output the agent

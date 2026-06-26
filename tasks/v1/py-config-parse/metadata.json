@@ -1,0 +1,34 @@
+{
+  "id": "py-config-parse",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. 'VulcanConf' is an invented config format defined entirely by this task's issue; it is not derived from any existing format or repository, so it cannot be matched to anything in model training data.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "comments_blanks", "cmd": "python -m pytest test_parse.py::test_comments_and_blanks -q"},
+      {"name": "basic_whitespace", "cmd": "python -m pytest test_parse.py::test_basic_and_whitespace -q"},
+      {"name": "quoting", "cmd": "python -m pytest test_parse.py::test_quoting -q"},
+      {"name": "escapes", "cmd": "python -m pytest test_parse.py::test_escapes_in_quotes -q"},
+      {"name": "inline_comments", "cmd": "python -m pytest test_parse.py::test_inline_comments -q"},
+      {"name": "bool_null", "cmd": "python -m pytest test_parse.py::test_bool_null_coercion -q"},
+      {"name": "int_coercion", "cmd": "python -m pytest test_parse.py::test_int_coercion -q"},
+      {"name": "float_coercion", "cmd": "python -m pytest test_parse.py::test_float_coercion -q"},
+      {"name": "empty_duplicate", "cmd": "python -m pytest test_parse.py::test_empty_and_duplicate -q"},
+      {"name": "invalid", "cmd": "python -m pytest test_parse.py::test_invalid_raises -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "imports", "cmd": "python -m pytest test_parse.py::test_module_imports -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["confkit/parse.py"]
+  }
+}

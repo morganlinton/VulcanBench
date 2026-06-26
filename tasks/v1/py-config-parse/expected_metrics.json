@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Invented format with ~10 independent rule groups: quoting and escapes, the whitespace-before-# inline comment rule, quoted-always-string vs unquoted coercion, leading-zero ints and bare-dot floats staying strings, and error cases. Missing any single group leaves functional < 1.0, which is the point: it targets the frontier ceiling."
+}

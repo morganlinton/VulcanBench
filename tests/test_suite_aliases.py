@@ -22,7 +22,7 @@ def test_v1_micro_excludes_large_scale_tasks() -> None:
 def test_v1_suite_excludes_hello_world() -> None:
     suite = load_suite("v1", Path("tasks"))
     assert "hello-world" not in suite.task_ids
-    assert len(suite.task_ids) >= 37
+    assert len(suite.task_ids) >= 38
 
 
 def test_v1_rust_suite_contains_rust_tasks() -> None:

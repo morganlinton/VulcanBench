@@ -1,0 +1,85 @@
+diff --git a/confkit/parse.py b/confkit/parse.py
+index 8fd3297..4a9ab88 100644
+--- a/confkit/parse.py
++++ b/confkit/parse.py
+@@ -1,3 +1,78 @@
++import re
++
++_INT = re.compile(r"[+-]?(0|[1-9][0-9]*)$")
++_FLOAT = re.compile(r"[+-]?([0-9]+\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+)$")
++_ESCAPES = {"n": "\n", "t": "\t", '"': '"', "\\": "\\"}
++
++
+ def parse_config(text):
+-    """Parse the VulcanConf config format into a dict (see issue.md)."""
+-    raise NotImplementedError
++    result = {}
++    for raw in text.split("\n"):
++        line = raw.rstrip("\r")
++        stripped = line.strip()
++        if stripped == "" or stripped.startswith("#"):
++            continue
++        eq = line.find("=")
++        if eq == -1:
++            raise ValueError(f"missing '=': {raw!r}")
++        key = line[:eq].strip()
++        if key == "":
++            raise ValueError(f"empty key: {raw!r}")
++        result[key] = _parse_value(line[eq + 1 :])
++    return result
++
++
++def _parse_value(s):
++    v = s.lstrip()
++    if v[:1] == '"':
++        return _parse_quoted(v)
++    idx = _comment_index(v)
++    if idx is not None:
++        v = v[:idx]
++    v = v.strip()
++    if v == "":
++        return ""
++    return _coerce(v)
++
++
++def _comment_index(v):
++    for i, ch in enumerate(v):
++        if ch == "#" and (i == 0 or v[i - 1].isspace()):
++            return i
++    return None
++
++
++def _parse_quoted(v):
++    out = []
++    i, n = 1, len(v)
++    while i < n:
++        ch = v[i]
++        if ch == "\\":
++            if i + 1 >= n:
++                break
++            out.append(_ESCAPES.get(v[i + 1], v[i + 1]))
++            i += 2
++            continue
++        if ch == '"':
++            rest = v[i + 1 :].strip()
++            if rest != "" and not rest.startswith("#"):
++                raise ValueError(f"trailing content after quoted value: {rest!r}")
++            return "".join(out)
++        out.append(ch)
++        i += 1
++    raise ValueError("unterminated quoted value")
++
++
++def _coerce(s):
++    low = s.lower()
++    if low == "true":
++        return True
++    if low == "false":
++        return False
++    if low in ("null", "none"):
++        return None
++    if _INT.match(s):
++        return int(s)
++    if _FLOAT.match(s):
++        return float(s)
++    return s

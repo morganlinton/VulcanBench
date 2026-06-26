@@ -1,0 +1,83 @@
+diff --git a/reactive/graph.py b/reactive/graph.py
+index 4ac3c8f..78db4e0 100644
+--- a/reactive/graph.py
++++ b/reactive/graph.py
+@@ -10,14 +10,40 @@ class DependencyGraph:
+ 
+     def set_dependencies(self, node, deps):
+         """Replace node's direct dependencies with deps (clearing any previous)."""
+-        raise NotImplementedError
++        self._deps[node] = set(deps)
+ 
+     def dependents(self, node):
+         """Direct dependents: the set of nodes that depend on `node`."""
+-        raise NotImplementedError
++        return {n for n, ds in self._deps.items() if node in ds}
+ 
+     def affected_order(self, start):
+         """`start` plus all transitive dependents, ordered so each node comes
+         after every dependency of it that is in the set. Raises CycleError on a
+         cycle among the affected nodes."""
+-        raise NotImplementedError
++        affected = set()
++        stack = [start]
++        while stack:
++            n = stack.pop()
++            if n in affected:
++                continue
++            affected.add(n)
++            stack.extend(self.dependents(n))
++
++        order = []
++        state = {}  # node -> 0 visiting, 1 done
++        for node in affected:
++            self._visit(node, affected, state, order)
++        return order
++
++    def _visit(self, node, affected, state, order):
++        st = state.get(node)
++        if st == 1:
++            return
++        if st == 0:
++            raise CycleError(f"dependency cycle at {node!r}")
++        state[node] = 0
++        for dep in self._deps.get(node, ()):
++            if dep in affected:
++                self._visit(dep, affected, state, order)
++        state[node] = 1
++        order.append(node)
+diff --git a/reactive/sheet.py b/reactive/sheet.py
+index c96c91c..d544b35 100644
+--- a/reactive/sheet.py
++++ b/reactive/sheet.py
+@@ -11,14 +11,26 @@ class Sheet:
+ 
+     def set_value(self, name, value):
+         """Set `name` to a constant, then recompute its dependents."""
+-        raise NotImplementedError
++        self._formulas.pop(name, None)
++        self._graph.set_dependencies(name, [])
++        self._values[name] = value
++        for node in self._graph.affected_order(name):
++            if node != name:
++                self._eval(node)
+ 
+     def set_formula(self, name, deps, fn):
+         """Set `name` to fn(values_of_deps); recompute it and its dependents.
+ 
+         Raises CycleError if this introduces a dependency cycle."""
+-        raise NotImplementedError
++        self._formulas[name] = (list(deps), fn)
++        self._graph.set_dependencies(name, deps)
++        for node in self._graph.affected_order(name):
++            self._eval(node)
+ 
+     def get(self, name):
+-        """Return the current value of `name` (KeyError if unset)."""
+-        raise NotImplementedError
++        return self._values[name]
++
++    def _eval(self, node):
++        if node in self._formulas:
++            deps, fn = self._formulas[node]
++            self._values[node] = fn({d: self._values[d] for d in deps})

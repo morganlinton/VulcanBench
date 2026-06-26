@@ -6,7 +6,7 @@ the corpus cannot silently shrink or lose coverage. They do not run the tasks â€
 that is `scripts/validate_tasks.py` (gold-solves / fail-to-pass / determinism).
 
 Claims ledger (promise -> proving test):
-- "38 real, multi-language tasks"                      -> test_minimum_real_task_count
+- "39 real, multi-language tasks"                      -> test_minimum_real_task_count
 - "difficulty spans easy/medium/hard"                  -> test_difficulty_spread
 - "categories incl. refactor & concurrency"            -> test_category_coverage
 - "medium/large navigation tasks for large-codebase"   -> test_repo_scale_coverage
@@ -24,14 +24,14 @@ import pytest
 
 # Floors, not targets: the suite must not silently shrink below what is shipped.
 # v1 was pruned from 52 -> 43 -> 31 (9 unsolvable scaffolds, then 12
-# zero-discrimination "Double" one-liners), then grew to 38 as hard,
+# zero-discrimination "Double" one-liners), then grew to 39 as hard,
 # discriminating tasks were added (py-expr-eval, go-parallel-map,
 # py-sliding-window-max, go-ttl-lru-cache, py-url-normalize, py-semver-compare,
-# py-config-parse).
+# py-config-parse, py-reactive-sheet [first real multi_file]).
 # The large/navigation tier shed mislabeled one-liners (12 -> 7). Raise these as
 # more discriminating tasks land.
 TASKS_ROOT = Path("tasks/v1")
-M3_MIN_REAL_TASKS = 38
+M3_MIN_REAL_TASKS = 39
 M2_MIN_MEDIUM_LARGE = 7
 
 
@@ -97,7 +97,7 @@ def test_task_complexity_labels() -> None:
 
 # --- composition discipline: keep the suite from regressing to easy filler ---
 
-MIN_HARD_TASKS = 10
+MIN_HARD_TASKS = 11
 MIN_MEDIUM_OR_HARD_FRACTION = 0.6
 MIN_NON_LOCALIZED_TASKS = 2
 

@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file task: the gold spans reactive/graph.py (transitive-dependent collection + DFS topological order with cycle detection) and reactive/sheet.py (value/formula state + recompute driven by affected_order). The difficulty is cross-file: a model must keep the graph's ordering contract and the sheet's recompute loop consistent, including transitive propagation and dependency clearing on rebind."
+}

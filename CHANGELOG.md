@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **First real multi-file task** `py-reactive-sheet` (hard, `multi_file`): implement a
+  reactive spreadsheet whose `Sheet` and `DependencyGraph` collaborate across two files,
+  requiring transitive topological recomputation, dependency clearing on formula rebind,
+  and cycle detection kept consistent across both modules. Validated; the gold patch spans
+  both files. Suite v1: 39 tasks, 11 hard, 3 non-localized.
 - **Grader trust + variance controls** for agentic grading: `metadata.grader_samples: N`
   grades by majority vote over N calls (ties resolve to incorrect) and reports
   `self_consistency`; `scripts/grader_eval.py` (+ `harness/grader_eval.py`) scores a

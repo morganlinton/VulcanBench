@@ -1,0 +1,30 @@
+{
+  "id": "py-reactive-sheet",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The reactive-sheet engine, its two-file split, and the recomputation/cycle tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "basic_formula", "cmd": "python -m pytest test_reactive.py::test_basic_formula -q"},
+      {"name": "transitive_update", "cmd": "python -m pytest test_reactive.py::test_transitive_update -q"},
+      {"name": "topological_order", "cmd": "python -m pytest test_reactive.py::test_topological_order_diamond -q"},
+      {"name": "formula_rebind", "cmd": "python -m pytest test_reactive.py::test_formula_rebind_clears_old_deps -q"},
+      {"name": "cycle_detection", "cmd": "python -m pytest test_reactive.py::test_cycle_detection -q"},
+      {"name": "get_unknown", "cmd": "python -m pytest test_reactive.py::test_get_unknown_raises -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "construct", "cmd": "python -m pytest test_reactive.py::test_construct -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "entry_paths": ["reactive/sheet.py", "reactive/graph.py"]
+  }
+}

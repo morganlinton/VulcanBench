@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Multi-file feature** `py-textdiff` (hard, `multi_file`): an LCS-based line diff plus a
+  validating patch applier. `textdiff/diff.py` builds a minimal edit script of
+  keep/del/ins ops whose kept lines are a *longest* common subsequence;
+  `textdiff/patch.py` applies a script against a source, raising `PatchError` on mismatch or
+  unconsumed input. The files share only the op-tuple contract; the defining invariant
+  `apply(diff(a, b), a) == b` holds only if both halves agree. The minimality test rejects a
+  naive delete-all-then-insert-all diff. Validated (gold=1.0, pre-patch fails, deterministic);
+  the gold patch spans both files.
 - **Bug fix** `go-slice-batches` (medium, `bug_fix`): the classic Go slice-aliasing footgun.
   `batch.Batches` returns `items[i:end]` sub-slices that keep spare capacity over the input's
   backing array, so `append(b[0], x)` overwrites the next batch and the caller's slice. The

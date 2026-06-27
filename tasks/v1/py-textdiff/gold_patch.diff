@@ -1,0 +1,87 @@
+diff --git a/textdiff/diff.py b/textdiff/diff.py
+index aba04f4..df45c8a 100644
+--- a/textdiff/diff.py
++++ b/textdiff/diff.py
+@@ -1,8 +1,7 @@
+ """Compute a line-level diff between two sequences of lines.
+ 
+-NOTE: diff is not implemented — see issue.md. It must produce a minimal edit
+-script (longest common subsequence of kept lines) made of ("keep"|"del"|"ins",
+-line) operations, consumed by ``textdiff/patch.py``.
++``diff`` produces a minimal edit script whose kept lines form a longest common
++subsequence of the two inputs. The script is consumed by ``textdiff/patch.py``.
+ """
+ 
+ 
+@@ -11,6 +10,35 @@ def diff(a, b):
+ 
+     Each op is a tuple: ("keep", line) for a line common to both, ("del", line)
+     for a line only in ``a``, ("ins", line) for a line only in ``b``. The kept
+-    lines must form a longest common subsequence of ``a`` and ``b``.
++    lines form a longest common subsequence of ``a`` and ``b``.
+     """
+-    raise NotImplementedError
++    n, m = len(a), len(b)
++    # dp[i][j] = LCS length of a[i:] and b[j:]
++    dp = [[0] * (m + 1) for _ in range(n + 1)]
++    for i in range(n - 1, -1, -1):
++        for j in range(m - 1, -1, -1):
++            if a[i] == b[j]:
++                dp[i][j] = dp[i + 1][j + 1] + 1
++            else:
++                dp[i][j] = max(dp[i + 1][j], dp[i][j + 1])
++
++    ops = []
++    i = j = 0
++    while i < n and j < m:
++        if a[i] == b[j]:
++            ops.append(("keep", a[i]))
++            i += 1
++            j += 1
++        elif dp[i + 1][j] >= dp[i][j + 1]:
++            ops.append(("del", a[i]))
++            i += 1
++        else:
++            ops.append(("ins", b[j]))
++            j += 1
++    while i < n:
++        ops.append(("del", a[i]))
++        i += 1
++    while j < m:
++        ops.append(("ins", b[j]))
++        j += 1
++    return ops
+diff --git a/textdiff/patch.py b/textdiff/patch.py
+index 0d66f9d..3ded73d 100644
+--- a/textdiff/patch.py
++++ b/textdiff/patch.py
+@@ -1,7 +1,4 @@
+-"""Apply an edit script produced by ``textdiff/diff.py``.
+-
+-NOTE: apply is not implemented — see issue.md.
+-"""
++"""Apply an edit script produced by ``textdiff/diff.py``."""
+ 
+ 
+ class PatchError(Exception):
+@@ -14,4 +11,19 @@ def apply(ops, a):
+     "keep"/"del" ops must match the next line of ``a`` (else PatchError); "ins"
+     ops add a line. Every line of ``a`` must be consumed (else PatchError).
+     """
+-    raise NotImplementedError
++    result = []
++    i = 0
++    for kind, line in ops:
++        if kind in ("keep", "del"):
++            if i >= len(a) or a[i] != line:
++                raise PatchError(f"op {kind!r} {line!r} does not match source at {i}")
++            if kind == "keep":
++                result.append(line)
++            i += 1
++        elif kind == "ins":
++            result.append(line)
++        else:
++            raise PatchError(f"unknown op kind: {kind!r}")
++    if i != len(a):
++        raise PatchError("edit script did not consume all of the source")
++    return result

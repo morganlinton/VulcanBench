@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file feature: the gold spans textdiff/diff.py (an LCS dynamic-programming table plus a backtrack that emits keep/del/ins ops so the kept lines are a *longest* common subsequence) and textdiff/patch.py (a validating applier that matches keep/del against the source, emits keep/ins, and raises PatchError on mismatch or unconsumed source). The two files share only the op-tuple contract, and the defining round-trip invariant apply(diff(a,b), a) == b only holds if both halves agree. The LCS-minimality test rejects a naive delete-all-then-insert-all diff, and the patch-validation tests reject an applier that ignores the source."
+}

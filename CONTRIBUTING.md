@@ -47,7 +47,7 @@ A single task can be validated with:
 
 ```bash
 vulcanbench validate-task tasks/v1/<task-id>
-make validate-tasks   # validates all 49 suite tasks (+ hello-world demo skipped)
+make validate-tasks   # validates all 50 suite tasks (+ hello-world demo skipped)
 ```
 
 All PRs must pass `make ci` before review.

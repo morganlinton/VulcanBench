@@ -1,0 +1,31 @@
+{
+  "id": "py-textdiff",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The exact op-tuple format, the diff/patch two-file split, and the round-trip + LCS-minimality + patch-validation tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "round_trip", "cmd": "python -m pytest test_textdiff.py::test_round_trip -q"},
+      {"name": "kept_is_lcs", "cmd": "python -m pytest test_textdiff.py::test_kept_lines_are_a_longest_common_subsequence -q"},
+      {"name": "known_kinds", "cmd": "python -m pytest test_textdiff.py::test_ops_use_only_known_kinds -q"},
+      {"name": "insert_only", "cmd": "python -m pytest test_textdiff.py::test_insert_only_diff -q"},
+      {"name": "delete_only", "cmd": "python -m pytest test_textdiff.py::test_delete_only_diff -q"},
+      {"name": "rejects_wrong_source", "cmd": "python -m pytest test_textdiff.py::test_apply_rejects_wrong_source -q"},
+      {"name": "consumes_all_source", "cmd": "python -m pytest test_textdiff.py::test_apply_requires_consuming_all_of_source -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "callables_exist", "cmd": "python -m pytest test_textdiff.py::test_callables_exist -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "entry_paths": ["textdiff/diff.py", "textdiff/patch.py"]
+  }
+}

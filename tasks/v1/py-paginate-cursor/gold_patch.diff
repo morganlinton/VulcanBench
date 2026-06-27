@@ -1,0 +1,43 @@
+diff --git a/pagination/cursor.py b/pagination/cursor.py
+index 9829cd8..224f543 100644
+--- a/pagination/cursor.py
++++ b/pagination/cursor.py
+@@ -1,8 +1,7 @@
+ """Opaque pagination cursors over records ordered by ``(ts, id)``.
+ 
+-NOTE: ``is_after`` has a bug — it treats the record *at* the cursor as being
+-"after" the cursor, which makes that record repeat across page boundaries. See
+-issue.md.
++Records are ordered by ``(ts, id)``; the cursor carries both so ties on ``ts``
++are broken by ``id``.
+ """
+ 
+ import base64
+@@ -23,4 +22,4 @@ def decode_cursor(token):
+ 
+ def is_after(record, token):
+     """True if ``record`` sorts strictly after the position named by ``token``."""
+-    return (record["ts"], record["id"]) >= decode_cursor(token)
++    return (record["ts"], record["id"]) > decode_cursor(token)
+diff --git a/pagination/repository.py b/pagination/repository.py
+index af5b00b..1ad9bd6 100644
+--- a/pagination/repository.py
++++ b/pagination/repository.py
+@@ -1,7 +1,7 @@
+ """An in-memory repository with cursor-based pagination.
+ 
+-NOTE: ``page`` reports a ``next_cursor`` even when the page it just returned was
+-the last one, so callers never see the end of the data. See issue.md.
++``page`` returns a ``next_cursor`` only when more records remain, so callers can
++paginate until it is ``None``.
+ """
+ 
+ from pagination.cursor import encode_cursor, is_after
+@@ -27,5 +27,6 @@ class Repository:
+         if after is not None:
+             rows = [r for r in rows if is_after(r, after)]
+         page_items = rows[:limit]
+-        next_cursor = encode_cursor(page_items[-1]) if page_items else None
++        has_more = len(rows) > limit
++        next_cursor = encode_cursor(page_items[-1]) if (page_items and has_more) else None
+         return Page(page_items, next_cursor)

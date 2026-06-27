@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file bug fix: the gold changes pagination/cursor.py (the boundary comparison must be strict, >, so the cursor row is excluded from the next page) and pagination/repository.py (emit next_cursor only when more rows remain, len(rows) > limit). Fixing only one file leaves either duplicated boundary rows or non-terminating pagination; a correct solution requires both, and the tie-break test confirms the cursor's (ts, id) key is used rather than ts alone."
+}

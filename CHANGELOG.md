@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Realistic multi-file bug fix** `py-paginate-cursor` (medium, `multi_file`, `bug_fix`):
+  cursor pagination that repeats rows at page boundaries and never terminates. Two bugs in
+  two files: `pagination/cursor.py` compares with `>=` (the cursor row is treated as "after"
+  itself, so it repeats), and `pagination/repository.py` always advertises a `next_cursor`
+  (so a walk never ends, and loops forever on the last record). Ships real buggy code, not
+  stubs; tests walk the full dataset asserting no duplicates, no gaps, correct tie-breaking
+  on `id`, and termination (with a loop guard so the buggy version fails instead of hanging).
+  Validated (gold=1.0, pre-patch fails, deterministic).
 - **Fourth multi-file task** `py-event-ledger` (hard, `multi_file`): implement an
   event-sourced bank ledger. `ledger/events.py` holds the immutable event schema and a
   pure reducer (`apply_event`/`replay`); `ledger/bank.py` is the command side that validates

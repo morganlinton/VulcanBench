@@ -1,0 +1,31 @@
+{
+  "id": "py-paginate-cursor",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific two-bug split (non-strict cursor comparison in cursor.py plus an always-set next_cursor in repository.py) and the pagination-walk tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "is_after_strict", "cmd": "python -m pytest test_pagination.py::test_is_after_is_strict -q"},
+      {"name": "last_page_no_next", "cmd": "python -m pytest test_pagination.py::test_last_page_has_no_next_cursor -q"},
+      {"name": "full_walk", "cmd": "python -m pytest test_pagination.py::test_full_walk_no_dupes_no_gaps -q"},
+      {"name": "contiguous_pages", "cmd": "python -m pytest test_pagination.py::test_pages_are_contiguous_no_boundary_repeat -q"},
+      {"name": "tie_break", "cmd": "python -m pytest test_pagination.py::test_tie_break_on_id_within_same_timestamp -q"},
+      {"name": "limit_over_size", "cmd": "python -m pytest test_pagination.py::test_limit_larger_than_dataset -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "first_page", "cmd": "python -m pytest test_pagination.py::test_first_page_basic -q"},
+      {"name": "empty", "cmd": "python -m pytest test_pagination.py::test_empty_repository -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["pagination/repository.py", "pagination/cursor.py"]
+  }
+}

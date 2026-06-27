@@ -1,0 +1,105 @@
+diff --git a/pubsub/broker.go b/pubsub/broker.go
+index dc3b26b..cf170fb 100644
+--- a/pubsub/broker.go
++++ b/pubsub/broker.go
+@@ -1,25 +1,60 @@
+ package pubsub
+ 
+-// NOTE: Subscribe and Publish are not implemented — see issue.md. The broker must
+-// be safe for concurrent use.
++import (
++	"sort"
++	"sync"
++)
+ 
+ // Broker routes published messages to subscribers whose pattern matches the
+-// message's topic.
++// message's topic. It is safe for concurrent use.
+ type Broker struct {
++	mu     sync.Mutex
++	subs   map[int]subscription
++	nextID int
++}
++
++type subscription struct {
++	id      int
++	pattern string
++	fn      func(topic string, payload any)
+ }
+ 
+ // New creates an empty broker.
+ func New() *Broker {
+-	return &Broker{}
++	return &Broker{subs: make(map[int]subscription)}
+ }
+ 
+ // Subscribe registers fn to receive messages whose topic matches pattern, and
+ // returns a function that cancels the subscription.
+ func (b *Broker) Subscribe(pattern string, fn func(topic string, payload any)) func() {
+-	return func() {}
++	b.mu.Lock()
++	defer b.mu.Unlock()
++	id := b.nextID
++	b.nextID++
++	b.subs[id] = subscription{id: id, pattern: pattern, fn: fn}
++	return func() {
++		b.mu.Lock()
++		defer b.mu.Unlock()
++		delete(b.subs, id)
++	}
+ }
+ 
+ // Publish delivers payload to every subscription whose pattern matches topic, in
+ // subscription order.
+ func (b *Broker) Publish(topic string, payload any) {
++	b.mu.Lock()
++	var targets []subscription
++	for _, s := range b.subs {
++		if Match(s.pattern, topic) {
++			targets = append(targets, s)
++		}
++	}
++	b.mu.Unlock()
++
++	// Deliver in subscription order, outside the lock so a callback may
++	// (un)subscribe without deadlocking.
++	sort.Slice(targets, func(i, j int) bool { return targets[i].id < targets[j].id })
++	for _, s := range targets {
++		s.fn(topic, payload)
++	}
+ }
+diff --git a/pubsub/match.go b/pubsub/match.go
+index a4ff980..0931f64 100644
+--- a/pubsub/match.go
++++ b/pubsub/match.go
+@@ -1,14 +1,27 @@
+ // Package pubsub is an in-memory publish/subscribe broker with wildcard topic
+ // matching. Topics are dot-separated segments (e.g. "sensor.temp.kitchen").
+-//
+-// NOTE: Match is not implemented — see issue.md for the wildcard rules.
+ package pubsub
+ 
++import "strings"
++
+ // Match reports whether a subscription pattern matches a concrete topic.
+ //
+ // Segments are separated by ".". In a pattern, "+" matches exactly one segment
+ // and "#" matches the remaining zero-or-more segments (and is only valid as the
+ // final segment). All other segments must match literally.
+ func Match(pattern, topic string) bool {
+-	return false
++	p := strings.Split(pattern, ".")
++	t := strings.Split(topic, ".")
++	for i, seg := range p {
++		if seg == "#" {
++			return true // matches the remaining zero-or-more segments
++		}
++		if i >= len(t) {
++			return false // pattern still has segments but topic is exhausted
++		}
++		if seg != "+" && seg != t[i] {
++			return false
++		}
++	}
++	return len(p) == len(t)
+ }

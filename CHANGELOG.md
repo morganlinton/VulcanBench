@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Multi-file feature** `go-pubsub` (hard, `multi_file`): an in-memory publish/subscribe
+  broker with MQTT-style wildcard topics. `pubsub/match.go` implements segment matching (`+`
+  is exactly one segment, `#` matches the trailing remainder including zero segments);
+  `pubsub/broker.go` is a mutex-guarded subscription registry delivering in subscription
+  order, with callbacks invoked outside the lock so a callback may (un)subscribe. The
+  concurrent test runs under `-race`, so a non-thread-safe solution is rejected. Validated
+  (gold=1.0, pre-patch fails, deterministic); the gold patch spans both files.
 - **Multi-file feature** `ts-state-machine` (medium, `multi_file`): implement a finite state
   machine over a transition table. `src/transitions.ts` indexes `{from, event, to}` triples
   for `nextState`/`allowedEvents`; `src/machine.ts` drives state + history and uses the table

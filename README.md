@@ -9,7 +9,7 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity — with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.5.1** — 46 gold-verified tasks, tool-calling agent (mock / OpenAI /
+**v0.5.1** — 47 gold-verified tasks, tool-calling agent (mock / OpenAI /
 Anthropic / Z.ai), Docker sandbox, pre-run cost estimates with bundled priors
 (`vulcanbench estimate`), `v1-compare` suite, five-metric scoring, suite runs,
 and HTML replay.
@@ -149,7 +149,7 @@ vulcanbench/sandbox:base -f sandbox/Dockerfile.base .` (Python + Go + Node).
 
 ## Tasks
 
-The `tasks/v1/` suite holds **46** gold-verified tasks across Python,
+The `tasks/v1/` suite holds **47** gold-verified tasks across Python,
 Go, TypeScript, and Rust, plus the `hello-world` demo. Each task ships a starting
 `repo/`, **hidden** `tests/` (never shown to the agent), declarative
 `fail_to_pass`/`pass_to_pass` test commands in `metadata.json`, and a

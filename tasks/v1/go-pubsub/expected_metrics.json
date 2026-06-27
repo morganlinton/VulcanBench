@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file feature: the gold spans pubsub/match.go (segment-wise wildcard matching where + consumes one segment, # matches the trailing remainder including zero segments, and non-wildcard patterns require equal segment counts) and pubsub/broker.go (a mutex-guarded subscription map with monotonic ids; Publish snapshots matching subs under the lock, sorts by id for subscription-order delivery, and invokes callbacks outside the lock so a callback may (un)subscribe without deadlock). The difficulty is cross-file plus concurrency: the broker depends on Match's contract, and the concurrent pass_to_pass test runs under -race so a non-thread-safe solution is rejected. Edge-dense matching (#-matches-zero, + is exactly one) discriminates partial implementations."
+}

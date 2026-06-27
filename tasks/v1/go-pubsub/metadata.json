@@ -1,0 +1,29 @@
+{
+  "id": "go-pubsub",
+  "category": "feature",
+  "languages": ["go"],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific wildcard rules, the match.go/broker.go split, and the subscription-order delivery and unsubscribe tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "match_wildcards", "cmd": "go test -run '^TestMatchLiteralAndWildcards$' ./..."},
+      {"name": "deliver_matching", "cmd": "go test -run '^TestPublishDeliversToMatchingSubscribers$' ./..."},
+      {"name": "payload", "cmd": "go test -run '^TestPublishPassesPayload$' ./..."},
+      {"name": "unsubscribe", "cmd": "go test -run '^TestUnsubscribeStopsDelivery$' ./..."}
+    ],
+    "pass_to_pass": [
+      {"name": "no_subscribers", "cmd": "go test -run '^TestPublishNoSubscribersIsNoop$' ./..."},
+      {"name": "concurrent_race_free", "cmd": "go test -race -run '^TestConcurrentSubscribePublishIsRaceFree$' ./..."}
+    ]
+  },
+  "test_timeout_s": 180,
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "entry_paths": ["pubsub/match.go", "pubsub/broker.go"]
+  }
+}

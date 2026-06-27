@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Fourth multi-file task** `py-event-ledger` (hard, `multi_file`): implement an
+  event-sourced bank ledger. `ledger/events.py` holds the immutable event schema and a
+  pure reducer (`apply_event`/`replay`); `ledger/bank.py` is the command side that validates
+  commands, emits events, and maintains live balances through the reducer. The difficulty is
+  cross-file: the live state must always equal a replay of the log, a successful `transfer`
+  must emit exactly two events atomically (never a half-applied transfer), rejected commands
+  must emit nothing, and `Bank.from_history(history())` must reproduce balances exactly.
+  Validated (gold=1.0, pre-patch=0.0, deterministic); the gold patch spans both files.
+  Suite v1: 42 tasks, 14 hard, 6 non-localized.
 - **Third multi-file task** `py-bytecode-vm` (hard, `multi_file`): implement a bytecode
   compiler and a stack VM that share only a documented instruction set. `vmlang/compiler.py`
   lowers an AST to a flat instruction list (with backpatched forward jumps for `if` and

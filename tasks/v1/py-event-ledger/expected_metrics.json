@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file task: the gold spans ledger/events.py (immutable event schema + a non-mutating reducer that folds events into balances) and ledger/bank.py (command validation + emitting events + maintaining live state through the reducer + rebuild-from-history). The difficulty is cross-file: the bank must emit exactly the events the reducer interprets and keep its live balances equal to a replay of the log, so the central event-sourcing invariant (snapshot == replay(history)) holds. The atomic two-event transfer and the no-event-on-rejected-command rule require the command side and the reducer to stay consistent; a state update that bypasses the log, or a transfer that emits one event before failing, breaks the rebuild-matches-live invariant."
+}

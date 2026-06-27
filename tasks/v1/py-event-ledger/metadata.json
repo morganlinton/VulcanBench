@@ -1,0 +1,31 @@
+{
+  "id": "py-event-ledger",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The event schema, the two-file split between the pure reducer and the command-side Bank, the atomic two-event transfer, and the replay/rebuild-consistency tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "open_deposit_balance", "cmd": "python -m pytest test_ledger.py::test_open_deposit_balance -q"},
+      {"name": "withdraw_and_insufficient", "cmd": "python -m pytest test_ledger.py::test_withdraw_and_insufficient_funds -q"},
+      {"name": "validation_errors", "cmd": "python -m pytest test_ledger.py::test_validation_errors -q"},
+      {"name": "transfer_two_events", "cmd": "python -m pytest test_ledger.py::test_transfer_moves_funds_with_two_events -q"},
+      {"name": "transfer_atomic", "cmd": "python -m pytest test_ledger.py::test_transfer_is_atomic_on_insufficient_funds -q"},
+      {"name": "rebuild_from_history", "cmd": "python -m pytest test_ledger.py::test_rebuild_from_history_matches_live_state -q"},
+      {"name": "snapshot_equals_replay", "cmd": "python -m pytest test_ledger.py::test_snapshot_equals_replay_of_history -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "construct", "cmd": "python -m pytest test_ledger.py::test_construct -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "entry_paths": ["ledger/bank.py", "ledger/events.py"]
+  }
+}

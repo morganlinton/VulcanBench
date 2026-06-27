@@ -24,16 +24,17 @@ import pytest
 
 # Floors, not targets: the suite must not silently shrink below what is shipped.
 # v1 was pruned from 52 -> 43 -> 31 (9 unsolvable scaffolds, then 12
-# zero-discrimination "Double" one-liners), then grew to 41 as hard,
+# zero-discrimination "Double" one-liners), then grew to 42 as hard,
 # discriminating tasks were added (py-expr-eval, go-parallel-map,
 # py-sliding-window-max, go-ttl-lru-cache, py-url-normalize, py-semver-compare,
 # py-config-parse, py-reactive-sheet [first real multi_file], py-txn-kvstore
 # [second multi_file: nested-transaction undo journal across two files],
-# py-bytecode-vm [third multi_file: bytecode compiler + stack VM sharing an ISA]).
+# py-bytecode-vm [third multi_file: bytecode compiler + stack VM sharing an ISA],
+# py-event-ledger [fourth multi_file: event-sourced ledger, reducer + command side]).
 # The large/navigation tier shed mislabeled one-liners (12 -> 7). Raise these as
 # more discriminating tasks land.
 TASKS_ROOT = Path("tasks/v1")
-M3_MIN_REAL_TASKS = 41
+M3_MIN_REAL_TASKS = 42
 M2_MIN_MEDIUM_LARGE = 7
 
 
@@ -99,9 +100,9 @@ def test_task_complexity_labels() -> None:
 
 # --- composition discipline: keep the suite from regressing to easy filler ---
 
-MIN_HARD_TASKS = 13
+MIN_HARD_TASKS = 14
 MIN_MEDIUM_OR_HARD_FRACTION = 0.6
-MIN_NON_LOCALIZED_TASKS = 5
+MIN_NON_LOCALIZED_TASKS = 6
 
 
 def test_hard_task_floor() -> None:

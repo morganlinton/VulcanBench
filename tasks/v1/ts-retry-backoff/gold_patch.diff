@@ -1,0 +1,34 @@
+diff --git a/src/retry.ts b/src/retry.ts
+index 80fa446..f0ba952 100644
+--- a/src/retry.ts
++++ b/src/retry.ts
+@@ -1,10 +1,9 @@
+ /**
+  * Retry an async operation with exponential backoff.
+  *
+- * NOTE: this implementation has two bugs — it runs one fewer attempt than
+- * requested (so an operation that would succeed on its final allowed attempt is
+- * reported as failed), and it does not cap the backoff delay at `maxDelayMs`
+- * (delays grow without bound). See issue.md.
++ * The operation is attempted up to `attempts` times (the first call plus
++ * retries). Before the k-th retry it waits `min(baseDelayMs * 2 ** (k - 1),
++ * maxDelayMs)` milliseconds. If every attempt fails, the last error is thrown.
+  */
+ 
+ export interface RetryOptions {
+@@ -28,13 +27,13 @@ export async function retry<T>(
+   const { attempts, baseDelayMs, maxDelayMs } = options;
+   const sleep = options.sleep ?? realSleep;
+   let lastError: unknown;
+-  for (let attempt = 1; attempt <= attempts - 1; attempt++) {
++  for (let attempt = 1; attempt <= attempts; attempt++) {
+     try {
+       return await fn();
+     } catch (err) {
+       lastError = err;
+       if (attempt < attempts) {
+-        const delay = baseDelayMs * 2 ** (attempt - 1);
++        const delay = Math.min(baseDelayMs * 2 ** (attempt - 1), maxDelayMs);
+         await sleep(delay);
+       }
+     }

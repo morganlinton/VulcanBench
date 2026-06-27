@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Bug fix in src/retry.ts: the loop must run up to `attempts` iterations (not attempts - 1) so the final allowed attempt executes, and the backoff delay must be Math.min(baseDelayMs * 2 ** (attempt - 1), maxDelayMs). The injected sleep recorder makes the exact delay sequence assertable ([10, 20, 40, 50, 50] for base=10/max=50), so an uncapped fix fails on the delay sequence and an off-by-one fix fails the last-attempt and call-count checks. Deterministic: no real timers."
+}

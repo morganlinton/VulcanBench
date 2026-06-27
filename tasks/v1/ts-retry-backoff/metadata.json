@@ -1,0 +1,28 @@
+{
+  "id": "ts-retry-backoff",
+  "category": "bug_fix",
+  "languages": ["typescript"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific two-bug retry helper (attempt off-by-one plus uncapped backoff), the injected sleep recorder, and the exact delay-sequence assertions are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "succeeds_last_attempt", "cmd": "node --experimental-strip-types --test --test-name-pattern='^succeeds on the last allowed attempt$' tests/retry.test.ts"},
+      {"name": "caps_backoff", "cmd": "node --experimental-strip-types --test --test-name-pattern='^caps backoff delay at maxDelayMs$' tests/retry.test.ts"},
+      {"name": "throws_last_error", "cmd": "node --experimental-strip-types --test --test-name-pattern='^throws the last error after exhausting all attempts$' tests/retry.test.ts"}
+    ],
+    "pass_to_pass": [
+      {"name": "first_success", "cmd": "node --experimental-strip-types --test --test-name-pattern='^returns immediately on first success$' tests/retry.test.ts"},
+      {"name": "retries_then_succeeds", "cmd": "node --experimental-strip-types --test --test-name-pattern='^retries then succeeds early$' tests/retry.test.ts"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 60,
+    "entry_paths": ["src/retry.ts"]
+  }
+}

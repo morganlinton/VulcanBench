@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Async bug fix** `ts-retry-backoff` (medium, `bug_fix`): an exponential-backoff retry
+  helper in `src/retry.ts` with two classic bugs — an off-by-one that runs `attempts - 1`
+  tries (so an operation that would succeed on its final attempt is reported failed), and an
+  uncapped delay that ignores `maxDelayMs`. An injected `sleep` recorder makes the exact
+  backoff schedule (`[10, 20, 40, 50, 50]`) and the call count assertable with no real
+  timers. Validated (gold=1.0, pre-patch fails, deterministic).
 - **Concurrency bug fix** `go-ratelimit` (hard, `concurrency`): a token-bucket rate limiter
   for throttling an API client that over-grants and races. `bucket/bucket.go` never clamps
   refill to capacity (an idle bucket grants a huge burst) and has no locking (concurrent

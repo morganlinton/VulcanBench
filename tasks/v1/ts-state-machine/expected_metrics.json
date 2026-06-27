@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Multi-file feature: the gold spans src/transitions.ts (build a nested from->event->to index in the constructor; nextState/allowedEvents read it) and src/machine.ts (can delegates to the table; send validates via nextState, throwing InvalidTransitionError and leaving state/history/listeners untouched on an invalid event, otherwise advancing state, appending history, and notifying listeners in registration order). The difficulty is cross-file: the machine must rely on the table's lookup contract, and the no-op-on-invalid guarantee plus listener ordering have to be kept consistent across the two modules."
+}

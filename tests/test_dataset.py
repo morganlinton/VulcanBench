@@ -24,7 +24,7 @@ import pytest
 
 # Floors, not targets: the suite must not silently shrink below what is shipped.
 # v1 was pruned from 52 -> 43 -> 31 (9 unsolvable scaffolds, then 12
-# zero-discrimination "Double" one-liners), then grew to 45 as hard,
+# zero-discrimination "Double" one-liners), then grew to 46 as hard,
 # discriminating tasks were added (py-expr-eval, go-parallel-map,
 # py-sliding-window-max, go-ttl-lru-cache, py-url-normalize, py-semver-compare,
 # py-config-parse, py-reactive-sheet [first real multi_file], py-txn-kvstore
@@ -34,7 +34,7 @@ import pytest
 # The large/navigation tier shed mislabeled one-liners (12 -> 7). Raise these as
 # more discriminating tasks land.
 TASKS_ROOT = Path("tasks/v1")
-M3_MIN_REAL_TASKS = 45
+M3_MIN_REAL_TASKS = 46
 M2_MIN_MEDIUM_LARGE = 7
 
 
@@ -102,7 +102,7 @@ def test_task_complexity_labels() -> None:
 
 MIN_HARD_TASKS = 15
 MIN_MEDIUM_OR_HARD_FRACTION = 0.6
-MIN_NON_LOCALIZED_TASKS = 7
+MIN_NON_LOCALIZED_TASKS = 8
 
 
 def test_hard_task_floor() -> None:

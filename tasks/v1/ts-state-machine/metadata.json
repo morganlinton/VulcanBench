@@ -1,0 +1,29 @@
+{
+  "id": "ts-state-machine",
+  "category": "feature",
+  "languages": ["typescript"],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The two-file split between TransitionTable and Machine, the order-workflow transitions, and the unchanged-on-invalid and listener-ordering tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "table_lookup", "cmd": "node --experimental-strip-types --test --test-name-pattern='^table nextState and allowedEvents$' tests/machine.test.ts"},
+      {"name": "valid_transitions", "cmd": "node --experimental-strip-types --test --test-name-pattern='^valid transitions advance state and record history$' tests/machine.test.ts"},
+      {"name": "invalid_unchanged", "cmd": "node --experimental-strip-types --test --test-name-pattern='^invalid transition throws and leaves the machine unchanged$' tests/machine.test.ts"},
+      {"name": "can_reflects", "cmd": "node --experimental-strip-types --test --test-name-pattern='^can reflects the allowed events of the current state$' tests/machine.test.ts"},
+      {"name": "on_transition", "cmd": "node --experimental-strip-types --test --test-name-pattern='^onTransition notifies listeners with the payload, in order$' tests/machine.test.ts"}
+    ],
+    "pass_to_pass": [
+      {"name": "initial_state", "cmd": "node --experimental-strip-types --test --test-name-pattern='^initial state and history$' tests/machine.test.ts"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["src/machine.ts", "src/transitions.ts"]
+  }
+}

@@ -1,0 +1,92 @@
+diff --git a/src/machine.ts b/src/machine.ts
+index 81845c2..f99b1a1 100644
+--- a/src/machine.ts
++++ b/src/machine.ts
+@@ -1,8 +1,7 @@
+ /**
+- * A finite state machine driven by a TransitionTable.
+- *
+- * NOTE: can/send/onTransition are not implemented — see issue.md. The current
+- * state and history are set up in the constructor.
++ * A finite state machine driven by a TransitionTable. The table decides which
++ * transitions are legal; the machine tracks the current state, the history of
++ * visited states, and notifies listeners after each successful transition.
+  */
+ 
+ import { TransitionTable } from "./transitions.ts";
+@@ -39,17 +38,28 @@ export class Machine {
+ 
+   /** Whether `event` has a valid transition out of the current state. */
+   can(event: string): boolean {
+-    throw new Error("not implemented");
++    return this.table.nextState(this.current, event) !== undefined;
+   }
+ 
+   /** Apply `event`, advancing the state. Throws InvalidTransitionError if the
+    *  event is not valid in the current state (leaving the machine unchanged). */
+   send(event: string): void {
+-    throw new Error("not implemented");
++    const to = this.table.nextState(this.current, event);
++    if (to === undefined) {
++      throw new InvalidTransitionError(
++        `cannot '${event}' from '${this.current}'`,
++      );
++    }
++    const from = this.current;
++    this.current = to;
++    this.trail.push(to);
++    for (const listener of this.listeners) {
++      listener({ from, event, to });
++    }
+   }
+ 
+   /** Register a listener invoked after every successful transition. */
+   onTransition(listener: Listener): void {
+-    throw new Error("not implemented");
++    this.listeners.push(listener);
+   }
+ }
+diff --git a/src/transitions.ts b/src/transitions.ts
+index 45cfc7d..2bad382 100644
+--- a/src/transitions.ts
++++ b/src/transitions.ts
+@@ -1,9 +1,7 @@
+ /**
+  * A transition table for a finite state machine: which event moves the machine
+- * from which state to which next state.
+- *
+- * NOTE: the lookup methods are not implemented — see issue.md. Build an index in
+- * the constructor so nextState/allowedEvents are O(1)/O(events).
++ * from which state to which next state. The constructor indexes the transitions
++ * so nextState/allowedEvents are cheap lookups.
+  */
+ 
+ export interface Transition {
+@@ -16,16 +14,24 @@ export class TransitionTable {
+   private index = new Map<string, Map<string, string>>();
+ 
+   constructor(transitions: Transition[]) {
+-    void transitions;
++    for (const { from, event, to } of transitions) {
++      let byEvent = this.index.get(from);
++      if (byEvent === undefined) {
++        byEvent = new Map<string, string>();
++        this.index.set(from, byEvent);
++      }
++      byEvent.set(event, to);
++    }
+   }
+ 
+   /** The state reached by applying `event` in `from`, or undefined if none. */
+   nextState(from: string, event: string): string | undefined {
+-    throw new Error("not implemented");
++    return this.index.get(from)?.get(event);
+   }
+ 
+   /** The events that have a transition defined out of `from`. */
+   allowedEvents(from: string): string[] {
+-    throw new Error("not implemented");
++    const byEvent = this.index.get(from);
++    return byEvent === undefined ? [] : [...byEvent.keys()];
+   }
+ }

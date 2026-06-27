@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Multi-file feature** `ts-state-machine` (medium, `multi_file`): implement a finite state
+  machine over a transition table. `src/transitions.ts` indexes `{from, event, to}` triples
+  for `nextState`/`allowedEvents`; `src/machine.ts` drives state + history and uses the table
+  to validate `send`, throwing `InvalidTransitionError` and staying a no-op on an invalid
+  event, and notifying listeners in registration order. First non-localized TypeScript task.
+  Validated (gold=1.0, pre-patch fails, deterministic); the gold patch spans both files.
 - **Async bug fix** `ts-retry-backoff` (medium, `bug_fix`): an exponential-backoff retry
   helper in `src/retry.ts` with two classic bugs — an off-by-one that runs `attempts - 1`
   tries (so an operation that would succeed on its final attempt is reported failed), and an

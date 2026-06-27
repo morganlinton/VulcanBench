@@ -10,7 +10,7 @@ VulcanBench/
 │   ├── sandbox/      # DockerToolExecutor (non-root, network-off)
 │   ├── evaluator/    # functional + quality + security + efficiency + human_like
 │   └── tracer/       # JSONL + self-contained replay.html
-├── tasks/v1/         # 45 gold-verified suite tasks (+ hello-world demo)
+├── tasks/v1/         # 46 gold-verified suite tasks (+ hello-world demo)
 ├── dashboard/        # Next.js App Router (leaderboard, trace viewer, submit)
 ├── backend/          # FastAPI + SQLModel (filesystem or Postgres)
 ├── sandbox/          # Dockerfile.base + task template

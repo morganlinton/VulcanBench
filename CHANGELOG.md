@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Concurrency bug fix** `go-ratelimit` (hard, `concurrency`): a token-bucket rate limiter
+  for throttling an API client that over-grants and races. `bucket/bucket.go` never clamps
+  refill to capacity (an idle bucket grants a huge burst) and has no locking (concurrent
+  `Allow` callers race and over-grant). The fix needs both a capacity clamp and a mutex held
+  across refill+consume. Tests inject a clock for deterministic timing and run under `-race`,
+  asserting exactly `capacity` concurrent grants. Validated (gold=1.0, pre-patch fails,
+  deterministic).
 - **Realistic multi-file bug fix** `py-paginate-cursor` (medium, `multi_file`, `bug_fix`):
   cursor pagination that repeats rows at page boundaries and never terminates. Two bugs in
   two files: `pagination/cursor.py` compares with `>=` (the cursor row is treated as "after"

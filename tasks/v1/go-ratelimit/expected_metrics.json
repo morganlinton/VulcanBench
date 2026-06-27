@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Concurrency bug fix in bucket/bucket.go: refill() must clamp tokens to capacity, and Allow/AllowN must serialize access (a sync.Mutex held across refill + consume). The clamp test fails pre-fix because an idle bucket over-refills; the concurrent test runs under -race and asserts exactly capacity grants, so it fails both on the data race and on the over-grant from lost updates. A fix that only adds the clamp still trips -race; one that only adds the lock still over-grants after idle. The injected clock keeps timing deterministic."
+}

@@ -1,0 +1,27 @@
+{
+  "id": "go-ratelimit",
+  "category": "concurrency",
+  "languages": ["go"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific two-bug token bucket (missing capacity clamp plus missing lock) with an injected clock and the exact-capacity concurrent grant test is not derived from any existing repository, so it post-dates all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "capacity_clamped", "cmd": "go test -run '^TestCapacityIsClamped$' ./..."},
+      {"name": "concurrent_exact_capacity", "cmd": "go test -race -run '^TestConcurrentAllowGrantsExactlyCapacity$' ./..."}
+    ],
+    "pass_to_pass": [
+      {"name": "allow_until_empty", "cmd": "go test -run '^TestAllowUntilEmpty$' ./..."},
+      {"name": "refill_gradual", "cmd": "go test -run '^TestRefillIsGradual$' ./..."}
+    ]
+  },
+  "test_timeout_s": 180,
+  "agent_hints": {
+    "suggested_max_steps": 70,
+    "entry_paths": ["bucket/bucket.go"]
+  }
+}

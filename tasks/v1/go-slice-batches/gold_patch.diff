@@ -1,0 +1,32 @@
+diff --git a/batch/batch.go b/batch/batch.go
+index 3f46b6e..1290103 100644
+--- a/batch/batch.go
++++ b/batch/batch.go
+@@ -1,14 +1,9 @@
+ // Package batch splits a slice into consecutive batches.
+-//
+-// NOTE: Batches has a bug — each returned batch is a sub-slice of the input's
+-// backing array, so the batches alias each other and the input. Appending to one
+-// batch can silently overwrite the next batch (and mutate the caller's slice).
+-// See issue.md.
+ package batch
+ 
+ // Batches splits items into consecutive batches of at most size elements. A size
+-// below 1 is treated as 1. Each batch must be independent of the others and of
+-// the input: appending to or growing one batch must not disturb anything else.
++// below 1 is treated as 1. Each batch is an independent copy, so appending to or
++// growing one batch never disturbs the other batches or the input.
+ func Batches(items []int, size int) [][]int {
+ 	if size < 1 {
+ 		size = 1
+@@ -19,7 +14,9 @@ func Batches(items []int, size int) [][]int {
+ 		if end > len(items) {
+ 			end = len(items)
+ 		}
+-		out = append(out, items[i:end])
++		b := make([]int, end-i)
++		copy(b, items[i:end])
++		out = append(out, b)
+ 	}
+ 	return out
+ }

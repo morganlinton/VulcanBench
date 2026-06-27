@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Bug fix in batch/batch.go for the classic Go slice-aliasing footgun: returning items[i:end] gives each batch spare capacity over the input's backing array, so append(b[0], x) overwrites b[1] and the caller's slice. The fix copies each batch into fresh storage (make + copy, or a full three-index slice items[i:end:end] to cap it). The contents/size-clamp tests pass on the buggy version (values are correct); the independence, no-alias, and zero-spare-capacity tests fail until each batch owns its storage. Deterministic."
+}

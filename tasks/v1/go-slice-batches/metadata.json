@@ -1,0 +1,28 @@
+{
+  "id": "go-slice-batches",
+  "category": "bug_fix",
+  "languages": ["go"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific batching API and the alias/independence/spare-capacity tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "append_no_corrupt", "cmd": "go test -run '^TestAppendingToABatchDoesNotCorruptTheNext$' ./..."},
+      {"name": "no_alias_input", "cmd": "go test -run '^TestBatchesDoNotAliasTheInput$' ./..."},
+      {"name": "no_spare_capacity", "cmd": "go test -run '^TestEachBatchHasNoSpareCapacity$' ./..."}
+    ],
+    "pass_to_pass": [
+      {"name": "contents", "cmd": "go test -run '^TestBatchesContents$' ./..."},
+      {"name": "size_clamp", "cmd": "go test -run '^TestSizeBelowOneIsTreatedAsOne$' ./..."}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 50,
+    "entry_paths": ["batch/batch.go"]
+  }
+}

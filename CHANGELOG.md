@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Bug fix** `go-slice-batches` (medium, `bug_fix`): the classic Go slice-aliasing footgun.
+  `batch.Batches` returns `items[i:end]` sub-slices that keep spare capacity over the input's
+  backing array, so `append(b[0], x)` overwrites the next batch and the caller's slice. The
+  fix copies each batch into its own storage. Contents/size-clamp tests pass on the buggy
+  version (values are correct); independence, no-alias, and zero-spare-capacity tests fail
+  until fixed. Validated (gold=1.0, pre-patch fails, deterministic).
 - **Behavior-preserving refactor** `py-extract-pricing` (medium, `refactor`, `multi_file`):
   `shop/checkout.py` inlines every pricing rule in one `total` function; extract them into the
   four pure helpers in `shop/pricing.py` (subtotal, discount, tax, shipping) and have `total`

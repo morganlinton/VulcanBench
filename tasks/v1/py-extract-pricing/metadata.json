@@ -1,0 +1,29 @@
+{
+  "id": "py-extract-pricing",
+  "category": "refactor",
+  "languages": ["python"],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-06-26",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-26. The specific pricing rules (discount codes, basis-point tax flooring, free-shipping threshold), the checkout/pricing split, and the behavior-preserving extraction tests are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "repo_scale": "small",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "subtotal", "cmd": "python -m pytest test_pricing.py::test_subtotal -q"},
+      {"name": "discount_codes", "cmd": "python -m pytest test_pricing.py::test_discount_codes -q"},
+      {"name": "tax_floors", "cmd": "python -m pytest test_pricing.py::test_tax_floors -q"},
+      {"name": "shipping_threshold", "cmd": "python -m pytest test_pricing.py::test_shipping_threshold -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "total_end_to_end", "cmd": "python -m pytest test_pricing.py::test_total_end_to_end -q"},
+      {"name": "total_free_shipping", "cmd": "python -m pytest test_pricing.py::test_total_free_shipping_after_big_order -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 70,
+    "entry_paths": ["shop/pricing.py", "shop/checkout.py"]
+  }
+}

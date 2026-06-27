@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Behavior-preserving refactor across two files: implement the four pure helpers in shop/pricing.py exactly as currently inlined in shop/checkout.py (integer-floor discount percentages, the flat 5OFF capped at the subtotal, basis-point tax flooring, the 5000-cent free-shipping threshold), then rewrite checkout.total to compose subtotal -> discount -> tax-on-discounted + shipping-on-discounted. The four pricing tests fail pre-refactor (stubs) and pass once extracted; the end-to-end total tests already pass and must stay green, so any drift in the extracted rules is caught. Edge cases (flooring, the discount cap, the exact threshold) discriminate a faithful extraction from an approximate one."
+}

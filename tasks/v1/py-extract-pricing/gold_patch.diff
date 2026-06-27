@@ -1,0 +1,84 @@
+diff --git a/shop/checkout.py b/shop/checkout.py
+index a759788..f6c46a3 100644
+--- a/shop/checkout.py
++++ b/shop/checkout.py
+@@ -1,9 +1,9 @@
+-"""Order checkout. ``total`` currently inlines every pricing rule.
+-
+-NOTE: the pricing rules below should be extracted into ``shop/pricing.py`` and
+-reused here without changing the result. See issue.md.
++"""Order checkout. The pricing rules live in ``shop/pricing.py`` and ``total``
++composes them.
+ """
+ 
++from shop.pricing import discount, shipping, subtotal, tax
++
+ 
+ def total(items, code, rate_bps):
+     """Order total in integer cents.
+@@ -12,20 +12,6 @@ def total(items, code, rate_bps):
+     code:  discount code (or None)
+     rate_bps: tax rate in basis points (1% == 100 bps)
+     """
+-    sub = 0
+-    for it in items:
+-        sub += it["price_cents"] * it["qty"]
+-
+-    if code == "SAVE10":
+-        disc = sub * 10 // 100
+-    elif code == "HALF":
+-        disc = sub * 50 // 100
+-    elif code == "5OFF":
+-        disc = min(500, sub)
+-    else:
+-        disc = 0
+-    discounted = sub - disc
+-
+-    tax_amt = discounted * rate_bps // 10000
+-    ship = 0 if discounted >= 5000 else 599
+-    return discounted + tax_amt + ship
++    sub = subtotal(items)
++    discounted = sub - discount(sub, code)
++    return discounted + tax(discounted, rate_bps) + shipping(discounted)
+diff --git a/shop/pricing.py b/shop/pricing.py
+index 819a6ab..cd517f6 100644
+--- a/shop/pricing.py
++++ b/shop/pricing.py
+@@ -1,25 +1,30 @@
+-"""Pure pricing helpers. To be extracted from ``shop/checkout.py``.
++"""Pure pricing helpers, extracted from ``shop/checkout.py``.
+ 
+-All amounts are integer cents; every rule floors (integer division). See issue.md
+-for the exact contract.
++All amounts are integer cents; every rule floors (integer division).
+ """
+ 
+ 
+ def subtotal(items):
+     """Sum of price_cents * qty over items."""
+-    raise NotImplementedError
++    return sum(it["price_cents"] * it["qty"] for it in items)
+ 
+ 
+ def discount(subtotal_cents, code):
+     """Discount amount in cents for the given code (0 if none/unknown)."""
+-    raise NotImplementedError
++    if code == "SAVE10":
++        return subtotal_cents * 10 // 100
++    if code == "HALF":
++        return subtotal_cents * 50 // 100
++    if code == "5OFF":
++        return min(500, subtotal_cents)
++    return 0
+ 
+ 
+ def tax(amount_cents, rate_bps):
+     """Tax on amount_cents at rate_bps basis points, floored."""
+-    raise NotImplementedError
++    return amount_cents * rate_bps // 10000
+ 
+ 
+ def shipping(amount_cents):
+     """Shipping cost in cents for an order whose discounted amount is given."""
+-    raise NotImplementedError
++    return 0 if amount_cents >= 5000 else 599

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Behavior-preserving refactor** `py-extract-pricing` (medium, `refactor`, `multi_file`):
+  `shop/checkout.py` inlines every pricing rule in one `total` function; extract them into the
+  four pure helpers in `shop/pricing.py` (subtotal, discount, tax, shipping) and have `total`
+  compose them without changing results. The pricing tests fail pre-refactor (stubs); the
+  end-to-end total tests already pass and must stay green, so any drift in the extracted
+  rules (flooring, the flat-discount cap, the free-shipping threshold) is caught. Validated
+  (gold=1.0, pre-patch fails, deterministic). Broadens the `refactor` category.
 - **Multi-file feature** `go-pubsub` (hard, `multi_file`): an in-memory publish/subscribe
   broker with MQTT-style wildcard topics. `pubsub/match.go` implements segment matching (`+`
   is exactly one segment, `#` matches the trailing remainder including zero segments);

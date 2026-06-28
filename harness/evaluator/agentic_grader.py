@@ -186,3 +186,180 @@ def _extract_verdict(content: str | None) -> tuple[bool, float | None, str] | No
     except (TypeError, ValueError):
         confidence = None
     return correct, confidence, str(obj.get("reasons", ""))
+
+
+# --- rubric grading (mergeability, not just correctness) -----------------------
+#
+# A rubric grades whether a change would be *merged*, not merely whether it works:
+# a list of BLOCKING criteria (failing any => score 0) plus WEIGHTED quality
+# criteria (weighted aggregate). Correctness is a blocking criterion, so the
+# functional score becomes continuous in [0, 1] and a working-but-unmergeable
+# change scores below a clean one. This is the discriminating axis once functional
+# correctness saturates at the frontier.
+
+_RUBRIC_SYSTEM = (
+    "You are a senior engineer doing code review. You decide whether a candidate code "
+    "change is MERGEABLE into this codebase: not just whether it works, but whether it "
+    "meets the team's quality bar given the surrounding code. Evaluate each listed "
+    "criterion independently as pass/fail, strictly and fairly, judging against the "
+    "existing code shown rather than your own preferences."
+)
+
+
+def _normalize_weighted(items: Any) -> list[tuple[float, str]]:
+    out: list[tuple[float, str]] = []
+    for it in items or []:
+        if not isinstance(it, dict):
+            continue
+        crit = it.get("criterion") or it.get("c")
+        if not (isinstance(crit, str) and crit.strip()):
+            continue
+        raw_weight = it.get("weight", it.get("w", 1))
+        try:
+            weight = float(raw_weight) if raw_weight is not None else 1.0
+        except (TypeError, ValueError):
+            weight = 1.0
+        out.append((weight, crit.strip()))
+    return out
+
+
+def grade_rubric(
+    *,
+    issue: str,
+    patch: str,
+    rubric: dict[str, Any],
+    gold_patch: str,
+    provider: LLMProvider,
+    remaining_s: RemainingSeconds | None = None,
+    samples: int = 1,
+) -> GraderResult:
+    """Grade ``patch`` against a mergeability ``rubric`` via ``provider``.
+
+    ``rubric`` = ``{"blocking": [str, ...], "weighted": [{"weight": n,
+    "criterion": str}, ...], "pass_threshold": float}``. Score is 0 if any
+    blocking criterion fails, else the weighted fraction of passing quality
+    criteria. ``correct`` is ``score >= pass_threshold`` (default 1.0). With
+    ``samples > 1`` each criterion is decided by majority vote (ties -> fail).
+    """
+    if not patch.strip():
+        return GraderResult(False, 0.0, {"reason": "no patch to grade"})
+    blocking = [c for c in (rubric.get("blocking") or []) if isinstance(c, str) and c.strip()]
+    weighted = _normalize_weighted(rubric.get("weighted"))
+    if not blocking and not weighted:
+        return GraderResult(None, None, {"reason": "task has no rubric"})
+    threshold = float(rubric.get("pass_threshold", 1.0))
+
+    messages = _build_rubric_messages(issue, patch, blocking, weighted, gold_patch)
+    blk_votes: list[list[bool]] = []
+    wtd_votes: list[list[bool]] = []
+    tokens = 0
+    failures: list[str] = []
+    last_notes = ""
+    for _ in range(max(1, samples)):
+        timeout_s = remaining_s() if remaining_s is not None else None
+        if timeout_s is not None and timeout_s <= 0:
+            failures.append("run budget exceeded")
+            break
+        try:
+            resp = _complete_with_optional_timeout(provider, messages, [], timeout_s)
+        except ProviderError as e:
+            failures.append(f"provider error: {e}")
+            continue
+        tokens += resp.usage.prompt_tokens + resp.usage.completion_tokens
+        v = _extract_rubric_verdict(resp.content)
+        if v is None:
+            failures.append("unparsable response")
+            continue
+        blk_votes.append(v[0])
+        wtd_votes.append(v[1])
+        last_notes = v[2] or last_notes
+
+    base: dict[str, Any] = {"model": provider.spec, "grader_tokens": tokens}
+    if failures:
+        base["failures"] = failures
+    if not blk_votes and not wtd_votes:
+        return GraderResult(None, None, {**base, "reason": "no valid grader verdict"})
+
+    blk_pass = _majority_cols(blk_votes, len(blocking))
+    wtd_pass = _majority_cols(wtd_votes, len(weighted))
+    blocked = (not all(blk_pass)) if blocking else False
+    if blocked:
+        score = 0.0
+    else:
+        total = sum(w for w, _ in weighted)
+        got = sum(w for (w, _), passed in zip(weighted, wtd_pass, strict=True) if passed)
+        score = (got / total) if total else 1.0
+    score = round(score, 4)
+    n = max(len(blk_votes), len(wtd_votes), 1)
+    return GraderResult(
+        correct=score >= threshold,
+        score=score,
+        details={
+            **base,
+            "score": score,
+            "blocked": blocked,
+            "blocking_pass": blk_pass,
+            "weighted_pass": wtd_pass,
+            "pass_threshold": threshold,
+            "samples": n,
+            "notes": last_notes,
+        },
+    )
+
+
+def _majority_cols(votes: list[list[bool]], n: int) -> list[bool]:
+    """Per-criterion majority over samples (ties resolve to fail)."""
+    out: list[bool] = []
+    for i in range(n):
+        col = [bool(v[i]) for v in votes if i < len(v)]
+        out.append(bool(col) and sum(col) * 2 > len(col))
+    return out
+
+
+def _extract_rubric_verdict(content: str | None) -> tuple[list[bool], list[bool], str] | None:
+    if not content:
+        return None
+    obj = _first_json_object(content)
+    if obj is None:
+        return None
+    blk, wtd = obj.get("blocking"), obj.get("weighted")
+    if not isinstance(blk, list) or not isinstance(wtd, list):
+        return None
+
+    def _b(x: Any) -> bool:
+        return x if isinstance(x, bool) else str(x).strip().lower() in {"true", "yes", "pass"}
+
+    return [_b(x) for x in blk], [_b(x) for x in wtd], str(obj.get("notes", ""))
+
+
+def _build_rubric_messages(
+    issue: str,
+    patch: str,
+    blocking: list[str],
+    weighted: list[tuple[float, str]],
+    gold_patch: str,
+) -> list[dict[str, Any]]:
+    blk = "\n".join(f"B{i}: {c}" for i, c in enumerate(blocking))
+    wtd = "\n".join(f"W{i} (weight {w:g}): {c}" for i, (w, c) in enumerate(weighted))
+    reference = _truncate_diff(gold_patch) if gold_patch.strip() else "(none provided)"
+    instruction = (
+        "Evaluate the candidate against EACH criterion in order. Respond with ONLY a JSON "
+        'object: {"blocking": [<bool per B>], "weighted": [<bool per W>], '
+        '"notes": "<one sentence>"}. '
+        f"Do not include the token {GRADER_SENTINEL} in your answer. ({GRADER_SENTINEL})"
+    )
+    return [
+        {"role": "system", "content": _RUBRIC_SYSTEM},
+        {
+            "role": "user",
+            "content": (
+                f"# Task given to the agent\n{issue}\n\n"
+                f"# Reference solution (one mergeable approach; shows the house style)\n"
+                f"```diff\n{reference}\n```\n\n"
+                f"# Candidate change to grade\n```diff\n{_truncate_diff(patch)}\n```\n\n"
+                f"# BLOCKING criteria (failing ANY means the change is not mergeable)\n{blk}\n\n"
+                f"# WEIGHTED quality criteria\n{wtd}\n\n"
+                f"{instruction}"
+            ),
+        },
+    ]

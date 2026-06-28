@@ -1,0 +1,31 @@
+{
+  "id": "py-orders-rubric",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The ApiClient house style, the list_orders task, and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "list_orders fetches GET /users/{user_id}/orders and respects the page argument (page 2 must request page=2), returning the parsed orders.",
+      "The change modifies only apiclient/client.py and adds no new files and no new third-party dependency."
+    ],
+    "weighted": [
+      {"weight": 3, "criterion": "The HTTP call goes through self._request(...) so it inherits the client's auth header and HTTPError->ApiError handling, rather than calling urllib/requests directly."},
+      {"weight": 2, "criterion": "Failures surface as ApiError consistent with the other methods, rather than being swallowed (e.g. returning None) or raising a different exception type."},
+      {"weight": 2, "criterion": "Response parsing reuses self._parse(...) rather than calling json.loads or handling .read() directly."},
+      {"weight": 1, "criterion": "The method signature, docstring, and concise one-line body style match the neighboring get_user/get_order methods."}
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": ["apiclient/client.py"]
+  }
+}

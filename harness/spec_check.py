@@ -99,12 +99,12 @@ def static_spec_lint(task: _HasIssue) -> SpecResult:
     Returns ``warn`` (never ``fail``) — it is a triage signal, not proof. Confirm
     a warned task with :func:`solvability_verdict` before deciding it is broken.
 
-    Agentic-graded tasks are exempt: their prompts are intentionally terse because
-    the grader, not the issue, holds the specification.
+    Agentic- and rubric-graded tasks are exempt: their prompts are intentionally
+    terse because the grader, not the issue, holds the specification.
     """
     metadata = getattr(task, "metadata", None)
-    if isinstance(metadata, dict) and metadata.get("grader") == "agentic":
-        return SpecResult(OK, ["agentic grader — terse prompt is intentional"])
+    if isinstance(metadata, dict) and metadata.get("grader") in {"agentic", "rubric"}:
+        return SpecResult(OK, [f"{metadata.get('grader')} grader — terse prompt is intentional"])
     issue = getattr(task, "issue", "") or ""
     if not issue.strip():
         return SpecResult(WARN, ["issue.md is empty — no specification for the agent"])

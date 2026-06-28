@@ -377,6 +377,7 @@ def _evaluate_with_budget(
         budget_exceeded=lambda stage: deadline.record_exceeded(collector, stage),
         grader=str(task.metadata.get("grader", "tests")),
         acceptance_criteria=task.metadata.get("acceptance_criteria"),
+        rubric=task.metadata.get("rubric"),
         gold_patch=gold,
         grader_provider=grader_provider,
         grader_samples=int(task.metadata.get("grader_samples", 1) or 1),
@@ -965,11 +966,11 @@ def _build_grader_provider(
 ) -> LLMProvider | None:
     """Resolve the provider for the agentic correctness grader, or ``None``.
 
-    Only built for tasks that opt in with ``metadata.grader == "agentic"``. Unlike
-    the judge ensemble it runs even with ``--no-judges``, because for an
-    agentic-graded task the grader *is* the ``functional`` signal.
+    Only built for tasks that opt in with ``metadata.grader`` of ``"agentic"`` or
+    ``"rubric"``. Unlike the judge ensemble it runs even with ``--no-judges``,
+    because for those tasks the grader *is* the ``functional`` signal.
     """
-    if task.metadata.get("grader") != "agentic":
+    if task.metadata.get("grader") not in {"agentic", "rubric"}:
         return None
     return _build_judge_provider(True, judge_model, model, run_provider, collector)
 

@@ -265,6 +265,67 @@ def _validate_agentic(task: Task) -> Result:
     )
 
 
+def _validate_rubric(task: Task) -> Result:
+    """Validate a rubric-graded task's wiring with the offline mock grader.
+
+    Checks the rubric is well-formed (non-empty blocking criteria and/or weighted
+    items with positive weights) and a non-empty gold patch, then that the mock
+    grader scores the gold patch at the pass threshold and an empty change at 0.0.
+    Real mergeability grading happens at run time against a live judge; this only
+    proves the task is wired so a non-solution cannot pass.
+    """
+    from harness.agent.providers import get_provider  # noqa: PLC0415 — avoid import cycle
+    from harness.evaluator.agentic_grader import grade_rubric  # noqa: PLC0415
+
+    rubric = task.metadata.get("rubric")
+    if not isinstance(rubric, dict):
+        return Result(task.task_id, FAIL, ["grader=rubric requires a metadata.rubric object"])
+    blocking = [c for c in (rubric.get("blocking") or []) if isinstance(c, str) and c.strip()]
+    weighted = rubric.get("weighted") or []
+    weighted_ok = isinstance(weighted, list) and all(
+        isinstance(w, dict)
+        and isinstance(w.get("criterion") or w.get("c"), str)
+        and float(w.get("weight", w.get("w", 1)) or 0) > 0
+        for w in weighted
+    )
+    if not weighted_ok or (not blocking and not weighted):
+        return Result(
+            task.task_id,
+            FAIL,
+            ["rubric needs blocking criteria and/or weighted items with positive weights"],
+        )
+    gold_text = task.gold_patch.read_text(encoding="utf-8") if task.gold_patch else ""
+    if not gold_text.strip():
+        return Result(task.task_id, FAIL, ["gold_patch.diff is empty"])
+
+    mock = get_provider("mock:synthetic")
+    threshold = float(rubric.get("pass_threshold", 1.0))
+    gold_grade = grade_rubric(
+        issue=task.issue, patch=gold_text, rubric=rubric, gold_patch=gold_text, provider=mock
+    )
+    if gold_grade.score is None or gold_grade.score < threshold:
+        return Result(
+            task.task_id, FAIL, [f"gold patch did not grade mergeable: {gold_grade.details}"]
+        )
+    empty_grade = grade_rubric(
+        issue=task.issue, patch="", rubric=rubric, gold_patch=gold_text, provider=mock
+    )
+    if empty_grade.score != 0.0:
+        return Result(
+            task.task_id,
+            FAIL,
+            ["an empty change graded mergeable — the grader cannot reject a non-solution"],
+        )
+    return Result(
+        task.task_id,
+        PASS,
+        [
+            f"rubric grader wired: gold>={threshold:g}, empty=0 (mock); "
+            f"{len(blocking)} blocking + {len(weighted)} weighted"
+        ],
+    )
+
+
 def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: PLR0911, PLR0912
     """Functional, schema, and provenance validation for one task directory."""
     task_id = task_root.name
@@ -281,7 +342,7 @@ def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: P
         return Result(task_id, FAIL, [f"metadata missing/empty: {missing}"])
     grader_mode = str(task.metadata.get("grader", "tests"))
     spec = task.tests_spec
-    if grader_mode != "agentic" and (not spec or not spec.get("fail_to_pass")):
+    if grader_mode not in {"agentic", "rubric"} and (not spec or not spec.get("fail_to_pass")):
         return Result(task_id, FAIL, ["metadata.tests.fail_to_pass is empty"])
     if task.repo_dir is None and task.snapshot is None:
         return Result(task_id, FAIL, ["no repo/ directory or repo_snapshot.tar.gz"])
@@ -304,6 +365,8 @@ def _validate_core(task_root: Path, opts: ValidateOptions) -> Result:  # noqa: P
     # the test-based gold-solves / fail-to-pass / determinism checks.
     if grader_mode == "agentic":
         return _validate_agentic(task)
+    if grader_mode == "rubric":
+        return _validate_rubric(task)
 
     # 2. toolchain — skip (do not fail) when a host language tool is absent (local mode only).
     if opts.sandbox == "local":

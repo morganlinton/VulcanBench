@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Graded by the mergeability rubric (grader: rubric), not hidden tests. functional is continuous in [0,1]: 0 if any blocking criterion fails (correctness, scope), else the weighted fraction of passing quality criteria. The gold reuses self._request/self._parse and raises ApiError (score 1.0). A working-but-unmergeable change scores below 1.0 — e.g. bypassing _request (~0.25) or swallowing the error and returning None (~0.625) — which is the discrimination this task exists to capture once functional correctness saturates at the frontier. Use a judge model different from the solved model (avoid self-grading)."
+}

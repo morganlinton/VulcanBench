@@ -1,0 +1,12 @@
+diff --git a/apiclient/client.py b/apiclient/client.py
+index 772cdc5..db9660e 100644
+--- a/apiclient/client.py
++++ b/apiclient/client.py
+@@ -45,3 +45,7 @@ class ApiClient:
+     def get_order(self, order_id):
+         """Return the order record for order_id."""
+         return self._parse(self._request("GET", f"/orders/{order_id}"))
++
++    def list_orders(self, user_id, page=1):
++        """Return the given page of the user's orders."""
++        return self._parse(self._request("GET", f"/users/{user_id}/orders?page={page}"))

@@ -168,7 +168,7 @@ suite earning its run cost:
 
 ### Test-graded vs. agentic-graded tasks
 
-Two grading modes, chosen per task via `metadata.grader`:
+Three grading modes, chosen per task via `metadata.grader`:
 
 - **`tests`** (default): hidden `fail_to_pass`/`pass_to_pass` commands. Deterministic
   and exact — but the `issue.md` must specify the expected behavior (the spec gate
@@ -181,10 +181,21 @@ Two grading modes, chosen per task via `metadata.grader`:
   change grades incorrect using the offline mock grader. Run it against a strong,
   independent `--judge-model` so a model isn't grading its own output. Because LLM
   grading is non-deterministic, keep `tests` for anything needing reproducible scoring.
+- **`rubric`**: an LLM grades **mergeability**, not just correctness — the axis that
+  still separates frontier models once functional correctness saturates. The task ships
+  a `metadata.rubric` with `blocking` criteria (failing **any** scores 0 — correctness,
+  scope) and `weighted` quality criteria (`{"weight": n, "criterion": "..."}`); the
+  `functional` score becomes continuous in `[0, 1]` (the weighted fraction of passing
+  quality criteria), so a working-but-unmergeable change scores below a clean one.
+  `pass_threshold` (default 1.0) sets when a run counts as a pass@1 solve. Like
+  `agentic`, the prompt is terse, the spec gate is skipped, and `validate-task` checks
+  the gold grades at/above threshold and an empty change scores 0 via the mock grader.
+  See `tasks/v1/py-orders-rubric` for a worked example.
 
-  Before relying on an agentic task, **prove its grader is trustworthy**. Add a
-  `grader_cases.json` with labeled candidate diffs (known-correct and known-incorrect)
-  and run `python scripts/grader_eval.py --task tasks/v1/<id> --model <grader> --samples 5`:
+  Before relying on an agentic or rubric task, **prove its grader is trustworthy**. Add a
+  `grader_cases.json` with labeled candidate diffs (known-correct and known-incorrect — for
+  a rubric, include *working-but-unmergeable* diffs as `incorrect`) and run
+  `python scripts/grader_eval.py --task tasks/v1/<id> --model <grader> --samples 5`:
   it reports accuracy, false-pass rate, and self-consistency. A non-zero false-pass rate
   means the grader rubber-stamps wrong answers — fix the criteria (or the grader model)
   before shipping. Use `metadata.grader_samples` to grade by majority vote at run time.

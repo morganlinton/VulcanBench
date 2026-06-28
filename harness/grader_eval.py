@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from harness.agent.providers import LLMProvider
-from harness.evaluator.agentic_grader import grade_correctness
+from harness.evaluator.agentic_grader import grade_correctness, grade_rubric
 from harness.tasks import Task
 
 
@@ -51,19 +51,32 @@ def evaluate_grader(
 ) -> dict[str, Any]:
     """Grade each labeled case and aggregate trust metrics for the grader."""
     criteria = task.metadata.get("acceptance_criteria") or []
+    rubric_meta = task.metadata.get("rubric")
+    rubric: dict[str, Any] = rubric_meta if isinstance(rubric_meta, dict) else {}
+    is_rubric = str(task.metadata.get("grader")) == "rubric" and bool(rubric)
     gold = task.gold_patch.read_text(encoding="utf-8") if task.gold_patch else ""
 
     results: list[dict[str, Any]] = []
     for case in cases:
         expected = str(case.get("expected")) == "correct"
-        graded = grade_correctness(
-            issue=task.issue,
-            patch=str(case.get("diff", "")),
-            acceptance_criteria=list(criteria),
-            gold_patch=gold,
-            provider=provider,
-            samples=samples,
-        )
+        if is_rubric:
+            graded = grade_rubric(
+                issue=task.issue,
+                patch=str(case.get("diff", "")),
+                rubric=rubric,
+                gold_patch=gold,
+                provider=provider,
+                samples=samples,
+            )
+        else:
+            graded = grade_correctness(
+                issue=task.issue,
+                patch=str(case.get("diff", "")),
+                acceptance_criteria=list(criteria),
+                gold_patch=gold,
+                provider=provider,
+                samples=samples,
+            )
         results.append(
             {
                 "name": case.get("name"),

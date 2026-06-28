@@ -6,11 +6,21 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from harness.agent.providers import LLMResponse, TokenUsage, get_provider
-from harness.evaluator.agentic_grader import GRADER_SENTINEL, grade_correctness
+from harness.evaluator.agentic_grader import GRADER_SENTINEL, grade_correctness, grade_rubric
 from harness.evaluator.evaluate import evaluate_run
 from harness.spec_check import OK, static_spec_lint
 
 _DIFF = "diff --git a/x.py b/x.py\n--- a/x.py\n+++ b/x.py\n@@ -1 +1 @@\n-old\n+new\n"
+
+_RUBRIC = {
+    "blocking": ["is correct", "stays in scope"],
+    "weighted": [
+        {"weight": 3, "criterion": "reuses the helper"},
+        {"weight": 2, "criterion": "raises the right error"},
+        {"weight": 2, "criterion": "reuses the parser"},
+        {"weight": 1, "criterion": "matches the style"},
+    ],
+}
 
 
 class _StubProvider:
@@ -70,6 +80,48 @@ def test_missing_criteria_returns_none() -> None:
         issue="t", patch=_DIFF, acceptance_criteria=[], gold_patch=_DIFF, provider=provider
     )
     assert res.score is None
+
+
+# --- rubric grader -------------------------------------------------------------
+
+
+def test_rubric_full_pass_scores_one() -> None:
+    provider = _StubProvider('{"blocking": [true, true], "weighted": [true, true, true, true]}')
+    res = grade_rubric(issue="t", patch=_DIFF, rubric=_RUBRIC, gold_patch=_DIFF, provider=provider)
+    assert res.score == 1.0
+    assert res.correct is True
+
+
+def test_rubric_blocking_failure_scores_zero() -> None:
+    # any blocking criterion failing zeroes the score regardless of weighted items
+    provider = _StubProvider('{"blocking": [true, false], "weighted": [true, true, true, true]}')
+    res = grade_rubric(issue="t", patch=_DIFF, rubric=_RUBRIC, gold_patch=_DIFF, provider=provider)
+    assert res.score == 0.0
+    assert res.details["blocked"] is True
+    assert res.correct is False
+
+
+def test_rubric_weighted_aggregate() -> None:
+    # blocking pass; weighted passes 3 + 2 of (3,2,2,1) total 8 -> 5/8 = 0.625
+    provider = _StubProvider('{"blocking": [true, true], "weighted": [true, true, false, false]}')
+    res = grade_rubric(issue="t", patch=_DIFF, rubric=_RUBRIC, gold_patch=_DIFF, provider=provider)
+    assert res.score == 0.625
+    assert res.correct is False  # below the default pass_threshold of 1.0
+
+
+def test_rubric_empty_patch_short_circuits() -> None:
+    provider = _StubProvider('{"blocking": [true, true], "weighted": [true, true, true, true]}')
+    res = grade_rubric(issue="t", patch="   ", rubric=_RUBRIC, gold_patch=_DIFF, provider=provider)
+    assert res.score == 0.0
+    assert provider.calls == 0
+
+
+def test_rubric_pass_threshold_allows_partial_pass() -> None:
+    rubric = {**_RUBRIC, "pass_threshold": 0.6}
+    provider = _StubProvider('{"blocking": [true, true], "weighted": [true, true, false, false]}')
+    res = grade_rubric(issue="t", patch=_DIFF, rubric=rubric, gold_patch=_DIFF, provider=provider)
+    assert res.score == 0.625
+    assert res.correct is True  # 0.625 >= 0.6
 
 
 def test_unparsable_reply_returns_none() -> None:

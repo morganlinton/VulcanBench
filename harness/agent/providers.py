@@ -341,10 +341,15 @@ class MockProvider(LLMProvider):
         # deterministic — gold passes, an empty pre-patch state fails.
         if any("VULCANBENCH_GRADER" in str(m.get("content", "")) for m in messages):
             has_change = any("diff --git" in str(m.get("content", "")) for m in messages)
+            verdict = "true" if has_change else "false"
+            # Emit both the binary (acceptance_criteria) and rubric verdict shapes so the
+            # same mock deterministically grades either grader offline: gold (a real diff)
+            # passes every criterion, an empty pre-patch change fails them.
+            arr = "[" + ", ".join([verdict] * 16) + "]"
             return LLMResponse(
                 content=(
-                    f'{{"correct": {"true" if has_change else "false"}, '
-                    '"confidence": 0.9, "reasons": "mock grader"}'
+                    f'{{"correct": {verdict}, "confidence": 0.9, "reasons": "mock grader", '
+                    f'"blocking": {arr}, "weighted": {arr}, "notes": "mock grader"}}'
                 ),
                 usage=TokenUsage(prompt_tokens=140, completion_tokens=18),
             )

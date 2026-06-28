@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold_mergeable",
+      "expected": "correct",
+      "diff": "diff --git a/apiclient/client.py b/apiclient/client.py\nindex 772cdc5..db9660e 100644\n--- a/apiclient/client.py\n+++ b/apiclient/client.py\n@@ -45,3 +45,7 @@ class ApiClient:\n     def get_order(self, order_id):\n         \"\"\"Return the order record for order_id.\"\"\"\n         return self._parse(self._request(\"GET\", f\"/orders/{order_id}\"))\n+\n+    def list_orders(self, user_id, page=1):\n+        \"\"\"Return the given page of the user's orders.\"\"\"\n+        return self._parse(self._request(\"GET\", f\"/users/{user_id}/orders?page={page}\"))\n"
+    },
+    {
+      "name": "bypasses_request",
+      "expected": "incorrect",
+      "diff": "diff --git a/apiclient/client.py b/apiclient/client.py\nindex 772cdc5..6dfe7ab 100644\n--- a/apiclient/client.py\n+++ b/apiclient/client.py\n@@ -45,3 +45,12 @@ class ApiClient:\n     def get_order(self, order_id):\n         \"\"\"Return the order record for order_id.\"\"\"\n         return self._parse(self._request(\"GET\", f\"/orders/{order_id}\"))\n+\n+    def list_orders(self, user_id, page=1):\n+        import urllib.request\n+        req = urllib.request.Request(\n+            self._base + f\"/users/{user_id}/orders?page={page}\",\n+            headers={\"Authorization\": f\"Bearer {self._token}\"},\n+        )\n+        with urllib.request.urlopen(req) as r:\n+            return self._parse(r.read())\n"
+    },
+    {
+      "name": "swallows_error",
+      "expected": "incorrect",
+      "diff": "diff --git a/apiclient/client.py b/apiclient/client.py\nindex 772cdc5..c3b6b6c 100644\n--- a/apiclient/client.py\n+++ b/apiclient/client.py\n@@ -45,3 +45,10 @@ class ApiClient:\n     def get_order(self, order_id):\n         \"\"\"Return the order record for order_id.\"\"\"\n         return self._parse(self._request(\"GET\", f\"/orders/{order_id}\"))\n+\n+    def list_orders(self, user_id, page=1):\n+        \"\"\"Return the given page of the user's orders, or None on error.\"\"\"\n+        try:\n+            return self._parse(self._request(\"GET\", f\"/users/{user_id}/orders?page={page}\"))\n+        except ApiError:\n+            return None\n"
+    },
+    {
+      "name": "ignores_page",
+      "expected": "incorrect",
+      "diff": "diff --git a/apiclient/client.py b/apiclient/client.py\nindex 772cdc5..9a58d0e 100644\n--- a/apiclient/client.py\n+++ b/apiclient/client.py\n@@ -45,3 +45,7 @@ class ApiClient:\n     def get_order(self, order_id):\n         \"\"\"Return the order record for order_id.\"\"\"\n         return self._parse(self._request(\"GET\", f\"/orders/{order_id}\"))\n+\n+    def list_orders(self, user_id, page=1):\n+        \"\"\"Return the user's orders.\"\"\"\n+        return self._parse(self._request(\"GET\", f\"/users/{user_id}/orders\"))\n"
+    }
+  ]
+}

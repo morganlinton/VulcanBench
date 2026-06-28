@@ -50,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
     reports = []
     for root in _task_roots(target):
         task = load_task(root.name, root.parent)
-        if task.metadata.get("grader") != "agentic":
+        if task.metadata.get("grader") not in {"agentic", "rubric"}:
             continue
         cases = load_grader_cases(root)
         if not cases:
@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if not reports:
-        print(f"no agentic tasks with grader_cases.json under {target}")
+        print(f"no agentic/rubric tasks with grader_cases.json under {target}")
         return 0
 
     if provider.name == "mock":

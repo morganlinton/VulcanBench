@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Rubric grading (`grader: "rubric"`)** — a third grading mode that scores *mergeability*,
+  not just correctness, the axis that still separates frontier models once functional
+  correctness saturates (motivated by Cognition's FrontierCode). A task ships a
+  `metadata.rubric` with `blocking` criteria (failing any scores 0) plus `weighted` quality
+  criteria; `functional` becomes continuous in `[0, 1]`. Implemented in
+  `harness/evaluator/agentic_grader.grade_rubric` (blocking + weighted aggregate, per-criterion
+  majority vote over `grader_samples`), wired through `evaluate_run`, the run loop, the spec
+  gate (terse prompts allowed), `validate-task` (offline mock-grader wiring check), and
+  `grader_eval.py` (grader-trust). First example task `py-orders-rubric` (terse "add
+  `list_orders`" over a house-style API client) with a 4-case calibration set; a real judge
+  scored it accuracy=1.0, false_pass=0 (gold mergeable=1.0, bypass-plumbing≈0.25,
+  swallow-error≈0.625, wrong=0). Not in the default suite (kept out of self-graded compare runs).
 - **Multi-file feature** `py-textdiff` (hard, `multi_file`): an LCS-based line diff plus a
   validating patch applier. `textdiff/diff.py` builds a minimal edit script of
   keep/del/ins ops whose kept lines are a *longest* common subsequence;

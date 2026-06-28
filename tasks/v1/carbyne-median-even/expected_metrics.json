@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold averages the two middle values for even length and sorts a copy (1.0). Returning the single upper-middle element is wrong for even length, and not sorting gives the wrong value \u2014 both blocked (0). Sorting xs in place is correct but mutates the caller's slice (weighted miss)."
+}

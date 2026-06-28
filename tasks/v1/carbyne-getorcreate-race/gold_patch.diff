@@ -1,0 +1,20 @@
+diff --git a/cache/cache.go b/cache/cache.go
+index 468189a..572bc3d 100644
+--- a/cache/cache.go
++++ b/cache/cache.go
+@@ -28,3 +28,15 @@ func (c *Cache) Set(key string, v int) {
+ 	defer c.mu.Unlock()
+ 	c.m[key] = v
+ }
++
++// GetOrCreate returns the value for key, creating it with make() if absent.
++func (c *Cache) GetOrCreate(key string, make func() int) int {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	if v, ok := c.m[key]; ok {
++		return v
++	}
++	v := make()
++	c.m[key] = v
++	return v
++}

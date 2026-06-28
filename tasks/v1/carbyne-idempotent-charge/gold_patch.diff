@@ -1,0 +1,15 @@
+diff --git a/payments/__init__.py b/payments/__init__.py
+index ae92303..4bf853f 100644
+--- a/payments/__init__.py
++++ b/payments/__init__.py
+@@ -8,3 +8,10 @@ class PaymentProcessor:
+ 
+     def _charge(self, order):
+         return self._gateway.charge(order["amount"])
++
++    def process(self, order, idempotency_key):
++        if idempotency_key in self._results:
++            return self._results[idempotency_key]
++        result = self._charge(order)
++        self._results[idempotency_key] = result
++        return result

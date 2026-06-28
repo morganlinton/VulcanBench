@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-defensive-copy",
+  "category": "feature",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "The roles getter returns the profile's roles, AND a caller that mutates the returned value at runtime cannot change the Profile's internal _roles \u2014 it returns a fresh copy (a `readonly` type annotation alone does not count, since it still hands back the same array reference).",
+      "The change modifies only src/profile.ts and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It returns a fresh array copy (e.g. [...this._roles] or this._roles.slice()), matching how the constructor defensively copies roles."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "src/profile.ts"
+    ]
+  }
+}

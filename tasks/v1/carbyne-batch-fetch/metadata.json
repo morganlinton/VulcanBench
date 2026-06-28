@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-batch-fetch",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "get_many returns the users for all of the given ids.",
+      "The change modifies only the userservice module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "It fetches the users in a SINGLE batched query via the db's query_many (e.g. an IN clause), NOT by calling get()/query_one once per id in a loop \u2014 i.e. it avoids the N+1 query pattern. The IN placeholders are built from the count of ids (not by interpolating id values), so it stays parameterized."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "userservice/__init__.py"
+    ]
+  }
+}

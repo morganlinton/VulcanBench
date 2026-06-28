@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold returns a fresh copy so callers cannot mutate internals (1.0). Returning the internal array by reference is blocked; a `readonly string[]` type on the SAME reference is also blocked, because at runtime the array is still shared and mutable (the subtle trap)."
+}

@@ -1,0 +1,12 @@
+diff --git a/billing/__init__.py b/billing/__init__.py
+index fad8120..4ac7462 100644
+--- a/billing/__init__.py
++++ b/billing/__init__.py
+@@ -3,3 +3,7 @@
+ 
+ def with_tax(amount_cents, rate_bps):
+     return amount_cents + amount_cents * rate_bps // 10000
++
++def split_evenly(total_cents, n):
++    base, rem = divmod(total_cents, n)
++    return [base + (1 if i < rem else 0) for i in range(n)]

@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-idempotent-charge",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "A second call to process with the SAME idempotency_key does NOT charge again \u2014 it returns the result stored from the first call. A new idempotency_key charges exactly once.",
+      "The change modifies only the payments module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It checks _results for the idempotency_key before charging and records the result under that key, so the de-duplication persists across calls."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "payments/__init__.py"
+    ]
+  }
+}

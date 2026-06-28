@@ -1,0 +1,13 @@
+diff --git a/src/profile.ts b/src/profile.ts
+index 4054bd1..f9ec9eb 100644
+--- a/src/profile.ts
++++ b/src/profile.ts
+@@ -13,4 +13,8 @@ export class Profile {
+   get name(): string {
+     return this._name;
+   }
++
++  get roles(): readonly string[] {
++    return [...this._roles];
++  }
+ }

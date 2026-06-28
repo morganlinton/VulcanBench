@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold commits on success and rolls back + re-raises on any error (1.0). Not rolling back on error, committing in a finally (so a failed op is committed), or rolling back but swallowing the exception are all blocked (0)."
+}

@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/src/profile.ts b/src/profile.ts\nindex 4054bd1..f9ec9eb 100644\n--- a/src/profile.ts\n+++ b/src/profile.ts\n@@ -13,4 +13,8 @@ export class Profile {\n   get name(): string {\n     return this._name;\n   }\n+\n+  get roles(): readonly string[] {\n+    return [...this._roles];\n+  }\n }\n"
+    },
+    {
+      "name": "returns_internal_ref",
+      "expected": "incorrect",
+      "diff": "diff --git a/src/profile.ts b/src/profile.ts\nindex 4054bd1..5d594ed 100644\n--- a/src/profile.ts\n+++ b/src/profile.ts\n@@ -13,4 +13,8 @@ export class Profile {\n   get name(): string {\n     return this._name;\n   }\n+\n+  get roles(): string[] {\n+    return this._roles;\n+  }\n }\n"
+    },
+    {
+      "name": "readonly_type_same_ref",
+      "expected": "incorrect",
+      "diff": "diff --git a/src/profile.ts b/src/profile.ts\nindex 4054bd1..36513fe 100644\n--- a/src/profile.ts\n+++ b/src/profile.ts\n@@ -13,4 +13,8 @@ export class Profile {\n   get name(): string {\n     return this._name;\n   }\n+\n+  get roles(): readonly string[] {\n+    return this._roles;\n+  }\n }\n"
+    }
+  ]
+}

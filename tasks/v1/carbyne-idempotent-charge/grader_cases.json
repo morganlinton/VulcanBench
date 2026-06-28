@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/payments/__init__.py b/payments/__init__.py\nindex ae92303..4bf853f 100644\n--- a/payments/__init__.py\n+++ b/payments/__init__.py\n@@ -8,3 +8,10 @@ class PaymentProcessor:\n \n     def _charge(self, order):\n         return self._gateway.charge(order[\"amount\"])\n+\n+    def process(self, order, idempotency_key):\n+        if idempotency_key in self._results:\n+            return self._results[idempotency_key]\n+        result = self._charge(order)\n+        self._results[idempotency_key] = result\n+        return result\n"
+    },
+    {
+      "name": "always_charges",
+      "expected": "incorrect",
+      "diff": "diff --git a/payments/__init__.py b/payments/__init__.py\nindex ae92303..7c6e393 100644\n--- a/payments/__init__.py\n+++ b/payments/__init__.py\n@@ -8,3 +8,8 @@ class PaymentProcessor:\n \n     def _charge(self, order):\n         return self._gateway.charge(order[\"amount\"])\n+\n+    def process(self, order, idempotency_key):\n+        result = self._charge(order)\n+        self._results[idempotency_key] = result\n+        return result\n"
+    },
+    {
+      "name": "ignores_key",
+      "expected": "incorrect",
+      "diff": "diff --git a/payments/__init__.py b/payments/__init__.py\nindex ae92303..b24854b 100644\n--- a/payments/__init__.py\n+++ b/payments/__init__.py\n@@ -8,3 +8,6 @@ class PaymentProcessor:\n \n     def _charge(self, order):\n         return self._gateway.charge(order[\"amount\"])\n+\n+    def process(self, order, idempotency_key):\n+        return self._charge(order)\n"
+    }
+  ]
+}

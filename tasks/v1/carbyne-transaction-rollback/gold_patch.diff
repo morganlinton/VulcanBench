@@ -1,0 +1,18 @@
+diff --git a/txn/__init__.py b/txn/__init__.py
+index 167a6ff..2a2b322 100644
+--- a/txn/__init__.py
++++ b/txn/__init__.py
+@@ -13,3 +13,13 @@ class DB:
+ 
+     def rollback(self):
+         self.log.append("rollback")
++
++def run_in_transaction(db, fn):
++    db.begin()
++    try:
++        result = fn()
++    except Exception:
++        db.rollback()
++        raise
++    db.commit()
++    return result

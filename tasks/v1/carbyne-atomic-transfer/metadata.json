@@ -1,0 +1,39 @@
+{
+  "id": "carbyne-atomic-transfer",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "transfer moves amount from src to dst on success; and if src has insufficient funds it raises InsufficientFunds and leaves BOTH balances unchanged \u2014 no partial debit or credit.",
+      "The change modifies only the ledger module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "It confirms the source has sufficient funds BEFORE mutating any balance, so a failed transfer cannot leave partial state (e.g. it withdraws from src before crediting dst, or checks first)."
+      },
+      {
+        "weight": 2,
+        "criterion": "It goes through the existing withdraw/deposit methods (or their validation) rather than mutating _balances directly and bypassing the insufficient-funds and positive-amount checks."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "ledger/__init__.py"
+    ]
+  }
+}

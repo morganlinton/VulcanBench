@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-dedup-order",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "unique returns the distinct items in the order of their FIRST occurrence in the input (preserving input order), consistent with the module's order-preserving helpers.",
+      "The change modifies only the seqkit module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It preserves order by tracking seen values while iterating, not via list(set(...)) (which loses order) or by sorting."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "seqkit/__init__.py"
+    ]
+  }
+}

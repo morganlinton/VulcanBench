@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold reuses withdraw-then-deposit so a failed transfer is atomic (1.0). Crediting dst before withdrawing src leaves partial state on failure, and mutating _balances directly allows overdraft \u2014 both blocked (0). Checking manually without reusing withdraw/deposit is atomic but bypasses validation (~0.6)."
+}

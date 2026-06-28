@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold checks-and-creates inside one locked critical section, so make() runs once per key under contention (1.0). Calling Get then Set releases the lock in between (a TOCTOU race that can double-call make), and doing it unlocked is a data race \u2014 both blocked (0)."
+}

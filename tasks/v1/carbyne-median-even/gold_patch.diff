@@ -1,0 +1,21 @@
+diff --git a/stats/stats.go b/stats/stats.go
+index 58ae100..8dee68d 100644
+--- a/stats/stats.go
++++ b/stats/stats.go
+@@ -21,3 +21,16 @@ func sortedCopy(xs []float64) []float64 {
+ 	sort.Float64s(out)
+ 	return out
+ }
++
++// Median returns the median of xs, or 0 for an empty slice.
++func Median(xs []float64) float64 {
++	if len(xs) == 0 {
++		return 0
++	}
++	s := sortedCopy(xs)
++	n := len(s)
++	if n%2 == 1 {
++		return s[n/2]
++	}
++	return (s[n/2-1] + s[n/2]) / 2
++}

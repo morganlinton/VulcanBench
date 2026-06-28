@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/txn/__init__.py b/txn/__init__.py\nindex 167a6ff..2a2b322 100644\n--- a/txn/__init__.py\n+++ b/txn/__init__.py\n@@ -13,3 +13,13 @@ class DB:\n \n     def rollback(self):\n         self.log.append(\"rollback\")\n+\n+def run_in_transaction(db, fn):\n+    db.begin()\n+    try:\n+        result = fn()\n+    except Exception:\n+        db.rollback()\n+        raise\n+    db.commit()\n+    return result\n"
+    },
+    {
+      "name": "no_rollback",
+      "expected": "incorrect",
+      "diff": "diff --git a/txn/__init__.py b/txn/__init__.py\nindex 167a6ff..5f75d96 100644\n--- a/txn/__init__.py\n+++ b/txn/__init__.py\n@@ -13,3 +13,9 @@ class DB:\n \n     def rollback(self):\n         self.log.append(\"rollback\")\n+\n+def run_in_transaction(db, fn):\n+    db.begin()\n+    result = fn()\n+    db.commit()\n+    return result\n"
+    },
+    {
+      "name": "commit_in_finally",
+      "expected": "incorrect",
+      "diff": "diff --git a/txn/__init__.py b/txn/__init__.py\nindex 167a6ff..b577782 100644\n--- a/txn/__init__.py\n+++ b/txn/__init__.py\n@@ -13,3 +13,10 @@ class DB:\n \n     def rollback(self):\n         self.log.append(\"rollback\")\n+\n+def run_in_transaction(db, fn):\n+    db.begin()\n+    try:\n+        return fn()\n+    finally:\n+        db.commit()\n"
+    },
+    {
+      "name": "swallows_error",
+      "expected": "incorrect",
+      "diff": "diff --git a/txn/__init__.py b/txn/__init__.py\nindex 167a6ff..815a975 100644\n--- a/txn/__init__.py\n+++ b/txn/__init__.py\n@@ -13,3 +13,13 @@ class DB:\n \n     def rollback(self):\n         self.log.append(\"rollback\")\n+\n+def run_in_transaction(db, fn):\n+    db.begin()\n+    try:\n+        result = fn()\n+        db.commit()\n+        return result\n+    except Exception:\n+        db.rollback()\n+        return None\n"
+    }
+  ]
+}

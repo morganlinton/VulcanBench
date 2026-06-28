@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/seqkit/__init__.py b/seqkit/__init__.py\nindex eb331ba..5a8a287 100644\n--- a/seqkit/__init__.py\n+++ b/seqkit/__init__.py\n@@ -4,3 +4,12 @@\n def compact(items):\n     \"\"\"Drop falsy values, preserving order.\"\"\"\n     return [x for x in items if x]\n+\n+def unique(items):\n+    seen = set()\n+    out = []\n+    for x in items:\n+        if x not in seen:\n+            seen.add(x)\n+            out.append(x)\n+    return out\n"
+    },
+    {
+      "name": "uses_set",
+      "expected": "incorrect",
+      "diff": "diff --git a/seqkit/__init__.py b/seqkit/__init__.py\nindex eb331ba..f61b341 100644\n--- a/seqkit/__init__.py\n+++ b/seqkit/__init__.py\n@@ -4,3 +4,6 @@\n def compact(items):\n     \"\"\"Drop falsy values, preserving order.\"\"\"\n     return [x for x in items if x]\n+\n+def unique(items):\n+    return list(set(items))\n"
+    },
+    {
+      "name": "sorted_set",
+      "expected": "incorrect",
+      "diff": "diff --git a/seqkit/__init__.py b/seqkit/__init__.py\nindex eb331ba..cca9724 100644\n--- a/seqkit/__init__.py\n+++ b/seqkit/__init__.py\n@@ -4,3 +4,6 @@\n def compact(items):\n     \"\"\"Drop falsy values, preserving order.\"\"\"\n     return [x for x in items if x]\n+\n+def unique(items):\n+    return sorted(set(items))\n"
+    }
+  ]
+}

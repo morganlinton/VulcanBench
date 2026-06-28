@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-transaction-rollback",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "run_in_transaction begins a transaction, runs fn(), and on success commits and returns fn()'s result; and if fn() raises ANY exception it rolls back and RE-RAISES \u2014 it never commits a failed operation and never swallows the exception.",
+      "The change modifies only the txn module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "Rollback happens on every failure path (try/except or a context manager covering unexpected exception types), and commit runs only on the success path \u2014 not in a finally that would also commit on error."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "txn/__init__.py"
+    ]
+  }
+}

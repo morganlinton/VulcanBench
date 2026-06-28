@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-median-even",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "Median returns the correct median of the SORTED values: for an odd count the middle value, and for an EVEN count the average of the two middle values; 0 for an empty slice.",
+      "The change modifies only stats/stats.go and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It does NOT mutate the input slice xs \u2014 it sorts a copy (e.g. via the existing sortedCopy helper), consistent with Mean leaving xs untouched."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "stats/stats.go"
+    ]
+  }
+}

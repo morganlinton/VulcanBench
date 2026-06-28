@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-tz-aware",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "is_expired returns True iff event['expires_at'] is before the current time, and works for timezone-AWARE datetimes WITHOUT raising \u2014 it must not compare an aware datetime against a naive one (datetime.now() and datetime.utcnow() are naive and would raise a TypeError).",
+      "The change modifies only the events module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It obtains the current time as a timezone-aware UTC value (the module's now(), or datetime.now(timezone.utc)), consistent with the module."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "events/__init__.py"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+diff --git a/seqkit/__init__.py b/seqkit/__init__.py
+index eb331ba..5a8a287 100644
+--- a/seqkit/__init__.py
++++ b/seqkit/__init__.py
+@@ -4,3 +4,12 @@
+ def compact(items):
+     """Drop falsy values, preserving order."""
+     return [x for x in items if x]
++
++def unique(items):
++    seen = set()
++    out = []
++    for x in items:
++        if x not in seen:
++            seen.add(x)
++            out.append(x)
++    return out

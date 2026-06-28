@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/cache/cache.go b/cache/cache.go\nindex 468189a..572bc3d 100644\n--- a/cache/cache.go\n+++ b/cache/cache.go\n@@ -28,3 +28,15 @@ func (c *Cache) Set(key string, v int) {\n \tdefer c.mu.Unlock()\n \tc.m[key] = v\n }\n+\n+// GetOrCreate returns the value for key, creating it with make() if absent.\n+func (c *Cache) GetOrCreate(key string, make func() int) int {\n+\tc.mu.Lock()\n+\tdefer c.mu.Unlock()\n+\tif v, ok := c.m[key]; ok {\n+\t\treturn v\n+\t}\n+\tv := make()\n+\tc.m[key] = v\n+\treturn v\n+}\n"
+    },
+    {
+      "name": "check_then_lock_race",
+      "expected": "incorrect",
+      "diff": "diff --git a/cache/cache.go b/cache/cache.go\nindex 468189a..43c5dc5 100644\n--- a/cache/cache.go\n+++ b/cache/cache.go\n@@ -28,3 +28,13 @@ func (c *Cache) Set(key string, v int) {\n \tdefer c.mu.Unlock()\n \tc.m[key] = v\n }\n+\n+// GetOrCreate returns the value for key, creating it with make() if absent.\n+func (c *Cache) GetOrCreate(key string, make func() int) int {\n+\tif v, ok := c.Get(key); ok {\n+\t\treturn v\n+\t}\n+\tv := make()\n+\tc.Set(key, v)\n+\treturn v\n+}\n"
+    },
+    {
+      "name": "no_lock_race",
+      "expected": "incorrect",
+      "diff": "diff --git a/cache/cache.go b/cache/cache.go\nindex 468189a..37f0742 100644\n--- a/cache/cache.go\n+++ b/cache/cache.go\n@@ -28,3 +28,13 @@ func (c *Cache) Set(key string, v int) {\n \tdefer c.mu.Unlock()\n \tc.m[key] = v\n }\n+\n+// GetOrCreate returns the value for key, creating it with make() if absent.\n+func (c *Cache) GetOrCreate(key string, make func() int) int {\n+\tif v, ok := c.m[key]; ok {\n+\t\treturn v\n+\t}\n+\tv := make()\n+\tc.m[key] = v\n+\treturn v\n+}\n"
+    }
+  ]
+}

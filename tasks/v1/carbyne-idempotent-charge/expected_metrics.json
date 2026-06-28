@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold returns the stored result for a repeated idempotency_key without re-charging (1.0). Charging on every call (even recording the result afterward) double-charges on retry, and ignoring the key entirely never dedups \u2014 both blocked (0)."
+}

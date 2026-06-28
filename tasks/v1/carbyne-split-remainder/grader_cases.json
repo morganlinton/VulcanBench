@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/billing/__init__.py b/billing/__init__.py\nindex fad8120..4ac7462 100644\n--- a/billing/__init__.py\n+++ b/billing/__init__.py\n@@ -3,3 +3,7 @@\n \n def with_tax(amount_cents, rate_bps):\n     return amount_cents + amount_cents * rate_bps // 10000\n+\n+def split_evenly(total_cents, n):\n+    base, rem = divmod(total_cents, n)\n+    return [base + (1 if i < rem else 0) for i in range(n)]\n"
+    },
+    {
+      "name": "drops_remainder",
+      "expected": "incorrect",
+      "diff": "diff --git a/billing/__init__.py b/billing/__init__.py\nindex fad8120..8045326 100644\n--- a/billing/__init__.py\n+++ b/billing/__init__.py\n@@ -3,3 +3,6 @@\n \n def with_tax(amount_cents, rate_bps):\n     return amount_cents + amount_cents * rate_bps // 10000\n+\n+def split_evenly(total_cents, n):\n+    return [total_cents // n] * n\n"
+    },
+    {
+      "name": "float_round",
+      "expected": "incorrect",
+      "diff": "diff --git a/billing/__init__.py b/billing/__init__.py\nindex fad8120..98d612b 100644\n--- a/billing/__init__.py\n+++ b/billing/__init__.py\n@@ -3,3 +3,6 @@\n \n def with_tax(amount_cents, rate_bps):\n     return amount_cents + amount_cents * rate_bps // 10000\n+\n+def split_evenly(total_cents, n):\n+    return [round(total_cents / n)] * n\n"
+    },
+    {
+      "name": "concentrate_last",
+      "expected": "incorrect",
+      "diff": "diff --git a/billing/__init__.py b/billing/__init__.py\nindex fad8120..9adc86a 100644\n--- a/billing/__init__.py\n+++ b/billing/__init__.py\n@@ -3,3 +3,9 @@\n \n def with_tax(amount_cents, rate_bps):\n     return amount_cents + amount_cents * rate_bps // 10000\n+\n+def split_evenly(total_cents, n):\n+    base = total_cents // n\n+    parts = [base] * n\n+    parts[-1] += total_cents - base * n\n+    return parts\n"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/stats/stats.go b/stats/stats.go\nindex 58ae100..8dee68d 100644\n--- a/stats/stats.go\n+++ b/stats/stats.go\n@@ -21,3 +21,16 @@ func sortedCopy(xs []float64) []float64 {\n \tsort.Float64s(out)\n \treturn out\n }\n+\n+// Median returns the median of xs, or 0 for an empty slice.\n+func Median(xs []float64) float64 {\n+\tif len(xs) == 0 {\n+\t\treturn 0\n+\t}\n+\ts := sortedCopy(xs)\n+\tn := len(s)\n+\tif n%2 == 1 {\n+\t\treturn s[n/2]\n+\t}\n+\treturn (s[n/2-1] + s[n/2]) / 2\n+}\n"
+    },
+    {
+      "name": "picks_upper_middle",
+      "expected": "incorrect",
+      "diff": "diff --git a/stats/stats.go b/stats/stats.go\nindex 58ae100..155632d 100644\n--- a/stats/stats.go\n+++ b/stats/stats.go\n@@ -21,3 +21,12 @@ func sortedCopy(xs []float64) []float64 {\n \tsort.Float64s(out)\n \treturn out\n }\n+\n+// Median returns the median of xs, or 0 for an empty slice.\n+func Median(xs []float64) float64 {\n+\tif len(xs) == 0 {\n+\t\treturn 0\n+\t}\n+\ts := sortedCopy(xs)\n+\treturn s[len(s)/2]\n+}\n"
+    },
+    {
+      "name": "forgets_sort",
+      "expected": "incorrect",
+      "diff": "diff --git a/stats/stats.go b/stats/stats.go\nindex 58ae100..692fcdf 100644\n--- a/stats/stats.go\n+++ b/stats/stats.go\n@@ -21,3 +21,15 @@ func sortedCopy(xs []float64) []float64 {\n \tsort.Float64s(out)\n \treturn out\n }\n+\n+// Median returns the median of xs, or 0 for an empty slice.\n+func Median(xs []float64) float64 {\n+\tif len(xs) == 0 {\n+\t\treturn 0\n+\t}\n+\tn := len(xs)\n+\tif n%2 == 1 {\n+\t\treturn xs[n/2]\n+\t}\n+\treturn (xs[n/2-1] + xs[n/2]) / 2\n+}\n"
+    },
+    {
+      "name": "mutates_input",
+      "expected": "incorrect",
+      "diff": "diff --git a/stats/stats.go b/stats/stats.go\nindex 58ae100..d84867c 100644\n--- a/stats/stats.go\n+++ b/stats/stats.go\n@@ -21,3 +21,16 @@ func sortedCopy(xs []float64) []float64 {\n \tsort.Float64s(out)\n \treturn out\n }\n+\n+// Median returns the median of xs, or 0 for an empty slice.\n+func Median(xs []float64) float64 {\n+\tif len(xs) == 0 {\n+\t\treturn 0\n+\t}\n+\tsort.Float64s(xs)\n+\tn := len(xs)\n+\tif n%2 == 1 {\n+\t\treturn xs[n/2]\n+\t}\n+\treturn (xs[n/2-1] + xs[n/2]) / 2\n+}\n"
+    }
+  ]
+}

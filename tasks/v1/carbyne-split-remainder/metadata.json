@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-split-remainder",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "split_evenly returns a list of n integer amounts that SUM EXACTLY to total_cents, and any two of the amounts differ by at most 1 cent (so no money is lost or created and the split is even).",
+      "The change modifies only the billing module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It distributes the remainder cents one per part across the first parts (e.g. via divmod), rather than dropping them, rounding floats, or piling the whole remainder onto a single part."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "billing/__init__.py"
+    ]
+  }
+}

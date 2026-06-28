@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-getorcreate-race",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and the mergeability rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "GetOrCreate returns the existing value for key, or creates it with make() and stores it if absent, calling make() AT MOST ONCE per key even when many goroutines call it concurrently for the same missing key.",
+      "The change modifies only cache/cache.go and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "It holds c.mu across BOTH the presence check and the store as a single critical section, so two goroutines racing on a missing key cannot both call make \u2014 it does NOT release the lock between checking and creating (e.g. via Get then Set) and is not unlocked."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "cache/cache.go"
+    ]
+  }
+}

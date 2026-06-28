@@ -1,0 +1,12 @@
+diff --git a/ledger/__init__.py b/ledger/__init__.py
+index e4fa9e5..91a8972 100644
+--- a/ledger/__init__.py
++++ b/ledger/__init__.py
+@@ -28,3 +28,7 @@ class Ledger:
+         if self._balances[account] < amount:
+             raise InsufficientFunds(account)
+         self._balances[account] -= amount
++
++    def transfer(self, src, dst, amount):
++        self.withdraw(src, amount)
++        self.deposit(dst, amount)

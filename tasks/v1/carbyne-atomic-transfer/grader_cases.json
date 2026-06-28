@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/ledger/__init__.py b/ledger/__init__.py\nindex e4fa9e5..91a8972 100644\n--- a/ledger/__init__.py\n+++ b/ledger/__init__.py\n@@ -28,3 +28,7 @@ class Ledger:\n         if self._balances[account] < amount:\n             raise InsufficientFunds(account)\n         self._balances[account] -= amount\n+\n+    def transfer(self, src, dst, amount):\n+        self.withdraw(src, amount)\n+        self.deposit(dst, amount)\n"
+    },
+    {
+      "name": "manual_check_no_reuse",
+      "expected": "incorrect",
+      "diff": "diff --git a/ledger/__init__.py b/ledger/__init__.py\nindex e4fa9e5..e425c68 100644\n--- a/ledger/__init__.py\n+++ b/ledger/__init__.py\n@@ -28,3 +28,9 @@ class Ledger:\n         if self._balances[account] < amount:\n             raise InsufficientFunds(account)\n         self._balances[account] -= amount\n+\n+    def transfer(self, src, dst, amount):\n+        if self._balances[src] < amount:\n+            raise InsufficientFunds(src)\n+        self._balances[src] -= amount\n+        self._balances[dst] += amount\n"
+    },
+    {
+      "name": "credit_first_partial",
+      "expected": "incorrect",
+      "diff": "diff --git a/ledger/__init__.py b/ledger/__init__.py\nindex e4fa9e5..ff7377a 100644\n--- a/ledger/__init__.py\n+++ b/ledger/__init__.py\n@@ -28,3 +28,7 @@ class Ledger:\n         if self._balances[account] < amount:\n             raise InsufficientFunds(account)\n         self._balances[account] -= amount\n+\n+    def transfer(self, src, dst, amount):\n+        self.deposit(dst, amount)\n+        self.withdraw(src, amount)\n"
+    },
+    {
+      "name": "direct_overdraft",
+      "expected": "incorrect",
+      "diff": "diff --git a/ledger/__init__.py b/ledger/__init__.py\nindex e4fa9e5..5b872b4 100644\n--- a/ledger/__init__.py\n+++ b/ledger/__init__.py\n@@ -28,3 +28,7 @@ class Ledger:\n         if self._balances[account] < amount:\n             raise InsufficientFunds(account)\n         self._balances[account] -= amount\n+\n+    def transfer(self, src, dst, amount):\n+        self._balances[src] -= amount\n+        self._balances[dst] += amount\n"
+    }
+  ]
+}

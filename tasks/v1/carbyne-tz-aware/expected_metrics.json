@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold compares against an aware UTC now() (1.0). Using datetime.now() (naive local) or datetime.utcnow() (naive!) raises a TypeError comparing aware vs naive \u2014 both blocked (0). The utcnow trap is the subtle one."
+}

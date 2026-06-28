@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/userservice/__init__.py b/userservice/__init__.py\nindex f04ee94..8b5600a 100644\n--- a/userservice/__init__.py\n+++ b/userservice/__init__.py\n@@ -8,3 +8,9 @@ class UserService:\n \n     def get(self, user_id):\n         return self._db.query_one(\"SELECT * FROM users WHERE id = ?\", [user_id])\n+\n+    def get_many(self, ids):\n+        placeholders = \",\".join(\"?\" for _ in ids)\n+        return self._db.query_many(\n+            f\"SELECT * FROM users WHERE id IN ({placeholders})\", list(ids)\n+        )\n"
+    },
+    {
+      "name": "n_plus_1",
+      "expected": "incorrect",
+      "diff": "diff --git a/userservice/__init__.py b/userservice/__init__.py\nindex f04ee94..dd2ffa8 100644\n--- a/userservice/__init__.py\n+++ b/userservice/__init__.py\n@@ -8,3 +8,6 @@ class UserService:\n \n     def get(self, user_id):\n         return self._db.query_one(\"SELECT * FROM users WHERE id = ?\", [user_id])\n+\n+    def get_many(self, ids):\n+        return [self.get(user_id) for user_id in ids]\n"
+    },
+    {
+      "name": "returns_first_only",
+      "expected": "incorrect",
+      "diff": "diff --git a/userservice/__init__.py b/userservice/__init__.py\nindex f04ee94..f08a6f5 100644\n--- a/userservice/__init__.py\n+++ b/userservice/__init__.py\n@@ -8,3 +8,6 @@ class UserService:\n \n     def get(self, user_id):\n         return self._db.query_one(\"SELECT * FROM users WHERE id = ?\", [user_id])\n+\n+    def get_many(self, ids):\n+        return self.get(ids[0])\n"
+    }
+  ]
+}

@@ -72,6 +72,8 @@ vulcanbench run --suite v1-large --model openai:gpt-4o --repeat 5 --sandbox dock
 # Diamond tier: rubric-graded *mergeability* (not just correctness). Use a judge
 # model different from the one under test to avoid self-grading:
 vulcanbench run --suite v1-diamond --model anthropic:claude-opus-4-8 --judge-model openai:gpt-5.5
+# Carbyne tier: harder still — terse prompts where the naive solution is subtly wrong:
+vulcanbench run --suite v1-carbyne --model anthropic:claude-opus-4-8 --judge-model openai:gpt-5.5
 vulcanbench leaderboard            # by model: pass@1 ± stderr, pass@k, cost, latency
 vulcanbench leaderboard --by run   # per-run drill-down
 vulcanbench report -o report.md    # shareable Markdown/JSON report (ranking,

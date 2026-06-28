@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne tier: gold issues one batched query_many with an IN clause (1.0). Looping get() per id is the N+1 pattern (weighted miss, ~0). Returning only the first user is blocked (0)."
+}

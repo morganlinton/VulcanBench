@@ -27,6 +27,7 @@ SUITE_ALIASES = {
     "v1-rust": "v1",
     "v1-compare": "v1",
     "v1-diamond": "v1",
+    "v1-carbyne": "v1",
 }
 
 
@@ -68,8 +69,10 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
     ``tasks/<name>/suite.json`` manifest pins a subset/order. Aliases ``v1-micro``
     and ``v1-large`` read ``tasks/v1/suite.json`` keys ``micro`` / ``large``.
     ``v1-rust`` filters by language ``rust`` in metadata.languages. ``v1-diamond``
-    reads the ``diamond`` key: the rubric-graded mergeability tier (run with a
-    ``--judge-model`` different from the model under test to avoid self-grading).
+    and ``v1-carbyne`` read the ``diamond`` / ``carbyne`` keys: rubric-graded
+    mergeability tiers (carbyne is the harder one — the naive solution is subtly
+    wrong). Run them with a ``--judge-model`` different from the model under test
+    to avoid self-grading.
     """
     if name in SUITE_ALIASES:
         tasks_root = tasks_base / SUITE_ALIASES[name]
@@ -83,6 +86,8 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
                 task_ids = list(data.get("compare") or [])
             elif name == "v1-diamond":
                 task_ids = list(data.get("diamond") or [])
+            elif name == "v1-carbyne":
+                task_ids = list(data.get("carbyne") or [])
             else:
                 key = "micro" if name == "v1-micro" else "large"
                 task_ids = list(data.get(key) or _scale_filter(tasks_root, key))

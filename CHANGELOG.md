@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Carbyne tier (`v1-carbyne` suite)** — 10 harder rubric-graded tasks (named for the carbon
+  allotrope harder than diamond). The diamond run showed the frontier passes "obvious" mergeability
+  traps and only loses cosmetic style points, so carbyne tasks use *terse prompts that do not
+  telegraph the trap* over **subtly-wrong-naive** problems, with **substantive-only rubrics** (no
+  cosmetic style criteria): atomic transfer (no partial state on failure), money split (parts must
+  sum exactly), defensive copy (a `readonly` type on the same reference isn't a copy),
+  get-or-create (no check-then-act TOCTOU race), idempotent charge, transaction rollback+re-raise,
+  even-length median without mutating the input, timezone-aware comparison (`utcnow()` is naive),
+  N+1 batch fetch, and order-preserving dedup. Every task's grader-trust passes with a live judge
+  (accuracy=1.0, false_pass=0) — the judge reliably catches partial-state, TOCTOU races, the
+  readonly-isn't-a-copy trick, etc. New `carbyne` key + `v1-carbyne` alias; run with a
+  `--judge-model` different from the model under test.
 - **Diamond tier (`v1-diamond` suite)** — the first batch of rubric-graded mergeability tasks,
   the answer to frontier saturation (GPT-5.5 hit 100% functional on the test-graded suite). Each
   ships a terse prompt over house-style code where correctness is trivial but the rubric catches

@@ -1,0 +1,14 @@
+diff --git a/userservice/__init__.py b/userservice/__init__.py
+index f04ee94..8b5600a 100644
+--- a/userservice/__init__.py
++++ b/userservice/__init__.py
+@@ -8,3 +8,9 @@ class UserService:
+ 
+     def get(self, user_id):
+         return self._db.query_one("SELECT * FROM users WHERE id = ?", [user_id])
++
++    def get_many(self, ids):
++        placeholders = ",".join("?" for _ in ids)
++        return self._db.query_many(
++            f"SELECT * FROM users WHERE id IN ({placeholders})", list(ids)
++        )

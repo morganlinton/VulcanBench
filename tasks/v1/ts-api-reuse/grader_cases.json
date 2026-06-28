@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/src/github.ts b/src/github.ts\nindex 638d7ce..264dc0d 100644\n--- a/src/github.ts\n+++ b/src/github.ts\n@@ -23,4 +23,8 @@ export class GitHub {\n   async getRepo(owner: string, name: string): Promise<unknown> {\n     return this.request(`/repos/${owner}/${name}`);\n   }\n+\n+  async listIssues(owner: string, name: string, page = 1): Promise<unknown> {\n+    return this.request(`/repos/${owner}/${name}/issues?page=${page}`);\n+  }\n }\n"
+    },
+    {
+      "name": "raw_fetch",
+      "expected": "incorrect",
+      "diff": "diff --git a/src/github.ts b/src/github.ts\nindex 638d7ce..0c6efc8 100644\n--- a/src/github.ts\n+++ b/src/github.ts\n@@ -23,4 +23,11 @@ export class GitHub {\n   async getRepo(owner: string, name: string): Promise<unknown> {\n     return this.request(`/repos/${owner}/${name}`);\n   }\n+\n+  async listIssues(owner: string, name: string, page = 1): Promise<unknown> {\n+    const res = await fetch(`https://api.github.com/repos/${owner}/${name}/issues?page=${page}`, {\n+      headers: { Authorization: `Bearer ${this.token}` },\n+    });\n+    return res.json();\n+  }\n }\n"
+    },
+    {
+      "name": "ignores_page",
+      "expected": "incorrect",
+      "diff": "diff --git a/src/github.ts b/src/github.ts\nindex 638d7ce..59a091d 100644\n--- a/src/github.ts\n+++ b/src/github.ts\n@@ -23,4 +23,8 @@ export class GitHub {\n   async getRepo(owner: string, name: string): Promise<unknown> {\n     return this.request(`/repos/${owner}/${name}`);\n   }\n+\n+  async listIssues(owner: string, name: string, page = 1): Promise<unknown> {\n+    return this.request(`/repos/${owner}/${name}/issues`);\n+  }\n }\n"
+    }
+  ]
+}

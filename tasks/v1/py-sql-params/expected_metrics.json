@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Rubric-graded mergeability/safety. Gold binds the email as a query parameter (1.0). Interpolating it into the SQL string (f-string or concatenation) works for benign input but is an injection risk and off-convention (~0.2); querying the wrong column is blocked (0)."
+}

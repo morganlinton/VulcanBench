@@ -1,0 +1,13 @@
+diff --git a/src/github.ts b/src/github.ts
+index 638d7ce..264dc0d 100644
+--- a/src/github.ts
++++ b/src/github.ts
+@@ -23,4 +23,8 @@ export class GitHub {
+   async getRepo(owner: string, name: string): Promise<unknown> {
+     return this.request(`/repos/${owner}/${name}`);
+   }
++
++  async listIssues(owner: string, name: string, page = 1): Promise<unknown> {
++    return this.request(`/repos/${owner}/${name}/issues?page=${page}`);
++  }
+ }

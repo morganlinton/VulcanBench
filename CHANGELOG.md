@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Diamond tier (`v1-diamond` suite)** — the first batch of rubric-graded mergeability tasks,
+  the answer to frontier saturation (GPT-5.5 hit 100% functional on the test-graded suite). Each
+  ships a terse prompt over house-style code where correctness is trivial but the rubric catches
+  *mergeability*: `py-validate-convention` (raise the module's error type, not ValueError/bool),
+  `py-immutable-transform` (don't mutate the input), `go-counter-lock` (reuse the receiver mutex,
+  no data race), `py-logging-convention` (use the module logger, not print), `py-sql-params`
+  (bound parameters, not string interpolation), `ts-api-reuse` (reuse the shared request wrapper),
+  plus `py-orders-rubric`. Every task's grader-trust checks pass with a live judge
+  (accuracy=1.0, false_pass=0 over labeled working-but-unmergeable variants). New `diamond` key in
+  `tasks/v1/suite.json` and `v1-diamond` suite alias; run with a `--judge-model` different from the
+  model under test. Kept out of the default/compare suites (no self-grading there).
 - **Rubric grading (`grader: "rubric"`)** — a third grading mode that scores *mergeability*,
   not just correctness, the axis that still separates frontier models once functional
   correctness saturates (motivated by Cognition's FrontierCode). A task ships a

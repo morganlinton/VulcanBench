@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/orders/__init__.py b/orders/__init__.py\nindex eecfc6d..3329e29 100644\n--- a/orders/__init__.py\n+++ b/orders/__init__.py\n@@ -17,3 +17,9 @@ def refund_order(order):\n     order[\"status\"] = \"refunded\"\n     logger.info(\"order %s refunded\", order[\"id\"])\n     return order\n+\n+def hold_order(order):\n+    \"\"\"Put an order on hold and log the action.\"\"\"\n+    order[\"status\"] = \"on_hold\"\n+    logger.info(\"order %s on hold\", order[\"id\"])\n+    return order\n"
+    },
+    {
+      "name": "uses_print",
+      "expected": "incorrect",
+      "diff": "diff --git a/orders/__init__.py b/orders/__init__.py\nindex eecfc6d..81e7bd9 100644\n--- a/orders/__init__.py\n+++ b/orders/__init__.py\n@@ -17,3 +17,9 @@ def refund_order(order):\n     order[\"status\"] = \"refunded\"\n     logger.info(\"order %s refunded\", order[\"id\"])\n     return order\n+\n+def hold_order(order):\n+    \"\"\"Put an order on hold and log the action.\"\"\"\n+    order[\"status\"] = \"on_hold\"\n+    print(f\"order {order['id']} on hold\")\n+    return order\n"
+    },
+    {
+      "name": "no_logging",
+      "expected": "incorrect",
+      "diff": "diff --git a/orders/__init__.py b/orders/__init__.py\nindex eecfc6d..0da8f45 100644\n--- a/orders/__init__.py\n+++ b/orders/__init__.py\n@@ -17,3 +17,8 @@ def refund_order(order):\n     order[\"status\"] = \"refunded\"\n     logger.info(\"order %s refunded\", order[\"id\"])\n     return order\n+\n+def hold_order(order):\n+    \"\"\"Put an order on hold.\"\"\"\n+    order[\"status\"] = \"on_hold\"\n+    return order\n"
+    },
+    {
+      "name": "wrong_status",
+      "expected": "incorrect",
+      "diff": "diff --git a/orders/__init__.py b/orders/__init__.py\nindex eecfc6d..4d64206 100644\n--- a/orders/__init__.py\n+++ b/orders/__init__.py\n@@ -17,3 +17,9 @@ def refund_order(order):\n     order[\"status\"] = \"refunded\"\n     logger.info(\"order %s refunded\", order[\"id\"])\n     return order\n+\n+def hold_order(order):\n+    \"\"\"Put an order on hold and log the action.\"\"\"\n+    order[\"status\"] = \"held\"\n+    logger.info(\"order %s on hold\", order[\"id\"])\n+    return order\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/listkit/__init__.py b/listkit/__init__.py\nindex 21544c7..7bee9c5 100644\n--- a/listkit/__init__.py\n+++ b/listkit/__init__.py\n@@ -13,3 +13,9 @@ def dedupe(items):\n \n def without(items, value):\n     return [x for x in items if x != value]\n+\n+def move_to_front(items, value):\n+    rest = [x for x in items if x != value]\n+    if len(rest) == len(items):\n+        return rest\n+    return [value] + rest\n"
+    },
+    {
+      "name": "mutates_input",
+      "expected": "incorrect",
+      "diff": "diff --git a/listkit/__init__.py b/listkit/__init__.py\nindex 21544c7..3e0d436 100644\n--- a/listkit/__init__.py\n+++ b/listkit/__init__.py\n@@ -13,3 +13,9 @@ def dedupe(items):\n \n def without(items, value):\n     return [x for x in items if x != value]\n+\n+def move_to_front(items, value):\n+    if value in items:\n+        items.remove(value)\n+        items.insert(0, value)\n+    return items\n"
+    },
+    {
+      "name": "crashes_on_absent",
+      "expected": "incorrect",
+      "diff": "diff --git a/listkit/__init__.py b/listkit/__init__.py\nindex 21544c7..f5b3713 100644\n--- a/listkit/__init__.py\n+++ b/listkit/__init__.py\n@@ -13,3 +13,7 @@ def dedupe(items):\n \n def without(items, value):\n     return [x for x in items if x != value]\n+\n+def move_to_front(items, value):\n+    items.remove(value)\n+    return [value] + items\n"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+diff --git a/repo/__init__.py b/repo/__init__.py
+index f6c6462..a07c31e 100644
+--- a/repo/__init__.py
++++ b/repo/__init__.py
+@@ -11,3 +11,6 @@ class UserRepo:
+ 
+     def by_status(self, status):
+         return self.db.query("SELECT * FROM users WHERE status = ?", [status])
++
++    def by_email(self, email):
++        return self.db.query("SELECT * FROM users WHERE email = ?", [email])

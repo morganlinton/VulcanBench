@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Rubric-graded mergeability. Gold raises ValidationError(field, message) and returns the cleaned value like the siblings (1.0). Working-but-off-convention changes score lower: returning a bool (~0.12), raising ValueError (~0.38); a change that doesn't enforce the full rule is blocked (0)."
+}

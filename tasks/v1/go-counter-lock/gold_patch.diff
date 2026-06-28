@@ -1,0 +1,15 @@
+diff --git a/counter/counter.go b/counter/counter.go
+index 2b21749..8db5f6d 100644
+--- a/counter/counter.go
++++ b/counter/counter.go
+@@ -27,3 +27,10 @@ func (c *SafeCounter) Get(key string) int {
+ 	defer c.mu.Unlock()
+ 	return c.counts[key]
+ }
++
++// Add increases the count for key by n.
++func (c *SafeCounter) Add(key string, n int) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	c.counts[key] += n
++}

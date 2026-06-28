@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/counter/counter.go b/counter/counter.go\nindex 2b21749..8db5f6d 100644\n--- a/counter/counter.go\n+++ b/counter/counter.go\n@@ -27,3 +27,10 @@ func (c *SafeCounter) Get(key string) int {\n \tdefer c.mu.Unlock()\n \treturn c.counts[key]\n }\n+\n+// Add increases the count for key by n.\n+func (c *SafeCounter) Add(key string, n int) {\n+\tc.mu.Lock()\n+\tdefer c.mu.Unlock()\n+\tc.counts[key] += n\n+}\n"
+    },
+    {
+      "name": "no_lock",
+      "expected": "incorrect",
+      "diff": "diff --git a/counter/counter.go b/counter/counter.go\nindex 2b21749..ebcecd1 100644\n--- a/counter/counter.go\n+++ b/counter/counter.go\n@@ -27,3 +27,8 @@ func (c *SafeCounter) Get(key string) int {\n \tdefer c.mu.Unlock()\n \treturn c.counts[key]\n }\n+\n+// Add increases the count for key by n.\n+func (c *SafeCounter) Add(key string, n int) {\n+\tc.counts[key] += n\n+}\n"
+    },
+    {
+      "name": "separate_lock",
+      "expected": "incorrect",
+      "diff": "diff --git a/counter/counter.go b/counter/counter.go\nindex 2b21749..0fe6228 100644\n--- a/counter/counter.go\n+++ b/counter/counter.go\n@@ -27,3 +27,11 @@ func (c *SafeCounter) Get(key string) int {\n \tdefer c.mu.Unlock()\n \treturn c.counts[key]\n }\n+\n+// Add increases the count for key by n.\n+func (c *SafeCounter) Add(key string, n int) {\n+\tvar mu sync.Mutex\n+\tmu.Lock()\n+\tdefer mu.Unlock()\n+\tc.counts[key] += n\n+}\n"
+    },
+    {
+      "name": "sets_instead_of_adds",
+      "expected": "incorrect",
+      "diff": "diff --git a/counter/counter.go b/counter/counter.go\nindex 2b21749..5cd27e6 100644\n--- a/counter/counter.go\n+++ b/counter/counter.go\n@@ -27,3 +27,10 @@ func (c *SafeCounter) Get(key string) int {\n \tdefer c.mu.Unlock()\n \treturn c.counts[key]\n }\n+\n+// Add increases the count for key by n.\n+func (c *SafeCounter) Add(key string, n int) {\n+\tc.mu.Lock()\n+\tdefer c.mu.Unlock()\n+\tc.counts[key] = n\n+}\n"
+    }
+  ]
+}

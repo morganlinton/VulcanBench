@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Rubric-graded mergeability. Gold reuses the receiver's mutex like Inc/Get (1.0). A working-but-unlocked Add (data race) or one using a useless local mutex scores ~0.2; setting instead of adding is blocked (0)."
+}

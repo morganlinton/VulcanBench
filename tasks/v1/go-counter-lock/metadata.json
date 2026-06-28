@@ -1,0 +1,39 @@
+{
+  "id": "go-counter-lock",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The SafeCounter type and the Add rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "Add increases counts[key] by n (so Add('x', 3) then Add('x', 2) makes Get('x') == 5).",
+      "The change modifies only counter/counter.go and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 4,
+        "criterion": "It guards the shared map mutation with the receiver's c.mu (Lock then Unlock, e.g. via defer) exactly like Inc and Get, so the method stays safe for concurrent use \u2014 not unlocked, and not using a new/local mutex."
+      },
+      {
+        "weight": 1,
+        "criterion": "Signature, doc comment, and style match Inc and Get."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "counter/counter.go"
+    ]
+  }
+}

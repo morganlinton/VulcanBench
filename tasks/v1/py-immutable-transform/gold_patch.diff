@@ -1,0 +1,14 @@
+diff --git a/listkit/__init__.py b/listkit/__init__.py
+index 21544c7..7bee9c5 100644
+--- a/listkit/__init__.py
++++ b/listkit/__init__.py
+@@ -13,3 +13,9 @@ def dedupe(items):
+ 
+ def without(items, value):
+     return [x for x in items if x != value]
++
++def move_to_front(items, value):
++    rest = [x for x in items if x != value]
++    if len(rest) == len(items):
++        return rest
++    return [value] + rest

@@ -1,0 +1,39 @@
+{
+  "id": "py-sql-params",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The UserRepo parameterized-query convention and the by_email rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "by_email returns the users whose email matches the given value.",
+      "The change modifies only the repo module and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 4,
+        "criterion": "The email is passed as a BOUND PARAMETER \u2014 db.query with a ? placeholder and [email] \u2014 and is NOT interpolated into the SQL string via an f-string or concatenation, consistent with by_id/by_status and safe from SQL injection."
+      },
+      {
+        "weight": 1,
+        "criterion": "Signature and style match the sibling query methods."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "repo/__init__.py"
+    ]
+  }
+}

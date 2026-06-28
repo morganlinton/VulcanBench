@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/repo/__init__.py b/repo/__init__.py\nindex f6c6462..a07c31e 100644\n--- a/repo/__init__.py\n+++ b/repo/__init__.py\n@@ -11,3 +11,6 @@ class UserRepo:\n \n     def by_status(self, status):\n         return self.db.query(\"SELECT * FROM users WHERE status = ?\", [status])\n+\n+    def by_email(self, email):\n+        return self.db.query(\"SELECT * FROM users WHERE email = ?\", [email])\n"
+    },
+    {
+      "name": "fstring_injection",
+      "expected": "incorrect",
+      "diff": "diff --git a/repo/__init__.py b/repo/__init__.py\nindex f6c6462..c77954a 100644\n--- a/repo/__init__.py\n+++ b/repo/__init__.py\n@@ -11,3 +11,6 @@ class UserRepo:\n \n     def by_status(self, status):\n         return self.db.query(\"SELECT * FROM users WHERE status = ?\", [status])\n+\n+    def by_email(self, email):\n+        return self.db.query(f\"SELECT * FROM users WHERE email = '{email}'\", [])\n"
+    },
+    {
+      "name": "string_concat",
+      "expected": "incorrect",
+      "diff": "diff --git a/repo/__init__.py b/repo/__init__.py\nindex f6c6462..d676988 100644\n--- a/repo/__init__.py\n+++ b/repo/__init__.py\n@@ -11,3 +11,6 @@ class UserRepo:\n \n     def by_status(self, status):\n         return self.db.query(\"SELECT * FROM users WHERE status = ?\", [status])\n+\n+    def by_email(self, email):\n+        return self.db.query(\"SELECT * FROM users WHERE email = '\" + email + \"'\", [])\n"
+    },
+    {
+      "name": "wrong_column",
+      "expected": "incorrect",
+      "diff": "diff --git a/repo/__init__.py b/repo/__init__.py\nindex f6c6462..15f1dbe 100644\n--- a/repo/__init__.py\n+++ b/repo/__init__.py\n@@ -11,3 +11,6 @@ class UserRepo:\n \n     def by_status(self, status):\n         return self.db.query(\"SELECT * FROM users WHERE status = ?\", [status])\n+\n+    def by_email(self, email):\n+        return self.db.query(\"SELECT * FROM users WHERE name = ?\", [email])\n"
+    }
+  ]
+}

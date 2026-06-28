@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/forms/__init__.py b/forms/__init__.py\nindex 3d224f3..7ff8f50 100644\n--- a/forms/__init__.py\n+++ b/forms/__init__.py\n@@ -22,3 +22,9 @@ def validate_age(value):\n     if value < 0 or value > 150:\n         raise ValidationError(\"age\", \"out of range\")\n     return value\n+\n+def validate_username(value):\n+    value = value.strip()\n+    if not (3 <= len(value) <= 20 and all(c.isalnum() or c == \"_\" for c in value)):\n+        raise ValidationError(\"username\", \"must be 3-20 letters, digits, or underscores\")\n+    return value\n"
+    },
+    {
+      "name": "returns_bool",
+      "expected": "incorrect",
+      "diff": "diff --git a/forms/__init__.py b/forms/__init__.py\nindex 3d224f3..22cafa3 100644\n--- a/forms/__init__.py\n+++ b/forms/__init__.py\n@@ -22,3 +22,7 @@ def validate_age(value):\n     if value < 0 or value > 150:\n         raise ValidationError(\"age\", \"out of range\")\n     return value\n+\n+def validate_username(value):\n+    value = value.strip()\n+    return 3 <= len(value) <= 20 and all(c.isalnum() or c == \"_\" for c in value)\n"
+    },
+    {
+      "name": "raises_valueerror",
+      "expected": "incorrect",
+      "diff": "diff --git a/forms/__init__.py b/forms/__init__.py\nindex 3d224f3..2988674 100644\n--- a/forms/__init__.py\n+++ b/forms/__init__.py\n@@ -22,3 +22,9 @@ def validate_age(value):\n     if value < 0 or value > 150:\n         raise ValidationError(\"age\", \"out of range\")\n     return value\n+\n+def validate_username(value):\n+    value = value.strip()\n+    if not (3 <= len(value) <= 20 and all(c.isalnum() or c == \"_\" for c in value)):\n+        raise ValueError(\"invalid username\")\n+    return value\n"
+    },
+    {
+      "name": "wrong_rule",
+      "expected": "incorrect",
+      "diff": "diff --git a/forms/__init__.py b/forms/__init__.py\nindex 3d224f3..0ae61a7 100644\n--- a/forms/__init__.py\n+++ b/forms/__init__.py\n@@ -22,3 +22,9 @@ def validate_age(value):\n     if value < 0 or value > 150:\n         raise ValidationError(\"age\", \"out of range\")\n     return value\n+\n+def validate_username(value):\n+    value = value.strip()\n+    if len(value) < 3:\n+        raise ValidationError(\"username\", \"too short\")\n+    return value\n"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "py-logging-convention",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The orders module, the logger convention, and the hold_order rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "hold_order sets order['status'] to exactly 'on_hold' and returns the order.",
+      "The change modifies only the orders module and adds no new third-party dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "It logs the action through the module's `logger` (logging), consistent with cancel_order/refund_order, rather than using print() or doing no logging at all."
+      },
+      {
+        "weight": 2,
+        "criterion": "It calls logger.info with a lazy %-style message (e.g. logger.info(\"order %s on hold\", order[\"id\"])) like the siblings."
+      },
+      {
+        "weight": 1,
+        "criterion": "Signature, docstring, and style match the sibling functions."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "orders/__init__.py"
+    ]
+  }
+}

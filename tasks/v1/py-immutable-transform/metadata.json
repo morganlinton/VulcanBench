@@ -1,0 +1,43 @@
+{
+  "id": "py-immutable-transform",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The listkit transforms, the return-new-list convention, and the move_to_front rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "move_to_front returns the elements with value at the front and the others in their original relative order, and returns an equivalent list (not an error) when value is absent.",
+      "The change modifies only the listkit module and adds no new third-party dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "It does NOT mutate its input argument \u2014 the caller's list is unchanged after the call, consistent with dedupe and without returning new lists."
+      },
+      {
+        "weight": 2,
+        "criterion": "It returns a newly constructed list rather than the mutated input."
+      },
+      {
+        "weight": 1,
+        "criterion": "Style matches the sibling transforms."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "listkit/__init__.py"
+    ]
+  }
+}

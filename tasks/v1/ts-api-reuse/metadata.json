@@ -1,0 +1,43 @@
+{
+  "id": "ts-api-reuse",
+  "category": "feature",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The GitHub client house style and the listIssues rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "listIssues fetches /repos/{owner}/{name}/issues and includes the page query parameter (page 2 requests page=2), returning the parsed issues.",
+      "The change modifies only src/github.ts and adds no new dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "The call goes through this.request(...) so it inherits the Authorization header and the !res.ok error handling, rather than calling fetch() directly."
+      },
+      {
+        "weight": 2,
+        "criterion": "It does not duplicate the base URL, the auth header, or the JSON parsing that request() already provides."
+      },
+      {
+        "weight": 1,
+        "criterion": "Signature and style match getUser and getRepo."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "src/github.ts"
+    ]
+  }
+}

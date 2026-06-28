@@ -1,0 +1,14 @@
+diff --git a/orders/__init__.py b/orders/__init__.py
+index eecfc6d..3329e29 100644
+--- a/orders/__init__.py
++++ b/orders/__init__.py
+@@ -17,3 +17,9 @@ def refund_order(order):
+     order["status"] = "refunded"
+     logger.info("order %s refunded", order["id"])
+     return order
++
++def hold_order(order):
++    """Put an order on hold and log the action."""
++    order["status"] = "on_hold"
++    logger.info("order %s on hold", order["id"])
++    return order

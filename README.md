@@ -68,6 +68,10 @@ vulcanbench effort-sweep --suite v1 --model openai:gpt-5.1 --efforts low,medium,
 # Fast micro/small sweep vs navigation-heavy medium/large tasks:
 vulcanbench run --suite v1-micro --model openai:gpt-4o
 vulcanbench run --suite v1-large --model openai:gpt-4o --repeat 5 --sandbox docker
+
+# Diamond tier: rubric-graded *mergeability* (not just correctness). Use a judge
+# model different from the one under test to avoid self-grading:
+vulcanbench run --suite v1-diamond --model anthropic:claude-opus-4-8 --judge-model openai:gpt-5.5
 vulcanbench leaderboard            # by model: pass@1 ± stderr, pass@k, cost, latency
 vulcanbench leaderboard --by run   # per-run drill-down
 vulcanbench report -o report.md    # shareable Markdown/JSON report (ranking,

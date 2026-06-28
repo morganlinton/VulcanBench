@@ -1,0 +1,47 @@
+{
+  "id": "py-validate-convention",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28. The forms validators, the ValidationError convention, and the validate_username rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "validate_username accepts only 3-20 character usernames of letters, digits, or underscores, and rejects shorter, longer, or otherwise-invalid input.",
+      "The change modifies only the forms module and adds no new third-party dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "Invalid input raises ValidationError (the module's own exception type), not ValueError, an assert, or a returned boolean/None."
+      },
+      {
+        "weight": 2,
+        "criterion": "On success it returns the validated/cleaned username, consistent with validate_email and validate_age returning their value."
+      },
+      {
+        "weight": 2,
+        "criterion": "It raises ValidationError with the same (field, message) shape as the sibling validators, using field 'username'."
+      },
+      {
+        "weight": 1,
+        "criterion": "Signature, naming, and style match the neighboring validators."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "forms/__init__.py"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+diff --git a/forms/__init__.py b/forms/__init__.py
+index 3d224f3..7ff8f50 100644
+--- a/forms/__init__.py
++++ b/forms/__init__.py
+@@ -22,3 +22,9 @@ def validate_age(value):
+     if value < 0 or value > 150:
+         raise ValidationError("age", "out of range")
+     return value
++
++def validate_username(value):
++    value = value.strip()
++    if not (3 <= len(value) <= 20 and all(c.isalnum() or c == "_" for c in value)):
++        raise ValidationError("username", "must be 3-20 letters, digits, or underscores")
++    return value

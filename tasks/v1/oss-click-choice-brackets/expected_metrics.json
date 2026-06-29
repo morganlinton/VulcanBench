@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Real OSS bug fix (pallets/click#3578), DETERMINISTIC test grading (the PR's own tests). The fail_to_pass test fails on base (renders [[a|b|c]]) and passes once the optional-Choice double-bracketing is fixed in make_metavar; pass_to_pass guards that a plain optional argument still renders [VAR]."
+}

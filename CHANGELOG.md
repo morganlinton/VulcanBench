@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **First real OSS task, deterministically graded** `oss-click-choice-brackets` (hard, `system`,
+  `bug_fix`): a genuine post-cutoff bug fix from `pallets/click` PR #3578 (optional `Choice`
+  arguments rendered `[[a|b|c]]` instead of `[a|b|c]`). The repo is the real click package sliced at
+  the PR's base commit via `scripts/slice_repo.py` (BSD LICENSE preserved), `source: oss` /
+  `decontaminated: false`. Graded by the PR's **own tests** (`grader: tests`, `PYTHONPATH=src
+  pytest`) — deterministic, no LLM judge. Validated: gold=1.0, pre-patch fails, deterministic over 3
+  runs. Establishes the FrontierCode-style pipeline (slice a real PR → run its tests) without the
+  judge-noise/asymmetry/gold-mimicry pitfalls that LLM-rubric grading hit on subtle tasks.
+
 - **Carbyne tier (`v1-carbyne` suite)** — 22 harder rubric-graded tasks (named for the carbon
   allotrope harder than diamond). The diamond run showed the frontier passes "obvious" mergeability
   traps and only loses cosmetic style points, so carbyne tasks use *terse prompts that do not

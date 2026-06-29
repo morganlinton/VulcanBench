@@ -1,0 +1,36 @@
+{
+  "id": "oss-click-choice-brackets",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-06-29",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "8929d392781c8113bc569f388c15c47b94f86581",
+  "upstream": {
+    "url": "https://github.com/pallets/click/pull/3578",
+    "issue": "https://github.com/pallets/click/pull/3578",
+    "commit": "8929d392781c8113bc569f388c15c47b94f86581"
+  },
+  "decontamination_notes": "Real fix from pallets/click PR #3578 (https://github.com/pallets/click/pull/3578), merged 2026-06-13 \u2014 after the model training cutoffs, so the specific fix is novel. The buggy code is long-standing click, so models may recognize the code, but not this fix. Repo sliced at base commit 8929d392781c8113bc569f388c15c47b94f86581; click BSD-3 LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "choice_optional_metavar",
+        "cmd": "PYTHONPATH=src python -m pytest oss_tests.py::test_choice_argument_optional_metavar -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "plain_optional_unaffected",
+        "cmd": "PYTHONPATH=src python -m pytest oss_tests.py::test_plain_optional_argument_still_bracketed -q"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

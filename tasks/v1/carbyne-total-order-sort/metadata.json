@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-total-order-sort",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "in_order sorts by priority descending then due ascending, places tasks whose due is None AFTER tasks with a real due date within the same priority, and does NOT raise when a priority group contains both None and real dates.",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "Its sort key never compares None directly against a date (e.g. it uses a (due is None, due) tuple), rather than relying on None being orderable."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "taskkit/__init__.py"
+    ]
+  }
+}

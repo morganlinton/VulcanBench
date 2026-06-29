@@ -1,0 +1,1 @@
+Add `truncate(s, n)` to the module: if `s` is longer than `n` characters, shorten it so the result, INCLUDING a trailing '…' (one character), is at most `n` characters; otherwise return `s` unchanged.

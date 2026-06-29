@@ -1,0 +1,1 @@
+Add `insert_index(xs, target)` to the module: given a sorted list `xs`, return the index at which `target` should be inserted to keep it sorted. If `target` already appears, return the index of its FIRST (leftmost) occurrence.

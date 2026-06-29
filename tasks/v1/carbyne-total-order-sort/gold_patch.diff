@@ -1,0 +1,11 @@
+diff --git a/taskkit/__init__.py b/taskkit/__init__.py
+index e13f93a..2cd39fb 100644
+--- a/taskkit/__init__.py
++++ b/taskkit/__init__.py
+@@ -4,3 +4,6 @@ datetime.date, or None meaning no due date)."""
+ 
+ def titles(tasks):
+     return [t["title"] for t in tasks]
++
++def in_order(tasks):
++    return sorted(tasks, key=lambda t: (-t["priority"], t["due"] is None, t["due"]))

@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-lru-touch",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "get returns the value for key (or None if absent) AND marks the key as most-recently-used, so a key that was just read is NOT the next one evicted \u2014 reads count as use, consistent with put using move_to_end. A get that does not update recency is wrong for an LRU.",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "On a hit it moves the key to the most-recently-used end (move_to_end with the default last=True), matching put \u2014 not leaving order unchanged and not moving it to the least-recently-used end."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "lru/__init__.py"
+    ]
+  }
+}

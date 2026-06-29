@@ -1,0 +1,13 @@
+diff --git a/csvkit/__init__.py b/csvkit/__init__.py
+index ededf47..165d137 100644
+--- a/csvkit/__init__.py
++++ b/csvkit/__init__.py
+@@ -3,3 +3,8 @@
+ 
+ def join_row(fields):
+     return ",".join(fields)
++
++def quote(field):
++    if any(c in field for c in (",", '"', "\n", "\r")):
++        return '"' + field.replace('"', '""') + '"'
++    return field

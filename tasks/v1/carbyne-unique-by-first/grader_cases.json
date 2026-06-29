@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/uniqkit/__init__.py b/uniqkit/__init__.py\nindex 1a7e389..b82be87 100644\n--- a/uniqkit/__init__.py\n+++ b/uniqkit/__init__.py\n@@ -3,3 +3,13 @@\n \n def compact(items):\n     return [x for x in items if x]\n+\n+def unique_by(items, key):\n+    seen = set()\n+    out = []\n+    for item in items:\n+        k = key(item)\n+        if k not in seen:\n+            seen.add(k)\n+            out.append(item)\n+    return out\n"
+    },
+    {
+      "name": "dict_keeps_last",
+      "expected": "incorrect",
+      "diff": "diff --git a/uniqkit/__init__.py b/uniqkit/__init__.py\nindex 1a7e389..50e6b7e 100644\n--- a/uniqkit/__init__.py\n+++ b/uniqkit/__init__.py\n@@ -3,3 +3,6 @@\n \n def compact(items):\n     return [x for x in items if x]\n+\n+def unique_by(items, key):\n+    return list({key(item): item for item in items}.values())\n"
+    },
+    {
+      "name": "sorted_by_key",
+      "expected": "incorrect",
+      "diff": "diff --git a/uniqkit/__init__.py b/uniqkit/__init__.py\nindex 1a7e389..2f852c1 100644\n--- a/uniqkit/__init__.py\n+++ b/uniqkit/__init__.py\n@@ -3,3 +3,6 @@\n \n def compact(items):\n     return [x for x in items if x]\n+\n+def unique_by(items, key):\n+    return list({key(item): item for item in sorted(items, key=key)}.values())\n"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+diff --git a/lru/__init__.py b/lru/__init__.py
+index 5d8fc5d..ccf03cf 100644
+--- a/lru/__init__.py
++++ b/lru/__init__.py
+@@ -15,3 +15,9 @@ class LRU:
+         self._d[key] = value
+         if len(self._d) > self.capacity:
+             self._d.popitem(last=False)
++
++    def get(self, key):
++        if key not in self._d:
++            return None
++        self._d.move_to_end(key)
++        return self._d[key]

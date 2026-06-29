@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/csvkit/__init__.py b/csvkit/__init__.py\nindex ededf47..165d137 100644\n--- a/csvkit/__init__.py\n+++ b/csvkit/__init__.py\n@@ -3,3 +3,8 @@\n \n def join_row(fields):\n     return \",\".join(fields)\n+\n+def quote(field):\n+    if any(c in field for c in (\",\", '\"', \"\\n\", \"\\r\")):\n+        return '\"' + field.replace('\"', '\"\"') + '\"'\n+    return field\n"
+    },
+    {
+      "name": "comma_only_no_double",
+      "expected": "incorrect",
+      "diff": "diff --git a/csvkit/__init__.py b/csvkit/__init__.py\nindex ededf47..314dc21 100644\n--- a/csvkit/__init__.py\n+++ b/csvkit/__init__.py\n@@ -3,3 +3,8 @@\n \n def join_row(fields):\n     return \",\".join(fields)\n+\n+def quote(field):\n+    if \",\" in field:\n+        return '\"' + field + '\"'\n+    return field\n"
+    },
+    {
+      "name": "doubles_but_misses_newline",
+      "expected": "incorrect",
+      "diff": "diff --git a/csvkit/__init__.py b/csvkit/__init__.py\nindex ededf47..3c86c9b 100644\n--- a/csvkit/__init__.py\n+++ b/csvkit/__init__.py\n@@ -3,3 +3,8 @@\n \n def join_row(fields):\n     return \",\".join(fields)\n+\n+def quote(field):\n+    if \",\" in field or '\"' in field:\n+        return '\"' + field.replace('\"', '\"\"') + '\"'\n+    return field\n"
+    }
+  ]
+}

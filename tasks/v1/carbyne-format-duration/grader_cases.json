@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/fmtkit/__init__.py b/fmtkit/__init__.py\nindex c570759..6b42222 100644\n--- a/fmtkit/__init__.py\n+++ b/fmtkit/__init__.py\n@@ -3,3 +3,15 @@\n \n def comma(n):\n     return f\"{n:,}\"\n+\n+def format_duration(seconds):\n+    h, rem = divmod(seconds, 3600)\n+    m, s = divmod(rem, 60)\n+    parts = []\n+    if h:\n+        parts.append(f\"{h}h\")\n+    if m:\n+        parts.append(f\"{m}m\")\n+    if s:\n+        parts.append(f\"{s}s\")\n+    return \" \".join(parts) if parts else \"0s\"\n"
+    },
+    {
+      "name": "empty_on_zero",
+      "expected": "incorrect",
+      "diff": "diff --git a/fmtkit/__init__.py b/fmtkit/__init__.py\nindex c570759..3767941 100644\n--- a/fmtkit/__init__.py\n+++ b/fmtkit/__init__.py\n@@ -3,3 +3,15 @@\n \n def comma(n):\n     return f\"{n:,}\"\n+\n+def format_duration(seconds):\n+    h, rem = divmod(seconds, 3600)\n+    m, s = divmod(rem, 60)\n+    parts = []\n+    if h:\n+        parts.append(f\"{h}h\")\n+    if m:\n+        parts.append(f\"{m}m\")\n+    if s:\n+        parts.append(f\"{s}s\")\n+    return \" \".join(parts)\n"
+    },
+    {
+      "name": "always_all_parts",
+      "expected": "incorrect",
+      "diff": "diff --git a/fmtkit/__init__.py b/fmtkit/__init__.py\nindex c570759..7679527 100644\n--- a/fmtkit/__init__.py\n+++ b/fmtkit/__init__.py\n@@ -3,3 +3,8 @@\n \n def comma(n):\n     return f\"{n:,}\"\n+\n+def format_duration(seconds):\n+    h, rem = divmod(seconds, 3600)\n+    m, s = divmod(rem, 60)\n+    return f\"{h}h {m}m {s}s\"\n"
+    }
+  ]
+}

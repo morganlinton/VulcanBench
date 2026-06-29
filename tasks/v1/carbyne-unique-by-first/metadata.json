@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-unique-by-first",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "unique_by keeps the FIRST item encountered for each distinct key(item) and returns them in input order. (A {key(i): i for i in items} comprehension keeps the LAST item per key, which is wrong here.)",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It tracks seen keys while iterating and appends the first item per key, rather than building a dict that overwrites earlier items with later ones."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "uniqkit/__init__.py"
+    ]
+  }
+}

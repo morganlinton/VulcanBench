@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-format-duration",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "format_duration includes only the non-zero h/m/s components in order, AND returns '0s' for an input of 0 (not an empty string), e.g. 3661 -> '1h 1m 1s', 60 -> '1m', 0 -> '0s'.",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It omits zero components but special-cases the all-zero input to '0s', rather than returning '' for 0 or always printing all three components."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "fmtkit/__init__.py"
+    ]
+  }
+}

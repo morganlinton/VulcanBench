@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne: gold reserves a char for the ellipsis so the result fits in n (1.0). s[:n] + ellipsis is length n+1 (exceeds n); always appending the ellipsis mangles short strings \u2014 both blocked (0)."
+}

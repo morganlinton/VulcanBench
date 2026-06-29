@@ -1,0 +1,16 @@
+diff --git a/buckets/buckets.go b/buckets/buckets.go
+index b93fd55..5995a63 100644
+--- a/buckets/buckets.go
++++ b/buckets/buckets.go
+@@ -3,3 +3,11 @@ package buckets
+ 
+ // Width is the bucket width.
+ const Width = 10
++
++// BucketIndex returns the index of the width-10 bucket containing value.
++func BucketIndex(value int) int {
++	if value < 0 {
++		return -((-value + Width - 1) / Width)
++	}
++	return value / Width
++}

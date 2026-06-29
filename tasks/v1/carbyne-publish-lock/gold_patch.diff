@@ -1,0 +1,19 @@
+diff --git a/bus/bus.go b/bus/bus.go
+index f31a9e1..560c02a 100644
+--- a/bus/bus.go
++++ b/bus/bus.go
+@@ -15,3 +15,14 @@ func (b *Bus) Subscribe(fn func(string)) {
+ 	defer b.mu.Unlock()
+ 	b.subs = append(b.subs, fn)
+ }
++
++// Publish calls every current subscriber with msg.
++func (b *Bus) Publish(msg string) {
++	b.mu.Lock()
++	subs := make([]func(string), len(b.subs))
++	copy(subs, b.subs)
++	b.mu.Unlock()
++	for _, fn := range subs {
++		fn(msg)
++	}
++}

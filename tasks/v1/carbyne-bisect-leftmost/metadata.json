@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-bisect-leftmost",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "insert_index returns the LEFTMOST insertion point: the smallest index i such that every element before i is < target and every element from i on is >= target. For a target already present (possibly with duplicates) this is the index of its FIRST occurrence (bisect_left semantics, not bisect_right or an arbitrary matching index).",
+      "The change modifies only the module and adds no third-party dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It returns the leftmost position (bisect_left), not the rightmost (bisect_right) and not the first arbitrary index a binary search happens to land on."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "sortedkit/__init__.py"
+    ]
+  }
+}

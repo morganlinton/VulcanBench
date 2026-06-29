@@ -1,0 +1,19 @@
+diff --git a/ranges/__init__.py b/ranges/__init__.py
+index eddc336..cfb35dd 100644
+--- a/ranges/__init__.py
++++ b/ranges/__init__.py
+@@ -3,3 +3,14 @@
+ 
+ def length(interval):
+     return interval[1] - interval[0]
++
++def merge(intervals):
++    if not intervals:
++        return []
++    out = [list(intervals[0])]
++    for start, end in sorted(intervals):
++        if start <= out[-1][1]:
++            out[-1][1] = max(out[-1][1], end)
++        else:
++            out.append([start, end])
++    return [tuple(x) for x in out]

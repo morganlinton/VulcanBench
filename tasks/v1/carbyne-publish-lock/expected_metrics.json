@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne (hard concurrency): gold copies the slice under the lock then calls outside it (1.0). Holding the lock during callbacks can deadlock if a subscriber re-enters the Bus, and reading subs unlocked is a data race \u2014 both blocked (0)."
+}

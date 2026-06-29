@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/datekit/__init__.py b/datekit/__init__.py\nindex 422f6f7..957e503 100644\n--- a/datekit/__init__.py\n+++ b/datekit/__init__.py\n@@ -5,3 +5,11 @@ from datetime import date, timedelta\n \n def add_days(d, n):\n     return d + timedelta(days=n)\n+\n+def add_months(d, n):\n+    import calendar\n+    m = d.month - 1 + n\n+    year = d.year + m // 12\n+    month = m % 12 + 1\n+    day = min(d.day, calendar.monthrange(year, month)[1])\n+    return date(year, month, day)\n"
+    },
+    {
+      "name": "naive_replace",
+      "expected": "incorrect",
+      "diff": "diff --git a/datekit/__init__.py b/datekit/__init__.py\nindex 422f6f7..8311ea5 100644\n--- a/datekit/__init__.py\n+++ b/datekit/__init__.py\n@@ -5,3 +5,7 @@ from datetime import date, timedelta\n \n def add_days(d, n):\n     return d + timedelta(days=n)\n+\n+def add_months(d, n):\n+    m = d.month - 1 + n\n+    return d.replace(year=d.year + m // 12, month=m % 12 + 1)\n"
+    },
+    {
+      "name": "timedelta_30",
+      "expected": "incorrect",
+      "diff": "diff --git a/datekit/__init__.py b/datekit/__init__.py\nindex 422f6f7..3175fee 100644\n--- a/datekit/__init__.py\n+++ b/datekit/__init__.py\n@@ -5,3 +5,6 @@ from datetime import date, timedelta\n \n def add_days(d, n):\n     return d + timedelta(days=n)\n+\n+def add_months(d, n):\n+    return d + timedelta(days=30 * n)\n"
+    }
+  ]
+}

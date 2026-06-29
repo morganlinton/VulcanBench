@@ -1,0 +1,13 @@
+diff --git a/textkit2/__init__.py b/textkit2/__init__.py
+index 3e3bc52..e8e04c6 100644
+--- a/textkit2/__init__.py
++++ b/textkit2/__init__.py
+@@ -3,3 +3,8 @@
+ 
+ def normalize_ws(s):
+     return " ".join(s.split())
++
++def truncate(s, n):
++    if len(s) <= n:
++        return s
++    return s[: n - 1] + "…"

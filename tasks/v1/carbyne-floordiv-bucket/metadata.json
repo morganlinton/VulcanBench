@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-floordiv-bucket",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "BucketIndex uses FLOOR division so negative values bucket correctly: -1..-10 -> -1, -11..-20 -> -2. (Go's built-in / truncates toward zero, which would wrongly put -1 in bucket 0 \u2014 that must be handled.)",
+      "The change modifies only buckets.go and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It computes a true floor division for negatives (special-casing value<0 or using math.Floor), not Go's default truncating /."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "buckets/buckets.go"
+    ]
+  }
+}

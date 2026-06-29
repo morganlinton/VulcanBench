@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-csv-quote",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "quote wraps the field in double quotes if it contains a comma, a double-quote, OR a newline (\\n or \\r); and when quoting, any embedded double-quote is escaped by DOUBLING it (\" -> \"\"). Fields needing none of this are returned unchanged.",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It triggers quoting on newlines as well as commas and quotes, and doubles embedded quotes (not just wrapping, and not only checking for a comma)."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "csvkit/__init__.py"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/bus/bus.go b/bus/bus.go\nindex f31a9e1..560c02a 100644\n--- a/bus/bus.go\n+++ b/bus/bus.go\n@@ -15,3 +15,14 @@ func (b *Bus) Subscribe(fn func(string)) {\n \tdefer b.mu.Unlock()\n \tb.subs = append(b.subs, fn)\n }\n+\n+// Publish calls every current subscriber with msg.\n+func (b *Bus) Publish(msg string) {\n+\tb.mu.Lock()\n+\tsubs := make([]func(string), len(b.subs))\n+\tcopy(subs, b.subs)\n+\tb.mu.Unlock()\n+\tfor _, fn := range subs {\n+\t\tfn(msg)\n+\t}\n+}\n"
+    },
+    {
+      "name": "holds_lock_during_callbacks",
+      "expected": "incorrect",
+      "diff": "diff --git a/bus/bus.go b/bus/bus.go\nindex f31a9e1..e4270a9 100644\n--- a/bus/bus.go\n+++ b/bus/bus.go\n@@ -15,3 +15,12 @@ func (b *Bus) Subscribe(fn func(string)) {\n \tdefer b.mu.Unlock()\n \tb.subs = append(b.subs, fn)\n }\n+\n+// Publish calls every current subscriber with msg.\n+func (b *Bus) Publish(msg string) {\n+\tb.mu.Lock()\n+\tdefer b.mu.Unlock()\n+\tfor _, fn := range b.subs {\n+\t\tfn(msg)\n+\t}\n+}\n"
+    },
+    {
+      "name": "no_lock",
+      "expected": "incorrect",
+      "diff": "diff --git a/bus/bus.go b/bus/bus.go\nindex f31a9e1..057bfdb 100644\n--- a/bus/bus.go\n+++ b/bus/bus.go\n@@ -15,3 +15,10 @@ func (b *Bus) Subscribe(fn func(string)) {\n \tdefer b.mu.Unlock()\n \tb.subs = append(b.subs, fn)\n }\n+\n+// Publish calls every current subscriber with msg.\n+func (b *Bus) Publish(msg string) {\n+\tfor _, fn := range b.subs {\n+\t\tfn(msg)\n+\t}\n+}\n"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Carbyne (LRU subtlety): gold touches the key on read so reads count as use (1.0). A plain dict.get doesn't update recency (a just-read key gets evicted), and move_to_end(last=False) marks it LRU \u2014 both blocked (0)."
+}

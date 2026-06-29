@@ -1,0 +1,16 @@
+diff --git a/datekit/__init__.py b/datekit/__init__.py
+index 422f6f7..957e503 100644
+--- a/datekit/__init__.py
++++ b/datekit/__init__.py
+@@ -5,3 +5,11 @@ from datetime import date, timedelta
+ 
+ def add_days(d, n):
+     return d + timedelta(days=n)
++
++def add_months(d, n):
++    import calendar
++    m = d.month - 1 + n
++    year = d.year + m // 12
++    month = m % 12 + 1
++    day = min(d.day, calendar.monthrange(year, month)[1])
++    return date(year, month, day)

@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/ranges/__init__.py b/ranges/__init__.py\nindex eddc336..cfb35dd 100644\n--- a/ranges/__init__.py\n+++ b/ranges/__init__.py\n@@ -3,3 +3,14 @@\n \n def length(interval):\n     return interval[1] - interval[0]\n+\n+def merge(intervals):\n+    if not intervals:\n+        return []\n+    out = [list(intervals[0])]\n+    for start, end in sorted(intervals):\n+        if start <= out[-1][1]:\n+            out[-1][1] = max(out[-1][1], end)\n+        else:\n+            out.append([start, end])\n+    return [tuple(x) for x in out]\n"
+    },
+    {
+      "name": "strict_overlap",
+      "expected": "incorrect",
+      "diff": "diff --git a/ranges/__init__.py b/ranges/__init__.py\nindex eddc336..5eaa4e3 100644\n--- a/ranges/__init__.py\n+++ b/ranges/__init__.py\n@@ -3,3 +3,14 @@\n \n def length(interval):\n     return interval[1] - interval[0]\n+\n+def merge(intervals):\n+    if not intervals:\n+        return []\n+    out = [list(sorted(intervals)[0])]\n+    for start, end in sorted(intervals)[1:]:\n+        if start < out[-1][1]:\n+            out[-1][1] = max(out[-1][1], end)\n+        else:\n+            out.append([start, end])\n+    return [tuple(x) for x in out]\n"
+    },
+    {
+      "name": "no_sort",
+      "expected": "incorrect",
+      "diff": "diff --git a/ranges/__init__.py b/ranges/__init__.py\nindex eddc336..4c3840d 100644\n--- a/ranges/__init__.py\n+++ b/ranges/__init__.py\n@@ -3,3 +3,14 @@\n \n def length(interval):\n     return interval[1] - interval[0]\n+\n+def merge(intervals):\n+    if not intervals:\n+        return []\n+    out = [list(intervals[0])]\n+    for start, end in intervals[1:]:\n+        if start <= out[-1][1]:\n+            out[-1][1] = max(out[-1][1], end)\n+        else:\n+            out.append([start, end])\n+    return [tuple(x) for x in out]\n"
+    }
+  ]
+}

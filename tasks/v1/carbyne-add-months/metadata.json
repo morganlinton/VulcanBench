@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-add-months",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "add_months returns the date n months later and CLAMPS the day to the last valid day of the target month when needed (e.g. Jan 31 + 1 month = Feb 28 or 29, never a crash or a roll over into March), handling year rollover correctly.",
+      "The change modifies only the datekit module and adds no third-party dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It computes the target year/month and clamps the day to that month's length (e.g. via calendar.monthrange), rather than a fixed 30-day delta or a bare date.replace that overflows on day 29-31."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "datekit/__init__.py"
+    ]
+  }
+}

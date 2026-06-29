@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/rotkit/__init__.py b/rotkit/__init__.py\nindex 1e7adf4..2cbe590 100644\n--- a/rotkit/__init__.py\n+++ b/rotkit/__init__.py\n@@ -3,3 +3,9 @@\n \n def reverse(xs):\n     return xs[::-1]\n+\n+def rotate(xs, n):\n+    if not xs:\n+        return []\n+    n %= len(xs)\n+    return xs[-n:] + xs[:-n] if n else xs[:]\n"
+    },
+    {
+      "name": "no_modulo_overflow",
+      "expected": "incorrect",
+      "diff": "diff --git a/rotkit/__init__.py b/rotkit/__init__.py\nindex 1e7adf4..7689fac 100644\n--- a/rotkit/__init__.py\n+++ b/rotkit/__init__.py\n@@ -3,3 +3,6 @@\n \n def reverse(xs):\n     return xs[::-1]\n+\n+def rotate(xs, n):\n+    return xs[-n:] + xs[:-n]\n"
+    },
+    {
+      "name": "rotates_left",
+      "expected": "incorrect",
+      "diff": "diff --git a/rotkit/__init__.py b/rotkit/__init__.py\nindex 1e7adf4..b30d5a2 100644\n--- a/rotkit/__init__.py\n+++ b/rotkit/__init__.py\n@@ -3,3 +3,9 @@\n \n def reverse(xs):\n     return xs[::-1]\n+\n+def rotate(xs, n):\n+    if not xs:\n+        return []\n+    n %= len(xs)\n+    return xs[n:] + xs[:n]\n"
+    }
+  ]
+}

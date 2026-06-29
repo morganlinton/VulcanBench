@@ -1,0 +1,18 @@
+diff --git a/sortedkit/__init__.py b/sortedkit/__init__.py
+index d750e41..115182c 100644
+--- a/sortedkit/__init__.py
++++ b/sortedkit/__init__.py
+@@ -3,3 +3,13 @@
+ 
+ def contains(xs, target):
+     return target in xs
++
++def insert_index(xs, target):
++    lo, hi = 0, len(xs)
++    while lo < hi:
++        mid = (lo + hi) // 2
++        if xs[mid] < target:
++            lo = mid + 1
++        else:
++            hi = mid
++    return lo

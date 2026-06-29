@@ -1,0 +1,14 @@
+diff --git a/rotkit/__init__.py b/rotkit/__init__.py
+index 1e7adf4..2cbe590 100644
+--- a/rotkit/__init__.py
++++ b/rotkit/__init__.py
+@@ -3,3 +3,9 @@
+ 
+ def reverse(xs):
+     return xs[::-1]
++
++def rotate(xs, n):
++    if not xs:
++        return []
++    n %= len(xs)
++    return xs[-n:] + xs[:-n] if n else xs[:]

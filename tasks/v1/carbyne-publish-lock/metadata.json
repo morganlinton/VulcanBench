@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-publish-lock",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "Publish invokes each current subscriber with msg, is safe to call concurrently with Subscribe, and does NOT hold b.mu while invoking the subscriber callbacks \u2014 so a subscriber that calls back into the Bus (e.g. Subscribe) cannot deadlock on the non-reentrant mutex.",
+      "The change modifies only bus.go and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 3,
+        "criterion": "It snapshots/copies the subscriber slice WHILE holding the lock, then RELEASES the lock and calls the callbacks outside the critical section \u2014 not iterating with the lock held, and not reading b.subs with no lock."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "bus/bus.go"
+    ]
+  }
+}

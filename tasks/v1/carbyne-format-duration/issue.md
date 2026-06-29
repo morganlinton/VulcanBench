@@ -1,0 +1,1 @@
+Add `format_duration(seconds)` to the module: format a non-negative integer number of seconds as a string like '1h 2m 3s', including only the non-zero components in h/m/s order. Zero seconds should format as '0s'.

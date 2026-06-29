@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-truncate-ellipsis",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "truncate returns s unchanged when len(s) <= n; otherwise it returns a string whose TOTAL length (visible text plus the single '\u2026' character) is at most n.",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "When shortening it reserves one character for the ellipsis (e.g. s[:n-1] + '\u2026'), so the result length never exceeds n."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "textkit2/__init__.py"
+    ]
+  }
+}

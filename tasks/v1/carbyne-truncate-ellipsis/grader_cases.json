@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/textkit2/__init__.py b/textkit2/__init__.py\nindex 3e3bc52..e8e04c6 100644\n--- a/textkit2/__init__.py\n+++ b/textkit2/__init__.py\n@@ -3,3 +3,8 @@\n \n def normalize_ws(s):\n     return \" \".join(s.split())\n+\n+def truncate(s, n):\n+    if len(s) <= n:\n+        return s\n+    return s[: n - 1] + \"\u2026\"\n"
+    },
+    {
+      "name": "off_by_one",
+      "expected": "incorrect",
+      "diff": "diff --git a/textkit2/__init__.py b/textkit2/__init__.py\nindex 3e3bc52..f6af27d 100644\n--- a/textkit2/__init__.py\n+++ b/textkit2/__init__.py\n@@ -3,3 +3,8 @@\n \n def normalize_ws(s):\n     return \" \".join(s.split())\n+\n+def truncate(s, n):\n+    if len(s) <= n:\n+        return s\n+    return s[:n] + \"\u2026\"\n"
+    },
+    {
+      "name": "always_truncates",
+      "expected": "incorrect",
+      "diff": "diff --git a/textkit2/__init__.py b/textkit2/__init__.py\nindex 3e3bc52..2039623 100644\n--- a/textkit2/__init__.py\n+++ b/textkit2/__init__.py\n@@ -3,3 +3,6 @@\n \n def normalize_ws(s):\n     return \" \".join(s.split())\n+\n+def truncate(s, n):\n+    return s[: n - 1] + \"\u2026\"\n"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-rotate-list",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; not derived from any existing repository, so it post-dates all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "rotate returns xs rotated RIGHT by n, correct for: n larger than len(xs) (equivalent to n mod len), negative n (rotate left), n a multiple of the length or 0 (same order), and an empty list (returns []). For example rotate([1,2,3,4], 1) -> [4,1,2,3] and rotate([1,2,3], 4) -> [3,1,2].",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It reduces n modulo the length (so n > len works) and rotates in the RIGHT direction, handling the empty list."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "rotkit/__init__.py"
+    ]
+  }
+}

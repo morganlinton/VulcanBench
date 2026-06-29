@@ -1,0 +1,35 @@
+{
+  "id": "carbyne-merge-intervals",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-28",
+  "repo_scale": "small",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-06-28 for the carbyne tier; the house code and rubric are not derived from any existing repository, so they post-date all model training cutoffs.",
+  "grader": "rubric",
+  "rubric": {
+    "pass_threshold": 1.0,
+    "blocking": [
+      "merge returns the minimal sorted list of non-overlapping intervals covering the same points, merging intervals that overlap OR merely touch (share an endpoint, e.g. (1,2) and (2,3) -> (1,3)), and it works for inputs given in any order.",
+      "The change modifies only the module and adds no dependency."
+    ],
+    "weighted": [
+      {
+        "weight": 2,
+        "criterion": "It sorts the intervals first and merges when the next start is <= the current end (so touching intervals merge), rather than using a strict < or skipping the sort."
+      }
+    ]
+  },
+  "grader_samples": 3,
+  "agent_hints": {
+    "suggested_max_steps": 30,
+    "entry_paths": [
+      "ranges/__init__.py"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/taskkit/__init__.py b/taskkit/__init__.py\nindex e13f93a..2cd39fb 100644\n--- a/taskkit/__init__.py\n+++ b/taskkit/__init__.py\n@@ -4,3 +4,6 @@ datetime.date, or None meaning no due date).\"\"\"\n \n def titles(tasks):\n     return [t[\"title\"] for t in tasks]\n+\n+def in_order(tasks):\n+    return sorted(tasks, key=lambda t: (-t[\"priority\"], t[\"due\"] is None, t[\"due\"]))\n"
+    },
+    {
+      "name": "crashes_on_none",
+      "expected": "incorrect",
+      "diff": "diff --git a/taskkit/__init__.py b/taskkit/__init__.py\nindex e13f93a..7c725b5 100644\n--- a/taskkit/__init__.py\n+++ b/taskkit/__init__.py\n@@ -4,3 +4,6 @@ datetime.date, or None meaning no due date).\"\"\"\n \n def titles(tasks):\n     return [t[\"title\"] for t in tasks]\n+\n+def in_order(tasks):\n+    return sorted(tasks, key=lambda t: (-t[\"priority\"], t[\"due\"]))\n"
+    },
+    {
+      "name": "none_sorts_first",
+      "expected": "incorrect",
+      "diff": "diff --git a/taskkit/__init__.py b/taskkit/__init__.py\nindex e13f93a..ab61457 100644\n--- a/taskkit/__init__.py\n+++ b/taskkit/__init__.py\n@@ -4,3 +4,6 @@ datetime.date, or None meaning no due date).\"\"\"\n \n def titles(tasks):\n     return [t[\"title\"] for t in tasks]\n+\n+def in_order(tasks):\n+    return sorted(tasks, key=lambda t: (-t[\"priority\"], t[\"due\"] is not None, t[\"due\"]))\n"
+    }
+  ]
+}

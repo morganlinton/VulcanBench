@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/sortedkit/__init__.py b/sortedkit/__init__.py\nindex d750e41..115182c 100644\n--- a/sortedkit/__init__.py\n+++ b/sortedkit/__init__.py\n@@ -3,3 +3,13 @@\n \n def contains(xs, target):\n     return target in xs\n+\n+def insert_index(xs, target):\n+    lo, hi = 0, len(xs)\n+    while lo < hi:\n+        mid = (lo + hi) // 2\n+        if xs[mid] < target:\n+            lo = mid + 1\n+        else:\n+            hi = mid\n+    return lo\n"
+    },
+    {
+      "name": "bisect_right",
+      "expected": "incorrect",
+      "diff": "diff --git a/sortedkit/__init__.py b/sortedkit/__init__.py\nindex d750e41..0918648 100644\n--- a/sortedkit/__init__.py\n+++ b/sortedkit/__init__.py\n@@ -3,3 +3,7 @@\n \n def contains(xs, target):\n     return target in xs\n+\n+def insert_index(xs, target):\n+    import bisect\n+    return bisect.bisect_right(xs, target)\n"
+    },
+    {
+      "name": "returns_any_match",
+      "expected": "incorrect",
+      "diff": "diff --git a/sortedkit/__init__.py b/sortedkit/__init__.py\nindex d750e41..89292ad 100644\n--- a/sortedkit/__init__.py\n+++ b/sortedkit/__init__.py\n@@ -3,3 +3,15 @@\n \n def contains(xs, target):\n     return target in xs\n+\n+def insert_index(xs, target):\n+    lo, hi = 0, len(xs)\n+    while lo < hi:\n+        mid = (lo + hi) // 2\n+        if xs[mid] == target:\n+            return mid\n+        elif xs[mid] < target:\n+            lo = mid + 1\n+        else:\n+            hi = mid\n+    return lo\n"
+    }
+  ]
+}

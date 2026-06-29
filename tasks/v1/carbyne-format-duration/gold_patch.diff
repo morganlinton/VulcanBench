@@ -1,0 +1,20 @@
+diff --git a/fmtkit/__init__.py b/fmtkit/__init__.py
+index c570759..6b42222 100644
+--- a/fmtkit/__init__.py
++++ b/fmtkit/__init__.py
+@@ -3,3 +3,15 @@
+ 
+ def comma(n):
+     return f"{n:,}"
++
++def format_duration(seconds):
++    h, rem = divmod(seconds, 3600)
++    m, s = divmod(rem, 60)
++    parts = []
++    if h:
++        parts.append(f"{h}h")
++    if m:
++        parts.append(f"{m}m")
++    if s:
++        parts.append(f"{s}s")
++    return " ".join(parts) if parts else "0s"

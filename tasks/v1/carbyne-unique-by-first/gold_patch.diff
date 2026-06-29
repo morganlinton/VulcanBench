@@ -1,0 +1,18 @@
+diff --git a/uniqkit/__init__.py b/uniqkit/__init__.py
+index 1a7e389..b82be87 100644
+--- a/uniqkit/__init__.py
++++ b/uniqkit/__init__.py
+@@ -3,3 +3,13 @@
+ 
+ def compact(items):
+     return [x for x in items if x]
++
++def unique_by(items, key):
++    seen = set()
++    out = []
++    for item in items:
++        k = key(item)
++        if k not in seen:
++            seen.add(k)
++            out.append(item)
++    return out

@@ -1,0 +1,1 @@
+Add `merge(intervals)` to the module: given a list of (start, end) intervals (in any order), return a new sorted list of non-overlapping intervals covering the same points. Intervals that merely touch, like (1, 2) and (2, 3), must be merged into one.

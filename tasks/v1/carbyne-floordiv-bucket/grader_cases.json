@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/buckets/buckets.go b/buckets/buckets.go\nindex b93fd55..5995a63 100644\n--- a/buckets/buckets.go\n+++ b/buckets/buckets.go\n@@ -3,3 +3,11 @@ package buckets\n \n // Width is the bucket width.\n const Width = 10\n+\n+// BucketIndex returns the index of the width-10 bucket containing value.\n+func BucketIndex(value int) int {\n+\tif value < 0 {\n+\t\treturn -((-value + Width - 1) / Width)\n+\t}\n+\treturn value / Width\n+}\n"
+    },
+    {
+      "name": "naive_truncate",
+      "expected": "incorrect",
+      "diff": "diff --git a/buckets/buckets.go b/buckets/buckets.go\nindex b93fd55..e64151a 100644\n--- a/buckets/buckets.go\n+++ b/buckets/buckets.go\n@@ -3,3 +3,8 @@ package buckets\n \n // Width is the bucket width.\n const Width = 10\n+\n+// BucketIndex returns the index of the width-10 bucket containing value.\n+func BucketIndex(value int) int {\n+\treturn value / Width\n+}\n"
+    }
+  ]
+}

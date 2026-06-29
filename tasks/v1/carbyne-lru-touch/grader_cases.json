@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "gold",
+      "expected": "correct",
+      "diff": "diff --git a/lru/__init__.py b/lru/__init__.py\nindex 5d8fc5d..ccf03cf 100644\n--- a/lru/__init__.py\n+++ b/lru/__init__.py\n@@ -15,3 +15,9 @@ class LRU:\n         self._d[key] = value\n         if len(self._d) > self.capacity:\n             self._d.popitem(last=False)\n+\n+    def get(self, key):\n+        if key not in self._d:\n+            return None\n+        self._d.move_to_end(key)\n+        return self._d[key]\n"
+    },
+    {
+      "name": "no_touch",
+      "expected": "incorrect",
+      "diff": "diff --git a/lru/__init__.py b/lru/__init__.py\nindex 5d8fc5d..2a56966 100644\n--- a/lru/__init__.py\n+++ b/lru/__init__.py\n@@ -15,3 +15,6 @@ class LRU:\n         self._d[key] = value\n         if len(self._d) > self.capacity:\n             self._d.popitem(last=False)\n+\n+    def get(self, key):\n+        return self._d.get(key)\n"
+    },
+    {
+      "name": "touch_wrong_end",
+      "expected": "incorrect",
+      "diff": "diff --git a/lru/__init__.py b/lru/__init__.py\nindex 5d8fc5d..572bb23 100644\n--- a/lru/__init__.py\n+++ b/lru/__init__.py\n@@ -15,3 +15,9 @@ class LRU:\n         self._d[key] = value\n         if len(self._d) > self.capacity:\n             self._d.popitem(last=False)\n+\n+    def get(self, key):\n+        if key not in self._d:\n+            return None\n+        self._d.move_to_end(key, last=False)\n+        return self._d[key]\n"
+    }
+  ]
+}

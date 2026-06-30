@@ -143,7 +143,8 @@ In brief:
 
 1. Create `tasks/v1/<task-id>/` with `metadata.json`, `issue.md`, `repo/`, `tests/`, `gold_patch.diff`, and `expected_metrics.json`.
 2. Run `vulcanbench validate-task tasks/v1/<task-id>` — the gold patch must solve it (`functional == 1.0`), `fail_to_pass` tests must genuinely fail pre-patch, and scoring must be deterministic.
-3. Open a PR using the task-submission PR template. Include provenance and decontamination notes as required by the validator.
+3. Register the task in `tasks/v1/suite.json`, then run `python scripts/sync_task_counts.py` to ratchet the dataset floors in `tests/test_dataset.py` and the documented counts. `python scripts/sync_task_counts.py --check` fails if anything is out of sync (CI-friendly, no writes).
+4. Open a PR using the task-submission PR template. Include provenance and decontamination notes as required by the validator.
 
 ### Curation discipline
 

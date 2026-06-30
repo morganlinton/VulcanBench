@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Second OSS task, and the first decontaminated one** `oss-more-itertools-iter-index` (hard,
+  `bug_fix`, `medium` scale): a genuine post-cutoff fix from `more-itertools` commit `43decdd7`
+  (2026-06-17). `iter_index` accepted negative `start`/`stop` for sequences (fast path) but the
+  general-iterable slow path passed them to `islice`, which rejects negative indices and raises; the
+  fix materializes to a tuple so both paths agree. The agent must find `iter_index` in a ~7k-LOC
+  vendored package (MIT LICENSE preserved) and reason about the dual code paths. Graded by the
+  commit's own test (`grader: tests`), `source: oss` / `decontaminated: true` (post-cutoff). The
+  provenance dataset guard now allows decontaminated OSS tasks (was hard-coded to `false`). Validated:
+  gold=1.0, pre-patch fails, deterministic over 3 runs.
 - **First real OSS task, deterministically graded** `oss-click-choice-brackets` (hard, `system`,
   `bug_fix`): a genuine post-cutoff bug fix from `pallets/click` PR #3578 (optional `Choice`
   arguments rendered `[[a|b|c]]` instead of `[a|b|c]`). The repo is the real click package sliced at

@@ -24,7 +24,7 @@ import pytest
 
 # Floors, not targets: the suite must not silently shrink below what is shipped.
 # v1 was pruned from 52 -> 43 -> 31 (9 unsolvable scaffolds, then 12
-# zero-discrimination "Double" one-liners), then grew to 51 as hard,
+# zero-discrimination "Double" one-liners), then grew to 52 as hard,
 # discriminating tasks were added (py-expr-eval, go-parallel-map,
 # py-sliding-window-max, go-ttl-lru-cache, py-url-normalize, py-semver-compare,
 # py-config-parse, py-reactive-sheet [first real multi_file], py-txn-kvstore
@@ -34,7 +34,7 @@ import pytest
 # The large/navigation tier shed mislabeled one-liners (12 -> 7). Raise these as
 # more discriminating tasks land.
 TASKS_ROOT = Path("tasks/v1")
-M3_MIN_REAL_TASKS = 51
+M3_MIN_REAL_TASKS = 52
 M2_MIN_MEDIUM_LARGE = 7
 
 
@@ -100,7 +100,7 @@ def test_task_complexity_labels() -> None:
 
 # --- composition discipline: keep the suite from regressing to easy filler ---
 
-MIN_HARD_TASKS = 18
+MIN_HARD_TASKS = 19
 MIN_MEDIUM_OR_HARD_FRACTION = 0.6
 MIN_NON_LOCALIZED_TASKS = 12
 
@@ -161,10 +161,15 @@ def test_provenance_labeling() -> None:
     assert len(oss) >= 1, "expected at least one honestly OSS-sourced task"
     for d in oss:
         meta = _meta(d)
-        assert meta.get("decontaminated") is False
+        # An OSS task may be decontaminated (a post-cutoff fix) or not; the flag
+        # must be an explicit bool and the upstream provenance must be documented.
+        assert isinstance(meta.get("decontaminated"), bool)
         notes = meta.get("decontamination_notes", "")
         upstream = meta.get("upstream") or {}
-        provenance = f"{notes} {upstream.get('url', '')} {upstream.get('issue', '')}"
+        provenance = (
+            f"{notes} {upstream.get('url', '')} {upstream.get('issue', '')} "
+            f"{upstream.get('pr', '')} {upstream.get('fix_commit', '')}"
+        )
         assert "http" in provenance
         repo = d / "repo"
         licenses = [p for p in repo.rglob("*") if "license" in p.name.lower() and p.is_file()]

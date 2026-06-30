@@ -1,0 +1,4 @@
+{
+  "functional": 1.0,
+  "notes": "Real post-cutoff OSS bug fix. The agent must locate iter_index in a ~7k-LOC vendored package and recognize that the sequence fast path accepts negative start/stop while the islice slow path rejects them; the gold materializes a general iterable to a tuple when start/stop is negative so both paths agree. Difficulty is navigation + the subtle dual-path semantics, not the size of the edit."
+}

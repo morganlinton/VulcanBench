@@ -1,0 +1,32 @@
+{
+  "id": "oss-more-itertools-iter-index",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-30",
+  "source": "oss",
+  "base_commit": "c5538f9ff7f3fa92ac0fe378b5c70486494c040b",
+  "upstream": {
+    "url": "https://github.com/more-itertools/more-itertools",
+    "issue": "",
+    "pr": "https://github.com/more-itertools/more-itertools/commit/43decdd76072519fbf1392fb3d066ad26601c147",
+    "fix_commit": "43decdd76072519fbf1392fb3d066ad26601c147"
+  },
+  "repo_scale": "medium",
+  "decontaminated": true,
+  "decontamination_notes": "Sourced from the MIT-licensed more-itertools library (https://github.com/more-itertools/more-itertools), LICENSE preserved. repo/more_itertools/{__init__,more,recipes}.py are the verbatim upstream files at base_commit c5538f9ff7f3fa92ac0fe378b5c70486494c040b (the parent of the fix). The bug (iter_index raising ValueError on negative start/stop for general iterables because islice rejects negative indices while the sequence fast path does not) was fixed upstream in commit 43decdd76072519fbf1392fb3d066ad26601c147 on 2026-06-17, which is after the training cutoffs of the models under evaluation, so this task is decontaminated. The hidden test is the upstream test from that commit. Decontamination should be re-verified if a model's cutoff is later than 2026-06-17.",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "negative_bounds", "cmd": "python -m pytest test_iter_index.py::test_negative_bounds -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "positive_bounds", "cmd": "python -m pytest test_iter_index.py::test_positive_bounds_still_work -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {
+    "suggested_max_steps": 80,
+    "entry_paths": ["more_itertools/recipes.py"]
+  }
+}

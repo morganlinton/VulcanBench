@@ -61,7 +61,9 @@ def _task_rows(report: dict[str, Any], tasks_root: Path) -> list[dict[str, Any]]
                 "scale": meta.get("repo_scale") or "?",
                 "category": meta.get("category") or "?",
                 "difficulty": meta.get("difficulty") or "?",
-                "passes": {m: by_model.get(m, {}).get("solve_rate", 0) >= 1.0 for m in _MODEL_ORDER},
+                "passes": {
+                    m: by_model.get(m, {}).get("solve_rate", 0) >= 1.0 for m in _MODEL_ORDER
+                },
             }
         )
     return rows
@@ -138,7 +140,7 @@ class ReportPDF(FPDF):
         self.ln()
 
 
-def build_pdf(report: dict[str, Any], tasks_root: Path) -> ReportPDF:
+def build_pdf(report: dict[str, Any], tasks_root: Path) -> ReportPDF:  # noqa: PLR0915
     pdf = ReportPDF(orientation="P", unit="mm", format="Letter")
     pdf.alias_nb_pages()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -176,7 +178,9 @@ def build_pdf(report: dict[str, Any], tasks_root: Path) -> ReportPDF:
 
     pdf.section_title("Model comparison")
     widths = [42, 22, 22, 28, 22, 22, 22]
-    pdf.table_header(widths, ["Model", "Tasks", "pass@1", "pass@1 SE", "Avg total", "Cost $", "Avg s"])
+    pdf.table_header(
+        widths, ["Model", "Tasks", "pass@1", "pass@1 SE", "Avg total", "Cost $", "Avg s"]
+    )
     for model in report.get("models") or []:
         pdf.table_row(
             widths,
@@ -267,7 +271,9 @@ def build_pdf(report: dict[str, Any], tasks_root: Path) -> ReportPDF:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("report_json", type=Path, help="JSON report from vulcanbench report -f json")
+    parser.add_argument(
+        "report_json", type=Path, help="JSON report from vulcanbench report -f json"
+    )
     parser.add_argument("-o", "--output", type=Path, required=True, help="Output PDF path")
     parser.add_argument(
         "--tasks-root",

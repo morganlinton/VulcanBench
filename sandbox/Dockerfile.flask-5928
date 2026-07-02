@@ -1,0 +1,21 @@
+# Per-task sandbox image for tasks/v2/oss-flask-teardown-robust.
+#
+# Build:  docker build -t vulcanbench/sandbox:flask-5928 -f sandbox/Dockerfile.flask-5928 .
+#
+# Installs flask's runtime dependency stack (werkzeug, jinja2, blinker, ...) at the
+# task's base commit, then removes the flask package itself so the task workspace's
+# ``src/flask`` is the only flask on the import path (via PYTHONPATH=src).
+FROM vulcanbench/sandbox:base
+
+RUN pip install "flask @ git+https://github.com/pallets/flask.git@7b0088693ece1bd3a9238a6fdf56ed8df7a4d43b" \
+    && pip uninstall -y flask
+# flask's cli resolves its version via importlib.metadata, so leave a stub dist-info
+# for the "flask" distribution (code itself comes from the workspace src/).
+RUN SP="$(python -c 'import site; print(site.getsitepackages()[0])')" \
+    && mkdir -p "$SP/flask-3.2.0.dev0.dist-info" \
+    && printf 'Metadata-Version: 2.1\nName: flask\nVersion: 3.2.0.dev0\n' > "$SP/flask-3.2.0.dev0.dist-info/METADATA" \
+    && touch "$SP/flask-3.2.0.dev0.dist-info/RECORD"
+# Deps must remain importable; the flask package itself must be gone.
+RUN python -c "import werkzeug, jinja2, blinker, itsdangerous, click" \
+    && ! python -c "import flask" 2>/dev/null \
+    && python -c "import importlib.metadata as m; assert m.version('flask') == '3.2.0.dev0'"

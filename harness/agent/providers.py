@@ -217,12 +217,41 @@ class OpenAIProvider(LLMProvider):
         return _parse_responses_body(body)
 
 
+_CACHE_CONTROL = {"type": "ephemeral"}
+
+
+def _with_prompt_caching(
+    system: str, converted: list[dict[str, Any]]
+) -> tuple[str | list[dict[str, Any]], list[dict[str, Any]]]:
+    """Add prompt-cache breakpoints so the agent loop's re-sent transcript bills at
+    cache-read rates. Two ephemeral breakpoints: (1) tools+system (the stable prefix),
+    and (2) the tail of the last message (the growing conversation, cached
+    incrementally on each turn). No-ops safely on empty inputs. Prompt caching is GA
+    (no beta header)."""
+    system_field: str | list[dict[str, Any]] = system
+    if system:
+        system_field = [{"type": "text", "text": system, "cache_control": _CACHE_CONTROL}]
+    if converted:
+        last = dict(converted[-1])
+        content = last.get("content")
+        if isinstance(content, str):
+            last["content"] = [{"type": "text", "text": content, "cache_control": _CACHE_CONTROL}]
+        elif isinstance(content, list) and content:
+            blocks = list(content)
+            blocks[-1] = {**blocks[-1], "cache_control": _CACHE_CONTROL}
+            last["content"] = blocks
+        converted = [*converted[:-1], last]
+    return system_field, converted
+
+
 class AnthropicProvider(LLMProvider):
     """Anthropic Messages API.
 
     Reasoning effort maps to the API's ``output_config.effort`` field. No
     sampling parameters are sent: ``temperature``/``top_p``/``top_k`` are
-    rejected with a 400 by Opus 4.7 and newer models.
+    rejected with a 400 by Opus 4.7 and newer models. Prompt caching is applied to
+    the tools+system prefix and the growing transcript so re-sent context in the
+    agent loop bills at cache-read rates.
     """
 
     @property
@@ -263,6 +292,7 @@ class AnthropicProvider(LLMProvider):
             raise ProviderError("ANTHROPIC_API_KEY is not set")
         base = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com").rstrip("/")
         system, converted = _to_anthropic_messages(messages)
+        system_field, converted = _with_prompt_caching(system, converted)
         payload: dict[str, Any] = {
             "model": self.model,
             "max_tokens": 4096,
@@ -270,8 +300,8 @@ class AnthropicProvider(LLMProvider):
         }
         if effort is not None:
             payload["output_config"] = {"effort": effort}
-        if system:
-            payload["system"] = system
+        if system_field:
+            payload["system"] = system_field
         if tools:
             payload["tools"] = [_openai_tool_to_anthropic(t) for t in tools]
         body = _http_post_json(
@@ -298,11 +328,20 @@ class AnthropicProvider(LLMProvider):
                     )
                 )
         usage = body.get("usage", {})
+        # With prompt caching, ``input_tokens`` is the UNCACHED remainder; cache reads
+        # bill ~0.1x and cache writes ~1.25x (separate usage fields). Fold them into an
+        # effective prompt-token count so the existing per-token cost stays correct.
+        # Raw usage (incl. cache_read_input_tokens / cache_creation_input_tokens) is
+        # preserved in ``.raw`` for exact throughput accounting.
+        uncached = usage.get("input_tokens", 0)
+        cache_read = usage.get("cache_read_input_tokens", 0)
+        cache_write = usage.get("cache_creation_input_tokens", 0)
+        effective_prompt = round(uncached + cache_read * 0.1 + cache_write * 1.25)
         return LLMResponse(
             content="\n".join(content_text) or None,
             tool_calls=tool_calls,
             usage=TokenUsage(
-                prompt_tokens=usage.get("input_tokens", 0),
+                prompt_tokens=effective_prompt,
                 completion_tokens=usage.get("output_tokens", 0),
             ),
             raw=body,

@@ -1,0 +1,19 @@
+# Per-task sandbox image for tasks/v2/oss-aiohttp-upgrade-deferred.
+#
+# Build:  docker build -t vulcanbench/sandbox:aiohttp-13016 -f sandbox/Dockerfile.aiohttp-13016 .
+#
+# Installs aiohttp's runtime dependency stack only (all pure wheels); aiohttp itself is
+# imported from the task workspace via PYTHONPATH=. so the pure-Python parser under test
+# is the workspace source.
+FROM vulcanbench/sandbox:base
+
+RUN pip install \
+    "aiohappyeyeballs>=2.5.0" \
+    "aiosignal>=1.4.0" \
+    "frozenlist>=1.1.1" \
+    "multidict>=4.5,<7.0" \
+    "propcache>=0.2.0" \
+    "yarl>=1.17.0,<2.0"
+
+RUN python -c "import aiohappyeyeballs, aiosignal, frozenlist, multidict, propcache, yarl" \
+    && ! python -c "import aiohttp" 2>/dev/null

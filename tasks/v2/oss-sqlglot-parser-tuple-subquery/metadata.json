@@ -1,0 +1,28 @@
+{
+  "id": "oss-sqlglot-parser-tuple-subquery",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "93802ce4d0c8c0b960be6b7b84785fa3556c0310",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7807",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7807",
+    "commit": "93802ce4d0c8c0b960be6b7b84785fa3556c0310"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7807, merged 2026-06-29, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "paren_subquery_tuple", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_parenthesized_subquery_first_in_tuple -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "plain_tuple", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_plain_tuple_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

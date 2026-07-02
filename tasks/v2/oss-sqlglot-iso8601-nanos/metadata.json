@@ -1,0 +1,28 @@
+{
+  "id": "oss-sqlglot-iso8601-nanos",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-06-30",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "cf7e4bf4a57d331e4a6e5f4933cb7daf0e503c3b",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7808",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7808",
+    "commit": "cf7e4bf4a57d331e4a6e5f4933cb7daf0e503c3b"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7808, merged 2026-06-30, after model training cutoffs, so the specific fix is novel. sqlglot is long-standing so models may recognize the codebase but not this fix. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "iso8601_nanos_cast", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_from_iso8601_timestamp_nanos_transpiles_to_cast -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "unrelated_stable", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_unrelated_transpile_is_stable -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

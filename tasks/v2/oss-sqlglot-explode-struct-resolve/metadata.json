@@ -1,0 +1,28 @@
+{
+  "id": "oss-sqlglot-explode-struct-resolve",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "234198a311c56085b58f72f2871ec42103ff9a19",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7549",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7549",
+    "commit": "234198a311c56085b58f72f2871ec42103ff9a19"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7549, merged 2026-04-23, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "explode_struct_fields_resolve", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_explode_struct_fields_resolve -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "simple_select_unaffected", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_simple_select_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

@@ -167,9 +167,11 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         )
         if is_priced(model):
             try:
-                task_ids = (
-                    load_suite(suite).task_ids if suite is not None else [task]  # type: ignore[list-item]
-                )
+                if suite is not None:
+                    task_ids = load_suite(suite).task_ids
+                else:
+                    assert task is not None  # one of --task/--suite is required
+                    task_ids = [task]
                 plan = estimate_plan(
                     models=[model],
                     task_ids=task_ids,
@@ -308,7 +310,11 @@ def estimate(
         raise typer.Exit(code=1)
 
     try:
-        task_ids = load_suite(suite).task_ids if suite is not None else [task]  # type: ignore[list-item]
+        if suite is not None:
+            task_ids = load_suite(suite).task_ids
+        else:
+            assert task is not None  # one of --task/--suite is required
+            task_ids = [task]
         plan = estimate_plan(
             models=model,
             task_ids=task_ids,

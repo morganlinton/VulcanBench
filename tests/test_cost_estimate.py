@@ -95,7 +95,9 @@ def test_estimate_judges_multiplier(tmp_path: Path) -> None:
     assert on.mid_usd == pytest.approx(off.mid_usd * 3)
 
 
-def test_estimate_bundled_priors_cold_start(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_estimate_bundled_priors_cold_start(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     runs = tmp_path / "runs"
     monkeypatch.setenv("VULCANBENCH_COST_PRIORS", str(_FIXTURE_PRIORS))
     reset_cache()

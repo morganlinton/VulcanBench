@@ -1,0 +1,28 @@
+{
+  "id": "oss-more-itertools-interleave-empty",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "easy",
+  "task_complexity": "localized",
+  "created": "2026-06-30",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "5d946b3590bfe92f1465c1b9b9830dd434745c84",
+  "upstream": {
+    "url": "https://github.com/more-itertools/more-itertools/pull/1193",
+    "issue": "https://github.com/more-itertools/more-itertools/pull/1193",
+    "commit": "5d946b3590bfe92f1465c1b9b9830dd434745c84"
+  },
+  "decontamination_notes": "Real fix from more-itertools PR #1193, merged 2026-06-30, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "interleave_empty", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_interleave_evenly_empty -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "interleave_basic", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_interleave_evenly_basic -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

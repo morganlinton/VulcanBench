@@ -15,9 +15,11 @@ The test floors in ``tests/test_dataset.py`` are treated as a hard ratchet and
 must always be found; the prose counts in README/CONTRIBUTING/ARCHITECTURE are
 best-effort (a reworded sentence warns rather than fails).
 """
+
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -28,8 +30,6 @@ TASKS = ROOT / "tasks" / "v1"
 
 
 def real_tasks() -> list[dict]:
-    import json
-
     out = []
     for d in sorted(TASKS.iterdir()):
         if not d.is_dir() or not (d / "metadata.json").exists():

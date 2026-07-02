@@ -1,0 +1,29 @@
+{
+  "id": "oss-poetry-extras-duplicate-conflict",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "d57090395b14ba260a24a97ab704819667bf6cf1",
+  "image": "vulcanbench/sandbox:poetry-10943",
+  "upstream": {
+    "url": "https://github.com/python-poetry/poetry/pull/10943",
+    "issue": "https://github.com/python-poetry/poetry/issues/10447",
+    "commit": "d57090395b14ba260a24a97ab704819667bf6cf1"
+  },
+  "decontamination_notes": "Real fix from python-poetry/poetry PR #10943, merged 2026-06-13, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit (src/ + pyproject + LICENSE + README); MIT LICENSE preserved in repo/. Runs in per-task image vulcanbench/sandbox:poetry-10943 (poetry runtime deps preinstalled, poetry package itself removed; tests run with PYTHONPATH=src).",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "extras_duplicate_no_conflict", "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_optional_extras_and_group_dep_with_extras_resolves -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "basic_resolution_stable", "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_basic_dependency_resolves -q"}
+    ]
+  },
+  "test_timeout_s": 180
+}

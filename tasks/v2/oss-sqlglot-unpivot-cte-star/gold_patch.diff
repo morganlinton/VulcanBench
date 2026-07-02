@@ -1,0 +1,95 @@
+diff --git a/sqlglot/optimizer/qualify_columns.py b/sqlglot/optimizer/qualify_columns.py
+index ea09866b..28de2be4 100644
+--- a/sqlglot/optimizer/qualify_columns.py
++++ b/sqlglot/optimizer/qualify_columns.py
+@@ -138,13 +138,6 @@ def validate_qualify_columns(expression: E, sql: str | None = None) -> E:
+ 
+                 raise OptimizeError(error_msg)
+ 
+-            if unqualified_columns and scope.pivots and scope.pivots[0].unpivot:
+-                # New columns produced by the UNPIVOT can't be qualified, but there may be columns
+-                # under the UNPIVOT's IN clause that can and should be qualified. We recompute
+-                # this list here to ensure those in the former category will be excluded.
+-                unpivot_columns = set(_unpivot_columns(scope.pivots[0]))
+-                unqualified_columns = [c for c in unqualified_columns if c not in unpivot_columns]
+-
+             all_unqualified_columns.extend(unqualified_columns)
+ 
+     if all_unqualified_columns:
+@@ -188,13 +181,18 @@ def _separate_pseudocolumns(scope: Scope, pseudocolumns: set[str]) -> None:
+         scope.clear_cache()
+ 
+ 
+-def _unpivot_columns(unpivot: exp.Pivot) -> Iterator[exp.Column]:
++def _unpivot_columns(unpivot: exp.Pivot) -> Iterator[exp.Identifier]:
+     name_columns = [
+         field.this
+         for field in unpivot.fields
+-        if isinstance(field, exp.In) and isinstance(field.this, exp.Column)
++        if isinstance(field, exp.In) and isinstance(field.this, exp.Identifier)
+     ]
+-    value_columns = (c for e in unpivot.expressions for c in e.find_all(exp.Column))
++    value_columns = (
++        ident
++        for e in unpivot.expressions
++        for ident in (e.expressions if isinstance(e, exp.Tuple) else [e])
++        if isinstance(ident, exp.Identifier)
++    )
+ 
+     return itertools.chain(name_columns, value_columns)
+ 
+diff --git a/sqlglot/optimizer/resolver.py b/sqlglot/optimizer/resolver.py
+index 1868c662..ca6f8d5a 100644
+--- a/sqlglot/optimizer/resolver.py
++++ b/sqlglot/optimizer/resolver.py
+@@ -139,6 +139,17 @@ class Resolver:
+ 
+             source = self.scope.sources[name]
+ 
++            # A pivoted CTE reference is stored as an exp.Table in the scope sources (see
++            # _traverse_tables in scope.py), but the underlying CTE Scope still holds the
++            # column information we need to resolve pre-pivot columns.
++            if (
++                isinstance(source, exp.Table)
++                and not source.db
++                and source.args.get("pivots")
++                and source.name in self.scope.cte_sources
++            ):
++                source = self.scope.cte_sources[source.name]
++
+             if isinstance(source, exp.Table):
+                 columns = self.schema.column_names(source, only_visible)
+             elif isinstance(source, Scope) and isinstance(
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index 210d1e3d..ef3ed5f7 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -275,6 +275,15 @@ def _resolve_dialect(dialect: DialectType) -> Dialect:
+     return Dialect.get_or_raise(dialect)
+ 
+ 
++def _unpivot_target(expr: exp.Expr) -> exp.Expr:
++    # UNPIVOT's pre-FOR values and FOR field are new output names, not column references.
++    if isinstance(expr, exp.Column) and not expr.table:
++        return expr.this
++    if isinstance(expr, exp.Tuple):
++        expr.set("expressions", [_unpivot_target(e) for e in expr.expressions])
++    return expr
++
++
+ SENTINEL_NONE: Token = Token(TokenType.SENTINEL, "SENTINEL")
+ 
+ 
+@@ -5142,6 +5151,12 @@ class Parser:
+             )
+         )
+ 
++        if unpivot:
++            pivot.set("expressions", [_unpivot_target(e) for e in pivot.expressions])
++            for pivot_field in pivot.fields:
++                if isinstance(pivot_field, exp.In):
++                    pivot_field.set("this", _unpivot_target(pivot_field.this))
++
+         if not self._match_set((TokenType.PIVOT, TokenType.UNPIVOT), advance=False):
+             pivot.set("alias", self._parse_table_alias())
+ 

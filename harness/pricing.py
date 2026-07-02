@@ -41,6 +41,8 @@ PRICES: dict[str, dict[str, float]] = {
     "anthropic:claude-opus-4-8": {"input": 5.00, "output": 25.00},
     "anthropic:claude-opus-4-7": {"input": 5.00, "output": 25.00},
     "anthropic:claude-opus-4-6": {"input": 5.00, "output": 25.00},
+    # Sonnet 5 standard pricing; intro promo ($2/$10) runs through 2026-08-31.
+    "anthropic:claude-sonnet-5": {"input": 3.00, "output": 15.00},
     "anthropic:claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
     "anthropic:claude-haiku-4-5": {"input": 1.00, "output": 5.00},
     "zai:glm-5.2": {"input": 1.40, "output": 4.40},

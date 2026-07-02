@@ -1,0 +1,22 @@
+# Per-task sandbox image for tasks/v2/oss-poetry-extras-duplicate-conflict.
+#
+# Build:  docker build -t vulcanbench/sandbox:poetry-10943 -f sandbox/Dockerfile.poetry-10943 .
+#
+# Installs poetry's runtime dependency stack (cleo, poetry-core, requests, ...) at the
+# task's base commit, then removes the poetry package itself so the task workspace's
+# ``src/poetry`` is the only poetry on the import path (via PYTHONPATH=src).
+FROM vulcanbench/sandbox:base
+
+RUN pip install "poetry @ git+https://github.com/python-poetry/poetry.git@d57090395b14ba260a24a97ab704819667bf6cf1" \
+    && pip install pytest-xdist \
+    && pip uninstall -y poetry
+# poetry/__version__.py resolves its version via importlib.metadata, so leave a stub
+# dist-info for the "poetry" distribution (code itself comes from the workspace src/).
+RUN SP="$(python -c 'import site; print(site.getsitepackages()[0])')" \
+    && mkdir -p "$SP/poetry-2.5.0.dev0.dist-info" \
+    && printf 'Metadata-Version: 2.1\nName: poetry\nVersion: 2.5.0.dev0\n' > "$SP/poetry-2.5.0.dev0.dist-info/METADATA" \
+    && touch "$SP/poetry-2.5.0.dev0.dist-info/RECORD"
+# Deps must remain importable; the poetry package itself must be gone.
+RUN python -c "from cleo.io.null_io import NullIO; from poetry.core.packages.project_package import ProjectPackage" \
+    && ! python -c "import poetry.puzzle" 2>/dev/null \
+    && python -c "import importlib.metadata as m; assert m.version('poetry') == '2.5.0.dev0'"

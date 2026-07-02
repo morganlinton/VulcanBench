@@ -46,14 +46,18 @@ def _parse_range(raw: Any) -> PriorRange | None:
     low = raw.get("low")
     mid = raw.get("mid")
     high = raw.get("high")
-    if not all(isinstance(v, (int, float)) for v in (low, mid, high)):
+    if (
+        not isinstance(low, (int, float))
+        or not isinstance(mid, (int, float))
+        or not isinstance(high, (int, float))
+    ):
         return None
     n = raw.get("n", 0)
     n_int = int(n) if isinstance(n, (int, float)) else 0
     return PriorRange(low=float(low), mid=float(mid), high=float(high), n=n_int)
 
 
-def _parse_priors(data: Any) -> PriorBuckets:
+def _parse_priors(data: Any) -> PriorBuckets:  # noqa: PLR0912
     if not isinstance(data, dict):
         return PriorBuckets.empty()
     if data.get("version") != 1:

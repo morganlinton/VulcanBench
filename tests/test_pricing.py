@@ -47,3 +47,12 @@ def test_provider_prefix_fallback() -> None:
 def test_zai_glm_priced() -> None:
     assert pricing.is_priced("zai:glm-5.2")
     assert pricing.cost_usd("zai:glm-5.2", 1_000_000, 1_000_000) == 5.80
+
+
+def test_anthropic_frontier_models_priced() -> None:
+    # Sonnet 5 standard pricing: input 3.00/1M, output 15.00/1M -> 1M+1M = 18.00.
+    assert pricing.is_priced("anthropic:claude-sonnet-5")
+    assert pricing.cost_usd("anthropic:claude-sonnet-5", 1_000_000, 1_000_000) == 18.0
+    # Opus 4.8: input 5.00/1M, output 25.00/1M -> 30.00. Both are needed for the
+    # effort-sweep cost/Pareto axis; an unpriced model silently yields cost=None.
+    assert pricing.cost_usd("anthropic:claude-opus-4-8", 1_000_000, 1_000_000) == 30.0

@@ -1,0 +1,28 @@
+{
+  "id": "oss-click-version-distribution-name",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "916883afad450c0c9bbc4212817900949131adbd",
+  "upstream": {
+    "url": "https://github.com/pallets/click/pull/3582",
+    "issue": "https://github.com/pallets/click/pull/3582",
+    "commit": "916883afad450c0c9bbc4212817900949131adbd"
+  },
+  "decontamination_notes": "Real fix from pallets/click PR #3582, merged 2026-06-14, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit (src/ + pyproject + LICENSE + README); BSD LICENSE preserved in repo/. click has no runtime deps, so this runs in the base sandbox image; tests run with PYTHONPATH=src and fabricate a fake installed distribution on sys.path.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "module_name_resolves_to_distribution", "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_version_resolves_module_name_to_distribution -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "distribution_name_lookup_stable", "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_version_direct_distribution_name_stable -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

@@ -295,7 +295,10 @@ class AnthropicProvider(LLMProvider):
         system_field, converted = _with_prompt_caching(system, converted)
         payload: dict[str, Any] = {
             "model": self.model,
-            "max_tokens": 4096,
+            # Thinking counts toward max_tokens on always-on-thinking models
+            # (Fable 5) and adaptive-by-default models (Sonnet 5); 4096 could
+            # truncate a thinking-heavy step to an empty response.
+            "max_tokens": 16000,
             "messages": converted,
         }
         if effort is not None:
@@ -314,6 +317,13 @@ class AnthropicProvider(LLMProvider):
             payload,
             timeout=timeout,
         )
+        if body.get("stop_reason") == "refusal":
+            details = body.get("stop_details") or {}
+            raise ProviderError(
+                "model refused the request"
+                f" (category={details.get('category')!r}):"
+                f" {details.get('explanation') or 'no explanation provided'}"
+            )
         content_text: list[str] = []
         tool_calls: list[ToolInvocation] = []
         for block in body.get("content", []):

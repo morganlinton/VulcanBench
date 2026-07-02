@@ -56,3 +56,6 @@ def test_anthropic_frontier_models_priced() -> None:
     # Opus 4.8: input 5.00/1M, output 25.00/1M -> 30.00. Both are needed for the
     # effort-sweep cost/Pareto axis; an unpriced model silently yields cost=None.
     assert pricing.cost_usd("anthropic:claude-opus-4-8", 1_000_000, 1_000_000) == 30.0
+    # Fable 5: input 10.00/1M, output 50.00/1M -> 60.00.
+    assert pricing.is_priced("anthropic:claude-fable-5")
+    assert pricing.cost_usd("anthropic:claude-fable-5", 1_000_000, 1_000_000) == 60.0

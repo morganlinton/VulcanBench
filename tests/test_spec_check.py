@@ -57,7 +57,7 @@ def test_lint_passes_specified_issues(text: str) -> None:
 
 def test_has_behavior_cue() -> None:
     assert has_behavior_cue("the function must return 2")
-    assert has_behavior_cue("want: [][]string{{`a\"b`}}")
+    assert has_behavior_cue('want: [][]string{{`a"b`}}')
     assert not has_behavior_cue("Correct `run` in service module.")
 
 

@@ -53,7 +53,7 @@ def _parse_range(raw: Any) -> PriorRange | None:
     return PriorRange(low=float(low), mid=float(mid), high=float(high), n=n_int)
 
 
-def _parse_priors(data: Any) -> PriorBuckets:
+def _parse_priors(data: Any) -> PriorBuckets:  # noqa: PLR0912
     if not isinstance(data, dict):
         return PriorBuckets.empty()
     if data.get("version") != 1:

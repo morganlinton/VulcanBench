@@ -51,8 +51,7 @@ def build_cells(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
         # pass@1: per task, fraction of attempts solved, averaged over tasks.
         per_task_rate = [
-            sum(1 for a in attempts if _solved(a)) / len(attempts)
-            for attempts in by_task.values()
+            sum(1 for a in attempts if _solved(a)) / len(attempts) for attempts in by_task.values()
         ]
         n_runs = len(cell_rows)
         solved_runs = sum(1 for r in cell_rows if _solved(r))
@@ -107,7 +106,7 @@ def print_table(cells: list[dict[str, Any]]) -> None:
     for c in cells:
         flag = "" if c["cost_known"] else " (cost partial)"
         print(
-            f"{(c['model'] or '?')[:28]:28} {str(c['effort'] or '-'):7} "
+            f"{(c['model'] or '?')[:28]:28} {c['effort'] or '-'!s:7} "
             f"{_fmt(c['n_tasks'], 5)} {_fmt(c['n_runs'], 4)} "
             f"{_fmt(c['pass_at_1'], 7, 3)} {_fmt(c['total_cost_usd'], 8, 3)} "
             f"{_fmt(c['avg_cost_usd'], 7, 4)} {_fmt(c['cost_per_solved_usd'], 9, 4)} "

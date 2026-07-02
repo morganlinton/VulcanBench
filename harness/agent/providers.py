@@ -336,7 +336,7 @@ class AnthropicProvider(LLMProvider):
         uncached = usage.get("input_tokens", 0)
         cache_read = usage.get("cache_read_input_tokens", 0)
         cache_write = usage.get("cache_creation_input_tokens", 0)
-        effective_prompt = int(round(uncached + cache_read * 0.1 + cache_write * 1.25))
+        effective_prompt = round(uncached + cache_read * 0.1 + cache_write * 1.25)
         return LLMResponse(
             content="\n".join(content_text) or None,
             tool_calls=tool_calls,

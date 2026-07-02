@@ -1,0 +1,5 @@
+Calling a byte stream's `receive()` with a non-positive `max_bytes` silently misbehaves instead of reporting the error.
+
+anyio's byte-receive streams take a `max_bytes` argument (`await stream.receive(max_bytes)`). A `max_bytes` of `0` or a negative number is never valid: depending on the concrete stream and backend it either hangs, returns an empty result that looks like end-of-stream, or raises an opaque low-level error. Callers that compute `max_bytes` from arithmetic (a remaining-length countdown, a buffer size difference) can land on `0` and get confusing behavior far from the real bug.
+
+Make this a clear, uniform contract: `receive()` must reject a `max_bytes` less than `1` by raising `ValueError("max_bytes must be a positive integer")`, before attempting any I/O. This must hold for every byte-receive stream anyio exposes and on both the asyncio and trio backends: the backend socket streams, the buffered receive stream, the file read stream, the stapled stream, and the TLS stream. A valid positive `max_bytes` must behave exactly as before.

@@ -1,0 +1,17 @@
+# Per-task sandbox image for tasks/v2/oss-pytest-approx-public-type.
+#
+# Build:  docker build -t vulcanbench/sandbox:pytest-14647 -f sandbox/Dockerfile.pytest-14647 .
+#
+# pytest's runtime deps only; pytest itself is imported from the workspace via
+# PYTHONPATH=src. The base image already ships a `pytest` used as the test runner
+# (host pytest), while the workspace src/_pytest is the package under test - the
+# public-type assertions import `pytest` from PYTHONPATH=src.
+FROM vulcanbench/sandbox:base
+
+RUN pip install \
+    "iniconfig" \
+    "pluggy>=1.5" \
+    "packaging" \
+    "pygments>=2.7.2"
+
+RUN python -c "import iniconfig, pluggy, packaging, pygments"

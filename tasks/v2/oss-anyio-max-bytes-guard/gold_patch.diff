@@ -1,0 +1,130 @@
+diff --git a/src/anyio/_backends/_asyncio.py b/src/anyio/_backends/_asyncio.py
+index cd773af..bc7e6ab 100644
+--- a/src/anyio/_backends/_asyncio.py
++++ b/src/anyio/_backends/_asyncio.py
+@@ -1068,6 +1068,9 @@ class StreamReaderWrapper(abc.ByteReceiveStream):
+     _stream: asyncio.StreamReader
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         data = await self._stream.read(max_bytes)
+         if data:
+             return data
+@@ -1317,6 +1320,9 @@ class SocketStream(abc.SocketStream):
+         return self._transport.get_extra_info("socket")
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         with self._receive_guard:
+             if (
+                 not self._protocol.read_event.is_set()
+@@ -1441,6 +1447,9 @@ class UNIXSocketStream(_RawSocketMixin, abc.UNIXSocketStream):
+             self._raw_socket.shutdown(socket.SHUT_WR)
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         loop = get_running_loop()
+         await AsyncIOBackend.checkpoint()
+         with self._receive_guard:
+diff --git a/src/anyio/_backends/_trio.py b/src/anyio/_backends/_trio.py
+index 091c78c..341ddea 100644
+--- a/src/anyio/_backends/_trio.py
++++ b/src/anyio/_backends/_trio.py
+@@ -322,6 +322,9 @@ class ReceiveStreamWrapper(abc.ByteReceiveStream):
+     _stream: trio.abc.ReceiveStream
+ 
+     async def receive(self, max_bytes: int | None = None) -> bytes:
++        if max_bytes is not None and max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         try:
+             data = await self._stream.receive_some(max_bytes)
+         except trio.ClosedResourceError as exc:
+@@ -477,6 +480,9 @@ class SocketStream(_TrioSocketMixin, abc.SocketStream):
+         self._send_guard = ResourceGuard("writing to")
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         with self._receive_guard:
+             try:
+                 data = await self._trio_socket.recv(max_bytes)
+diff --git a/src/anyio/abc/_streams.py b/src/anyio/abc/_streams.py
+index 186e3f5..34ebfc1 100644
+--- a/src/anyio/abc/_streams.py
++++ b/src/anyio/abc/_streams.py
+@@ -140,8 +140,10 @@ class ByteReceiveStream(AsyncResource, TypedAttributeProvider):
+         .. note:: Implementers of this interface should not return an empty
+             :class:`bytes` object, and users should ignore them.
+ 
+-        :param max_bytes: maximum number of bytes to receive
++        :param max_bytes: maximum number of bytes to receive (must be a positive
++            integer)
+         :return: the received bytes
++        :raises ValueError: if ``max_bytes`` is less than 1
+         :raises ~anyio.EndOfStream: if this stream has been closed from the other end
+         """
+ 
+diff --git a/src/anyio/streams/buffered.py b/src/anyio/streams/buffered.py
+index acf312b..a3b07f7 100644
+--- a/src/anyio/streams/buffered.py
++++ b/src/anyio/streams/buffered.py
+@@ -65,6 +65,9 @@ class BufferedByteReceiveStream(ByteReceiveStream):
+         self._buffer.extend(data)
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         if self._closed:
+             raise ClosedResourceError
+ 
+diff --git a/src/anyio/streams/file.py b/src/anyio/streams/file.py
+index 79c3d50..b9d7ca4 100644
+--- a/src/anyio/streams/file.py
++++ b/src/anyio/streams/file.py
+@@ -79,6 +79,9 @@ class FileReadStream(_BaseFileStream, ByteReceiveStream):
+         return cls(file)
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         try:
+             data = await to_thread.run_sync(self._file.read, max_bytes)
+         except ValueError:
+diff --git a/src/anyio/streams/stapled.py b/src/anyio/streams/stapled.py
+index 9248b68..0a3c53d 100644
+--- a/src/anyio/streams/stapled.py
++++ b/src/anyio/streams/stapled.py
+@@ -41,6 +41,9 @@ class StapledByteStream(ByteStream):
+     receive_stream: ByteReceiveStream
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         return await self.receive_stream.receive(max_bytes)
+ 
+     async def send(self, item: bytes) -> None:
+diff --git a/src/anyio/streams/tls.py b/src/anyio/streams/tls.py
+index e2a7ca5..d59aab2 100644
+--- a/src/anyio/streams/tls.py
++++ b/src/anyio/streams/tls.py
+@@ -236,6 +236,9 @@ class TLSStream(ByteStream):
+         await self.transport_stream.aclose()
+ 
+     async def receive(self, max_bytes: int = 65536) -> bytes:
++        if max_bytes < 1:
++            raise ValueError("max_bytes must be a positive integer")
++
+         data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+         if not data:
+             raise EndOfStream

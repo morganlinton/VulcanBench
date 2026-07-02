@@ -1,0 +1,22 @@
+# Per-task sandbox image for tasks/v2/oss-celery-flush-busy-workers.
+#
+# Build:  docker build -t vulcanbench/sandbox:celery-10346 -f sandbox/Dockerfile.celery-10346 .
+#
+# celery's runtime dependency stack; celery itself is imported from the workspace
+# via PYTHONPATH=. so the workspace celery/ is the package under test.
+FROM vulcanbench/sandbox:base
+
+RUN pip install \
+    "billiard>=4.2.1,<5.0" \
+    "kombu>=5.5.2,<5.7" \
+    "vine>=5.1.0,<6.0" \
+    "click>=8.1.2,<9.0" \
+    "click-didyoumean>=0.3.0" \
+    "click-repl>=0.2.0" \
+    "click-plugins>=1.1.1" \
+    "python-dateutil>=2.8.2" \
+    "tzdata>=2025.2" \
+    "tzlocal"
+
+RUN python -c "import billiard, kombu, vine, click" \
+    && ! python -c "import celery" 2>/dev/null

@@ -1,0 +1,45 @@
+{
+  "id": "oss-pytest-approx-public-type",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-02",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "2eac0d6cfe0be3d2d49b86c3860ee00f60517813",
+  "image": "vulcanbench/sandbox:pytest-14647",
+  "upstream": {
+    "url": "https://github.com/pytest-dev/pytest/pull/14647",
+    "issue": "https://github.com/pytest-dev/pytest/pull/14647",
+    "commit": "2eac0d6cfe0be3d2d49b86c3860ee00f60517813"
+  },
+  "decontamination_notes": "Real feature from pytest-dev/pytest PR #14647, merged 2026-06-25, after model training cutoffs. Exposes pytest.Approx as the public base type of every approx() return, requiring a new/renamed public class, wiring in pytest/__init__ (__all__), and rewiring the assertion compare machinery (_compare_any) plus every Approx subclass. Repo sliced at base commit (src/ + pyproject + LICENSE); MIT LICENSE preserved. A stub src/_pytest/_version.py is added to the slice because pytest generates it via setuptools-scm at build time (not committed). Runs in per-task image vulcanbench/sandbox:pytest-14647; tests import pytest from the workspace via PYTHONPATH=src.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "public_attribute",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_approx_is_public_attribute -q"
+      },
+      {
+        "name": "return_values_instances",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_approx_return_values_are_instances -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "public_type_drives_comparison",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_public_type_drives_comparison -q"
+      },
+      {
+        "name": "repr_compare_stable",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_repr_compare_recognises_public_type -q"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

@@ -1,0 +1,30 @@
+{
+  "id": "oss-celery-flush-busy-workers",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-02",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "74a7a63bb4844f4f8e426fa1f6b6a073a89ef01d",
+  "image": "vulcanbench/sandbox:celery-10346",
+  "upstream": {
+    "url": "https://github.com/celery/celery/pull/10346",
+    "issue": "https://github.com/celery/celery/pull/10346",
+    "commit": "74a7a63bb4844f4f8e426fa1f6b6a073a89ef01d"
+  },
+  "decontamination_notes": "Real fix from celery/celery PR #10346, merged 2026-06-10, after model training cutoffs. Concurrency bug in AsynPool.flush(): must preserve _busy_workers for workers running accepted jobs (via _write_to, fallback _scheduled_for) instead of clearing the set, while still dropping non-running workers. Repo sliced at base commit; BSD LICENSE preserved. Runs in per-task image vulcanbench/sandbox:celery-10346 (celery runtime deps preinstalled, celery imported from workspace via PYTHONPATH=.). Test adapts the PR's own unit tests using a patched billiard worker-process factory.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "preserve_via_write_to", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_flush_preserves_busy_worker_running_accepted_job -q"},
+      {"name": "preserve_via_scheduled_for", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_flush_preserves_busy_worker_via_scheduled_for_fallback -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "drop_non_running_worker", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_flush_drops_worker_without_accepted_job -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

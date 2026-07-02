@@ -1,0 +1,44 @@
+{
+  "id": "oss-urllib3-reject-invalid-host",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-02",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "d7030c0077b6429a9d2ddeac703891973c82cbd5",
+  "upstream": {
+    "url": "https://github.com/urllib3/urllib3/pull/5095",
+    "issue": "https://github.com/urllib3/urllib3/pull/5095",
+    "commit": "d7030c0077b6429a9d2ddeac703891973c82cbd5"
+  },
+  "decontamination_notes": "Real fix from urllib3/urllib3 PR #5095, merged 2026-06-30, after model training cutoffs. Multi-rule host-validation contract in util/url.py: raw control chars, percent-encoded control chars, and stray percent must all raise LocationParseError while valid hosts (incl. %20) parse. Repo sliced at base commit (src/ + pyproject + LICENSE); MIT LICENSE preserved. A stub src/urllib3/_version.py is added because urllib3 generates it via hatch-vcs at build time (not committed). urllib3 has no runtime deps, so this runs in the base sandbox image with PYTHONPATH=src.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "raw_invalid_chars",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_raw_invalid_host_chars_rejected -q"
+      },
+      {
+        "name": "pct_encoded_control",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_percent_encoded_control_char_rejected -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "bare_percent",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_bare_percent_in_host_rejected -q"
+      },
+      {
+        "name": "valid_hosts_stable",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_valid_hosts_still_parse -q"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

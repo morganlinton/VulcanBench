@@ -1,0 +1,85 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1600px; height: 900px; }
+body { font-family: "Times New Roman", Times, Georgia, serif; background: #f7f5f0; color: #1c1a17; }
+.page { width: 1600px; height: 900px; padding: 44px 78px 30px; position: relative; }
+.masthead { display: flex; justify-content: space-between; align-items: baseline;
+  font-variant: small-caps; letter-spacing: 2.5px; font-size: 17px; color: #6f6a62; }
+.masthead b { color: #1c1a17; font-weight: 600; }
+.rule2 { border-top: 2.5px solid #1c1a17; margin-top: 8px; }
+.rule1 { border-top: 1px solid #1c1a17; margin-top: 2.5px; }
+h1 { text-align: center; font-size: 40px; font-weight: 600; margin-top: 28px; letter-spacing: 0.2px; }
+.eff { font-size: 28px; font-weight: 400; font-style: italic; color: #55504a; }
+.authors { text-align: center; font-style: italic; font-size: 20px; margin-top: 10px; color: #3a362f; }
+.abstract { width: 1150px; margin: 22px auto 0; font-size: 19px; line-height: 1.5; text-align: justify; }
+.abstract .lead { font-variant: small-caps; letter-spacing: 1.5px; font-weight: 600; }
+.cols { display: grid; grid-template-columns: 700px 700px; gap: 44px; margin-top: 26px; }
+.tcap, .fcap { font-size: 15.5px; margin-bottom: 8px; line-height: 1.35; }
+.tcap b, .fcap b { font-variant: small-caps; letter-spacing: 1px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 17px; }
+thead th { border-top: 2px solid #1c1a17; border-bottom: 1px solid #1c1a17;
+  padding: 7px 6px; font-weight: 600; text-align: right; font-size: 16px; }
+thead th:first-child { text-align: left; }
+tbody td { padding: 7.5px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+tbody td:first-child { text-align: left; }
+tbody tr:last-child td { border-bottom: 2px solid #1c1a17; }
+.model { font-style: italic; }
+.legend { display: flex; gap: 26px; justify-content: center; font-size: 14.5px; margin-top: 2px; color: #3a362f; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 14px; height: 14px; display: inline-block; }
+.findings { margin-top: 16px; font-size: 16.5px; line-height: 1.42; }
+.findings p { margin-top: 7px; text-indent: 0; }
+.findings .n { font-weight: 700; }
+.foot { position: absolute; left: 78px; right: 78px; bottom: 26px;
+  border-top: 1px solid #1c1a17; padding-top: 9px; font-size: 13.5px;
+  color: #55504a; line-height: 1.4; display: flex; justify-content: space-between; gap: 40px; }
+.foot .brand { white-space: nowrap; text-align: right; font-variant: small-caps;
+  letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
+</style></head><body>
+<div class="page">
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 3</span><span>July 2026 &nbsp;&middot;&nbsp; 10 tasks &middot; 30 runs</span></div>
+  <div class="rule2"></div><div class="rule1"></div>
+
+  <h1>Claude Fable 5 <span class="eff">(low effort)</span> &nbsp;vs.&nbsp; Claude Sonnet 5 <span class="eff">(high)</span> &nbsp;vs.&nbsp; GLM-5.2 <span class="eff">(high)</span></h1>
+  <div class="authors">Ten real engineering tasks from open-source repositories, graded by deterministic hidden tests</div>
+
+  <div class="abstract" style="text-align:center;">
+  All three models score <b>80%</b> and fail the <b>same two tasks</b>. At equal accuracy, the newest tier at its
+  <i>lowest</i> effort uses <b>27% of the cost</b>, 24% of the time, and 8% of the tokens of the prior tier at its <i>highest</i> effort.</div>
+
+  <div class="cols">
+    <div>
+      <div class="tcap"><b>Table 1.</b> Pass rate and resource consumption, one run per task, deterministic hidden-test grading.</div>
+      <table>
+        <thead><tr><th>Model (effort)</th><th>Score</th><th>Cost</th><th>Time</th><th>Tokens</th><th>$/solved</th></tr></thead>
+        <tbody>
+          <tr><td class="model">Claude Fable 5 (low)</td><td>8/10<sup>&dagger;</sup></td><td>$2.27</td><td>14 min</td><td>0.14 M</td><td>$0.28</td></tr>
+          <tr><td class="model">Claude Sonnet 5 (high)</td><td>8/10</td><td>$8.41</td><td>59 min</td><td>1.75 M</td><td>$1.05</td></tr>
+          <tr><td class="model">GLM-5.2 (high)</td><td>8/10</td><td>$15.81</td><td>124 min</td><td>10.82 M</td><td>$1.98</td></tr>
+        </tbody>
+      </table>
+      <div class="findings">
+        <p><span class="n">1.</span> <b>Same failures everywhere.</b> All three fail the same two tasks; the Flask teardown redesign is now 0-for-4 across frontier models.</p>
+        <p><span class="n">2.</span> <b>Low effort beat high effort.</b> Fable 5 solved the suite's hardest passable task in 86 steps; Sonnet 5 needs 330+ and usually fails it.</p>
+        <p><span class="n">3.</span> <b>Cheap tokens, expensive outcomes.</b> GLM-5.2 has the lowest unit price but the highest cost per solved task (77x the tokens of Fable 5).</p>
+      </div>
+    </div>
+    <div>
+      <div class="fcap"><b>Figure 1.</b> Resource consumption at equal (80%) accuracy. Bars ordered Fable 5, Sonnet 5, GLM-5.2 within each panel.</div>
+      <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" width="100%"><rect x="26.0" y="188.2" width="36.3" height="23.8" fill="#27425f"/><text x="44.1" y="181.2" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">$2.27</text><rect x="80.4" y="123.7" width="36.3" height="88.3" fill="#7a8ba1"/><text x="98.5" y="116.7" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">$8.41</text><rect x="134.8" y="46.0" width="36.3" height="166.0" fill="#9c6644"/><text x="152.9" y="39.0" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">$15.81</text><line x1="20.0" y1="212" x2="213.33333333333334" y2="212" stroke="#1c1a17" stroke-width="1"/><text x="116.7" y="234" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Cost</text><text x="116.7" y="252" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">USD per full run</text><rect x="259.3" y="193.3" width="36.3" height="18.7" fill="#27425f"/><text x="277.5" y="186.3" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">14</text><rect x="313.7" y="133.0" width="36.3" height="79.0" fill="#7a8ba1"/><text x="331.9" y="126.0" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">59</text><rect x="368.1" y="46.0" width="36.3" height="166.0" fill="#9c6644"/><text x="386.3" y="39.0" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">124</text><line x1="253.33333333333337" y1="212" x2="446.66666666666674" y2="212" stroke="#1c1a17" stroke-width="1"/><text x="350.0" y="234" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Wall-clock</text><text x="350.0" y="252" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">minutes</text><rect x="492.7" y="209.9" width="36.3" height="2.1" fill="#27425f"/><text x="510.8" y="202.9" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">0.14</text><rect x="547.1" y="185.2" width="36.3" height="26.8" fill="#7a8ba1"/><text x="565.2" y="178.2" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">1.75</text><rect x="601.5" y="46.0" width="36.3" height="166.0" fill="#9c6644"/><text x="619.6" y="39.0" text-anchor="middle" font-size="13.5" fill="#1c1a17" font-family="Georgia, serif">10.82</text><line x1="486.6666666666667" y1="212" x2="680.0" y2="212" stroke="#1c1a17" stroke-width="1"/><text x="583.3" y="234" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Tokens</text><text x="583.3" y="252" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">millions</text></svg>
+      <div class="legend">
+        <span><span class="sw" style="background:#27425f"></span>Claude Fable 5 (low)</span>
+        <span><span class="sw" style="background:#7a8ba1"></span>Claude Sonnet 5 (high)</span>
+        <span><span class="sw" style="background:#9c6644"></span>GLM-5.2 (high)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>Method.</b> Real merged PRs (flask, aiohttp, sqlglot, click, chi, more-itertools, packaging), all post-training-cutoff, run in a network-isolated Docker sandbox, one attempt per task.
+    &nbsp;<sup>&dagger;</sup>Fable 5's safety classifier refused the aiohttp task (a benign HTTP-parser fix flagged as cyber content); scored as a failure. GLM-5.2's API ignores the effort setting.</div>
+    <div class="brand">VulcanBench<br><span style="font-size:12px;letter-spacing:1px;color:#6f6a62">open-source coding benchmark</span></div>
+  </div>
+</div>
+</body></html>

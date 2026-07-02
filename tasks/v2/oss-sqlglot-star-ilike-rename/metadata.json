@@ -1,0 +1,29 @@
+{
+  "id": "oss-sqlglot-star-ilike-rename",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "468eccaa72e446be46868f081eec351050aa021d",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7720",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7720",
+    "commit": "468eccaa72e446be46868f081eec351050aa021d"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7720, merged 2026-06-11, after model training cutoffs, so the specific fix is novel. Multi-site feature spanning parser.py, generator.py, optimizer/qualify_columns.py, and expressions/core.py. Repo sliced at base commit; MIT LICENSE preserved in repo/. Runs in the base sandbox image with PYTHONPATH=.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "star_ilike_rename_combined", "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_star_ilike_rename_parses_and_qualifies -q"},
+      {"name": "star_ilike_expansion", "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_star_ilike_qualifies_to_matching_columns -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "star_rename_stable", "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_star_rename_without_ilike_stable -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

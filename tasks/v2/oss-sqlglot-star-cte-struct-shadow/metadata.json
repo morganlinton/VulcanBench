@@ -1,0 +1,28 @@
+{
+  "id": "oss-sqlglot-star-cte-struct-shadow",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "71deae40bb727a5dba8bc443c85187067123434c",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7718",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7718",
+    "commit": "71deae40bb727a5dba8bc443c85187067123434c"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7718, merged 2026-06-08, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "unreferenced_cte_no_shadow", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_unreferenced_cte_does_not_shadow_struct_star -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "cte_in_from_precedence", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_cte_in_from_takes_precedence -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

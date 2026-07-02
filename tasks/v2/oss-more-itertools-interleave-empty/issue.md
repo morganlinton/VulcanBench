@@ -1,0 +1,1 @@
+Calling `interleave_evenly([])` with an empty list of iterables raises an `IndexError` instead of producing an empty result. When there are no input iterables it should return an empty iterator (yield nothing). Fix `interleave_evenly` so it handles the empty-input case cleanly while leaving its behavior on non-empty input unchanged.

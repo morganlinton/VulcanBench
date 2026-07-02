@@ -1,0 +1,28 @@
+{
+  "id": "oss-sqlglot-resolver-flatten-recursion",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "f3ba8e4d20311c4e657f4f763c3e354fa533ba47",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7737",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7737",
+    "commit": "f3ba8e4d20311c4e657f4f763c3e354fa533ba47"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7737, merged 2026-06-11, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "flatten_missing_table_raises", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_lateral_flatten_missing_table_raises_optimize_error -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "lateral_struct_field_resolves", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_lateral_struct_field_resolves -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

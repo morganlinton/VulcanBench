@@ -1,0 +1,29 @@
+{
+  "id": "oss-sqlglot-qualify-lateral-star",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "7a0a9abc516fd3280382f26b89adfc1547c10098",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7802",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7802",
+    "commit": "7a0a9abc516fd3280382f26b89adfc1547c10098"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7802, merged 2026-06-26, after model training cutoffs, so the specific fix is novel. sqlglot is long-standing so models may recognize the codebase but not this optimizer fix. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "star_expands_lateral", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_select_star_expands_lateral_columns -q"},
+      {"name": "star_partial_alias", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_select_star_partial_column_alias -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "non_lateral_star", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_non_lateral_star_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

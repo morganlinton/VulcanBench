@@ -1,0 +1,29 @@
+{
+  "id": "oss-packaging-empty-name",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "easy",
+  "task_complexity": "localized",
+  "created": "2026-06-30",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "fb82782df51f9a33bf9d2a489361a3784bb739ff",
+  "upstream": {
+    "url": "https://github.com/pypa/packaging/pull/1305",
+    "issue": "https://github.com/pypa/packaging/pull/1305",
+    "commit": "fb82782df51f9a33bf9d2a489361a3784bb739ff"
+  },
+  "decontamination_notes": "Real fix from pypa/packaging PR #1305, merged 2026-06-29, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; BSD/Apache LICENSE files preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "empty_wheel", "cmd": "PYTHONPATH=src python -m pytest oss_tests.py::test_empty_name_wheel_rejected -q"},
+      {"name": "empty_sdist", "cmd": "PYTHONPATH=src python -m pytest oss_tests.py::test_empty_name_sdist_rejected -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "valid_wheel", "cmd": "PYTHONPATH=src python -m pytest oss_tests.py::test_valid_wheel_still_parses -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

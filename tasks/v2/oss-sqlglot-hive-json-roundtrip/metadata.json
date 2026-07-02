@@ -1,0 +1,29 @@
+{
+  "id": "oss-sqlglot-hive-json-roundtrip",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "5d9c56e8799fad51ebf941984fd12f8087a64673",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7818",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7818",
+    "commit": "5d9c56e8799fad51ebf941984fd12f8087a64673"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7818, merged 2026-06-30, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "parse_json_roundtrip", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_parse_json_roundtrip -q"},
+      {"name": "to_json_roundtrip", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_to_json_parse_json_roundtrip -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "simple_select", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_simple_select_roundtrip -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

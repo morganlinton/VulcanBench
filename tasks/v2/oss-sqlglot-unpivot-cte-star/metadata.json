@@ -1,0 +1,28 @@
+{
+  "id": "oss-sqlglot-unpivot-cte-star",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "e3fee4d2dc33b770622831490d2980a837718475",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/7550",
+    "issue": "https://github.com/tobymao/sqlglot/pull/7550",
+    "commit": "e3fee4d2dc33b770622831490d2980a837718475"
+  },
+  "decontamination_notes": "Real fix from tobymao/sqlglot PR #7550, merged 2026-04-23, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; MIT LICENSE preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "unpivot_cte_star_expands", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_unpivot_cte_star_expands -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "plain_cte_star_unaffected", "cmd": "PYTHONPATH=. python -m pytest oss_tests.py::test_plain_cte_star_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

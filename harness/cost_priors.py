@@ -46,7 +46,11 @@ def _parse_range(raw: Any) -> PriorRange | None:
     low = raw.get("low")
     mid = raw.get("mid")
     high = raw.get("high")
-    if not all(isinstance(v, (int, float)) for v in (low, mid, high)):
+    if (
+        not isinstance(low, (int, float))
+        or not isinstance(mid, (int, float))
+        or not isinstance(high, (int, float))
+    ):
         return None
     n = raw.get("n", 0)
     n_int = int(n) if isinstance(n, (int, float)) else 0

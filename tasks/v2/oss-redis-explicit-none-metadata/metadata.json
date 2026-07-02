@@ -1,0 +1,30 @@
+{
+  "id": "oss-redis-explicit-none-metadata",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-02",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "b72f24ad6a2226d46aed770e18094a86117d2217",
+  "upstream": {
+    "url": "https://github.com/redis/redis-py/pull/4081",
+    "issue": "https://github.com/redis/redis-py/pull/4081",
+    "commit": "b72f24ad6a2226d46aed770e18094a86117d2217"
+  },
+  "decontamination_notes": "Real feature from redis/redis-py PR #4081, merged 2026-05-27, after model training cutoffs. Three-way distinction (omitted / explicit None / value) for client-identification metadata via a SENTINEL, threaded through DriverInfo (defaults, formatted_name) and resolve_driver_info across the client config surface (12 files in the PR). Repo sliced at base commit; MIT LICENSE preserved. redis-py has no required runtime deps on Python 3.12 (async-timeout only for <3.11.3), so this runs in the base sandbox image with PYTHONPATH=. The behavioral contract is unit-testable at the DriverInfo/resolve_driver_info level without a live Redis server.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "explicit_none_version", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_explicit_none_version_is_not_autofilled -q"},
+      {"name": "resolve_explicit_none", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_resolve_respects_explicit_none -q"},
+      {"name": "defaults_when_omitted", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_defaults_applied_when_omitted -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "explicit_none_name", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_explicit_none_name_is_not_sent -q"}
+    ]
+  },
+  "test_timeout_s": 120
+}

@@ -1,0 +1,17 @@
+# Per-task sandbox image for tasks/v2/oss-anyio-max-bytes-guard.
+#
+# Build:  docker build -t vulcanbench/sandbox:anyio-1191 -f sandbox/Dockerfile.anyio-1191 .
+#
+# anyio's runtime deps only (sniffio, idna, typing_extensions) plus pytest-asyncio
+# and trio for the test; anyio itself is imported from the workspace via PYTHONPATH=src.
+FROM vulcanbench/sandbox:base
+
+RUN pip install \
+    "sniffio>=1.1" \
+    "idna>=2.8" \
+    "typing_extensions>=4.5" \
+    "pytest-asyncio>=0.23" \
+    "trio>=0.26"
+
+RUN python -c "import sniffio, idna, pytest_asyncio, trio" \
+    && ! python -c "import anyio" 2>/dev/null

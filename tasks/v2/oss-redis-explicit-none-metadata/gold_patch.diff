@@ -1,0 +1,387 @@
+diff --git a/redis/_parsers/socket.py b/redis/_parsers/socket.py
+index 738d65a..a70f500 100644
+--- a/redis/_parsers/socket.py
++++ b/redis/_parsers/socket.py
+@@ -5,7 +5,9 @@ from io import SEEK_END
+ from typing import Optional, Union
+ 
+ from ..exceptions import ConnectionError, TimeoutError
+-from ..utils import SSL_AVAILABLE
++from ..utils import SENTINEL, SSL_AVAILABLE
++
++# Re-export SENTINEL from this historical location for compatibility.
+ 
+ NONBLOCKING_EXCEPTION_ERROR_NUMBERS = {BlockingIOError: errno.EWOULDBLOCK}
+ 
+@@ -21,7 +23,6 @@ if SSL_AVAILABLE:
+ NONBLOCKING_EXCEPTIONS = tuple(NONBLOCKING_EXCEPTION_ERROR_NUMBERS.keys())
+ 
+ SERVER_CLOSED_CONNECTION_ERROR = "Connection closed by server."
+-SENTINEL = object()
+ 
+ SYM_CRLF = b"\r\n"
+ 
+diff --git a/redis/asyncio/client.py b/redis/asyncio/client.py
+index aa58b5a..7157515 100644
+--- a/redis/asyncio/client.py
++++ b/redis/asyncio/client.py
+@@ -78,6 +78,7 @@ from redis.exceptions import (
+ from redis.observability.attributes import PubSubDirection
+ from redis.typing import ChannelT, EncodableT, KeyT
+ from redis.utils import (
++    SENTINEL,
+     SSL_AVAILABLE,
+     _set_info_logger,
+     deprecated_args,
+@@ -264,9 +265,9 @@ class Redis(
+         single_connection_client: bool = False,
+         health_check_interval: int = 0,
+         client_name: Optional[str] = None,
+-        lib_name: Optional[str] = None,
+-        lib_version: Optional[str] = None,
+-        driver_info: Optional["DriverInfo"] = None,
++        lib_name: Union[Optional[str], object] = SENTINEL,
++        lib_version: Union[Optional[str], object] = SENTINEL,
++        driver_info: Union[Optional["DriverInfo"], object] = SENTINEL,
+         username: Optional[str] = None,
+         auto_close_connection_pool: Optional[bool] = None,
+         redis_connect_func=None,
+@@ -320,7 +321,7 @@ class Redis(
+             if not retry_on_error:
+                 retry_on_error = []
+ 
+-            # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version
++            # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version.
+             computed_driver_info = resolve_driver_info(
+                 driver_info, lib_name, lib_version
+             )
+diff --git a/redis/asyncio/cluster.py b/redis/asyncio/cluster.py
+index 1928826..40a1057 100644
+--- a/redis/asyncio/cluster.py
++++ b/redis/asyncio/cluster.py
+@@ -59,6 +59,7 @@ from redis.commands import READ_COMMANDS, AsyncRedisClusterCommands
+ from redis.commands.policies import AsyncPolicyResolver, AsyncStaticPolicyResolver
+ from redis.crc import REDIS_CLUSTER_HASH_SLOTS, key_slot
+ from redis.credentials import CredentialProvider
++from redis.driver_info import DriverInfo, resolve_driver_info
+ from redis.event import AfterAsyncClusterInstantiationEvent, EventDispatcher
+ from redis.exceptions import (
+     AskError,
+@@ -82,10 +83,10 @@ from redis.exceptions import (
+ )
+ from redis.typing import AnyKeyT, EncodableT, KeyT
+ from redis.utils import (
++    SENTINEL,
+     SSL_AVAILABLE,
+     deprecated_args,
+     deprecated_function,
+-    get_lib_version,
+     safe_str,
+     str_if_bytes,
+     truncate_text,
+@@ -289,8 +290,9 @@ class RedisCluster(AbstractRedis, AbstractRedisCluster, AsyncRedisClusterCommand
+         username: Optional[str] = None,
+         password: Optional[str] = None,
+         client_name: Optional[str] = None,
+-        lib_name: Optional[str] = "redis-py",
+-        lib_version: Optional[str] = get_lib_version(),
++        lib_name: Union[Optional[str], object] = SENTINEL,
++        lib_version: Union[Optional[str], object] = SENTINEL,
++        driver_info: Union[Optional["DriverInfo"], object] = SENTINEL,
+         # Encoding related kwargs
+         encoding: str = "utf-8",
+         encoding_errors: str = "strict",
+@@ -337,6 +339,8 @@ class RedisCluster(AbstractRedis, AbstractRedisCluster, AsyncRedisClusterCommand
+                 'ClusterNode("localhost", 6379), ClusterNode("localhost", 6380)])'
+             )
+ 
++        computed_driver_info = resolve_driver_info(driver_info, lib_name, lib_version)
++
+         kwargs: Dict[str, Any] = {
+             "max_connections": max_connections,
+             "connection_class": Connection,
+@@ -345,8 +349,7 @@ class RedisCluster(AbstractRedis, AbstractRedisCluster, AsyncRedisClusterCommand
+             "username": username,
+             "password": password,
+             "client_name": client_name,
+-            "lib_name": lib_name,
+-            "lib_version": lib_version,
++            "driver_info": computed_driver_info,
+             # Encoding related kwargs
+             "encoding": encoding,
+             "encoding_errors": encoding_errors,
+diff --git a/redis/asyncio/connection.py b/redis/asyncio/connection.py
+index 0e0e74d..6127cd6 100644
+--- a/redis/asyncio/connection.py
++++ b/redis/asyncio/connection.py
+@@ -80,7 +80,13 @@ from redis.exceptions import (
+ )
+ from redis.observability.metrics import CloseReason
+ from redis.typing import EncodableT
+-from redis.utils import HIREDIS_AVAILABLE, str_if_bytes
++from redis.utils import (
++    HIREDIS_AVAILABLE,
++    str_if_bytes,
++)
++from redis.utils import (
++    SENTINEL as DEFAULT_SENTINEL,
++)
+ 
+ from .._parsers import (
+     BaseParser,
+@@ -175,9 +181,9 @@ class AbstractConnection:
+         socket_read_size: int = 65536,
+         health_check_interval: float = 0,
+         client_name: Optional[str] = None,
+-        lib_name: Optional[str] = None,
+-        lib_version: Optional[str] = None,
+-        driver_info: Optional[DriverInfo] = None,
++        lib_name: Union[Optional[str], object] = DEFAULT_SENTINEL,
++        lib_version: Union[Optional[str], object] = DEFAULT_SENTINEL,
++        driver_info: Union[Optional[DriverInfo], object] = DEFAULT_SENTINEL,
+         username: Optional[str] = None,
+         retry: Optional[Retry] = None,
+         redis_connect_func: Optional[ConnectCallbackT] = None,
+@@ -194,7 +200,7 @@ class AbstractConnection:
+         driver_info : DriverInfo, optional
+             Driver metadata for CLIENT SETINFO. If provided, lib_name and lib_version
+             are ignored. If not provided, a DriverInfo will be created from lib_name
+-            and lib_version (or defaults if those are also None).
++            and lib_version. Explicit None disables CLIENT SETINFO.
+         lib_name : str, optional
+             **Deprecated.** Use driver_info instead. Library name for CLIENT SETINFO.
+         lib_version : str, optional
+@@ -214,7 +220,7 @@ class AbstractConnection:
+         self.db = db
+         self.client_name = client_name
+ 
+-        # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version
++        # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version.
+         self.driver_info = resolve_driver_info(driver_info, lib_name, lib_version)
+ 
+         self.credential_provider = credential_provider
+diff --git a/redis/client.py b/redis/client.py
+index 283c3b7..8c62c17 100755
+--- a/redis/client.py
++++ b/redis/client.py
+@@ -69,6 +69,7 @@ from redis.observability.recorder import (
+ )
+ from redis.retry import Retry
+ from redis.utils import (
++    SENTINEL,
+     _set_info_logger,
+     check_protocol_version,
+     deprecated_args,
+@@ -253,9 +254,9 @@ class Redis(RedisModuleCommands, CoreCommands, SentinelCommands):
+         single_connection_client: bool = False,
+         health_check_interval: int = 0,
+         client_name: Optional[str] = None,
+-        lib_name: Optional[str] = None,
+-        lib_version: Optional[str] = None,
+-        driver_info: Optional["DriverInfo"] = None,
++        lib_name: Union[Optional[str], object] = SENTINEL,
++        lib_version: Union[Optional[str], object] = SENTINEL,
++        driver_info: Union[Optional["DriverInfo"], object] = SENTINEL,
+         username: Optional[str] = None,
+         redis_connect_func: Optional[Callable[[], None]] = None,
+         credential_provider: Optional[CredentialProvider] = None,
+@@ -301,6 +302,7 @@ class Redis(RedisModuleCommands, CoreCommands, SentinelCommands):
+             Optional DriverInfo object to identify upstream libraries.
+             If provided, lib_name and lib_version are ignored.
+             If not provided, a DriverInfo will be created from lib_name and lib_version.
++            Explicit None disables CLIENT SETINFO.
+             Argument is ignored when connection_pool is provided.
+         lib_name:
+             **Deprecated.** Use driver_info instead. Library name for CLIENT SETINFO.
+@@ -328,7 +330,7 @@ class Redis(RedisModuleCommands, CoreCommands, SentinelCommands):
+             if not retry_on_error:
+                 retry_on_error = []
+ 
+-            # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version
++            # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version.
+             computed_driver_info = resolve_driver_info(
+                 driver_info, lib_name, lib_version
+             )
+diff --git a/redis/cluster.py b/redis/cluster.py
+index 43dee3a..75d212f 100644
+--- a/redis/cluster.py
++++ b/redis/cluster.py
+@@ -192,6 +192,7 @@ REDIS_ALLOWED_KEYS = (
+     "encoding",
+     "encoding_errors",
+     "host",
++    "driver_info",
+     "lib_name",
+     "lib_version",
+     "max_connections",
+diff --git a/redis/connection.py b/redis/connection.py
+index 784e1f2..0f63521 100644
+--- a/redis/connection.py
++++ b/redis/connection.py
+@@ -90,6 +90,9 @@ from .utils import (
+     format_error_message,
+     str_if_bytes,
+ )
++from .utils import (
++    SENTINEL as DEFAULT_SENTINEL,
++)
+ 
+ if SSL_AVAILABLE:
+     import ssl
+@@ -779,9 +782,9 @@ class AbstractConnection(MaintNotificationsAbstractConnection, ConnectionInterfa
+         socket_read_size: int = 65536,
+         health_check_interval: int = 0,
+         client_name: Optional[str] = None,
+-        lib_name: Optional[str] = None,
+-        lib_version: Optional[str] = None,
+-        driver_info: Optional[DriverInfo] = None,
++        lib_name: Union[Optional[str], object] = DEFAULT_SENTINEL,
++        lib_version: Union[Optional[str], object] = DEFAULT_SENTINEL,
++        driver_info: Union[Optional[DriverInfo], object] = DEFAULT_SENTINEL,
+         username: Optional[str] = None,
+         retry: Union[Any, None] = None,
+         redis_connect_func: Optional[Callable[[], None]] = None,
+@@ -815,7 +818,7 @@ class AbstractConnection(MaintNotificationsAbstractConnection, ConnectionInterfa
+         driver_info : DriverInfo, optional
+             Driver metadata for CLIENT SETINFO. If provided, lib_name and lib_version
+             are ignored. If not provided, a DriverInfo will be created from lib_name
+-            and lib_version (or defaults if those are also None).
++            and lib_version. Explicit None disables CLIENT SETINFO.
+         lib_name : str, optional
+             **Deprecated.** Use driver_info instead. Library name for CLIENT SETINFO.
+         lib_version : str, optional
+@@ -836,7 +839,7 @@ class AbstractConnection(MaintNotificationsAbstractConnection, ConnectionInterfa
+         self.db = db
+         self.client_name = client_name
+ 
+-        # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version
++        # Handle driver_info: if provided, use it; otherwise create from lib_name/lib_version.
+         self.driver_info = resolve_driver_info(driver_info, lib_name, lib_version)
+ 
+         self.credential_provider = credential_provider
+diff --git a/redis/driver_info.py b/redis/driver_info.py
+index 11440c7..f108a8b 100644
+--- a/redis/driver_info.py
++++ b/redis/driver_info.py
+@@ -3,6 +3,8 @@ from __future__ import annotations
+ from dataclasses import dataclass, field
+ from typing import List, Optional
+ 
++from redis.utils import SENTINEL
++
+ _BRACES = {"(", ")", "[", "]", "{", "}"}
+ 
+ 
+@@ -66,10 +68,11 @@ class DriverInfo:
+     Parameters
+     ----------
+     name : str, optional
+-        The base library name (default: "redis-py")
++        The base library name. If omitted, defaults to "redis-py". If None,
++        LIB-NAME will not be sent.
+     lib_version : str, optional
+-        The redis-py library version. If None, the version will be determined
+-        automatically from the installed package.
++        The redis-py library version. If omitted, the version will be determined
++        automatically from the installed package. If None, LIB-VER will not be sent.
+ 
+     Examples
+     --------
+@@ -86,13 +89,15 @@ class DriverInfo:
+     '5.0.0'
+     """
+ 
+-    name: str = "redis-py"
+-    lib_version: Optional[str] = None
++    name: Optional[str] | object = SENTINEL
++    lib_version: Optional[str] | object = SENTINEL
+     _upstream: List[str] = field(default_factory=list)
+ 
+     def __post_init__(self):
+-        """Initialize lib_version if not provided."""
+-        if self.lib_version is None:
++        """Initialize default metadata if not explicitly provided."""
++        if self.name is SENTINEL:
++            self.name = "redis-py"
++        if self.lib_version is SENTINEL:
+             from redis.utils import get_lib_version
+ 
+             self.lib_version = get_lib_version()
+@@ -128,7 +133,7 @@ class DriverInfo:
+         return self
+ 
+     @property
+-    def formatted_name(self) -> str:
++    def formatted_name(self) -> Optional[str]:
+         """Return the base name with upstream drivers encoded, if any.
+ 
+         With no upstream drivers, this is just :pyattr:`name`. Otherwise::
+@@ -136,20 +141,23 @@ class DriverInfo:
+             name(driver1_vX;driver2_vY)
+         """
+ 
++        name = self.name
++        if not isinstance(name, str) or not name:
++            return None
+         if not self._upstream:
+-            return self.name
+-        return f"{self.name}({';'.join(self._upstream)})"
++            return name
++        return f"{name}({';'.join(self._upstream)})"
+ 
+ 
+ def resolve_driver_info(
+-    driver_info: Optional[DriverInfo],
+-    lib_name: Optional[str],
+-    lib_version: Optional[str],
+-) -> DriverInfo:
++    driver_info: Optional[DriverInfo] | object = SENTINEL,
++    lib_name: Optional[str] | object = SENTINEL,
++    lib_version: Optional[str] | object = SENTINEL,
++) -> Optional[DriverInfo]:
+     """Resolve driver_info from parameters.
+ 
+     If driver_info is provided, use it. Otherwise, create DriverInfo from
+-    lib_name and lib_version (using defaults if not provided).
++    lib_name and lib_version (using defaults only for sentinel values).
+ 
+     Parameters
+     ----------
+@@ -162,15 +170,15 @@ def resolve_driver_info(
+ 
+     Returns
+     -------
+-    DriverInfo
++    DriverInfo, optional
+         The resolved DriverInfo instance
+     """
+-    if driver_info is not None:
+-        return driver_info
++    if driver_info is SENTINEL:
++        if lib_name is None and lib_version is None:
++            return None
++        return DriverInfo(name=lib_name, lib_version=lib_version)
+ 
+-    # Fallback: create DriverInfo from lib_name and lib_version
+-    from redis.utils import get_lib_version
++    if driver_info is None or isinstance(driver_info, DriverInfo):
++        return driver_info
+ 
+-    name = lib_name if lib_name is not None else "redis-py"
+-    version = lib_version if lib_version is not None else get_lib_version()
+-    return DriverInfo(name=name, lib_version=version)
++    raise TypeError("driver_info must be a DriverInfo instance or None")
+diff --git a/redis/utils.py b/redis/utils.py
+index 4355d0c..dc1e4a9 100644
+--- a/redis/utils.py
++++ b/redis/utils.py
+@@ -43,6 +43,9 @@ except ImportError:
+ 
+ from importlib import metadata
+ 
++# Marker for omitted arguments. Compare by identity only.
++SENTINEL = object()
++
+ 
+ def from_url(url: str, **kwargs: Any) -> "Redis":
+     """

@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html,body { width:1600px; height:900px; }
+body { font-family:"Times New Roman",Times,Georgia,serif; background:#f7f5f0; color:#1c1a17; }
+.page { width:1600px; height:900px; padding:34px 92px 24px; position:relative; }
+.masthead { display:flex; justify-content:space-between; align-items:baseline; font-variant:small-caps; letter-spacing:2.5px; font-size:16px; color:#6f6a62; }
+.masthead b { color:#1c1a17; font-weight:600; }
+.rule2 { border-top:2.5px solid #1c1a17; margin-top:8px; }
+.rule1 { border-top:1px solid #1c1a17; margin-top:2.5px; }
+h1 { text-align:center; font-size:36px; font-weight:600; margin-top:14px; }
+.sub { text-align:center; font-style:italic; font-size:18px; margin-top:8px; color:#3a362f; }
+table { width:100%; border-collapse:collapse; font-size:18px; margin-top:16px; }
+thead th { border-top:2px solid #1c1a17; border-bottom:1px solid #1c1a17; padding:7px 8px; font-weight:600; text-align:left; font-size:17px; font-variant:small-caps; letter-spacing:0.5px; }
+thead th.r { text-align:right; }
+tbody td { padding:6px 8px; vertical-align:middle; }
+tbody tr:nth-child(even) { background:rgba(28,26,23,0.028); }
+tbody tr:last-child td { border-bottom:2px solid #1c1a17; }
+.num { color:#8a8378; width:34px; font-variant-numeric:tabular-nums; }
+.ev { font-family:"IBM Plex Mono","Courier New",monospace; font-size:16.5px; }
+.src { color:#4a453e; font-size:17px; }
+.ty { font-style:italic; color:#4a453e; }
+.ln { color:#4a453e; }
+.df { text-align:right; }
+.pill { display:inline-block; padding:3px 13px; border-radius:11px; font-size:15px; font-weight:600; font-variant:small-caps; letter-spacing:0.6px; }
+.foot { position:absolute; left:92px; right:92px; bottom:22px; border-top:1px solid #1c1a17; padding-top:9px; font-size:13.5px; color:#55504a; line-height:1.4; display:flex; justify-content:space-between; gap:40px; }
+.foot .brand { white-space:nowrap; text-align:right; font-variant:small-caps; letter-spacing:1.5px; color:#1c1a17; font-size:15px; }
+</style></head><body>
+<div class="page">
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;The Eval Set</span><span>July 2026 &nbsp;&middot;&nbsp; 15 evals &middot; 7 repositories &middot; 2 languages</span></div>
+  <div class="rule2"></div><div class="rule1"></div>
+
+  <h1>VulcanBench Evals 6.2.26</h1>
+  <div class="sub">Every eval is a real merged pull request from a production open-source project, graded by deterministic hidden tests</div>
+
+  <table>
+    <thead><tr><th>#</th><th>Eval</th><th>Source (repository &amp; PR)</th><th>Type</th><th>Language</th><th class="r">Difficulty</th></tr></thead>
+    <tbody><tr><td class='num'>1</td><td class='ev'>flask-teardown-robust</td><td class='src'>pallets/flask #5928</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#7a2d16;background:#f0d9cc'>Very hard</span></td></tr><tr><td class='num'>2</td><td class='ev'>sqlglot-iso8601-nanos</td><td class='src'>tobymao/sqlglot #7808</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#9c6644;background:#f0e2d4'>Hard</span></td></tr><tr><td class='num'>3</td><td class='ev'>redis-explicit-none-metadata</td><td class='src'>redis/redis-py #4081</td><td class='ty'>feature</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#9c6644;background:#f0e2d4'>Hard</span></td></tr><tr><td class='num'>4</td><td class='ev'>sqlglot-unpivot-cte-star</td><td class='src'>tobymao/sqlglot #7550</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#9c6644;background:#f0e2d4'>Hard</span></td></tr><tr><td class='num'>5</td><td class='ev'>anyio-max-bytes-guard</td><td class='src'>agronholm/anyio #1191</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#9c6644;background:#f0e2d4'>Hard</span></td></tr><tr><td class='num'>6</td><td class='ev'>sqlglot-qualify-lateral-star</td><td class='src'>tobymao/sqlglot #7802</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#9c6644;background:#f0e2d4'>Hard</span></td></tr><tr><td class='num'>7</td><td class='ev'>pytest-approx-public-type</td><td class='src'>pytest-dev/pytest #14647</td><td class='ty'>feature</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#3f5468;background:#dde4ea'>Medium</span></td></tr><tr><td class='num'>8</td><td class='ev'>urllib3-reject-invalid-host</td><td class='src'>urllib3/urllib3 #5095</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#3f5468;background:#dde4ea'>Medium</span></td></tr><tr><td class='num'>9</td><td class='ev'>poetry-extras-duplicate-conflict</td><td class='src'>python-poetry/poetry #10943</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#3f5468;background:#dde4ea'>Medium</span></td></tr><tr><td class='num'>10</td><td class='ev'>packaging-range-prerelease-policy</td><td class='src'>pypa/packaging #1295</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#3f5468;background:#dde4ea'>Medium</span></td></tr><tr><td class='num'>11</td><td class='ev'>sqlglot-parser-tuple-subquery</td><td class='src'>tobymao/sqlglot #7807</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#3f5468;background:#dde4ea'>Medium</span></td></tr><tr><td class='num'>12</td><td class='ev'>chi-readfrom-tee-doublecount</td><td class='src'>go-chi/chi #1085</td><td class='ty'>bug fix</td><td class='ln'>Go</td><td class='df'><span class='pill' style='color:#5f6a58;background:#e2e6da'>Easy</span></td></tr><tr><td class='num'>13</td><td class='ev'>click-version-distribution-name</td><td class='src'>pallets/click #3582</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#5f6a58;background:#e2e6da'>Easy</span></td></tr><tr><td class='num'>14</td><td class='ev'>packaging-empty-name</td><td class='src'>pypa/packaging #1305</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#5f6a58;background:#e2e6da'>Easy</span></td></tr><tr><td class='num'>15</td><td class='ev'>more-itertools-interleave-empty</td><td class='src'>more-itertools #1193</td><td class='ty'>bug fix</td><td class='ln'>Python</td><td class='df'><span class='pill' style='color:#5f6a58;background:#e2e6da'>Easy</span></td></tr></tbody>
+  </table>
+
+  <div class="foot">
+    <div><b>Difficulty</b> is derived from measured results across four frontier configurations (Claude Fable 5 low and medium, Claude Opus 4.8 high, GPT-5.5 high): how many solved each eval, and the agent effort it took. Only the two hardest evals separate the models; the rest are solved by all four at varying cost.</div>
+    <div class="brand">VulcanBench<br><span style="font-size:12px;letter-spacing:1px;color:#6f6a62">open-source coding benchmark</span></div>
+  </div>
+</div>
+</body></html>

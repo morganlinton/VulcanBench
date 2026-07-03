@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+html,body { width:1600px; height:900px; }
+body { font-family:"Times New Roman",Times,Georgia,serif; background:#f7f5f0; color:#1c1a17; }
+.page { width:1600px; height:900px; padding:42px 74px 28px; position:relative; }
+.masthead { display:flex; justify-content:space-between; align-items:baseline; font-variant:small-caps; letter-spacing:2.5px; font-size:16px; color:#6f6a62; }
+.masthead b { color:#1c1a17; font-weight:600; }
+.rule2 { border-top:2.5px solid #1c1a17; margin-top:8px; }
+.rule1 { border-top:1px solid #1c1a17; margin-top:2.5px; }
+h1 { text-align:center; font-size:37px; font-weight:600; margin-top:26px; }
+.eff { font-size:25px; font-weight:400; font-style:italic; color:#55504a; }
+.authors { text-align:center; font-style:italic; font-size:19px; margin-top:9px; color:#3a362f; }
+.abstract { width:1170px; margin:20px auto 0; font-size:18px; line-height:1.5; text-align:center; }
+.cols { display:grid; grid-template-columns:720px 700px; gap:40px; margin-top:24px; }
+.tcap,.fcap { font-size:15px; margin-bottom:8px; line-height:1.3; }
+.tcap b,.fcap b { font-variant:small-caps; letter-spacing:1px; font-weight:600; }
+table { width:100%; border-collapse:collapse; font-size:16.5px; }
+thead th { border-top:2px solid #1c1a17; border-bottom:1px solid #1c1a17; padding:7px 6px; font-weight:600; text-align:right; font-size:15.5px; }
+thead th:first-child { text-align:left; }
+tbody td { padding:7px 6px; text-align:right; font-variant-numeric:tabular-nums; }
+tbody td:first-child { text-align:left; }
+tbody tr:last-child td { border-bottom:2px solid #1c1a17; }
+.model { font-style:italic; }
+.win { font-weight:700; }
+.legend { display:flex; gap:20px; justify-content:center; font-size:13.5px; margin-top:4px; color:#3a362f; flex-wrap:wrap; }
+.legend span { display:inline-flex; align-items:center; gap:6px; }
+.sw { width:13px; height:13px; display:inline-block; }
+.findings { margin-top:16px; font-size:16px; line-height:1.42; }
+.findings p { margin-top:7px; }
+.findings .n { font-weight:700; }
+.foot { position:absolute; left:74px; right:74px; bottom:24px; border-top:1px solid #1c1a17; padding-top:9px; font-size:13px; color:#55504a; line-height:1.4; display:flex; justify-content:space-between; gap:40px; }
+.foot .brand { white-space:nowrap; text-align:right; font-variant:small-caps; letter-spacing:1.5px; color:#1c1a17; font-size:15px; }
+</style></head><body>
+<div class="page">
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 4</span><span>July 2026 &nbsp;&middot;&nbsp; 15 tasks &middot; 60 runs</span></div>
+  <div class="rule2"></div><div class="rule1"></div>
+
+  <h1>Claude Fable 5 <span class="eff">(low / medium)</span> &nbsp;vs.&nbsp; Opus 4.8 <span class="eff">(high)</span> &nbsp;vs.&nbsp; GPT-5.5 <span class="eff">(high)</span></h1>
+  <div class="authors">Fifteen real engineering tasks from open-source repositories, graded by deterministic hidden tests</div>
+
+  <div class="abstract">All four configurations score <b>14 of 15</b>, but <b>each misses a different task</b>. GPT-5.5 alone
+  solves the multi-site Flask redesign that stops every other model, and alone fails an SQL transpile task the others pass. At equal accuracy,
+  cost spans <b>4x</b>: Opus 4.8 is the value leader; GPT-5.5 pays heavily for its one extra capability.</div>
+
+  <div class="cols">
+    <div>
+      <div class="tcap"><b>Table 1.</b> Aggregate results, one run per task, deterministic hidden-test grading. Costs corrected for provider prompt-cache discounts.</div>
+      <table>
+        <thead><tr><th>Model (effort)</th><th>Score</th><th>Cost</th><th>Time</th><th>Steps</th><th>Tokens</th></tr></thead>
+        <tbody>
+          <tr><td class="model">Claude Fable 5 (low)</td><td>14/15</td><td>$5.99</td><td>27 min</td><td>66</td><td>0.40 M</td></tr>
+          <tr><td class="model">Claude Fable 5 (medium)</td><td>14/15</td><td>$11.10</td><td>44 min</td><td>84</td><td>0.64 M</td></tr>
+          <tr><td class="model">Claude Opus 4.8 (high)</td><td>14/15</td><td class="win">$5.00</td><td>27 min</td><td>96</td><td>0.71 M</td></tr>
+          <tr><td class="model">GPT-5.5 (high)</td><td>14/15</td><td>$20.43</td><td>71 min</td><td>195</td><td>2.97 M</td></tr>
+        </tbody>
+      </table>
+      <div class="findings">
+        <p><span class="n">1.</span> <b>The single misses differ.</b> Fable and Opus fail only the Flask teardown redesign; GPT-5.5 solves it but fails only an SQL dialect transpile the others pass.</p>
+        <p><span class="n">2.</span> <b>Opus 4.8 is the value leader.</b> Same 14/15 as everything else, at the lowest cost, fewest tokens, and no refusals.</p>
+        <p><span class="n">3.</span> <b>More effort is not always better.</b> Fable-medium costs 2x Fable-low for the identical score; GPT-5.5 spends 4x Opus for one extra task.</p>
+      </div>
+    </div>
+    <div>
+      <div class="fcap"><b>Figure 1.</b> Resource consumption at equal (14/15) accuracy. Bars: Fable-low, Fable-medium, Opus-high, GPT-5.5-high.</div>
+      <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" width="100%"><rect x="22.0" y="153.7" width="30.2" height="46.3" fill="#27425f"/><text x="37.1" y="147.7" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">$5.99</text><rect x="62.7" y="114.2" width="30.2" height="85.8" fill="#5b7089"/><text x="77.8" y="108.2" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">$11.10</text><rect x="103.4" y="161.3" width="30.2" height="38.7" fill="#7a8ba1"/><text x="118.5" y="155.3" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">$5.00</text><rect x="144.1" y="42.0" width="30.2" height="158.0" fill="#9c6644"/><text x="159.2" y="36.0" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">$20.43</text><line x1="16.0" y1="200" x2="224.0" y2="200" stroke="#1c1a17" stroke-width="1"/><text x="120.0" y="222" text-anchor="middle" font-size="14" fill="#1c1a17" font-family="Georgia,serif" font-style="italic">Cost</text><text x="120.0" y="239" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia,serif">USD per run</text><rect x="262.0" y="139.9" width="30.2" height="60.1" fill="#27425f"/><text x="277.1" y="133.9" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">27</text><rect x="302.7" y="102.1" width="30.2" height="97.9" fill="#5b7089"/><text x="317.8" y="96.1" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">44</text><rect x="343.4" y="139.9" width="30.2" height="60.1" fill="#7a8ba1"/><text x="358.5" y="133.9" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">27</text><rect x="384.1" y="42.0" width="30.2" height="158.0" fill="#9c6644"/><text x="399.2" y="36.0" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">71</text><line x1="256.0" y1="200" x2="464.0" y2="200" stroke="#1c1a17" stroke-width="1"/><text x="360.0" y="222" text-anchor="middle" font-size="14" fill="#1c1a17" font-family="Georgia,serif" font-style="italic">Wall-clock</text><text x="360.0" y="239" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia,serif">minutes</text><rect x="502.0" y="178.7" width="30.2" height="21.3" fill="#27425f"/><text x="517.1" y="172.7" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">0.40</text><rect x="542.7" y="166.0" width="30.2" height="34.0" fill="#5b7089"/><text x="557.8" y="160.0" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">0.64</text><rect x="583.4" y="162.2" width="30.2" height="37.8" fill="#7a8ba1"/><text x="598.5" y="156.2" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">0.71</text><rect x="624.1" y="42.0" width="30.2" height="158.0" fill="#9c6644"/><text x="639.2" y="36.0" text-anchor="middle" font-size="12" fill="#1c1a17" font-family="Georgia,serif">2.97</text><line x1="496.0" y1="200" x2="704.0" y2="200" stroke="#1c1a17" stroke-width="1"/><text x="600.0" y="222" text-anchor="middle" font-size="14" fill="#1c1a17" font-family="Georgia,serif" font-style="italic">Tokens</text><text x="600.0" y="239" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia,serif">millions</text></svg>
+      <div class="legend">
+        <span><span class="sw" style="background:#27425f"></span>Fable 5 (low)</span>
+        <span><span class="sw" style="background:#5b7089"></span>Fable 5 (medium)</span>
+        <span><span class="sw" style="background:#7a8ba1"></span>Opus 4.8 (high)</span>
+        <span><span class="sw" style="background:#9c6644"></span>GPT-5.5 (high)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>Method.</b> Fifteen tasks from real merged PRs (flask, aiohttp-adjacent, sqlglot, click, chi, more-itertools, packaging, anyio, pytest, urllib3, poetry, redis; Python and Go), all merged after model training cutoffs, graded by deterministic hidden tests in a network-isolated Docker sandbox. One run per task per configuration; zero refusals. Costs reflect each provider's automatic prompt-cache discount.</div>
+    <div class="brand">VulcanBench<br><span style="font-size:12px;letter-spacing:1px;color:#6f6a62">open-source coding benchmark</span></div>
+  </div>
+</div>
+</body></html>

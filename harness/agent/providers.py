@@ -610,11 +610,29 @@ def _parse_responses_body(body: dict[str, Any]) -> LLMResponse:
         content="\n".join(part for part in content_parts if part) or None,
         tool_calls=tool_calls,
         usage=TokenUsage(
-            prompt_tokens=usage.get("input_tokens", usage.get("prompt_tokens", 0)),
+            prompt_tokens=_openai_effective_prompt_tokens(
+                usage.get("input_tokens", usage.get("prompt_tokens", 0)),
+                (usage.get("input_tokens_details") or {}).get("cached_tokens", 0),
+            ),
             completion_tokens=usage.get("output_tokens", usage.get("completion_tokens", 0)),
         ),
         raw=body,
     )
+
+
+def _openai_effective_prompt_tokens(input_tokens: int, cached_tokens: int) -> int:
+    """Fold OpenAI's automatic prompt-cache discount into an effective prompt count.
+
+    Unlike Anthropic (where ``input_tokens`` is the uncached remainder), OpenAI reports
+    ``input_tokens`` as the FULL prompt and carries the cached portion in
+    ``input_tokens_details.cached_tokens``. Cached input on the GPT-5 series bills at
+    ~0.1x the input rate, so the re-sent transcript in a long agent loop is far cheaper
+    than the raw token count implies. Fold cache reads at 0.1x so ``cost_usd`` reflects
+    what OpenAI actually bills.
+    """
+    cached = min(max(cached_tokens, 0), input_tokens)
+    uncached = input_tokens - cached
+    return round(uncached + cached * 0.1)
 
 
 def _parse_chat_completions_response(body: dict[str, Any]) -> LLMResponse:
@@ -633,7 +651,10 @@ def _parse_chat_completions_response(body: dict[str, Any]) -> LLMResponse:
         content=msg.get("content"),
         tool_calls=tool_calls,
         usage=TokenUsage(
-            prompt_tokens=usage.get("prompt_tokens", 0),
+            prompt_tokens=_openai_effective_prompt_tokens(
+                usage.get("prompt_tokens", 0),
+                (usage.get("prompt_tokens_details") or {}).get("cached_tokens", 0),
+            ),
             completion_tokens=usage.get("completion_tokens", 0),
         ),
         raw=body,

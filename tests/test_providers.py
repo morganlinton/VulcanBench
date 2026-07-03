@@ -233,6 +233,34 @@ def test_openai_effort_uses_responses_payload(monkeypatch: pytest.MonkeyPatch) -
     assert resp.usage.total == 14
 
 
+def test_openai_responses_discounts_cached_prompt_tokens(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # OpenAI reports input_tokens as the FULL prompt, with the cached portion in
+    # input_tokens_details.cached_tokens (billed ~0.1x on the GPT-5 series). The
+    # effective prompt count must fold cache reads at 0.1x, not bill them full price.
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        return {
+            "output": [{"type": "message", "content": [{"type": "output_text", "text": "ok"}]}],
+            "usage": {
+                "input_tokens": 10000,
+                "input_tokens_details": {"cached_tokens": 9000},
+                "output_tokens": 100,
+            },
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = OpenAIProvider("gpt-5.5").complete(
+        [{"role": "user", "content": "hi"}], [], effort="high"
+    )
+    # 1000 uncached + 9000 cached * 0.1 = 1000 + 900 = 1900 effective prompt tokens
+    # (a full-price count would have been 10000).
+    assert resp.usage.prompt_tokens == 1900
+    assert resp.usage.completion_tokens == 100
+
+
 def test_openai_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     with pytest.raises(P.ProviderError, match="OPENAI_API_KEY"):

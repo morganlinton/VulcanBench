@@ -1,0 +1,45 @@
+{
+  "id": "oss-mypy-typevartuple-defaults",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-03",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "8f4c84052cbb4cda3042287da0039754436eb49f",
+  "image": "vulcanbench/sandbox:mypy-21544",
+  "upstream": {
+    "url": "https://github.com/python/mypy/pull/21544",
+    "issue": "https://github.com/python/mypy/pull/21544",
+    "commit": "8f4c84052cbb4cda3042287da0039754436eb49f"
+  },
+  "decontamination_notes": "Real fix from python/mypy PR #21544, merged 2026-05-28, after model training cutoffs. Multiple independent TypeVarTuple-with-defaults bugs spanning semanal.py and typeanal.py in one of the deepest corners of the type system; graded on three independent parity points (concrete default substitution, empty-tuple default, defaulted-TypeVar-after-TVT error) so partial fixes fail. Repo sliced at base commit (mypy/ incl. typeshed subtree); MIT LICENSE preserved. Runs in per-task image vulcanbench/sandbox:mypy-21544 (typing_extensions, mypy_extensions, pathspec, librt); the workspace mypy runs interpreted via PYTHONPATH=. as a subprocess on test snippets.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "concrete_tvt_default",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_bare_reference_applies_concrete_tvt_default -q"
+      },
+      {
+        "name": "empty_tvt_default",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_bare_reference_applies_empty_tvt_default -q"
+      },
+      {
+        "name": "default_after_tvt_error",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_default_typevar_after_tvt_is_error -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "explicit_args_stable",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_explicit_args_still_resolve -q"
+      }
+    ]
+  },
+  "test_timeout_s": 600
+}

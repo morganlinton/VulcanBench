@@ -1,0 +1,375 @@
+diff --git a/sympy/polys/domains/algebraicfield.py b/sympy/polys/domains/algebraicfield.py
+index 2d04a7e987..a3bf34a7d8 100644
+--- a/sympy/polys/domains/algebraicfield.py
++++ b/sympy/polys/domains/algebraicfield.py
+@@ -2,6 +2,7 @@
+ 
+ from __future__ import annotations
+ 
++from functools import cached_property
+ from sympy.core.add import Add
+ from sympy.core.mul import Mul
+ from sympy.core.singleton import S
+@@ -10,6 +11,7 @@
+ from sympy.polys.domains.characteristiczero import CharacteristicZero
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.domains.ringextension import RingExtension
+ from sympy.polys.polyclasses import ANP, DMP
+ from sympy.polys.polyerrors import CoercionFailed, DomainError, NotAlgebraic, IsomorphismFailed
+@@ -25,7 +27,13 @@
+ 
+ 
+ @public
+-class AlgebraicField(Field[Alg], CharacteristicZero, SimpleDomain[Alg], RingExtension[Alg, MPQ]):
++class AlgebraicField(
++    Field[Alg],
++    CharacteristicZero,
++    SimpleDomain[Alg],
++    ConjugateDomain[Alg],
++    RingExtension[Alg, MPQ]
++):
+     r"""Algebraic number field :ref:`QQ(a)`
+ 
+     A :ref:`QQ(a)` domain represents an `algebraic number field`_
+@@ -551,6 +559,28 @@ def primes_above(self, p):
+         rad = self._nilradicals_mod_p.get(p)
+         return prime_decomp(p, ZK=ZK, dK=dK, radical=rad)
+ 
++    @cached_property
++    def conjugate(self):
++        """Returns the complex conjugate of ``a``. """
++        try:
++            # the conjugate of ext has the same minpoly as ext
++            z = self.ext.func((self.ext.minpoly, self.ext.conjugate()))
++            conj = self.from_sympy(z)
++        except CoercionFailed:
++            raise CoercionFailed("the algebraic field is not closed under conjugation")
++
++        if conj.rep == [1, 0]:
++            # conj == ext implies ext is real
++            return lambda a: a
++
++        def conjugate(a):
++            v = self.zero
++            for c in a.rep:
++                v = v * conj + c
++            return v
++
++        return conjugate
++
+     def galois_group(self, by_name=False, max_tries=30, randomize=False):
+         """
+         Compute the Galois group of the Galois closure of this field.
+diff --git a/sympy/polys/domains/complexfield.py b/sympy/polys/domains/complexfield.py
+index 1e3d870bb9..218527de2b 100644
+--- a/sympy/polys/domains/complexfield.py
++++ b/sympy/polys/domains/complexfield.py
+@@ -9,12 +9,13 @@
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.gaussiandomains import QQ_I
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.polyerrors import DomainError, CoercionFailed
+ from sympy.utilities import public
+ 
+ 
+ @public
+-class ComplexField(Field, CharacteristicZero, SimpleDomain):
++class ComplexField(Field, CharacteristicZero, SimpleDomain, ConjugateDomain):
+     """Complex numbers up to the given precision. """
+ 
+     rep = 'CC'
+@@ -195,4 +196,9 @@ def exsqrt(self, a):
+         """
+         return a ** 0.5
+ 
++    def conjugate(self, a):
++        """Returns the complex conjugate of ``a``. """
++        return self.dtype(a.real, -a.imag)
++
++
+ CC = ComplexField()
+diff --git a/sympy/polys/domains/conjugatedomain.py b/sympy/polys/domains/conjugatedomain.py
+new file mode 100644
+index 0000000000..0fd46f5905
+--- /dev/null
++++ b/sympy/polys/domains/conjugatedomain.py
+@@ -0,0 +1,16 @@
++"""Implementation of :class:`ConjugateDomain` class. """
++from __future__ import annotations
++
++
++from sympy.polys.domains.domain import Domain, Er
++from sympy.utilities import public
++
++@public
++class ConjugateDomain(Domain[Er]):
++    """Base class for domains supporting conjugation. """
++
++    is_ConjugateDomain = True
++
++    def conjugate(self, a: Er) -> Er:
++        """Returns the complex conjugate of ``a``."""
++        raise NotImplementedError
+diff --git a/sympy/polys/domains/domain.py b/sympy/polys/domains/domain.py
+index fb30f57f69..f61573d45f 100644
+--- a/sympy/polys/domains/domain.py
++++ b/sympy/polys/domains/domain.py
+@@ -495,6 +495,9 @@ class of the associated domain elements.
+     is_Simple: bool = False
+     """Boolean flag indicating if the domain is a simple domain."""
+ 
++    is_ConjugateDomain: bool = False
++    """Boolean flag indicating if the domain supports conjugation."""
++
+     is_Composite: bool = False
+     """Boolean flag indicating if the domain is a composite domain."""
+ 
+diff --git a/sympy/polys/domains/expressiondomain.py b/sympy/polys/domains/expressiondomain.py
+index 297191dd2e..9a0d9f4e34 100644
+--- a/sympy/polys/domains/expressiondomain.py
++++ b/sympy/polys/domains/expressiondomain.py
+@@ -7,6 +7,7 @@
+ from sympy.polys.domains.characteristiczero import CharacteristicZero
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.polyutils import PicklableWithSlots
+ from sympy.utilities import public
+ 
+@@ -14,7 +15,7 @@
+               "basic": False, "multinomial": False, "log": False}
+ 
+ @public
+-class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
++class ExpressionDomain(Field, CharacteristicZero, SimpleDomain, ConjugateDomain):
+     """A class for arbitrary expressions. """
+ 
+     is_SymbolicDomain = is_EX = True
+@@ -278,5 +279,9 @@ def gcd(self, a, b):
+     def lcm(self, a, b):
+         return a.lcm(b)
+ 
++    def conjugate(self, a):
++        """Returns the complex conjugate of ``a``."""
++        return self.dtype(a.ex.conjugate())
++
+ 
+ EX = ExpressionDomain()
+diff --git a/sympy/polys/domains/expressionrawdomain.py b/sympy/polys/domains/expressionrawdomain.py
+index d0309838d0..84f451bac2 100644
+--- a/sympy/polys/domains/expressionrawdomain.py
++++ b/sympy/polys/domains/expressionrawdomain.py
+@@ -6,12 +6,13 @@
+ from sympy.polys.domains.characteristiczero import CharacteristicZero
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.polyerrors import CoercionFailed
+ from sympy.utilities import public
+ 
+ 
+ @public
+-class ExpressionRawDomain(Field, CharacteristicZero, SimpleDomain):
++class ExpressionRawDomain(Field, CharacteristicZero, SimpleDomain, ConjugateDomain):
+     """A class for arbitrary expressions but without automatic simplification. """
+ 
+     is_SymbolicRawDomain = is_EXRAW = True
+@@ -54,5 +55,9 @@ def get_field(self):
+     def sum(self, items):
+         return Add(*items)
+ 
++    def conjugate(self, a):
++        """Returns the complex conjugate of ``a``."""
++        return a.conjugate()
++
+ 
+ EXRAW = ExpressionRawDomain()
+diff --git a/sympy/polys/domains/gaussiandomains.py b/sympy/polys/domains/gaussiandomains.py
+index aefcafb164..b073881887 100644
+--- a/sympy/polys/domains/gaussiandomains.py
++++ b/sympy/polys/domains/gaussiandomains.py
+@@ -14,6 +14,7 @@
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.ring import Ring
+ from sympy.polys.domains.ringextension import RingExtension
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ 
+ 
+ Tdom = TypeVar('Tdom', MPZ, MPQ)
+@@ -275,7 +276,7 @@ def __divmod__(self, other: Self | int) -> tuple[Self, Self]:
+             return self/other, self._parent.zero
+ 
+ 
+-class GaussianDomain(RingExtension[Telem, Tdom]):
++class GaussianDomain(RingExtension[Telem, Tdom], ConjugateDomain):
+     """Base class for Gaussian domains."""
+     dom: Domain
+     units: tuple[Telem, Telem, Telem, Telem]
+@@ -361,6 +362,10 @@ def from_AlgebraicField(K1, a, K0) -> Telem | None:
+             return K1.from_sympy(K0.to_sympy(a))
+         return None
+ 
++    def conjugate(self, a: Telem) -> Telem:
++        """Returns the complex conjugate of ``a``."""
++        return self.dtype(a.x, -a.y)
++
+ 
+ class GaussianIntegerRing(GaussianDomain[GaussianInteger, MPZ], Ring[MPZ]):
+     r"""Ring of Gaussian integers ``ZZ_I``
+diff --git a/sympy/polys/domains/integerring.py b/sympy/polys/domains/integerring.py
+index 28be150944..89631c7df3 100644
+--- a/sympy/polys/domains/integerring.py
++++ b/sympy/polys/domains/integerring.py
+@@ -13,13 +13,14 @@
+ from sympy.polys.domains.characteristiczero import CharacteristicZero
+ from sympy.polys.domains.ring import Ring
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.polyerrors import CoercionFailed
+ from sympy.utilities import public
+ 
+ import math
+ 
+ @public
+-class IntegerRing(Ring[MPZ], CharacteristicZero, SimpleDomain):
++class IntegerRing(Ring[MPZ], CharacteristicZero, SimpleDomain, ConjugateDomain):
+     r"""The domain ``ZZ`` representing the integers `\mathbb{Z}`.
+ 
+     The :py:class:`IntegerRing` class represents the ring of integers as a
+@@ -272,5 +273,9 @@ def factorial(self, a):
+         """Compute factorial of ``a``. """
+         return factorial(a)
+ 
++    def conjugate(self, a: MPZ) -> MPZ:
++        """Returns the complex conjugate of ``a``."""
++        return a
++
+ 
+ ZZ = IntegerRing()
+diff --git a/sympy/polys/domains/rationalfield.py b/sympy/polys/domains/rationalfield.py
+index c75040c74b..c98e74d3b3 100644
+--- a/sympy/polys/domains/rationalfield.py
++++ b/sympy/polys/domains/rationalfield.py
+@@ -9,11 +9,12 @@
+ from sympy.polys.domains.characteristiczero import CharacteristicZero
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.polyerrors import CoercionFailed
+ from sympy.utilities import public
+ 
+ @public
+-class RationalField(Field[MPQ], CharacteristicZero, SimpleDomain):
++class RationalField(Field[MPQ], CharacteristicZero, SimpleDomain, ConjugateDomain):
+     r"""Abstract base class for the domain :ref:`QQ`.
+ 
+     The :py:class:`RationalField` class represents the field of rational
+@@ -198,4 +199,9 @@ def exsqrt(self, a):
+             return None
+         return MPQ(p_sqrt, q_sqrt)
+ 
++    def conjugate(self, a):
++        """Returns the complex conjugate of ``a``."""
++        return a
++
++
+ QQ = RationalField()
+diff --git a/sympy/polys/domains/realfield.py b/sympy/polys/domains/realfield.py
+index 96378665d0..b9868c3e7a 100644
+--- a/sympy/polys/domains/realfield.py
++++ b/sympy/polys/domains/realfield.py
+@@ -7,6 +7,7 @@
+ from sympy.core.numbers import Float
+ from sympy.polys.domains.field import Field
+ from sympy.polys.domains.simpledomain import SimpleDomain
++from sympy.polys.domains.conjugatedomain import ConjugateDomain
+ from sympy.polys.domains.characteristiczero import CharacteristicZero
+ from sympy.polys.polyerrors import CoercionFailed
+ from sympy.utilities import public
+@@ -51,7 +52,7 @@ def to_rational(s, max_denom, limit=True):
+ 
+ 
+ @public
+-class RealField(Field, CharacteristicZero, SimpleDomain):
++class RealField(Field, CharacteristicZero, SimpleDomain, ConjugateDomain):
+     """Real numbers up to the given precision. """
+ 
+     rep = 'RR'
+@@ -215,5 +216,9 @@ def exsqrt(self, a):
+         """
+         return a ** 0.5 if a >= 0 else None
+ 
++    def conjugate(self, a):
++        """Returns the complex conjugate of ``a``."""
++        return a
++
+ 
+ RR = RealField()
+diff --git a/sympy/polys/domains/tests/test_domains.py b/sympy/polys/domains/tests/test_domains.py
+index c9ad892c6d..972e583bb0 100644
+--- a/sympy/polys/domains/tests/test_domains.py
++++ b/sympy/polys/domains/tests/test_domains.py
+@@ -1163,6 +1163,7 @@ def test_gaussian_domains():
+         assert 2*i + r == q
+         i, r = divmod(2, q)
+         assert q*i + r == G(2, 0)
++        assert G.conjugate(q) == G(3, -4)
+ 
+         a, b = G(2, 0), G(1, -1)
+         c, d, g = G.gcdex(a, b)
+@@ -1433,3 +1434,52 @@ def test_exsqrt():
+     assert F7.exsqrt(F7(3)) is None
+     assert F7.is_square(F7(0)) is True
+     assert F7.exsqrt(F7(0)) == F7(0)
++
++
++def test_Domain_conjugate():
++    domains = [ZZ, QQ, RR, CC, ZZ_I, QQ_I, EX, EXRAW]
++    for domain in domains:
++        a = domain(7)
++        assert domain.is_ConjugateDomain
++        assert domain.of_type(domain.conjugate(a))
++        assert domain.conjugate(a) == a
++
++        if domain.is_Field:
++            b = domain(-5)
++            assert domain.of_type(domain.conjugate(a / b))
++            assert domain.conjugate(a / b) == domain(a / b)
++
++    domains = [CC, ZZ_I, QQ_I, EX, EXRAW]
++    for domain in domains:
++        a = domain.from_sympy(7 + 3*I)
++        b = domain.from_sympy(7 - 3*I)
++        assert domain.of_type(domain.conjugate(a))
++        assert domain.conjugate(a) == b
++        assert domain.conjugate(b) == a
++
++    domains = [
++        FF(2), FF(11), ZZ[x], QQ[x], QQ[x, y], RR[z], CC[z],
++        ZZ_I[x], QQ_I[x, y], QQ_I.frac_field(x, y), EXRAW[z],
++    ]
++    for domain in domains:
++        assert not domain.is_ConjugateDomain
++
++    # algebraic fields
++    K = QQ.algebraic_field(sqrt(2))
++    a = K.from_sympy(sqrt(2) + 1)
++    assert K.is_ConjugateDomain
++    assert K.conjugate(a) == a
++
++    K = QQ.algebraic_field((-1 + sqrt(5)*I)/4)
++    a = K.from_sympy((-7 + 3*sqrt(5)*I)/2)
++    b = K.from_sympy((-7 - 3*sqrt(5)*I)/2)
++    assert K.conjugate(a) == b
++
++    K = QQ.cyclotomic_field(7)
++    a = K.dtype([0, 1, 2, 3, 4, 5, 6], K.mod.to_list(), QQ)
++    b = K.dtype([5, 4, 3, 2, 1, 0, 6], K.mod.to_list(), QQ)
++    assert K.conjugate(a) == b
++
++    a = Poly(x**3 - x + 1, x, domain=ZZ).all_roots()[-1]
++    K = QQ.algebraic_field(a)
++    raises(CoercionFailed, lambda: K.conjugate(K.from_sympy(a)))

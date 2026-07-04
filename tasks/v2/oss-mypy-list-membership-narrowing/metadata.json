@@ -1,0 +1,30 @@
+{
+  "id": "oss-mypy-list-membership-narrowing",
+  "category": "bug_fix",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-03",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "db331b44ac2b4ef35b138cd5ecba7731c656ca4c",
+  "image": "vulcanbench/sandbox:mypy-21544",
+  "upstream": {
+    "url": "https://github.com/python/mypy/pull/21456",
+    "issue": "https://github.com/python/mypy/pull/21456",
+    "commit": "db331b44ac2b4ef35b138cd5ecba7731c656ca4c"
+  },
+  "decontamination_notes": "Real fix from python/mypy PR #21456, merged 2026-05 (after model training cutoffs). Extends literal narrowing inside membership tests to cover list literals (not just tuples), in mypy's conditional type-narrowing logic (checker.py). Graded on two independent literal element types (str, int) with tuple narrowing as a no-regression check. The narrowest of this batch's very-hard tasks. Repo sliced at base commit (mypy/ incl. typeshed subtree, 128k LOC); MIT LICENSE preserved. Runs in the shared mypy per-task image vulcanbench/sandbox:mypy-21544; the workspace mypy runs interpreted via PYTHONPATH=. as a subprocess on test snippets.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "string_list_narrowing", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_string_literal_list_membership_narrows -q"},
+      {"name": "int_list_narrowing", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_int_literal_list_membership_narrows -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "tuple_narrowing_stable", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_tuple_membership_still_narrows -q"}
+    ]
+  },
+  "test_timeout_s": 600
+}

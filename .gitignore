@@ -151,6 +151,8 @@ runs/
 tasks/v1/*/repo_snapshot.tar.gz
 tasks/v1/*/repo_snapshot/
 *.tar.gz
+# But DO track committed task snapshots (stored via Git LFS, see .gitattributes).
+!tasks/v2/**/repo_snapshot.tar.gz
 *.zip
 node_modules/
 .next/

@@ -1,0 +1,34 @@
+{
+  "id": "oss-sympy-ground-eigenvects",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-03",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:sympy-29877",
+  "base_commit": "cacef37de3738284af467a88ee0437768b626738",
+  "upstream": {
+    "url": "https://github.com/sympy/sympy/pull/29984",
+    "issue": "https://github.com/sympy/sympy/pull/29984",
+    "commit": "cacef37de3738284af467a88ee0437768b626738"
+  },
+  "decontamination_notes": "Real feature from sympy/sympy PR #29984 (GSoC 2026), merged 2026-07-03, after model training cutoffs. Adds ground_eigenvals / ground_eigenvects to DomainMatrix. The eigenvalue SET is determined, but the result REPRESENTATION is implementation-arbitrary: eigenvalues are returned in characteristic-polynomial factorization order (not sorted), and each eigenvector basis is the specific null-space basis produced with nullspace(divide_last=False). A plausible correct-from-first-principles implementation that sorts eigenvalues or scales the eigenvector basis differently produces a valid-but-different result and fails the exact-match assertions (verified: sorted-order + default nullspace diverges from gold on the 4x4 block matrix). Repo sliced at the PR base commit (786k LOC, methods absent); LICENSE preserved. Uses the sympy-29877 image (sympy needs mpmath); runs with PYTHONPATH=.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "eigenvals_basic", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_ground_eigenvals_basic -q"},
+      {"name": "eigenvects_swap_exact", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_ground_eigenvects_symmetric_swap_exact -q"},
+      {"name": "eigenvects_zeros_identity", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_ground_eigenvects_zeros_identity_basis -q"},
+      {"name": "eigenvects_block_exact", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_ground_eigenvects_block_matrix_exact -q"},
+      {"name": "eigenvects_empty_none", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_ground_eigenvects_empty_and_no_ground_eigenvalue -q"},
+      {"name": "non_square_raises", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_non_square_raises -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "core_unaffected", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_core_domainmatrix_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 300
+}

@@ -24,5 +24,13 @@
     "oss-more-itertools-interleave-empty",
     "oss-packaging-range-prerelease-policy",
     "oss-packaging-empty-name"
+  ],
+  "_veryhard_note": "Very-hard tail: 5 CONFIRMED frontier-hard tasks (claude-fable-5 --effort low fails each; screened 2026-07-03/04). Three distinct hard sub-veins: (1) seed-dependent partition (leiden, implemented-and-graded-0 at 96 steps), (2) arbitrary internal naming (canonicalize), (3) convention-dense exact-output reproduction (pennylane trotter gate stream + selectcopy-qrom and labs-arithmetic exact resource counts; trotter/qrom failed via all-recon DNF incl. hunting the hidden verifier, arithmetic failed on merit: wrote a full 6-operator implementation, counts graded 0.1667 functional, $8.58). NOTE the concentration: 3 of 5 are pennylane labs, sharing the convention-dense vein; they are independent algorithms with independently validated grading, but future rotation should diversify repos. What does NOT work (all solved by Fable-low): spec-derivable outputs however deep the domain (mypy x2, sympy conjugate, vf2pp, lineage, 4 resolver spares, 5 behavioral batch-6), canonical algorithms even when seeded (random_walk, dropped), and any task whose graded convention is visible in-repo (ground-eigenvects). Framework precedent alone does NOT rescue the model (qrom failed despite LabsQROM in the same file). See memory what-trips-frontier-models.",
+  "veryhard": [
+    "oss-networkx-leiden-communities",
+    "oss-sqlglot-canonicalize-internal-names",
+    "oss-pennylane-trotter-fragmented",
+    "oss-pennylane-selectcopy-qrom",
+    "oss-pennylane-labs-arithmetic"
   ]
 }

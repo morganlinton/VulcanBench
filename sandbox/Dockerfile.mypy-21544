@@ -1,0 +1,16 @@
+# Per-task sandbox image for tasks/v2/oss-mypy-typevartuple-defaults.
+#
+# Build:  docker build -t vulcanbench/sandbox:mypy-21544 -f sandbox/Dockerfile.mypy-21544 .
+#
+# mypy's runtime deps only; mypy itself is imported from the workspace via
+# PYTHONPATH=. so the workspace mypy/ (interpreted, uncompiled) is under test.
+FROM vulcanbench/sandbox:base
+
+RUN pip install \
+    "typing_extensions>=4.6.0" \
+    "mypy_extensions>=1.0.0" \
+    "pathspec>=0.9.0" \
+    "librt"
+
+RUN python -c "import typing_extensions, mypy_extensions, pathspec, librt" \
+    && ! python -c "import mypy" 2>/dev/null

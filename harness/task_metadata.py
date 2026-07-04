@@ -8,13 +8,15 @@ from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
-REPO_SCALES = frozenset({"micro", "small", "medium", "large"})
+REPO_SCALES = frozenset({"micro", "small", "medium", "large", "xlarge"})
 TASK_COMPLEXITIES = frozenset({"localized", "multi_file", "system", "architecture"})
 SCALE_LOC_BOUNDS: dict[str, tuple[int, int | None]] = {
     "micro": (0, 500),
     "small": (500, 1_000),
     "medium": (1_000, 10_000),
     "large": (10_000, 50_000),
+    # Very large navigation surfaces (type checkers, compilers, CAS systems).
+    "xlarge": (50_000, None),
 }
 DEFAULT_MAX_STEPS = 50
 DEFAULT_TIMEOUT_S: float | None = None
@@ -23,6 +25,7 @@ SCALE_DEFAULTS: dict[str, dict[str, int | float]] = {
     "small": {"suggested_max_steps": 60, "suggested_timeout_s": 600},
     "medium": {"suggested_max_steps": 100, "suggested_timeout_s": 1200},
     "large": {"suggested_max_steps": 150, "suggested_timeout_s": 1800},
+    "xlarge": {"suggested_max_steps": 200, "suggested_timeout_s": 1800},
 }
 MAX_SNAPSHOT_BYTES = 100 * 1024 * 1024
 LIST_FILES_CAP = 500

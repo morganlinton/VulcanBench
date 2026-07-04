@@ -133,14 +133,19 @@ def _check_decontamination(task: Task) -> str | None:  # noqa: PLR0911
         if not isinstance(upstream, dict) or not upstream.get("url"):
             return "oss tasks require metadata.upstream.url"
         repo = task.repo_dir
-        if repo is None and task.snapshot is not None:
+        if repo is not None:
+            if not _has_license(repo):
+                return "oss task must preserve the upstream LICENSE/NOTICE file"
+        elif task.snapshot is not None:
+            # Extract to a temp dir and check the license WHILE it still exists;
+            # the check must stay inside the context manager (a snapshot task has
+            # no repo/ dir to fall back on).
             with tempfile.TemporaryDirectory() as td:
                 extract_root = Path(td)
                 with tarfile.open(task.snapshot, "r:gz") as tar:
                     _safe_extract(tar, extract_root)
-                repo = extract_root
-        if repo is not None and not _has_license(repo):
-            return "oss task must preserve the upstream LICENSE/NOTICE file"
+                if not _has_license(extract_root):
+                    return "oss task must preserve the upstream LICENSE/NOTICE file"
     return None
 
 

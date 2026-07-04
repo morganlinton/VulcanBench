@@ -1,0 +1,12 @@
+# Per-task sandbox image for tasks/v2/oss-sympy-domain-conjugate.
+#
+# Build:  docker build -t vulcanbench/sandbox:sympy-29877 -f sandbox/Dockerfile.sympy-29877 .
+#
+# sympy's only runtime dep is mpmath; sympy itself is imported from the workspace
+# via PYTHONPATH=. so the workspace sympy/ is under test.
+FROM vulcanbench/sandbox:base
+
+RUN pip install "mpmath>=1.1.0"
+
+RUN python -c "import mpmath" \
+    && ! python -c "import sympy" 2>/dev/null

@@ -1,0 +1,31 @@
+{
+  "id": "oss-networkx-vf2pp-subgraph",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-03",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "54f71e628998f7ee8a8028a297dfdd45b1808fa2",
+  "upstream": {
+    "url": "https://github.com/networkx/networkx/pull/8506",
+    "issue": "https://github.com/networkx/networkx/pull/8506",
+    "commit": "54f71e628998f7ee8a8028a297dfdd45b1808fa2"
+  },
+  "decontamination_notes": "Real feature from networkx/networkx PR #8506, merged 2026-02-28, after model training cutoffs. Extends the VF2++ matcher (NP-complete subgraph matching) from whole-graph isomorphism to node-induced subgraph isomorphism and monomorphism, six net-new public functions built on a rewritten matcher core. Graded on exact reference outputs that hinge on the induced-vs-injection distinction (K4 has zero induced P3 subgraphs but 24 P3 monomorphisms), so a plausible-but-wrong implementation fails. Repo sliced at base commit (193k LOC); BSD LICENSE preserved. networkx has no required runtime deps, so this runs in the base sandbox image with PYTHONPATH=.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "subgraph_iso_positive", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_subgraph_isomorphism_positive_and_count -q"},
+      {"name": "induced_semantics", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_induced_semantics_reject_non_induced -q"},
+      {"name": "monomorphism", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_monomorphism_allows_extra_host_edges -q"},
+      {"name": "mono_mapping_valid", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_monomorphism_mapping_is_edge_preserving -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "full_iso_unaffected", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_full_graph_isomorphism_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 300
+}

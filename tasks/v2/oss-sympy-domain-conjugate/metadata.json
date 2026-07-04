@@ -1,0 +1,33 @@
+{
+  "id": "oss-sympy-domain-conjugate",
+  "category": "feature",
+  "languages": ["python"],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-03",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "df6acd23038c738beb7b2953a834518e6fe97d16",
+  "image": "vulcanbench/sandbox:sympy-29877",
+  "upstream": {
+    "url": "https://github.com/sympy/sympy/pull/29877",
+    "issue": "https://github.com/sympy/sympy/pull/29877",
+    "commit": "df6acd23038c738beb7b2953a834518e6fe97d16"
+  },
+  "decontamination_notes": "Real feature from sympy/sympy PR #29877, merged 2026-07-02, after model training cutoffs. Adds a ConjugateDomain abstraction and threads conjugation through 11 files of the polynomial-domain hierarchy (Gaussian rings/fields, complex field, real/rational/integer identity cases, algebraic number fields via generator conjugation). Graded on independent parity points across four distinct domain families, so a partial implementation fails. Repo sliced at base commit (786k LOC); BSD LICENSE preserved. Runs in per-task image vulcanbench/sandbox:sympy-29877 (mpmath only); sympy imported from the workspace via PYTHONPATH=.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "gaussian_integer", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_gaussian_integer_conjugate -q"},
+      {"name": "gaussian_rational", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_gaussian_rational_conjugate -q"},
+      {"name": "real_identity", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_real_domains_conjugate_is_identity -q"},
+      {"name": "complex_field", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_complex_field_conjugate -q"},
+      {"name": "algebraic_field", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_algebraic_field_conjugate -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "arithmetic_stable", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_base_domain_arithmetic_unaffected -q"}
+    ]
+  },
+  "test_timeout_s": 300
+}

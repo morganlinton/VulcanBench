@@ -1,0 +1,24 @@
+# Per-task image for oss-pennylane-trotter-fragmented (PennyLaneAI/pennylane PR #9459).
+# Installs PennyLane's runtime dependencies (from the base-commit pyproject) plus jax,
+# but NOT pennylane itself: the task imports pennylane from the workspace via PYTHONPATH.
+# pennylane-lightning is deliberately omitted (it would pull in pennylane as a dep and
+# the graded tests never execute on a device; op capture only needs the core imports).
+FROM vulcanbench/sandbox:base
+
+RUN pip install --no-cache-dir \
+    "numpy>=2.0" \
+    "scipy" \
+    "networkx" \
+    "rustworkx>=0.14.0" \
+    "autograd" \
+    "appdirs" \
+    "autoray==0.8.10" \
+    "cachetools" \
+    "requests" \
+    "tomlkit" \
+    "typing_extensions" \
+    "packaging" \
+    "diastatic-malt" \
+    "gast" \
+    "jax" \
+    "jaxlib"

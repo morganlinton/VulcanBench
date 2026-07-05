@@ -470,9 +470,7 @@ def test_run_agent_stops_at_per_run_cost_cap(
             # -> ~$2.25 per step, so a $5 cap should trip on the 3rd step.
             return LLMResponse(
                 content=None,
-                tool_calls=[
-                    ToolInvocation(id="t", name="run_command", arguments={"cmd": "true"})
-                ],
+                tool_calls=[ToolInvocation(id="t", name="run_command", arguments={"cmd": "true"})],
                 usage=TokenUsage(prompt_tokens=200_000, completion_tokens=50_000),
             )
 

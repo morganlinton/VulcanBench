@@ -69,8 +69,12 @@ def _patch_that_returns(suite: Path, tmp: Path, value: int) -> str:
     """Build a git patch (like a real run's final.patch) that makes f() return ``value``."""
     task = load_task("fix-f", suite)
     ws = prepare_workspace(task, tmp / "patchws")
-    env = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
-           "GIT_COMMITTER_EMAIL": "t@t"}
+    env = {
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@t",
+    }
     full = {**os.environ, **env}
     subprocess.run(["git", "init", "-q"], cwd=ws, check=True, env=full)
     subprocess.run(["git", "add", "-A"], cwd=ws, check=True, env=full)

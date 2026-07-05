@@ -27,7 +27,7 @@ from harness.agent.protocol import RunCommandArgs
 from harness.sandbox.docker_executor import DockerToolExecutor
 from harness.sandbox.images import resolve_sandbox_image
 from harness.tasks import load_task, prepare_workspace, task_hash
-from harness.verifier import DEFAULT_TIMEOUT, run_declarative_verifier
+from harness.verifier import DEFAULT_TIMEOUT, Runner, run_declarative_verifier
 
 DEFAULT_TASKS_BASE = Path("tasks")
 
@@ -86,7 +86,7 @@ def _apply_patch(workspace: Path, patch: str) -> None:
             raise RuntimeError(f"patch did not apply: {proc.stderr.strip()}")
 
 
-def _docker_runner(executor: DockerToolExecutor):
+def _docker_runner(executor: DockerToolExecutor) -> Runner:
     def run(cmd: str, _workspace: Path, timeout: int) -> int:
         try:
             res = executor.run_command(RunCommandArgs(cmd=cmd, timeout=timeout))
@@ -140,8 +140,12 @@ def regrade_run(
         _git(["commit", "-q", "--allow-empty", "-m", "base"], workspace)
         _apply_patch(workspace, patch)
     except RuntimeError as e:
-        return {"run_dir": str(run_dir), "task_id": task_id, "old_functional": old_functional,
-                "error": str(e)}
+        return {
+            "run_dir": str(run_dir),
+            "task_id": task_id,
+            "old_functional": old_functional,
+            "error": str(e),
+        }
 
     executor: DockerToolExecutor | None = None
     try:

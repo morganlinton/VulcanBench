@@ -916,14 +916,24 @@ def regrade(
     n_changed = 0
     for rec in records:
         if rec.get("error"):
-            table.add_row(rec.get("task_id") or rec["run_dir"], "-", "-", "-", f"[red]{rec['error']}[/red]")
+            table.add_row(
+                rec.get("task_id") or rec["run_dir"], "-", "-", "-", f"[red]{rec['error']}[/red]"
+            )
             continue
         old = rec["old_functional"]
         new = rec["new_functional"]
         delta = rec["delta"]
         if delta:
             n_changed += 1
-        dstr = "" if delta is None else (f"[green]+{delta}[/green]" if delta > 0 else (f"[red]{delta}[/red]" if delta < 0 else "0"))
+        dstr = (
+            ""
+            if delta is None
+            else (
+                f"[green]+{delta}[/green]"
+                if delta > 0
+                else (f"[red]{delta}[/red]" if delta < 0 else "0")
+            )
+        )
         table.add_row(
             rec["task_id"],
             "-" if old is None else f"{old:.3f}",

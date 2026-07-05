@@ -136,6 +136,7 @@ def run_agent(
     timeout_s: float | None = None,
     effort: str | None = None,
     experiment_id: str | None = None,
+    max_run_cost: float | None = None,
 ) -> dict[str, Any]:
     """Run one evaluation: agent solves ``task_id`` with ``model``.
 
@@ -143,8 +144,10 @@ def run_agent(
     (isolated container), or ``auto`` (docker if available, else local). When
     ``judges`` is set, the ``human_like`` metric is computed by an LLM judge
     ensemble using ``judge_model`` (defaulting to ``model``). ``suite``/
-    ``suite_id`` tag the run so the leaderboard can group it. Returns a summary
-    dict (also persisted to ``<run_dir>/summary.json``).
+    ``suite_id`` tag the run so the leaderboard can group it. ``max_run_cost``
+    is a per-run USD ceiling on agent spend: the model loop stops once this run's
+    own cost crosses it, and the summary records ``cost_capped``. Returns a
+    summary dict (also persisted to ``<run_dir>/summary.json``).
     """
     task = load_task(task_id, tasks_root)
     provider = provider or get_provider(model)
@@ -178,7 +181,7 @@ def run_agent(
     ]
 
     try:
-        prompt_tokens, completion_tokens, finished = _run_model_loop(
+        prompt_tokens, completion_tokens, finished, cost_capped = _run_model_loop(
             provider,
             tools,
             messages,
@@ -188,6 +191,8 @@ def run_agent(
             run_id,
             deadline,
             effort_meta.as_summary() if effort_meta else None,
+            model=model,
+            max_run_cost=max_run_cost,
         )
         patch = _git_diff(workspace)
         changed_files = _git_changed_files(workspace)
@@ -246,6 +251,7 @@ def run_agent(
             "duration_s": duration_s,
             "started_at": started_at.isoformat(),
             "finished": finished,
+            "cost_capped": cost_capped,
             "manifest": manifest,
             "task_hash": task_hash(task),
             "suite": suite,
@@ -413,7 +419,7 @@ def _budget_exceeded_scores(functional: float, total_tokens: int, steps: int) ->
     )
 
 
-def _run_model_loop(
+def _run_model_loop(  # noqa: PLR0912 — linear ReAct loop with budget + cost guards
     provider: LLMProvider,
     tools: list[dict[str, Any]],
     messages: list[dict[str, Any]],
@@ -423,10 +429,13 @@ def _run_model_loop(
     run_id: str,
     deadline: _RunDeadline,
     effort: dict[str, Any] | None = None,
-) -> tuple[int, int, bool]:
+    model: str | None = None,
+    max_run_cost: float | None = None,
+) -> tuple[int, int, bool, bool]:
     prompt_tokens = 0
     completion_tokens = 0
     finished = False
+    cost_capped = False
 
     for step in range(1, max_steps + 1):
         if not deadline.ensure_time(collector, "llm_request", step):
@@ -454,6 +463,21 @@ def _run_model_loop(
         )
         if not deadline.ensure_time(collector, "llm_response", step):
             break
+
+        # Per-run cost ceiling: once this run's own agent spend crosses the cap,
+        # stop before paying for another (expensive) model call. The partial work
+        # is still verified and scored honestly — "hit the cap" is a real outcome,
+        # not an error. Only enforceable when the model is priced.
+        if max_run_cost is not None and model is not None:
+            run_cost = cost_usd(model, prompt_tokens, completion_tokens)
+            if run_cost is not None and run_cost >= max_run_cost:
+                collector.record(
+                    "cost_cap_exceeded",
+                    {"cost_usd": run_cost, "max_run_cost": max_run_cost, "step": step},
+                )
+                cost_capped = True
+                messages.append(_assistant_message(resp))
+                break
 
         messages.append(_assistant_message(resp))
 
@@ -491,7 +515,7 @@ def _run_model_loop(
             if not deadline.ensure_time(collector, f"tool:{tc.name}", step):
                 break
 
-    return prompt_tokens, completion_tokens, finished
+    return prompt_tokens, completion_tokens, finished, cost_capped
 
 
 _MANIFEST_TOOLS = ("git", "ruff", "bandit", "radon", "go", "node")

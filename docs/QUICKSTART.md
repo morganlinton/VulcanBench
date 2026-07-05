@@ -89,10 +89,32 @@ vulcanbench report --suite v1 -o report.md
 >   cheap functional-only runs.
 > - `--max-cost` is a soft cap that stops launching new runs (suite runs only)
 >   and requires a priced model; cost/latency are recorded per run regardless.
+> - `--max-run-cost` is a **per-run** hard ceiling: an individual agent run stops
+>   once its own spend crosses the value (overshoot bounded by one model call),
+>   the summary records `cost_capped: true`, and the partial result is still
+>   graded honestly. Ideal for the hard tier, where a failing run can otherwise
+>   ruminate to the step cap — `--max-run-cost 2.50` turns "$8 DNF" into "$2.50
+>   DNF" and loses no signal (works on single `--task` and suite/sweep runs).
 > - Default `--sandbox docker` runs the agent's shell commands in an isolated
 >   container. Use `--sandbox local` only for trusted dev loops (e.g.
 >   `mock:synthetic`). Override prices any time with
 >   `VULCANBENCH_PRICING=/path/to/prices.json`.
+
+**Re-grade for free after a task changes.** Grading is deterministic, so when you
+edit a task's hidden tests or thresholds you don't need to re-run the model —
+just re-grade the existing runs. `regrade` rebuilds each run's workspace from the
+task base plus the captured agent patch, overlays the *current* tests, and
+re-verifies in the sandbox at zero API cost:
+
+```bash
+# one run, or an entire directory of runs
+vulcanbench regrade runs/<run-id> --sandbox docker
+vulcanbench regrade runs/ --sandbox docker            # regrades every run under it
+```
+
+It prints old → new functional per run and writes `regrade.json` into each run
+dir. Use it to re-score historical runs against a calibrated task without paying
+for a single new model call.
 
 See the full example in the README and `docs/ARCHITECTURE.md`. To add your own
 task: `docs/TASK_CONTRIBUTION.md`.

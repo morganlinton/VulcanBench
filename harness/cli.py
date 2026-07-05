@@ -25,6 +25,7 @@ from harness.cost_estimate import estimate_plan
 from harness.effort import DEFAULT_SWEEP_EFFORTS, parse_efforts
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
 from harness.pricing import is_priced
+from harness.regrade import find_run_dirs, regrade_run
 from harness.report import build_report, to_markdown
 from harness.sandbox.docker_executor import SandboxError
 from harness.suite import SUITE_ALIASES, load_suite, run_suite
@@ -103,6 +104,12 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     max_cost: float | None = typer.Option(
         None, "--max-cost", help="USD spend cap for a suite run (stops launching new runs)"
     ),
+    max_run_cost: float | None = typer.Option(
+        None,
+        "--max-run-cost",
+        help="Per-run USD ceiling: stop an individual agent run once its own spend "
+        "crosses this (records cost_capped; the partial result is still graded)",
+    ),
     timeout: float | None = typer.Option(
         None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
     ),
@@ -151,6 +158,17 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
             names = ", ".join(sorted(set(unpriced)))
             console.print(f"[red]error[/red] --max-cost needs priced models; no price for {names}")
             raise typer.Exit(code=1)
+    if max_run_cost is not None:
+        if not (math.isfinite(max_run_cost) and max_run_cost > 0):
+            console.print(
+                f"[red]error[/red] --max-run-cost must be a finite number > 0, got {max_run_cost}"
+            )
+            raise typer.Exit(code=1)
+        if not is_priced(model):
+            console.print(
+                f"[red]error[/red] --max-run-cost needs a priced model; no price for {model}"
+            )
+            raise typer.Exit(code=1)
     if sandbox not in {"local", "docker", "auto"}:
         console.print(f"[red]error[/red] --sandbox must be local|docker|auto, got {sandbox!r}")
         raise typer.Exit(code=1)
@@ -194,6 +212,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         "network": network,
         "timeout_s": timeout,
         "effort": effort,
+        "max_run_cost": max_run_cost,
     }
     pass_at_1: float | None = None
     n_incomplete = 0  # errored + skipped runs (an incomplete suite)
@@ -425,7 +444,7 @@ def _run_suite(
 
 
 @app.command("effort-sweep")
-def effort_sweep(
+def effort_sweep(  # noqa: PLR0912 — CLI entry: option validation + per-effort dispatch
     suite: str = typer.Option(..., "--suite", help="Suite to sweep, e.g. v1"),
     model: str = typer.Option(..., "--model", "-m", help="provider:model e.g. openai:gpt-5.1"),
     efforts: str = typer.Option(
@@ -468,6 +487,12 @@ def effort_sweep(
     max_cost: float | None = typer.Option(
         None, "--max-cost", help="USD spend cap per effort (same semantics as run --suite)"
     ),
+    max_run_cost: float | None = typer.Option(
+        None,
+        "--max-run-cost",
+        help="Per-run USD ceiling: stop an individual agent run once its own spend "
+        "crosses this (records cost_capped; the partial result is still graded)",
+    ),
     timeout: float | None = typer.Option(
         None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
     ),
@@ -492,6 +517,17 @@ def effort_sweep(
     if max_cost is not None and not (math.isfinite(max_cost) and max_cost > 0):
         console.print(f"[red]error[/red] --max-cost must be a finite number > 0, got {max_cost}")
         raise typer.Exit(code=1)
+    if max_run_cost is not None:
+        if not (math.isfinite(max_run_cost) and max_run_cost > 0):
+            console.print(
+                f"[red]error[/red] --max-run-cost must be a finite number > 0, got {max_run_cost}"
+            )
+            raise typer.Exit(code=1)
+        if not is_priced(model):
+            console.print(
+                f"[red]error[/red] --max-run-cost needs a priced model; no price for {model}"
+            )
+            raise typer.Exit(code=1)
 
     experiment_id = f"experiment-{uuid.uuid4().hex[:8]}"
     console.print(
@@ -523,6 +559,7 @@ def effort_sweep(
                     image=image,
                     network=network,
                     timeout_s=timeout,
+                    max_run_cost=max_run_cost,
                     experiment_id=experiment_id,
                 )
             )
@@ -823,6 +860,81 @@ def list_tasks(
         console.print(i)
     if not ids:
         console.print("no tasks in tasks/v1/ (hello-world synthetic is the demo seed)")
+
+
+@app.command()
+def regrade(
+    target: Path = typer.Argument(  # noqa: B008
+        ...,
+        exists=True,
+        help="A run directory, or a directory of runs (regrades every run under it)",
+    ),
+    tasks_base: Path = typer.Option(  # noqa: B008
+        Path("tasks"), "--tasks-base", help="Root holding task suites (tasks/<suite>/<id>)"
+    ),
+    sandbox: str = typer.Option(
+        "docker", "--sandbox", help="Where to run verifiers: local|docker (docker matches runs)"
+    ),
+    image: str | None = typer.Option(
+        None, "--image", help="Docker sandbox image (default: per-task image)"
+    ),
+    write: bool = typer.Option(
+        True, "--write/--no-write", help="Write regrade.json into each run dir"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Emit the records as JSON"),
+) -> None:
+    """Re-grade existing run(s) against the current task definition, at zero API cost.
+
+    Rebuilds each run's workspace from the task base plus the captured agent patch,
+    overlays the *current* hidden tests, and re-runs the verifier. Use after
+    changing a task's tests or thresholds to re-score old runs without paying for
+    new model calls.
+    """
+    if sandbox not in {"local", "docker"}:
+        console.print(f"[red]error[/red] --sandbox must be local|docker, got {sandbox!r}")
+        raise typer.Exit(code=1)
+    run_dirs = find_run_dirs(target)
+    if not run_dirs:
+        console.print(f"[red]error[/red] no runs (no summary.json) under {target}")
+        raise typer.Exit(code=1)
+
+    records = []
+    for rd in run_dirs:
+        rec = regrade_run(rd, tasks_base=tasks_base, sandbox=sandbox, image=image, write=write)
+        records.append(rec)
+
+    if json_output:
+        typer.echo(json.dumps(records, indent=2))
+        raise typer.Exit()
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Task")
+    table.add_column("Old", justify="right")
+    table.add_column("New", justify="right")
+    table.add_column("Δ", justify="right")
+    table.add_column("Note")
+    n_changed = 0
+    for rec in records:
+        if rec.get("error"):
+            table.add_row(rec.get("task_id") or rec["run_dir"], "-", "-", "-", f"[red]{rec['error']}[/red]")
+            continue
+        old = rec["old_functional"]
+        new = rec["new_functional"]
+        delta = rec["delta"]
+        if delta:
+            n_changed += 1
+        dstr = "" if delta is None else (f"[green]+{delta}[/green]" if delta > 0 else (f"[red]{delta}[/red]" if delta < 0 else "0"))
+        table.add_row(
+            rec["task_id"],
+            "-" if old is None else f"{old:.3f}",
+            f"{new:.3f}",
+            dstr,
+            rec.get("model") or "",
+        )
+    console.print(table)
+    console.print(
+        f"[cyan]regraded[/cyan] {len(records)} run(s), {n_changed} score change(s), $0 API spend"
+    )
 
 
 if __name__ == "__main__":

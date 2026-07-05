@@ -432,3 +432,107 @@ def test_changed_files_are_captured_before_hidden_tests(
     assert captured == [["m.py"]]
     assert (run_dir / "workspace" / "t_f2p.py").exists()
     assert "t_f2p.py" not in (run_dir / "final.patch").read_text(encoding="utf-8")
+
+
+def test_run_agent_stops_at_per_run_cost_cap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A per-run cost ceiling halts the loop once the run's own spend crosses it.
+
+    The partial result is still verified/scored, ``cost_capped`` is set, and a
+    ``cost_cap_exceeded`` event is recorded. Uses a priced model so a real cost
+    can be computed, and a provider that never finishes (keeps requesting tools).
+    """
+
+    class FakeExecutor:
+        def execute(self, call):  # type: ignore[no-untyped-def]
+            return SimpleNamespace(result={"ok": True}, error=None)
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr(loop_mod, "_make_executor", lambda *a, **k: FakeExecutor())
+    monkeypatch.setattr(loop_mod, "_verify", lambda *a, **k: (0.0, {"scores": {"functional": 0.0}}))
+
+    class GrindProvider(LLMProvider):
+        @property
+        def name(self) -> str:
+            return "anthropic"
+
+        def complete(
+            self,
+            messages: list[dict[str, Any]],
+            tools: list[dict[str, Any]],
+            timeout_s: float | None = None,
+            effort: str | None = None,
+        ) -> LLMResponse:
+            # Every call is expensive and never finishes: opus-4-8 at $5/$25 per M
+            # -> ~$2.25 per step, so a $5 cap should trip on the 3rd step.
+            return LLMResponse(
+                content=None,
+                tool_calls=[
+                    ToolInvocation(id="t", name="run_command", arguments={"cmd": "true"})
+                ],
+                usage=TokenUsage(prompt_tokens=200_000, completion_tokens=50_000),
+            )
+
+    res = run_agent(
+        task_id="hello-world",
+        model="anthropic:claude-opus-4-8",
+        output_dir=tmp_path,
+        provider=GrindProvider("grind"),
+        tasks_root=Path("tasks/v1"),
+        judges=False,
+        max_run_cost=5.0,
+    )
+
+    summary = res["summary"]
+    assert summary["cost_capped"] is True
+    assert summary["finished"] is False
+    # Overshoot is bounded by one step: the cap trips as soon as cost crosses $5.
+    assert 5.0 <= summary["cost_usd"] <= 5.0 + 2.5
+    types = [
+        json.loads(line)["type"]
+        for line in (tmp_path / res["run_id"] / "trace.jsonl").read_text().splitlines()
+    ]
+    assert "cost_cap_exceeded" in types
+
+
+def test_run_agent_no_cost_cap_runs_to_completion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without a cap, the same expensive provider runs until it finishes."""
+
+    class FakeExecutor:
+        def execute(self, call):  # type: ignore[no-untyped-def]
+            return SimpleNamespace(result={"ok": True}, error=None)
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr(loop_mod, "_make_executor", lambda *a, **k: FakeExecutor())
+    monkeypatch.setattr(loop_mod, "_verify", lambda *a, **k: (0.0, {"scores": {"functional": 0.0}}))
+
+    class FinishProvider(LLMProvider):
+        @property
+        def name(self) -> str:
+            return "anthropic"
+
+        def complete(self, messages, tools, timeout_s=None, effort=None):  # type: ignore[no-untyped-def]
+            return LLMResponse(
+                content="FINISH: done",
+                usage=TokenUsage(prompt_tokens=200_000, completion_tokens=50_000),
+            )
+
+    res = run_agent(
+        task_id="hello-world",
+        model="anthropic:claude-opus-4-8",
+        output_dir=tmp_path,
+        provider=FinishProvider("finish"),
+        tasks_root=Path("tasks/v1"),
+        judges=False,
+        max_run_cost=None,
+    )
+    summary = res["summary"]
+    assert summary["cost_capped"] is False
+    assert summary["finished"] is True

@@ -21,6 +21,7 @@ from harness import __version__
 from harness.agent.loop import run_agent
 from harness.agent.providers import ProviderError
 from harness.calibration import calibrate_tasks, calibration_to_markdown
+from harness.compare import build_matrix
 from harness.cost_estimate import estimate_plan
 from harness.effort import DEFAULT_SWEEP_EFFORTS, parse_efforts
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
@@ -945,6 +946,85 @@ def regrade(
     console.print(
         f"[cyan]regraded[/cyan] {len(records)} run(s), {n_changed} score change(s), $0 API spend"
     )
+
+
+@app.command()
+def compare(
+    suite: str = typer.Option(..., "--suite", help="Suite to compare, e.g. v2"),
+    runs_dir: Path = typer.Option(  # noqa: B008
+        Path("./runs"), "--runs-dir", "-o", help="Where cached runs live"
+    ),
+    tasks_base: Path = typer.Option(  # noqa: B008
+        Path("tasks"), "--tasks-base", help="Root holding task suites"
+    ),
+    incomplete: bool = typer.Option(
+        False, "--incomplete/--complete-only", help="Also show cells missing some tasks"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Emit the matrix as JSON"),
+) -> None:
+    """Build a model x effort comparison for a frozen suite from cached runs only.
+
+    Re-runs nothing: every cell comes from ``./runs``, filtered to the suite's
+    current task hashes (stale runs, scored against an older task definition, are
+    excluded). To add a model to the comparison, run just that one model against
+    the suite, then re-run ``compare`` — the baselines are read from cache.
+    """
+    try:
+        matrix = build_matrix(suite, runs_dir=runs_dir, tasks_base=tasks_base)
+    except FileNotFoundError as e:
+        console.print(f"[red]error[/red] {e}")
+        raise typer.Exit(code=1) from e
+
+    if json_output:
+        typer.echo(json.dumps(matrix, indent=2))
+        raise typer.Exit()
+
+    console.print(
+        f"[bold]{matrix['suite']}[/bold] "
+        f"[dim]frozen @ {matrix['version']} · {matrix['n_tasks']} tasks[/dim]"
+    )
+    cells = matrix["cells"] if incomplete else [c for c in matrix["cells"] if c["complete"]]
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Model (effort)")
+    table.add_column("Pass@1", justify="right")
+    table.add_column("Cost", justify="right")
+    table.add_column("Coverage", justify="right")
+    for c in cells:
+        cov = f"{c['n_present']}/{c['n_total']}"
+        cov_str = cov if c["complete"] else f"[yellow]{cov}[/yellow]"
+        table.add_row(
+            f"{c['model']} ({c['effort']})",
+            "-" if c["pass_at_1"] is None else f"{c['pass_at_1']:.3f}",
+            "?" if c["cost_usd"] is None else f"${c['cost_usd']:.2f}",
+            cov_str,
+        )
+    console.print(table)
+
+    if matrix["n_stale_excluded"]:
+        console.print(
+            f"[dim]{matrix['n_stale_excluded']} stale run(s) excluded "
+            f"(scored against an older task definition; re-run or `regrade`).[/dim]"
+        )
+
+    # Show what a new column needs: incomplete cells and how to fill them.
+    gaps = [c for c in matrix["cells"] if not c["complete"]]
+    if gaps and not incomplete:
+        console.print("[dim]Incomplete cells hidden; pass --incomplete to see them.[/dim]")
+    for c in gaps if incomplete else []:
+        miss = c["missing_tasks"]
+        console.print(
+            f"[yellow]incomplete[/yellow] {c['model']} ({c['effort']}): "
+            f"missing {len(miss)}/{c['n_total']} task(s)"
+        )
+        if c["n_present"] == 0:
+            eff = "" if c["effort"] == "-" else f" --effort {c['effort']}"
+            console.print(
+                f"  fill: vulcanbench run --suite {suite} -m {c['model']}{eff} --sandbox docker"
+            )
+        else:
+            shown = ", ".join(miss[:6]) + (" …" if len(miss) > 6 else "")
+            console.print(f"  missing: {shown}")
 
 
 if __name__ == "__main__":

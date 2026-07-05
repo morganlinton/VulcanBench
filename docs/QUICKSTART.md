@@ -116,5 +116,23 @@ It prints old → new functional per run and writes `regrade.json` into each run
 dir. Use it to re-score historical runs against a calibrated task without paying
 for a single new model call.
 
+**Add a model to a comparison without re-running the baselines.** Because grading
+is deterministic and every run records the `task_hash` it was scored against, a
+model×effort comparison is a *query over cached runs*, not a re-run. `compare`
+builds the matrix for a frozen suite from `./runs`, excluding any run scored
+against an older task definition (so results stay apples-to-apples):
+
+```bash
+vulcanbench compare --suite v2                     # complete cells only
+vulcanbench compare --suite v2 --incomplete        # show gaps + how to fill them
+```
+
+The suite is "frozen" implicitly by its task hashes (`compare` prints a short
+version id); change a task and its cached runs go stale and drop out. To add a
+model, run just that one model against the suite, then re-run `compare` — the
+baselines come from cache. That turns a new-model report from a full-matrix
+re-run into a single new column, and pairs naturally with `--max-run-cost` to
+bound the cost of that one column.
+
 See the full example in the README and `docs/ARCHITECTURE.md`. To add your own
 task: `docs/TASK_CONTRIBUTION.md`.

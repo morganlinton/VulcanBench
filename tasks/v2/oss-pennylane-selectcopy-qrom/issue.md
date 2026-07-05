@@ -51,3 +51,27 @@ Example from the resource-estimation workflow:
    'X': 7.036E+6,
    'Hadamard': 1.055E+7
 ```
+
+Acceptance example with exact integer counts, pinning the cost model. The
+parameter optimization brute-forces the Theorem 1 Toffoli cost
+
+```
+cost(N, b, mu, lam) = (ceil(b/mu) + 1) * (ceil(N/lam) + lam - 5)
+                      + (lam - 1) * (mu * (floor(b/mu) + 1) + b % mu)
+```
+
+over bits-per-iteration `mu in 1..b` and batch sizes `lam` restricted to powers
+of two (`lam = 2, 4, 8, ...` up to `2**floor(log2(N-1))`), subject to
+`mu * (lam - 1) <= available_dirty_aux`, taking the first minimum in that
+iteration order. For `num_bitstrings=2048, size_bitstring=16,
+available_dirty_aux=48` the estimate must come out exactly:
+
+```
+total wires: 83  (algorithmic 27, allocated zero-state 56)
+total gates: 41006
+  X:                2048
+  CNOT:             34782
+  Toffoli (left-elbow logical ANDs): 1020
+  Toffoli (plain):  96
+  Hadamard:         3060
+```

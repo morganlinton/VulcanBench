@@ -32,6 +32,24 @@ Semantics:
   the estimator accounts T gates for phase rotations, Toffolis, CNOT ladders,
   and QFT Hadamards.
 
+Acceptance examples with exact counts, pinning the cost model:
+
+```pycon
+>>> import pennylane.labs.estimator_beta as qre
+>>> r = qre.estimate(qre.LabsPhaseAdder(num_x_wires=4))
+>>> int(r.total_wires), int(r.total_gates)
+(4, 176)                      # all T gates (176), no auxiliary wires
+
+>>> r = qre.estimate(qre.LabsAdder(num_x_wires=5, mod=19))
+>>> int(r.total_wires), int(r.algo_wires), int(r.zeroed_wires), int(r.total_gates)
+(7, 5, 2, 14014)              # T: 13728, CNOT: 248, Hadamard: 36, X: 2
+
+>>> r = qre.estimate(qre.LabsModExp(num_x_wires=4, num_output_wires=5, mod=21))
+>>> int(r.total_wires), int(r.algo_wires), int(r.zeroed_wires), int(r.total_gates)
+(17, 9, 8, 604300)            # T: 591360, CNOT: 10840, Hadamard: 1440,
+                              # Toffoli: 580, X: 80
+```
+
 Export all six from `pennylane.labs.estimator_beta` and from
 `pennylane.labs.estimator_beta.templates`. Existing operators (including
 `LabsQROM` and `SelectCopyQROM`) must be unchanged.

@@ -1,7 +1,9 @@
 {
   "id": "oss-pennylane-trotter-fragmented",
   "category": "feature",
-  "languages": ["python"],
+  "languages": [
+    "python"
+  ],
   "difficulty": "hard",
   "task_complexity": "system",
   "created": "2026-07-03",
@@ -15,18 +17,36 @@
     "issue": "https://github.com/PennyLaneAI/pennylane/pull/9459",
     "commit": "7bf1af3c952c11bd716f7859887eb17fe9a5f4de"
   },
-  "decontamination_notes": "Real feature from PennyLaneAI/pennylane PR #9459, merged 2026-06-02, after model training cutoffs. Adds a 402-line net-new second-order Trotter template for fragmented (CDF/CGF) Hamiltonians to pennylane.labs. Graded on the EXACT emitted gate stream: the reference merges adjacent fragment basis rotations into one BasisRotation per boundary (including across Trotter steps and the one-body turn-around), skips rotations that merge to identity, uses a specific RZ/IsingZZ decomposition of the diagonals, and emits the accumulated energy shift as a trailing GlobalPhase reduced mod 4*pi (RZ(-phi) on the control wire in the controlled variant). Many mathematically equivalent circuits produce the same unitary but a different op stream, and the merging/skip/phase conventions have no in-repo precedent to copy (labs research code), so a plausible correct-from-first-principles implementation fails the exact-match assertions. Repo sliced at the PR base commit (280k LOC, template absent); Apache-2.0 LICENSE preserved. Runs in the pennylane-9459 image (PennyLane runtime deps + jax, pennylane itself imported from the workspace via PYTHONPATH; tests only capture the queued ops, no device execution).",
+  "decontamination_notes": "Real feature from PennyLaneAI/pennylane PR #9459, merged 2026-06-02, after model training cutoffs. Adds a 402-line net-new second-order Trotter template for fragmented (CDF/CGF) Hamiltonians to pennylane.labs. Graded on the EXACT emitted gate stream: the reference merges adjacent fragment basis rotations into one BasisRotation per boundary (including across Trotter steps and the one-body turn-around), skips rotations that merge to identity, uses a specific RZ/IsingZZ decomposition of the diagonals, and emits the accumulated energy shift as a trailing GlobalPhase reduced mod 4*pi (RZ(-phi) on the control wire in the controlled variant). Many mathematically equivalent circuits produce the same unitary but a different op stream, and the merging/skip/phase conventions have no in-repo precedent to copy (labs research code), so a plausible correct-from-first-principles implementation fails the exact-match assertions. Repo sliced at the PR base commit (280k LOC, template absent); Apache-2.0 LICENSE preserved. Runs in the pennylane-9459 image (PennyLane runtime deps + jax, pennylane itself imported from the workspace via PYTHONPATH; tests only capture the queued ops, no device execution). CALIBRATED 2026-07-04: benchmark runs showed the graded conventions were under-specified relative to exact-output grading (all configs 0/5 on the veryhard tier), so the issue now includes an acceptance example with exact reference values for a small instance DISTINCT from the hidden graded cases. The conventions are thereby fully verifiable from the issue; the hidden tests still require implementing the full algorithm correctly at other parameter points.",
   "grader": "tests",
   "tests": {
     "fail_to_pass": [
-      {"name": "cdf_exact_stream", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cdf_exact_gate_stream -q"},
-      {"name": "cdf_merged_rotations", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cdf_merged_basis_rotation_matrices -q"},
-      {"name": "cdf_controlled", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cdf_controlled_double_phase -q"},
-      {"name": "cgf_exact_stream", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cgf_exact_gate_stream -q"},
-      {"name": "shape_validation", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_shape_autodetection_rejects_bad_input -q"}
+      {
+        "name": "cdf_exact_stream",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cdf_exact_gate_stream -q"
+      },
+      {
+        "name": "cdf_merged_rotations",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cdf_merged_basis_rotation_matrices -q"
+      },
+      {
+        "name": "cdf_controlled",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cdf_controlled_double_phase -q"
+      },
+      {
+        "name": "cgf_exact_stream",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cgf_exact_gate_stream -q"
+      },
+      {
+        "name": "shape_validation",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_shape_autodetection_rejects_bad_input -q"
+      }
     ],
     "pass_to_pass": [
-      {"name": "core_unaffected", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_core_pennylane_unaffected -q"}
+      {
+        "name": "core_unaffected",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_core_pennylane_unaffected -q"
+      }
     ]
   },
   "test_timeout_s": 600

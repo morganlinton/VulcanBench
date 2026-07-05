@@ -1,7 +1,9 @@
 {
   "id": "oss-pennylane-labs-arithmetic",
   "category": "feature",
-  "languages": ["python"],
+  "languages": [
+    "python"
+  ],
   "difficulty": "hard",
   "task_complexity": "system",
   "created": "2026-07-04",
@@ -15,19 +17,40 @@
     "issue": "https://github.com/PennyLaneAI/pennylane/pull/9390",
     "commit": "e4bf9c8a3adc5640a8504ba8207a07a333e456ff"
   },
-  "decontamination_notes": "Real feature from PennyLaneAI/pennylane PR #9390, merged 2026-06-25, after model training cutoffs. Adds a 1000-line net-new arithmetic.py with six Fourier-space arithmetic resource operators (LabsPhaseAdder, LabsAdder, LabsOutAdder, ClassicalOutMultiplier, LabsMultiplier, LabsModExp) to labs/estimator_beta. Graded on EXACT wire and gate counts across eight parameter regimes (e.g. LabsModExp(6, 8, mod=201) = 3,155,328 T gates): the counts encode which building blocks each operator decomposes into, the modular-reduction circuitry (extra work wires, controlled corrections), phase-rotation T-counts, and auxiliary wire bookkeeping. Textbook-faithful from-scratch implementations that differ in any internal choice yield different counts. Same recipe as oss-pennylane-selectcopy-qrom, which Fable-low failed (all-recon DNF). Repo sliced at the PR base commit (280k LOC, arithmetic.py absent; LabsQROM and SelectCopyQROM exist at base and are guarded by a pass_to_pass test). Apache-2.0 LICENSE preserved. Reuses the pennylane-9459 image; pure counting, no device execution.",
+  "decontamination_notes": "Real feature from PennyLaneAI/pennylane PR #9390, merged 2026-06-25, after model training cutoffs. Adds a 1000-line net-new arithmetic.py with six Fourier-space arithmetic resource operators (LabsPhaseAdder, LabsAdder, LabsOutAdder, ClassicalOutMultiplier, LabsMultiplier, LabsModExp) to labs/estimator_beta. Graded on EXACT wire and gate counts across eight parameter regimes (e.g. LabsModExp(6, 8, mod=201) = 3,155,328 T gates): the counts encode which building blocks each operator decomposes into, the modular-reduction circuitry (extra work wires, controlled corrections), phase-rotation T-counts, and auxiliary wire bookkeeping. Textbook-faithful from-scratch implementations that differ in any internal choice yield different counts. Same recipe as oss-pennylane-selectcopy-qrom, which Fable-low failed (all-recon DNF). Repo sliced at the PR base commit (280k LOC, arithmetic.py absent; LabsQROM and SelectCopyQROM exist at base and are guarded by a pass_to_pass test). Apache-2.0 LICENSE preserved. Reuses the pennylane-9459 image; pure counting, no device execution. CALIBRATED 2026-07-04: benchmark runs showed the graded conventions were under-specified relative to exact-output grading (all configs 0/5 on the veryhard tier), so the issue now includes an acceptance example with exact reference values for a small instance DISTINCT from the hidden graded cases. The conventions are thereby fully verifiable from the issue; the hidden tests still require implementing the full algorithm correctly at other parameter points.",
   "grader": "tests",
   "tests": {
     "fail_to_pass": [
-      {"name": "phase_adder", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_phase_adder_counts -q"},
-      {"name": "adder", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_adder_counts -q"},
-      {"name": "outadder_multiplier", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_out_adder_and_classical_multiplier_counts -q"},
-      {"name": "multiplier", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_multiplier_counts -q"},
-      {"name": "modexp", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_modexp_counts -q"},
-      {"name": "validation_exports", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_validation_and_exports -q"}
+      {
+        "name": "phase_adder",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_phase_adder_counts -q"
+      },
+      {
+        "name": "adder",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_adder_counts -q"
+      },
+      {
+        "name": "outadder_multiplier",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_out_adder_and_classical_multiplier_counts -q"
+      },
+      {
+        "name": "multiplier",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_multiplier_counts -q"
+      },
+      {
+        "name": "modexp",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_modexp_counts -q"
+      },
+      {
+        "name": "validation_exports",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_validation_and_exports -q"
+      }
     ],
     "pass_to_pass": [
-      {"name": "estimator_unaffected", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_existing_estimator_unaffected -q"}
+      {
+        "name": "estimator_unaffected",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_existing_estimator_unaffected -q"
+      }
     ]
   },
   "test_timeout_s": 600

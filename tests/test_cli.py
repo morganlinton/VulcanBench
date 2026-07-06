@@ -10,6 +10,7 @@ import pytest
 from typer.testing import CliRunner
 
 import harness.cli as cli_mod
+from harness import __version__
 from harness.cli import app
 
 runner = CliRunner()
@@ -18,7 +19,7 @@ runner = CliRunner()
 def test_version() -> None:
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.5.1" in result.output
+    assert __version__ in result.output
 
 
 def test_help() -> None:

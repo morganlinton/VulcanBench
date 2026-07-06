@@ -9,10 +9,14 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity — with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.5.1** — 52 gold-verified tasks, tool-calling agent (mock / OpenAI /
-Anthropic / Z.ai), Docker sandbox, pre-run cost estimates with bundled priors
-(`vulcanbench estimate`), `v1-compare` suite, five-metric scoring, suite runs,
-and HTML replay.
+**v0.6.0** — adds a **frontier-hard task tier** (net-new-algorithm tasks from
+real merged PRs, each screened to defeat low-effort frontier models) and
+**cost-efficient reporting**: per-run cost caps (`--max-run-cost`),
+cached-baseline comparison (`compare`), free re-grading after task edits
+(`regrade`), and gap-only resume (`--only-missing`) — so a new-model report is
+one column, not a full-matrix re-run. Builds on v0.5's 52 gold-verified tasks,
+tool-calling agent (mock / OpenAI / Anthropic / Z.ai), Docker sandbox, pre-run
+cost estimates, five-metric scoring, and HTML replay.
 See [docs/QUICKSTART.md](docs/QUICKSTART.md) to get started.
 
 ## One-command setup

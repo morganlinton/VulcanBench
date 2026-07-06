@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -320,3 +321,67 @@ def test_parallel_error_containment(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert result["errors"][0]["task_id"] == "task-b"
     assert {t["task_id"] for t in result["tasks"]} == {"task-a"}
     assert result["aggregate"][0]["n_tasks"] == 1  # only task-a produced a run
+
+
+def test_run_suite_only_missing_reuses_and_fills(tmp_path: Path) -> None:
+    """--only-missing reuses fresh cached runs and launches only the gaps."""
+    base = tmp_path / "tasks"
+    _make_task(base / "demo", "task-a")
+    _make_task(base / "demo", "task-b")
+    out = tmp_path / "runs"
+
+    # Full first pass: two runs.
+    first = run_suite("demo", "mock:synthetic", output_dir=out, tasks_base=base, judges=False)
+    assert first["n_runs"] == 2
+
+    # only_missing with both already cached: nothing new runs, both covered.
+    reuse = run_suite(
+        "demo", "mock:synthetic", output_dir=out, tasks_base=base, judges=False, only_missing=True
+    )
+    assert reuse["n_runs"] == 0
+    assert set(reuse["covered_cached"]) == {"task-a", "task-b"}
+
+    # Drop task-a's cached run: only_missing now runs exactly task-a.
+    for d in out.glob("task-a-*"):
+        shutil.rmtree(d)
+    gap = run_suite(
+        "demo", "mock:synthetic", output_dir=out, tasks_base=base, judges=False, only_missing=True
+    )
+    assert gap["n_runs"] == 1
+    assert {t["task_id"] for t in gap["tasks"]} == {"task-a"}
+    assert gap["covered_cached"] == ["task-b"]
+
+
+def test_run_suite_only_missing_ignores_stale_cache(tmp_path: Path) -> None:
+    """A cached run scored against an older task definition is not reused."""
+    base = tmp_path / "tasks"
+    _make_task(base / "demo", "task-a")
+    out = tmp_path / "runs"
+    run_suite("demo", "mock:synthetic", output_dir=out, tasks_base=base, judges=False)
+
+    # Change the task's prompt -> its hash changes -> the cached run is stale.
+    (base / "demo" / "task-a" / "issue.md").write_text("Completely different task now.")
+    res = run_suite(
+        "demo", "mock:synthetic", output_dir=out, tasks_base=base, judges=False, only_missing=True
+    )
+    assert res["n_runs"] == 1  # stale cache ignored, task re-run
+    assert res["covered_cached"] == []
+
+
+def test_run_suite_only_missing_tops_up_repeats(tmp_path: Path) -> None:
+    """With repeat>N and N fresh runs cached, only the shortfall is launched."""
+    base = tmp_path / "tasks"
+    _make_task(base / "demo", "task-a")
+    out = tmp_path / "runs"
+    run_suite("demo", "mock:synthetic", output_dir=out, tasks_base=base, judges=False, repeat=1)
+
+    res = run_suite(
+        "demo",
+        "mock:synthetic",
+        output_dir=out,
+        tasks_base=base,
+        judges=False,
+        repeat=3,
+        only_missing=True,
+    )
+    assert res["n_runs"] == 2  # 1 already cached, top up to 3

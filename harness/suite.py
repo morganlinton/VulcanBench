@@ -108,7 +108,7 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
     return Suite(name=name, tasks_root=tasks_root, task_ids=task_ids)
 
 
-def run_suite(  # noqa: PLR0915 — linear scheduler: validation + budget loop + summary assembly
+def run_suite(  # noqa: PLR0912, PLR0915 — linear scheduler: validation + budget loop + summary
     name: str,
     model: str,
     output_dir: Path = Path("./runs"),
@@ -116,6 +116,7 @@ def run_suite(  # noqa: PLR0915 — linear scheduler: validation + budget loop +
     repeat: int = 1,
     max_concurrency: int = 1,
     max_cost: float | None = None,
+    only_missing: bool = False,
     **run_kwargs: Any,
 ) -> dict[str, Any]:
     """Run ``model`` against every task in the suite, ``repeat`` times each.
@@ -148,7 +149,28 @@ def run_suite(  # noqa: PLR0915 — linear scheduler: validation + budget loop +
     suite_id = f"suite-{uuid.uuid4().hex[:8]}"
     started_at = datetime.now(UTC)
 
-    units = [task_id for task_id in suite.task_ids for _ in range(repeat)]
+    # ``only_missing`` reuses cached, non-stale runs for this model+effort and
+    # launches only enough runs to top each task up to ``repeat`` — so a partly
+    # finished column is resumed instead of re-run from scratch.
+    covered: list[str] = []
+    if only_missing:
+        from harness.compare import fresh_run_counts  # noqa: PLC0415 — avoid import cycle
+
+        counts = fresh_run_counts(
+            list(suite.task_ids),
+            model,
+            run_kwargs.get("effort"),
+            output_dir,
+            suite.tasks_root,
+        )
+        units = []
+        for task_id in suite.task_ids:
+            need = max(0, repeat - counts.get(task_id, 0))
+            units.extend([task_id] * need)
+            if need == 0:
+                covered.append(task_id)
+    else:
+        units = [task_id for task_id in suite.task_ids for _ in range(repeat)]
 
     def _run_one(task_id: str) -> dict[str, Any]:
         res = run_agent(
@@ -236,6 +258,8 @@ def run_suite(  # noqa: PLR0915 — linear scheduler: validation + budget loop +
         "n_tasks": len(suite.task_ids),
         "n_runs": len(task_results),
         "n_skipped": len(skipped),
+        "only_missing": only_missing,
+        "covered_cached": covered,
         "tasks": task_results,
         "errors": errors,
         "skipped": skipped,

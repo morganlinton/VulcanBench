@@ -145,5 +145,16 @@ vulcanbench run --suite v2 -m anthropic:claude-opus-4-8 --effort high \
   --only-missing --max-run-cost 2.50 --sandbox docker
 ```
 
+> **Keep runs in one place.** Both the cache reuse (`--only-missing`) and the
+> comparison (`compare`) only see runs under the directory they scan — the
+> `--output-dir` of the run for `--only-missing`, and `--runs-dir` for `compare`
+> (both default to `./runs`, scanned recursively). Runs written to *other*
+> directories are invisible to that lookup, so `--only-missing` will re-run a
+> cell whose cached result lives elsewhere, and `compare` will show it as
+> missing. Point every run at the same `--output-dir` (or consolidate run dirs
+> under one root before comparing) so the cache lookup sees the full history.
+> Nesting is fine — sub-directories are discovered — the runs just have to be
+> under the one root you scan.
+
 See the full example in the README and `docs/ARCHITECTURE.md`. To add your own
 task: `docs/TASK_CONTRIBUTION.md`.

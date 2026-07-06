@@ -134,5 +134,16 @@ baselines come from cache. That turns a new-model report from a full-matrix
 re-run into a single new column, and pairs naturally with `--max-run-cost` to
 bound the cost of that one column.
 
+`--only-missing` closes the loop: on a suite run it skips tasks that already have
+enough fresh cached runs for that model+effort and launches only the gaps, so an
+interrupted or partial column is *resumed* rather than re-run. Stale cached runs
+(scored against an older task definition) are ignored and re-run.
+
+```bash
+# run a column; if it's interrupted or you add tasks, re-run to fill only the gaps
+vulcanbench run --suite v2 -m anthropic:claude-opus-4-8 --effort high \
+  --only-missing --max-run-cost 2.50 --sandbox docker
+```
+
 See the full example in the README and `docs/ARCHITECTURE.md`. To add your own
 task: `docs/TASK_CONTRIBUTION.md`.

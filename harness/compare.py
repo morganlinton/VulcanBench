@@ -19,6 +19,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from harness.effort import normalize_effort
 from harness.leaderboard import current_task_hashes, mark_stale, summary_to_row
 from harness.suite import DEFAULT_TASKS_BASE, load_suite
 
@@ -65,6 +66,37 @@ def suite_version(suite: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> dict[str
 
 def _cell_key(row: dict[str, Any]) -> tuple[str, str]:
     return (row.get("model") or "?", row.get("effort_requested") or "-")
+
+
+def fresh_run_counts(
+    task_ids: list[str],
+    model: str,
+    effort: str | None,
+    runs_dir: Path,
+    tasks_root: Path,
+) -> dict[str, int]:
+    """Count non-stale cached runs per task for one (model, effort) cell.
+
+    A run counts only if its task still matches the current definition on disk
+    (its recorded ``task_hash`` is fresh). Used by the suite runner to skip tasks
+    that already have enough cached runs, so ``--only-missing`` fills just the
+    gaps instead of re-running a whole column.
+    """
+    want_effort = normalize_effort(effort)
+    wanted = set(task_ids)
+    rows = [
+        r
+        for r in _scan_runs_recursive(runs_dir)
+        if r.get("task_id") in wanted
+        and r.get("model") == model
+        and normalize_effort(r.get("effort_requested")) == want_effort
+    ]
+    mark_stale(rows, tasks_root)
+    counts: dict[str, int] = dict.fromkeys(task_ids, 0)
+    for r in rows:
+        if r.get("task_stale") is not True:
+            counts[str(r.get("task_id"))] += 1
+    return counts
 
 
 def build_matrix(

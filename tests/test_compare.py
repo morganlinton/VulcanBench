@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from harness.compare import build_matrix, suite_version
+from harness.compare import build_matrix, fresh_run_counts, suite_version
 from harness.tasks import load_task, task_hash
 
 
@@ -47,7 +47,12 @@ def _make_suite(base: Path, name: str, task_ids: list[str]) -> Path:
 def _write_run(
     runs: Path, task_id: str, model: str, effort: str, functional: float, cost: float, thash: str
 ) -> None:
-    d = runs / f"{task_id}-{model}-{effort}".replace(":", "_")
+    base = f"{task_id}-{model}-{effort}".replace(":", "_")
+    d = runs / base
+    n = 1
+    while d.exists():
+        d = runs / f"{base}-{n}"
+        n += 1
     d.mkdir(parents=True)
     (d / "summary.json").write_text(
         json.dumps(
@@ -141,3 +146,21 @@ def test_new_model_is_a_single_new_column(tmp_path: Path) -> None:
     cells = build_matrix("s", runs_dir=runs, tasks_base=tmp_path)["cells"]
     assert len(cells) == 2
     assert {c["model"] for c in cells} == {"opus", "newmodel"}
+
+
+def test_fresh_run_counts_filters_model_effort_and_staleness(tmp_path: Path) -> None:
+    suite = _make_suite(tmp_path, "s", ["a", "b"])
+    ha = task_hash(load_task("a", suite))
+    hb = task_hash(load_task("b", suite))
+    runs = tmp_path / "runs"
+
+    _write_run(runs, "a", "opus", "low", 1.0, 0.5, ha)
+    _write_run(runs, "a", "opus", "low", 1.0, 0.5, ha)  # a second attempt for a
+    _write_run(runs, "b", "opus", "low", 1.0, 0.7, hb)
+    _write_run(runs, "a", "opus", "high", 1.0, 0.9, ha)  # different effort
+    _write_run(runs, "a", "fable", "low", 1.0, 2.0, ha)  # different model
+    _write_run(runs, "b", "opus", "low", 1.0, 0.7, "STALE")  # stale hash
+
+    counts = fresh_run_counts(["a", "b"], "opus", "low", runs, suite)
+    assert counts["a"] == 2  # two fresh opus-low runs for a
+    assert counts["b"] == 1  # the stale one is not counted

@@ -111,6 +111,12 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         help="Per-run USD ceiling: stop an individual agent run once its own spend "
         "crosses this (records cost_capped; the partial result is still graded)",
     ),
+    only_missing: bool = typer.Option(
+        False,
+        "--only-missing",
+        help="Suite runs: skip tasks that already have enough fresh cached runs for "
+        "this model+effort, running only the gaps (resume a partial column)",
+    ),
     timeout: float | None = typer.Option(
         None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
     ),
@@ -170,6 +176,9 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
                 f"[red]error[/red] --max-run-cost needs a priced model; no price for {model}"
             )
             raise typer.Exit(code=1)
+    if only_missing and suite is None:
+        console.print("[red]error[/red] --only-missing applies to suite runs (use --suite)")
+        raise typer.Exit(code=1)
     if sandbox not in {"local", "docker", "auto"}:
         console.print(f"[red]error[/red] --sandbox must be local|docker|auto, got {sandbox!r}")
         raise typer.Exit(code=1)
@@ -220,7 +229,14 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     try:
         if suite is not None:
             pass_at_1, n_incomplete = _run_suite(
-                suite, model, output_dir, run_kwargs, repeat, max_concurrency, max_cost
+                suite,
+                model,
+                output_dir,
+                run_kwargs,
+                repeat,
+                max_concurrency,
+                max_cost,
+                only_missing,
             )
         else:
             pass_at_1, n_incomplete = _run_single(task, model, output_dir, run_kwargs, repeat)  # type: ignore[arg-type]
@@ -408,13 +424,15 @@ def _run_suite(
     repeat: int,
     max_concurrency: int,
     max_cost: float | None = None,
+    only_missing: bool = False,
 ) -> tuple[float | None, int]:
     """Run a suite; returns (pass@1, n_incomplete) where n_incomplete counts
     errored + budget-skipped runs."""
     suffix = f" x{repeat}" if repeat > 1 else ""
     par = f" ({max_concurrency}-way parallel)" if max_concurrency > 1 else ""
     cap = f" (budget ${max_cost})" if max_cost is not None else ""
-    console.print(f"[cyan]running suite[/cyan] {suite}{suffix}{par}{cap} with {model} ...")
+    resume = " (only-missing)" if only_missing else ""
+    console.print(f"[cyan]running suite[/cyan] {suite}{suffix}{par}{cap}{resume} with {model} ...")
     result = run_suite(
         suite,
         model,
@@ -422,8 +440,15 @@ def _run_suite(
         repeat=repeat,
         max_concurrency=max_concurrency,
         max_cost=max_cost,
+        only_missing=only_missing,
         **run_kwargs,
     )
+    covered = result.get("covered_cached") or []
+    if covered:
+        console.print(
+            f"[dim]only-missing: reused {len(covered)} cached task(s), "
+            f"ran {result.get('n_runs', 0)} new run(s).[/dim]"
+        )
     n_errors = len(result.get("errors") or [])
     n_skipped = result.get("n_skipped", 0)
     if n_errors:
@@ -494,6 +519,12 @@ def effort_sweep(  # noqa: PLR0912 — CLI entry: option validation + per-effort
         help="Per-run USD ceiling: stop an individual agent run once its own spend "
         "crosses this (records cost_capped; the partial result is still graded)",
     ),
+    only_missing: bool = typer.Option(
+        False,
+        "--only-missing",
+        help="Skip tasks that already have enough fresh cached runs per effort, "
+        "running only the gaps (resume a partial sweep)",
+    ),
     timeout: float | None = typer.Option(
         None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
     ),
@@ -552,6 +583,7 @@ def effort_sweep(  # noqa: PLR0912 — CLI entry: option validation + per-effort
                     repeat=repeat,
                     max_concurrency=max_concurrency,
                     max_cost=max_cost,
+                    only_missing=only_missing,
                     effort=effort,
                     max_steps=max_steps,
                     judges=judges,

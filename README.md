@@ -103,6 +103,40 @@ ensemble, `--timeout SECONDS` to cap a run's wall-clock. Traces, summaries, and
 patches are secret-redacted and size-capped before they're written, so run
 artifacts are safe to publish. See `make ci`, `make docker-up`, docs/.
 
+## Cost-efficient reporting
+
+Grading is deterministic and every run records the `task_hash` it was scored
+against, so comparisons are queries over `./runs`, not re-runs. Four commands
+turn a "$70 full-matrix re-run" into a "~$10 one new column":
+
+```bash
+# Per-run hard cost ceiling: stop a single agent run once its own spend crosses
+# the value (records cost_capped; the partial result is still graded). Turns a
+# failing run that would ruminate to the step cap into a bounded "DNF at cap".
+vulcanbench run --suite v2 --model anthropic:claude-fable-5 --max-run-cost 2.50
+
+# Resume / fill only the gaps: reuse fresh cached runs for this model+effort and
+# launch only the missing tasks (stale runs, scored against an older task
+# definition, are ignored and re-run). Pairs with --max-run-cost.
+vulcanbench run --suite v2 --model anthropic:claude-opus-4-8 --effort high \
+  --only-missing --max-run-cost 2.50
+
+# Assemble the model × effort matrix for a frozen suite from cached runs only —
+# baselines are never re-run. Add a model = run that one model, then re-compare.
+vulcanbench compare --suite v2                 # complete cells (prints a frozen version id)
+vulcanbench compare --suite v2 --incomplete    # show gaps + the command to fill them
+
+# Re-score existing runs against the current task definition at $0 API cost
+# (rebuilds base + captured agent patch + current hidden tests, re-verifies).
+# Use after editing a task's tests/thresholds instead of re-running the model.
+vulcanbench regrade runs/<run-id> --sandbox docker
+vulcanbench regrade runs/ --sandbox docker     # every run under a directory
+```
+
+Cache reuse (`--only-missing`) and comparison (`compare`) only see runs under the
+directory they scan (`--output-dir` / `--runs-dir`, default `./runs`, recursive),
+so keep every run under one root. See `docs/QUICKSTART.md` for the full workflow.
+
 ## Models
 
 Specify a model as `provider:model`:

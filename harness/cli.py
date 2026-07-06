@@ -1,7 +1,7 @@
 """VulcanBench CLI entrypoint (Typer + Rich).
 
-Commands: run, estimate, effort-sweep, leaderboard, report, calibrate, replay,
-validate-task, list-tasks. See ``vulcanbench --help``.
+Commands: run, estimate, effort-sweep, compare, regrade, leaderboard, report,
+calibrate, replay, validate-task, list-tasks. See ``vulcanbench --help``.
 """
 
 from __future__ import annotations

@@ -1,0 +1,45 @@
+{
+  "id": "oss-zod-proto-catchall",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-08",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "8fcb71a5ffa5b32a508ac8bb38b7e1e13c387bf5",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/5898",
+    "issue": "https://github.com/colinhacks/zod/pull/5898",
+    "commit": "8fcb71a5ffa5b32a508ac8bb38b7e1e13c387bf5"
+  },
+  "decontamination_notes": "Real security bug fix from colinhacks/zod PR #5898, merged 2026-04-29, after model training cutoffs. In handleCatchall (packages/zod/src/v4/core/schemas.ts) an unrecognized __proto__ key from input was assigned via result[key]=value, going through the __proto__ setter and replacing the fresh result object's prototype (prototype pollution). The fix adds `if (key === '__proto__') continue;` to the catchall iteration. Gold behavior was captured empirically in the node-ts sandbox: __proto__ dropped from own keys, prototype stays Object.prototype, no global leak, and a strictObject given a __proto__ key parses successfully (since it is no longer collected as unrecognized). Zod is a zero-runtime-dependency TS monorepo with extensionless ESM imports; hidden tests run via tsx (node-ts image) with node:test. JSON.parse is used in tests to create the real own __proto__ property (an object literal's __proto__: is the setter, not the vector). Repo sliced at the PR base commit (67k LOC); MIT LICENSE preserved. Coverage floor: 3 fail_to_pass tests, each of which FAILS at the unfixed base (result prototype replaced, attacker payload inherited, strictObject rejects __proto__) plus a regression guard covering ordinary behavior and the own-keys invariant that holds both before and after.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "clean_prototype",
+        "cmd": "tsx --test --test-name-pattern='^vb catchall result keeps a clean prototype$' vb_proto_catchall.test.ts"
+      },
+      {
+        "name": "no_payload_exposed",
+        "cmd": "tsx --test --test-name-pattern='^vb catchall does not expose the attacker payload$' vb_proto_catchall.test.ts"
+      },
+      {
+        "name": "strict_proto_ok",
+        "cmd": "tsx --test --test-name-pattern='^vb strictObject with a __proto__ key parses successfully$' vb_proto_catchall.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ordinary_unaffected",
+        "cmd": "tsx --test --test-name-pattern='^vb ordinary catchall and strict behavior unaffected$' vb_regression.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 180
+}

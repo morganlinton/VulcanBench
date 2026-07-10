@@ -1,0 +1,22 @@
+[package]
+name = "jiff"
+version = "0.2.21"
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+license = "Unlicense OR MIT"
+repository = "https://github.com/BurntSushi/jiff"
+description = "A date-time library that encourages you to jump into the pit of success."
+categories = ["date-and-time", "no-std"]
+keywords = ["date", "time", "calendar", "zone", "duration"]
+edition = "2021"
+rust-version = "1.70"
+autobenches = false
+autoexamples = false
+
+[lib]
+name = "jiff"
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+perf-inline = []

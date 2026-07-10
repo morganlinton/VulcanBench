@@ -1,0 +1,45 @@
+{
+  "id": "oss-flask-teardown-robust",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "7b0088693ece1bd3a9238a6fdf56ed8df7a4d43b",
+  "image": "vulcanbench/sandbox:flask-5928",
+  "upstream": {
+    "url": "https://github.com/pallets/flask/pull/5928",
+    "issue": "https://github.com/pallets/flask/pull/5928",
+    "commit": "7b0088693ece1bd3a9238a6fdf56ed8df7a4d43b"
+  },
+  "decontamination_notes": "Real fix from pallets/flask PR #5928, merged 2026-02-19, after model training cutoffs, so the specific fix is novel. Multi-file fix (app.py, ctx.py, helpers.py). Repo sliced at base commit (src/ + pyproject + LICENSE + README); BSD LICENSE preserved in repo/. Runs in per-task image vulcanbench/sandbox:flask-5928 (flask runtime deps preinstalled, flask package itself removed; tests run with PYTHONPATH=src). Hidden test asserts structure (all callbacks run, exception-group leaves), not message wording.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "teardown_runs_all_and_aggregates",
+        "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_all_teardown_callbacks_run_and_errors_aggregate -q"
+      },
+      {
+        "name": "appcontext_teardowns_all_run",
+        "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_appcontext_teardowns_all_run_and_aggregate -q"
+      },
+      {
+        "name": "teardown_continues_after_raise",
+        "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_teardown_continues_after_earlier_callback_raises -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "clean_teardown_stable",
+        "cmd": "PYTHONPATH=src python -m pytest -o addopts= oss_tests.py::test_clean_teardown_unaffected -q"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

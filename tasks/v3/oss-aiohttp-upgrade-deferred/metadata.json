@@ -1,0 +1,49 @@
+{
+  "id": "oss-aiohttp-upgrade-deferred",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "664d695c9278e90be29a16d959ed0e0b73447afc",
+  "image": "vulcanbench/sandbox:aiohttp-13016",
+  "upstream": {
+    "url": "https://github.com/aio-libs/aiohttp/pull/13016",
+    "issue": "https://github.com/aio-libs/aiohttp/pull/13016",
+    "commit": "664d695c9278e90be29a16d959ed0e0b73447afc"
+  },
+  "decontamination_notes": "Real fix from aio-libs/aiohttp PR #13016, merged 2026-06-30, after model training cutoffs, so the specific fix is novel. Parser state-machine change mirrored across http_parser.py and _http_parser.pyx. Repo sliced at base commit (aiohttp/ + pyproject + LICENSE + README); Apache-2.0 LICENSE preserved in repo/. Runs in per-task image vulcanbench/sandbox:aiohttp-13016 (runtime deps only, no aiohttp installed; tests import the workspace package via PYTHONPATH=.). Grading exercises the pure-Python parser; the Cython twin remains in the workspace and the issue states the sync requirement.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "upgrade_body_content_length",
+        "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_upgrade_with_content_length_body -q"
+      },
+      {
+        "name": "upgrade_body_chunked",
+        "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_upgrade_with_chunked_body -q"
+      },
+      {
+        "name": "upgrade_body_split_feeds",
+        "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_upgrade_body_split_across_feeds -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "upgrade_empty_body_immediate",
+        "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_upgrade_empty_body_switches_immediately -q"
+      },
+      {
+        "name": "plain_request_stable",
+        "cmd": "PYTHONPATH=. python -m pytest -o addopts= oss_tests.py::test_plain_request_parsing_stable -q"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

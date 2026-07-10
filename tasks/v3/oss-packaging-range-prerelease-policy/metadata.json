@@ -1,0 +1,48 @@
+{
+  "id": "oss-packaging-range-prerelease-policy",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-06-30",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "dec2caffa063d77dd40627fd9baf7a0f9cff227a",
+  "upstream": {
+    "url": "https://github.com/pypa/packaging/pull/1295",
+    "issue": "https://github.com/pypa/packaging/pull/1295",
+    "commit": "dec2caffa063d77dd40627fd9baf7a0f9cff227a"
+  },
+  "decontamination_notes": "Real fix from pypa/packaging PR #1295, merged 2026-06-26, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit; BSD/Apache LICENSE files preserved in repo/.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "union_full_prerelease_policy",
+        "cmd": "PYTHONPATH=src python -m pytest test_ranges.py::test_vb_union_full_preserves_autodetected_policy -q"
+      },
+      {
+        "name": "union_full_reversed_policy",
+        "cmd": "PYTHONPATH=src python -m pytest test_ranges.py::test_vb_union_full_reversed_order_preserves_policy -q"
+      },
+      {
+        "name": "union_full_beta_policy",
+        "cmd": "PYTHONPATH=src python -m pytest test_ranges.py::test_vb_union_full_preserves_policy_for_beta_specifier -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "full_no_arbitrary",
+        "cmd": "PYTHONPATH=src python -m pytest test_ranges.py -k \"test_full_no_arbitrary\" -q"
+      },
+      {
+        "name": "arbitrary_flag_distinguishes_full",
+        "cmd": "PYTHONPATH=src python -m pytest test_ranges.py -k \"test_arbitrary_flag_distinguishes_full\" -q"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

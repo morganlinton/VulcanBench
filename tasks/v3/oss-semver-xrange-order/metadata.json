@@ -1,0 +1,30 @@
+{
+  "id": "oss-semver-xrange-order",
+  "category": "bug_fix",
+  "languages": ["javascript"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "6b77aa84a648a4b54ea32a21e6db60ebd54d5040",
+  "upstream": {
+    "url": "https://github.com/npm/node-semver/pull/874",
+    "issue": "https://github.com/npm/node-semver/pull/874",
+    "commit": "6b77aa84a648a4b54ea32a21e6db60ebd54d5040"
+  },
+  "decontamination_notes": "Real bug fix from npm/node-semver PR #874, merged 2026-06-09, after model training cutoffs. When expanding an x-range, node-semver accepted a fixed (non-wildcard) segment following an x/* wildcard segment (e.g. 1.x.5 or x.1), silently coercing it into a garbage range instead of rejecting it. The fix (classes/range.js) adds an invalidXRangeOrder(M, m, p) predicate and, in replaceXRange, returns the comparator unexpanded when a wildcard is followed by a fixed segment, so validRange returns null. Repo sliced at the PR base commit (6b77aa84); the whole node-semver library is included so require('./index') resolves. Pure JavaScript, zero external dependencies; hidden tests run under Node's built-in node:test (no image needed). ISC LICENSE preserved. Coverage floor: 3 fail_to_pass tests (fixed patch after x minor, fixed minor after x major, fixed patch after x major+minor), each producing a non-null garbage range at base and null after the fix, plus a pass_to_pass regression guard over well-formed trailing-x ranges that expand identically at base and after the fix.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "fixed_patch_after_x_minor", "cmd": "node --test --test-name-pattern='^vb xrange fixed patch after x minor$' vb_xrange_order.test.js"},
+      {"name": "fixed_minor_after_x_major", "cmd": "node --test --test-name-pattern='^vb xrange fixed minor after x major$' vb_xrange_order.test.js"},
+      {"name": "fixed_patch_after_x_major_minor", "cmd": "node --test --test-name-pattern='^vb xrange fixed patch after x major minor$' vb_xrange_order.test.js"}
+    ],
+    "pass_to_pass": [
+      {"name": "xranges_unaffected", "cmd": "node --test --test-name-pattern='^vb existing xranges unaffected$' vb_regression.test.js"}
+    ]
+  },
+  "test_timeout_s": 600
+}

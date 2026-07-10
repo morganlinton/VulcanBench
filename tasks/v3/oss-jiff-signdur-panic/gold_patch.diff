@@ -1,0 +1,48 @@
+--- a/src/signed_duration.rs	2026-07-09 06:31:20
++++ b/src/signed_duration.rs	2026-07-09 06:32:07
+@@ -2512,11 +2512,11 @@
+ 
+     fn try_from(sd: SignedDuration) -> Result<Duration, Error> {
+         let secs = u64::try_from(sd.as_secs())
+-            .map_err(|_| SpecialBoundsError::UnsignedDurationSeconds)?;
+-        // Guaranteed to succeed because the above only succeeds
+-        // when `sd` is non-negative. And when `sd` is non-negative,
+-        // we are guaranteed that 0<=nanos<=999,999,999.
+-        let nanos = u32::try_from(sd.subsec_nanos()).unwrap();
++            .map_err(|_| SpecialBoundsError::SignedToUnsignedDuration)?;
++        // This could still be negative in the case where
++        // `sd.as_secs()` is zero.
++        let nanos = u32::try_from(sd.subsec_nanos())
++            .map_err(|_| SpecialBoundsError::SignedToUnsignedDuration)?;
+         Ok(Duration::new(secs, nanos))
+     }
+ }
+--- a/src/util/b.rs	2026-07-09 06:31:20
++++ b/src/util/b.rs	2026-07-09 06:32:07
+@@ -710,7 +710,7 @@
+     UnixNanoseconds,
+     SignedDurationFloatOutOfRangeF32,
+     SignedDurationFloatOutOfRangeF64,
+-    UnsignedDurationSeconds,
++    SignedToUnsignedDuration,
+ }
+ 
+ impl core::fmt::Display for SpecialBoundsError {
+@@ -723,11 +723,12 @@
+                 UnixMicroseconds::MIN as i128 * (NANOS_PER_MICRO as i128),
+                 UnixMicroseconds::MAX as i128 * (NANOS_PER_MICRO as i128),
+             ),
+-            UnsignedDurationSeconds => (
+-                "unsigned duration seconds",
+-                u64::MIN as i128,
+-                u64::MAX as i128,
+-            ),
++            SignedToUnsignedDuration => {
++                return f.write_str(
++                    "negative signed durations cannot be converted \
++                     to an unsigned duration",
++                );
++            }
+             SignedDurationFloatOutOfRangeF32 => {
+                 return write!(
+                     f,

@@ -1,0 +1,31 @@
+{
+  "id": "oss-hono-client-header-merge",
+  "category": "bug_fix",
+  "languages": ["typescript"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-08",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "626b185d0e80c9d1eefd728d5e9f7db2f4f1b4a6",
+  "upstream": {
+    "url": "https://github.com/honojs/hono/pull/5092",
+    "issue": "https://github.com/honojs/hono/issues/5089",
+    "commit": "626b185d0e80c9d1eefd728d5e9f7db2f4f1b4a6"
+  },
+  "decontamination_notes": "Real bug fix from honojs/hono PR #5092 (fixes #5089), merged 2026-07-07, after model training cutoffs. In the hc RPC client (src/client/client.ts), when both client-level and per-request headers were present, deepMerge let the per-request headers replace the client-level ones so only one set was sent. The fix composes a headers function that spreads both (resolving function/object, sync/async) with per-request precedence, then deepMerges. Gold behavior captured empirically via a custom fetch spy (no network, no msw): fn-client + obj-request, obj-client + fn-request, and fn-client + fn-request all carry BOTH headers; per-request-only and same-key precedence are unchanged (regression). Hono is a zero-runtime-dependency TS package with extensionless ESM imports; hidden tests run via tsx (node-ts image) with node:test and capture outgoing headers through the client's custom fetch option. Repo sliced at the PR base commit (75k LOC); MIT LICENSE preserved. Coverage floor: 3 fail_to_pass tests (the three header-source combinations, each failing at base) plus a regression guard.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "fn_client_obj_request", "cmd": "tsx --test --test-name-pattern='^vb merges function client headers with object request headers$' vb_client_headers.test.ts"},
+      {"name": "obj_client_fn_request", "cmd": "tsx --test --test-name-pattern='^vb merges object client headers with function request headers$' vb_client_headers.test.ts"},
+      {"name": "fn_client_fn_request", "cmd": "tsx --test --test-name-pattern='^vb merges function client headers with function request headers$' vb_client_headers.test.ts"}
+    ],
+    "pass_to_pass": [
+      {"name": "single_side_unaffected", "cmd": "tsx --test --test-name-pattern='^vb per-request headers and same-key precedence unaffected$' vb_regression.test.ts"}
+    ]
+  },
+  "test_timeout_s": 180
+}

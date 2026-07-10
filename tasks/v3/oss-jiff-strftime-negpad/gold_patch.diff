@@ -1,0 +1,59 @@
+--- a/src/fmt/strtime/printer.rs	2026-07-09 15:30:05
++++ b/src/fmt/strtime/printer.rs	2026-07-09 15:30:39
+@@ -1025,6 +1025,18 @@
+             self.width.unwrap_or(pad_width)
+         };
+         if number < 0 {
++            // Special case formatting a negative integer with non-zero
++            // padding. This case isn't handled by the `BorrowedWriter`
++            // API, so just handle it specially instead of bloating up
++            // the hot path.
++            if pad_width > 0 {
++                return Self::write_negative_int(
++                    pad_byte,
++                    pad_width,
++                    number.unsigned_abs(),
++                    wtr,
++                );
++            }
+             wtr.write_ascii_char(b'-')?;
+         }
+         let number = number.unsigned_abs();
+@@ -1033,7 +1045,37 @@
+             (b' ', 2) if number <= 99 => wtr.write_int_pad2_space(number),
+             (b'0', 4) if number <= 9999 => wtr.write_int_pad4(number),
+             _ => wtr.write_int_pad(number, pad_byte, pad_width),
++        }
++    }
++
++    /// Writes a negative integer with explicit width, where sign is part of
++    /// total width.
++    #[cold]
++    #[inline(never)]
++    fn write_negative_int(
++        pad_byte: u8,
++        pad_width: u8,
++        number: u64,
++        wtr: &mut BorrowedWriter<'_, '_, '_>,
++    ) -> Result<(), Error> {
++        // The sign is part of the total width, so offset the
++        // padding to account for it.
++        let mut pad_width = pad_width.saturating_sub(1);
++        // When padding to spaces, we want the padding first
++        // and then the `-` sign. So handle the padding here
++        // explicitly. For padding to zeros, we handle it
++        // normally (other than offsetting the padding width
++        // above).
++        if pad_byte == b' ' {
++            let d = 1 + number.checked_ilog10().unwrap_or(0) as u8;
++            for _ in 0..pad_width.saturating_sub(d) {
++                wtr.write_ascii_char(b' ')?;
++            }
++            // Don't do any padding to the call below.
++            pad_width = 0;
+         }
++        wtr.write_ascii_char(b'-')?;
++        wtr.write_int_pad(number, pad_byte, pad_width)
+     }
+ }
+ 

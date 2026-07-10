@@ -1,0 +1,45 @@
+diff --git a/packages/zod/src/v4/classic/schemas.ts b/packages/zod/src/v4/classic/schemas.ts
+index 701aeb9..20c72a7 100644
+--- a/packages/zod/src/v4/classic/schemas.ts
++++ b/packages/zod/src/v4/classic/schemas.ts
+@@ -2121,6 +2121,17 @@ export function codec<const A extends core.SomeType, B extends core.SomeType = c
+   }) as any;
+ }
+ 
++export function invertCodec<A extends core.SomeType, B extends core.SomeType>(codec: ZodCodec<A, B>): ZodCodec<B, A> {
++  const def = codec._zod.def;
++  return new ZodCodec({
++    type: "pipe",
++    in: def.out as any,
++    out: def.in as any,
++    transform: def.reverseTransform as any,
++    reverseTransform: def.transform as any,
++  }) as any;
++}
++
+ // ZodReadonly
+ export interface ZodReadonly<T extends core.SomeType = core.$ZodType>
+   extends _ZodType<core.$ZodReadonlyInternals<T>>,
+diff --git a/packages/zod/src/v4/mini/schemas.ts b/packages/zod/src/v4/mini/schemas.ts
+index e00e434..73f8d29 100644
+--- a/packages/zod/src/v4/mini/schemas.ts
++++ b/packages/zod/src/v4/mini/schemas.ts
+@@ -1629,6 +1629,18 @@ export function codec<const A extends SomeType, B extends core.SomeType = core.$
+   }) as any;
+ }
+ 
++// @__NO_SIDE_EFFECTS__
++export function invertCodec<A extends SomeType, B extends SomeType>(codec: ZodMiniCodec<A, B>): ZodMiniCodec<B, A> {
++  const def = codec._zod.def;
++  return new ZodMiniCodec({
++    type: "pipe",
++    in: def.out as any,
++    out: def.in as any,
++    transform: def.reverseTransform as any,
++    reverseTransform: def.transform as any,
++  }) as any;
++}
++
+ // ZodMiniReadonly
+ export interface ZodMiniReadonly<T extends SomeType = core.$ZodType>
+   extends _ZodMiniType<core.$ZodReadonlyInternals<T>> {

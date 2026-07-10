@@ -1,0 +1,48 @@
+{
+  "id": "oss-semver-truncate",
+  "category": "feature",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-08",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "c368af612e521767e960419e6388c5129c857984",
+  "upstream": {
+    "url": "https://github.com/npm/node-semver/pull/855",
+    "issue": "https://github.com/npm/node-semver/pull/855",
+    "commit": "c368af612e521767e960419e6388c5129c857984"
+  },
+  "decontamination_notes": "Real feature from npm/node-semver PR #855, merged 2026-05-07, after model training cutoffs. Adds a net-new truncate(version, releaseType, options) function (functions/truncate.js) re-exported from index.js: drops build metadata always, keeps prerelease identifiers for pre* release types, zeroes lower-precision components for major/minor/patch, returns null on invalid type or unparseable version. Zero-runtime-dependency CommonJS package; hidden tests are written with the built-in node:test runner (no vitest), so the base sandbox image runs them with no extra deps. Reference values are the upstream fixtures plus additional cases. Repo sliced at the PR base commit (6k LOC, truncate.js absent); ISC LICENSE preserved. Grading meets the v3 coverage floor: 4 fail_to_pass tests spanning level truncation, prerelease-type handling, build-metadata stripping, and invalid-input null returns, plus a prerelease-independent regression guard.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "truncate_levels",
+        "cmd": "node --test --test-name-pattern='^vb truncate levels$' vb_truncate.test.js"
+      },
+      {
+        "name": "truncate_prerelease_types",
+        "cmd": "node --test --test-name-pattern='^vb truncate prerelease types$' vb_truncate.test.js"
+      },
+      {
+        "name": "truncate_build_metadata",
+        "cmd": "node --test --test-name-pattern='^vb truncate build metadata$' vb_truncate.test.js"
+      },
+      {
+        "name": "truncate_invalid",
+        "cmd": "node --test --test-name-pattern='^vb truncate invalid$' vb_truncate.test.js"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "semver_unaffected",
+        "cmd": "node --test --test-name-pattern='^vb existing semver unaffected$' vb_regression.test.js"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

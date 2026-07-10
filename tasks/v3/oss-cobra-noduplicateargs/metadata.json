@@ -1,0 +1,31 @@
+{
+  "id": "oss-cobra-noduplicateargs",
+  "category": "feature",
+  "languages": ["go"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:base",
+  "base_commit": "f2878bab8c96afd6e36968af96343b35dbb82a82",
+  "upstream": {
+    "url": "https://github.com/spf13/cobra/pull/2397",
+    "issue": "https://github.com/spf13/cobra/issues/2396",
+    "commit": "f2878bab8c96afd6e36968af96343b35dbb82a82"
+  },
+  "decontamination_notes": "Real feature from spf13/cobra PR #2397 (closes #2396), merged 2026-04-25, after model training cutoffs. Adds a net-new exported positional-args validator NoDuplicateArgs(cmd *Command, args []string) error that rejects duplicate positional arguments with a 'duplicate argument %q for %q' message, matching the shape of cobra's other Args validators. Repo sliced at the PR base commit (f2878ba). External dependencies (pflag, mousetrap, go-md2man, yaml) are vendored via `go mod vendor` (vendor/ ~1MB) and the offline test command uses -mod=vendor; verified with `docker run --network none ... go test -mod=vendor` (no GOPROXY access). Apache-2.0 LICENSE preserved. Because the fail_to_pass tests reference the net-new symbol they do not compile at the base commit, so the pass_to_pass regression guard lives in a SEPARATE package (osscheck_reg) that exercises only pre-existing validators (ArbitraryArgs/NoArgs/ExactArgs) and therefore compiles and passes at base. Coverage floor: 3 fail_to_pass tests (rejects duplicates, error message format, allows unique) plus the separate-package pass_to_pass guard.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "rejects_duplicates", "cmd": "go test -mod=vendor -run '^TestNoDuplicateArgsRejectsDuplicates$' ./osscheck/"},
+      {"name": "message_format", "cmd": "go test -mod=vendor -run '^TestNoDuplicateArgsMessageFormat$' ./osscheck/"},
+      {"name": "allows_unique", "cmd": "go test -mod=vendor -run '^TestNoDuplicateArgsAllowsUnique$' ./osscheck/"}
+    ],
+    "pass_to_pass": [
+      {"name": "existing_validators_unaffected", "cmd": "go test -mod=vendor -run '^TestExistingArgValidatorsUnaffected$' ./osscheck_reg/"}
+    ]
+  },
+  "test_timeout_s": 600
+}

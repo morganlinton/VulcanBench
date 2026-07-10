@@ -1,0 +1,33 @@
+{
+  "id": "oss-zod-invert-codec",
+  "category": "feature",
+  "languages": ["typescript"],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-07-08",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "b6a3b3369a5b9fdde9adde8203b96b71c0634ad5",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/5770",
+    "issue": "https://github.com/colinhacks/zod/issues/5625",
+    "commit": "b6a3b3369a5b9fdde9adde8203b96b71c0634ad5"
+  },
+  "decontamination_notes": "Real feature from colinhacks/zod PR #5770 (closes #5625), merged 2026-04-28, after model training cutoffs. Adds a net-new invertCodec(codec) function to BOTH the classic (packages/zod/src/v4/classic/schemas.ts) and mini (v4/mini/schemas.ts) APIs: constructs a new pipe-typed codec with in/out schemas swapped and transform/reverseTransform swapped, without mutating the original. Multi-file: the model must discover the parallel classic/mini structure and each API's conventions (the surface exports flow through external.ts re-exports). Zod is a zero-runtime-dependency TypeScript monorepo; source uses extensionless ESM imports, so hidden tests run via tsx (pinned in the node-ts image) with node:test. Repo sliced at the PR base commit (66k LOC, invertCodec absent); MIT LICENSE preserved. Coverage floor: 5 fail_to_pass tests (transform swap, schema swap incl. safeDecode failure path, double-inversion round-trip, no-mutation, mini-API parity) plus an invert-independent regression guard.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "invert_swaps_transforms", "cmd": "tsx --test --test-name-pattern='^vb invert swaps decode and encode$' vb_invert_codec.test.ts"},
+      {"name": "invert_swaps_schemas", "cmd": "tsx --test --test-name-pattern='^vb invert swaps the schemas$' vb_invert_codec.test.ts"},
+      {"name": "double_inversion", "cmd": "tsx --test --test-name-pattern='^vb double inversion round-trips$' vb_invert_codec.test.ts"},
+      {"name": "no_mutation", "cmd": "tsx --test --test-name-pattern='^vb invert does not mutate the original codec$' vb_invert_codec.test.ts"},
+      {"name": "mini_parity", "cmd": "tsx --test --test-name-pattern='^vb mini api has invertCodec too$' vb_invert_codec.test.ts"}
+    ],
+    "pass_to_pass": [
+      {"name": "codec_unaffected", "cmd": "tsx --test --test-name-pattern='^vb existing codec behavior unaffected$' vb_regression.test.ts"}
+    ]
+  },
+  "test_timeout_s": 180
+}

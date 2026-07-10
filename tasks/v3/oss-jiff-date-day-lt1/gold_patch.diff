@@ -1,0 +1,11 @@
+--- a/src/civil/date.rs	2026-07-09 15:27:06
++++ b/src/civil/date.rs	2026-07-09 15:27:37
+@@ -246,7 +246,7 @@
+     pub fn new(year: i16, month: i8, day: i8) -> Result<Date, Error> {
+         let year = b::Year::check(year)?;
+         let month = b::Month::check(month)?;
+-        if day > 28 && day > itime::days_in_month(year, month) {
++        if day < 1 || day > 28 && day > itime::days_in_month(year, month) {
+             return Err(Error::itime_range(
+                 crate::shared::util::itime::RangeError::DateInvalidDays {
+                     year,

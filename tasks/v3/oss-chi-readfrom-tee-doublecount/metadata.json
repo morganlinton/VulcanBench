@@ -1,0 +1,44 @@
+{
+  "id": "oss-chi-readfrom-tee-doublecount",
+  "category": "bug_fix",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-07-01",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "a54874f0e2f12647a19e82ee70dfa8185014100c",
+  "upstream": {
+    "url": "https://github.com/go-chi/chi/pull/1085",
+    "issue": "https://github.com/go-chi/chi/issues/1067",
+    "commit": "a54874f0e2f12647a19e82ee70dfa8185014100c"
+  },
+  "decontamination_notes": "Real fix from go-chi/chi PR #1085, merged 2026-05-16, after model training cutoffs, so the specific fix is novel. Repo sliced at base commit (full module; MIT LICENSE preserved). chi is stdlib-only, so tests run offline in the base sandbox image. Hidden test lives in its own package dir (osscheck/) so it compiles against the middleware source without the repo's internal test files, via the public NewWrapResponseWriter API.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "readfrom_tee_counts_once",
+        "cmd": "go test -run '^TestOSSReadFromWithTeeCountsBytesOnce$' ./osscheck/"
+      },
+      {
+        "name": "readfrom_tee_two_calls_once",
+        "cmd": "go test -run '^TestOSSReadFromWithTeeTwoCallsAccumulateOnce$' ./osscheck/"
+      },
+      {
+        "name": "write_then_readfrom_tee_once",
+        "cmd": "go test -run '^TestOSSWriteThenReadFromWithTeeCountsOnce$' ./osscheck/"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "readfrom_no_tee_stable",
+        "cmd": "go test -run '^TestOSSReadFromWithoutTeeStable$' ./osscheck/"
+      }
+    ]
+  },
+  "test_timeout_s": 120
+}

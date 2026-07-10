@@ -1,0 +1,33 @@
+{
+  "id": "oss-jiff-strftime-negpad",
+  "category": "bug_fix",
+  "languages": ["rust"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "0cfd63b4f72bed36b0b293650fbaa9934a085e26",
+  "upstream": {
+    "url": "https://github.com/BurntSushi/jiff/pull/487",
+    "issue": "https://github.com/BurntSushi/jiff/pull/487",
+    "commit": "0cfd63b4f72bed36b0b293650fbaa9934a085e26"
+  },
+  "decontamination_notes": "Real bug fix from BurntSushi/jiff PR #487, merged 2026-02-12, after model training cutoffs. jiff's strftime printer wrote the minus sign for a negative field and then zero-padded the digits to the full requested width, so negative values (e.g. negative years via %Y/%G/%06Y) came out one character too wide (-0024 instead of -024, -002025 instead of -02025). The fix (src/fmt/strtime/printer.rs) special-cases negative integers with non-zero pad width via a new write_negative_int helper that treats the sign as part of the total width (and, for space padding, emits the pad before the sign). Repo sliced at the PR base commit (0cfd63b). Built offline with zero external dependencies: jiff is trimmed to a standalone single crate that compiles with --no-default-features --features std, so no vendoring is needed. LOC is the real jiff source. Unlicense/MIT LICENSE preserved. Coverage floor: 3 fail_to_pass tests over negative years with default and explicit widths (%Y, %G, %06Y), each one character too wide at base and correct after the fix, plus 3 pass_to_pass regression guards over positive years (which never take the negative-sign path) that hold at base and after the fix. Tests use the public Date::strftime API.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "year_default_width_negative", "cmd": "cargo test --offline --test vb_strftime year_default_width_negative"},
+      {"name": "iso_week_year_default_width_negative", "cmd": "cargo test --offline --test vb_strftime iso_week_year_default_width_negative"},
+      {"name": "year_zero_padded_negative", "cmd": "cargo test --offline --test vb_strftime year_zero_padded_negative"}
+    ],
+    "pass_to_pass": [
+      {"name": "year_default_width_positive", "cmd": "cargo test --offline --test vb_regression year_default_width_positive"},
+      {"name": "year_zero_padded_positive", "cmd": "cargo test --offline --test vb_regression year_zero_padded_positive"},
+      {"name": "year_space_padded_positive", "cmd": "cargo test --offline --test vb_regression year_space_padded_positive"}
+    ]
+  },
+  "test_timeout_s": 600
+}

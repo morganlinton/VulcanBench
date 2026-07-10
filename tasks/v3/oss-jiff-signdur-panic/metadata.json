@@ -1,0 +1,33 @@
+{
+  "id": "oss-jiff-signdur-panic",
+  "category": "bug_fix",
+  "languages": ["rust"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "c3d960e1922b9c88bfd8e50f061df4987503c4dd",
+  "upstream": {
+    "url": "https://github.com/BurntSushi/jiff/pull/527",
+    "issue": "https://github.com/BurntSushi/jiff/issues/526",
+    "commit": "c3d960e1922b9c88bfd8e50f061df4987503c4dd"
+  },
+  "decontamination_notes": "Real bug fix from BurntSushi/jiff PR #527 (fixes issue #526), merged 2026-02-28, after model training cutoffs. TryFrom<SignedDuration> for std::time::Duration panicked instead of returning Err when the signed duration had a zero whole-seconds component and a negative subsecond component (e.g. SignedDuration::new(0, -1)): the seconds were converted fallibly but the nanoseconds used u32::try_from(sd.subsec_nanos()).unwrap(). The fix maps the nanos conversion failure to the same SpecialBoundsError (renamed UnsignedDurationSeconds -> SignedToUnsignedDuration with a corrected Display message). Repo sliced at the PR base commit (c3d960e). To build in the network-isolated sandbox with zero external dependencies, jiff is trimmed to a standalone single crate (workspace sub-crates, optional deps, dev-deps and existing integration tests removed) that compiles fully offline with --no-default-features --features std; no vendoring is required. LOC is the real jiff source. Unlicense/MIT LICENSE preserved. Coverage floor: 3 fail_to_pass tests, each a distinct zero-seconds/negative-subsecond input that panics at base and returns Err after the fix, plus 3 pass_to_pass regression guards (non-negative roundtrip, negative-seconds-already-errors, forward Duration->SignedDuration roundtrip) that hold at base and do not reference the fixed path.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "zero_secs_minus_one", "cmd": "cargo test --offline --test vb_signdur_panic zero_secs_minus_one_nano_is_err"},
+      {"name": "zero_secs_max_neg_subsec", "cmd": "cargo test --offline --test vb_signdur_panic zero_secs_max_negative_subsec_is_err"},
+      {"name": "zero_secs_half_neg_subsec", "cmd": "cargo test --offline --test vb_signdur_panic zero_secs_half_negative_subsec_is_err"}
+    ],
+    "pass_to_pass": [
+      {"name": "non_negative_roundtrip", "cmd": "cargo test --offline --test vb_regression non_negative_roundtrips_ok"},
+      {"name": "negative_seconds_errors", "cmd": "cargo test --offline --test vb_regression negative_seconds_already_errors"},
+      {"name": "from_std_roundtrip", "cmd": "cargo test --offline --test vb_regression from_std_duration_roundtrips"}
+    ]
+  },
+  "test_timeout_s": 600
+}

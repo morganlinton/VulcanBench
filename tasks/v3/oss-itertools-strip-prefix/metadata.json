@@ -1,0 +1,32 @@
+{
+  "id": "oss-itertools-strip-prefix",
+  "category": "feature",
+  "languages": ["rust"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-08",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "12b6ec6f91eb83eebe4ac150e53aca14365cd894",
+  "upstream": {
+    "url": "https://github.com/rust-itertools/itertools/pull/1104",
+    "issue": "https://github.com/rust-itertools/itertools/issues/1096",
+    "commit": "12b6ec6f91eb83eebe4ac150e53aca14365cd894"
+  },
+  "decontamination_notes": "Real feature from rust-itertools/itertools PR #1104, merged 2026-05-21, after model training cutoffs. Adds strip_prefix and strip_prefix_by to the Itertools trait (the iterator analogue of str::strip_prefix) plus a public StripPrefixError struct; on mismatch the error exposes the partially-consumed iterator, the prefix remainder, and the mismatched (Option<Item>, PrefixItem) pair for recovery. Repo sliced at the PR base commit (src/lib.rs, strip_prefix absent). To run in the network-isolated sandbox, dependencies are vendored (cargo vendor -> vendor/ with .cargo/config.toml replace-source); the criterion dev-dep and [[bench]] targets were removed to keep vendoring lean, and an offline build was verified with `docker run --network none ... cargo build --offline`. LOC is inflated by the vendored crates; the itertools source change is one file. MIT/Apache-2.0 LICENSE preserved. Coverage floor: 4 fail_to_pass tests (Ok/empty/full prefix, mismatch state recovery, exhausted-iterator None, cross-type predicate via strip_prefix_by), each of which fails to even compile at base (the items do not exist), plus a strip_prefix-independent regression guard over interleave/chunks/dedup/cartesian_product.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "ok_and_empty", "cmd": "cargo test --offline --test vb_strip_prefix vb_strip_prefix_ok_and_empty"},
+      {"name": "mismatch_recovers", "cmd": "cargo test --offline --test vb_strip_prefix vb_strip_prefix_mismatch_recovers_state"},
+      {"name": "exhausted", "cmd": "cargo test --offline --test vb_strip_prefix vb_strip_prefix_exhausted_iterator"},
+      {"name": "by_cross_type", "cmd": "cargo test --offline --test vb_strip_prefix vb_strip_prefix_by_cross_type_predicate"}
+    ],
+    "pass_to_pass": [
+      {"name": "itertools_unaffected", "cmd": "cargo test --offline --test vb_regression vb_existing_itertools_unaffected"}
+    ]
+  },
+  "test_timeout_s": 600
+}

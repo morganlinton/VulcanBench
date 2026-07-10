@@ -1,0 +1,56 @@
+{
+  "id": "oss-networkx-leiden-communities",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-07-03",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "4857d9a2580810605facc26f3dc7d23f8c04c1cd",
+  "upstream": {
+    "url": "https://github.com/networkx/networkx/pull/8509",
+    "issue": "https://github.com/networkx/networkx/pull/8509",
+    "commit": "4857d9a2580810605facc26f3dc7d23f8c04c1cd"
+  },
+  "decontamination_notes": "Real feature from networkx/networkx PR #8509, merged 2026-05-12, after model training cutoffs. A 600-line net-new native implementation of the full Leiden community-detection algorithm (local move, refinement, aggregation, CPM quality), where only a backend-dispatch stub existed at base. Graded on exact reproduction of the reference partition for fixed graph/seed/resolution plus validity and no-regression checks; a merely-plausible implementation that produces a different partition fails. Repo sliced at base commit (193k LOC); BSD LICENSE preserved. networkx has no required runtime deps, so this runs in the base sandbox image with PYTHONPATH=. CALIBRATED 2026-07-04: exact-seed-partition grading replaced by semantic grading (CPM quality thresholds on karate club + les miserables, community connectivity guarantee, resolution semantics, seed determinism) after benchmark runs showed the exact-match test required reproducing the reference's incidental RNG consumption order, which correct implementations cannot derive. Thresholds set below the reference's across-seed floor and far above degenerate/naive baselines.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "partition_quality",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_leiden_partition_quality -q"
+      },
+      {
+        "name": "communities_connected",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_leiden_communities_are_connected -q"
+      },
+      {
+        "name": "resolution",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_leiden_honors_resolution -q"
+      },
+      {
+        "name": "deterministic_seed",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_leiden_deterministic_for_seed -q"
+      },
+      {
+        "name": "partitions_generator",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_leiden_partitions_generator -q"
+      },
+      {
+        "name": "valid_partition",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_leiden_is_a_valid_partition -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "modularity_unaffected",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_existing_modularity_communities_unaffected -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300
+}

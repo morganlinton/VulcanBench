@@ -1,0 +1,31 @@
+{
+  "id": "oss-pflag-uintslice-hex",
+  "category": "bug_fix",
+  "languages": ["go"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:base",
+  "base_commit": "74752827e8d9c7a60d753adb5cb6ea8baf0ee396",
+  "upstream": {
+    "url": "https://github.com/spf13/pflag/pull/484",
+    "issue": "https://github.com/spf13/pflag/pull/484",
+    "commit": "74752827e8d9c7a60d753adb5cb6ea8baf0ee396"
+  },
+  "decontamination_notes": "Real bug fix from spf13/pflag PR #484, merged 2026-07-02, after model training cutoffs. UintSlice flags parsed each element with strconv.ParseUint(d, 10, 0) (base 10 only), so Go-style base prefixes 0x/0o/0b were rejected even though other pflag integer types accept them. The fix changes the base argument from 10 to 0 (automatic base detection) in the three UintSlice parse sites (Set, fromString, uintSliceConv) in uint_slice.go. Repo sliced at the PR base commit (7475282). pflag has zero external dependencies (stdlib only), so no vendoring is needed and the offline test runs with plain `go test` under --network none. BSD-3-Clause LICENSE preserved. This is a behavioral change (no new symbol), so the package compiles at base; the 3 fail_to_pass tests (hex, mixed hex/octal/binary, large hex) error out at base and pass after the fix, and the pass_to_pass decimal test passes at base and after. Hidden tests use the public FlagSet.UintSlice/GetUintSlice API.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "uintslice_hex", "cmd": "go test -run '^TestUintSliceHex$' ./osscheck/"},
+      {"name": "uintslice_mixed_radix", "cmd": "go test -run '^TestUintSliceMixedRadix$' ./osscheck/"},
+      {"name": "uintslice_hex_large", "cmd": "go test -run '^TestUintSliceHexLarge$' ./osscheck/"}
+    ],
+    "pass_to_pass": [
+      {"name": "uintslice_decimal_unaffected", "cmd": "go test -run '^TestUintSliceDecimalUnaffected$' ./osscheck/"}
+    ]
+  },
+  "test_timeout_s": 600
+}

@@ -1,0 +1,30 @@
+{
+  "id": "oss-semver-inc-dotted-prerelease",
+  "category": "bug_fix",
+  "languages": ["javascript"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": false,
+  "base_commit": "76416081a8413383cf6e24c82cafa438bd076d41",
+  "upstream": {
+    "url": "https://github.com/npm/node-semver/pull/870",
+    "issue": "https://github.com/npm/node-semver/pull/870",
+    "commit": "76416081a8413383cf6e24c82cafa438bd076d41"
+  },
+  "decontamination_notes": "Real bug fix from npm/node-semver PR #870, merged 2026-06-04, after model training cutoffs. SemVer#inc('prerelease', identifier) only compared the first prerelease component (this.prerelease[0]) against the identifier, so a DOTTED identifier (e.g. 'alpha.beta') never matched and the prerelease was reset instead of incrementing the numeric segment after the matched prefix. The fix (classes/semver.js) adds an isPrereleaseIdentifier helper that matches the dotted identifier against the leading prerelease components and increments the segment that follows. Repo sliced at the PR base commit (76416081); the whole node-semver library is included so require('./index') resolves. Pure JavaScript, zero external dependencies; hidden tests run under Node's built-in node:test (no image needed). ISC LICENSE preserved. Coverage floor: 3 fail_to_pass tests over dotted identifiers (partial prefix, full prefix, and a longer nested prefix), each of which resets the prerelease at base and increments correctly after the fix, plus a pass_to_pass regression guard (plain prerelease increment with no identifier, single-token identifier, and unrelated inc/valid ops) that holds at base and after the fix.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "inc_dotted_alpha_beta", "cmd": "node --test --test-name-pattern='^vb inc dotted alpha beta$' vb_inc_prerelease.test.js"},
+      {"name": "inc_dotted_alpha_beta_5", "cmd": "node --test --test-name-pattern='^vb inc dotted alpha beta 5$' vb_inc_prerelease.test.js"},
+      {"name": "inc_dotted_alpha_10_beta", "cmd": "node --test --test-name-pattern='^vb inc dotted alpha 10 beta$' vb_inc_prerelease.test.js"}
+    ],
+    "pass_to_pass": [
+      {"name": "semver_unaffected", "cmd": "node --test --test-name-pattern='^vb existing semver unaffected$' vb_regression.test.js"}
+    ]
+  },
+  "test_timeout_s": 600
+}

@@ -1,0 +1,33 @@
+{
+  "id": "oss-jiff-date-day-lt1",
+  "category": "bug_fix",
+  "languages": ["rust"],
+  "difficulty": "medium",
+  "task_complexity": "localized",
+  "created": "2026-07-09",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "243d8a04ccdae0663390c4d17bf85e9a27891ddb",
+  "upstream": {
+    "url": "https://github.com/BurntSushi/jiff/pull/524",
+    "issue": "https://github.com/BurntSushi/jiff/pull/524",
+    "commit": "243d8a04ccdae0663390c4d17bf85e9a27891ddb"
+  },
+  "decontamination_notes": "Real bug fix from BurntSushi/jiff PR #524, merged 2026-02-22, after model training cutoffs. jiff::civil::Date::new validated only the upper day bound (day > days_in_month) and accepted day == 0 or negative days, producing invalid Date values. The fix adds a `day < 1` guard to the range check in src/civil/date.rs. Repo sliced at the PR base commit (243d8a04). Built offline with zero external dependencies: jiff is trimmed to a standalone single crate (no workspace sub-crates, no optional/dev deps, no existing integration tests) that compiles with --no-default-features --features std, so no vendoring is needed. LOC is the real jiff source. Unlicense/MIT LICENSE preserved. Coverage floor: 3 fail_to_pass tests (day 0 and two negative days), each accepted as Ok at base and rejected as Err after the fix, plus 3 pass_to_pass regression guards (leap day ok, non-leap Feb 29 err, ordinary date ok) that hold at base and do not depend on the new guard.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "zero_day", "cmd": "cargo test --offline --test vb_date_day zero_day_is_err"},
+      {"name": "negative_day", "cmd": "cargo test --offline --test vb_date_day negative_day_is_err"},
+      {"name": "large_negative_day", "cmd": "cargo test --offline --test vb_date_day large_negative_day_is_err"}
+    ],
+    "pass_to_pass": [
+      {"name": "leap_day_ok", "cmd": "cargo test --offline --test vb_regression leap_day_is_ok"},
+      {"name": "non_leap_feb29_err", "cmd": "cargo test --offline --test vb_regression non_leap_feb29_is_err"},
+      {"name": "ordinary_date_ok", "cmd": "cargo test --offline --test vb_regression ordinary_date_is_ok"}
+    ]
+  },
+  "test_timeout_s": 600
+}

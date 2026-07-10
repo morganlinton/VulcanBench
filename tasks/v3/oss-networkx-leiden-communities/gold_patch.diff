@@ -1,0 +1,1467 @@
+diff --git a/networkx/algorithms/community/leiden.py b/networkx/algorithms/community/leiden.py
+index a37ad659..a6d3ccbc 100644
+--- a/networkx/algorithms/community/leiden.py
++++ b/networkx/algorithms/community/leiden.py
+@@ -1,25 +1,33 @@
+ """Functions for detecting communities based on Leiden Community Detection
+ algorithm.
+-
+-These functions do not have NetworkX implementations.
+-They may only be run with an installable :doc:`backend </backends>`
+-that supports them.
+ """
+ 
++import functools
+ import itertools
++import math
++import random
+ from collections import deque
+ 
+ import networkx as nx
++from networkx.algorithms.community.quality import constant_potts_model, modularity
+ from networkx.utils import not_implemented_for, py_random_state
+ 
+ __all__ = ["leiden_communities", "leiden_partitions"]
+ 
+ 
+-@not_implemented_for("directed")
+ @py_random_state("seed")
+-@nx._dispatchable(edge_attrs="weight", implemented_by_nx=False)
+-def leiden_communities(G, weight="weight", resolution=1, max_level=None, seed=None):
+-    r"""Find a best partition of `G` using Leiden Community Detection (backend required)
++@nx._dispatchable(edge_attrs="weight")
++def leiden_communities(
++    G,
++    weight="weight",
++    resolution=1.0,
++    max_level=None,
++    seed=None,
++    quality_function="cpm",
++    theta=0.01,
++):
++    r"""Return the best set of communities of `G` using Leiden Community Detection
++    algorithm [1]_.
+ 
+     Leiden Community Detection is an algorithm to extract the community structure
+     of a network based on modularity optimization. It is an improvement upon the
+@@ -61,32 +69,34 @@ def leiden_communities(G, weight="weight", resolution=1, max_level=None, seed=No
+         used as a weight. If None then each edge has weight 1.
+     resolution : float, optional (default=1)
+         If resolution is less than 1, the algorithm favors larger communities.
+-        Greater than 1 favors smaller communities.
++        Greater than 1 favors smaller communities
+     max_level : int or None, optional (default=None)
+         The maximum number of levels (steps of the algorithm) to compute.
+         Must be a positive integer or None. If None, then there is no max
+-        level and the algorithm will run until converged.
++        level and the threshold parameter determines the stopping condition.
+     seed : integer, random_state, or None (default)
+         Indicator of random number generation state.
+         See :ref:`Randomness<randomness>`.
++    quality_function : str (default="cpm")
++        The algorithm optimises for a measure of quality. By default
++        the constant_potts_model is used, but this can be changed (e.g.
++        modularity)
++    theta : float (default=0.01)
++        Parameter that determines the degree of randomness in the
++        _refine_partition step of the algorithm,
+ 
+     Returns
+     -------
+     list
+         A list of disjoint sets (partition of `G`). Each set represents one community.
+-        All communities together contain all the nodes in `G`.
+ 
+     Examples
+     --------
+-    >>> import networkx as nx
+-    >>> G = nx.petersen_graph()
+-    >>> nx.community.leiden_communities(G, backend="example_backend")  # doctest: +SKIP
+-    [{2, 3, 5, 7, 8}, {0, 1, 4, 6, 9}]
+ 
+     Notes
+     -----
+-    The order in which the nodes are considered can affect the final output. In the algorithm
+-    the ordering happens using a random shuffle.
++    The order in which the nodes are considered can affect the final output.
++    In the algorithm the ordering happens using a random shuffle.
+ 
+     References
+     ----------
+@@ -98,7 +108,9 @@ def leiden_communities(G, weight="weight", resolution=1, max_level=None, seed=No
+     leiden_partitions
+     :any:`louvain_communities`
+     """
+-    partitions = leiden_partitions(G, weight, resolution, seed)
++
++    partitions = leiden_partitions(G, weight, resolution, seed, quality_function, theta)
++
+     if max_level is not None:
+         if max_level <= 0:
+             raise ValueError("max_level argument must be a positive integer or None")
+@@ -107,10 +119,16 @@ def leiden_communities(G, weight="weight", resolution=1, max_level=None, seed=No
+     return final_partition.pop()
+ 
+ 
+-@not_implemented_for("directed")
+ @py_random_state("seed")
+-@nx._dispatchable(edge_attrs="weight", implemented_by_nx=False)
+-def leiden_partitions(G, weight="weight", resolution=1, seed=None):
++@nx._dispatchable(edge_attrs="weight")
++def leiden_partitions(
++    G,
++    weight="weight",
++    resolution=1.0,
++    seed=None,
++    quality_function="cpm",
++    theta=0.01,
++):
+     """Yield partitions for each level of Leiden Community Detection (backend required)
+ 
+     Leiden Community Detection is an algorithm to extract the community
+@@ -156,7 +174,545 @@ def leiden_partitions(G, weight="weight", resolution=1, seed=None):
+     leiden_communities
+     :any:`louvain_partitions`
+     """
+-    raise NotImplementedError(
+-        "'leiden_partitions' is not implemented by networkx. "
+-        "Please try a different backend."
+-    )
++
++    partition = [{u} for u in G]
++    refinement_mapping = None
++
++    if nx.is_empty(G):
++        yield partition
++        return
++
++    is_directed = G.is_directed()
++    if G.is_multigraph():
++        # this is the same as how louvain handles multigraph inputs
++        graph = _convert_multigraph(G, weight, is_directed)
++    else:
++        # if the weight parameter is defined then we use this value for
++        # edge weights within the algorithm, defaulting to 1 where the
++        # attribute does not exist
++        # else if weight is None then all edges are given a weight of 1
++        if weight:
++            graph = G.__class__()
++            graph.add_nodes_from(G)
++            graph.add_weighted_edges_from(G.edges(data=weight, default=1))
++        else:
++            graph = G.__class__()
++            graph.add_nodes_from(G)
++            graph.add_edges_from(G.edges())
++            nx.set_edge_attributes(graph, 1, name="weight")
++
++    # The following setup stage depends on the choice of quality
++    # function. In particular, this stage must set three things:
++    # 1) set the function quality_function
++    # 2) set the corresponding quality_delta function
++    # 3) set the specific attributes required to compute the
++    #    quality_function and quality_delta
++
++    # the quality_delta function computes the partial quality delta contributed by
++    # adding nodes_to_add to community.
++    # Corresponding value from removing U from C is computed by taking
++    # the negative  -1 * quality_delta(U, C-U)
++    # to compute the overall quality delta from moving node u from A to B we have
++    # q_delta = quality_delta({u}, B) - quality_delta({u}, A-{u})
++
++    if quality_function == "cpm":
++        # Setup for constant potts model
++        node_attributes = ["node_weight"]
++        nx.set_node_attributes(graph, 1, name="node_weight")
++
++        quality_function = functools.partial(
++            constant_potts_model,
++            resolution=resolution,
++            node_weight="node_weight",
++            weight="weight",
++        )
++
++        if is_directed:
++            # Setup for directed constant potts model
++            gamma = 2 * resolution
++
++            def quality_delta(nodes_to_add, community):
++                comm_size = sum(graph.nodes[u]["node_weight"] for u in community)
++                nodes_size = sum(graph.nodes[u]["node_weight"] for u in nodes_to_add)
++                E_in = sum(
++                    wt
++                    for _, v, wt in graph.edges(nodes_to_add, data="weight")
++                    if v in community
++                )
++                E_out = sum(
++                    wt
++                    for _, v, wt in graph.edges(community, data="weight")
++                    if v in nodes_to_add
++                )
++                return E_in + E_out - gamma * comm_size * nodes_size
++        else:
++            # Setup for undirected constant potts model
++            gamma = resolution
++
++            def quality_delta(nodes_to_add, community):
++                comm_size = sum(graph.nodes[u]["node_weight"] for u in community)
++                nodes_size = sum(graph.nodes[u]["node_weight"] for u in nodes_to_add)
++                E = sum(
++                    wt
++                    for _, v, wt in graph.edges(nodes_to_add, data="weight")
++                    if v in community
++                )
++                return E - gamma * comm_size * nodes_size
++
++    elif quality_function == "modularity":
++        # Setup for (unipartite) modularity
++
++        # the modualrity function throws an zero division error
++        # if the graph consists of only a single node.
++        # if leiden aggregates the graph to a single node then
++        # we just need to retun a value that ensure the algorithm
++        # stops
++        def guarded_modularity(G, P):
++
++            try:
++                return modularity(G, P, resolution=resolution)
++            except ZeroDivisionError:
++                return float("inf")
++
++        quality_function = guarded_modularity
++        if is_directed:
++            # Setup for directed modularity
++            node_attributes = ["in_degree", "out_degree"]
++            in_degrees = graph.in_degree(weight="weight")
++            out_degrees = graph.out_degree(weight="weight")
++
++            m = sum(wt for u, wt in in_degrees) + sum(wt for u, wt in out_degrees)
++            for u, v, data in graph.edges(data=True):
++                data["weight"] *= 1 / m
++
++            nx.set_node_attributes(
++                graph, {u: in_deg / m for u, in_deg in in_degrees}, "in_degree"
++            )
++            nx.set_node_attributes(
++                graph, {u: out_deg / m for u, out_deg in out_degrees}, "out_degree"
++            )
++
++            gamma = 2 * resolution
++
++            def quality_delta(nodes_to_add, community):
++                nodes_in = sum(graph.nodes[u]["in_degree"] for u in nodes_to_add)
++                nodes_out = sum(graph.nodes[u]["out_degree"] for u in nodes_to_add)
++                comm_in = sum(graph.nodes[u]["in_degree"] for u in community)
++                comm_out = sum(graph.nodes[u]["out_degree"] for u in community)
++                E_to = sum(
++                    wt
++                    for _, v, wt in graph.edges(nodes_to_add, data="weight")
++                    if v in community
++                )
++                E_from = sum(
++                    wt
++                    for _, v, wt in graph.edges(community, data="weight")
++                    if v in nodes_to_add
++                )
++                return (E_to + E_from) - gamma * (
++                    nodes_in * comm_out + nodes_out * comm_in
++                )
++
++        else:
++            # Setup for undirected modularity
++            node_attributes = ["degree"]
++            degrees = graph.degree(weight="weight")
++
++            m = sum(deg for u, deg in degrees) / 2
++            for u, v, data in graph.edges(data=True):
++                data["weight"] *= 1 / m
++            nx.set_node_attributes(graph, {u: deg / m for u, deg in degrees}, "degree")
++            gamma = 2 * resolution
++
++            def quality_delta(nodes_to_add, community):
++                nodes_size = sum(graph.nodes[u]["degree"] for u in nodes_to_add)
++                comm_size = sum(graph.nodes[u]["degree"] for u in community)
++                E_D = sum(
++                    wt
++                    for u, v, wt in graph.edges(nodes_to_add, data="weight")
++                    if v in community
++                )
++                return E_D - gamma * nodes_size * comm_size
++
++    elif quality_function == "barber_modularity":
++        # Setup for undirected bipartite barber modularity (not yet fully implemented)
++
++        if is_directed:
++            raise nx.NetworkXError("barber_modularity not implemented for DiGraph")
++
++        # quality_function should be defined inline rather than
++        # importing nx.bipartite.community.modularity as the
++        # function within this algorithm needs to accept the
++        # aggregated graphs which are not bipartite and therefore
++        # requires a variation of the algorithm
++
++        def barber_modularity():
++            return
++
++        quality_function = barber_modularity
++
++        node_attributes = ["red_degree", "blue_degree"]
++
++        red_nodes = {u for u, c in G.nodes(data="bipartite") if c == 0}
++        blue_nodes = {u for u, c in G.nodes(data="bipartite") if c == 1}
++
++        # expect the bipartite graph G to follow the NetworkX convention to have node
++        # a node attribe bipartite taking value 0 or 1, so should check this using
++        # something like the following:
++        #
++        # if len(red_nodes.union(blue_nodes)) < len(G):
++        #    raise nx.NetworkXError(
++        #         "expecting node attribute 'bipartite', with values 0 or 1"
++        #     )
++
++        degrees = graph.degree(weight="weight")
++        m = sum(deg for u, deg in degrees) / 2
++
++        red_degree = {u: G.degree(u, weight="weight") / m for u in red_nodes}
++        for u in blue_nodes:
++            red_degree[u] = 0
++
++        blue_degree = {u: G.degree(u, weight="weight") / m for u in blue_nodes}
++        for u in red_nodes:
++            blue_degree[u] = 0
++
++        nx.set_node_attributes(graph, red_degree, "red_degree")
++        nx.set_node_attributes(graph, blue_degree, "blue_degree")
++
++        for u, v, data in graph.edges(data=True):
++            data["weight"] *= 1 / m
++
++        def quality_delta(nodes_to_add, community):
++            nodes_red = sum(graph.nodes[u]["red_degree"] for u in nodes_to_add)
++            nodes_blue = sum(graph.nodes[u]["blue_degree"] for u in nodes_to_add)
++            comm_red = sum(graph.nodes[u]["red_degree"] for u in community)
++            comm_blue = sum(graph.nodes[u]["blue_degree"] for u in community)
++            E = sum(
++                wt
++                for _, v, wt in graph.edges(nodes_to_add, data="weight")
++                if v in community
++            )
++            return E - resolution * (nodes_red * comm_blue + nodes_blue * comm_red)
++
++        raise nx.NetworkXError("barber_modularity not implemented for leiden")
++    else:
++        raise nx.NetworkXError(f"{quality_function} not implemented for DiGraph")
++
++    # The setup phase has ended, the main algorithm now begins.
++    Q = quality_function(graph, partition)
++
++    improvement_made = True
++
++    while improvement_made:
++        # _move_nodes_fast plays the same role as _one_level in the
++        # networkx implementation of the louvain algorithm
++        # when moving nodes to find the greatest increase in quality,
++
++        # leiden initialises nodes into communities based on the
++        # unrefined partition of the previous stage. The dict
++        # refinement_mapping specifies how these initial communities
++        # are to be set
++        P = _move_nodes_fast(graph, refinement_mapping, quality_delta, seed=seed)
++
++        P_refined = _refine_partition(graph, P, quality_delta, seed=seed, theta=theta)
++
++        P_refined_flat = [comm for P_ref in P_refined for comm in P_ref]
++
++        # Stop when overall change in quality is close to zero.
++        Q_new = quality_function(graph, P_refined_flat)
++        improvement_made = (Q_new - Q) > 0.0000001
++        Q = Q_new
++
++        graph, refinement_mapping = _create_aggregate_graph(
++            graph, P_refined, node_attributes
++        )
++
++        # the partition of the original underlying graph is read from
++        # the node attribute 'nodes', which is set during _create_aggregate_graph(...)
++        # Each node in graph represents a community in the original graph
++        # and the node holds this information in the attribute 'nodes'.
++        yield [set(graph.nodes[u]["nodes"]).copy() for u in graph]
++
++    return
++
++
++def _move_nodes_fast(G, refinement_mapping, quality_delta_func, seed):
++
++    # Unlike louvain, instead of beginning each iteration with the singleton
++    # partition, each iteration uses the (unrefined) partition from the previous
++    # step as the starting communities when moving nodes.
++    # This section of code initilises nodes into those communities.
++    # if no partition is passed from the previous step (i.e. during the
++    # first iteration) then this is skipped and the singleton partition is used.
++    if refinement_mapping:
++        P = [set() for _ in range(len(refinement_mapping.values()))]
++        node2com = {}
++        for i, u in enumerate(G):
++            P[refinement_mapping[i]].add(u)
++            node2com[u] = refinement_mapping[i]
++    else:
++        P = [{u} for u in G]
++        node2com = {u: i for i, u in enumerate(G)}
++
++    rand_nodes = list(G.nodes)
++    seed.shuffle(rand_nodes)
++    node_queue = deque(rand_nodes)
++
++    while node_queue:
++        u = node_queue.pop()
++        neighbor_coms = {node2com[v] for v in nx.all_neighbors(G, u)}
++
++        best_delta = 0
++        old_com = node2com[u]
++        best_com = old_com
++
++        # this value is the overall change in quality that occurs
++        # when node u is removed from its current community
++        q_rem = quality_delta_func({u}, P[old_com] - {u})
++
++        # for each node in the queue, we measure the change in quality
++        # from moving that node to each other community, keeping track of
++        # the community that gives the greatest improvement best_com
++        for new_com in neighbor_coms:
++            if new_com != old_com:
++                # this quantity is the overall change in quality that
++                # occurs wen the node u is added the the new community
++                q_add = quality_delta_func({u}, P[new_com])
++
++                # the overall change in quality therefore from moving
++                # node u from old_com to new_com is as follows
++                Q_delta = q_add - q_rem
++
++                if Q_delta > best_delta:
++                    best_delta = Q_delta
++                    best_com = new_com
++
++        if best_delta > 0:
++            node2com[u] = best_com
++
++            P[old_com].remove(u)
++            P[best_com].add(u)
++
++            neighbours = set(G.adj[u])
++            nodes_to_visit = neighbours - P[best_com]
++
++            for v in nodes_to_visit:
++                if v not in node_queue:
++                    node_queue.appendleft(v)
++
++    P = list(filter(None, P))
++
++    return P
++
++
++def _refine_partition(
++    G,
++    P,
++    quality_delta_func,
++    seed,
++    theta,
++):
++
++    P_refined = []
++
++    for C in P:
++        # each community C in the partition P
++        # is split into a set of smaller communities
++        # resulting in a refined partition
++
++        C_refined = _merge_node_subset(
++            G,
++            C,
++            quality_delta_func,
++            seed,
++            theta,
++        )
++        C_refined = list(filter(None, C_refined))
++        P_refined.append(C_refined)
++
++    return P_refined
++
++
++def _merge_node_subset(
++    G,
++    C,
++    quality_delta_func,
++    seed,
++    theta,
++):
++
++    node2com = {u: i for i, u in enumerate(C)}
++    C_refined = [{u} for u in C]
++    # first, the sufficiently well-connected nodes within S
++    # are identified and added to the set R.
++    R = {u for u in C if quality_delta_func({u}, C - {u}) > 0}
++
++    for u in R:
++        comm = node2com[u]
++        if C_refined[comm] != {u}:
++            continue
++        # if the community that u belongs to is the singleton {u}, then
++        # we will proceed to merge it probabilistically with another
++        # community within C.
++
++        # first we identify candidate communities to merge u into
++        # and then the final community is randomly selected from these
++        # according to a probability distribution which is partly
++        # defined by the relative quality_delta (bigger increase in
++        # quality makes choosing that community more likely, but
++        # the algorithm does not greedily choose the greatest increase)
++
++        # we therefore track both the communities and their respective
++        # probabilities in order to define the probabilty distribution
++        # to select the community that u will be moved into
++
++        # if u is not in a singleton partition then we move on to the
++        # next node.
++        candidate_comm = []
++        candidate_comm_q_delta = []
++
++        # this is the change in quality that occurs from removing node
++        # u from its current community
++        q_rem = quality_delta_func({u}, C_refined[comm] - {u})
++        for i, new_comm in enumerate(C_refined):
++            if comm == i:
++                # we only want to consider moving u to a different
++                # community, not its current community.
++                continue
++
++            # We only consider merging u into a community that
++            # is within S. This is what is means for the resulting
++            # partition to be a refinement of S.
++
++            # this application of quality_delta_func relates to the
++            # definition of T in line :37 from pseudocode in paper
++            if quality_delta_func(new_comm, C - new_comm) > 0:
++                # the change in quality the occurs from moving node u
++                # into the new community
++                q_add = quality_delta_func({u}, C_refined[i])
++
++                # the overall quality delta is therefore the sum
++                # of the change in quality from removing u from its
++                # starting community, and the change of quality
++                # from adding it to the new community
++
++                Q_delta = q_add - q_rem
++
++                if Q_delta > 0:
++                    candidate_comm.append(i)
++                    candidate_comm_q_delta.append(Q_delta)
++
++        # if there are candidate communities identified then
++        # one is selected at random, and u is added to that
++        # community
++        if candidate_comm:
++            # the probability distribution that the new community it drawn
++            # from is defined in terms of the quality delta associated
++            # with the move to each community.
++
++            # If moving u to community C results in a quality delta QC,
++            # the relative frequency withi which C will be chosen is
++            # proportional to
++            #
++            #       math.exp(QC/theta)
++            #
++            # Since computing large exponentials can cause overflow
++            # errors, we use an equivalent form that computes normalised
++            # values with the same ratios
++            max_delta = max(candidate_comm_q_delta)
++            candidate_comm_prob = [
++                math.exp((x - max_delta) / theta) for x in candidate_comm_q_delta
++            ]
++
++            new_comm = seed.choices(candidate_comm, weights=candidate_comm_prob)[0]
++
++            C_refined[comm].remove(u)
++            C_refined[new_comm].add(u)
++            node2com[u] = new_comm
++
++    return C_refined
++
++
++def _create_aggregate_graph(G, refined_communities_list, node_attributes):
++    """
++    Generate a new graph based on the partitions of a given graph
++
++    node_attributes is a list of attributes that are required for the
++    given choice of quality function. When aggregating a community (set
++    of nodes) into a new node of the aggregated graph, the value for
++    each attribute is the sum of the constituent nodes.
++    """
++
++    H = G.__class__()
++    old2new = {}
++
++    refinement_mapping = {}
++    new_node_id = 0
++    for partition_index, community in enumerate(refined_communities_list):
++        for refined_community in community:
++            # each refined_community from the refined_partiton defines
++            # a node in the new aggregated graph
++
++            refinement_mapping[new_node_id] = partition_index
++
++            agg_vals = {attribute: 0 for attribute in node_attributes}
++
++            # will contain the nodes defining a community
++            # in the original graph
++            original_nodes = set()
++
++            # old_node is node from the previous iteration
++            # i.e. aggregated graph from the previous
++            # stage, not the original graph
++            for old_node in refined_community:
++                for node_attribute in node_attributes:
++                    agg_vals[node_attribute] += G.nodes[old_node][node_attribute]
++
++                old2new[old_node] = new_node_id
++                original_nodes.update(G.nodes[old_node].get("nodes", {old_node}))
++
++            H.add_node(new_node_id, nodes=original_nodes, **agg_vals)
++
++            new_node_id += 1
++
++    for u, v, uv_weight in G.edges(data="weight"):
++        new_u = old2new[u]
++        new_v = old2new[v]
++        if new_u != new_v:
++            if H.has_edge(new_u, new_v):
++                H.edges[(new_u, new_v)]["weight"] += uv_weight
++            else:
++                H.add_edge(new_u, new_v, weight=uv_weight)
++
++    return H, refinement_mapping
++
++
++def _convert_multigraph(G, weight, is_directed):
++    """Convert a Multigraph to normal Graph"""
++    if is_directed:
++        H = nx.DiGraph()
++    else:
++        H = nx.Graph()
++
++    H.add_nodes_from(G)
++    for u, v, wt in G.edges(data=weight, default=1):
++        if H.has_edge(u, v):
++            H[u][v]["weight"] += wt
++        else:
++            H.add_edge(u, v, weight=wt)
++    return H
++
++
++def _is_valid_refinement(p, ref_p):
++    """
++    helper function useful during debugging, checking whether
++    a refined partition ref_p is a true refinement of a partition p
++    """
++    val = True
++    for c1 in ref_p:
++        for c2 in p:
++            if c1.issubset(c2):
++                break
++        else:
++            val = False
++    return val
+diff --git a/networkx/algorithms/community/quality.py b/networkx/algorithms/community/quality.py
+index 1622f893..13e266b6 100644
+--- a/networkx/algorithms/community/quality.py
++++ b/networkx/algorithms/community/quality.py
+@@ -279,6 +279,9 @@ def _cpm_delta_partial_eval_remove(
+     q_add = _cpm_delta_partial_eval_add(G, u, B)
+ 
+     """
++
++    dir_factor = 2 if G.is_directed() else 1
++
+     A_prime = community - {node}
+ 
+     n_A_prime = sum(wt for u, wt in G.nodes(data=node_weight) if u in A_prime)
+@@ -287,7 +290,10 @@ def _cpm_delta_partial_eval_remove(
+ 
+     E_diff = sum(wt for _, v, wt in G.edges({node}, data=weight) if v in A_prime)
+ 
+-    return resolution * 2 * n_A_prime * u_wt - E_diff
++    if G.is_directed():
++        E_diff += sum(wt for _, v, wt in G.edges(A_prime, data=weight) if v in {node})
++
++    return resolution * dir_factor * n_A_prime * u_wt - E_diff
+ 
+ 
+ def _cpm_delta_partial_eval_add(
+@@ -300,6 +306,8 @@ def _cpm_delta_partial_eval_add(
+ 
+     for more details.
+     """
++    dir_factor = 2 if G.is_directed() else 1
++
+     n_B = sum(wt for u, wt in G.nodes(data=node_weight) if u in community)
+ 
+     # could optimise by passing u_wt directly as a parameter rather than
+@@ -307,15 +315,41 @@ def _cpm_delta_partial_eval_add(
+     u_wt = G.nodes[node][node_weight]
+ 
+     E_D = sum(wt for _, v, wt in G.edges({node}, data=weight) if v in community)
+-    return E_D - resolution * 2 * n_B * u_wt
++    if G.is_directed():
++        E_D += sum(wt for _, v, wt in G.edges(community, data=weight) if v in {node})
++
++    return E_D - resolution * dir_factor * n_B * u_wt
++
++
++def _quality_delta_cpm_directed(
++    G, nodes_to_add, community, resolution, weight="weight", node_weight="node_weight"
++):
++    n_size = sum(G.nodes[u][node_weight] for u in nodes_to_add)
++    comm_size = sum(G.nodes[u][node_weight] for u in community)
++    E_D_out = sum(
++        wt for _, v, wt in G.edges(nodes_to_add, data=weight) if v in community
++    )
++    E_D_in = sum(
++        wt for _, v, wt in G.edges(community, data=weight) if v in nodes_to_add
++    )
++    return E_D_out + E_D_in - resolution * 2 * n_size * comm_size
++
++
++def _quality_delta_cpm_undirected(
++    G, nodes_to_add, community, resolution, weight="weight", node_weight="node_weight"
++):
++    n_size = sum(G.nodes[u][node_weight] for u in nodes_to_add)
++    comm_size = sum(G.nodes[u][node_weight] for u in community)
++    E_D = sum(wt for _, v, wt in G.edges(nodes_to_add, data=weight) if v in community)
++    return E_D - resolution * n_size * comm_size
+ 
+ 
+ def constant_potts_model(
+     G,
+     communities,
+-    weight,
+-    node_weight,
+-    resolution,
++    weight="weight",
++    node_weight="node_weight",
++    resolution=1,
+ ):
+     r"""
+     Computes the Constant Potts Model, which is a measure of quality of a
+@@ -397,14 +431,29 @@ def constant_potts_model(
+        resolution-limit-free community detection"
+        <https://arxiv.org/abs/1104.3083>
+     """
++    is_directed = G.is_directed()
++    if is_directed:
+ 
+-    def community_contribution(community):
+-        comm = set(community)
+-        E_c = sum(wt for u, v, wt in G.edges(comm, data=weight, default=1) if v in comm)
++        def community_contribution(community):
++            comm = set(community)
++            E_c = sum(
++                wt for u, v, wt in G.edges(comm, data=weight, default=1) if v in comm
++            )
++
++            n_c = sum(G.nodes[node].get(node_weight, 1) for node in community)
++
++            return E_c - resolution * (n_c**2)
++    else:
++
++        def community_contribution(community):
++            comm = set(community)
++            E_c = sum(
++                wt for u, v, wt in G.edges(comm, data=weight, default=1) if v in comm
++            )
+ 
+-        n_c = sum(G.nodes[node].get(node_weight, 1) for node in community)
++            n_c = sum(G.nodes[node].get(node_weight, 1) for node in community)
+ 
+-        return E_c - resolution * (n_c**2)
++            return E_c - resolution * (n_c**2) / 2
+ 
+     return sum(community_contribution(c) for c in communities)
+ 
+diff --git a/networkx/algorithms/community/tests/test_leiden.py b/networkx/algorithms/community/tests/test_leiden.py
+index 7e61b94c..5ee15ea8 100644
+--- a/networkx/algorithms/community/tests/test_leiden.py
++++ b/networkx/algorithms/community/tests/test_leiden.py
+@@ -2,52 +2,42 @@ import pytest
+ 
+ import networkx as nx
+ from networkx.algorithms.community import leiden_communities, leiden_partitions
++from networkx.algorithms.community.quality import constant_potts_model, modularity
+ 
+-# Leiden is not yet implemented by networkx, so only run tests in this file for
+-# backends that implement Leiden.
+-no_backends_for_leiden_communities = (
+-    "not set(nx.config.backend_priority.algos) & leiden_communities.backends"
+-)
+-
+-no_backends_for_leiden_partitions = (
+-    "not set(nx.config.backend_priority.algos) & leiden_partitions.backends"
+-)
+ 
++def test_modularity_increase():
+ 
+-def test_leiden_with_nx_backend():
+-    G = nx.karate_club_graph()
+-    with pytest.raises(NotImplementedError):
+-        nx.community.leiden_partitions(G, backend="networkx")
+-    with pytest.raises(NotImplementedError):
+-        nx.community.leiden_communities(G, backend="networkx")
++    # by default leiden_communities uses constant_potts_model as the quality
++    # function being optimised, not modularity.
+ 
++    # The equivalent test test_cpm_increase is implemented below using constant_potts_model
++    # and another test using modularity as the explicit quality function
++    # test_modularity_increase_qf_parameter is also implemented below
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+-def test_modularity_increase():
+     G = nx.LFR_benchmark_graph(
+         250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
+     )
+     partition = [{u} for u in G.nodes()]
+-    mod = nx.community.modularity(G, partition)
+-    partition = nx.community.leiden_communities(G)
++    q_mod = nx.community.modularity(G, partition)
++    partition = nx.community.leiden_communities(
++        G, quality_function="modularity", resolution=0.2
++    )
+ 
+-    assert nx.community.modularity(G, partition) > mod
++    assert nx.community.modularity(G, partition) > q_mod
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+ def test_valid_partition():
+     G = nx.LFR_benchmark_graph(
+         250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
+     )
+-    partition = nx.community.leiden_communities(G)
++    partition = nx.community.leiden_communities(G, resolution=0.1, seed=10)
+ 
+     assert nx.community.is_partition(G, partition)
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_partitions)
+ def test_partition_iterator():
+     G = nx.path_graph(15)
+-    parts_iter = nx.community.leiden_partitions(G, seed=42)
++    parts_iter = nx.community.leiden_partitions(G, resolution=0.2, seed=42)
+     first_part = next(parts_iter)
+     first_copy = [s.copy() for s in first_part]
+ 
+@@ -57,7 +47,6 @@ def test_partition_iterator():
+     assert first_copy[0] == first_part[0]
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+ def test_none_weight_param():
+     G = nx.karate_club_graph()
+     nx.set_edge_attributes(
+@@ -72,38 +61,59 @@ def test_none_weight_param():
+     assert partition2 != partition3
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+ def test_quality():
+     G = nx.LFR_benchmark_graph(
+         250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
+     )
+     H = nx.MultiGraph(G)
+ 
+-    partition = nx.community.leiden_communities(G)
+-    partition2 = nx.community.leiden_communities(H)
++    partition = nx.community.leiden_communities(
++        G, quality_function="modularity", resolution=0.05, seed=10
++    )
++    partition2 = nx.community.leiden_communities(
++        H, quality_function="modularity", resolution=0.05, seed=10
++    )
++
++    quality = nx.community.partition_quality(G, partition)[0]
++    quality2 = nx.community.partition_quality(H, partition2)[0]
++
++    assert quality >= 0.45
++    assert quality2 >= 0.45
++
++
++def test_quality_cpm():
++    G = nx.LFR_benchmark_graph(
++        250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
++    )
++    H = nx.MultiGraph(G)
++    singleton_partition = [{u} for u in G]
++
++    r = 0.05
++    partition = nx.community.leiden_communities(G, resolution=r, seed=10)
++    partition2 = nx.community.leiden_communities(H, resolution=r, seed=10)
+ 
+     quality = nx.community.partition_quality(G, partition)[0]
+     quality2 = nx.community.partition_quality(H, partition2)[0]
+ 
+-    assert quality >= 0.65
+-    assert quality2 >= 0.65
++    assert quality > 0.45
++    assert quality2 > 0.45
++    assert quality > nx.community.partition_quality(G, singleton_partition)[0]
++    assert quality2 > nx.community.partition_quality(H, singleton_partition)[0]
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+ def test_resolution():
+     G = nx.LFR_benchmark_graph(
+         250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
+     )
+ 
+-    partition1 = nx.community.leiden_communities(G, resolution=0.5, seed=12)
+-    partition2 = nx.community.leiden_communities(G, seed=12)
+-    partition3 = nx.community.leiden_communities(G, resolution=2, seed=12)
++    partition1 = nx.community.leiden_communities(G, resolution=0.05, seed=12)
++    partition2 = nx.community.leiden_communities(G, resolution=0.10, seed=12)
++    partition3 = nx.community.leiden_communities(G, resolution=0.5, seed=12)
+ 
+-    assert len(partition1) <= len(partition2)
+-    assert len(partition2) <= len(partition3)
++    assert len(partition1) < len(partition2)
++    assert len(partition2) < len(partition3)
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+ def test_empty_graph():
+     G = nx.Graph()
+     G.add_nodes_from(range(5))
+@@ -111,28 +121,210 @@ def test_empty_graph():
+     assert nx.community.leiden_communities(G) == expected
+ 
+ 
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+-def test_directed_not_implemented():
+-    G = nx.cycle_graph(4, create_using=nx.DiGraph)
+-    with pytest.raises(nx.NetworkXNotImplemented):
+-        nx.community.leiden_communities(G)
+-
+-
+-@pytest.mark.skipif(no_backends_for_leiden_partitions)
+-@pytest.mark.skipif(no_backends_for_leiden_communities)
+ def test_max_level():
+     G = nx.LFR_benchmark_graph(
+         250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
+     )
+-    parts_iter = nx.community.leiden_partitions(G, seed=42)
++    parts_iter = nx.community.leiden_partitions(G, resolution=0.1, seed=42)
+     for max_level, expected in enumerate(parts_iter, 1):
+-        partition = nx.community.leiden_communities(G, max_level=max_level, seed=42)
++        partition = nx.community.leiden_communities(
++            G, max_level=max_level, resolution=0.1, seed=42
++        )
+         assert partition == expected
++
+     assert max_level > 1  # Ensure we are actually testing max_level
+     # max_level is an upper limit; it's okay if we stop before it's hit.
+-    partition = nx.community.leiden_communities(G, max_level=max_level + 1, seed=42)
++    partition = nx.community.leiden_communities(
++        G, max_level=max_level + 1, resolution=0.1, seed=42
++    )
+     assert partition == expected
+     with pytest.raises(
+         ValueError, match="max_level argument must be a positive integer"
+     ):
+         nx.community.leiden_communities(G, max_level=0)
++
++
++def test_connected_communities_LFR():
++    G = nx.LFR_benchmark_graph(
++        250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
++    )
++
++    partition = nx.community.leiden.leiden_communities(
++        G, weight=None, resolution=0.3, theta=0.1, seed=10
++    )
++
++    for C in partition:
++        assert _check_connected_community(G, C)
++
++
++def test_quality_function_not_implemented():
++    G = nx.karate_club_graph()
++
++    with pytest.raises(nx.NetworkXError):
++        leiden_communities(
++            G, quality_function="bad_quality_function", resolution=0.2, seed=1
++        )
++
++
++def test_expected():
++    G = nx.karate_club_graph()
++
++    part = leiden_communities(G, resolution=0.2, seed=1)
++
++    part_expected = [
++        {0, 1, 2, 3, 7, 11, 12, 13, 17, 19, 21},
++        {16, 4, 5, 6, 10},
++        {9},
++        {8, 14, 15, 18, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33},
++    ]
++
++    assert _equivalent_partitions(part, part_expected)
++
++    G = nx.karate_club_graph()
++
++    part = leiden_communities(G, weight=None, resolution=0.2, seed=1)
++
++    part_expected = [
++        {11},
++        {12},
++        {0, 1, 2, 3, 7, 8, 13},
++        {17},
++        {19},
++        {30},
++        {9},
++        {16, 4, 5, 6, 10},
++        {21},
++        {24, 25, 28, 31},
++        {26},
++        {32, 33, 14, 15, 18, 20, 22, 23, 27, 29},
++    ]
++
++    assert _equivalent_partitions(part, part_expected)
++
++
++def test_connected_communities():
++    G = nx.karate_club_graph()
++    n = 42
++    r = 0.2
++    part = leiden_communities(G, resolution=r, seed=n)
++    for C in part:
++        assert _check_connected_community(G, C)
++
++
++def test_connected_communities_modularity():
++    G = nx.karate_club_graph()
++    n = 42
++    r = 0.3
++    part = leiden_communities(
++        G, weight=None, quality_function="modularity", resolution=r, seed=n
++    )
++    for C in part:
++        assert _check_connected_community(G, C)
++
++
++def test_connected_communities_no_weights():
++    G = nx.karate_club_graph()
++    r = 0.3
++    part = leiden_communities(G, weight=None, resolution=r, seed=111)
++    for C in part:
++        assert _check_connected_community(G, C)
++
++
++def test_directed_graphs_modularity():
++    G = nx.gn_graph(n=100, seed=11)
++    assert nx.is_directed(G)
++    comms = leiden_communities(
++        G, quality_function="modularity", weight=None, resolution=0.2, seed=11
++    )
++
++
++def test_directed_graphs_cpm():
++    G = nx.gn_graph(n=100, seed=11)
++    assert nx.is_directed(G)
++    comms = leiden_communities(G, weight=None, resolution=0.2, seed=11)
++
++
++def test_bipartite_graphs_modularity():
++    G = nx.bipartite.random_graph(10, 20, 0.2, seed=11)
++    with pytest.raises(nx.NetworkXError):
++        leiden_communities(
++            G, quality_function="barber_modularity", resolution=0.2, seed=1
++        )
++
++
++def test_bipartite_graphs_modularity_directed():
++    G = nx.bipartite.random_graph(10, 20, 0.2, directed=True, seed=11)
++    with pytest.raises(nx.NetworkXError):
++        leiden_communities(
++            G, quality_function="barber_modularity", resolution=0.2, seed=1
++        )
++
++
++def test_modularity_increase_qf_parameter():
++    G = nx.LFR_benchmark_graph(
++        250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
++    )
++    partition = [{u} for u in G.nodes()]
++    q_mod = nx.community.modularity(G, partition)
++    partition = leiden_communities(
++        G, resolution=0.1, quality_function="modularity", seed=10
++    )
++
++    assert nx.community.modularity(G, partition) > q_mod
++
++
++def test_cpm_increase():
++    G = nx.LFR_benchmark_graph(
++        250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
++    )
++    partition = [{u} for u in G.nodes()]
++    r = 0.3
++    cpm = constant_potts_model(
++        G, partition, weight=None, node_weight=None, resolution=r
++    )
++    partition = leiden_communities(G, resolution=r, seed=10)
++
++    assert constant_potts_model(G, partition, weight=None, resolution=r) > cpm
++
++
++def test_resolution_cpm():
++    G = nx.LFR_benchmark_graph(
++        250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
++    )
++
++    partition1 = leiden_communities(G, resolution=0.05, seed=12)
++    partition2 = leiden_communities(G, resolution=0.2, seed=12)
++    partition3 = leiden_communities(G, resolution=0.7, seed=12)
++
++    assert len(partition1) < len(partition2)
++    assert len(partition2) < len(partition3)
++
++
++def test_resolution_modularity():
++    G = nx.LFR_benchmark_graph(
++        250, 3, 1.5, 0.009, average_degree=5, min_community=20, seed=10
++    )
++
++    partition1 = leiden_communities(
++        G, quality_function="modularity", resolution=0.01, seed=10
++    )
++    partition2 = leiden_communities(
++        G, quality_function="modularity", resolution=2.0, seed=10
++    )
++    partition3 = leiden_communities(
++        G, quality_function="modularity", resolution=10.0, seed=10
++    )
++
++    assert len(partition1) < len(partition2)
++    assert len(partition2) < len(partition3)
++
++
++def _equivalent_partitions(P1, P2):
++    P1 = {frozenset(C) for C in P1}
++    P2 = {frozenset(C) for C in P2}
++    return P1 == P2
++
++
++def _check_connected_community(G, community):
++    C = G.subgraph(community).copy()
++    return nx.is_connected(C)
+diff --git a/networkx/algorithms/community/tests/test_quality.py b/networkx/algorithms/community/tests/test_quality.py
+index 36504349..15e4acf9 100644
+--- a/networkx/algorithms/community/tests/test_quality.py
++++ b/networkx/algorithms/community/tests/test_quality.py
+@@ -13,8 +13,8 @@ from networkx.algorithms.community import (
+     partition_quality,
+ )
+ from networkx.algorithms.community.quality import (
+-    _cpm_delta_partial_eval_add,
+-    _cpm_delta_partial_eval_remove,
++    _quality_delta_cpm_directed,
++    _quality_delta_cpm_undirected,
+     inter_community_edges,
+ )
+ 
+@@ -75,7 +75,147 @@ def test_modularity():
+     assert 2 / 9 == pytest.approx(modularity(G, C), abs=1e-7)
+ 
+ 
+-def test_cpm():
++def _validate_quality_delta(G, u, A, B, quality_func, delta_func, resolution):
++    all_nodes = set(G.nodes)
++    C = all_nodes - (A.union(B))
++    if C:
++        P = [A, B, C]
++    else:
++        P = [A, B]
++
++    A_prime = A - {u}
++    B_prime = B.union({u})
++
++    if C:
++        P_prime = [A_prime, B_prime, C]
++    else:
++        P_prime = [A_prime, B_prime]
++
++    Q_before = quality_func(G, P, resolution)
++    Q_after = quality_func(G, P_prime, resolution)
++    Q_delta = Q_after - Q_before
++
++    Q_fast_delta_rem = delta_func(G, {u}, A, resolution)
++    Q_fast_delta_add = delta_func(G, {u}, B, resolution)
++    Q_fast_delta = Q_fast_delta_add - Q_fast_delta_rem
++
++    return (Q_delta - Q_fast_delta) < 0.000000001
++
++
++def test_cpm_delta_undirected():
++    G = nx.barbell_graph(3, 0)
++    partition = [{0, 1, 2}, {3, 4}, {5}]
++    nx.set_node_attributes(G, 1, "node_weight")
++    nx.set_edge_attributes(G, 1, "weight")
++    r = 0.5
++
++    u = 0
++    A = partition[0]
++    B = partition[1]
++
++    assert _validate_quality_delta(
++        G, u, A, B, constant_potts_model, _quality_delta_cpm_undirected, r
++    )
++
++
++def test_cpm_delta_directed():
++    G = nx.barbell_graph(3, 0)
++    G = nx.to_directed(G)
++
++    partition = [{0, 1, 2}, {3, 4, 5}]
++    nx.set_node_attributes(G, 1, "node_weight")
++    nx.set_edge_attributes(G, 1, "weight")
++    r = 0.5
++
++    u = 0
++    A = partition[0]
++    B = partition[1]
++    r = 0.5
++
++    assert _validate_quality_delta(
++        G, u, A, B, constant_potts_model, _quality_delta_cpm_directed, r
++    )
++
++
++def test_cpm_delta_undirected_weights():
++    G = nx.barbell_graph(3, 0)
++    partition = [{0, 1, 2}, {3, 4, 5}]
++    G.nodes[0]["node_weight"] = 1
++    G.nodes[1]["node_weight"] = 2
++    G.nodes[2]["node_weight"] = 3
++    G.nodes[3]["node_weight"] = 4
++    G.nodes[4]["node_weight"] = 5
++    G.nodes[5]["node_weight"] = 6
++
++    # the add and remove functions should cancel terms which come from
++    # self-loops and hence we add some weighted self-loops
++    for i in range(6):
++        G.add_edge(i, i)
++        G.edges[(i, i)]["weight"] = i + 2
++
++    G.edges[(0, 1)]["weight"] = 1
++    G.edges[(0, 2)]["weight"] = 2
++    G.edges[(1, 2)]["weight"] = 3
++    G.edges[(2, 3)]["weight"] = 4
++    G.edges[(3, 4)]["weight"] = 5
++    G.edges[(3, 5)]["weight"] = 6
++    G.edges[(4, 5)]["weight"] = 7
++
++    u = 0
++    A = partition[0]
++    B = partition[1]
++    r = 0.5
++
++    assert _validate_quality_delta(
++        G, u, A, B, constant_potts_model, _quality_delta_cpm_undirected, r
++    )
++
++
++def test_cpm_delta_directed_weights():
++    G = nx.barbell_graph(3, 0)
++    partition = [{0, 1, 2}, {3, 4, 5}]
++    G.nodes[0]["node_weight"] = 1
++    G.nodes[1]["node_weight"] = 2
++    G.nodes[2]["node_weight"] = 3
++    G.nodes[3]["node_weight"] = 4
++    G.nodes[4]["node_weight"] = 5
++    G.nodes[5]["node_weight"] = 6
++
++    # the add and remove functions should cancel terms which come from
++    # self-loops and hence we add some weighted self-loops
++    for i in range(6):
++        G.add_edge(i, i)
++        G.edges[(i, i)]["weight"] = i + 2
++
++    G = nx.to_directed(G)
++
++    G.edges[(0, 1)]["weight"] = 1
++    G.edges[(0, 2)]["weight"] = 2
++    G.edges[(1, 2)]["weight"] = 3
++    G.edges[(2, 3)]["weight"] = 4
++    G.edges[(3, 4)]["weight"] = 5
++    G.edges[(3, 5)]["weight"] = 6
++    G.edges[(4, 5)]["weight"] = 7
++
++    G.edges[(1, 0)]["weight"] = 1
++    G.edges[(2, 0)]["weight"] = 2
++    G.edges[(2, 1)]["weight"] = 3
++    G.edges[(3, 2)]["weight"] = 4
++    G.edges[(4, 3)]["weight"] = 5
++    G.edges[(5, 3)]["weight"] = 6
++    G.edges[(5, 4)]["weight"] = 7
++
++    u = 0
++    A = partition[0]
++    B = partition[1]
++    r = 0.5
++
++    assert _validate_quality_delta(
++        G, u, A, B, constant_potts_model, _quality_delta_cpm_directed, r
++    )
++
++
++def test_cpm_undirected():
+     G = nx.barbell_graph(3, 0)
+     partition = [{0, 1, 2}, {3, 4, 5}]
+     gamma = 0.1
+@@ -84,7 +224,7 @@ def test_cpm():
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (3 - gamma * 3**2) + (3 - gamma * 3**2) == cpm
++    assert 3 - (gamma * 3**2) / 2 + 3 - (gamma * 3**2) / 2 == cpm
+ 
+     partition = [{0, 1, 2}, {3, 4, 5}]
+     gamma = 1
+@@ -93,7 +233,7 @@ def test_cpm():
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (3 - gamma * 3**2) + (3 - gamma * 3**2) == cpm
++    assert 3 - (gamma * 3**2) / 2 + 3 - (gamma * 3**2) / 2 == cpm
+ 
+     partition = [{i} for i in G]
+     gamma = 1
+@@ -102,7 +242,7 @@ def test_cpm():
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert -6 * gamma == cpm
++    assert -6 * gamma / 2 == cpm
+ 
+     G = nx.barbell_graph(3, 0)
+     partition = [{0, 1, 2}, {3, 4, 5}]
+@@ -127,13 +267,13 @@ def test_cpm():
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (3 - gamma * 3**2) + (3 - gamma * 3**2) == cpm
++    assert 3 - (gamma * 3**2) / 2 + 3 - (gamma * 3**2) / 2 == cpm
+     cpm = constant_potts_model(
+         G, partition, weight="bar", node_weight="foo", resolution=gamma
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (6 - gamma * 9**2) + (6 - gamma * 20**2) == cpm
++    assert 6 - (gamma * 9**2) / 2 + 6 - (gamma * 20**2) / 2 == cpm
+ 
+     gamma = 0.2
+     cpm = constant_potts_model(
+@@ -141,14 +281,14 @@ def test_cpm():
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (3 - gamma * 3**2) + (3 - gamma * 3**2) == cpm
++    assert 3 - (gamma * 3**2) / 2 + 3 - (gamma * 3**2) / 2 - cpm < 0.000000000001
+ 
+     cpm = constant_potts_model(
+         G, partition, weight="bar", node_weight="foo", resolution=gamma
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (6 - gamma * 9**2) + (6 - gamma * 20**2) == cpm
++    assert 6 - (gamma * 9**2) / 2 + 6 - (gamma * 20**2) / 2 == cpm
+ 
+     G = nx.barbell_graph(3, 0)
+     partition = [{0, 1, 2}, {3, 4, 5}]
+@@ -172,80 +312,7 @@ def test_cpm():
+     )
+     # compare cpm against the value computed by hand using the
+     # formula stated in the definition of constant_potts_model
+-    assert (6 - gamma * 9**2) + (6 - gamma * 20**2) == cpm
+-
+-
+-def test_cpm_add_remove_total_cost():
+-    G = nx.barbell_graph(3, 0)
+-    partition = [{0, 1, 2}, {3, 4, 5}]
+-    nx.set_node_attributes(G, 1, "node_weight")
+-    nx.set_edge_attributes(G, 1, "weight")
+-    r = 0.5
+-
+-    u = 0
+-    A = partition[0]
+-    B = partition[1]
+-    qA = _cpm_delta_partial_eval_remove(G, node=u, community=A, resolution=r)
+-    qB = _cpm_delta_partial_eval_add(G, node=u, community=B, resolution=r)
+-
+-    q_after = constant_potts_model(
+-        G,
+-        [A - {u}, B.union({u})],
+-        weight="weight",
+-        node_weight="node_weight",
+-        resolution=r,
+-    )
+-    q_before = constant_potts_model(
+-        G, [A, B], weight="weight", node_weight="node_weight", resolution=r
+-    )
+-    q_delta = q_after - q_before
+-    assert qA + qB == q_delta
+-
+-
+-def test_cpm_add_remove_total_cost_weights():
+-    G = nx.barbell_graph(3, 0)
+-    partition = [{0, 1, 2}, {3, 4, 5}]
+-    G.nodes[0]["node_weight"] = 1
+-    G.nodes[1]["node_weight"] = 2
+-    G.nodes[2]["node_weight"] = 3
+-    G.nodes[3]["node_weight"] = 4
+-    G.nodes[4]["node_weight"] = 5
+-    G.nodes[5]["node_weight"] = 6
+-
+-    # the add and remove functions should cancel terms which come from
+-    # self-loops and hence we add some weighted self-loops
+-    for i in range(6):
+-        G.add_edge(i, i)
+-        G.edges[(i, i)]["weight"] = i + 2
+-
+-    G.edges[(0, 1)]["weight"] = 1
+-    G.edges[(0, 2)]["weight"] = 2
+-    G.edges[(1, 2)]["weight"] = 3
+-    G.edges[(2, 3)]["weight"] = 4
+-    G.edges[(3, 4)]["weight"] = 5
+-    G.edges[(3, 5)]["weight"] = 6
+-    G.edges[(4, 5)]["weight"] = 7
+-
+-    r = 0.5
+-
+-    u = 0
+-    A = partition[0]
+-    B = partition[1]
+-    qA = _cpm_delta_partial_eval_remove(G, node=u, community=A, resolution=r)
+-    qB = _cpm_delta_partial_eval_add(G, node=u, community=B, resolution=r)
+-
+-    q_after = constant_potts_model(
+-        G,
+-        [A - {u}, B.union({u})],
+-        weight="weight",
+-        node_weight="node_weight",
+-        resolution=r,
+-    )
+-    q_before = constant_potts_model(
+-        G, [A, B], weight="weight", node_weight="node_weight", resolution=r
+-    )
+-    q_delta = q_after - q_before
+-    assert qA + qB == q_delta
++    assert 6 - (gamma * 9**2) / 2 + 6 - (gamma * 20**2) / 2 == cpm
+ 
+ 
+ def test_modularity_resolution():

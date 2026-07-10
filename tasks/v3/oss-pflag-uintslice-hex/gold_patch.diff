@@ -1,0 +1,29 @@
+--- a/uint_slice.go	2026-07-09 15:52:48
++++ b/uint_slice.go	2026-07-09 15:52:48
+@@ -23,7 +23,7 @@
+ 	ss := strings.Split(val, ",")
+ 	out := make([]uint, len(ss))
+ 	for i, d := range ss {
+-		u, err := strconv.ParseUint(d, 10, 0)
++		u, err := strconv.ParseUint(d, 0, 0)
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -51,7 +51,7 @@
+ }
+ 
+ func (s *uintSliceValue) fromString(val string) (uint, error) {
+-	t, err := strconv.ParseUint(val, 10, 0)
++	t, err := strconv.ParseUint(val, 0, 0)
+ 	if err != nil {
+ 		return 0, err
+ 	}
+@@ -101,7 +101,7 @@
+ 	ss := strings.Split(val, ",")
+ 	out := make([]uint, len(ss))
+ 	for i, d := range ss {
+-		u, err := strconv.ParseUint(d, 10, 0)
++		u, err := strconv.ParseUint(d, 0, 0)
+ 		if err != nil {
+ 			return nil, err
+ 		}

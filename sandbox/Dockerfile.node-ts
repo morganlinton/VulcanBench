@@ -1,0 +1,10 @@
+# TypeScript-source sandbox image (v3 TS tasks).
+#
+# Real-world TS repos (hono, zod) use extensionless ESM imports in their
+# source, which Node's built-in --experimental-strip-types cannot resolve.
+# tsx (esbuild-based) resolves TS-style specifiers and runs the node:test
+# runner directly against .ts files: `tsx --test vb_x.test.ts`.
+# Baked into the image (pinned) so the network-off sandbox needs no installs.
+FROM vulcanbench/sandbox:base
+
+RUN npm install -g tsx@4.20.3 && tsx --version

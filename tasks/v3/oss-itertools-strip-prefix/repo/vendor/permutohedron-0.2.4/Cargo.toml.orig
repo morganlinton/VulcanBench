@@ -1,0 +1,22 @@
+[package]
+name = "permutohedron"
+version = "0.2.4"
+authors = ["bluss"]
+
+license = "MIT/Apache-2.0"
+repository = "https://github.com/bluss/permutohedron"
+documentation = "https://docs.rs/permutohedron/"
+
+description = "Generate permutations of sequences. Either lexicographical order permutations, or a minimal swaps permutation sequence implemented using Heap's algorithm."
+
+keywords = ["permutations", "heaps-algorithm", "lexicographic", "no_std"]
+
+[profile.bench]
+debug = true
+
+[features]
+std = []
+default = ["std"]
+
+[package.metadata.release]
+no-dev-version = true

@@ -88,7 +88,9 @@ def effort_config(provider: str, requested: str | None) -> EffortConfig | None:
             provider_value=_OPENAI_EFFORT_VALUES[effort],
             supported=True,
         )
-    if provider_name in {"mock", "zai"}:
+    # claude-code: headless Claude Code has no per-request effort control;
+    # the requested level is recorded on the run but not sent.
+    if provider_name in {"mock", "zai", "claude-code"}:
         return EffortConfig(
             requested=effort,
             provider=provider_name,

@@ -27,9 +27,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from harness.agent.cli_agents import (
+    CliAgentOutcome,
+    build_cli_prompt,
+    is_cli_agent_spec,
+    run_claude_code_task,
+)
 from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolCall, ToolProtocol, get_openai_tool_schemas
-from harness.agent.providers import LLMProvider, get_provider
+from harness.agent.providers import LLMProvider, get_provider, parse_model_spec
 from harness.effort import effort_config
 from harness.evaluator.evaluate import evaluate_run
 from harness.evaluator.scorer import run_verifier, score_run
@@ -150,8 +156,7 @@ def run_agent(
     summary dict (also persisted to ``<run_dir>/summary.json``).
     """
     task = load_task(task_id, tasks_root)
-    provider = provider or get_provider(model)
-    effort_meta = effort_config(provider.name, effort)
+    cli_agent, provider, effort_meta = _resolve_run_engine(model, provider, effort, sandbox)
     effective_max_steps = resolve_max_steps(task.metadata, max_steps)
     effective_timeout = resolve_agent_timeout_s(task.metadata, timeout_s)
 
@@ -181,17 +186,22 @@ def run_agent(
     ]
 
     try:
-        prompt_tokens, completion_tokens, finished, cost_capped = _run_model_loop(
-            provider,
-            tools,
-            messages,
-            effective_max_steps,
-            collector,
-            executor,
-            run_id,
-            deadline,
-            effort_meta.as_summary() if effort_meta else None,
+        prompt_tokens, completion_tokens, finished, cost_capped, cli_outcome = _execute_agent(
+            cli_agent=cli_agent,
             model=model,
+            provider=provider,
+            task=task,
+            tools=tools,
+            messages=messages,
+            effective_max_steps=effective_max_steps,
+            collector=collector,
+            executor=executor,
+            run_id=run_id,
+            run_dir=run_dir,
+            workspace=workspace,
+            deadline=deadline,
+            effort_meta=effort_meta,
+            network=network,
             max_run_cost=max_run_cost,
         )
         patch = _git_diff(workspace)
@@ -258,6 +268,7 @@ def run_agent(
             "suite_id": suite_id,
             **({"effort": effort_meta.as_summary()} if effort_meta else {}),
             **({"experiment_id": experiment_id} if experiment_id else {}),
+            **({"cli_agent": cli_outcome.summary()} if cli_outcome else {}),
             "verifier": verifier_payload,
             "replay_command": f"vulcanbench replay {run_id}",
         },
@@ -281,6 +292,91 @@ def run_synthetic_hello(
         max_steps=max_steps,
         tasks_root=tasks_root,
     )
+
+
+def _resolve_run_engine(
+    model: str,
+    provider: LLMProvider | None,
+    effort: str | None,
+    sandbox: str,
+) -> tuple[bool, LLMProvider | None, Any]:
+    """Decide whether ``model`` runs as a vendor agent CLI or via a provider.
+
+    Vendor agent CLIs (``claude-code:*``) execute their own tools host-side
+    (subscription billing); the sandbox executor is only used for setup and
+    verification. Docker would verify in a different environment than the
+    agent ran in, so CLI runs require the explicit ``--sandbox local`` opt-in.
+    """
+    if provider is None and is_cli_agent_spec(model):
+        if sandbox != "local":
+            raise SandboxError(
+                f"model spec {model!r} runs a vendor agent CLI on the host with "
+                "its own tool execution; pass --sandbox local to acknowledge "
+                "host execution"
+            )
+        return True, None, effort_config("claude-code", effort)
+    provider = provider or get_provider(model)
+    return False, provider, effort_config(provider.name, effort)
+
+
+def _execute_agent(
+    *,
+    cli_agent: bool,
+    model: str,
+    provider: LLMProvider | None,
+    task: Task,
+    tools: list[dict[str, Any]],
+    messages: list[dict[str, Any]],
+    effective_max_steps: int,
+    collector: TraceCollector,
+    executor: ToolProtocol,
+    run_id: str,
+    run_dir: Path,
+    workspace: Path,
+    deadline: _RunDeadline,
+    effort_meta: Any,
+    network: bool,
+    max_run_cost: float | None,
+) -> tuple[int, int, bool, bool, CliAgentOutcome | None]:
+    """Run the agent phase: the vendor CLI in the workspace, or the model loop."""
+    if cli_agent:
+        _, cli_model = parse_model_spec(model)
+        outcome = run_claude_code_task(
+            workspace=workspace,
+            prompt=build_cli_prompt(task.issue),
+            model=cli_model,
+            priced_spec=model,
+            max_turns=effective_max_steps,
+            collector=collector,
+            stream_log_path=run_dir / "cli-agent-stream.jsonl",
+            timeout_s=deadline.remaining_s(),
+            network=network,
+            max_run_cost=max_run_cost,
+        )
+        if outcome.timed_out:
+            deadline.record_exceeded(collector, "cli_agent")
+        return (
+            outcome.prompt_tokens,
+            outcome.completion_tokens,
+            outcome.finished,
+            outcome.cost_capped,
+            outcome,
+        )
+    assert provider is not None  # resolved by _resolve_run_engine for non-CLI specs
+    prompt_tokens, completion_tokens, finished, cost_capped = _run_model_loop(
+        provider,
+        tools,
+        messages,
+        effective_max_steps,
+        collector,
+        executor,
+        run_id,
+        deadline,
+        effort_meta.as_summary() if effort_meta else None,
+        model=model,
+        max_run_cost=max_run_cost,
+    )
+    return prompt_tokens, completion_tokens, finished, cost_capped, None
 
 
 def _compute_cost(

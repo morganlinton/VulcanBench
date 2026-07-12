@@ -69,7 +69,14 @@ def main(
 def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear guards + dispatch
     task: str | None = typer.Option(None, "--task", "-t", help="Task ID e.g. swe-001"),
     suite: str | None = typer.Option(None, "--suite", help="Run a whole suite, e.g. v1 (tasks/v1)"),
-    model: str = typer.Option(..., "--model", "-m", help="provider:model e.g. openai:gpt-4o"),
+    model: str = typer.Option(
+        ...,
+        "--model",
+        "-m",
+        help="provider:model e.g. openai:gpt-4o, anthropic:claude-opus-4-8, or "
+        "claude-code:claude-opus-4-8 (Claude Code CLI, subscription billing; "
+        "needs --sandbox local)",
+    ),
     output_dir: Path = typer.Option(  # noqa: B008
         Path("./runs"), "--output-dir", "-o", help="Where to write trace/replay"
     ),

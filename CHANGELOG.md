@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Subscription-billed runs via vendor agent CLIs** (`claude-code:<model>` specs): the task is
+  handed to Claude Code headless (`claude -p --output-format stream-json`) in the prepared
+  workspace instead of the VulcanBench agent loop, billing a Claude Pro/Max subscription instead of
+  API rates. Everything downstream (git diff → verifier → evaluator → scoring) is unchanged, and
+  the CLI's stream is translated into trace events so `replay.html` still works. Honesty
+  guarantees: `cost_usd` is the *hypothetical* API cost of the reported token usage
+  (`claude-code:` prices alias to `anthropic:`), the summary records
+  `cli_agent: {harness, billing: "subscription", cli_reported_cost_usd, session_id, ...}` so
+  vendor-harness results can't be silently mixed with uniform-loop columns, subscription
+  usage-limit hits raise a run *error* (resumable with `--only-missing`) instead of scoring a
+  starved run as 0, and `ANTHROPIC_API_KEY` is stripped from the CLI subprocess so a set key can't
+  silently flip a run onto API billing. `--max-run-cost` (enforced mid-run against hypothetical
+  cost), `--timeout`, and `--max-steps` (mapped to `--max-turns`) all work; judges/graders can
+  also run on the subscription via `--judge-model claude-code:<model>` (single-shot, tools
+  disabled). Requires `--sandbox local` (the CLI executes its own tools host-side). See
+  QUICKSTART → "Run on your Claude subscription".
 - **Second OSS task, and the first decontaminated one** `oss-more-itertools-iter-index` (hard,
   `bug_fix`, `medium` scale): a genuine post-cutoff fix from `more-itertools` commit `43decdd7`
   (2026-06-17). `iter_index` accepted negative `start`/`stop` for sequences (fast path) but the

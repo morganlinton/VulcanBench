@@ -100,6 +100,48 @@ vulcanbench report --suite v1 -o report.md
 >   `mock:synthetic`). Override prices any time with
 >   `VULCANBENCH_PRICING=/path/to/prices.json`.
 
+## Run on your Claude subscription instead of the API (`claude-code:`)
+
+If you have a Claude Pro/Max subscription, `claude-code:<model>` specs run the
+task with **Claude Code headless** (`claude -p`) instead of the VulcanBench
+agent loop — billing your subscription, not API rates:
+
+```bash
+# Requires Claude Code installed and signed in with your subscription
+# (run `claude` once interactively, or set CLAUDE_CODE_OAUTH_TOKEN).
+vulcanbench run --task py-topo-sort-cycle \
+  --model claude-code:claude-opus-4-8 \
+  --judge-model claude-code:claude-opus-4-8 \
+  --sandbox local
+```
+
+What to know before using it:
+
+- **You're benchmarking model + vendor harness**, not the uniform VulcanBench
+  loop. `claude-code:claude-opus-4-8` results are *not comparable* to
+  `anthropic:claude-opus-4-8` columns — the summary records
+  `cli_agent.harness` so they can't be silently mixed. Use it for cheap dev
+  iterations, task authoring, and smoke tests; keep API runs for published
+  cross-provider numbers.
+- **`cost_usd` is hypothetical.** It's what the same tokens would have cost at
+  API rates (`claude-code:` prices map to `anthropic:` prices), so you can see
+  what a run *would* have cost. `cli_agent.billing: "subscription"` and the
+  CLI's own `cli_reported_cost_usd` are recorded alongside.
+- **`--sandbox local` is required.** Claude Code executes its own tools on
+  your host (that's the harness being benchmarked); the docker sandbox would
+  verify in a different environment than the agent ran in.
+- **Subscription limits are run errors, not zeros.** If a Max 5-hour window or
+  weekly cap is hit mid-suite, the run records an error instead of a 0 score;
+  resume the gaps later with `--only-missing`.
+- **Judges/graders can ride the subscription too**: pass
+  `--judge-model claude-code:<model>` (single-shot `claude -p` calls). Or point
+  `--judge-model` at a cheap API model (e.g. `anthropic:claude-haiku-4-5`) —
+  judge calls are a small fraction of run cost.
+- `ANTHROPIC_API_KEY` is stripped from the CLI subprocess so a set key can
+  never silently flip the run onto API billing. `--max-run-cost` still works
+  (enforced against the hypothetical cost, mid-run); `--effort` is recorded
+  but not sent (headless Claude Code has no effort control).
+
 **Re-grade for free after a task changes.** Grading is deterministic, so when you
 edit a task's hidden tests or thresholds you don't need to re-run the model —
 just re-grade the existing runs. `regrade` rebuilds each run's workspace from the

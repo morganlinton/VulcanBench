@@ -1,0 +1,102 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1600px; height: 900px; }
+body { font-family: "Times New Roman", Times, Georgia, serif; background: #f7f5f0; color: #1c1a17; }
+.page { width: 1600px; height: 900px; padding: 44px 78px 30px; position: relative; }
+.masthead { display: flex; justify-content: space-between; align-items: baseline;
+  font-variant: small-caps; letter-spacing: 2.5px; font-size: 17px; color: #6f6a62; }
+.masthead b { color: #1c1a17; font-weight: 600; }
+.rule2 { border-top: 2.5px solid #1c1a17; margin-top: 8px; }
+.rule1 { border-top: 1px solid #1c1a17; margin-top: 2.5px; }
+h1 { text-align: center; font-size: 37px; font-weight: 600; margin-top: 20px; letter-spacing: 0.2px; }
+.eff { font-size: 25px; font-weight: 400; font-style: italic; color: #55504a; }
+.authors { text-align: center; font-style: italic; font-size: 19px; margin-top: 9px; color: #3a362f; }
+.abstract { width: 1240px; margin: 18px auto 0; font-size: 18.5px; line-height: 1.48; text-align: center; }
+.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 20px; }
+.tcap, .fcap { font-size: 15px; margin-bottom: 7px; line-height: 1.35; }
+.tcap b, .fcap b { font-variant: small-caps; letter-spacing: 1px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+thead th { border-top: 2px solid #1c1a17; border-bottom: 1px solid #1c1a17;
+  padding: 6px 5px; font-weight: 600; text-align: right; font-size: 14.5px; }
+thead th:first-child { text-align: left; }
+tbody td { padding: 5.1px 5px; text-align: right; font-variant-numeric: tabular-nums; }
+tbody td:first-child { text-align: left; }
+tbody tr:last-child td { border-bottom: 2px solid #1c1a17; }
+tbody tr.win td { font-weight: 700; }
+tbody tr.sep td { border-top: 1px solid #c9c2b6; }
+.model { font-style: italic; }
+.legend { display: flex; flex-wrap: wrap; gap: 22px 28px; justify-content: center; font-size: 14px; margin-top: 6px; color: #3a362f; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend .note { width: 100%; text-align: center; font-size: 12.5px; color: #6f6a62; font-style: italic; }
+.sw { width: 14px; height: 14px; display: inline-block; }
+.findings { margin-top: 8px; font-size: 14.5px; line-height: 1.34; }
+.findings p { margin-top: 6px; }
+.findings .n { font-weight: 700; }
+.foot { position: absolute; left: 78px; right: 78px; bottom: 24px;
+  border-top: 1px solid #1c1a17; padding-top: 8px; font-size: 13px;
+  color: #55504a; line-height: 1.38; display: flex; justify-content: space-between; gap: 40px; }
+.foot .brand { white-space: nowrap; text-align: right; font-variant: small-caps;
+  letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
+</style></head><body>
+<div class="page">
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 07</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; 207 runs &middot; 3 effort levels &middot; 5 languages</span></div>
+  <div class="rule2"></div><div class="rule1"></div>
+
+  <h1>Grok 4.5 &nbsp;vs.&nbsp; Claude Fable 5<sup>&dagger;</sup> &nbsp;vs.&nbsp; GPT-5.6 Sol <span class="eff">(low, medium &amp; high effort)</span></h1>
+  <div class="authors">Twenty-three real merged PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests</div>
+
+  <div class="abstract">
+  <b>Grok 4.5 leads at 91% from medium effort onward</b> &mdash; high effort buys it nothing but a 31% larger bill.
+  GPT-5.6 Sol is the only model whose accuracy climbs monotonically with effort (78&rarr;83&rarr;87%);
+  Fable 5 oscillates at 85&plusmn;2% regardless of the knob. The two frontier-hard tasks went <b>0-for-27</b>.</div>
+
+  <div class="cols">
+    <div>
+      <div class="tcap"><b>Table 1.</b> One run per task per effort. Tokens are billed tokens; time is sandbox wall-clock, per-task averages.</div>
+      <table>
+        <thead><tr><th>Model (effort)</th><th>Score</th><th>Cost</th><th>Tokens/task</th><th>Time/task</th><th>$/task</th><th>$/solved</th></tr></thead>
+        <tbody>
+          <tr class="win"><td class="model">Grok 4.5 (medium)</td><td>21/23</td><td>$6.67</td><td>106 K</td><td>3.9 min</td><td>$0.29</td><td>$0.32</td></tr>
+          <tr><td class="model">Grok 4.5 (high)</td><td>21/23</td><td>$8.76</td><td>141 K</td><td>4.9 min</td><td>$0.38</td><td>$0.42</td></tr>
+          <tr class="sep"><td class="model">Claude Fable 5 (low)<sup>&dagger;</sup></td><td>20/23</td><td>$12.18</td><td>28 K</td><td>3.4 min</td><td>$0.53</td><td>$0.61</td></tr>
+          <tr><td class="model">GPT-5.6 Sol (high)</td><td>20/23</td><td>$15.90</td><td>85 K</td><td>4.2 min</td><td>$0.69</td><td>$0.80</td></tr>
+          <tr><td class="model">Claude Fable 5 (high)<sup>&dagger;</sup></td><td>20/23</td><td>$20.82</td><td>44 K</td><td>4.3 min</td><td>$0.91</td><td>$1.04</td></tr>
+          <tr class="sep"><td class="model">Grok 4.5 (low)</td><td>19/23</td><td>$3.39</td><td>57 K</td><td>2.5 min</td><td>$0.15</td><td>$0.18</td></tr>
+          <tr><td class="model">GPT-5.6 Sol (medium)</td><td>19/23</td><td>$8.83</td><td>50 K</td><td>2.8 min</td><td>$0.38</td><td>$0.46</td></tr>
+          <tr><td class="model">Claude Fable 5 (medium)<sup>&dagger;</sup></td><td>19/23</td><td>$16.32</td><td>36 K</td><td>3.7 min</td><td>$0.71</td><td>$0.86</td></tr>
+          <tr class="sep"><td class="model">GPT-5.6 Sol (low)</td><td>18/23</td><td>$3.85</td><td>23 K</td><td>1.5 min</td><td>$0.17</td><td>$0.21</td></tr>
+        </tbody>
+      </table>
+      <div class="findings">
+        <p><span class="n">1.</span> <b>Grok plateaus at medium.</b> High effort spends 33% more tokens for the identical 21/23; medium is the efficiency frontier of all nine configs.</p>
+        <p><span class="n">2.</span> <b>Only Sol rewards the knob.</b> 78&rarr;83&rarr;87%, monotonic; each step buys real accuracy. Fable&rsquo;s failures rotate among borderline tasks instead of responding to effort.</p>
+        <p><span class="n">3.</span> <b>Frugal tokens, premium price.</b> Fable uses the fewest tokens at every effort (28&ndash;44 K/task) yet is the costliest per solved task ($0.61&ndash;$1.04).</p>
+        <p><span class="n">4.</span> <b>The ceiling held; one wall fell.</b> PennyLane Trotter and SQLGlot canonicalization: 0-for-27. Flask&rsquo;s teardown redesign fell to all three models &mdash; but only at high effort.</p>
+      </div>
+    </div>
+    <div>
+      <div class="fcap"><b>Figure 1.</b> Accuracy and cost-efficiency across nine configurations. Within each model group, shades darken low &rarr; medium &rarr; high.</div>
+      <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" width="100%">
+<rect x="26.0" y="74.9" width="24" height="137.1" fill="#c99b7a"/><text x="38.0" y="69.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">83</text><rect x="56.0" y="60.4" width="24" height="151.6" fill="#9c6644"/><text x="68.0" y="55.4" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">91</text><rect x="86.0" y="60.4" width="24" height="151.6" fill="#6e4227"/><text x="98.0" y="55.4" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">91</text><rect x="128.0" y="67.6" width="24" height="144.4" fill="#8ba3c4"/><text x="140.0" y="62.6" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text><rect x="158.0" y="74.9" width="24" height="137.1" fill="#5d7ba0"/><text x="170.0" y="69.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">83</text><rect x="188.0" y="67.6" width="24" height="144.4" fill="#27425f"/><text x="200.0" y="62.6" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text><rect x="230.0" y="82.0" width="24" height="130.0" fill="#ccd4dd"/><text x="242.0" y="77.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">78</text><rect x="260.0" y="74.9" width="24" height="137.1" fill="#a3b1c2"/><text x="272.0" y="69.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">83</text><rect x="290.0" y="67.6" width="24" height="144.4" fill="#7a8ba1"/><text x="302.0" y="62.6" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text><text x="62.0" y="224" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text><text x="170.0" y="224" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text><text x="272.0" y="224" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text><line x1="20" y1="212" x2="320" y2="212" stroke="#1c1a17" stroke-width="1"/>
+<text x="170.0" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Accuracy</text>
+<text x="170.0" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">pass@1 (%), 23 tasks</text>
+<rect x="392.0" y="185.0" width="24" height="27.0" fill="#c99b7a"/><text x="404.0" y="180.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.18</text><rect x="422.0" y="164.0" width="24" height="48.0" fill="#9c6644"/><text x="434.0" y="159.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.32</text><rect x="452.0" y="149.1" width="24" height="62.9" fill="#6e4227"/><text x="464.0" y="144.1" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.42</text><rect x="494.0" y="120.1" width="24" height="91.9" fill="#8ba3c4"/><text x="506.0" y="115.1" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.61</text><rect x="524.0" y="82.4" width="24" height="129.6" fill="#5d7ba0"/><text x="536.0" y="77.4" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.86</text><rect x="554.0" y="54.9" width="24" height="157.1" fill="#27425f"/><text x="566.0" y="49.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">1.04</text><rect x="596.0" y="179.7" width="24" height="32.3" fill="#ccd4dd"/><text x="608.0" y="174.7" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.21</text><rect x="626.0" y="141.8" width="24" height="70.2" fill="#a3b1c2"/><text x="638.0" y="136.8" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.47</text><rect x="656.0" y="92.0" width="24" height="120.0" fill="#7a8ba1"/><text x="668.0" y="87.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.80</text><text x="428.0" y="224" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text><text x="536.0" y="224" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text><text x="638.0" y="224" text-anchor="middle" font-size="11.5" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text><line x1="386" y1="212" x2="686" y2="212" stroke="#1c1a17" stroke-width="1"/>
+<text x="536.0" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Economy</text>
+<text x="536.0" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">USD per solved task</text>
+</svg>
+      <div class="legend">
+        <span><span class="sw" style="background:#9c6644"></span>Grok 4.5</span>
+        <span><span class="sw" style="background:#5d7ba0"></span>Claude Fable 5</span>
+        <span><span class="sw" style="background:#a3b1c2"></span>GPT-5.6 Sol</span>
+        <span class="note">Three bars per model: light &rarr; dark = low &rarr; medium &rarr; high effort</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task per effort. Every task pre-validated: gold patch = 1.0, unpatched = 0.0, deterministic over 3 runs. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback: 6 of 69 runs (8.7%) were declined by the safety classifier (category &lsquo;cyber&rsquo;; the same three tasks at every effort tried) and served end-to-end by Opus 4.8; all six passed. Total benchmark spend $96.72.</div>
+    <div class="brand">vulcanbench &middot; open source &middot; July 12, 2026</div>
+  </div>
+</div>
+</body></html>

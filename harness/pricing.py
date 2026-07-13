@@ -55,6 +55,19 @@ PRICES: dict[str, dict[str, float]] = {
 
 _PER_MILLION = 1_000_000.0
 
+# Vendor agent-CLI specs (subscription billing) price at the underlying API
+# rates, so their ``cost_usd`` is the *hypothetical* API cost of the same
+# tokens. The run summary marks these with ``cli_agent.billing`` so the
+# number is never mistaken for actual spend.
+_SPEC_ALIASES = {"claude-code:": "anthropic:"}
+
+
+def _canonical_spec(model: str) -> str:
+    for prefix, replacement in _SPEC_ALIASES.items():
+        if model.startswith(prefix):
+            return replacement + model[len(prefix) :]
+    return model
+
 
 @lru_cache(maxsize=1)
 def _prices() -> dict[str, dict[str, float]]:
@@ -72,6 +85,7 @@ def _prices() -> dict[str, dict[str, float]]:
 
 
 def _rate(model: str) -> dict[str, float] | None:
+    model = _canonical_spec(model)
     prices = _prices()
     if model in prices:
         return prices[model]

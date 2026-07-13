@@ -307,16 +307,28 @@ class AnthropicProvider(LLMProvider):
             payload["system"] = system_field
         if tools:
             payload["tools"] = [_openai_tool_to_anthropic(t) for t in tools]
+        headers = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+        }
+        # Opt-in server-side refusal fallback (e.g. Fable 5 -> Opus 4.8): a
+        # request declined by the safety classifiers is re-served by the
+        # fallback model inside the same call, with repricing applied by the
+        # API. The response's ``model`` field reports which model answered.
+        fallback = os.environ.get("VULCANBENCH_REFUSAL_FALLBACK")
+        if fallback:
+            headers["anthropic-beta"] = "server-side-fallback-2026-06-01"
+            payload["fallbacks"] = [{"model": fallback}]
         body = _http_post_json(
             f"{base}/v1/messages",
-            {
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-                "Content-Type": "application/json",
-            },
+            headers,
             payload,
             timeout=timeout,
         )
+        served = body.get("model")
+        if fallback and served and not str(served).startswith(self.model):
+            print(f"[vulcanbench] refusal fallback: step served by {served}", flush=True)
         if body.get("stop_reason") == "refusal":
             details = body.get("stop_details") or {}
             raise ProviderError(
@@ -730,7 +742,14 @@ def parse_model_spec(spec: str) -> tuple[str, str]:
 def get_provider(spec: str) -> LLMProvider:
     """Construct a provider from a ``provider:model`` spec."""
     provider, model = parse_model_spec(spec)
+    if provider == "claude-code":
+        # Late import (circular otherwise: cli_agents imports from this
+        # module). This provider is single-shot (judges/graders); full task
+        # runs go through ``harness.agent.cli_agents.run_claude_code_task``.
+        from harness.agent.cli_agents import ClaudeCodeProvider  # noqa: PLC0415
+
+        return ClaudeCodeProvider(model)
     if provider not in _PROVIDERS:
-        known = ", ".join(sorted(_PROVIDERS))
+        known = ", ".join(sorted([*_PROVIDERS, "claude-code"]))
         raise ValueError(f"unknown provider {provider!r}; known: {known}")
     return _PROVIDERS[provider](model)

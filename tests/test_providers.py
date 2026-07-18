@@ -11,6 +11,7 @@ from harness.agent.providers import (
     MockProvider,
     OpenAIProvider,
     TokenUsage,
+    KimiProvider,
     ZaiProvider,
     get_provider,
     parse_model_spec,
@@ -54,6 +55,13 @@ def test_get_provider_returns_zai() -> None:
     assert isinstance(p, ZaiProvider)
     assert p.name == "zai"
     assert p.spec == "zai:glm-5.2"
+
+
+def test_get_provider_returns_kimi() -> None:
+    p = get_provider("kimi:kimi-k3")
+    assert isinstance(p, KimiProvider)
+    assert p.name == "kimi"
+    assert p.spec == "kimi:kimi-k3"
 
 
 def test_token_usage_total() -> None:
@@ -398,8 +406,95 @@ def test_zai_ignores_effort(monkeypatch: pytest.MonkeyPatch) -> None:
     assert resp.content == "ok"
 
 
+def test_kimi_complete_omits_temperature(monkeypatch: pytest.MonkeyPatch) -> None:
+    # kimi-k3 rejects sampling params; the payload must not carry temperature.
+    monkeypatch.setenv("MOONSHOT_API_KEY", "kimi-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        seen["payload"] = payload
+        seen["auth"] = headers["Authorization"]
+        return {
+            "choices": [
+                {
+                    "message": {
+                        "content": "ok",
+                        "tool_calls": [
+                            {
+                                "id": "c1",
+                                "function": {"name": "read_file", "arguments": '{"path": "a"}'},
+                            }
+                        ],
+                    }
+                }
+            ],
+            "usage": {"prompt_tokens": 11, "completion_tokens": 3},
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = KimiProvider("kimi-k3").complete(
+        [{"role": "user", "content": "hi"}], [{"function": {"name": "read_file"}}]
+    )
+    assert seen["url"] == "https://api.moonshot.ai/v1/chat/completions"
+    assert seen["auth"] == "Bearer kimi-test"
+    assert "temperature" not in seen["payload"]  # type: ignore[operator]
+    assert resp.tool_calls[0].name == "read_file"
+    assert resp.usage.total == 14
+
+
+def test_kimi_complete_uses_custom_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MOONSHOT_API_KEY", "kimi-test")
+    monkeypatch.setenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = KimiProvider("kimi-k3").complete([], [])
+    assert seen["url"] == "https://api.moonshot.cn/v1/chat/completions"
+    assert resp.content == "ok"
+
+
+def test_http_post_json_wraps_read_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A socket timeout during resp.read() raises raw TimeoutError (not
+    # URLError); it must become a retryable ProviderError.
+    def fake_urlopen(req, timeout=120):  # type: ignore[no-untyped-def]
+        raise TimeoutError("The read operation timed out")
+
+    monkeypatch.setattr(P.urllib.request, "urlopen", fake_urlopen)
+    with pytest.raises(P.ProviderError, match="read timeout"):
+        P._http_post_json("https://example.invalid/v1/chat/completions", {}, {})
+
+
+def test_kimi_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MOONSHOT_API_KEY", raising=False)
+    with pytest.raises(P.ProviderError, match="MOONSHOT_API_KEY"):
+        KimiProvider("kimi-k3").complete([], [])
+
+
+def test_kimi_sends_reasoning_effort_when_given(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The loop only passes effort when effort_config says supported, and it
+    # passes the provider value ("max"); the provider sends it verbatim.
+    monkeypatch.setenv("MOONSHOT_API_KEY", "kimi-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["payload"] = payload
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    KimiProvider("kimi-k3").complete([], [], effort="max")
+    assert seen["payload"]["reasoning_effort"] == "max"  # type: ignore[index]
+    KimiProvider("kimi-k3").complete([], [])
+    assert "reasoning_effort" not in seen["payload"]  # type: ignore[operator]
+
+
 def test_providers_do_not_stream_yet() -> None:
     assert get_provider("mock:synthetic").supports_streaming is False
     assert OpenAIProvider("gpt-4o").supports_streaming is False
     assert AnthropicProvider("claude-opus-4-8").supports_streaming is False
     assert ZaiProvider("glm-5.2").supports_streaming is False
+    assert KimiProvider("kimi-k3").supports_streaming is False

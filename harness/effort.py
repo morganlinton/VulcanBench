@@ -25,6 +25,13 @@ _ANTHROPIC_EFFORT_VALUES = {
     "extra-high": "xhigh",
 }
 
+# Moonshot Kimi K3 `reasoning_effort`. Only "max" exists today (thinking is
+# always on); levels the API doesn't accept yet are absent from this map and
+# fall back to recorded-but-not-sent.
+_KIMI_EFFORT_VALUES = {
+    "extra-high": "max",
+}
+
 
 class EffortNotSupportedError(ValueError):
     """Raised when a provider cannot run a requested effort level."""
@@ -87,6 +94,17 @@ def effort_config(provider: str, requested: str | None) -> EffortConfig | None:
             provider="openai",
             provider_value=_OPENAI_EFFORT_VALUES[effort],
             supported=True,
+        )
+    # kimi: K3 always thinks; its reasoning_effort currently accepts only "max"
+    # (Moonshot has announced more levels — extend this map when they ship).
+    # Other levels are recorded on the run but not sent.
+    if provider_name == "kimi":
+        provider_value = _KIMI_EFFORT_VALUES.get(effort)
+        return EffortConfig(
+            requested=effort,
+            provider="kimi",
+            provider_value=provider_value,
+            supported=provider_value is not None,
         )
     # claude-code: headless Claude Code has no per-request effort control;
     # the requested level is recorded on the run but not sent.

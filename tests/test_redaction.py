@@ -38,6 +38,13 @@ def test_redacts_zai_env_value(monkeypatch: pytest.MonkeyPatch) -> None:
     assert REDACTED in out
 
 
+def test_redacts_moonshot_env_value(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MOONSHOT_API_KEY", "sk-kimisupersecret123456")
+    out = redact("the key is sk-kimisupersecret123456 in the log")
+    assert "sk-kimisupersecret123456" not in out
+    assert REDACTED in out
+
+
 def test_redacts_api_token_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VULCANBENCH_API_TOKEN", "tok_supersecretvalue123456")
     out = redact("auth tok_supersecretvalue123456 end")

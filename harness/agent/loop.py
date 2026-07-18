@@ -1044,6 +1044,7 @@ _JUDGE_KEY_ENV = {
     "openai": "OPENAI_API_KEY",
     "anthropic": "ANTHROPIC_API_KEY",
     "zai": "ZAI_API_KEY",
+    "kimi": "MOONSHOT_API_KEY",
 }
 
 

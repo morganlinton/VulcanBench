@@ -1,0 +1,121 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1600px; height: 900px; }
+body { font-family: "Times New Roman", Times, Georgia, serif; background: #f7f5f0; color: #1c1a17; }
+.page { width: 1600px; height: 900px; padding: 44px 78px 30px; position: relative; }
+.masthead { display: flex; justify-content: space-between; align-items: baseline;
+  font-variant: small-caps; letter-spacing: 2.5px; font-size: 17px; color: #6f6a62; }
+.masthead b { color: #1c1a17; font-weight: 600; }
+.rule2 { border-top: 2.5px solid #1c1a17; margin-top: 8px; }
+.rule1 { border-top: 1px solid #1c1a17; margin-top: 2.5px; }
+h1 { text-align: center; font-size: 37px; font-weight: 600; margin-top: 20px; letter-spacing: 0.2px; }
+.eff { font-size: 25px; font-weight: 400; font-style: italic; color: #55504a; }
+.authors { text-align: center; font-style: italic; font-size: 19px; margin-top: 9px; color: #3a362f; }
+.abstract { width: 1240px; margin: 18px auto 0; font-size: 18.5px; line-height: 1.48; text-align: center; }
+.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 20px; }
+.tcap, .fcap { font-size: 15px; margin-bottom: 7px; line-height: 1.35; }
+.tcap b, .fcap b { font-variant: small-caps; letter-spacing: 1px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+thead th { border-top: 2px solid #1c1a17; border-bottom: 1px solid #1c1a17;
+  padding: 6px 5px; font-weight: 600; text-align: right; font-size: 14.5px; }
+thead th:first-child { text-align: left; }
+tbody td { padding: 5.1px 5px; text-align: right; font-variant-numeric: tabular-nums; }
+tbody td:first-child { text-align: left; }
+tbody tr:last-child td { border-bottom: 2px solid #1c1a17; }
+tbody tr.win td { font-weight: 700; }
+tbody tr.sep td { border-top: 1px solid #c9c2b6; }
+tbody tr.subject td { background: #efeade; }
+.model { font-style: italic; }
+.legend { display: flex; flex-wrap: wrap; gap: 22px 28px; justify-content: center; font-size: 14px; margin-top: 6px; color: #3a362f; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend .note { width: 100%; text-align: center; font-size: 12.5px; color: #6f6a62; font-style: italic; }
+.sw { width: 14px; height: 14px; display: inline-block; }
+.findings { margin-top: 8px; font-size: 14.5px; line-height: 1.34; }
+.findings p { margin-top: 6px; }
+.findings .n { font-weight: 700; }
+.foot { position: absolute; left: 78px; right: 78px; bottom: 24px;
+  border-top: 1px solid #1c1a17; padding-top: 8px; font-size: 13px;
+  color: #55504a; line-height: 1.38; display: flex; justify-content: space-between; gap: 40px; }
+.foot .brand { white-space: nowrap; text-align: right; font-variant: small-caps;
+  letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
+</style></head><body>
+<div class="page">
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 08</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; 5 models &middot; single best config each &middot; 5 languages</span></div>
+  <div class="rule2"></div><div class="rule1"></div>
+
+  <h1>Kimi K3 <span class="eff">(max thinking)</span> &nbsp;vs.&nbsp; the July frontier</h1>
+  <div class="authors">Twenty-three real merged PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests</div>
+
+  <div class="abstract">
+  <b>Moonshot&rsquo;s 2.8T open-weight flagship lands at 17/23 (74%)</b> &mdash; and every one of its misses is a
+  30-minute timeout, not a wrong patch. At 18.1 min/task it is 4&ndash;5&times; slower than the field,
+  and Haiku 4.5 outsolves it (18/23) at half the cost per solved task.</div>
+
+  <div class="cols">
+    <div>
+      <div class="tcap"><b>Table 1.</b> One run per task; each model at its best-scoring effort config. Tokens are billed tokens; time is sandbox wall-clock, per-task averages.</div>
+      <table>
+        <thead><tr><th>Model (effort)</th><th>Score</th><th>Cost</th><th>Tokens/task</th><th>Time/task</th><th>$/task</th><th>$/solved</th></tr></thead>
+        <tbody>
+          <tr class="win"><td class="model">Grok 4.5 (medium)</td><td>21/23</td><td>$6.67</td><td>106 K</td><td>3.9 min</td><td>$0.29</td><td>$0.32</td></tr>
+          <tr class="sep"><td class="model">Claude Fable 5 (low)<sup>&dagger;</sup></td><td>20/23</td><td>$12.18</td><td>28 K</td><td>3.4 min</td><td>$0.53</td><td>$0.61</td></tr>
+          <tr><td class="model">GPT-5.6 Sol (high)</td><td>20/23</td><td>$15.90</td><td>85 K</td><td>4.2 min</td><td>$0.69</td><td>$0.80</td></tr>
+          <tr class="sep"><td class="model">Claude Haiku 4.5 (&mdash;)</td><td>18/23</td><td>$9.14</td><td>312 K</td><td>5.1 min</td><td>$0.40</td><td>$0.51</td></tr>
+          <tr class="subject"><td class="model">Kimi K3 (max)</td><td>17/23</td><td>$16.84</td><td>134 K</td><td>18.1 min</td><td>$0.73</td><td>$0.99</td></tr>
+        </tbody>
+      </table>
+      <div class="findings">
+        <p><span class="n">1.</span> <b>The clock is the failure mode.</b> All five K3 zero-scores ran out the 30-minute task budget mid-work; it never submitted a wrong final patch. One partial credit (SQLGlot ISO-8601, 0.7).</p>
+        <p><span class="n">2.</span> <b>Always-on max thinking is slow.</b> 18.1 min/task average against 3.4&ndash;5.1 for the field &mdash; with moderate tokens (134 K/task), the cost is time, not volume.</p>
+        <p><span class="n">3.</span> <b>A small closed model beats the open flagship here.</b> Haiku 4.5: one more solve, half the $/solved, 3.5&times; the speed &mdash; on time-budgeted agentic work, latency is accuracy.</p>
+        <p><span class="n">4.</span> <b>Integration is part of the score.</b> Three K3 solves were initially lost to 120-second HTTP read timeouts on judge calls; a 900 s provider timeout recovered all three.</p>
+      </div>
+    </div>
+    <div>
+      <div class="fcap"><b>Figure 1.</b> Accuracy and cost-efficiency, best configuration per model. Kimi K3 shaded distinct; value labels on every bar.</div>
+      <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" width="100%">
+<rect x="50" y="61.4" width="24" height="150.6" fill="#9c6644"/><text x="62" y="56.4" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">91</text>
+<rect x="106" y="68.0" width="24" height="144.0" fill="#5d7ba0"/><text x="118" y="63.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
+<rect x="162" y="68.0" width="24" height="144.0" fill="#a3b1c2"/><text x="174" y="63.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
+<rect x="218" y="82.9" width="24" height="129.1" fill="#7d6a94"/><text x="230" y="77.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">78</text>
+<rect x="274" y="89.5" width="24" height="122.5" fill="#3f7369"/><text x="286" y="84.5" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">74</text>
+<text x="62" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text>
+<text x="118" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text>
+<text x="174" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text>
+<text x="230" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Haiku 4.5</text>
+<text x="286" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Kimi K3</text>
+<line x1="20" y1="212" x2="328" y2="212" stroke="#1c1a17" stroke-width="1"/>
+<text x="174" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Accuracy</text>
+<text x="174" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">pass@1 (%), 23 tasks</text>
+<rect x="416" y="163.7" width="24" height="48.3" fill="#9c6644"/><text x="428" y="158.7" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.32</text>
+<rect x="472" y="119.9" width="24" height="92.1" fill="#5d7ba0"/><text x="484" y="114.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.61</text>
+<rect x="528" y="91.2" width="24" height="120.8" fill="#a3b1c2"/><text x="540" y="86.2" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.80</text>
+<rect x="584" y="135.0" width="24" height="77.0" fill="#7d6a94"/><text x="596" y="130.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.51</text>
+<rect x="640" y="62.5" width="24" height="149.5" fill="#3f7369"/><text x="652" y="57.5" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.99</text>
+<text x="428" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text>
+<text x="484" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text>
+<text x="540" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text>
+<text x="596" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Haiku 4.5</text>
+<text x="652" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Kimi K3</text>
+<line x1="386" y1="212" x2="694" y2="212" stroke="#1c1a17" stroke-width="1"/>
+<text x="540" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Economy</text>
+<text x="540" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">USD per solved task</text>
+</svg>
+      <div class="legend">
+        <span><span class="sw" style="background:#9c6644"></span>Grok 4.5</span>
+        <span><span class="sw" style="background:#5d7ba0"></span>Claude Fable 5</span>
+        <span><span class="sw" style="background:#a3b1c2"></span>GPT-5.6 Sol</span>
+        <span><span class="sw" style="background:#7d6a94"></span>Claude Haiku 4.5</span>
+        <span><span class="sw" style="background:#3f7369"></span>Kimi K3</span>
+        <span class="note">Grok/Fable/Sol figures reproduced from Report No. 07 (best effort config each); Haiku and Kimi are new single-config runs</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking is always on and <i>reasoning_effort</i> supports only &ldquo;max&rdquo;, so a single configuration is reported. Kimi suite spend $16.84 under a $40 cap. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
+    <div class="brand">vulcanbench &middot; open source &middot; July 18, 2026</div>
+  </div>
+</div>
+</body></html>

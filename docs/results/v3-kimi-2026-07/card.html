@@ -12,15 +12,15 @@ body { font-family: "Times New Roman", Times, Georgia, serif; background: #f7f5f
 h1 { text-align: center; font-size: 37px; font-weight: 600; margin-top: 20px; letter-spacing: 0.2px; }
 .eff { font-size: 25px; font-weight: 400; font-style: italic; color: #55504a; }
 .authors { text-align: center; font-style: italic; font-size: 19px; margin-top: 9px; color: #3a362f; }
-.abstract { width: 1240px; margin: 18px auto 0; font-size: 19.5px; line-height: 1.48; text-align: center; }
-.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 24px; }
+.abstract { width: 1280px; margin: 18px auto 0; font-size: 19px; line-height: 1.48; text-align: center; }
+.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 22px; }
 .tcap, .fcap { font-size: 15px; margin-bottom: 7px; line-height: 1.35; }
 .tcap b, .fcap b { font-variant: small-caps; letter-spacing: 1px; font-weight: 600; }
-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
 thead th { border-top: 2px solid #1c1a17; border-bottom: 1px solid #1c1a17;
-  padding: 7px 5px; font-weight: 600; text-align: right; font-size: 15px; }
+  padding: 6px 5px; font-weight: 600; text-align: right; font-size: 14.5px; }
 thead th:first-child { text-align: left; }
-tbody td { padding: 6.4px 5px; text-align: right; font-variant-numeric: tabular-nums; }
+tbody td { padding: 5.1px 5px; text-align: right; font-variant-numeric: tabular-nums; }
 tbody td:first-child { text-align: left; }
 tbody tr:last-child td { border-bottom: 2px solid #1c1a17; }
 tbody tr.win td { font-weight: 700; }
@@ -31,7 +31,7 @@ tbody tr.subject td { background: #efeade; }
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .legend .note { width: 100%; text-align: center; font-size: 12.5px; color: #6f6a62; font-style: italic; }
 .sw { width: 14px; height: 14px; display: inline-block; }
-.findings { margin-top: 12px; font-size: 15px; line-height: 1.4; }
+.findings { margin-top: 10px; font-size: 15px; line-height: 1.4; }
 .findings p { margin-top: 7px; }
 .findings .n { font-weight: 700; }
 .foot { position: absolute; left: 78px; right: 78px; bottom: 24px;
@@ -41,77 +41,92 @@ tbody tr.subject td { background: #efeade; }
   letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
 </style></head><body>
 <div class="page">
-  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 08</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; 4 models &middot; 5 languages</span></div>
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 08</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; 4 models &middot; 11 configurations &middot; 5 languages</span></div>
   <div class="rule2"></div><div class="rule1"></div>
 
   <h1>Kimi K3 <span class="eff">(max thinking)</span> &nbsp;vs.&nbsp; Grok 4.5, Claude Fable 5 &amp; GPT-5.6 Sol</h1>
   <div class="authors">Twenty-three real merged PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests</div>
 
   <div class="abstract">
-  <b>17/23 (74%) at the standard 30-minute budget &middot; 20/23 (87%) at 2 hours &mdash; level with Fable&nbsp;5 and Sol.</b><br>
-  18.1 min/task vs. 3.4&ndash;4.2 for the field; $0.99 vs. $0.32&ndash;$0.80 per solved task.</div>
+  <b>Kimi K3 ships one effort level (max): 17/23 (74%) at the standard 30-minute budget, 20/23 (87%) at 2 hours</b> &mdash;
+  matching Fable&nbsp;5 and Sol at high effort, at $1.37 vs. $0.80&ndash;$1.04 per solved task. Grok 4.5 leads all eleven configurations at 21/23.</div>
 
   <div class="cols">
     <div>
-      <div class="tcap"><b>Table 1.</b> One run per task, best effort config per model. Tokens are billed; time is sandbox wall-clock, per-task averages.</div>
+      <div class="tcap"><b>Table 1.</b> All configurations, one run per task each. Tokens are billed; time is sandbox wall-clock, per-task averages.</div>
       <table>
         <thead><tr><th>Model (effort)</th><th>Score</th><th>Cost</th><th>Tokens/task</th><th>Time/task</th><th>$/task</th><th>$/solved</th></tr></thead>
         <tbody>
+          <tr><td class="model">Grok 4.5 (low)</td><td>19/23</td><td>$3.39</td><td>57 K</td><td>2.5 min</td><td>$0.15</td><td>$0.18</td></tr>
           <tr class="win"><td class="model">Grok 4.5 (medium)</td><td>21/23</td><td>$6.67</td><td>106 K</td><td>3.9 min</td><td>$0.29</td><td>$0.32</td></tr>
+          <tr><td class="model">Grok 4.5 (high)</td><td>21/23</td><td>$8.76</td><td>141 K</td><td>4.9 min</td><td>$0.38</td><td>$0.42</td></tr>
           <tr class="sep"><td class="model">Claude Fable 5 (low)<sup>&dagger;</sup></td><td>20/23</td><td>$12.18</td><td>28 K</td><td>3.4 min</td><td>$0.53</td><td>$0.61</td></tr>
+          <tr><td class="model">Claude Fable 5 (medium)<sup>&dagger;</sup></td><td>19/23</td><td>$16.32</td><td>36 K</td><td>3.7 min</td><td>$0.71</td><td>$0.86</td></tr>
+          <tr><td class="model">Claude Fable 5 (high)<sup>&dagger;</sup></td><td>20/23</td><td>$20.82</td><td>44 K</td><td>4.3 min</td><td>$0.91</td><td>$1.04</td></tr>
+          <tr class="sep"><td class="model">GPT-5.6 Sol (low)</td><td>18/23</td><td>$3.85</td><td>23 K</td><td>1.5 min</td><td>$0.17</td><td>$0.21</td></tr>
+          <tr><td class="model">GPT-5.6 Sol (medium)</td><td>19/23</td><td>$8.83</td><td>50 K</td><td>2.8 min</td><td>$0.38</td><td>$0.46</td></tr>
           <tr><td class="model">GPT-5.6 Sol (high)</td><td>20/23</td><td>$15.90</td><td>85 K</td><td>4.2 min</td><td>$0.69</td><td>$0.80</td></tr>
           <tr class="sep subject"><td class="model">Kimi K3 (max, 30-min budget)</td><td>17/23</td><td>$16.84</td><td>134 K</td><td>18.1 min</td><td>$0.73</td><td>$0.99</td></tr>
           <tr class="subject"><td class="model">Kimi K3 (max, 2-h budget)<sup>&Dagger;</sup></td><td>20/23</td><td>$27.43</td><td>216 K</td><td>28.3 min</td><td>$1.19</td><td>$1.37</td></tr>
         </tbody>
       </table>
       <div class="findings">
-        <p><span class="n">1.</span> All six capped misses were timeouts &mdash; K3 never submitted a wrong final patch. The 2-hour budget converts three (aiohttp 64 min, NetworkX-Leiden 107 min, jiff-strftime 21 min) for +$10.59.</p>
-        <p><span class="n">2.</span> The two tasks still unsolved at 2 h &mdash; PennyLane Trotter (0.2) and SQLGlot canonicalize (0.17) &mdash; have never been solved by any model (0-for-27 in Report No. 07).</p>
+        <p><span class="n">1.</span> All six capped K3 misses were timeouts &mdash; it never submitted a wrong final patch. The 2-hour budget converts three (aiohttp 64 min, NetworkX-Leiden 107 min, jiff-strftime 21 min) for +$10.59.</p>
+        <p><span class="n">2.</span> The two tasks K3 still leaves unsolved at 2 h &mdash; PennyLane Trotter (0.2) and SQLGlot canonicalize (0.17) &mdash; are unsolved by every configuration ever run (0-for-27 in Report No. 07).</p>
       </div>
     </div>
     <div>
-      <div class="fcap"><b>Figure 1.</b> Accuracy and cost per solved task; Kimi K3 at both budgets (light = 2-hour). Value labels on every bar.</div>
+      <div class="fcap"><b>Figure 1.</b> All eleven configurations, grouped by model. Shades darken low &rarr; medium &rarr; high effort; for Kimi, 30-minute &rarr; 2-hour budget.</div>
       <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" width="100%">
-<rect x="50" y="61.4" width="24" height="150.6" fill="#9c6644"/><text x="62" y="56.4" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">91</text>
-<rect x="106" y="68.0" width="24" height="144.0" fill="#5d7ba0"/><text x="118" y="63.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
-<rect x="162" y="68.0" width="24" height="144.0" fill="#a3b1c2"/><text x="174" y="63.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
-<rect x="218" y="89.5" width="24" height="122.5" fill="#3f7369"/><text x="230" y="84.5" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">74</text>
-<rect x="274" y="68.0" width="24" height="144.0" fill="#85ab9f"/><text x="286" y="63.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
-<text x="62" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text>
-<text x="118" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text>
-<text x="174" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text>
-<text x="230" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">K3 30 m</text>
-<text x="286" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">K3 2 h</text>
-<line x1="20" y1="212" x2="328" y2="212" stroke="#1c1a17" stroke-width="1"/>
-<text x="174" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Accuracy</text>
-<text x="174" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">pass@1 (%), 23 tasks</text>
-<rect x="416" y="176.8" width="24" height="35.2" fill="#9c6644"/><text x="428" y="171.8" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.32</text>
-<rect x="472" y="144.9" width="24" height="67.1" fill="#5d7ba0"/><text x="484" y="139.9" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.61</text>
-<rect x="528" y="124.0" width="24" height="88.0" fill="#a3b1c2"/><text x="540" y="119.0" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.80</text>
-<rect x="584" y="103.1" width="24" height="108.9" fill="#3f7369"/><text x="596" y="98.1" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">0.99</text>
-<rect x="640" y="61.3" width="24" height="150.7" fill="#85ab9f"/><text x="652" y="56.3" text-anchor="middle" font-size="11.5" fill="#1c1a17" font-family="Georgia, serif">1.37</text>
-<text x="428" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text>
-<text x="484" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text>
-<text x="540" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text>
-<text x="596" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">K3 30 m</text>
-<text x="652" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">K3 2 h</text>
-<line x1="386" y1="212" x2="694" y2="212" stroke="#1c1a17" stroke-width="1"/>
-<text x="540" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Economy</text>
-<text x="540" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">USD per solved task</text>
+<rect x="24" y="74.6" width="20" height="137.4" fill="#c99b7a"/><text x="34" y="69.6" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">83</text>
+<rect x="50" y="61.4" width="20" height="150.6" fill="#9c6644"/><text x="60" y="56.4" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">91</text>
+<rect x="76" y="61.4" width="20" height="150.6" fill="#6e4227"/><text x="86" y="56.4" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">91</text>
+<rect x="110" y="68.0" width="20" height="144.0" fill="#8ba3c4"/><text x="120" y="63.0" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
+<rect x="136" y="74.6" width="20" height="137.4" fill="#5d7ba0"/><text x="146" y="69.6" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">83</text>
+<rect x="162" y="68.0" width="20" height="144.0" fill="#27425f"/><text x="172" y="63.0" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
+<rect x="196" y="82.9" width="20" height="129.1" fill="#ccd4dd"/><text x="206" y="77.9" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">78</text>
+<rect x="222" y="74.6" width="20" height="137.4" fill="#a3b1c2"/><text x="232" y="69.6" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">83</text>
+<rect x="248" y="68.0" width="20" height="144.0" fill="#7a8ba1"/><text x="258" y="63.0" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
+<rect x="282" y="89.5" width="20" height="122.5" fill="#85ab9f"/><text x="292" y="84.5" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">74</text>
+<rect x="308" y="68.0" width="20" height="144.0" fill="#3f7369"/><text x="318" y="63.0" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">87</text>
+<text x="60" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text>
+<text x="146" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text>
+<text x="232" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text>
+<text x="305" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Kimi K3</text>
+<line x1="20" y1="212" x2="332" y2="212" stroke="#1c1a17" stroke-width="1"/>
+<text x="176" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Accuracy</text>
+<text x="176" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">pass@1 (%), 23 tasks</text>
+<rect x="390" y="192.2" width="20" height="19.8" fill="#c99b7a"/><text x="400" y="187.2" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.18</text>
+<rect x="416" y="176.8" width="20" height="35.2" fill="#9c6644"/><text x="426" y="171.8" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.32</text>
+<rect x="442" y="165.8" width="20" height="46.2" fill="#6e4227"/><text x="452" y="160.8" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.42</text>
+<rect x="476" y="144.9" width="20" height="67.1" fill="#8ba3c4"/><text x="486" y="139.9" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.61</text>
+<rect x="502" y="117.4" width="20" height="94.6" fill="#5d7ba0"/><text x="512" y="112.4" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.86</text>
+<rect x="528" y="97.6" width="20" height="114.4" fill="#27425f"/><text x="538" y="92.6" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">1.04</text>
+<rect x="562" y="188.9" width="20" height="23.1" fill="#ccd4dd"/><text x="572" y="183.9" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.21</text>
+<rect x="588" y="161.4" width="20" height="50.6" fill="#a3b1c2"/><text x="598" y="156.4" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.46</text>
+<rect x="614" y="124.0" width="20" height="88.0" fill="#7a8ba1"/><text x="624" y="119.0" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.80</text>
+<rect x="648" y="103.1" width="20" height="108.9" fill="#85ab9f"/><text x="658" y="98.1" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">0.99</text>
+<rect x="674" y="61.3" width="20" height="150.7" fill="#3f7369"/><text x="684" y="56.3" text-anchor="middle" font-size="10.5" fill="#1c1a17" font-family="Georgia, serif">1.37</text>
+<text x="426" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Grok 4.5</text>
+<text x="512" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Fable 5</text>
+<text x="598" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Sol</text>
+<text x="671" y="224" text-anchor="middle" font-size="11" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">Kimi K3</text>
+<line x1="386" y1="212" x2="698" y2="212" stroke="#1c1a17" stroke-width="1"/>
+<text x="542" y="244" text-anchor="middle" font-size="14.5" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Economy</text>
+<text x="542" y="262" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif">USD per solved task</text>
 </svg>
       <div class="legend">
         <span><span class="sw" style="background:#9c6644"></span>Grok 4.5</span>
         <span><span class="sw" style="background:#5d7ba0"></span>Claude Fable 5</span>
         <span><span class="sw" style="background:#a3b1c2"></span>GPT-5.6 Sol</span>
-        <span><span class="sw" style="background:#3f7369"></span>Kimi K3 (30 min)</span>
-        <span><span class="sw" style="background:#85ab9f"></span>Kimi K3 (2 h)</span>
-        <span class="note">Grok/Fable/Sol figures reproduced from Report No. 07 (best effort config each)</span>
+        <span><span class="sw" style="background:#3f7369"></span>Kimi K3</span>
+        <span class="note">Three bars per model: light &rarr; dark = low &rarr; medium &rarr; high effort. Kimi K3 has one effort level; its two bars are 30-minute &rarr; 2-hour budget.</span>
       </div>
     </div>
   </div>
 
   <div class="foot">
-    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs, network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking always on, <i>reasoning_effort</i> = &ldquo;max&rdquo; (the only level shipped). &Dagger;&nbsp;2-hour row: the five timed-out tasks re-run with <i>--override-budgets</i> (2 h / 400 steps / $4 per run, marked <i>budget_override</i>); the other 18 runs unchanged. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs, network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task per configuration. Grok/Fable/Sol: Report No. 07 runs. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking always on, <i>reasoning_effort</i> = &ldquo;max&rdquo; (the only level shipped). &Dagger;&nbsp;2-hour row: the five timed-out tasks re-run with <i>--override-budgets</i> (2 h / 400 steps / $4 per run, marked <i>budget_override</i>); the other 18 runs unchanged. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
     <div class="brand">vulcanbench &middot; open source &middot; July 18, 2026</div>
   </div>
 </div>

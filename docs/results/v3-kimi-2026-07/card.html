@@ -70,6 +70,7 @@ tbody tr.subject td { background: #efeade; }
         <p><span class="n">2.</span> <b>Always-on max thinking is slow.</b> 18.1 min/task average against 3.4&ndash;5.1 for the field &mdash; with moderate tokens (134 K/task), the cost is time, not volume.</p>
         <p><span class="n">3.</span> <b>A small closed model beats the open flagship here.</b> Haiku 4.5: one more solve, half the $/solved, 3.5&times; the speed &mdash; on time-budgeted agentic work, latency is accuracy.</p>
         <p><span class="n">4.</span> <b>Integration is part of the score.</b> Three K3 solves were initially lost to 120-second HTTP read timeouts on judge calls; a 900 s provider timeout recovered all three.</p>
+        <p><span class="n">5.</span> <b>Given time, it closes the gap.</b> Uncapped ablation (2 h wall clock, 400 steps, $4/run): aiohttp, NetworkX-Leiden, and jiff-strftime all fall &mdash; <b>20/23 (87%)</b>, level with Fable&nbsp;5 and Sol. The two remaining partials are the tasks no model has ever solved.</p>
       </div>
     </div>
     <div>
@@ -114,7 +115,7 @@ tbody tr.subject td { background: #efeade; }
   </div>
 
   <div class="foot">
-    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking is always on and <i>reasoning_effort</i> supports only &ldquo;max&rdquo;, so a single configuration is reported. Kimi suite spend $16.84 under a $40 cap. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking is always on and <i>reasoning_effort</i> supports only &ldquo;max&rdquo;, so a single configuration is reported. Kimi suite spend $16.84 under a $40 cap; the finding-5 ablation re-ran only the five timed-out tasks with <i>--override-budgets</i> (runs marked <i>budget_override</i>, excluded from Table 1 and Figure 1; +$17.05). &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
     <div class="brand">vulcanbench &middot; open source &middot; July 18, 2026</div>
   </div>
 </div>

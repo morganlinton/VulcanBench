@@ -79,8 +79,16 @@ def agent_hints(metadata: dict[str, Any]) -> dict[str, Any]:
     return hints if isinstance(hints, dict) else {}
 
 
-def resolve_max_steps(metadata: dict[str, Any], cli_max_steps: int | None = None) -> int:
-    """Resolve step budget from metadata; optional CLI value caps (does not raise)."""
+def resolve_max_steps(
+    metadata: dict[str, Any], cli_max_steps: int | None = None, override: bool = False
+) -> int:
+    """Resolve step budget from metadata; optional CLI value caps (does not raise).
+
+    With ``override=True`` the CLI value is taken verbatim, even above the task
+    default — an ablation mode; such runs are not comparable to capped runs.
+    """
+    if override and cli_max_steps is not None:
+        return cli_max_steps
     hints = agent_hints(metadata)
     raw = hints.get("suggested_max_steps", metadata.get("max_steps"))
     if isinstance(raw, int) and raw > 0:
@@ -104,9 +112,15 @@ def resolve_verifier_timeout_s(metadata: dict[str, Any], default: int = 120) -> 
 
 
 def resolve_agent_timeout_s(
-    metadata: dict[str, Any], cli_timeout: float | None = None
+    metadata: dict[str, Any], cli_timeout: float | None = None, override: bool = False
 ) -> float | None:
-    """Agent wall-clock budget from hints/scale defaults; CLI ``--timeout`` caps when set."""
+    """Agent wall-clock budget from hints/scale defaults; CLI ``--timeout`` caps when set.
+
+    With ``override=True`` the CLI value is taken verbatim, even above the task
+    default — an ablation mode; such runs are not comparable to capped runs.
+    """
+    if override and cli_timeout is not None:
+        return cli_timeout
     hints = agent_hints(metadata)
     hint_timeout = hints.get("suggested_timeout_s")
     if isinstance(hint_timeout, (int, float)) and hint_timeout > 0:

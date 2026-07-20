@@ -304,6 +304,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915 — linear stream-parse loop
         # Killed by the budget/cost watchdog (partial work still counts), or
         # the CLI died without reporting — approximate usage from the stream.
         outcome.prompt_tokens, outcome.completion_tokens = _fold_usage_totals(usage_by_msg.values())
+        outcome.num_turns = len(usage_by_msg)
         if not (killed["timeout"] or killed["cost"]):
             tail = "".join(stderr_chunks)[-500:].strip()
             raise ProviderError(

@@ -72,6 +72,35 @@ def test_run_agent_solves_hello_world(tmp_path: Path) -> None:
     assert (run_dir / "replay.html").exists()
 
 
+def test_run_agent_steps_count_iterations_not_trace_events(tmp_path: Path) -> None:
+    """summary['steps'] must be agent loop iterations, not the trace-event counter.
+
+    collector.step increments on every record() (llm_request, llm_response,
+    tool_call, tool_observation, …). Using it for scoring under-reports
+    efficiency whenever a step emits multiple events.
+    """
+    res = run_agent(
+        task_id="hello-world",
+        model="mock:synthetic",
+        output_dir=tmp_path,
+        tasks_root=Path("tasks/v1"),
+        judges=False,
+    )
+    run_dir = tmp_path / res["run_id"]
+    summary = res["summary"]
+    events = [
+        json.loads(line)
+        for line in (run_dir / "trace.jsonl").read_text().splitlines()
+        if line.strip()
+    ]
+    llm_requests = sum(1 for e in events if e["type"] == "llm_request")
+    assert llm_requests >= 1
+    assert summary["steps"] == llm_requests
+    # Tool/metric events inflate the trace counter past the iteration count.
+    assert len(events) > llm_requests
+    assert summary["steps"] < len(events)
+
+
 def test_run_agent_records_mock_effort_metadata(tmp_path: Path) -> None:
     res = run_agent(
         task_id="hello-world",

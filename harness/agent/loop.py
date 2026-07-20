@@ -187,23 +187,25 @@ def run_agent(
     ]
 
     try:
-        prompt_tokens, completion_tokens, finished, cost_capped, cli_outcome = _execute_agent(
-            cli_agent=cli_agent,
-            model=model,
-            provider=provider,
-            task=task,
-            tools=tools,
-            messages=messages,
-            effective_max_steps=effective_max_steps,
-            collector=collector,
-            executor=executor,
-            run_id=run_id,
-            run_dir=run_dir,
-            workspace=workspace,
-            deadline=deadline,
-            effort_meta=effort_meta,
-            network=network,
-            max_run_cost=max_run_cost,
+        prompt_tokens, completion_tokens, finished, cost_capped, actual_steps, cli_outcome = (
+            _execute_agent(
+                cli_agent=cli_agent,
+                model=model,
+                provider=provider,
+                task=task,
+                tools=tools,
+                messages=messages,
+                effective_max_steps=effective_max_steps,
+                collector=collector,
+                executor=executor,
+                run_id=run_id,
+                run_dir=run_dir,
+                workspace=workspace,
+                deadline=deadline,
+                effort_meta=effort_meta,
+                network=network,
+                max_run_cost=max_run_cost,
+            )
         )
         patch = _git_diff(workspace)
         changed_files = _git_changed_files(workspace)
@@ -230,7 +232,7 @@ def run_agent(
     scores = _evaluate_with_budget(
         functional=functional,
         total_tokens=total_tokens,
-        steps=collector.step,
+        steps=actual_steps,
         workspace=workspace,
         patch=patch,
         changed_files=changed_files,
@@ -250,7 +252,7 @@ def run_agent(
     summary = collector.finalize(
         scores,
         {
-            "steps": collector.step,
+            "steps": actual_steps,
             "total_tokens": total_tokens,
             "tokens": {
                 "prompt": prompt_tokens,
@@ -348,7 +350,7 @@ def _execute_agent(
     effort_meta: Any,
     network: bool,
     max_run_cost: float | None,
-) -> tuple[int, int, bool, bool, CliAgentOutcome | None]:
+) -> tuple[int, int, bool, bool, int, CliAgentOutcome | None]:
     """Run the agent phase: the vendor CLI in the workspace, or the model loop."""
     if cli_agent:
         _, cli_model = parse_model_spec(model)
@@ -371,10 +373,11 @@ def _execute_agent(
             outcome.completion_tokens,
             outcome.finished,
             outcome.cost_capped,
+            outcome.num_turns if outcome.num_turns is not None else 0,
             outcome,
         )
     assert provider is not None  # resolved by _resolve_run_engine for non-CLI specs
-    prompt_tokens, completion_tokens, finished, cost_capped = _run_model_loop(
+    prompt_tokens, completion_tokens, finished, cost_capped, actual_steps = _run_model_loop(
         provider,
         tools,
         messages,
@@ -387,7 +390,7 @@ def _execute_agent(
         model=model,
         max_run_cost=max_run_cost,
     )
-    return prompt_tokens, completion_tokens, finished, cost_capped, None
+    return prompt_tokens, completion_tokens, finished, cost_capped, actual_steps, None
 
 
 def _compute_cost(
@@ -543,10 +546,12 @@ def _run_model_loop(  # noqa: PLR0912 — linear ReAct loop with budget + cost g
     completion_tokens = 0
     finished = False
     cost_capped = False
+    actual_steps = 0
 
     for step in range(1, max_steps + 1):
         if not deadline.ensure_time(collector, "llm_request", step):
             break
+        actual_steps = step
         request_data: dict[str, Any] = {"step": step, "messages": len(messages)}
         if effort is not None:
             request_data["effort"] = effort
@@ -622,7 +627,7 @@ def _run_model_loop(  # noqa: PLR0912 — linear ReAct loop with budget + cost g
             if not deadline.ensure_time(collector, f"tool:{tc.name}", step):
                 break
 
-    return prompt_tokens, completion_tokens, finished, cost_capped
+    return prompt_tokens, completion_tokens, finished, cost_capped, actual_steps
 
 
 _MANIFEST_TOOLS = ("git", "ruff", "bandit", "radon", "go", "node")

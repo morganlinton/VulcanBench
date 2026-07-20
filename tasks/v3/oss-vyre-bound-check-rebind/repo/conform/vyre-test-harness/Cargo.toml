@@ -1,0 +1,29 @@
+[package]
+name = "vyre-test-harness"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Test harness for the vyre execution engine."
+publish = false
+
+[lints]
+workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = []
+strict-fp = ["vyre-harness/strict-fp"]
+
+[dependencies]
+vyre-driver.workspace = true
+vyre-foundation.workspace = true
+vyre-harness.workspace = true
+vyre-libs = { workspace = true, features = ["security"] }
+vyre-reference.workspace = true
+vyre-self-substrate = { workspace = true, features = ["cpu-parity"] }

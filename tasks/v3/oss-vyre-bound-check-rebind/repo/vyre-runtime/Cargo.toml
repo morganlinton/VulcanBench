@@ -1,0 +1,79 @@
+[package]
+name = "vyre-runtime"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Persistent megakernel + io_uring zero-copy streaming runtime for vyre  -  GPU as VIR0 bytecode interpreter"
+readme = "README.md"
+keywords = ["gpu", "io-uring", "megakernel", "nvme", "vyre"]
+categories = ["asynchronous", "hardware-support", "api-bindings"]
+documentation = "https://docs.rs/vyre-runtime"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+legacy-infallible = []
+megakernel-batch = []
+subgroup-ops = []
+self-substrate-adapters = ["dep:vyre-self-substrate"]
+# Compatibility no-op for older manifests. The C workspace adapter lives in
+# `vyre-frontend-c::megakernel_workspace`; runtime owns only the generic seam.
+c-frontend-adapter = []
+# V7-API-008: domain-prefixed feature naming convention. `remote-cache`
+# is the canonical name; `remote` is kept as a back-compat alias for
+# 0.6.x consumers and will be removed in a future semver-major.
+remote-cache = ["ureq"]
+remote = ["remote-cache"]
+# Opt-in NVMe passthrough via `IORING_OP_URING_CMD` (Linux kernel 6.0+).
+uring-cmd-nvme = []
+
+[dependencies]
+vyre-driver.workspace = true
+vyre-self-substrate = { workspace = true, optional = true }
+vyre-foundation.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+blake3.workspace = true
+bytemuck.workspace = true
+rustc-hash.workspace = true
+smallvec.workspace = true
+arc-swap = { workspace = true }
+ureq = { workspace = true, optional = true }
+dashmap.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc.workspace = true
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs
+vyre = { workspace = true }
+tempfile.workspace = true
+criterion.workspace = true
+proptest.workspace = true
+
+
+
+
+
+
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+libc.workspace = true
+
+[lints]
+workspace = true
+
+[[test]]
+name = "sweep_tenant_policy_oracle_matrix"
+path = "tests/sweep_tenant_policy_oracle_matrix.rs"
+
+[[test]]
+name = "sweep_ring_buffer_oracle_matrix"
+path = "tests/sweep_ring_buffer_oracle_matrix.rs"

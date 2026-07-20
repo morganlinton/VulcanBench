@@ -1,0 +1,45 @@
+[package]
+name = "vyre-conform-runner"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Conformance test runner for the vyre execution engine."
+publish = false
+
+[lints]
+workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = ["gpu"]
+gpu = ["dep:vyre-driver-cuda", "dep:vyre-driver-metal", "dep:vyre-driver-wgpu"]
+
+[dependencies]
+blake3 = { workspace = true }
+ed25519-dalek = { workspace = true }
+hex = { workspace = true }
+inventory = { workspace = true }
+rand_core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tempfile = { workspace = true }
+vyre = { workspace = true }
+vyre-driver = { workspace = true }
+vyre-driver-cuda = { workspace = true, optional = true }
+vyre-driver-metal = { workspace = true, optional = true }
+vyre-driver-reference = { workspace = true }
+vyre-driver-wgpu = { workspace = true, optional = true }
+vyre-foundation = { workspace = true }
+vyre-intrinsics = { workspace = true }
+vyre-libs = { workspace = true, features = ["full", "logical", "nn-moe", "security", "visual", "parsing", "math", "nn", "matching", "crypto"] }
+vyre-primitives = { workspace = true }
+vyre-reference = { workspace = true }
+vyre-spec = { workspace = true }
+vyre-test-harness = { workspace = true }

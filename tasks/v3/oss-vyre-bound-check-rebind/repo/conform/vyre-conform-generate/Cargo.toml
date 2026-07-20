@@ -1,0 +1,20 @@
+[package]
+name = "vyre-conform-generate"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Counterexample shrinking + witness generation for vyre conformance testing."
+readme = "README.md"
+keywords = ["vyre", "conformance", "shrinking", "witness"]
+categories = ["development-tools::testing"]
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+vyre-conform-spec.workspace = true

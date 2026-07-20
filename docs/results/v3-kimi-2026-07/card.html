@@ -71,7 +71,7 @@ tbody tr.subject td { background: #efeade; }
         </tbody>
       </table>
       <div class="findings">
-        <p><span class="n">1.</span> Five of the six capped K3 misses were timeouts mid-work; the sixth (SQLGlot ISO-8601) was a submitted patch at 0.7 partial credit. The 2-hour budget converts three timeouts (aiohttp 64 min, NetworkX-Leiden 107 min, jiff-strftime 21 min) for +$10.59.</p>
+        <p><span class="n">1.</span> Five of the six capped K3 misses ran out of the 30-minute task budget mid-work; the sixth (SQLGlot ISO-8601) was a submitted patch at 0.7 partial credit. The 2-hour budget converts three of them (aiohttp 64 min, NetworkX-Leiden 107 min, jiff-strftime 21 min) for +$10.59.</p>
         <p><span class="n">2.</span> The two tasks K3 still leaves unsolved at 2 h &mdash; PennyLane Trotter (0.2) and SQLGlot canonicalize (0.17), both ending at the $4 cost cap &mdash; are unsolved by every configuration ever run (0-for-27 in Report No. 07).</p>
       </div>
     </div>
@@ -126,7 +126,7 @@ tbody tr.subject td { background: #efeade; }
   </div>
 
   <div class="foot">
-    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs, network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task per configuration. Grok/Fable/Sol: Report No. 07 runs. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking always on, <i>reasoning_effort</i> = &ldquo;max&rdquo; (the only level shipped). &Dagger;&nbsp;2-hour row: the five timed-out tasks re-run with <i>--override-budgets</i> (2 h / 400 steps / $4 per run, marked <i>budget_override</i>); the other 18 runs unchanged. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs, network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task per configuration. Grok/Fable/Sol: Report No. 07 runs. kimi-k3 via the Moonshot API ($3/$15 per M tokens); thinking always on, <i>reasoning_effort</i> = &ldquo;max&rdquo; (the only level shipped). &Dagger;&nbsp;2-hour row: the five tasks unfinished at 30 minutes re-run with <i>--override-budgets</i> (2 h / 400 steps / $4 per run, marked <i>budget_override</i>); the other 18 runs unchanged. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback (see Report No. 07).</div>
     <div class="brand">vulcanbench &middot; open source &middot; July 18, 2026</div>
   </div>
 </div>

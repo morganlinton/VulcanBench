@@ -36,7 +36,7 @@ tr.subj td { background: #efe9dc !important; }
   <p class="byline">Moonshot&rsquo;s 2.8T open-weight flagship, at its single shipped effort level, against the Report 07 field: twenty-three real merged post-cutoff PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests.</p>
 
   <h2>Abstract</h2>
-  <p class="abs">Kimi K3 ships one effort level (max, always-thinking): 17/23 (74%) at the standard 30-minute budget, 20/23 (87%) at two hours &mdash; level with Fable 5 and Sol at high effort, at $1.37 vs. $0.80&ndash;$1.04 per solved task. Five of its six capped misses were timeouts (the sixth scored 0.7 partial credit); at 18.1 min/task it runs 4&ndash;7&times; slower than the field. Kimi benchmark spend $33.89 under a $40 cap.</p>
+  <p class="abs">Kimi K3 ships one effort level (max, always-thinking): 17/23 (74%) at the standard 30-minute budget, 20/23 (87%) at two hours &mdash; level with Fable 5 and Sol at high effort, at $1.37 vs. $0.80&ndash;$1.04 per solved task. Five of its six capped misses ran out of the 30-minute task budget (the sixth scored 0.7 partial credit); at 18.1 min/task it runs 4&ndash;7&times; slower than the field. Kimi benchmark spend $33.89 under a $40 cap.</p>
 
   <h2>Table 1. Results (Grok/Fable/Sol reproduced from Report 07)</h2>
   <table>
@@ -55,11 +55,11 @@ tr.subj td { background: #efe9dc !important; }
       <tr class="subj"><td>Kimi K3 (max, 30-min budget)</td><td>17/23</td><td>73.9%</td><td>$16.84</td><td>134 K</td><td>18.1 min</td><td>$0.99</td></tr>
     </tbody>
   </table>
-  <p class="note">&Dagger; 2-hour row: the five tasks that timed out at 30 minutes were re-run with exact budgets of 2 h / 400 steps / $4 per run (runs marked budget_override); the other 18 runs unchanged. It is an ablation, not a leaderboard config &mdash; every other model ran under the standard budget. * Fable 5 ran with Opus 4.8 refusal fallback (see Report 07). Tokens are billed tokens; time is sandbox wall-clock.</p>
+  <p class="note">&Dagger; 2-hour row: the five tasks that did not finish within the 30-minute budget were re-run with exact budgets of 2 h / 400 steps / $4 per run (runs marked budget_override); the other 18 runs unchanged. It is an ablation, not a leaderboard config &mdash; every other model ran under the standard budget. * Fable 5 ran with Opus 4.8 refusal fallback (see Report 07). Tokens are billed tokens; time is sandbox wall-clock.</p>
 
   <h2>Findings</h2>
   <div class="findings">
-    <p><b class="fh">1. The clock is the dominant failure mode &mdash; not the only one.</b>Five of the six capped misses were timeouts mid-work; the sixth (SQLGlot ISO-8601) was a submitted patch that earned 0.7 partial credit. Given two hours, three timeouts convert, while the two hardest tasks still end at the $4 cost cap with partial progress.</p>
+    <p><b class="fh">1. The clock is the dominant failure mode &mdash; not the only one.</b>Five of the six capped misses ran out of the task budget mid-work; the sixth (SQLGlot ISO-8601) was a submitted patch that earned 0.7 partial credit. Given two hours, three of them convert, while the two hardest tasks still end at the $4 cost cap with partial progress.</p>
     <p><b class="fh">2. Always-on max thinking is slow, not verbose.</b>18.1 min/task against 3.4&ndash;4.9 for the field, on moderate token volume (134 K/task). The cost of Preserved Thinking is time; on time-budgeted agentic work, latency is accuracy.</p>
     <p><b class="fh">3. Given time, it closes the gap.</b>At 2 hours, aiohttp (64 min), NetworkX-Leiden (107 min), and jiff-strftime (21 min &mdash; run-to-run variance, not time starvation) all fall: 20/23, matching high-effort Fable 5 and Sol for +$10.59.</p>
     <p><b class="fh">4. The difficulty ceiling held.</b>PennyLane Trotter fragmentation (0.2 partial) and SQLGlot internal-name canonicalization (0.17 partial) remain unsolved by every configuration ever run on v3 &mdash; 0-for-27 in Report 07, and K3&rsquo;s two-hour, $4 attempts didn&rsquo;t crack them either.</p>
@@ -69,11 +69,11 @@ tr.subj td { background: #efe9dc !important; }
   <table>
     <thead><tr><th>Task</th><th>30-min budget</th><th>2-h budget</th><th>Time</th><th>Cost</th></tr></thead>
     <tbody>
-      <tr><td>aiohttp-upgrade-deferred</td><td>x timeout</td><td>ok solved</td><td>64 min</td><td>$2.66</td></tr>
-      <tr><td>networkx-leiden-communities</td><td>x timeout</td><td>ok solved</td><td>107 min</td><td>$4.35</td></tr>
-      <tr><td>jiff-strftime-negpad</td><td>x timeout</td><td>ok solved</td><td>21 min</td><td>$1.14</td></tr>
-      <tr><td>pennylane-trotter-fragmented</td><td>x timeout</td><td>partial (0.2), $4 cap</td><td>100 min</td><td>$4.78</td></tr>
-      <tr><td>sqlglot-canonicalize-internal-names</td><td>x timeout</td><td>partial (0.17), $4 cap</td><td>94 min</td><td>$4.12</td></tr>
+      <tr><td>aiohttp-upgrade-deferred</td><td>x did not finish</td><td>ok solved</td><td>64 min</td><td>$2.66</td></tr>
+      <tr><td>networkx-leiden-communities</td><td>x did not finish</td><td>ok solved</td><td>107 min</td><td>$4.35</td></tr>
+      <tr><td>jiff-strftime-negpad</td><td>x did not finish</td><td>ok solved</td><td>21 min</td><td>$1.14</td></tr>
+      <tr><td>pennylane-trotter-fragmented</td><td>x did not finish</td><td>partial (0.2), $4 cap</td><td>100 min</td><td>$4.78</td></tr>
+      <tr><td>sqlglot-canonicalize-internal-names</td><td>x did not finish</td><td>partial (0.17), $4 cap</td><td>94 min</td><td>$4.12</td></tr>
       <tr><td>sqlglot-iso8601-nanos</td><td>partial (0.7)</td><td>&mdash; not re-run</td><td>&mdash;</td><td>&mdash;</td></tr>
     </tbody>
   </table>

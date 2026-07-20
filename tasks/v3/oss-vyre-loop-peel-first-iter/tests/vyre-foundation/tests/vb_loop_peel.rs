@@ -44,8 +44,11 @@ fn find_loop(nodes: &[Node]) -> Option<(&Expr, &[Node])> {
     None
 }
 
-fn entry_body(program: &Program) -> Vec<Node> {
-    program.entry().to_vec()
+fn entry_body(program: &Program) -> &[Node] {
+    match program.entry() {
+        [Node::Region { body, .. }] => body.as_slice(),
+        other => other,
+    }
 }
 
 fn peel_fixture() -> Program {
@@ -69,7 +72,7 @@ fn peel_prologue_includes_rest_at_i_zero() {
     let result = LoopPeelPass::transform(peel_fixture());
     assert!(result.changed, "peeling must fire");
     let body = entry_body(&result.program);
-    let pairs = store_pairs(&body);
+    let pairs = store_pairs(body);
     assert!(
         pairs.len() >= 2,
         "prologue must include then and rest stores; got {pairs:?}"
@@ -90,7 +93,7 @@ fn peel_prologue_includes_rest_at_i_zero() {
 fn peel_substitutes_induction_var_in_prologue() {
     let result = LoopPeelPass::transform(peel_fixture());
     let body = entry_body(&result.program);
-    let pairs = store_pairs(&body);
+    let pairs = store_pairs(body);
     assert!(
         !matches!(pairs[0].0, Expr::Var(_)),
         "prologue must not leave a stale Var(i) as the store index"
@@ -105,7 +108,7 @@ fn peel_substitutes_induction_var_in_prologue() {
 fn peel_remainder_starts_at_one_with_rest() {
     let result = LoopPeelPass::transform(peel_fixture());
     let body = entry_body(&result.program);
-    let (from, lbody) = find_loop(&body).expect("remainder loop present");
+    let (from, lbody) = find_loop(body).expect("remainder loop present");
     assert_eq!(from, &Expr::u32(1), "remainder loop starts at i = 1");
     assert_eq!(
         store_pairs(lbody),
@@ -139,12 +142,130 @@ fn peel_full_first_iteration_store_sequence() {
     assert!(result.changed);
     let body = entry_body(&result.program);
     assert_eq!(
-        store_pairs(&body),
+        store_pairs(body),
         vec![
             (Expr::u32(0), Expr::u32(99)),
             (Expr::u32(0), Expr::u32(7)),
             (Expr::var("i"), Expr::u32(7)),
         ],
         "prologue then++rest at i=0, then remainder rest with Var(i)"
+    );
+}
+
+fn peel_then_plus_rest(rest: Vec<Node>) -> Program {
+    let guard = Node::If {
+        cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
+        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(99))],
+        otherwise: vec![],
+    };
+    let mut body = vec![guard];
+    body.extend(rest);
+    program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(10),
+        body,
+    }])
+}
+
+#[test]
+fn peel_materializes_multiple_trailing_rest_stores_at_i_zero() {
+    let program = peel_then_plus_rest(vec![
+        Node::store("buf", Expr::var("i"), Expr::u32(7)),
+        Node::store("buf", Expr::var("i"), Expr::u32(8)),
+    ]);
+    let result = LoopPeelPass::transform(program);
+    assert!(result.changed, "peeling must fire");
+    assert_eq!(
+        store_pairs(entry_body(&result.program)),
+        vec![
+            (Expr::u32(0), Expr::u32(99)),
+            (Expr::u32(0), Expr::u32(7)),
+            (Expr::u32(0), Expr::u32(8)),
+            (Expr::var("i"), Expr::u32(7)),
+            (Expr::var("i"), Expr::u32(8)),
+        ],
+        "every trailing rest stmt must run once in the prologue at i=0 and stay in the remainder"
+    );
+}
+
+#[test]
+fn peel_substitutes_induction_inside_nested_if_in_rest() {
+    // rest contains If(true, [store(i, 3)], []) — the nested store still uses Var(i)
+    // and must become LitU32(0) in the prologue.
+    let nested = Node::If {
+        cond: Expr::bool(true),
+        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(3))],
+        otherwise: vec![],
+    };
+    let program = peel_then_plus_rest(vec![nested]);
+    let result = LoopPeelPass::transform(program);
+    assert!(result.changed);
+    let pairs = store_pairs(entry_body(&result.program));
+    assert!(
+        pairs
+            .iter()
+            .any(|(idx, val)| *idx == Expr::u32(0) && *val == Expr::u32(3)),
+        "nested rest store must appear in prologue with i substituted to 0; got {pairs:?}"
+    );
+    assert!(
+        pairs
+            .iter()
+            .any(|(idx, val)| matches!(idx, Expr::Var(_)) && *val == Expr::u32(3)),
+        "remainder must keep the nested rest store under Var(i); got {pairs:?}"
+    );
+}
+
+#[test]
+fn peel_substitutes_induction_in_then_arm_arithmetic_index() {
+    // then stores at (i + 1). Peel substitutes only; it does not const-fold, so
+    // the prologue index is Add(0, 1) — never a leftover Var(i).
+    let guard = Node::If {
+        cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
+        then: vec![Node::store(
+            "buf",
+            Expr::add(Expr::var("i"), Expr::u32(1)),
+            Expr::u32(99),
+        )],
+        otherwise: vec![],
+    };
+    let rest = Node::store("buf", Expr::var("i"), Expr::u32(7));
+    let program = program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(4),
+        body: vec![guard, rest],
+    }]);
+    let result = LoopPeelPass::transform(program);
+    assert!(result.changed);
+    let pairs = store_pairs(entry_body(&result.program));
+    assert_eq!(
+        &pairs[0],
+        &(Expr::add(Expr::u32(0), Expr::u32(1)), Expr::u32(99)),
+        "then-arm index must substitute i:=0 inside Add; got {pairs:?}"
+    );
+    assert!(
+        !matches!(pairs[0].0, Expr::Var(_))
+            && !matches!(&pairs[0].0, Expr::BinOp { left, .. } if matches!(left.as_ref(), Expr::Var(_))),
+        "prologue must not leave a stale Var(i) in the arithmetic index"
+    );
+    assert_eq!(&pairs[1], &(Expr::u32(0), Expr::u32(7)));
+}
+
+#[test]
+fn peel_remainder_keeps_from_one_after_multi_rest() {
+    let program = peel_then_plus_rest(vec![
+        Node::store("buf", Expr::var("i"), Expr::u32(7)),
+        Node::store("buf", Expr::var("i"), Expr::u32(8)),
+    ]);
+    let result = LoopPeelPass::transform(program);
+    let (from, lbody) = find_loop(entry_body(&result.program)).expect("remainder loop");
+    assert_eq!(from, &Expr::u32(1));
+    assert_eq!(
+        store_pairs(lbody),
+        vec![
+            (Expr::var("i"), Expr::u32(7)),
+            (Expr::var("i"), Expr::u32(8)),
+        ]
     );
 }

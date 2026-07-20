@@ -32,6 +32,18 @@
       {
         "name": "full_store_sequence",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_full_first_iteration_store_sequence"
+      },
+      {
+        "name": "multi_trailing_rest",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_materializes_multiple_trailing_rest_stores_at_i_zero"
+      },
+      {
+        "name": "nested_if_in_rest",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_inside_nested_if_in_rest"
+      },
+      {
+        "name": "arith_index_sub",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_in_then_arm_arithmetic_index"
       }
     ],
     "pass_to_pass": [
@@ -42,6 +54,10 @@
       {
         "name": "skip_nonzero_from",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_still_skips_non_zero_from"
+      },
+      {
+        "name": "remainder_multi_rest",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_remainder_keeps_from_one_after_multi_rest"
       }
     ]
   },

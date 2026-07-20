@@ -41,14 +41,7 @@
       }
     ]
   },
-  "setup": [
-    {
-      "name": "build-tests",
-      "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform --no-run"
-    }
-  ],
-  "setup_timeout_s": 900,
-  "test_timeout_s": 600,
+  "test_timeout_s": 900,
   "agent_hints": {
     "suggested_max_steps": 200,
     "suggested_timeout_s": 1800

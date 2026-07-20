@@ -1,0 +1,49 @@
+[package]
+name = "vyre-grammar-gen"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license = "MIT OR Apache-2.0"
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Host-side C11 grammar table generator for the vyre GPU C parser. Emits DFA lexer + LR(1) action/goto tables as binary blobs that vyre-libs::parsing loads as ReadOnly buffers."
+readme = "README.md"
+keywords = ["gpu", "parser", "c11", "vyre"]
+categories = ["compilers", "parsing"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+clap = { version = "=4.6.1", features = ["derive"] }
+blake3.workspace = true
+regex.workspace = true
+regex-automata.workspace = true
+
+[[bin]]
+name = "vyre-grammar-gen"
+path = "src/main.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies]
+proptest = { workspace = true }
+
+[lints.clippy]
+cast_lossless = "allow"
+cast_possible_truncation = "allow"
+
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+unreachable_pub = "warn"
+nonstandard_style = { level = "warn", priority = -1 }
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+
+[package.metadata.santh]
+status = "alpha"

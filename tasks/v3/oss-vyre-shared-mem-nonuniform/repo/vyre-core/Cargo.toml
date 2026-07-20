@@ -1,0 +1,41 @@
+[package]
+name = "vyre"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+description = "GPU compute intermediate representation with a standard operation library"
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/vyre"
+readme = "README.md"
+keywords = ["gpu", "ir", "compute", "wgsl", "conformance"]
+categories = ["algorithms", "compilers", "hardware-support"]
+
+[dependencies]
+vyre-driver.workspace = true
+vyre-foundation.workspace = true
+vyre-lower.workspace = true
+vyre-driver-cuda = { workspace = true, optional = true }
+vyre-driver-wgpu = { workspace = true, optional = true }
+blake3.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+toml.workspace = true
+
+[build-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+cuda = ["dep:vyre-driver-cuda"]
+wgpu = ["dep:vyre-driver-wgpu"]
+cpu-parity = []
+
+[lints]
+workspace = true

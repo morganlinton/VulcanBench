@@ -1,0 +1,10 @@
+error[E0599]: no variant or associated item named `DefinitelyNotALaw` found for enum `AlgebraicLaw` in the current scope
+  --> tests/ui/derive_laws_unknown_law_variant.rs:16:10
+   |
+7  |     pub enum AlgebraicLaw {
+   |     --------------------- variant or associated item `DefinitelyNotALaw` not found for this enum
+...
+16 | #[derive(AlgebraicLaws)]
+   |          ^^^^^^^^^^^^^ variant or associated item not found in `AlgebraicLaw`
+   |
+   = note: this error originates in the derive macro `AlgebraicLaws` (in Nightly builds, run with -Z macro-backtrace for more info)

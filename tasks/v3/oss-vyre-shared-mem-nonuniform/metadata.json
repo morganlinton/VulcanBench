@@ -1,0 +1,69 @@
+{
+  "id": "oss-vyre-shared-mem-nonuniform",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-07-19",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "2b1e8d9411e39389a8f2c6a828b7961e88b6674e",
+  "upstream": {
+    "url": "https://github.com/santhreal/vyre",
+    "issue": "https://github.com/santhreal/vyre/commit/cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2",
+    "commit": "cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2"
+  },
+  "decontamination_notes": "Real bug fix from santhreal/vyre commit cd7dfbb (2026-06-22), after model training cutoffs. shared_mem_promote inserted AsyncLoad/AsyncWait/Barrier into StructuredIfThen/ForLoop child bodies (non-uniform CF), which deadlocks on GPU. Fix tracks workgroup-uniformity through the rewrite. Full workspace slice at the parent commit. LICENSE preserved. Hidden tests: 6 fail_to_pass (If/For/ITE/nested/sibling/block-under-if) and 3 pass_to_pass (root, StructuredBlock, Region still promote).",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "if_then",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then"
+      },
+      {
+        "name": "for_loop",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_for_loop_body"
+      },
+      {
+        "name": "ite",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then_else"
+      },
+      {
+        "name": "nested",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_nested_structured_if"
+      },
+      {
+        "name": "sibling",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_uniform_root_when_sibling_child_is_nonuniform"
+      },
+      {
+        "name": "block_under_if",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_in_structured_block_under_if"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "root",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_repeated_loads_in_uniform_root_body"
+      },
+      {
+        "name": "structured_block",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_inside_structured_block_child"
+      },
+      {
+        "name": "region",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_inside_region_child"
+      }
+    ]
+  },
+  "test_timeout_s": 900,
+  "agent_hints": {
+    "suggested_max_steps": 200,
+    "suggested_timeout_s": 1800
+  }
+}

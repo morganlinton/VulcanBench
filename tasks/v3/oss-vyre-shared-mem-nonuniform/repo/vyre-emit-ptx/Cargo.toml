@@ -1,0 +1,33 @@
+[package]
+name = "vyre-emit-ptx"
+version = "0.6.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "PTX text emitter for vyre KernelDescriptor. Produces NVRTC-compatible CUDA assembly."
+readme = "README.md"
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+documentation = "https://docs.rs/vyre-emit-ptx"
+categories = ["compilers", "hardware-support"]
+keywords = ["vyre", "ptx", "cuda", "shader"]
+
+[lib]
+name = "vyre_emit_ptx"
+path = "src/lib.rs"
+
+[dependencies]
+vyre-foundation = { workspace = true }
+vyre-lower = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+rustc-hash = { workspace = true }
+smallvec = { workspace = true }
+
+[features]
+default = []
+nvrtc = []
+
+[dev-dependencies]
+vyre-emit-naga = { workspace = true }
+cudarc = { workspace = true }
+proptest.workspace = true

@@ -22,30 +22,42 @@
   "tests": {
     "fail_to_pass": [
       {
-        "name": "no_barrier_in_if",
+        "name": "if_then",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then"
       },
       {
-        "name": "no_barrier_in_for",
+        "name": "for_loop",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_for_loop_body"
       },
       {
-        "name": "no_barrier_in_ite",
+        "name": "ite",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then_else"
       },
       {
-        "name": "no_barrier_nested",
+        "name": "nested",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_nested_structured_if"
       },
       {
-        "name": "sibling_child_clean",
+        "name": "sibling",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_uniform_root_when_sibling_child_is_nonuniform"
+      },
+      {
+        "name": "block_under_if",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_in_structured_block_under_if"
       }
     ],
     "pass_to_pass": [
       {
-        "name": "root_still_promotes",
+        "name": "root",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_repeated_loads_in_uniform_root_body"
+      },
+      {
+        "name": "structured_block",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_inside_structured_block_child"
+      },
+      {
+        "name": "region",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_inside_region_child"
       }
     ]
   },

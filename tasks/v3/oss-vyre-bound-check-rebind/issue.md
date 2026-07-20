@@ -14,8 +14,8 @@ store. That is the unsound direction.
 
 - When the loop body rebinds the induction variable before a `var < to` guard
   whose literal equals the loop upper bound, the elision pass must **not**
-  remove that guard (transform reports no change; the `If` remains structurally
-  present; analyze agrees that there is nothing redundant to remove).
+  remove that guard: the `If` must remain structurally present around the
+  protected store.
 - When the induction variable is stable for the whole body, existing redundant
   elision behavior for true loop-range re-checks must keep working.
 - Other loop transforms that assume a stable induction variable for the whole

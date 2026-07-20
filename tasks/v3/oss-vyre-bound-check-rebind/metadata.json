@@ -22,41 +22,53 @@
   "tests": {
     "fail_to_pass": [
       {
-        "name": "no_elide_after_let_rebind",
+        "name": "let_rebind",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_keeps_guard_after_let_rebind"
       },
       {
-        "name": "no_elide_after_assign_rebind",
+        "name": "assign_rebind",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_keeps_guard_after_assign_rebind"
       },
       {
-        "name": "store_stays_guarded",
+        "name": "nested_if_rebind",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_keeps_guard_when_rebind_is_nested_inside_if"
+      },
+      {
+        "name": "store_guarded",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind rebind_keeps_store_under_if"
       }
     ],
     "pass_to_pass": [
       {
-        "name": "still_elides_stable",
+        "name": "still_elides",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind still_elides_true_redundant_guard_on_stable_induction"
       },
       {
-        "name": "range_fold_skips_rebind",
+        "name": "unrelated_let_elides",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_still_fires_when_unrelated_name_is_bound"
+      },
+      {
+        "name": "range_fold",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind range_fold_skips_when_induction_rebound"
       },
       {
-        "name": "lower_bound_skips_rebind",
+        "name": "lower_bound",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind lower_bound_normalize_skips_when_induction_rebound"
       },
       {
-        "name": "strip_mine_skips_rebind",
+        "name": "strip_mine_skip",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind strip_mine_skips_when_induction_rebound"
       },
       {
-        "name": "unroll_skips_write",
+        "name": "strip_mine_unrelated",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind strip_mine_still_fires_when_unrelated_name_is_bound"
+      },
+      {
+        "name": "unroll",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind unroll_skips_when_induction_written"
       },
       {
-        "name": "nested_same_name_range_fold",
+        "name": "nested_same_name",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind nested_same_name_loop_blocks_range_fold_on_outer"
       }
     ]

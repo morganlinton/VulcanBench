@@ -214,6 +214,75 @@ fn nested_same_name_loop_blocks_range_fold_on_outer() {
     );
 }
 
+#[test]
+fn elide_keeps_guard_when_rebind_is_nested_inside_if() {
+    // Let-rebind sits inside an unconditional-looking If(true) before the guard.
+    // The helper must descend through If — a top-level-only scan would miss it.
+    let program = program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(4),
+        body: vec![
+            Node::If {
+                cond: Expr::bool(true),
+                then: vec![Node::let_bind("i", Expr::load("buf", Expr::var("i")))],
+                otherwise: vec![],
+            },
+            Node::if_then(
+                Expr::lt(Expr::var("i"), Expr::u32(4)),
+                vec![Node::store("buf", Expr::var("i"), Expr::u32(7))],
+            ),
+        ],
+    }]);
+    let result = LoopRedundantBoundCheckElidePass::transform(program);
+    assert!(
+        !result.changed,
+        "rebind inside If must still poison induction-based elision"
+    );
+    assert_eq!(count_ifs(entry_body(&result.program)), 2);
+}
+
+#[test]
+fn elide_still_fires_when_unrelated_name_is_bound() {
+    // `let j = ...` must not block eliding a true redundant `if i < 4`.
+    let program = program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(4),
+        body: vec![
+            Node::let_bind("j", Expr::load("buf", Expr::var("i"))),
+            Node::if_then(
+                Expr::lt(Expr::var("i"), Expr::u32(4)),
+                vec![Node::store("buf", Expr::var("i"), Expr::u32(7))],
+            ),
+        ],
+    }]);
+    let result = LoopRedundantBoundCheckElidePass::transform(program);
+    assert!(
+        result.changed,
+        "binding an unrelated name must not disable redundant-guard elision"
+    );
+    assert_eq!(count_ifs(entry_body(&result.program)), 0);
+}
+
+#[test]
+fn strip_mine_still_fires_when_unrelated_name_is_bound() {
+    let program = program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(32),
+        body: vec![
+            Node::let_bind("j", Expr::u32(0)),
+            Node::store("buf", Expr::var("i"), Expr::u32(1)),
+        ],
+    }]);
+    let result = LoopStripMine::transform(program);
+    assert!(
+        result.changed,
+        "unrelated let must not look like an induction rebind to strip-mine"
+    );
+}
+
 fn loop_with_body(var: &str, to: u32, body: Vec<Node>) -> Node {
     Node::Loop {
         var: Ident::from(var),
@@ -225,7 +294,6 @@ fn loop_with_body(var: &str, to: u32, body: Vec<Node>) -> Node {
 
 #[test]
 fn still_elides_true_redundant_guard_on_stable_induction() {
-    // No rebind: `if i < 4` inside Loop(i,0,4) is a redundant range re-check.
     let entry = vec![loop_with_body(
         "i",
         4,
@@ -234,19 +302,10 @@ fn still_elides_true_redundant_guard_on_stable_induction() {
             vec![Node::store("buf", Expr::var("i"), Expr::u32(7))],
         )],
     )];
-    let program = program_with_entry(entry);
-    let result = LoopRedundantBoundCheckElidePass::transform(program);
-    assert!(
-        result.changed,
-        "stable induction + matching upper bound should still elide"
-    );
-    assert_eq!(
-        count_ifs(entry_body(&result.program)),
-        0,
-        "redundant guard should be gone when induction is stable"
-    );
+    let result = LoopRedundantBoundCheckElidePass::transform(program_with_entry(entry));
+    assert!(result.changed);
+    assert_eq!(count_ifs(entry_body(&result.program)), 0);
 }
-
 
 #[test]
 fn rebind_keeps_store_under_if() {
@@ -262,27 +321,18 @@ fn rebind_keeps_store_under_if() {
         ],
     )];
     let result = LoopRedundantBoundCheckElidePass::transform(program_with_entry(entry));
-    // Walk: every Store must be nested under an If (not floated to the loop body).
     fn stores_outside_if(nodes: &[Node]) -> usize {
         let mut bad = 0;
         for n in nodes {
             match n {
                 Node::Store { .. } => bad += 1,
                 Node::If { .. } => {}
-                Node::Block(b) | Node::Loop { body: b, .. } => {
-                    bad += stores_outside_if(b);
-                }
-                Node::Region { body, .. } => {
-                    bad += stores_outside_if(body);
-                }
+                Node::Block(b) | Node::Loop { body: b, .. } => bad += stores_outside_if(b),
+                Node::Region { body, .. } => bad += stores_outside_if(body),
                 _ => {}
             }
         }
         bad
     }
-    assert_eq!(
-        stores_outside_if(entry_body(&result.program)),
-        0,
-        "store must remain under the bounds-check If, not become unconditional"
-    );
+    assert_eq!(stores_outside_if(entry_body(&result.program)), 0);
 }

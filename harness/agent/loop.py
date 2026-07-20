@@ -143,6 +143,7 @@ def run_agent(
     effort: str | None = None,
     experiment_id: str | None = None,
     max_run_cost: float | None = None,
+    override_budgets: bool = False,
 ) -> dict[str, Any]:
     """Run one evaluation: agent solves ``task_id`` with ``model``.
 
@@ -157,8 +158,8 @@ def run_agent(
     """
     task = load_task(task_id, tasks_root)
     cli_agent, provider, effort_meta = _resolve_run_engine(model, provider, effort, sandbox)
-    effective_max_steps = resolve_max_steps(task.metadata, max_steps)
-    effective_timeout = resolve_agent_timeout_s(task.metadata, timeout_s)
+    effective_max_steps = resolve_max_steps(task.metadata, max_steps, override=override_budgets)
+    effective_timeout = resolve_agent_timeout_s(task.metadata, timeout_s, override=override_budgets)
 
     run_id = f"{task_id}-{uuid.uuid4().hex[:8]}"
     run_dir = output_dir / run_id
@@ -267,6 +268,16 @@ def run_agent(
             "suite": suite,
             "suite_id": suite_id,
             **({"effort": effort_meta.as_summary()} if effort_meta else {}),
+            **(
+                {
+                    "budget_override": {
+                        "timeout_s": effective_timeout,
+                        "max_steps": effective_max_steps,
+                    }
+                }
+                if override_budgets
+                else {}
+            ),
             **({"experiment_id": experiment_id} if experiment_id else {}),
             **({"cli_agent": cli_outcome.summary()} if cli_outcome else {}),
             "verifier": verifier_payload,
@@ -1044,6 +1055,7 @@ _JUDGE_KEY_ENV = {
     "openai": "OPENAI_API_KEY",
     "anthropic": "ANTHROPIC_API_KEY",
     "zai": "ZAI_API_KEY",
+    "kimi": "MOONSHOT_API_KEY",
 }
 
 

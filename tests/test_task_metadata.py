@@ -50,6 +50,22 @@ def test_resolve_max_steps_cli_caps_hints() -> None:
     assert resolve_max_steps(meta) == 100
 
 
+def test_resolve_max_steps_override_exceeds_default() -> None:
+    meta = {"agent_hints": {"suggested_max_steps": 100}}
+    assert resolve_max_steps(meta, cli_max_steps=400, override=True) == 400
+    # Without override the CLI value can only cap.
+    assert resolve_max_steps(meta, cli_max_steps=400) == 100
+    # Override with no CLI value falls back to the task default.
+    assert resolve_max_steps(meta, override=True) == 100
+
+
+def test_resolve_agent_timeout_override_exceeds_default() -> None:
+    meta = {"repo_scale": "medium"}
+    assert resolve_agent_timeout_s(meta, cli_timeout=7200, override=True) == 7200
+    assert resolve_agent_timeout_s(meta, cli_timeout=7200) == 1200.0
+    assert resolve_agent_timeout_s(meta, override=True) == 1200.0
+
+
 def test_resolve_agent_timeout_ignores_test_timeout_s() -> None:
     meta = {"repo_scale": "medium", "test_timeout_s": 120}
     assert resolve_agent_timeout_s(meta) == 1200.0

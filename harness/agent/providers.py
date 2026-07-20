@@ -12,6 +12,7 @@ Providers implemented:
                        API when reasoning effort is supplied.
 - ``anthropic:<model>`` Anthropic Messages API.
 - ``zai:<model>``      Z.ai (Zhipu) OpenAI-compatible Chat Completions API.
+- ``kimi:<model>``     Moonshot AI (Kimi) OpenAI-compatible Chat Completions API.
 
 Only the Python standard library is used for HTTP so the harness stays
 dependency-light; ``tenacity`` provides retry/backoff.
@@ -115,6 +116,10 @@ def _http_post_json(
         raise ProviderError(f"HTTP {e.code} from {url}: {body[:500]}") from e
     except urllib.error.URLError as e:
         raise ProviderError(f"network error calling {url}: {e.reason}") from e
+    except TimeoutError as e:
+        # socket timeout during resp.read() surfaces raw (not as URLError);
+        # wrap it so @_RETRY treats it like any other transient provider error.
+        raise ProviderError(f"read timeout after {timeout:.0f}s calling {url}") from e
 
 
 def _http_timeout(timeout_s: float | None) -> float:
@@ -497,6 +502,67 @@ class ZaiProvider(LLMProvider):
         return _chat_completions_complete(base, api_key, self.model, messages, tools, timeout)
 
 
+class KimiProvider(LLMProvider):
+    """Moonshot AI (Kimi) OpenAI-compatible Chat Completions API.
+
+    Uses ``/chat/completions`` only. ``kimi-k3`` rejects sampling params, so no
+    ``temperature`` is sent. Thinking is always on for K3; ``effort`` (when the
+    harness resolves it as supported, e.g. ``extra-high`` -> ``"max"``) is sent
+    as ``reasoning_effort``.
+    """
+
+    @property
+    def name(self) -> str:
+        return "kimi"
+
+    # K3's always-on max thinking routinely exceeds the generic 120s default on
+    # deadline-less calls (e.g. judge/grader invocations), so use a roomier one.
+    DEFAULT_TIMEOUT_S = 900.0
+
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout_s: float | None = None,
+        effort: str | None = None,
+    ) -> LLMResponse:
+        if timeout_s is not None:
+            return self._complete_once(messages, tools, _http_timeout(timeout_s), effort)
+        return self._complete_with_retry(messages, tools, self.DEFAULT_TIMEOUT_S, effort)
+
+    @_RETRY
+    def _complete_with_retry(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
+    ) -> LLMResponse:
+        return self._complete_once(messages, tools, timeout, effort)
+
+    def _complete_once(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
+    ) -> LLMResponse:
+        api_key = os.environ.get("MOONSHOT_API_KEY")
+        if not api_key:
+            raise ProviderError("MOONSHOT_API_KEY is not set")
+        base = os.environ.get("MOONSHOT_BASE_URL", "https://api.moonshot.ai/v1").rstrip("/")
+        return _chat_completions_complete(
+            base,
+            api_key,
+            self.model,
+            messages,
+            tools,
+            timeout,
+            temperature=None,
+            extra_payload={"reasoning_effort": effort} if effort else None,
+        )
+
+
 def _loads_args(raw: Any) -> dict[str, Any]:
     if isinstance(raw, dict):
         return raw
@@ -687,6 +753,7 @@ def _chat_completions_complete(
     tools: list[dict[str, Any]],
     timeout: float,
     temperature: float | None = 0,
+    extra_payload: dict[str, Any] | None = None,
 ) -> LLMResponse:
     payload: dict[str, Any] = {
         "model": model,
@@ -694,6 +761,8 @@ def _chat_completions_complete(
     }
     if temperature is not None:
         payload["temperature"] = temperature
+    if extra_payload:
+        payload.update(extra_payload)
     if tools:
         payload["tools"] = tools
         payload["tool_choice"] = "auto"
@@ -719,6 +788,7 @@ _PROVIDERS: dict[str, type[LLMProvider]] = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
     "zai": ZaiProvider,
+    "kimi": KimiProvider,
     "mock": MockProvider,
 }
 

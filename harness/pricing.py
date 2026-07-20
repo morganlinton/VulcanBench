@@ -49,6 +49,9 @@ PRICES: dict[str, dict[str, float]] = {
     "zai:glm-5.1": {"input": 1.40, "output": 4.40},
     "zai:glm-5": {"input": 1.00, "output": 3.20},
     "zai:glm-5-turbo": {"input": 1.20, "output": 4.00},
+    # Cache-hit input is $0.30/M; we bill all input at the cache-miss rate, so
+    # kimi costs are a slight overestimate on long multi-turn runs.
+    "kimi:kimi-k3": {"input": 3.00, "output": 15.00},
     # Free / offline.
     "mock:": {"input": 0.0, "output": 0.0},
 }

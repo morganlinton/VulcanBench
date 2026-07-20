@@ -69,6 +69,11 @@ def main(
 def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear guards + dispatch
     task: str | None = typer.Option(None, "--task", "-t", help="Task ID e.g. swe-001"),
     suite: str | None = typer.Option(None, "--suite", help="Run a whole suite, e.g. v1 (tasks/v1)"),
+    tasks_root: Path = typer.Option(  # noqa: B008
+        Path("tasks/v1"),
+        "--tasks-root",
+        help="Task definitions root for --task runs (suites derive their own)",
+    ),
     model: str = typer.Option(
         ...,
         "--model",
@@ -126,6 +131,12 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     ),
     timeout: float | None = typer.Option(
         None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
+    ),
+    override_budgets: bool = typer.Option(
+        False,
+        "--override-budgets",
+        help="Treat --timeout/--max-steps as exact budgets, even ABOVE task defaults "
+        "(ablation mode; runs are marked and not comparable to capped runs)",
     ),
     fail_under: float | None = typer.Option(
         None, "--fail-under", help="Exit non-zero (4) if pass@1 is below this threshold (CI gate)"
@@ -189,8 +200,8 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     if sandbox not in {"local", "docker", "auto"}:
         console.print(f"[red]error[/red] --sandbox must be local|docker|auto, got {sandbox!r}")
         raise typer.Exit(code=1)
-    if task is not None and task not in list_task_ids():
-        available = ", ".join(list_task_ids()) or "(none)"
+    if task is not None and task not in list_task_ids(tasks_root):
+        available = ", ".join(list_task_ids(tasks_root)) or "(none)"
         console.print(f"[red]unknown task[/red] {task!r}. Available: {available}")
         raise typer.Exit(code=1)
     if dry_run:
@@ -230,6 +241,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
         "timeout_s": timeout,
         "effort": effort,
         "max_run_cost": max_run_cost,
+        "override_budgets": override_budgets,
     }
     pass_at_1: float | None = None
     n_incomplete = 0  # errored + skipped runs (an incomplete suite)
@@ -246,7 +258,14 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
                 only_missing,
             )
         else:
-            pass_at_1, n_incomplete = _run_single(task, model, output_dir, run_kwargs, repeat)  # type: ignore[arg-type]
+            pass_at_1, n_incomplete = _run_single(
+                task,  # type: ignore[arg-type]
+                model,
+                output_dir,
+                run_kwargs,
+                repeat,
+                tasks_root=tasks_root,
+            )
     except SandboxError as e:
         console.print(f"[red]sandbox error[/red] {e}")
         raise typer.Exit(code=3) from e
@@ -390,7 +409,12 @@ def _summary_row(summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def _run_single(
-    task: str, model: str, output_dir: Path, run_kwargs: dict[str, Any], repeat: int
+    task: str,
+    model: str,
+    output_dir: Path,
+    run_kwargs: dict[str, Any],
+    repeat: int,
+    tasks_root: Path = Path("tasks/v1"),
 ) -> tuple[float | None, int]:
     """Run a single task ``repeat`` times; returns (pass@1, n_errors).
 
@@ -399,7 +423,9 @@ def _run_single(
     """
     summaries = []
     for _ in range(repeat):
-        res = run_agent(task_id=task, model=model, output_dir=output_dir, **run_kwargs)
+        res = run_agent(
+            task_id=task, model=model, output_dir=output_dir, tasks_root=tasks_root, **run_kwargs
+        )
         summaries.append(res["summary"])
 
     agg = aggregate_by_model([_summary_row(s) for s in summaries])[0]

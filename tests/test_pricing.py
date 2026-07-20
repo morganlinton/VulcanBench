@@ -49,6 +49,12 @@ def test_zai_glm_priced() -> None:
     assert pricing.cost_usd("zai:glm-5.2", 1_000_000, 1_000_000) == 5.80
 
 
+def test_kimi_k3_priced() -> None:
+    # Moonshot list price: input 3.00/1M (cache miss), output 15.00/1M -> 18.00.
+    assert pricing.is_priced("kimi:kimi-k3")
+    assert pricing.cost_usd("kimi:kimi-k3", 1_000_000, 1_000_000) == 18.0
+
+
 def test_anthropic_frontier_models_priced() -> None:
     # Sonnet 5 standard pricing: input 3.00/1M, output 15.00/1M -> 1M+1M = 18.00.
     assert pricing.is_priced("anthropic:claude-sonnet-5")

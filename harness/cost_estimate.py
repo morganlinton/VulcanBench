@@ -34,6 +34,7 @@ _DEFAULT_PER_RUN: dict[str, float] = {
     "anthropic:": 0.055,
     "zai:": 0.055,
     "kimi:": 0.055,
+    "qwen:": 0.03,
 }
 _DEFAULT_FALLBACK = 0.08
 
@@ -42,6 +43,7 @@ _PROVIDER_ENV = {
     "anthropic": "ANTHROPIC_API_KEY",
     "zai": "ZAI_API_KEY",
     "kimi": "MOONSHOT_API_KEY",
+    "qwen": "DASHSCOPE_API_KEY",
 }
 
 _PROVIDER_LABEL = {
@@ -49,6 +51,7 @@ _PROVIDER_LABEL = {
     "anthropic": "Anthropic",
     "zai": "Z.ai (Zhipu)",
     "kimi": "Moonshot (Kimi)",
+    "qwen": "Qwen (DashScope)",
 }
 
 _KNOWN_TASK_SOURCES = frozenset({"exact", "prior_exact"})

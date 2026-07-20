@@ -108,7 +108,7 @@ def effort_config(provider: str, requested: str | None) -> EffortConfig | None:
         )
     # claude-code: headless Claude Code has no per-request effort control;
     # the requested level is recorded on the run but not sent.
-    if provider_name in {"mock", "zai", "claude-code"}:
+    if provider_name in {"mock", "zai", "qwen", "claude-code"}:
         return EffortConfig(
             requested=effort,
             provider=provider_name,

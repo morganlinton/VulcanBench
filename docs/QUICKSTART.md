@@ -53,6 +53,8 @@ make sandbox-image            # builds vulcanbench/sandbox:base (Python+Go+Node)
 export OPENAI_API_KEY=sk-...           # for openai:* models
 export ANTHROPIC_API_KEY=sk-ant-...    # for anthropic:* models
 export ZAI_API_KEY=...                 # for zai:* models (GLM)
+export MOONSHOT_API_KEY=...            # for kimi:* models
+export DASHSCOPE_API_KEY=sk-...        # for qwen:* models (DashScope)
 ```
 
 **3. Start small and cheap** — one task, in Docker (the default), judges off,

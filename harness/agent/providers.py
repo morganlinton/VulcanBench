@@ -13,6 +13,8 @@ Providers implemented:
 - ``anthropic:<model>`` Anthropic Messages API.
 - ``zai:<model>``      Z.ai (Zhipu) OpenAI-compatible Chat Completions API.
 - ``kimi:<model>``     Moonshot AI (Kimi) OpenAI-compatible Chat Completions API.
+- ``qwen:<model>``     Alibaba Cloud DashScope OpenAI-compatible Chat Completions
+                       API (Qwen).
 
 Only the Python standard library is used for HTTP so the harness stays
 dependency-light; ``tenacity`` provides retry/backoff.
@@ -563,6 +565,60 @@ class KimiProvider(LLMProvider):
         )
 
 
+class QwenProvider(LLMProvider):
+    """Alibaba Cloud DashScope (Qwen) OpenAI-compatible Chat Completions API.
+
+    Uses ``/compatible-mode/v1/chat/completions``. Default base URL is the
+    international endpoint; set ``DASHSCOPE_BASE_URL`` for China
+    (``https://dashscope.aliyuncs.com/compatible-mode/v1``) or another region.
+    Reasoning effort is not supported on this path (``reasoning_effort`` is
+    silently ignored by DashScope; Qwen's ``enable_thinking`` needs streaming
+    on some models, which this harness does not use yet) — ``--effort`` is
+    recorded as metadata only.
+    """
+
+    @property
+    def name(self) -> str:
+        return "qwen"
+
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout_s: float | None = None,
+        effort: str | None = None,
+    ) -> LLMResponse:
+        del effort
+        timeout = _http_timeout(timeout_s)
+        if timeout_s is not None:
+            return self._complete_once(messages, tools, timeout)
+        return self._complete_with_retry(messages, tools, timeout)
+
+    @_RETRY
+    def _complete_with_retry(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+    ) -> LLMResponse:
+        return self._complete_once(messages, tools, timeout)
+
+    def _complete_once(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+    ) -> LLMResponse:
+        api_key = os.environ.get("DASHSCOPE_API_KEY")
+        if not api_key:
+            raise ProviderError("DASHSCOPE_API_KEY is not set")
+        base = os.environ.get(
+            "DASHSCOPE_BASE_URL",
+            "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        ).rstrip("/")
+        return _chat_completions_complete(base, api_key, self.model, messages, tools, timeout)
+
+
 def _loads_args(raw: Any) -> dict[str, Any]:
     if isinstance(raw, dict):
         return raw
@@ -789,6 +845,7 @@ _PROVIDERS: dict[str, type[LLMProvider]] = {
     "anthropic": AnthropicProvider,
     "zai": ZaiProvider,
     "kimi": KimiProvider,
+    "qwen": QwenProvider,
     "mock": MockProvider,
 }
 

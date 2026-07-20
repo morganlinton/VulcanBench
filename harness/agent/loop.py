@@ -1056,6 +1056,7 @@ _JUDGE_KEY_ENV = {
     "anthropic": "ANTHROPIC_API_KEY",
     "zai": "ZAI_API_KEY",
     "kimi": "MOONSHOT_API_KEY",
+    "qwen": "DASHSCOPE_API_KEY",
 }
 
 

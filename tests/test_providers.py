@@ -7,11 +7,12 @@ import pytest
 from harness.agent import providers as P
 from harness.agent.providers import (
     AnthropicProvider,
+    KimiProvider,
     LLMResponse,
     MockProvider,
     OpenAIProvider,
+    QwenProvider,
     TokenUsage,
-    KimiProvider,
     ZaiProvider,
     get_provider,
     parse_model_spec,
@@ -24,6 +25,7 @@ from harness.agent.providers import (
         ("openai:gpt-4o", ("openai", "gpt-4o")),
         ("anthropic:claude-opus-4-8", ("anthropic", "claude-opus-4-8")),
         ("zai:glm-5.2", ("zai", "glm-5.2")),
+        ("qwen:qwen3.7-plus", ("qwen", "qwen3.7-plus")),
         ("mock:synthetic", ("mock", "synthetic")),
         ("openai:gpt-4o:extra", ("openai", "gpt-4o:extra")),
     ],
@@ -62,6 +64,13 @@ def test_get_provider_returns_kimi() -> None:
     assert isinstance(p, KimiProvider)
     assert p.name == "kimi"
     assert p.spec == "kimi:kimi-k3"
+
+
+def test_get_provider_returns_qwen() -> None:
+    p = get_provider("qwen:qwen3.7-plus")
+    assert isinstance(p, QwenProvider)
+    assert p.name == "qwen"
+    assert p.spec == "qwen:qwen3.7-plus"
 
 
 def test_token_usage_total() -> None:
@@ -492,9 +501,85 @@ def test_kimi_sends_reasoning_effort_when_given(monkeypatch: pytest.MonkeyPatch)
     assert "reasoning_effort" not in seen["payload"]  # type: ignore[operator]
 
 
+def test_qwen_complete_parses_tool_calls(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "qwen-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        seen["auth"] = headers["Authorization"]
+        assert payload["tools"]
+        return {
+            "choices": [
+                {
+                    "message": {
+                        "content": "ok",
+                        "tool_calls": [
+                            {
+                                "id": "c1",
+                                "function": {"name": "read_file", "arguments": '{"path": "a"}'},
+                            }
+                        ],
+                    }
+                }
+            ],
+            "usage": {"prompt_tokens": 11, "completion_tokens": 3},
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = QwenProvider("qwen3.7-plus").complete(
+        [{"role": "user", "content": "hi"}], [{"function": {"name": "read_file"}}]
+    )
+    assert seen["url"] == (
+        "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+    )
+    assert seen["auth"] == "Bearer qwen-test"
+    assert resp.content == "ok"
+    assert resp.tool_calls[0].name == "read_file"
+    assert resp.tool_calls[0].arguments == {"path": "a"}
+    assert resp.usage.total == 14
+
+
+def test_qwen_complete_uses_custom_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "qwen-test")
+    monkeypatch.setenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = QwenProvider("qwen3.7-plus").complete([], [])
+    assert seen["url"] == "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+    assert resp.content == "ok"
+
+
+def test_qwen_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    with pytest.raises(P.ProviderError, match="DASHSCOPE_API_KEY"):
+        QwenProvider("qwen3.7-plus").complete([], [])
+
+
+def test_qwen_ignores_effort(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "qwen-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["payload"] = payload
+        return {"choices": [{"message": {"content": "ok"}}], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    resp = QwenProvider("qwen3.7-plus").complete([], [], effort="high")
+    assert "enable_thinking" not in seen["payload"]  # type: ignore[operator]
+    assert "reasoning_effort" not in seen["payload"]  # type: ignore[operator]
+    assert resp.content == "ok"
+
+
 def test_providers_do_not_stream_yet() -> None:
     assert get_provider("mock:synthetic").supports_streaming is False
     assert OpenAIProvider("gpt-4o").supports_streaming is False
     assert AnthropicProvider("claude-opus-4-8").supports_streaming is False
     assert ZaiProvider("glm-5.2").supports_streaming is False
     assert KimiProvider("kimi-k3").supports_streaming is False
+    assert QwenProvider("qwen3.7-plus").supports_streaming is False

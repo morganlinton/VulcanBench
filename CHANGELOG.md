@@ -234,6 +234,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `oss-ty-m3-02/08/11/14`) that every model solved. Two easy anchors per language
   are kept; `oss-py-m2-00` and `oss-py-m3-00` were re-specified as honest anchors.
 
+## [0.7.0] - 2026-07-20
+
+### Added
+
+- **Qwen provider** (`qwen:<model>`): Alibaba Cloud DashScope OpenAI-compatible Chat
+  Completions API. Needs `DASHSCOPE_API_KEY`. Default base URL is the international
+  endpoint (`https://dashscope-intl.aliyuncs.com/compatible-mode/v1`); override with
+  `DASHSCOPE_BASE_URL` for China (`https://dashscope.aliyuncs.com/compatible-mode/v1`)
+  or another region. Reasoning effort is recorded as metadata only (DashScope's
+  `enable_thinking` path is not used yet — it requires streaming on some models).
+  Built-in pricing covers `qwen3.7-plus`, `qwen3.7-max`, `qwen3.6-flash`, `qwen3-max`,
+  `qwen3.5-plus`, and `qwen-plus` (international list rates for the default context
+  tier).
+
 ## [0.5.1] - 2026-06-23
 
 ### Fixed

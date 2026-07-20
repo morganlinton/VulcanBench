@@ -52,6 +52,15 @@ PRICES: dict[str, dict[str, float]] = {
     # Cache-hit input is $0.30/M; we bill all input at the cache-miss rate, so
     # kimi costs are a slight overestimate on long multi-turn runs.
     "kimi:kimi-k3": {"input": 3.00, "output": 15.00},
+    # DashScope international list prices (≤256K / ≤32K tier as applicable).
+    # Long-context tiers and promo discounts are not modeled — override with
+    # VULCANBENCH_PRICING for exact numbers.
+    "qwen:qwen3.7-plus": {"input": 0.40, "output": 1.60},
+    "qwen:qwen3.7-max": {"input": 2.50, "output": 7.50},
+    "qwen:qwen3.6-flash": {"input": 0.25, "output": 1.50},
+    "qwen:qwen3-max": {"input": 1.20, "output": 6.00},
+    "qwen:qwen3.5-plus": {"input": 0.40, "output": 2.40},
+    "qwen:qwen-plus": {"input": 0.40, "output": 1.20},
     # Free / offline.
     "mock:": {"input": 0.0, "output": 0.0},
 }

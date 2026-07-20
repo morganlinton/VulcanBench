@@ -45,6 +45,17 @@ def test_zai_effort_is_noop_metadata() -> None:
     }
 
 
+def test_qwen_effort_is_noop_metadata() -> None:
+    cfg = effort_config("qwen", "high")
+    assert cfg is not None
+    assert cfg.as_summary() == {
+        "requested": "high",
+        "provider": "qwen",
+        "provider_value": None,
+        "supported": False,
+    }
+
+
 def test_kimi_effort_below_max_is_noop_metadata() -> None:
     # Moonshot only ships reasoning_effort="max" today; other levels are
     # recorded but not sent.

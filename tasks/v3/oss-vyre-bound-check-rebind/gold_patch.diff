@@ -1,0 +1,333 @@
+diff --git a/vyre-foundation/src/optimizer/passes/loops/loop_lower_bound_normalize.rs b/vyre-foundation/src/optimizer/passes/loops/loop_lower_bound_normalize.rs
+index c8d5b33..b2fc083 100644
+--- a/vyre-foundation/src/optimizer/passes/loops/loop_lower_bound_normalize.rs
++++ b/vyre-foundation/src/optimizer/passes/loops/loop_lower_bound_normalize.rs
+@@ -53,6 +53,7 @@
+ //!   contain a nested Loop that re-binds the same name. Both
+ //!   collisions block the rewrite.
+ 
++use super::substitution::body_rebinds_var;
+ use crate::ir::{BinOp, Expr, Ident, Node, Program};
+ use crate::optimizer::{vyre_pass, PassAnalysis, PassResult};
+ use crate::visit::node_map;
+@@ -161,28 +162,8 @@ fn is_normalizable_loop(node: &Node) -> bool {
+     }
+ }
+ 
+-fn body_rebinds_var(body: &[Node], var: &Ident) -> bool {
+-    fn check(node: &Node, var: &Ident) -> bool {
+-        match node {
+-            Node::Assign { name, .. } | Node::Let { name, .. } => name == var,
+-            Node::Loop {
+-                var: inner, body, ..
+-            } => {
+-                if inner == var {
+-                    return true;
+-                }
+-                body.iter().any(|n| check(n, var))
+-            }
+-            Node::If {
+-                then, otherwise, ..
+-            } => then.iter().any(|n| check(n, var)) || otherwise.iter().any(|n| check(n, var)),
+-            Node::Block(body) => body.iter().any(|n| check(n, var)),
+-            Node::Region { body, .. } => body.iter().any(|n| check(n, var)),
+-            _ => false,
+-        }
+-    }
+-    body.iter().any(|n| check(n, var))
+-}
++// `body_rebinds_var` lives in `super::substitution` (one canonical copy shared
++// with loop_var_range_fold; both fold against a derived induction-var range).
+ 
+ #[expect(
+     clippy::too_many_lines,
+diff --git a/vyre-foundation/src/optimizer/passes/loops/loop_redundant_bound_check_elide.rs b/vyre-foundation/src/optimizer/passes/loops/loop_redundant_bound_check_elide.rs
+index 7fac0e0..57c3239 100644
+--- a/vyre-foundation/src/optimizer/passes/loops/loop_redundant_bound_check_elide.rs
++++ b/vyre-foundation/src/optimizer/passes/loops/loop_redundant_bound_check_elide.rs
+@@ -46,6 +46,7 @@
+ //! Conservative because the IR value-set fact table only admits this exact
+ //! literal-bound implication today.
+ 
++use super::substitution::body_writes_loop_var;
+ use crate::ir::{BinOp, Expr, Node, Program};
+ use crate::optimizer::{vyre_pass, PassAnalysis, PassResult};
+ 
+@@ -163,8 +164,15 @@ fn elide_in_node_with_ctx(node: Node, loop_ctx: Option<(&str, u32)>, changed: &m
+             body,
+         } => {
+             // The loop establishes a fresh ctx; only fires when `to` is a
+-            // literal (the conservative analysis we documented above).
+-            let new_ctx = lit_u32_value(&to).map(|to_lit| (var.as_str(), to_lit));
++            // literal (the conservative analysis we documented above) AND the
++            // body never rebinds the loop var. If a `Let`/`Assign` shadows the
++            // induction variable (e.g. `let i = load(idx, i)` — a gathered
++            // index), a later `if i < to` is a *real* bounds check, not a
++            // redundant one; eliding it would drop the guard and admit an
++            // out-of-range access. strip_mine / unroll gate the same way.
++            let new_ctx = lit_u32_value(&to)
++                .filter(|_| !body_writes_loop_var(&body, &var))
++                .map(|to_lit| (var.as_str(), to_lit));
+             let body = elide_in_sequence(body, new_ctx, changed);
+             Node::Loop {
+                 var,
+@@ -230,7 +238,9 @@ fn has_redundant_guard_with_ctx(node: &Node, loop_ctx: Option<(&str, u32)>) -> b
+                     .any(|n| has_redundant_guard_with_ctx(n, loop_ctx))
+         }
+         Node::Loop { var, to, body, .. } => {
+-            let new_ctx = lit_u32_value(to).map(|to_lit| (var.as_str(), to_lit));
++            let new_ctx = lit_u32_value(to)
++                .filter(|_| !body_writes_loop_var(body, var))
++                .map(|to_lit| (var.as_str(), to_lit));
+             body.iter()
+                 .any(|n| has_redundant_guard_with_ctx(n, new_ctx))
+         }
+@@ -507,6 +517,61 @@ mod tests {
+         );
+     }
+ 
++    #[test]
++    fn transform_does_not_elide_when_body_rebinds_loop_var() {
++        // The loop body shadows the induction variable `i` with a value
++        // loaded from a buffer (a gathered index that may be out of range).
++        // The subsequent `if i < 4` is then a REAL bounds check on the loaded
++        // index, not a redundant re-check of the loop range. Eliding it would
++        // drop the guard and let `store(buf, i, ..)` run with an out-of-range
++        // `i`. The pass must decline. Pre-fix the guard was elided (the pass
++        // matched the cond by loop-var name without noticing the rebind).
++        let entry = vec![loop_with_body(
++            "i",
++            4,
++            vec![
++                // i := buf[i]  -  i is now an arbitrary loaded value.
++                Node::let_bind(
++                    "i",
++                    Expr::Load {
++                        buffer: Ident::from("buf"),
++                        index: Box::new(Expr::var("i")),
++                    },
++                ),
++                Node::if_then(
++                    Expr::lt(Expr::var("i"), Expr::u32(4)),
++                    vec![Node::store("buf", Expr::var("i"), Expr::u32(7))],
++                ),
++            ],
++        )];
++        let program = program_with_entry(entry);
++        let result = LoopRedundantBoundCheckElidePass::transform(Clone::clone(&program));
++        assert!(
++            !result.changed,
++            "a guard after the loop var is rebound is a real bounds check, \
++             not a redundant one  -  the pass must not elide it"
++        );
++        // The `if i < 4` guard node must structurally survive (it is NOT
++        // rewritten into a Block). count_redundant_if_guards reports the
++        // surviving If; an elided guard (replaced by Block) would count 0.
++        let total: usize = result
++            .program
++            .entry()
++            .iter()
++            .map(|n| count_redundant_if_guards(n, None))
++            .sum();
++        assert_eq!(
++            total, 1,
++            "the real bounds-check guard must remain in the loop body"
++        );
++        // analyze must also decline (SKIP), staying coherent with transform.
++        assert_eq!(
++            crate::optimizer::ProgramPass::analyze(&LoopRedundantBoundCheckElidePass, &program),
++            PassAnalysis::SKIP,
++            "analyze must agree with transform: no redundant guard to elide"
++        );
++    }
++
+     #[test]
+     fn transform_is_idempotent() {
+         let entry = vec![loop_with_body(
+diff --git a/vyre-foundation/src/optimizer/passes/loops/loop_strip_mine.rs b/vyre-foundation/src/optimizer/passes/loops/loop_strip_mine.rs
+index 480aeae..ff95696 100644
+--- a/vyre-foundation/src/optimizer/passes/loops/loop_strip_mine.rs
++++ b/vyre-foundation/src/optimizer/passes/loops/loop_strip_mine.rs
+@@ -9,7 +9,7 @@
+ //! loop to unroll/vectorization and tiled-memory rewrites while keeping
+ //! code size bounded.
+ 
+-use super::substitution::substitute_nodes;
++use super::substitution::{body_writes_loop_var, substitute_nodes};
+ use crate::ir::{Expr, Ident, Node, Program};
+ use crate::optimizer::{vyre_pass, PassAnalysis, PassResult};
+ use crate::visit::node_map;
+@@ -311,20 +311,8 @@ fn collect_names_in_expr(expr: &Expr, out: &mut Vec<Ident>) {
+     }
+ }
+ 
+-fn body_writes_loop_var(nodes: &[Node], var: &Ident) -> bool {
+-    nodes.iter().any(|node| match node {
+-        Node::Let { name, .. } | Node::Assign { name, .. } => name == var,
+-        Node::If {
+-            then, otherwise, ..
+-        } => body_writes_loop_var(then, var) || body_writes_loop_var(otherwise, var),
+-        Node::Loop {
+-            var: inner, body, ..
+-        } => inner != var && body_writes_loop_var(body, var),
+-        Node::Block(body) => body_writes_loop_var(body, var),
+-        Node::Region { body, .. } => body_writes_loop_var(body, var),
+-        _ => false,
+-    })
+-}
++// `body_writes_loop_var` lives in `super::substitution` (one canonical copy
++// shared by every loop pass that reasons about induction-variable stability).
+ 
+ #[cfg(test)]
+ mod tests {
+diff --git a/vyre-foundation/src/optimizer/passes/loops/loop_unroll.rs b/vyre-foundation/src/optimizer/passes/loops/loop_unroll.rs
+index 8afab6c..3c220a4 100644
+--- a/vyre-foundation/src/optimizer/passes/loops/loop_unroll.rs
++++ b/vyre-foundation/src/optimizer/passes/loops/loop_unroll.rs
+@@ -1,5 +1,5 @@
+-use super::substitution::{substitute_node, substitute_nodes};
+-use crate::ir::{Expr, Ident, Node, Program};
++use super::substitution::{body_writes_loop_var, substitute_node, substitute_nodes};
++use crate::ir::{Expr, Node, Program};
+ use crate::optimizer::{vyre_pass, PassAnalysis, PassResult};
+ use smallvec::SmallVec;
+ use std::borrow::Cow;
+@@ -192,20 +192,10 @@ fn literal_u32(expr: &Expr) -> Option<u32> {
+     }
+ }
+ 
+-fn body_writes_loop_var(nodes: &[Node], var: &Ident) -> bool {
+-    nodes.iter().any(|node| match node {
+-        Node::Let { name, .. } | Node::Assign { name, .. } => name == var,
+-        Node::If {
+-            then, otherwise, ..
+-        } => body_writes_loop_var(then, var) || body_writes_loop_var(otherwise, var),
+-        Node::Loop {
+-            var: inner, body, ..
+-        } => inner != var && body_writes_loop_var(body, var),
+-        Node::Block(body) => body_writes_loop_var(body, var),
+-        Node::Region { body, .. } => body_writes_loop_var(body, var),
+-        _ => false,
+-    })
+-}
++// `body_writes_loop_var` lives in `super::substitution` (one canonical copy
++// shared by every loop pass that reasons about induction-variable stability).
++// `body_contains_assign` below is unroll-specific (any Assign at all is unsafe
++// to duplicate across unrolled copies, not just an assign to the loop var).
+ 
+ fn body_contains_assign(nodes: &[Node]) -> bool {
+     nodes.iter().any(|node| match node {
+diff --git a/vyre-foundation/src/optimizer/passes/loops/loop_var_range_fold.rs b/vyre-foundation/src/optimizer/passes/loops/loop_var_range_fold.rs
+index c2da5da..27fceac 100644
+--- a/vyre-foundation/src/optimizer/passes/loops/loop_var_range_fold.rs
++++ b/vyre-foundation/src/optimizer/passes/loops/loop_var_range_fold.rs
+@@ -48,6 +48,7 @@
+ //!   has the inner If folded against `j`'s range first if `j`
+ //!   appears in the condition, then against `i`'s range.
+ 
++use super::substitution::body_rebinds_var;
+ use crate::ir::{BinOp, Expr, Ident, Node, Program};
+ use crate::optimizer::program_shape_facts::ProgramShapeFacts;
+ use crate::optimizer::{vyre_pass, PassAnalysis, PassResult};
+@@ -336,32 +337,9 @@ fn bound_range(expr: &Expr, shape_facts: &ProgramShapeFacts) -> Option<BoundRang
+     }
+ }
+ 
+-fn body_rebinds_var(body: &[Node], var: &Ident) -> bool {
+-    body.iter().any(|n| node_rebinds_var(n, var))
+-}
+-
+-fn node_rebinds_var(node: &Node, var: &Ident) -> bool {
+-    match node {
+-        Node::Assign { name, .. } | Node::Let { name, .. } => name == var,
+-        Node::Loop {
+-            var: inner, body, ..
+-        } => {
+-            if inner == var {
+-                return true;
+-            }
+-            body.iter().any(|n| node_rebinds_var(n, var))
+-        }
+-        Node::If {
+-            then, otherwise, ..
+-        } => {
+-            then.iter().any(|n| node_rebinds_var(n, var))
+-                || otherwise.iter().any(|n| node_rebinds_var(n, var))
+-        }
+-        Node::Block(body) => body.iter().any(|n| node_rebinds_var(n, var)),
+-        Node::Region { body, .. } => body.iter().any(|n| node_rebinds_var(n, var)),
+-        _ => false,
+-    }
+-}
++// `body_rebinds_var` lives in `super::substitution` (one canonical copy shared
++// with loop_lower_bound_normalize; both fold against a derived induction-var
++// range and decline whenever the induction name is reintroduced).
+ 
+ fn has_foldable_if(node: &Node, shape_facts: &ProgramShapeFacts) -> bool {
+     if let Node::Loop {
+diff --git a/vyre-foundation/src/optimizer/passes/loops/substitution.rs b/vyre-foundation/src/optimizer/passes/loops/substitution.rs
+index 6cceb1e..38873a3 100644
+--- a/vyre-foundation/src/optimizer/passes/loops/substitution.rs
++++ b/vyre-foundation/src/optimizer/passes/loops/substitution.rs
+@@ -6,3 +6,61 @@
+ //! alias kept so existing `super::substitution::...` imports stay stable.
+ 
+ pub(super) use crate::transform::subst::{substitute_node, substitute_nodes};
++
++use crate::ir::{Ident, Node};
++
++/// True iff any node in `nodes` rebinds `var` — a `Let` or `Assign` whose
++/// name equals `var`. This is the precondition guard for every loop pass that
++/// reasons about the induction variable: if the body rewrites `var`, then a
++/// later `Var(var)` no longer denotes the loop's `[from, to)` induction value,
++/// so induction-range facts (substitution validity, redundant-guard elision,
++/// strip-mine splitting, unrolling) cannot be applied to it.
++///
++/// A nested `Loop` that reuses the same name (`inner == var`) opens a fresh
++/// binding scope for `var`; writes inside it are to that inner binding and do
++/// not perturb the outer induction value, so the walk does not descend into it
++/// and does not count it as a write. Every loop pass that consults this must
++/// therefore treat a nested same-name loop as establishing its own context
++/// (which they do). `If` / `Block` / `Region` keep the surrounding context, so
++/// the walk descends through them.
++pub(super) fn body_writes_loop_var(nodes: &[Node], var: &Ident) -> bool {
++    nodes.iter().any(|node| match node {
++        Node::Let { name, .. } | Node::Assign { name, .. } => name == var,
++        Node::If {
++            then, otherwise, ..
++        } => body_writes_loop_var(then, var) || body_writes_loop_var(otherwise, var),
++        Node::Loop {
++            var: inner, body, ..
++        } => inner != var && body_writes_loop_var(body, var),
++        Node::Block(body) => body_writes_loop_var(body, var),
++        Node::Region { body, .. } => body_writes_loop_var(body, var),
++        _ => false,
++    })
++}
++
++/// Like [`body_writes_loop_var`] but *more* conservative about nested loops: a
++/// nested `Loop` that reuses the same name (`inner == var`) is itself counted
++/// as a rebind (returns `true`) rather than being skipped.
++///
++/// Passes that derive a numeric *range* for the loop variable and fold against
++/// it (`loop_var_range_fold`, `loop_lower_bound_normalize`) use this stricter
++/// form: a nested same-name loop reintroduces the name with a different range,
++/// and rather than reason about which `Var(var)` site sees which range, these
++/// passes simply decline whenever the name is reintroduced at all. Passes that
++/// only ask "is the outer induction value still intact after this body"
++/// ([`body_writes_loop_var`]: strip-mine, unroll) can safely skip the nested
++/// same-name loop because its writes are scoped to the inner binding.
++pub(super) fn body_rebinds_var(body: &[Node], var: &Ident) -> bool {
++    body.iter().any(|node| match node {
++        Node::Let { name, .. } | Node::Assign { name, .. } => name == var,
++        Node::Loop {
++            var: inner, body, ..
++        } => inner == var || body_rebinds_var(body, var),
++        Node::If {
++            then, otherwise, ..
++        } => body_rebinds_var(then, var) || body_rebinds_var(otherwise, var),
++        Node::Block(body) => body_rebinds_var(body, var),
++        Node::Region { body, .. } => body_rebinds_var(body, var),
++        _ => false,
++    })
++}

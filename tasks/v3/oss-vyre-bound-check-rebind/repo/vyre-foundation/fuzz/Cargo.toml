@@ -1,0 +1,36 @@
+[package]
+name = "vyre-foundation-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+vyre-foundation = { path = ".." }
+toml = "=1.1.2"
+
+[[bin]]
+name = "decoder"
+path = "fuzz_targets/decoder.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "program_wire"
+path = "fuzz_targets/program_wire.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "registry_toml"
+path = "fuzz_targets/registry_toml.rs"
+test = false
+doc = false
+bench = false

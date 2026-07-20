@@ -186,23 +186,25 @@ def run_agent(
     ]
 
     try:
-        prompt_tokens, completion_tokens, finished, cost_capped, actual_steps, cli_outcome = _execute_agent(
-            cli_agent=cli_agent,
-            model=model,
-            provider=provider,
-            task=task,
-            tools=tools,
-            messages=messages,
-            effective_max_steps=effective_max_steps,
-            collector=collector,
-            executor=executor,
-            run_id=run_id,
-            run_dir=run_dir,
-            workspace=workspace,
-            deadline=deadline,
-            effort_meta=effort_meta,
-            network=network,
-            max_run_cost=max_run_cost,
+        prompt_tokens, completion_tokens, finished, cost_capped, actual_steps, cli_outcome = (
+            _execute_agent(
+                cli_agent=cli_agent,
+                model=model,
+                provider=provider,
+                task=task,
+                tools=tools,
+                messages=messages,
+                effective_max_steps=effective_max_steps,
+                collector=collector,
+                executor=executor,
+                run_id=run_id,
+                run_dir=run_dir,
+                workspace=workspace,
+                deadline=deadline,
+                effort_meta=effort_meta,
+                network=network,
+                max_run_cost=max_run_cost,
+            )
         )
         patch = _git_diff(workspace)
         changed_files = _git_changed_files(workspace)
@@ -360,7 +362,7 @@ def _execute_agent(
             outcome.completion_tokens,
             outcome.finished,
             outcome.cost_capped,
-            outcome.num_turns or 0,
+            outcome.num_turns if outcome.num_turns is not None else 0,
             outcome,
         )
     assert provider is not None  # resolved by _resolve_run_engine for non-CLI specs
@@ -536,9 +538,9 @@ def _run_model_loop(  # noqa: PLR0912 — linear ReAct loop with budget + cost g
     actual_steps = 0
 
     for step in range(1, max_steps + 1):
-        actual_steps = step
         if not deadline.ensure_time(collector, "llm_request", step):
             break
+        actual_steps = step
         request_data: dict[str, Any] = {"step": step, "messages": len(messages)}
         if effort is not None:
             request_data["effort"] = effort

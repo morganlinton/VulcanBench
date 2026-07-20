@@ -22,42 +22,46 @@
   "tests": {
     "fail_to_pass": [
       {
-        "name": "prologue_includes_rest",
-        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_prologue_includes_rest_at_i_zero"
-      },
-      {
-        "name": "prologue_substitutes_i",
-        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_var_in_prologue"
-      },
-      {
-        "name": "full_store_sequence",
-        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_full_first_iteration_store_sequence"
-      },
-      {
-        "name": "multi_trailing_rest",
+        "name": "multi_trailing",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_materializes_multiple_trailing_rest_stores_at_i_zero"
       },
       {
-        "name": "nested_if_in_rest",
+        "name": "nested_if_rest",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_inside_nested_if_in_rest"
       },
       {
-        "name": "arith_index_sub",
+        "name": "arith_index",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_in_then_arm_arithmetic_index"
+      },
+      {
+        "name": "swapped_eq",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_accepts_swapped_eq_operands"
+      },
+      {
+        "name": "ref_eval_oracle",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_preserves_reference_eval_on_buffer_stores"
       }
     ],
     "pass_to_pass": [
       {
-        "name": "remainder_shape",
-        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_remainder_starts_at_one_with_rest"
-      },
-      {
-        "name": "skip_nonzero_from",
-        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_still_skips_non_zero_from"
-      },
-      {
-        "name": "remainder_multi_rest",
+        "name": "remainder_multi",
         "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_remainder_keeps_from_one_after_multi_rest"
+      },
+      {
+        "name": "skip_else",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_when_otherwise_arm_is_nonempty"
+      },
+      {
+        "name": "skip_rest_rebind",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_when_rest_rebinds_induction"
+      },
+      {
+        "name": "skip_n1",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_trip_count_one"
+      },
+      {
+        "name": "skip_nonzero_guard",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_guard_on_nonzero_literal"
       }
     ]
   },

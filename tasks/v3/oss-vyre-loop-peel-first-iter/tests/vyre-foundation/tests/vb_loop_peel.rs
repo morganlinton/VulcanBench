@@ -1,9 +1,22 @@
-//! Hidden fail_to_pass / pass_to_pass for loop peel first-iteration materialization.
+//! Adversarial coverage for loop peel first-iteration materialization.
+//!
+//! Locks down shapes beyond the single then+rest fixture: multiple trailing
+//! statements, nested control flow in the remainder, and induction uses inside
+//! non-store expressions in the peeled then-arm.
+
 use vyre_foundation::ir::{Expr, Ident, Node, Program};
 use vyre_foundation::optimizer::passes::loops::loop_peel::LoopPeelPass;
 
 fn program_with_entry(entry: Vec<Node>) -> Program {
     Program::wrapped(vec![], [1, 1, 1], entry)
+}
+
+fn entry_body(program: &Program) -> &[Node] {
+    // Program::wrapped places the body under a Region.
+    match program.entry() {
+        [Node::Region { body, .. }] => body.as_slice(),
+        other => other,
+    }
 }
 
 fn store_pairs(nodes: &[Node]) -> Vec<(Expr, Expr)> {
@@ -42,114 +55,6 @@ fn find_loop(nodes: &[Node]) -> Option<(&Expr, &[Node])> {
         }
     }
     None
-}
-
-fn entry_body(program: &Program) -> &[Node] {
-    match program.entry() {
-        [Node::Region { body, .. }] => body.as_slice(),
-        other => other,
-    }
-}
-
-fn peel_fixture() -> Program {
-    let guard = Node::If {
-        cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
-        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(99))],
-        otherwise: vec![],
-    };
-    let rest = Node::store("buf", Expr::var("i"), Expr::u32(7));
-    let entry = vec![Node::Loop {
-        var: Ident::from("i"),
-        from: Expr::u32(0),
-        to: Expr::u32(10),
-        body: vec![guard, rest],
-    }];
-    program_with_entry(entry)
-}
-
-#[test]
-fn peel_prologue_includes_rest_at_i_zero() {
-    let result = LoopPeelPass::transform(peel_fixture());
-    assert!(result.changed, "peeling must fire");
-    let body = entry_body(&result.program);
-    let pairs = store_pairs(body);
-    assert!(
-        pairs.len() >= 2,
-        "prologue must include then and rest stores; got {pairs:?}"
-    );
-    assert_eq!(
-        &pairs[0],
-        &(Expr::u32(0), Expr::u32(99)),
-        "first-iteration then-arm must store with i substituted to 0"
-    );
-    assert_eq!(
-        &pairs[1],
-        &(Expr::u32(0), Expr::u32(7)),
-        "first-iteration rest must also run at i = 0, not be dropped"
-    );
-}
-
-#[test]
-fn peel_substitutes_induction_var_in_prologue() {
-    let result = LoopPeelPass::transform(peel_fixture());
-    let body = entry_body(&result.program);
-    let pairs = store_pairs(body);
-    assert!(
-        !matches!(pairs[0].0, Expr::Var(_)),
-        "prologue must not leave a stale Var(i) as the store index"
-    );
-    assert!(
-        !matches!(pairs[1].0, Expr::Var(_)),
-        "prologue rest store must use the peeled constant index, not Var(i)"
-    );
-}
-
-#[test]
-fn peel_remainder_starts_at_one_with_rest() {
-    let result = LoopPeelPass::transform(peel_fixture());
-    let body = entry_body(&result.program);
-    let (from, lbody) = find_loop(body).expect("remainder loop present");
-    assert_eq!(from, &Expr::u32(1), "remainder loop starts at i = 1");
-    assert_eq!(
-        store_pairs(lbody),
-        vec![(Expr::var("i"), Expr::u32(7))],
-        "remainder keeps rest with the induction variable"
-    );
-}
-
-#[test]
-fn peel_still_skips_non_zero_from() {
-    let entry = vec![Node::Loop {
-        var: Ident::from("i"),
-        from: Expr::u32(2),
-        to: Expr::u32(10),
-        body: vec![
-            Node::If {
-                cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
-                then: vec![Node::store("buf", Expr::var("i"), Expr::u32(1))],
-                otherwise: vec![],
-            },
-            Node::store("buf", Expr::var("i"), Expr::u32(2)),
-        ],
-    }];
-    let result = LoopPeelPass::transform(program_with_entry(entry));
-    assert!(!result.changed, "non-zero from must not peel");
-}
-
-#[test]
-fn peel_full_first_iteration_store_sequence() {
-    let result = LoopPeelPass::transform(peel_fixture());
-    assert!(result.changed);
-    let body = entry_body(&result.program);
-    assert_eq!(
-        store_pairs(body),
-        vec![
-            (Expr::u32(0), Expr::u32(99)),
-            (Expr::u32(0), Expr::u32(7)),
-            (Expr::var("i"), Expr::u32(7)),
-        ],
-        "prologue then++rest at i=0, then remainder rest with Var(i)"
-    );
 }
 
 fn peel_then_plus_rest(rest: Vec<Node>) -> Program {
@@ -267,5 +172,136 @@ fn peel_remainder_keeps_from_one_after_multi_rest() {
             (Expr::var("i"), Expr::u32(7)),
             (Expr::var("i"), Expr::u32(8)),
         ]
+    );
+}
+
+#[test]
+fn peel_accepts_swapped_eq_operands() {
+    // Eq(LitU32(0), Var(i)) must peel the same as Eq(Var(i), LitU32(0)).
+    let guard = Node::If {
+        cond: Expr::eq(Expr::u32(0), Expr::var("i")),
+        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(99))],
+        otherwise: vec![],
+    };
+    let rest = Node::store("buf", Expr::var("i"), Expr::u32(7));
+    let result = LoopPeelPass::transform(program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(5),
+        body: vec![guard, rest],
+    }]));
+    assert!(result.changed);
+    assert_eq!(
+        store_pairs(entry_body(&result.program)),
+        vec![
+            (Expr::u32(0), Expr::u32(99)),
+            (Expr::u32(0), Expr::u32(7)),
+            (Expr::var("i"), Expr::u32(7)),
+        ]
+    );
+}
+
+#[test]
+fn peel_skips_when_otherwise_arm_is_nonempty() {
+    let guard = Node::If {
+        cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
+        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(1))],
+        otherwise: vec![Node::store("buf", Expr::var("i"), Expr::u32(2))],
+    };
+    let result = LoopPeelPass::transform(program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(4),
+        body: vec![guard, Node::store("buf", Expr::var("i"), Expr::u32(3))],
+    }]));
+    assert!(!result.changed, "nonempty else-arm is not the peel pattern");
+}
+
+#[test]
+fn peel_skips_when_rest_rebinds_induction() {
+    let result = LoopPeelPass::transform(peel_then_plus_rest(vec![
+        Node::let_bind("i", Expr::u32(0)),
+        Node::store("buf", Expr::var("i"), Expr::u32(7)),
+    ]));
+    assert!(
+        !result.changed,
+        "rest that rebinds the loop var must refuse peel (substitution would corrupt)"
+    );
+}
+
+#[test]
+fn peel_skips_trip_count_one() {
+    let guard = Node::If {
+        cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
+        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(1))],
+        otherwise: vec![],
+    };
+    let result = LoopPeelPass::transform(program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(1),
+        body: vec![guard],
+    }]));
+    assert!(!result.changed, "N<=1 has no remainder to peel into");
+}
+
+#[test]
+fn peel_skips_guard_on_nonzero_literal() {
+    let guard = Node::If {
+        cond: Expr::eq(Expr::var("i"), Expr::u32(1)),
+        then: vec![Node::store("buf", Expr::var("i"), Expr::u32(1))],
+        otherwise: vec![],
+    };
+    let result = LoopPeelPass::transform(program_with_entry(vec![Node::Loop {
+        var: Ident::from("i"),
+        from: Expr::u32(0),
+        to: Expr::u32(4),
+        body: vec![guard, Node::store("buf", Expr::var("i"), Expr::u32(2))],
+    }]));
+    assert!(!result.changed, "first-iter guard must be Eq(i, 0), not Eq(i, 1)");
+}
+
+#[test]
+fn peel_preserves_reference_eval_on_buffer_stores() {
+    use vyre_foundation::ir::{BufferDecl, DataType};
+    use vyre_reference::value::Value;
+
+    // out[i] = 10 on first iter via guard, out[i] = 1 on every iter via rest.
+    // For N=3 expected: out = [10, 1, 1] wait — both then and rest store on i=0,
+    // so out[0] ends as rest's value 1, then iters 1,2 store 1. So [1,1,1].
+    // Stronger observable: then stores 99 at i, rest stores 7 at i.
+    // Final: out[0]=7 (rest overwrites then), out[1]=7, out[2]=7.
+    let program = Program::wrapped(
+        vec![BufferDecl::output("out", 0, DataType::U32).with_count(3)],
+        [1, 1, 1],
+        vec![Node::Loop {
+            var: Ident::from("i"),
+            from: Expr::u32(0),
+            to: Expr::u32(3),
+            body: vec![
+                Node::If {
+                    cond: Expr::eq(Expr::var("i"), Expr::u32(0)),
+                    then: vec![Node::store("out", Expr::var("i"), Expr::u32(99))],
+                    otherwise: vec![],
+                },
+                Node::store("out", Expr::var("i"), Expr::u32(7)),
+            ],
+        }],
+    );
+    let inputs: [Value; 0] = [];
+    let before = vyre_reference::reference_eval(&program, &inputs)
+        .expect("original peel fixture must evaluate");
+    let peeled = LoopPeelPass::transform(program);
+    assert!(peeled.changed);
+    let after = vyre_reference::reference_eval(&peeled.program, &inputs)
+        .expect("peeled program must evaluate");
+    assert_eq!(
+        before, after,
+        "peel must be observationally identical under reference_eval"
+    );
+    assert_eq!(
+        before,
+        vec![Value::from(7u32.to_le_bytes().to_vec().repeat(3))],
+        "sanity: final buffer is three 7s (rest overwrites then on i=0)"
     );
 }

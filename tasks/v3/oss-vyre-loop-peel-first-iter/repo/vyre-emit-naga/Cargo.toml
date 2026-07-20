@@ -1,0 +1,41 @@
+[package]
+name = "vyre-emit-naga"
+version = "0.6.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Naga IR emitter for vyre KernelDescriptor. Produces wgpu-compatible compute shaders."
+readme = "README.md"
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+documentation = "https://docs.rs/vyre-emit-naga"
+categories = ["compilers", "hardware-support"]
+keywords = ["vyre", "naga", "wgpu", "shader"]
+
+[lib]
+name = "vyre_emit_naga"
+path = "src/lib.rs"
+
+[dependencies]
+vyre-lower.workspace = true
+naga = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+vyre-foundation.workspace = true
+vyre-driver = { workspace = true }
+vyre-spec = { workspace = true }
+rustc-hash = { workspace = true }
+inventory = { workspace = true }
+serde_json.workspace = true
+blake3 = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs.
+# `c-parser` is required by carrier_scope_regression::dump_c11_lexer_naga, which
+# builds the real `vyre_libs::parsing::c::lex::lexer::c11_lexer` megakernel and
+# drives it through lower_for_emit → vyre_emit_naga::emit to regression-test
+# loop-carrier scope handling on a real-world program. `parsing::c` is gated
+# behind `c-parser` (vyre-libs/Cargo.toml), so without this the test binary
+# fails to compile (E0433: no `c` in `parsing`).
+vyre-libs = { workspace = true, features = ["c-parser"] }
+proptest.workspace = true

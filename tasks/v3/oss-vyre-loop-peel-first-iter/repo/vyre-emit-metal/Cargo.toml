@@ -1,0 +1,30 @@
+[package]
+name = "vyre-emit-metal"
+version = "0.6.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Metal Shading Language artifact emitter for vyre KernelDescriptor. Routes through naga::Module to share substrate-neutral lowering."
+readme = "README.md"
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+documentation = "https://docs.rs/vyre-emit-metal"
+categories = ["compilers", "hardware-support"]
+keywords = ["vyre", "metal", "msl", "shader", "gpu"]
+
+[lib]
+name = "vyre_emit_metal"
+path = "src/lib.rs"
+
+[dependencies]
+vyre-emit-naga = { workspace = true }
+vyre-lower = { workspace = true }
+vyre-foundation = { workspace = true }
+naga = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+blake3 = { workspace = true }
+bincode = { workspace = true }
+
+[dev-dependencies]
+proptest.workspace = true

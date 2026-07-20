@@ -205,3 +205,99 @@ fn no_cooperative_ops_inside_structured_if_then_else() {
         );
     }
 }
+
+fn repeated_loads(gid_result: u32, load_a: u32, load_b: u32) -> Vec<KernelOp> {
+    vec![
+        op(KernelOpKind::GlobalInvocationId, vec![0], Some(gid_result)),
+        op(KernelOpKind::LoadGlobal, vec![0, gid_result], Some(load_a)),
+        op(KernelOpKind::LoadGlobal, vec![0, gid_result], Some(load_b)),
+    ]
+}
+
+#[test]
+fn no_cooperative_ops_inside_nested_structured_if() {
+    // Root: if (c0) { if (c1) { load; load } }
+    let input = KernelDescriptor {
+        id: "nested".into(),
+        bindings: BindingLayout {
+            slots: vec![binding(0, DataType::U32, BindingVisibility::ReadOnly)],
+        },
+        dispatch: Dispatch::new(32, 1, 1),
+        body: KernelBody {
+            ops: vec![
+                op(KernelOpKind::Literal, vec![0], Some(0)),
+                op(KernelOpKind::StructuredIfThen, vec![0, 0], None),
+            ],
+            child_bodies: vec![KernelBody {
+                ops: vec![
+                    op(KernelOpKind::Literal, vec![0], Some(1)),
+                    op(KernelOpKind::StructuredIfThen, vec![1, 0], None),
+                ],
+                child_bodies: vec![KernelBody {
+                    ops: repeated_loads(2, 3, 4),
+                    child_bodies: vec![],
+                    literals: vec![],
+                }],
+                literals: vec![LiteralValue::U32(1)],
+            }],
+            literals: vec![LiteralValue::U32(1)],
+        },
+    };
+    let output = shared_mem_promote(&input);
+    let outer = &output.body.child_bodies[0];
+    assert!(
+        cooperative_ops(outer).is_empty(),
+        "outer if body must stay free of cooperative ops"
+    );
+    assert!(
+        !outer.child_bodies.is_empty(),
+        "nested structure must be preserved"
+    );
+    let inner = &outer.child_bodies[0];
+    assert!(
+        cooperative_ops(inner).is_empty(),
+        "nested if body must not gain barriers/async ops"
+    );
+}
+
+#[test]
+fn still_promotes_uniform_root_when_sibling_child_is_nonuniform() {
+    // Root has repeated loads (uniform) AND a StructuredIfThen child with its
+    // own repeated loads. Root must still promote; the child must not.
+    let input = KernelDescriptor {
+        id: "sibling".into(),
+        bindings: BindingLayout {
+            slots: vec![binding(0, DataType::U32, BindingVisibility::ReadOnly)],
+        },
+        dispatch: Dispatch::new(32, 1, 1),
+        body: KernelBody {
+            ops: vec![
+                op(KernelOpKind::GlobalInvocationId, vec![0], Some(0)),
+                op(KernelOpKind::LoadGlobal, vec![0, 0], Some(1)),
+                op(KernelOpKind::LoadGlobal, vec![0, 0], Some(2)),
+                op(KernelOpKind::Literal, vec![0], Some(3)),
+                op(KernelOpKind::StructuredIfThen, vec![3, 0], None),
+            ],
+            child_bodies: vec![KernelBody {
+                ops: repeated_loads(4, 5, 6),
+                child_bodies: vec![],
+                literals: vec![],
+            }],
+            literals: vec![LiteralValue::U32(1)],
+        },
+    };
+    let output = shared_mem_promote(&input);
+    assert!(
+        output
+            .body
+            .ops
+            .iter()
+            .any(|op| matches!(op.kind, KernelOpKind::AsyncLoad { .. })),
+        "uniform root repeated loads must still promote"
+    );
+    let child_illegal = cooperative_ops(&output.body.child_bodies[0]);
+    assert!(
+        child_illegal.is_empty(),
+        "non-uniform sibling child must not gain {child_illegal:?}"
+    );
+}

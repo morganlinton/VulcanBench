@@ -32,6 +32,14 @@
       {
         "name": "no_barrier_in_ite",
         "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then_else"
+      },
+      {
+        "name": "no_barrier_nested",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_nested_structured_if"
+      },
+      {
+        "name": "sibling_child_clean",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_uniform_root_when_sibling_child_is_nonuniform"
       }
     ],
     "pass_to_pass": [

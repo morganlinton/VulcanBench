@@ -13,11 +13,11 @@
   "image": "vulcanbench/sandbox:rust",
   "base_commit": "2b1e8d9411e39389a8f2c6a828b7961e88b6674e",
   "upstream": {
-    "url": "https://github.com/santhsecurity/vyre",
-    "issue": "https://github.com/santhsecurity/vyre/commit/cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2",
+    "url": "https://github.com/santhreal/vyre",
+    "issue": "https://github.com/santhreal/vyre/commit/cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2",
     "commit": "cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2"
   },
-  "decontamination_notes": "Real bug fix from santhsecurity/vyre commit cd7dfbb (2026-06-22), after model training cutoffs. shared_mem_promote inserted AsyncLoad/AsyncWait/Barrier into StructuredIfThen/ForLoop child bodies (non-uniform CF), which deadlocks on GPU. Fix tracks workgroup-uniformity through the rewrite. Full workspace slice at the parent commit. LICENSE preserved. Coverage floor: 3 fail_to_pass / regression tests.",
+  "decontamination_notes": "Real bug fix from santhreal/vyre commit cd7dfbb (2026-06-22), after model training cutoffs. shared_mem_promote inserted AsyncLoad/AsyncWait/Barrier into StructuredIfThen/ForLoop child bodies (non-uniform CF), which deadlocks on GPU. Fix tracks workgroup-uniformity through the rewrite. Full workspace slice at the parent commit. LICENSE preserved. Hidden tests: 6 fail_to_pass (If/For/ITE/nested/sibling/block-under-if) and 3 pass_to_pass (root, StructuredBlock, Region still promote).",
   "grader": "tests",
   "tests": {
     "fail_to_pass": [

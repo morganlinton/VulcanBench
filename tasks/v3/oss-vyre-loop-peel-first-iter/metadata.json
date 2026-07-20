@@ -1,0 +1,60 @@
+{
+  "id": "oss-vyre-loop-peel-first-iter",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-07-19",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b",
+  "upstream": {
+    "url": "https://github.com/santhsecurity/vyre",
+    "issue": "https://github.com/santhsecurity/vyre/commit/a94026fb04f78600677f696415ae276cf3067b29",
+    "commit": "a94026fb04f78600677f696415ae276cf3067b29"
+  },
+  "decontamination_notes": "Real bug fix from santhsecurity/vyre commit a94026f (2026-06-22), after model training cutoffs. loop_peel lifted only the first-iteration guard then-arm and left rest exclusively in the i=1 remainder loop, dropping rest[i:=0] and leaving Var(i) unsubstituted in the prologue. Full workspace slice at the parent commit. LICENSE-MIT/LICENSE-APACHE preserved. Coverage floor: 3 fail_to_pass integration tests.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "prologue_includes_rest",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_prologue_includes_rest_at_i_zero"
+      },
+      {
+        "name": "prologue_substitutes_i",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_var_in_prologue"
+      },
+      {
+        "name": "full_store_sequence",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_full_first_iteration_store_sequence"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "remainder_shape",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_remainder_starts_at_one_with_rest"
+      },
+      {
+        "name": "skip_nonzero_from",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_still_skips_non_zero_from"
+      }
+    ]
+  },
+  "setup": [
+    {
+      "name": "build-tests",
+      "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel --no-run"
+    }
+  ],
+  "setup_timeout_s": 900,
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 120,
+    "suggested_timeout_s": 1800
+  }
+}

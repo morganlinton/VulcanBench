@@ -1,0 +1,54 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Build task runner for the vyre workspace."
+# Deep-sweep: xtask is an internal build-task runner, not a
+# published crate. `cargo publish` on the workspace must skip it.
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+sha2.workspace = true
+blake3.workspace = true
+vyre.workspace = true
+vyre-foundation.workspace = true
+vyre-harness.workspace = true
+vyre-driver.workspace = true
+# `xtask lego-audit` is the release catalog gate. It must link every
+# shipped Tier-3 consumer so primitive coverage is measured against the
+# real composition surface, not a feature-narrow slice.
+vyre-libs = { workspace = true, features = ["full", "logical", "nn-moe", "security", "visual", "parsing", "math", "nn", "matching", "crypto"] }
+vyre-intrinsics.workspace = true
+vyre-primitives = { workspace = true, features = ["text", "matching", "math", "nn", "hash", "parsing", "graph", "bitset", "reduce", "label", "predicate", "fixpoint", "inventory-registry"] }
+vyre-reference.workspace = true
+vyre-bench.workspace = true
+vyre-driver-wgpu.workspace = true
+vyre-driver-cuda.workspace = true
+vyre-driver-reference.workspace = true
+vyre-driver-spirv.workspace = true
+vyre-frontend-c.workspace = true
+vyre-lints.workspace = true
+vyre-lower.workspace = true
+vyre-emit-metal.workspace = true
+inventory.workspace = true
+toml.workspace = true
+syn = { workspace = true, features = ["full", "visit"] }
+quote = { workspace = true }
+proc-macro2 = { workspace = true, features = ["span-locations"] }
+walkdir.workspace = true
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tree-sitter = { workspace = true }
+tree-sitter-c = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

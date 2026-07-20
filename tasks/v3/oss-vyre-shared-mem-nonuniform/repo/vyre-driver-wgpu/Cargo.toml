@@ -1,0 +1,128 @@
+[package]
+name = "vyre-driver-wgpu"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "wgpu backend for vyre IR  -  implements VyreBackend, owns GPU runtime, buffer pool, pipeline cache"
+readme = "README.md"
+keywords = ["gpu", "wgpu", "ir", "backend", "vyre"]
+categories = ["graphics", "rendering::graphics-api", "hardware-support"]
+documentation = "https://docs.rs/vyre-wgpu"
+
+[features]
+default = []
+wgpu = []
+parity-testing = []
+c-parser = ["vyre-libs/c-parser"]
+math-linalg = ["vyre-libs/math-linalg"]
+math-scan = ["vyre-libs/math-scan"]
+nn-attention = ["vyre-libs/nn-attention"]
+matching-substring = ["vyre-libs/matching-substring"]
+matching-dfa = ["vyre-libs/matching-dfa"]
+matching-nfa = ["vyre-libs/matching-nfa"]
+megakernel-batch = ["vyre-runtime/megakernel-batch"]
+uring-cmd-nvme = ["vyre-runtime/uring-cmd-nvme"]
+# Forwards vyre-runtime's infallible legacy telemetry-decode API so the
+# megakernel long-term edge-case integration tests can opt into it.
+legacy-infallible = ["vyre-runtime/legacy-infallible"]
+
+[dependencies]
+vyre-driver = { workspace = true, features = ["self-substrate-adapters"] }
+vyre-runtime = { workspace = true, features = ["self-substrate-adapters"] }
+vyre-foundation = { workspace = true }
+vyre-self-substrate = { workspace = true }
+vyre-spec = { workspace = true }
+vyre-lower.workspace = true
+vyre-emit-naga.workspace = true
+naga = { workspace = true, features = ["wgsl-out", "spv-out"] }
+wgpu.workspace = true
+pollster.workspace = true
+bytemuck.workspace = true
+crossbeam-queue = { workspace = true }
+crossbeam-channel.workspace = true
+arc-swap = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+tracing.workspace = true
+thiserror.workspace = true
+rustc-hash.workspace = true
+blake3.workspace = true
+serde.workspace = true
+toml.workspace = true
+inventory.workspace = true
+dashmap = { workspace = true }
+smallvec.workspace = true
+crc32fast = { workspace = true }
+fs2.workspace = true
+libm.workspace = true
+bincode = { workspace = true }
+
+[dev-dependencies]
+vyre-harness = { workspace = true }
+criterion.workspace = true
+stats_alloc.workspace = true
+tokio.workspace = true
+tempfile.workspace = true
+proptest.workspace = true
+vyre-libs = { version = "0.6.1", path = "../vyre-libs", features = ["matching", "parsing", "c-parser", "nn-attention", "cpu-parity", "crypto-blake3"] }
+# The integration tests under tests/ exercise the public `vyre` umbrella facade
+# (vyre::ir, vyre::{DispatchConfig, VyreBackend, validate, ...}) — the ergonomic
+# surface a real consumer uses. The 0.6.2 refactor dropped this dev-dep, which
+# silently RED-ed ~90 test files (use of unlinked crate `vyre`). `default-features
+# = false` keeps the `wgpu` feature OFF, so vyre does NOT pull vyre-driver-wgpu back
+# in — no dependency cycle.
+# PATH-ONLY (no version): vyre (vyre-core) is published AFTER this crate in the 0.6.3
+# train, so a versioned/workspace dev-dep would be unsatisfiable at publish time.
+# cargo strips path-only dev-deps from the published manifest; the local test build
+# still links it through the path.
+vyre = { path = "../vyre-core", default-features = false }
+# A handful of tests reach `vyre_primitives::wire::pack_u32_iter` directly (the
+# facade doesn't re-export the wire POD helpers). Also dropped in the 0.6.2 refactor.
+vyre-primitives = { workspace = true }
+# Cross-OS shader-VALIDITY coverage for the combined segmented megakernel: the
+# winning Vulkan/DX12 runs implicitly prove SPIR-V/HLSL validity, but macOS/Metal
+# is hardware-blocked, so the megakernel descriptor is lowered to MSL here (naga's
+# MSL backend runs the validator, so a successful emit IS a Metal-validity proof)
+# and to SPIR-V (explicit, not run-implied). PATH-ONLY (no version), like the `vyre`
+# dev-dep above: cargo strips path-only dev-deps at publish, so this never creates a
+# publish-ordering constraint, and `--edges=normal` keeps it out of the layering lint.
+vyre-emit-metal = { path = "../vyre-emit-metal" }
+vyre-emit-spirv = { path = "../vyre-emit-spirv" }
+# A CPU-reference parity test (`c_ast_expression_support`) compares against vyre-reference.
+vyre-reference = { workspace = true }
+# `lens_gpu_parity` (and other GPU parity tests) use the shared conform harness.
+# PATH-ONLY: vyre-test-harness is publish=false (never on crates.io), so a versioned
+# dev-dep is unsatisfiable at publish. cargo strips path-only dev-deps on publish.
+vyre-test-harness = { path = "../conform/vyre-test-harness" }
+tracing-subscriber.workspace = true
+libc.workspace = true
+# PATH-ONLY (package = vyre-grammar-gen): vyre-grammar-gen is NOT in the 0.6.3
+# publish train (it is only ever a dev-dep here + in vyre-libs, and a normal dep of
+# the publish=false vyre-frontend-c), so crates.io has only 0.6.2 — a `^0.6.3`
+# workspace req is unsatisfiable at publish. cargo strips path-only dev-deps from
+# the published manifest; local test builds still link it via the path.
+c-grammar-gen = { package = "vyre-grammar-gen", path = "../vyre-grammar-gen" }
+tree-sitter = { workspace = true }
+tree-sitter-go = { workspace = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# build.rs reads this to stamp VYRE_NAGA_VERSION into the binary so the
+# pipeline-cache key invalidates when the shader frontend changes. Bump in
+# lockstep with the workspace `naga` dep.
+[package.metadata.vyre]
+naga_version = "25.0.0"
+
+[lints]
+workspace = true
+
+
+
+[[bin]]
+name = "vyre-wgpu"
+path = "src/bin/vyre.rs"

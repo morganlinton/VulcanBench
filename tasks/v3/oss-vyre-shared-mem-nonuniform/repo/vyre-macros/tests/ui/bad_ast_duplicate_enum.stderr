@@ -1,0 +1,5 @@
+error: duplicate AST enum `Expr`. Fix: merge the variants into one `Expr` block or rename the second enum.
+ --> tests/ui/bad_ast_duplicate_enum.rs:8:5
+  |
+8 |     Expr {
+  |     ^^^^

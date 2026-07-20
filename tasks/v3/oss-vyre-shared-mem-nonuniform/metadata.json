@@ -1,0 +1,56 @@
+{
+  "id": "oss-vyre-shared-mem-nonuniform",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-07-19",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "2b1e8d9411e39389a8f2c6a828b7961e88b6674e",
+  "upstream": {
+    "url": "https://github.com/santhsecurity/vyre",
+    "issue": "https://github.com/santhsecurity/vyre/commit/cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2",
+    "commit": "cd7dfbbb7a3fe1cb50763b7f0dfd1c32127b03c2"
+  },
+  "decontamination_notes": "Real bug fix from santhsecurity/vyre commit cd7dfbb (2026-06-22), after model training cutoffs. shared_mem_promote inserted AsyncLoad/AsyncWait/Barrier into StructuredIfThen/ForLoop child bodies (non-uniform CF), which deadlocks on GPU. Fix tracks workgroup-uniformity through the rewrite. Full workspace slice at the parent commit. LICENSE preserved. Coverage floor: 3 fail_to_pass / regression tests.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "no_barrier_in_if",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then"
+      },
+      {
+        "name": "no_barrier_in_for",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_for_loop_body"
+      },
+      {
+        "name": "no_barrier_in_ite",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform no_cooperative_ops_inside_structured_if_then_else"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "root_still_promotes",
+        "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform still_promotes_repeated_loads_in_uniform_root_body"
+      }
+    ]
+  },
+  "setup": [
+    {
+      "name": "build-tests",
+      "cmd": "cargo test -p vyre-lower --offline --test vb_shared_mem_nonuniform --no-run"
+    }
+  ],
+  "setup_timeout_s": 900,
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 120,
+    "suggested_timeout_s": 1800
+  }
+}

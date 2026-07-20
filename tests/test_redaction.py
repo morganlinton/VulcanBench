@@ -45,6 +45,13 @@ def test_redacts_moonshot_env_value(monkeypatch: pytest.MonkeyPatch) -> None:
     assert REDACTED in out
 
 
+def test_redacts_dashscope_env_value(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DASHSCOPE_API_KEY", "sk-qwentestsecret123456")
+    out = redact("the key is sk-qwentestsecret123456 in the log")
+    assert "sk-qwentestsecret123456" not in out
+    assert REDACTED in out
+
+
 def test_redacts_api_token_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VULCANBENCH_API_TOKEN", "tok_supersecretvalue123456")
     out = redact("auth tok_supersecretvalue123456 end")

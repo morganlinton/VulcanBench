@@ -18,9 +18,9 @@ store. That is the unsound direction.
   present; analyze agrees that there is nothing redundant to remove).
 - When the induction variable is stable for the whole body, existing redundant
   elision behavior for true loop-range re-checks must keep working.
-- Related loop passes that already had private copies of an induction-stability
-  / rebind check should share one coherent definition of "body writes / rebinds
-  the loop var" rather than drifting apart.
+- Other loop transforms that assume a stable induction variable for the whole
+  body must keep refusing to fire when that name is rebound (their existing
+  skip behavior must not regress).
 
 A minimal counterexample: loop `i` in `0..4` whose body does
 `let i = load(buf, i); if i < 4 { store(buf, i, 7) }`. After the fix the `if`

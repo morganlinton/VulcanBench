@@ -13,11 +13,11 @@
   "image": "vulcanbench/sandbox:rust",
   "base_commit": "39749dc4b4041eda8a961214ed6a85a647f6176e",
   "upstream": {
-    "url": "https://github.com/santhsecurity/vyre",
-    "issue": "https://github.com/santhsecurity/vyre/commit/a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b",
+    "url": "https://github.com/santhreal/vyre",
+    "issue": "https://github.com/santhreal/vyre/commit/a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b",
     "commit": "a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b"
   },
-  "decontamination_notes": "Real bug fix from santhsecurity/vyre commit a9fc3ba (2026-06-22), after model training cutoffs. loop_redundant_bound_check_elide matched guards by induction-variable name and dropped a real bounds check after let i = load(...). Fix gates elision on induction stability and consolidates rebind helpers across six loop-pass files. Full workspace slice at the parent commit. LICENSE preserved. Coverage floor: 3 fail_to_pass / regression tests.",
+  "decontamination_notes": "Real bug fix from santhreal/vyre commit a9fc3ba (2026-06-22), after model training cutoffs. loop_redundant_bound_check_elide matched guards by induction-variable name and dropped a real bounds check after let/assign rebound the loop var. Fix gates elision on induction stability; upstream also consolidates rebind helpers across loop passes. Full workspace slice at the parent commit. LICENSE preserved. Hidden tests: 4 fail_to_pass (Let/Assign/nested-If rebind + store stays guarded) and 8 pass_to_pass (stable elision, unrelated-name, cross-pass skip surfaces).",
   "grader": "tests",
   "tests": {
     "fail_to_pass": [

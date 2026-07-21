@@ -28,15 +28,15 @@ tr.subj td { background: #efe9dc !important; }
 </style></head><body>
 <div class="page">
   <div class="rhead"><b>VulcanBench Technical Report No. 08</b>
-    <div class="rmeta">July 19, 2026&ensp;|&ensp;v3 suite&ensp;|&ensp;23 tasks&ensp;|&ensp;28 Kimi runs&ensp;|&ensp;1 effort level&ensp;|&ensp;5 languages&ensp;|&ensp;$33.89</div>
+    <div class="rmeta">July 19, 2026&ensp;|&ensp;v3 suite&ensp;|&ensp;23 tasks&ensp;|&ensp;11 configurations&ensp;|&ensp;5 languages&ensp;|&ensp;$33.89 Kimi spend</div>
   </div>
   <div class="rule"></div>
 
   <h1>Kimi K3 vs Grok 4.5, Claude Fable 5 &amp; GPT-5.6 Sol</h1>
-  <p class="byline">Moonshot&rsquo;s 2.8T open-weight flagship, at its single shipped effort level, against the Report 07 field: twenty-three real merged post-cutoff PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests.</p>
+  <p class="byline">Moonshot&rsquo;s 2.8T open-weight flagship joins the Report 07 field: twenty-three real merged post-cutoff PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests.</p>
 
   <h2>Abstract</h2>
-  <p class="abs">Kimi K3 ships one effort level (max, always-thinking): 17/23 (74%) at the standard 30-minute budget, 20/23 (87%) at two hours &mdash; level with Fable 5 and Sol at high effort, at $1.37 vs. $0.80&ndash;$1.04 per solved task. Five of its six capped misses ran out of the 30-minute task budget (the sixth scored 0.7 partial credit); at 18.1 min/task it runs 4&ndash;7&times; slower than the field. Kimi benchmark spend $33.89 under a $40 cap.</p>
+  <p class="abs">Grok 4.5 leads all eleven configurations at 21/23 (91.3%) with the lowest cost per solved task ($0.32). Kimi K3 debuts at 17/23 (74%) in its standard configuration and 20/23 (87%) under an extended-budget ablation &mdash; level with the best Fable 5 and Sol configurations ($1.37 vs. $0.80&ndash;$1.04 per solved task). The two hardest v3 tasks remain unsolved by every model. Kimi benchmark spend $33.89 under a $40 cap.</p>
 
   <h2>Table 1. Results (Grok/Fable/Sol reproduced from Report 07)</h2>
   <table>
@@ -59,13 +59,12 @@ tr.subj td { background: #efe9dc !important; }
 
   <h2>Findings</h2>
   <div class="findings">
-    <p><b class="fh">1. The clock is the dominant failure mode &mdash; not the only one.</b>Five of the six capped misses ran out of the task budget mid-work; the sixth (SQLGlot ISO-8601) was a submitted patch that earned 0.7 partial credit. Given two hours, three of them convert, while the two hardest tasks still end at the $4 cost cap with partial progress.</p>
-    <p><b class="fh">2. Always-on max thinking is slow, not verbose.</b>18.1 min/task against 3.4&ndash;4.9 for the field, on moderate token volume (134 K/task). The cost of Preserved Thinking is time; on time-budgeted agentic work, latency is accuracy.</p>
-    <p><b class="fh">3. Given time, it closes the gap.</b>At 2 hours, aiohttp (64 min), NetworkX-Leiden (107 min), and jiff-strftime (21 min &mdash; run-to-run variance, not time starvation) all fall: 20/23, matching high-effort Fable 5 and Sol for +$10.59.</p>
-    <p><b class="fh">4. The difficulty ceiling held.</b>PennyLane Trotter fragmentation (0.2 partial) and SQLGlot internal-name canonicalization (0.17 partial) remain unsolved by every configuration ever run on v3 &mdash; 0-for-27 in Report 07, and K3&rsquo;s two-hour, $4 attempts didn&rsquo;t crack them either.</p>
+    <p><b class="fh">1. Grok 4.5 wins on accuracy and economics.</b>21/23 (91.3%) at $0.32 per solved task &mdash; no other configuration matches either number. Its medium and high efforts tie, keeping medium the efficiency frontier of the board.</p>
+    <p><b class="fh">2. Kimi K3 debuts mid-pack and closes with budget.</b>17/23 in its standard configuration; the extended-budget ablation converts aiohttp, NetworkX-Leiden, and jiff-strftime for +$10.59, reaching 20/23 &mdash; matching the best Fable 5 and Sol configurations.</p>
+    <p><b class="fh">3. The v3 difficulty ceiling held.</b>PennyLane Trotter fragmentation (0.2 partial) and SQLGlot internal-name canonicalization (0.17 partial) remain unsolved by every configuration ever run &mdash; 0-for-27 in Report 07, and K3&rsquo;s extended attempts didn&rsquo;t crack them either.</p>
   </div>
 
-  <h2>Budget ablation (what the extra ninety minutes bought)</h2>
+  <h2>Extended-budget ablation</h2>
   <table>
     <thead><tr><th>Task</th><th>30-min budget</th><th>2-h budget</th><th>Time</th><th>Cost</th></tr></thead>
     <tbody>
@@ -77,10 +76,10 @@ tr.subj td { background: #efe9dc !important; }
       <tr><td>sqlglot-iso8601-nanos</td><td>partial (0.7)</td><td>&mdash; not re-run</td><td>&mdash;</td><td>&mdash;</td></tr>
     </tbody>
   </table>
-  <p class="note">The two $4-capped partials ended on money, not conviction &mdash; a larger budget might buy more progress, at a meaningfully higher price than any other configuration on the board.</p>
+  <p class="note">The two remaining tasks ended at the $4 per-run cost cap with partial progress.</p>
 
   <h2>Method &amp; reproducibility</h2>
-  <p class="abs">Same 23 v3 tasks as Report 07 (real merged post-cutoff PRs: Python 9, Rust 4, TypeScript 4, JavaScript 3, Go 3). Network-isolated Docker sandboxes; deterministic hidden-test grading; one attempt per task per configuration. Every task pre-validated: gold patch = 1.0, unpatched = 0.0, deterministic over 3 runs. kimi-k3 via the Moonshot API ($3/$15 per million tokens, cache-hit input billed here at the cache-miss rate); thinking is always on and reasoning_effort accepts only &ldquo;max&rdquo; (further levels announced but unshipped), so K3 contributes one effort configuration. Harness note: three solves were initially lost to 120-second judge-call read timeouts, recovered with a 900-second provider timeout. Reproduce: vulcanbench run --suite v3 --model kimi:kimi-k3 --effort extra-high &mdash; the ablation adds --tasks-root tasks/v3 --timeout 7200 --max-steps 400 --override-budgets --max-run-cost 4 per task.</p>
+  <p class="abs">Same 23 v3 tasks as Report 07 (real merged post-cutoff PRs: Python 9, Rust 4, TypeScript 4, JavaScript 3, Go 3). Network-isolated Docker sandboxes; deterministic hidden-test grading; one attempt per task per configuration. Every task pre-validated: gold patch = 1.0, unpatched = 0.0, deterministic over 3 runs. kimi-k3 via the Moonshot API ($3/$15 per million tokens, cache-hit input billed here at the cache-miss rate), run in its single available API configuration. The extended-budget ablation runs are stamped budget_override so they cannot be mixed into standard comparisons. Reproduce: vulcanbench run --suite v3 --model kimi:kimi-k3 --effort extra-high &mdash; the ablation adds --tasks-root tasks/v3 --timeout 7200 --max-steps 400 --override-budgets --max-run-cost 4 per task.</p>
 
   <div class="foot">vulcanbench.com&ensp;|&ensp;Report 08&ensp;|&ensp;page 1</div>
 </div>

@@ -324,10 +324,10 @@ publishing results.
 
 - **Trademarks & independence.** "OpenAI" and "GPT" are trademarks of OpenAI;
   "Anthropic" and "Claude" are trademarks of Anthropic; "Z.ai" and "GLM" are
-  trademarks of Zhipu AI; "Qwen" and "DashScope" are trademarks of Alibaba Cloud.
-  VulcanBench is not affiliated with, sponsored by, or
-  endorsed by any of these companies. Model and provider names are used only to
-  identify the systems under test.
+  trademarks of Zhipu AI; "Kimi" and "Moonshot" are trademarks of Moonshot AI;
+  "Qwen" and "DashScope" are trademarks of Alibaba Cloud. VulcanBench is not
+  affiliated with, sponsored by, or endorsed by any of these companies. Model
+  and provider names are used only to identify the systems under test.
 
 This is not legal advice; consult the current provider terms for authoritative
 guidance.

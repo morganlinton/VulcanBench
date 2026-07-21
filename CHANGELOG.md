@@ -234,7 +234,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `oss-ty-m3-02/08/11/14`) that every model solved. Two easy anchors per language
   are kept; `oss-py-m2-00` and `oss-py-m3-00` were re-specified as honest anchors.
 
-## [0.7.0] - 2026-07-20
+## [0.7.0] - 2026-07-21
 
 ### Added
 

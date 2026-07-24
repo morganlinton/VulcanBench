@@ -9,9 +9,10 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity — with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.7.0** — adds a **Qwen / DashScope provider** (`qwen:qwen3.7-plus` and friends)
-so Alibaba Cloud models can be benchmarked like OpenAI / Anthropic / Z.ai / Kimi.
-Builds on v0.6's frontier-hard task tier and cost-efficient reporting
+**v0.7.1** — adds built-in **Claude Opus 5 pricing** (`anthropic:claude-opus-5`)
+so estimates, reports, and cost caps use Anthropic's $5/M input and $25/M output
+rates. Builds on v0.7's Qwen / DashScope provider and v0.6's frontier-hard task
+tier and cost-efficient reporting
 (`--max-run-cost`, `compare`, `regrade`, `--only-missing`), and on v0.5's 52
 gold-verified tasks, tool-calling agent, Docker sandbox, pre-run cost estimates,
 five-metric scoring, and HTML replay.

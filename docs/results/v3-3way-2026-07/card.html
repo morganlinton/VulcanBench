@@ -40,16 +40,16 @@ tbody tr.sep td { border-top: 1px solid #c9c2b6; }
   letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
 </style></head><body>
 <div class="page">
-  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 07</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; 207 runs &middot; 3 effort levels &middot; 5 languages</span></div>
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 07</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; + Opus 5 low smoke &middot; 5 languages</span></div>
   <div class="rule2"></div><div class="rule1"></div>
 
-  <h1>Grok 4.5 &nbsp;vs.&nbsp; Claude Fable 5<sup>&dagger;</sup> &nbsp;vs.&nbsp; GPT-5.6 Sol <span class="eff">(low, medium &amp; high effort)</span></h1>
+  <h1>Grok 4.5 &nbsp;vs.&nbsp; Claude Fable 5<sup>&dagger;</sup> &nbsp;vs.&nbsp; GPT-5.6 Sol &nbsp;vs.&nbsp; Claude Opus 5<sup>&Dagger;</sup> <span class="eff">(matrix + launch-day low)</span></h1>
   <div class="authors">Twenty-three real merged PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests</div>
 
   <div class="abstract">
   <b>Grok 4.5 leads at 91% from medium effort onward</b> &mdash; high effort buys it nothing but a 31% larger bill.
   GPT-5.6 Sol is the only model whose accuracy climbs monotonically with effort (78&rarr;83&rarr;87%);
-  Fable 5 oscillates at 85&plusmn;2% regardless of the knob. The two frontier-hard tasks went <b>0-for-27</b>.</div>
+  Fable 5 oscillates at 85&plusmn;2% regardless of the knob. <b>Opus 5 (low)<sup>&Dagger;</sup> ties Fable-low at 87%</b> for $9.17 vs $12.18 and is the first config to clear PennyLane Trotter.</div>
 
   <div class="cols">
     <div>
@@ -62,6 +62,7 @@ tbody tr.sep td { border-top: 1px solid #c9c2b6; }
           <tr class="sep"><td class="model">Claude Fable 5 (low)<sup>&dagger;</sup></td><td>20/23</td><td>$12.18</td><td>28 K</td><td>3.4 min</td><td>$0.53</td><td>$0.61</td></tr>
           <tr><td class="model">GPT-5.6 Sol (high)</td><td>20/23</td><td>$15.90</td><td>85 K</td><td>4.2 min</td><td>$0.69</td><td>$0.80</td></tr>
           <tr><td class="model">Claude Fable 5 (high)<sup>&dagger;</sup></td><td>20/23</td><td>$20.82</td><td>44 K</td><td>4.3 min</td><td>$0.91</td><td>$1.04</td></tr>
+          <tr><td class="model">Claude Opus 5 (low)<sup>&Dagger;</sup></td><td>20/23</td><td>$9.17</td><td>37 K</td><td>3.3 min</td><td>$0.40</td><td>$0.46</td></tr>
           <tr class="sep"><td class="model">Grok 4.5 (low)</td><td>19/23</td><td>$3.39</td><td>57 K</td><td>2.5 min</td><td>$0.15</td><td>$0.18</td></tr>
           <tr><td class="model">GPT-5.6 Sol (medium)</td><td>19/23</td><td>$8.83</td><td>50 K</td><td>2.8 min</td><td>$0.38</td><td>$0.46</td></tr>
           <tr><td class="model">Claude Fable 5 (medium)<sup>&dagger;</sup></td><td>19/23</td><td>$16.32</td><td>36 K</td><td>3.7 min</td><td>$0.71</td><td>$0.86</td></tr>
@@ -69,10 +70,10 @@ tbody tr.sep td { border-top: 1px solid #c9c2b6; }
         </tbody>
       </table>
       <div class="findings">
-        <p><span class="n">1.</span> <b>Grok plateaus at medium.</b> High effort spends 33% more tokens for the identical 21/23; medium is the efficiency frontier of all nine configs.</p>
-        <p><span class="n">2.</span> <b>Only Sol rewards the knob.</b> 78&rarr;83&rarr;87%, monotonic; each step buys real accuracy. Fable&rsquo;s failures rotate among borderline tasks instead of responding to effort.</p>
-        <p><span class="n">3.</span> <b>Frugal tokens, premium price.</b> Fable uses the fewest tokens at every effort (28&ndash;44 K/task) yet is the costliest per solved task ($0.61&ndash;$1.04).</p>
-        <p><span class="n">4.</span> <b>The ceiling held; one wall fell.</b> PennyLane Trotter and SQLGlot canonicalization: 0-for-27. Flask&rsquo;s teardown redesign fell to all three models &mdash; but only at high effort.</p>
+        <p><span class="n">1.</span> <b>Grok plateaus at medium.</b> High effort spends 33% more tokens for the identical 21/23; medium remains the efficiency frontier of the three-effort matrix.</p>
+        <p><span class="n">2.</span> <b>Only Sol rewards the knob.</b> 78&rarr;83&rarr;87%, monotonic. Fable&rsquo;s failures rotate among borderline tasks instead of responding to effort.</p>
+        <p><span class="n">3.</span> <b>Opus 5 (low) ties Fable-low cheaper.</b> 20/23 for $9.17 vs Fable-low $12.18; 37 K tokens/task. First config to clear PennyLane Trotter; SQLGlot canonicalization still unsolved.</p>
+        <p><span class="n">4.</span> <b>Prior ceiling:</b> PennyLane + SQLGlot canonicalize were 0-for-27 before Opus 5. Flask teardown fell to all three matrix models only at high effort.</p>
       </div>
     </div>
     <div>
@@ -89,14 +90,14 @@ tbody tr.sep td { border-top: 1px solid #c9c2b6; }
         <span><span class="sw" style="background:#9c6644"></span>Grok 4.5</span>
         <span><span class="sw" style="background:#5d7ba0"></span>Claude Fable 5</span>
         <span><span class="sw" style="background:#a3b1c2"></span>GPT-5.6 Sol</span>
-        <span class="note">Three bars per model: light &rarr; dark = low &rarr; medium &rarr; high effort</span>
+        <span class="note">Three bars per model: light &rarr; dark = low &rarr; medium &rarr; high effort. Opus 5 (low) is table-only; chart is the original three-effort matrix.</span>
       </div>
     </div>
   </div>
 
   <div class="foot">
-    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), network-isolated Docker sandboxes, deterministic hidden-test grading, one attempt per task per effort. Every task pre-validated: gold patch = 1.0, unpatched = 0.0, deterministic over 3 runs. &dagger;&nbsp;Fable 5 ran with Opus 4.8 refusal fallback: 6 of 69 runs (8.7%) were declined by the safety classifier (category &lsquo;cyber&rsquo;; the same three tasks at every effort tried) and served end-to-end by Opus 4.8; all six passed. Total benchmark spend $96.72.</div>
-    <div class="brand">vulcanbench &middot; open source &middot; July 12, 2026</div>
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), deterministic hidden-test grading. Matrix: network-isolated Docker, one attempt per task &times; low/medium/high; pre-validated gold=1.0 / unpatched=0.0. &dagger;&nbsp;Fable 5 with Opus 4.8 refusal fallback (6/69 runs). &Dagger;&nbsp;Opus 5 launch-day smoke (2026-07-24): effort=low only, local sandbox, $5/$25 per M; 14/23 first-pass 529 overloads filled via --only-missing; itertools + chi also failed pass_to_pass (env-unverified). Matrix spend $96.72; Opus 5 column $9.17.</div>
+    <div class="brand">vulcanbench &middot; open source &middot; July 24, 2026</div>
   </div>
 </div>
 </body></html>

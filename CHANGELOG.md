@@ -234,6 +234,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `oss-ty-m3-02/08/11/14`) that every model solved. Two easy anchors per language
   are kept; `oss-py-m2-00` and `oss-py-m3-00` were re-specified as honest anchors.
 
+## [0.7.1] - 2026-07-24
+
+### Added
+
+- Built-in pricing for `anthropic:claude-opus-5` at Anthropic's published standard
+  rates of $5 per million input tokens and $25 per million output tokens. Cost
+  estimates, reports, `--max-cost`, and `--max-run-cost` now support Opus 5.
+
 ## [0.7.0] - 2026-07-24
 
 ### Added

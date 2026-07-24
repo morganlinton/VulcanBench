@@ -9,14 +9,12 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity — with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.6.0** — adds a **frontier-hard task tier** (net-new-algorithm tasks from
-real merged PRs, each screened to defeat low-effort frontier models) and
-**cost-efficient reporting**: per-run cost caps (`--max-run-cost`),
-cached-baseline comparison (`compare`), free re-grading after task edits
-(`regrade`), and gap-only resume (`--only-missing`) — so a new-model report is
-one column, not a full-matrix re-run. Builds on v0.5's 52 gold-verified tasks,
-tool-calling agent (mock / OpenAI / Anthropic / Z.ai), Docker sandbox, pre-run
-cost estimates, five-metric scoring, and HTML replay.
+**v0.7.0** — adds a **Qwen / DashScope provider** (`qwen:qwen3.7-plus` and friends)
+so Alibaba Cloud models can be benchmarked like OpenAI / Anthropic / Z.ai / Kimi.
+Builds on v0.6's frontier-hard task tier and cost-efficient reporting
+(`--max-run-cost`, `compare`, `regrade`, `--only-missing`), and on v0.5's 52
+gold-verified tasks, tool-calling agent, Docker sandbox, pre-run cost estimates,
+five-metric scoring, and HTML replay.
 See [docs/QUICKSTART.md](docs/QUICKSTART.md) to get started.
 
 ## One-command setup
@@ -57,6 +55,7 @@ export OPENAI_API_KEY=...      # or ANTHROPIC_API_KEY=...
 vulcanbench run --task hello-world --model openai:gpt-4o
 vulcanbench run --task hello-world --model anthropic:claude-opus-4-8
 vulcanbench run --task hello-world --model zai:glm-5.2
+vulcanbench run --task hello-world --model qwen:qwen3.7-plus
 
 # Each run prints all five metrics + cost, e.g.:
 #   functional=1.0 quality=1.0 security=1.0 human_like=0.8 total=0.974 cost=$0.0
@@ -152,14 +151,21 @@ Specify a model as `provider:model`:
 - `zai:<model>` — Z.ai (Zhipu) OpenAI-compatible Chat Completions API. Needs
   `ZAI_API_KEY`. Reasoning effort is not supported; `--effort` is recorded as
   metadata only.
+- `kimi:<model>` — Moonshot AI (Kimi) OpenAI-compatible Chat Completions API.
+  Needs `MOONSHOT_API_KEY`. `extra-high` maps to Kimi's `reasoning_effort=max`;
+  other effort levels are recorded as metadata only.
+- `qwen:<model>` — Alibaba Cloud DashScope (Qwen) OpenAI-compatible Chat
+  Completions API. Needs `DASHSCOPE_API_KEY`. Default base URL is the
+  international endpoint; set `DASHSCOPE_BASE_URL` for China or another region.
+  Reasoning effort is not supported; `--effort` is recorded as metadata only.
 
 `--effort` accepts `low`, `medium`, `high`, or `extra-high`. OpenAI runs map it
 to the Responses API `reasoning.effort` field; Anthropic runs map it to the
 Messages API `output_config.effort` field. `extra-high` maps to `xhigh` on both
 providers and is opt-in for sweeps because support is model-dependent (e.g.
-Claude Opus 4.7+). Mock and Z.ai runs accept the field as no-op metadata. Effort
-labels are each provider's own scale — a cross-provider comparison at the same
-label compares each model at its own setting, not a calibrated equivalence.
+Claude Opus 4.7+). Mock, Z.ai, and Qwen runs accept the field as no-op metadata.
+Effort labels are each provider's own scale — a cross-provider comparison at the
+same label compares each model at its own setting, not a calibrated equivalence.
 
 ## Sandbox
 
@@ -303,7 +309,8 @@ publishing results.
 
 - **You bring your own keys, under your own agreement.** VulcanBench never
   bundles or shares API credentials. Each run uses the keys in your environment
-  (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `ZAI_API_KEY`), so every call is made
+  (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `ZAI_API_KEY`, `MOONSHOT_API_KEY`,
+  `DASHSCOPE_API_KEY`), so every call is made
   under *your* account and *your* commercial/API agreement with that provider.
   You are responsible for staying within your provider's terms and usage
   policies.
@@ -317,9 +324,10 @@ publishing results.
 
 - **Trademarks & independence.** "OpenAI" and "GPT" are trademarks of OpenAI;
   "Anthropic" and "Claude" are trademarks of Anthropic; "Z.ai" and "GLM" are
-  trademarks of Zhipu AI. VulcanBench is not affiliated with, sponsored by, or
-  endorsed by any of these companies. Model and provider names are used only to
-  identify the systems under test.
+  trademarks of Zhipu AI; "Kimi" and "Moonshot" are trademarks of Moonshot AI;
+  "Qwen" and "DashScope" are trademarks of Alibaba Cloud. VulcanBench is not
+  affiliated with, sponsored by, or endorsed by any of these companies. Model
+  and provider names are used only to identify the systems under test.
 
 This is not legal advice; consult the current provider terms for authoritative
 guidance.

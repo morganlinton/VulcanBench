@@ -1,6 +1,6 @@
 [project]
 name = "vulcanbench"
-version = "0.6.0"
+version = "0.7.0"
 description = "VulcanBench v1 - open-source LLM benchmarking harness for realistic software engineering tasks"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -103,7 +103,7 @@ exclude = [
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "PL", "RUF"]
-ignore = ["E501", "PLR0913", "PLR2004"]
+ignore = ["E501", "PLR0913", "PLR0917", "PLR2004"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["harness"]

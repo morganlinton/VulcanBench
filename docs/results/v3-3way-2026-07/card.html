@@ -3,41 +3,41 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 1600px; height: 900px; }
 body { font-family: "Times New Roman", Times, Georgia, serif; background: #f7f5f0; color: #1c1a17; }
-.page { width: 1600px; height: 900px; padding: 44px 78px 30px; position: relative; }
+.page { width: 1600px; height: 900px; padding: 36px 78px 26px; position: relative; }
 .masthead { display: flex; justify-content: space-between; align-items: baseline;
-  font-variant: small-caps; letter-spacing: 2.5px; font-size: 17px; color: #6f6a62; }
+  font-variant: small-caps; letter-spacing: 2.5px; font-size: 16px; color: #6f6a62; }
 .masthead b { color: #1c1a17; font-weight: 600; }
-.rule2 { border-top: 2.5px solid #1c1a17; margin-top: 8px; }
+.rule2 { border-top: 2.5px solid #1c1a17; margin-top: 7px; }
 .rule1 { border-top: 1px solid #1c1a17; margin-top: 2.5px; }
-h1 { text-align: center; font-size: 37px; font-weight: 600; margin-top: 20px; letter-spacing: 0.2px; }
-.eff { font-size: 25px; font-weight: 400; font-style: italic; color: #55504a; }
-.authors { text-align: center; font-style: italic; font-size: 19px; margin-top: 9px; color: #3a362f; }
-.abstract { width: 1240px; margin: 18px auto 0; font-size: 18.5px; line-height: 1.48; text-align: center; }
-.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 20px; }
-.tcap, .fcap { font-size: 15px; margin-bottom: 7px; line-height: 1.35; }
+h1 { text-align: center; font-size: 34px; font-weight: 600; margin-top: 14px; letter-spacing: 0.2px; }
+.eff { font-size: 22px; font-weight: 400; font-style: italic; color: #55504a; }
+.authors { text-align: center; font-style: italic; font-size: 17px; margin-top: 7px; color: #3a362f; }
+.abstract { width: 1240px; margin: 12px auto 0; font-size: 17px; line-height: 1.42; text-align: center; }
+.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 14px; }
+.tcap, .fcap { font-size: 14.5px; margin-bottom: 6px; line-height: 1.3; }
 .tcap b, .fcap b { font-variant: small-caps; letter-spacing: 1px; font-weight: 600; }
-table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 thead th { border-top: 2px solid #1c1a17; border-bottom: 1px solid #1c1a17;
-  padding: 6px 5px; font-weight: 600; text-align: right; font-size: 14.5px; }
+  padding: 4.5px 5px; font-weight: 600; text-align: right; font-size: 13.5px; }
 thead th:first-child { text-align: left; }
-tbody td { padding: 5.1px 5px; text-align: right; font-variant-numeric: tabular-nums; }
+tbody td { padding: 3.8px 5px; text-align: right; font-variant-numeric: tabular-nums; }
 tbody td:first-child { text-align: left; }
 tbody tr:last-child td { border-bottom: 2px solid #1c1a17; }
 tbody tr.win td { font-weight: 700; }
 tbody tr.sep td { border-top: 1px solid #c9c2b6; }
 .model { font-style: italic; }
-.legend { display: flex; flex-wrap: wrap; gap: 22px 28px; justify-content: center; font-size: 14px; margin-top: 6px; color: #3a362f; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px 28px; justify-content: center; font-size: 13.5px; margin-top: 4px; color: #3a362f; }
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
-.legend .note { width: 100%; text-align: center; font-size: 12.5px; color: #6f6a62; font-style: italic; }
+.legend .note { width: 100%; text-align: center; font-size: 12px; color: #6f6a62; font-style: italic; }
 .sw { width: 14px; height: 14px; display: inline-block; }
-.findings { margin-top: 8px; font-size: 14.5px; line-height: 1.34; }
-.findings p { margin-top: 6px; }
+.findings { margin-top: 6px; font-size: 13.5px; line-height: 1.3; }
+.findings p { margin-top: 4px; }
 .findings .n { font-weight: 700; }
-.foot { position: absolute; left: 78px; right: 78px; bottom: 24px;
-  border-top: 1px solid #1c1a17; padding-top: 8px; font-size: 13px;
-  color: #55504a; line-height: 1.38; display: flex; justify-content: space-between; gap: 40px; }
+.foot { position: absolute; left: 78px; right: 78px; bottom: 18px;
+  border-top: 1px solid #1c1a17; padding-top: 7px; font-size: 12px;
+  color: #55504a; line-height: 1.32; display: flex; justify-content: space-between; gap: 40px; }
 .foot .brand { white-space: nowrap; text-align: right; font-variant: small-caps;
-  letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
+  letter-spacing: 1.5px; color: #1c1a17; font-size: 14px; }
 </style></head><body>
 <div class="page">
   <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 07</span><span>July 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; + Opus 5 low smoke &middot; 5 languages</span></div>
@@ -73,7 +73,7 @@ tbody tr.sep td { border-top: 1px solid #c9c2b6; }
         <p><span class="n">1.</span> <b>Grok plateaus at medium.</b> High effort spends 33% more tokens for the identical 21/23; medium remains the efficiency frontier of the three-effort matrix.</p>
         <p><span class="n">2.</span> <b>Only Sol rewards the knob.</b> 78&rarr;83&rarr;87%, monotonic. Fable&rsquo;s failures rotate among borderline tasks instead of responding to effort.</p>
         <p><span class="n">3.</span> <b>Opus 5 (low) ties Fable-low cheaper.</b> 20/23 for $9.17 vs Fable-low $12.18; 37 K tokens/task. First config to clear PennyLane Trotter; SQLGlot canonicalization still unsolved.</p>
-        <p><span class="n">4.</span> <b>Prior ceiling:</b> PennyLane + SQLGlot canonicalize were 0-for-27 before Opus 5. Flask teardown fell to all three matrix models only at high effort.</p>
+        <p><span class="n">4.</span> <b>Prior ceiling:</b> PennyLane + SQLGlot canonicalize were 0-for-27 before Opus 5; Flask teardown fell only at high effort.</p>
       </div>
     </div>
     <div>
@@ -96,7 +96,7 @@ tbody tr.sep td { border-top: 1px solid #c9c2b6; }
   </div>
 
   <div class="foot">
-    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs (jiff, itertools, zod, hono, node-semver, cobra, pflag, chi, flask, aiohttp, sqlglot, packaging, more-itertools, networkx, pennylane), deterministic hidden-test grading. Matrix: network-isolated Docker, one attempt per task &times; low/medium/high; pre-validated gold=1.0 / unpatched=0.0. &dagger;&nbsp;Fable 5 with Opus 4.8 refusal fallback (6/69 runs). &Dagger;&nbsp;Opus 5 launch-day smoke (2026-07-24): effort=low only, local sandbox, $5/$25 per M; 14/23 first-pass 529 overloads filled via --only-missing; itertools + chi also failed pass_to_pass (env-unverified). Matrix spend $96.72; Opus 5 column $9.17.</div>
+    <div><b>Method.</b> VulcanBench v3: 23 post-cutoff OSS PRs, deterministic hidden-test grading. Matrix: Docker sandbox, one attempt &times; low/medium/high. &dagger;&nbsp;Fable 5 with Opus 4.8 refusal fallback (6/69). &Dagger;&nbsp;Opus 5 launch-day smoke (2026-07-24): effort=low, local sandbox, $5/$25 per M; 14/23 first-pass 529s filled via --only-missing; itertools + chi also failed pass_to_pass (env-unverified). Matrix $96.72; Opus 5 column $9.17.</div>
     <div class="brand">vulcanbench &middot; open source &middot; July 24, 2026</div>
   </div>
 </div>

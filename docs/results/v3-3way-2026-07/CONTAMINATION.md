@@ -7,7 +7,7 @@
 Claude Opus 5 training cutoff: **May 2026**.  
 Claude Fable 5 training cutoff: **January 2026** (all 23 v3 merges are later → OK for Fable by date).
 
-## Contaminated for Opus 5 (13)
+## Contaminated for Opus 5 (13) — excluded from fair card
 
 | Task | Merged |
 |---|---|
@@ -25,7 +25,7 @@ Claude Fable 5 training cutoff: **January 2026** (all 23 v3 merges are later →
 | oss-hono-request-bytes | 2026-05-16 |
 | oss-itertools-strip-prefix | 2026-05-21 |
 
-## Clean for Opus 5 (10)
+## Clean for Opus 5 (10) — fair comparison slice
 
 | Task | Merged |
 |---|---|
@@ -40,12 +40,25 @@ Claude Fable 5 training cutoff: **January 2026** (all 23 v3 merges are later →
 | oss-pflag-uintslice-hex | 2026-07-02 |
 | oss-hono-client-header-merge | 2026-07-07 |
 
-## Opus 5 scores on clean subset only
+## Fair scores on clean 10 (all models)
+
+| Model (effort) | Score | Fails |
+|---|---|---|
+| **Claude Opus 5 (low)** | **10/10** | — |
+| Grok 4.5 (medium/high) | 9/10 | pennylane |
+| Claude Fable 5 (low/high) | 9/10 | pennylane |
+| GPT-5.6 Sol (medium/high) | 9/10 | pennylane |
+| Claude Opus 5 (medium/high) | 9/10 | pennylane |
+| Grok 4.5 (low) | 8/10 | pennylane, aiohttp |
+| Claude Fable 5 (medium) | 8/10 | pennylane, iso8601 |
+| GPT-5.6 Sol (low) | 8/10 | pennylane, aiohttp |
+
+## Opus 5 cost on clean 10
 
 | Effort | Score | Cost |
 |---|---|---|
 | low | **10/10** | $3.53 |
-| medium | 9/10 (miss: pennylane) | $5.84 |
-| high | 9/10 (miss: pennylane) | $8.57 |
+| medium | 9/10 | $5.84 |
+| high | 9/10 | $8.57 |
 
 Full-suite 20/23 figures for Opus 5 must not be treated as post-training signal.

@@ -1,0 +1,35 @@
+[package]
+name = "vyre-lints"
+version = "0.6.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Lego-block enforcement lints for vyre. Forbids raw IR construction in dialect crates."
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+documentation = "https://docs.rs/vyre-lints"
+readme = "README.md"
+categories = ["development-tools", "compilers"]
+keywords = ["vyre", "lint", "ir", "compiler"]
+
+[[bin]]
+name = "vyre-lints"
+path = "src/main.rs"
+
+[lib]
+name = "vyre_lints"
+path = "src/lib.rs"
+
+[dependencies]
+syn = { workspace = true, features = ["full", "visit", "extra-traits"] }
+proc-macro2 = { workspace = true, features = ["span-locations"] }
+walkdir = { workspace = true }
+toml = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs
+vyre = { workspace = true }
+vyre-foundation = { workspace = true }
+tempfile = { workspace = true }

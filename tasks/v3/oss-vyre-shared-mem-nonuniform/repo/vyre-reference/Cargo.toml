@@ -1,0 +1,85 @@
+[package]
+name = "vyre-reference"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Pure-Rust CPU reference interpreter for vyre IR; byte-identical oracle for backend conformance"
+readme = "README.md"
+keywords = ["gpu", "ir", "reference", "interpreter", "vyre"]
+categories = ["algorithms", "api-bindings"]
+documentation = "https://docs.rs/vyre-reference"
+
+[dependencies]
+rayon = { workspace = true }
+vyre-foundation.workspace = true
+vyre-primitives = { workspace = true, features = ["hash", "matching"] }
+
+vyre-spec.workspace = true
+blake3.workspace = true
+bytemuck.workspace = true
+rustc-hash.workspace = true
+smallvec.workspace = true
+im.workspace = true
+libm.workspace = true
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs
+vyre = { workspace = true }
+proptest.workspace = true
+criterion.workspace = true
+regex-automata.workspace = true
+hex.workspace = true
+fnv.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = ["subgroup-ops"]
+subgroup-ops = []
+
+[lints]
+workspace = true
+
+[[test]]
+name = "test_fnv1a32_zero"
+path = "tests/fnv1a32_zero.rs"
+
+[[test]]
+name = "sweep_dual_arith_oracle_matrix"
+path = "tests/sweep_dual_arith_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_xor_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_xor_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_and_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_and_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_or_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_or_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_not_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_not_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_shift_left_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_shift_left_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_shift_right_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_shift_right_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_popcount_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_popcount_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_bitwise_clz_volume_oracle_matrix"
+path = "tests/sweep_dual_bitwise_clz_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_compare_eq_volume_oracle_matrix"
+path = "tests/sweep_dual_compare_eq_volume_oracle_matrix.rs"
+[[test]]
+name = "sweep_dual_compare_lt_volume_oracle_matrix"
+path = "tests/sweep_dual_compare_lt_volume_oracle_matrix.rs"

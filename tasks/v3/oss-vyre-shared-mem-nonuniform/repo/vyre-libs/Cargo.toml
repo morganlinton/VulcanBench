@@ -1,0 +1,386 @@
+[package]
+name = "vyre-libs"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "vyre Category A library ecosystem  -  pure-IR compositions over vyre-ops hardware primitives"
+readme = "README.md"
+keywords = ["gpu", "ml", "linear-algebra", "cryptography", "vyre"]
+categories = ["algorithms", "science"]
+documentation = "https://docs.rs/vyre-libs"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+# Default: ML / linear-algebra / matching / decode core. Crypto + the
+# heavy nn-attention surface ride opt-in. Keeps `cargo add vyre-libs`
+# from compiling blake3/fnv for consumers that only need matmul +
+# substring scanning. Audit item #63  -  reduced default blast radius.
+default = [
+    "math-linalg", "math-scan", "math-broadcast",
+    "nn-activation", "nn-linear", "nn-norm",
+    "matching-substring", "matching-dfa",
+    "hash",
+    "decode",
+]
+# `full` aggregates everything that used to be in default + crypto +
+# the algebra/succinct/attention extras. Consumers that previously
+# relied on the wide default flip to `full` (no behavior change).
+full = [
+    "math-linalg", "math-scan", "math-broadcast", "math-algebra", "math-succinct",
+    "nn-activation", "nn-linear", "nn-linear-4bit", "nn-norm", "nn-attention", "nn-moe", "nn-inference",
+    "matching-substring", "matching-dfa",
+    "hash",
+    "decode",
+    "crypto-fnv", "crypto-blake3",
+]
+bench = []
+cpu-parity = ["vyre-primitives/cpu-parity"]
+hash = []
+math = ["math-linalg", "math-scan", "math-broadcast", "math-algebra", "math-succinct"]
+nn = ["nn-activation", "nn-linear", "nn-norm", "nn-attention"]
+matching = ["matching-substring", "matching-dfa"]
+crypto = ["crypto-fnv", "crypto-blake3"]
+decode = []
+text = []
+logical = []
+rule = ["dep:regex"]
+
+"math-linalg" = []
+"math-scan" = []
+"math-broadcast" = []
+"math-algebra" = []
+"math-succinct" = []
+"nn-activation" = []
+"nn-linear" = ["math-linalg"]
+"nn-linear-4bit" = ["nn-linear"]
+"nn-norm" = []
+"nn-attention" = ["nn-norm", "math-linalg"]
+"nn-moe" = ["nn-attention"]
+"nn-inference" = ["nn-activation", "nn-linear", "nn-norm", "nn-attention", "nn-moe"]
+"matching-substring" = ["cpu-parity"]
+"matching-dfa" = ["cpu-parity"]
+"matching-nfa" = ["matching-dfa"]
+"matching-regex" = ["matching-nfa", "dep:regex-syntax"]
+"intern" = []
+"crypto-fnv" = ["hash"]
+"crypto-blake3" = ["hash"]
+"visual" = []
+# rust-parser excluded until lex/parse WIP is green (see ROADMAP rust frontend)
+"parsing" = ["c-parser", "go-parser", "python-parser"]
+# `parsing::c` modules import from `crate::scan::dispatch_io` for u32
+# packing helpers; the `scan` module itself is gated on the matching
+# triple, so `c-parser` MUST pull the same triple or the parsing source
+# fails to resolve `crate::scan` at consumer build time. (Reproduced
+# 2026-05-23 when vyre-frontend-c built with just `c-parser` and 17
+# unresolved-import errors landed in vyre-libs.)
+"c-parser" = ["matching-substring", "matching-dfa", "matching-nfa"]
+"rust-parser" = ["matching-substring", "matching-dfa"]
+"go-parser" = []
+"python-parser" = []
+"test-fixtures" = []
+security = []
+# Enables the `security::weir_ifds` module + its tests. OFF by default and not
+# enabled anywhere in this workspace: weir_ifds `use`s the external
+# `external_dataflow_engine` crate, which is not vendored here. Turning this on
+# without that crate present is a compile error by design — restore the
+# integration (add the crate to deps) before enabling.
+weir_ifds_external_engine = []
+"self-substrate" = []
+
+[dependencies]
+vyre.workspace = true
+vyre-foundation = { workspace = true, features = ["serde"] }
+vyre-harness.workspace = true
+vyre-spec.workspace = true
+vyre-driver.workspace = true
+vyre-self-substrate = { workspace = true }
+vyre-primitives = { workspace = true, features = ["text", "matching", "decode", "math", "nn", "hash", "parsing", "graph", "bitset", "reduce", "label", "predicate", "fixpoint", "nfa", "inventory-registry", "geom", "opt", "topology", "visual"] }
+smallvec.workspace = true
+inventory.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+regex-syntax = { workspace = true, optional = true }
+regex = { workspace = true, optional = true }
+libm.workspace = true
+rustc-hash.workspace = true
+blake3.workspace = true
+rayon.workspace = true
+bytemuck.workspace = true
+
+[dev-dependencies]
+# Parity tests import the vyre-primitives CPU reference oracles, which are gated
+# behind `cpu-parity`. Enabling it here (dev-dep only) turns it on for vyre-libs'
+# own test/bench builds without leaking the oracles into production (resolver 2).
+vyre-primitives = { workspace = true, features = ["cpu-parity"] }
+vyre-emit-naga = { workspace = true }
+vyre-intrinsics = { workspace = true }
+vyre-driver-reference = { workspace = true }
+# integration tests/benches assert against these crates' public APIs
+vyre-driver-wgpu = { workspace = true }
+vyre-lower = { workspace = true }
+vyre-emit-ptx = { workspace = true }
+vyre-driver = { workspace = true }
+vyre-reference = { workspace = true }
+proptest.workspace = true
+tempfile.workspace = true
+criterion.workspace = true
+naga.workspace = true
+# PATH-ONLY (package = vyre-grammar-gen): see vyre-driver-wgpu — vyre-grammar-gen is
+# not in the 0.6.3 train (crates.io has only 0.6.2), so a `^0.6.3` workspace req is
+# unsatisfiable at publish. cargo strips path-only dev-deps; local builds use the path.
+c-grammar-gen = { package = "vyre-grammar-gen", path = "../vyre-grammar-gen" }
+tree-sitter = { workspace = true }
+tree-sitter-go = { workspace = true }
+
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true
+
+[[test]]
+name = "sweep_text_utf8_oracle_matrix"
+path = "tests/sweep_text_utf8_oracle_matrix.rs"
+required-features = ["text"]
+
+[[test]]
+name = "sweep_decode_hex_oracle_matrix"
+path = "tests/sweep_decode_hex_oracle_matrix.rs"
+required-features = ["decode"]
+
+[[test]]
+name = "sweep_logical_reference_matrix"
+path = "tests/sweep_logical_reference_matrix.rs"
+required-features = ["logical"]
+
+[[test]]
+name = "sweep_hash_crc32_reference_matrix"
+path = "tests/sweep_hash_crc32_reference_matrix.rs"
+required-features = ["hash"]
+
+# Rust frontend oracle tests import `vyre_libs::parsing::rust`, which is gated
+# behind `rust-parser`. Register them with `required-features` (matching the
+# sweep tests above) so a package-scoped `cargo test -p vyre-libs` cleanly skips
+# them instead of failing to compile, and so they build+run whenever the feature
+# is enabled. Without this entry the auto-discovered tests broke the per-crate
+# gate and only ran via workspace feature unification.
+[[test]]
+name = "rust_lower_exec_oracle"
+path = "tests/rust_lower_exec_oracle.rs"
+required-features = ["rust-parser"]
+
+[[test]]
+name = "rust_sema_borrow_oracle"
+path = "tests/rust_sema_borrow_oracle.rs"
+required-features = ["rust-parser"]
+
+[[test]]
+name = "rust_gpu_lexer_plan"
+path = "tests/rust_gpu_lexer_plan.rs"
+required-features = ["rust-parser"]
+
+# C-frontend oracle tests import `vyre_libs::parsing::c`, gated behind
+# `c-parser`. Same remedy as the rust oracles above: register each with
+# `required-features` so a package-scoped `cargo test -p vyre-libs` cleanly
+# SKIPS them instead of compiling the `#![cfg]`-emptied file to a vacuous
+# `0 tests ... ok` (which silently hid whether the C frontend was covered).
+# They build+run under `cargo test -p vyre-libs --features c-parser` (or `parsing`).
+[[test]]
+name = "gpu_pipeline_lex_classify_roundtrip"
+path = "tests/gpu_pipeline_lex_classify_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_undef_parse_roundtrip"
+path = "tests/gpu_undef_parse_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_ast_linux_style_raw_source_contracts"
+path = "tests/c_ast_linux_style_raw_source_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_ast_c99_for_do_macro_e2e"
+path = "tests/c_ast_c99_for_do_macro_e2e.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_parser_pipeline_lexer_adversarial_contracts"
+path = "tests/c_parser_pipeline_lexer_adversarial_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_include_parse_roundtrip"
+path = "tests/gpu_include_parse_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_ast_gnu_builtin_vast_contracts"
+path = "tests/c_ast_gnu_builtin_vast_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_ast_container_of_e2e"
+path = "tests/c_ast_container_of_e2e.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_ifdef_value_roundtrip"
+path = "tests/gpu_ifdef_value_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_vast_classify_wire_depth_contract"
+path = "tests/c_vast_classify_wire_depth_contract.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_preprocess_pipeline_contracts"
+path = "tests/c_preprocess_pipeline_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "ir_aliasing"
+path = "tests/ir_aliasing.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c11_keyword"
+path = "tests/c11_keyword.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_int_literal_scan_roundtrip"
+path = "tests/gpu_int_literal_scan_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_pipeline_extract_payloads_roundtrip"
+path = "tests/gpu_pipeline_extract_payloads_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_preprocess_gpu_resident_state_contracts"
+path = "tests/c_preprocess_gpu_resident_state_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_reference_decode_contracts"
+path = "tests/c_reference_decode_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_preprocess_named_macro_expansion_contracts"
+path = "tests/c_preprocess_named_macro_expansion_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_preprocess_dynamic_macro_optimizer_idempotence_contract"
+path = "tests/c_preprocess_dynamic_macro_optimizer_idempotence_contract.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_ast_gnu_asm_decomposition_and_attribute_kinds"
+path = "tests/c_ast_gnu_asm_decomposition_and_attribute_kinds.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_char_constant_scan_roundtrip"
+path = "tests/gpu_char_constant_scan_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_preprocess_directive_count_contract"
+path = "tests/c_preprocess_directive_count_contract.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "ast_shunting_yard"
+path = "tests/ast_shunting_yard.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_if_expression_roundtrip"
+path = "tests/gpu_if_expression_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_preprocess_dynamic_macro_expansion_contracts"
+path = "tests/c_preprocess_dynamic_macro_expansion_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_parser_pipeline_malformed_stream_contracts"
+path = "tests/c_parser_pipeline_malformed_stream_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_sema_scope_optimizer_idempotence_contract"
+path = "tests/c_sema_scope_optimizer_idempotence_contract.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_ast_linux_grade_gnu_and_c11_construct_coverage"
+path = "tests/c_ast_linux_grade_gnu_and_c11_construct_coverage.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_packed_haystack_semantic_parity"
+path = "tests/c_packed_haystack_semantic_parity.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_comment_strip_mask_roundtrip"
+path = "tests/gpu_comment_strip_mask_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "vast_builder_oob_guard_regression"
+path = "tests/vast_builder_oob_guard_regression.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c_lexer_preprocessor_hash_contracts"
+path = "tests/c_lexer_preprocessor_hash_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c11_lexer_naga_validation"
+path = "tests/c11_lexer_naga_validation.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_pipeline_driver_roundtrip"
+path = "tests/gpu_pipeline_driver_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_directive_metadata_roundtrip"
+path = "tests/gpu_directive_metadata_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_pipeline_filter_roundtrip"
+path = "tests/gpu_pipeline_filter_roundtrip.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "c11_function_extractor_contracts"
+path = "tests/c11_function_extractor_contracts.rs"
+required-features = ["c-parser"]
+
+[[test]]
+name = "gpu_define_parse_roundtrip"
+path = "tests/gpu_define_parse_roundtrip.rs"
+required-features = ["c-parser"]

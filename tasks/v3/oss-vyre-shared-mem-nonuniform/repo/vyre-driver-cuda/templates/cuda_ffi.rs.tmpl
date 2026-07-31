@@ -1,0 +1,660 @@
+//! Hand-rolled CUDA driver-API FFI.
+//!
+//! Loads `libcuda.so` via dlopen so the launcher binary doesn't force-link
+//! the CUDA toolchain at compile time. The set of bound symbols is the
+//! minimum needed to load PTX, allocate device buffers, copy weights, and
+//! launch a persistent kernel.
+
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+#![allow(dead_code)]
+
+use std::ffi::{c_char, c_int, c_uint, c_void, CStr, CString};
+use std::ptr;
+use std::sync::OnceLock;
+
+pub type CUresult = c_int;
+pub type CUcontext = *mut c_void;
+pub type CUdevice = c_int;
+pub type CUmodule = *mut c_void;
+pub type CUfunction = *mut c_void;
+pub type CUstream = *mut c_void;
+pub type CUdeviceptr = u64;
+
+const CUDA_SUCCESS: CUresult = 0;
+
+struct Cuda {
+    h_libcuda: *mut c_void,
+    cuInit: unsafe extern "C" fn(c_uint) -> CUresult,
+    cuDeviceGet: unsafe extern "C" fn(*mut CUdevice, c_int) -> CUresult,
+    cuDeviceGetCount: unsafe extern "C" fn(*mut c_int) -> CUresult,
+    cuDeviceGetAttribute: unsafe extern "C" fn(*mut c_int, c_int, CUdevice) -> CUresult,
+    cuCtxCreate_v2: unsafe extern "C" fn(*mut CUcontext, c_uint, CUdevice) -> CUresult,
+    cuCtxDestroy_v2: unsafe extern "C" fn(CUcontext) -> CUresult,
+    cuModuleLoadData: unsafe extern "C" fn(*mut CUmodule, *const c_void) -> CUresult,
+    cuModuleUnload: unsafe extern "C" fn(CUmodule) -> CUresult,
+    cuModuleGetFunction:
+        unsafe extern "C" fn(*mut CUfunction, CUmodule, *const c_char) -> CUresult,
+    cuMemAlloc_v2: unsafe extern "C" fn(*mut CUdeviceptr, usize) -> CUresult,
+    cuMemFree_v2: unsafe extern "C" fn(CUdeviceptr) -> CUresult,
+    cuMemcpyHtoD_v2: unsafe extern "C" fn(CUdeviceptr, *const c_void, usize) -> CUresult,
+    cuMemcpyDtoH_v2: unsafe extern "C" fn(*mut c_void, CUdeviceptr, usize) -> CUresult,
+    cuLaunchKernel: unsafe extern "C" fn(
+        CUfunction,
+        c_uint,
+        c_uint,
+        c_uint,
+        c_uint,
+        c_uint,
+        c_uint,
+        c_uint,
+        CUstream,
+        *mut *mut c_void,
+        *mut *mut c_void,
+    ) -> CUresult,
+    cuCtxSynchronize: unsafe extern "C" fn() -> CUresult,
+    cuStreamCreate: unsafe extern "C" fn(*mut CUstream, c_uint) -> CUresult,
+    cuStreamSynchronize: unsafe extern "C" fn(CUstream) -> CUresult,
+}
+
+unsafe impl Send for Cuda {}
+unsafe impl Sync for Cuda {}
+
+static CUDA: OnceLock<Cuda> = OnceLock::new();
+
+unsafe fn dlopen(name: &CStr) -> *mut c_void {
+    libc::dlopen(name.as_ptr(), libc::RTLD_NOW | libc::RTLD_GLOBAL)
+}
+
+unsafe fn dlsym(handle: *mut c_void, sym: &CStr) -> Result<*mut c_void, String> {
+    let p = libc::dlsym(handle, sym.as_ptr());
+    if p.is_null() {
+        let err = libc::dlerror();
+        let msg = if err.is_null() {
+            "(no dlerror)".to_string()
+        } else {
+            CStr::from_ptr(err).to_string_lossy().into_owned()
+        };
+        Err(format!(
+            "cuda_ffi: failed to resolve symbol {}: {msg}",
+            sym.to_string_lossy()
+        ))
+    } else {
+        Ok(p)
+    }
+}
+
+fn cuda() -> Result<&'static Cuda, String> {
+    if let Some(c) = CUDA.get() {
+        return Ok(c);
+    }
+    let c = unsafe {
+        let names: [&CStr; 2] = [
+            c"libcuda.so.1",
+            c"libcuda.so",
+        ];
+        let mut h: *mut c_void = ptr::null_mut();
+        for n in names {
+            h = dlopen(n);
+            if !h.is_null() {
+                break;
+            }
+        }
+        if h.is_null() {
+            return Err("cuda_ffi: libcuda.so not found. Fix: install NVIDIA driver runtime.".to_string());
+        }
+
+        macro_rules! sym {
+            ($name:literal) => {{
+                let s = CString::new($name).map_err(|error| {
+                    format!(
+                        "cuda_ffi: symbol name {:?} contains an interior NUL byte: {error}. Fix: repair the generated CUDA FFI symbol table.",
+                        $name
+                    )
+                })?;
+                std::mem::transmute(dlsym(h, &s)?)
+            }};
+        }
+
+        Cuda {
+            h_libcuda: h,
+            cuInit: sym!("cuInit"),
+            cuDeviceGet: sym!("cuDeviceGet"),
+            cuDeviceGetCount: sym!("cuDeviceGetCount"),
+            cuDeviceGetAttribute: sym!("cuDeviceGetAttribute"),
+            cuCtxCreate_v2: sym!("cuCtxCreate_v2"),
+            cuCtxDestroy_v2: sym!("cuCtxDestroy_v2"),
+            cuModuleLoadData: sym!("cuModuleLoadData"),
+            cuModuleUnload: sym!("cuModuleUnload"),
+            cuModuleGetFunction: sym!("cuModuleGetFunction"),
+            cuMemAlloc_v2: sym!("cuMemAlloc_v2"),
+            cuMemFree_v2: sym!("cuMemFree_v2"),
+            cuMemcpyHtoD_v2: sym!("cuMemcpyHtoD_v2"),
+            cuMemcpyDtoH_v2: sym!("cuMemcpyDtoH_v2"),
+            cuLaunchKernel: sym!("cuLaunchKernel"),
+            cuCtxSynchronize: sym!("cuCtxSynchronize"),
+            cuStreamCreate: sym!("cuStreamCreate"),
+            cuStreamSynchronize: sym!("cuStreamSynchronize"),
+        }
+    };
+    if CUDA.set(c).is_err() {
+        return CUDA
+            .get()
+            .ok_or_else(|| "CUDA driver table was initialized concurrently but is unavailable".to_string());
+    }
+    CUDA.get()
+        .ok_or_else(|| "CUDA driver table initialized but unavailable".to_string())
+}
+
+fn check(rc: CUresult, op: &str) -> Result<(), String> {
+    if rc == CUDA_SUCCESS {
+        Ok(())
+    } else {
+        Err(format!("cuda_ffi: {op} returned CUresult {rc}"))
+    }
+}
+
+fn reserve_vec_to_capacity<T>(
+    vec: &mut Vec<T>,
+    target_capacity: usize,
+    context: &str,
+    item: &str,
+) -> Result<(), String> {
+    if target_capacity <= vec.capacity() {
+        return Ok(());
+    }
+    vec.try_reserve_exact(target_capacity - vec.len()).map_err(|error| {
+        format!(
+            "{context} could not reserve {target_capacity} {item}(s): {error}. Fix: split the AOT kernel artifact before launch."
+        )
+    })
+}
+
+pub fn cu_init() -> Result<(), String> {
+    let c = cuda()?;
+    unsafe { check((c.cuInit)(0), "cuInit") }
+}
+
+pub fn cu_device_get(ordinal: c_int) -> Result<CUdevice, String> {
+    let c = cuda()?;
+    let mut dev: CUdevice = 0;
+    unsafe {
+        check((c.cuDeviceGet)(&mut dev, ordinal), "cuDeviceGet")?;
+    }
+    Ok(dev)
+}
+
+pub fn cu_device_count() -> Result<i32, String> {
+    let c = cuda()?;
+    let mut n: c_int = 0;
+    unsafe {
+        check((c.cuDeviceGetCount)(&mut n), "cuDeviceGetCount")?;
+    }
+    Ok(n)
+}
+
+const CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK: c_int = 1;
+const CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X: c_int = 2;
+const CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y: c_int = 3;
+const CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z: c_int = 4;
+const CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X: c_int = 5;
+const CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y: c_int = 6;
+const CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z: c_int = 7;
+const CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK: c_int = 8;
+
+#[derive(Clone, Copy, Debug)]
+pub struct DeviceLaunchLimits {
+    pub max_threads_per_block: u32,
+    pub max_block_dim: [u32; 3],
+    pub max_grid_dim: [u32; 3],
+    pub max_shared_memory_per_block: u32,
+}
+
+fn cu_device_attribute(device: CUdevice, attr: c_int, label: &str) -> Result<u32, String> {
+    let c = cuda()?;
+    let mut value: c_int = 0;
+    unsafe {
+        check(
+            (c.cuDeviceGetAttribute)(&mut value, attr, device),
+            "cuDeviceGetAttribute",
+        )?;
+    }
+    u32::try_from(value).map_err(|error| {
+        format!("CUDA device attribute {label} returned negative value {value}: {error}. Fix: repair the CUDA driver/device probe before AOT launch.")
+    })
+}
+
+pub fn cu_device_launch_limits(device: CUdevice) -> Result<DeviceLaunchLimits, String> {
+    Ok(DeviceLaunchLimits {
+        max_threads_per_block: cu_device_attribute(
+            device,
+            CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK,
+            "MAX_THREADS_PER_BLOCK",
+        )?,
+        max_block_dim: [
+            cu_device_attribute(device, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X, "MAX_BLOCK_DIM_X")?,
+            cu_device_attribute(device, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y, "MAX_BLOCK_DIM_Y")?,
+            cu_device_attribute(device, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z, "MAX_BLOCK_DIM_Z")?,
+        ],
+        max_grid_dim: [
+            cu_device_attribute(device, CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X, "MAX_GRID_DIM_X")?,
+            cu_device_attribute(device, CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y, "MAX_GRID_DIM_Y")?,
+            cu_device_attribute(device, CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z, "MAX_GRID_DIM_Z")?,
+        ],
+        max_shared_memory_per_block: cu_device_attribute(
+            device,
+            CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK,
+            "MAX_SHARED_MEMORY_PER_BLOCK",
+        )?,
+    })
+}
+
+pub struct CtxGuard {
+    raw: CUcontext,
+}
+
+impl Drop for CtxGuard {
+    fn drop(&mut self) {
+        if self.raw.is_null() {
+            return;
+        }
+        if let Ok(c) = cuda() {
+            unsafe {
+                let rc = (c.cuCtxDestroy_v2)(self.raw);
+                if rc != CUDA_SUCCESS {
+                    eprintln!("CUDA context destroy failed with code {rc}");
+                }
+            }
+        }
+    }
+}
+
+pub fn cu_ctx_create(device: CUdevice) -> Result<CtxGuard, String> {
+    let c = cuda()?;
+    let mut ctx: CUcontext = ptr::null_mut();
+    unsafe {
+        check(
+            (c.cuCtxCreate_v2)(&mut ctx, 0, device),
+            "cuCtxCreate_v2",
+        )?;
+    }
+    if ctx.is_null() {
+        return Err(
+            "cuCtxCreate_v2 returned a null context after success. Fix: update the CUDA driver or fail this AOT launch before loading modules."
+                .to_string(),
+        );
+    }
+    Ok(CtxGuard { raw: ctx })
+}
+
+pub struct ModuleGuard {
+    raw: CUmodule,
+}
+
+impl ModuleGuard {
+    pub fn raw(&self) -> CUmodule {
+        self.raw
+    }
+}
+
+impl Drop for ModuleGuard {
+    fn drop(&mut self) {
+        if self.raw.is_null() {
+            return;
+        }
+        if let Ok(c) = cuda() {
+            unsafe {
+                let rc = (c.cuModuleUnload)(self.raw);
+                if rc != CUDA_SUCCESS {
+                    eprintln!("CUDA module unload failed with code {rc}");
+                }
+            }
+        }
+    }
+}
+
+pub fn cu_module_load_data(bytes: &[u8]) -> Result<ModuleGuard, String> {
+    let c = cuda()?;
+    // PTX must be NUL-terminated for cuModuleLoadData.
+    let mut staged = Vec::new();
+    let module_image_ptr = if bytes.ends_with(&[0]) {
+        bytes.as_ptr()
+    } else {
+        let staged_len = bytes.len().checked_add(1).ok_or_else(|| {
+            "cuModuleLoadData PTX image length overflowed while appending NUL terminator. Fix: split the AOT kernel artifact before launch."
+                .to_string()
+        })?;
+        reserve_vec_to_capacity(
+            &mut staged,
+            staged_len,
+            "cuModuleLoadData NUL-terminated PTX staging",
+            "byte",
+        )?;
+        staged.extend_from_slice(bytes);
+        staged.push(0);
+        staged.as_ptr()
+    };
+    let mut m: CUmodule = ptr::null_mut();
+    unsafe {
+        check(
+            (c.cuModuleLoadData)(&mut m, module_image_ptr as *const c_void),
+            "cuModuleLoadData",
+        )?;
+    }
+    if m.is_null() {
+        return Err(
+            "cuModuleLoadData returned a null module after success. Fix: update the CUDA driver or reject this AOT bundle before function lookup."
+                .to_string(),
+        );
+    }
+    Ok(ModuleGuard { raw: m })
+}
+
+pub fn cu_module_get_function(module: &ModuleGuard, name: &str) -> Result<CUfunction, String> {
+    let c = cuda()?;
+    let cname = CString::new(name).map_err(|e| format!("name has nul: {e}"))?;
+    let mut f: CUfunction = ptr::null_mut();
+    unsafe {
+        check(
+            (c.cuModuleGetFunction)(&mut f, module.raw(), cname.as_ptr()),
+            "cuModuleGetFunction",
+        )?;
+    }
+    if f.is_null() {
+        return Err(
+            "cuModuleGetFunction returned a null function after success. Fix: ensure the AOT manifest entry_point names a visible CUDA kernel."
+                .to_string(),
+        );
+    }
+    Ok(f)
+}
+
+pub struct DeviceAllocation {
+    raw: CUdeviceptr,
+    bytes: u64,
+}
+
+impl DeviceAllocation {
+    pub fn ptr(&self) -> CUdeviceptr {
+        self.raw
+    }
+
+    pub fn byte_len(&self) -> u64 {
+        self.bytes
+    }
+}
+
+impl Drop for DeviceAllocation {
+    fn drop(&mut self) {
+        if self.raw == 0 {
+            return;
+        }
+        if let Ok(c) = cuda() {
+            unsafe {
+                let rc = (c.cuMemFree_v2)(self.raw);
+                if rc != CUDA_SUCCESS {
+                    eprintln!("CUDA device allocation free failed with code {rc}");
+                }
+            }
+        }
+    }
+}
+
+pub fn cu_mem_alloc(bytes: u64) -> Result<DeviceAllocation, String> {
+    let c = cuda()?;
+    let requested_bytes = bytes;
+    let bytes = usize::try_from(requested_bytes).map_err(|error| {
+        format!("cuMemAlloc_v2 byte count cannot fit usize: {error}. Fix: split the AOT buffer before allocation.")
+    })?;
+    if bytes == 0 {
+        return Err(
+            "cuMemAlloc_v2 received a zero-byte allocation request. Fix: assign a positive streaming-buffer size before allocation."
+                .to_string(),
+        );
+    }
+    let mut dptr: CUdeviceptr = 0;
+    unsafe {
+        check(
+            (c.cuMemAlloc_v2)(&mut dptr, bytes),
+            "cuMemAlloc_v2",
+        )?;
+    }
+    if dptr == 0 {
+        return Err(
+            "cuMemAlloc_v2 returned a null device pointer after success. Fix: update the CUDA driver or fail this AOT launch before passing null kernel arguments."
+                .to_string(),
+        );
+    }
+    Ok(DeviceAllocation {
+        raw: dptr,
+        bytes: requested_bytes,
+    })
+}
+
+pub fn cu_mem_free(dptr: CUdeviceptr) -> Result<(), String> {
+    let c = cuda()?;
+    unsafe { check((c.cuMemFree_v2)(dptr), "cuMemFree_v2") }
+}
+
+pub fn cu_memcpy_h_to_d(dst: CUdeviceptr, src: &[u8]) -> Result<(), String> {
+    if src.is_empty() {
+        return Ok(());
+    }
+    if dst == 0 {
+        return Err(
+            "cuMemcpyHtoD_v2 received a null destination device pointer. Fix: repair AOT device allocation before upload."
+                .to_string(),
+        );
+    }
+    let c = cuda()?;
+    unsafe {
+        check(
+            (c.cuMemcpyHtoD_v2)(dst, src.as_ptr() as *const c_void, src.len()),
+            "cuMemcpyHtoD_v2",
+        )
+    }
+}
+
+pub fn cu_memcpy_d_to_h(dst: &mut [u32], src: CUdeviceptr) -> Result<(), String> {
+    if dst.is_empty() {
+        return Ok(());
+    }
+    if src == 0 {
+        return Err(
+            "cuMemcpyDtoH_v2 received a null source device pointer. Fix: repair AOT device allocation before readback."
+                .to_string(),
+        );
+    }
+    let c = cuda()?;
+    let bytes = std::mem::size_of_val(dst);
+    unsafe {
+        check(
+            (c.cuMemcpyDtoH_v2)(dst.as_mut_ptr() as *mut c_void, src, bytes),
+            "cuMemcpyDtoH_v2",
+        )
+    }
+}
+
+pub fn cu_memcpy_d_to_h_offset(
+    dst: &mut [u32],
+    src: CUdeviceptr,
+    offset_bytes: u64,
+) -> Result<(), String> {
+    if dst.is_empty() {
+        return Ok(());
+    }
+    if src == 0 {
+        return Err(
+            "cuMemcpyDtoH_v2 offset readback received a null source device pointer. Fix: repair AOT metrics allocation before readback."
+                .to_string(),
+        );
+    }
+    let c = cuda()?;
+    let bytes = std::mem::size_of_val(dst);
+    let bytes_u64 = u64::try_from(bytes).map_err(|error| {
+        format!("cuMemcpyDtoH_v2 offset readback byte length cannot fit u64: {error}. Fix: split the metrics readback before launch.")
+    })?;
+    let src = src.checked_add(offset_bytes).ok_or_else(|| {
+        format!("cuMemcpyDtoH_v2 offset readback overflowed device pointer: base={src}, offset={offset_bytes}. Fix: correct the AOT manifest metrics buffer size.")
+    })?;
+    src.checked_add(bytes_u64).ok_or_else(|| {
+        format!("cuMemcpyDtoH_v2 offset readback range overflowed device pointer: start={src}, bytes={bytes_u64}. Fix: correct the AOT manifest metrics buffer size.")
+    })?;
+    unsafe {
+        check(
+            (c.cuMemcpyDtoH_v2)(dst.as_mut_ptr() as *mut c_void, src, bytes),
+            "cuMemcpyDtoH_v2 (offset)",
+        )
+    }
+}
+
+pub struct KernelArgs {
+    storage: Vec<u64>,
+    ptrs: Vec<*mut c_void>,
+}
+
+impl KernelArgs {
+    pub fn with_capacity(capacity: usize) -> Result<Self, String> {
+        let mut storage = Vec::new();
+        storage.try_reserve_exact(capacity).map_err(|error| {
+            format!(
+                "AOT CUDA kernel-argument value table could not reserve {capacity} slot(s): {error}. Fix: split the AOT kernel artifact before launch."
+            )
+        })?;
+        let mut ptrs = Vec::new();
+        ptrs.try_reserve_exact(capacity).map_err(|error| {
+            format!(
+                "AOT CUDA kernel-argument pointer table could not reserve {capacity} slot(s): {error}. Fix: split the AOT kernel artifact before launch."
+            )
+        })?;
+        Ok(Self { storage, ptrs })
+    }
+
+    fn reset(&mut self, device_ptrs: &[DeviceAllocation]) -> Result<(), String> {
+        self.storage.clear();
+        self.ptrs.clear();
+        for (index, allocation) in device_ptrs.iter().enumerate() {
+            if allocation.ptr() == 0 {
+                return Err(format!(
+                    "AOT CUDA kernel argument {index} is a null device pointer. Fix: repair manifest allocation before launch."
+                ));
+            }
+        }
+        reserve_vec_to_capacity(
+            &mut self.storage,
+            device_ptrs.len(),
+            "AOT CUDA kernel-argument value table",
+            "launch slot",
+        )?;
+        reserve_vec_to_capacity(
+            &mut self.ptrs,
+            device_ptrs.len(),
+            "AOT CUDA kernel-argument pointer table",
+            "launch slot",
+        )?;
+        for allocation in device_ptrs {
+            self.storage.push(allocation.ptr());
+        }
+        self.ptrs.extend(
+            self.storage
+                .iter_mut()
+                .map(|p| p as *mut u64 as *mut c_void),
+        );
+        Ok(())
+    }
+}
+
+pub fn cu_launch_kernel(
+    f: CUfunction,
+    grid: [u32; 3],
+    block: [u32; 3],
+    shared_bytes: u32,
+    device_ptrs: &[DeviceAllocation],
+    limits: &DeviceLaunchLimits,
+) -> Result<(), String> {
+    let mut args = KernelArgs::with_capacity(device_ptrs.len())?;
+    cu_launch_kernel_prepared(f, grid, block, shared_bytes, device_ptrs, &mut args, limits)
+}
+
+pub fn cu_launch_kernel_prepared(
+    f: CUfunction,
+    grid: [u32; 3],
+    block: [u32; 3],
+    shared_bytes: u32,
+    device_ptrs: &[DeviceAllocation],
+    args: &mut KernelArgs,
+    limits: &DeviceLaunchLimits,
+) -> Result<(), String> {
+    let c = cuda()?;
+    let resolved_grid = validate_launch_limits(grid, block, shared_bytes, limits)?;
+
+    args.reset(device_ptrs)?;
+
+    unsafe {
+        check(
+            (c.cuLaunchKernel)(
+                f,
+                resolved_grid[0],
+                resolved_grid[1],
+                resolved_grid[2],
+                block[0],
+                block[1],
+                block[2],
+                shared_bytes,
+                ptr::null_mut(),
+                args.ptrs.as_mut_ptr(),
+                ptr::null_mut(),
+            ),
+            "cuLaunchKernel",
+        )
+    }
+}
+
+fn validate_launch_limits(
+    grid: [u32; 3],
+    block: [u32; 3],
+    shared_bytes: u32,
+    limits: &DeviceLaunchLimits,
+) -> Result<[u32; 3], String> {
+    for axis in 0..3 {
+        if block[axis] == 0 || block[axis] > limits.max_block_dim[axis] {
+            return Err(format!(
+                "AOT CUDA launch block dimension axis {axis}={} exceeds device limit {} or is zero. Fix: regenerate the manifest for this GPU or lower the workgroup size.",
+                block[axis],
+                limits.max_block_dim[axis]
+            ));
+        }
+        if grid[axis] == 0 || grid[axis] > limits.max_grid_dim[axis] {
+            return Err(format!(
+                "AOT CUDA launch grid dimension axis {axis}={} exceeds device limit {}. Fix: shard the dispatch or regenerate the manifest for this GPU.",
+                grid[axis],
+                limits.max_grid_dim[axis]
+            ));
+        }
+    }
+    let threads_per_block = u64::from(block[0])
+        .checked_mul(u64::from(block[1]))
+        .and_then(|xy| xy.checked_mul(u64::from(block[2])))
+        .ok_or_else(|| {
+            format!("AOT CUDA launch block dimensions overflow u64: {block:?}. Fix: lower the manifest workgroup size.")
+        })?;
+    if threads_per_block > u64::from(limits.max_threads_per_block) {
+        return Err(format!(
+            "AOT CUDA launch requests {threads_per_block} threads/block but device limit is {}. Fix: regenerate the manifest for this GPU or lower the workgroup size.",
+            limits.max_threads_per_block
+        ));
+    }
+    if shared_bytes > limits.max_shared_memory_per_block {
+        return Err(format!(
+            "AOT CUDA launch requests {shared_bytes} dynamic shared-memory bytes but device limit is {}. Fix: regenerate the manifest for this GPU or lower shared-memory use.",
+            limits.max_shared_memory_per_block
+        ));
+    }
+    Ok(grid)
+}
+
+pub fn cu_stream_synchronize() -> Result<(), String> {
+    let c = cuda()?;
+    // Use cuCtxSynchronize as a coarse default-stream barrier.
+    unsafe { check((c.cuCtxSynchronize)(), "cuCtxSynchronize") }
+}

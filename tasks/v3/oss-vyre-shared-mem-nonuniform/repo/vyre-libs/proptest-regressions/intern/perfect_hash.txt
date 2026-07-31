@@ -1,0 +1,9 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 5575c8eaa33034c79aab21b688d6c1806eca023676eb2cafdf232c263a2aefcb # shrinks to entries = [("z", 0), ("z", 0)], queries = ["a"]
+cc ab9fc881a76608916fc8aab251cb9d32734842db683261464f0907da98d577b2 # shrinks to entries = [("_", 0), ("a", 0), ("0", 0), ("A", 0), ("A", 0), ("a", 0), ("0", 0), ("A", 0), ("_", 0), ("a", 0), ("a", 0)]
+cc 5203ff7a701f52995d6e3ae50fe1f59a589db1b6b168410805ed657fe3112f85 # shrinks to entries = [("a", 0), ("b", 0), ("0", 0), ("1", 0), ("_", 0), ("c", 0), ("2", 0), ("d", 0), ("A", 0), ("e", 0), ("f", 0)]

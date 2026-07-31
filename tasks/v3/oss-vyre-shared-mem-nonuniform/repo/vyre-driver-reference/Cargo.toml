@@ -1,0 +1,27 @@
+[package]
+name = "vyre-driver-reference"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/vyre-driver-reference"
+description = "cpu-ref VyreBackend adapter over the pure Rust vyre-reference interpreter."
+readme = "README.md"
+keywords = ["cpu", "reference", "backend", "vyre"]
+categories = ["algorithms", "api-bindings"]
+
+[dependencies]
+vyre-driver.workspace = true
+vyre-foundation.workspace = true
+vyre-reference.workspace = true
+inventory.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true

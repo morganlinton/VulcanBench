@@ -1,0 +1,5 @@
+error: duplicate vyre_pass requires_caps entry `cuda`. Fix: list each dependency, invalidation, or capability once.
+ --> tests/ui/bad_pass_duplicate_requires_caps.rs:7:30
+  |
+7 |     requires_caps = ["cuda", "cuda"]
+  |                              ^^^^^^

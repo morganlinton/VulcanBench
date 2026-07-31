@@ -1,0 +1,40 @@
+[package]
+name = "vyre-self-substrate"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Vyre self-substrate: vyre using its own primitives on its own scheduler problems. The recursion-thesis layer between vyre-primitives and vyre-driver."
+readme = "README.md"
+keywords = ["gpu", "compiler", "scheduler", "vyre"]
+categories = ["compilers", "algorithms"]
+documentation = "https://docs.rs/vyre-self-substrate"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+cpu-parity = ["vyre-primitives/cpu-parity"]
+
+[dependencies]
+vyre-foundation.workspace = true
+vyre-primitives = { workspace = true, features = ["math", "graph", "fixpoint", "matching", "bitset", "reduce", "nn", "topology", "opt", "hash", "parsing", "predicate", "label", "effects", "types", "cat", "zx", "dnnf", "inventory-registry"] }
+tracing.workspace = true
+rustc-hash.workspace = true
+
+[dev-dependencies]
+# Parity tests import the vyre-primitives CPU reference oracles (quantized *_cpu),
+# gated behind `cpu-parity`. Enable it for this crate's own test/bench builds only
+# (resolver 2 keeps it out of production builds of dependents).
+vyre-primitives = { workspace = true, features = ["cpu-parity"] }
+vyre-reference = { workspace = true }
+
+[[test]]
+name = "sweep_graph_cpu_oracle_matrix"
+path = "tests/sweep_graph_cpu_oracle_matrix.rs"
+required-features = ["cpu-parity"]

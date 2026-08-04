@@ -32,8 +32,8 @@ Output: `vulcanbench_suite3_rankings.png` (2560×3360) next to the scripts.
   weights register in matplotlib as separate families ("Chakra Petch",
   "… Medium", "… SemiBold").
 - **Lab logos** (`logos/`): white silhouettes derived from each company's mark
-  (simple-icons for Anthropic/DeepSeek/Moonshot; Wikimedia Commons for OpenAI
-  and xAI). Used nominatively to identify the systems under test — see the
+  (simple-icons for Anthropic/DeepSeek/Moonshot/Qwen; Wikimedia Commons for
+  OpenAI and xAI). Used nominatively to identify the systems under test — see the
   trademark note in the root README. All marks belong to their owners.
 - **VulcanBench logo**: `vb_logo_rounded.png`, derived from
   https://vulcanbench.com/assets/logo.png (see also `docs/assets/`).

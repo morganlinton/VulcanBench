@@ -16,7 +16,11 @@ REPO = str(HERE.parents[1])
 
 # Models with repeat sweeps: aggregate from individual run summaries
 # (per-task mean pass@1) instead of a single suite.json.
-REPEAT_MODELS = {"deepseek:deepseek-v4-flash", "openai:grok-4.5"}
+REPEAT_MODELS = {
+    "deepseek:deepseek-v4-flash",
+    "openai:grok-4.5",
+    "qwen:qwen3.8-max",
+}
 
 best = {}
 for p in glob.glob(f"{REPO}/runs*/suite-*/suite.json"):

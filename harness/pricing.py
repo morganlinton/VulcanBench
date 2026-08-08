@@ -68,6 +68,10 @@ PRICES: dict[str, dict[str, float]] = {
     # not modeled — override with VULCANBENCH_PRICING if/when it lands.
     "deepseek:deepseek-v4-flash": {"input": 0.14, "output": 0.28},
     "deepseek:deepseek-v4-pro": {"input": 0.435, "output": 0.87},
+    # Meta Model API standard tier. Contributor requests permit Meta to use
+    # prompts/completions for training in exchange for the lower rate.
+    "meta:muse-spark-1.2": {"input": 1.25, "output": 4.25},
+    "meta:muse-spark-1.2-contributor": {"input": 0.10, "output": 0.20},
     # Free / offline.
     "mock:": {"input": 0.0, "output": 0.0},
 }

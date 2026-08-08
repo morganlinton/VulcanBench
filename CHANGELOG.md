@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Meta Model API provider** (`meta:muse-spark-1.2`): calls Muse Spark through
+  Meta's OpenAI-compatible Responses API with `MODEL_API_KEY`, while the agent's
+  tools and deterministic verifier remain inside VulcanBench's Docker sandbox.
+  This bypasses Muse Code's container sign-in failure without weakening task
+  isolation. Supports low/medium/high effort plus `extra-high` -> `xhigh`, and
+  prices both the standard and data-sharing Contributor tiers.
 - **Qwen reasoning effort** (`qwen:<model>`, Qwen3.8+): `--effort low/medium` maps to
   DashScope's `reasoning_effort` and `extra-high` maps to its `xhigh`; `high` is recorded
   as metadata only because Qwen's documented enum is low/medium/xhigh (no `high`) with

@@ -175,6 +175,23 @@ def test_cli_estimate_command() -> None:
     assert "OPENAI_API_KEY" in result.output
 
 
+def test_cli_estimate_meta_uses_official_env_name() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "estimate",
+            "--task",
+            "hello-world",
+            "--model",
+            "meta:muse-spark-1.2",
+            "--no-judges",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "Meta Model API" in result.output
+    assert "MODEL_API_KEY" in result.output
+
+
 def test_run_dry_run_includes_estimate() -> None:
     result = runner.invoke(
         app,

@@ -67,6 +67,11 @@ def test_deepseek_v4_flash_priced() -> None:
     assert pricing.cost_usd("deepseek:deepseek-v4-flash", 1_000_000, 1_000_000) == 0.42
 
 
+def test_muse_spark_12_tiers_priced() -> None:
+    assert pricing.cost_usd("meta:muse-spark-1.2", 1_000_000, 1_000_000) == 5.50
+    assert pricing.cost_usd("meta:muse-spark-1.2-contributor", 1_000_000, 1_000_000) == 0.30
+
+
 def test_anthropic_frontier_models_priced() -> None:
     # Sonnet 5 standard pricing: input 3.00/1M, output 15.00/1M -> 1M+1M = 18.00.
     assert pricing.is_priced("anthropic:claude-sonnet-5")

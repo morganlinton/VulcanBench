@@ -16,6 +16,7 @@ Providers implemented:
 - ``qwen:<model>``     Alibaba Cloud DashScope OpenAI-compatible Chat Completions
                        API (Qwen).
 - ``deepseek:<model>`` DeepSeek OpenAI-compatible Chat Completions API.
+- ``meta:<model>``     Meta Model API Responses endpoint (Muse Spark).
 
 Only the Python standard library is used for HTTP so the harness stays
 dependency-light; ``tenacity`` provides retry/backoff.
@@ -301,6 +302,62 @@ class OpenAIProvider(LLMProvider):
             timeout=timeout,
         )
         return _parse_responses_body(body)
+
+
+class MetaProvider(LLMProvider):
+    """Meta Model API provider for Muse Spark.
+
+    Uses Meta's OpenAI-compatible Responses API directly.  The model request is
+    made by the host-side harness while tool calls still execute through the
+    selected VulcanBench executor (Docker by default), so this path does not
+    depend on Muse Code being able to authenticate from inside a container.
+    """
+
+    @property
+    def name(self) -> str:
+        return "meta"
+
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout_s: float | None = None,
+        effort: str | None = None,
+    ) -> LLMResponse:
+        timeout = _http_timeout(timeout_s, self.MAX_REQUEST_TIMEOUT_S)
+        attempts = _budgeted_attempts(timeout_s, timeout)
+        return _call_with_retry(self._complete_once, attempts, messages, tools, timeout, effort)
+
+    def _complete_once(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+        effort: str | None,
+    ) -> LLMResponse:
+        api_key = os.environ.get("MODEL_API_KEY")
+        if not api_key:
+            raise ProviderError("MODEL_API_KEY is not set")
+        base = os.environ.get("META_BASE_URL", "https://api.meta.ai/v1").rstrip("/")
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "input": _to_responses_input(messages),
+        }
+        if effort is not None:
+            payload["reasoning"] = {"effort": effort}
+        if tools:
+            payload["tools"] = [_openai_tool_to_responses(t) for t in tools]
+            payload["tool_choice"] = "auto"
+        body = _http_post_json(
+            f"{base}/responses",
+            {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            payload,
+            timeout=timeout,
+        )
+        # Meta's standard cached-input rate is 0.15/1.25 = 0.12 of uncached
+        # input.  The Contributor model is 0.002/0.10 = 0.02.
+        cached_factor = 0.02 if self.model.endswith("-contributor") else 0.12
+        return _parse_responses_body(body, cached_input_factor=cached_factor)
 
 
 _CACHE_CONTROL = {"type": "ephemeral"}
@@ -843,7 +900,7 @@ def _openai_tool_to_responses(tool: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _parse_responses_body(body: dict[str, Any]) -> LLMResponse:
+def _parse_responses_body(body: dict[str, Any], cached_input_factor: float = 0.1) -> LLMResponse:
     content_parts: list[str] = []
     tool_calls: list[ToolInvocation] = []
     for item in body.get("output") or []:
@@ -871,6 +928,7 @@ def _parse_responses_body(body: dict[str, Any]) -> LLMResponse:
             prompt_tokens=_openai_effective_prompt_tokens(
                 usage.get("input_tokens", usage.get("prompt_tokens", 0)),
                 (usage.get("input_tokens_details") or {}).get("cached_tokens", 0),
+                cached_input_factor,
             ),
             completion_tokens=usage.get("output_tokens", usage.get("completion_tokens", 0)),
         ),
@@ -878,7 +936,9 @@ def _parse_responses_body(body: dict[str, Any]) -> LLMResponse:
     )
 
 
-def _openai_effective_prompt_tokens(input_tokens: int, cached_tokens: int) -> int:
+def _openai_effective_prompt_tokens(
+    input_tokens: int, cached_tokens: int, cached_input_factor: float = 0.1
+) -> int:
     """Fold OpenAI's automatic prompt-cache discount into an effective prompt count.
 
     Unlike Anthropic (where ``input_tokens`` is the uncached remainder), OpenAI reports
@@ -890,7 +950,7 @@ def _openai_effective_prompt_tokens(input_tokens: int, cached_tokens: int) -> in
     """
     cached = min(max(cached_tokens, 0), input_tokens)
     uncached = input_tokens - cached
-    return round(uncached + cached * 0.1)
+    return round(uncached + cached * cached_input_factor)
 
 
 def _parse_chat_completions_response(body: dict[str, Any]) -> LLMResponse:
@@ -971,6 +1031,7 @@ _PROVIDERS: dict[str, type[LLMProvider]] = {
     "kimi": KimiProvider,
     "qwen": QwenProvider,
     "deepseek": DeepSeekProvider,
+    "meta": MetaProvider,
     "mock": MockProvider,
 }
 

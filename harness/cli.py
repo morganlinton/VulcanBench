@@ -152,7 +152,7 @@ def run(  # noqa: PLR0912, PLR0915 — CLI entry: option declarations + linear g
     effort: str | None = typer.Option(
         None,
         "--effort",
-        help="Normalized reasoning effort: low|medium|high|extra-high",
+        help="Normalized reasoning effort: low|medium|high|extra-high|max",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only, do not launch sandbox"),
     use_priors: bool = typer.Option(

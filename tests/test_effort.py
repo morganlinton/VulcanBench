@@ -23,6 +23,17 @@ def test_openai_extra_high_maps_to_xhigh() -> None:
     }
 
 
+def test_openai_max_maps_to_distinct_max_value() -> None:
+    cfg = effort_config("openai", "max")
+    assert cfg is not None
+    assert cfg.as_summary() == {
+        "requested": "max",
+        "provider": "openai",
+        "provider_value": "max",
+        "supported": True,
+    }
+
+
 def test_mock_effort_is_noop_metadata() -> None:
     cfg = effort_config("mock", "low")
     assert cfg is not None
@@ -97,6 +108,30 @@ def test_deepseek_medium_is_noop_metadata() -> None:
     }
 
 
+def test_meta_effort_maps_low_through_xhigh() -> None:
+    for requested, sent in (
+        ("low", "low"),
+        ("medium", "medium"),
+        ("high", "high"),
+        ("extra-high", "xhigh"),
+    ):
+        cfg = effort_config("meta", requested)
+        assert cfg is not None
+        assert cfg.as_summary() == {
+            "requested": requested,
+            "provider": "meta",
+            "provider_value": sent,
+            "supported": True,
+        }
+
+
+def test_meta_max_is_noop_metadata() -> None:
+    cfg = effort_config("meta", "max")
+    assert cfg is not None
+    assert cfg.provider_value is None
+    assert cfg.supported is False
+
+
 def test_kimi_effort_below_max_is_noop_metadata() -> None:
     # Moonshot only ships reasoning_effort="max" today; other levels are
     # recorded but not sent.
@@ -133,6 +168,17 @@ def test_anthropic_effort_maps_to_output_config_values() -> None:
     xhigh = effort_config("anthropic", "extra-high")
     assert xhigh is not None
     assert xhigh.provider_value == "xhigh"
+
+
+def test_anthropic_max_is_noop_metadata() -> None:
+    cfg = effort_config("anthropic", "max")
+    assert cfg is not None
+    assert cfg.as_summary() == {
+        "requested": "max",
+        "provider": "anthropic",
+        "provider_value": None,
+        "supported": False,
+    }
 
 
 def test_unknown_provider_effort_rejected() -> None:

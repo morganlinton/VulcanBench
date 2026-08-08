@@ -1,0 +1,85 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+@page { size: A4; margin: 0; }
+html, body { width: 210mm; }
+body { font-family: Helvetica, Arial, sans-serif; color: #1a1a1a; font-size: 8.6pt; line-height: 1.27; }
+.page { padding: 11mm 15mm 10mm; position: relative; height: 296mm; overflow: hidden; }
+.rhead b { font-size: 11pt; }
+.rmeta { color: #555; font-size: 8pt; margin-top: 2px; }
+.rule { border-top: 1.5px solid #1a1a1a; margin: 6px 0 9px; }
+h1 { font-size: 15.5pt; margin: 2px 0 3px; }
+.byline { font-style: italic; color: #333; font-size: 8.8pt; margin-bottom: 7px; }
+h2 { font-size: 9.8pt; margin: 7px 0 3px; }
+p.abs, p.note { text-align: justify; }
+p.note { font-style: italic; color: #444; font-size: 7.4pt; margin-top: 3px; }
+table { width: 100%; border-collapse: collapse; font-size: 8.2pt; margin-top: 3px; }
+thead th { background: #eee; text-align: right; padding: 2.5px 5px; border-top: 1.5px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; }
+thead th:first-child { text-align: left; }
+tbody td { padding: 2.2px 5px; text-align: right; }
+tbody td:first-child { text-align: left; }
+tbody tr:nth-child(odd) td { background: #f7f7f7; }
+tbody tr:last-child td { border-bottom: 1.5px solid #1a1a1a; }
+tr.win td { font-weight: 700; }
+tr.sep td { border-top: 1px solid #999; font-style: italic; color: #444; }
+.findings p { margin-top: 3.5px; text-align: justify; }
+.prose p { margin-top: 3.5px; text-align: justify; }
+.foot { position: absolute; bottom: 7mm; left: 15mm; right: 15mm; text-align: center; color: #666; font-size: 7.5pt; font-style: italic; border-top: 0.5px solid #999; padding-top: 3px; }
+</style></head><body>
+<div class="page">
+  <div class="rhead"><b>VulcanBench Technical Report No. 12</b>
+    <div class="rmeta">August 4, 2026&ensp;|&ensp;v3 suite&ensp;|&ensp;23 tasks&ensp;|&ensp;202 runs&ensp;|&ensp;3 effort levels&ensp;|&ensp;5 languages&ensp;|&ensp;$126.25</div>
+  </div>
+  <div class="rule"></div>
+
+  <h1>Qwen3.8-Max across the effort knob</h1>
+  <p class="byline">First measurement of Alibaba&rsquo;s Qwen3.8-Max on the full v3 suite: twenty-three real merged post-cutoff PRs across five languages, at low, medium, and xhigh effort, three attempts per task.</p>
+
+  <h2>Abstract</h2>
+  <p class="abs">Qwen3.8-Max&rsquo;s effort knob runs backwards, further than any model measured here: 81.2% at low, 71.0% at medium, 55.1% at xhigh &mdash; a 26-point fall to the lowest column on the v3 board. Since xhigh is the API default, an untuned integration gets the worst setting. The deficit is unfinished work, not bad work: wrong answers vanish (3 &rarr; 0 &rarr; 0) while runs that never finish climb (14% &rarr; 29% &rarr; 41%), and six tasks low solves 3-for-3 account for 83% of the drop. At $126.25 against DeepSeek V4-Flash&rsquo;s $13.60 on the same suite, and 19.6&ndash;25.5 min/task, it is the most expensive and slowest model on the board &mdash; and the first debut measured at three attempts per task.</p>
+
+  <h2>Table 1. Results (three attempts per task per effort level)</h2>
+  <table>
+    <thead><tr><th>Effort</th><th>pass@1</th><th>Solved</th><th>Wrong</th><th>Unfinished</th><th>Cost</th><th>Tok/task</th><th>Time/task</th><th>Steps</th><th>$/task</th><th>$/solved</th></tr></thead>
+    <tbody>
+      <tr class="win"><td>low</td><td>81.2%</td><td>56/69</td><td>3</td><td>10</td><td>$42.09</td><td>188 K</td><td>19.6 min</td><td>179</td><td>$0.61</td><td>$0.75</td></tr>
+      <tr><td>medium</td><td>71.0%</td><td>49/69</td><td>0</td><td>20</td><td>$38.81</td><td>157 K</td><td>21.7 min</td><td>152</td><td>$0.56</td><td>$0.79</td></tr>
+      <tr><td>xhigh <i>(default)</i></td><td>55.1%</td><td>38/64</td><td>0</td><td>26</td><td>$45.35</td><td>208 K</td><td>25.5 min</td><td>167</td><td>$0.71</td><td>$1.19</td></tr>
+    </tbody>
+  </table>
+  <p class="note">pass@1 is the mean per-task success rate across attempts, so uneven counts do not bias it. Wrong = a finished run that failed the hidden tests; unfinished = cut off at the wall-clock or step budget, unchanged from Reports 07, 08 and 10. The xhigh column has 64 runs, not 69: five died on 600-second API read timeouts (below), excluded rather than scored zero. Qwen&rsquo;s enum is low/medium/xhigh &mdash; no <i>high</i> &mdash; xhigh being the default.</p>
+
+  <h2>Findings</h2>
+  <div class="findings">
+    <p><b>1. The knob runs backwards, and steeply.</b> Low leads xhigh by 26 points, more than triple the 9-point inversion Report 10 recorded for Claude Opus 5, and far outside the noise: standard errors are &plusmn;7.8, &plusmn;9.4 and &plusmn;9.7 points, and low-vs-xhigh does not overlap. Paying for effort is the difference between mid-table and last.</p>
+    <p><b>2. Effort converts wrong answers into unfinished runs.</b> Wrong answers fall to zero (3 &rarr; 0 &rarr; 0) while runs that hit a budget climb (10 &rarr; 20 &rarr; 26, or 14% &rarr; 29% &rarr; 41%). At medium and xhigh <i>every single failure</i> is an incomplete run. Failed runs burn ~5&times; the completion tokens of successful ones (115&ndash;140 K vs 22&ndash;29 K) and 3&times; the clock &mdash; not sloppy attempts, but runs cut off mid-work.</p>
+    <p><b>3. The regression is in solvable work.</b> Three tasks score zero at every setting; extra reasoning rescues none of them. Nine regress from low to xhigh, and the six that low solves 3-for-3 account for 83% of the drop, three collapsing to zero. It is not losing the hard problems. It is losing the ones it already knows how to do.</p>
+    <p><b>4. Most expensive, slowest, and beaten on every axis.</b> The sweep cost $126.25 against $13.60 for DeepSeek V4-Flash on the identical suite. Every DeepSeek column (88.4 / 87.3 / 85.5) outscores every Qwen column (81.2 / 71.0 / 55.1) with no overlap, at $0.08 per solved task against $0.75&ndash;1.19. At 19.6&ndash;25.5 min/task it is the slowest model on v3, ahead of Kimi K3 at 17.2.</p>
+    <p><b>5. A second clock, imposed by the provider.</b> Five xhigh runs on the suite&rsquo;s heaviest repositories failed with 600-second read timeouts from the DashScope endpoint &mdash; a single request exceeding ten minutes, well inside the harness&rsquo;s own 45- and 60-minute budgets. No previous report has recorded this. They are logged as run <i>errors</i> rather than scored zero, the treatment safety refusals receive, and retrying reproduced them: at its default effort, the model can exceed its own provider&rsquo;s response window.</p>
+  </div>
+
+  <h2>Table 2. Failure map (the nine tasks that moved; fourteen scored identically at all three settings)</h2>
+  <table>
+    <thead><tr><th>Task</th><th>low</th><th>medium</th><th>xhigh</th></tr></thead>
+    <tbody>
+      <tr><td>jiff-strftime-negpad</td><td>3/3</td><td>3/3</td><td>0/3 &mdash; 3 unfinished</td></tr>
+      <tr><td>semver-inc-dotted-prerelease</td><td>3/3</td><td>0/3 &mdash; 3 unfinished</td><td>0/3 &mdash; 3 unfinished</td></tr>
+      <tr><td>sqlglot-qualify-lateral-star</td><td>3/3</td><td>1/3 &mdash; 2 unfinished</td><td>0/3 &mdash; 3 unfinished</td></tr>
+      <tr><td>packaging-range-prerelease-policy</td><td>3/3</td><td>3/3</td><td>1/3 &mdash; 2 unfinished</td></tr>
+      <tr><td>semver-xrange-order</td><td>3/3</td><td>3/3</td><td>1/3 &mdash; 2 unfinished</td></tr>
+      <tr><td>zod-invert-codec</td><td>3/3</td><td>3/3</td><td>1/3 &mdash; 2 unfinished</td></tr>
+      <tr><td>itertools-strip-prefix</td><td>3/3</td><td>3/3</td><td>2/3 &mdash; 1 unfinished</td></tr>
+      <tr><td>flask-teardown-robust</td><td>1/3 &mdash; 2 unfinished</td><td>0/3 &mdash; 3 unfinished</td><td>0/3 &mdash; 3 unfinished</td></tr>
+      <tr><td>networkx-leiden-communities</td><td>1/3 &mdash; 2 unfinished</td><td>0/3 &mdash; 3 unfinished</td><td>0/1 &mdash; 1 unfinished</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Never solved at any setting: aiohttp-upgrade-deferred, pennylane-trotter-fragmented, sqlglot-canonicalize-internal-names. Cells are solved/attempted. Of the 56 unfinished runs across the sweep, 38 died at the 45-minute (large) or 60-minute (xlarge) wall-clock boundary and only three hit the step ceiling; none was cost-capped. The clock, not the step budget, is what binds.</p>
+
+  <h2>Method &amp; caveats</h2>
+  <div class="prose">
+    <p>VulcanBench v3: 23 tasks from real merged post-cutoff PRs (Python 9, TypeScript 4, Rust 4, Go 3, JavaScript 3), network-isolated Docker sandboxes, hidden-test grading. Budgets scale with repository size &mdash; 50&ndash;200 steps, 5&ndash;60 min &mdash; identical for every model and unchanged since Report 07. Priced at $2/$6 per M tokens, international (Singapore) endpoint. Caveats: with an unlimited budget xhigh might close some of the gap, so this measures capability under a fixed budget, not a ceiling; Qwen&rsquo;s <code>thinking_budget</code> cap &mdash; the knob most likely to address this pattern &mdash; was untested because its API rejects it alongside <code>reasoning_effort</code>. Every column here is three attempts per task; the single-attempt columns of Reports 07, 08 and 10 carry wider uncertainty.</p>
+  </div>
+
+  <div class="foot">VulcanBench Technical Report No. 12 &middot; vulcanbench.com &middot; open source &middot; August 4, 2026</div>
+</div>
+</body></html>

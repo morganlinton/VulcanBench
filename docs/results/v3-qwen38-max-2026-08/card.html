@@ -1,0 +1,129 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1600px; height: 900px; }
+body { font-family: "Times New Roman", Times, Georgia, serif; background: #f7f5f0; color: #1c1a17; }
+.page { width: 1600px; height: 900px; padding: 44px 78px 30px; position: relative; }
+.masthead { display: flex; justify-content: space-between; align-items: baseline;
+  font-variant: small-caps; letter-spacing: 2.5px; font-size: 17px; color: #6f6a62; }
+.masthead b { color: #1c1a17; font-weight: 600; }
+.rule2 { border-top: 2.5px solid #1c1a17; margin-top: 8px; }
+.rule1 { border-top: 1px solid #1c1a17; margin-top: 2.5px; }
+h1 { text-align: center; font-size: 37px; font-weight: 600; margin-top: 20px; letter-spacing: 0.2px; }
+.eff { font-size: 25px; font-weight: 400; font-style: italic; color: #55504a; }
+.authors { text-align: center; font-style: italic; font-size: 19px; margin-top: 9px; color: #3a362f; }
+.abstract { width: 1280px; margin: 12px auto 0; font-size: 19px; line-height: 1.48; text-align: center; }
+.cols { display: grid; grid-template-columns: 730px 670px; gap: 42px; margin-top: 12px; }
+.tcap, .fcap { font-size: 15px; margin-bottom: 7px; line-height: 1.35; }
+.tcap b, .fcap b { font-variant: small-caps; letter-spacing: 1px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+thead th { border-top: 2px solid #1c1a17; border-bottom: 1px solid #1c1a17;
+  padding: 6px 5px; font-weight: 600; text-align: right; font-size: 14.5px; }
+thead th:first-child { text-align: left; }
+tbody td { padding: 4.4px 5px; text-align: right; font-variant-numeric: tabular-nums; }
+tbody td:first-child { text-align: left; }
+tbody tr:last-child td { border-bottom: 2px solid #1c1a17; }
+tbody tr.win td { font-weight: 700; }
+tbody tr.subject td { background: #efeade; }
+.model { font-style: italic; }
+table.map { font-size: 14px; }
+table.map thead th { font-size: 13px; padding: 4px 5px; }
+table.map tbody td { padding: 1.5px 5px; text-align: center; }
+table.map thead th:first-child, table.map tbody td:first-child { text-align: left; }
+table.map tbody td.ok { color: #4a6b46; font-weight: 600; }
+table.map tbody td.to { color: #8a8478; font-style: italic; }
+table.map tbody td.part { color: #9c6644; font-style: italic; }
+.legend { display: flex; flex-wrap: wrap; gap: 20px 26px; justify-content: center; font-size: 14px; margin-top: 8px; color: #3a362f; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend .note { width: 100%; text-align: center; font-size: 12.5px; color: #6f6a62; font-style: italic; }
+.sw { width: 14px; height: 14px; display: inline-block; }
+.findings { margin-top: 6px; font-size: 14.5px; line-height: 1.36; }
+.findings p { margin-top: 5px; }
+.findings .n { font-weight: 700; }
+.foot { position: absolute; left: 78px; right: 78px; bottom: 24px;
+  border-top: 1px solid #1c1a17; padding-top: 8px; font-size: 13px;
+  color: #55504a; line-height: 1.38; display: flex; justify-content: space-between; gap: 40px; }
+.foot .brand { white-space: nowrap; text-align: right; font-variant: small-caps;
+  letter-spacing: 1.5px; color: #1c1a17; font-size: 15px; }
+</style></head><body>
+<div class="page">
+  <div class="masthead"><span><b>VulcanBench</b> &nbsp;Technical Report No. 12</span><span>August 2026 &nbsp;&middot;&nbsp; 23 tasks &middot; 1 model &middot; 3 configurations &middot; 5 languages</span></div>
+  <div class="rule2"></div><div class="rule1"></div>
+
+  <h1>Qwen3.8-Max <span class="eff">(low vs. medium vs. xhigh effort)</span></h1>
+  <div class="authors">Twenty-three real merged PRs across Python, Rust, TypeScript, JavaScript, and Go, graded by deterministic hidden tests</div>
+
+  <div class="abstract">
+  <b>The effort knob runs backwards: 81.2% at low, 55.1% at the shipped default.</b>
+  Raising effort costs more and solves less, ending at the lowest column on the v3 board. The deficit is unfinished work, not bad work &mdash; wrong answers fall to zero while runs cut off by the clock climb from 14% to 41%. What it loses is work it already handles.</div>
+
+  <div class="cols">
+    <div>
+      <div class="tcap"><b>Table 1.</b> All three configurations, three attempts per task each. Wrong = a finished run that failed the hidden tests; unfinished = cut off at its 45- or 60-minute budget.</div>
+      <table>
+        <thead><tr><th>Effort</th><th>pass@1</th><th>Solved</th><th>Wrong</th><th>Unfinished</th><th>Cost</th><th>Tokens/task</th><th>Time/task</th><th>$/solved</th></tr></thead>
+        <tbody>
+          <tr class="win subject"><td class="model">low</td><td>81.2%</td><td>56/69</td><td>3</td><td>10</td><td>$42.09</td><td>188 K</td><td>19.6 min</td><td>$0.75</td></tr>
+          <tr><td class="model">medium</td><td>71.0%</td><td>49/69</td><td>0</td><td>20</td><td>$38.81</td><td>157 K</td><td>21.7 min</td><td>$0.79</td></tr>
+          <tr><td class="model">xhigh <span style="font-style:normal;color:#6f6a62">(default)</span></td><td>55.1%</td><td>38/64</td><td>0</td><td>26</td><td>$45.35</td><td>208 K</td><td>25.5 min</td><td>$1.19</td></tr>
+        </tbody>
+      </table>
+      <div class="findings">
+        <p><span class="n">1.</span> Effort converts wrong answers into unfinished runs. Wrong answers fall to zero (3 &rarr; 0 &rarr; 0) while runs that hit a budget climb (10 &rarr; 20 &rarr; 26); at medium and xhigh <i>every</i> failure is an incomplete run. Failed runs burn roughly five times the completion tokens of successful ones and three times the clock &mdash; work cut off mid-flight, not sloppy attempts.</p>
+        <p><span class="n">2.</span> The regression sits in solvable work. Three tasks score zero at every setting; extra reasoning rescues none. Of the nine that regress, the six low solves 3-for-3 account for 83% of the drop. Against DeepSeek V4-Flash on the same suite &mdash; $126.25 to $13.60 &mdash; every DeepSeek column outscores every Qwen column with no overlap.</p>
+      </div>
+
+      <div class="tcap" style="margin-top:6px"><b>Table 2.</b> The nine tasks that moved; the other fourteen scored identically at every setting.</div>
+      <table class="map">
+        <thead><tr><th>Task</th><th>low</th><th>medium</th><th>xhigh</th></tr></thead>
+        <tbody>
+          <tr><td class="model">jiff-strftime-negpad</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="to">0/3</td></tr>
+          <tr><td class="model">semver-inc-dotted-prerelease</td><td class="ok">3/3</td><td class="to">0/3</td><td class="to">0/3</td></tr>
+          <tr><td class="model">sqlglot-qualify-lateral-star</td><td class="ok">3/3</td><td class="part">1/3</td><td class="to">0/3</td></tr>
+          <tr><td class="model">packaging-range-prerelease-policy</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="part">1/3</td></tr>
+          <tr><td class="model">semver-xrange-order</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="part">1/3</td></tr>
+          <tr><td class="model">zod-invert-codec</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="part">1/3</td></tr>
+          <tr><td class="model">itertools-strip-prefix</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="part">2/3</td></tr>
+          <tr><td class="model">flask-teardown-robust</td><td class="part">1/3</td><td class="to">0/3</td><td class="to">0/3</td></tr>
+          <tr><td class="model">networkx-leiden-communities</td><td class="part">1/3</td><td class="to">0/3</td><td class="to">0/1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="fcap"><b>Figure 1.</b> Accuracy and unfinished runs across the effort knob. Shades darken low &rarr; medium &rarr; xhigh. As effort rises accuracy falls and incomplete runs climb; the two move together.</div>
+      <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" width="100%">
+<rect x="96" y="90.0" width="36" height="180.0" fill="#8ba3c4"/><text x="114" y="85.0" text-anchor="middle" font-size="12.5" fill="#1c1a17" font-family="Georgia, serif">81.2</text>
+<rect x="158" y="112.6" width="36" height="157.4" fill="#5d7ba0"/><text x="176" y="107.6" text-anchor="middle" font-size="12.5" fill="#1c1a17" font-family="Georgia, serif">71.0</text>
+<rect x="220" y="147.9" width="36" height="122.1" fill="#27425f"/><text x="238" y="142.9" text-anchor="middle" font-size="12.5" fill="#1c1a17" font-family="Georgia, serif">55.1</text>
+<text x="114" y="286" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">low</text>
+<text x="176" y="286" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">medium</text>
+<text x="238" y="286" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">xhigh</text>
+<line x1="20" y1="270" x2="332" y2="270" stroke="#1c1a17" stroke-width="1"/>
+<text x="176" y="310" text-anchor="middle" font-size="15" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Accuracy</text>
+<text x="176" y="328" text-anchor="middle" font-size="12.5" fill="#6f6a62" font-family="Georgia, serif">pass@1 (%), 23 tasks</text>
+<rect x="462" y="205.8" width="36" height="64.2" fill="#8ba3c4"/><text x="480" y="200.8" text-anchor="middle" font-size="12.5" fill="#1c1a17" font-family="Georgia, serif">14%</text>
+<rect x="524" y="141.6" width="36" height="128.4" fill="#5d7ba0"/><text x="542" y="136.6" text-anchor="middle" font-size="12.5" fill="#1c1a17" font-family="Georgia, serif">29%</text>
+<rect x="586" y="90.0" width="36" height="180.0" fill="#27425f"/><text x="604" y="85.0" text-anchor="middle" font-size="12.5" fill="#1c1a17" font-family="Georgia, serif">41%</text>
+<text x="480" y="286" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">low</text>
+<text x="542" y="286" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">medium</text>
+<text x="604" y="286" text-anchor="middle" font-size="12" fill="#6f6a62" font-family="Georgia, serif" font-style="italic">xhigh</text>
+<line x1="386" y1="270" x2="698" y2="270" stroke="#1c1a17" stroke-width="1"/>
+<text x="542" y="310" text-anchor="middle" font-size="15" fill="#1c1a17" font-family="Georgia, serif" font-style="italic">Unfinished runs</text>
+<text x="542" y="328" text-anchor="middle" font-size="12.5" fill="#6f6a62" font-family="Georgia, serif">share cut off by a budget</text>
+</svg>
+      <div class="legend">
+        <span><span class="sw" style="background:#8ba3c4"></span>low effort</span>
+        <span><span class="sw" style="background:#5d7ba0"></span>medium effort</span>
+        <span><span class="sw" style="background:#27425f"></span>xhigh effort</span>
+        <span class="note">Both panels are zero-based. Table 2 cells are solved/attempted; green solved every attempt, amber some, grey none.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>Method.</b> VulcanBench v3: 23 tasks from real merged post-cutoff PRs, network-isolated Docker sandboxes, deterministic hidden-test grading, three attempts per task per configuration. Wall-clock budgets 45 min (large) / 60 (xlarge), unchanged from Reports No.&nbsp;07&ndash;10. Qwen3.8-Max at $2/$6 per M tokens; $126.25 across 202 runs. Five xhigh runs died on 600-second provider-side API read timeouts and are excluded rather than scored zero.</div>
+    <div class="brand">vulcanbench &middot; open source &middot; August 4, 2026</div>
+  </div>
+</div>
+</body></html>

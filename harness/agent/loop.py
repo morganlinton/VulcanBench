@@ -1058,6 +1058,7 @@ _JUDGE_KEY_ENV = {
     "kimi": "MOONSHOT_API_KEY",
     "qwen": "DASHSCOPE_API_KEY",
     "deepseek": "DEEPSEEK_API_KEY",
+    "meta": "MODEL_API_KEY",
 }
 
 

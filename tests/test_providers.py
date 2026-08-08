@@ -10,6 +10,7 @@ from harness.agent.providers import (
     DeepSeekProvider,
     KimiProvider,
     LLMResponse,
+    MetaProvider,
     MockProvider,
     OpenAIProvider,
     QwenProvider,
@@ -28,6 +29,7 @@ from harness.agent.providers import (
         ("zai:glm-5.2", ("zai", "glm-5.2")),
         ("qwen:qwen3.7-plus", ("qwen", "qwen3.7-plus")),
         ("deepseek:deepseek-v4-flash", ("deepseek", "deepseek-v4-flash")),
+        ("meta:muse-spark-1.2", ("meta", "muse-spark-1.2")),
         ("mock:synthetic", ("mock", "synthetic")),
         ("openai:gpt-4o:extra", ("openai", "gpt-4o:extra")),
     ],
@@ -80,6 +82,13 @@ def test_get_provider_returns_deepseek() -> None:
     assert isinstance(p, DeepSeekProvider)
     assert p.name == "deepseek"
     assert p.spec == "deepseek:deepseek-v4-flash"
+
+
+def test_get_provider_returns_meta() -> None:
+    p = get_provider("meta:muse-spark-1.2")
+    assert isinstance(p, MetaProvider)
+    assert p.name == "meta"
+    assert p.spec == "meta:muse-spark-1.2"
 
 
 def test_token_usage_total() -> None:
@@ -259,6 +268,27 @@ def test_openai_effort_uses_responses_payload(monkeypatch: pytest.MonkeyPatch) -
     assert resp.usage.total == 14
 
 
+def test_openai_max_effort_uses_distinct_responses_value(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["payload"] = payload
+        return {
+            "output": [{"type": "message", "content": [{"type": "output_text", "text": "ok"}]}],
+            "usage": {},
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    OpenAIProvider("gpt-5.6-terra").complete([], [], effort="max")
+
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert payload["reasoning"] == {"effort": "max"}
+
+
 def test_openai_responses_discounts_cached_prompt_tokens(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -291,6 +321,57 @@ def test_openai_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     with pytest.raises(P.ProviderError, match="OPENAI_API_KEY"):
         OpenAIProvider("gpt-4o").complete([], [])
+
+
+def test_meta_complete_uses_responses_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MODEL_API_KEY", "meta-test")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen.update(url=url, headers=headers, payload=payload)
+        return {
+            "output": [
+                {
+                    "type": "function_call",
+                    "call_id": "m1",
+                    "name": "run_tests",
+                    "arguments": "{}",
+                }
+            ],
+            "usage": {
+                "input_tokens": 1000,
+                "input_tokens_details": {"cached_tokens": 500},
+                "output_tokens": 25,
+            },
+        }
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    response = MetaProvider("muse-spark-1.2").complete(
+        [{"role": "user", "content": "fix it"}],
+        [{"function": {"name": "run_tests", "description": "test", "parameters": {}}}],
+        effort="high",
+    )
+
+    assert seen["url"] == "https://api.meta.ai/v1/responses"
+    assert seen["headers"] == {
+        "Authorization": "Bearer meta-test",
+        "Content-Type": "application/json",
+    }
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert payload["model"] == "muse-spark-1.2"
+    assert payload["reasoning"] == {"effort": "high"}
+    assert payload["tools"][0]["name"] == "run_tests"
+    assert response.tool_calls[0].name == "run_tests"
+    # 500 uncached + 500 cached at Meta's 0.12 relative standard-tier rate.
+    assert response.usage.prompt_tokens == 560
+    assert response.usage.completion_tokens == 25
+
+
+def test_meta_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
+    with pytest.raises(P.ProviderError, match="MODEL_API_KEY"):
+        MetaProvider("muse-spark-1.2").complete([], [])
 
 
 def test_anthropic_complete_parses(monkeypatch: pytest.MonkeyPatch) -> None:

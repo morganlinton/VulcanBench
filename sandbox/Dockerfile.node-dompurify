@@ -1,0 +1,40 @@
+# DOMPurify sandbox image (oss-dompurify-ownerdocument-clobber).
+#
+# Build:  docker build -t vulcanbench/sandbox:node-dompurify -f sandbox/Dockerfile.node-dompurify .
+#
+# DOMPurify needs a DOM implementation to run at all, so unlike the zero-dep
+# node-ts tasks (which run `tsx --test` against source with no installs) this
+# image bakes jsdom in. The hidden tests import src/purify.ts directly under
+# tsx and construct a jsdom window; jsdom is resolved from the global
+# node_modules via NODE_PATH, so the network-off sandbox needs no installs and
+# the task slice ships without a committed node_modules.
+#
+# jsdom is pinned to the version in DOMPurify's own package-lock at the base
+# commit (2c8ca25) so the DOM behaviour matches upstream's test runner.
+FROM vulcanbench/sandbox:node-ts
+
+# The base image ships Node 22.11, on which jsdom's transitive
+# html-encoding-sniffer hits ERR_REQUIRE_ESM (it require()s an ESM-only module).
+# require(ESM) is unflagged from Node 22.12, so bump Node just for this image.
+ARG NODE_VERSION=22.12.0
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in \
+      amd64) narch=x64 ;; \
+      arm64) narch=arm64 ;; \
+      *) echo "unsupported arch: $arch" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${narch}.tar.xz" -o /tmp/node.tar.xz; \
+    tar -C /usr/local --strip-components=1 -xJf /tmp/node.tar.xz; \
+    rm /tmp/node.tar.xz; \
+    node --version
+
+# Let bare `require('jsdom')` / `import 'jsdom'` resolve from the global prefix
+# (npm root -g on the node base image), including under tsx's esbuild loader.
+ENV NODE_PATH=/usr/local/lib/node_modules
+
+# Install jsdom into that global prefix and smoke-test that it both resolves via
+# NODE_PATH and actually loads (constructing a JSDOM exercises the transitive
+# html-encoding-sniffer chain, guarding against an ESM-require regression).
+RUN npm install -g jsdom@29.1.1 \
+    && node -e "new (require('jsdom').JSDOM)('<p>ok</p>'); console.log('jsdom ok')"

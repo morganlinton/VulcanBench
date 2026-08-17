@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>DOMPurify demo: Hook to open all links in a new window</title>
+        <script src="../dist/purify.js"></script>
+    </head>
+    <body>
+        <!-- Our DIV to receive content -->
+        <div id="sanitized"></div>
+
+        <!-- Now let's sanitize that content -->
+        <script>
+            'use strict';
+
+            // Specify dirty HTML
+            const dirty = `
+                <a href="?a">CLICK</a>
+                <a href="?a" target="jajaja">CLICK</a>
+                <svg><a href="?svg"><circle r=40></a></svg>
+                <form action="?form"><input type="submit"></form>
+                <img src="404" width="200" height="200" usemap="#test">
+                <map name="test"><area href="?area" shape="rect" coords="0,0,200,200"></area></map>
+                <math href="?mathml">CLICKME</math>
+                <math><mi href="?mathml">CLICKME</mi></math>
+                <math><mi target="xxx" href="?mathml">CLICKME</mi></math>
+                <svg xmlns:xlink="http://www.w3.org/2000/svg"><a xlink:href="?bla"><circle r=40></a></svg>
+            `;
+            
+            // Add a hook to make all links open a new window
+            DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+                if ('target' in node) {
+                    node.setAttribute('target', '_blank');
+                    node.setAttribute('rel', 'noopener noreferrer');
+                }
+                if (!node.hasAttribute('target') && (node.hasAttribute('xlink:href') || node.hasAttribute('href'))) {
+                    node.setAttribute('xlink:show', 'new');
+                }
+            });
+            
+            // Clean HTML string and write into our DIV
+            const clean = DOMPurify.sanitize(dirty);
+            document.getElementById('sanitized').innerHTML = clean;
+        </script>
+    </body>
+</html>

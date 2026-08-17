@@ -1,0 +1,51 @@
+{
+  "id": "oss-dompurify-ownerdocument-clobber",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-08-16",
+  "repo_scale": "large",
+  "source": "oss",
+  "image": "vulcanbench/sandbox:node-dompurify",
+  "decontaminated": true,
+  "base_commit": "2c8ca25ef3cec05e12a50bd456f57a816eaa5998",
+  "upstream": {
+    "url": "https://github.com/cure53/DOMPurify",
+    "issue": "https://github.com/cure53/DOMPurify/pull/1560",
+    "pr": "https://github.com/cure53/DOMPurify/pull/1560",
+    "commit": "0332fe7cd45ad7971935e78c210c4714be4662ad"
+  },
+  "upstream_merged": "2026-08-03",
+  "decontamination_notes": "Real DOM-clobbering fail-open fix from cure53/DOMPurify PR #1560 ('fix: added better handling of clobbering via ownerDocument'), merged 2026-08-03 -- after the training cutoffs of the models evaluated here (e.g. Opus 5, May 2026), so the specific fix is not in their training data (decontaminated: true), with upstream_merged recorded as proof. HTMLFormElement carries [LegacyOverrideBuiltIns], so a form child named 'ownerDocument' (<input name=\"ownerDocument\">, or a form-associated external input) shadows Node.prototype.ownerDocument: a direct form.ownerDocument read returns that element. DOMPurify's _createNodeIterator read the property directly and called createNodeIterator.call(<the clobbering element>, ...), which throws 'Illegal invocation'. On the IN_PLACE path that throw is raised BEFORE the sanitize walk's fail-closed exception barrier, so the caller's live tree is returned with every armed on-event handler un-neutralized -- a clobber that fully defeats sanitization. The fix reads ownerDocument through a cached Node.prototype getter (immune to the per-element shadow) at both _createNodeIterator and _scrubTemplateExpressions, and moves iterator construction inside the barrier so any residual failure still fails closed. The gold patch is the ownerDocument subset of the PR (the getOwnerDocument getter, the two clobber-safe reads, and the barrier move); the PR's orthogonal _forkSharedAllowlist hook-widening hardening, which the upstream tests do not exercise, is excluded. Slice at the PR base commit (21.9k LOC). Runs on a dedicated :node-dompurify image (node-ts + jsdom@29.1.1 baked in, pinned to DOMPurify's package-lock; resolved via NODE_PATH) so the slice ships without a committed node_modules and the network-off sandbox needs no installs. Hidden tests run tsx --test directly against src/purify.ts (no rollup build) with node:test, a jsdom window, and a VERSION shim for the build-time global. Coverage floor: 3 fail_to_pass (a clobbered ownerDocument leaving, respectively, a direct on-event handler, a deeply nested handler, and any serialized on-event handler un-stripped on the IN_PLACE path -- each armed at base because the iterator throws before the barrier) plus a 2-check regression guard (un-clobbered IN_PLACE sanitize still strips handlers; ordinary string sanitize keeps benign markup and drops dangerous attributes). MIT/Apache-2.0 (LICENSE, LICENSE-MPL) preserved.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "clobber_direct_handler",
+        "cmd": "tsx --test --test-name-pattern='^vb clobbered ownerDocument still strips a direct on-event handler$' vb_ownerdoc.test.ts"
+      },
+      {
+        "name": "clobber_nested_handler",
+        "cmd": "tsx --test --test-name-pattern='^vb clobbered ownerDocument still neutralizes a deeply nested handler$' vb_ownerdoc.test.ts"
+      },
+      {
+        "name": "clobber_serialized_tree",
+        "cmd": "tsx --test --test-name-pattern='^vb clobbered ownerDocument leaves no on-event handler in the serialized tree$' vb_ownerdoc.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "unclobbered_in_place",
+        "cmd": "tsx --test --test-name-pattern='^vb IN_PLACE without any clobber strips an on-event handler as usual$' vb_regression.test.ts"
+      },
+      {
+        "name": "string_sanitize",
+        "cmd": "tsx --test --test-name-pattern='^vb string sanitize keeps benign markup and drops dangerous attributes$' vb_regression.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300
+}

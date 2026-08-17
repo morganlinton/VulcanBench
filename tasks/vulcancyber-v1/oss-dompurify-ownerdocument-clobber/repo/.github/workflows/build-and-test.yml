@@ -1,0 +1,208 @@
+name: Build & Test
+
+on:
+  push:
+    branches:
+      - main
+      - 3.x
+      - 2.x
+    # Skip on docs-only / metadata-only pushes. Keep this list in SYNC with
+    # build-and-test-skip.yml - that companion workflow reports success for
+    # the same required-check names when this one is skipped, otherwise PRs
+    # that only touch docs would hang forever on "Waiting for status to be
+    # reported" (GitHub's well-known paths-filter + required-check gotcha).
+    paths-ignore:
+      - '**/*.md'
+      - 'demos/**'
+      - 'website/**'
+      - 'LICENSE'
+      - '.gitattributes'
+      - '.editorconfig'
+      - '.prettierrc'
+      - '.nvmrc'
+      - '.gitignore'
+      - '.husky/**'
+      - 'osv-scanner.toml'
+      - '.github/ISSUE_TEMPLATE.md'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+      - '.github/FUNDING.yml'
+      - '.github/dependabot.yml'
+      - '.github/workflows/codeql-analysis.yml'
+      - '.github/workflows/dependency-review.yml'
+      - '.github/workflows/fuzz.yml'
+      - '.github/workflows/scorecard.yml'
+      - '.github/workflows/sign-release.yml'
+      - '.github/workflows/slsa-provenance.yml'
+      - '.github/workflows/legacy-browsers.yml'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - 'demos/**'
+      - 'website/**'
+      - 'LICENSE'
+      - '.gitattributes'
+      - '.editorconfig'
+      - '.prettierrc'
+      - '.nvmrc'
+      - '.gitignore'
+      - '.husky/**'
+      - 'osv-scanner.toml'
+      - '.github/ISSUE_TEMPLATE.md'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+      - '.github/FUNDING.yml'
+      - '.github/dependabot.yml'
+      - '.github/workflows/codeql-analysis.yml'
+      - '.github/workflows/dependency-review.yml'
+      - '.github/workflows/fuzz.yml'
+      - '.github/workflows/scorecard.yml'
+      - '.github/workflows/sign-release.yml'
+      - '.github/workflows/slsa-provenance.yml'
+      - '.github/workflows/legacy-browsers.yml'
+
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same PR to save minutes on rapid pushes.
+# Pushes to protected branches are NOT cancelled - we want full CI history
+# for every merged commit.
+concurrency:
+  group: build-test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Fast feedback: lint, build, dist-sync and jsdom across all supported
+  # Node versions. The full three-engine browser suite runs once, on the
+  # primary Node version only - browser behaviour is Node-independent, so
+  # repeating it per Node entry added cost without coverage.
+  # Runs on every push and every PR.
+  install:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x, 24.x, 25.x, 26.x]
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      # All three engines, but only on the primary Node version (the same
+      # one the browser-matrix job uses). DOMPurify's security posture
+      # depends on per-engine HTML parser behaviour being exercised on
+      # every PR - but the browsers don't care which Node drives them, so
+      # installing and running 3 engines x 5 Node versions repeated the
+      # same suite 15 times. This gate keeps the full per-engine coverage
+      # once per PR and drops the 12 redundant runs.
+      - name: Install Playwright Browsers
+        if: matrix.node-version == '25.x'
+        run: ./node_modules/.bin/playwright install --with-deps chromium firefox webkit
+
+      - name: Build
+        run: npm run build
+        
+      - name: Verify dist/ matches src/
+        run: |
+          if ! git diff --quiet dist/; then
+            echo "::error::dist/ is out of sync with src/. The husky pre-commit hook should have rebuilt dist/ before commit. Did you commit without running 'npm install' first (which wires up the hook), or bypass hooks with --no-verify?"
+            echo "--- dist/ diff ---"
+            git diff --stat dist/
+            git diff dist/ | head -100
+            exit 1
+          fi
+          echo "dist/ matches src/ ✓"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test (jsdom + full browser matrix)
+        if: matrix.node-version == '25.x'
+        run: npm run test:ci
+
+      - name: Test (jsdom)
+        if: matrix.node-version != '25.x'
+        run: npm run test:jsdom
+
+      - name: Upload Playwright report
+        if: failure() && matrix.node-version == '25.x'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report-node-${{ matrix.node-version }}
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Verify TypeScript
+        run: npm run verify-typescript
+
+  # Browser diversity: chromium + firefox + webkit across Ubuntu, macOS, and
+  # Windows. Catches OS-specific rendering quirks (e.g. macOS WebKit ≈ real
+  # Safari engine, Windows font shaping, Linux-specific parser paths).
+  #
+  # Only runs on release branches (main, 2.x, 3.x) to conserve runner minutes.
+  # PRs get full three-engine coverage on a single Node version from the
+  # "install" job above, which is sufficient for catching regressions.
+  browser-matrix:
+    if: github.event_name == 'push'
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js 25.x
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 25.x
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Install Playwright Browsers (Linux)
+        if: runner.os == 'Linux'
+        run: ./node_modules/.bin/playwright install --with-deps chromium firefox webkit
+
+      - name: Install Playwright Browsers (macOS / Windows)
+        if: runner.os != 'Linux'
+        run: ./node_modules/.bin/playwright install chromium firefox webkit
+
+      - name: Build
+        run: npm run build
+
+      - name: Run browser tests (all engines)
+        run: npm run test:browser
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: playwright-report/
+          retention-days: 7

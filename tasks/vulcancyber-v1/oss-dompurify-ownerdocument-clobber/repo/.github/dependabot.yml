@@ -1,0 +1,106 @@
+version: 2
+updates:
+  # GitHub Actions: weekly, grouped. SHA-pinning means most updates are just
+  # noise unless a real CVE lands; weekly cadence is plenty.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - '*'
+  # Main npm tree (build, test, lint tooling). Weekly + grouped minor/patch so
+  # routine bumps land in one reviewable PR; majors stay separate.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  # Consumer-shape verification harnesses under typescript/. These exist to
+  # catch packaging regressions, not to ship code - group them all together
+  # so we don't get six separate PRs every time @types/node bumps.
+  - package-ecosystem: npm
+    directory: /typescript
+    schedule:
+      interval: weekly
+    groups:
+      typescript-harness:
+        patterns:
+          - '*'
+  - package-ecosystem: npm
+    directory: /typescript/esm
+    schedule:
+      interval: weekly
+    groups:
+      typescript-harness:
+        patterns:
+          - '*'
+  - package-ecosystem: npm
+    directory: /typescript/esm-with-no-types
+    schedule:
+      interval: weekly
+    groups:
+      typescript-harness:
+        patterns:
+          - '*'
+  - package-ecosystem: npm
+    directory: /typescript/esm-with-specific-types
+    schedule:
+      interval: weekly
+    groups:
+      typescript-harness:
+        patterns:
+          - '*'
+  # Legacy-browser harness: intentionally frozen old Playwright builds used
+  # only to exercise DOMPurify against older engines. They are never shipped
+  # and never updated (bumping them defeats the purpose). This entry exists
+  # solely to stop Dependabot trying - and failing - to open security-update
+  # PRs for them: open-pull-requests-limit 0 disables version PRs, and the
+  # ignore suppresses the playwright security-update attempts. NOTE: this only
+  # quiets Dependabot. OpenSSF Scorecard scans the lockfile via OSV separately
+  # and needs a root osv-scanner.toml entry to clear GHSA-7mvr-c777-76hp.
+  - package-ecosystem: npm
+    directory: /test/legacy-playwright
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: playwright
+  # ---------------------------------------------------------------------
+  # 2.x LTS branch. Dependabot watches exactly one branch per entry, so
+  # the entries above (without target-branch) apply only to main. Mirror
+  # the actions and root-npm entries here so 2.x receives routine
+  # dependency updates too. The /typescript/... entries are not mirrored:
+  # those harnesses don't exist on 2.x. Security updates (driven by GHSA
+  # matches) reach 2.x automatically and bypass group settings, so an
+  # incoming CVE patch lands as its own PR rather than being bundled
+  # with the weekly grouped batch.
+  # ---------------------------------------------------------------------
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: '2.x'
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - '*'
+  - package-ecosystem: npm
+    directory: /
+    target-branch: '2.x'
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch

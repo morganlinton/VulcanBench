@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>DOMPurify demo: Hook to remove empty elements</title>
+        <script src="../dist/purify.js"></script>
+    </head>
+    <body>
+        <!-- Our DIV to receive content -->
+        <div id="sanitized"></div>
+
+        <!-- Now let's sanitize that content -->
+        <script>
+            'use strict';
+            
+            // Specify dirty HTML
+            const dirty = '<p>Not empty</p><p class="empty"></p>';
+            
+            // Add a hook to remove empty nodes
+            DOMPurify.addHook('beforeSanitizeAttributes', node => {
+                // Remove the node in case it is empty
+                if (!node.hasChildNodes() && !node.textContent) {
+                    node.remove();
+                }
+            });
+            
+            // Clean HTML string and write into our DIV
+            const clean = DOMPurify.sanitize(dirty);
+            document.getElementById('sanitized').innerHTML = clean;
+        </script>
+    </body>
+</html>

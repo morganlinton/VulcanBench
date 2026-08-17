@@ -102,24 +102,29 @@ class DockerToolExecutor(ToolProtocol):
                 f"could not connect to the Docker daemon ({e}). Is Docker running?"
             ) from e
 
+        run_kwargs: dict[str, Any] = dict(
+            command=["sleep", "infinity"],
+            detach=True,
+            working_dir=_CONTAINER_WORKDIR,
+            volumes={str(self.workspace): {"bind": _CONTAINER_WORKDIR, "mode": "rw"}},
+            environment=_SANDBOX_ENV,
+            network_disabled=not network,
+            mem_limit=mem_limit,
+            nano_cpus=int(cpus * 1_000_000_000),
+            pids_limit=pids_limit,
+            security_opt=["no-new-privileges"],
+            cap_drop=["ALL"],
+            tty=False,
+            auto_remove=False,
+        )
+        # Drop to the host uid/gid so bind-mounted files stay host-owned. Only
+        # POSIX hosts expose getuid/getgid; on Windows/Docker Desktop the daemon
+        # maps ownership itself, so run as the image default there.
+        if hasattr(os, "getuid") and hasattr(os, "getgid"):
+            run_kwargs["user"] = f"{os.getuid()}:{os.getgid()}"
+
         try:
-            self._container = self._client.containers.run(
-                image,
-                command=["sleep", "infinity"],
-                detach=True,
-                working_dir=_CONTAINER_WORKDIR,
-                volumes={str(self.workspace): {"bind": _CONTAINER_WORKDIR, "mode": "rw"}},
-                environment=_SANDBOX_ENV,
-                network_disabled=not network,
-                mem_limit=mem_limit,
-                nano_cpus=int(cpus * 1_000_000_000),
-                pids_limit=pids_limit,
-                user=f"{os.getuid()}:{os.getgid()}",
-                security_opt=["no-new-privileges"],
-                cap_drop=["ALL"],
-                tty=False,
-                auto_remove=False,
-            )
+            self._container = self._client.containers.run(image, **run_kwargs)
         except Exception as e:
             raise SandboxError(f"failed to start sandbox container from {image!r}: {e}") from e
 

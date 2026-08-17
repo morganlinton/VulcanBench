@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>DOMPurify demo: Config usage</title>
+        <script src="../dist/purify.js"></script>
+    </head>
+    <body>
+        <!-- Our DIV to receive content -->
+        <div id="sanitized"></div>
+
+        <!-- Now let's sanitize that content -->
+        <script>
+            'use strict';
+            
+            // Assuming DOMPurify is globally available
+            // import DOMPurify from 'dompurify'; // Uncomment if using ES6 modules
+            
+            // Specify dirty HTML
+            const dirty = `
+                <p>HELLO</p><style>*{x:expression(alert(1))}</style>
+                <iframe/\/src=JavScript:alert&lpar;1)></ifrAMe><br>goodbye</p><h1>not me!</h1>
+            `;
+            
+            // Specify a configuration directive, only <P> elements allowed
+            // Note: We want to also keep <p>'s text content, so we add #text too
+            const config = { ALLOWED_TAGS: ['p', '#text'], KEEP_CONTENT: false };
+            
+            // Clean HTML string and write into our DIV
+            const clean = DOMPurify.sanitize(dirty, config);
+            document.getElementById('sanitized').innerHTML = clean;
+        </script>
+    </body>
+</html>

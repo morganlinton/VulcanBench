@@ -1,7 +1,7 @@
 {
   "_charter": "./CHARTER.md",
   "_note": "VulcanCyber v1: a cybersecurity eval suite curated from real merged OSS PRs whose fixes ALL merged after 2026-06-01 (post current model training cutoffs, incl. Opus 5's May 2026 cutoff), so the suite is contamination-clean for today's frontier models. Defensive posture only: every task is 'here is vulnerable/insufficient code, produce the fix', graded by the PR's own deterministic security regression tests (grader:tests, no LLM judge). A mix of (A) vulnerability fixes and (B) security-tooling PRs across Python, Rust, TypeScript, JavaScript, Go. EVERY task records upstream_merged, so when a newer model's cutoff moves past these dates the clean subset is a query, not archaeology -- do not assume this suite stays clean indefinitely. Tasks are admitted only after validation (gold=1.0, base fails fail_to_pass, deterministic x3 via scripts/validate_tasks.py --sandbox docker) and difficulty measurement (Sonnet 5 + Opus 5, repeat>=3). This manifest is populated as tasks are admitted; see CANDIDATES.md for the sourcing worklog and CHARTER.md for the discipline.",
-  "_status": "16 tasks, all validated (gold=1.0, pre-patch=0.0, deterministic x3, Docker). Languages: Python 6, TypeScript 3, Rust 3, Go 2, JavaScript 2. Families: A 15, B 1. Difficulty measurement (Phase 5) deferred until a paid frontier sweep is run.",
+  "_status": "17 tasks, all validated (gold=1.0, pre-patch=0.0, deterministic x3, Docker). Languages: Python 6, TypeScript 4, Rust 3, Go 2, JavaScript 2. Families: A 16, B 1. Difficulty measurement (Phase 5) deferred until a paid frontier sweep is run.",
   "tasks": [
     "oss-hono-proto-pollution-parsers",
     "oss-undici-header-crlf-coercion",
@@ -18,7 +18,8 @@
     "oss-gix-validate-lone-at-refname",
     "oss-validator-bytelength-surrogate",
     "oss-content-disposition-ext-value",
-    "oss-urllib3-host-injection-validation"
+    "oss-urllib3-host-injection-validation",
+    "oss-dompurify-ownerdocument-clobber"
   ],
   "full": [
     "oss-hono-proto-pollution-parsers",
@@ -36,7 +37,8 @@
     "oss-gix-validate-lone-at-refname",
     "oss-validator-bytelength-surrogate",
     "oss-content-disposition-ext-value",
-    "oss-urllib3-host-injection-validation"
+    "oss-urllib3-host-injection-validation",
+    "oss-dompurify-ownerdocument-clobber"
   ],
   "python": [
     "oss-pyyaml-merge-key-dos",

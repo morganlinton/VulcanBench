@@ -1,0 +1,28 @@
+EventResults {
+    input: "",
+    events: [
+        Event {
+            kind: Scalar,
+            encoding: None,
+            span: 0..0,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                0..0,
+            ),
+            description: "string values must be quoted",
+            expected: Some(
+                [
+                    Description(
+                        "literal string",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                0..0,
+            ),
+        },
+    ],
+}

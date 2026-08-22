@@ -1,0 +1,84 @@
+EventResults {
+    input: "\nkey . = \"value\"\n",
+    events: [
+        Event {
+            kind: Newline,
+            encoding: None,
+            span: 0..1,
+        },
+        Event {
+            kind: SimpleKey,
+            encoding: None,
+            span: 1..4,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 4..5,
+        },
+        Event {
+            kind: KeySep,
+            encoding: None,
+            span: 5..6,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 6..7,
+        },
+        Event {
+            kind: SimpleKey,
+            encoding: None,
+            span: 7..7,
+        },
+        Event {
+            kind: KeyValSep,
+            encoding: None,
+            span: 7..8,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 8..9,
+        },
+        Event {
+            kind: Scalar,
+            encoding: Some(
+                BasicString,
+            ),
+            span: 9..16,
+        },
+        Event {
+            kind: Newline,
+            encoding: None,
+            span: 16..17,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                7..7,
+            ),
+            description: "unquoted keys cannot be empty",
+            expected: Some(
+                [
+                    Description(
+                        "letters",
+                    ),
+                    Description(
+                        "numbers",
+                    ),
+                    Literal(
+                        "-",
+                    ),
+                    Literal(
+                        "_",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                7..7,
+            ),
+        },
+    ],
+}

@@ -1,0 +1,43 @@
+EventResults {
+    input: "[,2]",
+    events: [
+        Event {
+            kind: ArrayOpen,
+            encoding: None,
+            span: 0..1,
+        },
+        Event {
+            kind: Error,
+            encoding: None,
+            span: 1..2,
+        },
+        Event {
+            kind: Scalar,
+            encoding: None,
+            span: 2..3,
+        },
+        Event {
+            kind: ArrayClose,
+            encoding: None,
+            span: 3..4,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                0..1,
+            ),
+            description: "extra comma in array",
+            expected: Some(
+                [
+                    Description(
+                        "value",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                1..2,
+            ),
+        },
+    ],
+}

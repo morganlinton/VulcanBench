@@ -1,0 +1,33 @@
+EventResults {
+    input: "[",
+    events: [
+        Event {
+            kind: ArrayOpen,
+            encoding: None,
+            span: 0..1,
+        },
+        Event {
+            kind: ArrayClose,
+            encoding: None,
+            span: 1..1,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                0..1,
+            ),
+            description: "unclosed array",
+            expected: Some(
+                [
+                    Literal(
+                        "]",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                1..1,
+            ),
+        },
+    ],
+}

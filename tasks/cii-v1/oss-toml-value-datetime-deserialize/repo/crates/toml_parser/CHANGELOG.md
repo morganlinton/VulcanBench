@@ -1,0 +1,120 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+<!-- next-header -->
+## [Unreleased] - ReleaseDate
+
+## [1.1.3] - 2026-07-27
+
+### Performance
+
+- Reduce over-allocation with improved tokens/bytes calculation
+
+## [1.1.2] - 2026-04-01
+
+### Fixes
+
+- For unquoted keys, report a span over all contiguous invalid characters, rather than insertion points before each byte
+
+## [1.1.1] - 2026-03-31
+
+### Fixes
+
+- Remove stack overflow with *many* `=` in a row
+- Remove stack overflow with *many* `+` / `-` in a row
+
+## [1.1.0] - 2026-03-23
+
+### Compatibility
+
+- Update MSRV to 1.85
+
+## [1.0.10] - 2026-03-17
+
+### Internal
+
+- Update dependencies
+
+## [1.0.9] - 2026-02-16
+
+### Fixes
+
+- Error on `-_1`
+- Report correct error location for `0b_1`
+- Report expected value for all digit separator errors
+- Don't double-report on some `1__2` cases
+
+## [1.0.8] - 2026-02-12
+
+### Fixes
+
+- Generate synthetic events when closing an inline table without a value
+
+## [1.0.7] - 2026-02-10
+
+### Fixes
+
+- Don't panic on integers with a radix, an underscore, and a non-digit character
+
+## [1.0.6] - 2025-12-18
+
+### Features
+
+- TOML 1.1 support
+  - multi-line inline tables
+  - trailing commas on inline tables
+  - `\e` string escape character
+  - `\xHH` string escape character
+
+## [1.0.5] - 2025-12-17
+
+## [1.0.4] - 2025-10-09
+
+## [1.0.3] - 2025-09-18
+
+### Compatibility
+
+- Update MSRV to 1.76
+
+### Internal
+
+- Update dependencies
+
+## [1.0.2] - 2025-08-04
+
+### Fixes
+
+- Improve missing-open-quote errors
+- Don't treat trailing quotes as separate items
+- Conjoin more values in unquoted string errors
+- Reduce float false positives
+- Reduce float/bool false positives
+
+## [1.0.1] - 2025-07-11
+
+### Fixes
+
+- Fix infinite loop when `)` is present outside of quotes
+
+## [1.0.0] - 2025-07-08
+
+<!-- next-url -->
+[Unreleased]: https://github.com/toml-rs/toml/compare/toml_parser-v1.1.3...HEAD
+[1.1.3]: https://github.com/toml-rs/toml/compare/toml_parser-v1.1.2...toml_parser-v1.1.3
+[1.1.2]: https://github.com/toml-rs/toml/compare/toml_parser-v1.1.1...toml_parser-v1.1.2
+[1.1.1]: https://github.com/toml-rs/toml/compare/toml_parser-v1.1.0...toml_parser-v1.1.1
+[1.1.0]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.10...toml_parser-v1.1.0
+[1.0.10]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.9...toml_parser-v1.0.10
+[1.0.9]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.8...toml_parser-v1.0.9
+[1.0.8]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.7...toml_parser-v1.0.8
+[1.0.7]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.6...toml_parser-v1.0.7
+[1.0.6]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.5...toml_parser-v1.0.6
+[1.0.5]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.4...toml_parser-v1.0.5
+[1.0.4]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.3...toml_parser-v1.0.4
+[1.0.3]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.2...toml_parser-v1.0.3
+[1.0.2]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.1...toml_parser-v1.0.2
+[1.0.1]: https://github.com/toml-rs/toml/compare/toml_parser-v1.0.0...toml_parser-v1.0.1
+[1.0.0]: https://github.com/toml-rs/toml/compare/e5b281ad...toml_parser-v1.0.0

@@ -1,0 +1,57 @@
+EventResults {
+    input: "\"\"\"  \\\"\"\"",
+    events: [
+        Event {
+            kind: Scalar,
+            encoding: Some(
+                MlBasicString,
+            ),
+            span: 0..9,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                0..9,
+            ),
+            description: "missing escaped value",
+            expected: Some(
+                [
+                    Literal(
+                        "b",
+                    ),
+                    Literal(
+                        "e",
+                    ),
+                    Literal(
+                        "f",
+                    ),
+                    Literal(
+                        "n",
+                    ),
+                    Literal(
+                        "r",
+                    ),
+                    Literal(
+                        "\\",
+                    ),
+                    Literal(
+                        "\"",
+                    ),
+                    Literal(
+                        "x",
+                    ),
+                    Literal(
+                        "u",
+                    ),
+                    Literal(
+                        "U",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                6..6,
+            ),
+        },
+    ],
+}

@@ -12,3 +12,9 @@ tasks/v2/**/repo_snapshot* filter=lfs diff=lfs merge=lfs -text
 
 # Large binary assets if any (traces can be large but we keep JSONL text)
 # runs/ is gitignored entirely
+
+# Task repo slices are byte-exact fixtures: vendored crates carry sha256
+# checksums (.cargo-checksum.json) and tests may assert on CRLF content, so
+# line-ending normalization corrupts them. Never convert anything under a
+# task's repo/ tree.
+tasks/*/*/repo/** -text

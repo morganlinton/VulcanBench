@@ -1,0 +1,77 @@
+{
+  "id": "oss-hono-regexp-wildcard-middleware",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "a19462879716e7b600daed8eb3a1b2af4bd68feb",
+  "upstream": {
+    "url": "https://github.com/honojs/hono/pull/5266",
+    "issue": "https://github.com/honojs/hono/issues/5258",
+    "commit": "a19462879716e7b600daed8eb3a1b2af4bd68feb"
+  },
+  "upstream_merged": "2026-08-19",
+  "decontamination_notes": "Real bug fix from honojs/hono PR #5266 (fixes #5258, related #5260/#5261), merged 2026-08-19, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. RegExpRouter builds a trie whose middleware-association step decided which registered routes a wildcard middleware covers: a suffix wildcard without a preceding slash (/assets*) was treated as a literal '*' character during association, and a trailing wildcard after a (patterned) label (/:name/*, /:year{[0-9]{4}}/*) failed to associate with routes using a different parameter name at the same position. The fix spans src/router/reg-exp-router/node.ts (exports the label/wildcard regexp constants) and router.ts (association logic), keeping registration order and per-handler parameter names. Repo sliced at the PR base commit (a1946287) minus docs/benchmarks/perf-measures/runtime-tests, mirroring the prior hono tasks (MIT LICENSE preserved; hono has no runtime deps, node-ts image runs tsx directly). Coverage: 6 fail_to_pass tests exercising RegExpRouter directly (SmartRouter would mask the defect by falling back), each verified failing at base and passing after the gold patch: suffix wildcard association in both registration orders, label wildcard across param names, nested-brace and regexp-metacharacter patterns, and default-pattern reverse order; 4 pass_to_pass guards pin slash-wildcard association, wildcard sub-path matching with own params, static/param basics, and non-matching paths. Assertions check handler lists and param objects via the router's public match API, never error text. Expected handler orders and params come from the upstream PR's own test cases.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "suffix_wildcard",
+        "cmd": "tsx --test --test-name-pattern='^vb suffix wildcard without slash associates with covered route$' vb_regexp_wildcard.test.ts"
+      },
+      {
+        "name": "suffix_wildcard_reverse",
+        "cmd": "tsx --test --test-name-pattern='^vb suffix wildcard without slash associates in reverse order$' vb_regexp_wildcard.test.ts"
+      },
+      {
+        "name": "label_cross_params",
+        "cmd": "tsx --test --test-name-pattern='^vb label wildcard middleware crosses param names$' vb_regexp_wildcard.test.ts"
+      },
+      {
+        "name": "nested_braces",
+        "cmd": "tsx --test --test-name-pattern='^vb nested-brace pattern wildcard middleware crosses param names$' vb_regexp_wildcard.test.ts"
+      },
+      {
+        "name": "regexp_meta",
+        "cmd": "tsx --test --test-name-pattern='^vb regexp-meta pattern wildcard middleware crosses param names$' vb_regexp_wildcard.test.ts"
+      },
+      {
+        "name": "default_pattern_reverse",
+        "cmd": "tsx --test --test-name-pattern='^vb default-pattern wildcard middleware in reverse registration order$' vb_regexp_wildcard.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "slash_wildcard",
+        "cmd": "tsx --test --test-name-pattern='^vb slash wildcard middleware associates with covered route$' vb_regexp_regression.test.ts"
+      },
+      {
+        "name": "wildcard_subpath",
+        "cmd": "tsx --test --test-name-pattern='^vb label wildcard matches a sub path with its own param$' vb_regexp_regression.test.ts"
+      },
+      {
+        "name": "static_param_basics",
+        "cmd": "tsx --test --test-name-pattern='^vb static and param routes match with own params$' vb_regexp_regression.test.ts"
+      },
+      {
+        "name": "no_match",
+        "cmd": "tsx --test --test-name-pattern='^vb unmatched path yields no handlers$' vb_regexp_regression.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/router/reg-exp-router/"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

@@ -1,0 +1,30 @@
+[package]
+name = "toml-test-data"
+version = "2.13.0"
+description = "TOML test cases"
+categories = ["development-tools::testing", "text-processing", "encoding"]
+keywords = ["development", "toml"]
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+include = [
+  "build.rs",
+  "src/**/*",
+  "Cargo.toml",
+  "Cargo.lock",
+  "LICENSE*",
+  "README.md",
+  "examples/**/*",
+  "assets/**/*",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--generate-link-to-definition"]
+
+[dependencies]
+include_dir = "0.7.4"
+
+[lints]
+workspace = true

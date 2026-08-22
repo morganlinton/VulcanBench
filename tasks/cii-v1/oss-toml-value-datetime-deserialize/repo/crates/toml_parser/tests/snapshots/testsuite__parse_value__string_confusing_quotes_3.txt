@@ -1,0 +1,30 @@
+EventResults {
+    input: "\"\"\"  \"\"",
+    events: [
+        Event {
+            kind: Scalar,
+            encoding: Some(
+                MlBasicString,
+            ),
+            span: 0..7,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                0..7,
+            ),
+            description: "invalid multi-line basic string",
+            expected: Some(
+                [
+                    Literal(
+                        "\"",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                7..7,
+            ),
+        },
+    ],
+}

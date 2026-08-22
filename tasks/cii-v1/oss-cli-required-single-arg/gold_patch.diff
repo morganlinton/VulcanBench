@@ -1,0 +1,196 @@
+diff --git a/args.go b/args.go
+index b3acfd5ccc..0dad209914 100644
+--- a/args.go
++++ b/args.go
+@@ -77,6 +77,11 @@ type Argument interface {
+ 	Get() any
+ }
+ 
++type requiredArgument interface {
++	name() string
++	required() bool
++}
++
+ // AnyArguments to differentiate between no arguments(nil) vs aleast one
+ var AnyArguments = []Argument{
+ 	&StringArgs{
+@@ -89,6 +94,7 @@ type ArgumentBase[T any, C any, VC ValueCreator[T, C]] struct {
+ 	Value       T      `json:"value"`     // the default value of this argument
+ 	Destination *T     `json:"-"`         // the destination point for this argument
+ 	UsageText   string `json:"usageText"` // the usage text to show
++	Required    bool   `json:"required"`  // whether the argument is required or not
+ 	Config      C      `json:"config"`    // config for this argument similar to Flag Config
+ 
+ 	value *T
+@@ -98,18 +104,33 @@ func (a *ArgumentBase[T, C, VC]) HasName(s string) bool {
+ 	return s == a.Name
+ }
+ 
++func (a *ArgumentBase[T, C, VC]) name() string {
++	return a.Name
++}
++
++func (a *ArgumentBase[T, C, VC]) required() bool {
++	return a.Required
++}
++
+ func (a *ArgumentBase[T, C, VC]) Usage() string {
+ 	if a.UsageText != "" {
+ 		return a.UsageText
+ 	}
+ 
+-	usageFormat := "%[1]s"
++	usageFormat := "[%[1]s]"
++	if a.Required {
++		usageFormat = "%[1]s"
++	}
+ 	return fmt.Sprintf(usageFormat, a.Name)
+ }
+ 
+ func (a *ArgumentBase[T, C, VC]) Parse(s []string) ([]string, error) {
+ 	tracef("calling arg%[1] parse with args %[2]", a.Name, s)
+ 
++	if a.Required && len(s) == 0 {
++		return s, &errRequiredArguments{missingArguments: []string{a.Name}}
++	}
++
+ 	var vc VC
+ 	var t T
+ 	value := vc.Create(a.Value, &t, a.Config)
+diff --git a/command.go b/command.go
+index 4cd907a558..6f80294755 100644
+--- a/command.go
++++ b/command.go
+@@ -454,6 +454,40 @@ func (cmd *Command) checkRequiredFlags() requiredFlagsErr {
+ 	return nil
+ }
+ 
++func (cmd *Command) checkRequiredArguments() requiredArgumentsErr {
++	// The help and completion commands are allowed to run without
++	// enforcement of required arguments, since they do not invoke user
++	// actions that depend on those argument values.
++	if cmd.builtInHelp || cmd.isCompletionCommand {
++		return nil
++	}
++
++	tracef("checking for required arguments (cmd=%[1]q)", cmd.Name)
++
++	missingArguments := []string{}
++	// This count-based precheck relies on required single-value arguments
++	// being declared before optional or multi-value arguments, as documented.
++	// Argument.Parse remains the backstop for unsupported orderings.
++	providedArguments := cmd.Args().Len()
++
++	for index, arg := range cmd.Arguments {
++		requiredArg, ok := arg.(requiredArgument)
++		if ok && requiredArg.required() && index >= providedArguments {
++			missingArguments = append(missingArguments, requiredArg.name())
++		}
++	}
++
++	if len(missingArguments) != 0 {
++		tracef("found missing required arguments %[1]q (cmd=%[2]q)", missingArguments, cmd.Name)
++
++		return &errRequiredArguments{missingArguments: missingArguments}
++	}
++
++	tracef("all required arguments set (cmd=%[1]q)", cmd.Name)
++
++	return nil
++}
++
+ func (cmd *Command) onInvalidFlag(ctx context.Context, name string) {
+ 	for cmd != nil {
+ 		if cmd.InvalidFlagAccessHandler != nil {
+diff --git a/command_run.go b/command_run.go
+index 8d5907151e..e0fd3f435c 100644
+--- a/command_run.go
++++ b/command_run.go
+@@ -343,21 +343,14 @@ func (cmd *Command) run(ctx context.Context, osArgs []string) (_ context.Context
+ 		}
+ 	}
+ 
++	var requiredErr error
+ 	if err := cmd.checkAllRequiredFlags(); err != nil {
+-		cmd.isInError = true
+-		if cmd.OnUsageError != nil {
+-			err = cmd.OnUsageError(ctx, cmd, err, cmd.parent != nil)
+-		} else {
+-			fmt.Fprintf(cmd.Root().ErrWriter, "Incorrect Usage: %s\n\n", err.Error())
+-			if cmd.parent == nil {
+-				_ = ShowRootCommandHelp(cmd)
+-			} else {
+-				if err := ShowCommandHelp(ctx, cmd.parent, cmd.Name); err != nil {
+-					_ = ShowSubcommandHelp(cmd)
+-				}
+-			}
+-		}
+-		return ctx, err
++		requiredErr = err
++	} else if err := cmd.checkRequiredArguments(); err != nil {
++		requiredErr = err
++	}
++	if requiredErr != nil {
++		return cmd.handleRequiredError(ctx, requiredErr)
+ 	}
+ 
+ 	// Run the command action.
+@@ -369,6 +362,9 @@ func (cmd *Command) run(ctx context.Context, osArgs []string) (_ context.Context
+ 			rargs, err = arg.Parse(rargs)
+ 			if err != nil {
+ 				tracef("calling with %[1]v (cmd=%[2]q)", err, cmd.Name)
++				if _, ok := err.(*errRequiredArguments); ok {
++					return cmd.handleRequiredError(ctx, err)
++				}
+ 				if cmd.OnUsageError != nil {
+ 					err = cmd.OnUsageError(ctx, cmd, err, cmd.parent != nil)
+ 				}
+@@ -388,6 +384,21 @@ func (cmd *Command) run(ctx context.Context, osArgs []string) (_ context.Context
+ 	return ctx, deferErr
+ }
+ 
++func (cmd *Command) handleRequiredError(ctx context.Context, err error) (context.Context, error) {
++	cmd.isInError = true
++	if cmd.OnUsageError != nil {
++		err = cmd.OnUsageError(ctx, cmd, err, cmd.parent != nil)
++	} else {
++		fmt.Fprintf(cmd.Root().ErrWriter, "Incorrect Usage: %s\n\n", err.Error())
++		if cmd.parent == nil {
++			_ = ShowRootCommandHelp(cmd)
++		} else if helpErr := ShowCommandHelp(ctx, cmd.parent, cmd.Name); helpErr != nil {
++			_ = ShowSubcommandHelp(cmd)
++		}
++	}
++	return ctx, err
++}
++
+ func commandChain(cmd *Command) []*Command {
+ 	var cmdChain []*Command
+ 	for p := cmd; p != nil; p = p.parent {
+diff --git a/errors.go b/errors.go
+index ffd6471f23..ff0dfa51d7 100644
+--- a/errors.go
++++ b/errors.go
+@@ -61,6 +61,22 @@ func (e *errRequiredFlags) Error() string {
+ 	return fmt.Sprintf("Required flags %q not set", joinedMissingFlags)
+ }
+ 
++type requiredArgumentsErr interface {
++	error
++}
++
++type errRequiredArguments struct {
++	missingArguments []string
++}
++
++func (e *errRequiredArguments) Error() string {
++	if len(e.missingArguments) == 1 {
++		return fmt.Sprintf("Required argument %q not set", e.missingArguments[0])
++	}
++	joinedMissingArguments := strings.Join(e.missingArguments, ", ")
++	return fmt.Sprintf("Required arguments %q not set", joinedMissingArguments)
++}
++
+ type mutuallyExclusiveGroup struct {
+ 	flag1Name string
+ 	flag2Name string

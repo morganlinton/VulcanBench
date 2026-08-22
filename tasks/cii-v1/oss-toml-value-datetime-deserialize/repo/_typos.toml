@@ -1,0 +1,8 @@
+[files]
+extend-exclude = [
+    "crates/*/tests/snapshots/**",
+    "crates/benchmarks/src/Cargo.*.toml",
+]
+
+[default.extend-words]
+ser = "ser"

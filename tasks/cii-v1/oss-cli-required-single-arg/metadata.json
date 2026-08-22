@@ -1,0 +1,66 @@
+{
+  "id": "oss-cli-required-single-arg",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:base",
+  "base_commit": "4c19740af571db4fa063de81c7ab0e56c5085fa2",
+  "upstream": {
+    "url": "https://github.com/urfave/cli/pull/2393",
+    "issue": "https://github.com/urfave/cli/issues/2392",
+    "commit": "4c19740af571db4fa063de81c7ab0e56c5085fa2"
+  },
+  "upstream_merged": "2026-08-16",
+  "decontamination_notes": "Real feature from urfave/cli PR #2393 (fixes #2392), merged 2026-08-16, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. urfave/cli v3 had no way to require a single-value argument ({Type}Arg): ArgumentBase.Parse fell back to the default value when no argument was given, so commands ran with empty values instead of failing. The upstream fix adds a Required field to ArgumentBase (plus a requiredArgument interface in args.go), threads missing-argument detection through command.go/command_run.go, adds errRequiredArguments in errors.go, and changes Usage() to render optional single args bracketed ([name]) to match the plural {Type}Args. Task spans four source files (system complexity). Repo sliced at the PR base commit (4c19740a): full module tree minus .git/.github, with go mod vendor committed (testify closure, 50 files; the upstream .gitignore's 'vendor' rule is stripped so the vendor tree is tracked \u2014 go builds run offline with -mod=vendor). MIT LICENSE preserved. The gold patch is the PR's four source files; its docs and regenerated godoc fixtures are dropped as non-source. Hidden tests live in test-only sub-packages so their compilation is independent: vbrequired/ (fail_to_pass) references the new Required API and does not compile at base \u2014 all four commands verified failing at base and passing after the gold patch (missing required arg errors, default value does not satisfy, chained required args, bracketed-vs-bare usage rendering); vbreg/ (pass_to_pass) compiles and passes at base, guarding optional-arg default fallback, plural-args Min enforcement, and required flags. Assertions check error presence and destination values, never error text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "required_missing",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBSingleRequiredArgMissing ./vbrequired/"
+      },
+      {
+        "name": "default_not_satisfy",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBRequiredArgDefaultDoesNotSatisfy ./vbrequired/"
+      },
+      {
+        "name": "chained_required",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBChainedRequiredArgs ./vbrequired/"
+      },
+      {
+        "name": "usage_rendering",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBUsageRendering ./vbrequired/"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "optional_default",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBOptionalSingleArgUsesDefault ./vbreg/"
+      },
+      {
+        "name": "plural_min",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBPluralArgsMinStillEnforced ./vbreg/"
+      },
+      {
+        "name": "required_flags",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBRequiredFlagStillEnforced ./vbreg/"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "args.go",
+      "command_run.go"
+    ],
+    "suggested_max_steps": 240,
+    "suggested_timeout_s": 4320
+  }
+}

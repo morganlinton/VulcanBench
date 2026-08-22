@@ -1,0 +1,4 @@
+# ensure eol conversions do not happen as tests can rely on them
+* text eol=lf
+# Vendored crates are checksummed byte-for-byte; never convert them.
+vendor/** -text

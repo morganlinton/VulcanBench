@@ -1,0 +1,89 @@
+EventResults {
+    input: "\n . key = \"value\"\n",
+    events: [
+        Event {
+            kind: Newline,
+            encoding: None,
+            span: 0..1,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 1..2,
+        },
+        Event {
+            kind: SimpleKey,
+            encoding: None,
+            span: 2..2,
+        },
+        Event {
+            kind: KeySep,
+            encoding: None,
+            span: 2..3,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 3..4,
+        },
+        Event {
+            kind: SimpleKey,
+            encoding: None,
+            span: 4..7,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 7..8,
+        },
+        Event {
+            kind: KeyValSep,
+            encoding: None,
+            span: 8..9,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 9..10,
+        },
+        Event {
+            kind: Scalar,
+            encoding: Some(
+                BasicString,
+            ),
+            span: 10..17,
+        },
+        Event {
+            kind: Newline,
+            encoding: None,
+            span: 17..18,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                2..2,
+            ),
+            description: "unquoted keys cannot be empty",
+            expected: Some(
+                [
+                    Description(
+                        "letters",
+                    ),
+                    Description(
+                        "numbers",
+                    ),
+                    Literal(
+                        "-",
+                    ),
+                    Literal(
+                        "_",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                2..2,
+            ),
+        },
+    ],
+}

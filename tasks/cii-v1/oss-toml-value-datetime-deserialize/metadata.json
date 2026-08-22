@@ -1,0 +1,72 @@
+{
+  "id": "oss-toml-value-datetime-deserialize",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:rust-2024",
+  "base_commit": "4ec099fed591a172f82007cb2f9d605985bbecee",
+  "upstream": {
+    "url": "https://github.com/toml-rs/toml/pull/1194",
+    "issue": "https://github.com/toml-rs/toml/issues/440",
+    "commit": "4ec099fed591a172f82007cb2f9d605985bbecee"
+  },
+  "upstream_merged": "2026-07-28",
+  "decontamination_notes": "Real bug fix from toml-rs/toml PR #1194 (closes #440), merged 2026-07-28, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. toml::value::Datetime asks serde for TOML's private datetime struct; the legacy toml::Value deserializer forwarded deserialize_struct to deserialize_any, where Value::Datetime is represented as a string, so typed conversions from an already-parsed Value or Table failed with a type error while the direct parser path worked. The fix handles the private datetime struct in Value's deserialize_struct, forwards Table's deserialize_struct to the Value implementation, and deliberately leaves deserialize_any unchanged so generic cross-format conversions (e.g. into serde_json::Value) still produce a string. Workspace sliced at the PR base commit (4ec099fe) with cargo-prune to the dependency closure of the toml crate (toml, toml_datetime, toml_parser, toml_writer, serde_spanned; crates/ layout preserved), third-party deps vendored (Cargo.lock regenerated for the pruned workspace, cargo vendor + .cargo/config.toml) so the sandbox builds offline; MIT/Apache LICENSEs preserved. Coverage: 4 fail_to_pass tests, each verified failing at base and passing after the gold patch (typed Datetime from Value, all four datetime flavors, a Datetime struct field from Table, and from Value); 3 pass_to_pass guards pin the deserialize_any string representation for JSON conversion, the direct-from-document parser path, and plain typed Table fields. Assertions check parsed values via public APIs, never error text. Image is vulcanbench/sandbox:rust-2024 (rustc 1.90): the regenerated lockfile pulls dev-deps (e.g. the ignore crate) that use let-chains, which need rustc >= 1.88 \u2014 the 1.87 :rust image cannot build them.",
+  "grader": "tests",
+  "setup": [
+    {
+      "name": "warm-build",
+      "cmd": "cargo build --offline -p toml --tests"
+    }
+  ],
+  "setup_timeout_s": 900,
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "datetime_from_value",
+        "cmd": "cargo test --offline -p toml --test vb_datetime datetime_from_value_typed"
+      },
+      {
+        "name": "datetime_variants",
+        "cmd": "cargo test --offline -p toml --test vb_datetime datetime_variants_from_value_typed"
+      },
+      {
+        "name": "struct_field_from_table",
+        "cmd": "cargo test --offline -p toml --test vb_datetime datetime_struct_field_from_table"
+      },
+      {
+        "name": "struct_field_from_value",
+        "cmd": "cargo test --offline -p toml --test vb_datetime datetime_struct_field_from_value"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "json_any_still_string",
+        "cmd": "cargo test --offline -p toml --test vb_reg generic_json_conversion_still_string"
+      },
+      {
+        "name": "from_str_path",
+        "cmd": "cargo test --offline -p toml --test vb_reg from_str_datetime_field_works"
+      },
+      {
+        "name": "plain_typed_fields",
+        "cmd": "cargo test --offline -p toml --test vb_reg plain_typed_table_fields_work"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "crates/toml/src/"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

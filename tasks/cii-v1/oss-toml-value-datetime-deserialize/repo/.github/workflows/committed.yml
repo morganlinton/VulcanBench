@@ -1,0 +1,29 @@
+# Not run as part of pre-commit checks because they don't handle sending the correct commit
+# range to `committed`
+name: Lint Commits
+on: [pull_request]
+
+permissions:
+  contents: read
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+  CLICOLOR: 1
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  committed:
+    name: Lint Commits
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Lint Commits
+      uses: crate-ci/committed@5a1fb885977dc7070de32ccdc47857a7696343bd # master

@@ -1,0 +1,69 @@
+EventResults {
+    input: "\n = \"value\"\n",
+    events: [
+        Event {
+            kind: Newline,
+            encoding: None,
+            span: 0..1,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 1..2,
+        },
+        Event {
+            kind: SimpleKey,
+            encoding: None,
+            span: 2..2,
+        },
+        Event {
+            kind: KeyValSep,
+            encoding: None,
+            span: 2..3,
+        },
+        Event {
+            kind: Whitespace,
+            encoding: None,
+            span: 3..4,
+        },
+        Event {
+            kind: Scalar,
+            encoding: Some(
+                BasicString,
+            ),
+            span: 4..11,
+        },
+        Event {
+            kind: Newline,
+            encoding: None,
+            span: 11..12,
+        },
+    ],
+    errors: [
+        ParseError {
+            context: Some(
+                2..2,
+            ),
+            description: "unquoted keys cannot be empty",
+            expected: Some(
+                [
+                    Description(
+                        "letters",
+                    ),
+                    Description(
+                        "numbers",
+                    ),
+                    Literal(
+                        "-",
+                    ),
+                    Literal(
+                        "_",
+                    ),
+                ],
+            ),
+            unexpected: Some(
+                2..2,
+            ),
+        },
+    ],
+}

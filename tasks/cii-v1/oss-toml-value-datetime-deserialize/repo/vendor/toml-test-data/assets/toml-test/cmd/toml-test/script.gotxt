@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Also compatible with zsh, but not POSIX sh.
+#
+# Run the toml-test compliance tests: https://github.com/toml-lang/toml-test
+
+# Decoder and encoder commands; leave encoder blank if writing TOML isn't supported.
+decoder="{{join .Decoder " "}}"
+{{if .Encoder}}encoder="{{join .Encoder " "}}"{{else}}
+encoder=  # No encoder tests{{end}}
+
+# Setup command(s), one -setup per array entry.
+setup=({{range $s := .Setup}}
+{{"\t"}}-setup {{$s | quote}}{{end}}
+)
+
+# Version of the TOML specification to test.
+toml={{.TOML}}
+
+# Skip known failures.
+skip=(
+{{- if .FailedValid}}
+	# Failing "valid" tests
+{{range $t := .FailedValid}}{{"\t"}}-skip '{{$t}}'
+{{end}}{{end}}
+
+{{- if .FailedEncoder}}
+	# Failing "encoder" tests
+{{range $t := .FailedEncoder}}{{"\t"}}-skip '{{$t}}'
+{{end}}{{end}}
+
+{{- if .FailedInvalid}}
+	# Failing "invalid" tests
+{{range $t := .FailedInvalid}}{{"\t"}}-skip '{{$t}}'
+{{end}}{{end -}}
+)
+
+# Find toml-test
+tt=
+if [[ -x "./toml-test" ]] && [[ ! -d "./toml-test" ]]; then
+	tt="./toml-test"
+elif command -v "toml-test" >/dev/null; then
+	tt="toml-test"
+elif [[ -n "$(go env GOBIN)" ]] && [[ -x "$(go env GOBIN)/toml-test" ]]; then
+	tt="$(go env GOPATH)/toml-test"
+elif [[ -n "$(go env GOPATH)" ]] && [[ -x "$(go env GOPATH)/bin/toml-test" ]]; then
+	tt="$(go env GOPATH)/bin/toml-test"
+elif [[ -x "$HOME/go/bin/toml-test" ]]; then
+	tt="$HOME/go/bin/toml-test"
+fi
+if ! command -v "$tt" >/dev/null; then
+	echo >&2 'toml-test not in current dir, $PATH, $GOBIN, $GOPATH/bin, or $HOME/go/bin; install with:'
+	echo >&2 '    % go install github.com/toml-lang/toml-test/v2/cmd/toml-test@{{.Version}}'
+	echo >&2
+	echo >&2 'Or download a binary from:'
+	echo >&2 '    https://github.com/toml-lang/toml-test/releases'
+	exit 1
+fi
+
+# Run toml-test
+"$tt" test -toml="$toml" -skip-must-err ${skip[@]} "${setup[@]}" -decoder="$decoder" -encoder="${encoder:-}" "$@"

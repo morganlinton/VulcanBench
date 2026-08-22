@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import tarfile
 from contextlib import suppress
@@ -43,6 +44,40 @@ SCALE_DEFAULTS: dict[str, dict[str, int | float]] = {
     "large": {"suggested_max_steps": 150, "suggested_timeout_s": 2700},
     "xlarge": {"suggested_max_steps": 200, "suggested_timeout_s": 3600},
 }
+# Complexity-scaled budgets (Coding Intelligence Index): repo_scale sets the
+# baseline (navigation surface drives per-step cost), and task_complexity
+# multiplies it (a cross-module fix needs more of those steps than a one-file
+# edit in the same tree). The v3/v4 timeout failures were exactly this gap: a
+# `system` task in a medium repo got the same 1200s as a one-liner. These
+# multipliers are used to STAMP explicit `agent_hints` into each task
+# (scripts/stamp_task_budgets.py) rather than applied at run time, so a task's
+# budget is auditable in its metadata and older suites' run conditions never
+# shift under cached-run comparisons.
+COMPLEXITY_BUDGET_MULTIPLIERS: dict[str, float] = {
+    "localized": 1.0,
+    "multi_file": 1.3,
+    "system": 1.6,
+    "architecture": 2.0,
+}
+
+
+def complexity_scaled_budgets(scale: str, complexity: str) -> dict[str, int]:
+    """Explicit per-task budgets from the scale baseline x complexity multiplier.
+
+    Returns ``{"suggested_max_steps": int, "suggested_timeout_s": int}`` suitable
+    for stamping into ``metadata.agent_hints``. Unknown scales fall back to the
+    micro baseline and unknown complexities to x1.0, mirroring ``repo_scale()``
+    and ``task_complexity()`` normalization. Timeouts round up to a whole minute
+    so stamped values read cleanly in metadata.
+    """
+    base = SCALE_DEFAULTS.get(scale, SCALE_DEFAULTS["micro"])
+    mult = COMPLEXITY_BUDGET_MULTIPLIERS.get(complexity, 1.0)
+    steps = round(float(base["suggested_max_steps"]) * mult)
+    timeout = float(base["suggested_timeout_s"]) * mult
+    timeout_s = int(-(-timeout // 60) * 60)  # ceil to whole minutes
+    return {"suggested_max_steps": steps, "suggested_timeout_s": timeout_s}
+
+
 MAX_SNAPSHOT_BYTES = 100 * 1024 * 1024
 LIST_FILES_CAP = 500
 SEARCH_CODE_CAP = 100
@@ -245,6 +280,38 @@ def validate_scale_fields(task_root: Path, metadata: dict[str, Any]) -> list[str
     ):
         reasons.append("test_timeout_s must be a positive number when set")
 
+    reasons.extend(_validate_explicit_budgets(task_root, metadata))
+
+    return reasons
+
+
+def _validate_explicit_budgets(task_root: Path, metadata: dict[str, Any]) -> list[str]:
+    """Enforce per-task budgets when the suite manifest demands them.
+
+    A suite whose ``suite.json`` sets ``"require_explicit_budgets": true`` (the
+    Coding Intelligence Index does) fails any task without positive
+    ``agent_hints.suggested_max_steps`` and ``suggested_timeout_s`` — budgets
+    must be stamped and auditable per task, never inherited silently from
+    scale defaults.
+    """
+    manifest = task_root.parent / "suite.json"
+    if not manifest.is_file():
+        return []
+    try:
+        suite_data = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    if suite_data.get("require_explicit_budgets") is not True:
+        return []
+    reasons: list[str] = []
+    hints = agent_hints(metadata)
+    for key in ("suggested_max_steps", "suggested_timeout_s"):
+        value = hints.get(key)
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
+            reasons.append(
+                f"suite requires explicit budgets: agent_hints.{key} must be a positive "
+                "number (stamp with scripts/stamp_task_budgets.py)"
+            )
     return reasons
 
 

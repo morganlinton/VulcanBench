@@ -139,3 +139,67 @@ def test_bigger_repos_get_at_least_as_much_wall_clock() -> None:
         SCALE_DEFAULTS["xlarge"]["suggested_timeout_s"]
         > (SCALE_DEFAULTS["large"]["suggested_timeout_s"])
     )
+
+
+def test_complexity_scaled_budgets_formula() -> None:
+    from harness.task_metadata import COMPLEXITY_BUDGET_MULTIPLIERS, complexity_scaled_budgets
+
+    # localized keeps the scale baseline exactly.
+    base = complexity_scaled_budgets("medium", "localized")
+    assert base == {"suggested_max_steps": 100, "suggested_timeout_s": 1200}
+    # system multiplies it (1200 * 1.6 = 1920, already a whole minute).
+    system = complexity_scaled_budgets("medium", "system")
+    assert system == {"suggested_max_steps": 160, "suggested_timeout_s": 1920}
+    # Timeouts round UP to whole minutes (300 * 1.3 = 390 -> 420).
+    assert complexity_scaled_budgets("micro", "multi_file")["suggested_timeout_s"] == 420
+    # architecture at xlarge is the ceiling: 2h, 400 steps.
+    top = complexity_scaled_budgets("xlarge", "architecture")
+    assert top == {"suggested_max_steps": 400, "suggested_timeout_s": 7200}
+    # Unknown values normalize like repo_scale()/task_complexity() do.
+    assert complexity_scaled_budgets("bogus", "bogus") == complexity_scaled_budgets(
+        "micro", "localized"
+    )
+    # Budgets are monotone in complexity for every scale.
+    order = ["localized", "multi_file", "system", "architecture"]
+    assert [COMPLEXITY_BUDGET_MULTIPLIERS[c] for c in order] == sorted(
+        COMPLEXITY_BUDGET_MULTIPLIERS[c] for c in order
+    )
+
+
+def test_suite_requiring_explicit_budgets_fails_unstamped_task(tmp_path) -> None:
+    import json as _json
+
+    suite_dir = tmp_path / "cii-test"
+    task_dir = suite_dir / "some-task"
+    task_dir.mkdir(parents=True)
+    (suite_dir / "suite.json").write_text(
+        _json.dumps({"require_explicit_budgets": True, "tasks": ["some-task"]}),
+        encoding="utf-8",
+    )
+    meta = {"id": "some-task", "repo_scale": "medium", "task_complexity": "system"}
+
+    reasons = validate_scale_fields(task_dir, meta)
+    assert any("suggested_max_steps" in r for r in reasons)
+    assert any("suggested_timeout_s" in r for r in reasons)
+
+    # Stamped budgets satisfy the rule.
+    meta["agent_hints"] = {"suggested_max_steps": 160, "suggested_timeout_s": 1920}
+    assert validate_scale_fields(task_dir, meta) == []
+
+    # Zero/negative/boolean values are rejected.
+    meta["agent_hints"] = {"suggested_max_steps": 0, "suggested_timeout_s": True}
+    assert len(validate_scale_fields(task_dir, meta)) == 2
+
+
+def test_suite_without_flag_does_not_require_budgets(tmp_path) -> None:
+    import json as _json
+
+    suite_dir = tmp_path / "plain"
+    task_dir = suite_dir / "some-task"
+    task_dir.mkdir(parents=True)
+    (suite_dir / "suite.json").write_text(_json.dumps({"tasks": ["some-task"]}), encoding="utf-8")
+    assert validate_scale_fields(task_dir, {"id": "some-task"}) == []
+    # No suite.json at all (loose task dir) also passes.
+    loose = tmp_path / "loose" / "task"
+    loose.mkdir(parents=True)
+    assert validate_scale_fields(loose, {"id": "task"}) == []

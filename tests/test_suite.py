@@ -465,3 +465,24 @@ def test_graded_failure_is_not_retried(tmp_path: Path, monkeypatch: pytest.Monke
     assert result["n_infra_retries"] == 0, "only environmental failures are retried"
     assert len(calls) == 1
     assert len(result["errors"]) == 1
+
+
+def test_load_suite_name_alias_and_display_name(tmp_path: Path) -> None:
+    base = tmp_path / "tasks"
+    _make_task(base / "cii-v1", "task-a")
+    (base / "cii-v1" / "suite.json").write_text(
+        json.dumps({"display_name": "VulcanBench Coding Intelligence Index", "tasks": ["task-a"]})
+    )
+    # The alias resolves to the directory; the canonical name is recorded so runs
+    # launched via alias and via directory name land in the same cache/compare pool.
+    for alias in ("cii", "coding-intelligence-index", "cii-v1"):
+        suite = load_suite(alias, tasks_base=base)
+        assert suite.name == "cii-v1"
+        assert suite.display_name == "VulcanBench Coding Intelligence Index"
+        assert suite.task_ids == ["task-a"]
+
+
+def test_load_suite_display_name_falls_back_to_name(tmp_path: Path) -> None:
+    base = tmp_path / "tasks"
+    _make_task(base / "demo", "task-a")
+    assert load_suite("demo", tasks_base=base).display_name == "demo"

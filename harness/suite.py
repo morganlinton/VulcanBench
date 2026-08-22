@@ -32,6 +32,13 @@ SUITE_ALIASES = {
     "v1-carbyne": "v1",
 }
 
+#: Plain directory aliases: alternate CLI names for a whole suite, with none of
+#: the v1 tier/filter semantics. ``--suite cii`` loads ``tasks/cii-v1`` as-is.
+SUITE_NAME_ALIASES = {
+    "cii": "cii-v1",
+    "coding-intelligence-index": "cii-v1",
+}
+
 
 #: Failures that say nothing about the model under test: a stalled or refused
 #: provider call, a sandbox that would not start. Scoring these as a task failure
@@ -55,6 +62,13 @@ class Suite:
     name: str
     tasks_root: Path
     task_ids: list[str]
+    #: Human-facing suite name from suite.json ``display_name`` (e.g. "VulcanBench
+    #: Coding Intelligence Index"); falls back to ``name`` when the manifest has none.
+    display_name: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.display_name:
+            self.display_name = self.name
 
 
 def _scale_filter(tasks_root: Path, tier: str) -> list[str]:
@@ -115,16 +129,21 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
             task_ids = _scale_filter(tasks_root, key)
         return Suite(name=name, tasks_root=tasks_root, task_ids=task_ids)
 
-    tasks_root = tasks_base / name
+    dir_name = SUITE_NAME_ALIASES.get(name, name)
+    tasks_root = tasks_base / dir_name
     if not tasks_root.is_dir():
         raise FileNotFoundError(f"suite {name!r} not found under {tasks_base}")
     manifest = tasks_root / "suite.json"
+    display_name = ""
     if manifest.exists():
         data = json.loads(manifest.read_text(encoding="utf-8"))
         task_ids = list(data.get("full") or data.get("tasks") or list_task_ids(tasks_root))
+        raw_display = data.get("display_name")
+        if isinstance(raw_display, str):
+            display_name = raw_display
     else:
         task_ids = list_task_ids(tasks_root)
-    return Suite(name=name, tasks_root=tasks_root, task_ids=task_ids)
+    return Suite(name=dir_name, tasks_root=tasks_root, task_ids=task_ids, display_name=display_name)
 
 
 def run_suite(  # noqa: PLR0912, PLR0915 — linear scheduler: validation + budget loop + summary
@@ -207,7 +226,7 @@ def run_suite(  # noqa: PLR0912, PLR0915 — linear scheduler: validation + budg
             model=model,
             output_dir=output_dir,
             tasks_root=suite.tasks_root,
-            suite=name,
+            suite=suite.name,
             suite_id=suite_id,
             **run_kwargs,
         )

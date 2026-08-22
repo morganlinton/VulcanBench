@@ -301,11 +301,11 @@ def run_suite(  # noqa: PLR0912, PLR0915 — linear scheduler: validation + budg
 
     # Aggregate only this invocation's runs (match suite_id, not just the name).
     suite_rows = [r for r in scan_leaderboard(output_dir) if r.get("suite_id") == suite_id]
-    aggregate = aggregate_by_model(suite_rows, suite=name)
+    aggregate = aggregate_by_model(suite_rows, suite=suite.name)
 
     suite_summary = {
         "suite_id": suite_id,
-        "suite": name,
+        "suite": suite.name,
         "model": model,
         "effort": run_kwargs.get("effort"),
         "experiment_id": run_kwargs.get("experiment_id"),

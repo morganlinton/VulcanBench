@@ -210,6 +210,10 @@ def _workspace_dependency_closure(metadata: dict[str, Any], target_crates: list[
 def _rewrite_workspace_members(cargo_toml: Path, kept_members: set[str]) -> None:  # noqa: PLR0912
     """Rewrite ``[workspace] members`` in the root Cargo.toml to only ``kept_members``.
 
+    ``kept_members`` are member directory paths relative to the workspace root
+    (e.g. ``crates/toml``), which is what the ``members`` array actually holds —
+    crate names only coincide with them when crates sit at the root.
+
     Uses a minimal targeted text edit to avoid reformatting the file. Reads with
     ``tomllib`` for understanding, writes with text substitution.
     """
@@ -313,8 +317,19 @@ def _cargo_prune(slice_root: Path, target_crates: list[str]) -> None:
         if target.is_dir():
             shutil.rmtree(target)
 
-    # Rewrite the root Cargo.toml members.
-    _rewrite_workspace_members(slice_root / "Cargo.toml", closure)
+    # Rewrite the root Cargo.toml members. Members are DIRECTORY PATHS relative
+    # to the workspace root, not crate names — with a glob like
+    # `members = ["crates/*"]` the two differ, and writing names produces a
+    # workspace whose members cannot be found.
+    kept_paths: set[str] = set()
+    for name, manifest_path in workspace_members.items():
+        if name in closure:
+            try:
+                rel = Path(manifest_path).parent.relative_to(slice_root.resolve())
+            except ValueError:
+                continue
+            kept_paths.add(str(rel))
+    _rewrite_workspace_members(slice_root / "Cargo.toml", kept_paths)
 
     # Verify the pruned workspace resolves.
     try:

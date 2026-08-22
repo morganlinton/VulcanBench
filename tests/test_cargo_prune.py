@@ -150,3 +150,35 @@ def test_cargo_prune_integration(tmp_path: Path) -> None:
     cargo_content = (root / "Cargo.toml").read_text(encoding="utf-8")
     assert "drop" not in cargo_content
     assert "keep" in cargo_content
+
+
+@pytest.mark.skipif(shutil.which("cargo") is None, reason="cargo not installed")
+def test_cargo_prune_glob_members_keep_paths(tmp_path: Path) -> None:
+    """Members under a `crates/*` glob must be rewritten as PATHS, not names.
+
+    Regression: the rewrite wrote crate names ("keep") into the members array,
+    which only resolves when crates sit at the workspace root. With the common
+    crates/ layout the pruned workspace could not find its own members.
+    """
+    root = tmp_path / "repo"
+    (root / "crates").mkdir(parents=True)
+    (root / "Cargo.toml").write_text(
+        '[workspace]\nmembers = ["crates/*"]\nresolver = "2"\n', encoding="utf-8"
+    )
+    for name in ("keep", "drop"):
+        crate = root / "crates" / name
+        (crate / "src").mkdir(parents=True)
+        (crate / "Cargo.toml").write_text(
+            f'[package]\nname = "{name}"\nversion = "0.1.0"\nedition = "2021"\n',
+            encoding="utf-8",
+        )
+        (crate / "src" / "lib.rs").write_text("pub fn f() -> i32 { 1 }\n", encoding="utf-8")
+
+    subprocess.run(["cargo", "generate-lockfile"], cwd=root, check=True, capture_output=True)
+
+    _cargo_prune(root, ["keep"])
+
+    assert not (root / "crates" / "drop").exists()
+    cargo_content = (root / "Cargo.toml").read_text(encoding="utf-8")
+    assert '"crates/keep"' in cargo_content
+    # _cargo_prune re-runs cargo metadata itself; reaching here means it resolves.

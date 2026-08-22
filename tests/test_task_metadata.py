@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import json
+
 from harness.task_metadata import (
+    COMPLEXITY_BUDGET_MULTIPLIERS,
     SCALE_DEFAULTS,
+    complexity_scaled_budgets,
     infer_task_complexity_from_gold_patch,
     repo_scale,
     resolve_agent_timeout_s,
@@ -142,8 +146,6 @@ def test_bigger_repos_get_at_least_as_much_wall_clock() -> None:
 
 
 def test_complexity_scaled_budgets_formula() -> None:
-    from harness.task_metadata import COMPLEXITY_BUDGET_MULTIPLIERS, complexity_scaled_budgets
-
     # localized keeps the scale baseline exactly.
     base = complexity_scaled_budgets("medium", "localized")
     assert base == {"suggested_max_steps": 100, "suggested_timeout_s": 1200}
@@ -167,13 +169,11 @@ def test_complexity_scaled_budgets_formula() -> None:
 
 
 def test_suite_requiring_explicit_budgets_fails_unstamped_task(tmp_path) -> None:
-    import json as _json
-
     suite_dir = tmp_path / "cii-test"
     task_dir = suite_dir / "some-task"
     task_dir.mkdir(parents=True)
     (suite_dir / "suite.json").write_text(
-        _json.dumps({"require_explicit_budgets": True, "tasks": ["some-task"]}),
+        json.dumps({"require_explicit_budgets": True, "tasks": ["some-task"]}),
         encoding="utf-8",
     )
     meta = {"id": "some-task", "repo_scale": "medium", "task_complexity": "system"}
@@ -192,12 +192,10 @@ def test_suite_requiring_explicit_budgets_fails_unstamped_task(tmp_path) -> None
 
 
 def test_suite_without_flag_does_not_require_budgets(tmp_path) -> None:
-    import json as _json
-
     suite_dir = tmp_path / "plain"
     task_dir = suite_dir / "some-task"
     task_dir.mkdir(parents=True)
-    (suite_dir / "suite.json").write_text(_json.dumps({"tasks": ["some-task"]}), encoding="utf-8")
+    (suite_dir / "suite.json").write_text(json.dumps({"tasks": ["some-task"]}), encoding="utf-8")
     assert validate_scale_fields(task_dir, {"id": "some-task"}) == []
     # No suite.json at all (loose task dir) also passes.
     loose = tmp_path / "loose" / "task"

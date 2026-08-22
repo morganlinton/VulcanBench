@@ -1,0 +1,112 @@
+import type {Options} from '../types/options.js';
+import {usualFormBoundarySize} from '../core/constants.js';
+
+const encoder = new TextEncoder();
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-types
+export const getBodySize = (body?: BodyInit | null): number => {
+	if (!body) {
+		return 0;
+	}
+
+	if (body instanceof FormData) {
+		// This is an approximation, as FormData size calculation is not straightforward
+		let size = 0;
+
+		for (const [key, value] of body) {
+			size += usualFormBoundarySize;
+			size += encoder.encode(`Content-Disposition: form-data; name="${key}"`).byteLength;
+			size += typeof value === 'string'
+				? encoder.encode(value).byteLength
+				: value.size;
+		}
+
+		return size;
+	}
+
+	if (body instanceof Blob) {
+		return body.size;
+	}
+
+	if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) {
+		return body.byteLength;
+	}
+
+	if (typeof body === 'string') {
+		return encoder.encode(body).byteLength;
+	}
+
+	if (body instanceof URLSearchParams) {
+		return encoder.encode(body.toString()).byteLength;
+	}
+
+	return 0;
+};
+
+const withProgress = (stream: ReadableStream<Uint8Array>, totalBytes: number, onProgress: Options['onDownloadProgress'] | Options['onUploadProgress']): ReadableStream<Uint8Array> => {
+	let previousChunk: Uint8Array | undefined;
+	let transferredBytes = 0;
+
+	return stream.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+		transform(currentChunk, controller) {
+			controller.enqueue(currentChunk);
+
+			if (previousChunk) {
+				transferredBytes += previousChunk.byteLength;
+
+				let percent = totalBytes === 0 ? 0 : transferredBytes / totalBytes;
+				// Avoid reporting 100% progress before the stream is actually finished (in case totalBytes is inaccurate)
+				if (percent >= 1) {
+					// Epsilon is used here to get as close as possible to 100% without reaching it.
+					// If we were to use 0.99 here, percent could potentially go backwards.
+					percent = 1 - Number.EPSILON;
+				}
+
+				onProgress?.({percent, totalBytes: Math.max(totalBytes, transferredBytes), transferredBytes}, previousChunk);
+			}
+
+			previousChunk = currentChunk;
+		},
+		flush() {
+			if (previousChunk) {
+				transferredBytes += previousChunk.byteLength;
+				onProgress?.({percent: 1, totalBytes: Math.max(totalBytes, transferredBytes), transferredBytes}, previousChunk);
+			}
+		},
+	}));
+};
+
+export const streamResponse = (response: Response, onDownloadProgress: Options['onDownloadProgress']) => {
+	if (!response.body) {
+		return response;
+	}
+
+	const responseInit = {
+		status: response.status,
+		statusText: response.statusText,
+		headers: response.headers,
+	};
+
+	if (response.status === 204) {
+		return new Response(null, responseInit);
+	}
+
+	const totalBytes = Math.max(0, Number(response.headers.get('content-length')) || 0);
+	return new Response(withProgress(response.body, totalBytes, onDownloadProgress), responseInit);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-types
+export const streamRequest = (request: Request, onUploadProgress: Options['onUploadProgress'], originalBody?: BodyInit | null) => {
+	if (!request.body) {
+		return request;
+	}
+
+	// Use original body for size calculation since request.body is already a stream
+	const totalBytes = getBodySize(originalBody ?? request.body);
+
+	return new Request(request, {
+		// @ts-expect-error - Types are outdated.
+		duplex: 'half',
+		body: withProgress(request.body, totalBytes, onUploadProgress),
+	});
+};

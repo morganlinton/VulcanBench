@@ -1,0 +1,68 @@
+/*
+* Hifitime
+* Copyright (C) 2017-onward Christopher Rabotin <christopher.rabotin@gmail.com> et al. (cf. https://github.com/nyx-space/hifitime/graphs/contributors)
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at https://mozilla.org/MPL/2.0/.
+*
+* Documentation: https://nyxspace.com/
+*/
+
+use super::{Duration, Epoch, TimeScale, TimeSeries, Weekday};
+use crate::parser::Token;
+
+#[cfg(kani)]
+mod kani_harnesses {
+    use super::*;
+    #[kani::proof]
+    fn kani_harness_value_ok() {
+        let val: i32 = kani::any();
+        let callee: Token = kani::any();
+        let _ = callee.value_ok(val);
+    }
+
+    #[kani::proof]
+    fn kani_harness_gregorian_position() {
+        let callee: Token = kani::any();
+        let _ = callee.gregorian_position();
+    }
+
+    #[kani::proof]
+    fn kani_harness_advance_with() {
+        let ending_char: char = kani::any();
+        let mut callee: Token = kani::any();
+        let _ = callee.advance_with(ending_char);
+    }
+
+    #[kani::proof]
+    fn kani_harness_is_numeric() {
+        let callee: Token = kani::any();
+        let _ = callee.is_numeric();
+    }
+
+    #[kani::proof]
+    fn kani_harness_time_series_exclusive() {
+        let d1: Duration = kani::any();
+        let d2: Duration = kani::any();
+        let start = Epoch::from_duration(d1, TimeScale::TAI);
+        let end = Epoch::from_duration(d2, TimeScale::TAI);
+        let step: Duration = kani::any();
+        let _ = TimeSeries::exclusive(start, end, step);
+    }
+
+    #[kani::proof]
+    fn kani_harness_time_series_inclusive() {
+        let d1: Duration = kani::any();
+        let d2: Duration = kani::any();
+        let start = Epoch::from_duration(d1, TimeScale::TAI);
+        let end = Epoch::from_duration(d2, TimeScale::TAI);
+        let step: Duration = kani::any();
+        let _ = TimeSeries::inclusive(start, end, step);
+    }
+
+    #[kani::proof]
+    fn kani_harness_to_c89_weekday() {
+        let callee: Weekday = kani::any();
+        let _ = callee.to_c89_weekday();
+    }
+}

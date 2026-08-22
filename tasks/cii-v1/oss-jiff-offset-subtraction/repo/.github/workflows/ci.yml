@@ -1,0 +1,679 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+  schedule:
+  - cron: '00 01 * * *'
+
+# The section is needed to drop write-all permissions that are granted on
+# `schedule` event. By specifying any permission explicitly all others are set
+# to none. By using the principle of least privilege the damage a compromised
+# workflow can do (because of an injection or compromised third party tool or
+# action) is restricted. Currently the worklow doesn't need any additional
+# permission except for pulling the code. Adding labels to issues, commenting
+# on pull-requests, etc. may need additional permissions:
+#
+# Syntax for this section:
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+#
+# Reference for how to assign permissions on a job-by-job basis:
+# https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
+#
+# Reference for available permissions that we can enable if needed:
+# https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+permissions:
+  # to fetch code (actions/checkout)
+  contents: read
+
+jobs:
+  # The standard `cargo test --all` on many platforms.
+  #
+  # For the other `test-*` jobs, we cut this down to Linux/nightly and
+  # macOS/nightly, just to avoid more jobs than we probably need.
+  test-default:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build: stable
+          os: ubuntu-latest
+          rust: stable
+        - build: beta
+          os: ubuntu-latest
+          rust: beta
+        - build: nightly
+          os: ubuntu-latest
+          rust: nightly
+        - build: macos
+          os: macos-latest
+          rust: stable
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+    # In Rust 2024, doc tests are (mostly) all compiled into a single
+    # executable and then run once. This is a lot faster for Jiff, which
+    # has 1000+ doc tests. Since this job is where we run most of our
+    # tests (and we run MSRV on a different job), we just bump to Rust 2024
+    # to take advantage of this.
+    - name: Switch to Rust 2024
+      run: sed -i.bak 's/^edition = "2021"$/edition = "2024"/' Cargo.toml
+    - name: Bump rust-version to Rust 1.85
+      run: sed -i.bak 's/^rust-version = "1\.70"$/rust-version = "1.85"/' Cargo.toml
+    - run: ./scripts/test-default
+
+  # Test all features enabled.
+  test-all:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build: nightly
+          os: ubuntu-latest
+          rust: nightly
+        - build: macos
+          os: macos-latest
+          rust: nightly
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+    # In Rust 2024, doc tests are (mostly) all compiled into a single
+    # executable and then run once. This is a lot faster for Jiff, which
+    # has 1000+ doc tests. Since this job is where we run most of our
+    # tests (and we run MSRV on a different job), we just bump to Rust 2024
+    # to take advantage of this.
+    - name: Switch to Rust 2024
+      run: sed -i.bak 's/^edition = "2021"$/edition = "2024"/' Cargo.toml
+    - name: Bump rust-version to Rust 1.85
+      run: sed -i.bak 's/^rust-version = "1\.70"$/rust-version = "1.85"/' Cargo.toml
+    - run: ./scripts/test-all
+
+  # Test Jiff when only the bundled tzdb is enabled.
+  test-only-bundle:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build: nightly
+          os: ubuntu-latest
+          rust: nightly
+        - build: macos
+          os: macos-latest
+          rust: nightly
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+    # In Rust 2024, doc tests are (mostly) all compiled into a single
+    # executable and then run once. This is a lot faster for Jiff, which
+    # has 1000+ doc tests. Since this job is where we run most of our
+    # tests (and we run MSRV on a different job), we just bump to Rust 2024
+    # to take advantage of this.
+    - name: Switch to Rust 2024
+      run: sed -i.bak 's/^edition = "2021"$/edition = "2024"/' Cargo.toml
+    - name: Bump rust-version to Rust 1.85
+      run: sed -i.bak 's/^rust-version = "1\.70"$/rust-version = "1.85"/' Cargo.toml
+    - run: ./scripts/test-only-bundle
+
+  # Test Jiff in core-only (including no-alloc) configurations.
+  test-core:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build: nightly
+          os: ubuntu-latest
+          rust: nightly
+        - build: macos
+          os: macos-latest
+          rust: nightly
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: ./scripts/test-only-core
+
+  # Test a number of different feature combinations.
+  #
+  # Jiff has too many features to do the full powerset, so this just tries to
+  # get decent coverage over what I perceive to be likely configs.
+  test-various-feature-combos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - build: nightly
+          os: ubuntu-latest
+          rust: nightly
+        - build: macos
+          os: macos-latest
+          rust: nightly
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: ./scripts/test-various-feature-combos
+
+  # Run tests with `testrelease` profile.
+  #
+  # This is useful because Jiff's ranged integers internally track min/max
+  # values in debug mode, but don't in release mode. So there may occasionally
+  # be a discrepancy that is worth testing here.
+  #
+  # NOTE: The above is no longer true, but Jiff does have some
+  # `cfg(debug_assertions)` in various places, so it's good to test in release
+  # mode too.
+  test-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    # In Rust 2024, doc tests are (mostly) all compiled into a single
+    # executable and then run once. This is a lot faster for Jiff, which has
+    # 1000+ doc tests. Since we run doc tests in this job, we just bump to Rust
+    # 2024 to take advantage of this.
+    - name: Switch to Rust 2024
+      run: sed -i.bak 's/^edition = "2021"$/edition = "2024"/' Cargo.toml
+    - name: Bump rust-version to Rust 1.85
+      run: sed -i.bak 's/^rust-version = "1\.70"$/rust-version = "1.85"/' Cargo.toml
+    - name: Run tests under release mode
+      run: cargo test --verbose --all --profile testrelease
+
+  # Test that documentation gets built.
+  test-doc:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Build docs with all features enabled
+      run: cargo doc --verbose --all-features
+
+  # Run benchmarks as tests.
+  test-bench:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Run benchmark tests
+      run: |
+        cargo bench --manifest-path bench/Cargo.toml -- --test
+
+  # Test that we can build the fuzzer targets.
+  #
+  # It's not necessary to check the fuzzers on all platforms, as this is pretty
+  # strictly a testing utility.
+  test-fuzz:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Build fuzzer targets
+      working-directory: ./fuzz
+      run: cargo build --verbose
+
+  # Runs miri on a subset of Jiff's test suite. This doesn't quite cover
+  # everything. In particular, `miri` and `insta` cannot play nice together,
+  # and `insta` is used a lot among Jiff's tests. However, the primary reason
+  # why we want to run `miri` (at present, 2025-02-25) is to check out pointer
+  # tagging representation of `jiff::tz::TimeZone`. And we can run the tests in
+  # `tz`.
+  #
+  # 2025-12-25: We're now also running Miri on the `jiff::fmt::buffer`
+  # implementation, which futzes around with uninitialized memory.
+  test-miri:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        # We use nightly here so that we can use miri I guess?
+        toolchain: nightly
+        components: miri
+    - name: "Run tests on `jiff::tz` under miri"
+      run: "cargo miri test tz:: --verbose"
+    - name: "Run tests on `jiff::fmt::buffer` under miri"
+      run: "cargo miri test fmt::buffer:: --verbose"
+    - name: Run proc macro integration tests under miri
+      run: cargo miri test --test integration procmacro --verbose
+
+  # Test for Windows. We test fewer configurations here because it just
+  # takes forever otherwise.
+  win-msvc:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    # In Rust 2024, doc tests are (mostly) all compiled into a single
+    # executable and then run once. This is a lot faster for Jiff, which has
+    # 1000+ doc tests. Since we run doc tests in this job, we just bump to Rust
+    # 2024 to take advantage of this.
+    - name: Switch to Rust 2024
+      shell: bash
+      run: sed -i.bak 's/^edition = "2021"$/edition = "2024"/' Cargo.toml
+    - name: Bump rust-version to Rust 1.85
+      shell: bash
+      run: sed -i.bak 's/^rust-version = "1\.70"$/rust-version = "1.85"/' Cargo.toml
+    - run: cargo build --all --verbose
+    - run: cargo doc --features defmt,serde,static --verbose
+    - run: cargo test --verbose --all
+
+  # Tests for stable-x86_64-gnu. It's different enough from the "main" targets
+  # to warrant its own section. The main problem is that it is just
+  # annoyingly slow. Like, twice as slow as the next slowest runner. So we
+  # run a stripped down version (even more so than msvc) of tests.
+  win-gnu:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable-x86_64-gnu
+    - run: cargo build --all --verbose
+    - run: cargo doc --features defmt,serde,static --verbose
+    - run: cargo test --verbose --lib
+    - run: cargo test --verbose --test integration
+
+  # This job runs a stripped down version of CI to test the MSRV. The specific
+  # reason for doing this is that Jiff dev-dependencies tend to evolve more
+  # quickly. Or if I want to use newer features in doc examples. There isn't as
+  # tight of a control on them because, well, they're only used in tests and
+  # their MSRV doesn't matter as much.
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.70.0
+    # quickcheck 1.1.0 requires Rust 1.85+. But we still work with older
+    # versions of quickcheck, so downgrade it.
+    - name: Downgrade quickcheck
+      run: cargo update -p quickcheck --precise 1.0.3
+    - name: Downgrade log
+      run: cargo update -p log --precise 0.4.33
+    # We would use `cargo build --all` here, but `jiff-cli` doesn't really
+    # track an MSRV and I don't want it to.
+    - name: Build jiff
+      run: cargo build -p jiff --verbose
+    - name: Build jiff-tzdb
+      run: cargo build -p jiff-tzdb --verbose
+    - name: Build jiff-tzdb-platform
+      run: cargo build -p jiff-tzdb-platform --verbose
+    - name: Build docs
+      run: cargo doc -p jiff --verbose
+    # NOTE: We currently don't track some ecosystem integration crates
+    # like `jiff-icu`. They don't support Jiff's MSRV at time of writing
+    # (2025-02-02), and I think these sorts of integration crates are at very
+    # low risk of being more aggressive with respect to MSRV than the crates
+    # they depend on. So for now, we just don't test them here.
+    #
+    # NOTE: We don't really care much about adding dev dependencies, and they
+    # can move quite a bit faster. So unfortunately don't run tests on MSRV. We
+    # could fix this by adding a `Carg.msrv.lock` or some such, but it doesn't
+    # seem worth it.
+    # - name: Run library tests
+      # run: cargo test --lib
+    # - name: Run integration tests
+      # run: cargo test --test integration
+
+  # Same as above, but for Windows. The MSRV is technically higher because Jiff
+  # inherits the MSRV of system-level dependencies (like `windows-link`).
+  msrv-win:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.71.1
+    - run: cargo build -p jiff --verbose
+
+  # This job tests that examples outside the workspace build.
+  #
+  # These are outside the workspace because their dependency graphs are
+  # absolutely ludicrous.
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Build all examples
+      run: ./scripts/test-examples
+    - name: Run all test programs
+      run: ./scripts/test-programs
+
+  # This job builds and runs tests for Jiff's "integration" crates. That is,
+  # the crates that provide wrappers or traits for integrating with other
+  # crates in the ecosystem. For example, `jiff-diesel`.
+  #
+  # These are outside the workspace because their dependency graphs are
+  # absolutely ludicrous.
+  integrations:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Build all examples
+      run: ./scripts/test-integrations
+
+  # A test to ensure that `Zoned::now()` doesn't take "too long" on its
+  # first run.
+  time-zone-init:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-latest
+        - os: ubuntu-24.04-arm
+        - os: macos-latest
+        - os: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - run: cargo test --features logging --test integration init::zoned_now -- --nocapture
+
+
+  # Generic testing for most cross targets. Some get special treatment in
+  # other jobs.
+  cross:
+    env:
+      # Bump this as appropriate. We pin to a version to make sure CI
+      # continues to work as cross releases in the past have broken things
+      # in subtle ways.
+      CROSS_VERSION: v0.2.5
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+        - i686-unknown-linux-gnu
+        - aarch64-unknown-linux-gnu
+        - powerpc-unknown-linux-gnu
+        - powerpc64-unknown-linux-gnu
+        - s390x-unknown-linux-gnu
+        - x86_64-linux-android
+        - aarch64-linux-android
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install and configure Cross
+      run: |
+        # In the past, new releases of 'cross' have broken CI. So for now, we
+        # pin it. We also use their pre-compiled binary releases because cross
+        # has over 100 dependencies and takes a bit to compile.
+        dir="$RUNNER_TEMP/cross-download"
+        mkdir "$dir"
+        echo "$dir" >> $GITHUB_PATH
+        cd "$dir"
+        curl -LO "https://github.com/cross-rs/cross/releases/download/$CROSS_VERSION/cross-x86_64-unknown-linux-musl.tar.gz"
+        tar xf cross-x86_64-unknown-linux-musl.tar.gz
+    - run: cross build -p jiff --verbose --target ${{ matrix.target }}
+    # I haven't been able to get Insta working in this context, so I guess
+    # we just test the build.
+    #
+    # Note that I also have a very manual testing setup for Android:
+    # https://github.com/BurntSushi/tauri-jiff
+    - if: "!contains(matrix.target, 'android')"
+      run: cross test --verbose --target ${{ matrix.target }} --all --all-targets
+    # Useful to catch some classes of test failures.
+    # Ref: https://github.com/BurntSushi/jiff/issues/573
+    - if: "!contains(matrix.target, 'android')"
+      run: cross test --verbose --target ${{ matrix.target }} --lib --no-default-features -- size
+    - if: "!contains(matrix.target, 'android')"
+      run: cross test --verbose --target ${{ matrix.target }} -p jiff-cli
+
+  # Test integration with the `defmt` crate for a thumb target.
+  thumbv7m-none-eabi:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        targets: thumbv7m-none-eabi
+    - uses: actions/checkout@v5
+    - name: Test the build only
+      run: |
+        cargo build -p jiff --target thumbv7m-none-eabi --features alloc --no-default-features --features defmt
+
+  # This is meant to test that Jiff's use of `Arc` from `portable-atomic-util`
+  # on targets that don't have `alloc::sync::Arc` in `std` works.
+  #
+  # Normally I'd do this with Cross, but I guess `riscv32imc-unknown-none-elf`
+  # isn't in Cross, and that's the target that the end user wanting this
+  # cares about[1,2].
+  #
+  # [1]: https://github.com/BurntSushi/jiff/issues/162
+  # [2]: https://github.com/BurntSushi/jiff/pull/177
+  riscv32imc-unknown-none-elf:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        targets: riscv32imc-unknown-none-elf
+    - uses: actions/checkout@v5
+    - name: Test the build only
+      run: |
+        cargo build -p jiff --target riscv32imc-unknown-none-elf --features alloc --no-default-features --features portable-atomic/critical-section
+
+  # Test the wasm32-wasip1 target via wasmtime.
+  wasm32-wasip1:
+    runs-on: ubuntu-latest
+    env:
+      # The version of wasmtime to download and install.
+      WASMTIME_VERSION: 30.0.1
+      # Yes'um.
+      WASMTIME_BACKTRACE_DETAILS: 1
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+    - name: Add wasm32-wasip1 target
+      run: rustup target add wasm32-wasip1
+    - name: Download and install Wasmtime
+      run: |
+        echo "CARGO_BUILD_TARGET=wasm32-wasip1" >> $GITHUB_ENV
+        curl -LO https://github.com/bytecodealliance/wasmtime/releases/download/v$WASMTIME_VERSION/wasmtime-v$WASMTIME_VERSION-x86_64-linux.tar.xz
+        tar xvf wasmtime-v$WASMTIME_VERSION-x86_64-linux.tar.xz
+        echo `pwd`/wasmtime-v$WASMTIME_VERSION-x86_64-linux >> $GITHUB_PATH
+        echo "CARGO_TARGET_WASM32_WASIP1_RUNNER=wasmtime run --dir / --env INSTA_WORKSPACE_ROOT=$PWD --" >> $GITHUB_ENV
+    - name: Build jiff
+      run: cargo build -p jiff --verbose
+    - name: Build jiff-tzdb
+      run: cargo build -p jiff-tzdb --verbose
+    - name: Build jiff-tzdb-platform
+      run: cargo build -p jiff-tzdb-platform --verbose
+    - name: Run library tests
+      run: cargo test --lib -- --nocapture
+    - name: Run integration tests
+      run: cargo test --test integration -- --nocapture
+
+  # Test the wasm32-unknown-emscripten target via nodejs.
+  wasm32-unknown-emscripten:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_BUILD_TARGET: wasm32-unknown-emscripten
+      CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUNNER: node
+      INSTA_FORCE_PASS: 1
+      INSTA_UPDATE: no
+      RUSTFLAGS: >
+        -C link-arg=-sSTACK_SIZE=16777216
+        -C link-arg=-sNODERAWFS=1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: stable
+      - name: Add wasm32-unknown-emscripten target
+        run: rustup target add wasm32-unknown-emscripten
+      - name: Install emsdk
+        uses: mymindstorm/setup-emsdk@v14
+      - name: Build jiff
+        run: cargo build --verbose -p jiff
+      - name: Build jiff-tzdb
+        run: cargo build --verbose -p jiff-tzdb
+      - name: Build jiff-tzdb-platform
+        run: cargo build --verbose -p jiff-tzdb-platform
+      - name: Run library tests
+        run: cargo test --lib -- --nocapture
+      - name: Run integration tests
+        run: cargo test --test integration -- --nocapture
+
+  # Tests wasm32-unknown-unknown integration via wasm-pack.
+  wasm32-unknown-uknown:
+    runs-on: ubuntu-latest
+    env:
+      # Set the time zone to something so that there's some kind of interesting
+      # output to scrutinize. The test below doesn't actually assert anything
+      # about the time zone, but we can at least visually inspect it in the CI
+      # logs.
+      TZ: America/New_York
+    steps:
+    - uses: dtolnay/rust-toolchain@1.81.0
+    - uses: actions/checkout@v5
+    - name: Install wasm-pack
+      run: |
+        curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - name: Test wasm-pack project
+      run: |
+        cd crates/jiff-wasm
+        wasm-pack test --node
+
+  # This job checks the docsrs configuration.
+  #
+  # This is important because we enable `doc_cfg`, which is an unstable
+  # feature that can (and has) broken.
+  docsrs:
+    runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: "-D rustdoc::broken_intra_doc_links --cfg docsrs_jiff"
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+    - name: Build docs
+      run: cargo doc --verbose --workspace --all-features
+
+  # Check that all files are formatted properly.
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        components: rustfmt
+    - name: Check formatting
+      run: |
+        cargo fmt --all -- --check
+
+  # Check that some `jiff-cli generate` commands don't produce a diff.
+  generated:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        components: rustfmt
+    - name: Install jiff-cli
+      run: cargo install -f --path crates/jiff-cli
+    - name: Generate crc32 code
+      run: |
+        jiff-cli generate crc32
+        if ! git diff --exit-code; then
+          echo 'Please run `cargo run -p jiff-cli -- generate crc32`'
+          exit 1
+        fi
+    - name: Generate unit designator match expression
+      run: |
+        jiff-cli generate unit-designator-match
+        if ! git diff --exit-code; then
+          echo 'Please run `cargo run -p jiff-cli -- generate unit-designator-match`'
+          exit 1
+        fi
+    - name: Generate mapping from Windows zones to IANA time zone identifiers
+      run: |
+        curl -LO 'https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/windowsZones.xml'
+        jiff-cli generate windows-zones windowsZones.xml
+        if ! git diff --exit-code; then
+          echo 'In a separate PR, please download windowsZones.xml'
+          echo 'from github.com/unicode-org/cldr and run'
+          echo '`cargo run -p jiff-cli -- generate windows-zones`'
+          exit 1
+        fi

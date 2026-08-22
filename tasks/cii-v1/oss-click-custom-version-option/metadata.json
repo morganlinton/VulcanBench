@@ -1,0 +1,64 @@
+{
+  "id": "oss-click-custom-version-option",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "base_commit": "16fc00e2f4a2717a521084f193709a6058afc693",
+  "upstream": {
+    "url": "https://github.com/pallets/click/pull/3581",
+    "issue": "https://github.com/pallets/click/discussions/3527",
+    "commit": "16fc00e2f4a2717a521084f193709a6058afc693"
+  },
+  "upstream_merged": "2026-07-08",
+  "decontamination_notes": "Real feature from pallets/click PR #3581 (discussion #3527), merged 2026-07-08, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Adds custom_version_option to src/click/decorators.py (an eager, non-exposed flag option whose callback builds the whole version string from the Context, echoed with ctx.color and followed by ctx.exit()) and exports it from src/click/__init__.py (multi_file); version_option's parameter set is declared frozen. Repo sliced at the PR base commit (16fc00e2) to src/click + pyproject.toml + LICENSE (click is dependency-free on Linux; base sandbox image, PYTHONPATH=src; the workspace copy shadows any site-packages click). Coverage: 4 fail_to_pass tests via click.testing.CliRunner, each verified failing at base (the attribute does not exist) and passing after the gold patch \u2014 callback output printed with exit 0 and the body not run, custom parameter declarations, the callback receiving the Context (prog_name visible via info_name), and eagerness beating a missing required argument; 3 pass_to_pass guards pin version_option, plain option parsing, and help rendering. Output assertions use the tests' own strings, never library error text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "prints_and_exits",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_prints_callback_output_and_exits -q"
+      },
+      {
+        "name": "param_decls",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_custom_param_decls -q"
+      },
+      {
+        "name": "receives_context",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_callback_receives_context -q"
+      },
+      {
+        "name": "eager",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_eager_before_required_arguments -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "version_option",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_version_option_still_works -q"
+      },
+      {
+        "name": "plain_command",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_plain_command_runs -q"
+      },
+      {
+        "name": "help",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_help_still_renders -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/click/decorators.py"
+    ],
+    "suggested_max_steps": 195,
+    "suggested_timeout_s": 3540
+  }
+}

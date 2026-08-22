@@ -1,0 +1,26 @@
+diff --git a/pygments/formatters/html.py b/pygments/formatters/html.py
+index 1ebe629c0d..4f8ac2ba14 100644
+--- a/pygments/formatters/html.py
++++ b/pygments/formatters/html.py
+@@ -27,7 +27,7 @@
+ 
+ 
+ def webify(color):
+-    if color.startswith('calc') or color.startswith('var'):
++    if color == 'transparent' or color.startswith('calc') or color.startswith('var'):
+         return color
+     else:
+         # Check if the color can be shortened from 6 to 3 characters
+diff --git a/pygments/style.py b/pygments/style.py
+index acf25d6d8e..c766fd05e3 100644
+--- a/pygments/style.py
++++ b/pygments/style.py
+@@ -74,6 +74,8 @@ def colorformat(text):
+                     return col[0] * 2 + col[1] * 2 + col[2] * 2
+             elif text == '':
+                 return ''
++            elif text == 'transparent':
++                return text
+             elif text.startswith('var') or text.startswith('calc'):
+                 return text
+             assert False, f"wrong color format {text!r}"

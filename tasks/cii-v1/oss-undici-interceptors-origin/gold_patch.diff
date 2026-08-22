@@ -1,0 +1,60 @@
+diff --git a/lib/interceptor/cache.js b/lib/interceptor/cache.js
+index f50c1b7b67d..2d7d01f130a 100644
+--- a/lib/interceptor/cache.js
++++ b/lib/interceptor/cache.js
+@@ -540,13 +540,16 @@ module.exports = (opts = {}) => {
+ 
+   return dispatch => {
+     return (opts, handler) => {
+-      if (!opts.origin || arrayIncludes(safeMethodsToNotCache, opts.method)) {
+-        // Not a method we want to cache or we don't have the origin, skip
++      if (arrayIncludes(safeMethodsToNotCache, opts.method)) {
++        // Not a method we want to cache, skip
+         return dispatch(opts, handler)
+       }
+ 
+       // Check if origin is in whitelist
+       if (origins !== undefined) {
++        if (!opts.origin) {
++          return dispatch(opts, handler)
++        }
+         const requestOrigin = opts.origin.toString().toLowerCase()
+         let isAllowed = false
+ 
+diff --git a/lib/interceptor/deduplicate.js b/lib/interceptor/deduplicate.js
+index 248a92373dd..bacfeb3fb37 100644
+--- a/lib/interceptor/deduplicate.js
++++ b/lib/interceptor/deduplicate.js
+@@ -59,7 +59,7 @@ module.exports = (opts = {}) => {
+ 
+   return dispatch => {
+     return (opts, handler) => {
+-      if (!opts.origin || opts.upgrade || methods.includes(opts.method) === false) {
++      if (opts.upgrade || methods.includes(opts.method) === false) {
+         return dispatch(opts, handler)
+       }
+ 
+diff --git a/lib/util/cache.js b/lib/util/cache.js
+index d156731d1b5..1fac28af5d9 100644
+--- a/lib/util/cache.js
++++ b/lib/util/cache.js
+@@ -148,9 +148,7 @@ function getMalformedRestrictiveDirectiveName (key) {
+  * @param {import('../../types/dispatcher.d.ts').default.DispatchOptions} opts
+  */
+ function makeCacheKey (opts) {
+-  if (!opts.origin) {
+-    throw new Error('opts.origin is undefined')
+-  }
++  const origin = opts.origin ? opts.origin.toString() : ''
+ 
+   let fullPath = opts.path || '/'
+ 
+@@ -159,7 +157,7 @@ function makeCacheKey (opts) {
+   }
+ 
+   return {
+-    origin: opts.origin.toString(),
++    origin,
+     method: opts.method,
+     path: fullPath,
+     headers: opts.headers

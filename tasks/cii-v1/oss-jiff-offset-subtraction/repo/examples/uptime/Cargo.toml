@@ -1,0 +1,19 @@
+[package]
+publish = false
+name = "uptime"
+version = "0.1.0"
+edition = "2021"
+
+# Examples in Jiff are explicitly isolated from the workspace to avoid
+# dev-dependencies accumulating. (Not all examples have big dependency trees,
+# but we still exclude them from the workspace as a general rule.)
+[workspace]
+
+[dependencies]
+anyhow = "1.0.86"
+jiff = { path = "../../crates/jiff" }
+regex-lite = "0.1.6"
+
+[[bin]]
+name = "uptime"
+path = "main.rs"

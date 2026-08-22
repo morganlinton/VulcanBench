@@ -1,0 +1,80 @@
+diff --git a/source/core/constants.ts b/source/core/constants.ts
+index e12186a8..5e9e8bcb 100644
+--- a/source/core/constants.ts
++++ b/source/core/constants.ts
+@@ -36,7 +36,7 @@ export const supportsAbortSignal = typeof globalThis.AbortSignal === 'function'
+ export const supportsResponseStreams = typeof globalThis.ReadableStream === 'function';
+ export const supportsFormData = typeof globalThis.FormData === 'function';
+ 
+-export const requestMethods = ['get', 'post', 'put', 'patch', 'head', 'delete'] as const;
++export const requestMethods = ['get', 'post', 'put', 'patch', 'head', 'delete', 'query'] as const;
+ 
+ const validate = <T extends Array<true>>() => undefined as unknown as T;
+ validate<[
+diff --git a/source/types/ky.ts b/source/types/ky.ts
+index e3742785..dfb03d03 100644
+--- a/source/types/ky.ts
++++ b/source/types/ky.ts
+@@ -69,6 +69,14 @@ export type KyInstance = {
+ 	*/
+ 	head: (url: Input, options?: Options) => ResponsePromise;
+ 
++	/**
++	Fetch the given `url` using the option `{method: 'query'}`.
++
++	@param url - `Request` object, `URL` object, or URL string.
++	@returns A promise with `Body` methods added.
++	*/
++	query: <T>(url: Input, options?: Options) => ResponsePromise<T>;
++
+ 	/**
+ 	Create a new Ky instance with complete new defaults, without inheriting from any parent instance.
+ 
+diff --git a/source/types/options.ts b/source/types/options.ts
+index 767ad1cd..7e4d7c5e 100644
+--- a/source/types/options.ts
++++ b/source/types/options.ts
+@@ -8,7 +8,7 @@ export type SearchParamsInit = string | string[][] | Record<string, string> | UR
+ // eslint-disable-next-line unicorn/prevent-abbreviations
+ export type SearchParamsOption = SearchParamsInit | Record<string, string | number | boolean | undefined> | Array<Array<string | number | boolean>>;
+ 
+-export type RequestHttpMethod = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete';
++export type RequestHttpMethod = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'query';
+ export type HttpMethod = LiteralUnion<RequestHttpMethod | 'options' | 'trace', string>;
+ 
+ export type Input = string | URL | Request;
+@@ -400,7 +400,7 @@ export interface Options extends KyOptions, Omit<RequestInit, 'headers'> { // es
+ 	/**
+ 	HTTP method used to make the request.
+ 
+-	Internally, the standard methods (`GET`, `POST`, `PUT`, `PATCH`, `HEAD` and `DELETE`) are uppercased in order to avoid server errors due to case sensitivity.
++	Internally, the standard methods (`GET`, `POST`, `PUT`, `PATCH`, `HEAD`, `DELETE`, and `QUERY`) are uppercased in order to avoid server errors due to case sensitivity.
+ 	*/
+ 	method?: LiteralUnion<HttpMethod, string>;
+ 
+diff --git a/source/types/retry.ts b/source/types/retry.ts
+index 3ea92815..db3b2f2c 100644
+--- a/source/types/retry.ts
++++ b/source/types/retry.ts
+@@ -23,7 +23,7 @@ export type RetryOptions = {
+ 	/**
+ 	The HTTP methods allowed to retry.
+ 
+-	@default ['get', 'put', 'head', 'delete', 'options', 'trace']
++	@default ['get', 'put', 'head', 'delete', 'options', 'trace', 'query']
+ 	*/
+ 	methods?: HttpMethod[];
+ 
+diff --git a/source/utils/normalize.ts b/source/utils/normalize.ts
+index c13ae33f..f0763432 100644
+--- a/source/utils/normalize.ts
++++ b/source/utils/normalize.ts
+@@ -5,7 +5,7 @@ import type {HttpMethod, RequestHttpMethod} from '../types/options.js';
+ export const normalizeRequestMethod = (input: string): string =>
+ 	requestMethods.includes(input as RequestHttpMethod) ? input.toUpperCase() : input;
+ 
+-const retryMethods: HttpMethod[] = ['get', 'put', 'head', 'delete', 'options', 'trace'];
++const retryMethods: HttpMethod[] = ['get', 'put', 'head', 'delete', 'options', 'trace', 'query'];
+ 
+ const retryStatusCodes = [408, 413, 429, 500, 502, 503, 504];
+ 

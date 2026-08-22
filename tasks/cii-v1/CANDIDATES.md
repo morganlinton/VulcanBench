@@ -103,6 +103,24 @@ Wave-5 infrastructure notes:
   unknown-option-rejection test therefore passes at base too and belongs in
   the guards, not fail_to_pass.
 
+### Wave 6 (2026-08-22)
+
+| Task | Source PR | Merged | Lang | Complexity | Why |
+|---|---|---|---|---|---|
+| oss-pygments-transparent-color | pygments#3180 | 2026-07-05 | py | multi_file/easy | third easy anchor; CSS keyword pass-through |
+| oss-click-custom-version-option | click#3581 | 2026-07-08 | py | multi_file/medium | feature with frozen-API rationale |
+| oss-jiff-offset-subtraction | jiff#617 | 2026-07-28 | rust | localized/easy | checked_sub ADDED; tests target jiff-core's public API |
+| oss-ky-query-method | ky#873 | 2026-07-06 | ts | system/medium | QUERY shortcut + uppercasing + retry defaults |
+| oss-undici-interceptors-origin | undici#5628 | 2026-08-01 | js | system/hard | silently-inert interceptors; hit-counting servers |
+
+Wave-6 notes: sweep #3 (11 fresh repos/lang, since 2026-06-01) yielded 49
+candidates with dedup flags. jiff's cargo-prune kept dependent integration
+crates (diesel/sqlx/icu/wasm) — closure follows dependencies, so dependents
+must be trimmed by hand before vendoring. The public jiff crate never calls
+the buggy core routine: grade against jiff-core's own public API. Remaining
+to 30: 4 tasks; viable leftovers include hono#5252/#5179, zod#6442,
+body-parser#741, undici#5696, vitest mocker pair, trio (needs new PRs).
+
 ## Triage rules learned
 
 - **Dedup against every existing suite first** (`grep -rh '"url"' tasks/*/*/metadata.json`):

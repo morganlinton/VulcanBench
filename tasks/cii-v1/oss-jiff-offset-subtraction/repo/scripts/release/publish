@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+function tagit {
+  tag="$1"
+  git tag -s -a "$tag" -m "$tag"
+  git push origin "$tag"
+}
+
+if ! [ -f ./crates/jiff-cli/Cargo.toml ]; then
+  echo "must run in the root of a jiff repository checkout" >&2
+  exit 1
+fi
+
+crate="$1"
+shift
+
+release_dir="$(dirname "$0")"
+case $crate in
+  jiff)
+    current="$("$release_dir"/get-version ./crates/jiff/Cargo.toml)"
+    cargo publish --manifest-path ./crates/jiff-static/Cargo.toml
+    cargo publish --manifest-path ./crates/jiff/Cargo.toml
+    tagit "$current"
+    tagit "jiff-static-$current"
+    ;;
+  jiff-core)
+    current="$("$release_dir"/get-version ./crates/jiff-core/Cargo.toml)"
+    cargo publish --manifest-path ./crates/jiff-core/Cargo.toml
+    tagit "jiff-core-$current"
+    ;;
+  jiff-tzdb)
+    current="$("$release_dir"/get-version ./crates/jiff-tzdb/Cargo.toml)"
+    cargo publish --manifest-path ./crates/jiff-tzdb/Cargo.toml
+    tagit "jiff-tzdb-$current"
+    ;;
+  *)
+    echo "unrecognize publish name" >&2
+    exit 1
+    ;;
+esac

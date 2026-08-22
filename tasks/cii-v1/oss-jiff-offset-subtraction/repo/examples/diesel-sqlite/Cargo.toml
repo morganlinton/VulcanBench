@@ -1,0 +1,24 @@
+[package]
+publish = false
+name = "diesel-sqlite-test"
+version = "0.0.1"
+edition = "2021"
+
+# Examples in Jiff are explicitly isolated from the workspace to avoid
+# dev-dependencies accumulating. (Not all examples have big dependency trees,
+# but we still exclude them from the workspace as a general rule.)
+[workspace]
+
+[dependencies]
+anyhow = "1.0.95"
+diesel = { version = "2.2.0", features = [
+    "returning_clauses_for_sqlite_3_35",
+    "sqlite",
+] }
+jiff = { path = "../../crates/jiff" }
+jiff-diesel = { path = "../../crates/jiff-diesel", features = ["sqlite"] }
+tempfile = "3.16.0"
+
+[[bin]]
+name = "diesel-sqlite-test"
+path = "main.rs"

@@ -1,0 +1,23 @@
+[package]
+publish = false
+name = "sqlx-sqlite-test"
+version = "0.0.1"
+edition = "2021"
+
+# Examples in Jiff are explicitly isolated from the workspace to avoid
+# dev-dependencies accumulating. (Not all examples have big dependency trees,
+# but we still exclude them from the workspace as a general rule.)
+[workspace]
+
+[dependencies]
+anyhow = "1.0.95"
+chrono = "0.4.39"
+jiff = { path = "../../crates/jiff" }
+jiff-sqlx = { path = "../../crates/jiff-sqlx", features = ["sqlite"] }
+tempfile = "3.16.0"
+sqlx = { version = "0.9.0", features = ["chrono", "runtime-tokio", "sqlite"] }
+tokio = { version = "1.43.0", features = ["full"] }
+
+[[bin]]
+name = "sqlx-sqlite-test"
+path = "main.rs"

@@ -1,0 +1,68 @@
+{
+  "id": "oss-jiff-offset-subtraction",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "easy",
+  "task_complexity": "localized",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:rust-2024",
+  "base_commit": "2584cff71daebd477afe241cf049d4ccf595b855",
+  "upstream": {
+    "url": "https://github.com/BurntSushi/jiff/pull/617",
+    "issue": "https://github.com/BurntSushi/jiff/pull/617",
+    "commit": "2584cff71daebd477afe241cf049d4ccf595b855"
+  },
+  "upstream_merged": "2026-07-28",
+  "decontamination_notes": "Real bug fix from BurntSushi/jiff PR #617, merged 2026-07-28, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. jiff_core::tz::Offset::checked_sub called the checked ADD ranged-integer routine, so it added the subtrahend (UTC.checked_sub(1) yielded +1s) and its range check bounded the wrong direction; the fix computes the subtraction in i64 and range-checks the true result (localized, one source file; the public jiff crate's own Offset arithmetic does not route through this routine, which is why the hidden tests target jiff-core's public API directly). Kept as a small localized anchor. Workspace sliced at the PR base commit (2584cff7) with cargo-prune to the closure of the jiff crate; the dependent integration crates (jiff-diesel/icu/sqlx/wasm) are dropped from the workspace to keep the vendor tree sane; third-party deps vendored with a regenerated lockfile (the upstream .gitignore Cargo.lock rule is stripped so offline builds reproduce); rust-2024 image. MIT/Unlicense preserved. jiff-core auto-discovers integration tests, so the hidden tests need no manifest overlay: vb_offset_sub.rs (fail_to_pass, 3 tests, each verified failing at base and passing after the gold patch) covers subtracting positive and negative seconds and the range error at both bounds; vb_offset_reg.rs (pass_to_pass) guards checked_add, accessors/until, and the i32::MIN subtrahend which errors at base and after alike. Assertions compare Offset values via constant_seconds and error presence, never message text.",
+  "grader": "tests",
+  "setup": [
+    {
+      "name": "warm-build",
+      "cmd": "cargo build --offline -p jiff-core --lib"
+    }
+  ],
+  "setup_timeout_s": 900,
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "sub_positive",
+        "cmd": "cargo test --offline -p jiff-core --test vb_offset_sub vb_subtracts_positive_seconds"
+      },
+      {
+        "name": "sub_negative",
+        "cmd": "cargo test --offline -p jiff-core --test vb_offset_sub vb_subtracts_negative_seconds"
+      },
+      {
+        "name": "overflow_bounds",
+        "cmd": "cargo test --offline -p jiff-core --test vb_offset_sub vb_rejects_overflow_at_bounds"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "add_unchanged",
+        "cmd": "cargo test --offline -p jiff-core --test vb_offset_reg vb_checked_add_still_adds"
+      },
+      {
+        "name": "accessors",
+        "cmd": "cargo test --offline -p jiff-core --test vb_offset_reg vb_accessors_and_until"
+      },
+      {
+        "name": "i32_min",
+        "cmd": "cargo test --offline -p jiff-core --test vb_offset_reg vb_rejects_i32_min_subtrahend"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "crates/jiff-core/src/tz/offset.rs"
+    ],
+    "suggested_max_steps": 200,
+    "suggested_timeout_s": 3600
+  }
+}

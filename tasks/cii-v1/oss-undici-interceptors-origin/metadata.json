@@ -1,0 +1,58 @@
+{
+  "id": "oss-undici-interceptors-origin",
+  "category": "bug_fix",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "2ab178a3e3260fe2a516bdcf1a5154cdf579f8bb",
+  "upstream": {
+    "url": "https://github.com/nodejs/undici/pull/5628",
+    "issue": "https://github.com/nodejs/undici/issues/5613",
+    "commit": "2ab178a3e3260fe2a516bdcf1a5154cdf579f8bb"
+  },
+  "upstream_merged": "2026-08-01",
+  "decontamination_notes": "Real bug fix from nodejs/undici PR #5628 (issue #5613), merged 2026-08-01, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Client and Pool dispatch without opts.origin (they know their own origin), and both the cache() and deduplicate() interceptors bailed out immediately when opts.origin was absent \u2014 silently passing every request through \u2014 while lib/util/cache.js's key builder threw on the missing origin. The fix (3 files, system complexity) decouples the origin check from the method check in cache.js, drops the origin bail-out in deduplicate.js, and makes makeCacheKey tolerate a missing origin. Repo sliced at the PR base commit (2ab178a3) to lib/ + index.js + index-fetch.js + package.json + LICENSE (undici is dependency-free at runtime, bundled llhttp WASM included; node-ts image, loopback node:http servers work in the network-off sandbox). Coverage: 3 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 cache() on Client (server hit exactly once across two GETs), cache() on Pool, and deduplicate() coalescing two concurrent requests; 2 pass_to_pass guards pin plain Client dispatch and POST never being cached. Assertions count server hits and compare bodies from the tests' own servers, never library error text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "cache_client",
+        "cmd": "node --test --test-name-pattern='vb cache\\(\\) caches when composed onto a Client' vb_interceptor_origin.test.cjs"
+      },
+      {
+        "name": "cache_pool",
+        "cmd": "node --test --test-name-pattern='vb cache\\(\\) caches when composed onto a Pool' vb_interceptor_origin.test.cjs"
+      },
+      {
+        "name": "deduplicate",
+        "cmd": "node --test --test-name-pattern='vb deduplicate\\(\\) coalesces concurrent requests on a Client' vb_interceptor_origin.test.cjs"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "plain_client",
+        "cmd": "node --test --test-name-pattern='vb plain Client request works' vb_undici_reg.test.cjs"
+      },
+      {
+        "name": "post_not_cached",
+        "cmd": "node --test --test-name-pattern='vb cache\\(\\) does not cache POST' vb_undici_reg.test.cjs"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "lib/interceptor/cache.js",
+      "lib/interceptor/deduplicate.js"
+    ],
+    "suggested_max_steps": 320,
+    "suggested_timeout_s": 5760
+  }
+}

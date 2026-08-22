@@ -1,0 +1,48 @@
+[package]
+authors = ["Alex Huszagh <ahuszagh@gmail.com>"]
+autobenches = false
+categories = ["parsing", "no-std"]
+description = "Efficient parsing of integers from strings."
+edition = "2021"
+keywords = ["parsing", "lexical", "no_std"]
+license = "MIT/Apache-2.0"
+name = "lexical-parse-integer"
+readme = "README.md"
+repository = "https://github.com/Alexhuszagh/rust-lexical"
+version = "1.0.6"
+rust-version = "1.60.0"
+exclude = [
+    "assets/*",
+    "docs/*",
+    "etc/*",
+    "cargo-timing*.html"
+]
+
+[dependencies.lexical-util]
+version = "1.0.7"
+path = "../lexical-util"
+default-features = false
+features = ["parse-integers"]
+
+[features]
+default = ["std"]
+# Use the standard library.
+std = ["lexical-util/std"]
+# Add support for parsing power-of-two integer strings.
+power-of-two = ["lexical-util/power-of-two"]
+# Add support for parsing non-decimal integer strings.
+radix = ["lexical-util/radix", "power-of-two"]
+# Add support for parsing custom integer formats.
+format = ["lexical-util/format"]
+# Reduce code size at the cost of performance.
+compact = ["lexical-util/compact"]
+
+# INTERNAL ONLY
+# -------------
+# Internal only features. These are not meant to be used directly.
+# Enable the lint checks.
+lint = ["lexical-util/lint"]
+
+[package.metadata.docs.rs]
+features = ["radix", "format"]
+rustdoc-args = ["--cfg", "docsrs"]

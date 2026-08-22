@@ -1,0 +1,61 @@
+{
+  "id": "oss-ky-query-method",
+  "category": "feature",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "61d6d66d27911001b9b4d57ab93139f9ad61384b",
+  "upstream": {
+    "url": "https://github.com/sindresorhus/ky/pull/873",
+    "issue": "https://github.com/sindresorhus/ky/pull/873",
+    "commit": "61d6d66d27911001b9b4d57ab93139f9ad61384b"
+  },
+  "upstream_merged": "2026-07-06",
+  "decontamination_notes": "Real feature from sindresorhus/ky PR #873, merged 2026-07-06, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Adds HTTP QUERY support across five source files (system complexity): source/core/constants.ts adds 'query' to requestMethods (which drives both the ky.query shortcut generation and method uppercasing), source/utils/normalize.ts and source/types/retry.ts add it to the default retryable methods, and source/types/ky.ts and options.ts extend the type surface. Repo sliced at the PR base commit (61d6d66d) to source/ + package.json + license (ky is dependency-free; node-ts image runs the TS source via tsx with Node's global fetch, and loopback node:http servers work in the network-off sandbox). Coverage: 3 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 the ky.query shortcut round-tripping JSON, {method: 'query'} uppercased to QUERY on the wire (observed by the server), and body conveyance; 3 pass_to_pass guards pin ky.get, POST uppercasing, and error-status rejection. Assertions check observed methods/bodies from the tests' own servers, never library error text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "query_shortcut",
+        "cmd": "tsx --test --test-name-pattern='vb ky.query sends a QUERY request' vb_query.test.ts"
+      },
+      {
+        "name": "uppercased",
+        "cmd": "tsx --test --test-name-pattern='vb query method option is uppercased' vb_query.test.ts"
+      },
+      {
+        "name": "json_body",
+        "cmd": "tsx --test --test-name-pattern='vb ky.query conveys a json body' vb_query.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "get",
+        "cmd": "tsx --test --test-name-pattern='vb ky.get works' vb_ky_reg.test.ts"
+      },
+      {
+        "name": "post_uppercase",
+        "cmd": "tsx --test --test-name-pattern='vb ky.post uppercases and sends' vb_ky_reg.test.ts"
+      },
+      {
+        "name": "http_error",
+        "cmd": "tsx --test --test-name-pattern='vb error status throws HTTPError' vb_ky_reg.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "source/core/constants.ts"
+    ],
+    "suggested_max_steps": 160,
+    "suggested_timeout_s": 1920
+  }
+}

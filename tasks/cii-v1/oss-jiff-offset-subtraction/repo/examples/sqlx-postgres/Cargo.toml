@@ -1,0 +1,21 @@
+[package]
+publish = false
+name = "sqlx-postgres-test"
+version = "0.0.1"
+edition = "2021"
+
+# Examples in Jiff are explicitly isolated from the workspace to avoid
+# dev-dependencies accumulating. (Not all examples have big dependency trees,
+# but we still exclude them from the workspace as a general rule.)
+[workspace]
+
+[dependencies]
+anyhow = "1.0.95"
+jiff = { path = "../../crates/jiff" }
+jiff-sqlx = { path = "../../crates/jiff-sqlx", features = ["postgres"] }
+sqlx = { version = "0.9.0", features = ["postgres", "runtime-tokio"] }
+tokio = { version = "1.43.0", features = ["full"] }
+
+[[bin]]
+name = "sqlx-postgres-test"
+path = "main.rs"

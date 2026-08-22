@@ -1,0 +1,24 @@
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+profile = "release"
+features = ["python", "pyo3/extension-module"]
+
+[project]
+name = "hifitime"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Intended Audience :: Science/Research",
+]
+license = "MPL-2.0"
+dynamic = ["version"]
+
+[tool.yapf]
+based_on_style = "google"
+spaces_before_comment = 4
+column_limit = 100

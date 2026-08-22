@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# This is a convenience script for running a broad swath of tests across
+# features. We don't test the complete space, since the complete space is quite
+# large.
+#
+# This script is used to run a more exhaustive set of tests than what just
+# `cargo test` or even `cargo test --all` will do. Specifically, we run tests
+# under a number of different feature configurations.
+#
+# This is practically necessary because it is very easy to accidentally break
+# a particular feature combination, especially `--no-default-features`.
+
+set -e
+
+# cd to the directory containing this crate's Cargo.toml so that we don't need
+# to pass --manifest-path to every `cargo` command.
+cd "$(dirname "$0")/.."
+
+# This is split into separate scripts so that each one can be run in an
+# independent job on CI. This speeds up CI. But locally, developer workstations
+# are powerful enough that just running everything at once doesn't take that
+# long (a few minutes on my aging i9-12900K).
+./scripts/test-default
+./scripts/test-all
+./scripts/test-only-bundle
+./scripts/test-only-core
+./scripts/test-various-feature-combos

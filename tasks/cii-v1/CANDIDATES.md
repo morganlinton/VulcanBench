@@ -22,6 +22,20 @@ composition targets and the admission gate.
 | oss-cli-required-single-arg | cli#2393 | 2026-08-16 | go | system/medium | 4-file feature: API + parse + errors + usage rendering |
 | oss-hono-regexp-wildcard-middleware | hono#5266 | 2026-08-19 | ts | multi_file/hard | router association logic; SmartRouter masks it |
 
+### Wave 2 (2026-08-22, PRs verified vs both waves' dedup sweep)
+
+| Task | Source PR | Merged | Lang | Complexity | Why |
+|---|---|---|---|---|---|
+| oss-packaging-interpreter-tag-identifier | packaging#1351 | 2026-07-28 | py | multi_file/easy | deliberate easy anchor; vivid mis-parse symptom |
+| oss-echo-problem-details | echo#3062 | 2026-07-30 | go | multi_file/medium | RFC 9457 feature with a rich behavioral contract |
+| oss-zod-codepoint-length | zod#6441 | 2026-08-19 | ts | system/hard | 3 files incl. compiled codegen path; perf-aware fix |
+| oss-clap-mangen-override-usage | clap#6467 | 2026-08-06 | rust | system/medium | cross-crate (clap_builder + clap_mangen) |
+| oss-sqlglot-multi-table-ddl | sqlglot#8229 | 2026-08-20 | py | system/hard | 6-file breaking AST change; human-authored PR |
+
+Wave-2 dedup catch: anyio#1228 and attrs#1592 were already python-1 tasks
+(oss-anyio-fail-at-deadline, oss-attrs-generator-on-setattr) — the shortlist
+below is re-checked, but always re-run the grep before building.
+
 ## Triage rules learned
 
 - **Dedup against every existing suite first** (`grep -rh '"url"' tasks/*/*/metadata.json`):

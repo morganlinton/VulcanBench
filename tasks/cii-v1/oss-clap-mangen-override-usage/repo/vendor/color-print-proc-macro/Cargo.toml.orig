@@ -1,0 +1,20 @@
+[package]
+name = "color-print-proc-macro"
+version = "0.3.7"
+edition = "2018"
+authors = ["Johann David <johann.david.dev@protonmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Implementation for the package color-print"
+repository = "https://gitlab.com/dajoha/color-print"
+
+[lib]
+proc-macro = true
+
+[features]
+terminfo = []
+
+[dependencies]
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+nom = "7.1"

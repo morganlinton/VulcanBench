@@ -1,0 +1,73 @@
+{
+  "id": "oss-clap-mangen-override-usage",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:rust-2024",
+  "base_commit": "4684d7abc545cef1d78708864cfe8c7668ed49c1",
+  "upstream": {
+    "url": "https://github.com/clap-rs/clap/pull/6467",
+    "issue": "https://github.com/clap-rs/clap/pull/6467",
+    "commit": "4684d7abc545cef1d78708864cfe8c7668ed49c1"
+  },
+  "upstream_merged": "2026-08-06",
+  "decontamination_notes": "Real bug fix from clap-rs/clap PR #6467, merged 2026-08-06, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. clap_mangen derived the man-page SYNOPSIS from the declared arguments even when Command::override_usage was set, contradicting the help output. The fix spans three files across two crates (system complexity): clap_builder/src/builder/command.rs promotes the internal get_override_usage to a public get_overridden_usage, clap_builder/src/output/usage.rs follows the rename, and clap_mangen/src/render.rs renders the override in the SYNOPSIS \u2014 one line per non-empty form with explicit breaks, bolding the command name only on forms that start with it. Workspace sliced at the PR base commit (4684d7ab) with cargo-prune to the closure of clap_mangen (clap root, clap_builder, clap_derive, clap_lex, clap_mangen), third-party deps vendored (lock regenerated for the pruned workspace; offline builds via .cargo/config.toml); rust-2024 image for headroom on vendored dev-dep MSRVs. MIT/Apache LICENSEs preserved. Hidden tests are integration tests of clap_mangen compiled independently per --test target: vb_synopsis.rs (fail_to_pass, 4 tests) compiles at base and fails behaviorally \u2014 single-form override rendering with bold name, multi-form preservation with .br separators, override replacing the derived synopsis, and non-name forms staying roman; vb_reg.rs (pass_to_pass, 3 tests) guards the derived synopsis without an override, help output still honoring override_usage, and man-page section structure. Assertions check rendered roff/help content from the tests' own inputs, never library error text.",
+  "grader": "tests",
+  "setup": [
+    {
+      "name": "warm-build",
+      "cmd": "cargo build --offline -p clap_mangen --tests"
+    }
+  ],
+  "setup_timeout_s": 900,
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "single_form",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_synopsis vb_single_form_override_is_rendered"
+      },
+      {
+        "name": "multi_form",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_synopsis vb_multi_form_override_keeps_every_form"
+      },
+      {
+        "name": "replaces_derived",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_synopsis vb_override_replaces_derived_synopsis"
+      },
+      {
+        "name": "non_name_roman",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_synopsis vb_non_name_form_is_not_bolded"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "derived_without_override",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_reg vb_derived_synopsis_still_rendered_without_override"
+      },
+      {
+        "name": "help_override",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_reg vb_help_output_still_shows_override_usage"
+      },
+      {
+        "name": "sections",
+        "cmd": "cargo test --offline -p clap_mangen --test vb_reg vb_man_page_sections_present"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "clap_mangen/src/render.rs",
+      "clap_builder/src/builder/command.rs"
+    ],
+    "suggested_max_steps": 320,
+    "suggested_timeout_s": 5760
+  }
+}

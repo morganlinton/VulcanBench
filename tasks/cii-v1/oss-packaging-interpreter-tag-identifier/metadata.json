@@ -1,0 +1,72 @@
+{
+  "id": "oss-packaging-interpreter-tag-identifier",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "easy",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": true,
+  "base_commit": "b62954b62d04f58a939d2856c67ebe4de32cdb5d",
+  "upstream": {
+    "url": "https://github.com/pypa/packaging/pull/1351",
+    "issue": "https://github.com/pypa/packaging/issues/577",
+    "commit": "b62954b62d04f58a939d2856c67ebe4de32cdb5d"
+  },
+  "upstream_merged": "2026-07-28",
+  "decontamination_notes": "Real bug fix from pypa/packaging PR #1351 (issue #577), merged 2026-07-28, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. parse_tag validated empty components and component counts but not the interpreter itself, so a non-identifier interpreter like '2.7.6' passed through and the compressed-set dot-splitting turned it into three nonsense tags (2/7/6); parse_wheel_filename inherited the bug for wheels like playlyfe-0.1.1-2.7.6-none-any.whl. The fix (src/packaging/tags.py + src/packaging/utils.py, multi_file) raises InvalidTag for any interpreter component that is not a Python identifier, and adjusts the InvalidWheelFilename wrapping. Deliberately kept as an easy anchor for the difficulty band. Repo sliced at the PR base commit (b62954b6) to src/packaging plus the three LICENSE files, keeping the upstream src/ layout (test cmds use PYTHONPATH=src); packaging is dependency-free so the base sandbox image runs the hidden tests with pytest. Coverage: 4 fail_to_pass tests (7 cases with parametrize), each verified failing at base and passing after the gold patch: the four non-identifier spellings from the upstream PR, a guard that a dotted interpreter is never split into multiple tags, and the wheel-filename level for both the real-world and the '+' spelling; 5 pass_to_pass guards pin identifier interpreters (including non-listed ones, enforcing a real identifier check over a hard-coded list), compressed-set expansion, empty-component and component-count rejections, and normal wheel-filename parsing. Assertions check exception TYPES and parsed values, never message text. Expected values generated from the gold patch behavior.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "non_identifier_rejected",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_non_identifier_interpreter_rejected -q"
+      },
+      {
+        "name": "dotted_not_split",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_dotted_interpreter_not_split_into_tags -q"
+      },
+      {
+        "name": "wheel_invalid_interpreter",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_wheel_filename_invalid_interpreter_rejected -q"
+      },
+      {
+        "name": "wheel_plus_interpreter",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_wheel_filename_plus_interpreter_rejected -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "identifiers_accepted",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_identifier_interpreters_accepted -q"
+      },
+      {
+        "name": "compressed_sets",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_compressed_tag_sets_still_expand -q"
+      },
+      {
+        "name": "empty_component",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_empty_component_still_rejected -q"
+      },
+      {
+        "name": "component_count",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_wrong_component_count_still_rejected -q"
+      },
+      {
+        "name": "valid_wheel",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_valid_wheel_filename_still_parses -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/packaging/tags.py"
+    ],
+    "suggested_max_steps": 130,
+    "suggested_timeout_s": 1560
+  }
+}

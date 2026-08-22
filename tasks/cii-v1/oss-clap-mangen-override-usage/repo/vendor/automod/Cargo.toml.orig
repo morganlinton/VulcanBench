@@ -1,0 +1,30 @@
+[package]
+name = "automod"
+version = "1.0.17"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+categories = ["development-tools::build-utils", "filesystem", "no-std", "no-std::no-alloc"]
+description = "Pull in every source file in a directory as a module."
+documentation = "https://docs.rs/automod"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/dtolnay/automod"
+rust-version = "1.71"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.74"
+quote = "1.0.35"
+syn = "2.0.46"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+rustdoc-args = [
+    "--generate-link-to-definition",
+    "--generate-macro-expansion",
+    "--extern-html-root-url=core=https://doc.rust-lang.org",
+    "--extern-html-root-url=alloc=https://doc.rust-lang.org",
+    "--extern-html-root-url=std=https://doc.rust-lang.org",
+    "--extern-html-root-url=proc_macro=https://doc.rust-lang.org",
+]

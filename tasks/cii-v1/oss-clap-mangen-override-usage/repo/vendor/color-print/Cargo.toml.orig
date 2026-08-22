@@ -1,0 +1,23 @@
+[package]
+name = "color-print"
+version = "0.3.7"
+edition = "2018"
+authors = ["Johann David <johann.david.dev@protonmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Colorize and stylize strings for terminal at compile-time, by using an HTML-like syntax"
+keywords = ["color", "terminal", "ansi", "terminfo"]
+repository = "https://gitlab.com/dajoha/color-print"
+readme = "README.md"
+
+[features]
+terminfo = [
+    "color-print-proc-macro/terminfo",
+    "lazy_static",
+    "terminfo_crate",
+]
+
+[dependencies]
+color-print-proc-macro = "0.3.7"
+# color-print-proc-macro = { version = "0.3.7", path = "../color-print-proc-macro" }
+lazy_static = { version = "1.4", optional = true }
+terminfo_crate = { version = "0.7.3", optional = true, package = "terminfo" }

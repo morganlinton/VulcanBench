@@ -1,0 +1,95 @@
+[package]
+name = "similar"
+version = "3.2.0"
+authors = [
+    "Armin Ronacher <armin.ronacher@active-4.com>",
+    "Pierre-Étienne Meunier <pe@pijul.org>",
+    "Brandon Williams <bwilliams.eng@gmail.com>",
+]
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "A diff library for Rust"
+repository = "https://github.com/mitsuhiko/similar"
+keywords = ["diff", "difference", "patience", "compare", "changes"]
+readme = "README.md"
+include = ["CHANGELOG.md", "Cargo.toml", "LICENSE", "README.md", "src/**/*.rs"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std", "text"]
+std = ["bstr?/std"]
+text = []
+inline = ["text"]
+wasm32_web_time = ["web-time"]
+unicode = ["text", "unicode-segmentation", "bstr?/unicode"]
+bytes = ["bstr", "text"]
+hashbrown = ["dep:hashbrown"]
+
+[dev-dependencies]
+insta = "1.10.0"
+console = "0.15.0"
+serde_json = "1.0.68"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+criterion = "0.8.2"
+
+[dependencies]
+unicode-segmentation = { version = "1.7.1", optional = true }
+bstr = { version = "1.5.0", optional = true, default-features = false }
+serde = { version = "1.0.130", optional = true, default-features = false, features = ["alloc", "derive"] }
+web-time = { version = "1.1", optional = true }
+hashbrown = { version = "0.15", optional = true, default-features = false, features = ["default-hasher"] }
+
+[[example]]
+name = "patience"
+required-features = ["text", "inline"]
+
+[[example]]
+name = "whitespace"
+required-features = ["text"]
+
+[[example]]
+name = "terminal"
+required-features = ["text"]
+
+[[example]]
+name = "terminal-inline"
+required-features = ["text", "inline", "bytes"]
+
+[[example]]
+name = "original-slices"
+required-features = ["text"]
+
+[[example]]
+name = "udiff"
+required-features = ["std", "text", "bytes"]
+
+[[example]]
+name = "close-matches"
+required-features = ["text"]
+
+[[example]]
+name = "large"
+required-features = ["text"]
+
+[[example]]
+name = "serde"
+required-features = ["text", "serde"]
+
+[[example]]
+name = "perf-fuzz"
+required-features = ["std", "text"]
+
+[[bench]]
+name = "diffs"
+harness = false
+
+[[bench]]
+name = "allocations"
+harness = false
+
+[profile.release]
+debug = true

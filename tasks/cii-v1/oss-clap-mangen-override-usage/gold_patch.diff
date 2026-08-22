@@ -1,0 +1,101 @@
+diff --git a/clap_builder/src/builder/command.rs b/clap_builder/src/builder/command.rs
+index 2d789b955c8..12183406550 100644
+--- a/clap_builder/src/builder/command.rs
++++ b/clap_builder/src/builder/command.rs
+@@ -3822,6 +3822,14 @@ impl Command {
+         self.long_about.as_ref()
+     }
+ 
++    /// Get the usage message specified via [`Command::override_usage`].
++    ///
++    /// [`Command::override_usage`]: Command::override_usage()
++    #[inline]
++    pub fn get_overridden_usage(&self) -> Option<&StyledStr> {
++        self.usage_str.as_ref()
++    }
++
+     /// Get the custom section heading specified via [`Command::flatten_help`].
+     #[inline]
+     pub fn is_flatten_help_set(&self) -> bool {
+@@ -4305,10 +4313,6 @@ impl Command {
+ 
+ // Internally used only
+ impl Command {
+-    pub(crate) fn get_override_usage(&self) -> Option<&StyledStr> {
+-        self.usage_str.as_ref()
+-    }
+-
+     pub(crate) fn get_override_help(&self) -> Option<&StyledStr> {
+         self.help_str.as_ref()
+     }
+diff --git a/clap_builder/src/output/usage.rs b/clap_builder/src/output/usage.rs
+index 7c4ddc5ffca..0cb93d498b8 100644
+--- a/clap_builder/src/output/usage.rs
++++ b/clap_builder/src/output/usage.rs
+@@ -74,7 +74,7 @@ impl<'cmd> Usage<'cmd> {
+     // Creates a usage string (*without title*) if one was not provided by the user manually.
+     fn write_usage_no_title(&self, styled: &mut StyledStr, used: &[Id]) -> bool {
+         debug!("Usage::create_usage_no_title");
+-        if let Some(u) = self.cmd.get_override_usage() {
++        if let Some(u) = self.cmd.get_overridden_usage() {
+             styled.push_styled(u);
+             true
+         } else {
+diff --git a/clap_mangen/src/render.rs b/clap_mangen/src/render.rs
+index c2a7bef41ed..fa6c70cbb9f 100644
+--- a/clap_mangen/src/render.rs
++++ b/clap_mangen/src/render.rs
+@@ -31,6 +31,12 @@ pub(crate) fn description(roff: &mut Roff, cmd: &clap::Command) {
+ 
+ pub(crate) fn synopsis(roff: &mut Roff, cmd: &clap::Command) {
+     let name = cmd.get_bin_name().unwrap_or_else(|| cmd.get_name());
++
++    if let Some(usage) = cmd.get_overridden_usage() {
++        override_synopsis(roff, name, &usage.to_string());
++        return;
++    }
++
+     let mut line = vec![bold(name), roman(" ")];
+ 
+     let required_groups: Vec<Vec<&Arg>> = cmd
+@@ -178,6 +184,40 @@ fn render_synopsis_arg(arg: &Arg) -> Vec<Inline> {
+     inline
+ }
+ 
++/// Render the usage set with [`clap::Command::override_usage`].
++///
++/// Such a usage may document several invocation forms, one per line, indented
++/// to line up under the `Usage: ` prefix of the help output. Each line is
++/// trimmed and given a line of its own, so that commands documenting more than
++/// one form keep them all visible instead of having them collapsed into the
++/// single line derived from the arguments. Empty lines are dropped.
++///
++/// A form starting with the name of the command has that name set in bold, to
++/// match the synopsis derived from the arguments.
++fn override_synopsis(roff: &mut Roff, name: &str, usage: &str) {
++    let mut first = true;
++
++    for form in usage.lines().map(str::trim).filter(|l| !l.is_empty()) {
++        // Each form is rendered as its own text line, separated by an explicit
++        // break, rather than as a single line holding `Inline::LineBreak`s: a
++        // form starting with a control character is only escaped by `roff` when
++        // it starts the line it is rendered on.
++        if !first {
++            roff.control("br", []);
++        }
++        first = false;
++
++        match form.strip_prefix(name) {
++            Some(rest) if rest.is_empty() || rest.starts_with(' ') => {
++                roff.text([bold(name), roman(rest)]);
++            }
++            _ => {
++                roff.text([roman(form)]);
++            }
++        }
++    }
++}
++
+ pub(crate) fn options(roff: &mut Roff, items: &[&Arg]) {
+     let mut sorted_items = items.to_vec();
+     sorted_items.sort_by_key(|opt| option_sort_key(opt));

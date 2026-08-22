@@ -1,0 +1,179 @@
+diff --git a/sqlglot/expressions/ddl.py b/sqlglot/expressions/ddl.py
+index ad431b2957..9bec04e7c9 100644
+--- a/sqlglot/expressions/ddl.py
++++ b/sqlglot/expressions/ddl.py
+@@ -345,7 +345,6 @@ class MergeTreeTTL(Expression):
+ 
+ class Drop(Expression):
+     arg_types = {
+-        "this": False,
+         "kind": False,
+         "tables": False,
+         "expressions": False,
+diff --git a/sqlglot/expressions/query.py b/sqlglot/expressions/query.py
+index f5e52dbec9..a5d45a290a 100644
+--- a/sqlglot/expressions/query.py
++++ b/sqlglot/expressions/query.py
+@@ -1891,7 +1891,7 @@ class Where(Expression):
+ class Analyze(Expression):
+     arg_types = {
+         "kind": False,
+-        "this": False,
++        "tables": False,
+         "options": False,
+         "mode": False,
+         "partition": False,
+diff --git a/sqlglot/generator.py b/sqlglot/generator.py
+index 8714318ec5..4489730948 100644
+--- a/sqlglot/generator.py
++++ b/sqlglot/generator.py
+@@ -1827,9 +1827,7 @@ def delete_sql(self, expression: exp.Delete) -> str:
+         return self.prepend_ctes(expression, f"DELETE{hint}{tables}{expression_sql}")
+ 
+     def drop_sql(self, expression: exp.Drop) -> str:
+-        this = self.sql(expression, "this")
+         tables = self.expressions(expression, key="tables", flat=True)
+-        this = f"{this}, {tables}" if tables else this
+         expressions = self.expressions(expression, flat=True)
+         expressions = f" ({expressions})" if expressions else ""
+         kind = expression.args["kind"]
+@@ -1851,7 +1849,7 @@ def drop_sql(self, expression: exp.Drop) -> str:
+         purge = " PURGE" if expression.args.get("purge") else ""
+         sync = " SYNC" if expression.args.get("sync") else ""
+         force = " FORCE" if expression.args.get("force") else ""
+-        return f"DROP{temporary}{materialized}{iceberg} {kind}{concurrently_sql}{exists_sql}{this}{on_cluster}{expressions}{cascade}{restrict}{constraints}{purge}{sync}{force}"
++        return f"DROP{temporary}{materialized}{iceberg} {kind}{concurrently_sql}{exists_sql}{tables}{on_cluster}{expressions}{cascade}{restrict}{constraints}{purge}{sync}{force}"
+ 
+     def set_operation(self, expression: exp.SetOperation) -> str:
+         op_type = type(expression)
+@@ -6048,8 +6046,8 @@ def analyze_sql(self, expression: exp.Analyze) -> str:
+         options = f" {options}" if options else ""
+         kind = self.sql(expression, "kind")
+         kind = f" {kind}" if kind else ""
+-        this = self.sql(expression, "this")
+-        this = f" {this}" if this else ""
++        tables = self.expressions(expression, key="tables", flat=True)
++        tables = f" {tables}" if tables else ""
+         mode = self.sql(expression, "mode")
+         mode = f" {mode}" if mode else ""
+         properties = self.sql(expression, "properties")
+@@ -6058,7 +6056,7 @@ def analyze_sql(self, expression: exp.Analyze) -> str:
+         partition = f" {partition}" if partition else ""
+         inner_expression = self.sql(expression, "expression")
+         inner_expression = f" {inner_expression}" if inner_expression else ""
+-        return f"ANALYZE{options}{kind}{this}{partition}{mode}{inner_expression}{properties}"
++        return f"ANALYZE{options}{kind}{tables}{partition}{mode}{inner_expression}{properties}"
+ 
+     def xmltable_sql(self, expression: exp.XMLTable) -> str:
+         this = self.sql(expression, "this")
+diff --git a/sqlglot/generators/tsql.py b/sqlglot/generators/tsql.py
+index 2756ff4e7f..9f61b4e977 100644
+--- a/sqlglot/generators/tsql.py
++++ b/sqlglot/generators/tsql.py
+@@ -596,7 +596,8 @@ def alter_sql(self, expression: exp.Alter) -> str:
+ 
+     def drop_sql(self, expression: exp.Drop) -> str:
+         if expression.args["kind"] == "VIEW":
+-            expression.this.set("catalog", None)
++            for table in expression.args.get("tables") or []:
++                table.set("catalog", None)
+         return super().drop_sql(expression)
+ 
+     def options_modifier(self, expression: exp.Expr) -> str:
+diff --git a/sqlglot/parser.py b/sqlglot/parser.py
+index b68102b29e..d7db660951 100644
+--- a/sqlglot/parser.py
++++ b/sqlglot/parser.py
+@@ -2412,16 +2412,13 @@ def _parse_drop(self, exists: bool = False) -> exp.Drop | exp.Command:
+         concurrently = self._match_text_seq("CONCURRENTLY")
+         if_exists = exists or self._parse_exists()
+ 
++        tables: exp.Expr | list[exp.Expr] | None
+         if kind == "COLUMN":
+-            this = self._parse_column()
++            tables = self._parse_column()
++        elif kind in ("TABLE", "VIEW"):
++            tables = self._parse_csv(lambda: self._parse_table_parts(schema=True))
+         else:
+-            this = self._parse_table_parts(schema=True, is_db_reference=kind == "SCHEMA")
+-
+-        tables = (
+-            self._parse_csv(lambda: self._parse_table_parts(schema=True))
+-            if kind == "TABLE" and self._match(TokenType.COMMA)
+-            else None
+-        )
++            tables = self._parse_table_parts(schema=True, is_db_reference=kind == "SCHEMA")
+ 
+         cluster = self._parse_on_property() if self._match(TokenType.ON) else None
+ 
+@@ -2435,8 +2432,7 @@ def _parse_drop(self, exists: bool = False) -> exp.Drop | exp.Command:
+         return self.expression(
+             exp.Drop(
+                 exists=if_exists,
+-                this=this,
+-                tables=tables,
++                tables=ensure_list(tables),
+                 expressions=expressions,
+                 kind=self.dialect.CREATABLE_KIND_MAPPING.get(kind) or kind,
+                 temporary=temporary,
+@@ -9318,21 +9314,23 @@ def _parse_analyze(self) -> exp.Analyze | exp.Command:
+             else:
+                 options.append(self._prev.text.upper())
+ 
+-        this: exp.Expr | None = None
++        tables: exp.Expr | list[exp.Expr] | None = None
+         inner_expression: exp.Expr | None = None
+ 
+         kind = self._curr.text.upper() if self._curr else None
+ 
+-        if self._match(TokenType.TABLE) or self._match(TokenType.INDEX):
+-            this = self._parse_table_parts()
++        if self._match(TokenType.TABLE):
++            tables = self._parse_csv(self._parse_table_parts)
++        elif self._match(TokenType.INDEX):
++            tables = self._parse_table_parts()
+         elif self._match_text_seq("TABLES"):
+             if self._match_set((TokenType.FROM, TokenType.IN)):
+                 kind = f"{kind} {self._prev.text.upper()}"
+-                this = self._parse_table(schema=True, is_db_reference=True)
++                tables = self._parse_table(schema=True, is_db_reference=True)
+         elif self._match_text_seq("DATABASE"):
+-            this = self._parse_table(schema=True, is_db_reference=True)
++            tables = self._parse_table(schema=True, is_db_reference=True)
+         elif self._match_text_seq("CLUSTER"):
+-            this = self._parse_table()
++            tables = self._parse_table()
+         # Try matching inner expr keywords before fallback to parse table.
+         elif self._match_texts(self.ANALYZE_EXPRESSION_PARSERS):
+             kind = None
+@@ -9340,7 +9338,7 @@ def _parse_analyze(self) -> exp.Analyze | exp.Command:
+         else:
+             # Empty kind  https://prestodb.io/docs/current/sql/analyze.html
+             kind = None
+-            this = self._parse_table_parts()
++            tables = self._parse_csv(self._parse_table_parts)
+ 
+         partition = self._try_parse(self._parse_partition)
+         if not partition and self._match_texts(self.PARTITION_KEYWORDS):
+@@ -9361,7 +9359,7 @@ def _parse_analyze(self) -> exp.Analyze | exp.Command:
+         return self.expression(
+             exp.Analyze(
+                 kind=kind,
+-                this=this,
++                tables=ensure_list(tables),
+                 mode=mode,
+                 partition=partition,
+                 properties=properties,
+diff --git a/sqlglot/parsers/spark2.py b/sqlglot/parsers/spark2.py
+index 7386e412ad..630f6c8da2 100644
+--- a/sqlglot/parsers/spark2.py
++++ b/sqlglot/parsers/spark2.py
+@@ -112,7 +112,7 @@ class Spark2Parser(HiveParser):
+ 
+     def _parse_drop_column(self) -> exp.Drop | exp.Command | None:
+         return (
+-            self.expression(exp.Drop(this=self._parse_schema(), kind="COLUMNS"))
++            self.expression(exp.Drop(tables=[self._parse_schema()], kind="COLUMNS"))
+             if self._match_text_seq("DROP", "COLUMNS")
+             else None
+         )

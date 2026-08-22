@@ -1,0 +1,77 @@
+{
+  "id": "oss-echo-problem-details",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:go-1.26",
+  "base_commit": "2e1ed480a17f5839468dddc4bdf26373a67ce60a",
+  "upstream": {
+    "url": "https://github.com/labstack/echo/pull/3062",
+    "issue": "https://github.com/labstack/echo/pull/3062",
+    "commit": "2e1ed480a17f5839468dddc4bdf26373a67ce60a"
+  },
+  "upstream_merged": "2026-07-30",
+  "decontamination_notes": "Real feature from labstack/echo PR #3062, merged 2026-07-30, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Adds RFC 9457 Problem Details support to echo v5: a ProblemError type (error + status-code interfaces, JSON members with omitempty on detail/instance), a ProblemErrorer conversion interface, ProblemDetailsHTTPErrorHandler(exposeError) with a documented precedence chain (errors.As on *ProblemError, then ProblemErrorer, then status-code/HTTPError mapping with exposeError gating), zero-value defaulting (about:blank / 500 / status text), HEAD no-body handling, committed-response short-circuit, and the MIMEApplicationProblemJSON constant in echo.go. Repo sliced at the PR base commit (2e1ed480): full module minus .git/.github with go mod vendor committed (testify + x/text closure, 131 files; upstream .gitignore vendor rule stripped) so builds run offline with -mod=vendor; go.mod needs go 1.25 so the go-1.26 sandbox image is required. MIT LICENSE preserved. Hidden tests live in test-only sub-packages for independent compilation: vbproblem/ (fail_to_pass) references the new API and fails to compile at base \u2014 all 7 commands verified failing at base and passing after the gold patch (plain error with exposeError false/true, HTTPError mapping, ProblemError pass-through, zero-value defaulting, ProblemErrorer conversion, HEAD no-body); vbreg/ (pass_to_pass) compiles and passes at base, guarding the default error handler, routing, and JSON content types. Assertions decode the response JSON and check fields/status/content-type; detail strings asserted are the tests' own inputs, never library error phrasing.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "plain_not_exposed",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBPlainErrorNotExposed ./vbproblem/"
+      },
+      {
+        "name": "plain_exposed",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBPlainErrorExposed ./vbproblem/"
+      },
+      {
+        "name": "httperror_mapped",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBHTTPErrorMapped ./vbproblem/"
+      },
+      {
+        "name": "problemerror_asis",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBProblemErrorUsedAsIs ./vbproblem/"
+      },
+      {
+        "name": "zero_defaults",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBProblemErrorZeroDefaults ./vbproblem/"
+      },
+      {
+        "name": "errorer_conversion",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBProblemErrorerConversion ./vbproblem/"
+      },
+      {
+        "name": "head_no_body",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBHeadRequestNoBody ./vbproblem/"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "default_handler",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBDefaultErrorHandlerStillDefault ./vbreg/"
+      },
+      {
+        "name": "routing",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBBasicRoutingWorks ./vbreg/"
+      },
+      {
+        "name": "json_content_type",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBJSONResponseContentType ./vbreg/"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "echo.go"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

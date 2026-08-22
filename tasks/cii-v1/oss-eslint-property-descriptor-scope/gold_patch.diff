@@ -1,0 +1,343 @@
+diff --git a/lib/rules/accessor-pairs.js b/lib/rules/accessor-pairs.js
+index 4af67ad772ca..5b91b7aa37f2 100644
+--- a/lib/rules/accessor-pairs.js
++++ b/lib/rules/accessor-pairs.js
+@@ -87,56 +87,6 @@ function isAccessorKind(node) {
+ 	return node.kind === "get" || node.kind === "set";
+ }
+ 
+-/**
+- * Checks whether or not a given node is an argument of a specified method call.
+- * @param {ASTNode} node A node to check.
+- * @param {number} index An expected index of the node in arguments.
+- * @param {string} object An expected name of the object of the method.
+- * @param {string} property An expected name of the method.
+- * @returns {boolean} `true` if the node is an argument of the specified method call.
+- */
+-function isArgumentOfMethodCall(node, index, object, property) {
+-	const parent = node.parent;
+-
+-	return (
+-		parent.type === "CallExpression" &&
+-		astUtils.isSpecificMemberAccess(parent.callee, object, property) &&
+-		parent.arguments[index] === node
+-	);
+-}
+-
+-/**
+- * Checks whether or not a given node is a property descriptor.
+- * @param {ASTNode} node A node to check.
+- * @returns {boolean} `true` if the node is a property descriptor.
+- */
+-function isPropertyDescriptor(node) {
+-	// Object.defineProperty(obj, "foo", {set: ...})
+-	if (
+-		isArgumentOfMethodCall(node, 2, "Object", "defineProperty") ||
+-		isArgumentOfMethodCall(node, 2, "Reflect", "defineProperty")
+-	) {
+-		return true;
+-	}
+-
+-	/*
+-	 * Object.defineProperties(obj, {foo: {set: ...}})
+-	 * Object.create(proto, {foo: {set: ...}})
+-	 */
+-	const grandparent = node.parent.parent;
+-
+-	return (
+-		grandparent.type === "ObjectExpression" &&
+-		(isArgumentOfMethodCall(grandparent, 1, "Object", "create") ||
+-			isArgumentOfMethodCall(
+-				grandparent,
+-				1,
+-				"Object",
+-				"defineProperties",
+-			))
+-	);
+-}
+-
+ //------------------------------------------------------------------------------
+ // Rule Definition
+ //------------------------------------------------------------------------------
+@@ -367,7 +317,7 @@ module.exports = {
+ 		 */
+ 		function checkObjectExpression(node) {
+ 			checkObjectLiteral(node);
+-			if (isPropertyDescriptor(node)) {
++			if (astUtils.isPropertyDescriptor(node, sourceCode)) {
+ 				checkPropertyDescriptor(node);
+ 			}
+ 		}
+diff --git a/lib/rules/getter-return.js b/lib/rules/getter-return.js
+index 28c10fa2514b..09874e5442fe 100644
+--- a/lib/rules/getter-return.js
++++ b/lib/rules/getter-return.js
+@@ -117,52 +117,11 @@ module.exports = {
+ 				if (
+ 					parent.type === "Property" &&
+ 					astUtils.getStaticPropertyName(parent) === "get" &&
+-					parent.parent.type === "ObjectExpression"
++					parent.parent.type === "ObjectExpression" &&
++					astUtils.isPropertyDescriptor(parent.parent, sourceCode)
+ 				) {
+-					// Object.defineProperty() or Reflect.defineProperty()
+-					if (parent.parent.parent.type === "CallExpression") {
+-						const callNode = parent.parent.parent.callee;
+-
+-						if (
+-							astUtils.isSpecificMemberAccess(
+-								callNode,
+-								"Object",
+-								"defineProperty",
+-							) ||
+-							astUtils.isSpecificMemberAccess(
+-								callNode,
+-								"Reflect",
+-								"defineProperty",
+-							)
+-						) {
+-							return true;
+-						}
+-					}
+-
+-					// Object.defineProperties() or Object.create()
+-					if (
+-						parent.parent.parent.type === "Property" &&
+-						parent.parent.parent.parent.type ===
+-							"ObjectExpression" &&
+-						parent.parent.parent.parent.parent.type ===
+-							"CallExpression"
+-					) {
+-						const callNode =
+-							parent.parent.parent.parent.parent.callee;
+-
+-						return (
+-							astUtils.isSpecificMemberAccess(
+-								callNode,
+-								"Object",
+-								"defineProperties",
+-							) ||
+-							astUtils.isSpecificMemberAccess(
+-								callNode,
+-								"Object",
+-								"create",
+-							)
+-						);
+-					}
++					// Getter in a property descriptor
++					return true;
+ 				}
+ 			}
+ 			return false;
+diff --git a/lib/rules/no-setter-return.js b/lib/rules/no-setter-return.js
+index 63e0de53bfa4..c71c4d1867d3 100644
+--- a/lib/rules/no-setter-return.js
++++ b/lib/rules/no-setter-return.js
+@@ -15,94 +15,6 @@ const astUtils = require("./utils/ast-utils");
+ // Helpers
+ //------------------------------------------------------------------------------
+ 
+-/**
+- * Determines whether the given node is an argument of the specified global method call, at the given `index` position.
+- * E.g., for given `index === 1`, this function checks for `objectName.methodName(foo, node)`, where objectName is a global variable.
+- * @param {ASTNode} node The node to check.
+- * @param {SourceCode} sourceCode Source code to which the node belongs.
+- * @param {string} objectName Name of the global object.
+- * @param {string} methodName Name of the method.
+- * @param {number} index The given position.
+- * @returns {boolean} `true` if the node is argument at the given position.
+- */
+-function isArgumentOfGlobalMethodCall(
+-	node,
+-	sourceCode,
+-	objectName,
+-	methodName,
+-	index,
+-) {
+-	const callNode = node.parent;
+-
+-	return (
+-		callNode.type === "CallExpression" &&
+-		callNode.arguments[index] === node &&
+-		astUtils.isSpecificMemberAccess(
+-			callNode.callee,
+-			objectName,
+-			methodName,
+-		) &&
+-		sourceCode.isGlobalReference(
+-			astUtils.skipChainExpression(callNode.callee).object,
+-		)
+-	);
+-}
+-
+-/**
+- * Determines whether the given node is used as a property descriptor.
+- * @param {ASTNode} node The node to check.
+- * @param {SourceCode} sourceCode Source code to which the node belongs.
+- * @returns {boolean} `true` if the node is a property descriptor.
+- */
+-function isPropertyDescriptor(node, sourceCode) {
+-	if (
+-		isArgumentOfGlobalMethodCall(
+-			node,
+-			sourceCode,
+-			"Object",
+-			"defineProperty",
+-			2,
+-		) ||
+-		isArgumentOfGlobalMethodCall(
+-			node,
+-			sourceCode,
+-			"Reflect",
+-			"defineProperty",
+-			2,
+-		)
+-	) {
+-		return true;
+-	}
+-
+-	const parent = node.parent;
+-
+-	if (parent.type === "Property" && parent.value === node) {
+-		const grandparent = parent.parent;
+-
+-		if (
+-			grandparent.type === "ObjectExpression" &&
+-			(isArgumentOfGlobalMethodCall(
+-				grandparent,
+-				sourceCode,
+-				"Object",
+-				"create",
+-				1,
+-			) ||
+-				isArgumentOfGlobalMethodCall(
+-					grandparent,
+-					sourceCode,
+-					"Object",
+-					"defineProperties",
+-					1,
+-				))
+-		) {
+-			return true;
+-		}
+-	}
+-
+-	return false;
+-}
+-
+ /**
+  * Determines whether the given function node is used as a setter function.
+  * @param {ASTNode} node The node to check.
+@@ -126,7 +38,7 @@ function isSetter(node, sourceCode) {
+ 		parent.value === node &&
+ 		astUtils.getStaticPropertyName(parent) === "set" &&
+ 		parent.parent.type === "ObjectExpression" &&
+-		isPropertyDescriptor(parent.parent, sourceCode)
++		astUtils.isPropertyDescriptor(parent.parent, sourceCode)
+ 	) {
+ 		// Setter in a property descriptor
+ 		return true;
+diff --git a/lib/rules/utils/ast-utils.js b/lib/rules/utils/ast-utils.js
+index 8d2883d2be36..07b4d28bbdaa 100644
+--- a/lib/rules/utils/ast-utils.js
++++ b/lib/rules/utils/ast-utils.js
+@@ -551,6 +551,91 @@ function isMethodWhichHasThisArg(node) {
+ 	return isSpecificMemberAccess(node, null, arrayMethodWithThisArgPattern);
+ }
+ 
++/**
++ * Determines whether the given node is an argument of the specified global method call, at the given `index` position.
++ * E.g., for given `index === 1`, this function checks for `objectName.methodName(foo, node)`, where objectName is a global variable.
++ * @param {ASTNode} node The node to check.
++ * @param {SourceCode} sourceCode Source code to which the node belongs.
++ * @param {string} objectName Name of the global object.
++ * @param {string} methodName Name of the method.
++ * @param {number} index The given position.
++ * @returns {boolean} `true` if the node is argument at the given position.
++ * @private
++ */
++function isArgumentOfGlobalMethodCall(
++	node,
++	sourceCode,
++	objectName,
++	methodName,
++	index,
++) {
++	const callNode = node.parent;
++
++	return (
++		callNode.type === "CallExpression" &&
++		callNode.arguments[index] === node &&
++		isSpecificMemberAccess(callNode.callee, objectName, methodName) &&
++		sourceCode.isGlobalReference(
++			skipChainExpression(callNode.callee).object,
++		)
++	);
++}
++
++/**
++ * Determines whether the given node is used as a property descriptor.
++ * @param {ASTNode} node The node to check.
++ * @param {SourceCode} sourceCode Source code to which the node belongs.
++ * @returns {boolean} `true` if the node is a property descriptor.
++ */
++function isPropertyDescriptor(node, sourceCode) {
++	if (
++		isArgumentOfGlobalMethodCall(
++			node,
++			sourceCode,
++			"Object",
++			"defineProperty",
++			2,
++		) ||
++		isArgumentOfGlobalMethodCall(
++			node,
++			sourceCode,
++			"Reflect",
++			"defineProperty",
++			2,
++		)
++	) {
++		return true;
++	}
++
++	const parent = node.parent;
++
++	if (parent.type === "Property" && parent.value === node) {
++		const grandparent = parent.parent;
++
++		if (
++			grandparent.type === "ObjectExpression" &&
++			(isArgumentOfGlobalMethodCall(
++				grandparent,
++				sourceCode,
++				"Object",
++				"create",
++				1,
++			) ||
++				isArgumentOfGlobalMethodCall(
++					grandparent,
++					sourceCode,
++					"Object",
++					"defineProperties",
++					1,
++				))
++		) {
++			return true;
++		}
++	}
++
++	return false;
++}
++
+ /**
+  * Creates the negate function of the given function.
+  * @param {Function} f The function to negate.
+@@ -1510,6 +1595,7 @@ module.exports = {
+ 	isInLoop,
+ 	isArrayFromMethod,
+ 	isArrayFromAsyncMethod,
++	isPropertyDescriptor,
+ 	isParenthesised,
+ 	createGlobalLinebreakMatcher,
+ 	equalTokens,

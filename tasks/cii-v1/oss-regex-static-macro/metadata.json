@@ -1,0 +1,77 @@
+{
+  "id": "oss-regex-static-macro",
+  "category": "feature",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:rust-2024",
+  "base_commit": "b9d2cf724f89754ea879b6c223d2292c4d3e2dd3",
+  "upstream": {
+    "url": "https://github.com/rust-lang/regex/pull/1371",
+    "issue": "https://github.com/rust-lang/regex/issues/709",
+    "commit": "b9d2cf724f89754ea879b6c223d2292c4d3e2dd3"
+  },
+  "upstream_merged": "2026-07-09",
+  "decontamination_notes": "Real feature from rust-lang/regex PR #1371 (issue #709), merged 2026-07-09, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Adds the declarative regex! macro: a per-call-site Lazy static (exposed through a doc-hidden __private module so no supporting type becomes public API) yielding &Regex, plus a bytes::regex! twin re-exported from a #[macro_export] __bytes_regex. The fix spans src/lib.rs, src/bytes.rs, src/regex/bytes.rs and src/regex/string.rs (system complexity). Workspace sliced at the PR base commit (b9d2cf72) with cargo-prune to the closure of the regex crate (regex root, regex-automata, regex-syntax, regex-test; bench/ and fuzz/ dropped), third-party deps vendored (lock regenerated; offline builds via .cargo/config.toml); rust-2024 image for vendored dev-dep MSRV headroom. MIT/Apache LICENSEs preserved. The upstream crate sets autotests=false with explicit [[test]] targets, so the hidden-test overlay also supplies the task's Cargo.toml with two appended [[test]] entries (vb_macro, vb_reg) \u2014 the manifest is otherwise identical to base, the gold patch does not touch it, and the feature requires no manifest change, so agent manifest edits are ignored at grading (documented deliberately). Coverage: 5 fail_to_pass tests in vb_macro.rs, which references the new macros and fails to compile at base \u2014 matching and coexistence in one scope, &Regex usability in function positions, pointer-identity proof of one compilation per call site, the bytes twin, and captures/named groups through the macro; 3 pass_to_pass guards in vb_reg.rs pin Regex::new, invalid-pattern is_err (type only, no message), and bytes::Regex::new. Verified: p2p passes at base, everything passes after the gold patch.",
+  "grader": "tests",
+  "setup": [
+    {
+      "name": "warm-build",
+      "cmd": "cargo build --offline -p regex --lib"
+    }
+  ],
+  "setup_timeout_s": 900,
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "macro_matches",
+        "cmd": "cargo test --offline -p regex --test vb_macro vb_macro_matches_and_coexists"
+      },
+      {
+        "name": "static_reference",
+        "cmd": "cargo test --offline -p regex --test vb_macro vb_macro_returns_static_regex_reference"
+      },
+      {
+        "name": "one_compilation",
+        "cmd": "cargo test --offline -p regex --test vb_macro vb_macro_reuses_one_compilation_per_call_site"
+      },
+      {
+        "name": "bytes_twin",
+        "cmd": "cargo test --offline -p regex --test vb_macro vb_bytes_macro_matches"
+      },
+      {
+        "name": "captures",
+        "cmd": "cargo test --offline -p regex --test vb_macro vb_macro_captures_work"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "regex_new",
+        "cmd": "cargo test --offline -p regex --test vb_reg vb_regex_new_still_works"
+      },
+      {
+        "name": "invalid_errors",
+        "cmd": "cargo test --offline -p regex --test vb_reg vb_invalid_pattern_still_errors"
+      },
+      {
+        "name": "bytes_new",
+        "cmd": "cargo test --offline -p regex --test vb_reg vb_bytes_regex_new_still_works"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/lib.rs",
+      "src/regex/string.rs"
+    ],
+    "suggested_max_steps": 320,
+    "suggested_timeout_s": 5760
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "id": "oss-chi-query-method",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:base",
+  "base_commit": "d7b767bcbea51e486bdc9fd06d25136767ec14b5",
+  "upstream": {
+    "url": "https://github.com/go-chi/chi/pull/1132",
+    "issue": "https://github.com/go-chi/chi/pull/1132",
+    "commit": "d7b767bcbea51e486bdc9fd06d25136767ec14b5"
+  },
+  "upstream_merged": "2026-07-05",
+  "decontamination_notes": "Real feature from go-chi/chi PR #1132, merged 2026-07-05, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Adds HTTP QUERY method support (RFC 10008) across three source files (system complexity): tree.go defines the mQUERY methodTyp bit, registers it in the method maps and the mALL mask, mux.go adds Mux.Query and threads the method through registration, and chi.go extends the Router interface. Correct 405/Allow behavior falls out of the methodTyp bitmask, which the hidden tests pin. Repo sliced at the PR base commit (d7b767bc): full module minus .git/.github; chi is dependency-free (no vendor needed), builds on the base sandbox image (go.mod go 1.23 matches the image's Go 1.23.4). MIT LICENSE preserved. Hidden tests live in test-only sub-packages for independent compilation: vbquery/ (fail_to_pass) references the new Query API and fails to compile at base \u2014 all 4 commands verified failing at base and passing after the gold patch (QUERY route dispatch with body, MethodFunc registration, QUERY vs GET distinctness, and QUERY in the 405 Allow header); vbreg/ (pass_to_pass) compiles and passes at base, guarding GET/POST routing, URL params, 405-with-Allow, and 404. Assertions check status codes, bodies from the tests' own handlers, and Allow header contents, never library error text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "query_route",
+        "cmd": "go test -count=1 -run TestVBQueryRouteMatches ./vbquery/"
+      },
+      {
+        "name": "query_methodfunc",
+        "cmd": "go test -count=1 -run TestVBQueryViaMethodFunc ./vbquery/"
+      },
+      {
+        "name": "query_vs_get",
+        "cmd": "go test -count=1 -run TestVBQueryDistinctFromGet ./vbquery/"
+      },
+      {
+        "name": "allow_header",
+        "cmd": "go test -count=1 -run TestVBQueryInAllowHeaderOn405 ./vbquery/"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "get_post",
+        "cmd": "go test -count=1 -run TestVBGetAndPostRouting ./vbreg/"
+      },
+      {
+        "name": "url_params",
+        "cmd": "go test -count=1 -run TestVBUrlParams ./vbreg/"
+      },
+      {
+        "name": "405_allow",
+        "cmd": "go test -count=1 -run TestVB405WithAllowHeader ./vbreg/"
+      },
+      {
+        "name": "404",
+        "cmd": "go test -count=1 -run TestVB404ForUnknownRoute ./vbreg/"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "mux.go",
+      "tree.go"
+    ],
+    "suggested_max_steps": 160,
+    "suggested_timeout_s": 1920
+  }
+}

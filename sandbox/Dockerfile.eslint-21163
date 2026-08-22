@@ -1,0 +1,16 @@
+# Probe image for the eslint task: node-ts + eslint's runtime deps.
+#
+# Build (context is the TASK REPO, not the repo root — .dockerignore excludes tasks/):
+#   docker build -t vulcanbench/sandbox:eslint-21163 \
+#     -f sandbox/Dockerfile.eslint-21163 \
+#     tasks/cii-v1/oss-eslint-property-descriptor-scope/repo
+#
+# The eslint source itself is overlaid from the workspace; NODE_PATH lets
+# `require('espree')` et al. resolve from the image when the workspace has no
+# node_modules (the sandbox is network-off).
+FROM vulcanbench/sandbox:node-ts
+COPY package.json /opt/eslint-deps/package.json
+RUN cd /opt/eslint-deps \
+    && npm install --omit=dev --omit=peer --no-audit --no-fund --ignore-scripts \
+    && npm cache clean --force
+ENV NODE_PATH=/opt/eslint-deps/node_modules

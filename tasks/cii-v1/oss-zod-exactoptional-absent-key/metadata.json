@@ -1,0 +1,81 @@
+{
+  "id": "oss-zod-exactoptional-absent-key",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "fa77a4d7013693de0fdb84ee7385c6a08cbcc266",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/6434",
+    "issue": "https://github.com/colinhacks/zod/pull/6434",
+    "commit": "fa77a4d7013693de0fdb84ee7385c6a08cbcc266"
+  },
+  "upstream_merged": "2026-08-19",
+  "decontamination_notes": "Real bug fix from colinhacks/zod PR #6434, merged 2026-08-19, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. On the optionality ladder's middle rung (exactOptional: optin and optout both 'optional'), an absent key still ran the inner schema on undefined and kept whatever it invented (coerce -> 'undefined', catch -> the fallback, preprocess -> its substitute); absent middle-rung tuple slots likewise materialized. The fix spans two files: schemas.ts adds a leading gate in handlePropertyResult (passing the raw optin/optout through instead of booleans, so 'defaulted' still substitutes) and compile.ts mirrors the gate in the compiled object assembly (dropsWhenAbsent, presence-conditional key emission) and truncates absent middle-rung tuple slots in the compiled tuple check. Repo sliced at the PR base commit (fa77a4d7) to packages/zod plus root LICENSE/package.json (standard zod slicing; hidden tests import ./packages/zod/src/v4 via tsx). Coverage: 6 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 coerce/catch/preprocess absent keys in the interpreted AND jitless paths, tuple truncation, and the compiled path for objects and tuples separately (a schemas.ts-only fix fails those two); 5 pass_to_pass guards pin default/prefault substitution, explicitly-present undefined running the inner schema, catch on required keys (interpreted and compiled), plain optional, and exactOptional rejecting explicit undefined. Assertions compare parsed outputs via public APIs, never message text. Expected values come from the upstream PR's own test cases.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "absent_coerce",
+        "cmd": "tsx --test --test-name-pattern='^vb absent coerced key stays absent$' vb_absent.test.ts"
+      },
+      {
+        "name": "absent_catch",
+        "cmd": "tsx --test --test-name-pattern='^vb absent key with catch stays absent$' vb_absent.test.ts"
+      },
+      {
+        "name": "absent_preprocess",
+        "cmd": "tsx --test --test-name-pattern='^vb absent key with preprocess stays absent$' vb_absent.test.ts"
+      },
+      {
+        "name": "tuple_truncates",
+        "cmd": "tsx --test --test-name-pattern='^vb absent tuple slot on the middle rung truncates$' vb_absent.test.ts"
+      },
+      {
+        "name": "compiled_objects",
+        "cmd": "tsx --test --test-name-pattern='^vb compiled path agrees on absent middle-rung keys$' vb_absent.test.ts"
+      },
+      {
+        "name": "compiled_tuples",
+        "cmd": "tsx --test --test-name-pattern='^vb compiled path agrees on absent middle-rung tuple slots$' vb_absent.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "defaults_substitute",
+        "cmd": "tsx --test --test-name-pattern='^vb top rung still substitutes defaults$' vb_ladder_reg.test.ts"
+      },
+      {
+        "name": "present_undefined",
+        "cmd": "tsx --test --test-name-pattern='^vb explicitly present undefined still runs the inner schema$' vb_ladder_reg.test.ts"
+      },
+      {
+        "name": "required_catch",
+        "cmd": "tsx --test --test-name-pattern='^vb catch on a required key still substitutes$' vb_ladder_reg.test.ts"
+      },
+      {
+        "name": "plain_optional",
+        "cmd": "tsx --test --test-name-pattern='^vb plain optional absent key stays absent$' vb_ladder_reg.test.ts"
+      },
+      {
+        "name": "rejects_undefined",
+        "cmd": "tsx --test --test-name-pattern='^vb exactOptional still rejects explicit undefined for plain strings$' vb_ladder_reg.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "packages/zod/src/v4/core/schemas.ts"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

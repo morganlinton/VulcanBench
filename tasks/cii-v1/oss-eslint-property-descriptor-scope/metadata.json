@@ -1,0 +1,73 @@
+{
+  "id": "oss-eslint-property-descriptor-scope",
+  "category": "bug_fix",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:eslint-21163",
+  "base_commit": "677214e7eea83d8bc6e4b79eea871577e1369d5f",
+  "upstream": {
+    "url": "https://github.com/eslint/eslint/pull/21163",
+    "issue": "https://github.com/eslint/eslint/pull/21163",
+    "commit": "677214e7eea83d8bc6e4b79eea871577e1369d5f"
+  },
+  "upstream_merged": "2026-07-28",
+  "decontamination_notes": "Real bug fix from eslint/eslint PR #21163, merged 2026-07-28, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. ast-utils' isPropertyDescriptor treated any object with get/set members near Object.defineProperty / Reflect.defineProperty / Object.defineProperties / Object.create as a property descriptor, regardless of which argument position it occupied and regardless of whether the called name actually resolved to the real global (shadowed declarations and globals turned off in language options were treated as the global). getter-return and accessor-pairs inherited the false positives; no-setter-return shares the helper. The fix spans four files (system complexity): lib/rules/utils/ast-utils.js gains scope-aware global-method-argument detection, and the three rules are rewired onto it. Repo sliced at the PR base commit (677214e7) to lib/ + conf/ + messages/ + package.json + LICENSE \u2014 eslint's runtime needs its npm deps, so the task uses the per-task image vulcanbench/sandbox:eslint-21163 (sandbox/Dockerfile.eslint-21163: node-ts + npm install --omit=dev of the repo's own package.json into /opt/eslint-deps, exposed via NODE_PATH; build it with the TASK REPO as docker context \u2014 see the Dockerfile header \u2014 since .dockerignore excludes tasks/ from the root context). Hidden tests drive the rules through the public RuleTester API with node --test: 4 fail_to_pass tests, each verified failing at base and passing after the gold patch (getter-return wrong-argument-position, shadowed globals, disabled globals; accessor-pairs shadowed/disabled globals); 5 pass_to_pass guards pin real-descriptor detection (getter-without-return and setter-without-getter still reported, with errors asserted by COUNT only), normal valid cases, and the accessor-pairs wrong-argument-position cases that were already correct at base. No message-text assertions.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "gr_wrong_position",
+        "cmd": "node --test --test-name-pattern='vb getter-return: wrong argument position' vb_descriptor_scope.test.cjs"
+      },
+      {
+        "name": "gr_shadowed",
+        "cmd": "node --test --test-name-pattern='vb getter-return: shadowed global' vb_descriptor_scope.test.cjs"
+      },
+      {
+        "name": "gr_disabled_global",
+        "cmd": "node --test --test-name-pattern='vb getter-return: disabled global' vb_descriptor_scope.test.cjs"
+      },
+      {
+        "name": "ap_shadowed_disabled",
+        "cmd": "node --test --test-name-pattern='vb accessor-pairs: shadowed or disabled global' vb_descriptor_scope.test.cjs"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "gr_real_descriptor",
+        "cmd": "node --test --test-name-pattern='vb getter-return still flags a real descriptor' vb_rules_reg.test.cjs"
+      },
+      {
+        "name": "gr_valid_cases",
+        "cmd": "node --test --test-name-pattern='vb getter-return valid cases stay valid' vb_rules_reg.test.cjs"
+      },
+      {
+        "name": "ap_real_descriptor",
+        "cmd": "node --test --test-name-pattern='vb accessor-pairs still flags a real descriptor' vb_rules_reg.test.cjs"
+      },
+      {
+        "name": "ap_valid_cases",
+        "cmd": "node --test --test-name-pattern='vb accessor-pairs valid cases stay valid' vb_rules_reg.test.cjs"
+      },
+      {
+        "name": "ap_wrong_position_guard",
+        "cmd": "node --test --test-name-pattern='vb accessor-pairs: wrong argument position' vb_rules_reg.test.cjs"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "lib/rules/utils/ast-utils.js"
+    ],
+    "suggested_max_steps": 320,
+    "suggested_timeout_s": 5760
+  }
+}

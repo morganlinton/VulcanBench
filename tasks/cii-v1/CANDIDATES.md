@@ -36,6 +36,27 @@ Wave-2 dedup catch: anyio#1228 and attrs#1592 were already python-1 tasks
 (oss-anyio-fail-at-deadline, oss-attrs-generator-on-setattr) — the shortlist
 below is re-checked, but always re-run the grep before building.
 
+### Wave 3 (2026-08-22)
+
+| Task | Source PR | Merged | Lang | Complexity | Why |
+|---|---|---|---|---|---|
+| oss-chi-query-method | chi#1132 | 2026-07-05 | go | system/medium | HTTP QUERY across 3 files; bitmask 405 semantics |
+| oss-zod-exactoptional-absent-key | zod#6434 | 2026-08-19 | ts | multi_file/hard | subtle optionality-ladder gate across interp+compiled |
+| oss-eslint-property-descriptor-scope | eslint#21163 | 2026-07-28 | js | system/hard | FIRST JS task; scope-aware ast-utils across 4 files |
+| oss-regex-static-macro | regex#1371 | 2026-07-09 | rust | system/medium | regex! macro feature; API-surface discipline |
+
+Wave-3 infrastructure notes:
+- **JS-with-deps pattern established**: `sandbox/Dockerfile.eslint-21163` (node-ts
+  + `npm install --omit=dev` of the repo's package.json into /opt, NODE_PATH).
+  Build with the TASK REPO as docker context — `.dockerignore` excludes `tasks/`
+  from the root context.
+- **autotests=false crates** (regex): the hidden-test overlay must also carry
+  Cargo.toml with appended `[[test]]` targets; document that agent manifest
+  edits are ignored at grading.
+- Sweep #2 (JS/Rust, since 2026-06-01): rust-lang/cargo has task-shaped PRs but
+  the repo is too heavy to sandbox; bitflags#489 (iter_equal_names) is a viable
+  small Rust candidate; axios#11096/#11121 remain for JS (check test env needs).
+
 ## Triage rules learned
 
 - **Dedup against every existing suite first** (`grep -rh '"url"' tasks/*/*/metadata.json`):

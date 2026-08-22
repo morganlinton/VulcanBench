@@ -1,0 +1,65 @@
+{
+  "id": "oss-hono-trie-suffix-wildcard",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "41bdc4288ed7023c24d35f32bd065bd963435e3e",
+  "upstream": {
+    "url": "https://github.com/honojs/hono/pull/5236",
+    "issue": "https://github.com/honojs/hono/pull/5236",
+    "commit": "41bdc4288ed7023c24d35f32bd065bd963435e3e"
+  },
+  "upstream_merged": "2026-08-17",
+  "decontamination_notes": "Real bug fix from honojs/hono PR #5236, merged 2026-08-17, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. TrieRouter never matched suffix wildcard routes (a trailing * without a preceding slash, /assets*): the trie insertion treated the '*' as a literal path segment child. The fix spans src/router/trie-router/node.ts and router.ts (multi_file), matching the bare prefix, same-segment extensions and deeper paths, keeping regexp metacharacters in the prefix literal, and handling insertion when a node for the prefix already exists. Only reachable in apps when SmartRouter falls back to TrieRouter, which is exactly why the hidden tests exercise TrieRouter directly (same approach as the prior hono trie task). Repo sliced at the PR base commit (41bdc428) minus docs/benchmarks/perf-measures/runtime-tests (standard hono slicing, MIT LICENSE preserved, node-ts image runs tsx directly). Coverage: 3 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 prefix/extension/deep matching, literal regexp metacharacters, and existing-child registration order; 4 pass_to_pass guards pin slash wildcards, param capture (spread-normalized against null-prototype params), exact static routes, and the shorter-prefix non-match that was already correct at base. Assertions check matched handler lists and params via the router's public API. Expected outcomes come from the upstream PR's own test cases.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "prefix_and_extensions",
+        "cmd": "tsx --test --test-name-pattern='^vb suffix wildcard matches the bare prefix and extensions$' vb_suffix_wildcard.test.ts"
+      },
+      {
+        "name": "literal_regex_chars",
+        "cmd": "tsx --test --test-name-pattern='^vb regex characters in the prefix stay literal$' vb_suffix_wildcard.test.ts"
+      },
+      {
+        "name": "existing_child",
+        "cmd": "tsx --test --test-name-pattern='^vb suffix wildcard registers when its child already exists$' vb_suffix_wildcard.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "slash_wildcard",
+        "cmd": "tsx --test --test-name-pattern='^vb slash wildcard still matches sub paths$' vb_trie_reg.test.ts"
+      },
+      {
+        "name": "params",
+        "cmd": "tsx --test --test-name-pattern='^vb params still captured$' vb_trie_reg.test.ts"
+      },
+      {
+        "name": "static_exact",
+        "cmd": "tsx --test --test-name-pattern='^vb static routes still exact$' vb_trie_reg.test.ts"
+      },
+      {
+        "name": "shorter_prefix",
+        "cmd": "tsx --test --test-name-pattern='^vb suffix wildcard does not match a shorter prefix$' vb_trie_reg.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/router/trie-router/"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

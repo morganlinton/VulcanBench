@@ -1,0 +1,69 @@
+diff --git a/command.go b/command.go
+index 274bbe8989..62abc6db34 100644
+--- a/command.go
++++ b/command.go
+@@ -67,6 +67,11 @@ type Command struct {
+ 	// An action to execute after any subcommands are run, but after the subcommand has finished
+ 	// It is run even if Action() panics
+ 	After AfterFunc `json:"-"`
++	// An action to validate arguments before the command is run. If non-nil, it
++	// is called before Before and Action. If the current command does not set
++	// ArgValidator, the nearest ancestor that does is used instead.
++	// Returning a non-nil error short-circuits the command.
++	ArgValidator ArgValidatorFunc `json:"-"`
+ 	// The function to call when this command is invoked
+ 	Action ActionFunc `json:"-"`
+ 	// Execute this function if the proper command cannot be found
+diff --git a/command_run.go b/command_run.go
+index 8d5907151e..9fca52603e 100644
+--- a/command_run.go
++++ b/command_run.go
+@@ -327,6 +327,14 @@ func (cmd *Command) run(ctx context.Context, osArgs []string) (_ context.Context
+ 	// First, resolve the chain of nested commands up to the parent.
+ 	cmdChain := commandChain(cmd)
+ 
++	// Run ArgValidator from the nearest ancestor that sets one.
++	if validator := findArgValidator(cmd); validator != nil {
++		if err := validator(ctx, cmd); err != nil {
++			deferErr = cmd.handleExitCoder(ctx, err)
++			return ctx, deferErr
++		}
++	}
++
+ 	// Run Before actions in order.
+ 	if ctx, err = runBefore(ctx, cmdChain); err != nil {
+ 		deferErr = err
+@@ -397,6 +405,15 @@ func commandChain(cmd *Command) []*Command {
+ 	return cmdChain
+ }
+ 
++func findArgValidator(cmd *Command) ArgValidatorFunc {
++	for c := cmd; c != nil; c = c.parent {
++		if c.ArgValidator != nil {
++			return c.ArgValidator
++		}
++	}
++	return nil
++}
++
+ func runBefore(ctx context.Context, cmdChain []*Command) (context.Context, error) {
+ 	for _, cmd := range cmdChain {
+ 		if cmd.Before == nil {
+diff --git a/funcs.go b/funcs.go
+index fe1224c44e..17a73eca67 100644
+--- a/funcs.go
++++ b/funcs.go
+@@ -17,6 +17,13 @@ type AfterFunc func(context.Context, *Command) error
+ // ActionFunc is the action to execute when no subcommands are specified
+ type ActionFunc func(context.Context, *Command) error
+ 
++// ArgValidatorFunc is an action to validate arguments before the command is run.
++// If non-nil, it is called before the command's After and Action functions.
++// Returning a non-nil error short-circuits the command and propagates as
++// the exit error. If the current command does not set ArgValidator, the
++// nearest ancestor that does is used instead.
++type ArgValidatorFunc func(context.Context, *Command) error
++
+ // CommandNotFoundFunc is executed if the proper command cannot be found
+ type CommandNotFoundFunc func(context.Context, *Command, string)
+ 

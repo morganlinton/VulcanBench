@@ -57,6 +57,31 @@ Wave-3 infrastructure notes:
   the repo is too heavy to sandbox; bitflags#489 (iter_equal_names) is a viable
   small Rust candidate; axios#11096/#11121 remain for JS (check test env needs).
 
+### Wave 4 (2026-08-22)
+
+| Task | Source PR | Merged | Lang | Complexity | Why |
+|---|---|---|---|---|---|
+| oss-hono-trie-suffix-wildcard | hono#5236 | 2026-08-17 | ts | multi_file/medium | trie insertion bug only visible on SmartRouter fallback |
+| oss-cli-arg-validator | cli#2377 | 2026-08-16 | go | system/medium | tree-wide validator hook; nearest-wins inheritance |
+| oss-bitflags-iter-equal-names | bitflags#489 | 2026-06-05 | rust | multi_file/easy | second easy anchor; alias/convenience-name semantics |
+| oss-axios-methodlist-adapter-errors | axios#11096 | 2026-08-13 | js | system/medium | shared method list + AxiosError adapter errors |
+
+Wave-4 infrastructure notes:
+- **ESM deps images** (axios): NODE_PATH does NOT apply to ESM imports — the
+  per-task image symlinks `/node_modules` so the ancestor walk from the
+  workspace mount finds the deps (`sandbox/Dockerfile.axios-11096`).
+- Loopback servers work in the network-off sandbox (lo exists under
+  `--network none`), so JS tasks can grade real request/response behavior.
+- pydantic#13667 deferred: needs a per-task image pairing the in-tree
+  pydantic-core python sources with a compiled _pydantic_core wheel — version
+  pairing is the risk; attempt in wave 5.
+
+- **Stale `target/` poisons host-side runs**: building in-place inside a task
+  repo leaves same-platform artifacts that let `cargo test` reuse a PATCHED
+  test binary at base (`--sandbox local` graded a mock run 1.0). Docker
+  validation is immune (different platform), which is why the gate still held.
+  Always `rm -rf repo/target` after in-place verification — or verify in a copy.
+
 ## Triage rules learned
 
 - **Dedup against every existing suite first** (`grep -rh '"url"' tasks/*/*/metadata.json`):

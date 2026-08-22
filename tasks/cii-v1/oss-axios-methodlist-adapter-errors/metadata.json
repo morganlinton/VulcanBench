@@ -1,0 +1,70 @@
+{
+  "id": "oss-axios-methodlist-adapter-errors",
+  "category": "bug_fix",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:axios-11096",
+  "base_commit": "2d2a21af8a433089474a2149781799c93acbcf3c",
+  "upstream": {
+    "url": "https://github.com/axios/axios/pull/11096",
+    "issue": "https://github.com/axios/axios/pull/11096",
+    "commit": "2d2a21af8a433089474a2149781799c93acbcf3c"
+  },
+  "upstream_merged": "2026-08-13",
+  "decontamination_notes": "Real bug fix from axios/axios PR #11096, merged 2026-08-13, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Core hard-coded divergent HTTP method lists (defaults.headers lacked options/purge/link/unlink slots; dispatch header cleanup used another inline list), and the node HTTP adapter threw bare TypeError for an invalid httpVersion and for an invalid address produced by a custom lookup \u2014 the latter from inside the DNS callback where nothing catches it, crashing the process instead of rejecting. The fix (5 files, system complexity) introduces the shared frozen lib/core/methodList.js, rewires defaults/index.js, core/Axios.js cleanup and core/mergeConfig.js onto it, and converts the adapter errors to AxiosError with ERR_BAD_OPTION_VALUE, wrapping the lookup address-entry construction so the error reaches the request's rejection path. Repo sliced at the PR base commit (2d2a21af) to lib/ + index.js + package.json + LICENSE. axios's runtime deps come from the per-task image vulcanbench/sandbox:axios-11096 (sandbox/Dockerfile.axios-11096: node-ts + npm install --omit=dev of the repo's package.json, with /node_modules symlinked at the filesystem root because ESM imports resolve via the node_modules ancestor walk, not NODE_PATH; build with the TASK REPO as docker context \u2014 .dockerignore excludes tasks/). Hidden tests run node --test with loopback node:http servers (sandbox network-off keeps loopback): 4 fail_to_pass, each verified failing at base and passing after the gold patch \u2014 full per-method default header slots, method-scoped OPTIONS headers actually applied, httpVersion and lookup errors as AxiosError with the ERR_BAD_OPTION_VALUE code (code constants are public API; no message-text assertions); 4 pass_to_pass guards pin basic GET/POST, existing header slots, and error-status rejection shape.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "method_slots",
+        "cmd": "node --test --test-name-pattern='vb defaults expose per-method header slots' vb_methodlist.test.js"
+      },
+      {
+        "name": "options_headers",
+        "cmd": "node --test --test-name-pattern='vb method-scoped default headers apply to OPTIONS' vb_methodlist.test.js"
+      },
+      {
+        "name": "httpversion_error",
+        "cmd": "node --test --test-name-pattern='vb invalid httpVersion rejects with AxiosError' vb_methodlist.test.js"
+      },
+      {
+        "name": "lookup_error",
+        "cmd": "node --test --test-name-pattern='vb bad lookup address rejects with AxiosError' vb_methodlist.test.js"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "basic_get",
+        "cmd": "node --test --test-name-pattern='vb basic get works' vb_http_reg.test.js"
+      },
+      {
+        "name": "post_body",
+        "cmd": "node --test --test-name-pattern='vb post sends a json body' vb_http_reg.test.js"
+      },
+      {
+        "name": "existing_slots",
+        "cmd": "node --test --test-name-pattern='vb existing method header slots still present' vb_http_reg.test.js"
+      },
+      {
+        "name": "error_status",
+        "cmd": "node --test --test-name-pattern='vb http error status rejects with AxiosError' vb_http_reg.test.js"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "lib/core/",
+      "lib/adapters/http.js"
+    ],
+    "suggested_max_steps": 240,
+    "suggested_timeout_s": 4320
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "id": "oss-bitflags-iter-equal-names",
+  "category": "feature",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "easy",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:rust-2024",
+  "base_commit": "9196a3a860f6bc367aec3a044fbbebea18a59d01",
+  "upstream": {
+    "url": "https://github.com/bitflags/bitflags/pull/489",
+    "issue": "https://github.com/bitflags/bitflags/pull/489",
+    "commit": "9196a3a860f6bc367aec3a044fbbebea18a59d01"
+  },
+  "upstream_merged": "2026-06-05",
+  "decontamination_notes": "Real feature from bitflags/bitflags PR #489, merged 2026-06-05, after the training cutoffs of the models this suite targets (within the suite's >= 2026-06-01 window; re-check upstream_merged against any newer model's cutoff before reusing). Adds Flags::iter_equal_names: src/iter.rs gains the IterEqualNames iterator (filtering IterDefinedNames by bits equality, so aliases and convenience flags are included) and src/traits.rs the trait method (multi_file). Kept as a second easy anchor for the difficulty band. Repo sliced at the PR base commit (9196a3a8): full crate minus .git/.github, third-party deps vendored (lockfile committed \u2014 the upstream .gitignore's Cargo.lock rule is stripped so offline builds reproduce; deps are dev/optional-only, 37MB vendor). MIT/Apache LICENSEs preserved; rust-2024 image for vendored dev-dep MSRV headroom. Hidden tests are auto-discovered integration tests: vb_equal_names.rs (fail_to_pass) references the new method and fails to compile at base \u2014 all 4 commands verified failing at base and passing after the gold patch (alias inclusion in definition order, convenience-flag names, unnamed combinations yielding nothing, empty values yielding nothing); vb_reg.rs (pass_to_pass) compiles and passes at base, guarding iter_names decomposition and contains/bits/equality. Assertions compare collected name vectors from the tests' own flag definitions.",
+  "grader": "tests",
+  "setup": [
+    {
+      "name": "warm-build",
+      "cmd": "cargo build --offline --lib"
+    }
+  ],
+  "setup_timeout_s": 600,
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "alias_names",
+        "cmd": "cargo test --offline --test vb_equal_names vb_single_flag_with_alias_yields_both_names"
+      },
+      {
+        "name": "convenience_name",
+        "cmd": "cargo test --offline --test vb_equal_names vb_convenience_flag_name_is_yielded"
+      },
+      {
+        "name": "unnamed_combo",
+        "cmd": "cargo test --offline --test vb_equal_names vb_unnamed_combination_yields_nothing"
+      },
+      {
+        "name": "empty_value",
+        "cmd": "cargo test --offline --test vb_equal_names vb_empty_value_yields_nothing_unless_defined"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "iter_names",
+        "cmd": "cargo test --offline --test vb_reg vb_iter_names_still_decomposes"
+      },
+      {
+        "name": "contains_bits",
+        "cmd": "cargo test --offline --test vb_reg vb_contains_and_bits_unchanged"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/iter.rs",
+      "src/traits.rs"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

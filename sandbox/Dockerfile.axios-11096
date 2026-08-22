@@ -1,0 +1,16 @@
+# Probe image for the axios task: node-ts + axios's runtime deps.
+#
+# Build (context is the TASK REPO — .dockerignore excludes tasks/ from the root):
+#   docker build -t vulcanbench/sandbox:axios-11096 \
+#     -f sandbox/Dockerfile.axios-11096 \
+#     tasks/cii-v1/oss-axios-methodlist-adapter-errors/repo
+#
+# The axios source is overlaid from the workspace; the deps are installed into
+# the WORKSPACE MOUNT POINT's parent so ESM `import 'follow-redirects'` resolves
+# via the node_modules ancestor walk (NODE_PATH does not apply to ESM imports).
+FROM vulcanbench/sandbox:node-ts
+COPY package.json /opt/axios-deps/package.json
+RUN cd /opt/axios-deps \
+    && npm install --omit=dev --omit=peer --no-audit --no-fund --ignore-scripts \
+    && npm cache clean --force \
+    && ln -s /opt/axios-deps/node_modules /node_modules

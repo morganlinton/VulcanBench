@@ -1,0 +1,59 @@
+diff --git a/src/iter.rs b/src/iter.rs
+index ae0efc93..ada4b678 100644
+--- a/src/iter.rs
++++ b/src/iter.rs
+@@ -180,3 +180,35 @@ impl<B: Flags> Iterator for IterDefinedNames<B> {
+         None
+     }
+ }
++
++/**
++An iterator over all defined names for a specific flags value.
++*/
++pub struct IterEqualNames<T: Flags> {
++    inner: IterDefinedNames<T>,
++    bits: T::Bits,
++}
++
++impl<T: Flags> IterEqualNames<T> {
++    #[inline]
++    pub(crate) fn new(value: &T) -> Self {
++        Self {
++            inner: <T as Flags>::iter_defined_names(),
++            bits: value.bits(),
++        }
++    }
++}
++
++impl<T: Flags> Iterator for IterEqualNames<T> {
++    type Item = &'static str;
++
++    #[inline]
++    fn next(&mut self) -> Option<Self::Item> {
++        for (n, f) in self.inner.by_ref() {
++            if f.bits() == self.bits {
++                return Some(n);
++            }
++        }
++        None
++    }
++}
+diff --git a/src/traits.rs b/src/traits.rs
+index 2fbd9967..fc94a035 100644
+--- a/src/traits.rs
++++ b/src/traits.rs
+@@ -245,6 +245,14 @@ pub trait Flags: Sized + 'static {
+         iter::IterDefinedNames::new()
+     }
+ 
++    /// Get an iterator over all defined names for this flags value.
++    ///
++    /// This iterator will yield all defined names for the flags value, including
++    /// any convenience flags.
++    fn iter_equal_names(&self) -> iter::IterEqualNames<Self> {
++        iter::IterEqualNames::new(self)
++    }
++
+     /// Whether all bits in this flags value are unset.
+     fn is_empty(&self) -> bool {
+         self.bits() == Self::Bits::EMPTY

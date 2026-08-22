@@ -1,0 +1,159 @@
+diff --git a/lib/adapters/http.js b/lib/adapters/http.js
+index a9521e3711..90eedbcf4e 100755
+--- a/lib/adapters/http.js
++++ b/lib/adapters/http.js
+@@ -466,7 +466,7 @@ const wrapAsync = (asyncExecutor) => {
+ 
+ const resolveFamily = ({ address, family }) => {
+   if (!utils.isString(address)) {
+-    throw TypeError('address must be a string');
++    throw new AxiosError('address must be a string', AxiosError.ERR_BAD_OPTION_VALUE);
+   }
+   return {
+     address,
+@@ -495,9 +495,15 @@ const normalizeLookup = (lookup) => {
+         return cb(err);
+       }
+ 
+-      const addresses = utils.isArray(arg0)
+-        ? arg0.map((addr) => buildAddressEntry(addr))
+-        : [buildAddressEntry(arg0, arg1)];
++      let addresses;
++
++      try {
++        addresses = utils.isArray(arg0)
++          ? arg0.map((addr) => buildAddressEntry(addr))
++          : [buildAddressEntry(arg0, arg1)];
++      } catch (error) {
++        return cb(error);
++      }
+ 
+       opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
+     });
+@@ -572,6 +578,7 @@ export default isHttpAdapterSupported &&
+       let family = own('family');
+       let httpVersion = own('httpVersion');
+       if (httpVersion === undefined) httpVersion = 1;
++      const rawHttpVersion = httpVersion;
+       let http2Options = own('http2Options');
+       const httpAgent = own('httpAgent');
+       const httpsAgent = own('httpsAgent');
+@@ -589,14 +596,30 @@ export default isHttpAdapterSupported &&
+       let req;
+       let connectPhaseTimer;
+ 
+-      httpVersion = +httpVersion;
++      try {
++        httpVersion = +httpVersion;
++      } catch (err) {
++        throw new AxiosError(
++          'Invalid protocol version: value is not a number',
++          AxiosError.ERR_BAD_OPTION_VALUE,
++          config
++        );
++      }
+ 
+       if (Number.isNaN(httpVersion)) {
+-        throw TypeError(`Invalid protocol version: '${config.httpVersion}' is not a number`);
++        throw new AxiosError(
++          `Invalid protocol version: '${rawHttpVersion}' is not a number`,
++          AxiosError.ERR_BAD_OPTION_VALUE,
++          config
++        );
+       }
+ 
+       if (httpVersion !== 1 && httpVersion !== 2) {
+-        throw TypeError(`Unsupported protocol version '${httpVersion}'`);
++        throw new AxiosError(
++          `Unsupported protocol version '${httpVersion}'`,
++          AxiosError.ERR_BAD_OPTION_VALUE,
++          config
++        );
+       }
+ 
+       const isHttp2 = httpVersion === 2;
+diff --git a/lib/core/Axios.js b/lib/core/Axios.js
+index 47e54a1b84..4555b226d9 100644
+--- a/lib/core/Axios.js
++++ b/lib/core/Axios.js
+@@ -6,6 +6,7 @@ import InterceptorManager from './InterceptorManager.js';
+ import dispatchRequest from './dispatchRequest.js';
+ import mergeConfig from './mergeConfig.js';
+ import buildFullPath from './buildFullPath.js';
++import methodList from './methodList.js';
+ import validator from '../helpers/validator.js';
+ import AxiosHeaders from './AxiosHeaders.js';
+ import transitionalDefaults from '../defaults/transitional.js';
+@@ -154,12 +155,9 @@ class Axios {
+     let contextHeaders = headers && utils.merge(headers.common, headers[config.method]);
+ 
+     headers &&
+-      utils.forEach(
+-        ['delete', 'get', 'head', 'post', 'put', 'patch', 'query', 'common'],
+-        (method) => {
+-          delete headers[method];
+-        }
+-      );
++      utils.forEach(methodList.concat('common'), (method) => {
++        delete headers[method];
++      });
+ 
+     config.headers = AxiosHeaders.concat(contextHeaders, headers);
+ 
+diff --git a/lib/core/mergeConfig.js b/lib/core/mergeConfig.js
+index e164e03594..8ed8fde05a 100644
+--- a/lib/core/mergeConfig.js
++++ b/lib/core/mergeConfig.js
+@@ -124,7 +124,7 @@ export default function mergeConfig(config1, config2) {
+     transformResponse: defaultToConfig2,
+     paramsSerializer: defaultToConfig2,
+     timeout: defaultToConfig2,
+-    timeoutMessage: defaultToConfig2,
++    timeoutErrorMessage: defaultToConfig2,
+     withCredentials: defaultToConfig2,
+     withXSRFToken: defaultToConfig2,
+     adapter: defaultToConfig2,
+diff --git a/lib/core/methodList.js b/lib/core/methodList.js
+new file mode 100644
+index 0000000000..110c96ca78
+--- /dev/null
++++ b/lib/core/methodList.js
+@@ -0,0 +1,17 @@
++'use strict';
++
++const methodList = Object.freeze([
++  'get',
++  'delete',
++  'head',
++  'options',
++  'post',
++  'put',
++  'patch',
++  'purge',
++  'link',
++  'unlink',
++  'query',
++]);
++
++export default methodList;
+diff --git a/lib/defaults/index.js b/lib/defaults/index.js
+index 642a0895af..1303c46348 100644
+--- a/lib/defaults/index.js
++++ b/lib/defaults/index.js
+@@ -7,6 +7,7 @@ import toFormData from '../helpers/toFormData.js';
+ import toURLEncodedForm from '../helpers/toURLEncodedForm.js';
+ import platform from '../platform/index.js';
+ import formDataToJSON from '../helpers/formDataToJSON.js';
++import methodList from '../core/methodList.js';
+ 
+ const own = (obj, key) => (obj != null && utils.hasOwnProp(obj, key) ? obj[key] : undefined);
+ 
+@@ -170,7 +171,7 @@ const defaults = {
+   },
+ };
+ 
+-utils.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'query'], (method) => {
++utils.forEach(methodList, (method) => {
+   defaults.headers[method] = {};
+ });
+ 

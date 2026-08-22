@@ -1,0 +1,74 @@
+{
+  "id": "oss-cli-arg-validator",
+  "category": "feature",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:base",
+  "base_commit": "c5f123b3909fb3270433574d9940650579cf9820",
+  "upstream": {
+    "url": "https://github.com/urfave/cli/pull/2377",
+    "issue": "https://github.com/urfave/cli/pull/2377",
+    "commit": "c5f123b3909fb3270433574d9940650579cf9820"
+  },
+  "upstream_merged": "2026-08-16",
+  "decontamination_notes": "Real feature from urfave/cli PR #2377, merged 2026-08-16, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Adds Command.ArgValidator: an ArgValidatorFunc type in funcs.go, the field on Command in command.go, and the invocation in command_run.go \u2014 after parsing, before the action, with findArgValidator walking the parent chain so the nearest validator in the tree wins and errors go through handleExitCoder (system complexity, three files). Distinct from this suite's oss-cli-required-single-arg (PR #2393, declarative Required on single args); this is the programmable tree-wide hook, and the two PRs share neither files-in-fix nor a base commit. Repo sliced at the PR base commit (c5f123b3): full module minus .git/.github with go mod vendor committed (testify closure; upstream .gitignore vendor rule stripped); godoc fixtures dropped from the gold patch as non-source. MIT LICENSE preserved. Hidden tests in test-only sub-packages: vbvalidator/ (fail_to_pass) references the new API and fails to compile at base \u2014 all 5 commands verified failing at base and passing after the gold patch (runs-before-action ordering, error blocks the action and fails the run, tree-wide inheritance by subcommands, nearest-wins override, parsed args visible); vbregv/ (pass_to_pass) compiles and passes at base, guarding plain commands, action arg access, error propagation, and subcommand dispatch. Assertions check call order, error presence and arg values from the tests' own inputs, never library error text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "before_action",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBValidatorRunsBeforeAction ./vbvalidator/"
+      },
+      {
+        "name": "error_blocks",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBValidatorErrorBlocksAction ./vbvalidator/"
+      },
+      {
+        "name": "inherited",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBValidatorInheritedBySubcommands ./vbvalidator/"
+      },
+      {
+        "name": "nearest_wins",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBChildValidatorOverridesParent ./vbvalidator/"
+      },
+      {
+        "name": "sees_args",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBValidatorSeesParsedArgs ./vbvalidator/"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "plain_command",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBPlainCommandStillRuns ./vbregv/"
+      },
+      {
+        "name": "action_args",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBActionSeesArgs ./vbregv/"
+      },
+      {
+        "name": "action_error",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBActionErrorStillPropagates ./vbregv/"
+      },
+      {
+        "name": "subcommand_dispatch",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBSubcommandDispatchWorks ./vbregv/"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "command.go",
+      "command_run.go"
+    ],
+    "suggested_max_steps": 240,
+    "suggested_timeout_s": 4320
+  }
+}

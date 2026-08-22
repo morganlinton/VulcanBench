@@ -1,0 +1,81 @@
+diff --git a/lib/rules/no-unmodified-loop-condition.js b/lib/rules/no-unmodified-loop-condition.js
+index a159889a719f..a7e84e8d61ae 100644
+--- a/lib/rules/no-unmodified-loop-condition.js
++++ b/lib/rules/no-unmodified-loop-condition.js
+@@ -26,7 +26,6 @@ const Traverser = require("../shared/traverser"),
+ const SENTINEL_PATTERN =
+ 	/(?:(?:Call|Class|Function|Member|New|Yield)Expression|Statement|Declaration)$/u;
+ const LOOP_PATTERN = /^(?:DoWhile|For|While)Statement$/u; // for-in/of statements don't have `test` property.
+-const GROUP_PATTERN = /^(?:BinaryExpression|ConditionalExpression)$/u;
+ const SKIP_PATTERN = /^(?:ArrowFunction|Class|Function)Expression$/u;
+ const DYNAMIC_PATTERN = /^(?:Call|Member|New|TaggedTemplate|Yield)Expression$/u;
+ 
+@@ -190,7 +189,19 @@ module.exports = {
+ 			url: "https://eslint.org/docs/latest/rules/no-unmodified-loop-condition",
+ 		},
+ 
+-		schema: [],
++		schema: [
++			{
++				type: "object",
++				properties: {
++					checkConditionalExpressions: {
++						type: "boolean",
++					},
++				},
++				additionalProperties: false,
++			},
++		],
++
++		defaultOptions: [{ checkConditionalExpressions: false }],
+ 
+ 		messages: {
+ 			loopConditionNotModified:
+@@ -199,6 +210,7 @@ module.exports = {
+ 	},
+ 
+ 	create(context) {
++		const [{ checkConditionalExpressions }] = context.options;
+ 		const sourceCode = context.sourceCode;
+ 		let groupMap = null;
+ 
+@@ -305,10 +317,14 @@ module.exports = {
+ 				}
+ 
+ 				/*
+-				 * If it's inside of a group, OK if either operand is modified.
+-				 * So stores the group this reference belongs to.
++				 * If it's inside of a group, OK if any reference in that group is
++				 * modified. So stores the group this reference belongs to.
+ 				 */
+-				if (GROUP_PATTERN.test(node.type)) {
++				if (
++					node.type === "BinaryExpression" ||
++					(!checkConditionalExpressions &&
++						node.type === "ConditionalExpression")
++				) {
+ 					// If this expression is dynamic, no need to check.
+ 					if (hasDynamicExpressions(node)) {
+ 						break;
+diff --git a/lib/types/rules.d.ts b/lib/types/rules.d.ts
+index 10248c1cdcc0..d17bce5dc61b 100644
+--- a/lib/types/rules.d.ts
++++ b/lib/types/rules.d.ts
+@@ -4040,7 +4040,16 @@ export interface ESLintRules extends Linter.RulesRecord {
+ 	 * @since 2.0.0-alpha-2
+ 	 * @see https://eslint.org/docs/latest/rules/no-unmodified-loop-condition
+ 	 */
+-	"no-unmodified-loop-condition": Linter.RuleEntry<[]>;
++	"no-unmodified-loop-condition": Linter.RuleEntry<
++		[
++			Partial<{
++				/**
++				 * @default false
++				 */
++				checkConditionalExpressions: boolean;
++			}>,
++		]
++	>;
+ 
+ 	/**
+ 	 * Rule to disallow ternary operators when simpler alternatives exist.

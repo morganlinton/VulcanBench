@@ -1,0 +1,65 @@
+{
+  "id": "oss-eslint-loop-condition-ternary",
+  "category": "feature",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:eslint-21175",
+  "base_commit": "d3266fb26c719c6b90a6cbe54bb120c9335ad19c",
+  "upstream": {
+    "url": "https://github.com/eslint/eslint/pull/21175",
+    "issue": "https://github.com/eslint/eslint/pull/21175",
+    "commit": "d3266fb26c719c6b90a6cbe54bb120c9335ad19c"
+  },
+  "upstream_merged": "2026-08-11",
+  "decontamination_notes": "Real feature from eslint/eslint PR #21175, merged 2026-08-11, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. no-unmodified-loop-condition grouped ternary loop conditions (any modified reference silenced the whole condition); the feature adds a checkConditionalExpressions option (schema object with additionalProperties: false, defaultOptions [{checkConditionalExpressions: false}]) that stops ConditionalExpression from grouping so each reference must itself be modified, plus the lib/types/rules.d.ts update (multi_file). Repo sliced at the PR base commit (d3266fb2) to lib/ + conf/ + messages/ + package.json + LICENSE; deps come from the per-task image vulcanbench/sandbox:eslint-21175 (same NODE_PATH pattern as eslint-21163, built with the task repo as docker context). Hidden tests drive the rule through the public RuleTester API with node --test: 3 fail_to_pass, each verified failing at base (the base schema [] rejects any options object) and passing after the gold patch \u2014 option accepted with explicit false, option flagging an unmodified ternary operand (error COUNT only), and fully-modified ternaries staying valid under the option; 4 pass_to_pass guards pin option-less ternary grouping, plain unmodified-condition reporting, modified-condition validity, and unknown-option rejection (which holds at base and after). No message-text assertions.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "option_accepted",
+        "cmd": "node --test --test-name-pattern='vb option is accepted and default-off behavior is explicit' vb_ternary_option.test.cjs"
+      },
+      {
+        "name": "option_flags",
+        "cmd": "node --test --test-name-pattern='vb option flags unmodified ternary operands' vb_ternary_option.test.cjs"
+      },
+      {
+        "name": "option_valid_when_modified",
+        "cmd": "node --test --test-name-pattern='vb option leaves fully modified ternary conditions valid' vb_ternary_option.test.cjs"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ternary_grouped_default",
+        "cmd": "node --test --test-name-pattern='vb ternary condition still grouped without options' vb_loop_reg.test.cjs"
+      },
+      {
+        "name": "plain_reported",
+        "cmd": "node --test --test-name-pattern='vb unmodified plain condition still reported' vb_loop_reg.test.cjs"
+      },
+      {
+        "name": "plain_valid",
+        "cmd": "node --test --test-name-pattern='vb modified plain condition still valid' vb_loop_reg.test.cjs"
+      },
+      {
+        "name": "unknown_rejected",
+        "cmd": "node --test --test-name-pattern='vb unknown option properties are rejected' vb_loop_reg.test.cjs"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "lib/rules/no-unmodified-loop-condition.js"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "id": "oss-pydantic-none-discriminator",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:pydantic-13667",
+  "base_commit": "c04e41686b1e4338bd23da9b815c3e5108872631",
+  "upstream": {
+    "url": "https://github.com/pydantic/pydantic/pull/13667",
+    "issue": "https://github.com/pydantic/pydantic/issues/13660",
+    "commit": "c04e41686b1e4338bd23da9b815c3e5108872631"
+  },
+  "upstream_merged": "2026-08-16",
+  "decontamination_notes": "Real bug fix from pydantic/pydantic PR #13667 (issue #13660), merged 2026-08-16, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Discriminated-union tag inference only accepted Literal schemas, so a member annotating its tag field as bare None failed model build with PydanticUserError while the equivalent Literal[None] worked. The fix (multi_file) widens tag handling in pydantic/_internal/_discriminated_union.py to accept none schemas as tags, adjusts pydantic/json_schema.py so the OpenAPI discriminator mapping emits the 'null' key, and loosens the (runtime-inert) TypedDict hints in the in-tree pydantic-core/python/pydantic_core/core_schema.py. Monorepo sliced at the PR base commit (c04e4168) to pydantic/ + pyproject.toml + LICENSE plus the in-tree pydantic-core/python sources for realistic navigation \u2014 the hyphenated pydantic-core dir is not importable, so `import pydantic_core` always resolves to the compiled wheel baked into the per-task image vulcanbench/sandbox:pydantic-13667 (sandbox/Dockerfile.pydantic-13667: base + pydantic-core==2.48.0, the exact version this base commit pins, + typing-extensions/annotated-types/typing-inspection; pydantic itself overlaid via PYTHONPATH=.). Coverage: 3 fail_to_pass tests with models built inside each test (so the base-time build error fails each individually), verified failing at base and passing after the gold patch \u2014 None-tagged member builds and validates, literal member still routes, and the JSON-schema 'null' mapping; 5 pass_to_pass guards pin literal unions routing/rejecting, their JSON schema mapping, plain model validation, and the Literal[None] spelling that already worked at base. Assertions check types, routing and schema mapping via public APIs, never message text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "none_member_validates",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_none_member_builds_and_validates -q"
+      },
+      {
+        "name": "literal_still_routes",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_literal_member_still_routes -q"
+      },
+      {
+        "name": "json_schema_null",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_json_schema_maps_null -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "literal_union",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_literal_discriminated_union_routes -q"
+      },
+      {
+        "name": "unknown_tag",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_unknown_tag_rejected -q"
+      },
+      {
+        "name": "literal_schema",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_json_schema_for_literal_union -q"
+      },
+      {
+        "name": "plain_model",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_plain_model_validation_works -q"
+      },
+      {
+        "name": "literal_none_tag",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_optional_literal_none_union_tag -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "pydantic/_internal/_discriminated_union.py"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

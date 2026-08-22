@@ -82,6 +82,27 @@ Wave-4 infrastructure notes:
   validation is immune (different platform), which is why the gate still held.
   Always `rm -rf repo/target` after in-place verification — or verify in a copy.
 
+### Wave 5 (2026-08-22)
+
+| Task | Source PR | Merged | Lang | Complexity | Why |
+|---|---|---|---|---|---|
+| oss-anyio-create-task-names | anyio#1234 | 2026-07-19 | py | system/medium | naming parity across both backends; reuses anyio-1191 image |
+| oss-echo-group-implicit-overwrite | echo#3049 | 2026-07-21 | go | system/medium | implicit-route bookkeeping vs overwrite protection |
+| oss-eslint-loop-condition-ternary | eslint#21175 | 2026-08-11 | js | multi_file/medium | rule option feature; second eslint deps image |
+| oss-pydantic-none-discriminator | pydantic#13667 | 2026-08-16 | py | multi_file/hard | monorepo overlay + pinned pydantic-core wheel (2.48.0) |
+
+Wave-5 infrastructure notes:
+- **pydantic monorepo pattern**: image bakes the exact pydantic-core wheel the
+  base commit pins; the in-tree pydantic-core sources ship for navigation but
+  are unimportable (hyphenated dir), so `import pydantic_core` is always the
+  wheel. The fix's core_schema.py hunk is type-hints only (runtime-inert).
+- Scope hidden tests to the upstream fix's actual contract: echo#3049 does NOT
+  make explicit RouteNotFound override the implicit one (first test draft
+  over-specified and failed under gold).
+- eslint#21175: any options object fails at base (schema []) — an
+  unknown-option-rejection test therefore passes at base too and belongs in
+  the guards, not fail_to_pass.
+
 ## Triage rules learned
 
 - **Dedup against every existing suite first** (`grep -rh '"url"' tasks/*/*/metadata.json`):

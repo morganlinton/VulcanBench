@@ -1,0 +1,66 @@
+{
+  "id": "oss-anyio-create-task-names",
+  "category": "bug_fix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:anyio-1191",
+  "base_commit": "2ba69a649011e4608ab9485a0dcfe72b6f956ecc",
+  "upstream": {
+    "url": "https://github.com/agronholm/anyio/pull/1234",
+    "issue": "https://github.com/agronholm/anyio/pull/1234",
+    "commit": "2ba69a649011e4608ab9485a0dcfe72b6f956ecc"
+  },
+  "upstream_merged": "2026-07-19",
+  "decontamination_notes": "Real bug fix from agronholm/anyio PR #1234, merged 2026-07-19, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. TaskGroup.create_task defaulted the task name to the coroutine's bare __qualname__, while start_soon/start name tasks module-qualified via get_callable_name \u2014 the same work got different names depending on the spawning spelling. The fix spans three files across both backends (system complexity): abc/_tasks.py adds get_coro_name (module from cr_frame.f_globals joined with the qualname, override wins, graceful fallback), and _backends/_asyncio.py and _backends/_trio.py thread it through their create_task paths. Repo sliced at the PR base commit (2ba69a64) to LICENSE + pyproject.toml + src (same slicing as the python-1 anyio tasks); runtime deps come from the existing per-task image vulcanbench/sandbox:anyio-1191 (sniffio/idna/typing_extensions/pytest-asyncio/trio; anyio itself overlaid via PYTHONPATH=src). Coverage: 3 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 module-qualified default names on the asyncio and trio backends (asserted via the public TaskHandle.name against __name__ + __qualname__ computed in the test module itself), and agreement with start_soon's convention; 4 pass_to_pass guards pin explicit name= override, start_soon's already-module-qualified naming, awaiting the handle's result, and the trio backend running at all. No assertions on error or repr text beyond the name value.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "asyncio_name",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_asyncio_default_name_includes_module -q"
+      },
+      {
+        "name": "trio_name",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_trio_default_name_includes_module -q"
+      },
+      {
+        "name": "start_soon_convention",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_matches_start_soon_convention -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "explicit_name",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_explicit_name_still_wins -q"
+      },
+      {
+        "name": "start_soon_name",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_start_soon_name_already_module_qualified -q"
+      },
+      {
+        "name": "handle_result",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_create_task_result_awaitable -q"
+      },
+      {
+        "name": "trio_runs",
+        "cmd": "PYTHONPATH=src python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_trio_backend_runs -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/anyio/abc/_tasks.py",
+      "src/anyio/_backends/"
+    ],
+    "suggested_max_steps": 240,
+    "suggested_timeout_s": 4320
+  }
+}

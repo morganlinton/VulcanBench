@@ -1,0 +1,17 @@
+# Probe image for the pydantic task: base + pydantic's runtime deps, with the
+# compiled pydantic-core wheel version the base commit pins (2.48.0).
+# pydantic itself is overlaid from the workspace via PYTHONPATH=. — the
+# in-tree pydantic-core sources are NOT importable (hyphenated dir), so
+# `import pydantic_core` always resolves to the wheel.
+#
+# Build: docker build -t vulcanbench/sandbox:pydantic-13667 -f sandbox/Dockerfile.pydantic-13667 .
+FROM vulcanbench/sandbox:base
+
+RUN pip install --no-cache-dir \
+    "pydantic-core==2.48.0" \
+    "typing-extensions>=4.15.0" \
+    "annotated-types>=0.6.0" \
+    "typing-inspection>=0.4.4"
+
+RUN python -c "import pydantic_core, typing_extensions, annotated_types" \
+    && ! python -c "import pydantic" 2>/dev/null

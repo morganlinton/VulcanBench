@@ -1,0 +1,62 @@
+{
+  "id": "oss-echo-group-implicit-overwrite",
+  "category": "bug_fix",
+  "languages": [
+    "go"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:go-1.26",
+  "base_commit": "5a43c9b6d0e5273bd0077d4c2323e8ba64d87042",
+  "upstream": {
+    "url": "https://github.com/labstack/echo/pull/3049",
+    "issue": "https://github.com/labstack/echo/pull/3049",
+    "commit": "5a43c9b6d0e5273bd0077d4c2323e8ba64d87042"
+  },
+  "upstream_merged": "2026-07-21",
+  "decontamination_notes": "Real bug fix from labstack/echo PR #3049, merged 2026-07-21, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Group middleware registration implicitly adds RouteNotFound routes for the group prefix; under RouterConfig{AllowOverwritingRoute: false} a second Use (or Use after creating the group with middleware) panicked because the implicit routes could not be re-registered. The fix spans four files (system complexity): route.go adds an unexported allowOverwrite marker on Route, group.go sets it on the implicit registrations, and echo.go/router.go honor it in the add path so implicit bookkeeping routes are always replaceable while explicit user routes keep their overwrite protection. Repo sliced at the PR base commit (5a43c9b6): full module minus .git/.github with go mod vendor committed (upstream .gitignore vendor rule stripped; go-1.26 image for go.mod go 1.25). MIT LICENSE preserved. Hidden tests are behavioral (no new public API), in test-only sub-packages: vbgroup/ (fail_to_pass, 3 tests, each verified failing at base via the panic and passing after the gold patch) covers Use-twice, group-created-with-middleware plus later Use, and nested subgroups, all asserting both middlewares actually apply to a request; vbregg/ (pass_to_pass) guards explicit-route overwrite protection (recover-based, no message text), group middleware running on 404s inside the prefix, and group routing with params. Scoped to the upstream fix's contract: explicit RouteNotFound overriding the implicit one is NOT covered (the upstream change does not provide it).",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "use_twice",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBGroupUseTwiceWithOverwritingDisallowed ./vbgroup/"
+      },
+      {
+        "name": "created_with_mw",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBGroupCreatedWithMiddlewareCanUseAgain ./vbgroup/"
+      },
+      {
+        "name": "subgroup",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBSubgroupUseWithOverwritingDisallowed ./vbgroup/"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "explicit_protected",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBExplicitRouteStillProtected ./vbregg/"
+      },
+      {
+        "name": "mw_on_404",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBGroupMiddlewareRunsOn404InPrefix ./vbregg/"
+      },
+      {
+        "name": "group_routing",
+        "cmd": "go test -mod=vendor -count=1 -run TestVBGroupRoutingWorks ./vbregg/"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "group.go",
+      "router.go"
+    ],
+    "suggested_max_steps": 320,
+    "suggested_timeout_s": 5760
+  }
+}

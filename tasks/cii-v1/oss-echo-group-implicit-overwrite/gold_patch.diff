@@ -1,0 +1,75 @@
+diff --git a/echo.go b/echo.go
+index 1b231f163..98e7558cb 100644
+--- a/echo.go
++++ b/echo.go
+@@ -177,11 +177,12 @@ const (
+ 	// QUERY Method is a safe, idempotent request method carrying request content (a query) in its body, see rfc 10008.
+ 	// It is not (yet) part of the `net/http` standard library, so Echo defines it here.
+ 	QUERY = "QUERY"
+-	// RouteNotFound is special method type for routes handling "route not found" (404) cases
++	// RouteNotFound is a special method type for routes handling "route not found" (404) cases
+ 	RouteNotFound = "echo_route_not_found"
+-	// RouteAny is special method type that matches any HTTP method in request. Any has lower
++	// RouteAny is a special method type that matches any HTTP method in request. Any has lower
+ 	// priority that other methods that have been registered with Router to that path.
+ 	RouteAny = "echo_route_any"
++
+ )
+ 
+ // Headers
+diff --git a/group.go b/group.go
+index 76382627d..f064ef531 100644
+--- a/group.go
++++ b/group.go
+@@ -41,8 +41,12 @@ func (g *Group) Use(middleware ...MiddlewareFunc) {
+ 	// So we register catch all route (404 is a safe way to emulate route match) for this group and now during routing the
+ 	// Router would find route to match our request path and therefore guarantee the middleware(s) will get executed.
+ 	// Note: we use nil handler so Router would choose the default 404 handler. This may not work with custom routers.
+-	g.RouteNotFound("", nil)
+-	g.RouteNotFound("/*", nil)
++	if _, err := g.AddRoute(Route{Method: RouteNotFound, Path: "", allowOverwrite: true}); err != nil {
++		panic(err) // this is how `v4` handles errors. `v5` has methods to have panic-free usage
++	}
++	if _, err := g.AddRoute(Route{Method: RouteNotFound, Path: "/*", allowOverwrite: true}); err != nil {
++		panic(err) // this is how `v4` handles errors. `v5` has methods to have panic-free usage
++	}
+ }
+ 
+ // CONNECT implements `Echo#CONNECT()` for sub-routes within the Group. Panics on error.
+diff --git a/route.go b/route.go
+index 2f484e6da..2468a8816 100644
+--- a/route.go
++++ b/route.go
+@@ -22,6 +22,10 @@ type Route struct {
+ 	// fallback to default/global handlers in certain situations.
+ 	Handler     HandlerFunc
+ 	Middlewares []MiddlewareFunc
++
++	// allowOverwrite permits this route to replace an existing route with the same method+path,
++	// overriding the router's AllowOverwritingRoute config for this specific registration.
++	allowOverwrite bool
+ }
+ 
+ // ToRouteInfo converts Route to RouteInfo
+diff --git a/router.go b/router.go
+index 9d12f958e..99950aae7 100644
+--- a/router.go
++++ b/router.go
+@@ -506,6 +506,8 @@ func newAddRouteError(route Route, err error) *AddRouteError {
+ 
+ // Add registers a new route for method and path with matching handler.
+ func (r *DefaultRouter) Add(route Route) (RouteInfo, error) {
++	allowOverwritingRoute := r.allowOverwritingRoute || route.allowOverwrite
++
+ 	if route.Handler == nil {
+ 		switch route.Method {
+ 		case RouteNotFound:
+@@ -521,7 +523,7 @@ func (r *DefaultRouter) Add(route Route) (RouteInfo, error) {
+ 	path := normalizePathSlash(route.Path)
+ 
+ 	h := applyMiddleware(route.Handler, route.Middlewares...)
+-	if !r.allowOverwritingRoute {
++	if !allowOverwritingRoute {
+ 		for _, rr := range r.routes {
+ 			if route.Method == rr.Method && route.Path == rr.Path {
+ 				return RouteInfo{}, newAddRouteError(route, errors.New("adding duplicate route (same method+path) is not allowed"))

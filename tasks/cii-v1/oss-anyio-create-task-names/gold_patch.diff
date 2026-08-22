@@ -1,0 +1,76 @@
+diff --git a/src/anyio/_backends/_asyncio.py b/src/anyio/_backends/_asyncio.py
+index c00c2cd9b..c8022792e 100644
+--- a/src/anyio/_backends/_asyncio.py
++++ b/src/anyio/_backends/_asyncio.py
+@@ -101,7 +101,7 @@
+     UNIXDatagramPacketType,
+ )
+ from ..abc._eventloop import StrOrBytesPath
+-from ..abc._tasks import call_for_coroutine, get_callable_name
++from ..abc._tasks import call_for_coroutine, get_callable_name, get_coro_name
+ from ..lowlevel import RunVar
+ from ..streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
+ 
+@@ -926,10 +926,12 @@ def create_task(
+                 "This task group is not active; no new tasks can be started."
+             )
+ 
++        final_name = get_coro_name(coro, name)
++
+         if context is not None:
+-            return context.run(self._spawn, coro, name=name)
++            return context.run(self._spawn, coro, name=final_name)
+         else:
+-            return self._spawn(coro, name=name)
++            return self._spawn(coro, name=final_name)
+ 
+     async def start(
+         self,
+diff --git a/src/anyio/_backends/_trio.py b/src/anyio/_backends/_trio.py
+index 43d24d233..602b35b5c 100644
+--- a/src/anyio/_backends/_trio.py
++++ b/src/anyio/_backends/_trio.py
+@@ -84,7 +84,7 @@
+ from .._core._tasks import TaskHandle
+ from ..abc import IPSockAddrType, UDPPacketType, UNIXDatagramPacketType
+ from ..abc._eventloop import AsyncBackend, StrOrBytesPath
+-from ..abc._tasks import T_contra, call_for_coroutine, get_callable_name
++from ..abc._tasks import T_contra, call_for_coroutine, get_callable_name, get_coro_name
+ from ..streams.memory import MemoryObjectSendStream
+ 
+ if TYPE_CHECKING:
+@@ -267,7 +267,8 @@ def create_task(
+             raise TypeError(f"expected a coroutine, got {coro.__class__.__qualname__}")
+ 
+         self._check_active(coro)
+-        handle = TaskHandle(coro, name)
++        final_name = get_coro_name(coro, name)
++        handle = TaskHandle(coro, final_name)
+         if context is not None:
+             context.run(
+                 partial(self._nursery.start_soon, handle._run_coro, name=handle.name)
+diff --git a/src/anyio/abc/_tasks.py b/src/anyio/abc/_tasks.py
+index 44ee3a700..c65409ee0 100644
+--- a/src/anyio/abc/_tasks.py
++++ b/src/anyio/abc/_tasks.py
+@@ -25,6 +25,20 @@
+ PosArgsT = TypeVarTuple("PosArgsT")
+ 
+ 
++def get_coro_name(coro: Coroutine[Any, Any, object], override: object = None) -> str:
++    if override is not None:
++        return str(override)
++
++    try:
++        cr_frame = coro.cr_frame  # type: ignore[attr-defined]
++        module = cr_frame.f_globals["__name__"]
++    except (AttributeError, KeyError):
++        module = None
++
++    qualname = getattr(coro, "__qualname__", None)
++    return ".".join([x for x in (module, qualname) if x])
++
++
+ def get_callable_name(func: Callable, override: object = None) -> str:
+     if override is not None:
+         return str(override)

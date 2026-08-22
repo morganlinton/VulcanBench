@@ -180,10 +180,18 @@ def _search_repo(repo: str, since: str, per_repo: int) -> list[dict]:
     """Recent merged PRs for ``repo`` (number/title/url/closedAt), newest first."""
     rows = _gh_json(
         [
-            "search", "prs", "--repo", repo,
-            "--state", "closed", "--merged-at", f">={since}",
-            "--limit", str(per_repo),
-            "--json", "number,title,url,closedAt",
+            "search",
+            "prs",
+            "--repo",
+            repo,
+            "--state",
+            "closed",
+            "--merged-at",
+            f">={since}",
+            "--limit",
+            str(per_repo),
+            "--json",
+            "number,title,url,closedAt",
         ]
     )
     return rows if isinstance(rows, list) else []
@@ -193,8 +201,13 @@ def _enrich(repo: str, number: int) -> dict | None:
     """PR file list + commit oids to compute size, test-touch, and base commit."""
     data = _gh_json(
         [
-            "pr", "view", str(number), "--repo", repo,
-            "--json", "files,commits,mergeCommit,mergedAt,additions,deletions",
+            "pr",
+            "view",
+            str(number),
+            "--repo",
+            repo,
+            "--json",
+            "files,commits,mergeCommit,mergedAt,additions,deletions",
         ]
     )
     return data if isinstance(data, dict) else None
@@ -256,32 +269,50 @@ def mine(
 
 
 def _print_table(cands: list[Candidate]) -> None:
-    print(f"\n{'domain':14} {'repo':26} {'PR':>6} {'merged':10} "
-          f"{'+src/-':>9} {'f':>3}  title")
+    print(f"\n{'domain':14} {'repo':26} {'PR':>6} {'merged':10} {'+src/-':>9} {'f':>3}  title")
     print("-" * 100)
     for c in sorted(cands, key=lambda x: (x.domain, x.repo, -x.number)):
-        print(f"{c.domain:14} {c.repo:26} {c.number:>6} {c.merged_at:10} "
-              f"{str(c.src_additions)+'/'+str(c.deletions):>9} {c.changed_files:>3}  "
-              f"{c.title[:52]}")
+        print(
+            f"{c.domain:14} {c.repo:26} {c.number:>6} {c.merged_at:10} "
+            f"{str(c.src_additions) + '/' + str(c.deletions):>9} {c.changed_files:>3}  "
+            f"{c.title[:52]}"
+        )
     print(f"\n{len(cands)} candidate(s). Measure each (repeat >= 3) before admitting.")
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Mine candidate coding-task PRs (Python Suite v1)")
-    p.add_argument("--domain", action="append", choices=sorted(DOMAIN_REPOS),
-                   help="limit to one or more domains (default: all)")
+    p.add_argument(
+        "--domain",
+        action="append",
+        choices=sorted(DOMAIN_REPOS),
+        help="limit to one or more domains (default: all)",
+    )
     p.add_argument("--since", default="2026-02-01", help="only PRs merged on/after this date")
-    p.add_argument("--per-repo", type=int, default=25, help="max recent merged PRs scanned per repo")
-    p.add_argument("--min-loc", type=int, default=10, help="min net source additions (skip trivial)")
+    p.add_argument(
+        "--per-repo", type=int, default=25, help="max recent merged PRs scanned per repo"
+    )
+    p.add_argument(
+        "--min-loc", type=int, default=10, help="min net source additions (skip trivial)"
+    )
     p.add_argument("--max-loc", type=int, default=400, help="max net source additions (skip huge)")
     p.add_argument("--max-files", type=int, default=20, help="max changed files")
-    p.add_argument("--include-untested", action="store_true", help="keep PRs that touch no test path")
+    p.add_argument(
+        "--include-untested", action="store_true", help="keep PRs that touch no test path"
+    )
     p.add_argument("--json", help="write full candidate list to this JSON path")
     args = p.parse_args(argv)
 
     domains = args.domain or sorted(DOMAIN_REPOS)
-    cands = mine(domains, args.since, args.per_repo, args.min_loc,
-                 args.max_loc, args.max_files, args.include_untested)
+    cands = mine(
+        domains,
+        args.since,
+        args.per_repo,
+        args.min_loc,
+        args.max_loc,
+        args.max_files,
+        args.include_untested,
+    )
     _print_table(cands)
     if args.json:
         with open(args.json, "w", encoding="utf-8") as fh:

@@ -144,6 +144,14 @@ these rules (it **fails** a task that violates them):
   - the vendored `repo/` must **preserve the upstream LICENSE/NOTICE** file
     (only permissive licenses — MIT/BSD/Apache — should be vendored).
 
+  If the task vendors its dependencies (`go mod vendor` / `cargo vendor`) so the
+  offline sandbox needs no installs, the `vendor/` tree **must be committed with
+  the task** — verify with `git ls-files <task>/repo/vendor | wc -l` after
+  committing. Upstream Go repos routinely carry a `vendor` rule in `.gitignore`
+  that would silently drop it (a clean clone then can't build the task);
+  `slice_repo.py` strips such rules from the slice root, but double-check when
+  assembling a task by hand.
+
   Scaffold the structure with
   `python scripts/slice_repo.py` then
   `python scripts/import_oss_issues.py --id <id> --repo <path> --issue <file>`,

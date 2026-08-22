@@ -50,7 +50,10 @@ vulcanbench validate-task tasks/v1/<task-id>
 make validate-tasks   # validates all 52 suite tasks (+ hello-world demo skipped)
 ```
 
-All PRs must pass `make ci` before review.
+All PRs must pass `make ci` before review. This applies to direct pushes to
+`main` too (maintainers included): the CI format gate fails the whole Python job
+before mypy or pytest run, so an unformatted file turns `main` red until the
+next fix lands — run `make lint` (or full `make ci`) before any push.
 
 ## Code Style
 

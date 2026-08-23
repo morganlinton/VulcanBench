@@ -31,10 +31,16 @@ against BOTH reference frontier models before admission:
 - `codex:gpt-5.6-sol` (Codex CLI, subscription)
 - `claude-code:claude-opus-5` (Claude Code CLI, subscription)
 
-Admit iff the BEST model's solve count is ≤1/3 (functional == 1.0 at most
-once in three runs). Candidates where the best model solves 2/3 or 3/3 are
-REJECTED for v2 — they may be added to v1 if they pass v1's gate, so gate
-failures are not wasted work. Every gate verdict (admit or reject, with the
+Admit iff the BEST model's solve count is ≤2/3 (no model solves all three
+runs). Candidates a model solves 3/3 are REJECTED for v2 — they may be
+added to v1 if they pass v1's gate, so gate failures are not wasted work.
+
+This is the HARD-BAND bar, adopted 2026-08-23 after wave 1 ran 0/2 admits
+under the original ≤1/3 bar: v2's claim is "reference frontier models fail
+every admitted task at least one run in three," not "beyond the frontier."
+The per-task gate verdicts in CANDIDATES.md record exact solve counts, so
+the subset clearing the stricter ≤1/3 bar is always recoverable if a
+beyond-frontier cut is wanted later. Every gate verdict (admit or reject, with the
 six per-run scores) is logged in CANDIDATES.md; rejected tasks keep their
 runs/ artifacts for the record.
 

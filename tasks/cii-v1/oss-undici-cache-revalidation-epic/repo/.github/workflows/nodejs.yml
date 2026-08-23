@@ -1,0 +1,203 @@
+name: Node.js
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: true
+        type: string
+      runs-on:
+        required: true
+        type: string
+      codecov:
+        required: false
+        type: boolean
+        default: false
+      no-wasm-simd:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test ${{ inputs.codecov == true && 'and Coverage ' || '' }}with Node.js ${{ inputs.node-version }} on ${{ inputs.runs-on }}
+    timeout-minutes: ${{ inputs.runs-on == 'windows-latest' && 30 || 20 }}
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Setup Node.js@${{ inputs.node-version }}
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Print version information
+        run: |
+          echo OS: $(node -p "os.version()")
+          echo Node.js: $(node --version)
+          echo "Node.js built-in dependencies: $(node -p "'\r\n' + (Object.entries(process.versions).map(([k, v], i, arr) => (i !== arr.length - 1 ? '├──' : '└──') + k + '@' + v)).join('\r\n')")"
+          echo npm: $(npm --version)
+          echo git: $(git --version)
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Print installed dependencies
+        run: npm ls --all
+        continue-on-error: true
+
+      - name: Configure hosts file for WPT (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd ${{ github.workspace }}\test\web-platform-tests\wpt
+          python wpt make-hosts-file | Out-File $env:SystemRoot\System32\drivers\etc\hosts -Encoding ascii -Append
+        shell: powershell
+
+      - name: Configure hosts file for WPT (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd ${{ github.workspace }}/test/web-platform-tests/wpt
+          python3 wpt make-hosts-file | sudo tee -a /etc/hosts
+
+      - name: Generate PEM files
+        run: npm run generate-pem
+        id: generate-pem
+      
+      - name: Test unit
+        run: npm run test:unit
+        id: test-unit
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test node-test
+        run: npm run test:node-test
+        id: test-node-test
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test fetch
+        run: npm run test:fetch
+        id: test-fetch
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test node-fetch
+        run: npm run test:node-fetch
+        id: test-node-fetch
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test cache
+        run: npm run test:cache
+        id: test-cache
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test cache-interceptor with sqlite
+        run: npm run test:cache-interceptor
+        id: test-cache-interceptor
+        env:
+          CI: true
+          NODE_OPTIONS: --experimental-sqlite
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+
+      - name: Test cache-tests
+        run: npm run test:cache-tests
+        id: test-cache-tests
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test cookies
+        run: npm run test:cookies
+        id: test-cookies
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+
+      - name: Test interceptors
+        run: npm run test:interceptors
+        id: test-interceptors
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test eventsource
+        run: npm run test:eventsource
+        id: test-eventsource
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test infra
+        run: npm run test:infra
+        id: test-infra
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+
+      - name: Test subresource-integrity
+        run: npm run test:subresource-integrity
+        id: test-subresource-integrity
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test websocket
+        run: npm run test:websocket
+        id: test-websocket
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test jest
+        run: npm run test:jest
+        id: test-jest
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ''
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+      
+      - name: Test wpt
+        run: npm run test:wpt
+        id: test-wpt
+        env:
+          CI: true
+          NODE_V8_COVERAGE: ${{ inputs.codecov == true && './coverage/tmp' || '' }} 
+          UNDICI_NO_WASM_SIMD: ${{ inputs['no-wasm-simd'] }}
+
+      - name: Coverage summary
+        if: inputs.codecov == true
+        run: npm run coverage:report:ci
+        id: prepare-coverage-report
+      
+      - name: Upload coverage report to Codecov
+        if: inputs.codecov == true
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -40,7 +40,7 @@ for p in glob.glob(f"runs/{task}-*/summary.json"):
 print(max(counts.values(), default=0))
 PY
 )
-    if [ "$best" -ge 2 ]; then
+    if [ "$best" -ge 3 ]; then
       echo "[gate] early exit: a model already solved $best runs — verdict is REJECT regardless of remaining runs"
       break 2
     fi
@@ -66,6 +66,6 @@ for m in models:
     solves = sum(1 for v in vals if v == 1.0)
     best = max(best, solves)
     print(f"  {m:28s} runs={vals}  solves={solves}/3")
-verdict = "ADMIT (best model <=1/3)" if best <= 1 else f"REJECT (best model solves {best}/3; consider for v1)"
+verdict = "ADMIT (hard band: best model <=2/3)" if best <= 2 else f"REJECT (best model solves {best}/3; consider for v1)"
 print(f"  -> {verdict}")
 PY

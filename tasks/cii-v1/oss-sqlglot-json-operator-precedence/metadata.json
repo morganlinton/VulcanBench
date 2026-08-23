@@ -1,0 +1,73 @@
+{
+  "id": "oss-sqlglot-json-operator-precedence",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-23",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "base_commit": "f15c499771c44e2800338c15974c5618d5403cc7",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/pull/8063",
+    "issue": "https://github.com/tobymao/sqlglot/issues/8035",
+    "commit": "f15c499771c44e2800338c15974c5618d5403cc7"
+  },
+  "upstream_merged": "2026-08-10",
+  "decontamination_notes": "cii-v2 candidate #5 under the hard-band gate (best model <=2/3). sqlglot #8063 (fixes #8035, merged 2026-08-10, flagged as a breaking parser change): ->, ->>, #>, #>> and ? were parsed via COLUMN_OPERATORS as tight-binding accessors instead of Postgres's actual binary-operator tier (below +/-, level with ||, left-associative), corrupting adjacent casts, subscripts and arithmetic. Convention-heavy: the correct behavior is defined by Postgres's operator table, interacts with the parser's precedence-climbing structure, and must change for postgres+duckdb while leaving lambda-arrow dialects untouched. GRADING SUBTLETY solved during the build and worth keeping for future parser tasks: the upstream diff changes both BINDING (semantics) and RENDERING (the generator now emits -> instead of JSON_EXTRACT_PATH). To grade semantics only, every assertion compares parse-tree STRUCTURE: repr() of the tree with grouping Paren nodes stripped, asserting tree(X) == tree(X-with-explicit-parens) and != tree(wrong-reading). Two earlier comparison schemes were rejected as unsound: raw canonical SQL (parens render, so the explicit reading never equals the bare one) and paren-stripped canonical SQL (the generator re-renders distinct bindings to identical text, collapsing the comparison). Differentially probed 21 corners at base vs gold in-image: 13 diverge; the 4 fail_to_pass tests cover cast-binds-to-operand (all three text operators), arithmetic-binds-tighter, subscript-binds-to-operand, and duckdb sharing the tier. Left-associativity of chained extractions already held at base (verified) and is a GUARD, not f2p, alongside lambda-dialect preservation, ordinary precedence, paren round-trips, the ? operator, and postgres->duckdb transpilation. Per the v2 charter: no fix-location hints; the issue states Postgres's documented precedence facts and the observable mis-bindings only.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "cast_binds_operand",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cast_binds_to_the_operand_not_the_extraction -q"
+      },
+      {
+        "name": "arith_binds_tighter",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_arithmetic_binds_tighter_than_json_operators -q"
+      },
+      {
+        "name": "subscript_binds_operand",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_subscript_binds_to_the_operand -q"
+      },
+      {
+        "name": "duckdb_shares_tier",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_duckdb_shares_the_precedence_tier -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "left_assoc",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_json_operators_stay_left_associative -q"
+      },
+      {
+        "name": "lambda_dialects",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_lambda_dialects_keep_arrow_as_lambda -q"
+      },
+      {
+        "name": "ordinary_precedence",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_ordinary_precedence_unchanged -q"
+      },
+      {
+        "name": "paren_roundtrip",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_parenthesized_reading_survives_roundtrip -q"
+      },
+      {
+        "name": "question_roundtrip",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_question_operator_roundtrips -q"
+      },
+      {
+        "name": "transpile",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_postgres_to_duckdb_transpile_unchanged -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

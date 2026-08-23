@@ -1,0 +1,70 @@
+{
+  "id": "oss-undici-cache-revalidation-epic",
+  "category": "bugfix",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-23",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "e1cc0d436cc43ee737a083f9e6348ec45614e796",
+  "upstream": {
+    "url": "https://github.com/nodejs/undici/pull/5515",
+    "issue": "https://github.com/nodejs/undici/pull/5514",
+    "commit": "e1cc0d436cc43ee737a083f9e6348ec45614e796"
+  },
+  "upstream_merged": "2026-07-17",
+  "decontamination_notes": "cii-v2 candidate #4 under the hard-band gate (best model <=2/3). EPIC composing two undici PRs that touch the same file a day apart: #5515 'store revalidation-only responses so etag revalidation can engage' (merged 2026-07-16; SUPERSEDES community attempt #4624, whose first pass was judged structurally wrong) and #5514 'invalidate Location and Content-Location URIs on unsafe methods' (merged 2026-07-17, fixes #5509). Both are RFC 9111 conformance work \u2014 convention-heavy semantics (revalidation-only storage, SHOULD-level invalidation of named URIs, relative-reference resolution, same-origin restriction) that interact with the interceptor's storage, freshness, and invalidation paths. Base is the parent of #5515's merge; verified only these two PRs touched lib/handler/cache-handler.js in the window (4 total commits); gold is the two-PR diff of that single file. Repo sliced without upstream test/ to keep the slice lean; tests run against the package root via require('./index.js'). HARNESS SUBTLETY documented for maintainers: at this base, interceptors composed onto a bare Client are silently inert when dispatch options carry no origin (the later-fixed interceptors-origin regression, itself a v1 task) \u2014 all hidden tests therefore pass origin explicitly in each request, which was verified to make the cache engage at base (fresh responses served from cache, hits=1). Built by differential probing in-image: 9 scenarios; 5 diverge base-vs-gold (ETag+no-cache and ETag+max-age=0 revalidation with If-None-Match and 304-from-store, POST Location invalidation, Content-Location invalidation targeting a DIFFERENT URI than the request, relative Location resolution) and form the 5 fail_to_pass tests; 4 verified-stable scenarios are the guards (fresh-from-cache, request-URI self-invalidation, no-store, cross-origin Location must NOT invalidate \u2014 the same-origin check matters in both directions). Loopback servers only (work under the network-off sandbox). Assertions use origin hit counts, response bodies, and observed request headers; never library message text. Per the v2 charter: no fix-location hints; issue states the two behaviors and the RFC constraints, not the implementation.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "reval_no_cache",
+        "cmd": "node --test --test-name-pattern='vb etag response with no-cache is revalidated, not refetched' oss_tests.test.cjs"
+      },
+      {
+        "name": "reval_max_age_0",
+        "cmd": "node --test --test-name-pattern='vb etag response with max-age=0 is revalidated, not refetched' oss_tests.test.cjs"
+      },
+      {
+        "name": "post_location",
+        "cmd": "node --test --test-name-pattern='vb POST Location invalidates the cached target entry' oss_tests.test.cjs"
+      },
+      {
+        "name": "content_location",
+        "cmd": "node --test --test-name-pattern='vb Content-Location on an unsafe method invalidates its target' oss_tests.test.cjs"
+      },
+      {
+        "name": "relative_location",
+        "cmd": "node --test --test-name-pattern='vb relative Location references are resolved before invalidating' oss_tests.test.cjs"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "fresh_from_cache",
+        "cmd": "node --test --test-name-pattern='vb fresh responses are served from cache' reg_tests.test.cjs"
+      },
+      {
+        "name": "request_uri_invalidation",
+        "cmd": "node --test --test-name-pattern='vb an unsafe method still invalidates the request URI itself' reg_tests.test.cjs"
+      },
+      {
+        "name": "no_store",
+        "cmd": "node --test --test-name-pattern='vb no-store responses are never cached' reg_tests.test.cjs"
+      },
+      {
+        "name": "cross_origin_kept",
+        "cmd": "node --test --test-name-pattern='vb a cross-origin Location does not invalidate the other origin' reg_tests.test.cjs"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

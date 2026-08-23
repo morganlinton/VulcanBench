@@ -1,0 +1,74 @@
+{
+  "id": "oss-zod-record-intersection-strictness",
+  "category": "bugfix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-23",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "4cc4053d28fe6879fa360e2780ab52226202904e",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/6412",
+    "issue": "https://github.com/colinhacks/zod/issues/2200",
+    "commit": "4cc4053d28fe6879fa360e2780ab52226202904e"
+  },
+  "upstream_merged": "2026-08-14",
+  "decontamination_notes": "cii-v2 candidate #3 under the hard-band gate (best model <=2/3). zod #6412 'align record keys and intersection strictness with TypeScript' (merged 2026-08-14), which SUPERSEDES THREE prior human attempts (#5905, #6234, #6248) and fixes four issues reported independently over three years (#2200, #2573, #4017, #5663) \u2014 strong evidence the correct semantics are easy to get subtly wrong. The convention being implemented is TypeScript's index-signature treatment, which cannot be re-derived from first principles: inside an intersection a record's key schema governs only the keys it matches, a matching key with a wrong value is a value error not a key error, and an operand's refinements still run when the input carries keys that operand alone would reject. Built by differential probing: 28 corners executed at base and gold in the task image; exactly 6 diverge (regex- and template-literal-keyed records in intersections in both directions, plus strict-operand refinements running with extra keys present) and form the 4 fail_to_pass tests; the stable corners are pinned across 6 guards (standalone record excess-key checks, enum/literal exhaustiveness \u2014 enum-keyed records stay exhaustive even inside intersections, verified base==gold both directions \u2014 strict-object failure on unrecognized keys, intersection reconciliation incl. defaults, pipe semantics, plain object/loose/record basics). Base is the direct parent of the squash merge; gold is the PR's single source file (core/schemas.ts), tests excluded. Assertions use parse results and STRUCTURED issue codes only (sorted code lists), never message text. Per the v2 charter: no fix-location hints, symptoms-plus-required-behavior issue mirroring the upstream reports.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "regex_keyed_intersection",
+        "cmd": "tsx --test --test-name-pattern='vb regex-keyed record in intersection admits non-matching object keys' oss_tests.test.ts"
+      },
+      {
+        "name": "object_key_value_error",
+        "cmd": "tsx --test --test-name-pattern='vb object-governed key with wrong value reports only the value error' oss_tests.test.ts"
+      },
+      {
+        "name": "template_literal_keys",
+        "cmd": "tsx --test --test-name-pattern='vb template-literal-keyed record in intersection behaves the same way' oss_tests.test.ts"
+      },
+      {
+        "name": "strict_operand_refine_runs",
+        "cmd": "tsx --test --test-name-pattern='vb refinement on a strict operand still runs when an extra key is present' oss_tests.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "standalone_records",
+        "cmd": "tsx --test --test-name-pattern='vb standalone records keep their excess-key check' reg_tests.test.ts"
+      },
+      {
+        "name": "enum_literal_intersections",
+        "cmd": "tsx --test --test-name-pattern='vb enum and literal keyed intersections keep their behavior' reg_tests.test.ts"
+      },
+      {
+        "name": "strict_objects",
+        "cmd": "tsx --test --test-name-pattern='vb strict objects still fail on unrecognized keys' reg_tests.test.ts"
+      },
+      {
+        "name": "reconciliation",
+        "cmd": "tsx --test --test-name-pattern='vb intersection reconciliation of unrecognized keys' reg_tests.test.ts"
+      },
+      {
+        "name": "pipes",
+        "cmd": "tsx --test --test-name-pattern='vb pipe semantics are unchanged' reg_tests.test.ts"
+      },
+      {
+        "name": "object_record_basics",
+        "cmd": "tsx --test --test-name-pattern='vb plain object, loose object and record basics' reg_tests.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

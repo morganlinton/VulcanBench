@@ -1,0 +1,69 @@
+{
+  "id": "oss-networkx-kcomponents-exact-epic",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-23",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "base_commit": "472a452c4db89c79efdebbdb20501b10fc726eae",
+  "upstream": {
+    "url": "https://github.com/networkx/networkx/pull/8734",
+    "issue": "https://github.com/networkx/networkx/pull/8753",
+    "commit": "472a452c4db89c79efdebbdb20501b10fc726eae"
+  },
+  "upstream_merged": "2026-07-24",
+  "decontamination_notes": "cii-v2 EPIC (candidate #1 under the frontier admission gate). Composes TWO merged networkx PRs into one task: #8734 'Fix k_components losing or truncating k-components' (merged 2026-07-07) and its follow-up #8753 'Prune nested components in k_components reconstruction' (merged 2026-07-24) \u2014 both post-June-2026; upstream_merged records the later PR. Three interacting root causes in the exact Moody-White algorithm (networkx/algorithms/connectivity/kcomponents.py): (1) partition generation removed the union of all cutsets in a single pass and filtered nodes of degree <= k, silently dropping cutset nodes whose neighbors all lie in other cutsets and losing k-components; (2) reconstruction skipped propagating a (k+1)-level component that spans several k-level candidates without being a subset of any, replacing a genuine k-component by fragments; (3) a single consolidate pass can emit a component nested inside another, i.e. a non-maximal 'component'. Base chosen as the parent of #8734's merge commit; verified only these two PRs touched kcomponents.py in the window; gold is the two-PR diff of that one file. Failures at base are SILENT (output satisfies local invariants but is wrong), so the task cannot be solved by self-checking simple contracts. Upstream's own regression seed (gnp 16/0.6/22070) does NOT reproduce in this image (cut enumeration order is environment-dependent), so all random-graph fixtures were re-derived by differential fuzzing base-vs-gold IN THE TASK IMAGE: 24 of 898 connected G(n,p) graphs diverge (~1 in 37, matching upstream's ~1 in 60 claim); 12 verified-divergent graphs are pinned in the fail_to_pass batches with exact expected decompositions, each independently checked (induced connectivity >= k, no nesting, maximality). Guards pin the petersen decomposition, five verified non-divergent G(n,p) decompositions (base==gold), an output contract (no nesting, induced connectivity), directed-input rejection, and the untouched approximation module. Per the v2 charter, no fix-location hints: agent_hints carries budgets only, and the issue describes symptoms and one reproduction, never files, functions, or root causes. Assertions check decompositions only, never library message text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "two_icosahedra",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_two_icosahedra_joined_by_connectors -q"
+      },
+      {
+        "name": "exact_sparse",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_exact_decomposition_sparse_graphs -q"
+      },
+      {
+        "name": "exact_medium",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_exact_decomposition_medium_graphs -q"
+      },
+      {
+        "name": "exact_dense",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_exact_decomposition_dense_graphs -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "petersen",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_petersen_decomposition -q"
+      },
+      {
+        "name": "pinned_random",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_pinned_random_graph_decompositions -q"
+      },
+      {
+        "name": "output_contract",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_output_contract_no_nesting_and_connectivity -q"
+      },
+      {
+        "name": "directed_rejected",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_directed_graph_rejected -q"
+      },
+      {
+        "name": "approximation_unchanged",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_approximation_module_unchanged -q"
+      }
+    ]
+  },
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

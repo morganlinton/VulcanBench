@@ -1,0 +1,78 @@
+{
+  "id": "oss-zod-optionality-ladder",
+  "category": "bugfix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-23",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "e03d8587a16a4c635102b2415bc9dff6ee5f6ecf",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/6419",
+    "issue": "https://github.com/colinhacks/zod/issues/6321",
+    "commit": "e03d8587a16a4c635102b2415bc9dff6ee5f6ecf"
+  },
+  "upstream_merged": "2026-08-17",
+  "decontamination_notes": "cii-v2 candidate #2 under the frontier admission gate, chosen to match the profile of the suite's only frontier-resistant task (wide convention-rich contract, corners not derivable from first principles, no brute-force oracle possible): zod #6419 'refine optin into a three-rung ladder' (merged 2026-08-17, six days before task creation), fixing #6321 \u2014 a regression where .default() was lost when a .transform() followed it under .optional()/.partial(). Upstream's own first fix attempt (#6329) was superseded as structurally wrong, which is direct evidence the fix is easy to get subtly incorrect. The trap texture: the correct fix must make optional wrappers DELEGATE for schemas carrying a default while still SHORT-CIRCUITING undefined for schemas whose undefined-acceptance comes from preprocess/catch/bare transforms (the #5941/#5939 clobber invariants) \u2014 the two requirements point in opposite directions, so an over-broad fix breaks the guards and a narrow special-case likely misses prefault/async/union/lazy variants. Built by differential probing: 42 optionality corners executed at base and gold in the task image; exactly 5 diverge (the #6321 family: default/prefault + transform under optional/partial, sync and async) and 36 are stable. The 5 divergent behaviors form the 4 fail_to_pass tests; the 36 stable ones are pinned across 7 guards (key admissibility, tuple rungs, clobber short-circuits, wrapper orders, record/catchall, exactOptional/pipe/partial/required, async parity). Base is the direct parent of the squash-merge; gold is the PR's four source files (classic/schemas.ts, core/schemas.ts, core/util.ts, core/json-schema-processors.ts), tests and wiki excluded. Upstream's in-repo vitest tests remain in the slice at their BASE versions (some encode the pre-fix expectations upstream itself had to update \u2014 realistic, and hidden tests define truth). Per the v2 charter: no fix-location hints (agent_hints carries budgets only), issue states symptoms plus two must-not-change examples, never files, mechanisms, or the ladder design. Internal _zod.optin rung values are deliberately NOT asserted anywhere so any correct public behavior passes. Assertions check parse results only, never error message text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "default_transform_partial",
+        "cmd": "tsx --test --test-name-pattern='vb default-transform under partial supplies the default' oss_tests.test.ts"
+      },
+      {
+        "name": "default_transform_optional",
+        "cmd": "tsx --test --test-name-pattern='vb default-transform under optional supplies the default' oss_tests.test.ts"
+      },
+      {
+        "name": "prefault_transform_optional",
+        "cmd": "tsx --test --test-name-pattern='vb prefault-transform under optional supplies the prefault' oss_tests.test.ts"
+      },
+      {
+        "name": "async_parity",
+        "cmd": "tsx --test --test-name-pattern='vb async parity for default-transform under optional wrappers' oss_tests.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "key_admissibility",
+        "cmd": "tsx --test --test-name-pattern='vb key-level admissibility for every kind of key schema' reg_tests.test.ts"
+      },
+      {
+        "name": "tuple_rungs",
+        "cmd": "tsx --test --test-name-pattern='vb tuple minimum length respects defaults and optionals' reg_tests.test.ts"
+      },
+      {
+        "name": "clobber_short_circuits",
+        "cmd": "tsx --test --test-name-pattern='vb optional short-circuits undefined for non-default undefined-acceptors' reg_tests.test.ts"
+      },
+      {
+        "name": "wrapper_orders",
+        "cmd": "tsx --test --test-name-pattern='vb a default survives every wrapper order' reg_tests.test.ts"
+      },
+      {
+        "name": "record_catchall",
+        "cmd": "tsx --test --test-name-pattern='vb record and catchall values honor defaults for undefined' reg_tests.test.ts"
+      },
+      {
+        "name": "exactoptional_misc",
+        "cmd": "tsx --test --test-name-pattern='vb exactOptional, standalone parses and partial/required round trips' reg_tests.test.ts"
+      },
+      {
+        "name": "async_short_circuit",
+        "cmd": "tsx --test --test-name-pattern='vb async parity for the short-circuit invariants' reg_tests.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

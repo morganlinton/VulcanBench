@@ -1,0 +1,78 @@
+{
+  "id": "oss-hono-wildcard-prefix-overmatch",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "63bbcf508c74d9fe7a3e20f4dfe7ffacc566dcce",
+  "upstream": {
+    "url": "https://github.com/honojs/hono/pull/5252",
+    "issue": "https://github.com/honojs/hono/pull/5252",
+    "commit": "63bbcf508c74d9fe7a3e20f4dfe7ffacc566dcce"
+  },
+  "upstream_merged": "2026-08-17",
+  "decontamination_notes": "Real bug fix from honojs/hono PR #5252, merged 2026-08-17, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. LinearRouter and PatternRouter compiled wildcard routes into prefix regexes with no segment-boundary requirement: /path/* matched /pathfoo and /assets* matched the shorter /asset. The fix (multi_file) distinguishes slash-star from bare-star endings in src/router/linear-router/router.ts (explicit boundary check after the prefix) and src/router/pattern-router/router.ts (suffix regex '(?:$|/)' for slash-star). RegExpRouter was already correct, so the hidden tests exercise LinearRouter and PatternRouter directly (SmartRouter would mask the defect). Repo sliced at the PR base commit (63bbcf50) minus docs/benchmarks/perf-measures/runtime-tests (standard hono slicing; node-ts image, tsx). Coverage: 4 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 the /pathfoo and /asset overmatches on each router separately; 6 pass_to_pass guards pin legitimate matches (bare prefix, sub paths, suffix extensions) and param routes on both routers. Assertions count matched handlers via the routers' public match API. Expected outcomes come from the upstream PR's own test cases.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "linear_slash_boundary",
+        "cmd": "tsx --test --test-name-pattern='vb linear slash wildcard requires a segment boundary' vb_overmatch.test.ts"
+      },
+      {
+        "name": "pattern_slash_boundary",
+        "cmd": "tsx --test --test-name-pattern='vb pattern slash wildcard requires a segment boundary' vb_overmatch.test.ts"
+      },
+      {
+        "name": "linear_suffix_prefix",
+        "cmd": "tsx --test --test-name-pattern='vb linear suffix wildcard does not match a shorter prefix' vb_overmatch.test.ts"
+      },
+      {
+        "name": "pattern_suffix_prefix",
+        "cmd": "tsx --test --test-name-pattern='vb pattern suffix wildcard does not match a shorter prefix' vb_overmatch.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "linear_slash_matches",
+        "cmd": "tsx --test --test-name-pattern='vb linear slash wildcard matches the bare prefix and sub paths' vb_wildcard_reg.test.ts"
+      },
+      {
+        "name": "pattern_slash_matches",
+        "cmd": "tsx --test --test-name-pattern='vb pattern slash wildcard matches the bare prefix and sub paths' vb_wildcard_reg.test.ts"
+      },
+      {
+        "name": "linear_suffix_matches",
+        "cmd": "tsx --test --test-name-pattern='vb linear suffix wildcard matches prefix and extensions' vb_wildcard_reg.test.ts"
+      },
+      {
+        "name": "pattern_suffix_matches",
+        "cmd": "tsx --test --test-name-pattern='vb pattern suffix wildcard matches prefix and extensions' vb_wildcard_reg.test.ts"
+      },
+      {
+        "name": "linear_params",
+        "cmd": "tsx --test --test-name-pattern='vb linear static and param routes unchanged' vb_wildcard_reg.test.ts"
+      },
+      {
+        "name": "pattern_params",
+        "cmd": "tsx --test --test-name-pattern='vb pattern static and param routes unchanged' vb_wildcard_reg.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "src/router/linear-router/router.ts",
+      "src/router/pattern-router/router.ts"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

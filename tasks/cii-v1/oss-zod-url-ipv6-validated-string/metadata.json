@@ -1,0 +1,69 @@
+{
+  "id": "oss-zod-url-ipv6-validated-string",
+  "category": "bug_fix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-08-22",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "2a417097652c522d5f08c4ed9858b9d020517943",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/6442",
+    "issue": "https://github.com/colinhacks/zod/pull/6442",
+    "commit": "2a417097652c522d5f08c4ed9858b9d020517943"
+  },
+  "upstream_merged": "2026-08-19",
+  "decontamination_notes": "Real bug fix from colinhacks/zod PR #6442, merged 2026-08-19, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. z.url() validated via the WHATWG parser \u2014 which deletes ASCII tab/LF/CR instead of failing \u2014 but returned the original string, so the returned value could name a different host than the one validated; z.ipv6()/cidrv6() validated via new URL('http://[...]'), where delimiters re-split the authority ('::@1\\\\' validated the host 0.0.0.1) and the same character deletion accepted control characters. The fix (multi_file, security-flavored) adds stripTabAndNewline so url() returns the validated string, and gates ipv6 with an address-alphabet regex before a real IPv6 check, mirrored in the compiled path (compile.ts + schemas.ts). Standard zod slicing at the PR base commit (2a417097): packages/zod + root LICENSE/package.json, node-ts image, tsx imports ./packages/zod/src/v4. Coverage: 4 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 tab/LF/CR-stripped return values across host/path/query positions, re-delimiting rejection for ipv6/cidrv6, control-character rejection, and the COMPILED url path (a schemas-only fix fails it); 4 pass_to_pass guards pin verbatim clean URLs, normalize, valid IPv6/CIDR acceptance, and the compiled clean path. Expected values come from the upstream PR's own test cases; assertions compare parse outputs and safeParse success only.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "url_stripped",
+        "cmd": "tsx --test --test-name-pattern='vb url returns the tab-newline-stripped string it validated' vb_validated_string.test.ts"
+      },
+      {
+        "name": "ipv6_delimiters",
+        "cmd": "tsx --test --test-name-pattern='vb ipv6 rejects re-delimiting characters' vb_validated_string.test.ts"
+      },
+      {
+        "name": "ipv6_controls",
+        "cmd": "tsx --test --test-name-pattern='vb ipv6 rejects control characters' vb_validated_string.test.ts"
+      },
+      {
+        "name": "compiled_url",
+        "cmd": "tsx --test --test-name-pattern='vb compiled url agrees on the validated string' vb_validated_string.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "clean_urls",
+        "cmd": "tsx --test --test-name-pattern='vb clean urls still parse verbatim' vb_url_reg.test.ts"
+      },
+      {
+        "name": "normalize",
+        "cmd": "tsx --test --test-name-pattern='vb normalize still wins where it applies' vb_url_reg.test.ts"
+      },
+      {
+        "name": "valid_ipv6",
+        "cmd": "tsx --test --test-name-pattern='vb valid ipv6 addresses still accepted' vb_url_reg.test.ts"
+      },
+      {
+        "name": "compiled_clean",
+        "cmd": "tsx --test --test-name-pattern='vb compiled clean url unchanged' vb_url_reg.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "packages/zod/src/v4/core/schemas.ts"
+    ],
+    "suggested_max_steps": 260,
+    "suggested_timeout_s": 4680
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "id": "oss-bodyparser-limit-validation",
+  "category": "bug_fix",
+  "languages": [
+    "javascript"
+  ],
+  "difficulty": "medium",
+  "task_complexity": "system",
+  "created": "2026-08-22",
+  "repo_scale": "medium",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:bodyparser-741",
+  "base_commit": "0defdbe7f95ad0d3bc007d3a7c59c8c0ab9e6575",
+  "upstream": {
+    "url": "https://github.com/expressjs/body-parser/pull/741",
+    "issue": "https://github.com/expressjs/body-parser/pull/741",
+    "commit": "0defdbe7f95ad0d3bc007d3a7c59c8c0ab9e6575"
+  },
+  "upstream_merged": "2026-07-07",
+  "decontamination_notes": "Real bug fix from expressjs/body-parser PR #741, merged 2026-07-07, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Each parser coerced a non-number limit through bytes.parse and kept the null result on failure \u2014 an invalid limit (unparsable string, NaN, boolean, object) silently disabled body-size enforcement, failing open. The fix (4 files, system complexity: lib/types/json.js, raw.js, text.js, urlencoded.js) validates the parsed limit and throws TypeError at middleware creation, keeping the 100kb default for absent/null. Repo sliced at the PR base commit (0defdbe7) to lib/ + index.js + package.json + LICENSE; runtime deps come from the per-task image vulcanbench/sandbox:bodyparser-741 (node-ts + npm install of the repo's package.json via NODE_PATH \u2014 CJS, so NODE_PATH applies; built with the task repo as docker context). Coverage: 2 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 all four parsers times four invalid spellings throwing TypeError (exception TYPE only), plus a fail-open guard; 3 pass_to_pass guards drive the middleware over loopback node:http servers, pinning valid string limits parsing JSON, numeric limits enforcing 413 on oversized bodies, and the default limit. No message-text assertions.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "invalid_throws",
+        "cmd": "node --test --test-name-pattern='vb invalid limits throw TypeError at creation for every parser' vb_limit.test.cjs"
+      },
+      {
+        "name": "never_unlimited",
+        "cmd": "node --test --test-name-pattern='vb invalid limit is never silently unlimited' vb_limit.test.cjs"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "valid_string",
+        "cmd": "node --test --test-name-pattern='vb valid string limit accepted and parses json' vb_limit_reg.test.cjs"
+      },
+      {
+        "name": "numeric_enforced",
+        "cmd": "node --test --test-name-pattern='vb numeric limit accepted and enforced' vb_limit_reg.test.cjs"
+      },
+      {
+        "name": "default_limit",
+        "cmd": "node --test --test-name-pattern='vb default limit parses ordinary bodies' vb_limit_reg.test.cjs"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "lib/types/"
+    ],
+    "suggested_max_steps": 160,
+    "suggested_timeout_s": 1920
+  }
+}

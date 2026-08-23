@@ -2,7 +2,7 @@
   "display_name": "VulcanBench Coding Intelligence Index",
   "require_explicit_budgets": true,
   "_charter": "CHARTER.md",
-  "_note": "CII v1: 30 all-new tasks (target), upstream fixes merged >= 2026-06-01, per-task complexity-scaled budgets stamped in each task's agent_hints (scripts/stamp_task_budgets.py). Only validated, admitted tasks are listed here; candidates live in CANDIDATES.md.",
+  "_note": "CII v1 COMPLETE: 30 all-new tasks, upstream fixes merged >= 2026-06-01 (most >= 2026-07-01), per-task complexity-scaled budgets stamped in each task's agent_hints (scripts/stamp_task_budgets.py --check enforces consistency; validator requires them via require_explicit_budgets). All 30 gated by scripts/validate_tasks.py --sandbox docker: gold=1.0, pre-patch=0.0, deterministic over 3 runs. Languages Py7/TS7/Go5/Rust5/JS6. Difficulty calibration (measure-then-compose, frontier repeat-3) still pending \u2014 run it before publishing results. Build log: CANDIDATES.md.",
   "tasks": [
     "oss-networkx-digraph-node-cuts",
     "oss-toml-value-datetime-deserialize",
@@ -29,6 +29,10 @@
     "oss-click-custom-version-option",
     "oss-jiff-offset-subtraction",
     "oss-ky-query-method",
-    "oss-undici-interceptors-origin"
+    "oss-undici-interceptors-origin",
+    "oss-hono-wildcard-prefix-overmatch",
+    "oss-bodyparser-limit-validation",
+    "oss-zod-url-ipv6-validated-string",
+    "oss-undici-body-sent-hooks"
   ]
 }

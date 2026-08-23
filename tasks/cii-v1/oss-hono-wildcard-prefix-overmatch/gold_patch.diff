@@ -1,0 +1,59 @@
+diff --git a/src/router/linear-router/router.ts b/src/router/linear-router/router.ts
+index bc0c983f5e..acee5c17a9 100644
+--- a/src/router/linear-router/router.ts
++++ b/src/router/linear-router/router.ts
+@@ -40,7 +40,10 @@ export class LinearRouter<T> implements Router<T> {
+           }
+         } else if (hasStar && !hasLabel) {
+           const endsWithStar = routePath.charCodeAt(routePath.length - 1) === 42
+-          const parts = (endsWithStar ? routePath.slice(0, -2) : routePath).split(splitByStarRe)
++          const endsWithSlashStar = routePath.endsWith('/*')
++          const parts = (
++            endsWithStar ? routePath.slice(0, endsWithSlashStar ? -2 : -1) : routePath
++          ).split(splitByStarRe)
+ 
+           const lastIndex = parts.length - 1
+           for (let j = 0, pos = 0, len = parts.length; j < len; j++) {
+@@ -51,7 +54,11 @@ export class LinearRouter<T> implements Router<T> {
+             }
+             pos += part.length
+             if (j === lastIndex) {
+-              if (
++              if (endsWithSlashStar) {
++                if (pos !== path.length && path.charCodeAt(pos) !== 47) {
++                  continue ROUTES_LOOP
++                }
++              } else if (
+                 !endsWithStar &&
+                 pos !== path.length &&
+                 !(pos === path.length - 1 && path.charCodeAt(pos) === 47)
+diff --git a/src/router/pattern-router/router.ts b/src/router/pattern-router/router.ts
+index 456c9d23ba..1b016232b7 100644
+--- a/src/router/pattern-router/router.ts
++++ b/src/router/pattern-router/router.ts
+@@ -10,10 +10,8 @@ export class PatternRouter<T> implements Router<T> {
+   #routes: Route<T>[] = []
+ 
+   add(method: string, path: string, handler: T) {
+-    const endsWithWildcard = path.at(-1) === '*'
+-    if (endsWithWildcard) {
+-      path = path.slice(0, -2)
+-    }
++    const suffix = path.endsWith('/*') ? '(?:$|/)' : path.endsWith('*') ? '' : '/?$'
++    path = path.replace(/\*$/, '')
+     if (path.at(-1) === '?') {
+       path = path.slice(0, -1)
+       this.add(method, path.replace(/\/[^/]+$/, ''), handler)
+@@ -31,11 +29,7 @@ export class PatternRouter<T> implements Router<T> {
+     )
+ 
+     try {
+-      this.#routes.push([
+-        new RegExp(`^${parts.join('')}${endsWithWildcard ? '' : '/?$'}`),
+-        method,
+-        handler,
+-      ])
++      this.#routes.push([new RegExp(`^${parts.join('')}${suffix}`), method, handler])
+     } catch {
+       throw new UnsupportedPathError()
+     }

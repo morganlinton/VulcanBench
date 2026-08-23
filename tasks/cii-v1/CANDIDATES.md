@@ -121,6 +121,21 @@ the buggy core routine: grade against jiff-core's own public API. Remaining
 to 30: 4 tasks; viable leftovers include hono#5252/#5179, zod#6442,
 body-parser#741, undici#5696, vitest mocker pair, trio (needs new PRs).
 
+### Wave 7 — FINAL (2026-08-22)
+
+| Task | Source PR | Merged | Lang | Complexity | Why |
+|---|---|---|---|---|---|
+| oss-hono-wildcard-prefix-overmatch | hono#5252 | 2026-08-17 | ts | multi_file/medium | prefix overmatch in Linear+Pattern routers |
+| oss-bodyparser-limit-validation | body-parser#741 | 2026-07-07 | js | system/medium | fail-open limit misconfig; per-task deps image |
+| oss-zod-url-ipv6-validated-string | zod#6442 | 2026-08-19 | ts | multi_file/hard | WHATWG-parser divergence; security-flavored |
+| oss-undici-body-sent-hooks | undici#5696 | 2026-08-19 | js | system/medium | hooks dropped by every wrapped handler |
+
+**SUITE COMPLETE: 30/30 admitted.** Final composition: Py 7 / TS 7 / Go 5 /
+Rust 5 / JS 6; complexity 12x system, 13x multi_file, 1x localized anchor,
+with 4 easy anchors total. Next step (needs API keys): the charter's
+measure-then-compose pass — frontier repeat-3 over all 30 to calibrate the
+difficulty band and identify discriminators.
+
 ## Triage rules learned
 
 - **Dedup against every existing suite first** (`grep -rh '"url"' tasks/*/*/metadata.json`):

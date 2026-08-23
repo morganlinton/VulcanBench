@@ -1,0 +1,16 @@
+# Probe image for the bodyparser task: node-ts + bodyparser's runtime deps.
+#
+# Build (context is the TASK REPO, not the repo root — .dockerignore excludes tasks/):
+#   docker build -t vulcanbench/sandbox:bodyparser-741 \
+#     -f sandbox/Dockerfile.bodyparser-741 \
+#     tasks/cii-v1/oss-bodyparser-limit-validation/repo
+#
+# The bodyparser source itself is overlaid from the workspace; NODE_PATH lets
+# `require('espree')` et al. resolve from the image when the workspace has no
+# node_modules (the sandbox is network-off).
+FROM vulcanbench/sandbox:node-ts
+COPY package.json /opt/bodyparser-deps/package.json
+RUN cd /opt/bodyparser-deps \
+    && npm install --omit=dev --omit=peer --no-audit --no-fund --ignore-scripts \
+    && npm cache clean --force
+ENV NODE_PATH=/opt/bodyparser-deps/node_modules

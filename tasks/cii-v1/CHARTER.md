@@ -73,5 +73,8 @@ older suites' run conditions never shift underneath cached-run comparisons.
 
 ## Status
 
-Suite under construction. `suite.json` lists only validated, admitted tasks;
-candidates and measurements live in `CANDIDATES.md` until admitted.
+**Corpus complete (2026-08-22): 30/30 tasks admitted**, every one through the
+full gate (gold=1.0, pre-patch=0.0, deterministic x3 in Docker) with stamped
+complexity-scaled budgets. `CANDIDATES.md` holds the build log. Remaining
+before results are published: the measure-then-compose calibration pass
+(frontier repeat >= 3 over the suite) — blocked on provider API keys.

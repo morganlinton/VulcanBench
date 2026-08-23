@@ -1051,7 +1051,11 @@ def get_provider(spec: str) -> LLMProvider:
         from harness.agent.cli_agents import ClaudeCodeProvider  # noqa: PLC0415
 
         return ClaudeCodeProvider(model)
+    if provider == "codex":
+        from harness.agent.cli_agents import CodexProvider  # noqa: PLC0415
+
+        return CodexProvider(model)
     if provider not in _PROVIDERS:
-        known = ", ".join(sorted([*_PROVIDERS, "claude-code"]))
+        known = ", ".join(sorted([*_PROVIDERS, "claude-code", "codex"]))
         raise ValueError(f"unknown provider {provider!r}; known: {known}")
     return _PROVIDERS[provider](model)

@@ -35,6 +35,7 @@ from harness.task_metadata import (
     complexity_scaled_budgets,
     repo_scale,
     task_complexity,
+    task_difficulty,
 )
 
 
@@ -51,7 +52,9 @@ def stamp(task_dir: Path, check: bool) -> str:
     hints = metadata.get("agent_hints")
     if not isinstance(hints, dict):
         hints = {}
-    expected = complexity_scaled_budgets(repo_scale(metadata), task_complexity(metadata))
+    expected = complexity_scaled_budgets(
+        repo_scale(metadata), task_complexity(metadata), task_difficulty(metadata)
+    )
 
     if hints.get("budget_hand_tuned") is True:
         return "hand-tuned"

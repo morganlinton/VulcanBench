@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 
 from harness.task_metadata import (
-    COMPLEXITY_BUDGET_MULTIPLIERS,
+    CII_COMPLEXITY_BASE_MINUTES,
+    CII_DIFFICULTY_MULTIPLIERS,
     SCALE_DEFAULTS,
     complexity_scaled_budgets,
     infer_task_complexity_from_gold_patch,
@@ -14,6 +15,7 @@ from harness.task_metadata import (
     resolve_max_steps,
     resolve_verifier_timeout_s,
     task_complexity,
+    task_difficulty,
     validate_scale_fields,
 )
 
@@ -146,26 +148,45 @@ def test_bigger_repos_get_at_least_as_much_wall_clock() -> None:
 
 
 def test_complexity_scaled_budgets_formula() -> None:
-    # localized keeps the scale baseline exactly.
-    base = complexity_scaled_budgets("medium", "localized")
-    assert base == {"suggested_max_steps": 100, "suggested_timeout_s": 1200}
-    # system multiplies it (1200 * 1.6 = 1920, already a whole minute).
-    system = complexity_scaled_budgets("medium", "system")
-    assert system == {"suggested_max_steps": 160, "suggested_timeout_s": 1920}
-    # Timeouts round UP to whole minutes (300 * 1.3 = 390 -> 420).
-    assert complexity_scaled_budgets("micro", "multi_file")["suggested_timeout_s"] == 420
-    # architecture at xlarge is the ceiling: 2h, 400 steps.
-    top = complexity_scaled_budgets("xlarge", "architecture")
-    assert top == {"suggested_max_steps": 400, "suggested_timeout_s": 7200}
-    # Unknown values normalize like repo_scale()/task_complexity() do.
-    assert complexity_scaled_budgets("bogus", "bogus") == complexity_scaled_budgets(
-        "micro", "localized"
+    # TerminalBench-style: complexity base x difficulty x scale, half-hour
+    # increments, clamped to [30min, 8h].
+    # medium multi_file at medium difficulty: 120min * 1.0 * 1.0 = 2h.
+    assert complexity_scaled_budgets("medium", "multi_file") == {
+        "suggested_max_steps": 360,
+        "suggested_timeout_s": 7200,
+    }
+    # Easy localized on a small repo clamps up to the 30min floor.
+    assert complexity_scaled_budgets("small", "localized", "easy")["suggested_timeout_s"] == 1800
+    # Hard system on an xlarge repo: 150 * 1.5 * 1.5 = 337.5 -> 360min = 6h.
+    assert complexity_scaled_budgets("xlarge", "system", "hard")["suggested_timeout_s"] == 21600
+    # veryhard architecture on xlarge hits the 8h ceiling (240*2*1.5 = 720 -> 480).
+    assert complexity_scaled_budgets("xlarge", "architecture", "veryhard") == {
+        "suggested_max_steps": 1440,
+        "suggested_timeout_s": 28800,
+    }
+    # Steps track the clock at ~20s/step, rounded to tens.
+    b = complexity_scaled_budgets("large", "system", "medium")  # 150*1.25=187.5 -> 210min
+    assert b["suggested_timeout_s"] == 12600
+    assert b["suggested_max_steps"] == 630
+    # Unknown values normalize conservatively.
+    assert complexity_scaled_budgets("bogus", "bogus", "bogus") == complexity_scaled_budgets(
+        "medium", "localized", "medium"
     )
-    # Budgets are monotone in complexity for every scale.
-    order = ["localized", "multi_file", "system", "architecture"]
-    assert [COMPLEXITY_BUDGET_MULTIPLIERS[c] for c in order] == sorted(
-        COMPLEXITY_BUDGET_MULTIPLIERS[c] for c in order
+    # Budgets are monotone in complexity and difficulty.
+    order_c = ["localized", "multi_file", "system", "architecture"]
+    assert [CII_COMPLEXITY_BASE_MINUTES[c] for c in order_c] == sorted(
+        CII_COMPLEXITY_BASE_MINUTES[c] for c in order_c
     )
+    order_d = ["easy", "medium", "hard", "veryhard"]
+    assert [CII_DIFFICULTY_MULTIPLIERS[d] for d in order_d] == sorted(
+        CII_DIFFICULTY_MULTIPLIERS[d] for d in order_d
+    )
+
+
+def test_task_difficulty_normalizes() -> None:
+    assert task_difficulty({}) == "medium"
+    assert task_difficulty({"difficulty": "VeryHard"}) == "veryhard"
+    assert task_difficulty({"difficulty": "impossible"}) == "medium"
 
 
 def test_suite_requiring_explicit_budgets_fails_unstamped_task(tmp_path) -> None:

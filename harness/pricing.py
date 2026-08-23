@@ -79,7 +79,7 @@ _PER_MILLION = 1_000_000.0
 # rates, so their ``cost_usd`` is the *hypothetical* API cost of the same
 # tokens. The run summary marks these with ``cli_agent.billing`` so the
 # number is never mistaken for actual spend.
-_SPEC_ALIASES = {"claude-code:": "anthropic:"}
+_SPEC_ALIASES = {"claude-code:": "anthropic:", "codex:": "openai:"}
 
 
 def _canonical_spec(model: str) -> str:

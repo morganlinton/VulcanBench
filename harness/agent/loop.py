@@ -32,6 +32,7 @@ from harness.agent.cli_agents import (
     build_cli_prompt,
     is_cli_agent_spec,
     run_claude_code_task,
+    run_codex_task,
 )
 from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolCall, ToolProtocol, get_openai_tool_schemas
@@ -325,7 +326,8 @@ def _resolve_run_engine(
                 "its own tool execution; pass --sandbox local to acknowledge "
                 "host execution"
             )
-        return True, None, effort_config("claude-code", effort)
+        cli_provider = model.partition(":")[0].strip().lower()
+        return True, None, effort_config(cli_provider, effort)
     provider = provider or get_provider(model)
     return False, provider, effort_config(provider.name, effort)
 
@@ -351,19 +353,33 @@ def _execute_agent(
 ) -> tuple[int, int, bool, bool, CliAgentOutcome | None]:
     """Run the agent phase: the vendor CLI in the workspace, or the model loop."""
     if cli_agent:
-        _, cli_model = parse_model_spec(model)
-        outcome = run_claude_code_task(
-            workspace=workspace,
-            prompt=build_cli_prompt(task.issue),
-            model=cli_model,
-            priced_spec=model,
-            max_turns=effective_max_steps,
-            collector=collector,
-            stream_log_path=run_dir / "cli-agent-stream.jsonl",
-            timeout_s=deadline.remaining_s(),
-            network=network,
-            max_run_cost=max_run_cost,
-        )
+        cli_provider, cli_model = parse_model_spec(model)
+        if cli_provider == "codex":
+            outcome = run_codex_task(
+                workspace=workspace,
+                prompt=build_cli_prompt(task.issue),
+                model=cli_model,
+                priced_spec=model,
+                collector=collector,
+                stream_log_path=run_dir / "cli-agent-stream.jsonl",
+                timeout_s=deadline.remaining_s(),
+                network=network,
+                max_run_cost=max_run_cost,
+                effort=effort_meta.requested if effort_meta else None,
+            )
+        else:
+            outcome = run_claude_code_task(
+                workspace=workspace,
+                prompt=build_cli_prompt(task.issue),
+                model=cli_model,
+                priced_spec=model,
+                max_turns=effective_max_steps,
+                collector=collector,
+                stream_log_path=run_dir / "cli-agent-stream.jsonl",
+                timeout_s=deadline.remaining_s(),
+                network=network,
+                max_run_cost=max_run_cost,
+            )
         if outcome.timed_out:
             deadline.record_exceeded(collector, "cli_agent")
         return (

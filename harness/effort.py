@@ -70,6 +70,13 @@ _PROVIDER_EFFORT_MAPS = {
     "deepseek": _DEEPSEEK_EFFORT_VALUES,
     "qwen": _QWEN_EFFORT_VALUES,
     "xai": _XAI_EFFORT_VALUES,
+    # Codex CLI: config key model_reasoning_effort (low/medium/high/xhigh).
+    "codex": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "extra-high": "xhigh",
+    },
 }
 
 

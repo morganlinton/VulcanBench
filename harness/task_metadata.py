@@ -44,37 +44,70 @@ SCALE_DEFAULTS: dict[str, dict[str, int | float]] = {
     "large": {"suggested_max_steps": 150, "suggested_timeout_s": 2700},
     "xlarge": {"suggested_max_steps": 200, "suggested_timeout_s": 3600},
 }
-# Complexity-scaled budgets (Coding Intelligence Index): repo_scale sets the
-# baseline (navigation surface drives per-step cost), and task_complexity
-# multiplies it (a cross-module fix needs more of those steps than a one-file
-# edit in the same tree). The v3/v4 timeout failures were exactly this gap: a
-# `system` task in a medium repo got the same 1200s as a one-liner. These
-# multipliers are used to STAMP explicit `agent_hints` into each task
-# (scripts/stamp_task_budgets.py) rather than applied at run time, so a task's
-# budget is auditable in its metadata and older suites' run conditions never
-# shift under cached-run comparisons.
-COMPLEXITY_BUDGET_MULTIPLIERS: dict[str, float] = {
-    "localized": 1.0,
-    "multi_file": 1.3,
-    "system": 1.6,
-    "architecture": 2.0,
+# Complexity-scaled budgets (Coding Intelligence Index), TerminalBench-style:
+# generous wall-clock allowances in tidy half-hour increments, so a slow
+# verdict always means the model could not solve the task — never that the
+# clock was tuned to the median solver. TerminalBench's published budgets
+# cluster at 2h with a tail from 30min to 8h; this formula reproduces that
+# shape from the task's declared complexity (dominant factor), difficulty and
+# repo scale. These values are used to STAMP explicit `agent_hints` into each
+# task (scripts/stamp_task_budgets.py) rather than applied at run time, so a
+# task's budget is auditable in its metadata and older suites' run conditions
+# never shift under cached-run comparisons.
+CII_COMPLEXITY_BASE_MINUTES: dict[str, int] = {
+    "localized": 60,
+    "multi_file": 120,
+    "system": 150,
+    "architecture": 240,
 }
+CII_DIFFICULTY_MULTIPLIERS: dict[str, float] = {
+    "easy": 0.5,
+    "medium": 1.0,
+    "hard": 1.5,
+    "veryhard": 2.0,
+}
+CII_SCALE_MULTIPLIERS: dict[str, float] = {
+    "micro": 0.75,
+    "small": 0.75,
+    "medium": 1.0,
+    "large": 1.25,
+    "xlarge": 1.5,
+}
+CII_MIN_MINUTES = 30
+CII_MAX_MINUTES = 480  # 8h, TerminalBench's ceiling
+# Step allowance follows the clock at a measured ~20s per step (model round
+# trip + tool call), rounded to tens so stamped values read cleanly.
+CII_SECONDS_PER_STEP = 20
 
 
-def complexity_scaled_budgets(scale: str, complexity: str) -> dict[str, int]:
-    """Explicit per-task budgets from the scale baseline x complexity multiplier.
+def task_difficulty(metadata: dict[str, Any]) -> str:
+    """Normalized difficulty tier; unknown/missing values read as ``medium``."""
+    raw = str(metadata.get("difficulty") or "").strip().lower()
+    if raw in CII_DIFFICULTY_MULTIPLIERS:
+        return raw
+    return "medium"
+
+
+def complexity_scaled_budgets(
+    scale: str, complexity: str, difficulty: str = "medium"
+) -> dict[str, int]:
+    """Explicit per-task budgets: complexity base x difficulty x repo scale.
 
     Returns ``{"suggested_max_steps": int, "suggested_timeout_s": int}`` suitable
-    for stamping into ``metadata.agent_hints``. Unknown scales fall back to the
-    micro baseline and unknown complexities to x1.0, mirroring ``repo_scale()``
-    and ``task_complexity()`` normalization. Timeouts round up to a whole minute
-    so stamped values read cleanly in metadata.
+    for stamping into ``metadata.agent_hints``. Minutes are rounded UP to
+    half-hour increments and clamped to [30min, 8h]; unknown inputs normalize
+    the same way :func:`repo_scale` / :func:`task_complexity` /
+    :func:`task_difficulty` do (localized / medium / micro-like conservative
+    defaults).
     """
-    base = SCALE_DEFAULTS.get(scale, SCALE_DEFAULTS["micro"])
-    mult = COMPLEXITY_BUDGET_MULTIPLIERS.get(complexity, 1.0)
-    steps = round(float(base["suggested_max_steps"]) * mult)
-    timeout = float(base["suggested_timeout_s"]) * mult
-    timeout_s = int(-(-timeout // 60) * 60)  # ceil to whole minutes
+    base = CII_COMPLEXITY_BASE_MINUTES.get(complexity, CII_COMPLEXITY_BASE_MINUTES["localized"])
+    d_mult = CII_DIFFICULTY_MULTIPLIERS.get(difficulty, 1.0)
+    s_mult = CII_SCALE_MULTIPLIERS.get(scale, 1.0)
+    minutes = base * d_mult * s_mult
+    minutes = min(max(minutes, CII_MIN_MINUTES), CII_MAX_MINUTES)
+    minutes = int(-(-minutes // 30) * 30)  # ceil to half-hour increments
+    timeout_s = minutes * 60
+    steps = int(-(-(timeout_s / CII_SECONDS_PER_STEP) // 10) * 10)  # ceil to tens
     return {"suggested_max_steps": steps, "suggested_timeout_s": timeout_s}
 
 

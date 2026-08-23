@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Coding Intelligence Index v1** (`tasks/cii-v1/`, `--suite cii-v1`): 38 all-new
+  gold-verified tasks from post-cutoff OSS PRs (May–Aug 2026) with
+  complexity-scaled TB-style budgets; August 2026 frontier results published in
+  `docs/results/cii-v1-2026-08/` (Opus 5 96.3% vs GPT 5.6 Sol 86.5% pass@1).
+- **CII v2 frontier charter + admission gate** (`tasks/cii-v2/`,
+  `scripts/frontier_gate.sh`): difficulty-gated suite requiring n=3 measurement
+  against two reference frontier models before admission; candidate log with
+  per-run verdicts (wave 1: 0/5 admits, all recycled into v1).
+- **`codex:` CLI agent provider** (subscription-billed Codex runs) and
+  resumable measurement workers/top-up scripts used for the CII sweeps.
+- **CII report generator** (`scripts/cii-report/make_chart.py`): brand-styled
+  results chart aggregated live from `./runs`.
+
 - **Qwen reasoning effort** (`qwen:<model>`, Qwen3.8+): `--effort low/medium` maps to
   DashScope's `reasoning_effort` and `extra-high` maps to its `xhigh`; `high` is recorded
   as metadata only because Qwen's documented enum is low/medium/xhigh (no `high`) with

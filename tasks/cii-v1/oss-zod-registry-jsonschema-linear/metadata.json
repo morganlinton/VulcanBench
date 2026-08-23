@@ -1,0 +1,73 @@
+{
+  "id": "oss-zod-registry-jsonschema-linear",
+  "category": "performance",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-08-23",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "421cc9a507086377f257d76030966371b7b8f1b2",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/6408",
+    "issue": "https://github.com/colinhacks/zod/issues/6161",
+    "commit": "421cc9a507086377f257d76030966371b7b8f1b2"
+  },
+  "upstream_merged": "2026-08-14",
+  "decontamination_notes": "PERFORMANCE-GATED TASK \u2014 a deliberate design experiment, and the suite's first task whose fail_to_pass tests are purely performance assertions. Real fix from colinhacks/zod PR #6408 (fixes #6161), merged 2026-08-14, after the training cutoffs of the models this suite targets; authored by zod's creator. Converting a registry ran extractDefs and finalize once per registered schema, and both re-scanned the whole shared `seen` map on every call \u2014 five full-map passes repeated N times, so the work grew as O(N^2); the reporter saw ~30s for ~3000 types. The fix hoists those shared passes so they run once, across json-schema-generator.ts and to-json-schema.ts. Base is quadratic and CORRECT, which is what makes the task shape unusual: fail_to_pass contains only the two perf assertions (everything else already passes at base), and the pass_to_pass guards are pure output correctness. Since a failing guard zeroes the functional score, a fast-but-wrong implementation scores 0.0 and a correct-but-slow one scores 0.0 \u2014 only correct AND linear earns credit. Thresholds were calibrated empirically in the task's own sandbox image rather than guessed: measured BASE 578ms@500, 2260ms@1000, 9540ms@2000 (~4x per doubling, textbook quadratic) vs GOLD 26ms@800, 72ms@3000, 141ms@6000 (linear) \u2014 a ~190x gap at n=2000. The first perf test asserts only the RATIO t(2000)/t(500) < 8, which is machine-independent (base measures ~16.5, gold ~3); the second uses a 6s absolute budget at n=3000, sitting ~60x above the fast path and ~3x below the slow one, so it is robust to machine speed and to amd64-under-emulation slowness. Verified three ways at build time: BASE 0/2 perf, 7/7 correctness; GOLD 2/2 and 7/7; FAST-BUT-WRONG (extractDefs short-circuited) fails 3 correctness guards -> 0.0. Standard zod slicing at the PR base commit (packages/zod + root LICENSE/package.json; node-ts image, tsx). Assertions check timings/ratios and emitted JSON Schema content only, never library message text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "linear_scaling_ratio",
+        "cmd": "tsx --test --test-name-pattern='vb registry conversion scales linearly, not quadratically' vb_perf.test.ts"
+      },
+      {
+        "name": "large_registry_budget",
+        "cmd": "tsx --test --test-name-pattern='vb large registry converts within a generous time budget' vb_perf.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "all_schemas_present",
+        "cmd": "tsx --test --test-name-pattern='vb every registered schema appears with its id' vb_correct.test.ts"
+      },
+      {
+        "name": "shared_are_refs",
+        "cmd": "tsx --test --test-name-pattern='vb shared schemas become cross-references, not copies' vb_correct.test.ts"
+      },
+      {
+        "name": "field_details",
+        "cmd": "tsx --test --test-name-pattern='vb field details and required lists survive conversion' vb_correct.test.ts"
+      },
+      {
+        "name": "uri_callback",
+        "cmd": "tsx --test --test-name-pattern='vb the uri callback is honored for ids and refs' vb_correct.test.ts"
+      },
+      {
+        "name": "single_schema",
+        "cmd": "tsx --test --test-name-pattern='vb single-schema conversion is unaffected' vb_correct.test.ts"
+      },
+      {
+        "name": "nested_structures",
+        "cmd": "tsx --test --test-name-pattern='vb nested and recursive structures still convert' vb_correct.test.ts"
+      },
+      {
+        "name": "large_registry_correct",
+        "cmd": "tsx --test --test-name-pattern='vb a large registry still converts correctly, not just quickly' vb_correct.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "packages/zod/src/v4/core/to-json-schema.ts"
+    ],
+    "suggested_max_steps": 810,
+    "suggested_timeout_s": 16200
+  }
+}

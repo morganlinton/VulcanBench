@@ -1,0 +1,271 @@
+diff --git a/starlette/applications.py b/starlette/applications.py
+index 3e1a7816a..f3e26bc4d 100644
+--- a/starlette/applications.py
++++ b/starlette/applications.py
+@@ -5,6 +5,7 @@
+ 
+ from starlette.datastructures import State, URLPath
+ from starlette.middleware import Middleware, _MiddlewareFactory
++from starlette.middleware.body_limit import RequestBodyLimitMiddleware
+ from starlette.middleware.errors import ServerErrorMiddleware
+ from starlette.middleware.exceptions import ExceptionMiddleware
+ from starlette.requests import Request
+@@ -26,6 +27,8 @@ def __init__(
+         middleware: Sequence[Middleware] | None = None,
+         exception_handlers: Mapping[Any, ExceptionHandler] | None = None,
+         lifespan: Lifespan[AppType] | None = None,
++        *,
++        max_body_size: int | None = None,
+     ) -> None:
+         """Initializes the application.
+ 
+@@ -46,10 +49,13 @@ def __init__(
+             lifespan: A lifespan context function, which can be used to perform
+                 startup and shutdown tasks. This is a newer style that replaces the
+                 `on_startup` and `on_shutdown` handlers. Use one or the other, not both.
++            max_body_size: Non-negative maximum total size in bytes of an HTTP request
++                body. The default, `None`, does not limit request body size.
+         """
+         self.debug = debug
+         self.state = State()
+         self.router = Router(routes, lifespan=lifespan)
++        self.max_body_size = max_body_size
+         self.exception_handlers = {} if exception_handlers is None else dict(exception_handlers)
+         self.user_middleware = [] if middleware is None else list(middleware)
+         self.middleware_stack: ASGIApp | None = None
+@@ -65,11 +71,11 @@ def build_middleware_stack(self) -> ASGIApp:
+             else:
+                 exception_handlers[key] = value
+ 
+-        middleware = (
+-            [Middleware(ServerErrorMiddleware, handler=error_handler, debug=debug)]
+-            + self.user_middleware
+-            + [Middleware(ExceptionMiddleware, handlers=exception_handlers, debug=debug)]
+-        )
++        middleware = [Middleware(ServerErrorMiddleware, handler=error_handler, debug=debug)]
++        if self.max_body_size is not None:
++            middleware.append(Middleware(RequestBodyLimitMiddleware, max_body_size=self.max_body_size))
++        middleware += self.user_middleware
++        middleware.append(Middleware(ExceptionMiddleware, handlers=exception_handlers, debug=debug))
+ 
+         app = self.router
+         for cls, args, kwargs in reversed(middleware):
+diff --git a/starlette/formparsers.py b/starlette/formparsers.py
+index 3f3c598f4..88862f788 100644
+--- a/starlette/formparsers.py
++++ b/starlette/formparsers.py
+@@ -288,10 +288,10 @@ async def parse(self) -> FormData:
+                 self._file_parts_to_write.clear()
+                 self._file_parts_to_finish.clear()
+             parser.finalize()
+-        except (MultiPartException, OSError) as exc:
+-            # Close all the files if there was an error.
++        except BaseException:
++            # Close all the files if parsing or reading the request stream fails.
+             for file in self._files_to_close_on_error:
+                 file.close()
+-            raise exc
++            raise
+ 
+         return FormData(self.items)
+diff --git a/starlette/middleware/body_limit.py b/starlette/middleware/body_limit.py
+new file mode 100644
+index 000000000..159c70d97
+--- /dev/null
++++ b/starlette/middleware/body_limit.py
+@@ -0,0 +1,132 @@
++from __future__ import annotations
++
++from typing import cast
++
++from starlette.datastructures import Headers
++from starlette.exceptions import HTTPException
++from starlette.responses import PlainTextResponse
++from starlette.types import ASGIApp, Message, Receive, Scope, Send
++
++MAX_BODY_SIZE_SCOPE_KEY = "starlette.max_body_size"
++_BODY_LIMIT_RESPONDER_SCOPE_KEY = "starlette._body_limit_responder"
++
++
++class _Missing:
++    __slots__ = ()
++
++
++_MISSING = _Missing()
++
++
++class _RequestBodyTooLarge(HTTPException):
++    def __init__(self) -> None:
++        super().__init__(status_code=413, detail="Content Too Large")
++
++
++class _RequestBodyLimitResponseSent(Exception):
++    pass
++
++
++class RequestBodyLimitMiddleware:
++    """Limit the total size of an HTTP request body."""
++
++    def __init__(self, app: ASGIApp, max_body_size: int) -> None:
++        self.app = app
++        self.max_body_size = max_body_size
++
++    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
++        if scope["type"] != "http":
++            return await self.app(scope, receive, send)
++
++        responder = RequestBodyLimitResponder(self.app, self.max_body_size)
++        await responder(scope, receive, send)
++
++
++class RequestBodyLimitResponder:
++    def __init__(self, app: ASGIApp, max_body_size: int) -> None:
++        self.app = app
++        self.max_body_size = max_body_size
++        self._scope: Scope | None = None
++        self._receive: Receive | None = None
++        self._send: Send | None = None
++        self.content_length: int | None = None
++        self.total_size = 0
++        self.response_started = False
++
++    @property
++    def scope(self) -> Scope:
++        assert self._scope is not None
++        return self._scope
++
++    @property
++    def receive(self) -> Receive:
++        assert self._receive is not None
++        return self._receive
++
++    @property
++    def send(self) -> Send:
++        assert self._send is not None
++        return self._send
++
++    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
++        previous_scope_limit = cast(int | _Missing, scope.get(MAX_BODY_SIZE_SCOPE_KEY, _MISSING))
++        scope[MAX_BODY_SIZE_SCOPE_KEY] = self.max_body_size
++
++        active_responder = cast(RequestBodyLimitResponder | None, scope.get(_BODY_LIMIT_RESPONDER_SCOPE_KEY))
++        if active_responder is not None:
++            active_responder.max_body_size = self.max_body_size
++            if active_responder.total_size > active_responder.max_body_size:
++                raise _RequestBodyTooLarge
++            return await self.app(scope, receive, send)
++
++        self._scope = scope
++        self._receive = receive
++        self._send = send
++        self.content_length = _get_content_length(scope)
++        scope[_BODY_LIMIT_RESPONDER_SCOPE_KEY] = self
++
++        try:
++            await self.app(scope, self.receive_with_limit, self.send_with_limit)
++        except _RequestBodyTooLarge:
++            if self.response_started:
++                raise
++            response = PlainTextResponse("Content Too Large", status_code=413)
++            await response(scope, receive, send)
++        except _RequestBodyLimitResponseSent:
++            pass
++        finally:
++            scope.pop(_BODY_LIMIT_RESPONDER_SCOPE_KEY, None)
++            if isinstance(previous_scope_limit, _Missing):
++                scope.pop(MAX_BODY_SIZE_SCOPE_KEY, None)
++            else:
++                scope[MAX_BODY_SIZE_SCOPE_KEY] = previous_scope_limit
++
++    async def receive_with_limit(self) -> Message:
++        if self.content_length is not None and self.content_length > self.max_body_size:
++            raise _RequestBodyTooLarge
++
++        message = await self.receive()
++        if message["type"] == "http.request":
++            self.total_size += len(message.get("body", b""))
++            if self.total_size > self.max_body_size:
++                raise _RequestBodyTooLarge
++        return message
++
++    async def send_with_limit(self, message: Message) -> None:
++        if message["type"] == "http.response.start":
++            self.response_started = True
++            if self.content_length is not None and self.content_length > self.max_body_size:
++                response = PlainTextResponse("Content Too Large", status_code=413)
++                await response(self.scope, self.receive, self.send)
++                raise _RequestBodyLimitResponseSent
++        await self.send(message)
++
++
++def _get_content_length(scope: Scope) -> int | None:
++    content_length = Headers(scope=scope).get("content-length")
++    if content_length is None:
++        return None
++    try:
++        return int(content_length)
++    except ValueError:
++        return None
+diff --git a/starlette/routing.py b/starlette/routing.py
+index a035d18cd..d86ddb0c4 100644
+--- a/starlette/routing.py
++++ b/starlette/routing.py
+@@ -20,6 +20,7 @@
+ from starlette.datastructures import URL, Headers, URLPath
+ from starlette.exceptions import HTTPException, StarletteDeprecationWarning
+ from starlette.middleware import Middleware
++from starlette.middleware.body_limit import RequestBodyLimitMiddleware
+ from starlette.requests import Request
+ from starlette.responses import PlainTextResponse, RedirectResponse, Response
+ from starlette.types import ASGIApp, Lifespan, Receive, Scope, Send
+@@ -203,6 +204,7 @@ def __init__(
+         name: str | None = None,
+         include_in_schema: bool = True,
+         middleware: Sequence[Middleware] | None = None,
++        max_body_size: int | None = None,
+     ) -> None:
+         assert path.startswith("/"), "Routed paths must start with '/'"
+         self.path = path
+@@ -225,6 +227,8 @@ def __init__(
+         if middleware is not None:
+             for cls, args, kwargs in reversed(middleware):
+                 self.app = cls(self.app, *args, **kwargs)
++        if max_body_size is not None:
++            self.app = RequestBodyLimitMiddleware(self.app, max_body_size=max_body_size)
+ 
+         if methods is None:
+             self.methods = None
+@@ -365,6 +369,7 @@ def __init__(
+         name: str | None = None,
+         *,
+         middleware: Sequence[Middleware] | None = None,
++        max_body_size: int | None = None,
+     ) -> None:
+         assert path == "" or path.startswith("/"), "Routed paths must start with '/'"
+         assert app is not None or routes is not None, "Either 'app=...', or 'routes=' must be specified"
+@@ -377,6 +382,8 @@ def __init__(
+         if middleware is not None:
+             for cls, args, kwargs in reversed(middleware):
+                 self.app = cls(self.app, *args, **kwargs)
++        if max_body_size is not None:
++            self.app = RequestBodyLimitMiddleware(self.app, max_body_size=max_body_size)
+         self.name = name
+         self.path_regex, self.path_format, self.param_convertors = compile_path(self.path + "/{path:path}")
+ 
+@@ -574,6 +581,7 @@ def __init__(
+         lifespan: Lifespan[Any] | None = None,
+         *,
+         middleware: Sequence[Middleware] | None = None,
++        max_body_size: int | None = None,
+     ) -> None:
+         self.routes = [] if routes is None else list(routes)
+         self.redirect_slashes = redirect_slashes
+@@ -602,6 +610,8 @@ def __init__(
+         if middleware:
+             for cls, args, kwargs in reversed(middleware):
+                 self.middleware_stack = cls(self.middleware_stack, *args, **kwargs)
++        if max_body_size is not None:
++            self.middleware_stack = RequestBodyLimitMiddleware(self.middleware_stack, max_body_size=max_body_size)
+ 
+     async def not_found(self, scope: Scope, receive: Receive, send: Send) -> None:
+         if scope["type"] == "websocket":

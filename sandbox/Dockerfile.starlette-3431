@@ -1,0 +1,15 @@
+# Probe image for the starlette task: base + starlette's runtime deps and the
+# test-client stack. starlette itself is overlaid from the workspace via
+# PYTHONPATH=. — the image deliberately does NOT contain starlette.
+#
+# Build: docker build -t vulcanbench/sandbox:starlette-3431 -f sandbox/Dockerfile.starlette-3431 .
+FROM vulcanbench/sandbox:base
+
+RUN pip install --no-cache-dir \
+    "anyio>=4.4" \
+    "httpx>=0.27,<0.29" \
+    "python-multipart>=0.0.18" \
+    "typing_extensions>=4.10"
+
+RUN python -c "import anyio, httpx, multipart" \
+    && ! python -c "import starlette" 2>/dev/null

@@ -1,0 +1,98 @@
+{
+  "id": "oss-starlette-max-body-size",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "architecture",
+  "created": "2026-08-23",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:starlette-3431",
+  "base_commit": "9c500db197859dba4a8db13fa8e7d2c55de8152c",
+  "upstream": {
+    "url": "https://github.com/encode/starlette/pull/3431",
+    "issue": "https://github.com/encode/starlette/pull/3431",
+    "commit": "9c500db197859dba4a8db13fa8e7d2c55de8152c"
+  },
+  "upstream_merged": "2026-08-08",
+  "decontamination_notes": "Real feature from encode/starlette PR #3431, merged 2026-08-08 \u2014 one of the latest merges available when this task was built (2026-08-23), deliberately chosen to sit past any plausible training cutoff; re-check upstream_merged against any newer model's cutoff before reusing. Human-authored by a starlette maintainer (Kludex). Adds configurable request-body size limits: a new starlette/middleware/body_limit.py (RequestBodyLimitMiddleware plus a receive-wrapping responder that counts bytes as they arrive), threaded through applications.py (constructor kwarg + placement in the middleware stack between the server-error and exception middleware), routing.py (Router, Mount and Route kwargs), and formparsers.py (broadened cleanup so files opened during a parse are closed when the limit aborts it). Architecture complexity: the fix is a cross-cutting ASGI concern, not a localized edit \u2014 the byte counting has to happen in the receive channel, and a Content-Length-only implementation is wrong. Repo sliced at the PR base commit (9c500db1) to the starlette package + pyproject + LICENSE; deps come from the per-task image vulcanbench/sandbox:starlette-3431 (anyio, httpx for TestClient, python-multipart; starlette itself deliberately absent so PYTHONPATH=. resolves the workspace copy). Coverage: 6 fail_to_pass tests, each verified failing at base and passing after the gold patch \u2014 app-level limit, route-level limit (and non-interference with unlimited sibling routes), mount-level limit, the standalone middleware on a raw ASGI app, a STREAMED body with no Content-Length (which a header-only limiter lets through), and multipart uploads counting toward the limit. 9 pass_to_pass guards are the tail mechanism: because a failing guard zeroes the functional score, a limiter that swallows streaming bodies, breaks urlencoded/multipart parsing, disturbs the middleware stack (exception handlers, background tasks), or caps unlimited apps scores 0.0 rather than a partial. Assertions check status codes and endpoint-computed values only, never framework message text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "app_level",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_app_level_limit_rejects_oversized_body -q"
+      },
+      {
+        "name": "route_level",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_route_level_limit -q"
+      },
+      {
+        "name": "mount_level",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_mount_level_limit -q"
+      },
+      {
+        "name": "standalone_middleware",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_standalone_middleware_on_raw_asgi_app -q"
+      },
+      {
+        "name": "streamed_bytes",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_limit_counts_streamed_bytes_not_content_length -q"
+      },
+      {
+        "name": "multipart_counts",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_multipart_upload_counts_toward_limit -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "plain_request",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_plain_request_response_unchanged -q"
+      },
+      {
+        "name": "large_unlimited",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_large_body_without_limit_still_accepted -q"
+      },
+      {
+        "name": "urlencoded_form",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_urlencoded_form_parsing -q"
+      },
+      {
+        "name": "multipart_form",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_multipart_form_parsing_and_file_contents -q"
+      },
+      {
+        "name": "streaming_request",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_streaming_request_body_read_in_chunks -q"
+      },
+      {
+        "name": "streaming_response",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_streaming_response_still_streams -q"
+      },
+      {
+        "name": "handlers_tasks",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_exception_handlers_and_background_tasks -q"
+      },
+      {
+        "name": "mount_routing",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_mounted_app_routing_unchanged -q"
+      },
+      {
+        "name": "default_unlimited",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_no_limit_by_default -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "starlette/applications.py",
+      "starlette/routing.py"
+    ],
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

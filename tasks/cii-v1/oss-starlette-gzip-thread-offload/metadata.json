@@ -1,0 +1,77 @@
+{
+  "id": "oss-starlette-gzip-thread-offload",
+  "category": "feature",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "system",
+  "created": "2026-08-23",
+  "repo_scale": "large",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:starlette-3431",
+  "base_commit": "5567e274c8c4a0811fb3bc602c3b6631571b8e80",
+  "upstream": {
+    "url": "https://github.com/encode/starlette/pull/3410",
+    "issue": "https://github.com/encode/starlette/pull/3415",
+    "commit": "5567e274c8c4a0811fb3bc602c3b6631571b8e80"
+  },
+  "upstream_merged": "2026-08-05",
+  "decontamination_notes": "TRAP TASK \u2014 the first of a deliberate design experiment. Built from a PAIR of real merged starlette PRs: #3410 'Offload large GZip compression' (the feature) and #3415 'Default thread_minimum_size in GZipResponder' (the same maintainer, same day, repairing a regression #3410 shipped with). Both merged 2026-08-05, after the training cutoffs of the models this suite targets; re-check upstream_merged against any newer model's cutoff before reusing. Human-authored by a starlette maintainer (Kludex). The trap: #3410 added the new thread_minimum_size parameter to GZipResponder.__init__ as a REQUIRED keyword-only argument, breaking direct instantiation of that public class; #3415 had to give it a default. So the obvious implementation \u2014 the one upstream itself shipped \u2014 passes every feature test and fails the regression guards, and because a failing guard zeroes the functional score, it earns 0.0 rather than a partial. The gold patch is the corrected final state (both PRs). Verified three ways at build time: BASE 4 f2p fail / 6 guards pass; GOLD 10/10 pass; NAIVE (#3410 as first shipped, simulated by removing the default) 4/4 f2p pass but 2 guards FAIL -> functional 0.0. Base is deliberately the commit AFTER starlette #3411 (zlib.compressobj rework, which also touched gzip.py) so the task is purely #3410+#3415; the gold patch is scoped to starlette/middleware/gzip.py alone. Repo sliced at that base to the starlette package + pyproject + LICENSE; deps from the per-task image vulcanbench/sandbox:starlette-3431 (anyio, httpx, python-multipart; starlette itself absent so PYTHONPATH=. resolves the workspace copy). Coverage: 4 fail_to_pass tests (setting accepted and honored, large-body byte-exact round trip when offloaded, small bodies still compressed inline, streaming responses round trip) each verified failing at base and passing under gold; 6 pass_to_pass guards, of which the first two are the trap (GZipResponder constructible with its historical arguments, with and without compresslevel) and the rest pin minimum_size, accept-encoding negotiation, the Vary header, and default middleware construction. Assertions check response bytes, headers and status only, never framework message text.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "setting_accepted",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_thread_minimum_size_setting_accepted -q"
+      },
+      {
+        "name": "large_offload_roundtrip",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_large_body_compresses_correctly_when_offloaded -q"
+      },
+      {
+        "name": "small_inline",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_small_body_still_compressed_inline -q"
+      },
+      {
+        "name": "streaming_offload",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_streaming_response_offload_round_trips -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "responder_historical_args",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_responder_constructible_with_historical_arguments -q"
+      },
+      {
+        "name": "responder_compresslevel",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_responder_constructible_with_compresslevel -q"
+      },
+      {
+        "name": "middleware_defaults",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_middleware_without_new_setting -q"
+      },
+      {
+        "name": "minimum_size",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_minimum_size_still_skips_small_bodies -q"
+      },
+      {
+        "name": "no_accept_encoding",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_no_compression_without_accept_encoding -q"
+      },
+      {
+        "name": "vary_header",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_vary_header_set -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "entry_paths": [
+      "starlette/middleware/gzip.py"
+    ],
+    "suggested_max_steps": 900,
+    "suggested_timeout_s": 18000
+  }
+}

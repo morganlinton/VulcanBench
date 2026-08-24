@@ -164,3 +164,32 @@ as if they were contamination-free.
 
 Never label a task with provenance you can't stand behind, the benchmark's value
 is its transparency.
+
+
+## Multi-service environments (`metadata.environment`)
+
+A task that needs live services (databases, caches, load generators) ships a
+compose file and declares:
+
+```json
+"environment": {
+  "compose": "compose.yaml",
+  "ready": [{"service": "redis", "cmd": "redis-cli ping", "timeout_s": 60}],
+  "up_timeout_s": 300
+}
+```
+
+Rules the validator enforces:
+
+- publish ports **ephemerally** (`ports: ["6379"]`) — never `"6379:6379"`;
+  the harness resolves the real host ports per run,
+- no `container_name:` — per-run compose projects must not collide,
+- every `ready` probe needs `service` and `cmd` (run via `docker compose
+  exec` until it exits 0).
+
+The harness writes `.vb_services.json` (project name + `{service: {container
+port: host port}}`) into the workspace and gitignores it; the issue text
+should tell the agent to read it, and hidden tests reach services the same
+way. Environment tasks run with `--sandbox local` (the docker sandbox is
+network-disabled) and validate with `--sandbox local` plus host toolchains.
+Template: [`tasks/cii-v2/demo-compose-redis-smoke`](../tasks/cii-v2/demo-compose-redis-smoke).

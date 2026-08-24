@@ -1,0 +1,13 @@
+diff --git a/app.py b/app.py
+index 16d9126..3bc6ba9 100644
+--- a/app.py
++++ b/app.py
+@@ -6,7 +6,7 @@ from pathlib import Path
+ 
+ 
+ def flag_value() -> str:
+-    return "wrong-value"
++    return "expected-42"
+ 
+ 
+ def redis_port() -> int:

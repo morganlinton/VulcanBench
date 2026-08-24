@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Multi-service task environments** (`harness/environment.py`): tasks can
+  declare `metadata.environment` with a docker-compose file and readiness
+  probes. The harness brings the stack up under a unique per-run project
+  before the agent's clock starts, resolves ephemeral published ports into a
+  gitignored `.vb_services.json` in the workspace, and always tears down with
+  `down -v` — in `vulcanbench run` and in task validation (fresh stack per
+  gold/base/determinism run). Validation rejects the isolation footguns
+  (`container_name`, fixed host ports). Environment tasks require
+  `--sandbox local`; the walking-skeleton template is
+  `tasks/cii-v2/demo-compose-redis-smoke`.
+
 - **Coding Intelligence Index v1** (`tasks/cii-v1/`, `--suite cii-v1`): 38 all-new
   gold-verified tasks from post-cutoff OSS PRs (May to Aug 2026) with
   complexity-scaled TB-style budgets; August 2026 frontier results published in

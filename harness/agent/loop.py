@@ -41,6 +41,7 @@ from harness.agent.providers import LLMProvider, get_provider, parse_model_spec,
 from harness.agent.run_audit import audit_run
 from harness.economics import api_receipt, subscription_receipt
 from harness.effort import effort_config
+from harness.environment import start_environment
 from harness.evaluator.evaluate import evaluate_run
 from harness.evaluator.scorer import run_verifier, score_run
 from harness.persistence import maybe_post_run_summary
@@ -129,7 +130,7 @@ class _RunDeadline:
         collector.record("budget_exceeded", payload)
 
 
-def run_agent(
+def run_agent(  # noqa: PLR0915
     task_id: str,
     model: str,
     output_dir: Path = Path("./runs"),
@@ -180,6 +181,14 @@ def run_agent(
     # that declares a metadata "setup" key.
     _run_task_setup(task, workspace, executor, collector)
 
+    # Multi-service environments (metadata "environment") also come up before
+    # the clock starts; teardown is in the finally below.
+    environment = start_environment(task, run_id, workspace, sandbox=sandbox)
+    if environment is not None:
+        collector.record(
+            "environment_up", {"project": environment.project, "services": environment.ports}
+        )
+
     started_at = datetime.now(UTC)
     started_mono = time.monotonic()
     deadline = _RunDeadline(started_mono=started_mono, timeout_s=effective_timeout)
@@ -223,7 +232,9 @@ def run_agent(
         )
     finally:
         # Quality/security/judges run host-side over the mounted workspace and
-        # don't need the container, so tear it down now.
+        # don't need the container or the service stack, so tear both down now.
+        if environment is not None:
+            environment.down()
         close = getattr(executor, "close", None)
         if callable(close):
             close()

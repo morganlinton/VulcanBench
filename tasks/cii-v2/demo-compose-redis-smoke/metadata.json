@@ -1,0 +1,30 @@
+{
+  "id": "demo-compose-redis-smoke",
+  "category": "demo",
+  "languages": ["python"],
+  "difficulty": "trivial",
+  "task_complexity": "localized",
+  "created": "2026-08-24",
+  "repo_scale": "micro",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "Hand-authored walking-skeleton demo for the multi-service environment feature (CII v2 Phase 2). Exists to exercise and document the environment lifecycle end to end: compose up with a unique per-run project, readiness probing, ephemeral published-port resolution into .vb_services.json, verifier connectivity from the host to the service, and deterministic x3 teardown/reup. Not a benchmark task; never add it to a measured suite. It doubles as the template for authoring real environment tasks: note the compose rules (no container_name, no fixed host ports) and the manifest-reading pattern in repo/app.py.",
+  "environment": {
+    "compose": "compose.yaml",
+    "ready": [
+      {"service": "redis", "cmd": "redis-cli ping", "timeout_s": 60}
+    ]
+  },
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {"name": "flag_round_trip", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py -q"}
+    ],
+    "pass_to_pass": [
+      {"name": "manifest", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_manifest_present_with_project -q"},
+      {"name": "redis_ping", "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_redis_answers_ping -q"}
+    ]
+  },
+  "test_timeout_s": 120,
+  "agent_hints": {"suggested_max_steps": 50, "suggested_timeout_s": 300}
+}

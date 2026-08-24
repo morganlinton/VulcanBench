@@ -149,6 +149,13 @@ def task_hash(task: Task) -> str:
         h.update(b"\0")
     h.update(b"issue\0")
     h.update(task.issue.encode())
+    env_spec = task.metadata.get("environment")
+    if isinstance(env_spec, dict) and isinstance(env_spec.get("compose"), str):
+        compose = task.root / env_spec["compose"]
+        if compose.is_file():
+            h.update(b"environment\0")
+            h.update(compose.read_bytes())
+            h.update(b"\0")
     if task.hidden_tests_dir is not None:
         _hash_dir(h, "tests", task.hidden_tests_dir)
     h.update(b"\0tests_spec\0")

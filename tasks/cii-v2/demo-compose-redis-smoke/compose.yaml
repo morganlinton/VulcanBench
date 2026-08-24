@@ -1,0 +1,9 @@
+# Demo environment: a single Redis service with an ephemeral published port.
+# Template rules for environment tasks: no container_name, no fixed host
+# ports — the harness assigns a unique project per run and resolves the
+# published port into the workspace's .vb_services.json.
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379"

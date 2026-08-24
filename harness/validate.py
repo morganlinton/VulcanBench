@@ -29,10 +29,12 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from harness.environment import start_environment
 from harness.sandbox.docker_executor import DockerToolExecutor
 from harness.sandbox.images import resolve_sandbox_image
 from harness.spec_check import WARN as _SPEC_WARN
@@ -177,7 +179,11 @@ def _fresh(
     runner: Runner | None = None
     if opts.sandbox == "docker":
         runner, executor = _docker_runner(task, ws, opts.image)
+    environment = None
     try:
+        environment = start_environment(
+            task, f"val-{name}-{uuid.uuid4().hex[:6]}", ws, sandbox=opts.sandbox
+        )
         if task.setup_commands:
             run_setup(task, ws, runner=runner)
         if apply_gold:
@@ -186,6 +192,8 @@ def _fresh(
                 raise RuntimeError("gold patch did not apply cleanly (git apply failed)")
         return _functional(task, ws, runner=runner)
     finally:
+        if environment is not None:
+            environment.down()
         if executor is not None:
             executor.close()
 

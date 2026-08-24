@@ -1,0 +1,77 @@
+name: Benchmark pull requests
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  benchmark:
+    name: benchmark
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: >
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/benchmark')
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Checkout PR branch (resolve head)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.issue.number }}
+          PR_HEAD=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+          git fetch origin "$PR_HEAD"
+          git checkout "$PR_HEAD"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies (PR)
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -e ".[dev]"
+          make install-devc-release
+
+      - name: Benchmark PR branch
+        run: |
+          source .venv/bin/activate
+          python benchmarks/parse.py --json bench_pr.json --quiet --sqlglot-only
+
+      - name: Checkout main branch
+        run: |
+          git fetch origin main
+          git worktree add main-branch origin/main
+
+      - name: Install dependencies (main)
+        run: |
+          rm -rf .venv
+          python -m venv .venv
+          source .venv/bin/activate
+          cd main-branch
+          pip install -e ".[dev]"
+          make install-devc-release
+
+      - name: Benchmark main branch
+        run: |
+          source .venv/bin/activate
+          cd main-branch
+          python benchmarks/parse.py --json ../bench_main.json --quiet --sqlglot-only
+
+      - name: Compare results
+        run: |
+          source .venv/bin/activate
+          python benchmarks/compare.py bench_main.json bench_pr.json > benchmark_comment.md
+
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body-path: benchmark_comment.md

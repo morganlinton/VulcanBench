@@ -1,0 +1,73 @@
+{
+  "id": "oss-sqlglot-pushdown-semantics",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-24",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "base_commit": "7c561165fad44b1af9008dcdf1d636323a28ef58",
+  "upstream": {
+    "url": "https://github.com/tobymao/sqlglot/commit/ac7b6d92",
+    "issue": "https://github.com/tobymao/sqlglot/pull/8129",
+    "commit": "7c561165fad44b1af9008dcdf1d636323a28ef58"
+  },
+  "upstream_merged": "2026-08-12",
+  "decontamination_notes": "cii-v2 PROTOTYPE #1 of the DIAGNOSIS-FROM-SYMPTOM format (plan phase 1): the issue is an incident-style report of observable wrong results only \u2014 no failing test, no pass or file named, no distilled repro beyond the reporting user's queries \u2014 and the domain (SQL semantics) defines ground truth mathematically, so a symptom-only spec is still a complete spec. No oracle exists in the sandbox: there is no database to execute against, so the model must REASON about multiset/grouping semantics rather than differential-test. Upstream provenance: sqlglot commit ac7b6d92 by the maintainer (George Sittas, 2026-08-12, direct commit): projection pushdown pruned columns from INTERSECT/EXCEPT ALL operands (changing multiset row-equality) and from GROUP BY ALL scopes (changing the implicit grouping keys derived from the SELECT list) \u2014 silent result corruption in both families. Base is the commit's direct parent (which already includes the related human fix #8121); gold is the single-commit single-file diff. BUILD FORENSICS worth keeping: the initially mined candidate for this bug family (#8129, merged later) does NOT reproduce corruption at its own merge base \u2014 ac7b6d92 had already landed the blanket keep-everything fix by then, making #8129 a pure optimization refinement; always re-verify that the corruption exists AT THE CHOSEN BASE in-image, and prefer the commit that actually introduced the semantic change. The #8121 shadowed-clause-column family does not manifest through the public optimize() surface in this image (probed both ways) and is deliberately not graded. Grading is via STRUCTURAL PROPERTIES of the optimized parse tree (which projections survive in aggregation scopes and set-operation operands), never exact SQL text, so any semantics-preserving optimization passes. Verified three ways: BASE 4 f2p fail / 6 guards pass; GOLD 10/10; LAZY-FIX (pushdown disabled entirely) passes all f2p but fails the pruning guards -> functional 0.0. Guards pin legitimate pruning (plain subqueries, outer filters, explicit GROUP BY with unused projections), INTERSECT DISTINCT behavior, and plain-aggregate round trips, all verified base==gold. Per the v2 charter: no fix-location hints; agent_hints carries budgets only.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "gball_keys_survive",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_group_by_all_keeps_its_implicit_grouping_keys -q"
+      },
+      {
+        "name": "gball_rollup",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_group_by_all_rollup_totals_unchanged -q"
+      },
+      {
+        "name": "intersect_all",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_intersect_all_operands_keep_their_columns -q"
+      },
+      {
+        "name": "except_all",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_except_all_operands_keep_their_columns -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "plain_pruning",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_unused_columns_are_still_pruned_from_plain_subqueries -q"
+      },
+      {
+        "name": "filtered_pruning",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_unused_columns_pruned_when_outer_filters -q"
+      },
+      {
+        "name": "intersect_distinct",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_intersect_distinct_still_prunes_nothing_extra_is_kept -q"
+      },
+      {
+        "name": "plain_aggregate",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_plain_aggregate_roundtrip_unchanged -q"
+      },
+      {
+        "name": "used_aggregation",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_fully_used_aggregation_subquery_unchanged -q"
+      },
+      {
+        "name": "explicit_gb_pruning",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_explicit_group_by_still_allows_pruning_unused_projections -q"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

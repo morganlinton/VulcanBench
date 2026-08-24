@@ -1,0 +1,70 @@
+{
+  "id": "oss-zod-fromjsonschema-epic",
+  "category": "bugfix",
+  "languages": [
+    "typescript"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "system",
+  "created": "2026-08-24",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": true,
+  "image": "vulcanbench/sandbox:node-ts",
+  "base_commit": "e8034ebafe9dcd4be0af6e7b90f324fafaaa0324",
+  "upstream": {
+    "url": "https://github.com/colinhacks/zod/pull/6411",
+    "issue": "https://github.com/colinhacks/zod/pull/6020",
+    "commit": "e8034ebafe9dcd4be0af6e7b90f324fafaaa0324"
+  },
+  "upstream_merged": "2026-08-17",
+  "decontamination_notes": "cii-v2 PROTOTYPE #2 of the SUBSYSTEM-EPIC format (plan phase 1, horizon/breadth lever): composes FIVE human-authored fixes to zod's fromJSONSchema subsystem, all merged 2026-08-13..17, all touching the single file packages/zod/src/v4/classic/from-json-schema.ts \u2014 #6020 (tuples open-ended by default, author mneetika), #6402 ($ref JSON Pointer token unescaping, colinhacks), #6411 (propertyNames composition, colinhacks, +218 the largest), #6305 (hostname format, catdalfonso), #6022 (draft-04 exclusive-range redundancy, francisjohnjohnston-web) plus one comment-style chore in the range. Base is deliberately AFTER the two app/pullfrog PRs (#6199, #6201) touching the same file \u2014 pullfrog is an AI PR bot, excluded by the AI-authorship policy; their fixes are base state and are PINNED AS GUARDS (minItems/prefixItems, additionalProperties:false with patternProperties) rather than graded. Window verified: every commit touching the file in base..73bacbbb is one of the six listed. Four of the five composed fixes are behavior-divergent in-image and graded (tuples, $ref escapes, propertyNames both directions, hostname); the draft-04 fix is behavior-invisible at the accept/reject level (it removes an internally redundant inclusive bound) \u2014 it rides along in gold ungraded, and its observable semantics are pinned as a guard verified base==gold. The epic hypothesis under test: breadth (four distinct JSON-Schema-semantics families in one run) slows frontier models where single-fix tasks do not. Issue is a conformance-audit report enumerating observable failures only \u2014 no file or function named (though the subsystem is inherently identified by the API under audit). Assertions are runtime parse accept/reject behavior only, never message text. agent_hints carries budgets only.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "tuples_open_ended",
+        "cmd": "tsx --test --test-name-pattern='vb prefixItems tuples are open-ended unless items forbids extras' oss_tests.test.ts"
+      },
+      {
+        "name": "ref_pointer_unescape",
+        "cmd": "tsx --test --test-name-pattern='vb .ref resolves JSON Pointer escaped tokens' oss_tests.test.ts"
+      },
+      {
+        "name": "propertynames_composition",
+        "cmd": "tsx --test --test-name-pattern='vb propertyNames is enforced and composes with other object keywords' oss_tests.test.ts"
+      },
+      {
+        "name": "hostname_format",
+        "cmd": "tsx --test --test-name-pattern='vb hostname format is validated' oss_tests.test.ts"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "minitems_prefixitems",
+        "cmd": "tsx --test --test-name-pattern='vb minItems with prefixItems is respected' reg_tests.test.ts"
+      },
+      {
+        "name": "addprops_pattern",
+        "cmd": "tsx --test --test-name-pattern='vb additionalProperties false respects patternProperties' reg_tests.test.ts"
+      },
+      {
+        "name": "basics_unchanged",
+        "cmd": "tsx --test --test-name-pattern='vb plain refs, objects and numeric bounds are unchanged' reg_tests.test.ts"
+      },
+      {
+        "name": "datetime_offsets",
+        "cmd": "tsx --test --test-name-pattern='vb date-time accepts RFC 3339 numeric offsets' reg_tests.test.ts"
+      },
+      {
+        "name": "draft4_exclusive",
+        "cmd": "tsx --test --test-name-pattern='vb draft-04 boolean exclusive bounds behave as exclusive' reg_tests.test.ts"
+      }
+    ]
+  },
+  "test_timeout_s": 300,
+  "agent_hints": {
+    "suggested_max_steps": 1350,
+    "suggested_timeout_s": 27000
+  }
+}

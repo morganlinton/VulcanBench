@@ -6,6 +6,7 @@ Panel 3: effort-curve cards per swept model.
 """
 
 import json
+import math
 from pathlib import Path
 
 import matplotlib
@@ -43,6 +44,9 @@ LAB_COLOR = {
     "xAI": "#0A0A0A",
     "Moonshot": "#44445E",
     "DeepSeek": "#5786FE",
+    # Qwen's official violet (#6950EF) sits ΔE 12 from DeepSeek's blue — below
+    # the readability floor — so this deepened violet stands in for it.
+    "Alibaba": "#9333EA",
 }
 
 NAME = {
@@ -54,6 +58,12 @@ NAME = {
     "anthropic:claude-opus-5": ("Claude Opus 5", "Anthropic"),
     "deepseek:deepseek-v4-flash": ("DeepSeek V4-Flash", "DeepSeek"),
     "kimi:kimi-k3": ("Kimi K3", "Moonshot"),
+    "qwen:qwen3.8-max": ("Qwen3.8-Max", "Alibaba"),
+    "qwen:qwen3.8-27b": ("Qwen3.8-27B", "Alibaba"),
+    "xai:grok-4.6": ("Grok 4.6", "xAI"),
+    "openai:gpt-5.6-terra": ("GPT-5.6 Terra", "OpenAI"),
+    "openai:gpt-5.6-luna": ("GPT-5.6 Luna", "OpenAI"),
+    "deepseek:deepseek-v4-pro": ("DeepSeek V4 Pro", "DeepSeek"),
 }
 
 
@@ -68,10 +78,14 @@ def darken(hex_color: str, f: float) -> tuple:
 
 
 def eff_display(model: str, eff: str) -> str:
+    """Label an effort with the provider's own name for it."""
     if eff == "—":
         return "default"
-    if model.startswith("deepseek:") and eff == "extra-high":
-        return "max"
+    if eff == "extra-high":
+        if model.startswith("deepseek:"):
+            return "max"
+        if model.startswith("qwen:"):
+            return "xhigh"
     return eff
 
 
@@ -80,16 +94,16 @@ with open(HERE / "v3_rankings.json") as f:
 rows = [r for r in rows if r["model"] != "anthropic:claude-opus-4-8"]
 rows.sort(key=lambda r: (-r["pass1"], r["cost"]))
 
-fig = plt.figure(figsize=(16, 21), facecolor=SURFACE)
+fig = plt.figure(figsize=(16, 30), facecolor=SURFACE)
 gs = fig.add_gridspec(
-    3,
+    4,
     1,
-    height_ratios=[1.1, 0.72, 1.0],
+    height_ratios=[1.1, 0.72, 0.72, 2.55],
     hspace=0.78,
     left=0.065,
     right=0.955,
-    top=0.884,
-    bottom=0.062,
+    top=0.9,
+    bottom=0.085,
 )
 
 LOGOS = {lab: plt.imread(str(HERE / f"logos/{lab}.png")) for lab in LAB_COLOR}
@@ -110,7 +124,7 @@ def draw_bars(ax, bar_rows, values, val_fmt, ymax, ytick_step, ylabel, errs=None
             (x - W / 2, 0),
             W,
             v,
-            boxstyle="round,pad=0,rounding_size=0.28",
+            boxstyle=f"round,pad=0,rounding_size={ymax * 0.0026:.4f}",
             mutation_aspect=v / (ymax * 0.14),
             facecolor="none",
             edgecolor="none",
@@ -222,7 +236,7 @@ fig.text(
     0.9424,
     "23 frontier-hard software-engineering tasks from real merged OSS PRs  ·  "
     "pass@1 across reasoning-effort levels  ·  Docker-sandboxed agent runs  ·  "
-    "2026-08-01",
+    "2026-08-23",
     fontsize=11.5,
     color=INK2,
     family=SANS,
@@ -303,11 +317,40 @@ ax2.set_title(
     family=BRAND_MED,
 )
 
+# ---------------- Panel 3: avg cost per task run, lowest first ----------------
+ax3 = fig.add_subplot(gs[2])
+ax3.set_facecolor(SURFACE)
+crows = sorted(rows, key=lambda r: r["cost"] / r["n_runs"])
+cvals = [r["cost"] / r["n_runs"] for r in crows]
+labels3 = []
+for r in crows:
+    disp, _ = NAME[r["model"]]
+    partial = "*" if r["n_tasks"] < 23 else ""
+    labels3.append(f"{disp} ({eff_display(r['model'], r['effort'])}){partial}")
+cmax = max(cvals) * 1.22
+draw_bars(ax3, crows, cvals, lambda v: f"${v:.2f}", cmax, 1, "$ / task run")
+ax3.set_xticklabels(
+    labels3, rotation=42, ha="right", rotation_mode="anchor", fontsize=9.5, color=INK2, family=SANS
+)
+ax3.set_title(
+    "Cost — avg API spend per task run, lowest first",
+    loc="left",
+    fontsize=16,
+    color=INK,
+    pad=16,
+    family=BRAND_MED,
+)
 
-# ---------------- Panel 3: effort-curve cards ----------------
+
+# ---------------- Panel 4: effort-curve cards ----------------
 def model_efforts(model: str) -> list[str]:
+    """The provider's own effort ladder, low to high."""
     if model.startswith("deepseek:"):
-        return ["low", "high", "extra-high"]
+        return ["low", "high", "extra-high"]  # DeepSeek: low/high/max
+    if model.startswith("qwen:"):
+        return ["low", "medium", "extra-high"]  # Qwen: low/medium/xhigh
+    if model == "xai:grok-4.6":
+        return ["low", "medium", "high", "xhigh"]  # Grok 4.6 adds xhigh
     return ["low", "medium", "high"]
 
 
@@ -318,13 +361,22 @@ for r in rows:
 swept = [m for m, effs in by_model.items() if len(effs) >= 2]
 swept.sort(key=lambda m: -max(e["pass1"] for e in by_model[m].values()))
 
-gs2 = gs[2].subgridspec(1, len(swept), wspace=0.16)
+NCOL = 4
+nrow = math.ceil(len(swept) / NCOL)
+gs2 = gs[3].subgridspec(nrow, NCOL, wspace=0.16, hspace=0.52)
 CARD = "#f6f5f1"
 CARD_EDGE = "#e8e6df"
-Y0, Y1 = 73, 97
+# Cards share one y-scale so their shapes stay comparable; the floor follows
+# the lowest point (with room for its whisker) instead of clipping it.
+_card_lows = [(e["pass1"] - (e.get("se") or 0)) * 100 for m in swept for e in by_model[m].values()]
+_card_highs = [(e["pass1"] + (e.get("se") or 0)) * 100 for m in swept for e in by_model[m].values()]
+Y0 = min(73, 5 * math.floor((min(_card_lows) - 2) / 5))
+# Keep the top point under ~85% of the card so the header row stays clear.
+Y1 = max(97, Y0 + (max(_card_highs) - Y0) / 0.84)
+_card_ticks = list(range(int(math.ceil(Y0 / 5) * 5), int(max(_card_highs)) + 1, 5))
 first_card = None
 for k, model in enumerate(swept):
-    axc = fig.add_subplot(gs2[k])
+    axc = fig.add_subplot(gs2[k // NCOL, k % NCOL])
     if first_card is None:
         first_card = axc
     axc.set_facecolor("none")
@@ -442,14 +494,19 @@ for k, model in enumerate(swept):
         va="center",
     )
 
-    tick_names = {"low": "Low", "medium": "Med", "high": "High", "extra-high": "Max"}
-    axc.set_xlim(-0.42, 2.42)
+    tick_names = {"low": "Low", "medium": "Med", "high": "High"}
+    axc.set_xlim(-0.42, len(EFFORTS) - 1 + 0.42)
     axc.set_ylim(Y0, Y1)
     axc.set_xticks(range(len(EFFORTS)))
-    axc.set_xticklabels([tick_names[e] for e in EFFORTS], fontsize=10.5, color=INK2, family=SANS)
+    axc.set_xticklabels(
+        [tick_names.get(e, eff_display(model, e).capitalize()) for e in EFFORTS],
+        fontsize=10.5,
+        color=INK2,
+        family=SANS,
+    )
     axc.grid(axis="y", color="#dddbd3", linewidth=0.8, linestyle=(0, (1, 4)), zorder=0)
-    axc.set_yticks([75, 80, 85, 90, 95])
-    if k == 0:
+    axc.set_yticks(_card_ticks)
+    if k % NCOL == 0:
         axc.tick_params(axis="y", labelsize=9.5, colors=MUTED, length=0)
         axc.set_ylabel("pass@1 (%)", fontsize=10.5, color=INK2, family=SANS)
     else:
@@ -472,20 +529,29 @@ fig.text(
 # ---------------- Footnote ----------------
 fig.text(
     0.065,
-    0.044,
+    0.062,
     "* partial coverage — Claude Fable 5 excludes tasks refused by safety filters "
-    "(low 19/23, medium 21/23, high 20/23); Kimi K3 19/23; Claude Haiku 4.5 21/23. "
-    "Claude Opus 4.8 omitted (5/23 tasks).\n"
+    "(low 19/23, medium 21/23, high 20/23); Kimi K3 19/23; Claude Haiku 4.5 21/23; "
+    "Grok 4.5 low has 21/23 fresh tasks; Claude Opus 4.8 omitted (5/23 tasks).\n"
     "Claude Opus 5 columns are from vulcanbench.com Report 10 (single runs, "
-    "2026-07-26); 4 of its 5 high-effort failures were wall-clock timeouts. "
-    "Haiku 4.5 (default) and Kimi K3 (extra-high) have no effort sweep.\n"
+    "2026-07-26); 4 of its 5 high-effort failures were wall-clock timeouts. Haiku "
+    "4.5 (default) and Kimi K3 (extra-high) have no effort sweep.\n"
     "DeepSeek's effort scale is low/high/max per its API; an accidental duplicate "
-    "high run (its API coerces 'medium' to high) is excluded. DeepSeek and Grok 4.5 "
-    "columns aggregate 3 runs/task (repeat sweeps).\n"
+    "high run (its API coerces 'medium' to high) is excluded. Qwen's scale is "
+    "low/medium/xhigh (no 'high').\n"
+    "Grok 4.6 columns are a single pass (repeat 1, 2026-08-12) on xAI's API; its "
+    "effort scale is low/medium/high/xhigh and its unset-effort default is high. "
+    "xhigh is likewise the shipped default for the Qwen 3.8 family.\n"
+    "Repeat-swept models aggregate all fresh runs as per-task means; exact run "
+    "counts are shown on labels. GPT-5.6 Terra and Luna each have 3 runs/task at "
+    "low/medium/high; their 'max' columns are partial single sweeps.\n"
+    "Five Qwen3.8-Max xhigh runs on 3 tasks were lost to 600s API read timeouts "
+    "and are excluded rather than scored 0. Qwen3.8-27B columns are from Report 17 "
+    "(2026-08-21): one pass per level, low aggregates 3 runs, times are medians.\n"
     "Whiskers are ±1 stderr — single-pass columns (n=23 runs or fewer) carry wider "
     "uncertainty than repeat-swept ones (n=52-71). Cost = total spend at list API "
-    "prices across a column's runs. Time = sandbox wall-clock. "
-    "github.com/morganlinton/VulcanBench",
+    "prices across a column's runs; avg $/task run = column cost ÷ n.\n"
+    "Time = sandbox wall-clock. github.com/morganlinton/VulcanBench",
     fontsize=9,
     color=MUTED,
     ha="left",

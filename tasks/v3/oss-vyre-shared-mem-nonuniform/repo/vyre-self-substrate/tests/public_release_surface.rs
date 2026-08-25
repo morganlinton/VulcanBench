@@ -1,0 +1,196 @@
+//! External public-surface integration coverage for self-substrate release,
+//! evidence, and quality gates.
+//!
+//! The organization tests prove files are in the right directories. This test
+//! proves those gates remain usable from an external crate path, which catches
+//! accidental privatization, missing `pub mod` wiring, and broken re-exports.
+
+fn assert_public_type<T: 'static>() {
+    let name = std::any::type_name::<T>();
+    assert!(
+        name.starts_with("vyre_self_substrate::"),
+        "Fix: public surface type must resolve through vyre_self_substrate, got {name}"
+    );
+}
+
+fn assert_public_symbol<T>(_symbol: T) {}
+
+#[test]
+fn release_gate_surface_is_consumer_visible() {
+    assert_public_type::<
+        vyre_self_substrate::release::release_checklist_gate::ReleaseChecklistEvidence<'static>,
+    >();
+    assert_public_type::<vyre_self_substrate::release::release_checklist_gate::ReleaseChecklistProof>(
+    );
+    assert_public_type::<
+        vyre_self_substrate::release::release_completion_audit::ReleaseCompletionAuditProof,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::release::release_gap_findings::ReleaseGapFinding<'static>,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::release::release_gpu_evidence::ReleaseGpuEvidence<'static>,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::release::release_launch_sequence::ReleaseLaunchStep<'static>,
+    >();
+    assert_public_type::<vyre_self_substrate::release::release_scope_docs::ReleaseScopeDoc<'static>>(
+    );
+    assert_public_type::<
+        vyre_self_substrate::release::release_validation_matrix::ReleaseValidationCommand,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::release::release_validation_matrix::ReleaseValidationStep,
+    >();
+
+    assert_public_symbol(
+        vyre_self_substrate::release::release_checklist_gate::validate_release_checklist,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_checklist_gate::validate_release_evidence_run,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_completion_audit::validate_release_completion_audit,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_gap_findings::validate_release_gap_findings,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_gap_findings::validate_release_gap_suite_artifact,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_gpu_evidence::validate_release_gpu_evidence,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_gpu_evidence::validate_release_cuda_megakernel_artifact,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_gpu_evidence::validate_release_cuda_suite_artifacts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_launch_sequence::validate_release_launch_sequence,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_launch_sequence::validate_release_tag_plan_artifact,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_launch_sequence::validate_release_launch_receipts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_scope_docs::validate_release_scope_docs,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_scope_docs::validate_committed_release_scope_artifacts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_validation_matrix::validate_release_validation_matrix,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::release::release_validation_matrix::release_validation_execution_plan,
+    );
+    assert_eq!(
+        vyre_self_substrate::release::release_validation_matrix::GPU_PROBE_COMMAND,
+        "nvidia-smi",
+        "Fix: release validation must probe the real GPU path loudly."
+    );
+}
+
+#[test]
+fn evidence_and_quality_gate_surface_is_consumer_visible() {
+    assert_public_type::<
+        vyre_self_substrate::evidence::benchmark_baselines::ReleaseBenchmarkBaseline,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::evidence::benchmark_baselines::ReleaseBenchmarkArtifact<'static>,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::evidence::c_parser_benchmark_evidence::CParserBenchmarkEvidenceProof,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::evidence::cuda_ptx_pattern_evidence::CudaPtxPatternEvidenceProof,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::evidence::optimization_release_evidence::OptimizationReleaseEvidenceProof,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::quality::allocation_regression::AllocationRegressionSample<'static>,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::quality::architecture_boundary_map::ArchitectureBoundary<'static>,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::quality::contributor_module_map::ContributorModuleMapEntry<'static>,
+    >();
+    assert_public_type::<
+        vyre_self_substrate::quality::crate_metadata_readiness::CrateMetadataRecord<'static>,
+    >();
+    assert_public_type::<vyre_self_substrate::quality::deep_review_gate::DeepReviewRecord<'static>>(
+    );
+    assert_public_type::<vyre_self_substrate::quality::public_api_boundary::PublicApiExport<'static>>(
+    );
+    assert_public_type::<
+        vyre_self_substrate::quality::public_api_doctest_gate::PublicApiDoctestRecord<'static>,
+    >();
+
+    assert_public_symbol(
+        vyre_self_substrate::evidence::benchmark_baselines::validate_release_benchmark_baselines,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::evidence::benchmark_baselines::validate_committed_benchmark_artifacts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::evidence::c_parser_benchmark_evidence::validate_c_parser_benchmark_evidence,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::evidence::cuda_ptx_pattern_evidence::validate_cuda_ptx_pattern_evidence,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::evidence::optimization_release_evidence::validate_optimization_release_evidence,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::allocation_regression::validate_allocation_regression,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::allocation_regression::validate_allocation_regression_artifacts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::architecture_boundary_map::validate_architecture_boundary_map,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::architecture_boundary_map::validate_committed_architecture_boundary_artifacts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::contributor_module_map::validate_contributor_module_map,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::contributor_module_map::validate_committed_contributor_modularization_artifact,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::crate_metadata_readiness::validate_crate_metadata_readiness,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::crate_metadata_readiness::validate_metadata_matrix_artifact,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::crate_metadata_readiness::validate_publish_receipt_artifact,
+    );
+    assert_public_symbol(vyre_self_substrate::quality::deep_review_gate::validate_deep_review_gate);
+    assert_public_symbol(
+        vyre_self_substrate::quality::deep_review_gate::validate_deep_review_hygiene_artifacts,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::deep_review_gate::validate_deep_review_ledger_artifact,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::public_api_boundary::validate_public_api_boundary,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::public_api_boundary::validate_public_api_source_boundaries,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::public_api_doctest_gate::validate_public_api_doctests,
+    );
+    assert_public_symbol(
+        vyre_self_substrate::quality::public_api_doctest_gate::validate_public_api_docs_artifacts,
+    );
+}

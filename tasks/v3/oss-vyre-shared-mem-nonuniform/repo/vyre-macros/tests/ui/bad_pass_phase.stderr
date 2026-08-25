@@ -1,0 +1,5 @@
+error: unsupported pass phase. Fix: use unclassified, canonicalization, scalar_algebra, loop, memory, fusion_cse, sync, specialization, cleanup, dataflow, or megakernel.
+ --> tests/ui/bad_pass_phase.rs:7:13
+  |
+7 |     phase = "definitely_not_a_phase"
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^

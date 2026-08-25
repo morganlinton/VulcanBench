@@ -1,0 +1,5 @@
+schema_version = 1
+contract = "vyre-kernel-family-schedule:v1"
+family_id = "lower.rewrites"
+stage_order = ["normalize", "rewrite", "verify", "evidence"]
+evidence_policy = "write-rewrite-layer-contract"

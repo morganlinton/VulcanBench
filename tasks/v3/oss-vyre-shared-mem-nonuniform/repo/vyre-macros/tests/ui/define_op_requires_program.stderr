@@ -1,0 +1,13 @@
+error: unexpected end of input, missing `program = ...`. Fix: provide an expression that builds a vyre Program.
+  --> tests/ui/define_op_requires_program.rs:3:1
+   |
+3  | / define_op! {
+4  | |     id = "test.missing_program",
+5  | |     dialect = "test",
+6  | |     category = A,
+...  |
+9  | |     laws = [],
+10 | | }
+   | |_^
+   |
+   = note: this error originates in the macro `define_op` (in Nightly builds, run with -Z macro-backtrace for more info)

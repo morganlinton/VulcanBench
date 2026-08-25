@@ -1,0 +1,76 @@
+# vyre-bench competitor matrix
+#
+# Each [[competitor]] entry declares a CPU-SOTA baseline implementation
+# that is run alongside the GPU kernel for apples-to-apples comparison.
+# Versions are pinned to reproducible commits/tags.
+
+[[competitor]]
+name = "hashbrown"
+crate = "hashbrown"
+version = "=0.17.0"
+workloads = ["hashtable.openaddr.probe.10m"]
+license = "MIT OR Apache-2.0"
+
+[[competitor]]
+name = "memchr"
+crate = "memchr"
+version = "=2.7.4"
+workloads = ["foundation.dfa_match.256k"]
+license = "MIT OR Unlicense"
+
+[[competitor]]
+name = "simdjson"
+crate = "simdjson-rust"
+git = "https://github.com/SunDoge/simdjson-rust"
+rev = "v0.3.0"
+workloads = ["parser.json.simdjson_corpus"]
+license = "Apache-2.0"
+
+[[competitor]]
+name = "pest"
+crate = "pest"
+version = "=2.7.13"
+workloads = ["parser.peg.json_path"]
+license = "MIT OR Apache-2.0"
+
+[[competitor]]
+name = "pcre2"
+crate = "pcre2"
+version = "=0.2.11"
+workloads = ["regex.backtracking.adversarial"]
+license = "MIT OR Apache-2.0"
+
+[[competitor]]
+name = "re2"
+crate = "re2"
+version = "=0.2.0"
+workloads = ["regex.compiled.dense_dfa.10k"]
+license = "BSD-3-Clause"
+
+[[competitor]]
+name = "petgraph"
+crate = "petgraph"
+version = "=0.6.5"
+workloads = ["graph.dijkstra.priority_queue.1m", "graph.tarjan_scc.1m"]
+license = "MIT OR Apache-2.0"
+
+[[competitor]]
+name = "lz4"
+crate = "lz4"
+version = "=1.28.1"
+workloads = ["compress.lz4.decompress.100mb"]
+license = "MIT"
+
+[[competitor]]
+name = "openssl"
+crate = "openssl"
+version = "=0.10.78"
+workloads = ["crypto.aes_ctr.encrypt.10mb"]
+license = "Apache-2.0"
+
+[[competitor]]
+name = "rug"
+crate = "rug"
+version = "=1.27.0"
+workloads = ["bigint.modexp.4096"]
+license = "LGPL-3.0-or-later"

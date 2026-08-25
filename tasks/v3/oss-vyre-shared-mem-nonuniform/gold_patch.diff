@@ -1,0 +1,152 @@
+diff --git a/vyre-lower/src/rewrites/shared_mem_promote/mod.rs b/vyre-lower/src/rewrites/shared_mem_promote/mod.rs
+index a591bb7..2b3202e 100644
+--- a/vyre-lower/src/rewrites/shared_mem_promote/mod.rs
++++ b/vyre-lower/src/rewrites/shared_mem_promote/mod.rs
+@@ -53,6 +53,8 @@ pub fn shared_mem_promote(desc: &KernelDescriptor) -> KernelDescriptor {
+         desc.dispatch.workgroup_size[0].max(1),
+         &mut next_slot,
+         &mut shared_slots,
++        // The kernel entry body is reached by every workgroup lane: uniform.
++        true,
+     );
+     if !changed {
+         return desc.clone();
+@@ -80,14 +82,22 @@ fn rewrite_body(
+     workgroup_x: u32,
+     next_slot: &mut u32,
+     shared_slots: &mut Vec<BindingSlot>,
++    // True iff this body is reached by EVERY workgroup lane (uniform control
++    // flow). The promotion inserts a per-workgroup cooperative async tile-copy
++    // plus a workgroup `Barrier`; those may only appear in uniform flow. Inside
++    // a conditional `if`/loop body the barrier is reached by only the subset of
++    // lanes that took the branch — illegal non-uniform control flow that
++    // deadlocks/UBs on every GPU backend (WGSL/CUDA/SPIR-V).
++    uniform: bool,
+ ) -> bool {
+-    let candidates = collect_candidates(body, bindings);
+     let mut changed = false;
+-    let mut prefix = Vec::new();
+-    let mut waits = Vec::new();
+-    let mut replacements = BTreeMap::<usize, (u32, u32)>::new();
+-    let mut allocator = ResultAllocator::for_body_tree(body);
+-    let mut first_replaced_op = usize::MAX;
++    if uniform {
++        let candidates = collect_candidates(body, bindings);
++        let mut prefix = Vec::new();
++        let mut waits = Vec::new();
++        let mut replacements = BTreeMap::<usize, (u32, u32)>::new();
++        let mut allocator = ResultAllocator::for_body_tree(body);
++        let mut first_replaced_op = usize::MAX;
+ 
+     for candidate in candidates {
+         let Some(source_binding) = bindings
+@@ -189,8 +199,39 @@ fn rewrite_body(
+         body.ops = prefix;
+     }
+ 
+-    for child in &mut body.child_bodies {
+-        changed |= rewrite_body(child, bindings, workgroup_x, next_slot, shared_slots);
++    }
++
++    // Recurse, but uniformity is preserved ONLY through unconditional grouping
++    // (`StructuredBlock` / `Region`, which carry no per-lane condition). A child
++    // body referenced by `StructuredIfThen` / `StructuredIfThenElse` /
++    // `StructuredForLoop` is entered under a per-lane predicate, so it is
++    // non-uniform and must not host a cooperative copy/barrier.
++    let mut child_uniform = vec![false; body.child_bodies.len()];
++    if uniform {
++        for op in &body.ops {
++            let grouped_child = match op.kind {
++                KernelOpKind::StructuredBlock | KernelOpKind::Region { .. } => {
++                    op.operands.first().copied()
++                }
++                _ => None,
++            };
++            if let Some(child_index) = grouped_child {
++                if let Some(slot) = child_uniform.get_mut(child_index as usize) {
++                    *slot = true;
++                }
++            }
++        }
++    }
++
++    for (child_index, child) in body.child_bodies.iter_mut().enumerate() {
++        changed |= rewrite_body(
++            child,
++            bindings,
++            workgroup_x,
++            next_slot,
++            shared_slots,
++            child_uniform[child_index],
++        );
+     }
+ 
+     changed
+@@ -323,6 +364,67 @@ mod tests {
+         }
+     }
+ 
++    /// Regression: repeated global loads sitting inside a conditionally-executed
++    /// body (the universal bounds-guard `if gid < n { x = load(g, gid); y =
++    /// load(g, gid); }`) must NOT be promoted. Promotion inserts a per-workgroup
++    /// cooperative async copy + a workgroup `Barrier`; a workgroup barrier in
++    /// non-uniform control flow is illegal in every GPU model (WGSL/CUDA/SPIR-V)
++    /// and deadlocks/UBs — only lanes that enter the `if` would reach the
++    /// barrier. The promotion must be confined to workgroup-uniform bodies.
++    #[test]
++    fn does_not_insert_cooperative_ops_into_conditionally_executed_body() {
++        let input = KernelDescriptor {
++            id: "guarded".into(),
++            bindings: BindingLayout {
++                slots: vec![binding(0, DataType::U32, BindingVisibility::ReadOnly)],
++            },
++            dispatch: Dispatch::new(32, 1, 1),
++            body: KernelBody {
++                ops: vec![
++                    op(KernelOpKind::Literal, vec![0], Some(0)),
++                    // if (cond) { child_bodies[0] }
++                    op(KernelOpKind::StructuredIfThen, vec![0, 0], None),
++                ],
++                child_bodies: vec![KernelBody {
++                    ops: vec![
++                        op(KernelOpKind::GlobalInvocationId, vec![0], Some(1)),
++                        op(KernelOpKind::LoadGlobal, vec![0, 1], Some(2)),
++                        op(KernelOpKind::LoadGlobal, vec![0, 1], Some(3)),
++                    ],
++                    child_bodies: vec![],
++                    literals: vec![],
++                }],
++                literals: vec![LiteralValue::U32(1)],
++            },
++        };
++
++        let output = shared_mem_promote(&input);
++
++        let conditional_body = &output.body.child_bodies[0];
++        let illegal: Vec<_> = conditional_body
++            .ops
++            .iter()
++            .filter(|op| {
++                matches!(
++                    op.kind,
++                    KernelOpKind::Barrier { .. }
++                        | KernelOpKind::AsyncLoad { .. }
++                        | KernelOpKind::AsyncWait { .. }
++                )
++            })
++            .map(|op| op.kind.clone())
++            .collect();
++        assert!(
++            illegal.is_empty(),
++            "shared_mem_promote inserted cooperative ops {illegal:?} into a \
++             conditionally-executed (StructuredIfThen) body: a workgroup Barrier / \
++             cp.async in non-uniform control flow is illegal and deadlocks/UBs on GPU. \
++             Promotion must be confined to workgroup-uniform bodies. Conditional body \
++             now has {} ops (was 3).",
++            conditional_body.ops.len()
++        );
++    }
++
+     #[test]
+     fn promotes_repeated_global_x_u32_loads() {
+         let input = kernel(

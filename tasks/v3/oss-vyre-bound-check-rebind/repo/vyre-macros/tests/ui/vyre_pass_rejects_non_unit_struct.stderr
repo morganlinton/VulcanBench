@@ -1,0 +1,5 @@
+error: #[vyre_pass] supports only unit structs. Fix: move pass state into explicit scheduler/context storage and declare the pass as `pub struct PassName;`.
+ --> tests/ui/vyre_pass_rejects_non_unit_struct.rs:4:12
+  |
+4 | pub struct BadStatefulPass {
+  |            ^^^^^^^^^^^^^^^

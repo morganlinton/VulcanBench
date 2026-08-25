@@ -1,0 +1,81 @@
+{
+  "id": "oss-vyre-bound-check-rebind",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-07-19",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "39749dc4b4041eda8a961214ed6a85a647f6176e",
+  "upstream": {
+    "url": "https://github.com/santhreal/vyre",
+    "issue": "https://github.com/santhreal/vyre/commit/a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b",
+    "commit": "a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b"
+  },
+  "decontamination_notes": "Real bug fix from santhreal/vyre commit a9fc3ba (2026-06-22), after model training cutoffs. loop_redundant_bound_check_elide matched guards by induction-variable name and dropped a real bounds check after let/assign rebound the loop var. Fix gates elision on induction stability; upstream also consolidates rebind helpers across loop passes. Full workspace slice at the parent commit. LICENSE preserved. Hidden tests: 4 fail_to_pass (Let/Assign/nested-If rebind + store stays guarded) and 8 pass_to_pass (stable elision, unrelated-name, cross-pass skip surfaces).",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "let_rebind",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_keeps_guard_after_let_rebind"
+      },
+      {
+        "name": "assign_rebind",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_keeps_guard_after_assign_rebind"
+      },
+      {
+        "name": "nested_if_rebind",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_keeps_guard_when_rebind_is_nested_inside_if"
+      },
+      {
+        "name": "store_guarded",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind rebind_keeps_store_under_if"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "still_elides",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind still_elides_true_redundant_guard_on_stable_induction"
+      },
+      {
+        "name": "unrelated_let_elides",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind elide_still_fires_when_unrelated_name_is_bound"
+      },
+      {
+        "name": "range_fold",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind range_fold_skips_when_induction_rebound"
+      },
+      {
+        "name": "lower_bound",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind lower_bound_normalize_skips_when_induction_rebound"
+      },
+      {
+        "name": "strip_mine_skip",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind strip_mine_skips_when_induction_rebound"
+      },
+      {
+        "name": "strip_mine_unrelated",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind strip_mine_still_fires_when_unrelated_name_is_bound"
+      },
+      {
+        "name": "unroll",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind unroll_skips_when_induction_written"
+      },
+      {
+        "name": "nested_same_name",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_bound_check_rebind nested_same_name_loop_blocks_range_fold_on_outer"
+      }
+    ]
+  },
+  "test_timeout_s": 900,
+  "agent_hints": {
+    "suggested_max_steps": 200,
+    "suggested_timeout_s": 1800
+  }
+}

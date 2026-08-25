@@ -1,0 +1,41 @@
+# vyre workspace CODEOWNERS
+#
+# These paths require @santhsecurity/core-maintainers approval.
+# No PR that touches a maintainer-only path can merge without review.
+
+# ─── Specification (frozen contracts  -  oracle poisoning + monotonic weakening) ───
+/spec/                                    @santhsecurity/core-maintainers
+/conform/src/spec/                        @santhsecurity/core-maintainers
+
+# ─── Reference Interpreter (oracle poisoning) ──────────────────────
+/vyre-reference/                          @santhsecurity/core-maintainers
+
+# ─── wgpu Backend (dispatch correctness) ───────────────────────────
+/vyre-wgpu/                               @santhsecurity/core-maintainers
+
+# ─── Sigstore Signing Boundary (supply-chain trust) ────────────────
+/vyre-sigstore/                           @santhsecurity/core-maintainers
+
+# ─── Conform Proof Layer (decorative laws, rigged tests) ───────────
+/conform/src/proof/                       @santhsecurity/core-maintainers
+/conform/src/verify/harnesses/            @santhsecurity/core-maintainers
+/conform/src/enforce/                     @santhsecurity/core-maintainers
+/conform/src/adversarial/mutations/       @santhsecurity/core-maintainers
+/conform/src/meta/                        @santhsecurity/core-maintainers
+
+# ─── Core IR + Lowering (backend-agnostic, frozen) ─────────────────
+/core/src/ir/                             @santhsecurity/core-maintainers
+/core/src/lower/                          @santhsecurity/core-maintainers
+/core/src/backend.rs                      @santhsecurity/core-maintainers
+
+# ─── Build + CI Scripts + Release Infrastructure ───────────────────
+/.github/                                 @santhsecurity/core-maintainers
+/scripts/                                 @santhsecurity/core-maintainers
+/Cargo.toml                               @santhsecurity/core-maintainers
+/docs/RELEASE.md                          @santhsecurity/core-maintainers
+/deny.toml                                @santhsecurity/core-maintainers
+/docs/audits/MASTER_PLAN.md               @santhsecurity/core-maintainers
+/docs/audits/SWEEP.md                     @santhsecurity/core-maintainers
+
+# ─── Public-API Baselines (SemVer trip-wire) ───────────────────────
+/docs/public-api/                         @santhsecurity/core-maintainers

@@ -1,0 +1,119 @@
+# Tier A / Tier B configurability manifest.
+#
+# Every tool-facing crate declares both:
+#   tier_a  -  operational config: CLI flags + TOML defaults + env vars.
+#            Must point at the canonical schema (a .toml file or a
+#            documented `[config]` section in the crate's README).
+#   tier_b  -  community knowledge: TOML data files only, never CLI.
+#            Must point at a directory of `.toml` files (typically
+#            workspace `rules/`).
+#
+# A crate that genuinely has no Tier A or Tier B (pure-library, no
+# binary, no scan-time data) declares `kind = "library"` and is
+# excluded by the gate. Anything with a `[[bin]]` or that runs scans
+# at runtime must declare both tiers.
+#
+# This manifest is the single source of truth for `scripts/check_tier_config.sh`.
+# See docs/OWNERSHIP.md and `rules/README.md` for the underlying doctrine.
+
+[[crate]]
+name = "vyre-conform-runner"
+kind = "tool"
+binary = "vyre-conform"
+tier_a = "conform/vyre-conform-runner/CONFIG.md"
+tier_b = "rules/kat"
+notes = "Conformance runner. Tier A = CLI + per-run TOML manifest. Tier B = the KAT corpus (rules/kat/{primitive,composite}/**.toml)."
+
+[[crate]]
+name = "vyre-driver-wgpu"
+kind = "library"
+notes = "wgpu backend library; ships a bench-and-validate `vyre-wgpu` binary alongside the lib. Tier-A knobs documented in vyre-driver-wgpu/CONFIG.md. Library is publishable; the binary is workspace-internal."
+
+[[crate]]
+name = "vyre-frontend-c"
+kind = "tool"
+binary = "vyrec"
+tier_a = "vyre-frontend-c/CONFIG.md"
+tier_b = "rules/op"
+notes = "GPU C compiler driver. Tier A = clap CLI parser in tools/vyrec + workspace defaults. Tier B = op KATs that govern lex/parse rule semantics."
+
+[[crate]]
+name = "vyre-aot"
+kind = "library"
+notes = "AOT compiler library. Pure library; embedding tools provide the CLI surface. Runtime-tunable knobs documented in vyre-aot/CONFIG.md so embedding tools surface them consistently."
+
+[[crate]]
+name = "xtask"
+kind = "internal-tool"
+binary = "xtask"
+tier_a = "xtask/CONFIG.md"
+tier_b = "rules/op"
+notes = "Workspace tooling. Tier A = subcommand surface + env-var-controlled budgets. Tier B = the op catalog xtask emits/consumes."
+
+# Pure libraries  -  declared explicitly so the gate can verify completeness.
+
+[[crate]]
+name = "vyre-foundation"
+kind = "library"
+[[crate]]
+name = "vyre-driver"
+kind = "library"
+[[crate]]
+name = "vyre-driver-spirv"
+kind = "library"
+[[crate]]
+name = "vyre-driver-cuda"
+kind = "library"
+[[crate]]
+name = "vyre-reference"
+kind = "library"
+[[crate]]
+name = "vyre-spec"
+kind = "library"
+[[crate]]
+name = "vyre-macros"
+kind = "library"
+[[crate]]
+name = "vyre-primitives"
+kind = "library"
+[[crate]]
+name = "vyre-runtime"
+kind = "library"
+[[crate]]
+name = "vyre-libs"
+kind = "library"
+[[crate]]
+name = "vyre-intrinsics"
+kind = "library"
+[[crate]]
+name = "vyre-harness"
+kind = "library"
+[[crate]]
+name = "vyre-core"
+kind = "library"
+[[crate]]
+name = "vyre-conform-spec"
+kind = "internal-tool"
+tier_a = "conform/vyre-conform-runner/CONFIG.md"
+tier_b = "rules/kat"
+notes = "Workspace-internal conform substrate (witness sets + composition laws). Shares the runner's CONFIG.md surface."
+
+[[crate]]
+name = "vyre-conform-generate"
+kind = "internal-tool"
+tier_a = "conform/vyre-conform-runner/CONFIG.md"
+tier_b = "rules/kat"
+notes = "Workspace-internal conform substrate (counterexample shrinking + witness generation). Shares the runner's CONFIG.md surface."
+
+[[crate]]
+name = "vyre-conform-enforce"
+kind = "internal-tool"
+tier_a = "conform/vyre-conform-runner/CONFIG.md"
+tier_b = "rules/kat"
+notes = "Workspace-internal conform substrate (algebraic-law prover). Shares the runner's CONFIG.md surface."
+[[crate]]
+name = "vyre-test-harness"
+kind = "internal-tool"
+tier_a = "conform/vyre-conform-runner/CONFIG.md"
+tier_b = "rules/kat"
+notes = "Workspace-internal conform test harness. Shares the runner's CONFIG.md surface."

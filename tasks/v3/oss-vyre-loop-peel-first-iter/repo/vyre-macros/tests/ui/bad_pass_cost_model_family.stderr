@@ -1,0 +1,5 @@
+error: unsupported pass cost_model_family. Fix: use unknown, scalar, loop, memory, fusion, sync, dataflow, or megakernel.
+ --> tests/ui/bad_pass_cost_model_family.rs:7:25
+  |
+7 |     cost_model_family = "guesswork"
+  |                         ^^^^^^^^^^^

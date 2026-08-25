@@ -1,0 +1,82 @@
+[package]
+name = "vyre-driver-cuda"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/vyre-driver-cuda"
+description = "CUDA/PTX backend for vyre through the CUDA driver API."
+readme = "README.md"
+keywords = ["gpu", "compute", "cuda", "ptx", "vyre"]
+categories = ["hardware-support"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true
+
+[features]
+default = []
+cuda = []
+
+[dependencies]
+vyre-driver = { workspace = true }
+vyre-foundation = { workspace = true }
+vyre-spec = { workspace = true }
+vyre-lower.workspace = true
+vyre-emit-ptx.workspace = true
+# `optimizer` module dispatches the self-hosted optimizer passes
+# (DCE/CSE/const-fold) on CUDA. Lives in [dependencies] (not dev-deps)
+# because src/optimizer.rs is shipped lib code.
+vyre-self-substrate = { workspace = true }
+inventory.workspace = true
+tracing.workspace = true
+blake3.workspace = true
+bytemuck.workspace = true
+smallvec.workspace = true
+cudarc.workspace = true
+rustc-hash.workspace = true
+crossbeam-queue = { workspace = true }
+dashmap.workspace = true
+libc.workspace = true
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs across a broad
+# op surface (math conv/fft/scan, nn linear-4bit, parsing::c gpu_pipeline, scan/NFA),
+# so the dev-build enables that surface. All dev-only -> gated out of the production
+# lib build keyhog links.
+#   - `full`        : math-* + nn-* (incl nn-linear-4bit for QuantizedLinear4BitSpec)
+#                     + matching-substring/dfa + hash/decode/crypto.
+#   - `c-parser`    : `vyre_libs::parsing::c::preprocess::gpu_pipeline::*` for the
+#                     c_preprocess_{tokenize,filter,macro_expansion,payloads}_cuda tests.
+#   - `matching-nfa`: `ResidentRulePipeline` for the CUDA resident parity test
+#                     (not pulled by `full`).
+vyre-libs = { workspace = true, features = ["full", "c-parser", "matching-nfa"] }
+tempfile.workspace = true
+serde_json.workspace = true
+pollster.workspace = true
+# Required by tests/common/mod.rs (vyre::ir, vyre::DispatchConfig) and by
+# many live CUDA integration tests. `vyre` optionally depends on
+# vyre-driver-cuda behind `features = ["cuda"]`; adding it here as a dev-dep
+# without that feature flag does not create a cycle. Cargo dev-deps are only
+# compiled for the crate being tested, not for its dependents.
+vyre = { workspace = true }
+# Required by tests/common/mod.rs (vyre_reference::value::Value,
+# vyre_reference::reference_eval) and by differential tests.
+vyre-reference = { workspace = true }
+# Required by several _gpu_parity tests that import vyre_primitives::*.
+# `cpu-parity` exposes the CPU reference oracles (hex_decode_reference_packed, …)
+# these parity tests diff the GPU output against; gated out of production builds.
+vyre-primitives = { workspace = true, features = ["cpu-parity"] }
+# Required by tests/union_find_gpu_parity.rs, which imports the CPU union-find
+# reference oracles `union_find_emit::{canonicalize_parent_to_roots,
+# reference_union_find_alias}`. Those are `#[cfg(any(test, feature = "cpu-parity"))]`
+# in vyre-self-substrate, so a downstream test build must enable `cpu-parity`
+# explicitly (the `test` cfg only applies to that crate's own tests, not ours).
+# Dev-dep only -> gated out of the production lib build keyhog links.
+vyre-self-substrate = { workspace = true, features = ["cpu-parity"] }

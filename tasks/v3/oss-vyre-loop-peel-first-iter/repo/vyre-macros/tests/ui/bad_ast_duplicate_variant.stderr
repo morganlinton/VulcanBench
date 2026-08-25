@@ -1,0 +1,5 @@
+error: duplicate AST variant `Literal` in `Expr`. Fix: keep one `Literal` variant or give each variant a stable unique name.
+ --> tests/ui/bad_ast_duplicate_variant.rs:6:9
+  |
+6 |         Literal { value: u32 },
+  |         ^^^^^^^

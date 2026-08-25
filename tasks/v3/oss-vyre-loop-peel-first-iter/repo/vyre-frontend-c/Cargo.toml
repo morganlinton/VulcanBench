@@ -1,0 +1,93 @@
+[package]
+name = "vyre-frontend-c"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "GPU-first C parser and compile-evidence driver built on vyre and vyre-libs: bounded TU preparation, lex, digraph rewrite, AST evidence, and supported IR composition."
+readme = "README.md"
+keywords = ["vyre", "gpu", "c", "compiler", "cc"]
+categories = ["compilers", "development-tools"]
+# vyre-frontend-c is a workspace consumer/driver for the rest of vyre.
+# Publishing is gated on the crate API review alongside vyre-libs.
+publish = false
+
+[lints]
+workspace = true
+
+[features]
+default = []
+cpu-oracle = []
+legacy-infallible = ["vyre-runtime/legacy-infallible"]
+
+[dependencies]
+vyre.workspace = true
+vyre-driver.workspace = true
+vyre-lower.workspace = true
+vyre-self-substrate.workspace = true
+vyre-libs = { path = "../vyre-libs", default-features = false, features = ["c-parser", "cpu-parity"] }
+vyre-primitives = { workspace = true, default-features = false, features = ["matching"] }
+c-grammar-gen.workspace = true
+vyre-runtime.workspace = true
+vyre-foundation.workspace = true
+object = { workspace = true, features = ["write"] }
+blake3 = { workspace = true }
+bytemuck = { workspace = true }
+smallvec = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+vyre-driver-cuda = { workspace = true }
+vyre-driver-wgpu = { workspace = true, features = ["c-parser"] }
+vyre-debug.workspace = true
+vyre-lower.workspace = true
+vyre-reference.workspace = true
+# S0  -  AST equivalence oracle. clang's `-Xclang -ast-dump=json` is parsed in
+# the test support layer; serde_json is a workspace dep used by other
+# vyre crates already, no new build-time cost.
+serde_json = { workspace = true }
+criterion = { workspace = true }
+toml = { workspace = true }
+tree-sitter = { workspace = true }
+tree-sitter-c = { workspace = true }
+
+[[bench]]
+name = "parser_pipeline"
+harness = false
+
+[[bench]]
+name = "real_corpus"
+harness = false
+
+[[test]]
+name = "preprocessor_adversarial"
+path = "tests/preprocessor_adversarial.rs"
+required-features = ["cpu-oracle"]
+
+[[test]]
+name = "preprocessor_bounds"
+path = "tests/preprocessor_bounds.rs"
+required-features = ["cpu-oracle"]
+
+[[test]]
+name = "preprocessor_conditionals"
+path = "tests/preprocessor_conditionals.rs"
+required-features = ["cpu-oracle"]
+
+[[test]]
+name = "preprocessor_include_errors"
+path = "tests/preprocessor_include_errors.rs"
+required-features = ["cpu-oracle"]
+
+[[test]]
+name = "preprocessor_malformed"
+path = "tests/preprocessor_malformed.rs"
+required-features = ["cpu-oracle"]
+
+[[test]]
+name = "tu_host_preprocessor"
+path = "tests/tu_host_preprocessor.rs"
+required-features = ["cpu-oracle"]

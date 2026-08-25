@@ -1,0 +1,200 @@
+//! Hand-rolled NCCL FFI for multi-rank gradient all-reduce.
+//!
+//! Loads `libnccl.so` via dlopen so the launcher does not link NCCL at
+//! compile time. The minimum surface needed: comm init from a unique id,
+//! all-reduce on f32, comm destroy.
+
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+#![allow(dead_code)]
+
+use std::ffi::{c_char, c_int, c_uint, c_void, CStr, CString};
+use std::ptr;
+use std::sync::OnceLock;
+
+pub type ncclResult_t = c_int;
+pub type ncclComm_t = *mut c_void;
+pub type ncclDataType_t = c_int;
+pub type ncclRedOp_t = c_int;
+pub type cudaStream_t = *mut c_void;
+
+const NCCL_SUCCESS: ncclResult_t = 0;
+const NCCL_FLOAT32: ncclDataType_t = 7;
+const NCCL_SUM: ncclRedOp_t = 0;
+const NCCL_UNIQUE_ID_BYTES: usize = 128;
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ncclUniqueId {
+    pub internal: [c_char; NCCL_UNIQUE_ID_BYTES],
+}
+
+struct Nccl {
+    h: *mut c_void,
+    ncclGetUniqueId: unsafe extern "C" fn(*mut ncclUniqueId) -> ncclResult_t,
+    ncclCommInitRank: unsafe extern "C" fn(
+        *mut ncclComm_t,
+        c_int,
+        ncclUniqueId,
+        c_int,
+    ) -> ncclResult_t,
+    ncclAllReduce: unsafe extern "C" fn(
+        *const c_void,
+        *mut c_void,
+        usize,
+        ncclDataType_t,
+        ncclRedOp_t,
+        ncclComm_t,
+        cudaStream_t,
+    ) -> ncclResult_t,
+    ncclCommDestroy: unsafe extern "C" fn(ncclComm_t) -> ncclResult_t,
+}
+
+unsafe impl Send for Nccl {}
+unsafe impl Sync for Nccl {}
+
+static NCCL: OnceLock<Nccl> = OnceLock::new();
+
+unsafe fn dlopen(name: &CStr) -> *mut c_void {
+    libc::dlopen(name.as_ptr(), libc::RTLD_NOW | libc::RTLD_GLOBAL)
+}
+
+unsafe fn dlsym(handle: *mut c_void, sym: &CStr) -> Result<*mut c_void, String> {
+    let p = libc::dlsym(handle, sym.as_ptr());
+    if p.is_null() {
+        Err(format!(
+            "nccl_ffi: failed to resolve symbol {}",
+            sym.to_string_lossy()
+        ))
+    } else {
+        Ok(p)
+    }
+}
+
+fn nccl() -> Result<&'static Nccl, String> {
+    if let Some(c) = NCCL.get() {
+        return Ok(c);
+    }
+    let c = unsafe {
+        let names: [&CStr; 2] = [
+            CStr::from_bytes_with_nul(b"libnccl.so.2\0").unwrap(),
+            CStr::from_bytes_with_nul(b"libnccl.so\0").unwrap(),
+        ];
+        let mut h: *mut c_void = ptr::null_mut();
+        for n in names {
+            h = dlopen(n);
+            if !h.is_null() {
+                break;
+            }
+        }
+        if h.is_null() {
+            return Err("nccl_ffi: libnccl.so not found. Fix: install NCCL runtime.".to_string());
+        }
+
+        macro_rules! sym {
+            ($name:literal) => {{
+                let s = CString::new($name).unwrap();
+                std::mem::transmute(dlsym(h, &s)?)
+            }};
+        }
+
+        Nccl {
+            h,
+            ncclGetUniqueId: sym!("ncclGetUniqueId"),
+            ncclCommInitRank: sym!("ncclCommInitRank"),
+            ncclAllReduce: sym!("ncclAllReduce"),
+            ncclCommDestroy: sym!("ncclCommDestroy"),
+        }
+    };
+    if NCCL.set(c).is_err() {
+        return NCCL
+            .get()
+            .ok_or_else(|| "NCCL driver table was initialized concurrently but is unavailable".to_string());
+    }
+    NCCL.get()
+        .ok_or_else(|| "NCCL driver table initialized but unavailable".to_string())
+}
+
+fn check(rc: ncclResult_t, op: &str) -> Result<(), String> {
+    if rc == NCCL_SUCCESS {
+        Ok(())
+    } else {
+        Err(format!("nccl_ffi: {op} returned {rc}"))
+    }
+}
+
+pub fn init_world(rank: i32, world_size: i32) -> Result<ncclComm_t, String> {
+    let c = nccl()?;
+
+    // Read unique ID from env (rank-0 publishes via filesystem before others
+    // start; convention: hex-encoded 128-byte blob in NCCL_UNIQUE_ID).
+    let id_hex = std::env::var("NCCL_UNIQUE_ID")
+        .map_err(|_| "nccl_ffi: NCCL_UNIQUE_ID env var missing.".to_string())?;
+    if id_hex.len() != NCCL_UNIQUE_ID_BYTES * 2 {
+        return Err(format!(
+            "nccl_ffi: NCCL_UNIQUE_ID hex length {} != {}",
+            id_hex.len(),
+            NCCL_UNIQUE_ID_BYTES * 2
+        ));
+    }
+    let mut id = ncclUniqueId {
+        internal: [0; NCCL_UNIQUE_ID_BYTES],
+    };
+    for i in 0..NCCL_UNIQUE_ID_BYTES {
+        let hex = &id_hex[i * 2..i * 2 + 2];
+        id.internal[i] = u8::from_str_radix(hex, 16)
+            .map_err(|e| format!("nccl_ffi: bad hex byte: {e}"))? as c_char;
+    }
+
+    let mut comm: ncclComm_t = ptr::null_mut();
+    unsafe {
+        check(
+            (c.ncclCommInitRank)(&mut comm, world_size, id, rank),
+            "ncclCommInitRank",
+        )?;
+    }
+    Ok(comm)
+}
+
+pub fn all_reduce_f32(
+    comm: ncclComm_t,
+    send_dptr: u64,
+    recv_dptr: u64,
+    count: usize,
+) -> Result<(), String> {
+    let c = nccl()?;
+    unsafe {
+        check(
+            (c.ncclAllReduce)(
+                send_dptr as *const c_void,
+                recv_dptr as *mut c_void,
+                count,
+                NCCL_FLOAT32,
+                NCCL_SUM,
+                comm,
+                ptr::null_mut(),
+            ),
+            "ncclAllReduce",
+        )
+    }
+}
+
+pub fn destroy(comm: ncclComm_t) -> Result<(), String> {
+    let c = nccl()?;
+    unsafe { check((c.ncclCommDestroy)(comm), "ncclCommDestroy") }
+}
+
+pub fn generate_unique_id_hex() -> Result<String, String> {
+    let c = nccl()?;
+    let mut id = ncclUniqueId {
+        internal: [0; NCCL_UNIQUE_ID_BYTES],
+    };
+    unsafe {
+        check((c.ncclGetUniqueId)(&mut id), "ncclGetUniqueId")?;
+    }
+    let mut s = String::with_capacity(NCCL_UNIQUE_ID_BYTES * 2);
+    for &b in &id.internal {
+        let _ = std::fmt::Write::write_fmt(&mut s, format_args!("{:02x}", b as u8));
+    }
+    Ok(s)
+}

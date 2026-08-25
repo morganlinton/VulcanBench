@@ -1,0 +1,303 @@
+# Workspace members are listed explicitly. New crates must be added
+# below by name. Globs (e.g. "vyre-*") are not used so that each
+# addition is a reviewable change.
+[workspace]
+resolver = "2"
+members = [
+    "vyre-core",
+    "vyre-foundation",
+    "vyre-driver",
+    "vyre-harness",
+    "vyre-driver-metal",
+    "vyre-driver-wgpu",
+    "vyre-driver-spirv",
+    "vyre-driver-cuda",
+    "vyre-driver-reference",
+    "vyre-reference",
+    "vyre-spec",
+    "vyre-macros",
+    # Tier 2.5 LEGO substrate lives under vyre-primitives/src/<domain>/
+    # feature-gated per domain. See docs/primitives-tier.md.
+    "vyre-primitives",
+    # Recursion-thesis layer: vyre using its own primitives on its own
+    # scheduler problems. Sits between vyre-primitives and vyre-driver.
+    # Extracted from `vyre-driver/src/self_substrate/` in audit cleanup
+    # A10 (2026-04-30).
+    "vyre-self-substrate",
+    "conform/vyre-conform-spec",
+    "conform/vyre-conform-generate",
+    "conform/vyre-conform-enforce",
+    "conform/vyre-conform-runner",
+    "conform/vyre-test-harness",
+    "xtask",
+    "vyre-runtime",
+    "vyre-libs",
+    "vyre-intrinsics",
+    "vyre-aot",
+    "vyre-frontend-c",
+    "vyre-frontend-rust",
+    "vyre-bench",
+    "vyre-lints",
+    "vyre-lower",
+    "vyre-emit-naga",
+    "vyre-emit-ptx",
+    "vyre-emit-spirv",
+    "vyre-emit-metal",
+    "vyre-debug",
+    # Host-side C11 grammar-table generator for the vyre GPU C parser.
+    # Formerly `surgec-grammar-gen` in libs/shared — renamed + folded in so
+    # vyre owns its parser tables and depends on nothing surge-named.
+    "vyre-grammar-gen",
+]
+
+exclude = [
+    "examples/external_ir_extension",
+    "examples/libs-template",
+    "examples/public_facade_smoke",
+    "vyre-foundation/fuzz",
+]
+
+# The old `demos/rust_lexer_gpu` and `demos/rust_parser_gpu` workspace
+# members were removed with the WGSL-string dialects they depended on.
+# New parser demos must be added as normal workspace members backed by
+# pure-IR builders and their own tests.
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+authors = ["Santh Project <contact@santh.dev>"]
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+
+[workspace.lints.clippy]
+cast_lossless = "allow"
+cast_possible_truncation = "allow"
+# `drop(perf_scope.finish())` documents intent and matches the measurement
+# lifecycle; the value being Copy doesn't make the call meaningless.
+# Renamed in clippy 1.81: drop_copy → dropping_copy_types.
+dropping_copy_types = "allow"
+# BackendError intentionally carries context strings for actionable `Fix:`
+# messages. Boxing the error would hide the message from callers.
+result_large_err = "allow"
+# Chained closures in adapter pipelines (e.g. `.map(|e| e.to_string())`)
+# are clearer than the turbofished method-reference alternative.
+redundant_closure = "allow"
+# `&Option<T>` in internal APIs matches the storage layout and avoids
+# gratuitous re-wrapping at every call site.
+ref_option = "allow"
+# Explicit match arms are preferred over matches!() for readability when
+# the match body documents the pattern contract.
+match_like_matches_macro = "allow"
+# `x >= lo && x <= hi` reads naturally in bound-check contexts.
+manual_range_contains = "allow"
+# Nested matches are clearer than flattened alternatives when the outer
+# match documents a type-level dispatch and the inner match documents a
+# value-level refinement.
+collapsible_match = "allow"
+# `&*x` / `&expr` style borrows are preferred when they clarify ownership
+# transfer intent at the call site.
+needless_borrow = "allow"
+# `bool::then(|| expr)` vs `if b { Some(expr) } else { None }`  -  both are
+# fine; suppressing noise on existing code.
+unnecessary_lazy_evaluations = "allow"
+# Enum variants intentionally carry rich context for diagnostics.
+large_enum_variant = "allow"
+# Numeric kernel code uses explicit index-variable loops for symmetry with
+# the GPU shader version; iterator-based rewrites break the 1:1 correspondence.
+needless_range_loop = "allow"
+# `(n + d - 1) / d` is the standard GPU rounding idiom and reads better
+# than `n.div_ceil(d)` in kernel dimension calculations.
+manual_div_ceil = "allow"
+# Collapsible if-else chains are kept expanded when they document separate
+# semantic conditions at different abstraction levels.
+collapsible_if = "allow"
+# Doc-comment continuation lines are formatted for readability, not
+# mechanical indentation rules.
+doc_lazy_continuation = "allow"
+# `#[must_use]` on functions returning `#[must_use]` types is intentional
+# documentation that callers must not discard the value.
+double_must_use = "allow"
+# GPU kernel dispatch functions naturally pass buffer, config, device,
+# queue, pipeline, layout, etc.  -  8-9 args is normal for the domain.
+too_many_arguments = "allow"
+# Boolean expressions in condition-check code are written for domain clarity,
+# not mechanical minimality.
+nonminimal_bool = "allow"
+# Default impls with domain-meaningful values are more readable inline.
+derivable_impls = "allow"
+# Documentation list indentation is controlled by the doc system, not
+# mechanical clippy rules.
+doc_overindented_list_items = "allow"
+# Closures in option/result chains are kept explicit for readability.
+option_map_or_none = "allow"
+unnecessary_map_on_constructor = "allow"
+map_identity = "allow"
+manual_map = "allow"
+# Explicit if-chains are preferred over match in condition-heavy control flow.
+if_same_then_else = "allow"
+comparison_chain = "allow"
+# `vec![0; n]` vs `vec![0_u8; n]`  -  both fine, existing code uses the short form.
+slow_vector_initialization = "allow"
+# `.entry()` API is not always clearer than contains_key + insert.
+map_entry = "allow"
+# Explicit lifetimes kept for clarity in trait impls.
+needless_lifetimes = "allow"
+# `Vec::with_capacity` + push is preferred for readability in some paths.
+vec_init_then_push = "allow"
+# Field-level assignment after Default::default() is used for partial init.
+field_reassign_with_default = "allow"
+# Matrix-style `[r * cols + c]` indexing in tests intentionally writes the
+# zero-row term as `0 * cols + c` for visual symmetry with the non-zero rows;
+# erasing/identity_op flag those as bugs even though the convention matches
+# the rest of the row enumeration. Allowing both at the workspace level keeps
+# the math substrate tests readable without per-module suppressions.
+# `and_then(|x| Some(...))` kept explicit in chained option transforms.
+bind_instead_of_map = "allow"
+# Borrowed expression can be elided but is kept for type clarity.
+needless_borrows_for_generic_args = "allow"
+# Match-to-let rewrites lose readability in pattern-matching-heavy code.
+match_single_binding = "allow"
+# Explicit `size_of::<T>() * n` is clearer than `size_of_val` in GPU buffer sizing.
+manual_slice_size_calculation = "allow"
+# `CStr::from_bytes_with_nul(b"...\0")` is the established pattern in Vulkan FFI code.
+manual_c_str_literals = "allow"
+erasing_op = "allow"
+identity_op = "allow"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "deny"
+unreachable_pub = "warn"
+# WIP modules have staged variables/methods for upcoming passes.
+unused_variables = "allow"
+dead_code = "allow"
+nonstandard_style = { level = "warn", priority = -1 }
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+
+# Workspace-level dependency declarations. Internal members use path +
+# version (the `version` is required so a published crate can resolve its
+# workspace siblings from crates.io after publication).
+[workspace.dependencies]
+vyre = { version = "0.6.3", path = "vyre-core", default-features = false }
+vyre-foundation = { version = "0.6.3", path = "vyre-foundation" }
+vyre-driver = { version = "0.6.3", path = "vyre-driver" }
+vyre-driver-metal = { version = "0.6.3", path = "vyre-driver-metal" }
+vyre-driver-wgpu = { version = "0.6.3", path = "vyre-driver-wgpu" }
+vyre-driver-cuda = { version = "0.6.3", path = "vyre-driver-cuda" }
+vyre-driver-reference = { version = "0.6.3", path = "vyre-driver-reference" }
+vyre-driver-spirv = { version = "0.6.3", path = "vyre-driver-spirv" }
+vyre-reference = { version = "0.6.3", path = "vyre-reference" }
+vyre-spec = { version = "0.6.3", path = "vyre-spec" }
+vyre-macros = { version = "0.6.3", path = "vyre-macros" }
+vyre-primitives = { version = "0.6.3", path = "vyre-primitives", default-features = false }
+vyre-runtime = { version = "0.6.3", path = "vyre-runtime" }
+vyre-libs = { version = "0.6.3", path = "vyre-libs" }
+vyre-self-substrate = { version = "0.6.3", path = "vyre-self-substrate" }
+vyre-intrinsics = { version = "0.6.3", path = "vyre-intrinsics" }
+vyre-aot = { version = "0.6.3", path = "vyre-aot" }
+vyre-bench = { version = "0.6.3", path = "vyre-bench" }
+vyre-test-harness = { version = "0.6.3", path = "conform/vyre-test-harness" }
+vyre-harness = { version = "0.6.3", path = "vyre-harness" }
+vyre-lower = { version = "0.6.3", path = "vyre-lower" }
+vyre-emit-naga = { version = "0.6.3", path = "vyre-emit-naga" }
+vyre-emit-ptx = { version = "0.6.3", path = "vyre-emit-ptx" }
+vyre-emit-spirv = { version = "0.6.3", path = "vyre-emit-spirv" }
+vyre-emit-metal = { version = "0.6.3", path = "vyre-emit-metal" }
+vyre-frontend-c = { version = "0.6.3", path = "vyre-frontend-c" }
+vyre-frontend-rust = { version = "0.6.3", path = "vyre-frontend-rust" }
+vyre-lints = { version = "0.6.3", path = "vyre-lints" }
+vyre-debug = { version = "0.6.3", path = "vyre-debug" }
+vyre-conform-spec = { path = "conform/vyre-conform-spec" }
+vyre-conform-generate = { path = "conform/vyre-conform-generate" }
+vyre-conform-enforce = { path = "conform/vyre-conform-enforce" }
+c-grammar-gen = { package = "vyre-grammar-gen", version = "0.6.3", path = "vyre-grammar-gen" }
+
+# Shared third-party pins; every member agrees on versions.
+serde = { version = "=1.0.228", features = ["derive", "rc"] }
+serde_json = "1"
+thiserror = "=2.0.18"
+tracing = "=0.1.44"
+tempfile = "=3.27.0"
+proptest = "=1.11.0"
+rand = { version = "=0.10.1", features = ["std", "std_rng"] }
+rand_core = { version = "=0.6.4", features = ["getrandom"] }
+pollster = "=0.4.0"
+tokio = { version = "=1.52.3", features = ["rt", "fs", "time"] }
+wgpu = { version = "=25.0.2", features = ["wgsl", "naga-ir"] }
+metal = "=0.31.0"
+bytemuck = { version = "=1.25.0", features = ["derive"] }
+naga = { version = ">=25.0.0, <26.0.0", features = ["wgsl-in", "wgsl-out", "spv-out", "msl-out"] }
+object = { version = "=0.39.1", default-features = false }
+ash = "=0.38.0"
+proc-macro2 = { version = "=1.0.106", features = ["span-locations"] }
+syn = { version = "=2.0.117", features = ["full", "visit", "visit-mut"] }
+walkdir = "=2.5.0"
+toml = "=1.1.2"
+aho-corasick = "=1.1.4"
+faer = { version = "=0.24.0", default-features = false, features = ["std", "rayon"] }
+memchr = "=2.8.0"
+regex-syntax = "=0.8.10"
+blake3 = "=1.8.5"
+sha2 = "=0.11.0"
+percent-encoding = "=2.3.2"
+ed25519-dalek = { version = "=2.2.0", default-features = false, features = ["std"] }
+rustc-hash = "=2.1.2"
+im = "=15.1.0"
+rayon = "=1.12.0"
+wide = "=0.7.33"
+hex = "=0.4.3"
+clap = { version = "=4.6.1", features = ["derive"] }
+fs2 = "=0.4.3"
+stats_alloc = "=0.1.10"
+loom = "=0.7.2"
+regex = "=1.12.3"
+regex-automata = "=0.4.14"
+hashbrown = "=0.17.1"
+pcre2 = "=0.2.11"
+openssl = "=0.10.80"
+fnv = "=1.0.7"
+rustc_lexer = "=0.1.0"
+criterion = { version = "=0.8.2", features = ["html_reports"] }
+bumpalo = "=3.20.3"
+inventory = "=0.3.24"
+quote = "=1.0.45"
+smallvec = { version = "^1.15.1", features = ["serde"] }
+crossbeam-channel = "=0.5.15"
+libm = "=0.2.16"
+dashmap = "=6.2.1"
+tracing-subscriber = "=0.3.23"
+arc-swap = "=1.9.1"
+crossbeam-queue = "=0.3.12"
+crc32fast = "=1.5.0"
+bincode = { version = "=2.0.1", features = ["serde"] }
+rusqlite = { version = "=0.39.0", features = ["bundled"] }
+cudarc = { version = "=0.19.0", default-features = false, features = ["driver", "runtime", "std", "nvrtc", "dynamic-loading", "cuda-12000"] }
+ureq = "=3.3.0"
+libc = { version = "=0.2.186", default-features = false }
+brotli = "=8.0.2"
+lzma-rs = "=0.3.0"
+lasso = { version = "=0.7.3", features = ["multi-threaded"] }
+itoa = "=1.0.18"
+ryu = "=1.0.23"
+arrayvec = "=0.7.6"
+anyhow = "=1.0.102"
+tree-sitter = "=0.26.9"
+tree-sitter-c = "=0.24.2"
+tree-sitter-go = "=0.25.0"
+trybuild = "=1.0.116"
+assert_cmd = "=2.2.2"
+predicates = "=3.1.4"
+env_logger = "=0.11.10"
+core_affinity = "=0.8.3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+incremental = true

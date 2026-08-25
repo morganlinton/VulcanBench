@@ -1,0 +1,80 @@
+# Build artifacts  -  target directories at any depth.
+target/
+**/target/
+*/target/
+**/target-*/
+conform/fuzz/target/
+
+# Cargo lock backup.
+Cargo.lock.old
+
+# Temporary cargo target directories (e.g. CI / tooling).
+**/.cargo-target-*
+**/.cargo-target/
+/tmp/cargo-target-*
+
+# Mutation testing.
+mutants.out/
+mutants.out.old/
+*.rlib
+
+# proptest regression corpus  -  regenerated deterministically from seeds.
+# See scripts/fetch-regressions.sh.
+conform/regressions/
+
+# Profiling / flamegraph artifacts.
+*.profdata
+*.profraw
+perf.data*
+flamegraph.svg
+
+# Editor / IDE scratch.
+.vscode/
+.idea/
+.cursor/
+**/.cursor/
+*.swp
+*.swo
+*~
+
+# Python/test cache artifacts.
+.pytest_cache/
+**/.pytest_cache/
+__pycache__/
+**/__pycache__/
+
+# Generated split scratch emitted by local organization experiments.
+**/__law7_split/
+
+# Merge / rebase leftovers.
+*.orig
+*.rej
+
+# macOS.
+.DS_Store
+
+# Local operator/agent-only material: never export to the public Vyre repo.
+/.internals/
+/jules_tickets/
+/jules-tickets/
+/.jules/
+/jules/
+
+# Local rule drops used during private sweeps; shipped rule fixtures live in crate-owned paths.
+/rules/
+/.rules/
+
+# Root operational planning/status files are private operator state, not public prod repo source.
+/STATUS.md
+/ROADMAP.md
+/UPGRADE_PLAN.md
+/*STATUS*.md
+/*ROADMAP*.md
+/*PLAN*.md
+
+# Local generated adversarial registry closure scratch. Real adversarial tests
+# should be committed under crate-owned test names with specific assertions.
+**/tests/adversarial_registry_closure.rs
+
+# Private operator all-axes acceleration plan; do not publish to public Vyre repo.
+/docs/optimization/ALL_AXES_ACCELERATION_PLAN.md

@@ -1,0 +1,69 @@
+use crate::optimizer::dispatcher::{
+    DispatchError, OptimizerDispatcher, ResidentDispatchStep, ResidentReadRange,
+};
+use std::cell::{Cell, RefCell};
+use vyre_foundation::ir::Program;
+
+#[derive(Default)]
+pub(super) struct RecordingResidentDispatcher {
+    pub(super) next_handle: Cell<u64>,
+    pub(super) allocs: RefCell<Vec<usize>>,
+    pub(super) uploads: RefCell<Vec<Vec<u8>>>,
+    pub(super) sequence_upload_handles: RefCell<Vec<Vec<u64>>>,
+    pub(super) sequence_step_handles: RefCell<Vec<Vec<Vec<u64>>>>,
+    pub(super) sequence_step_grids: RefCell<Vec<Vec<Option<[u32; 3]>>>>,
+    pub(super) freed: RefCell<Vec<u64>>,
+}
+
+impl OptimizerDispatcher for RecordingResidentDispatcher {
+    fn dispatch(
+        &self,
+        _program: &Program,
+        _inputs: &[Vec<u8>],
+        _grid_override: Option<[u32; 3]>,
+    ) -> Result<Vec<Vec<u8>>, DispatchError> {
+        Err(DispatchError::Rejected(
+            "Fix: resident queue tests should not use non-resident dispatch.".to_string(),
+        ))
+    }
+
+    fn alloc_resident(&self, byte_len: usize) -> Result<u64, DispatchError> {
+        self.allocs.borrow_mut().push(byte_len);
+        let handle = self.next_handle.get() + 1;
+        self.next_handle.set(handle);
+        Ok(handle)
+    }
+
+    fn upload_resident_many(&self, uploads: &[(u64, &[u8])]) -> Result<(), DispatchError> {
+        self.uploads
+            .borrow_mut()
+            .extend(uploads.iter().map(|(_, bytes)| bytes.to_vec()));
+        Ok(())
+    }
+
+    fn upload_resident_many_sequence_read_ranges_into(
+        &self,
+        uploads: &[(u64, &[u8])],
+        steps: &[ResidentDispatchStep<'_>],
+        read_ranges: &[ResidentReadRange],
+        outputs: &mut Vec<Vec<u8>>,
+    ) -> Result<(), DispatchError> {
+        self.sequence_upload_handles
+            .borrow_mut()
+            .push(uploads.iter().map(|(handle, _)| *handle).collect());
+        self.sequence_step_handles
+            .borrow_mut()
+            .push(steps.iter().map(|step| step.handle_ids.to_vec()).collect());
+        self.sequence_step_grids
+            .borrow_mut()
+            .push(steps.iter().map(|step| step.grid_override).collect());
+        outputs.clear();
+        outputs.extend(read_ranges.iter().map(|range| vec![0u8; range.byte_len]));
+        Ok(())
+    }
+
+    fn free_resident(&self, handle: u64) -> Result<(), DispatchError> {
+        self.freed.borrow_mut().push(handle);
+        Ok(())
+    }
+}

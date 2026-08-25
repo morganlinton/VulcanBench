@@ -1,0 +1,8 @@
+//! CSE adversarial test suites  -  split per concern in the original tree.
+
+mod cse_does_not_alias_literal_through_mutable_variable;
+mod cse_does_not_alias_var_snapshot_through_mutable_source;
+mod cse_intern_dedups_structurally;
+mod cse_rewrites_call_args_without_extra_prefix_growth;
+mod cse_scoped_side_effect_invalidates_without_leaking;
+mod cse_still_eliminates_non_literal_common_subexpressions;

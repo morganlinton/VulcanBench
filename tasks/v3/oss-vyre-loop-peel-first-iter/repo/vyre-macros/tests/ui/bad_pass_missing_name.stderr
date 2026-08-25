@@ -1,0 +1,7 @@
+error: unexpected end of input, missing pass name. Fix: add name = "...".
+ --> tests/ui/bad_pass_missing_name.rs:3:1
+  |
+3 | #[vyre_pass(requires = [], invalidates = [])]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `vyre_pass` (in Nightly builds, run with -Z macro-backtrace for more info)

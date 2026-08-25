@@ -1,0 +1,9 @@
+[build]
+jobs = 16
+
+[env]
+PROPTEST_DISABLE_FAILURE_PERSISTENCE = "1"
+
+[alias]
+xtask = "run -p xtask --bin xtask --"
+check-vyre = "run -p xtask --bin xtask -- abstraction-gate"

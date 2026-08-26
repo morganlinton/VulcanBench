@@ -1,7 +1,7 @@
-"""Run models inside their own agent CLI (subscription billing).
+"""Run models inside their own agent CLI (subscription or API-metered).
 
-``claude-code:<model>``, ``codex:<model>``, ``cursor:<model>``, ``grok-build:<model>``
-and ``zcode:<model>`` run a task
+``claude-code:<model>``, ``codex:<model>``, ``cursor:<model>``, ``grok-build:<model>``,
+``zcode:<model>``, and ``pi:<inner-spec>`` run a task
 in the product's headless CLI instead of the VulcanBench agent loop.  The
 external harness owns its prompts, context management, and tools; everything
 downstream (git diff, verifier, evaluator, scoring) remains under VulcanBench.
@@ -42,16 +42,44 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from harness.agent.providers import (
+    META_DEFAULT_BASE_URL,
     LLMProvider,
     LLMResponse,
     NonRetryableProviderError,
     ProviderError,
     TokenUsage,
+    _resolve_meta_route,
+    parse_model_spec,
 )
 from harness.pricing import cost_usd
 from harness.redaction import sanitize
 
-CLI_AGENT_PROVIDERS = frozenset({"claude-code", "codex", "cursor", "grok-build", "zcode"})
+SUBSCRIPTION_HARNESSES = frozenset({"claude-code", "codex", "cursor", "grok-build", "zcode"})
+API_HARNESSES = frozenset({"pi"})
+CLI_AGENT_PROVIDERS = frozenset({*SUBSCRIPTION_HARNESSES, *API_HARNESSES})
+
+_PI_PASSTHROUGH_ENV = frozenset(
+    {
+        "META_MUSE_SPARK_API",
+        "MODEL_API_KEY",
+        "OPENROUTER_API_KEY",
+        "META_BASE_URL",
+        "OPENAI_API_KEY",
+        "OPENAI_BASE_URL",
+        "ANTHROPIC_API_KEY",
+        "ANTHROPIC_BASE_URL",
+        "ZAI_API_KEY",
+        "ZAI_BASE_URL",
+        "MOONSHOT_API_KEY",
+        "MOONSHOT_BASE_URL",
+        "DASHSCOPE_API_KEY",
+        "DASHSCOPE_BASE_URL",
+        "DEEPSEEK_API_KEY",
+        "DEEPSEEK_BASE_URL",
+        "XAI_API_KEY",
+        "XAI_BASE_URL",
+    }
+)
 
 # Claude Code's headless result text when a subscription window is exhausted
 # (e.g. "Claude AI usage limit reached|...", "5-hour limit reached ∙ resets 3am").
@@ -168,7 +196,11 @@ class HarnessPreflight:
 
     @property
     def ready(self) -> bool:
-        return self.available and self.authenticated and self.auth_mode == "subscription"
+        if not (self.available and self.authenticated):
+            return False
+        if self.auth_mode == "subscription":
+            return True
+        return self.harness in API_HARNESSES and self.auth_mode == "api"
 
     def as_summary(self) -> dict[str, Any]:
         return {
@@ -1775,6 +1807,13 @@ def _require_subscription(preflight: HarnessPreflight) -> None:
     raise ProviderError(f"{preflight.harness} preflight failed: {detail}")
 
 
+def _require_ready(preflight: HarnessPreflight) -> None:
+    if preflight.ready:
+        return
+    detail = preflight.detail or "authentication is not ready"
+    raise ProviderError(f"{preflight.harness} preflight failed: {detail}")
+
+
 @dataclass
 class CliAgentOutcome:
     """What a CLI-agent run produced, in the loop's accounting terms."""
@@ -2267,6 +2306,347 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
     return outcome
 
 
+def _pi_inner_spec(cli_model: str) -> str:
+    """Inner ``provider:model`` that Pi should call.
+
+    ``--harness pi --model meta:muse-spark-1.2`` becomes ``pi:meta:muse-spark-1.2``,
+    so the CLI adapter sees ``meta:muse-spark-1.2``. A bare ``muse-spark-*`` id
+    defaults to the Meta provider used in Report No. 19.
+    """
+    model = cli_model.strip()
+    if ":" in model:
+        return model
+    if model.lower().startswith("muse-spark"):
+        return f"meta:{model}"
+    raise ProviderError(
+        "pi harness needs an inner provider:model spec "
+        f"(e.g. meta:muse-spark-1.2), got {cli_model!r}"
+    )
+
+
+def _pi_key_env_names() -> tuple[str, ...]:
+    return (
+        "META_MUSE_SPARK_API",
+        "MODEL_API_KEY",
+        "OPENROUTER_API_KEY",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+    )
+
+
+def _pi_env(home: Path, extra: dict[str, str] | None = None) -> dict[str, str]:
+    """Host env for Pi: subscription scrub plus the API keys Pi must send."""
+    overrides = {"HOME": str(home)}
+    for key in _PI_PASSTHROUGH_ENV:
+        value = os.environ.get(key)
+        if value:
+            overrides[key] = value
+    if extra:
+        overrides.update(extra)
+    return _subscription_env(overrides)
+
+
+def _pi_preflight(pi_bin: str = "pi") -> HarnessPreflight:
+    version = _version(pi_bin)
+    if version is None:
+        return HarnessPreflight(
+            harness="pi",
+            available=False,
+            version=None,
+            authenticated=False,
+            auth_mode=None,
+            detail=(
+                f"{pi_bin!r} not found on PATH; install with "
+                "`npm install -g @earendil-works/pi-coding-agent`"
+            ),
+        )
+    present = [name for name in _pi_key_env_names() if os.environ.get(name)]
+    if not present:
+        return HarnessPreflight(
+            harness="pi",
+            available=True,
+            version=version,
+            authenticated=False,
+            auth_mode=None,
+            detail=(
+                "Pi is API-metered; set META_MUSE_SPARK_API (or MODEL_API_KEY / "
+                "OPENROUTER_API_KEY) for Muse Spark, or OPENAI_API_KEY / "
+                "ANTHROPIC_API_KEY for those providers"
+            ),
+        )
+    return HarnessPreflight(
+        harness="pi",
+        available=True,
+        version=version,
+        authenticated=True,
+        auth_mode="api",
+        plan_name=None,
+        detail=None,
+    )
+
+
+def _write_pi_meta_models_json(home: Path, inner_model: str) -> tuple[str, str]:
+    """Write a per-run Pi models.json that targets Meta's OpenAI-compatible API.
+
+    Returns ``(pi_model_flag, key_env)``. The file interpolates ``$ENV`` rather
+    than writing the secret, so a workspace listing cannot dump the key.
+    """
+    route = _resolve_meta_route(inner_model)
+    key_env = next((name for name in route.key_envs if os.environ.get(name)), None)
+    if key_env is None:
+        needed = " or ".join(route.key_envs)
+        raise ProviderError(f"{needed} is not set")
+    models_dir = home / ".pi" / "agent"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "providers": {
+            "vulcan-meta": {
+                "baseUrl": route.base or META_DEFAULT_BASE_URL,
+                "api": "openai-responses",
+                "apiKey": f"${key_env}",
+                "authHeader": True,
+                "models": [
+                    {
+                        "id": route.wire_model,
+                        "name": inner_model,
+                        "reasoning": True,
+                        "input": ["text"],
+                    }
+                ],
+            }
+        }
+    }
+    (models_dir / "models.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return f"vulcan-meta/{route.wire_model}", key_env
+
+
+def _pi_usage_tokens(usage: dict[str, Any]) -> tuple[int, int, int]:
+    """Parse Pi JSON-mode usage into (input, output, cache_read)."""
+    cache = int(
+        usage.get("cacheRead") or usage.get("cache_read") or usage.get("cached_input_tokens") or 0
+    )
+    inp = int(usage.get("input") or usage.get("inputTokens") or usage.get("input_tokens") or 0)
+    out = int(usage.get("output") or usage.get("outputTokens") or usage.get("output_tokens") or 0)
+    return inp, out, cache
+
+
+def run_pi_task(  # noqa: PLR0912, PLR0915 — linear stream-parse loop
+    *,
+    workspace: Path,
+    prompt: str,
+    model: str,
+    priced_spec: str,
+    max_turns: int,
+    collector: _Collector,
+    stream_log_path: Path | None = None,
+    timeout_s: float | None = None,
+    network: bool = False,
+    max_run_cost: float | None = None,
+    effort: str | None = None,
+    pi_bin: str = "pi",
+    env_overrides: dict[str, str] | None = None,
+    preflight: HarnessPreflight | None = None,
+) -> CliAgentOutcome:
+    """Run one task through Pi (``@earendil-works/pi-coding-agent``) on API keys.
+
+    Pi is a minimal open-source coding harness (read/write/edit/bash, no web
+    tools by default). Results measure **model + Pi**, not the VulcanBench
+    loop: the same ``meta:muse-spark-1.2`` column through ``--harness vulcan``
+    vs ``--harness pi`` is the harness delta. Billing stays on the API track
+    (``cli_agent.billing=api``); tokens price at the inner spec
+    (``pi:meta:muse-spark-1.2`` → ``meta:muse-spark-1.2``).
+
+    Isolation: ``HOME`` is a sibling of the workspace (operator ``~/.pi``
+    skills/config cannot leak in) and ``--no-session`` disables Pi's session
+    log. Meta models get a per-run ``models.json`` pointing at the same
+    Responses endpoint Vulcan's ``MetaProvider`` uses.
+    """
+    del priced_spec, max_turns, network  # Pi has no max-turns flag; no web tools to deny.
+    workspace = workspace.resolve()
+    if timeout_s is not None and timeout_s <= 0:
+        raise ProviderError("run budget exhausted before CLI agent start")
+    if max_run_cost is not None:
+        raise ProviderError(
+            "Pi reports usage at message boundaries rather than a live cost "
+            "stream, so --max-run-cost cannot be enforced; use --timeout"
+        )
+
+    checked = preflight or _pi_preflight(pi_bin)
+    _require_ready(checked)
+
+    inner = _pi_inner_spec(model)
+    provider_name, inner_model = parse_model_spec(inner)
+    home = workspace.parent / "pi-home"
+    home.mkdir(parents=True, exist_ok=True)
+    if provider_name == "meta":
+        pi_model, _key_env = _write_pi_meta_models_json(home, inner_model)
+    elif provider_name in {"openai", "anthropic"}:
+        pi_model = f"{provider_name}/{inner_model}"
+    else:
+        raise ProviderError(
+            f"pi harness does not yet route provider {provider_name!r}; "
+            "use meta:muse-spark-1.2 (or openai:/anthropic: inner specs)"
+        )
+
+    cmd = [
+        pi_bin,
+        "--mode",
+        "json",
+        "-p",
+        "--no-session",
+        "--no-skills",
+        "--no-extensions",
+        "--no-context-files",
+        "--model",
+        pi_model,
+    ]
+    if effort:
+        cmd += ["--thinking", effort]
+    cmd.append(prompt)
+
+    logged_argv = [
+        cmd[0],
+        "--mode",
+        "json",
+        "-p",
+        "--no-session",
+        "--no-skills",
+        "--no-extensions",
+        "--no-context-files",
+        "--model",
+        pi_model,
+    ]
+    if effort:
+        logged_argv += ["--thinking", effort]
+    logged_argv.append("<prompt omitted>")
+
+    collector.record(
+        "cli_agent_start",
+        {
+            "harness": "pi",
+            "argv": logged_argv,
+            "harness_version": checked.version,
+            "inner_spec": inner,
+        },
+    )
+
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=workspace,
+            env=_pi_env(home, env_overrides),
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except FileNotFoundError as e:
+        raise ProviderError(
+            f"{pi_bin!r} not found on PATH; install with "
+            "`npm install -g @earendil-works/pi-coding-agent`"
+        ) from e
+
+    stderr_chunks: list[str] = []
+
+    def _drain_stderr() -> None:
+        assert proc.stderr is not None
+        for chunk in proc.stderr:
+            stderr_chunks.append(chunk)
+
+    stderr_thread = threading.Thread(target=_drain_stderr, daemon=True)
+    stderr_thread.start()
+
+    outcome = CliAgentOutcome(
+        harness="pi",
+        billing="api",
+        cost_basis="metered-api-pricing",
+        execution_boundary="host-workspace; pi tools=read,write,edit,bash; no-session",
+        requested_model=inner,
+        reported_model=pi_model,
+        model_identity_confidence="requested-plus-wire",
+        harness_version=checked.version,
+        auth_method="api",
+        reported_effort=effort,
+        sandbox_profile="none (host; docker verifier allowed)",
+    )
+    killed = {"timeout": False}
+
+    def _kill_on_timeout() -> None:
+        killed["timeout"] = True
+        proc.kill()
+
+    watchdog: threading.Timer | None = None
+    if timeout_s is not None:
+        watchdog = threading.Timer(timeout_s, _kill_on_timeout)
+        watchdog.daemon = True
+        watchdog.start()
+
+    last_usage: dict[str, Any] | None = None
+    session_id: str | None = None
+    turns = 0
+    stream_f = stream_log_path.open("w", encoding="utf-8") if stream_log_path else None
+    try:
+        assert proc.stdout is not None
+        for raw_line in proc.stdout:
+            line = raw_line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if stream_f:
+                json.dump(sanitize(event), stream_f)
+                stream_f.write("\n")
+            etype = str(event.get("type") or "")
+            if etype == "session":
+                session_id = str(event.get("id") or "") or session_id
+            elif etype == "turn_end":
+                turns += 1
+            usage = event.get("usage")
+            if isinstance(usage, dict):
+                last_usage = usage
+            message = event.get("message")
+            if isinstance(message, dict) and isinstance(message.get("usage"), dict):
+                last_usage = message["usage"]
+            collector.record("cli_agent_event", {"type": etype})
+    finally:
+        if watchdog is not None:
+            watchdog.cancel()
+        if stream_f:
+            stream_f.close()
+
+    proc.wait()
+    stderr_thread.join(timeout=2)
+    outcome.timed_out = killed["timeout"]
+    outcome.session_id = session_id
+    outcome.num_turns = turns or None
+    if last_usage:
+        prompt_tokens, completion_tokens, cached = _pi_usage_tokens(last_usage)
+        outcome.prompt_tokens = prompt_tokens
+        outcome.completion_tokens = completion_tokens
+        outcome.cached_input_tokens = cached
+        raw_cost: Any = last_usage.get("cost")
+        if isinstance(raw_cost, dict):
+            raw_cost = raw_cost.get("total")
+        if raw_cost is not None:
+            try:
+                outcome.cli_reported_cost_usd = float(raw_cost)
+            except (TypeError, ValueError):
+                outcome.cli_reported_cost_usd = None
+    if outcome.timed_out:
+        outcome.finished = False
+        collector.record("cli_agent_result", outcome.summary())
+        return outcome
+    if proc.returncode != 0:
+        detail = "".join(stderr_chunks)[-500:].strip() or "no error detail"
+        raise ProviderError(f"pi failed (exit {proc.returncode}): {detail[:500]}")
+    outcome.finished = True
+    collector.record("cli_agent_result", outcome.summary())
+    return outcome
+
+
 @dataclass(frozen=True)
 class ClaudeCodeAdapter:
     harness_id: str = "claude-code"
@@ -2394,11 +2774,36 @@ class ZCodeAdapter:
         return run_zcode_task(**kwargs)
 
 
+@dataclass(frozen=True)
+class PiAdapter:
+    harness_id: str = "pi"
+
+    def capabilities(self) -> HarnessCapabilities:
+        return HarnessCapabilities(
+            harness=self.harness_id,
+            display_name="Pi",
+            executable="pi",
+            structured_events=True,
+            reports_tokens=True,
+            reports_model=True,
+            supports_effort=True,
+            supports_live_cost_cap=False,
+            sandbox="host workspace (read/write/edit/bash; no web tools)",
+        )
+
+    def preflight(self) -> HarnessPreflight:
+        return _pi_preflight()
+
+    def run_task(self, **kwargs: Any) -> CliAgentOutcome:
+        return run_pi_task(**kwargs)
+
+
 _CLI_AGENT_ADAPTERS: dict[str, CliAgentAdapter] = {
     "claude-code": ClaudeCodeAdapter(),
     "codex": CodexAdapter(),
     "cursor": CursorAdapter(),
     "grok-build": GrokBuildAdapter(),
+    "pi": PiAdapter(),
     "zcode": ZCodeAdapter(),
 }
 

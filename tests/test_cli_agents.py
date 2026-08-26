@@ -27,6 +27,7 @@ from harness.agent.cli_agents import (
     run_claude_code_task,
     run_codex_task,
     run_cursor_task,
+    run_pi_task,
     run_zcode_task,
 )
 from harness.agent.loop import _resolve_run_engine, run_agent
@@ -1042,3 +1043,166 @@ def test_subscription_env_blocks_system_pip_installs() -> None:
     assert env["PYTHONNOUSERSITE"] == "1"
     # Test adapters may still override explicitly.
     assert _subscription_env({"PIP_REQUIRE_VIRTUALENV": "0"})["PIP_REQUIRE_VIRTUALENV"] == "0"
+
+
+FAKE_PI = """#!/usr/bin/env python3
+import json, os, sys
+
+args = sys.argv[1:]
+mode = os.environ.get("FAKE_PI_MODE", "success")
+if "--version" in args:
+    print("pi 0.52.0")
+    sys.exit(0)
+if mode == "crash":
+    print("boom", file=sys.stderr)
+    sys.exit(2)
+if "--thinking" in args:
+    thinking = args[args.index("--thinking") + 1]
+else:
+    thinking = None
+model = args[args.index("--model") + 1] if "--model" in args else None
+if mode == "success":
+    with open("hello.py", "w") as f:
+        f.write('print("hello from vulcanbench")\\n')
+print(json.dumps({"type": "session", "version": 3, "id": "pi-s1"}))
+print(json.dumps({"type": "agent_start"}))
+print(json.dumps({"type": "turn_start"}))
+print(json.dumps({
+    "type": "message_end",
+    "message": {
+        "role": "assistant",
+        "usage": {"input": 200, "output": 40, "cacheRead": 50, "cost": {"total": 0.0042}},
+    },
+}))
+print(json.dumps({"type": "turn_end"}))
+print(json.dumps({"type": "agent_end", "messages": []}))
+open(os.path.join(os.environ.get("HOME", "."), "pi-argv.json"), "w").write(
+    json.dumps({"thinking": thinking, "model": model, "api_key_present": "META_MUSE_SPARK_API" in os.environ})
+)
+"""
+
+
+def _write_fake_pi(bin_dir: Path) -> Path:
+    script = bin_dir / "pi"
+    script.write_text(FAKE_PI)
+    script.chmod(script.stat().st_mode | stat.S_IEXEC)
+    return script
+
+
+@pytest.fixture
+def fake_pi(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> Path:
+    bin_dir = tmp_path_factory.mktemp("fake-pi-bin")
+    script = _write_fake_pi(bin_dir)
+    monkeypatch.setenv("PATH", f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}")
+    monkeypatch.setenv("META_MUSE_SPARK_API", "meta-test-key")
+    return script
+
+
+def test_pi_spec_detection_and_pricing_alias() -> None:
+    assert is_cli_agent_spec("pi:meta:muse-spark-1.2")
+    assert is_priced("pi:meta:muse-spark-1.2")
+    assert cost_usd("pi:meta:muse-spark-1.2", 1_000_000, 1_000_000) == cost_usd(
+        "meta:muse-spark-1.2", 1_000_000, 1_000_000
+    )
+
+
+def test_run_agent_via_pi_api_harness(tmp_path: Path, fake_pi: Path) -> None:
+    res = run_agent(
+        task_id="hello-world",
+        model="pi:meta:muse-spark-1.2",
+        output_dir=tmp_path,
+        tasks_root=Path("tasks/v1"),
+        judges=False,
+        sandbox="local",
+        effort="low",
+    )
+    summary = res["summary"]
+    assert summary["scores"]["functional"] == 1.0
+    assert summary["finished"] is True
+    cli = summary["cli_agent"]
+    assert cli["harness"] == "pi"
+    assert cli["billing"] == "api"
+    assert cli["requested_model"] == "meta:muse-spark-1.2"
+    assert cli["reported_model"] == "vulcan-meta/muse-spark-1.2"
+    assert cli["reported_effort"] == "low"
+    assert summary["tokens"]["prompt"] == 200
+    assert summary["tokens"]["completion"] == 40
+    assert summary["tokens"]["cached_input"] == 50
+    economics = summary["economics"]
+    assert economics["billing_mode"] == "api-metered"
+    assert economics["marginal_cash_usd"] == summary["cost_usd"]
+    stream_path = tmp_path / res["run_id"] / "cli-agent-stream.jsonl"
+    events = [json.loads(line) for line in stream_path.read_text().splitlines()]
+    assert any(e.get("type") == "session" for e in events)
+    start = json.loads(
+        next(
+            line
+            for line in (tmp_path / res["run_id"] / "trace.jsonl").read_text().splitlines()
+            if '"cli_agent_start"' in line
+        )
+    )
+    argv = start["data"]["argv"]
+    assert "--thinking" in argv and argv[argv.index("--thinking") + 1] == "low"
+    assert "-p" in argv
+    assert "--no-session" in argv
+    assert "--model" in argv and "vulcan-meta/" in argv[argv.index("--model") + 1]
+
+
+def test_pi_writes_meta_models_json_without_secret(tmp_path: Path, fake_pi: Path) -> None:
+    (tmp_path / "ws").mkdir()
+    outcome = run_pi_task(
+        workspace=tmp_path / "ws",
+        prompt="fix",
+        model="meta:muse-spark-1.2",
+        priced_spec="pi:meta:muse-spark-1.2",
+        max_turns=10,
+        collector=_Collector(),
+        effort="high",
+    )
+    assert outcome.finished is True
+    models = json.loads((tmp_path / "pi-home" / ".pi" / "agent" / "models.json").read_text())
+    assert models["providers"]["vulcan-meta"]["api"] == "openai-responses"
+    assert models["providers"]["vulcan-meta"]["apiKey"] == "$META_MUSE_SPARK_API"
+    secret = "meta-test-key"
+    assert secret not in (tmp_path / "pi-home" / ".pi" / "agent" / "models.json").read_text()
+
+
+def test_pi_rejects_unenforceable_live_cost_cap(tmp_path: Path, fake_pi: Path) -> None:
+    (tmp_path / "ws").mkdir()
+    with pytest.raises(ProviderError, match="max-run-cost"):
+        run_pi_task(
+            workspace=tmp_path / "ws",
+            prompt="fix",
+            model="meta:muse-spark-1.2",
+            priced_spec="pi:meta:muse-spark-1.2",
+            max_turns=10,
+            collector=_Collector(),
+            max_run_cost=1.0,
+        )
+
+
+def test_pi_allows_docker_verifier() -> None:
+    adapter, provider, effort = _resolve_run_engine(
+        model="pi:meta:muse-spark-1.2", provider=None, effort="extra-high", sandbox="docker"
+    )
+    assert adapter is not None and adapter.harness_id == "pi"
+    assert provider is None
+    assert effort is not None and effort.provider_value == "xhigh" and effort.supported
+
+
+def test_pi_missing_api_key_fails_closed(
+    tmp_path: Path, fake_pi: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("META_MUSE_SPARK_API", raising=False)
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    (tmp_path / "ws").mkdir()
+    with pytest.raises(ProviderError, match=r"API-metered|is not set|preflight"):
+        run_pi_task(
+            workspace=tmp_path / "ws",
+            prompt="fix",
+            model="meta:muse-spark-1.2",
+            priced_spec="pi:meta:muse-spark-1.2",
+            max_turns=10,
+            collector=_Collector(),
+        )

@@ -271,7 +271,11 @@ def run_agent(  # noqa: PLR0915
         scores,
         cached_input_tokens=cached_input_tokens,
     )
-    grading_uses_subscription = bool(cli_outcome and is_cli_agent_spec(judge_model or model))
+    grading_uses_subscription = bool(
+        cli_outcome
+        and cli_outcome.billing == "subscription"
+        and is_cli_agent_spec(judge_model or model)
+    )
     economics = (
         subscription_receipt(
             api_equivalent_cost_usd=cost["total"],
@@ -292,7 +296,7 @@ def run_agent(  # noqa: PLR0915
                 else "estimated-from-reported-tokens"
             ),
         )
-        if cli_outcome
+        if cli_outcome and cli_outcome.billing == "subscription"
         else api_receipt(cost["total"], cost["judges"])
     )
     duration_s = round(time.monotonic() - started_mono, 3)
@@ -1264,6 +1268,10 @@ def _build_judge_provider(
     if not judges:
         return None
     spec = judge_model or model
+    if spec.startswith("pi:"):
+        spec = spec[3:]
+        if ":" not in spec and spec.lower().startswith("muse-spark"):
+            spec = f"meta:{spec}"
     if run_provider is not None and spec == model:
         provider: LLMProvider = run_provider
     else:

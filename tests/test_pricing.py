@@ -118,6 +118,7 @@ def test_ollama_local_runs_are_free_not_unknown() -> None:
 def test_muse_spark_12_tiers_priced() -> None:
     assert pricing.cost_usd("meta:muse-spark-1.2", 1_000_000, 1_000_000) == 5.50
     assert pricing.cost_usd("meta:muse-spark-1.2-contributor", 1_000_000, 1_000_000) == 0.30
+    assert pricing.cost_usd("pi:meta:muse-spark-1.2", 1_000_000, 1_000_000) == 5.50
 
 
 def test_anthropic_frontier_models_priced() -> None:

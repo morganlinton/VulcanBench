@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-26
+
 ### Added
+
+- **Pi harness (`--harness pi`).** Runs a task through the open-source
+  [Pi](https://github.com/earendil-works/pi) coding agent
+  (`@earendil-works/pi-coding-agent`) while VulcanBench still owns the hidden
+  tests and scores. Pi is API-metered (not a subscription): `--harness pi
+  --billing api --model meta:muse-spark-1.2` records `cli_agent.harness=pi`
+  on the **api** leaderboard track, priced as the inner spec. Use it to
+  measure the harness delta against Report No. 19's uniform-loop Muse Spark
+  column. Effort maps to Pi's `--thinking` (`extra-high` → `xhigh`). Install
+  with `npm install -g @earendil-works/pi-coding-agent` and set
+  `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY`). See
+  [docs/HARNESS_BENCHMARKING.md](docs/HARNESS_BENCHMARKING.md).
 
 - **Report No. 19: Muse Spark 1.2 across the effort knob.** Published under
   [`docs/results/v3-musespark-2026-08/`](docs/results/v3-musespark-2026-08/model-card.md):

@@ -131,3 +131,14 @@ publication protocol). The low column is 18 fresh runs plus 5 reused by
 vulcanbench run --suite v3 --model meta:muse-spark-1.2 --effort <low|high|extra-high> \
   --repeat 1 --no-judges
 ```
+
+Same model through Pi (harness delta; still the api track):
+
+```
+npm install -g @earendil-works/pi-coding-agent
+vulcanbench harness doctor pi
+vulcanbench run --suite v3 --harness pi --billing api \
+  --model meta:muse-spark-1.2 --effort <low|high|extra-high> \
+  --repeat 1 --no-judges
+vulcanbench leaderboard --track api
+```

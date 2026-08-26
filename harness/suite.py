@@ -18,7 +18,7 @@ from typing import Any
 from harness.agent.cli_agents import is_cli_agent_spec
 from harness.agent.loop import run_agent
 from harness.agent.providers import NonRetryableProviderError, ProviderError
-from harness.leaderboard import aggregate_by_model, scan_leaderboard
+from harness.leaderboard import aggregate_by_model, scan_leaderboard, track_for_run
 from harness.sandbox.docker_executor import SandboxError
 from harness.task_metadata import repo_scale
 from harness.tasks import list_task_ids, load_task
@@ -243,7 +243,7 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
             "functional": summary.get("scores", {}).get("functional"),
             "cost_usd": summary.get("cost_usd"),
             "execution_harness": cli_agent.get("harness") or "vulcan",
-            "track": "subscription" if cli_agent else "api",
+            "track": track_for_run(cli_agent),
             "economics": economics,
             "duration_s": summary.get("duration_s"),
             "effort": summary.get("effort"),

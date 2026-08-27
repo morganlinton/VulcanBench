@@ -47,45 +47,77 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     gs = fig.add_gridspec(
         2,
         2,
-        height_ratios=[0.16, 1.0],
-        hspace=0.28,
+        height_ratios=[0.22, 1.0],
+        hspace=0.32,
         wspace=0.18,
         left=0.065,
         right=0.965,
-        top=0.96,
+        top=0.97,
         bottom=0.11,
     )
 
     hax = fig.add_subplot(gs[0, :])
-    hax.axis("off")
+    hax.set_axis_off()
+    hax.set_xlim(0, 1)
+    hax.set_ylim(0, 1)
+    box = hax.get_position()
+    fig_w, fig_h = fig.get_size_inches()
+    phys_w = box.width * fig_w
+    phys_h = box.height * fig_h
+    chip_h = 0.78
+    chip_w = chip_h * phys_h / phys_w
     try:
         logo = plt.imread(str(LOGO))
         hax.imshow(
-            logo, extent=(0.0, 0.052, 0.05, 0.95), transform=hax.transAxes, aspect="auto", zorder=5
+            logo,
+            extent=(0.0, chip_w, 0.11, 0.11 + chip_h),
+            transform=hax.transAxes,
+            aspect="auto",
+            zorder=5,
+            clip_on=False,
         )
-        tx = 0.066
+        tx = chip_w + 0.014
     except Exception:
         tx = 0.0
-    hax.text(tx, 0.62, "VulcanBench", family=BRAND, fontsize=26, color=INK, va="center")
     hax.text(
         tx,
-        0.14,
+        0.66,
+        "VulcanBench",
+        family=BRAND,
+        fontsize=26,
+        color=INK,
+        va="center",
+        transform=hax.transAxes,
+        clip_on=False,
+        zorder=6,
+    )
+    hax.text(
+        tx,
+        0.20,
         "Report No. 20   ·   Muse Spark 1.2: model versus harness   ·   suite v3   ·   23 tasks   ·   1 attempt/cell",
         family=BRAND_MED,
         fontsize=12.5,
         color=INK2,
         va="center",
+        transform=hax.transAxes,
+        clip_on=False,
+        zorder=6,
     )
     hax.text(
         0.999,
-        0.62,
+        0.66,
         "pass@1 by reasoning effort",
         family=SANS,
         fontsize=13,
         color=MUTED,
         va="center",
         ha="right",
+        transform=hax.transAxes,
+        clip_on=False,
+        zorder=6,
     )
+    hax.set_xlim(0, 1)
+    hax.set_ylim(0, 1)
 
     ax = fig.add_subplot(gs[1, 0])
     _style(ax)
@@ -100,11 +132,28 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     )
     for xi, yi in zip(x, pi_y, strict=True):
         ax.text(
-            xi, yi + 2.2, f"{yi:.1f}%", ha="center", family=BRAND_MED, fontsize=13, color=PI_COLOR
+            xi,
+            yi + 3.4,
+            f"{yi:.1f}%",
+            ha="center",
+            family=BRAND_MED,
+            fontsize=13,
+            color=PI_COLOR,
+            bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.4),
+            zorder=6,
         )
     for xi, yi in zip(x, api_y, strict=True):
         ax.text(
-            xi, yi - 3.8, f"{yi:.1f}%", ha="center", family=BRAND_MED, fontsize=13, color=API_COLOR
+            xi + 0.12,
+            yi - 1.0,
+            f"{yi:.1f}%",
+            ha="left",
+            va="top",
+            family=BRAND_MED,
+            fontsize=13,
+            color=API_COLOR,
+            bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.4),
+            zorder=6,
         )
     ax.set_xticks(x)
     ax.set_xticklabels([EFF_LABEL[e] for e in EFFORTS], family=SANS, fontsize=13, color=INK2)
@@ -114,12 +163,11 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     ax.set_ylabel("pass@1  (%)", family=SANS, fontsize=12, color=INK2)
     ax.set_xlabel("reasoning effort", family=SANS, fontsize=12, color=INK2)
     ax.legend(
-        loc="center left",
+        loc="lower left",
         frameon=False,
         fontsize=11.5,
         ncol=1,
         handlelength=1.6,
-        bbox_to_anchor=(0.0, 0.38),
     )
     ax.set_title(
         "Same model, opposite effort curves",
@@ -160,13 +208,14 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
             ax2.bar(pos, t, 0.72, bottom=s + w, color=TIMEOUT, zorder=3)
             ax2.text(
                 pos,
-                s - 0.8,
+                s * 0.52,
                 f"{s}",
                 ha="center",
-                va="top",
+                va="center",
                 family=BRAND_MED,
                 fontsize=12,
                 color="#ffffff",
+                bbox=dict(facecolor=SOLVED, edgecolor="none", pad=1.2),
             )
             xs.append(pos)
             labels.append(EFF_LABEL[e])
@@ -186,6 +235,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
             color=c,
         )
     ax2.set_ylim(0, 24)
+    ax2.yaxis.grid(False)
     ax2.set_yticks([0, 5, 10, 15, 20, 23])
     ax2.set_yticklabels(["0", "5", "10", "15", "20", "23"], family=SANS, fontsize=11, color=MUTED)
     ax2.set_ylabel("runs (of 23)", family=SANS, fontsize=12, color=INK2)

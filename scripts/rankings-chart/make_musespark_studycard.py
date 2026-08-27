@@ -36,6 +36,8 @@ FIELD = "#c7c3ba"
 EFFORTS = ["low", "high", "extra-high"]
 LBL = {"low": "low", "high": "high", "extra-high": "xhigh"}
 
+# Field models only. Muse Spark is drawn as a pair of bars (raw API vs Pi)
+# so the before/after lift is a first-class row, not a floating marker.
 BOARD = [
     ("Grok 4.5", 89.9),
     ("Claude Fable 5", 89.5),
@@ -45,7 +47,6 @@ BOARD = [
     ("Claude Opus 5", 87.0),
     ("Grok 4.6", 87.0),
     ("GPT-5.6 Sol", 87.0),
-    ("Muse Spark 1.2 (raw API)", 87.0),
     ("GPT-5.6 Luna", 85.5),
     ("Qwen3.8-27B", 82.6),
     ("Qwen3.8-Max", 81.2),
@@ -146,7 +147,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
         va="center",
     )
 
-    ax = fig.add_axes((0.062, 0.17, 0.42, 0.47))
+    ax = fig.add_axes((0.062, 0.17, 0.40, 0.47))
     _grid(ax)
     x = [0, 1, 2]
     ax.errorbar(
@@ -177,109 +178,107 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
         zorder=5,
         label="Bare-bones API loop",
     )
-    for xi, yi, se in zip(x, pi_y, pi_se, strict=True):
+    label_box = dict(facecolor=SURFACE, edgecolor="none", pad=1.6)
+    # Pi labels sit in the unused band above 100. API labels sit to the right
+    # of each point so they never land on a grid line or the x-axis.
+    for xi, yi in zip(x, pi_y, strict=True):
         ax.text(
             xi,
-            min(yi + se + 1.8, 99.2),
+            108.5,
             f"{yi:.1f}",
             ha="center",
             family=BRAND_MED,
             fontsize=13.5,
             color=PI_COLOR,
+            bbox=label_box,
+            zorder=6,
+            clip_on=False,
         )
-    for xi, yi, se in zip(x, api_y, api_se, strict=True):
+    for xi, yi in zip(x, api_y, strict=True):
         ax.text(
-            xi,
-            yi - se - 3.4,
+            xi + 0.22,
+            yi - 4.8,
             f"{yi:.1f}",
-            ha="center",
+            ha="left",
+            va="top",
             family=BRAND_MED,
             fontsize=13.5,
             color=API_COLOR,
+            bbox=label_box,
+            zorder=6,
+            clip_on=False,
         )
     ax.set_xticks(x)
     ax.set_xticklabels([LBL[e] for e in EFFORTS], family=SANS, fontsize=14, color=INK2)
-    ax.set_xlim(-0.3, 2.3)
-    ax.set_ylim(45, 104)
+    ax.set_xlim(-0.35, 2.45)
+    ax.set_ylim(42, 118)
     ax.set_yticks([50, 60, 70, 80, 90, 100])
     ax.set_yticklabels(["50", "60", "70", "80", "90", "100"], family=SANS, fontsize=11, color=MUTED)
     ax.set_xlabel("reasoning effort", family=SANS, fontsize=12.5, color=INK2)
     ax.set_title("pass@1 by effort", family=BRAND_MED, fontsize=15, color=INK, loc="left", pad=10)
     ax.legend(
-        loc="center left",
+        loc="lower left",
         frameon=False,
-        fontsize=12.5,
+        fontsize=12,
         handlelength=1.6,
-        bbox_to_anchor=(0.02, 0.42),
+        bbox_to_anchor=(0.02, 0.02),
     )
 
-    ax2 = fig.add_axes((0.60, 0.17, 0.345, 0.58))
+    ax2 = fig.add_axes((0.58, 0.12, 0.36, 0.58))
     ax2.set_facecolor(SURFACE)
     for s in ("top", "right", "left"):
         ax2.spines[s].set_visible(False)
     ax2.spines["bottom"].set_color(GRID)
     ax2.tick_params(length=0)
-    n = len(BOARD)
+    n_field = len(BOARD)
+    # Two Muse Spark rows on top (Pi, then raw API), then the rest of the board.
+    pair = [
+        ("after   Muse Spark 1.2 + Pi", PI_REF, PI_COLOR, True),
+        ("before  Muse Spark 1.2 raw API", API_BEST, API_COLOR, True),
+    ]
+    n = n_field + 2
     ys = list(range(n, 0, -1))
     base = 70.0
-    for (name, val), y in zip(BOARD, ys, strict=True):
-        is_ms = name.startswith("Muse Spark")
-        color = API_COLOR if is_ms else FIELD
+    rows = [*pair, *[(nm, val, FIELD, False) for nm, val in BOARD]]
+    for (name, val, color, hi), y in zip(rows, ys, strict=True):
         ax2.barh(y, val - base, left=base, height=0.62, color=color, zorder=3)
-        weight = BRAND_MED if is_ms else SANS
         ax2.text(
-            base - 0.6,
+            base - 0.55,
             y,
             name,
             ha="right",
             va="center",
-            family=weight,
-            fontsize=10.5,
-            color=INK if is_ms else INK2,
+            family=BRAND_MED if hi else SANS,
+            fontsize=10.2,
+            color=INK if hi else INK2,
         )
         ax2.text(
-            val + 0.5,
+            min(val + 0.9, 99.4),
             y,
             f"{val:.1f}",
             ha="left",
             va="center",
-            family=SANS,
+            family=BRAND_MED if hi else SANS,
             fontsize=10,
-            color=INK if is_ms else MUTED,
+            color=INK if hi else MUTED,
+            bbox=dict(facecolor=SURFACE, edgecolor="none", pad=0.8),
+            zorder=4,
         )
-    ms_y = ys[[nm for nm, _ in BOARD].index("Muse Spark 1.2 (raw API)")]
-    ax2.plot([PI_REF, PI_REF], [ms_y - 0.4, n + 0.4], color=PI_COLOR, lw=1.6, ls="--", zorder=2)
-    ax2.annotate(
-        "",
-        xy=(PI_REF, ms_y),
-        xytext=(API_BEST, ms_y),
-        arrowprops=dict(arrowstyle="->", color=PI_COLOR, lw=2.2),
-        zorder=6,
-    )
-    ax2.plot(PI_REF, ms_y, "o", color=PI_COLOR, ms=10, zorder=7)
-    ax2.text(
-        PI_REF - 0.3,
-        ms_y - 1.05,
-        "same model,\nin Pi: 95.7",
-        ha="right",
-        va="top",
-        family=BRAND_MED,
-        fontsize=10.5,
-        color=PI_COLOR,
-        linespacing=1.2,
-    )
-    ax2.set_xlim(base, 100)
-    ax2.set_ylim(0.3, n + 1.4)
+    # Small gap marker between the Muse Spark pair and the field.
+    gap_y = ys[1] - 0.55
+    ax2.plot([base, 99.2], [gap_y, gap_y], color=GRID, lw=1.0, zorder=2)
+    ax2.set_xlim(base, 101.5)
+    ax2.set_ylim(0.2, n + 2.4)
     ax2.set_yticks([])
     ax2.set_xticks([70, 80, 90, 100])
     ax2.set_xticklabels(["70", "80", "90", "100"], family=SANS, fontsize=11, color=MUTED)
     ax2.set_title(
-        "v3 best-effort leaderboard  (pass@1 %)",
+        "Before and after on the v3 board  (pass@1 %)",
         family=BRAND_MED,
         fontsize=15,
         color=INK,
         loc="left",
-        pad=10,
+        pad=18,
     )
 
     fig.text(

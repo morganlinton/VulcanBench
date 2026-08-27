@@ -373,17 +373,20 @@ one with `python scripts/import_oss_issues.py`. Format details:
 
 ## Coding Intelligence Index (CII)
 
-`tasks/cii-v1/` is the flagship measurement suite: **38 all-new tasks** sourced
-from upstream OSS PRs merged **May–August 2026** (post-cutoff for the models
-measured), with TerminalBench-style complexity-scaled budgets (30 min–8 h,
+`tasks/cii-v1/` is the flagship measurement suite: **41 all-new tasks** sourced
+from upstream OSS PRs merged **May to August 2026** (post-cutoff for the models
+measured), with TerminalBench-style complexity-scaled budgets (30 min to 8 h,
 stamped and validator-enforced), hidden fail-to-pass tests plus regression
 guards that zero the functional score on any regression, and a deterministic
 ×3 admission gate.
 
-**August 2026 frontier results** ([full report](docs/results/cii-v1-2026-08/README.md)):
-Claude Opus 5 (Claude Code CLI) **96.4% ± 2.8** vs GPT 5.6 Sol (Codex CLI)
-**86.5% ± 4.7** pass@1, a stable ~10-point gap carried by four discriminator
-tasks, with exactly one task resisting both models. CII v1 ranks frontier
+**August 2026 frontier results** ([full report](docs/results/cii-v1-2026-08/README.md)),
+three models over the same symmetric 37-task set:
+Claude Opus 5 (Claude Code CLI) **96.4% ± 2.8**, Claude Sonnet 5 (Claude Code
+CLI) **89.2% ± 4.6**, GPT 5.6 Sol (Codex CLI) **86.5% ± 4.7** pass@1. The
+Opus-over-Sol gap is resolved under paired per-task tests; Sonnet vs Sol is a
+statistical tie (which agrees with SWE-bench Pro, the format-matched external
+benchmark). Exactly one task resists all three models. CII v1 ranks frontier
 models; it does not ceiling them.
 
 `tasks/cii-v2/` is the difficulty-gated frontier successor: its

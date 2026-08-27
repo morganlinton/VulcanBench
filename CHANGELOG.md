@@ -31,10 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--sandbox local`; the walking-skeleton template is
   `tasks/cii-v2/demo-compose-redis-smoke`.
 
-- **Coding Intelligence Index v1** (`tasks/cii-v1/`, `--suite cii-v1`): 38 all-new
+- **Coding Intelligence Index v1** (`tasks/cii-v1/`, `--suite cii-v1`): 41 all-new
   gold-verified tasks from post-cutoff OSS PRs (May to Aug 2026) with
   complexity-scaled TB-style budgets; August 2026 frontier results published in
-  `docs/results/cii-v1-2026-08/` (Opus 5 96.3% vs GPT 5.6 Sol 86.5% pass@1).
+  `docs/results/cii-v1-2026-08/`, now a three-model report over the symmetric
+  37-task set (Opus 5 96.4%, Sonnet 5 89.2%, GPT 5.6 Sol 86.5% pass@1; Sonnet
+  vs Sol is a statistical tie, and the chart gained fixed per-model lanes so
+  coincident per-task dots stay visible).
 - **CII v2 frontier charter + admission gate** (`tasks/cii-v2/`,
   `scripts/frontier_gate.sh`): difficulty-gated suite requiring n=3 measurement
   against two reference frontier models before admission; candidate log with

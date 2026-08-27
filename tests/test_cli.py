@@ -58,7 +58,13 @@ def test_harness_list_json() -> None:
     result = runner.invoke(app, ["harness", "list", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
-    assert {row["harness"] for row in data} == {"claude-code", "codex", "cursor", "grok-build", "zcode"}
+    assert {row["harness"] for row in data} == {
+        "claude-code",
+        "codex",
+        "cursor",
+        "grok-build",
+        "zcode",
+    }
     assert all(row["structured_events"] for row in data)
 
 

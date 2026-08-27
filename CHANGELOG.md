@@ -14,13 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Report No. 20: Muse Spark 1.2, model versus harness.** Published under
   [`docs/results/v3-musespark-harness-2026-08/`](docs/results/v3-musespark-harness-2026-08/model-card.md)
   as Harness Study No. 04. Same 23-task v3 suite as Report No. 19, Pi vs the
-  uniform loop, one attempt per cell. As graded: 95.7% / 91.3% / 91.3% on Pi
-  against 87.0% / 73.9% / 52.2% on the uniform loop (39-point xhigh gap, zero
-  Pi timeouts). Model card, JSON, thread, and branded charts
+  uniform loop, one attempt per cell. Clean (six answer-key Pi cells dropped
+  from the numerator): 95.7% / 87.0% / 69.6% on Pi against 87.0% / 73.9% /
+  52.2% on the uniform loop, a 17.4-point clean xhigh gap (39.1 as graded)
+  with zero Pi timeouts. Model card, JSON, thread, and branded charts
   (`make_musespark_harness.py`, `make_musespark_studycard.py`,
-  `make_musespark_hero.py`). `pi:meta:muse-spark-1.2` is excluded from the v3
-  board aggregators. Integrity caveats (host-run agent, six answer-key cells)
-  are on the card.
+  `make_musespark_hero.py`). Integrity caveats (host-run agent, six
+  answer-key cells, under-metered Pi cash) lead the card.
+
+### Fixed
+
+- **Pi usage accounting sums per-message records.** `run_pi_task` previously
+  kept only Pi's last usage record; Pi reports usage per assistant message, so
+  billed tokens and `cli_reported_cost_usd` understated multi-turn runs (a
+  40-step run could show 0.6 K "billed" tokens). The parser now sums finalized
+  assistant `message_end` usage (input + cacheRead + cacheWrite as prompt,
+  cache-read subset tracked separately, per-message cost totaled). Report 20's
+  swept dollar figures predate the fix and are withheld on the card; the JSON
+  keeps them under `*_lastmsg` names.
+- **`leaderboard --track api` excludes API-metered CLI harnesses.** `pi:` rows
+  bill like api but measure model + external agent; they no longer appear on
+  the raw-API board and show only under `--track all`, making the Report 20
+  "not a board entry" rule an enforced invariant instead of advice.
 
 ## [0.9.0] - 2026-08-26
 

@@ -2423,13 +2423,33 @@ def _write_pi_meta_models_json(home: Path, inner_model: str) -> tuple[str, str]:
 
 
 def _pi_usage_tokens(usage: dict[str, Any]) -> tuple[int, int, int]:
-    """Parse Pi JSON-mode usage into (input, output, cache_read)."""
+    """Parse one Pi usage record into (prompt, completion, cache_read).
+
+    Pi's ``usage.input`` counts only uncached fresh input; cache reads and
+    writes are separate fields. VulcanBench's convention (see the grok
+    adapter) is ``prompt_tokens`` = total input including cache, with
+    ``cached_input_tokens`` the cache-read subset, so pricing can discount it.
+    """
     cache = int(
         usage.get("cacheRead") or usage.get("cache_read") or usage.get("cached_input_tokens") or 0
     )
+    cache_write = int(usage.get("cacheWrite") or usage.get("cache_write") or 0)
     inp = int(usage.get("input") or usage.get("inputTokens") or usage.get("input_tokens") or 0)
     out = int(usage.get("output") or usage.get("outputTokens") or usage.get("output_tokens") or 0)
-    return inp, out, cache
+    return inp + cache + cache_write, out, cache
+
+
+def _pi_usage_cost(usage: dict[str, Any]) -> float | None:
+    """Pi's own USD figure for one usage record, if present."""
+    raw: Any = usage.get("cost")
+    if isinstance(raw, dict):
+        raw = raw.get("total")
+    if raw is None:
+        return None
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return None
 
 
 def run_pi_task(  # noqa: PLR0912, PLR0915  linear stream-parse loop
@@ -2584,6 +2604,13 @@ def run_pi_task(  # noqa: PLR0912, PLR0915  linear stream-parse loop
         watchdog.daemon = True
         watchdog.start()
 
+    # Pi reports usage per assistant message (finalized on ``message_end``);
+    # Pi's own session stats sum those messages. Summing here, not keeping the
+    # last record, is what makes the run's tokens and cost the whole run's.
+    sum_prompt = sum_completion = sum_cached = 0
+    sum_cost = 0.0
+    usage_records = 0
+    cost_records = 0
     last_usage: dict[str, Any] | None = None
     last_error: str | None = None
     session_id: str | None = None
@@ -2612,8 +2639,22 @@ def run_pi_task(  # noqa: PLR0912, PLR0915  linear stream-parse loop
                 last_usage = usage
             message = event.get("message")
             if isinstance(message, dict):
-                if isinstance(message.get("usage"), dict):
-                    last_usage = message["usage"]
+                msg_usage = message.get("usage")
+                if isinstance(msg_usage, dict):
+                    last_usage = msg_usage
+                    # Only finalized assistant messages count toward the sum;
+                    # message_start/message_update carry partial figures for
+                    # the same message and would double-count.
+                    if etype == "message_end" and message.get("role") == "assistant":
+                        prompt, completion, cache = _pi_usage_tokens(msg_usage)
+                        sum_prompt += prompt
+                        sum_completion += completion
+                        sum_cached += cache
+                        usage_records += 1
+                        msg_cost = _pi_usage_cost(msg_usage)
+                        if msg_cost is not None:
+                            sum_cost += msg_cost
+                            cost_records += 1
                 err = message.get("errorMessage")
                 if message.get("stopReason") == "error" or err:
                     last_error = str(err or "pi turn failed")
@@ -2629,19 +2670,20 @@ def run_pi_task(  # noqa: PLR0912, PLR0915  linear stream-parse loop
     outcome.timed_out = killed["timeout"]
     outcome.session_id = session_id
     outcome.num_turns = turns or None
-    if last_usage:
+    if usage_records:
+        outcome.prompt_tokens = sum_prompt
+        outcome.completion_tokens = sum_completion
+        outcome.cached_input_tokens = sum_cached
+        if cost_records:
+            outcome.cli_reported_cost_usd = round(sum_cost, 6)
+    elif last_usage:
+        # No message_end usage seen (older Pi, or a stream cut short): the
+        # last record is a per-message figure and understates the run.
         prompt_tokens, completion_tokens, cached = _pi_usage_tokens(last_usage)
         outcome.prompt_tokens = prompt_tokens
         outcome.completion_tokens = completion_tokens
         outcome.cached_input_tokens = cached
-        raw_cost: Any = last_usage.get("cost")
-        if isinstance(raw_cost, dict):
-            raw_cost = raw_cost.get("total")
-        if raw_cost is not None:
-            try:
-                outcome.cli_reported_cost_usd = float(raw_cost)
-            except (TypeError, ValueError):
-                outcome.cli_reported_cost_usd = None
+        outcome.cli_reported_cost_usd = _pi_usage_cost(last_usage)
     if outcome.timed_out:
         outcome.finished = False
         collector.record("cli_agent_result", outcome.summary())

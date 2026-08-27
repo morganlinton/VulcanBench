@@ -1082,10 +1082,29 @@ print(json.dumps({"type": "session", "version": 3, "id": "pi-s1"}))
 print(json.dumps({"type": "agent_start"}))
 print(json.dumps({"type": "turn_start"}))
 print(json.dumps({
+    "type": "message_update",
+    "message": {
+        "role": "assistant",
+        "usage": {"input": 200, "output": 7, "cacheRead": 50, "cost": {"total": 0.001}},
+    },
+}))
+print(json.dumps({
     "type": "message_end",
     "message": {
         "role": "assistant",
-        "usage": {"input": 200, "output": 40, "cacheRead": 50, "cost": {"total": 0.0042}},
+        "usage": {
+            "input": 200, "output": 40, "cacheRead": 50, "cacheWrite": 10,
+            "cost": {"total": 0.0042},
+        },
+    },
+}))
+print(json.dumps({"type": "turn_end"}))
+print(json.dumps({"type": "turn_start"}))
+print(json.dumps({
+    "type": "message_end",
+    "message": {
+        "role": "assistant",
+        "usage": {"input": 20, "output": 60, "cacheRead": 250, "cost": {"total": 0.0018}},
     },
 }))
 print(json.dumps({"type": "turn_end"}))
@@ -1142,9 +1161,14 @@ def test_run_agent_via_pi_api_harness(tmp_path: Path, fake_pi: Path) -> None:
     assert cli["requested_model"] == "meta:muse-spark-1.2"
     assert cli["reported_model"] == "vulcan-meta/muse-spark-1.2"
     assert cli["reported_effort"] == "low"
-    assert summary["tokens"]["prompt"] == 200
-    assert summary["tokens"]["completion"] == 40
-    assert summary["tokens"]["cached_input"] == 50
+    # Summed across both assistant message_end events (not the last one),
+    # with prompt = input + cacheRead + cacheWrite per repo convention:
+    # (200+50+10) + (20+250) and 40+60; message_update partials don't count.
+    assert summary["tokens"]["prompt"] == 530
+    assert summary["tokens"]["completion"] == 100
+    assert summary["tokens"]["cached_input"] == 300
+    assert cli["cli_reported_cost_usd"] == pytest.approx(0.006)
+    assert cli["num_turns"] == 2
     economics = summary["economics"]
     assert economics["billing_mode"] == "api-metered"
     assert economics["marginal_cash_usd"] == summary["cost_usd"]

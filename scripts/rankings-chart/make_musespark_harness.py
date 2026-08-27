@@ -124,11 +124,45 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     x = list(range(3))
     api_y = [api[e]["passat1"] for e in EFFORTS]
     pi_y = [pi[e]["passat1"] for e in EFFORTS]
-    ax.plot(
-        x, pi_y, "-o", color=PI_COLOR, lw=3.2, ms=11, zorder=4, label="Pi harness (open source)"
+    pi_clean = [pi[e]["passat1_clean"] for e in EFFORTS]
+    api_err = [_stderr_pts(y, api[e]["n"]) for y, e in zip(api_y, EFFORTS, strict=True)]
+    pi_err = [_stderr_pts(y, pi[e]["n"]) for y, e in zip(pi_y, EFFORTS, strict=True)]
+    ax.errorbar(
+        x,
+        pi_y,
+        yerr=pi_err,
+        fmt="-o",
+        color=PI_COLOR,
+        lw=3.2,
+        ms=11,
+        capsize=5,
+        elinewidth=1.4,
+        zorder=4,
+        label="Pi harness (as graded)",
     )
     ax.plot(
-        x, api_y, "-o", color=API_COLOR, lw=3.2, ms=11, zorder=4, label="Raw API (uniform loop)"
+        x,
+        pi_clean,
+        "--o",
+        color=PI_COLOR,
+        lw=1.8,
+        ms=8,
+        mfc=SURFACE,
+        zorder=4,
+        label="Pi, answer-key cells dropped",
+    )
+    ax.errorbar(
+        x,
+        api_y,
+        yerr=api_err,
+        fmt="-o",
+        color=API_COLOR,
+        lw=3.2,
+        ms=11,
+        capsize=5,
+        elinewidth=1.4,
+        zorder=4,
+        label="Raw API (uniform loop)",
     )
     for xi, yi in zip(x, pi_y, strict=True):
         ax.text(
@@ -155,11 +189,26 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
             bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.4),
             zorder=6,
         )
+    for xi, yi in ((1, pi_clean[1]), (2, pi_clean[2])):
+        ax.text(
+            xi + 0.1,
+            yi - 0.6,
+            f"{yi:.1f}%",
+            ha="left",
+            va="top",
+            family=BRAND_MED,
+            fontsize=11.5,
+            color=PI_COLOR,
+            bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.2),
+            zorder=6,
+        )
     ax.set_xticks(x)
     ax.set_xticklabels([EFF_LABEL[e] for e in EFFORTS], family=SANS, fontsize=13, color=INK2)
-    ax.set_ylim(45, 102)
-    ax.set_yticks([50, 60, 70, 80, 90, 100])
-    ax.set_yticklabels(["50", "60", "70", "80", "90", "100"], family=SANS, fontsize=11, color=MUTED)
+    ax.set_ylim(38, 104)
+    ax.set_yticks([40, 50, 60, 70, 80, 90, 100])
+    ax.set_yticklabels(
+        ["40", "50", "60", "70", "80", "90", "100"], family=SANS, fontsize=11, color=MUTED
+    )
     ax.set_ylabel("pass@1  (%)", family=SANS, fontsize=12, color=INK2)
     ax.set_xlabel("reasoning effort", family=SANS, fontsize=12, color=INK2)
     ax.legend(
@@ -179,19 +228,20 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     )
     ax.annotate(
         "",
-        xy=(2, pi_y[2]),
+        xy=(2, pi_clean[2]),
         xytext=(2, api_y[2]),
         arrowprops=dict(arrowstyle="<->", color=MUTED, lw=1.3),
     )
     ax.text(
-        1.86,
-        (pi_y[2] + api_y[2]) / 2,
-        f"+{pi_y[2] - api_y[2]:.1f} pts",
+        1.95,
+        44.5,
+        f"+{pi_clean[2] - api_y[2]:.1f} pts clean\n(+{pi_y[2] - api_y[2]:.1f} as graded)",
         ha="right",
         va="center",
         family=BRAND_MED,
-        fontsize=12,
+        fontsize=11.5,
         color=INK2,
+        bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.4),
     )
 
     ax2 = fig.add_subplot(gs[1, 1])
@@ -266,9 +316,21 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
 
     fig.text(
         0.065,
-        0.035,
-        "Same Muse Spark 1.2, same 23 post-cutoff PRs, hidden-test grading. Both tracks are metered "
-        "(56.36 USD uniform loop, 0.24 USD Pi). One attempt per cell. Pi is host-run; six cells touched gold/hidden tests.",
+        0.047,
+        "Same Muse Spark 1.2, same 23 post-cutoff PRs, hidden-test grading, n=23 per column, "
+        "whiskers +/-1 binomial stderr, one attempt per cell. Pi is host-run: the dashed line "
+        "drops six answer-key cells.",
+        family=SANS,
+        fontsize=10,
+        color=MUTED,
+        va="center",
+    )
+    fig.text(
+        0.065,
+        0.024,
+        "Both tracks metered. Uniform loop 56.36 USD; this sweep under-metered Pi's cash "
+        "(per-message usage was not summed), so Pi cost is not quoted. Pi moved ~30-58 K "
+        "tokens/task vs the loop's 206-658 K.",
         family=SANS,
         fontsize=10,
         color=MUTED,
@@ -276,6 +338,12 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     )
     fig.savefig(OUT, facecolor=SURFACE)
     print(f"wrote {OUT}")
+
+
+def _stderr_pts(passat1_pct: float, n: int) -> float:
+    """+/-1 binomial stderr of a pass@1 percentage, in points."""
+    p = passat1_pct / 100.0
+    return 100.0 * (p * (1.0 - p) / n) ** 0.5
 
 
 def _style(ax: plt.Axes) -> None:

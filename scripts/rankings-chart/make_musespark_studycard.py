@@ -2,10 +2,9 @@
 
 Two panels in the VulcanBench Harness Study format:
   Left  - pass@1 by effort, Pi vs the bare-bones API loop, +/-1 stderr whiskers.
-  Right - where Muse Spark lands on the v3 best-effort leaderboard: its raw-API
-          best (87.0, low) is a legitimate board entry in the frontier cluster;
-          Pi (model plus agent) is shown for reference, lifting the same model
-          above the current board.
+  Right - where Muse Spark's raw-API best (87.0, low) lands on the v3
+          best-effort leaderboard. Pi (model plus agent) is charted in the left
+          panel only: it is not a board entry, so it does not get a board bar.
 
 Reads docs/results/v3-musespark-harness-2026-08/v3-musespark-harness-2026-08.json
 and writes report20-musespark-pi.png next to it.
@@ -36,8 +35,8 @@ FIELD = "#c7c3ba"
 EFFORTS = ["low", "high", "extra-high"]
 LBL = {"low": "low", "high": "high", "extra-high": "xhigh"}
 
-# Field models only. Muse Spark is drawn as a pair of bars (raw API vs Pi)
-# so the before/after lift is a first-class row, not a floating marker.
+# Field models only. Pi is model plus agent and never appears on this board
+# (the model card's rule); the left panel carries the harness comparison.
 BOARD = [
     ("Grok 4.5", 89.9),
     ("Claude Fable 5", 89.5),
@@ -54,7 +53,6 @@ BOARD = [
     ("Claude Haiku 4.5", 76.2),
     ("Kimi K3", 73.7),
 ]
-PI_REF = 95.7
 API_BEST = 87.0
 
 
@@ -131,7 +129,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     fig.text(
         0.062,
         0.795,
-        "Through its raw API, Muse Spark 1.2 ties the 87% frontier cluster. The Pi harness",
+        "Through its raw API, Muse Spark 1.2 ties the 87% frontier cluster. Pi lifts the same",
         family=SANS,
         fontsize=16.5,
         color=INK,
@@ -140,7 +138,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     fig.text(
         0.062,
         0.758,
-        "lifts the same model 8.7 points at low, and 39 points at xhigh, by finishing the work.",
+        "model 8.7 points at low; the clean xhigh lift is 17 points (39 as graded).",
         family=SANS,
         fontsize=16.5,
         color=INK,
@@ -162,7 +160,19 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
         elinewidth=2,
         capthick=2,
         zorder=5,
-        label="Pi harness",
+        label="Pi harness (as graded)",
+    )
+    pi_clean = [pi[e]["passat1_clean"] for e in EFFORTS]
+    ax.plot(
+        x,
+        pi_clean,
+        "--o",
+        color=PI_COLOR,
+        lw=1.8,
+        ms=8,
+        mfc=SURFACE,
+        zorder=5,
+        label="Pi, answer-key cells dropped",
     )
     ax.errorbar(
         x,
@@ -208,6 +218,19 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
             zorder=6,
             clip_on=False,
         )
+    for xi, yi in ((1, pi_clean[1]), (2, pi_clean[2])):
+        ax.text(
+            xi - 0.22,
+            yi - 1.2,
+            f"{yi:.1f}",
+            ha="right",
+            va="top",
+            family=BRAND_MED,
+            fontsize=12,
+            color=PI_COLOR,
+            bbox=label_box,
+            zorder=6,
+        )
     ax.set_xticks(x)
     ax.set_xticklabels([LBL[e] for e in EFFORTS], family=SANS, fontsize=14, color=INK2)
     ax.set_xlim(-0.35, 2.45)
@@ -230,16 +253,14 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
         ax2.spines[s].set_visible(False)
     ax2.spines["bottom"].set_color(GRID)
     ax2.tick_params(length=0)
-    n_field = len(BOARD)
-    # Two Muse Spark rows on top (Pi, then raw API), then the rest of the board.
-    pair = [
-        ("after   Muse Spark 1.2 + Pi", PI_REF, PI_COLOR, True),
-        ("before  Muse Spark 1.2 raw API", API_BEST, API_COLOR, True),
-    ]
-    n = n_field + 2
+    # Muse Spark's raw-API best joins the field at its sorted spot (head of
+    # the 87.0 tie). Pi is deliberately absent: not a board entry.
+    rows = [(nm, val, FIELD, False) for nm, val in BOARD]
+    spot = next(i for i, (_nm, val, _c, _h) in enumerate(rows) if val <= API_BEST)
+    rows.insert(spot, ("Muse Spark 1.2 raw API", API_BEST, API_COLOR, True))
+    n = len(rows)
     ys = list(range(n, 0, -1))
     base = 70.0
-    rows = [*pair, *[(nm, val, FIELD, False) for nm, val in BOARD]]
     for (name, val, color, hi), y in zip(rows, ys, strict=True):
         ax2.barh(y, val - base, left=base, height=0.62, color=color, zorder=3)
         ax2.text(
@@ -264,16 +285,13 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
             bbox=dict(facecolor=SURFACE, edgecolor="none", pad=0.8),
             zorder=4,
         )
-    # Small gap marker between the Muse Spark pair and the field.
-    gap_y = ys[1] - 0.55
-    ax2.plot([base, 99.2], [gap_y, gap_y], color=GRID, lw=1.0, zorder=2)
     ax2.set_xlim(base, 101.5)
     ax2.set_ylim(0.2, n + 2.4)
     ax2.set_yticks([])
     ax2.set_xticks([70, 80, 90, 100])
     ax2.set_xticklabels(["70", "80", "90", "100"], family=SANS, fontsize=11, color=MUTED)
     ax2.set_title(
-        "Before and after on the v3 board  (pass@1 %)",
+        "Muse Spark 1.2 raw API on the v3 board  (pass@1 %)",
         family=BRAND_MED,
         fontsize=15,
         color=INK,
@@ -294,8 +312,8 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     fig.text(
         0.062,
         0.038,
-        "Board entries are raw-API / uniform-loop runs. Pi is model plus agent, shown for reference, "
-        "not a raw-API leaderboard entry. Six Pi cells touched gold/hidden tests; see the model card.",
+        "Board entries are raw-API / uniform-loop runs; Pi (model plus agent) is charted left, never "
+        "on the board. Dashed Pi line drops six answer-key cells. Pi cash was under-metered; not quoted.",
         family=SANS,
         fontsize=10.5,
         color=MUTED,

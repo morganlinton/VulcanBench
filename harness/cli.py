@@ -828,7 +828,12 @@ def leaderboard(  # noqa: PLR0912
     format: str = typer.Option("markdown", "--format", "-f", help="markdown|json"),
     task: str | None = typer.Option(None, "--task", help="Filter by task id (run view)"),
     suite: str | None = typer.Option(None, "--suite", help="Filter by suite"),
-    track: str = typer.Option("all", "--track", help="Result track: all|api|subscription"),
+    track: str = typer.Option(
+        "all",
+        "--track",
+        help="Result track: all|api|subscription. api is uniform-loop runs only; "
+        "API-metered CLI harnesses (pi) appear under all.",
+    ),
 ) -> None:
     """Show API and subscription-product results without silently mixing them."""
     if track not in {"all", "api", "subscription"}:
@@ -842,6 +847,12 @@ def leaderboard(  # noqa: PLR0912
         rows = [r for r in rows if r.get("suite") == suite]
     if track != "all":
         rows = [r for r in rows if r.get("track") == track]
+    if track == "api":
+        # API-metered CLI harnesses (e.g. pi) bill like the api track but
+        # measure model + external agent, not the uniform loop. Keeping them
+        # out of --track api is what makes that board a raw-API comparison;
+        # they still show under --track all, labeled by harness.
+        rows = [r for r in rows if (r.get("execution_harness") or "vulcan") == "vulcan"]
     if by == "model":
         data: list[dict] = aggregate_by_model(rows)  # type: ignore[type-arg]
     else:

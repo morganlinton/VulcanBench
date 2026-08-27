@@ -171,9 +171,16 @@ and `--thinking` / `--model` / `--no-session`):
   Integrity audits should see `no_web` unless `--network` later grows a
   browser extension. `--max-run-cost` is rejected (usage is not a live
   stream); `--timeout` is the hard boundary.
-- **Track is api.** Unlike Claude Code / Codex, Pi bills the same API keys
-  as the uniform loop. `cost_usd` is metered cash, not a subscription
-  counterfactual.
+- **Track is api, board entry is not.** Unlike Claude Code / Codex, Pi bills
+  the same API keys as the uniform loop; `cost_usd` is metered cash, not a
+  subscription counterfactual. Because a `pi:` row measures model plus agent,
+  `leaderboard --track api` filters it out; it appears under `--track all`.
+- **Usage is summed per assistant message.** Pi emits a usage record on every
+  assistant `message_end`; the adapter sums them (fresh input + cache read +
+  cache write as prompt tokens, cache-read subset kept separately, Pi's
+  per-message cost totaled into `cli_reported_cost_usd`). Sweeps made before
+  v0.9.1 recorded only the last record and understate cost; do not quote
+  their dollar figures.
 
 ## Leakage: two channels, both real
 

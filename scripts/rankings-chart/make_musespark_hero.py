@@ -1,7 +1,9 @@
 """Report No. 20 hero card: the one-stat lead image for X.
 
-A single 16:9 card, Muse Spark 1.2 raw API vs the Pi harness at xhigh effort:
-52% vs 91%, with the takeaway that the harness is worth 39 points.
+A single 16:9 card, Muse Spark 1.2 raw API vs the Pi harness at xhigh effort.
+Leads with the clean Pi number (six answer-key cells dropped from the
+numerator): 52% vs 70%, harness worth 17 points; the as-graded 91% is the
+footnote, not the headline.
 
 Writes vulcanbench-v3-musespark-hero.png next to the report.
 Usage: python scripts/rankings-chart/make_musespark_hero.py
@@ -60,7 +62,7 @@ def main() -> None:
     ax.text(
         0.5,
         0.675,
-        "Muse Spark 1.2 at xhigh effort, pass@1 on 23 real merged PRs",
+        "Muse Spark 1.2 at xhigh effort, pass@1 on 23 real merged PRs, answer-key cells excluded",
         family=SANS,
         fontsize=17,
         color=INK2,
@@ -70,7 +72,7 @@ def main() -> None:
 
     lx, rx = 0.29, 0.71
     ax.text(lx, 0.44, "52%", family=BRAND, fontsize=150, color=API_COLOR, ha="center", va="center")
-    ax.text(rx, 0.44, "91%", family=BRAND, fontsize=150, color=PI_COLOR, ha="center", va="center")
+    ax.text(rx, 0.44, "70%", family=BRAND, fontsize=150, color=PI_COLOR, ha="center", va="center")
     ax.text(lx, 0.265, "Raw API", family=BRAND_MED, fontsize=24, color=API_COLOR, ha="center")
     ax.text(rx, 0.265, "Pi harness", family=BRAND_MED, fontsize=24, color=PI_COLOR, ha="center")
     ax.text(
@@ -86,7 +88,7 @@ def main() -> None:
     ax.text(
         rx,
         0.225,
-        "open-source agent, same model, Docker tests",
+        "open-source agent, same model, Docker tests\n(91% as graded; 6 cells that read answer keys excluded)",
         family=SANS,
         fontsize=14,
         color=MUTED,
@@ -98,7 +100,7 @@ def main() -> None:
     ax.text(
         0.5,
         0.115,
-        "Same model. The harness is worth 39 points.",
+        "Same model. The harness is worth 17 points, and every Pi run finishes.",
         family=BRAND,
         fontsize=26,
         color=INK,
@@ -109,7 +111,8 @@ def main() -> None:
     ax.text(
         0.5,
         0.045,
-        "VulcanBench v3   ·   hidden-test grading   ·   Docker verifier   ·   one attempt per cell",
+        "VulcanBench v3   ·   hidden-test grading   ·   Docker verifier   ·   "
+        "one attempt per cell   ·   Pi agent is host-run",
         family=SANS,
         fontsize=13,
         color=MUTED,

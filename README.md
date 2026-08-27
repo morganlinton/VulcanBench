@@ -221,7 +221,9 @@ Specify a model as `provider:model`:
 - `pi:<provider:model>` / `--harness pi`: the open-source Pi coding agent
   (`npm install -g @earendil-works/pi-coding-agent`). API-metered, not a
   subscription: `--harness pi --billing api --model meta:muse-spark-1.2`
-  stays on the api leaderboard track and prices as `meta:muse-spark-1.2`.
+  bills on the api cost track and prices as `meta:muse-spark-1.2`, but
+  `leaderboard --track api` filters `pi:` rows out (model plus agent is not
+  a raw-API board entry; use `--track all`).
   Results measure model plus Pi (read/write/edit/bash, no web tools). Effort
   is Pi `--thinking`. Compare to Report No. 19's uniform-loop Muse Spark
   column with the Report 18 ZCode recipe: `--model pi:meta:muse-spark-1.2

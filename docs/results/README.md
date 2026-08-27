@@ -48,4 +48,5 @@ must never be added to a raw-API leaderboard; see the model card's caveats.
 
 Report No. 20 (Harness Study No. 04) is the same design for Muse Spark 1.2:
 uniform loop (Report No. 19) versus the Pi harness on metered API. `pi:` rows
-must never be added as a second raw-API board entry; see that model card.
+must never be added as a second raw-API board entry; from v0.9.1 the CLI
+enforces this (`leaderboard --track api` filters them out). See that model card.

@@ -1,0 +1,117 @@
+{
+  "id": "env-orderflow-consistency-epic",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "architecture",
+  "created": "2026-08-27",
+  "repo_scale": "medium",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "cii-v2 LONG-HORIZON ENVIRONMENT EPIC #1: a five-service commerce platform (gateway, orders, inventory, billing, worker; one process each, booted from the workspace by the hidden tests' launcher) over the run's live Postgres+Redis, seeded with FOUR interacting defect families whose symptoms only emerge cross-service and under concurrency. D1 charge identity: the gateway keys billing idempotency on (order, quoted amount) and quotes at request time, so duplicate checkout submissions racing a coupon change derive different keys and double-charge (probe: 4/12 orders double-charged, mismatched amounts). D2 expiry/commit ordering: reservation expiry and commit both transition without a status predicate or lock, so a reservation can be released AND committed, corrupting stock both ways (probe: reserved drifted to -17). D3 availability cache: reserve skips per-request cache writes for hot SKUs deferring to the worker's bulk sync, but that sync uses SETNX and never overwrites the stale pin, while release/restock refresh early-returns when the cached value clears the low-stock threshold; combined with a read-modify-write stock guard this oversells 30/30 grants on stock 10 and understates after returns. D4 read model + reconciliation: the worker caches TRANSITIONAL reservation states in Redis (freezing orders at PAID forever), writes an optimistic COMPLETE into the read model, and the reconciliation job treats the READ MODEL as truth and rewrites the orders ledger from it (the incident's 'reconciliation made it worse'). The gold fix spans all five services plus two data-safe migrations: a durable per-order charge intent with snapshot pricing (key on intent id), conditional status transitions with rowcount branching on commit/release/expiry in single transactions, an atomic single-statement stock guard, per-order reservation identity (partial unique index + dedupe repair of stray ACTIVE holds), always-refresh cache semantics with SET-not-SETNX bulk sync, terminal-only status caching preferring COMMITTED, a non-optimistic read model, and source-of-truth reconciliation direction. Determinism: no wall-clock TTL reliance (expiry driven by an explicit 'now'), all races manifested via spawn-process pools behind a manager Barrier with contention volumes verified to manifest at base; six of eight fail-to-pass tests are fully deterministic constructions, two are volume races (12-order checkout storm, 20-commit expiry race) verified across repeated fresh-stack runs. Guards pin the sequential contract: happy path, checkout replay idempotency, same-key charge replay, cache-hit proof (tampered key served), sequential expiry, reconcile no-op on consistent state, insufficient-stock/404/422/409 contracts, cancel flow, exactly-once settle processing. Trap texture: 'delete the cache' fails the cache-hit guard; 'disable reconciliation' fails the seeded-drift repair test; 'stop retrying/serialize everything' does not close D1 (sequenced duplicate submissions still double-key at base). Issue text is symptoms-only (no file, function, or fix-shape hints) per the v2 charter; no agent_hints.entry_paths. Requires --sandbox local (live compose environment).",
+  "environment": {
+    "compose": "compose.yaml",
+    "ready": [
+      {
+        "service": "postgres",
+        "cmd": "pg_isready -U vb -d vb",
+        "timeout_s": 90
+      },
+      {
+        "service": "redis",
+        "cmd": "redis-cli ping",
+        "timeout_s": 60
+      }
+    ]
+  },
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "single_charge",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_concurrent_checkout_single_charge -q"
+      },
+      {
+        "name": "commit_expiry_exclusive",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_commit_and_expiry_are_mutually_exclusive -q"
+      },
+      {
+        "name": "no_oversell",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_flash_sale_never_oversells -q"
+      },
+      {
+        "name": "hot_cache_recovers",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_hot_sku_availability_recovers -q"
+      },
+      {
+        "name": "released_stock_sellable",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_released_stock_is_sellable_again -q"
+      },
+      {
+        "name": "no_stuck_orders",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_paid_orders_reach_complete -q"
+      },
+      {
+        "name": "recon_preserves_ledger",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_reconciliation_never_rewrites_the_ledger -q"
+      },
+      {
+        "name": "recon_repairs_drift",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_seeded_read_model_drift_is_repaired -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "happy_path",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_happy_path_end_to_end -q"
+      },
+      {
+        "name": "checkout_replay",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_checkout_replay_is_idempotent -q"
+      },
+      {
+        "name": "charge_replay",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_charge_replay_same_key -q"
+      },
+      {
+        "name": "cache_hit_path",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_availability_is_served_from_the_cache -q"
+      },
+      {
+        "name": "sequential_expiry",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_sequential_expiry_releases_stock -q"
+      },
+      {
+        "name": "recon_noop",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_reconcile_leaves_consistent_orders_alone -q"
+      },
+      {
+        "name": "insufficient_stock",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_insufficient_stock_rejected_sequentially -q"
+      },
+      {
+        "name": "not_found_contracts",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_not_found_contracts -q"
+      },
+      {
+        "name": "validation_contracts",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_validation_contracts -q"
+      },
+      {
+        "name": "cancel_flow",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_cancel_blocks_checkout -q"
+      },
+      {
+        "name": "settle_exactly_once",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_settle_events_processed_exactly_once -q"
+      }
+    ]
+  },
+  "test_timeout_s": 900,
+  "agent_hints": {
+    "suggested_max_steps": 1440,
+    "suggested_timeout_s": 28800
+  }
+}

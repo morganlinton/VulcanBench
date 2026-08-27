@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vb
+      POSTGRES_PASSWORD: vb
+      POSTGRES_DB: vb
+    ports:
+      - "5432"
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379"

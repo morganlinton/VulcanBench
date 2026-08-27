@@ -1,0 +1,467 @@
+diff --git a/db/inventory/002_reservation_identity.sql b/db/inventory/002_reservation_identity.sql
+new file mode 100644
+index 0000000..d21dc0d
+--- /dev/null
++++ b/db/inventory/002_reservation_identity.sql
+@@ -0,0 +1,28 @@
++-- An order holds at most one ACTIVE reservation; duplicate checkout
++-- attempts must converge on it instead of holding stock twice.
++--
++-- Data repair first: releases every stray duplicate ACTIVE hold (keeping
++-- the oldest per order) and returns its stock, so the index can build on
++-- databases that already accumulated duplicates.
++WITH stray AS (
++    SELECT id, sku, qty
++    FROM (
++        SELECT id, sku, qty,
++               row_number() OVER (PARTITION BY order_id ORDER BY created_at) AS rn
++        FROM reservations
++        WHERE status = 'ACTIVE'
++    ) ranked
++    WHERE rn > 1
++), released AS (
++    UPDATE reservations SET status = 'RELEASED'
++    WHERE id IN (SELECT id FROM stray)
++    RETURNING sku, qty
++)
++UPDATE products p
++SET reserved = p.reserved - returned.total
++FROM (SELECT sku, sum(qty) AS total FROM released GROUP BY sku) AS returned
++WHERE p.sku = returned.sku;
++
++CREATE UNIQUE INDEX reservations_one_active_per_order
++    ON reservations (order_id)
++    WHERE status = 'ACTIVE';
+diff --git a/db/orders/003_charge_intents.sql b/db/orders/003_charge_intents.sql
+new file mode 100644
+index 0000000..bf94c37
+--- /dev/null
++++ b/db/orders/003_charge_intents.sql
+@@ -0,0 +1,9 @@
++-- One charge intent per order: the priced snapshot a charge is keyed on.
++-- Created the first time checkout runs; every later attempt reuses it, so
++-- retries and duplicate submissions can never derive a second charge key.
++CREATE TABLE charge_intents (
++    order_id    text PRIMARY KEY REFERENCES orders (id),
++    intent_id   text NOT NULL UNIQUE,
++    total_cents integer NOT NULL CHECK (total_cents > 0),
++    created_at  timestamptz NOT NULL DEFAULT now()
++);
+diff --git a/orderflow/gateway/checkout.py b/orderflow/gateway/checkout.py
+index c99f1fd..de884a8 100644
+--- a/orderflow/gateway/checkout.py
++++ b/orderflow/gateway/checkout.py
+@@ -26,8 +26,8 @@ def _billing(path: str) -> str:
+     return topology.service_url("billing") + path
+ 
+ 
+-def charge_key(order_id: str, amount_cents: int) -> str:
+-    return hashlib.sha256(f"charge:{order_id}:{amount_cents}".encode()).hexdigest()
++def charge_key(order_id: str, intent_id: str) -> str:
++    return hashlib.sha256(f"charge:{order_id}:{intent_id}".encode()).hexdigest()
+ 
+ 
+ def run(order_id: str) -> dict:
+@@ -41,14 +41,14 @@ def run(order_id: str) -> dict:
+         _inventory("/reservations"),
+         {"sku": order["sku"], "qty": order["qty"], "order_id": order_id},
+     )
+-    quote = client.get(_orders(f"/orders/{order_id}/quote"))
+-    amount = int(quote["total_cents"])
++    intent = client.post(_orders(f"/orders/{order_id}/charge_intent"), {})
++    amount = int(intent["total_cents"])
+     charge = client.post(
+         _billing("/charges"),
+         {
+             "order_id": order_id,
+             "amount_cents": amount,
+-            "idem_key": charge_key(order_id, amount),
++            "idem_key": charge_key(order_id, str(intent["intent_id"])),
+         },
+     )
+     client.post(
+diff --git a/orderflow/inventory/cache.py b/orderflow/inventory/cache.py
+index 9fe8127..dc29c60 100644
+--- a/orderflow/inventory/cache.py
++++ b/orderflow/inventory/cache.py
+@@ -46,14 +46,5 @@ def is_hot(sku: str) -> bool:
+ 
+ 
+ def refresh_after_return(sku: str, sellable: int) -> None:
+-    """Refresh the cache after stock came back (release or restock).
+-
+-    When the cached value already shows the item comfortably in stock, the
+-    write is redundant churn on the flash-sale hot path, so it is skipped.
+-    """
+-    threshold = load().low_stock_threshold
+-    with Redis() as redis:
+-        raw = redis.get(_key(sku))
+-        if raw is not None and int(raw) >= threshold:
+-            return
+-        redis.set(_key(sku), str(sellable), ttl_s=load().availability_cache_ttl_s)
++    """Refresh the cache after stock came back (release or restock)."""
++    set_sellable(sku, sellable)
+diff --git a/orderflow/inventory/store.py b/orderflow/inventory/store.py
+index fdb8d5e..9c734c5 100644
+--- a/orderflow/inventory/store.py
++++ b/orderflow/inventory/store.py
+@@ -56,39 +56,68 @@ def reserve(sku: str, qty: int, order_id: str) -> dict:
+     if qty <= 0:
+         raise ApiError(422, "bad_qty", "qty must be positive")
+     cache.note_traffic(sku)
+-    cached = cache.get_sellable(sku)
+-    if cached is not None and cached < qty:
+-        raise ApiError(409, "insufficient_stock", f"{sku}: {cached} sellable")
+ 
+     reservation_id = uuid.uuid4().hex
+     expires_at = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
+         seconds=load().reservation_ttl_s
+     )
+     with connect() as conn, conn.cursor() as cur:
+-        cur.execute("SELECT available, reserved FROM products WHERE sku = %s", (sku,))
+-        row = cur.fetchone()
+-        if row is None:
+-            raise ApiError(404, "sku_not_found", f"no product {sku}")
+-        available, reserved = int(row[0]), int(row[1])
+-        sellable = available - reserved
+-        if sellable < qty:
+-            raise ApiError(409, "insufficient_stock", f"{sku}: {sellable} sellable")
++        # An order converges on one live reservation: replaying a checkout
++        # attempt must reuse it, never hold stock twice.
++        cur.execute(
++            "SELECT id, sku, qty FROM reservations "
++            "WHERE order_id = %s AND status IN ('ACTIVE', 'COMMITTED')",
++            (order_id,),
++        )
++        existing = cur.fetchone()
++        if existing is not None:
++            return {
++                "reservation_id": existing[0],
++                "sku": existing[1],
++                "qty": int(existing[2]),
++                "order_id": order_id,
++            }
++        # Atomic stock guard: the availability check and the hold are one
++        # statement, so concurrent reserves can neither oversell nor lose
++        # each other's updates.
+         cur.execute(
+-            "UPDATE products SET reserved = %s WHERE sku = %s",
+-            (reserved + qty, sku),
++            "UPDATE products SET reserved = reserved + %s "
++            "WHERE sku = %s AND available - reserved >= %s "
++            "RETURNING available - reserved",
++            (qty, sku, qty),
+         )
++        row = cur.fetchone()
++        if row is None:
++            cur.execute("SELECT 1 FROM products WHERE sku = %s", (sku,))
++            if cur.fetchone() is None:
++                raise ApiError(404, "sku_not_found", f"no product {sku}")
++            raise ApiError(409, "insufficient_stock", f"{sku}: not enough sellable stock")
++        sellable_after = int(row[0])
+         cur.execute(
+             "INSERT INTO reservations (id, sku, order_id, qty, status, expires_at) "
+-            "VALUES (%s, %s, %s, %s, 'ACTIVE', %s)",
++            "VALUES (%s, %s, %s, %s, 'ACTIVE', %s) "
++            "ON CONFLICT (order_id) WHERE status = 'ACTIVE' DO NOTHING",
+             (reservation_id, sku, order_id, qty, expires_at),
+         )
+-
+-    if cache.is_hot(sku):
+-        # Hot SKUs are refreshed in bulk by the worker's hot sync; skipping the
+-        # per-request write avoids a Redis stampede at flash-sale volume.
+-        pass
+-    else:
+-        cache.set_sellable(sku, sellable - qty)
++        if cur.rowcount == 0:
++            # A concurrent attempt for the same order won; hand back its hold.
++            cur.execute(
++                "UPDATE products SET reserved = reserved - %s WHERE sku = %s", (qty, sku)
++            )
++            cur.execute(
++                "SELECT id, sku, qty FROM reservations "
++                "WHERE order_id = %s AND status IN ('ACTIVE', 'COMMITTED')",
++                (order_id,),
++            )
++            winner = cur.fetchone()
++            return {
++                "reservation_id": winner[0],
++                "sku": winner[1],
++                "qty": int(winner[2]),
++                "order_id": order_id,
++            }
++
++    cache.set_sellable(sku, sellable_after)
+     return {"reservation_id": reservation_id, "sku": sku, "qty": qty, "order_id": order_id}
+ 
+ 
+@@ -126,33 +155,53 @@ def reservations_for_order(order_id: str) -> list[dict]:
+ 
+ 
+ def commit(reservation_id: str) -> dict:
+-    entry = reservation(reservation_id)
++    """Ship a reservation. Exactly one of commit/release wins per reservation:
++    the transition is a conditional update, and the stock movement only
++    happens when this call performed the transition."""
+     with connect() as conn, conn.cursor() as cur:
+         cur.execute(
+-            "UPDATE reservations SET status = 'COMMITTED' WHERE id = %s",
++            "UPDATE reservations SET status = 'COMMITTED' "
++            "WHERE id = %s AND status = 'ACTIVE' RETURNING sku, qty",
+             (reservation_id,),
+         )
+-        cur.execute(
+-            "UPDATE products SET available = available - %s, reserved = reserved - %s "
+-            "WHERE sku = %s",
+-            (entry["qty"], entry["qty"], entry["sku"]),
+-        )
+-    return {"reservation_id": reservation_id, "status": "COMMITTED"}
++        row = cur.fetchone()
++        if row is not None:
++            cur.execute(
++                "UPDATE products SET available = available - %s, reserved = reserved - %s "
++                "WHERE sku = %s",
++                (int(row[1]), int(row[1]), row[0]),
++            )
++            return {"reservation_id": reservation_id, "status": "COMMITTED"}
++    current = reservation(reservation_id)
++    if current["status"] == "COMMITTED":
++        return {"reservation_id": reservation_id, "status": "COMMITTED"}
++    raise ApiError(
++        409, "reservation_expired", f"reservation {reservation_id} was already released"
++    )
+ 
+ 
+ def release(reservation_id: str) -> dict:
+-    entry = reservation(reservation_id)
+     with connect() as conn, conn.cursor() as cur:
+         cur.execute(
+-            "UPDATE reservations SET status = 'RELEASED' WHERE id = %s",
++            "UPDATE reservations SET status = 'RELEASED' "
++            "WHERE id = %s AND status = 'ACTIVE' RETURNING sku, qty",
+             (reservation_id,),
+         )
+-        cur.execute(
+-            "UPDATE products SET reserved = reserved - %s WHERE sku = %s",
+-            (entry["qty"], entry["sku"]),
++        row = cur.fetchone()
++        if row is not None:
++            cur.execute(
++                "UPDATE products SET reserved = reserved - %s WHERE sku = %s",
++                (int(row[1]), row[0]),
++            )
++    if row is None:
++        current = reservation(reservation_id)
++        if current["status"] == "RELEASED":
++            return {"reservation_id": reservation_id, "status": "RELEASED"}
++        raise ApiError(
++            409, "already_committed", f"reservation {reservation_id} already shipped"
+         )
+-    info = product(entry["sku"])
+-    cache.refresh_after_return(entry["sku"], info["available"] - info["reserved"])
++    info = product(row[0])
++    cache.refresh_after_return(row[0], info["available"] - info["reserved"])
+     return {"reservation_id": reservation_id, "status": "RELEASED"}
+ 
+ 
+@@ -172,16 +221,26 @@ def restock(sku: str, qty: int) -> dict:
+ 
+ 
+ def expire_pass(now: dt.datetime | None = None) -> dict:
+-    """Release every overdue ACTIVE reservation. Invoked by the ops scheduler."""
++    """Release every overdue ACTIVE reservation. Invoked by the ops scheduler.
++
++    The transition and the stock return happen in one transaction, and the
++    transition is conditional on ACTIVE, so a reservation being committed
++    concurrently is either fully shipped or fully released, never both.
++    """
+     cutoff = now or dt.datetime.now(dt.timezone.utc)
+     with connect() as conn, conn.cursor() as cur:
+         cur.execute(
+-            "SELECT id FROM reservations WHERE status = 'ACTIVE' AND expires_at <= %s",
++            "UPDATE reservations SET status = 'RELEASED' "
++            "WHERE status = 'ACTIVE' AND expires_at <= %s RETURNING id, sku, qty",
+             (cutoff,),
+         )
+-        overdue = [row[0] for row in cur.fetchall()]
+-    released = 0
+-    for reservation_id in overdue:
+-        release(reservation_id)
+-        released += 1
+-    return {"examined": len(overdue), "released": released}
++        released_rows = cur.fetchall()
++        for _rid, sku, qty in released_rows:
++            cur.execute(
++                "UPDATE products SET reserved = reserved - %s WHERE sku = %s",
++                (int(qty), sku),
++            )
++    for sku in {row[1] for row in released_rows}:
++        info = product(sku)
++        cache.refresh_after_return(sku, info["available"] - info["reserved"])
++    return {"examined": len(released_rows), "released": len(released_rows)}
+diff --git a/orderflow/orders/app.py b/orderflow/orders/app.py
+index a89f707..6f00274 100644
+--- a/orderflow/orders/app.py
++++ b/orderflow/orders/app.py
+@@ -39,6 +39,13 @@ def quote(request: Request) -> tuple[int, dict]:
+     return 200, pricing.quote(request.params["order_id"])
+ 
+ 
++@router.route("POST", "/orders/{order_id}/charge_intent")
++def charge_intent(request: Request) -> tuple[int, dict]:
++    order_id = request.params["order_id"]
++    priced = pricing.quote(order_id)
++    return 200, store.charge_intent(order_id, int(priced["total_cents"]))
++
++
+ @router.route("POST", "/orders/{order_id}/paid")
+ def paid(request: Request) -> tuple[int, dict]:
+     charge_id, reservation_id = request.require("charge_id", "reservation_id")
+diff --git a/orderflow/orders/store.py b/orderflow/orders/store.py
+index 9e9b069..0eb9627 100644
+--- a/orderflow/orders/store.py
++++ b/orderflow/orders/store.py
+@@ -118,6 +118,28 @@ def cancel(order_id: str) -> dict:
+     return {"released_reservation": row[0]}
+ 
+ 
++def charge_intent(order_id: str, total_cents: int) -> dict:
++    """The order's charge intent, created on first use with a stable price.
++
++    Concurrent callers converge on one row: the insert is keyed on the
++    order, and every caller reads back whichever intent won.
++    """
++    import uuid
++
++    with connect() as conn, conn.cursor() as cur:
++        cur.execute(
++            "INSERT INTO charge_intents (order_id, intent_id, total_cents) "
++            "VALUES (%s, %s, %s) ON CONFLICT (order_id) DO NOTHING",
++            (order_id, uuid.uuid4().hex, total_cents),
++        )
++        cur.execute(
++            "SELECT intent_id, total_cents FROM charge_intents WHERE order_id = %s",
++            (order_id,),
++        )
++        row = cur.fetchone()
++    return {"order_id": order_id, "intent_id": row[0], "total_cents": int(row[1])}
++
++
+ def seed_coupon(code: str, percent_off: int) -> None:
+     with connect() as conn, conn.cursor() as cur:
+         cur.execute(
+diff --git a/orderflow/worker/hotsync.py b/orderflow/worker/hotsync.py
+index 50ae981..70292e0 100644
+--- a/orderflow/worker/hotsync.py
++++ b/orderflow/worker/hotsync.py
+@@ -1,9 +1,7 @@
+ """Bulk availability refresh for hot SKUs.
+ 
+-The inventory service skips per-request cache writes for SKUs under flash-
+-sale traffic; this job refreshes those keys in bulk instead. SETNX is used
+-so a concurrent per-request write (a SKU that just cooled down) is never
+-stomped by a bulk value computed moments earlier.
++A safety net for cache keys that drifted or expired under flash-sale
++traffic: recompute sellable from the source of truth and overwrite.
+ """
+ 
+ from __future__ import annotations
+@@ -36,7 +34,6 @@ def run() -> dict:
+         )
+         sellable = int(info["available"]) - int(info["reserved"])
+         with Redis() as redis:
+-            if redis.setnx(f"avail:{sku}", str(sellable)):
+-                redis.command("EXPIRE", f"avail:{sku}", str(ttl))
+-                refreshed += 1
++            redis.set(f"avail:{sku}", str(sellable), ttl_s=ttl)
++            refreshed += 1
+     return {"hot": len(hot_skus()), "refreshed": refreshed}
+diff --git a/orderflow/worker/readmodel.py b/orderflow/worker/readmodel.py
+index f2deed9..ce8d37f 100644
+--- a/orderflow/worker/readmodel.py
++++ b/orderflow/worker/readmodel.py
+@@ -17,11 +17,16 @@ def _status_key(order_id: str) -> str:
+     return f"resstate:{order_id}"
+ 
+ 
++_TERMINAL_STATES = ("COMMITTED", "RELEASED")
++
++
+ def reservation_state(order_id: str) -> str:
+-    """The order's current reservation status, cached.
++    """The order's current reservation status, cached once it is terminal.
+ 
+-    ``NONE`` when the order never reserved stock; otherwise the status of
+-    the order's most recent reservation.
++    A COMMITTED reservation defines the order's state even when a stray
++    duplicate hold exists alongside it. Only terminal states are cached:
++    ACTIVE (and NONE) are transitional, and caching them would freeze an
++    order mid-flight for the cache TTL.
+     """
+     with Redis() as redis:
+         cached = redis.get(_status_key(order_id))
+@@ -31,9 +36,16 @@ def reservation_state(order_id: str) -> str:
+         topology.service_url("inventory") + f"/internal/reservations/by_order/{order_id}"
+     )
+     entries = payload["reservations"]
+-    state = entries[-1]["status"] if entries else "NONE"
+-    with Redis() as redis:
+-        redis.set(_status_key(order_id), state, ttl_s=load().status_cache_ttl_s)
++    statuses = [entry["status"] for entry in entries]
++    if "COMMITTED" in statuses:
++        state = "COMMITTED"
++    elif statuses:
++        state = "ACTIVE" if "ACTIVE" in statuses else "RELEASED"
++    else:
++        state = "NONE"
++    if state in _TERMINAL_STATES:
++        with Redis() as redis:
++            redis.set(_status_key(order_id), state, ttl_s=load().status_cache_ttl_s)
+     return state
+ 
+ 
+@@ -84,15 +96,17 @@ def tick() -> dict:
+         order = _order_row(event["order_id"])
+         if order is not None:
+             state = reservation_state(event["order_id"])
+-            # Payment is the source of truth for fulfillment: once the charge
+-            # settled, this order is complete from the customer's perspective.
+-            _upsert_read_model(event["order_id"], "COMPLETE", event["charge_id"], state)
+-            if order["status"] == "PAID" and state == "COMMITTED":
++            status = order["status"]
++            if status == "PAID" and state == "COMMITTED":
+                 client.post(
+                     topology.service_url("orders")
+                     + f"/internal/orders/{event['order_id']}/complete"
+                 )
++                status = "COMPLETE"
+                 completed += 1
++            # The read model mirrors the ledger as observed, never a guess
++            # about where the order is headed.
++            _upsert_read_model(event["order_id"], status, event["charge_id"], state)
+         _mark_processed(event["id"])
+         processed += 1
+     return {"processed": processed, "completed": completed}
+diff --git a/orderflow/worker/reconcile.py b/orderflow/worker/reconcile.py
+index 15f01a6..e6794bf 100644
+--- a/orderflow/worker/reconcile.py
++++ b/orderflow/worker/reconcile.py
+@@ -21,12 +21,13 @@ def run() -> dict:
+     mismatched = [(oid, source, model) for oid, source, model in rows if source != model]
+     checked = len(rows)
+     with pg.connect("orders_db") as conn, conn.cursor() as cur:
+-        for order_id, _source_status, model_status in mismatched:
+-            # The read model reflects everything the pipeline has observed
+-            # (settlements included), so it is the fresher of the two views.
++        for order_id, source_status, _model_status in mismatched:
++            # The orders table is the ledger of record; reconciliation only
++            # ever rebuilds the derived view from it.
+             cur.execute(
+-                "UPDATE orders SET status = %s, updated_at = now() WHERE id = %s",
+-                (model_status, order_id),
++                "UPDATE order_read_model SET status = %s, updated_at = now() "
++                "WHERE order_id = %s",
++                (source_status, order_id),
+             )
+             fixed += 1
+     return {"checked": checked, "fixed": fixed}

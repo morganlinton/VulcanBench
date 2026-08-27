@@ -985,7 +985,7 @@ def _execute_tool(
         observation = _run_command_tool(
             executor,
             RunCommandArgs(
-                cmd="python -m pytest -q --tb=no || true", timeout=_tool_timeout(timeout_s)
+                cmd="python -m pytest -q --tb=no -o addopts= || true", timeout=_tool_timeout(timeout_s)
             ),
         )
     elif tc.name == "run_lint":

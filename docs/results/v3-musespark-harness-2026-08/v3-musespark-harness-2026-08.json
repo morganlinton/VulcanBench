@@ -1,0 +1,454 @@
+{
+  "suite": "v3",
+  "n_tasks": 23,
+  "repeat": 1,
+  "model": "muse-spark-1.2",
+  "report": 20,
+  "harness_study": 4,
+  "date": "2026-08-27",
+  "category_defs": {
+    "solved": "functional==1.0",
+    "wrong": "failed, returned an answer",
+    "timeout": "failed, did not finish (wall-clock)"
+  },
+  "api": {
+    "low": {
+      "n": 23,
+      "solved": 20,
+      "wrong": 3,
+      "timeout": 0,
+      "passat1": 87.0,
+      "cost": 8.19,
+      "cost_per_solved": 0.41,
+      "tokens_per_task": 206100,
+      "min_per_task": 6.7,
+      "median_min": 3.2,
+      "avg_steps": 51.1
+    },
+    "high": {
+      "n": 23,
+      "solved": 17,
+      "wrong": 1,
+      "timeout": 5,
+      "passat1": 73.9,
+      "cost": 20.92,
+      "cost_per_solved": 1.23,
+      "tokens_per_task": 483300,
+      "min_per_task": 21.3,
+      "median_min": 12.4,
+      "avg_steps": 46.1
+    },
+    "extra-high": {
+      "n": 23,
+      "solved": 12,
+      "wrong": 1,
+      "timeout": 10,
+      "passat1": 52.2,
+      "cost": 27.25,
+      "cost_per_solved": 2.27,
+      "tokens_per_task": 658200,
+      "min_per_task": 28.7,
+      "median_min": 20.1,
+      "avg_steps": 47.2
+    }
+  },
+  "pi": {
+    "low": {
+      "n": 23,
+      "solved": 22,
+      "wrong": 1,
+      "timeout": 0,
+      "passat1": 95.7,
+      "cost": 0.043076,
+      "cost_per_solved": 0.002,
+      "tokens_per_task": 1124,
+      "tokens_moved_per_task": 29734,
+      "min_per_task": 1.54,
+      "median_min": 1.35,
+      "avg_steps": 24.7
+    },
+    "high": {
+      "n": 23,
+      "solved": 21,
+      "wrong": 2,
+      "timeout": 0,
+      "passat1": 91.3,
+      "cost": 0.037401,
+      "cost_per_solved": 0.0018,
+      "tokens_per_task": 634,
+      "tokens_moved_per_task": 54727,
+      "min_per_task": 2.95,
+      "median_min": 2.68,
+      "avg_steps": 40.4
+    },
+    "extra-high": {
+      "n": 23,
+      "solved": 21,
+      "wrong": 2,
+      "timeout": 0,
+      "passat1": 91.3,
+      "cost": 0.15499,
+      "cost_per_solved": 0.0074,
+      "tokens_per_task": 4683,
+      "tokens_moved_per_task": 57778,
+      "min_per_task": 4.05,
+      "median_min": 3.44,
+      "avg_steps": 39.4
+    }
+  },
+  "integrity": {
+    "note": "Pi runs on the host; Docker is the verifier. Filesystem audit flags host path walks.",
+    "answer_key_access": [
+      {
+        "task": "oss-aiohttp-upgrade-deferred",
+        "effort": "extra-high"
+      },
+      {
+        "task": "oss-flask-teardown-robust",
+        "effort": "extra-high"
+      },
+      {
+        "task": "oss-packaging-range-prerelease-policy",
+        "effort": "extra-high"
+      },
+      {
+        "task": "oss-pennylane-trotter-fragmented",
+        "effort": "high"
+      },
+      {
+        "task": "oss-pennylane-trotter-fragmented",
+        "effort": "extra-high"
+      },
+      {
+        "task": "oss-sqlglot-qualify-lateral-star",
+        "effort": "extra-high"
+      }
+    ],
+    "benchmark_data_access": [
+      {
+        "task": "oss-aiohttp-upgrade-deferred",
+        "effort": "high"
+      },
+      {
+        "task": "oss-flask-teardown-robust",
+        "effort": "high"
+      },
+      {
+        "task": "oss-hono-request-bytes",
+        "effort": "high"
+      },
+      {
+        "task": "oss-packaging-range-prerelease-policy",
+        "effort": "high"
+      },
+      {
+        "task": "oss-semver-inc-dotted-prerelease",
+        "effort": "high"
+      },
+      {
+        "task": "oss-semver-inc-dotted-prerelease",
+        "effort": "extra-high"
+      },
+      {
+        "task": "oss-sqlglot-canonicalize-internal-names",
+        "effort": "low"
+      },
+      {
+        "task": "oss-sqlglot-canonicalize-internal-names",
+        "effort": "high"
+      },
+      {
+        "task": "oss-sqlglot-canonicalize-internal-names",
+        "effort": "extra-high"
+      },
+      {
+        "task": "oss-sqlglot-iso8601-nanos",
+        "effort": "high"
+      },
+      {
+        "task": "oss-sqlglot-iso8601-nanos",
+        "effort": "extra-high"
+      }
+    ],
+    "n_contaminated": 17,
+    "n_cells": 69
+  },
+  "matrix": {
+    "oss-aiohttp-upgrade-deferred": {
+      "api": {
+        "low": "solved",
+        "high": "timeout",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-chi-readfrom-tee-doublecount": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-cobra-noduplicateargs": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-flask-teardown-robust": {
+      "api": {
+        "low": "solved",
+        "high": "timeout",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-hono-client-header-merge": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-hono-request-bytes": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-itertools-strip-prefix": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "wrong",
+        "extra-high": "wrong"
+      }
+    },
+    "oss-jiff-date-day-lt1": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-jiff-signdur-panic": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-jiff-strftime-negpad": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-more-itertools-interleave-empty": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-networkx-leiden-communities": {
+      "api": {
+        "low": "wrong",
+        "high": "timeout",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "wrong",
+        "extra-high": "wrong"
+      }
+    },
+    "oss-packaging-range-prerelease-policy": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-pennylane-trotter-fragmented": {
+      "api": {
+        "low": "wrong",
+        "high": "timeout",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "wrong",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-pflag-uintslice-hex": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-semver-inc-dotted-prerelease": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-semver-truncate": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-semver-xrange-order": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-sqlglot-canonicalize-internal-names": {
+      "api": {
+        "low": "wrong",
+        "high": "timeout",
+        "extra-high": "timeout"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-sqlglot-iso8601-nanos": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-sqlglot-qualify-lateral-star": {
+      "api": {
+        "low": "solved",
+        "high": "wrong",
+        "extra-high": "wrong"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-zod-invert-codec": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    },
+    "oss-zod-proto-catchall": {
+      "api": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      },
+      "pi": {
+        "low": "solved",
+        "high": "solved",
+        "extra-high": "solved"
+      }
+    }
+  }
+}

@@ -22,6 +22,9 @@ gets scaled down until its labels are unreadable:
 ```bash
 python scripts/rankings-chart/make_cards.py     # rankings, speed, cost cards
 python scripts/rankings-chart/make_efforts.py   # effort-curve card
+python scripts/rankings-chart/make_musespark_harness.py    # Report 20 two-panel
+python scripts/rankings-chart/make_musespark_studycard.py  # Report 20 study card
+python scripts/rankings-chart/make_musespark_hero.py       # Report 20 16:9 hero
 ```
 
 These emit `vulcanbench_suite3_card_{rankings,speed,cost}.png` and

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-27
+
+### Added
+
+- **Report No. 20: Muse Spark 1.2, model versus harness.** Published under
+  [`docs/results/v3-musespark-harness-2026-08/`](docs/results/v3-musespark-harness-2026-08/model-card.md)
+  as Harness Study No. 04. Same 23-task v3 suite as Report No. 19, Pi vs the
+  uniform loop, one attempt per cell. As graded: 95.7% / 91.3% / 91.3% on Pi
+  against 87.0% / 73.9% / 52.2% on the uniform loop (39-point xhigh gap, zero
+  Pi timeouts). Model card, JSON, thread, and branded charts
+  (`make_musespark_harness.py`, `make_musespark_studycard.py`,
+  `make_musespark_hero.py`). `pi:meta:muse-spark-1.2` is excluded from the v3
+  board aggregators. Integrity caveats (host-run agent, six answer-key cells)
+  are on the card.
+
 ## [0.9.0] - 2026-08-26
 
 ### Added

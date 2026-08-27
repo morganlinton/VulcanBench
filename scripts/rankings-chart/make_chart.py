@@ -104,6 +104,7 @@ with open(HERE / "v3_rankings.json") as f:
 EXCLUDED_MODELS = {
     "anthropic:claude-opus-4-8",
     "zcode:glm-5.3",  # subscription harness: model plus product, off the board
+    "pi:meta:muse-spark-1.2",  # Pi harness: model plus agent, off the board
     "ollama:qwen3.8:27b",  # local-inference control runs
 }
 rows = [r for r in rows if r["model"] not in EXCLUDED_MODELS]

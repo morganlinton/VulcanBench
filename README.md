@@ -9,7 +9,8 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity, with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.9.0**: adds a **Pi execution harness** (`--harness pi`) so the same model
+**v0.9.1**: publishes **Report No. 20** (Muse Spark 1.2 through Pi vs the
+uniform loop, Harness Study No. 04). Previous: **v0.9.0**: adds a **Pi execution harness** (`--harness pi`) so the same model
 (for example Muse Spark 1.2) can be scored through Pi's minimal agent loop
 instead of Vulcan's, on the API cost track. Previous: **v0.8.0**: adds the **Voice Eval Suite v1** (`vulcanbench voice`): text-vs-audio delta measurement ("voice tax") across OpenAI Realtime, Gemini Live, and Qwen3-Omni, with a 200-question held-out set, a voices/rate/noise audio matrix, and modality-blind scoring. See [docs/VOICE_EVAL.md](docs/VOICE_EVAL.md). Previous: **v0.7.0**: adds a **Qwen / DashScope provider** (`qwen:qwen3.7-plus` and friends)
 so Alibaba Cloud models can be benchmarked like OpenAI / Anthropic / Z.ai / Kimi.

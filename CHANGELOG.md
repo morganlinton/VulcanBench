@@ -285,12 +285,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pi harness requires Docker for hidden tests.** Pi, like Cursor, runs its
   agent on the host. `--sandbox local` scored those tests on the host instead,
   so missing `tsx`, Werkzeug, and Go 1.23 became model zeros. `pi:` now
-  rejects `--sandbox local` unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. The
-  verifier also classifies those host-toolchain misses as infrastructure
-  errors rather than functional zeros. `--only-missing` matches verifier
-  sandbox mode, so a host-scored cell does not cover a `--sandbox docker`
-  resume. Publication recipe matches Report 18's ZCode column:
-  `--model pi:meta:muse-spark-1.2 --repeat 1 --no-judges --sandbox docker`.
+  rejects `--sandbox local` unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. Those
+  host misses stay ordinary scored failures (same verifier rules as every
+  other v3 column); they are not infrastructure skips that would shrink the
+  denominator. Fairness is `--sandbox docker`, the Report 18 ZCode recipe.
+  `--only-missing` matches verifier sandbox mode, so a host-scored cell does
+  not cover a docker resume.
 - **Client errors are no longer retried.** Any HTTP 4xx other than 408/409/425/429
   now raises `NonRetryableProviderError`: a bad key, missing entitlement, unknown
   model, or malformed body fails identically on every attempt, so retrying only

@@ -2392,6 +2392,12 @@ def _write_pi_meta_models_json(home: Path, inner_model: str) -> tuple[str, str]:
     environment-variable name (see Pi models.md), so we write the name, not
     the secret and not a ``$NAME`` shell interpolant (that would be sent as
     a literal and Meta would 401).
+
+    ``contextWindow`` must be declared: Pi assumes 128 K for custom models,
+    auto-compacts past it, and its compaction resume has crashed runs
+    ("Cannot continue from message role: assistant"). Meta accepted a 137.8 K
+    request on a live pennylane run, so 128 K is wrong for Muse Spark;
+    override with ``META_CONTEXT_WINDOW`` if Meta documents a different size.
     """
     route = _resolve_meta_route(inner_model)
     key_env = next((name for name in route.key_envs if os.environ.get(name)), None)
@@ -2413,6 +2419,7 @@ def _write_pi_meta_models_json(home: Path, inner_model: str) -> tuple[str, str]:
                         "name": inner_model,
                         "reasoning": True,
                         "input": ["text"],
+                        "contextWindow": int(os.environ.get("META_CONTEXT_WINDOW", "262144")),
                     }
                 ],
             }

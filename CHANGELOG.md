@@ -14,13 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Report No. 20: Muse Spark 1.2, model versus harness.** Published under
   [`docs/results/v3-musespark-harness-2026-08/`](docs/results/v3-musespark-harness-2026-08/model-card.md)
   as Harness Study No. 04. Same 23-task v3 suite as Report No. 19, Pi vs the
-  uniform loop, one attempt per cell. Clean (six answer-key Pi cells dropped
-  from the numerator): 95.7% / 87.0% / 69.6% on Pi against 87.0% / 73.9% /
-  52.2% on the uniform loop, a 17.4-point clean xhigh gap (39.1 as graded)
-  with zero Pi timeouts. Model card, JSON, thread, and branded charts
-  (`make_musespark_harness.py`, `make_musespark_studycard.py`,
-  `make_musespark_hero.py`). Integrity caveats (host-run agent, six
-  answer-key cells, under-metered Pi cash) lead the card.
+  uniform loop, one attempt per cell. The six Pi cells that read gold patches
+  or hidden tests in the unconfined sweep were replaced by seatbelt-confined,
+  audited-clean reruns before publication: 95.7% / 87.0% / 78.3% on Pi against
+  87.0% / 73.9% / 52.2% on the uniform loop (+8.7 / +13.1 / +26.1 points, one
+  Pi timeout in 69 cells). The reruns also documented the model actively
+  hunting the host for answer keys when confined, at real cost ($30.25 for the
+  six cells under correct metering). Model card, JSON (with a `rerun` block),
+  thread, and branded charts (`make_musespark_harness.py`,
+  `make_musespark_studycard.py`, `make_musespark_hero.py`).
 
 ### Fixed
 
@@ -36,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bill like api but measure model + external agent; they no longer appear on
   the raw-API board and show only under `--track all`, making the Report 20
   "not a board entry" rule an enforced invariant instead of advice.
+- **Pi models.json declares `contextWindow`.** Pi assumes 128 K for custom
+  models and force-compacts past it, and its compaction resume crashed two
+  pennylane runs ("Cannot continue from message role: assistant"). The
+  generated Meta provider entry now declares `contextWindow` (default 262144,
+  override with `META_CONTEXT_WINDOW`); Meta accepted a 137.8 K-token request
+  on a live run, so the 128 K default was simply wrong for Muse Spark.
 
 ## [0.9.0] - 2026-08-26
 

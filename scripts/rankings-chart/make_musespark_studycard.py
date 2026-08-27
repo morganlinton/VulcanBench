@@ -129,7 +129,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     fig.text(
         0.062,
         0.795,
-        "Through its raw API, Muse Spark 1.2 ties the 87% frontier cluster. Pi lifts the same",
+        "Through its raw API, Muse Spark 1.2 ties the 87% frontier cluster. Pi, sandbox-confined,",
         family=SANS,
         fontsize=16.5,
         color=INK,
@@ -138,7 +138,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
     fig.text(
         0.062,
         0.758,
-        "model 8.7 points at low; the clean xhigh lift is 17 points (39 as graded).",
+        "lifts the same model 8.7 points at low and 26 points at xhigh.",
         family=SANS,
         fontsize=16.5,
         color=INK,
@@ -160,19 +160,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
         elinewidth=2,
         capthick=2,
         zorder=5,
-        label="Pi harness (as graded)",
-    )
-    pi_clean = [pi[e]["passat1_clean"] for e in EFFORTS]
-    ax.plot(
-        x,
-        pi_clean,
-        "--o",
-        color=PI_COLOR,
-        lw=1.8,
-        ms=8,
-        mfc=SURFACE,
-        zorder=5,
-        label="Pi, answer-key cells dropped",
+        label="Pi harness (confined)",
     )
     ax.errorbar(
         x,
@@ -217,19 +205,6 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
             bbox=label_box,
             zorder=6,
             clip_on=False,
-        )
-    for xi, yi in ((1, pi_clean[1]), (2, pi_clean[2])):
-        ax.text(
-            xi - 0.22,
-            yi - 1.2,
-            f"{yi:.1f}",
-            ha="right",
-            va="top",
-            family=BRAND_MED,
-            fontsize=12,
-            color=PI_COLOR,
-            bbox=label_box,
-            zorder=6,
         )
     ax.set_xticks(x)
     ax.set_xticklabels([LBL[e] for e in EFFORTS], family=SANS, fontsize=14, color=INK2)
@@ -313,7 +288,7 @@ def main() -> None:  # noqa: PLR0915 (single linear chart layout)
         0.062,
         0.038,
         "Board entries are raw-API / uniform-loop runs; Pi (model plus agent) is charted left, never "
-        "on the board. Dashed Pi line drops six answer-key cells. Pi cash was under-metered; not quoted.",
+        "on the board. Six answer-key Pi cells were replaced by confined, audited-clean reruns.",
         family=SANS,
         fontsize=10.5,
         color=MUTED,

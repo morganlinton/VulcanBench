@@ -181,6 +181,17 @@ and `--thinking` / `--model` / `--no-session`):
   per-message cost totaled into `cli_reported_cost_usd`). Sweeps made before
   v0.9.1 recorded only the last record and understate cost; do not quote
   their dollar figures.
+- **Publication runs must confine the agent.** Report No. 20's reruns caught
+  Muse Spark systematically hunting the host for gold patches and hidden tests
+  (`find /`, /tmp sweeps, the `/System/Volumes/Data` path alias). Wrap Pi in a
+  macOS seatbelt: a `pi` wrapper script that execs `sandbox-exec -f profile.sb
+  <real pi> "$@"`, with the profile denying `file-read* file-write*` on every
+  local benchmark checkout under BOTH path aliases. Put the wrapper dir
+  OUTSIDE this repo and prepend it to `PATH`: `_subscription_env` scrubs
+  repo-rooted PATH entries, so a wrapper inside the checkout is silently
+  dropped and the run proceeds unconfined. Run `vulcanbench audit-runs` on
+  every output dir before reporting; accept only runs with no benchmark or
+  answer-key paths.
 
 ## Leakage: two channels, both real
 

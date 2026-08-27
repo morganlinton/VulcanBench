@@ -1056,6 +1056,20 @@ if "--version" in args:
 if mode == "crash":
     print("boom", file=sys.stderr)
     sys.exit(2)
+if mode == "auth_error":
+    print(json.dumps({"type": "session", "version": 3, "id": "pi-s1"}))
+    print(json.dumps({
+        "type": "message_end",
+        "message": {
+            "role": "assistant",
+            "content": [],
+            "stopReason": "error",
+            "errorMessage": "401 Unauthorized",
+            "usage": {"input": 0, "output": 0, "cost": {"total": 0}},
+        },
+    }))
+    print(json.dumps({"type": "turn_end"}))
+    sys.exit(0)
 if "--thinking" in args:
     thinking = args[args.index("--thinking") + 1]
 else:
@@ -1162,9 +1176,23 @@ def test_pi_writes_meta_models_json_without_secret(tmp_path: Path, fake_pi: Path
     assert outcome.finished is True
     models = json.loads((tmp_path / "pi-home" / ".pi" / "agent" / "models.json").read_text())
     assert models["providers"]["vulcan-meta"]["api"] == "openai-responses"
-    assert models["providers"]["vulcan-meta"]["apiKey"] == "$META_MUSE_SPARK_API"
+    assert models["providers"]["vulcan-meta"]["apiKey"] == "META_MUSE_SPARK_API"
     secret = "meta-test-key"
     assert secret not in (tmp_path / "pi-home" / ".pi" / "agent" / "models.json").read_text()
+
+
+def test_pi_auth_error_is_infrastructure(tmp_path: Path, fake_pi: Path) -> None:
+    (tmp_path / "ws").mkdir()
+    with pytest.raises(ProviderError, match="401 Unauthorized"):
+        run_pi_task(
+            workspace=tmp_path / "ws",
+            prompt="fix",
+            model="meta:muse-spark-1.2",
+            priced_spec="pi:meta:muse-spark-1.2",
+            max_turns=10,
+            collector=_Collector(),
+            env_overrides={"FAKE_PI_MODE": "auth_error"},
+        )
 
 
 def test_pi_rejects_unenforceable_live_cost_cap(tmp_path: Path, fake_pi: Path) -> None:

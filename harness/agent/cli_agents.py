@@ -2388,8 +2388,10 @@ def _pi_preflight(pi_bin: str = "pi") -> HarnessPreflight:
 def _write_pi_meta_models_json(home: Path, inner_model: str) -> tuple[str, str]:
     """Write a per-run Pi models.json that targets Meta's OpenAI-compatible API.
 
-    Returns ``(pi_model_flag, key_env)``. The file interpolates ``$ENV`` rather
-    than writing the secret, so a workspace listing cannot dump the key.
+    Returns ``(pi_model_flag, key_env)``. Pi resolves ``apiKey`` as an
+    environment-variable name (see Pi models.md), so we write the name, not
+    the secret and not a ``$NAME`` shell interpolant (that would be sent as
+    a literal and Meta would 401).
     """
     route = _resolve_meta_route(inner_model)
     key_env = next((name for name in route.key_envs if os.environ.get(name)), None)
@@ -2403,7 +2405,7 @@ def _write_pi_meta_models_json(home: Path, inner_model: str) -> tuple[str, str]:
             "vulcan-meta": {
                 "baseUrl": route.base or META_DEFAULT_BASE_URL,
                 "api": "openai-responses",
-                "apiKey": f"${key_env}",
+                "apiKey": key_env,
                 "authHeader": True,
                 "models": [
                     {
@@ -2430,7 +2432,7 @@ def _pi_usage_tokens(usage: dict[str, Any]) -> tuple[int, int, int]:
     return inp, out, cache
 
 
-def run_pi_task(  # noqa: PLR0912, PLR0915 — linear stream-parse loop
+def run_pi_task(  # noqa: PLR0912, PLR0915  linear stream-parse loop
     *,
     workspace: Path,
     prompt: str,
@@ -2583,6 +2585,7 @@ def run_pi_task(  # noqa: PLR0912, PLR0915 — linear stream-parse loop
         watchdog.start()
 
     last_usage: dict[str, Any] | None = None
+    last_error: str | None = None
     session_id: str | None = None
     turns = 0
     stream_f = stream_log_path.open("w", encoding="utf-8") if stream_log_path else None
@@ -2608,8 +2611,12 @@ def run_pi_task(  # noqa: PLR0912, PLR0915 — linear stream-parse loop
             if isinstance(usage, dict):
                 last_usage = usage
             message = event.get("message")
-            if isinstance(message, dict) and isinstance(message.get("usage"), dict):
-                last_usage = message["usage"]
+            if isinstance(message, dict):
+                if isinstance(message.get("usage"), dict):
+                    last_usage = message["usage"]
+                err = message.get("errorMessage")
+                if message.get("stopReason") == "error" or err:
+                    last_error = str(err or "pi turn failed")
             collector.record("cli_agent_event", {"type": etype})
     finally:
         if watchdog is not None:
@@ -2639,6 +2646,8 @@ def run_pi_task(  # noqa: PLR0912, PLR0915 — linear stream-parse loop
         outcome.finished = False
         collector.record("cli_agent_result", outcome.summary())
         return outcome
+    if last_error:
+        raise ProviderError(f"pi provider error: {last_error[:500]}")
     if proc.returncode != 0:
         detail = "".join(stderr_chunks)[-500:].strip() or "no error detail"
         raise ProviderError(f"pi failed (exit {proc.returncode}): {detail[:500]}")

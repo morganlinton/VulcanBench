@@ -28,6 +28,7 @@ Numbered technical reports, newest first. Each dated directory holds its
 
 | No. | Report | Directory |
 |---|---|---|
+| 20 | Muse Spark 1.2: model versus harness (raw API vs the Pi harness), Harness Study No. 04 | [v3-musespark-harness-2026-08](v3-musespark-harness-2026-08/model-card.md) |
 | 19 | Muse Spark 1.2 across the effort knob | [v3-musespark-2026-08](v3-musespark-2026-08/model-card.md) |
 | 18 | GLM 5.3: model versus harness (raw API vs the ZCode harness), Harness Study No. 03 | [v3-glm53-2026-08](v3-glm53-2026-08/model-card.md) |
 | 12 | Qwen3.8-Max across the effort knob | [v3-qwen38-max-2026-08](v3-qwen38-max-2026-08/model-card.md) |
@@ -44,3 +45,8 @@ Report No. 18 (Harness Study No. 03) measures one model (GLM 5.3) through two
 harnesses on the identical v3 suite: VulcanBench's uniform loop on the raw `zai`
 API, and Z.ai's own ZCode harness on a GLM Coding Plan. Its `subscription` track
 must never be added to a raw-API leaderboard; see the model card's caveats.
+
+Report No. 20 (Harness Study No. 04) is the same design for Muse Spark 1.2:
+uniform loop (Report No. 19) versus the Pi harness on metered API. `pi:` rows
+must never be added as a second raw-API board entry; from v0.9.1 the CLI
+enforces this (`leaderboard --track api` filters them out). See that model card.

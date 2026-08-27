@@ -22,7 +22,7 @@ runner = CliRunner()
 def test_version() -> None:
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert __version__ == "0.8.0"
+    assert __version__ == "0.9.1"
     assert __version__ in result.output
 
 
@@ -58,7 +58,14 @@ def test_harness_list_json() -> None:
     result = runner.invoke(app, ["harness", "list", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
-    assert {row["harness"] for row in data} == {"claude-code", "codex", "cursor", "grok-build", "zcode"}
+    assert {row["harness"] for row in data} == {
+        "claude-code",
+        "codex",
+        "cursor",
+        "grok-build",
+        "pi",
+        "zcode",
+    }
     assert all(row["structured_events"] for row in data)
 
 
@@ -80,6 +87,46 @@ def test_run_harness_options_normalize_subscription_spec() -> None:
     )
     assert result.exit_code == 0
     assert "model=codex:gpt-5.6-sol" in result.output
+
+
+def test_run_harness_options_normalize_pi_spec() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--task",
+            "hello-world",
+            "--harness",
+            "pi",
+            "--billing",
+            "api",
+            "--model",
+            "meta:muse-spark-1.2",
+            "--dry-run",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "model=pi:meta:muse-spark-1.2" in result.output
+
+
+def test_run_rejects_subscription_billing_on_pi() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--task",
+            "hello-world",
+            "--harness",
+            "pi",
+            "--billing",
+            "subscription",
+            "--model",
+            "meta:muse-spark-1.2",
+            "--dry-run",
+        ],
+    )
+    assert result.exit_code == 1
+    assert "API-metered" in result.output
 
 
 def test_run_rejects_subscription_billing_without_subscription_harness() -> None:
@@ -721,3 +768,40 @@ def test_leaderboard_json(tmp_path: Path) -> None:
     )
     result = runner.invoke(app, ["leaderboard", "--format", "json"])
     assert result.exit_code == 0
+
+
+def test_leaderboard_api_track_excludes_api_metered_cli_harnesses(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """pi bills like api but measures model + external agent: not a raw-API row."""
+    rows = [
+        {
+            "run_id": "loop-1",
+            "task_id": "hello-world",
+            "model": "meta:muse-spark-1.2",
+            "execution_harness": "vulcan",
+            "track": "api",
+            "scores": {"functional": 1.0},
+            "total": 1.0,
+        },
+        {
+            "run_id": "pi-1",
+            "task_id": "hello-world",
+            "model": "pi:meta:muse-spark-1.2",
+            "execution_harness": "pi",
+            "track": "api",
+            "scores": {"functional": 1.0},
+            "total": 1.0,
+        },
+    ]
+    monkeypatch.setattr(cli_mod, "scan_leaderboard", lambda *a, **k: rows)
+
+    api = runner.invoke(app, ["leaderboard", "--by", "run", "--track", "api", "--format", "json"])
+    assert api.exit_code == 0
+    api_models = [r["model"] for r in json.loads(api.output)]
+    assert api_models == ["meta:muse-spark-1.2"]
+
+    both = runner.invoke(app, ["leaderboard", "--by", "run", "--track", "all", "--format", "json"])
+    assert both.exit_code == 0
+    all_models = {r["model"] for r in json.loads(both.output)}
+    assert all_models == {"meta:muse-spark-1.2", "pi:meta:muse-spark-1.2"}

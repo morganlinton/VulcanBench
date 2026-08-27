@@ -29,6 +29,13 @@ from harness.tasks import list_task_ids, load_task, task_hash
 _METRIC_KEYS = ("functional", "quality", "security", "efficiency", "human_like")
 
 
+def track_for_run(cli_agent: dict[str, Any] | None) -> str:
+    """API vs subscription track. Pi is a CLI harness that still bills API."""
+    if not cli_agent:
+        return "api"
+    return "api" if cli_agent.get("billing") == "api" else "subscription"
+
+
 def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, Any]:
     """Project a run summary onto a compact leaderboard row."""
     scores = s.get("scores", {})
@@ -37,7 +44,7 @@ def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, An
     cli_agent = s.get("cli_agent") or {}
     economics = s.get("economics") or {}
     execution_harness = cli_agent.get("harness") or "vulcan"
-    track = "subscription" if cli_agent else "api"
+    track = track_for_run(cli_agent)
     legacy_cost = s.get("cost_usd")
     marginal_cash = economics.get("marginal_cash_usd")
     api_equivalent = economics.get("api_equivalent_cost_usd")
@@ -62,7 +69,7 @@ def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, An
         "execution_harness": execution_harness,
         "track": track,
         "access_mode": economics.get("billing_mode")
-        or ("api-metered" if not cli_agent else "subscription-included"),
+        or ("api-metered" if track == "api" else "subscription-included"),
         "cost_basis": economics.get("cost_basis"),
         "marginal_cash_usd": marginal_cash,
         "api_equivalent_cost_usd": api_equivalent,
@@ -82,6 +89,7 @@ def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, An
         "task_complexity": manifest_task.get("task_complexity"),
         "languages": manifest_task.get("languages"),
         "difficulty": manifest_task.get("difficulty"),
+        "sandbox_mode": ((s.get("manifest") or {}).get("sandbox") or {}).get("mode"),
     }
 
 

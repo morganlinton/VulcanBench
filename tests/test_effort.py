@@ -203,6 +203,23 @@ def test_meta_max_is_noop_metadata() -> None:
     assert cfg.supported is False
 
 
+def test_pi_effort_maps_thinking_levels() -> None:
+    for requested, sent in (
+        ("minimal", "minimal"),
+        ("low", "low"),
+        ("medium", "medium"),
+        ("high", "high"),
+        ("extra-high", "xhigh"),
+    ):
+        cfg = effort_config("pi", requested)
+        assert cfg is not None
+        assert cfg.provider_value == sent
+        assert cfg.supported is True
+    cfg = effort_config("pi", "max")
+    assert cfg is not None
+    assert cfg.supported is False
+
+
 def test_openai_minimal_maps_directly() -> None:
     cfg = effort_config("openai", "minimal")
     assert cfg is not None

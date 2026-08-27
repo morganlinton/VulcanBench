@@ -7,13 +7,14 @@ model API.
 
 Release A supports:
 
-| Harness | Spec | Subscription authentication | Execution boundary |
+| Harness | Spec | Authentication | Execution boundary |
 |---|---|---|---|
 | Claude Code | `claude-code:<model>` | Claude Pro/Max login | Claude permission auto mode; `--sandbox local` currently required |
 | Codex CLI | `codex:<model>` | Sign in with ChatGPT | Codex `workspace-write`; Vulcan setup/verifier may still use Docker |
 | Cursor CLI | `cursor:<model>` | `cursor-agent login` (Cursor account/credits) | Cursor sandbox enabled + force-allow; Vulcan setup/verifier may use Docker |
 | Grok Build | `grok-build:<model>` | `grok login` (grok.com OIDC) | custom kernel profile: workspace writes + repo reads denied (Seatbelt/Landlock); Vulcan setup/verifier may use Docker |
 | ZCode | `zcode:<model>` | `zcode login` (Z.ai OAuth, GLM Coding Plan) | ZCode permission mode `yolo` on the host workspace; web tools removed and the Browser Use plugin disabled; Vulcan setup/verifier may use Docker |
+| Pi | `pi:<provider:model>` | API keys (`META_MUSE_SPARK_API`, `OPENAI_API_KEY`, ...) | Pi read/write/edit/bash on the host workspace; no web tools; Vulcan setup/verifier **must** use `--sandbox docker` |
 
 Cursor-specific limits: `cursor-agent` streams no token usage or cost, so
 token counts are recorded as zero and the economics receipt marks the
@@ -135,6 +136,63 @@ re-verify these on every runtime update before a sweep):
   `ZCODE_DATA_BASE_DIR` and `ZCODE_STORAGE_DIR` through (a relocated state
   root must still be found) and never `ZCODE_API_KEY` / `ZCODE_BASE_URL`.
 
+Pi-specific notes (verified against `@earendil-works/pi-coding-agent` JSON mode
+and `--thinking` / `--model` / `--no-session`):
+
+- **This is the harness-delta path for Muse Spark.** Report No. 19 ran
+  `meta:muse-spark-1.2` through VulcanBench's uniform loop. Report No. 20
+  (Harness Study No. 04) is the Pi pair on the same suite. The inner spec
+  through Pi uses the Report 18 (ZCode) publication recipe: one attempt
+  per task, judges off, hidden tests in Docker:
+  `vulcanbench run --suite v3 --model pi:meta:muse-spark-1.2 --effort low --repeat 1 --no-judges --sandbox docker`.
+  That is the same flags as `zcode:glm-5.3` with the Pi spec swapped in.
+  `--harness pi --billing api --model meta:muse-spark-1.2` is equivalent.
+  Do not average `vulcan` vs `pi` columns or add `pi:` as a second raw-API
+  board entry. `cli_agent.harness` is `vulcan` vs `pi`. `--sandbox docker` is required:
+  Pi's tools run on the host, hidden tests run in the task image (`tsx`,
+  Go 1.23, Flask), the same split as ZCode. `--sandbox local` is rejected
+  unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. `--only-missing` ignores host-local
+  scores when the resume asks for Docker.
+- **Install and keys.** `npm install -g @earendil-works/pi-coding-agent`.
+  Preflight is ready when `pi` is on PATH and a Meta/OpenAI/Anthropic key is
+  set. `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY` with
+  `META_BASE_URL=https://openrouter.ai/api/v1`) is what Report 19 used.
+- **The effort knob is `--thinking`.** Same labels Pi documents
+  (`minimal`/`low`/`medium`/`high`/`xhigh`/`max`). Vulcan `extra-high` maps
+  to `xhigh`, matching Meta's `reasoning.effort`.
+- **Meta is registered per run**, not via the operator's `~/.pi`. The adapter
+  points `HOME` at a sibling of the workspace and writes
+  `~/.pi/agent/models.json` with `api: openai-responses` against
+  `META_BASE_URL`. Pi treats `apiKey` as an environment-variable *name*, so
+  the file stores `META_MUSE_SPARK_API` rather than the secret (a `$NAME`
+  interpolant is sent as a literal and Meta 401s). `--no-session` disables
+  Pi session logs.
+- **No web tools.** Pi's default tools are read, write, edit, and bash.
+  Integrity audits should see `no_web` unless `--network` later grows a
+  browser extension. `--max-run-cost` is rejected (usage is not a live
+  stream); `--timeout` is the hard boundary.
+- **Track is api, board entry is not.** Unlike Claude Code / Codex, Pi bills
+  the same API keys as the uniform loop; `cost_usd` is metered cash, not a
+  subscription counterfactual. Because a `pi:` row measures model plus agent,
+  `leaderboard --track api` filters it out; it appears under `--track all`.
+- **Usage is summed per assistant message.** Pi emits a usage record on every
+  assistant `message_end`; the adapter sums them (fresh input + cache read +
+  cache write as prompt tokens, cache-read subset kept separately, Pi's
+  per-message cost totaled into `cli_reported_cost_usd`). Sweeps made before
+  v0.9.1 recorded only the last record and understate cost; do not quote
+  their dollar figures.
+- **Publication runs must confine the agent.** Report No. 20's reruns caught
+  Muse Spark systematically hunting the host for gold patches and hidden tests
+  (`find /`, /tmp sweeps, the `/System/Volumes/Data` path alias). Wrap Pi in a
+  macOS seatbelt: a `pi` wrapper script that execs `sandbox-exec -f profile.sb
+  <real pi> "$@"`, with the profile denying `file-read* file-write*` on every
+  local benchmark checkout under BOTH path aliases. Put the wrapper dir
+  OUTSIDE this repo and prepend it to `PATH`: `_subscription_env` scrubs
+  repo-rooted PATH entries, so a wrapper inside the checkout is silently
+  dropped and the run proceeds unconfined. Run `vulcanbench audit-runs` on
+  every output dir before reporting; accept only runs with no benchmark or
+  answer-key paths.
+
 ## Leakage: two channels, both real
 
 External harnesses execute on the host with broad tool access, and a benchmark
@@ -222,6 +280,13 @@ vulcanbench run --task hello-world \
   --model glm-5.3 \
   --effort extra-high \
   --no-judges
+
+# Pi wrapping Muse Spark 1.2 (same flags as Report 18's ZCode column)
+vulcanbench run --task hello-world \
+  --model pi:meta:muse-spark-1.2 \
+  --effort low \
+  --no-judges \
+  --sandbox docker
 ```
 
 The old `--model claude-code:<model>` form remains supported. For publication,

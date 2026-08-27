@@ -7,7 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-27
+
 ### Added
+
+- **Report No. 20: Muse Spark 1.2, model versus harness.** Published under
+  [`docs/results/v3-musespark-harness-2026-08/`](docs/results/v3-musespark-harness-2026-08/model-card.md)
+  as Harness Study No. 04. Same 23-task v3 suite as Report No. 19, Pi vs the
+  uniform loop, one attempt per cell. The six Pi cells that read gold patches
+  or hidden tests in the unconfined sweep were replaced by seatbelt-confined,
+  audited-clean reruns before publication: 95.7% / 87.0% / 78.3% on Pi against
+  87.0% / 73.9% / 52.2% on the uniform loop (+8.7 / +13.1 / +26.1 points, one
+  Pi timeout in 69 cells). The reruns also documented the model actively
+  hunting the host for answer keys when confined, at real cost ($30.25 for the
+  six cells under correct metering). Model card, JSON (with a `rerun` block),
+  thread, and branded charts (`make_musespark_harness.py`,
+  `make_musespark_studycard.py`, `make_musespark_hero.py`).
+
+### Fixed
+
+- **Pi usage accounting sums per-message records.** `run_pi_task` previously
+  kept only Pi's last usage record; Pi reports usage per assistant message, so
+  billed tokens and `cli_reported_cost_usd` understated multi-turn runs (a
+  40-step run could show 0.6 K "billed" tokens). The parser now sums finalized
+  assistant `message_end` usage (input + cacheRead + cacheWrite as prompt,
+  cache-read subset tracked separately, per-message cost totaled). Report 20's
+  swept dollar figures predate the fix and are withheld on the card; the JSON
+  keeps them under `*_lastmsg` names.
+- **`leaderboard --track api` excludes API-metered CLI harnesses.** `pi:` rows
+  bill like api but measure model + external agent; they no longer appear on
+  the raw-API board and show only under `--track all`, making the Report 20
+  "not a board entry" rule an enforced invariant instead of advice.
+- **Pi models.json declares `contextWindow`.** Pi assumes 128 K for custom
+  models and force-compacts past it, and its compaction resume crashed two
+  pennylane runs ("Cannot continue from message role: assistant"). The
+  generated Meta provider entry now declares `contextWindow` (default 262144,
+  override with `META_CONTEXT_WINDOW`); Meta accepted a 137.8 K-token request
+  on a live run, so the 128 K default was simply wrong for Muse Spark.
+
+## [0.9.0] - 2026-08-26
+
+### Added
+
+- **Pi harness (`--harness pi`).** Runs a task through the open-source
+  [Pi](https://github.com/earendil-works/pi) coding agent
+  (`@earendil-works/pi-coding-agent`) while VulcanBench still owns the hidden
+  tests and scores. Pi is API-metered (not a subscription): `--harness pi
+  --billing api --model meta:muse-spark-1.2` records `cli_agent.harness=pi`
+  on the **api** leaderboard track, priced as the inner spec. Use it to
+  measure the harness delta against Report No. 19's uniform-loop Muse Spark
+  column. Effort maps to Pi's `--thinking` (`extra-high` → `xhigh`). Install
+  with `npm install -g @earendil-works/pi-coding-agent` and set
+  `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY`).
+  Publication runs must use `--sandbox docker` (Pi on the host, hidden tests
+  in the task image). See
+  [docs/HARNESS_BENCHMARKING.md](docs/HARNESS_BENCHMARKING.md).
 
 - **Report No. 19: Muse Spark 1.2 across the effort knob.** Published under
   [`docs/results/v3-musespark-2026-08/`](docs/results/v3-musespark-2026-08/model-card.md):
@@ -266,6 +320,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   already spent subscription credits. Cursor brings its own agent sandbox, so
   like Codex it is now exempt: `--sandbox docker` runs the agent on the host
   workspace and setup/verification in Docker over the same directory.
+- **Pi harness requires Docker for hidden tests.** Pi, like Cursor, runs its
+  agent on the host. `--sandbox local` scored those tests on the host instead,
+  so missing `tsx`, Werkzeug, and Go 1.23 became model zeros. `pi:` now
+  rejects `--sandbox local` unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. Those
+  host misses stay ordinary scored failures (same verifier rules as every
+  other v3 column); they are not infrastructure skips that would shrink the
+  denominator. Fairness is `--sandbox docker`, the Report 18 ZCode recipe.
+  `--only-missing` matches verifier sandbox mode, so a host-scored cell does
+  not cover a docker resume.
 - **Client errors are no longer retried.** Any HTTP 4xx other than 408/409/425/429
   now raises `NonRetryableProviderError`: a bad key, missing entitlement, unknown
   model, or malformed body fails identically on every attempt, so retrying only

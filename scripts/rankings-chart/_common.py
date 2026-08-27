@@ -74,6 +74,7 @@ NAME = {
 EXCLUDED = {
     "anthropic:claude-opus-4-8",  # 5/23 task coverage
     "zcode:glm-5.3",  # subscription harness: model plus product, never a board column
+    "pi:meta:muse-spark-1.2",  # Pi harness: model plus agent, never a board column
     "ollama:qwen3.8:27b",  # local-inference control runs, not the DashScope column
 }
 # Externally sourced (vulcanbench.com Report 10), not run in this checkout.

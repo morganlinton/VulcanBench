@@ -20,6 +20,7 @@ from rich.table import Table
 
 from harness import __version__
 from harness.agent.cli_agents import (
+    API_HARNESSES,
     CLI_AGENT_PROVIDERS,
     get_cli_agent_adapter,
     list_cli_agent_adapters,
@@ -30,7 +31,7 @@ from harness.calibration import calibrate_tasks, calibration_to_markdown
 from harness.compare import build_matrix
 from harness.cost_estimate import estimate_plan
 from harness.effort import DEFAULT_SWEEP_EFFORTS, parse_efforts
-from harness.leaderboard import aggregate_by_model, scan_leaderboard
+from harness.leaderboard import aggregate_by_model, scan_leaderboard, track_for_run
 from harness.pricing import is_priced
 from harness.regrade import find_run_dirs, regrade_run
 from harness.report import build_report, to_markdown
@@ -76,23 +77,30 @@ def _execution_spec(model: str, harness_name: str, billing: str) -> str:
     if harness_name == "vulcan":
         if billing == "subscription":
             raise ValueError(
-                "--billing subscription requires --harness claude-code|codex|cursor|grok-build|zcode"
+                "--billing subscription requires --harness "
+                "claude-code|codex|cursor|grok-build|zcode"
             )
         return model
     if harness_name not in CLI_AGENT_PROVIDERS:
         known = ", ".join(["vulcan", *sorted(CLI_AGENT_PROVIDERS)])
         raise ValueError(f"unknown --harness {harness_name!r}; known: {known}")
-    if billing == "api":
-        raise ValueError(
-            f"--harness {harness_name} is subscription-backed; use --billing subscription"
-        )
     if prefix in CLI_AGENT_PROVIDERS:
         if prefix != harness_name:
             raise ValueError(
                 f"model spec selects {prefix!r} but --harness selects {harness_name!r}"
             )
-        return model
-    return f"{harness_name}:{model}"
+        spec = model
+    else:
+        spec = f"{harness_name}:{model}"
+    if harness_name in API_HARNESSES:
+        if billing == "subscription":
+            raise ValueError(f"--harness {harness_name} is API-metered; use --billing api")
+        return spec
+    if billing == "api":
+        raise ValueError(
+            f"--harness {harness_name} is subscription-backed; use --billing subscription"
+        )
+    return spec
 
 
 @harness_app.command("list")
@@ -186,12 +194,12 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         "--model",
         "-m",
         help="Model id. Use provider:model for Vulcan's API loop, or a bare model "
-        "with --harness claude-code|codex|cursor|grok-build|zcode.",
+        "with --harness claude-code|codex|cursor|grok-build|zcode|pi.",
     ),
     harness_name: str = typer.Option(
         "vulcan",
         "--harness",
-        help="Execution harness: vulcan|claude-code|codex|cursor|grok-build|zcode",
+        help="Execution harness: vulcan|claude-code|codex|cursor|grok-build|zcode|pi",
     ),
     billing: str = typer.Option(
         "auto",
@@ -539,7 +547,7 @@ def _summary_row(summary: dict[str, Any]) -> dict[str, Any]:
         "functional": sc.get("functional"),
         "cost_usd": summary.get("cost_usd"),
         "execution_harness": cli_agent.get("harness") or "vulcan",
-        "track": "subscription" if cli_agent else "api",
+        "track": track_for_run(cli_agent),
         "access_mode": economics.get("billing_mode"),
         "marginal_cash_usd": marginal_cash,
         "api_equivalent_cost_usd": api_equivalent,
@@ -820,7 +828,12 @@ def leaderboard(  # noqa: PLR0912
     format: str = typer.Option("markdown", "--format", "-f", help="markdown|json"),
     task: str | None = typer.Option(None, "--task", help="Filter by task id (run view)"),
     suite: str | None = typer.Option(None, "--suite", help="Filter by suite"),
-    track: str = typer.Option("all", "--track", help="Result track: all|api|subscription"),
+    track: str = typer.Option(
+        "all",
+        "--track",
+        help="Result track: all|api|subscription. api is uniform-loop runs only; "
+        "API-metered CLI harnesses (pi) appear under all.",
+    ),
 ) -> None:
     """Show API and subscription-product results without silently mixing them."""
     if track not in {"all", "api", "subscription"}:
@@ -834,6 +847,12 @@ def leaderboard(  # noqa: PLR0912
         rows = [r for r in rows if r.get("suite") == suite]
     if track != "all":
         rows = [r for r in rows if r.get("track") == track]
+    if track == "api":
+        # API-metered CLI harnesses (e.g. pi) bill like the api track but
+        # measure model + external agent, not the uniform loop. Keeping them
+        # out of --track api is what makes that board a raw-API comparison;
+        # they still show under --track all, labeled by harness.
+        rows = [r for r in rows if (r.get("execution_harness") or "vulcan") == "vulcan"]
     if by == "model":
         data: list[dict] = aggregate_by_model(rows)  # type: ignore[type-arg]
     else:

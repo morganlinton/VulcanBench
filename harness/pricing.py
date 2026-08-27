@@ -109,6 +109,7 @@ _SPEC_ALIASES = {
     "codex:": "openai:",
     "grok-build:": "xai:",
     "zcode:": "zai:",
+    "pi:": "",
 }
 
 

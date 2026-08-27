@@ -153,6 +153,14 @@ def zai_supports_effort(model: str | None) -> bool:
     return any(name.startswith(prefix) for prefix in _ZAI_EFFORT_MODELS)
 
 
+_PI_EFFORT_VALUES = {
+    "minimal": "minimal",
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "extra-high": "xhigh",
+}
+
 _PROVIDER_EFFORT_MAPS = {
     "kimi": _KIMI_EFFORT_VALUES,
     "deepseek": _DEEPSEEK_EFFORT_VALUES,
@@ -162,6 +170,7 @@ _PROVIDER_EFFORT_MAPS = {
     "cursor": _CURSOR_EFFORT_VALUES,
     "grok-build": _GROK_BUILD_EFFORT_VALUES,
     "zcode": _ZCODE_EFFORT_VALUES,
+    "pi": _PI_EFFORT_VALUES,
 }
 
 

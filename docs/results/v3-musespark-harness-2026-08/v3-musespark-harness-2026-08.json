@@ -1,0 +1,522 @@
+{
+ "suite": "v3",
+ "n_tasks": 23,
+ "repeat": 1,
+ "model": "muse-spark-1.2",
+ "report": 20,
+ "harness_study": 4,
+ "date": "2026-08-27",
+ "category_defs": {
+  "solved": "functional==1.0",
+  "wrong": "failed, returned an answer",
+  "timeout": "failed, did not finish (wall-clock)"
+ },
+ "api": {
+  "low": {
+   "n": 23,
+   "solved": 20,
+   "wrong": 3,
+   "timeout": 0,
+   "passat1": 87.0,
+   "cost": 8.19,
+   "cost_per_solved": 0.41,
+   "tokens_per_task": 206100,
+   "min_per_task": 6.7,
+   "median_min": 3.2,
+   "avg_steps": 51.1
+  },
+  "high": {
+   "n": 23,
+   "solved": 17,
+   "wrong": 1,
+   "timeout": 5,
+   "passat1": 73.9,
+   "cost": 20.92,
+   "cost_per_solved": 1.23,
+   "tokens_per_task": 483300,
+   "min_per_task": 21.3,
+   "median_min": 12.4,
+   "avg_steps": 46.1
+  },
+  "extra-high": {
+   "n": 23,
+   "solved": 12,
+   "wrong": 1,
+   "timeout": 10,
+   "passat1": 52.2,
+   "cost": 27.25,
+   "cost_per_solved": 2.27,
+   "tokens_per_task": 658200,
+   "min_per_task": 28.7,
+   "median_min": 20.1,
+   "avg_steps": 47.2
+  }
+ },
+ "pi": {
+  "low": {
+   "n": 23,
+   "solved": 22,
+   "wrong": 1,
+   "timeout": 0,
+   "passat1": 95.7,
+   "tokens_moved_per_task": 29734,
+   "min_per_task": 1.54,
+   "median_min": 1.35,
+   "avg_steps": 24.7,
+   "tokens_lastmsg_per_task": 1124,
+   "cost_lastmsg_usd": 0.043076
+  },
+  "high": {
+   "n": 23,
+   "solved": 20,
+   "wrong": 3,
+   "timeout": 0,
+   "passat1": 87.0,
+   "tokens_moved_per_task": 54727,
+   "min_per_task": 2.95,
+   "median_min": 2.68,
+   "avg_steps": 40.4,
+   "tokens_lastmsg_per_task": 634,
+   "cost_lastmsg_usd": 0.037401
+  },
+  "extra-high": {
+   "n": 23,
+   "solved": 18,
+   "wrong": 4,
+   "timeout": 1,
+   "passat1": 78.3,
+   "tokens_moved_per_task": 57778,
+   "min_per_task": 4.05,
+   "median_min": 3.44,
+   "avg_steps": 39.4,
+   "tokens_lastmsg_per_task": 4683,
+   "cost_lastmsg_usd": 0.15499
+  }
+ },
+ "integrity": {
+  "note": "Pi runs on the host; Docker is the verifier. The 2026-08-27 sweep was unconfined: 17/69 cells were flagged for host path walks, 6 of them answer_key_access. Those six cells were REPLACED on 2026-08-27 by seatbelt-confined reruns (see rerun block), each audited clean of benchmark paths. The 11 benchmark_data_access flags on other original cells still stand (flagged, not excluded).",
+  "answer_key_access": [
+   {
+    "task": "oss-aiohttp-upgrade-deferred",
+    "effort": "extra-high"
+   },
+   {
+    "task": "oss-flask-teardown-robust",
+    "effort": "extra-high"
+   },
+   {
+    "task": "oss-packaging-range-prerelease-policy",
+    "effort": "extra-high"
+   },
+   {
+    "task": "oss-pennylane-trotter-fragmented",
+    "effort": "high"
+   },
+   {
+    "task": "oss-pennylane-trotter-fragmented",
+    "effort": "extra-high"
+   },
+   {
+    "task": "oss-sqlglot-qualify-lateral-star",
+    "effort": "extra-high"
+   }
+  ],
+  "benchmark_data_access": [
+   {
+    "task": "oss-aiohttp-upgrade-deferred",
+    "effort": "high"
+   },
+   {
+    "task": "oss-flask-teardown-robust",
+    "effort": "high"
+   },
+   {
+    "task": "oss-hono-request-bytes",
+    "effort": "high"
+   },
+   {
+    "task": "oss-packaging-range-prerelease-policy",
+    "effort": "high"
+   },
+   {
+    "task": "oss-semver-inc-dotted-prerelease",
+    "effort": "high"
+   },
+   {
+    "task": "oss-semver-inc-dotted-prerelease",
+    "effort": "extra-high"
+   },
+   {
+    "task": "oss-sqlglot-canonicalize-internal-names",
+    "effort": "low"
+   },
+   {
+    "task": "oss-sqlglot-canonicalize-internal-names",
+    "effort": "high"
+   },
+   {
+    "task": "oss-sqlglot-canonicalize-internal-names",
+    "effort": "extra-high"
+   },
+   {
+    "task": "oss-sqlglot-iso8601-nanos",
+    "effort": "high"
+   },
+   {
+    "task": "oss-sqlglot-iso8601-nanos",
+    "effort": "extra-high"
+   }
+  ],
+  "n_contaminated": 17,
+  "n_cells": 69
+ },
+ "matrix": {
+  "oss-aiohttp-upgrade-deferred": {
+   "api": {
+    "low": "solved",
+    "high": "timeout",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-chi-readfrom-tee-doublecount": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-cobra-noduplicateargs": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-flask-teardown-robust": {
+   "api": {
+    "low": "solved",
+    "high": "timeout",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "timeout"
+   }
+  },
+  "oss-hono-client-header-merge": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-hono-request-bytes": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-itertools-strip-prefix": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "wrong",
+    "extra-high": "wrong"
+   }
+  },
+  "oss-jiff-date-day-lt1": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-jiff-signdur-panic": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-jiff-strftime-negpad": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-more-itertools-interleave-empty": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-networkx-leiden-communities": {
+   "api": {
+    "low": "wrong",
+    "high": "timeout",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "wrong",
+    "extra-high": "wrong"
+   }
+  },
+  "oss-packaging-range-prerelease-policy": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-pennylane-trotter-fragmented": {
+   "api": {
+    "low": "wrong",
+    "high": "timeout",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "wrong",
+    "high": "wrong",
+    "extra-high": "wrong"
+   }
+  },
+  "oss-pflag-uintslice-hex": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-semver-inc-dotted-prerelease": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-semver-truncate": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-semver-xrange-order": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-sqlglot-canonicalize-internal-names": {
+   "api": {
+    "low": "wrong",
+    "high": "timeout",
+    "extra-high": "timeout"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-sqlglot-iso8601-nanos": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-sqlglot-qualify-lateral-star": {
+   "api": {
+    "low": "solved",
+    "high": "wrong",
+    "extra-high": "wrong"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "wrong"
+   }
+  },
+  "oss-zod-invert-codec": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  },
+  "oss-zod-proto-catchall": {
+   "api": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   },
+   "pi": {
+    "low": "solved",
+    "high": "solved",
+    "extra-high": "solved"
+   }
+  }
+ },
+ "accounting_note": "The original sweep parsed only Pi's last per-message usage record, so its per-run billed-token and cash figures understate run totals and are kept under *_lastmsg names; harness 0.9.1 sums per-message usage, and the six rerun cells carry correct metered figures (rerun block). tokens_moved_per_task for the pi columns still averages the ORIGINAL sweep cells; the rerun block lists per-cell moved tokens (pennylane runs are far heavier honest than tainted). min_per_task / median_min / avg_steps likewise describe the original sweep columns.",
+ "rerun": {
+  "date": "2026-08-27",
+  "why": "the original sweep ran Pi unconfined on the host; six cells read gold patches or hidden tests and were graded solved",
+  "method": "seatbelt-confined Pi (sandbox-exec denies the VulcanBench checkout and other local benchmark trees, plus /tmp FIFO hazards); workspace in a tmp perimeter; --sandbox docker verifier; effort and prompts identical to the sweep; Pi 0.75.5 (sweep used 0.74.2) with contextWindow=262144 declared (Pi otherwise assumes 128000 and its forced auto-compaction crashed two pennylane attempts); one pennylane xhigh attempt was retried after hanging on a host FIFO (infrastructure)",
+  "audit": "every accepted run audited: filesystem verdicts clean/out_of_workspace only, zero benchmark_data or answer_key paths, no web",
+  "accounting": "these runs use the summed per-message usage accounting (v0.9.1)",
+  "cells": [
+   {
+    "task": "oss-pennylane-trotter-fragmented",
+    "effort": "high",
+    "outcome": "wrong",
+    "functional": 0.4,
+    "min": 27.3,
+    "tokens_moved": 9643543,
+    "cost_usd": 12.262932,
+    "run_id": "oss-pennylane-trotter-fragmented-e70c43f7"
+   },
+   {
+    "task": "oss-pennylane-trotter-fragmented",
+    "effort": "extra-high",
+    "outcome": "wrong",
+    "functional": 0.4,
+    "min": 13.7,
+    "tokens_moved": 4978101,
+    "cost_usd": 6.50045,
+    "run_id": "oss-pennylane-trotter-fragmented-5d15a61d"
+   },
+   {
+    "task": "oss-aiohttp-upgrade-deferred",
+    "effort": "extra-high",
+    "outcome": "solved",
+    "functional": 1.0,
+    "min": 7.3,
+    "tokens_moved": 4256816,
+    "cost_usd": 5.430238,
+    "run_id": "oss-aiohttp-upgrade-deferred-764c1e07"
+   },
+   {
+    "task": "oss-flask-teardown-robust",
+    "effort": "extra-high",
+    "outcome": "timeout",
+    "functional": 0.0,
+    "min": 20.1,
+    "tokens_moved": 472593,
+    "cost_usd": 0.598763,
+    "run_id": "oss-flask-teardown-robust-be3fd6cd"
+   },
+   {
+    "task": "oss-packaging-range-prerelease-policy",
+    "effort": "extra-high",
+    "outcome": "solved",
+    "functional": 1.0,
+    "min": 3.0,
+    "tokens_moved": 778083,
+    "cost_usd": 1.016908,
+    "run_id": "oss-packaging-range-prerelease-policy-6e7a0b6a"
+   },
+   {
+    "task": "oss-sqlglot-qualify-lateral-star",
+    "effort": "extra-high",
+    "outcome": "wrong",
+    "functional": 0.0,
+    "min": 14.1,
+    "tokens_moved": 3485323,
+    "cost_usd": 4.438542,
+    "run_id": "oss-sqlglot-qualify-lateral-star-5dfbab82"
+   }
+  ],
+  "cost_usd_total": 30.247833
+ }
+}

@@ -73,7 +73,13 @@ def host_runner(cmd: str, workspace: Path, timeout: int) -> int:
 
 
 def _infrastructure_reason(cmd: str, outcome: RunnerOutcome) -> str | None:
-    """Return a reason when a test runner is missing its required toolchain."""
+    """Return a reason when a test runner is missing its required toolchain.
+
+    Keep this list identical for every model and harness. Host misses like
+    ``tsx``, Werkzeug, or a too-old Go must not become infrastructure skips:
+    other v3 columns ran in Docker and received a real pass/fail. Pi's fix
+    is ``--sandbox docker``, not a special-case denominator.
+    """
     output = f"{outcome.stdout}\n{outcome.stderr}".lower()
     if outcome.exit_code == 124:
         return "verifier command timed out"

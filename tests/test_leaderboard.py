@@ -106,6 +106,36 @@ def test_scan_projects_subscription_harness_and_economics(tmp_path: Path) -> Non
     assert row["marginal_cash_usd"] is None
 
 
+def test_pi_cli_harness_stays_on_api_track(tmp_path: Path) -> None:
+    d = tmp_path / "pi-api"
+    d.mkdir()
+    (d / "summary.json").write_text(
+        json.dumps(
+            {
+                "run_id": "pi-api",
+                "task_id": "hello-world",
+                "model": "pi:meta:muse-spark-1.2",
+                "cli_agent": {
+                    "harness": "pi",
+                    "billing": "api",
+                    "harness_version": "pi 0.52.0",
+                },
+                "economics": {
+                    "billing_mode": "api-metered",
+                    "cost_basis": "metered-api-pricing",
+                    "marginal_cash_usd": 0.36,
+                    "api_equivalent_cost_usd": 0.36,
+                },
+                "scores": {"functional": 1.0, "total": 1.0},
+            }
+        )
+    )
+    row = scan_leaderboard(tmp_path)[0]
+    assert row["track"] == "api"
+    assert row["execution_harness"] == "pi"
+    assert row["marginal_cash_usd"] == 0.36
+
+
 def test_historical_api_cost_is_used_as_metered_cash(tmp_path: Path) -> None:
     d = tmp_path / "historical-api"
     d.mkdir()

@@ -117,6 +117,10 @@ vulcanbench run --task py-topo-sort-cycle \
 vulcanbench run --task py-topo-sort-cycle \
   --harness codex --billing subscription \
   --model gpt-5.6-sol --no-judges
+
+# Muse Spark 1.2 through Pi (Report 18 ZCode recipe: docker verifier, judges off)
+vulcanbench run --task hello-world \
+  --model pi:meta:muse-spark-1.2 --effort low --no-judges --sandbox docker
 ```
 
 What to know before using it:

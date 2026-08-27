@@ -271,7 +271,11 @@ def run_agent(  # noqa: PLR0915
         scores,
         cached_input_tokens=cached_input_tokens,
     )
-    grading_uses_subscription = bool(cli_outcome and is_cli_agent_spec(judge_model or model))
+    grading_uses_subscription = bool(
+        cli_outcome
+        and cli_outcome.billing == "subscription"
+        and is_cli_agent_spec(judge_model or model)
+    )
     economics = (
         subscription_receipt(
             api_equivalent_cost_usd=cost["total"],
@@ -292,7 +296,7 @@ def run_agent(  # noqa: PLR0915
                 else "estimated-from-reported-tokens"
             ),
         )
-        if cli_outcome
+        if cli_outcome and cli_outcome.billing == "subscription"
         else api_receipt(cost["total"], cost["judges"])
     )
     duration_s = round(time.monotonic() - started_mono, 3)
@@ -410,6 +414,22 @@ def _resolve_run_engine(
                 f"model spec {model!r} runs a vendor agent CLI on the host with "
                 "its own tool execution; pass --sandbox local to acknowledge "
                 "host execution"
+            )
+        # Pi is the same split: agent on the host, hidden tests in the task
+        # image (tsx, Go 1.23, Flask deps). --sandbox local scores on the host
+        # and turns a missing tsx into a model zero. Require docker unless the
+        # operator opts into host verification.
+        if (
+            adapter.harness_id == "pi"
+            and sandbox == "local"
+            and os.environ.get("VULCANBENCH_ALLOW_HOST_EXEC") != "1"
+        ):
+            raise SandboxError(
+                f"model spec {model!r} runs Pi on the host; hidden tests "
+                "must use --sandbox docker so they run in the task image "
+                "(tsx, Go 1.23, Flask). --sandbox local scores on the host "
+                "and treats missing toolchains as model zeros. Set "
+                "VULCANBENCH_ALLOW_HOST_EXEC=1 only for a deliberate host smoke."
             )
         return adapter, None, effort_config(adapter.harness_id, effort)
     provider = provider or get_provider(model)
@@ -1264,6 +1284,10 @@ def _build_judge_provider(
     if not judges:
         return None
     spec = judge_model or model
+    if spec.startswith("pi:"):
+        spec = spec[3:]
+        if ":" not in spec and spec.lower().startswith("muse-spark"):
+            spec = f"meta:{spec}"
     if run_provider is not None and spec == model:
         provider: LLMProvider = run_provider
     else:

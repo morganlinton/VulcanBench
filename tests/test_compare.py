@@ -164,3 +164,52 @@ def test_fresh_run_counts_filters_model_effort_and_staleness(tmp_path: Path) -> 
     counts = fresh_run_counts(["a", "b"], "opus", "low", runs, suite)
     assert counts["a"] == 2  # two fresh opus-low runs for a
     assert counts["b"] == 1  # the stale one is not counted
+
+
+def test_fresh_run_counts_matches_verifier_sandbox(tmp_path: Path) -> None:
+    """Host-local scores must not cover a --sandbox docker resume."""
+    suite = _make_suite(tmp_path, "s", ["a"])
+    ha = task_hash(load_task("a", suite))
+    runs = tmp_path / "runs"
+    local_dir = runs / "a-local"
+    local_dir.mkdir(parents=True)
+    (local_dir / "summary.json").write_text(
+        json.dumps(
+            {
+                "run_id": "a-local",
+                "task_id": "a",
+                "model": "pi:meta:muse-spark-1.2",
+                "effort": {"requested": "low"},
+                "scores": {"functional": 0.0},
+                "task_hash": ha,
+                "manifest": {"sandbox": {"mode": "local"}},
+            }
+        )
+    )
+    docker_dir = runs / "a-docker"
+    docker_dir.mkdir()
+    (docker_dir / "summary.json").write_text(
+        json.dumps(
+            {
+                "run_id": "a-docker",
+                "task_id": "a",
+                "model": "pi:meta:muse-spark-1.2",
+                "effort": {"requested": "low"},
+                "scores": {"functional": 1.0},
+                "task_hash": ha,
+                "manifest": {"sandbox": {"mode": "docker"}},
+            }
+        )
+    )
+    all_counts = fresh_run_counts(
+        ["a"], "pi:meta:muse-spark-1.2", "low", runs, suite
+    )
+    assert all_counts["a"] == 2
+    docker_counts = fresh_run_counts(
+        ["a"], "pi:meta:muse-spark-1.2", "low", runs, suite, sandbox="docker"
+    )
+    assert docker_counts["a"] == 1
+    local_counts = fresh_run_counts(
+        ["a"], "pi:meta:muse-spark-1.2", "low", runs, suite, sandbox="local"
+    )
+    assert local_counts["a"] == 1

@@ -9,7 +9,10 @@ engineering tasks. VulcanBench measures how models perform across reasoning
 effort, language, codebase scale, and task complexity, with full traces,
 reproducible scoring, and a local dashboard.
 
-**v0.8.0**: adds the **Voice Eval Suite v1** (`vulcanbench voice`): text-vs-audio delta measurement ("voice tax") across OpenAI Realtime, Gemini Live, and Qwen3-Omni, with a 200-question held-out set, a voices/rate/noise audio matrix, and modality-blind scoring. See [docs/VOICE_EVAL.md](docs/VOICE_EVAL.md). Previous: **v0.7.0**: adds a **Qwen / DashScope provider** (`qwen:qwen3.7-plus` and friends)
+**v0.9.1**: publishes **Report No. 20** (Muse Spark 1.2 through Pi vs the
+uniform loop, Harness Study No. 04). Previous: **v0.9.0**: adds a **Pi execution harness** (`--harness pi`) so the same model
+(for example Muse Spark 1.2) can be scored through Pi's minimal agent loop
+instead of Vulcan's, on the API cost track. Previous: **v0.8.0**: adds the **Voice Eval Suite v1** (`vulcanbench voice`): text-vs-audio delta measurement ("voice tax") across OpenAI Realtime, Gemini Live, and Qwen3-Omni, with a 200-question held-out set, a voices/rate/noise audio matrix, and modality-blind scoring. See [docs/VOICE_EVAL.md](docs/VOICE_EVAL.md). Previous: **v0.7.0**: adds a **Qwen / DashScope provider** (`qwen:qwen3.7-plus` and friends)
 so Alibaba Cloud models can be benchmarked like OpenAI / Anthropic / Z.ai / Kimi.
 Builds on v0.6's frontier-hard task tier and cost-efficient reporting
 (`--max-run-cost`, `compare`, `regrade`, `--only-missing`), and on v0.5's 52
@@ -215,6 +218,18 @@ Specify a model as `provider:model`:
   (`cursor-grok-4.6-low` … `-xhigh`), sweep those by model id. Use
   `--sandbox docker` so hidden-test verification runs in the sandbox image;
   the Cursor agent itself works the host workspace under Cursor's own sandbox.
+- `pi:<provider:model>` / `--harness pi`: the open-source Pi coding agent
+  (`npm install -g @earendil-works/pi-coding-agent`). API-metered, not a
+  subscription: `--harness pi --billing api --model meta:muse-spark-1.2`
+  bills on the api cost track and prices as `meta:muse-spark-1.2`, but
+  `leaderboard --track api` filters `pi:` rows out (model plus agent is not
+  a raw-API board entry; use `--track all`).
+  Results measure model plus Pi (read/write/edit/bash, no web tools). Effort
+  is Pi `--thinking`. Compare to Report No. 19's uniform-loop Muse Spark
+  column with the Report 18 ZCode recipe: `--model pi:meta:muse-spark-1.2
+  --repeat 1 --no-judges --sandbox docker`. Pi's tools run on the host,
+  hidden tests run in the task image. `--sandbox local` is rejected unless
+  you opt into host scoring.
 
 Subscription runs record marginal cash, plan allocation, quota, and
 API-equivalent value separately; they are not mixed silently with raw API runs.

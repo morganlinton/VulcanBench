@@ -158,7 +158,10 @@ class PlanCostEstimate:
 
 
 def _provider(model: str) -> str:
-    return model.split(":", 1)[0] if ":" in model else model
+    head, _, rest = model.partition(":")
+    if head == "pi" and ":" in rest:
+        return rest.split(":", 1)[0]
+    return head if rest else model
 
 
 def _price_index(model: str) -> float | None:

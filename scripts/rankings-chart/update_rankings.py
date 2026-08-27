@@ -108,9 +108,7 @@ for (model, eff), tasks in agg.items():
         # Single-pass columns joined via Reports 17/18 publish MEDIAN times
         # (long-tail timeouts distort a 23-run mean); keep the board consistent.
         avg_duration_s=round(
-            statistics.median(all_durs)
-            if model == "zai:glm-5.3"
-            else dur / n_runs,
+            statistics.median(all_durs) if model == "zai:glm-5.3" else dur / n_runs,
             1,
         ),
         fin="",

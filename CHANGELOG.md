@@ -20,7 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   measure the harness delta against Report No. 19's uniform-loop Muse Spark
   column. Effort maps to Pi's `--thinking` (`extra-high` → `xhigh`). Install
   with `npm install -g @earendil-works/pi-coding-agent` and set
-  `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY`). See
+  `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY`).
+  Publication runs must use `--sandbox docker` (Pi on the host, hidden tests
+  in the task image). See
   [docs/HARNESS_BENCHMARKING.md](docs/HARNESS_BENCHMARKING.md).
 
 - **Report No. 19: Muse Spark 1.2 across the effort knob.** Published under
@@ -280,6 +282,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   already spent subscription credits. Cursor brings its own agent sandbox, so
   like Codex it is now exempt: `--sandbox docker` runs the agent on the host
   workspace and setup/verification in Docker over the same directory.
+- **Pi harness requires Docker for hidden tests.** Pi, like Cursor, runs its
+  agent on the host. `--sandbox local` scored those tests on the host instead,
+  so missing `tsx`, Werkzeug, and Go 1.23 became model zeros. `pi:` now
+  rejects `--sandbox local` unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. The
+  verifier also classifies those host-toolchain misses as infrastructure
+  errors rather than functional zeros.
 - **Client errors are no longer retried.** Any HTTP 4xx other than 408/409/425/429
   now raises `NonRetryableProviderError`: a bad key, missing entitlement, unknown
   model, or malformed body fails identically on every attempt, so retrying only

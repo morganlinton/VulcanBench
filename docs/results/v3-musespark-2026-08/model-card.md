@@ -139,6 +139,6 @@ npm install -g @earendil-works/pi-coding-agent
 vulcanbench harness doctor pi
 vulcanbench run --suite v3 --harness pi --billing api \
   --model meta:muse-spark-1.2 --effort <low|high|extra-high> \
-  --repeat 1 --no-judges
+  --repeat 1 --no-judges --sandbox docker
 vulcanbench leaderboard --track api
 ```

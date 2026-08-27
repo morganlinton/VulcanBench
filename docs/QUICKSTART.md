@@ -119,9 +119,10 @@ vulcanbench run --task py-topo-sort-cycle \
   --model gpt-5.6-sol --no-judges
 
 # Muse Spark 1.2 through Pi (compare to the uniform-loop Report 19 column)
+# Default --sandbox docker: Pi on the host, hidden tests in the task image.
 vulcanbench run --task hello-world \
   --harness pi --billing api \
-  --model meta:muse-spark-1.2 --effort low --no-judges
+  --model meta:muse-spark-1.2 --effort low --no-judges --sandbox docker
 ```
 
 What to know before using it:

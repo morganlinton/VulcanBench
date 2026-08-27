@@ -72,6 +72,19 @@ def host_runner(cmd: str, workspace: Path, timeout: int) -> int:
     return _run_host_captured(cmd, workspace, timeout).exit_code
 
 
+_MISSING_VERIFIER_BINARIES = (
+    "python",
+    "python3",
+    "pytest",
+    "go",
+    "cargo",
+    "npm",
+    "node",
+    "tsx",
+    "bun",
+)
+
+
 def _infrastructure_reason(cmd: str, outcome: RunnerOutcome) -> str | None:
     """Return a reason when a test runner is missing its required toolchain."""
     output = f"{outcome.stdout}\n{outcome.stderr}".lower()
@@ -79,9 +92,20 @@ def _infrastructure_reason(cmd: str, outcome: RunnerOutcome) -> str | None:
         return "verifier command timed out"
     if "no module named pytest" in output or "no module named 'pytest'" in output:
         return "pytest is unavailable in the verifier environment"
-    missing_commands = ("python", "python3", "pytest", "go", "cargo", "npm", "node")
-    if outcome.exit_code in {126, 127} and any(
-        cmd.lstrip().startswith(executable) for executable in missing_commands
+    # Flask v3 tasks pin vulcanbench/sandbox:flask-5928. Host scoring without
+    # Werkzeug is an environment miss, not a wrong patch.
+    if "no module named 'werkzeug'" in output or "no module named werkzeug" in output:
+        return "flask sandbox dependencies are unavailable in the verifier environment"
+    # go.mod toolchain newer than the host Go (base image is 1.23; host 1.22
+    # reports this instead of running the tests).
+    if "toolchain not available" in output or "go.mod requires go" in output:
+        return "go toolchain in the verifier environment is too old for this module"
+    first = cmd.lstrip().split()[0] if cmd.lstrip() else ""
+    first_name = Path(first).name
+    if first_name in _MISSING_VERIFIER_BINARIES and (
+        outcome.exit_code in {126, 127}
+        or f"{first_name}: command not found" in output
+        or f"{first_name}: not found" in output
     ):
         return "verifier toolchain command is unavailable"
     return None

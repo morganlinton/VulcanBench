@@ -1109,6 +1109,9 @@ def fake_pi(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.Monkey
     script = _write_fake_pi(bin_dir)
     monkeypatch.setenv("PATH", f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}")
     monkeypatch.setenv("META_MUSE_SPARK_API", "meta-test-key")
+    # Unit tests score hello-world on the host. Publication Pi runs must use
+    # --sandbox docker; this opt-in is what the adapter requires for local.
+    monkeypatch.setenv("VULCANBENCH_ALLOW_HOST_EXEC", "1")
     return script
 
 
@@ -1216,6 +1219,21 @@ def test_pi_allows_docker_verifier() -> None:
     assert adapter is not None and adapter.harness_id == "pi"
     assert provider is None
     assert effort is not None and effort.provider_value == "xhigh" and effort.supported
+
+
+def test_pi_rejects_local_sandbox_without_host_opt_in(
+    tmp_path: Path, fake_pi: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("VULCANBENCH_ALLOW_HOST_EXEC", raising=False)
+    with pytest.raises(SandboxError, match="--sandbox docker"):
+        run_agent(
+            task_id="hello-world",
+            model="pi:meta:muse-spark-1.2",
+            output_dir=tmp_path,
+            tasks_root=Path("tasks/v1"),
+            judges=False,
+            sandbox="local",
+        )
 
 
 def test_pi_missing_api_key_fails_closed(

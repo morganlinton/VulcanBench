@@ -14,7 +14,7 @@ Release A supports:
 | Cursor CLI | `cursor:<model>` | `cursor-agent login` (Cursor account/credits) | Cursor sandbox enabled + force-allow; Vulcan setup/verifier may use Docker |
 | Grok Build | `grok-build:<model>` | `grok login` (grok.com OIDC) | custom kernel profile: workspace writes + repo reads denied (Seatbelt/Landlock); Vulcan setup/verifier may use Docker |
 | ZCode | `zcode:<model>` | `zcode login` (Z.ai OAuth, GLM Coding Plan) | ZCode permission mode `yolo` on the host workspace; web tools removed and the Browser Use plugin disabled; Vulcan setup/verifier may use Docker |
-| Pi | `pi:<provider:model>` | API keys (`META_MUSE_SPARK_API`, `OPENAI_API_KEY`, ...) | Pi read/write/edit/bash on the host workspace; no web tools; Vulcan setup/verifier may use Docker |
+| Pi | `pi:<provider:model>` | API keys (`META_MUSE_SPARK_API`, `OPENAI_API_KEY`, ...) | Pi read/write/edit/bash on the host workspace; no web tools; Vulcan setup/verifier **must** use `--sandbox docker` |
 
 Cursor-specific limits: `cursor-agent` streams no token usage or cost, so
 token counts are recorded as zero and the economics receipt marks the
@@ -142,9 +142,12 @@ and `--thinking` / `--model` / `--no-session`):
 - **This is the harness-delta path for Muse Spark.** Report No. 19 ran
   `meta:muse-spark-1.2` through VulcanBench's uniform loop. The same inner
   spec through Pi is:
-  `vulcanbench run --suite v3 --harness pi --billing api --model meta:muse-spark-1.2 --effort low --no-judges`.
+  `vulcanbench run --suite v3 --harness pi --billing api --model meta:muse-spark-1.2 --effort low --no-judges --sandbox docker`.
   Leaderboard `--track api` shows both columns; they must not be averaged.
-  `cli_agent.harness` is `vulcan` vs `pi`.
+  `cli_agent.harness` is `vulcan` vs `pi`. `--sandbox docker` is required:
+  Pi's tools run on the host, hidden tests run in the task image (`tsx`,
+  Go 1.23, Flask). `--sandbox local` scores on the host and is rejected
+  unless `VULCANBENCH_ALLOW_HOST_EXEC=1`.
 - **Install and keys.** `npm install -g @earendil-works/pi-coding-agent`.
   Preflight is ready when `pi` is on PATH and a Meta/OpenAI/Anthropic key is
   set. `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY` with
@@ -155,8 +158,10 @@ and `--thinking` / `--model` / `--no-session`):
 - **Meta is registered per run**, not via the operator's `~/.pi`. The adapter
   points `HOME` at a sibling of the workspace and writes
   `~/.pi/agent/models.json` with `api: openai-responses` against
-  `META_BASE_URL`, interpolating `$META_MUSE_SPARK_API` so the secret is not
-  on disk. `--no-session` disables Pi session logs.
+  `META_BASE_URL`. Pi treats `apiKey` as an environment-variable *name*, so
+  the file stores `META_MUSE_SPARK_API` rather than the secret (a `$NAME`
+  interpolant is sent as a literal and Meta 401s). `--no-session` disables
+  Pi session logs.
 - **No web tools.** Pi's default tools are read, write, edit, and bash.
   Integrity audits should see `no_web` unless `--network` later grows a
   browser extension. `--max-run-cost` is rejected (usage is not a live
@@ -254,12 +259,14 @@ vulcanbench run --task hello-world \
   --no-judges
 
 # Pi (open-source harness) wrapping Muse Spark 1.2 on the Meta API
+# Agent on the host; hidden tests in Docker (do not pass --sandbox local)
 vulcanbench run --task hello-world \
   --harness pi \
   --billing api \
   --model meta:muse-spark-1.2 \
   --effort low \
-  --no-judges
+  --no-judges \
+  --sandbox docker
 ```
 
 The old `--model claude-code:<model>` form remains supported. For publication,

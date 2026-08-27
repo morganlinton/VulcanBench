@@ -106,6 +106,47 @@ def test_missing_pytest_is_an_infrastructure_error(tmp_path: Path) -> None:
         run_declarative_verifier(task, ws, runner=missing_pytest)
 
 
+def test_missing_tsx_is_an_infrastructure_error(tmp_path: Path) -> None:
+    _make_task(tmp_path / "tasks", f_returns=2)
+    task = load_task("fix-f", tmp_path / "tasks")
+    ws = prepare_workspace(task, tmp_path / "ws")
+
+    def missing_tsx(cmd: str, workspace: Path, timeout: int) -> RunnerOutcome:
+        return RunnerOutcome(127, stderr="tsx: command not found")
+
+    # Pretend the task's verifier command is tsx, like v3 TypeScript tasks.
+    task.metadata["tests"] = {
+        "fail_to_pass": [{"name": "vb", "cmd": "tsx --test vb.test.ts"}],
+        "pass_to_pass": [{"name": "reg", "cmd": "tsx --test vb_reg.test.ts"}],
+    }
+    with pytest.raises(VerifierInfrastructureError, match="toolchain command is unavailable"):
+        run_declarative_verifier(task, ws, runner=missing_tsx)
+
+
+def test_missing_werkzeug_is_an_infrastructure_error(tmp_path: Path) -> None:
+    _make_task(tmp_path / "tasks", f_returns=2)
+    task = load_task("fix-f", tmp_path / "tasks")
+    ws = prepare_workspace(task, tmp_path / "ws")
+
+    def missing_werkzeug(cmd: str, workspace: Path, timeout: int) -> RunnerOutcome:
+        return RunnerOutcome(1, stderr="ModuleNotFoundError: No module named 'werkzeug'")
+
+    with pytest.raises(VerifierInfrastructureError, match="flask sandbox dependencies"):
+        run_declarative_verifier(task, ws, runner=missing_werkzeug)
+
+
+def test_old_go_toolchain_is_an_infrastructure_error(tmp_path: Path) -> None:
+    _make_task(tmp_path / "tasks", f_returns=2)
+    task = load_task("fix-f", tmp_path / "tasks")
+    ws = prepare_workspace(task, tmp_path / "ws")
+
+    def old_go(cmd: str, workspace: Path, timeout: int) -> RunnerOutcome:
+        return RunnerOutcome(1, stderr="go: download go1.23 for linux/amd64: toolchain not available")
+
+    with pytest.raises(VerifierInfrastructureError, match="go toolchain"):
+        run_declarative_verifier(task, ws, runner=old_go)
+
+
 def test_hidden_tests_not_in_prepared_workspace(tmp_path: Path) -> None:
     """The agent's workspace must not contain hidden tests until verification."""
     _make_task(tmp_path / "tasks", f_returns=1)

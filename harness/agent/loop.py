@@ -419,15 +419,18 @@ def _resolve_run_engine(
         # image (tsx, Go 1.23, Flask deps). --sandbox local scores on the host
         # and turns a missing tsx into a model zero. Require docker unless the
         # operator opts into host verification.
-        if adapter.harness_id == "pi" and sandbox == "local":
-            if os.environ.get("VULCANBENCH_ALLOW_HOST_EXEC") != "1":
-                raise SandboxError(
-                    f"model spec {model!r} runs Pi on the host; hidden tests "
-                    "must use --sandbox docker so they run in the task image "
-                    "(tsx, Go 1.23, Flask). --sandbox local scores on the host "
-                    "and treats missing toolchains as model zeros. Set "
-                    "VULCANBENCH_ALLOW_HOST_EXEC=1 only for a deliberate host smoke."
-                )
+        if (
+            adapter.harness_id == "pi"
+            and sandbox == "local"
+            and os.environ.get("VULCANBENCH_ALLOW_HOST_EXEC") != "1"
+        ):
+            raise SandboxError(
+                f"model spec {model!r} runs Pi on the host; hidden tests "
+                "must use --sandbox docker so they run in the task image "
+                "(tsx, Go 1.23, Flask). --sandbox local scores on the host "
+                "and treats missing toolchains as model zeros. Set "
+                "VULCANBENCH_ALLOW_HOST_EXEC=1 only for a deliberate host smoke."
+            )
         return adapter, None, effort_config(adapter.harness_id, effort)
     provider = provider or get_provider(model)
     return None, provider, effort_config(provider.name, effort, provider.model)

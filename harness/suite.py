@@ -213,6 +213,7 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
             run_kwargs.get("effort"),
             output_dir,
             suite.tasks_root,
+            sandbox=run_kwargs.get("sandbox"),
         )
         units = []
         for task_id in suite.task_ids:

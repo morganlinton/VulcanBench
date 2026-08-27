@@ -141,13 +141,17 @@ and `--thinking` / `--model` / `--no-session`):
 
 - **This is the harness-delta path for Muse Spark.** Report No. 19 ran
   `meta:muse-spark-1.2` through VulcanBench's uniform loop. The same inner
-  spec through Pi is:
-  `vulcanbench run --suite v3 --harness pi --billing api --model meta:muse-spark-1.2 --effort low --no-judges --sandbox docker`.
+  spec through Pi uses the Report 18 (ZCode) publication recipe: one attempt
+  per task, judges off, hidden tests in Docker:
+  `vulcanbench run --suite v3 --model pi:meta:muse-spark-1.2 --effort low --repeat 1 --no-judges --sandbox docker`.
+  That is the same flags as `zcode:glm-5.3` with the Pi spec swapped in.
+  `--harness pi --billing api --model meta:muse-spark-1.2` is equivalent.
   Leaderboard `--track api` shows both columns; they must not be averaged.
   `cli_agent.harness` is `vulcan` vs `pi`. `--sandbox docker` is required:
   Pi's tools run on the host, hidden tests run in the task image (`tsx`,
-  Go 1.23, Flask). `--sandbox local` scores on the host and is rejected
-  unless `VULCANBENCH_ALLOW_HOST_EXEC=1`.
+  Go 1.23, Flask), the same split as ZCode. `--sandbox local` is rejected
+  unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. `--only-missing` ignores host-local
+  scores when the resume asks for Docker.
 - **Install and keys.** `npm install -g @earendil-works/pi-coding-agent`.
   Preflight is ready when `pi` is on PATH and a Meta/OpenAI/Anthropic key is
   set. `META_MUSE_SPARK_API` (or `MODEL_API_KEY` / `OPENROUTER_API_KEY` with
@@ -258,12 +262,9 @@ vulcanbench run --task hello-world \
   --effort extra-high \
   --no-judges
 
-# Pi (open-source harness) wrapping Muse Spark 1.2 on the Meta API
-# Agent on the host; hidden tests in Docker (do not pass --sandbox local)
+# Pi wrapping Muse Spark 1.2 (same flags as Report 18's ZCode column)
 vulcanbench run --task hello-world \
-  --harness pi \
-  --billing api \
-  --model meta:muse-spark-1.2 \
+  --model pi:meta:muse-spark-1.2 \
   --effort low \
   --no-judges \
   --sandbox docker

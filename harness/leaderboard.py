@@ -89,6 +89,7 @@ def summary_to_row(s: dict[str, Any], fallback_run_id: str = "") -> dict[str, An
         "task_complexity": manifest_task.get("task_complexity"),
         "languages": manifest_task.get("languages"),
         "difficulty": manifest_task.get("difficulty"),
+        "sandbox_mode": ((s.get("manifest") or {}).get("sandbox") or {}).get("mode"),
     }
 
 

@@ -74,6 +74,7 @@ def fresh_run_counts(
     effort: str | None,
     runs_dir: Path,
     tasks_root: Path,
+    sandbox: str | None = None,
 ) -> dict[str, int]:
     """Count non-stale cached runs per task for one (model, effort) cell.
 
@@ -81,8 +82,15 @@ def fresh_run_counts(
     (its recorded ``task_hash`` is fresh). Used by the suite runner to skip tasks
     that already have enough cached runs, so ``--only-missing`` fills just the
     gaps instead of re-running a whole column.
+
+    When ``sandbox`` is ``local`` or ``docker``, only runs whose manifest
+    recorded that verifier mode count. Host-scored CLI-harness zeros must not
+    cover a ``--sandbox docker`` resume (the Report 18 / ZCode publication
+    recipe). ``auto`` and omitted ``sandbox`` keep the previous match-all
+    behavior.
     """
     want_effort = normalize_effort(effort)
+    want_sandbox = sandbox if sandbox in {"local", "docker"} else None
     wanted = set(task_ids)
     rows = [
         r
@@ -94,8 +102,11 @@ def fresh_run_counts(
     mark_stale(rows, tasks_root)
     counts: dict[str, int] = dict.fromkeys(task_ids, 0)
     for r in rows:
-        if r.get("task_stale") is not True:
-            counts[str(r.get("task_id"))] += 1
+        if r.get("task_stale") is True:
+            continue
+        if want_sandbox is not None and r.get("sandbox_mode") != want_sandbox:
+            continue
+        counts[str(r.get("task_id"))] += 1
     return counts
 
 

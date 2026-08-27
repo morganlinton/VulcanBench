@@ -287,7 +287,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so missing `tsx`, Werkzeug, and Go 1.23 became model zeros. `pi:` now
   rejects `--sandbox local` unless `VULCANBENCH_ALLOW_HOST_EXEC=1`. The
   verifier also classifies those host-toolchain misses as infrastructure
-  errors rather than functional zeros.
+  errors rather than functional zeros. `--only-missing` matches verifier
+  sandbox mode, so a host-scored cell does not cover a `--sandbox docker`
+  resume. Publication recipe matches Report 18's ZCode column:
+  `--model pi:meta:muse-spark-1.2 --repeat 1 --no-judges --sandbox docker`.
 - **Client errors are no longer retried.** Any HTTP 4xx other than 408/409/425/429
   now raises `NonRetryableProviderError`: a bad key, missing entitlement, unknown
   model, or malformed body fails identically on every attempt, so retrying only

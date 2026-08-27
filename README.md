@@ -223,9 +223,10 @@ Specify a model as `provider:model`:
   stays on the api leaderboard track and prices as `meta:muse-spark-1.2`.
   Results measure model plus Pi (read/write/edit/bash, no web tools). Effort
   is Pi `--thinking`. Compare to Report No. 19's uniform-loop Muse Spark
-  column with the same `--effort` and `--no-judges`. Use `--sandbox docker`
-  (the default): Pi's tools run on the host, hidden tests run in the task
-  image. `--sandbox local` is rejected unless you opt into host scoring.
+  column with the Report 18 ZCode recipe: `--model pi:meta:muse-spark-1.2
+  --repeat 1 --no-judges --sandbox docker`. Pi's tools run on the host,
+  hidden tests run in the task image. `--sandbox local` is rejected unless
+  you opt into host scoring.
 
 Subscription runs record marginal cash, plan allocation, quota, and
 API-equivalent value separately; they are not mixed silently with raw API runs.

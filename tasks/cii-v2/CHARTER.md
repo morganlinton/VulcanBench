@@ -25,27 +25,41 @@ passing under gold; guards verified both ways; no error-message-text
 assertions; provenance recorded (upstream URLs, base_commit, licenses,
 merge dates post-June-2026 for contamination control).
 
-**Part 2 — frontier difficulty (new):** each candidate is measured n=3
-against BOTH reference frontier models before admission:
+**Part 2 — frontier effort (adopted 2026-08-28):** each candidate is
+measured n=3 against BOTH reference frontier models before admission:
 
 - `codex:gpt-5.6-sol` (Codex CLI, subscription)
 - `claude-code:claude-opus-5` (Claude Code CLI, subscription)
 
-Admit iff the BEST model's solve count is ≤2/3 (no model solves all three
-runs). Candidates a model solves 3/3 are REJECTED for v2 — they may be
-added to v1 if they pass v1's gate, so gate failures are not wasted work.
+Admit iff BOTH hold:
 
-This is the HARD-BAND bar, adopted 2026-08-23 after wave 1 ran 0/2 admits
-under the original ≤1/3 bar: v2's claim is "reference frontier models fail
-every admitted task at least one run in three," not "beyond the frontier."
-The per-task gate verdicts in CANDIDATES.md record exact solve counts, so
-the subset clearing the stricter ≤1/3 bar is always recoverable if a
-beyond-frontier cut is wanted later. Every gate verdict (admit or reject, with the
-six per-run scores) is logged in CANDIDATES.md; rejected tasks keep their
-runs/ artifacts for the record.
+1. the weaker reference solves at most 1/3 runs, and
+2. the stronger reference's MEDIAN wall-clock across its three runs is at
+   least 600 seconds (or it fails a run outright).
+
+v2's claim is therefore about measured work, not miracles: every admitted
+task defeats one frontier reference outright and costs the other real,
+sustained effort (10+ minutes per run against a 2-7 minute norm), with
+per-run durations, tokens, and hypothetical costs logged alongside solve
+counts. This axis matches what the suite exists to measure: accuracy,
+cost, and speed together.
+
+History of the bar, kept for the record: the original bar (2026-08-22)
+admitted at best-model <=1/3; wave 1 ran 0/2 and the bar was relaxed to
+the <=2/3 hard band (2026-08-23), which waves 1-3 then showed to be
+nearly unreachable fairly: ten task-design levers produced exactly one
+admit, and the only path to reliably beating the stronger reference was
+needle-obscurity that would measure luck rather than skill (the full
+verdict-by-verdict anatomy is in CANDIDATES.md). The effort axis was
+adopted in its place; the solve-count columns remain in every CANDIDATES
+row, so stricter cuts stay recoverable.
+
+Effort is relative to the frontier at admission time. When the frontier
+moves, re-measure; a task whose effort collapses is re-adjudicated.
 
 Run `scripts/frontier_gate.sh <task-id>` after the correctness gate passes;
-it performs the 6 measurements (resumable) and prints the verdict.
+it performs the 6 measurements (resumable) and prints solve counts and
+durations for the verdict.
 
 ## What we build differently
 

@@ -1,0 +1,975 @@
+{
+ "guard_earning": [
+  {
+   "input": [
+    "L MEM001 50000 G 000"
+   ],
+   "expected": [
+    "E MEM001 500 500",
+    "X 1 0 500"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 50000 F 000"
+   ],
+   "expected": [
+    "E MEM001 1000 1000",
+    "X 1 0 1000"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 123400 G 000",
+    "L MEM001 200 G 000",
+    "L MEM001 100 G 000"
+   ],
+   "expected": [
+    "E MEM001 1234 1234",
+    "E MEM001 2 1236",
+    "E MEM001 1 1237",
+    "X 3 0 1237"
+   ]
+  },
+  {
+   "input": [
+    "L OTHER99 40000 F QRS"
+   ],
+   "expected": [
+    "E OTHER99 800 800",
+    "X 1 0 800"
+   ]
+  }
+ ],
+ "guard_accumulation": [
+  {
+   "input": [
+    "L MEM001 150000 G 000",
+    "L MEM001 150000 G 000",
+    "L MEM001 150000 G 000"
+   ],
+   "expected": [
+    "E MEM001 1500 1500",
+    "E MEM001 1500 3000",
+    "E MEM001 1500 4500",
+    "X 3 0 4500"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 100000 F 000",
+    "L MEM001 100000 F 000"
+   ],
+   "expected": [
+    "E MEM001 2000 2000",
+    "E MEM001 2000 4000",
+    "X 2 0 4000"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "L MEM001 1234567890 G 000"
+   ],
+   "expected": [
+    "R MEM001 SPEND",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 12a G 000"
+   ],
+   "expected": [
+    "R MEM001 SPEND",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 50000 X 000"
+   ],
+   "expected": [
+    "R MEM001 CAT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 50000 G ab1"
+   ],
+   "expected": [
+    "R MEM001 PROMO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 50000 G AB"
+   ],
+   "expected": [
+    "R MEM001 PROMO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L TOOLONGID9 5000 G 000"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 5000 G"
+   ],
+   "expected": [
+    "R MEM001 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Z noise"
+   ],
+   "expected": [
+    "R noise FMT",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_retro_promotion": [
+  {
+   "input": [
+    "L MEM001 4900000 G 000",
+    "L MEM001 200000 G 000"
+   ],
+   "expected": [
+    "E MEM001 61250 61250",
+    "E MEM001 2500 63750",
+    "X 2 0 63750"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 4999000 G 000",
+    "L MEM001 10000 G 000"
+   ],
+   "expected": [
+    "E MEM001 62488 62488",
+    "E MEM001 125 62613",
+    "X 2 0 62613"
+   ]
+  }
+ ],
+ "f2p_gold_threshold": [
+  {
+   "input": [
+    "L MEM001 19500000 G 000",
+    "L MEM001 100000 G 000"
+   ],
+   "expected": [
+    "E MEM001 243750 243750",
+    "E MEM001 1250 245000",
+    "X 2 0 245000"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 19499000 G 000",
+    "L MEM001 10000 G 000"
+   ],
+   "expected": [
+    "E MEM001 243738 243738",
+    "E MEM001 125 243863",
+    "X 2 0 243863"
+   ]
+  }
+ ],
+ "f2p_electronics_promo": [
+  {
+   "input": [
+    "L MEM001 10000 E KAB"
+   ],
+   "expected": [
+    "E MEM001 400 400",
+    "X 1 0 400"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 10000 E AKB"
+   ],
+   "expected": [
+    "E MEM001 400 400",
+    "X 1 0 400"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 10000 E KKK"
+   ],
+   "expected": [
+    "E MEM001 300 300",
+    "X 1 0 300"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 10000 E QRS"
+   ],
+   "expected": [
+    "E MEM001 300 300",
+    "X 1 0 300"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 10000 F KAB"
+   ],
+   "expected": [
+    "E MEM001 200 200",
+    "X 1 0 200"
+   ]
+  }
+ ],
+ "f2p_travel_truncation": [
+  {
+   "input": [
+    "L MEM001 30100 T 000"
+   ],
+   "expected": [
+    "E MEM001 451 451",
+    "X 1 0 451"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 30000 T 000"
+   ],
+   "expected": [
+    "E MEM001 450 450",
+    "X 1 0 450"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 90300 T 000"
+   ],
+   "expected": [
+    "E MEM001 1354 1354",
+    "X 1 0 1354"
+   ]
+  }
+ ],
+ "f2p_sub100_skip": [
+  {
+   "input": [
+    "L MEM001 99 G 000"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 100 G 000"
+   ],
+   "expected": [
+    "E MEM001 1 1",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 99 G 000",
+    "L MEM001 50000 G 000"
+   ],
+   "expected": [
+    "E MEM001 500 500",
+    "X 1 0 500"
+   ]
+  }
+ ],
+ "f2p_order_of_operations": [
+  {
+   "input": [
+    "L MEM001 5000000 G 000",
+    "L MEM001 700 T 000"
+   ],
+   "expected": [
+    "E MEM001 62500 62500",
+    "E MEM001 13 62513",
+    "X 2 0 62513"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 5000000 G 000",
+    "L MEM001 1100 E 000"
+   ],
+   "expected": [
+    "E MEM001 62500 62500",
+    "E MEM001 41 62541",
+    "X 2 0 62541"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 5000000 G 000",
+    "L MEM001 1300 F 000"
+   ],
+   "expected": [
+    "E MEM001 62500 62500",
+    "E MEM001 32 62532",
+    "X 2 0 62532"
+   ]
+  }
+ ],
+ "f2p_id_case_fold": [
+  {
+   "input": [
+    "L MemA1 3000000 G 000",
+    "L MEMA1 3000000 G 000"
+   ],
+   "expected": [
+    "E MemA1 37500 37500",
+    "E MemA1 37500 75000",
+    "X 2 0 75000"
+   ]
+  },
+  {
+   "input": [
+    "L alpha 50000 G 000",
+    "L ALPHA 50000 G 000"
+   ],
+   "expected": [
+    "E alpha 500 500",
+    "E alpha 500 1000",
+    "X 2 0 1000"
+   ]
+  }
+ ],
+ "f2p_wildcard_promo": [
+  {
+   "input": [
+    "L MEM001 10000 E AAA"
+   ],
+   "expected": [
+    "E MEM001 300 300",
+    "X 1 0 300"
+   ]
+  },
+  {
+   "input": [
+    "L MEM001 10000 E KKK",
+    "L MEM001 10000 E KAB"
+   ],
+   "expected": [
+    "E MEM001 300 300",
+    "E MEM001 400 700",
+    "X 2 0 700"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "L R0000 92 E 000",
+    "L BigOne 850409942 E AAA",
+    "L R0002 180 G 000",
+    "L BADCAT 5000 X 000",
+    "L BigOne 439523047 E KAB",
+    "L BigOne 186 T KAB",
+    "L MEMA1 159 F KAB",
+    "L MemA1 226765 G AAA",
+    "L BigOne 925242 F KAB",
+    "L BigOne 974057183 G AKZ",
+    "L MemA1 755552591 E AAA",
+    "L BigOne 80 F AAA",
+    "L tiny 525187742 F AKZ",
+    "L MEMA1 84 E AKZ",
+    "L BigOne 51 G KKK",
+    "L tiny 531506 E AAA",
+    "L tiny 608112778 F 000",
+    "L BigOne 492926 E 000",
+    "L SPEND7 33 F KAB",
+    "L tiny 186 T QRS",
+    "L MemA1 190 E QRS",
+    "L tiny 382662304 E AKZ",
+    "L BigOne 130 T QRS",
+    "L SHORTY 5000 G",
+    "L R0024 165803 T AKZ",
+    "L BigOne 236630867 G AAA",
+    "L BigOne 985105 T QRS",
+    "L MemA1 537552548 F AAA",
+    "L MEMA1 6402577 E AAA",
+    "L tiny 308700938 E KAB",
+    "L BigOne 126 F 000",
+    "L MemA1 42 F QRS",
+    "L MemA1 609041850 F AAA",
+    "L tiny 3662943 T AAA",
+    "L R0034 2914086 F 000",
+    "L SPEND7 4163137 G 000",
+    "L MemA1 402481391 E 000",
+    "L MEMA1 856547350 T AAA",
+    "L tiny 5109256 E AKZ",
+    "L R0039 875336 E KKK",
+    "L SPEND7 9285837 G AAA",
+    "L tiny 153 E QRS",
+    "L R0042 304728251 E AKZ",
+    "L BigOne 783222 E KKK",
+    "L SPEND7 9906650 F QRS",
+    "L tiny 3399698 F AKZ",
+    "L EXTRAA 5000 G 000 TRAILING",
+    "L MemA1 444382721 G AKZ",
+    "L tiny 113 E AAA",
+    "L BADCAT 5000 X 000",
+    "L R0050 8828022 F 000",
+    "L R0051 7 G KAB",
+    "L tiny 654838 F KKK",
+    "L SHORTY 5000 G",
+    "L BigOne 131 E AAA",
+    "L MemA1 126 T AKZ",
+    "L SPEND7 2196434 G AKZ",
+    "L MEMA1 3132980 G KAB",
+    "L MemA1 756832913 E AKZ",
+    "L BigOne 540089 G AKZ",
+    "L SPEND7 9965518 F AKZ",
+    "NOISE",
+    "L SPEND7 301958 F 000",
+    "L tiny 5496094 E KAB",
+    "L SPEND7 5 E KKK",
+    "L BigOne 994654 E QRS",
+    "L MEMA1 138 F AKZ",
+    "L SPEND7 9551623 G AKZ",
+    "L MEMA1 821546247 T KKK",
+    "L MEMA1 346422 G 000",
+    "L BigOne 671857 F 000",
+    "L tiny 128 T 000",
+    "L SPEND7 945004360 E KKK",
+    "L MemA1 3829343 T KAB",
+    "L SPEND7 5364332 E 000",
+    "L MEMA1 384949124 G AKZ",
+    "L MemA1 781292 F AAA",
+    "L tiny 273750 E KKK",
+    "L BigOne 8246185 T AKZ",
+    "L MEMA1 4714710 G AKZ",
+    "L R0080 9395792 F 000",
+    "L R0081 196 G AKZ",
+    "L BigOne 965858914 G KAB",
+    "L MemA1 2812127 F AKZ",
+    "L MemA1 23 E AKZ",
+    "L tiny 764885 G KAB",
+    "L MEMA1 168570967 T KKK",
+    "L tiny 870446 G 000",
+    "L BigOne 20 T AAA",
+    "L BigOne 43 T QRS",
+    "L tiny 305246 T AAA",
+    "L MemA1 194 T AKZ",
+    "L SPEND7 80 F KAB",
+    "L MemA1 329457006 T AAA",
+    "L BigOne 7 E KKK",
+    "L tiny 1136894 G KKK",
+    "L R0096 91 G QRS",
+    "L tiny 51 F KKK",
+    "L R0098 54 F 000",
+    "L SPEND7 124 F AAA",
+    "L BigOne 785841278 F AAA",
+    "L BigOne 8939367 F 000",
+    "L R0102 257719924 G QRS",
+    "L BigOne 16655 F 000",
+    "L R0104 1371338 G 000",
+    "NOISE",
+    "L R0106 87 F QRS",
+    "L SPEND7 2442897 F KKK",
+    "L SPEND7 175 T KAB",
+    "L SHORTY 5000 G",
+    "L BigOne 9173330 T AAA",
+    "L BigOne 5200899 E KAB",
+    "L tiny 9322692 G KKK",
+    "L MemA1 632342077 T AKZ",
+    "L BADCAT 5000 X 000",
+    "L SHORTY 5000 G",
+    "L SPEND7 666009 G AKZ",
+    "L SPEND7 9020298 F KKK",
+    "L SPEND7 872705989 G QRS",
+    "L SPEND7 110 F AAA",
+    "L BigOne 84 F KAB",
+    "L tiny 1377539 T KKK",
+    "L R0122 7470724 E KKK",
+    "L MemA1 31 F 000",
+    "L BigOne 573042559 F 000",
+    "L R0125 1323154 T QRS",
+    "L SPEND7 3385857 G KKK",
+    "L tiny 23 T AKZ",
+    "L MemA1 3946059 E QRS",
+    "L EXTRAA 5000 G 000 TRAILING",
+    "L R0130 192399435 G 000",
+    "L MEMA1 5272119 G AKZ",
+    "L R0132 306315839 E KAB",
+    "L BADCAT 5000 X 000",
+    "L R0134 173638510 F QRS",
+    "L BigOne 123 E AKZ",
+    "L MemA1 4945727 E QRS",
+    "L tiny 73 G 000",
+    "L SHORTY 5000 G",
+    "L SPEND7 159 G KKK",
+    "L MemA1 3892064 T KAB",
+    "L tiny 152 T AKZ",
+    "L MemA1 159 G AKZ",
+    "L SPEND7 148200637 F KAB",
+    "L MemA1 5725534 E AAA",
+    "L R0145 5963823 T KAB",
+    "L MEMA1 841748 G AAA",
+    "L MemA1 189 F KKK",
+    "L tiny 968302501 E KKK",
+    "L MEMA1 136 G KKK",
+    "L BigOne 833418 T KAB",
+    "L MemA1 359807818 G 000",
+    "L MEMA1 927547500 G AKZ",
+    "L MemA1 179575551 F AAA",
+    "L tiny 159 E QRS"
+   ],
+   "expected": [
+    "E BigOne 31890371 31890371",
+    "E R0002 1 1",
+    "R BADCAT CAT",
+    "E BigOne 21976150 53866521",
+    "E BigOne 1 53866522",
+    "E MEMA1 2 2",
+    "E MEMA1 2267 2269",
+    "E BigOne 23130 53889652",
+    "E BigOne 12175714 66065366",
+    "E MEMA1 28333219 28335488",
+    "E tiny 13129692 13129692",
+    "E tiny 19931 13149623",
+    "E tiny 15202818 28352441",
+    "E BigOne 18484 66083850",
+    "E tiny 1 28352442",
+    "E MEMA1 4 28335492",
+    "E tiny 19133115 47485557",
+    "E BigOne 1 66083851",
+    "R SHORTY FMT",
+    "E R0024 2487 2487",
+    "E BigOne 2957885 69041736",
+    "E BigOne 18470 69060206",
+    "E MEMA1 13438812 41774304",
+    "E MEMA1 240094 42014398",
+    "E tiny 15435045 62920602",
+    "E BigOne 2 69060208",
+    "E MEMA1 15226045 57240443",
+    "E tiny 68679 62989281",
+    "E R0034 72850 72850",
+    "E SPEND7 52039 52039",
+    "E MEMA1 15093049 72333492",
+    "E MEMA1 16060261 88393753",
+    "E tiny 255460 63244741",
+    "E R0039 32824 32824",
+    "E SPEND7 116072 168111",
+    "E tiny 4 63244745",
+    "E R0042 15236410 15236410",
+    "E BigOne 29370 69089578",
+    "E SPEND7 247665 415776",
+    "E tiny 84990 63329735",
+    "E EXTRAA 50 50",
+    "E MEMA1 5554784 93948537",
+    "E tiny 4 63329739",
+    "R BADCAT CAT",
+    "E R0050 220700 220700",
+    "E tiny 16370 63346109",
+    "R SHORTY FMT",
+    "E BigOne 4 69089582",
+    "E MEMA1 1 93948538",
+    "E SPEND7 27455 443231",
+    "E MEMA1 39161 93987699",
+    "E MEMA1 37841645 131829344",
+    "E BigOne 6750 69096332",
+    "E SPEND7 249138 692369",
+    "R ???????? FMT",
+    "E SPEND7 7548 699917",
+    "E tiny 274800 63620909",
+    "E BigOne 37298 69133630",
+    "E MEMA1 2 131829346",
+    "E SPEND7 119395 819312",
+    "E MEMA1 15403991 147233337",
+    "E MEMA1 4330 147237667",
+    "E BigOne 16795 69150425",
+    "E tiny 1 63620910",
+    "E SPEND7 35437661 36256973",
+    "E MEMA1 71799 147309466",
+    "E SPEND7 201161 36458134",
+    "E MEMA1 4811864 152121330",
+    "E MEMA1 19530 152140860",
+    "E tiny 10264 63631174",
+    "E BigOne 154614 69305039",
+    "E MEMA1 58934 152199794",
+    "E R0080 234892 234892",
+    "E R0081 1 1",
+    "E BigOne 12073236 81378275",
+    "E MEMA1 70302 152270096",
+    "E tiny 9560 63640734",
+    "E MEMA1 3160704 155430800",
+    "E tiny 10880 63651614",
+    "E tiny 5722 63657336",
+    "E MEMA1 1 155430801",
+    "E MEMA1 6177318 161608119",
+    "E tiny 14210 63671546",
+    "E SPEND7 2 36458136",
+    "E BigOne 19646030 101024305",
+    "E BigOne 223482 101247787",
+    "E R0102 3221499 3221499",
+    "E BigOne 415 101248202",
+    "E R0104 15084 15084",
+    "R ???????? FMT",
+    "E SPEND7 61070 36519206",
+    "E SPEND7 1 36519207",
+    "R SHORTY FMT",
+    "E BigOne 171999 101420201",
+    "E BigOne 260040 101680241",
+    "E tiny 116532 63788078",
+    "E MEMA1 11856412 173464531",
+    "R BADCAT CAT",
+    "R SHORTY FMT",
+    "E SPEND7 8325 36527532",
+    "E SPEND7 225505 36753037",
+    "E SPEND7 10908824 47661861",
+    "E SPEND7 2 47661863",
+    "E tiny 25828 63813906",
+    "E R0122 280151 280151",
+    "E BigOne 14326062 116006303",
+    "E R0125 24808 24808",
+    "E SPEND7 42322 47704185",
+    "E MEMA1 147975 173612506",
+    "E EXTRAA 50 100",
+    "E R0130 2404992 2404992",
+    "E MEMA1 65901 173678407",
+    "E R0132 15315790 15315790",
+    "R BADCAT CAT",
+    "E R0134 4340962 4340962",
+    "E BigOne 5 116006308",
+    "E MEMA1 185464 173863871",
+    "R SHORTY FMT",
+    "E SPEND7 1 47704186",
+    "E MEMA1 72975 173936846",
+    "E tiny 1 63813907",
+    "E MEMA1 1 173936847",
+    "E SPEND7 3705015 51409201",
+    "E MEMA1 214706 174151553",
+    "E R0145 111821 111821",
+    "E MEMA1 10521 174162074",
+    "E MEMA1 2 174162076",
+    "E tiny 36311344 100125251",
+    "E MEMA1 1 174162077",
+    "E BigOne 15626 116021934",
+    "E MEMA1 4497598 178659675",
+    "E MEMA1 11594344 190254019",
+    "E MEMA1 4489388 194743407",
+    "E tiny 4 100125255",
+    "X 123 11 503815169"
+   ]
+  },
+  {
+   "input": [
+    "L tiny 1554853 T KKK",
+    "L MEMA1 908362069 F AKZ",
+    "L SHORTY 5000 G",
+    "L EXTRAA 5000 G 000 TRAILING",
+    "L tiny 5661650 G KKK",
+    "L MEMA1 164 T QRS",
+    "L tiny 259679263 T QRS",
+    "L MemA1 514535515 F QRS",
+    "L SPEND7 2066177 G KAB",
+    "L SPEND7 205921 E QRS",
+    "L tiny 702930 E 000",
+    "L EXTRAA 5000 G 000 TRAILING",
+    "L EXTRAA 5000 G 000 TRAILING",
+    "L tiny 3524073 G 000",
+    "L MemA1 606001 E AAA",
+    "L BigOne 9748138 G QRS",
+    "L MemA1 8717193 E AKZ",
+    "L tiny 931857767 G AAA",
+    "L R0018 36 E AAA",
+    "L R0019 8987477 F AKZ",
+    "L tiny 7090755 F 000",
+    "L MemA1 134 E KKK",
+    "L MemA1 438549608 G AKZ",
+    "L MemA1 166 F QRS",
+    "L SPEND7 163 E KAB",
+    "L SPEND7 880298 F 000",
+    "L SPEND7 7830901 T 000",
+    "L R0027 888786213 F 000",
+    "L MEMA1 805617 E QRS",
+    "L tiny 318580747 F QRS",
+    "L MEMA1 1137554 T KAB",
+    "L BigOne 861454465 E AAA",
+    "L MemA1 150 F 000",
+    "L SPEND7 887778 E AAA",
+    "L MemA1 2 G KKK",
+    "L BigOne 188899022 T KKK",
+    "L MEMA1 2733138 G AKZ",
+    "L R0037 422648 E AAA",
+    "L R0038 249896 T AKZ",
+    "L R0039 51666 F QRS",
+    "L tiny 923028490 F KAB",
+    "L MEMA1 384328220 G QRS",
+    "L BADCAT 5000 X 000",
+    "L SPEND7 171 F KKK",
+    "L BADCAT 5000 X 000",
+    "NOISE",
+    "L BigOne 79 E QRS",
+    "L R0047 94420 F KAB",
+    "L R0048 127 E AAA",
+    "L MEMA1 847873037 F AKZ",
+    "L MemA1 490450359 T 000",
+    "L MemA1 98 F AAA",
+    "L tiny 53 F AKZ",
+    "NOISE",
+    "L R0054 66 G KAB",
+    "L tiny 1899054 E QRS",
+    "L tiny 5623611 E QRS",
+    "L tiny 331621562 F QRS",
+    "L BigOne 169191 E AAA",
+    "L tiny 3932480 T KKK",
+    "L BADCAT 5000 X 000",
+    "L BigOne 367022498 T AKZ",
+    "L tiny 958644339 T KAB",
+    "L BigOne 184 T 000",
+    "L tiny 850449777 F QRS",
+    "L SPEND7 69 E KKK",
+    "L SPEND7 470210 G AKZ",
+    "NOISE",
+    "L SPEND7 22 F AKZ",
+    "L tiny 5672520 F KKK",
+    "L MemA1 389461653 G KKK",
+    "L BigOne 296503767 E AKZ",
+    "L MemA1 565392525 E 000",
+    "L tiny 215403 E QRS",
+    "L SPEND7 176216 F AKZ",
+    "L SPEND7 586679460 F 000",
+    "L tiny 5721927 F 000",
+    "L BigOne 12 E AAA",
+    "L R0078 756010 E KKK",
+    "L BigOne 194 E KAB",
+    "L tiny 548833124 E 000",
+    "L MEMA1 605698146 T QRS",
+    "L SHORTY 5000 G",
+    "L R0083 68 T 000",
+    "L BADCAT 5000 X 000",
+    "L BigOne 471791444 F AKZ",
+    "L BigOne 6512085 G AKZ",
+    "NOISE",
+    "L BigOne 778227 F AKZ",
+    "L BigOne 580532444 T KAB",
+    "L BigOne 152 T 000",
+    "L MEMA1 584899 G KAB",
+    "L SHORTY 5000 G",
+    "L SPEND7 649483 T AKZ",
+    "L R0094 670798831 T AKZ",
+    "L SPEND7 944787159 E AAA",
+    "L BigOne 9241042 G KKK",
+    "NOISE",
+    "L R0098 55 G QRS",
+    "L BigOne 6262380 G AAA",
+    "L SPEND7 484278364 T KKK",
+    "L tiny 43 T AAA",
+    "L SPEND7 229335265 G 000",
+    "L MEMA1 8020943 G KAB",
+    "L SPEND7 113 F AAA",
+    "L tiny 273942922 T 000",
+    "L SHORTY 5000 G",
+    "L R0107 91 F KAB",
+    "L MEMA1 1847453 F QRS",
+    "L BigOne 6345549 F QRS",
+    "L SPEND7 24 F AKZ",
+    "L R0111 328501 G AKZ",
+    "L tiny 103 F KAB",
+    "L BigOne 702663999 T 000",
+    "L MemA1 830181 T KKK",
+    "NOISE",
+    "L SPEND7 4987432 T QRS",
+    "L R0117 315119797 E QRS",
+    "L MemA1 3742932 F QRS",
+    "L R0119 95 G KAB",
+    "L MEMA1 471922 F QRS",
+    "L SPEND7 8206472 G QRS",
+    "L SPEND7 199978429 G 000",
+    "L R0123 9556292 E KAB",
+    "L SHORTY 5000 G",
+    "L BigOne 5476246 E KAB",
+    "L BigOne 213599 T 000",
+    "L R0127 1503937 E AAA",
+    "L EXTRAA 5000 G 000 TRAILING",
+    "L BigOne 145 F KKK",
+    "L SPEND7 994274 E KAB",
+    "L R0131 912413136 G 000",
+    "L tiny 85 G KAB",
+    "L MemA1 1857247 T KAB",
+    "L BigOne 877816 E AAA",
+    "L R0135 3555992 F QRS",
+    "L MEMA1 935410763 F QRS",
+    "L BigOne 1963013 T AKZ",
+    "L R0138 9890863 F 000",
+    "L MemA1 665129 F QRS",
+    "L MEMA1 738110 F AAA",
+    "L SPEND7 69 F KAB",
+    "L MEMA1 3562318 E KAB",
+    "L MEMA1 3 F KKK",
+    "L tiny 152 E AKZ",
+    "L SPEND7 27 F QRS",
+    "L SPEND7 8541504 E AAA",
+    "L SPEND7 3088787 G QRS",
+    "L R0148 52473 E AKZ",
+    "L R0149 623916525 T QRS",
+    "L MEMA1 2429207 E QRS",
+    "L BigOne 76718 E 000",
+    "L MemA1 4588058 G KKK",
+    "L BigOne 753690 E QRS",
+    "L tiny 64 E QRS",
+    "L EXTRAA 5000 G 000 TRAILING"
+   ],
+   "expected": [
+    "E tiny 29152 29152",
+    "E MEMA1 22709050 22709050",
+    "R SHORTY FMT",
+    "E EXTRAA 50 50",
+    "E tiny 70770 99922",
+    "E MEMA1 1 22709051",
+    "E tiny 4868985 4968907",
+    "E MEMA1 12863388 35572439",
+    "E SPEND7 25826 25826",
+    "E SPEND7 7721 33547",
+    "E tiny 26359 4995266",
+    "E EXTRAA 50 100",
+    "E EXTRAA 50 150",
+    "E tiny 44050 5039316",
+    "E MEMA1 22725 35595164",
+    "E BigOne 121851 121851",
+    "E MEMA1 435855 36031019",
+    "E tiny 11648221 16687537",
+    "E R0019 224685 224685",
+    "E tiny 177268 16864805",
+    "E MEMA1 4 36031023",
+    "E MEMA1 5481870 41512893",
+    "E MEMA1 2 41512895",
+    "E SPEND7 5 33552",
+    "E SPEND7 22005 55557",
+    "E SPEND7 146829 202386",
+    "E R0027 22219655 22219655",
+    "E MEMA1 30210 41543105",
+    "E tiny 7964518 24829323",
+    "E MEMA1 21328 41564433",
+    "E BigOne 32304540 32426391",
+    "E MEMA1 2 41564435",
+    "E SPEND7 33289 235675",
+    "E BigOne 3541856 35968247",
+    "E MEMA1 34164 41598599",
+    "E R0037 13946 13946",
+    "E R0038 3747 3747",
+    "E R0039 1032 1032",
+    "E tiny 23075710 47905033",
+    "E MEMA1 4804102 46402701",
+    "R BADCAT CAT",
+    "E SPEND7 2 235677",
+    "R BADCAT CAT",
+    "R ???????? FMT",
+    "E R0047 1888 1888",
+    "E R0048 3 3",
+    "E MEMA1 21196825 67599526",
+    "E MEMA1 9195943 76795469",
+    "R ???????? FMT",
+    "E tiny 71212 47976245",
+    "E tiny 210885 48187130",
+    "E tiny 8290538 56477668",
+    "E BigOne 6341 35974588",
+    "E tiny 73732 56551400",
+    "R BADCAT CAT",
+    "E BigOne 6881670 42856258",
+    "E tiny 17974580 74525980",
+    "E BigOne 1 42856259",
+    "E tiny 21261242 95787222",
+    "E SPEND7 5878 241555",
+    "R ???????? FMT",
+    "E tiny 141812 95929034",
+    "E MEMA1 4868270 81663739",
+    "E BigOne 14825185 57681444",
+    "E MEMA1 21202219 102865958",
+    "E tiny 8078 95937112",
+    "E SPEND7 4405 245960",
+    "E SPEND7 14666985 14912945",
+    "E tiny 143048 96080160",
+    "E R0078 28350 28350",
+    "E BigOne 5 57681449",
+    "E tiny 20581241 116661401",
+    "E MEMA1 11356839 114222797",
+    "R SHORTY FMT",
+    "R BADCAT CAT",
+    "E BigOne 11794785 69476234",
+    "E BigOne 81400 69557634",
+    "R ???????? FMT",
+    "E BigOne 19455 69577089",
+    "E BigOne 10884982 80462071",
+    "E BigOne 1 80462072",
+    "E MEMA1 7310 114230107",
+    "R SHORTY FMT",
+    "E SPEND7 12176 14925121",
+    "E R0094 12577477 12577477",
+    "E SPEND7 35429516 50354637",
+    "E BigOne 115512 80577584",
+    "R ???????? FMT",
+    "E BigOne 78279 80655863",
+    "E SPEND7 9080218 59434855",
+    "E SPEND7 2866690 62301545",
+    "E MEMA1 100261 114330368",
+    "E SPEND7 2 62301547",
+    "E tiny 5136429 121797830",
+    "R SHORTY FMT",
+    "E MEMA1 46185 114376553",
+    "E BigOne 158638 80814501",
+    "E R0111 3285 3285",
+    "E tiny 2 121797832",
+    "E BigOne 13174948 93989449",
+    "E MEMA1 15564 114392117",
+    "R ???????? FMT",
+    "E SPEND7 93513 62395060",
+    "E R0117 11816989 11816989",
+    "E MEMA1 93572 114485689",
+    "E MEMA1 11798 114497487",
+    "E SPEND7 102580 62497640",
+    "E SPEND7 2499730 64997370",
+    "E R0123 477810 477810",
+    "R SHORTY FMT",
+    "E BigOne 273810 94263259",
+    "E BigOne 4003 94267262",
+    "E R0127 56396 56396",
+    "E EXTRAA 50 200",
+    "E BigOne 2 94267264",
+    "E SPEND7 49710 65047080",
+    "E R0131 11405164 11405164",
+    "E MEMA1 34822 114532309",
+    "E BigOne 32918 94300182",
+    "E R0135 88898 88898",
+    "E MEMA1 23385268 137917577",
+    "E BigOne 36806 94336988",
+    "E R0138 247270 247270",
+    "E MEMA1 16628 137934205",
+    "E MEMA1 18452 137952657",
+    "E MEMA1 178115 138130772",
+    "E tiny 5 121797837",
+    "E SPEND7 320306 65367386",
+    "E SPEND7 38609 65405995",
+    "E R0148 2096 2096",
+    "E R0149 11698434 11698434",
+    "E MEMA1 91095 138221867",
+    "E BigOne 2876 94339864",
+    "E MEMA1 57350 138279217",
+    "E BigOne 28260 94368124",
+    "E EXTRAA 50 250",
+    "X 121 15 490718548"
+   ]
+  }
+ ]
+}

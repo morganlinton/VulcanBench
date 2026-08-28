@@ -1,0 +1,1834 @@
+{
+ "guard_nominal": [
+  {
+   "input": [
+    "T TAG0001 06 1 0530 1 C"
+   ],
+   "expected": [
+    "F TAG0001 250",
+    "X 1 0 250"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 11 2 0800 3 C"
+   ],
+   "expected": [
+    "F TAG0001 580",
+    "X 1 0 580"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 18 5 0929 5 T"
+   ],
+   "expected": [
+    "F TAG0001 1476",
+    "X 1 0 1476"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 29 6 0930 5 T"
+   ],
+   "expected": [
+    "F TAG0001 810",
+    "X 1 0 810"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 24 3 0700 2 T"
+   ],
+   "expected": [
+    "F TAG0001 1188",
+    "X 1 0 1188"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 24 3 0659 2 T"
+   ],
+   "expected": [
+    "F TAG0001 594",
+    "X 1 0 594"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 19 4 1600 4 C"
+   ],
+   "expected": [
+    "F TAG0001 740",
+    "X 1 0 740"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 19 4 1559 4 C"
+   ],
+   "expected": [
+    "F TAG0001 370",
+    "X 1 0 370"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 10 2 1859 1 T"
+   ],
+   "expected": [
+    "F TAG0001 1044",
+    "X 1 0 1044"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 10 2 1900 1 T"
+   ],
+   "expected": [
+    "F TAG0001 522",
+    "X 1 0 522"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 27 2 0800 6 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 08 1 1700 7 C"
+   ],
+   "expected": [
+    "F TAG0001 250",
+    "X 1 0 250"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 6 2359 5 C"
+   ],
+   "expected": [
+    "F TAG0001 450",
+    "X 1 0 450"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 1 0000 1 C"
+   ],
+   "expected": [
+    "F TAG0001 250",
+    "X 1 0 250"
+   ]
+  },
+  {
+   "input": [
+    "T A 09 2 1200 3 T"
+   ],
+   "expected": [
+    "F A 522",
+    "X 1 0 522"
+   ]
+  },
+  {
+   "input": [
+    "T ZX9ABCDEF0 28 3 1730 2 C"
+   ],
+   "expected": [
+    "F ZX9ABCDEF0 660",
+    "X 1 0 660"
+   ]
+  }
+ ],
+ "guard_errors": [
+  {
+   "input": [
+    "T TAG0001 00 2 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 GATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 41 2 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 GATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 4 2 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 GATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 4A 2 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 GATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 040 2 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 GATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 0 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 AXLES",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 7 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 AXLES",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 x 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 AXLES",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 22 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 AXLES",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 2360 2 C"
+   ],
+   "expected": [
+    "R TAG0001 TIME",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 2461 2 C"
+   ],
+   "expected": [
+    "R TAG0001 TIME",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 960 2 C"
+   ],
+   "expected": [
+    "R TAG0001 TIME",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 09301 2 C"
+   ],
+   "expected": [
+    "R TAG0001 TIME",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 09a0 2 C"
+   ],
+   "expected": [
+    "R TAG0001 TIME",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 8 C"
+   ],
+   "expected": [
+    "R TAG0001 DOW",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 9 C"
+   ],
+   "expected": [
+    "R TAG0001 DOW",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 22 C"
+   ],
+   "expected": [
+    "R TAG0001 DOW",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 x C"
+   ],
+   "expected": [
+    "R TAG0001 DOW",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 2 X"
+   ],
+   "expected": [
+    "R TAG0001 CLASS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 2 c"
+   ],
+   "expected": [
+    "R TAG0001 CLASS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 2 CT"
+   ],
+   "expected": [
+    "R TAG0001 CLASS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TOOLONGTAG1 20 2 1030 2 C"
+   ],
+   "expected": [
+    "R ?????????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T BAD-TAG 20 2 1030 2 C"
+   ],
+   "expected": [
+    "R ?????????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P TAG0001 20 2 1030 2 C"
+   ],
+   "expected": [
+    "R TAG0001 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 2"
+   ],
+   "expected": [
+    "R TAG0001 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T"
+   ],
+   "expected": [
+    "R ?????????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "hello"
+   ],
+   "expected": [
+    "R ?????????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 99 2 1030 2 X"
+   ],
+   "expected": [
+    "R TAG0001 GATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 9 9999 2 C"
+   ],
+   "expected": [
+    "R TAG0001 AXLES",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "guard_empty_batch": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "guard_multi": [
+  {
+   "input": [
+    "T CAR01 20 2 0815 1 C",
+    "T TRK99 25 5 1130 3 T",
+    "T BAD 41 2 1130 3 C",
+    "T CAR02 07 1 1815 5 C",
+    "not a passage"
+   ],
+   "expected": [
+    "F CAR01 580",
+    "F TRK99 738",
+    "R BAD GATE",
+    "F CAR02 500",
+    "R a FMT",
+    "X 3 2 1818"
+   ]
+  }
+ ],
+ "f2p_weekend_freight": [
+  {
+   "input": [
+    "T TAG0001 11 4 1030 5 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 11 4 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 11 4 1030 7 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 12 4 1030 5 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 12 4 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 12 4 1030 7 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 14 4 1030 5 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 14 4 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 14 4 1030 7 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 17 4 1030 5 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 17 4 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 17 4 1030 7 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 18 4 1030 5 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 18 4 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 18 4 1030 7 T"
+   ],
+   "expected": [
+    "F TAG0001 666",
+    "X 1 0 666"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 14 4 1030 6 C"
+   ],
+   "expected": [
+    "F TAG0001 370",
+    "X 1 0 370"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 14 4 1030 6 B"
+   ],
+   "expected": [
+    "F TAG0001 518",
+    "X 1 0 518"
+   ]
+  }
+ ],
+ "f2p_morning_stagger": [
+  {
+   "input": [
+    "T TAG0001 29 3 0644 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 29 3 0645 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 29 3 0659 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 29 3 0700 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 29 3 0929 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 29 3 0930 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0644 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0645 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0659 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0700 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0929 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0930 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 35 3 0644 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 35 3 0645 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 35 3 0659 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 35 3 0700 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 35 3 0929 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 35 3 0930 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 40 3 0644 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 40 3 0645 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 40 3 0659 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 40 3 0700 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 40 3 0929 2 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 40 3 0930 2 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0650 6 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 30 3 0650 5 T"
+   ],
+   "expected": [
+    "F TAG0001 1188",
+    "X 1 0 1188"
+   ]
+  }
+ ],
+ "f2p_sidecar": [
+  {
+   "input": [
+    "T TAG0001 22 1 1030 1 M"
+   ],
+   "expected": [
+    "F TAG0001 150",
+    "X 1 0 150"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 1 0800 1 M"
+   ],
+   "expected": [
+    "F TAG0001 300",
+    "X 1 0 300"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 2 1030 1 M"
+   ],
+   "expected": [
+    "F TAG0001 174",
+    "X 1 0 174"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 2 0800 1 M"
+   ],
+   "expected": [
+    "F TAG0001 348",
+    "X 1 0 348"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 3 1030 1 M"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 3 0800 1 M"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 4 1030 1 M"
+   ],
+   "expected": [
+    "F TAG0001 370",
+    "X 1 0 370"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 4 0800 1 M"
+   ],
+   "expected": [
+    "F TAG0001 740",
+    "X 1 0 740"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 6 1030 1 M"
+   ],
+   "expected": [
+    "F TAG0001 450",
+    "X 1 0 450"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 6 0800 1 M"
+   ],
+   "expected": [
+    "F TAG0001 900",
+    "X 1 0 900"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 22 3 1030 1 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  }
+ ],
+ "f2p_bus_peak": [
+  {
+   "input": [
+    "T TAG0001 21 1 0800 3 B"
+   ],
+   "expected": [
+    "F TAG0001 665",
+    "X 1 0 665"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 2 0800 3 B"
+   ],
+   "expected": [
+    "F TAG0001 771",
+    "X 1 0 771"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 3 0800 3 B"
+   ],
+   "expected": [
+    "F TAG0001 878",
+    "X 1 0 878"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 4 0800 3 B"
+   ],
+   "expected": [
+    "F TAG0001 984",
+    "X 1 0 984"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 5 0800 3 B"
+   ],
+   "expected": [
+    "F TAG0001 1091",
+    "X 1 0 1091"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 6 0800 3 B"
+   ],
+   "expected": [
+    "F TAG0001 1197",
+    "X 1 0 1197"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 3 1700 2 B"
+   ],
+   "expected": [
+    "F TAG0001 878",
+    "X 1 0 878"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 3 1030 3 B"
+   ],
+   "expected": [
+    "F TAG0001 462",
+    "X 1 0 462"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 3 0800 6 B"
+   ],
+   "expected": [
+    "F TAG0001 462",
+    "X 1 0 462"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 21 3 0800 3 T"
+   ],
+   "expected": [
+    "F TAG0001 1188",
+    "X 1 0 1188"
+   ]
+  }
+ ],
+ "f2p_rounding": [
+  {
+   "input": [
+    "T TAG0001 13 1 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 292",
+    "X 1 0 292"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 13 6 1030 7 T"
+   ],
+   "expected": [
+    "F TAG0001 526",
+    "X 1 0 526"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 16 1 2200 7 T"
+   ],
+   "expected": [
+    "F TAG0001 292",
+    "X 1 0 292"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 13 2 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 339",
+    "X 1 0 339"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 13 3 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 386",
+    "X 1 0 386"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 13 4 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 13 5 1030 6 T"
+   ],
+   "expected": [
+    "F TAG0001 480",
+    "X 1 0 480"
+   ]
+  }
+ ],
+ "f2p_dow_zero": [
+  {
+   "input": [
+    "T TAG0001 20 2 1030 0 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 0800 0 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 14 4 1030 0 T"
+   ],
+   "expected": [
+    "F TAG0001 433",
+    "X 1 0 433"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 7 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  }
+ ],
+ "f2p_time_2400": [
+  {
+   "input": [
+    "T TAG0001 20 2 2400 2 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 2400 6 T"
+   ],
+   "expected": [
+    "F TAG0001 522",
+    "X 1 0 522"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 0000 2 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 2401 2 C"
+   ],
+   "expected": [
+    "R TAG0001 TIME",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 2359 2 C"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  }
+ ],
+ "f2p_evening_stagger": [
+  {
+   "input": [
+    "T TAG0001 01 3 1859 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 01 3 1900 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 01 3 1929 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 01 3 1930 4 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 05 3 1859 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 05 3 1900 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 05 3 1929 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 05 3 1930 4 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 06 3 1859 4 C"
+   ],
+   "expected": [
+    "F TAG0001 660",
+    "X 1 0 660"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 06 3 1900 4 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 06 3 1929 4 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 06 3 1930 4 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 05 3 1915 7 C"
+   ],
+   "expected": [
+    "F TAG0001 330",
+    "X 1 0 330"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 05 3 1915 1 T"
+   ],
+   "expected": [
+    "F TAG0001 1188",
+    "X 1 0 1188"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "T TAG0001 20 2 1030 2 C EXTRA"
+   ],
+   "expected": [
+    "F TAG0001 290",
+    "X 1 0 290"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 24 4 0800 1 T x y z"
+   ],
+   "expected": [
+    "F TAG0001 1332",
+    "X 1 0 1332"
+   ]
+  },
+  {
+   "input": [
+    "T BAD-TAG 20 2 1030 2 C EXTRA"
+   ],
+   "expected": [
+    "R ?????????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T TAG0001 20 2 1030 2"
+   ],
+   "expected": [
+    "R TAG0001 FMT",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "T ZX9ABCDEF0 41 7 2149 0 M",
+    "T TOOLONGTAG1 24 4 0645 5 T",
+    "T ZX9ABCDEF0 11 7 1019 1 X",
+    "T TAG0001 02 4 1930 5 T",
+    "T BAD-TAG 30 2 0929 4 C",
+    "T Q 19 5 0115 1 M",
+    "T Q 00 1 0429 1 B",
+    "T Q 9 5 0644 6 T",
+    "T ZX9ABCDEF0 30 4 1508 2 M",
+    "T TAG0001 6 3 1616 9 C",
+    "T ZX9ABCDEF0 00 2 1929 5 C",
+    "T TAG0001 6 5 0700 7 T",
+    "T TOOLONGTAG1 41 2 0645 1 B",
+    "T Q 25 0 1039 5 X",
+    "T TOOLONGTAG1 6 6 1628 9 X",
+    "T TAG0001 02 2 1900 5 M",
+    "T TOOLONGTAG1 3 1 2336 0 C",
+    "T TOOLONGTAG1 1 5 0016 3 M",
+    "T BAD-TAG 00 0 0700 4 B",
+    "T BAD-TAG 6 3 1302 3 B",
+    "T BAD-TAG 5 1 0645 3 T",
+    "T TAG0001 29 4 0227 9 B extra",
+    "T BAD-TAG 41 2 1411 1 B",
+    "T Q 3 0 2359 7 c",
+    "T TOOLONGTAG1 00 1 2240 7 c",
+    "T BAD-TAG 00 3 1930 2 X",
+    "T Q 41 6 0644 0 M",
+    "T TOOLONGTAG1 35 3 1939 9 T extra",
+    "T Q 31 7 1103 5 M",
+    "T Q 01 5 2400 9 C",
+    "T ZX9ABCDEF0 41 7 1506 8 C",
+    "T Q 41 5 0644 3 c",
+    "T TAG0001 00 1 0644 0 X",
+    "T BAD-TAG 33 2 1915 4 B",
+    "T BAD-TAG 10 4 1859 3 c",
+    "T ZX9ABCDEF0 41 4 2359 6 M",
+    "T TOOLONGTAG1 41 3 1930 3 B extra",
+    "T TOOLONGTAG1 00 0 1929 0 C extra",
+    "T ZX9ABCDEF0 10 3 0000 3 C",
+    "T BAD-TAG 00 1 2138 4 M",
+    "T TOOLONGTAG1 00 6 0700 3 T extra",
+    "T BAD-TAG 00 2 0000 0 X",
+    "T TAG0001 6 6 0929 0 T extra",
+    "T BAD-TAG 1 1 0717 6 C",
+    "T TAG0001 1 5 0929 3 X",
+    "T BAD-TAG 41 3 0700 6 M",
+    "T TAG0001 37 6 0929 1 B",
+    "T TOOLONGTAG1 41 3 2360 5 M",
+    "T BAD-TAG 00 4 2007 7 C extra",
+    "T TOOLONGTAG1 5 6 0010 8 M",
+    "T Q 9 2 1527 7 B",
+    "T BAD-TAG 30 2 0048 0 B extra",
+    "T Q 32 0 0644 9 M",
+    "T Q 31 1 0040 1 C",
+    "T BAD-TAG 00 1 1242 3 X",
+    "T TAG0001 00 3 0644 0 M",
+    "T Q 00 7 0644 0 T",
+    "T TAG0001 41 2 2214 6 X",
+    "T TOOLONGTAG1 41 6 0929 8 c",
+    "T Q 23 7 1859 8 T",
+    "T TAG0001 00 5 1859 0 c",
+    "T ZX9ABCDEF0 00 5 1215 4 B",
+    "T ZX9ABCDEF0 3 7 1859 3 B extra",
+    "T Q 00 5 1206 8 X",
+    "T TOOLONGTAG1 00 3 1445 7 c",
+    "T TAG0001 4 5 0249 5 M",
+    "T TAG0001 23 7 2344 9 X",
+    "T BAD-TAG 34 2 1445 5 T extra",
+    "T ZX9ABCDEF0 28 7 2359 6 c",
+    "T TOOLONGTAG1 41 3 2359 2 M",
+    "T TAG0001 4 6 1900 7 M",
+    "T TOOLONGTAG1 41 3 0456 6 B extra",
+    "T TAG0001 9 0 0700 6 T",
+    "T TOOLONGTAG1 41 0 0644 9 B",
+    "T ZX9ABCDEF0 41 1 1626 1 X",
+    "T TAG0001 7 5 0050 8 C",
+    "T ZX9ABCDEF0 7 4 1603 5 T",
+    "T BAD-TAG 00 0 1402 5 M",
+    "T TOOLONGTAG1 41 7 1859 7 C extra",
+    "T TOOLONGTAG1 00 0 1813 3 B",
+    "T ZX9ABCDEF0 41 0 0919 9 C",
+    "T TOOLONGTAG1 2 2 1331 7 B",
+    "T TOOLONGTAG1 3 3 0645 9 T extra",
+    "T ZX9ABCDEF0 41 0 1859 5 B extra",
+    "T TOOLONGTAG1 41 3 0700 0 X",
+    "T Q 00 7 1831 4 c",
+    "T BAD-TAG 07 1 0700 1 X",
+    "T ZX9ABCDEF0 41 5 2352 8 M",
+    "T TOOLONGTAG1 5 2 2359 4 M",
+    "T ZX9ABCDEF0 41 5 2360 0 M extra",
+    "T ZX9ABCDEF0 3 2 1114 4 B",
+    "T TAG0001 00 6 1559 9 c",
+    "T TAG0001 9 1 1900 0 c",
+    "T Q 00 7 0422 4 X extra",
+    "T Q 00 1 2400 0 T",
+    "T TOOLONGTAG1 12 5 0929 4 M",
+    "T TAG0001 41 3 0644 1 c",
+    "T TOOLONGTAG1 4 0 2360 3 c",
+    "T TAG0001 41 0 0303 9 C",
+    "T ZX9ABCDEF0 00 1 0644 3 C extra",
+    "T ZX9ABCDEF0 8 5 0644 4 M",
+    "T Q 00 6 0644 8 C",
+    "T BAD-TAG 41 1 0332 9 X",
+    "T TOOLONGTAG1 01 3 0312 5 c",
+    "T TAG0001 33 6 1900 6 T",
+    "T TOOLONGTAG1 41 3 0929 3 M extra",
+    "T TOOLONGTAG1 17 2 0356 6 M",
+    "T ZX9ABCDEF0 2 2 1924 1 B",
+    "T BAD-TAG 00 7 0348 9 T extra",
+    "T BAD-TAG 5 2 0645 4 M",
+    "T ZX9ABCDEF0 8 6 0700 8 M",
+    "T BAD-TAG 00 3 0536 0 M",
+    "T Q 2 3 2033 8 C",
+    "T ZX9ABCDEF0 12 2 2360 8 X extra",
+    "T Q 4 3 0339 1 c",
+    "T BAD-TAG 5 0 1339 1 M",
+    "T TAG0001 6 7 0700 1 B",
+    "T TAG0001 35 7 2359 1 T",
+    "T BAD-TAG 00 4 1929 8 T",
+    "T TAG0001 41 0 2359 1 B"
+   ],
+   "expected": [
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 AXLES",
+    "F TAG0001 666",
+    "R ?????????? FMT",
+    "F Q 410",
+    "R Q GATE",
+    "R Q GATE",
+    "F ZX9ABCDEF0 370",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R Q AXLES",
+    "R ?????????? FMT",
+    "F TAG0001 348",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R TAG0001 DOW",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R Q AXLES",
+    "R Q DOW",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "F ZX9ABCDEF0 330",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "F TAG0001 1197",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R Q AXLES",
+    "F Q 250",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R Q AXLES",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R TAG0001 AXLES",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 AXLES",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R TAG0001 GATE",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "F TAG0001 810",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R ZX9ABCDEF0 TIME",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R TAG0001 AXLES",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "X 8 112 4381"
+   ]
+  },
+  {
+   "input": [
+    "T BAD-TAG 41 1 0644 2 c",
+    "T ZX9ABCDEF0 41 2 1956 6 T",
+    "T Q 41 3 2120 5 C",
+    "T ZX9ABCDEF0 8 3 2055 3 X",
+    "T TOOLONGTAG1 00 2 0445 6 c",
+    "T ZX9ABCDEF0 41 4 2359 7 c extra",
+    "T Q 41 0 1929 5 B",
+    "T TAG0001 36 3 1431 3 M",
+    "T BAD-TAG 1 6 1802 0 T",
+    "T TOOLONGTAG1 00 7 0436 9 M",
+    "T ZX9ABCDEF0 00 3 0818 2 X extra",
+    "T ZX9ABCDEF0 41 4 2359 7 X extra",
+    "T ZX9ABCDEF0 30 6 0203 3 C",
+    "T TAG0001 00 1 2400 2 c",
+    "T Q 41 5 1900 2 C",
+    "T ZX9ABCDEF0 40 4 1859 5 C",
+    "T TOOLONGTAG1 34 5 1930 5 c",
+    "T BAD-TAG 3 3 0644 4 c extra",
+    "T Q 08 3 1859 6 M",
+    "T TAG0001 41 7 0929 2 c",
+    "T TOOLONGTAG1 3 7 2360 2 c",
+    "T TAG0001 27 3 1206 6 M",
+    "T TAG0001 41 0 0129 8 C",
+    "T BAD-TAG 00 4 2038 4 C",
+    "T ZX9ABCDEF0 7 0 1859 2 C",
+    "T BAD-TAG 41 7 1930 1 C extra",
+    "T ZX9ABCDEF0 18 4 1929 8 X",
+    "T ZX9ABCDEF0 00 0 0929 6 c",
+    "T TOOLONGTAG1 28 1 0404 7 c",
+    "T TOOLONGTAG1 00 0 2155 3 B extra",
+    "T TAG0001 24 4 2358 6 B",
+    "T TAG0001 00 6 0057 1 B extra",
+    "T TOOLONGTAG1 5 4 2400 5 M",
+    "T BAD-TAG 1 5 2230 3 C",
+    "T ZX9ABCDEF0 8 4 1929 6 X",
+    "T TOOLONGTAG1 34 3 2400 7 X",
+    "T TOOLONGTAG1 5 4 1432 0 B extra",
+    "T TOOLONGTAG1 1 4 1900 6 C extra",
+    "T TOOLONGTAG1 7 6 0542 5 c",
+    "T TOOLONGTAG1 3 6 0929 7 C",
+    "T ZX9ABCDEF0 41 4 0700 4 T",
+    "T Q 36 4 2359 6 B extra",
+    "T TOOLONGTAG1 00 3 1451 4 C extra",
+    "T BAD-TAG 3 7 0644 4 B",
+    "T TOOLONGTAG1 20 4 0516 3 M",
+    "T Q 13 4 2400 9 X",
+    "T ZX9ABCDEF0 5 0 1859 4 X",
+    "T TAG0001 13 7 0154 1 X",
+    "T TOOLONGTAG1 41 5 0929 9 B",
+    "T TAG0001 4 4 0659 6 B",
+    "T BAD-TAG 19 1 1330 6 C",
+    "T TOOLONGTAG1 00 0 0129 1 C",
+    "T Q 1 5 1930 0 T",
+    "T TAG0001 41 7 1442 6 B",
+    "T BAD-TAG 41 6 1153 6 T",
+    "T ZX9ABCDEF0 6 5 2360 7 C extra",
+    "T BAD-TAG 29 4 1127 0 T extra",
+    "T ZX9ABCDEF0 00 1 0645 4 M",
+    "T TAG0001 00 3 0159 5 T",
+    "T Q 00 1 2359 7 C",
+    "T BAD-TAG 08 1 0644 8 c extra",
+    "T TOOLONGTAG1 3 7 1124 3 T",
+    "T Q 41 4 0700 9 T",
+    "T ZX9ABCDEF0 27 6 1245 9 B",
+    "T TAG0001 00 6 0000 4 X extra",
+    "T TAG0001 00 5 1115 0 T extra",
+    "T Q 00 2 1537 6 C",
+    "T BAD-TAG 9 7 0034 2 c",
+    "T ZX9ABCDEF0 41 4 2348 8 c",
+    "T TAG0001 00 1 1115 8 X",
+    "T TAG0001 41 1 0700 9 B",
+    "T TOOLONGTAG1 00 6 1900 0 T",
+    "T TAG0001 41 2 0837 2 X",
+    "T ZX9ABCDEF0 3 3 1929 0 M",
+    "T BAD-TAG 41 2 1930 3 c",
+    "T TAG0001 00 4 1859 7 C",
+    "T TAG0001 11 5 1929 6 c",
+    "T ZX9ABCDEF0 41 4 1533 1 T",
+    "T TOOLONGTAG1 12 2 0000 2 M extra",
+    "T BAD-TAG 6 4 0651 0 B",
+    "T TOOLONGTAG1 00 0 2360 0 C",
+    "T TOOLONGTAG1 35 1 1839 3 M",
+    "T BAD-TAG 4 1 0700 8 c",
+    "T ZX9ABCDEF0 32 3 1859 9 M",
+    "T TAG0001 41 7 1900 2 T",
+    "T ZX9ABCDEF0 00 6 0353 7 T",
+    "T ZX9ABCDEF0 41 0 1321 8 C",
+    "T ZX9ABCDEF0 7 6 2245 4 X",
+    "T BAD-TAG 41 6 0205 2 T",
+    "T BAD-TAG 41 3 1930 7 B",
+    "T TAG0001 16 6 1947 4 c",
+    "T TAG0001 00 1 1929 3 T",
+    "T BAD-TAG 41 0 1859 5 B extra",
+    "T TAG0001 5 5 2137 2 T extra",
+    "T ZX9ABCDEF0 00 4 1336 1 M",
+    "T BAD-TAG 29 2 0206 7 B extra",
+    "T TAG0001 25 4 2359 2 M extra",
+    "T TAG0001 41 1 1929 8 B",
+    "T Q 41 1 1402 0 C",
+    "T ZX9ABCDEF0 41 5 0547 0 M extra",
+    "T BAD-TAG 41 4 0419 2 C",
+    "T Q 00 5 1737 1 T",
+    "T Q 41 1 2359 6 M",
+    "T TOOLONGTAG1 00 2 1929 9 T",
+    "T BAD-TAG 08 6 0644 5 M",
+    "T Q 00 7 2400 9 X",
+    "T Q 13 7 0345 3 T",
+    "T ZX9ABCDEF0 00 1 0233 6 T",
+    "T Q 00 3 0209 3 C",
+    "T ZX9ABCDEF0 7 6 1929 3 c",
+    "T Q 7 0 0931 7 B extra",
+    "T BAD-TAG 35 3 0000 8 B",
+    "T TOOLONGTAG1 04 1 2400 5 B",
+    "T TAG0001 41 4 1859 6 X extra",
+    "T Q 5 6 1929 4 M",
+    "T BAD-TAG 00 5 1900 7 M",
+    "T ZX9ABCDEF0 9 2 0929 2 c",
+    "T BAD-TAG 19 7 1859 5 M",
+    "T BAD-TAG 41 7 1929 6 X extra",
+    "T TOOLONGTAG1 41 5 1900 7 c"
+   ],
+   "expected": [
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "F TAG0001 330",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "F ZX9ABCDEF0 450",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "F ZX9ABCDEF0 740",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "F Q 330",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "F TAG0001 330",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 DOW",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "F TAG0001 518",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "F Q 518",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R Q DOW",
+    "R ZX9ABCDEF0 GATE",
+    "R TAG0001 AXLES",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R ZX9ABCDEF0 DOW",
+    "R TAG0001 GATE",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R TAG0001 GATE",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R TAG0001 CLASS",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 DOW",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R TAG0001 CLASS",
+    "R TAG0001 GATE",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "F TAG0001 370",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R Q GATE",
+    "R Q AXLES",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "R ZX9ABCDEF0 GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R TAG0001 GATE",
+    "R Q GATE",
+    "R ?????????? FMT",
+    "R ZX9ABCDEF0 GATE",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "R ?????????? FMT",
+    "X 8 112 3586"
+   ]
+  }
+ ]
+}

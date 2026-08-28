@@ -1,0 +1,116 @@
+diff --git a/codeccore.py b/codeccore.py
+index 738e6b70..e8a4abed 100644
+--- a/codeccore.py
++++ b/codeccore.py
+@@ -3,9 +3,10 @@
+ Replaces the retired legacy binary (see ``legacy/README.md``). Reads codec
+ commands on stdin (``E`` encodes a field list to a 48-column VX record,
+ ``D`` decodes a record back to fields), writes one reply per command and
+-an ``X`` trailer at EOF. Format reference: ``docs/SPEC.md`` (note the
+-drift warning at the top of that file; the legacy engine's behavior is the
+-contract).
++an ``X`` trailer at EOF. Format reference: ``docs/SPEC.md``, corrected
++against the engine's actual behavior wherever the two disagree (the engine
++is the contract); every deviation from the written spec is marked
++``engine:`` below.
+ """
+ 
+ from __future__ import annotations
+@@ -17,6 +18,12 @@ ACCT_WIDTH = 10
+ AMOUNT_WIDTH = 11
+ MEMO_WIDTH = 15
+ MEMO_MAX = 15
++# engine: memos of 16 to 20 chars are not rejected on encode; they are
++# squeezed to first 12 chars + '~' + last 2 chars (15 stored chars).
++MEMO_SQUEEZE_MAX = 20
++# engine: the flag byte is 'H' (audit) instead of 'N' when the amount is
++# strictly above this threshold AND the date's month is 01.
++AUDIT_AMOUNT = 10_000_000
+ 
+ _WEIGHTS = (2, 5, 3)
+ _B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+@@ -82,7 +89,8 @@ class Engine:
+         echo = NO_ACCT
+         if len(tokens) >= 2 and _valid_acct(tokens[1]):
+             echo = tokens[1]
+-        if len(tokens) != 5:
++        # engine: extra trailing tokens are tolerated and ignored.
++        if len(tokens) < 5:
+             return f"R FMT {echo}"
+         acct, amount, date, memo = tokens[1:5]
+         if not _valid_acct(acct):
+@@ -95,10 +103,19 @@ class Engine:
+             memo = ""
+         if not _printable(memo):
+             return f"R FMT {acct}"
+-        if len(memo) > MEMO_MAX:
++        if len(memo) > MEMO_SQUEEZE_MAX:
+             return f"R FMT {acct}"
+-        stored = memo
+-        flag = "N"
++        if len(memo) > MEMO_MAX:
++            # engine: legacy squeeze instead of the spec's FMT reject.
++            stored = memo[:12] + "~" + memo[-2:]
++        else:
++            stored = memo
++        # engine: high-value January records carry audit flag 'H'; the
++        # flag participates in the check character.
++        if int(amount) > AUDIT_AMOUNT and date[4:6] == "01":
++            flag = "H"
++        else:
++            flag = "N"
+         body = (
+             "VX"
+             + acct.rjust(ACCT_WIDTH, "*")
+@@ -110,27 +127,42 @@ class Engine:
+         return "V " + body + check_char(body)
+ 
+     def _decode(self, arg: str) -> str:
+-        if len(arg) != RECLEN:
++        # engine: content after column 48 is tolerated and ignored when
++        # separated by a space.
++        if len(arg) == RECLEN:
++            record = arg
++        elif len(arg) > RECLEN and arg[RECLEN] == " ":
++            record = arg[:RECLEN]
++        else:
+             return "R LEN"
+-        record = arg
+-        if record[:2] != "VX":
++        # engine: the prefix matches case-insensitively; the check char is
++        # computed over the record with the prefix uppercased (all other
++        # bytes raw as received).
++        canon = record[:2].upper() + record[2:]
++        if canon[:2] != "VX":
+             return "R FMT"
+-        if record[RECLEN - 1] != check_char(record):
++        # engine: check char 'Z' is accepted unconditionally (maintenance
++        # override).
++        if record[RECLEN - 1] != "Z" and record[RECLEN - 1] != check_char(canon):
+             return "R CHK"
+-        acct = record[2:12].lstrip("*")
++        # engine: account padding may be '*' or spaces, on either side.
++        acct = record[2:12].strip("* ")
+         if not acct or not acct.isalnum():
+             return "R FMT"
+         amount = record[12:23]
+         if not amount.isdigit():
+             return "R FMT"
+         date = record[23:31]
+-        if not _valid_date(date):
++        # engine: the null date 00000000 is accepted verbatim on decode
++        # (encode still validates dates strictly).
++        if date != "00000000" and not _valid_date(date):
+             return "R FMT"
+-        memo = record[31:46].rstrip(".")
++        # engine: trailing memo padding of ',' is stripped as well as '.'
++        # (an older format padded memos with commas).
++        memo = record[31:46].rstrip(".,")
+         if not _printable(memo):
+             return "R FMT"
+-        if record[46] != "N":
+-            return "R FMT"
++        # engine: the flag byte is not validated on decode.
+         return f"P {acct} {int(amount)} {date} {memo or '_'}"
+ 
+ 

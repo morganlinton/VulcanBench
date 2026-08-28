@@ -1,0 +1,651 @@
+{
+ "guard_basic_kv": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT k1 hello",
+     "GET k1",
+     "DEL k1",
+     "GET k1",
+     "DEL k1"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "VAL hello",
+     "OK",
+     "ERR NOTFOUND",
+     "ERR NOTFOUND"
+    ]
+   ]
+  },
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT a1 x",
+     "PUT b2 y",
+     "GET a1",
+     "GET b2"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "OK",
+     "VAL x",
+     "VAL y"
+    ]
+   ]
+  }
+ ],
+ "guard_handshake_errors": [
+  {
+   "connections": [
+    [
+     "HELLO 0 nodeA"
+    ],
+    [
+     "HELLO 10 nodeA"
+    ],
+    [
+     "HELLO 3 toolongnode9"
+    ],
+    [
+     "NOTHELLO 3 nodeA"
+    ],
+    [
+     "HELLO x nodeA"
+    ]
+   ],
+   "expected": [
+    [
+     "ERR HANDSHAKE"
+    ],
+    [
+     "ERR HANDSHAKE"
+    ],
+    [
+     "ERR HANDSHAKE"
+    ],
+    [
+     "ERR HANDSHAKE"
+    ],
+    [
+     "ERR HANDSHAKE"
+    ]
+   ]
+  }
+ ],
+ "guard_fmt_errors": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT onlykey",
+     "GET",
+     "PUT k1 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",
+     "PUT kkkkkkkkkkkkkkkkk v",
+     "WHAT k"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "ERR FMT",
+     "ERR FMT",
+     "ERR FMT",
+     "ERR FMT",
+     "ERR FMT"
+    ]
+   ]
+  }
+ ],
+ "guard_persistence_across_connections": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT k1 v1"
+    ],
+    [
+     "HELLO 3 nodeB",
+     "GET k1"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK"
+    ],
+    [
+     "WELCOME 3 S2",
+     "VAL v1"
+    ]
+   ]
+  }
+ ],
+ "f2p_version_negotiation": [
+  {
+   "connections": [
+    [
+     "HELLO 2 nodeA",
+     "GET missing",
+     "BYE"
+    ],
+    [
+     "HELLO 1 nodeB",
+     "GET missing",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeC",
+     "GET missing",
+     "BYE"
+    ],
+    [
+     "HELLO 9 nodeD",
+     "GET missing",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 1 S1",
+     "NIL",
+     "GOODBYE 3"
+    ],
+    [
+     "WELCOME 1 S2",
+     "NIL",
+     "GOODBYE 3"
+    ],
+    [
+     "WELCOME 3 S3",
+     "ERR NOTFOUND",
+     "GOODBYE 3"
+    ],
+    [
+     "WELCOME 3 S4",
+     "ERR NOTFOUND",
+     "GOODBYE 3"
+    ]
+   ]
+  }
+ ],
+ "f2p_session_identity": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeB",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeA",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeC",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "GOODBYE 2"
+    ],
+    [
+     "WELCOME 3 S2",
+     "GOODBYE 2"
+    ],
+    [
+     "WELCOME 3 S1",
+     "GOODBYE 2"
+    ],
+    [
+     "WELCOME 3 S3",
+     "GOODBYE 2"
+    ]
+   ]
+  }
+ ],
+ "f2p_keys_ordering": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT alpha 1",
+     "PUT beta 2",
+     "PUT ALPHA2 3",
+     "PUT gamma 4",
+     "DEL beta",
+     "PUT beta 5",
+     "KEYS a",
+     "KEYS AL",
+     "KEYS beta",
+     "KEYS x",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "OK",
+     "OK",
+     "OK",
+     "OK",
+     "OK",
+     "KEY ALPHA2",
+     "KEY alpha",
+     "END 2",
+     "KEY ALPHA2",
+     "KEY alpha",
+     "END 2",
+     "KEY beta",
+     "END 1",
+     "END 0",
+     "GOODBYE 12"
+    ]
+   ]
+  }
+ ],
+ "f2p_put_overwrite_echo": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT k1 first",
+     "PUT k1 second",
+     "PUT k1 second",
+     "GET k1",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "OK first",
+     "OK",
+     "VAL second",
+     "GOODBYE 6"
+    ]
+   ]
+  }
+ ],
+ "f2p_value_truncation": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT k1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+     "GET k1",
+     "PUT k1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+     "PUT k2 BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+     "GET k2",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "VAL AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+     "OK",
+     "OK",
+     "VAL BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+     "GOODBYE 7"
+    ]
+   ]
+  }
+ ],
+ "f2p_goodbye_count": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeA",
+     "PUT k9 v",
+     "GET k9",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "GOODBYE 2"
+    ],
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "VAL v",
+     "GOODBYE 4"
+    ]
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "connections": [
+    [
+     "HELLO 3 nodeA",
+     "PUT k1 v1 extra",
+     "GET k1 extra",
+     "DEL k1 now please",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeZ trailing",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "VAL v1",
+     "OK",
+     "GOODBYE 5"
+    ],
+    [
+     "WELCOME 3 S2",
+     "GOODBYE 2"
+    ]
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "connections": [
+    [
+     "HELLO 1 fresh3",
+     "DEL Zed",
+     "KEYS k",
+     "KEYS ",
+     "GET qqqqqqqqqqqqqqqqq",
+     "PUT Zed XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "PUT beta XXXXXXXXXX",
+     "DEL k1",
+     "KEYS A",
+     "GET Alpha",
+     "PUT alpha v1",
+     "GET k1",
+     "PUT beta v1",
+     "PUT Zed v1",
+     "BYE"
+    ],
+    [
+     "HELLO 9 nodeA",
+     "PUT Alpha X",
+     "PUT beta XXXXXXXXXXX",
+     "GET Zed",
+     "PUT Alpha v2",
+     "KEYS k",
+     "PUT Zed v1",
+     "GET k5",
+     "KEYS a",
+     "DEL b2",
+     "KEYS k",
+     "BYE"
+    ],
+    [
+     "HELLO 9 nodeB",
+     "KEYS A",
+     "GET b2",
+     "PUT Alpha XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "PUT alpha v1",
+     "PUT k0 v1",
+     "DEL Zed",
+     "BYE"
+    ],
+    [
+     "HELLO 9 fresh0",
+     "PUT k0 v1",
+     "KEYS A",
+     "DEL b2",
+     "KEYS A",
+     "PUT beta v2",
+     "KEYS ",
+     "GET alpha",
+     "KEYS Z",
+     "PUT solo",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 1 S1",
+     "ERR NOTFOUND",
+     "END 0",
+     "ERR FMT",
+     "ERR FMT",
+     "OK",
+     "OK",
+     "ERR NOTFOUND",
+     "END 0",
+     "NIL",
+     "OK",
+     "NIL",
+     "OK XXXXXXXXXX",
+     "OK XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "GOODBYE 15"
+    ],
+    [
+     "WELCOME 3 S2",
+     "OK",
+     "OK v1",
+     "VAL v1",
+     "OK X",
+     "END 0",
+     "OK",
+     "ERR NOTFOUND",
+     "KEY Alpha",
+     "KEY alpha",
+     "END 2",
+     "ERR NOTFOUND",
+     "END 0",
+     "GOODBYE 12"
+    ],
+    [
+     "WELCOME 3 S3",
+     "KEY Alpha",
+     "KEY alpha",
+     "END 2",
+     "ERR NOTFOUND",
+     "OK v2",
+     "OK",
+     "OK",
+     "OK",
+     "GOODBYE 8"
+    ],
+    [
+     "WELCOME 3 S4",
+     "OK",
+     "KEY Alpha",
+     "KEY alpha",
+     "END 2",
+     "ERR NOTFOUND",
+     "KEY Alpha",
+     "KEY alpha",
+     "END 2",
+     "OK XXXXXXXXXXX",
+     "ERR FMT",
+     "VAL v1",
+     "END 0",
+     "ERR FMT",
+     "GOODBYE 11"
+    ]
+   ]
+  },
+  {
+   "connections": [
+    [
+     "HELLO 2 nodeC",
+     "GET alpha",
+     "KEYS A",
+     "DEL beta",
+     "PUT b2 v2",
+     "DEL beta",
+     "GET beta",
+     "PUT alpha v1",
+     "GET Zed",
+     "BYE"
+    ],
+    [
+     "HELLO 1 nodeC",
+     "PUT beta v1",
+     "KEYS k",
+     "PUT b2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "BYE"
+    ],
+    [
+     "HELLO 4 nodeA",
+     "KEYS Z",
+     "PUT solo",
+     "KEYS Z",
+     "PUT beta v1",
+     "GET beta",
+     "DEL Zed",
+     "KEYS k",
+     "GET beta",
+     "KEYS k",
+     "PUT Zed v2",
+     "DEL b2",
+     "PUT Alpha XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "PUT beta v1",
+     "BYE"
+    ],
+    [
+     "HELLO 3 nodeA",
+     "DEL Alpha",
+     "GET beta",
+     "PUT beta XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "GET qqqqqqqqqqqqqqqqq",
+     "GET Zed",
+     "NOPE x",
+     "KEYS a",
+     "DEL Zed",
+     "PUT alpha XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "GET k1",
+     "BYE"
+    ],
+    [
+     "HELLO 4 nodeC",
+     "NOPE x",
+     "KEYS a",
+     "DEL Zed",
+     "DEL Zed",
+     "DEL beta",
+     "GET k0",
+     "PUT Zed v2",
+     "BYE"
+    ],
+    [
+     "HELLO 9 nodeC",
+     "PUT Zed v2",
+     "PUT b2 XXXXXXXX",
+     "GET beta",
+     "DEL k4",
+     "PUT alpha v1",
+     "DEL alpha",
+     "DEL Alpha",
+     "PUT solo",
+     "PUT beta XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "PUT alpha v1",
+     "BYE"
+    ]
+   ],
+   "expected": [
+    [
+     "WELCOME 1 S1",
+     "NIL",
+     "END 0",
+     "ERR NOTFOUND",
+     "OK",
+     "ERR NOTFOUND",
+     "NIL",
+     "OK",
+     "NIL",
+     "GOODBYE 10"
+    ],
+    [
+     "WELCOME 1 S1",
+     "OK",
+     "END 0",
+     "OK v2",
+     "GOODBYE 5"
+    ],
+    [
+     "WELCOME 3 S2",
+     "END 0",
+     "ERR FMT",
+     "END 0",
+     "OK",
+     "VAL v1",
+     "ERR NOTFOUND",
+     "END 0",
+     "VAL v1",
+     "END 0",
+     "OK",
+     "OK",
+     "OK",
+     "OK",
+     "GOODBYE 15"
+    ],
+    [
+     "WELCOME 3 S2",
+     "OK",
+     "VAL v1",
+     "OK v1",
+     "ERR FMT",
+     "VAL v2",
+     "ERR FMT",
+     "KEY alpha",
+     "END 1",
+     "OK",
+     "OK v1",
+     "ERR NOTFOUND",
+     "GOODBYE 12"
+    ],
+    [
+     "WELCOME 3 S1",
+     "ERR FMT",
+     "KEY alpha",
+     "END 1",
+     "ERR NOTFOUND",
+     "ERR NOTFOUND",
+     "OK",
+     "ERR NOTFOUND",
+     "OK",
+     "GOODBYE 9"
+    ],
+    [
+     "WELCOME 3 S1",
+     "OK",
+     "OK",
+     "ERR NOTFOUND",
+     "ERR NOTFOUND",
+     "OK XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+     "OK",
+     "ERR NOTFOUND",
+     "ERR FMT",
+     "OK",
+     "OK",
+     "GOODBYE 12"
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,74 @@
+{
+  "id": "legacy-syncpeer-wire-parity",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "localized",
+  "created": "2026-08-28",
+  "repo_scale": "micro",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "cii-v2 OPAQUE-COMPONENT WAVE 2 #3 (NETWORK PEER): the opaque component is a live TCP daemon, so probing requires writing a socket client and characterizing wire behavior across CONNECTIONS (session state spans the process, not one connection). Stripped binary + drifted spec + spec-faithful naive base, per the admitted settlecore methodology. Quirk inventory (all verified divergent from base): version negotiation is min(v,3) EXCEPT v2 which negotiates down to 1 (the recalled-version quirk); session ids are per NODE NAME for the process lifetime with a returning node reclaiming its original id (spec says per-connection opaque tokens), discoverable only via reconnect experiments; GET-miss semantics depend on the NEGOTIATED version (v1: NIL, v3: ERR NOTFOUND; spec documents only v3, and the v2 downgrade makes the quirks interact); KEYS returns newest-slot-first (delete + re-put reorders) with a case-INSENSITIVE prefix filter over case-SENSITIVE keys; overwriting PUT echoes the OLD value but only when the value actually changes (no-op writes answer plain OK), compared post-truncation; values silently truncated to 48 chars (with a corner where a 64-char PUT then its 48-char prefix is a no-op); GOODBYE counts every line INCLUDING the handshake and the BYE itself; lenient trailing tokens. Grading never executes the binary: fixtures.json (14 sessions: 8 f2p families incl. two multi-connection parity session-sets, 4 guard families, guards ending by socket close so the GOODBYE quirk cannot leak into them) captured at build time over real TCP by the same driver the tests ship; build gate proved gold==binary on every session plus 12 random session-set sweeps, naive divergence per f2p family, naive agreement per guard. Hidden tests boot a FRESH workspace server per fixture session and quarantine legacy/ so proxying fails. Deterministic: no timing dependence, sequential connections, process-scoped counters.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "version_negotiation",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_version_negotiation -q"
+      },
+      {
+        "name": "session_identity",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_session_identity -q"
+      },
+      {
+        "name": "keys_ordering",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_keys_ordering -q"
+      },
+      {
+        "name": "put_overwrite_echo",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_put_overwrite_echo -q"
+      },
+      {
+        "name": "value_truncation",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_value_truncation -q"
+      },
+      {
+        "name": "goodbye_count",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_goodbye_count -q"
+      },
+      {
+        "name": "lenient_tokens",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_lenient_tokens -q"
+      },
+      {
+        "name": "full_wire_parity",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_full_wire_parity -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "basic_kv",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_basic_kv -q"
+      },
+      {
+        "name": "handshake_errors",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_handshake_errors -q"
+      },
+      {
+        "name": "fmt_errors",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_fmt_errors -q"
+      },
+      {
+        "name": "persistence_across_connections",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_persistence_across_connections -q"
+      }
+    ]
+  },
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 270,
+    "suggested_timeout_s": 5400
+  }
+}

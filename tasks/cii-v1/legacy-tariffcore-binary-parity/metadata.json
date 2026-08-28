@@ -1,0 +1,78 @@
+{
+  "id": "legacy-tariffcore-binary-parity",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "localized",
+  "created": "2026-08-28",
+  "repo_scale": "micro",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "cii-v2 OPAQUE-COMPONENT WAVE 3 #1 (CONJUNCTION-DARK): designed from the wave-2 anatomy law that difficulty lives in arbitrary conjunctions of unrelated dimensions with no spec or domain-folklore anchor, not in statefulness. A stripped legacy customs-duty binary as ground truth, drifted spec, spec-faithful naive base. Quirk inventory (all verified divergent, every conjunction sweep-inferable): FOUR two-dimension conjunctions with unguessable thresholds: air mode x computed-kg in (50,100] switches the weight-fee rate to 55c; sanctioned-origin set {KP,IR,SY,CU} x chemical chapters 28-38 adds a 130bp levy printed into the spec's 'reserved' column; declared value strictly over 2,000,000 x declaration-id TRAILING DIGITS >= 25 (a legacy ids-end-with-day-of-month convention) switches duty rounding to truncation, the darkest rule built so far (a computation mode keyed on a substring of an identifier); JPY currency x sea mode waives the weight fee entirely. Plus: duty rounds half-even while levy and fees round half-up (spec says nearest); the 900000 cap applies to duty+levy only, reducing levy first, never the weight fee (spec caps the total); chapter 98 is exempt like the documented 99 (naive rejects it); kilograms are the integer CEILING of decigrams while the spec's own example implies nearest; lenient trailing tokens. Grading never executes the binary: fixtures.json (69 batches: 9 f2p families with boundary controls on every conjunction edge, incl. two 120-200-line parity batches, 4 guard families kept clear of every quirk surface: exact-kg weights, day-free ids, tie-free values) captured at build time; build gate proved gold==binary on every fixture plus 40 random sweeps, naive divergence per f2p family, naive agreement per guard (two fixture families were initially vacuous because chosen values were not true rounding ties; recomputed with values congruent 50 and 20 mod 100). Hidden tests quarantine legacy/ so delegation fails. Fully deterministic.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "duty_rounding",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_duty_rounding -q"
+      },
+      {
+        "name": "weight_ceiling",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_weight_ceiling -q"
+      },
+      {
+        "name": "dense_air_band",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_dense_air_band -q"
+      },
+      {
+        "name": "origin_levy",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_origin_levy -q"
+      },
+      {
+        "name": "audit_mode",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_audit_mode -q"
+      },
+      {
+        "name": "jpy_sea_waiver",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_jpy_sea_waiver -q"
+      },
+      {
+        "name": "cap_scope",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_cap_scope -q"
+      },
+      {
+        "name": "chapter98",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_chapter98 -q"
+      },
+      {
+        "name": "full_corpus_parity",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_full_corpus_parity -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "rate_bands",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_rate_bands -q"
+      },
+      {
+        "name": "rejects",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_rejects -q"
+      },
+      {
+        "name": "weight_exact",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_weight_exact -q"
+      },
+      {
+        "name": "trailer",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_trailer -q"
+      }
+    ]
+  },
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 270,
+    "suggested_timeout_s": 5400
+  }
+}

@@ -1,0 +1,149 @@
+diff --git a/tariffcore.py b/tariffcore.py
+index b252282..a813589 100644
+--- a/tariffcore.py
++++ b/tariffcore.py
+@@ -1,9 +1,7 @@
+-"""TariffCore duty calculator, Python implementation.
++"""TariffCore duty calculator, Python implementation (engine-faithful).
+ 
+-Replaces the retired legacy binary (see ``legacy/README.md``). One
+-calculator per process: declarations on stdin, result lines on stdout,
+-trailer at end of input. Format reference: ``docs/SPEC.md`` (mind the
+-drift warning at the top; the engine's behavior is the contract).
++Replaces the retired legacy binary. Every deviation from docs/SPEC.md is
++marked ``engine:`` - the engine's behavior is the contract.
+ """
+ 
+ from __future__ import annotations
+@@ -15,9 +13,33 @@ RATE_BANDS = (
+     (50, 63, 800), (64, 83, 300), (84, 90, 150), (91, 97, 550),
+ )
+ CAP = 900_000
++LEVY_ORIGINS = {"KP", "IR", "SY", "CU"}
++LEVY_BP = 130
++AUDIT_VALUE_THRESHOLD = 2_000_000
++AUDIT_DAY = 25
++DENSE_AIR_LO_KG = 50
++DENSE_AIR_HI_KG = 100
++DENSE_AIR_RATE = 55
+ WEIGHT_RATE_CENTS = 40
+ 
+ 
++def _round_half_up(numerator: int, denominator: int) -> int:
++    quotient, remainder = divmod(numerator, denominator)
++    if 2 * remainder >= denominator:
++        return quotient + 1
++    return quotient
++
++
++def _round_half_even(numerator: int, denominator: int) -> int:
++    quotient, remainder = divmod(numerator, denominator)
++    doubled = 2 * remainder
++    if doubled > denominator:
++        return quotient + 1
++    if doubled < denominator:
++        return quotient
++    return quotient if quotient % 2 == 0 else quotient + 1
++
++
+ class Calculator:
+     def __init__(self, out=None):
+         self.count_ok = 0
+@@ -38,11 +60,12 @@ class Calculator:
+             return
+         declid = parts[1] if len(parts) > 1 else ""
+         id_ok = 1 <= len(declid) <= 10 and declid.isalnum()
+-        if parts[0] != "D" or len(parts) != 8 or not id_ok:
++        # engine: extra trailing tokens are tolerated
++        if parts[0] != "D" or len(parts) < 8 or not id_ok:
+             self._emit(f"R {declid if id_ok else '??????????'} FMT")
+             self.count_rej += 1
+             return
+-        _, declid, origin, hs, mode, currency, value_tok, weight_tok = parts
++        declid, origin, hs, mode, currency, value_tok, weight_tok = parts[1:8]
+         if not (len(origin) == 2 and origin.isalpha() and origin.isupper()):
+             self._reject(declid, "ORIGIN")
+             return
+@@ -67,23 +90,55 @@ class Calculator:
+             self._reject(declid, "HS")
+             return
+ 
+-        duty = 0
+-        if chapter != 99:
+-            rate_bp = None
++        duty = levy = 0
++        # engine: chapter 98 is exempt alongside the documented 99
++        # (legacy grandfather clause).
++        if chapter < 98:
++            rate_bp = 0
+             for lo, hi, bp in RATE_BANDS:
+                 if lo <= chapter <= hi:
+                     rate_bp = bp
+                     break
+-            if rate_bp is None:
+-                self._reject(declid, "HS")
+-                return
+-            duty = _round_nearest(value * rate_bp, 10_000)
+-
+-        kilograms = (weight_dg + 5_000) // 10_000  # nearest kg per the spec
+-        weight_fee = kilograms * WEIGHT_RATE_CENTS
+-
+-        total = min(duty + weight_fee, CAP)
+-        self._emit(f"T {declid} {duty} {weight_fee} 0 {total}")
++            # engine: the declaration id's trailing two digits carry the
++            # day of month (legacy convention); large declarations filed
++            # at month end compute duty in truncating audit mode.
++            day = 0
++            if len(declid) >= 2 and declid[-2:].isdigit():
++                day = int(declid[-2:])
++            if value > AUDIT_VALUE_THRESHOLD and day >= AUDIT_DAY:
++                duty = value * rate_bp // 10_000
++            else:
++                # engine: duty rounds half-even, not half-up.
++                duty = _round_half_even(value * rate_bp, 10_000)
++            # engine: origin x chemicals levy, rounded half-up, printed in
++            # the "reserved" levy column.
++            if origin in LEVY_ORIGINS and 28 <= chapter <= 38:
++                levy = _round_half_up(value * LEVY_BP, 10_000)
++            # engine: the cap applies to duty+levy only, reducing the levy
++            # first, and never touches the weight fee.
++            over = duty + levy - CAP
++            if over > 0:
++                if levy >= over:
++                    levy -= over
++                else:
++                    duty -= over - levy
++                    levy = 0
++
++        # engine: kilograms are the integer CEILING of the decigram weight
++        # (the spec's example table implies nearest).
++        kilograms = (weight_dg + 9_999) // 10_000
++        rate = WEIGHT_RATE_CENTS
++        # engine: dense-cargo air band.
++        if mode == "A" and DENSE_AIR_LO_KG < kilograms <= DENSE_AIR_HI_KG:
++            rate = DENSE_AIR_RATE
++        weight_fee = kilograms * rate
++        # engine: the 1987 treaty remnant waives sea freight fees billed
++        # in JPY.
++        if currency == "JPY" and mode == "S":
++            weight_fee = 0
++
++        total = duty + levy + weight_fee
++        self._emit(f"T {declid} {duty} {weight_fee} {levy} {total}")
+         self.count_ok += 1
+         self.sum_total += total
+ 
+@@ -91,13 +146,6 @@ class Calculator:
+         self._emit(f"X {self.count_ok} {self.count_rej} {self.sum_total}")
+ 
+ 
+-def _round_nearest(numerator: int, denominator: int) -> int:
+-    quotient, remainder = divmod(numerator, denominator)
+-    if 2 * remainder >= denominator:
+-        return quotient + 1
+-    return quotient
+-
+-
+ def main() -> None:
+     calculator = Calculator()
+     for line in sys.stdin:

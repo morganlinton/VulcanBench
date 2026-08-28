@@ -1,0 +1,74 @@
+{
+  "id": "legacy-loyaltycore-binary-parity",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "localized",
+  "created": "2026-08-28",
+  "repo_scale": "micro",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "cii-v2 OPAQUE-COMPONENT WAVE 5 #1 (ACCUMULATOR, ANTI-PATTERN-MATCH): batch-stateful tier ledger designed as the deliberate mirror image of the admitted payrollcore's cap quirk, so a solver that learned 'crossing records get the OLD treatment' from one task fails here: in this engine a record whose earn crosses a tier threshold is recomputed retroactively at the NEW tier (payroll gave the crossing record its full old treatment). Quirk inventory (all verified divergent from the spec-faithful naive base): retroactive tier promotion on crossing earns; an undocumented Gold threshold of 19,500 versus the documented 20,000 (discoverable only via balance-crossing constructions); an electronics x promo-containing-K conjunction lifting the multiplier to x4, gated by a legacy all-same-letter wildcard rule that exempts KKK; travel x1.5 truncating its final half point versus documented nearest; sub-100-cent spends skipped entirely including from batch counters versus the spec's zero-point line; tier bonus applied BEFORE the category multiplier with exact integer arithmetic and a single half-even rounding versus the naive's category-first two half-up roundings; member-id case folding with first-seen spelling; lenient trailing tokens. Composite output (earned merges base, category, and tier effects into one number). Guards sit strictly below Silver so no tier logic can engage (one guard initially crossed Gold in a single record and was rebuilt). Build gate: gold==binary on all 38 fixture batches plus 40 random sweeps, naive divergence per f2p family, naive agreement per guard. Grading never executes the binary; hidden tests quarantine legacy/. Fully deterministic.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "retro_promotion",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_retro_promotion -q"
+      },
+      {
+        "name": "gold_threshold",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_gold_threshold -q"
+      },
+      {
+        "name": "electronics_promo",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_electronics_promo -q"
+      },
+      {
+        "name": "travel_truncation",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_travel_truncation -q"
+      },
+      {
+        "name": "sub100_skip",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_sub100_skip -q"
+      },
+      {
+        "name": "order_of_operations",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_order_of_operations -q"
+      },
+      {
+        "name": "id_case_fold",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_id_case_fold -q"
+      },
+      {
+        "name": "wildcard_promo",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_wildcard_promo -q"
+      },
+      {
+        "name": "full_corpus_parity",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_full_corpus_parity -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "earning",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_earning -q"
+      },
+      {
+        "name": "accumulation",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_accumulation -q"
+      },
+      {
+        "name": "rejects",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_rejects -q"
+      }
+    ]
+  },
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 270,
+    "suggested_timeout_s": 5400
+  }
+}

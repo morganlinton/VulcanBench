@@ -1,0 +1,1359 @@
+{
+ "guard_single_layer": [
+  {
+   "input": [
+    "R WID1 500 1234",
+    "I WID1 200",
+    "I WID1 250"
+   ],
+   "expected": [
+    "A WID1 500",
+    "C WID1 246800 300",
+    "C WID1 308500 50",
+    "X 1 2 0 555300"
+   ]
+  },
+  {
+   "input": [
+    "R BOLT 60 999",
+    "I BOLT 59"
+   ],
+   "expected": [
+    "A BOLT 60",
+    "C BOLT 58941 1",
+    "X 1 1 0 58941"
+   ]
+  },
+  {
+   "input": [
+    "R NUT7 80 50",
+    "I NUT7 80"
+   ],
+   "expected": [
+    "A NUT7 80",
+    "C NUT7 4000 0",
+    "X 1 1 0 4000"
+   ]
+  },
+  {
+   "input": [
+    "R PLATE 999999 4321",
+    "I PLATE 123456"
+   ],
+   "expected": [
+    "A PLATE 999999",
+    "C PLATE 533453376 876543",
+    "X 1 1 0 533453376"
+   ]
+  }
+ ],
+ "guard_fifo_two_layer": [
+  {
+   "input": [
+    "R A1 100 10",
+    "R A1 50 20",
+    "I A1 100"
+   ],
+   "expected": [
+    "A A1 100",
+    "A A1 150",
+    "C A1 1000 50",
+    "X 2 1 0 1000"
+   ]
+  },
+  {
+   "input": [
+    "R B2 200 10",
+    "R B2 100 30",
+    "I B2 150"
+   ],
+   "expected": [
+    "A B2 200",
+    "A B2 300",
+    "C B2 1500 150",
+    "X 2 1 0 1500"
+   ]
+  },
+  {
+   "input": [
+    "R C3 300 77",
+    "R C3 300 78",
+    "I C3 250",
+    "I C3 40"
+   ],
+   "expected": [
+    "A C3 300",
+    "A C3 600",
+    "C C3 19250 350",
+    "C C3 3080 310",
+    "X 2 2 0 22330"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "Z NOISE 5"
+   ],
+   "expected": [
+    "E NOISE FMT",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R TOOLONGID9 5 10"
+   ],
+   "expected": [
+    "E ???????? FMT",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "I TOOLONGID9 5"
+   ],
+   "expected": [
+    "E ???????? FMT",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R BAD! 5 10"
+   ],
+   "expected": [
+    "E ???????? FMT",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R Q1 1234567 10"
+   ],
+   "expected": [
+    "E Q1 QTY",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R Q2 12x 10"
+   ],
+   "expected": [
+    "E Q2 QTY",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "I Q3 1234567"
+   ],
+   "expected": [
+    "E Q3 QTY",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R K9 5 12345678"
+   ],
+   "expected": [
+    "E K9 COST",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R K8 5 12a45"
+   ],
+   "expected": [
+    "E K8 COST",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R E1 5"
+   ],
+   "expected": [
+    "E E1 FMT",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "I E2"
+   ],
+   "expected": [
+    "E E2 FMT",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "I GHOST 25"
+   ],
+   "expected": [
+    "E GHOST STOCK",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R LOW 10 100",
+    "I LOW 30"
+   ],
+   "expected": [
+    "A LOW 10",
+    "E LOW STOCK",
+    "X 1 0 1 0"
+   ]
+  }
+ ],
+ "guard_empty_batch": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  }
+ ],
+ "guard_trailer_mix": [
+  {
+   "input": [
+    "R MIXA 400 11",
+    "R MIXB 300 22",
+    "I MIXA 150",
+    "I MIXC 1234567",
+    "R MIXA 200 33",
+    "I MIXB 90",
+    "R MIXD 5 99999999",
+    "I MIXA 100"
+   ],
+   "expected": [
+    "A MIXA 400",
+    "A MIXB 300",
+    "C MIXA 1650 250",
+    "E MIXC QTY",
+    "A MIXA 450",
+    "C MIXB 1980 210",
+    "E MIXD COST",
+    "C MIXA 1100 350",
+    "X 3 3 2 4730"
+   ]
+  }
+ ],
+ "f2p_display_stock": [
+  {
+   "input": [
+    "R D1 100 10",
+    "R D1 100 20",
+    "I D1 150"
+   ],
+   "expected": [
+    "A D1 100",
+    "A D1 200",
+    "C D1 1000 100",
+    "X 2 1 0 1000"
+   ]
+  },
+  {
+   "input": [
+    "R D2 50 10",
+    "R D2 50 20",
+    "R D2 100 30",
+    "I D2 120"
+   ],
+   "expected": [
+    "A D2 50",
+    "A D2 100",
+    "A D2 200",
+    "C D2 1500 100",
+    "X 3 1 0 1500"
+   ]
+  },
+  {
+   "input": [
+    "R D3 100 10",
+    "R D3 50 20",
+    "I D3 80"
+   ],
+   "expected": [
+    "A D3 100",
+    "A D3 150",
+    "C D3 800 70",
+    "X 2 1 0 800"
+   ]
+  },
+  {
+   "input": [
+    "R D4 60 10",
+    "R D4 60 20",
+    "I D4 60",
+    "I D4 60"
+   ],
+   "expected": [
+    "A D4 60",
+    "A D4 120",
+    "C D4 600 60",
+    "C D4 1200 0",
+    "X 2 2 0 1800"
+   ]
+  },
+  {
+   "input": [
+    "R D5 30 10",
+    "R D5 30 20",
+    "R D5 30 30",
+    "I D5 70"
+   ],
+   "expected": [
+    "A D5 30",
+    "A D5 60",
+    "A D5 90",
+    "C D5 900 30",
+    "X 3 1 0 900"
+   ]
+  }
+ ],
+ "f2p_cost_merge": [
+  {
+   "input": [
+    "R M1 50 10",
+    "R M1 30 20",
+    "R M1 30 20",
+    "I M1 60"
+   ],
+   "expected": [
+    "A M1 50",
+    "A M1 80",
+    "A M1 110",
+    "C M1 500 60",
+    "X 3 1 0 500"
+   ]
+  },
+  {
+   "input": [
+    "R M2 50 10",
+    "R M2 30 20",
+    "R M2 30 21",
+    "I M2 50"
+   ],
+   "expected": [
+    "A M2 50",
+    "A M2 80",
+    "A M2 110",
+    "C M2 500 60",
+    "X 3 1 0 500"
+   ]
+  },
+  {
+   "input": [
+    "R M3 40 15",
+    "R M3 40 15",
+    "I M3 60"
+   ],
+   "expected": [
+    "A M3 40",
+    "A M3 80",
+    "C M3 900 20",
+    "X 2 1 0 900"
+   ]
+  },
+  {
+   "input": [
+    "R M4 20 5",
+    "R M4 30 9",
+    "R M4 25 9",
+    "R M4 25 9",
+    "I M4 30"
+   ],
+   "expected": [
+    "A M4 20",
+    "A M4 50",
+    "A M4 75",
+    "A M4 100",
+    "C M4 100 80",
+    "X 4 1 0 100"
+   ]
+  }
+ ],
+ "f2p_shrinkage": [
+  {
+   "input": [
+    "R S1 100 50",
+    "I S1 100"
+   ],
+   "expected": [
+    "A S1 100",
+    "C S1 5100 0",
+    "X 1 1 0 5100"
+   ]
+  },
+  {
+   "input": [
+    "R S2 99 50",
+    "I S2 99"
+   ],
+   "expected": [
+    "A S2 99",
+    "C S2 4950 0",
+    "X 1 1 0 4950"
+   ]
+  },
+  {
+   "input": [
+    "R S3 150 33",
+    "I S3 150"
+   ],
+   "expected": [
+    "A S3 150",
+    "C S3 5049 0",
+    "X 1 1 0 5049"
+   ]
+  },
+  {
+   "input": [
+    "R S4 101 25",
+    "I S4 101"
+   ],
+   "expected": [
+    "A S4 101",
+    "C S4 2576 0",
+    "X 1 1 0 2576"
+   ]
+  },
+  {
+   "input": [
+    "R S5 200 50",
+    "I S5 100"
+   ],
+   "expected": [
+    "A S5 200",
+    "C S5 5000 100",
+    "X 1 1 0 5000"
+   ]
+  }
+ ],
+ "f2p_cost_cap": [
+  {
+   "input": [
+    "R K1 10 9000001",
+    "I K1 5"
+   ],
+   "expected": [
+    "A K1 10",
+    "C K1 45000000 5",
+    "X 1 1 0 45000000"
+   ]
+  },
+  {
+   "input": [
+    "R K2 10 9999999",
+    "I K2 4"
+   ],
+   "expected": [
+    "A K2 10",
+    "C K2 36000000 6",
+    "X 1 1 0 36000000"
+   ]
+  },
+  {
+   "input": [
+    "R K3 10 9000000",
+    "I K3 3"
+   ],
+   "expected": [
+    "A K3 10",
+    "C K3 27000000 7",
+    "X 1 1 0 27000000"
+   ]
+  }
+ ],
+ "f2p_partial_fill": [
+  {
+   "input": [
+    "R P1 50 100",
+    "I P1 100"
+   ],
+   "expected": [
+    "A P1 50",
+    "C P1 5000 0",
+    "X 1 1 0 5000"
+   ]
+  },
+  {
+   "input": [
+    "R P2 50 100",
+    "I P2 101"
+   ],
+   "expected": [
+    "A P2 50",
+    "E P2 STOCK",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R P3 120 100",
+    "I P3 200"
+   ],
+   "expected": [
+    "A P3 120",
+    "C P3 12240 0",
+    "X 1 1 0 12240"
+   ]
+  },
+  {
+   "input": [
+    "R P4 70 100",
+    "I P4 70"
+   ],
+   "expected": [
+    "A P4 70",
+    "C P4 7000 0",
+    "X 1 1 0 7000"
+   ]
+  }
+ ],
+ "f2p_case_fold": [
+  {
+   "input": [
+    "R Widget 50 100",
+    "I WIDGET 30"
+   ],
+   "expected": [
+    "A Widget 50",
+    "C Widget 3000 20",
+    "X 1 1 0 3000"
+   ]
+  },
+  {
+   "input": [
+    "R aa1 40 10",
+    "R AA1 40 20",
+    "I aa1 40"
+   ],
+   "expected": [
+    "A aa1 40",
+    "A aa1 80",
+    "C aa1 400 40",
+    "X 2 1 0 400"
+   ]
+  },
+  {
+   "input": [
+    "I FOO 5",
+    "R foo 10 7",
+    "I Foo 4"
+   ],
+   "expected": [
+    "E FOO STOCK",
+    "A FOO 10",
+    "C FOO 28 6",
+    "X 1 1 1 28"
+   ]
+  },
+  {
+   "input": [
+    "R bb2 40 10",
+    "R cc3 40 20",
+    "I bb2 30"
+   ],
+   "expected": [
+    "A bb2 40",
+    "A cc3 40",
+    "C bb2 300 10",
+    "X 2 1 0 300"
+   ]
+  }
+ ],
+ "f2p_zero_qty": [
+  {
+   "input": [
+    "R Z1 0 100"
+   ],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "R Z2 10 100",
+    "I Z2 0",
+    "I Z2 5"
+   ],
+   "expected": [
+    "A Z2 10",
+    "C Z2 500 5",
+    "X 1 1 0 500"
+   ]
+  },
+  {
+   "input": [
+    "R Z3 0 99999999"
+   ],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "I Z4 0"
+   ],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "R Z5 1 100"
+   ],
+   "expected": [
+    "A Z5 1",
+    "X 1 0 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "R L1 10 100 extra"
+   ],
+   "expected": [
+    "A L1 10",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "R L2 10 100",
+    "I L2 5 junk junk2"
+   ],
+   "expected": [
+    "A L2 10",
+    "C L2 500 5",
+    "X 1 1 0 500"
+   ]
+  },
+  {
+   "input": [
+    "R L3 10 100 5 5 5 5"
+   ],
+   "expected": [
+    "A L3 10",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "R L4 10 100",
+    "I L4 5"
+   ],
+   "expected": [
+    "A L4 10",
+    "C L4 500 5",
+    "X 1 1 0 500"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "R CamC3 955 99",
+    "I fff6 150",
+    "I EXTRAA 5 T1 T2",
+    "I BD4 1234567",
+    "R BoltB2 843 9000000",
+    "R CamC3 302 85",
+    "I fff6 0",
+    "R wdga1 0 8999993",
+    "I fff6 50",
+    "I fff6 0",
+    "I WDGA1 99",
+    "I CamC3 50",
+    "R CamC3 99 8999997",
+    "R N0013 99 9310478",
+    "R wdga1 1 9000000",
+    "I EEE5 0",
+    "I EEE5 0",
+    "R BD3 5 99999999",
+    "R EXTRAA 10 100 TRAILING",
+    "R fff6 771647 9999999",
+    "R DrumD4 444140 2271910",
+    "R DrumD4 709977 9000007",
+    "I WDGA1 100",
+    "R DrumD4 101 6962005",
+    "I DrumD4 0",
+    "R WdgA1 99 9000000",
+    "I wdga1 808556",
+    "I fff6 100",
+    "I SHORTY",
+    "I CamC3 1",
+    "R WDGA1 99 9000000",
+    "I WdgA1 150",
+    "I BoltB2 150",
+    "R fff6 99 5295766",
+    "R N0034 101 491147",
+    "R CamC3 101 9000000",
+    "I BoltB2 1206",
+    "R WDGA1 101 44",
+    "I fff6 0",
+    "R fff6 1 8396832",
+    "R wdga1 1 9000000",
+    "R WDGA1 579 9999999",
+    "R WdgA1 0 2209847",
+    "I WDGA1 325207",
+    "R WDGA1 1 9999999",
+    "R EXTRAA 10 100 TRAILING",
+    "I WDGA1 1",
+    "R WdgA1 101 53",
+    "R fff6 0 8592379",
+    "R wdga1 101 9999999",
+    "R CamC3 895386 86",
+    "R SHORTY 10",
+    "I BoltB2 1",
+    "I WDGA1 50",
+    "R fff6 1 8999990",
+    "I DrumD4 1",
+    "I EEE5 99",
+    "I WdgA1 0",
+    "I wdga1 99",
+    "I wdga1 50",
+    "I wdga1 114237",
+    "I WdgA1 150",
+    "R WdgA1 1 9000000",
+    "R N0063 863169 9000000",
+    "I WDGA1 150",
+    "R fff6 1 8999992",
+    "R CamC3 99 3203312",
+    "R WdgA1 558 454407",
+    "R EXTRAA 10 100 TRAILING",
+    "R WDGA1 101 65",
+    "I DrumD4 0",
+    "I CamC3 50",
+    "R WDGA1 1 8999998",
+    "I DrumD4 100",
+    "R N0074 431720 7058398",
+    "R N0075 520 9000000",
+    "R DrumD4 101 9999999",
+    "I CamC3 772",
+    "R WdgA1 99 8999999",
+    "R N0079 1 10",
+    "R wdga1 14 9000000",
+    "R DrumD4 0 9000000",
+    "I wdga1 50",
+    "R EEE5 101 1667159",
+    "R fff6 1 5507287",
+    "R DrumD4 100 27",
+    "R EEE5 99 76",
+    "R BoltB2 0 35",
+    "R BD2 12x 10",
+    "R fff6 99 27",
+    "I wdga1 50",
+    "R wdga1 100 874238",
+    "I WdgA1 100",
+    "R BoltB2 0 35",
+    "I BoltB2 150",
+    "R BoltB2 100 94",
+    "R SHORTY 10",
+    "R SHORTY 10",
+    "R WDGA1 100 9999999",
+    "I CamC3 150",
+    "R wdga1 101 9999999",
+    "I EEE5 208",
+    "R BoltB2 99 9999999",
+    "R WDGA1 795799 9000000",
+    "R BoltB2 101 9999999",
+    "I WdgA1 753572",
+    "R wdga1 485 4",
+    "I WdgA1 150",
+    "I WdgA1 0",
+    "R CamC3 1 96",
+    "I SHORTY",
+    "R wdga1 0 41",
+    "R fff6 100 7",
+    "R N0113 1 9000000",
+    "I BoltB2 1453",
+    "I CamC3 1",
+    "R DrumD4 204608 9000000",
+    "R DrumD4 326485 9999999",
+    "R N0118 101 1305640",
+    "R CamC3 99 9000000",
+    "R CamC3 99 8999997",
+    "R TOOLONGID9 5 10",
+    "R WDGA1 0 8222888",
+    "I CamC3 150",
+    "R CamC3 99 52",
+    "I WdgA1 150",
+    "R wdga1 101 9",
+    "R BoltB2 634295 9000000",
+    "R WDGA1 100 9999999",
+    "I CamC3 150",
+    "I wdga1 1",
+    "I WDGA1 1",
+    "R fff6 1 9999999",
+    "R DrumD4 100 8204980",
+    "R DrumD4 99 9999999",
+    "I WdgA1 249004",
+    "R DrumD4 100 9999999",
+    "R N0137 157709 9000000",
+    "I EEE5 89",
+    "R WdgA1 837 9000003",
+    "R BD2 12x 10",
+    "R EEE5 100 9999999",
+    "I DrumD4 321435",
+    "I WdgA1 1781",
+    "R N0144 101 9999999",
+    "NOISE line here",
+    "I WdgA1 100",
+    "R N0147 889146 3878900",
+    "R wdga1 1 7197439",
+    "R BoltB2 100 9000000",
+    "R WdgA1 101 9000000",
+    "R fff6 101 1608859",
+    "R wdga1 101 9000003",
+    "R BoltB2 99 9000000",
+    "I EEE5 1",
+    "R WdgA1 536557 22",
+    "I EEE5 1707",
+    "R N0157 737 9000000",
+    "R wdga1 135731 9999999",
+    "I wdga1 100",
+    "R EEE5 101 9000000",
+    "R TOOLONGID9 5 10",
+    "R fff6 385409 9000000",
+    "R N0163 0 8999992",
+    "R N0164 100 83",
+    "I EXTRAA 5 T1 T2",
+    "R WdgA1 99 1136650",
+    "I CamC3 746607",
+    "I BoltB2 100",
+    "I WDGA1 1150",
+    "I fff6 100",
+    "I EXTRAA 5 T1 T2",
+    "I WdgA1 100",
+    "I fff6 371",
+    "I WdgA1 100",
+    "I CamC3 100",
+    "R EEE5 100 9999999",
+    "R DrumD4 101 16",
+    "R WdgA1 374377 3557066",
+    "I BoltB2 0",
+    "I fff6 0",
+    "R EEE5 895258 9999999",
+    "I DrumD4 226905",
+    "R BoltB2 0 9999999",
+    "R wdga1 984 19",
+    "R EEE5 0 50"
+   ],
+   "expected": [
+    "A CamC3 955",
+    "E fff6 STOCK",
+    "E EXTRAA STOCK",
+    "E BD4 QTY",
+    "A BoltB2 843",
+    "A CamC3 1257",
+    "E fff6 STOCK",
+    "E WDGA1 STOCK",
+    "C CamC3 4950 1207",
+    "A CamC3 1306",
+    "A N0013 99",
+    "A WDGA1 1",
+    "E BD3 COST",
+    "A EXTRAA 10",
+    "A fff6 771647",
+    "A DrumD4 444140",
+    "A DrumD4 1154117",
+    "E WDGA1 STOCK",
+    "A DrumD4 1154218",
+    "A WDGA1 100",
+    "E WDGA1 STOCK",
+    "C fff6 900000000 771547",
+    "E SHORTY FMT",
+    "C CamC3 99 1305",
+    "A WDGA1 199",
+    "C WDGA1 1350000000 49",
+    "C BoltB2 1350000000 693",
+    "A fff6 771646",
+    "A N0034 101",
+    "A CamC3 1406",
+    "C BoltB2 6361740000 0",
+    "A WDGA1 150",
+    "A fff6 771647",
+    "A WDGA1 151",
+    "A WDGA1 730",
+    "E WDGA1 STOCK",
+    "A WDGA1 731",
+    "A EXTRAA 20",
+    "C WDGA1 9000000 730",
+    "A WDGA1 831",
+    "A WDGA1 932",
+    "A CamC3 896792",
+    "E SHORTY FMT",
+    "E BoltB2 STOCK",
+    "C WDGA1 432000088 882",
+    "A fff6 771648",
+    "C DrumD4 2271910 1154217",
+    "E EEE5 STOCK",
+    "C WDGA1 4356 783",
+    "C WDGA1 450000000 733",
+    "E WDGA1 STOCK",
+    "C WDGA1 1350000000 583",
+    "A WDGA1 584",
+    "A N0063 863169",
+    "C WDGA1 1350000000 434",
+    "A fff6 771649",
+    "A CamC3 896891",
+    "A WDGA1 992",
+    "A EXTRAA 30",
+    "A WDGA1 1093",
+    "C CamC3 4950 896841",
+    "A WDGA1 1094",
+    "C DrumD4 227191000 1154117",
+    "A N0074 431720",
+    "A N0075 520",
+    "A DrumD4 1154218",
+    "C CamC3 76428 896069",
+    "A WDGA1 1193",
+    "A N0079 1",
+    "A WDGA1 1207",
+    "C WDGA1 450000000 1157",
+    "A EEE5 101",
+    "A fff6 771650",
+    "A DrumD4 1154318",
+    "A EEE5 200",
+    "E BD2 QTY",
+    "A fff6 771749",
+    "C WDGA1 450000000 1107",
+    "A WDGA1 1207",
+    "C WDGA1 900000000 1107",
+    "E BoltB2 STOCK",
+    "A BoltB2 100",
+    "E SHORTY FMT",
+    "E SHORTY FMT",
+    "A WDGA1 1207",
+    "C CamC3 13898 895919",
+    "A WDGA1 1308",
+    "E EEE5 STOCK",
+    "A BoltB2 199",
+    "A WDGA1 797107",
+    "A BoltB2 300",
+    "E WDGA1 STOCK",
+    "A WDGA1 797592",
+    "C WDGA1 441005353 797442",
+    "A CamC3 895920",
+    "E SHORTY FMT",
+    "A fff6 771849",
+    "A N0113 1",
+    "E BoltB2 STOCK",
+    "C CamC3 85 895919",
+    "A DrumD4 1358926",
+    "A DrumD4 1685411",
+    "A N0118 101",
+    "A CamC3 896018",
+    "A CamC3 896117",
+    "E ???????? FMT",
+    "C CamC3 12750 895967",
+    "A CamC3 896066",
+    "C WDGA1 785990862 797292",
+    "A WDGA1 797393",
+    "A BoltB2 634595",
+    "A WDGA1 797493",
+    "C CamC3 603006854 895916",
+    "C WDGA1 454407 797492",
+    "C WDGA1 454407 797491",
+    "A fff6 771850",
+    "A DrumD4 1685511",
+    "A DrumD4 1685610",
+    "C WDGA1 2235127089694 548487",
+    "A DrumD4 1685710",
+    "A N0137 157709",
+    "C EEE5 148377151 111",
+    "A WDGA1 549324",
+    "E BD2 QTY",
+    "A EEE5 211",
+    "C DrumD4 730271390850 1364275",
+    "C WDGA1 16029000000 547543",
+    "A N0144 101",
+    "E line FMT",
+    "C WDGA1 900000000 547443",
+    "A N0147 889146",
+    "A WDGA1 547444",
+    "A BoltB2 634695",
+    "A WDGA1 547545",
+    "A fff6 771951",
+    "A WDGA1 547646",
+    "A BoltB2 634794",
+    "C EEE5 1667159 210",
+    "A WDGA1 1084203",
+    "E EEE5 STOCK",
+    "A N0157 737",
+    "A WDGA1 1219934",
+    "C WDGA1 900000000 1219834",
+    "A EEE5 311",
+    "E ???????? FMT",
+    "A fff6 1157360",
+    "A N0164 100",
+    "C EXTRAA 500 25",
+    "A WDGA1 1219933",
+    "C CamC3 1261196668 149309",
+    "C BoltB2 9400 634694",
+    "C WDGA1 10350000000 1218783",
+    "C fff6 900000000 1157260",
+    "C EXTRAA 500 20",
+    "C WDGA1 900000000 1218683",
+    "C fff6 3339000000 1156889",
+    "C WDGA1 900000000 1218583",
+    "C CamC3 8600 149209",
+    "A EEE5 411",
+    "A DrumD4 1364376",
+    "A WDGA1 1592960",
+    "A EEE5 895669",
+    "C DrumD4 1217254253640 1137471",
+    "A WDGA1 1593944",
+    "X 92 45 27 4235695226559"
+   ]
+  },
+  {
+   "input": [
+    "I BoltB2 713",
+    "I WdgA1 50",
+    "R wdga1 0 67",
+    "I fff6 99",
+    "R CamC3 831794 9000000",
+    "R N0005 0 1345949",
+    "R DrumD4 99 25",
+    "R WDGA1 99 9999999",
+    "R WdgA1 739 9999999",
+    "R BoltB2 1 9999999",
+    "R WDGA1 0 22",
+    "R WdgA1 946 9999999",
+    "I wdga1 50",
+    "R BoltB2 99 138351",
+    "R N0014 338428 9999999",
+    "I EEE5 99",
+    "R BD2 12x 10",
+    "I wdga1 99",
+    "I BoltB2 900937",
+    "R WdgA1 0 9999999",
+    "R CamC3 0 79",
+    "I fff6 1",
+    "I CamC3 7536",
+    "I wdga1 643163",
+    "R TOOLONGID9 5 10",
+    "I wdga1 1540",
+    "I BD4 1234567",
+    "R WDGA1 923 9999999",
+    "I DrumD4 297680",
+    "R N0029 309142 9999999",
+    "I SHORTY",
+    "I BoltB2 50",
+    "I WDGA1 51062",
+    "I BoltB2 68352",
+    "I wdga1 1310",
+    "I BD4 1234567",
+    "R CamC3 0 395427",
+    "I EEE5 921319",
+    "I BoltB2 50",
+    "R WdgA1 559 2649356",
+    "R fff6 101 9999999",
+    "R WDGA1 99 9000000",
+    "I WDGA1 100",
+    "R WDGA1 565022 9999999",
+    "I DrumD4 100",
+    "R fff6 257253 9999999",
+    "R fff6 176513 9000000",
+    "R EEE5 100 4636712",
+    "R CamC3 13 9000000",
+    "R EEE5 0 8999991",
+    "R N0050 101 9999999",
+    "R WdgA1 0 8051937",
+    "I wdga1 1603",
+    "R WDGA1 100 436071",
+    "R wdga1 732 9000000",
+    "I wdga1 99",
+    "I wdga1 729935",
+    "R fff6 0 9999999",
+    "I EEE5 150",
+    "I DrumD4 0",
+    "I WdgA1 482644",
+    "R WDGA1 99 9999999",
+    "R WdgA1 0 9000000",
+    "I SHORTY",
+    "I fff6 150",
+    "I fff6 50",
+    "R SHORTY 10",
+    "R wdga1 180805 68",
+    "R BoltB2 204073 7953638",
+    "NOISE line here",
+    "R WDGA1 0 55",
+    "R WDGA1 99 40",
+    "I CamC3 150",
+    "R EEE5 99 9000001",
+    "R BoltB2 283 8999993",
+    "R EEE5 391515 9999999",
+    "I DrumD4 100",
+    "R fff6 99 9000000",
+    "I fff6 99",
+    "R CamC3 99 9000007",
+    "R N0080 0 8999995",
+    "I fff6 1660",
+    "I EXTRAA 5 T1 T2",
+    "I CamC3 668910",
+    "R BoltB2 389 9000002",
+    "R fff6 101 52",
+    "I SHORTY",
+    "R wdga1 101 9000003",
+    "I WdgA1 50",
+    "R WdgA1 100 90",
+    "I DrumD4 99",
+    "R N0091 0 9000000",
+    "R EEE5 877181 9000000",
+    "R WDGA1 101 9000000",
+    "R BD3 5 99999999",
+    "R fff6 0 9000000",
+    "I WDGA1 1",
+    "R fff6 0 8999999",
+    "I BoltB2 99",
+    "I EEE5 100",
+    "R wdga1 0 9000007",
+    "R WDGA1 982 7622679",
+    "I BoltB2 1261",
+    "I wdga1 150",
+    "R fff6 385071 8999991",
+    "I wdga1 150",
+    "R WdgA1 1 9999999",
+    "I wdga1 299050",
+    "R WDGA1 101 5504576",
+    "R fff6 883923 38",
+    "I fff6 743524",
+    "R EXTRAA 10 100 TRAILING",
+    "R WdgA1 100 9999999",
+    "I WDGA1 411039",
+    "R DrumD4 101 8999992",
+    "I CamC3 150",
+    "R CamC3 1 58",
+    "NOISE line here",
+    "R BoltB2 763 9000000",
+    "I EEE5 559842",
+    "R EEE5 99 9000000",
+    "I EEE5 185412",
+    "I DrumD4 99",
+    "R WDGA1 99 9000000",
+    "I CamC3 150",
+    "R BoltB2 101 8999997",
+    "R N0126 99 9000004",
+    "R N0127 100 57",
+    "R EEE5 995 9999999",
+    "I DrumD4 1568",
+    "I CamC3 0",
+    "R wdga1 0 9000000",
+    "R BoltB2 1 9000000",
+    "I WDGA1 99",
+    "R EEE5 411081 5139543",
+    "R BoltB2 100 8",
+    "I WDGA1 719405",
+    "I CamC3 100",
+    "R BoltB2 101 9999999",
+    "I fff6 99",
+    "R SHORTY 10",
+    "I EEE5 100",
+    "I wdga1 241",
+    "R N0143 944588 87",
+    "R N0144 100 6",
+    "I EXTRAA 5 T1 T2",
+    "R CamC3 100 9000000",
+    "R CamC3 383648 9999999",
+    "I WdgA1 1993",
+    "R CamC3 1 9000000",
+    "R DrumD4 1 9000000",
+    "R CamC3 101 9999999",
+    "I fff6 99",
+    "R N0153 881483 9999999",
+    "R WdgA1 0 9000000",
+    "R BD3 5 99999999",
+    "R WdgA1 0 645423",
+    "I DrumD4 50",
+    "I CamC3 0",
+    "R WdgA1 101 74",
+    "R WDGA1 0 76",
+    "R DrumD4 100 2742591",
+    "R DrumD4 0 8999997",
+    "I WdgA1 100",
+    "R wdga1 1 9999999",
+    "R DrumD4 101 9000000",
+    "R EXTRAA 10 100 TRAILING",
+    "R BD2 12x 10",
+    "I DrumD4 95736",
+    "R EEE5 981 9000000",
+    "R BoltB2 1 9000003",
+    "R WDGA1 0 85",
+    "R N0172 0 70",
+    "R WdgA1 1 3109879",
+    "I WdgA1 1",
+    "R WdgA1 99 27",
+    "R fff6 101 6674334",
+    "R fff6 429 9000000",
+    "R EXTRAA 10 100 TRAILING"
+   ],
+   "expected": [
+    "E BoltB2 STOCK",
+    "E WdgA1 STOCK",
+    "E fff6 STOCK",
+    "A CamC3 831794",
+    "A DrumD4 99",
+    "A WdgA1 99",
+    "A WdgA1 838",
+    "A BoltB2 1",
+    "A WdgA1 1784",
+    "C WdgA1 450000000 1734",
+    "A BoltB2 100",
+    "A N0014 338428",
+    "E EEE5 STOCK",
+    "E BD2 QTY",
+    "C WdgA1 891000000 1635",
+    "E BoltB2 STOCK",
+    "E fff6 STOCK",
+    "C CamC3 67824000000 824258",
+    "E WdgA1 STOCK",
+    "E ???????? FMT",
+    "C WdgA1 13860000000 95",
+    "E BD4 QTY",
+    "A WdgA1 1018",
+    "E DrumD4 STOCK",
+    "A N0029 309142",
+    "E SHORTY FMT",
+    "E BoltB2 STOCK",
+    "E WdgA1 STOCK",
+    "E BoltB2 STOCK",
+    "C WdgA1 9345240000 0",
+    "E BD4 QTY",
+    "E EEE5 STOCK",
+    "E BoltB2 STOCK",
+    "A WdgA1 559",
+    "A fff6 101",
+    "A WdgA1 658",
+    "C WdgA1 264935600 558",
+    "A WdgA1 565580",
+    "C DrumD4 2475 0",
+    "A fff6 257354",
+    "A fff6 433867",
+    "A EEE5 100",
+    "A CamC3 824271",
+    "A N0050 101",
+    "E WdgA1 STOCK",
+    "A WdgA1 565680",
+    "A WdgA1 566412",
+    "C WdgA1 262286244 566313",
+    "C WdgA1 5087086375260 732",
+    "C EEE5 472944624 0",
+    "E WdgA1 STOCK",
+    "A WdgA1 831",
+    "E SHORTY FMT",
+    "C fff6 1350000000 433717",
+    "C fff6 450000000 433667",
+    "E SHORTY FMT",
+    "A WdgA1 181636",
+    "A BoltB2 204173",
+    "E line FMT",
+    "A WdgA1 181735",
+    "C CamC3 1350000000 824121",
+    "A EEE5 99",
+    "A BoltB2 204456",
+    "A EEE5 391614",
+    "E DrumD4 STOCK",
+    "A fff6 433766",
+    "C fff6 891000000 433667",
+    "A CamC3 824220",
+    "C fff6 14940000000 432007",
+    "E EXTRAA STOCK",
+    "C CamC3 6020190000000 155310",
+    "A BoltB2 204845",
+    "A fff6 432108",
+    "E SHORTY FMT",
+    "A WdgA1 181836",
+    "C WdgA1 450000000 181786",
+    "A WdgA1 181886",
+    "E DrumD4 STOCK",
+    "A EEE5 1268795",
+    "A WdgA1 181987",
+    "E BD3 COST",
+    "C WdgA1 9000000 181986",
+    "C BoltB2 22558398 204746",
+    "C EEE5 900000000 1268695",
+    "A WdgA1 182968",
+    "C BoltB2 10021722231 203485",
+    "C WdgA1 1350000000 182818",
+    "A fff6 817179",
+    "C WdgA1 1350000000 182668",
+    "A WdgA1 182669",
+    "C WdgA1 13635778478 1",
+    "A WdgA1 102",
+    "A fff6 1701102",
+    "C fff6 6690804202508 957578",
+    "A EXTRAA 10",
+    "A WdgA1 202",
+    "E WdgA1 STOCK",
+    "A DrumD4 101",
+    "C CamC3 1350000000 155160",
+    "A CamC3 155161",
+    "E line FMT",
+    "A BoltB2 204248",
+    "C EEE5 5038578000000 708853",
+    "A EEE5 708952",
+    "C EEE5 1668708000000 523540",
+    "C DrumD4 890999208 2",
+    "A WdgA1 301",
+    "C CamC3 1350000000 155011",
+    "A BoltB2 204349",
+    "A N0126 99",
+    "A N0127 100",
+    "A EEE5 524535",
+    "E DrumD4 STOCK",
+    "A BoltB2 204350",
+    "C WdgA1 548448448 202",
+    "A EEE5 935616",
+    "A BoltB2 204450",
+    "E WdgA1 STOCK",
+    "C CamC3 900000000 154911",
+    "A BoltB2 204551",
+    "C fff6 890999109 957479",
+    "E SHORTY FMT",
+    "C EEE5 900000000 935516",
+    "E WdgA1 STOCK",
+    "A N0143 944588",
+    "A N0144 100",
+    "C EXTRAA 500 5",
+    "A CamC3 155011",
+    "A CamC3 538659",
+    "E WdgA1 STOCK",
+    "A CamC3 538660",
+    "A DrumD4 3",
+    "A CamC3 538761",
+    "C fff6 890999109 957380",
+    "A N0153 881483",
+    "E BD3 COST",
+    "E DrumD4 STOCK",
+    "A WdgA1 303",
+    "A DrumD4 103",
+    "C WdgA1 889513728 203",
+    "A WdgA1 204",
+    "A DrumD4 204",
+    "A EXTRAA 15",
+    "E BD2 QTY",
+    "E DrumD4 STOCK",
+    "A EEE5 936497",
+    "A BoltB2 204552",
+    "A WdgA1 205",
+    "C WdgA1 9000000 204",
+    "A WdgA1 303",
+    "A fff6 957481",
+    "A fff6 957910",
+    "A EXTRAA 25",
+    "X 76 38 39 24654077005920"
+   ]
+  }
+ ]
+}

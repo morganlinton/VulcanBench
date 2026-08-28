@@ -21,3 +21,19 @@ rejects alike. Solve = functional 1.0. Bar: best model ≤1/3.
 | legacy-qlite-store-parity (WAVE 2 #2, STATEFUL STORE: LIFO slot reuse, first-char-raw matching, wrapping 32-bit sums) | PASS (gold=1.0, pre=0.0, det ×3; gold==binary over all fixtures + 40 sweeps) | 0.889, 0.0, 0.0 (0/3; best run found every NAMED quirk family and lost only the held-out parity corpus; zeros were overgeneralized range fixes tripping the guard) | 1.0, 1.0, 1.0 (3/3, 8-15 min/run) | **REJECT** — Opus again solved every run. Combined with matchcore, wave 2's stateful pair discriminates codex hard (1/6 solves across both) but does not touch Opus. Recycled to v1 (44 tasks) |
 | legacy-syncpeer-wire-parity (WAVE 2 #3, NETWORK PEER: live TCP daemon, cross-connection session state) | PASS (gold=1.0, pre=0.0, det ×3; gold==binary over all sessions + 12 sweeps) | 1.0, 1.0, 1.0 (3/3, ~3 min/run, early exit) | not run | **REJECT** — the wire/socket dimension added nothing: probing a TCP peer is one helper function away from probing stdin. Anatomy confirms the conjunction law by counterexample: every syncpeer quirk was single-dimension or protocol folklore (version negotiation, session reuse, ordering, truncation), so codex enumerated them instantly. Wave 2 verdict pattern: dimension of INTERACTION (wire, statefulness) does not create darkness; only unanchored conjunctions do. Recycled to v1 (45 tasks) |
 | legacy-tariffcore-binary-parity (WAVE 3 #1, CONJUNCTION-DARK: four unanchored two-dimension rules incl. rounding mode keyed on value x declaration-id trailing digits) | PASS (gold=1.0, pre=0.0, det ×3; gold==binary over all fixtures + 40 sweeps) | 1.0, 0.889, 0.667 (1/3, 11-33 min/run, its worst aggregate since the admitted settlecore) | 1.0, 1.0, 1.0 (3/3, 12-18 min/run) | **REJECT** — conjunctions bit (3-6x solve times, codex 1/3) but Opus still swept it. Post-mortem refines the law again: the OUTPUT FORMAT decomposed the inference problem — separate duty/fee/levy columns (and a "reserved" column going non-zero) let each conjunction be isolated by diffing one column, where settlecore's surcharge hid inside a composite fee. Law v4: darkness = unanchored conjunction x NON-DECOMPOSABLE observability x low probe-mass region. Next candidate: aggregate-only outputs forcing bisection. Recycled to v1 (46 tasks) |
+
+## Re-adjudication under the effort axis (2026-08-28)
+
+Morgan adopted the frontier-effort bar (charter Part 2): weaker reference
+<=1/3 solves AND stronger reference median >=600s. Re-adjudicating every
+opaque-component verdict against the recorded runs:
+
+| task | codex solves / median | opus solves / median | effort-axis verdict |
+|---|---|---|---|
+| legacy-settlecore-binary-parity | 0/3, 9.8 min | 1/3, 36.1 min | **ADMIT** (unchanged) |
+| legacy-matchcore-order-book-parity | 1/3, 8.2 min | 3/3, 12.4 min | **ADMIT** (was reject) |
+| legacy-qlite-store-parity | 0/3, 3.5 min | 3/3, 10.8 min | **ADMIT** (was reject) |
+| legacy-syncpeer-wire-parity | 3/3, 3.2 min | not run | REJECT (unchanged; stays in v1) |
+| legacy-tariffcore-binary-parity | 1/3, 11.1 min | 3/3, 13.4 min | **ADMIT** (was reject) |
+
+cii-v2 = 4 tasks; cii-v1 returns to 43.

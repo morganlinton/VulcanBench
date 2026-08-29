@@ -1,0 +1,1709 @@
+{
+ "guard_nominal": [
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -40 2",
+    "E led1 +7 3"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 60",
+    "A led1 67",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E a +1 1",
+    "E ZZ99ZZ99 +99999999 999999",
+    "E a -1 2"
+   ],
+   "expected": [
+    "A a 1",
+    "A ZZ99ZZ99 99999999",
+    "A a 0",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E b7 +500 10",
+    "E b7 -500 20",
+    "E b7 +3 21"
+   ],
+   "expected": [
+    "A b7 500",
+    "A b7 0",
+    "A b7 3",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E acct01 +05 007",
+    "E acct01 +5 8"
+   ],
+   "expected": [
+    "A acct01 5",
+    "A acct01 10",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E m1 +10 1",
+    "E m2 +20 1",
+    "E m1 -10 2",
+    "E m2 +1 3"
+   ],
+   "expected": [
+    "A m1 10",
+    "A m2 20",
+    "A m1 0",
+    "A m2 21",
+    "X 4 0 0"
+   ]
+  }
+ ],
+ "guard_replay_noop": [
+  {
+   "input": [
+    "Y"
+   ],
+   "expected": [
+    "YEND 0",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "Y",
+    "E led1 -40 2",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "Y led1 100",
+    "YEND 1",
+    "A led1 60",
+    "Y led1 60",
+    "YEND 1",
+    "X 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "E m1 +10 1",
+    "E m2 +20 1",
+    "Y",
+    "E m1 -5 2",
+    "Y",
+    "Y"
+   ],
+   "expected": [
+    "A m1 10",
+    "A m2 20",
+    "Y m1 10",
+    "Y m2 20",
+    "YEND 2",
+    "A m1 5",
+    "Y m1 5",
+    "Y m2 20",
+    "YEND 2",
+    "Y m1 5",
+    "Y m2 20",
+    "YEND 2",
+    "X 3 3 0"
+   ]
+  },
+  {
+   "input": [
+    "E q +0000001 1",
+    "E q -1 2",
+    "Y"
+   ],
+   "expected": [
+    "A q 1",
+    "A q 0",
+    "Y q 0",
+    "YEND 1",
+    "X 2 1 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "E"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E toolong99x +5 1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E AC-1 +5 1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5"
+   ],
+   "expected": [
+    "R led1 FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "YIELD"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 5 1"
+   ],
+   "expected": [
+    "R led1 DELTA",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +123456789 1"
+   ],
+   "expected": [
+    "R led1 DELTA",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 ++5 1"
+   ],
+   "expected": [
+    "R led1 DELTA",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 + 1"
+   ],
+   "expected": [
+    "R led1 DELTA",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 1234567"
+   ],
+   "expected": [
+    "R led1 SEQ",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 12x"
+   ],
+   "expected": [
+    "R led1 SEQ",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 -1"
+   ],
+   "expected": [
+    "R led1 SEQ",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 5",
+    "E led1 +9 3"
+   ],
+   "expected": [
+    "A led1 5",
+    "R led1 ORDER",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 5",
+    "E led1 +9 5"
+   ],
+   "expected": [
+    "A led1 5",
+    "R led1 ORDER",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 5",
+    "E led1 -9 6"
+   ],
+   "expected": [
+    "A led1 5",
+    "R led1 FLOOR",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 -1 1"
+   ],
+   "expected": [
+    "R led1 FLOOR",
+    "X 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty_batch": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led2 +50 1",
+    "Y",
+    "E led1 -30 2",
+    "E led1 +5 1",
+    "E BAD! +1 1",
+    "E led2 9 2",
+    "Y",
+    "? junk"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led2 50",
+    "Y led1 100",
+    "Y led2 50",
+    "YEND 2",
+    "A led1 70",
+    "R led1 ORDER",
+    "R ???????? FMT",
+    "R led2 DELTA",
+    "Y led1 70",
+    "Y led2 50",
+    "YEND 2",
+    "R ???????? FMT",
+    "X 3 2 4"
+   ]
+  }
+ ],
+ "f2p_floor_ghost": [
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -150 2",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "X 1 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -150 2",
+    "E led1 +7 3",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 FLOOR",
+    "A led1 107",
+    "Y led1 7",
+    "YEND 1",
+    "X 2 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -100 2",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 0",
+    "Y led1 0",
+    "YEND 1",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 -5 1",
+    "Y"
+   ],
+   "expected": [
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "X 0 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +10 1",
+    "E led1 -11 2",
+    "E led1 -11 3",
+    "Y"
+   ],
+   "expected": [
+    "A led1 10",
+    "R led1 FLOOR",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "X 1 1 2"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "Y led1 100",
+    "YEND 1",
+    "X 1 1 0"
+   ]
+  }
+ ],
+ "f2p_saturating_replay": [
+  {
+   "input": [
+    "E led1 +10 1",
+    "E led1 -15 2",
+    "E led1 -8 3",
+    "Y"
+   ],
+   "expected": [
+    "A led1 10",
+    "R led1 FLOOR",
+    "A led1 2",
+    "Y led1 0",
+    "YEND 1",
+    "X 2 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +10 1",
+    "E led1 -15 2",
+    "E led1 -8 3",
+    "E led1 +4 4",
+    "Y"
+   ],
+   "expected": [
+    "A led1 10",
+    "R led1 FLOOR",
+    "A led1 2",
+    "A led1 6",
+    "Y led1 4",
+    "YEND 1",
+    "X 3 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E s +20 1",
+    "E s -30 2",
+    "E s -19 3",
+    "E s -1 4",
+    "Y"
+   ],
+   "expected": [
+    "A s 20",
+    "R s FLOOR",
+    "A s 1",
+    "A s 0",
+    "Y s 0",
+    "YEND 1",
+    "X 3 1 1"
+   ]
+  }
+ ],
+ "f2p_post_replay_state": [
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -150 2",
+    "Y",
+    "E led1 -60 3"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "R led1 FLOOR",
+    "X 1 1 2"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -150 2",
+    "Y",
+    "E led1 -60 3",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "X 1 2 2"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 -150 2",
+    "Y",
+    "E led1 +1 3",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "A led1 1",
+    "Y led1 1",
+    "YEND 1",
+    "X 2 2 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +9 1",
+    "Y",
+    "E led1 -9 2"
+   ],
+   "expected": [
+    "A led1 9",
+    "Y led1 9",
+    "YEND 1",
+    "A led1 0",
+    "X 2 1 0"
+   ]
+  }
+ ],
+ "f2p_idempotent_redelivery": [
+  {
+   "input": [
+    "E led1 +100 5",
+    "E led1 +100 5"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 100",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 5",
+    "E led1 +100 5",
+    "E led1 +1 6"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 100",
+    "A led1 101",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 5",
+    "E led1 +99 5"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 ORDER",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 5",
+    "E led1 +100 4"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 ORDER",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 5",
+    "E led1 +05 5"
+   ],
+   "expected": [
+    "A led1 5",
+    "A led1 5",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 5",
+    "E led1 +1 6",
+    "E led1 +100 5"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 101",
+    "R led1 ORDER",
+    "X 2 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 5",
+    "E led1 +100 5",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 100",
+    "Y led1 100",
+    "YEND 1",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 -0 1",
+    "E led1 +0 1"
+   ],
+   "expected": [
+    "A led1 0",
+    "A led1 0",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "f2p_zero_delta": [
+  {
+   "input": [
+    "E led1 +0 1"
+   ],
+   "expected": [
+    "A led1 0",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 -0 1"
+   ],
+   "expected": [
+    "A led1 0",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +0 1",
+    "E led1 +7 2",
+    "Y"
+   ],
+   "expected": [
+    "A led1 0",
+    "A led1 7",
+    "Y led1 7",
+    "YEND 1",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E z +0 1",
+    "E a +5 1",
+    "Y"
+   ],
+   "expected": [
+    "A z 0",
+    "A a 5",
+    "Y z 0",
+    "Y a 5",
+    "YEND 2",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +0 1x"
+   ],
+   "expected": [
+    "R led1 SEQ",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +1 1"
+   ],
+   "expected": [
+    "A led1 1",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_case_folding": [
+  {
+   "input": [
+    "E Led1 +100 1",
+    "E LED1 +50 2"
+   ],
+   "expected": [
+    "A Led1 100",
+    "A Led1 150",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E Led1 +100 1",
+    "E LED1 +50 2",
+    "Y"
+   ],
+   "expected": [
+    "A Led1 100",
+    "A Led1 150",
+    "Y Led1 150",
+    "YEND 1",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "E LED1 -150 2",
+    "Y"
+   ],
+   "expected": [
+    "A led1 100",
+    "R led1 FLOOR",
+    "Y led1 0",
+    "YEND 1",
+    "X 1 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E Led1 +100 5",
+    "E lEd1 +100 5"
+   ],
+   "expected": [
+    "A Led1 100",
+    "A Led1 100",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E AcctX +5 1",
+    "E acctx +5 1",
+    "E ACCTX +2 2",
+    "Y"
+   ],
+   "expected": [
+    "A AcctX 5",
+    "A AcctX 5",
+    "A AcctX 7",
+    "Y AcctX 7",
+    "YEND 1",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +100 1",
+    "E led1 +50 2"
+   ],
+   "expected": [
+    "A led1 100",
+    "A led1 150",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "f2p_replay_ordering": [
+  {
+   "input": [
+    "E ghost -5 1",
+    "E led1 +10 1",
+    "Y"
+   ],
+   "expected": [
+    "R ghost FLOOR",
+    "A led1 10",
+    "Y ghost 0",
+    "Y led1 10",
+    "YEND 2",
+    "X 1 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E a1 +10 1",
+    "E b2 -3 1",
+    "E c3 +7 1",
+    "E b2 +4 2",
+    "Y"
+   ],
+   "expected": [
+    "A a1 10",
+    "R b2 FLOOR",
+    "A c3 7",
+    "A b2 4",
+    "Y a1 10",
+    "Y b2 4",
+    "Y c3 7",
+    "YEND 3",
+    "X 3 1 1"
+   ]
+  },
+  {
+   "input": [
+    "E a1 +10 1",
+    "E b2 -3 1",
+    "E c3 +7 1",
+    "Y",
+    "E b2 +4 2",
+    "Y"
+   ],
+   "expected": [
+    "A a1 10",
+    "R b2 FLOOR",
+    "A c3 7",
+    "Y a1 10",
+    "Y b2 0",
+    "Y c3 7",
+    "YEND 3",
+    "A b2 4",
+    "Y a1 10",
+    "Y b2 4",
+    "Y c3 7",
+    "YEND 3",
+    "X 3 2 1"
+   ]
+  },
+  {
+   "input": [
+    "E a1 +10 1",
+    "E b2 +3 1",
+    "E c3 +7 1",
+    "Y"
+   ],
+   "expected": [
+    "A a1 10",
+    "A b2 3",
+    "A c3 7",
+    "Y a1 10",
+    "Y b2 3",
+    "Y c3 7",
+    "YEND 3",
+    "X 3 1 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "E led1 +5 1 IGNORED"
+   ],
+   "expected": [
+    "A led1 5",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 1 a b c",
+    "E led1 +5 2 tail"
+   ],
+   "expected": [
+    "A led1 5",
+    "A led1 10",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 1",
+    "Y now please"
+   ],
+   "expected": [
+    "A led1 5",
+    "Y led1 5",
+    "YEND 1",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 1",
+    "Y "
+   ],
+   "expected": [
+    "A led1 5",
+    "Y led1 5",
+    "YEND 1",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E led1 +5 1"
+   ],
+   "expected": [
+    "A led1 5",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "E x +0 5",
+    "E toolong99 +123456789 -1",
+    "E ghost -0 10",
+    "E toolong99 -99999999 2",
+    "E toolong99 +123456789 2",
+    "E aud7 +123456789 5",
+    "E AC-1 +05 1234567",
+    "YIELD",
+    "E toolong99 ++1 1 tail tokens",
+    "E led1 +5 1",
+    "E led1",
+    "E toolong99 +99999999 9",
+    "E AUD7 -99999999 42",
+    "Y",
+    "E aud7 +123456789 10",
+    "E Led1 -0 5 a b",
+    "Y ",
+    "E ghost -99999999 1234567",
+    "E ghost -99999999 007",
+    "E aud7 +05 2",
+    "E AC-1 +05 007",
+    "E Led1 ++1 1",
+    "E toolong99 +5 5",
+    "E x +123456789 1",
+    "E Led1 ++1 007",
+    "E LED1 +5 007",
+    "E AC-1 -99999999 3",
+    "E toolong99 +123456789 -1",
+    "E aud7 5 2",
+    "E toolong99 +100 4",
+    "E ZZ99ZZ99 -99999999 007",
+    "E x + 1",
+    "Y now",
+    "E ghost -0 1x",
+    "E ghost +123456789 1x",
+    "E ZZ99ZZ99 +0 5",
+    "E LED1 +100 1x extra",
+    "E x +05 1234567",
+    "E AC-1 + 1",
+    "E aud7 ++1 9",
+    "E aud7 +100 42",
+    "E x -99999999 4",
+    "E led1 -99999999 2 a b",
+    "E Ghost -0 9",
+    "E aud7 5 3",
+    "E toolong99 -5 1 a b",
+    "E x +5 1234567",
+    "E AUD7 + 42",
+    "E ZZ99ZZ99 -99999999 999999",
+    "E Led1 ++1 3",
+    "E AUD7 -0 9 tail tokens",
+    "E AC-1 +100 999999",
+    "E LED1 -5 4",
+    "E LED1 5 5",
+    "E led1 -5 2",
+    "E aud7 +5 1x tail tokens",
+    "Y",
+    "E LED1 -150 1234567 a b",
+    "E toolong99 ++1 1",
+    "E ghost +05 1x a b",
+    "E led1 +05 007",
+    "E Ghost 5 007",
+    "E AUD7 +99999999 -1",
+    "E led1 +05 3",
+    "E toolong99 -99999999 4",
+    "E toolong99 +05 -1 tail tokens",
+    "E x + 42",
+    "E led1 +0 1234567",
+    "E toolong99 +100 5",
+    "E ZZ99ZZ99 +5 10",
+    "E led1 -99999999 007 extra",
+    "E AC-1 +123456789 1x",
+    "E ZZ99ZZ99 + 3",
+    "E Led1 ++1 2",
+    "E led1 +5 4",
+    "E aud7 +5 999999 extra",
+    "E ghost + 007 extra",
+    "E AC-1 -5 1x",
+    "E toolong99 +100 42",
+    "E led1 +5",
+    "E led1 +05 5",
+    "E Ghost +100 1",
+    "E toolong99 +0 1x tail tokens",
+    "E ghost +123456789 -1",
+    "Y",
+    "E toolong99 -5 1234567",
+    "E Ghost -99999999 1 extra",
+    "E AC-1 +5 -1",
+    "E Ghost +05 2",
+    "E AC-1 -5 -1",
+    "E AUD7 +99999999 4",
+    "E AC-1 5 -1",
+    "E Ghost -0 10",
+    "Y ",
+    "E toolong99 +5 1234567",
+    "E Ghost -0 1234567",
+    "E ghost +100 4",
+    "E Ghost ++1 3",
+    "E AUD7 -150 1234567",
+    "E ZZ99ZZ99 +100 3",
+    "E led1 +5",
+    "E AC-1 -99999999 007",
+    "Y",
+    "E toolong99 +05 1",
+    "E AUD7 +5 5",
+    "E ghost +5 -1",
+    "E Led1 -150 4",
+    "E ZZ99ZZ99 -99999999 1x",
+    "E Ghost -0 1234567",
+    "E Led1 -5 5",
+    "E toolong99 +100 -1",
+    "E toolong99 +99999999 1",
+    "E toolong99 -0 007",
+    "E ZZ99ZZ99 + 1",
+    "E ZZ99ZZ99 -5 5",
+    "Y",
+    "E ZZ99ZZ99 -0 1234567",
+    "E aud7 -99999999 007 tail tokens",
+    "E AUD7 +05 5",
+    "E ZZ99ZZ99 -150 9 tail tokens",
+    "E LED1 +100 5",
+    "E LED1 -0 1",
+    "E toolong99 +0 1x",
+    "E x +05 2",
+    "E x +99999999 1",
+    "E Led1 -150 3",
+    "E",
+    "E toolong99 -150 10",
+    "E x +5 3",
+    "E ZZ99ZZ99 +0 4",
+    "E ZZ99ZZ99 -5 42",
+    "E ghost -0 1234567",
+    "E Ghost +99999999 9 extra",
+    "Y",
+    "E Led1 +5 9",
+    "E toolong99 +123456789 999999 tail tokens",
+    "E ghost ++1 007",
+    "E ghost +5 1234567 tail tokens",
+    "E led1 +123456789 4",
+    "Y",
+    "E ZZ99ZZ99 +5 1x",
+    "Y now",
+    "E aud7 ++1 4",
+    "E toolong99 +0 999999",
+    "E led1 +100 1234567 tail tokens",
+    "YIELD",
+    "E Led1 +99999999 1",
+    "E led1 +0 007",
+    "Y",
+    "E LED1 ++1 4",
+    "E toolong99 -0 42 tail tokens",
+    "E x +100 4",
+    "E AUD7 + 1x",
+    "E x 5 5",
+    "Y ",
+    "Y"
+   ],
+   "expected": [
+    "A x 0",
+    "R ???????? FMT",
+    "A ghost 0",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R aud7 DELTA",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "A led1 5",
+    "R led1 FMT",
+    "R ???????? FMT",
+    "R AUD7 FLOOR",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 5",
+    "Y AUD7 0",
+    "YEND 4",
+    "R aud7 DELTA",
+    "A led1 5",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 5",
+    "Y AUD7 0",
+    "YEND 4",
+    "R ghost SEQ",
+    "R ghost ORDER",
+    "A AUD7 5",
+    "R ???????? FMT",
+    "R Led1 DELTA",
+    "R ???????? FMT",
+    "R x DELTA",
+    "R Led1 DELTA",
+    "A led1 10",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R aud7 DELTA",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 FLOOR",
+    "R x DELTA",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 5",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "R ghost SEQ",
+    "R ghost DELTA",
+    "A ZZ99ZZ99 0",
+    "R LED1 SEQ",
+    "R x SEQ",
+    "R ???????? FMT",
+    "R aud7 DELTA",
+    "A AUD7 105",
+    "R x ORDER",
+    "R led1 ORDER",
+    "R ghost ORDER",
+    "R aud7 DELTA",
+    "R ???????? FMT",
+    "R x SEQ",
+    "R AUD7 DELTA",
+    "R ZZ99ZZ99 FLOOR",
+    "R Led1 DELTA",
+    "R AUD7 ORDER",
+    "R ???????? FMT",
+    "R led1 ORDER",
+    "R LED1 DELTA",
+    "R led1 ORDER",
+    "R aud7 SEQ",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 105",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "R LED1 SEQ",
+    "R ???????? FMT",
+    "R ghost SEQ",
+    "A led1 10",
+    "R Ghost DELTA",
+    "R AUD7 SEQ",
+    "R led1 ORDER",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R x DELTA",
+    "R led1 SEQ",
+    "R ???????? FMT",
+    "A ZZ99ZZ99 5",
+    "R led1 ORDER",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 DELTA",
+    "R Led1 DELTA",
+    "R led1 ORDER",
+    "A AUD7 110",
+    "R ghost DELTA",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R led1 FMT",
+    "R led1 ORDER",
+    "R ghost ORDER",
+    "R ???????? FMT",
+    "R ghost DELTA",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 5",
+    "YEND 5",
+    "R ???????? FMT",
+    "R ghost ORDER",
+    "R ???????? FMT",
+    "R ghost ORDER",
+    "R ???????? FMT",
+    "R AUD7 ORDER",
+    "R ???????? FMT",
+    "A ghost 0",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 5",
+    "YEND 5",
+    "R ???????? FMT",
+    "R Ghost SEQ",
+    "R ghost ORDER",
+    "R Ghost DELTA",
+    "R AUD7 SEQ",
+    "R ZZ99ZZ99 ORDER",
+    "R led1 FMT",
+    "R ???????? FMT",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 5",
+    "YEND 5",
+    "R ???????? FMT",
+    "R AUD7 ORDER",
+    "R ghost SEQ",
+    "R led1 ORDER",
+    "R ZZ99ZZ99 SEQ",
+    "R Ghost SEQ",
+    "R led1 ORDER",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 DELTA",
+    "R ZZ99ZZ99 ORDER",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 5",
+    "YEND 5",
+    "R ZZ99ZZ99 SEQ",
+    "R AUD7 ORDER",
+    "R AUD7 ORDER",
+    "R ZZ99ZZ99 ORDER",
+    "R led1 ORDER",
+    "R led1 ORDER",
+    "R ???????? FMT",
+    "R x ORDER",
+    "R x ORDER",
+    "R led1 ORDER",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R x ORDER",
+    "R ZZ99ZZ99 ORDER",
+    "A ZZ99ZZ99 0",
+    "R ghost SEQ",
+    "R ghost ORDER",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 10",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "A led1 15",
+    "R ???????? FMT",
+    "R ghost DELTA",
+    "R ghost SEQ",
+    "R led1 DELTA",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 15",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "R ZZ99ZZ99 SEQ",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 15",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "R aud7 DELTA",
+    "R ???????? FMT",
+    "R led1 SEQ",
+    "R ???????? FMT",
+    "R led1 ORDER",
+    "R led1 ORDER",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 15",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "R LED1 DELTA",
+    "R ???????? FMT",
+    "R x ORDER",
+    "R AUD7 DELTA",
+    "R x DELTA",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 15",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "Y x 0",
+    "Y ghost 0",
+    "Y led1 15",
+    "Y AUD7 110",
+    "Y ZZ99ZZ99 0",
+    "YEND 5",
+    "X 14 14 128"
+   ]
+  },
+  {
+   "input": [
+    "E AUD7 -99999999 10",
+    "E AC-1 +05 2",
+    "E AUD7 +0 1x",
+    "E AUD7 +5 -1",
+    "E AUD7 -0 1234567",
+    "E aud7 -0 4",
+    "E x -99999999 007",
+    "E",
+    "E ZZ99ZZ99 +99999999 999999",
+    "E aud7 +100 42",
+    "E AUD7 + 4",
+    "E Led1 +5 1x",
+    "E led1 ++1 10",
+    "E ghost ++1 007",
+    "E aud7 +123456789 1",
+    "E ghost 5 5 tail tokens",
+    "Y now",
+    "E LED1 +100 007",
+    "E Ghost +99999999 1x",
+    "E Ghost + 9",
+    "E Led1 + 1234567",
+    "E LED1 +99999999 1x",
+    "Y",
+    "E ZZ99ZZ99 +05 1x",
+    "E toolong99 +99999999 4",
+    "E x -150 1234567",
+    "E AC-1 -0 42",
+    "E x +05 9 tail tokens",
+    "E ghost ++1 3",
+    "E led1 5 4",
+    "E x +100 -1",
+    "E aud7 +99999999 42 tail tokens",
+    "E ZZ99ZZ99 +5 10",
+    "E Ghost -150 1",
+    "E ZZ99ZZ99 -150 5 extra",
+    "E AC-1 -99999999 10",
+    "E ZZ99ZZ99 -99999999 1x",
+    "E ZZ99ZZ99 +100 10",
+    "Y now",
+    "E toolong99 +99999999 -1",
+    "E ZZ99ZZ99 +100 1234567",
+    "E led1",
+    "E LED1 + 9",
+    "E AUD7 +5 -1",
+    "Y",
+    "E Ghost +123456789 10",
+    "E Ghost +123456789 3",
+    "E Led1 -99999999 10",
+    "E aud7 +123456789 007",
+    "Y",
+    "E x -150 1",
+    "E toolong99 +05 9",
+    "E AUD7 -0 999999",
+    "E LED1 5 10",
+    "E aud7 5 007",
+    "E Led1 + 4",
+    "E Led1 -150 5",
+    "E ZZ99ZZ99 -0 5 tail tokens",
+    "Y",
+    "E aud7 +123456789 2",
+    "E LED1 -150 42",
+    "E aud7 +99999999 5",
+    "Y ",
+    "E ZZ99ZZ99 -5 2",
+    "E AC-1 +99999999 -1",
+    "E ZZ99ZZ99 -0 999999",
+    "E AUD7 -0 9",
+    "E ZZ99ZZ99 +100 -1",
+    "E x +05 1234567",
+    "E toolong99 -5 4",
+    "E ghost 5 42",
+    "E AUD7 +123456789 1",
+    "E LED1 -99999999 007 tail tokens",
+    "E ZZ99ZZ99 -5 999999",
+    "E ghost +123456789 4",
+    "E toolong99 -5 999999",
+    "E ghost -5 1234567",
+    "E ZZ99ZZ99 5 2",
+    "Y now",
+    "E ghost +05 9",
+    "E led1 + 007",
+    "E AUD7 +05 007",
+    "E ghost 5 1234567",
+    "E Led1 -99999999 007",
+    "E LED1 +100 4 extra",
+    "E led1 -5 1 a b",
+    "E LED1 +0 007",
+    "E aud7 -5 1234567",
+    "E Ghost -99999999 42",
+    "E led1 +100 10 tail tokens",
+    "E aud7 -150 9",
+    "E x +0 999999",
+    "E Ghost -150 3",
+    "E Led1 +5 10",
+    "E led1 +0 1",
+    "E LED1 -5 1234567",
+    "E aud7 +100 5",
+    "E led1 5 3",
+    "E x +5 999999",
+    "E x +99999999 1234567",
+    "E AC-1 -0 -1",
+    "E x +5 4",
+    "E ZZ99ZZ99 -5 1",
+    "E",
+    "E x -150 9",
+    "E aud7 + 1",
+    "Q junk",
+    "E ZZ99ZZ99 +99999999 42",
+    "E AC-1 -99999999 5",
+    "Y",
+    "E Led1 +100 42",
+    "E LED1 +0 007 extra",
+    "E LED1 -99999999 1x",
+    "E toolong99 5 1",
+    "Y",
+    "E LED1 +0 4 a b",
+    "E led1 -99999999 2",
+    "E x +05 2",
+    "E ZZ99ZZ99 +05 1x",
+    "E ZZ99ZZ99 -150 999999",
+    "E aud7 -0 4",
+    "E Ghost +99999999 42",
+    "Y",
+    "E",
+    "E Ghost +100 1x",
+    "E LED1 5 42",
+    "E ghost -5 1x tail tokens",
+    "Y ",
+    "E toolong99 +05 4",
+    "E LED1 + 9",
+    "E ZZ99ZZ99 5 1234567",
+    "E LED1 +05 1x",
+    "E AUD7 +99999999 007",
+    "E ghost +99999999 1234567",
+    "E x -0 3",
+    "E AUD7 +123456789 007",
+    "E aud7 +123456789 1x",
+    "E Led1 +05 007",
+    "E LED1 ++1 1",
+    "Y",
+    "YIELD",
+    "E AC-1 +05 1234567",
+    "E Ghost -5 2",
+    "E led1 -5 1 tail tokens",
+    "E Ghost 5 1x",
+    "E aud7 +99999999 007",
+    "E Ghost +0 1234567 tail tokens",
+    "E Ghost -5 5",
+    "E LED1 +05 2",
+    "E LED1 -0 9",
+    "E toolong99 + 3",
+    "E LED1 -0 1",
+    "E Ghost -0 007 a b",
+    "E x -5 4",
+    "E ZZ99ZZ99 +0 -1",
+    "E ZZ99ZZ99 -99999999 999999",
+    "E Led1 ++1 2",
+    "E x -0 10",
+    "E ghost -5 5",
+    "E AUD7 -0 1",
+    "Y"
+   ],
+   "expected": [
+    "R AUD7 FLOOR",
+    "R ???????? FMT",
+    "R AUD7 SEQ",
+    "R AUD7 SEQ",
+    "R AUD7 SEQ",
+    "A AUD7 0",
+    "R x FLOOR",
+    "R ???????? FMT",
+    "A ZZ99ZZ99 99999999",
+    "A AUD7 100",
+    "R AUD7 DELTA",
+    "R Led1 SEQ",
+    "R led1 DELTA",
+    "R ghost DELTA",
+    "R aud7 DELTA",
+    "R ghost DELTA",
+    "Y AUD7 100",
+    "Y x 0",
+    "Y ZZ99ZZ99 99999999",
+    "YEND 3",
+    "A LED1 100",
+    "R Ghost SEQ",
+    "R Ghost DELTA",
+    "R Led1 DELTA",
+    "R LED1 SEQ",
+    "Y AUD7 100",
+    "Y x 0",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 100",
+    "YEND 4",
+    "R ZZ99ZZ99 SEQ",
+    "R ???????? FMT",
+    "R x SEQ",
+    "R ???????? FMT",
+    "A x 5",
+    "R ghost DELTA",
+    "R led1 DELTA",
+    "R x SEQ",
+    "R AUD7 ORDER",
+    "R ZZ99ZZ99 ORDER",
+    "R Ghost FLOOR",
+    "R ZZ99ZZ99 ORDER",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 SEQ",
+    "R ZZ99ZZ99 ORDER",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 100",
+    "Y Ghost 0",
+    "YEND 5",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 SEQ",
+    "R led1 FMT",
+    "R LED1 DELTA",
+    "R AUD7 SEQ",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 100",
+    "Y Ghost 0",
+    "YEND 5",
+    "R Ghost DELTA",
+    "R Ghost DELTA",
+    "R LED1 FLOOR",
+    "R aud7 DELTA",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 0",
+    "Y Ghost 0",
+    "YEND 5",
+    "R x ORDER",
+    "R ???????? FMT",
+    "A AUD7 100",
+    "R LED1 DELTA",
+    "R aud7 DELTA",
+    "R Led1 DELTA",
+    "R LED1 ORDER",
+    "R ZZ99ZZ99 ORDER",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 0",
+    "Y Ghost 0",
+    "YEND 5",
+    "R aud7 DELTA",
+    "R LED1 FLOOR",
+    "R AUD7 ORDER",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 0",
+    "Y Ghost 0",
+    "YEND 5",
+    "R ZZ99ZZ99 ORDER",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 ORDER",
+    "R AUD7 ORDER",
+    "R ZZ99ZZ99 SEQ",
+    "R x SEQ",
+    "R ???????? FMT",
+    "R ghost DELTA",
+    "R AUD7 DELTA",
+    "R LED1 ORDER",
+    "R ZZ99ZZ99 ORDER",
+    "R ghost DELTA",
+    "R ???????? FMT",
+    "R ghost SEQ",
+    "R ZZ99ZZ99 DELTA",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 0",
+    "Y Ghost 0",
+    "YEND 5",
+    "A Ghost 5",
+    "R led1 DELTA",
+    "R AUD7 ORDER",
+    "R ghost DELTA",
+    "R LED1 ORDER",
+    "R LED1 ORDER",
+    "R LED1 ORDER",
+    "R LED1 ORDER",
+    "R aud7 SEQ",
+    "R Ghost FLOOR",
+    "A LED1 100",
+    "R AUD7 ORDER",
+    "A x 5",
+    "R Ghost ORDER",
+    "R LED1 ORDER",
+    "R LED1 ORDER",
+    "R LED1 SEQ",
+    "R AUD7 ORDER",
+    "R led1 DELTA",
+    "R x ORDER",
+    "R x SEQ",
+    "R ???????? FMT",
+    "R x ORDER",
+    "R ZZ99ZZ99 ORDER",
+    "R ???????? FMT",
+    "R x ORDER",
+    "R aud7 DELTA",
+    "R ???????? FMT",
+    "R ZZ99ZZ99 ORDER",
+    "R ???????? FMT",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 100",
+    "Y Ghost 0",
+    "YEND 5",
+    "A LED1 200",
+    "R LED1 ORDER",
+    "R LED1 SEQ",
+    "R ???????? FMT",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 200",
+    "Y Ghost 0",
+    "YEND 5",
+    "R LED1 ORDER",
+    "R LED1 ORDER",
+    "R x ORDER",
+    "R ZZ99ZZ99 SEQ",
+    "R ZZ99ZZ99 ORDER",
+    "R AUD7 ORDER",
+    "A Ghost 99999999",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 200",
+    "Y Ghost 99999999",
+    "YEND 5",
+    "R ???????? FMT",
+    "R Ghost SEQ",
+    "R LED1 DELTA",
+    "R ghost SEQ",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 200",
+    "Y Ghost 99999999",
+    "YEND 5",
+    "R ???????? FMT",
+    "R LED1 DELTA",
+    "R ZZ99ZZ99 DELTA",
+    "R LED1 SEQ",
+    "R AUD7 ORDER",
+    "R ghost SEQ",
+    "R x ORDER",
+    "R AUD7 DELTA",
+    "R aud7 DELTA",
+    "R LED1 ORDER",
+    "R LED1 DELTA",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 200",
+    "Y Ghost 99999999",
+    "YEND 5",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R Ghost ORDER",
+    "R LED1 ORDER",
+    "R Ghost DELTA",
+    "R AUD7 ORDER",
+    "R Ghost SEQ",
+    "R Ghost ORDER",
+    "R LED1 ORDER",
+    "R LED1 ORDER",
+    "R ???????? FMT",
+    "R LED1 ORDER",
+    "R Ghost ORDER",
+    "R x ORDER",
+    "R ZZ99ZZ99 SEQ",
+    "R ZZ99ZZ99 ORDER",
+    "R Led1 DELTA",
+    "R x ORDER",
+    "R Ghost ORDER",
+    "R AUD7 ORDER",
+    "Y AUD7 100",
+    "Y x 5",
+    "Y ZZ99ZZ99 99999999",
+    "Y LED1 200",
+    "Y Ghost 99999999",
+    "YEND 5",
+    "X 11 14 136"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,78 @@
+{
+  "id": "legacy-foldcore-binary-parity",
+  "category": "bugfix",
+  "languages": [
+    "python"
+  ],
+  "difficulty": "veryhard",
+  "task_complexity": "localized",
+  "created": "2026-08-29",
+  "repo_scale": "micro",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "decontamination_notes": "cii-v2 OPAQUE-COMPONENT WAVE (PATH-ASYMMETRIC IMPOSITION ENGINE): stripped legacy print-shop booklet imposition engine (macOS-arm64 + linux-amd64, C source withheld in builder/), drifted written spec, naive Python base implemented faithfully FROM THE SPEC. Built per the design law from the 23 gated experiments, mechanism-name test included: the core asymmetry is arbitrary legacy business logic (a patch-fold table from a service bulletin) with no textbook name, and difficulty is path asymmetry x unanchored stateful mechanics x order-and-composite-only outputs: nothing about the fold machinery is ever printed, the only observables are SHEET order, GEND counts, and the trailer. Quirk inventory (all verified divergent from the naive base): the FIRST/full imposition uses the documented fold (p8,p1,p2,p7)/(p6,p3,p4,p5) but RE-IMPOSITION after any INSERT (not append) PATCHES: only signatures containing or after the earliest insertion point are refolded, and refolded signatures use a rotated slot order (p8,p7,p1,p2)/(p6,p5,p3,p4), earlier signatures keeping their cached sheets (spec: recompute identically from current order); the earliest-insertion-point watermark is shared by all inserts between two Gs (minimum index wins) and clears at each G, so an extra G in the middle changes every later layout (stateful, unanchored); documents whose page count is congruent to 2 mod 8 at impose time get a BLANK leaf (two '-' slots) prepended to the final signature before folding (dark arithmetic conjunction, fires even on append-only jobs); appends made between an insert and the next G join the patched region regardless of position (pages beyond the last-imposed count always patch), where the naive folds them documented; inserting after the LAST page is treated as an append and sets NO watermark, so a following G full-refolds documented, diverging from the same session with a middle insert; page-id case folding with first-seen spelling echoed in SHEET lines, insert anchors folding too and DUP detection case-folded (naive case-sensitive); lenient trailing tokens on P/I/G with the '????????' FMT echo. Validation order FMT, WHERE, DUP (anchor '0' always the front, skipping WHERE). Guard construction was constrained by the quirks themselves: guards contain only append-only imposition or inserts confined to before the first G (where the engine folds documented), page counts never 2 mod 8 at any G, same-case ids, exact token counts, and reject lanes where both implementations agree. Build gate: gold==binary on all 78 fixture batches plus 40 random adversarial parity sweeps (sweep sessions mix fresh and duplicate ids, case-variant anchors, front/middle/after-last inserts, and interleaved Gs to guarantee patch, watermark-sharing, blank-leaf, inheritance, and case activity), naive divergence per f2p family, naive agreement on every guard batch; the linux-amd64 binary was separately verified against the full 78-batch corpus under docker. Grading never executes the binary; hidden tests quarantine legacy/ for the session so a replacement that shells out to it fails. Fully deterministic (static fixtures, no wall clock, no randomness in the engine). Graded skill: experimental characterization of a stateful black box whose internal paths diverge invisibly, via constructed insert-then-impose probe sessions read back through sheet order and composite counts alone.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "patch_fold",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_patch_fold -q"
+      },
+      {
+        "name": "watermark_share",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_watermark_share -q"
+      },
+      {
+        "name": "creep_blank",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_creep_blank -q"
+      },
+      {
+        "name": "append_inherit",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_append_inherit -q"
+      },
+      {
+        "name": "after_last",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_after_last -q"
+      },
+      {
+        "name": "case_dup",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_case_dup -q"
+      },
+      {
+        "name": "lenient",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_lenient -q"
+      },
+      {
+        "name": "full_corpus_parity",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider oss_tests.py::test_full_corpus_parity -q"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "append_impose",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_append_impose -q"
+      },
+      {
+        "name": "reimpose",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_reimpose -q"
+      },
+      {
+        "name": "rejects",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_rejects -q"
+      },
+      {
+        "name": "padding",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_padding -q"
+      },
+      {
+        "name": "trailer_counts",
+        "cmd": "PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider reg_tests.py::test_trailer_counts -q"
+      }
+    ]
+  },
+  "test_timeout_s": 600,
+  "agent_hints": {
+    "suggested_max_steps": 270,
+    "suggested_timeout_s": 5400
+  }
+}

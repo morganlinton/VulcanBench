@@ -94,3 +94,32 @@ The gate is relative to the frontier at admission time (models above, as of
 2026-08). Record gate results with model IDs and dates. When the frontier
 moves, the suite's difficulty claim is re-established by re-measurement, not
 assumed.
+
+## Budgets and timing (adopted 2026-08-28)
+
+How the field handles the clock, studied before adopting this policy:
+Terminal-Bench sets per-task timeouts sized to realistic execution time
+(task-level max_agent_timeout_sec, typically 60 minutes and up to 2 hours
+on hard tasks, with harness-level multipliers); DeepSWE uses one flat
+9000-second wall clock described as "a sanity upper bound rather than to
+shape performance," binding on 0.9% of rollouts. Neither derives
+difficulty from the clock, and our own evidence agrees (suite v3's
+uniform clocks produced timeout artifacts; Report 19 showed tightened
+effective time converts wrong answers into timeouts, measuring latency
+rather than capability).
+
+Two rules follow:
+
+1. **Calibrated sanity bounds.** Each admitted task's stamped budget is
+   3x the stronger reference's measured median from its gate runs,
+   rounded up to half hours (floor 30 minutes), recorded in
+   `budget_calibration` with `budget_hand_tuned: true`. Budgets stay
+   non-binding for capable runs, TB-style honest instead of
+   formula-slack.
+2. **Time-sliced reporting, never time-sliced running.** Difficulty by
+   the clock is reported analytically (`scripts/time_sliced.py`):
+   pass@1-within-T computed from recorded durations, always alongside the
+   full-budget score. No run is ever terminated by a slice, so the
+   measurement stays capability, and the slices show the headroom (at
+   adoption: the stronger reference scores 3.3% at the 10-minute slice
+   against 86.7% at full budget).

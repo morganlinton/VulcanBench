@@ -76,7 +76,9 @@
   },
   "test_timeout_s": 600,
   "agent_hints": {
-    "suggested_max_steps": 270,
-    "suggested_timeout_s": 5400
-  }
+    "suggested_max_steps": 360,
+    "suggested_timeout_s": 7200
+  },
+  "budget_hand_tuned": true,
+  "budget_calibration": "TB-style calibrated sanity bound, 2026-08-28: 3x the stronger reference's measured median (36.1 min over 3 gated runs), rounded up to half hours. Replaces the formula stamp of 5400s. Gate runs predate this restamp; every recorded solve fits within the calibrated budget."
 }

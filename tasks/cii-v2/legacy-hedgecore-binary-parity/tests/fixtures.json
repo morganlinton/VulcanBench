@@ -1,0 +1,1622 @@
+{
+ "guard_live_flows": [
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000",
+    "T bk1 GBPUSD B 5000 12500"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "P bk1 9250",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD S 4000 11250"
+   ],
+   "expected": [
+    "P bk1 -4500",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 10 1000",
+    "T bk1 EURUSD B 10 2000"
+   ],
+   "expected": [
+    "P bk1 1",
+    "P bk1 4",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T alpha EURUSD B 1000 20000",
+    "T beta EURUSD B 3000 10000",
+    "T alpha AUDUSD B 2000 5000"
+   ],
+   "expected": [
+    "P alpha 2000",
+    "P beta 3000",
+    "P alpha 3000",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T B1 EURUSD B 1000 10000",
+    "T b2 EURUSD B 1000 20000"
+   ],
+   "expected": [
+    "P B1 1000",
+    "P b2 2000",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "guard_reval": [
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000",
+    "T bk1 GBPUSD B 4000 12500",
+    "V EURUSD=16000,GBPUSD=12000",
+    "T bk1 GBPUSD S 1000 12000"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "P bk1 8000",
+    "P bk1 8000",
+    "P bk1 6800",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T alpha EURUSD B 1000 10000",
+    "T beta GBPUSD B 2000 20000",
+    "V EURUSD=30000"
+   ],
+   "expected": [
+    "P alpha 1000",
+    "P beta 4000",
+    "P alpha 3000",
+    "P beta 4000",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD=12345"
+   ],
+   "expected": [
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 5000 10000",
+    "V EURUSD=10000",
+    "V EURUSD=10000,GBPUSD=7"
+   ],
+   "expected": [
+    "P bk1 5000",
+    "P bk1 5000",
+    "P bk1 5000",
+    "X 1 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "T toolongid EURUSD B 1 1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bad-id EURUSD B 1 1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUS B 1 1"
+   ],
+   "expected": [
+    "R bk1 PAIR",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 eurusd B 1 1"
+   ],
+   "expected": [
+    "R bk1 PAIR",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUS1 B 1 1"
+   ],
+   "expected": [
+    "R bk1 PAIR",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD X 1 1"
+   ],
+   "expected": [
+    "R bk1 SIDE",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD BB 1 1"
+   ],
+   "expected": [
+    "R bk1 SIDE",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 123456789 1"
+   ],
+   "expected": [
+    "R bk1 AMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 12x 1"
+   ],
+   "expected": [
+    "R bk1 AMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 1 12345678"
+   ],
+   "expected": [
+    "R bk1 RATE",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 1 0"
+   ],
+   "expected": [
+    "R bk1 RATE",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 1 1x"
+   ],
+   "expected": [
+    "R bk1 RATE",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1"
+   ],
+   "expected": [
+    "R bk1 FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD"
+   ],
+   "expected": [
+    "R bk1 FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B"
+   ],
+   "expected": [
+    "R bk1 FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 1"
+   ],
+   "expected": [
+    "R bk1 FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V "
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD=1,"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD=0"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUS=1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V eurusd=1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD=12345678"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD==1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V EURUSD=1;GBPUSD=2"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000",
+    "V EURUSD=1 GBPUSD=2"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "R ???????? FMT",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "t bk1 EURUSD B 1 1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "v EURUSD=1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    ""
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "T bk1 EURUSD B 1000 10000",
+    "T beta EURUSD B 2000 20000",
+    "V EURUSD=15000",
+    "T bk1 EURUS B 1 1",
+    "T bad-id EURUSD B 1 1",
+    "V broken",
+    "Q junk",
+    "T beta EURUSD S 1000 30000"
+   ],
+   "expected": [
+    "P bk1 1000",
+    "P beta 4000",
+    "P bk1 1500",
+    "P beta 3000",
+    "R bk1 PAIR",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P beta 3000",
+    "X 3 1 4"
+   ]
+  }
+ ],
+ "f2p_reval_cent": [
+  {
+   "input": [
+    "T bk1 EURUSD B 15 15000",
+    "V EURUSD=15000"
+   ],
+   "expected": [
+    "P bk1 22",
+    "P bk1 23",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 12 12000",
+    "T bk1 GBPUSD B 7 12000",
+    "V EURUSD=12000,GBPUSD=12000"
+   ],
+   "expected": [
+    "P bk1 14",
+    "P bk1 22",
+    "P bk1 23",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 3 11000",
+    "T bk1 AUDUSD B 3 11000",
+    "T bk1 NZDUSD B 3 11000",
+    "V EURUSD=11000,AUDUSD=11000,NZDUSD=11000"
+   ],
+   "expected": [
+    "P bk1 3",
+    "P bk1 6",
+    "P bk1 9",
+    "P bk1 10",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 1000 15000",
+    "V EURUSD=15000"
+   ],
+   "expected": [
+    "P bk1 1500",
+    "P bk1 1500",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 47 5000",
+    "V EURUSD=5000"
+   ],
+   "expected": [
+    "P bk1 24",
+    "P bk1 24",
+    "X 1 1 0"
+   ]
+  }
+ ],
+ "f2p_washout": [
+  {
+   "input": [
+    "T bk1 EURUSD B 20000 10000",
+    "T bk1 EURUSD S 50000 10000"
+   ],
+   "expected": [
+    "P bk1 20000",
+    "P bk1 -29985",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD S 30000 8000",
+    "T bk1 EURUSD B 90000 8000",
+    "T bk1 GBPUSD B 4000 12500"
+   ],
+   "expected": [
+    "P bk1 -24000",
+    "P bk1 47970",
+    "P bk1 52970",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 20000 10000",
+    "T bk1 EURUSD S 50000 10000",
+    "V GBPUSD=12345"
+   ],
+   "expected": [
+    "P bk1 20000",
+    "P bk1 -29985",
+    "P bk1 -29985",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 20000 10000",
+    "T bk1 EURUSD S 50000 10000",
+    "T bk1 EURUSD B 70000 10000"
+   ],
+   "expected": [
+    "P bk1 20000",
+    "P bk1 -29985",
+    "P bk1 39980",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 20000 10000",
+    "T bk1 EURUSD S 10000 10000"
+   ],
+   "expected": [
+    "P bk1 20000",
+    "P bk1 10000",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "f2p_jpy_fixing": [
+  {
+   "input": [
+    "T bk1 USDJPY B 100 1300"
+   ],
+   "expected": [
+    "P bk1 1300",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 USDJPY B 100 1300",
+    "V USDJPY=1300",
+    "V EURUSD=15000"
+   ],
+   "expected": [
+    "P bk1 1300",
+    "P bk1 1300",
+    "P bk1 13",
+    "X 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURJPY B 50 1610",
+    "T bk1 GBPUSD B 2000 12500",
+    "V GBPUSD=12500",
+    "V EURJPY=1610,GBPUSD=12500"
+   ],
+   "expected": [
+    "P bk1 805",
+    "P bk1 3305",
+    "P bk1 2508",
+    "P bk1 3305",
+    "X 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 JPYUSD B 1000 7000",
+    "V JPYUSD=7000"
+   ],
+   "expected": [
+    "P bk1 700",
+    "P bk1 700",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 GBPUSD B 1000 12500"
+   ],
+   "expected": [
+    "P bk1 1250",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_flat_drop": [
+  {
+   "input": [
+    "T bk1 EURUSD B 30000 10000",
+    "T bk1 EURUSD S 30000 10007",
+    "T bk1 EURUSD S 30000 10000",
+    "T bk1 EURUSD B 90000 10000"
+   ],
+   "expected": [
+    "P bk1 30000",
+    "P bk1 0",
+    "P bk1 -30000",
+    "P bk1 59970",
+    "X 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 40000 9000",
+    "T bk1 EURUSD S 40000 9070",
+    "T bk1 EURUSD B 20000 9000",
+    "V GBPUSD=11111"
+   ],
+   "expected": [
+    "P bk1 36000",
+    "P bk1 0",
+    "P bk1 18000",
+    "P bk1 18000",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 10000 10000",
+    "T bk1 GBPUSD B 50000 12000",
+    "T bk1 GBPUSD S 50000 12000",
+    "T bk1 GBPUSD S 60000 12000",
+    "T bk1 GBPUSD B 180000 12000"
+   ],
+   "expected": [
+    "P bk1 10000",
+    "P bk1 70000",
+    "P bk1 10000",
+    "P bk1 -62000",
+    "P bk1 153940",
+    "X 5 0 0"
+   ]
+  }
+ ],
+ "f2p_amount_zero": [
+  {
+   "input": [
+    "T bk1 EURUSD B 0 15000",
+    "T bk1 EURUSD B 1000 10000"
+   ],
+   "expected": [
+    "P bk1 1000",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 0 15000"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 0 0"
+   ],
+   "expected": [
+    "R bk1 RATE",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 00 15000"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 1 10000"
+   ],
+   "expected": [
+    "P bk1 1",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_book_case": [
+  {
+   "input": [
+    "T Desk1 EURUSD B 1000 10000",
+    "T DESK1 EURUSD B 1000 10000",
+    "V EURUSD=10000"
+   ],
+   "expected": [
+    "P Desk1 1000",
+    "P Desk1 2000",
+    "P Desk1 2000",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa EURUSD B 2000 15000",
+    "T AA GBPUSD B 4000 12500",
+    "T bb EURUSD B 1000 10000",
+    "V EURUSD=15000,GBPUSD=12500"
+   ],
+   "expected": [
+    "P aa 3000",
+    "P aa 8000",
+    "P bb 1000",
+    "P aa 8000",
+    "P bb 1500",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T x1 EURUSD B 1000 10000",
+    "T y1 EURUSD B 1000 10000"
+   ],
+   "expected": [
+    "P x1 1000",
+    "P y1 1000",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000 extra"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000 x y z",
+    "T bk1 EURUSD B 2000 15000"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "P bk1 6000",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T bk1 EURUSD B 2000 15000",
+    "V EURUSD=15000 junk"
+   ],
+   "expected": [
+    "P bk1 3000",
+    "R ???????? FMT",
+    "X 1 0 1"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "Q noise",
+    "T hedge99 NZDUSD B 0 10007",
+    "T BK1 AUDUSD B 50000 1610",
+    "V EURJPY=10000,GBPUSD=15000,USDJPY=9002",
+    "V NZDUSD==15000",
+    "V USDJPY==9002,AUDUSD=9999999",
+    "T Desk1 JPYUSD B 0 1",
+    "T desk1 JPYUSD S 2000 10000",
+    "V EURJPY=10007,NZDUSD=1,NZDUSD=12500",
+    "T desk1 NZDUSD S 1111 1",
+    "T alpha EURUSD S 0 1610",
+    "T alpha GBPUSD S 30000 13337",
+    "T desk1 GBPUSD B 2000 1610",
+    "V GBPUSD=13337,AUDUSD=12500,EURJPY=9002,",
+    "T hedge99 EURJPY B 50000 1",
+    "V EURJPY=10000,NZDUSD=1,AUDUSD=1610",
+    "T desk1 JPYUSD B 20000 7 extra tail",
+    "t bk1 EURUSD B 1 1",
+    "V AUDUSD=1300,AUDUSD=9002,USDJPY=13337",
+    "T toolongid EURUSD B 1 1",
+    "T BK1 NZDUSD B 1111 7",
+    "T bk1 EURUSD X 1 1",
+    "T b2 AUDUSD S 2000 1",
+    "T B2 NZDUSD S 1111 9999999",
+    "V ",
+    "V JPYUSD=1300;USDJPY=10001",
+    "T bk1 EURUSD B",
+    "T BK1 USDJPY B 2000 7",
+    "T Desk1 NZDUSD S 2000 15000",
+    "T b2 USDJPY B 12345678 10000",
+    "T desk1 USDJPY S 50000 10000",
+    "T desk1 AUDUSD S 1 1",
+    "T alpha USDJPY S 2000 10007",
+    "T Desk1 EURJPY B 12345678 13337",
+    "T B2 JPYUSD S 2000 1",
+    "V EURUSD=9002,JPYUSD=10007",
+    "T b2 AUDUSD B 50000 1300 extra tail",
+    "t bk1 EURUSD B 1 1",
+    "T Desk1 USDJPY S 2000 7",
+    "V USDJPY=12500,EURJPY=1300,EURJPY=1,",
+    "T toolongid EURUSD B 1 1",
+    "T BK1 AUDUSD S 50000 10007 extra tail",
+    "t bk1 EURUSD B 1 1",
+    "T toolongid EURUSD B 1 1",
+    "T bk1 EURJPY B 12345678 7",
+    "T bk1 AUDUSD S 30000 10001",
+    "T BK1 USDJPY B 20000 1300",
+    "T bk1 GBPUSD B 2501 13337",
+    "T hedge99 NZDUSD S 20000 15000",
+    "T bk1 GBPUSD B 90000 1",
+    "T desk1 EURJPY B 50000 1300",
+    "T bk1 EURUSD B 1 0",
+    "T hedge99 EURJPY B 50000 1",
+    "V AUDUSD=10000 tail",
+    "T bk1 EURJPY B 2501 1610",
+    "T bk1 AUDUSD B 90000 1300",
+    "V GBPUSD=13337,GBPUSD=9999999,EURJPY=1300",
+    "T Desk1 NZDUSD B 20000 10000 extra tail",
+    "T hedge99 AUDUSD B 333 1",
+    "T alpha AUDUSD S 50000 1",
+    "T BK1 NZDUSD S 20000 10007 extra tail",
+    "T BK1 JPYUSD B 25 9002",
+    "T B2 EURUSD S 12345678 1610",
+    "T bk1 AUDUSD S 90000 1610",
+    "V USDJPY=1",
+    "T bk1 EURUSD X 1 1",
+    "V AUDUSD=12500,EURUSD=7,AUDUSD=1610",
+    "V JPYUSD=9002 tail",
+    "T Desk1 EURUSD B 333 1300",
+    "T bk1 USDJPY S 90000 13337",
+    "T toolongid EURUSD B 1 1",
+    "T bk1 EURUSD B",
+    "t bk1 EURUSD B 1 1",
+    "T b2 NZDUSD B 90000 9999999",
+    "T alpha NZDUSD B 2501 10007",
+    "V ",
+    "T Desk1 GBPUSD S 333 9002",
+    "T bk1 EURJPY S 25 9002",
+    "V EURJPY=15000",
+    "T desk1 EURUSD B 30000 15000",
+    "T Desk1 EURUSD S 0 9002",
+    "T hedge99 EURUSD B 2000 13337",
+    "T Desk1 EURJPY S 30000 9999999",
+    "T alpha NZDUSD S 0 13337",
+    "T hedge99 NZDUSD S 50000 10001",
+    "V ",
+    "T b2 JPYUSD S 50000 15000",
+    "T bk1 GBPUSD S 333 1610",
+    "T bk1 EURUSD B",
+    "V GBPUSD=15000",
+    "t bk1 EURUSD B 1 1",
+    "T hedge99 GBPUSD S 333 12500",
+    "T bk1 EURUSD B 1 0",
+    "T Desk1 USDJPY B 25 15000",
+    "T bk1 AUDUSD B 1 10000",
+    "t bk1 EURUSD B 1 1",
+    "V USDJPY=1",
+    "V GBPUSD=9999999,NZDUSD=12500,USDJPY=1300,",
+    "V NZDUSD=10000,EURJPY=1",
+    "T bk1 EURUSD B 1 0",
+    "T bk1 EURUSD B 1 0",
+    "T BK1 NZDUSD B 20000 1",
+    "t bk1 EURUSD B 1 1",
+    "V EURJPY=10000,EURUSD=1300",
+    "T b2 GBPUSD B 90000 10007",
+    "T hedge99 EURJPY B 20000 9002",
+    "V AUDUSD=10007",
+    "V EURUSD=1",
+    "V USDJPY=10007",
+    "T bk1 EURJPY S 0 10007",
+    "T B2 JPYUSD B 20000 1",
+    "V EURUSD==1,NZDUSD=1610,JPYUSD=1",
+    "T b2 EURUSD B 0 10001",
+    "T desk1 JPYUSD B 50000 7",
+    "T desk1 AUDUSD B 25 9002",
+    "T bk1 EURUS B 1 1",
+    "T bk1 EURJPY B 25 10007",
+    "T hedge99 EURUSD B 12345678 10007 extra tail",
+    "T alpha EURUSD B 90000 7",
+    "V GBPUSD=9999999,EURUSD=10001,AUDUSD=9002",
+    "T B2 USDJPY B 333 15000",
+    "V NZDUSD=10000,GBPUSD=10000,AUDUSD=9002",
+    "T hedge99 EURJPY S 1111 12500",
+    "T desk1 JPYUSD B 1 13337 extra tail",
+    "V NZDUSD=9002",
+    "T alpha USDJPY S 1111 15000",
+    "T toolongid EURUSD B 1 1",
+    "T toolongid EURUSD B 1 1",
+    "Q noise",
+    "T BK1 USDJPY B 25 9999999",
+    "T alpha EURJPY B 2000 10007",
+    "T alpha JPYUSD B 1111 10001 extra tail",
+    "T bk1 NZDUSD S 2000 10001",
+    "T BK1 JPYUSD S 12345678 1610",
+    "T desk1 EURJPY S 1 9999999 extra tail",
+    "T Desk1 EURUSD S 50000 10007 extra tail",
+    "V ",
+    "V GBPUSD=13337,AUDUSD=10000",
+    "T Desk1 JPYUSD B 30000 7",
+    "T BK1 USDJPY B 20000 10000",
+    "V JPYUSD=13337",
+    "T B2 EURJPY S 20000 12500 extra tail",
+    "V JPYUSD==10000",
+    "V NZDUSD=1300,EURJPY=10000",
+    "T desk1 EURJPY S 2000 9999999",
+    "T hedge99 EURJPY B 20000 10007 extra tail",
+    "V GBPUSD=1300,JPYUSD=10001,EURUSD=10",
+    "T alpha AUDUSD S 2501 9002 extra tail",
+    "T b2 EURJPY B 25 10001",
+    "V JPYUSD=10001,JPYUSD=10000",
+    "V JPYUSD=13337,USDJPY=1610 tail",
+    "V EURJPY=9002,EURUSD=12500,EURJPY=10000",
+    "V EURUSD=13337 tail",
+    "T B2 EURJPY S 12345678 9002",
+    "T bk1 EURUS B 1 1",
+    "T alpha USDJPY S 20000 1610",
+    "T Desk1 USDJPY B 25 12500",
+    "T desk1 NZDUSD S 20000 1",
+    "Q noise",
+    "T bk1 EURJPY S 50000 13337",
+    "T hedge99 USDJPY S 30000 10000",
+    "T b2 EURJPY B 333 13337",
+    "T BK1 GBPUSD B 2000 12500",
+    "V USDJPY=15000,AUDUSD=10001 tail",
+    "T bk1 NZDUSD B 2501 1610"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "P BK1 8050",
+    "P BK1 8050",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P desk1 -2000",
+    "P BK1 8050",
+    "P desk1 -2000",
+    "P desk1 -2000",
+    "P alpha -40011",
+    "P desk1 -1678",
+    "R ???????? FMT",
+    "P hedge99 500",
+    "P BK1 8050",
+    "P desk1 -1678",
+    "P alpha -40011",
+    "P hedge99 5000000",
+    "P desk1 326",
+    "R ???????? FMT",
+    "P BK1 45010",
+    "P desk1 325",
+    "P alpha -40011",
+    "P hedge99 50000",
+    "R ???????? FMT",
+    "P BK1 45011",
+    "R bk1 SIDE",
+    "P b2 0",
+    "P b2 -1111000",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R bk1 FMT",
+    "P BK1 45151",
+    "P desk1 -4340",
+    "P b2 1233456800",
+    "P desk1 -5004340",
+    "P desk1 -5004340",
+    "P alpha -240151",
+    "P desk1 1641538735",
+    "P b2 1233456800",
+    "P BK1 45012",
+    "P desk1 16429099",
+    "P alpha -42012",
+    "P hedge99 50000",
+    "P b2 11232677",
+    "P b2 1233461015",
+    "R ???????? FMT",
+    "P desk1 1646553104",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P BK1 141",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P BK1 864338",
+    "P BK1 834335",
+    "P BK1 1120195",
+    "P BK1 1123531",
+    "P hedge99 4970000",
+    "P BK1 1120204",
+    "P desk1 161153843",
+    "R bk1 RATE",
+    "P hedge99 -29000",
+    "R ???????? FMT",
+    "P BK1 199061689",
+    "P BK1 199099462",
+    "P BK1 253037948",
+    "P desk1 163157123",
+    "P alpha -30001998",
+    "P hedge99 1270000",
+    "P b2 11238893",
+    "P desk1 163175068",
+    "P hedge99 1270000",
+    "P alpha -30200142",
+    "P BK1 253302195",
+    "P BK1 253302218",
+    "P b2 1231473361",
+    "P BK1 253289633",
+    "P BK1 94082789",
+    "P desk1 3645811",
+    "P alpha -30000022",
+    "P hedge99 -17000",
+    "P b2 -2970983",
+    "R bk1 SIDE",
+    "P BK1 94082556",
+    "P desk1 3646326",
+    "P alpha -30008047",
+    "P hedge99 -16946",
+    "P b2 -1112681",
+    "R ???????? FMT",
+    "P desk1 163178231",
+    "P BK1 243937858",
+    "R ???????? FMT",
+    "R bk1 FMT",
+    "R ???????? FMT",
+    "P b2 89009489",
+    "P alpha -30005564",
+    "R ???????? FMT",
+    "P desk1 161179732",
+    "P BK1 1194992354",
+    "P BK1 1944609733",
+    "P desk1 1859388132",
+    "P alpha -30005544",
+    "P hedge99 14970054",
+    "P b2 88887266",
+    "P desk1 1859433075",
+    "P hedge99 14972721",
+    "P desk1 1236567757718",
+    "P hedge99 14932714",
+    "R ???????? FMT",
+    "P b2 88933490",
+    "P BK1 1843148479",
+    "R bk1 FMT",
+    "P BK1 18546125",
+    "P desk1 12365759651",
+    "P alpha -50547",
+    "P hedge99 82714",
+    "P b2 88811267",
+    "R ???????? FMT",
+    "P hedge99 14932298",
+    "R bk1 RATE",
+    "P desk1 1236559962987",
+    "P BK1 1843246723",
+    "R ???????? FMT",
+    "P BK1 18610934",
+    "P desk1 12365759137",
+    "P alpha -50567",
+    "P hedge99 82298",
+    "P b2 88933489",
+    "R ???????? FMT",
+    "P BK1 212861",
+    "P desk1 206553",
+    "P alpha -50549",
+    "P hedge99 -66695",
+    "P b2 11210",
+    "R bk1 RATE",
+    "R bk1 RATE",
+    "P BK1 231078",
+    "R ???????? FMT",
+    "P BK1 1234923668",
+    "P desk1 1236609140",
+    "P alpha -50549",
+    "P hedge99 9929897",
+    "P b2 -1585087",
+    "P b2 -1372801",
+    "P hedge99 10732298",
+    "P BK1 12456401",
+    "P desk1 12407017",
+    "P alpha -92534",
+    "P hedge99 38201",
+    "P b2 -1454718",
+    "P BK1 12456401",
+    "P desk1 12403077",
+    "P alpha -92534",
+    "P hedge99 37941",
+    "P b2 148986",
+    "P BK1 5651648",
+    "P desk1 7201944",
+    "P alpha -292674",
+    "P hedge99 37941",
+    "P b2 1235579748",
+    "P b2 1235657745",
+    "R ???????? FMT",
+    "P desk1 1231386101",
+    "P desk1 1231386124",
+    "R bk1 PAIR",
+    "P BK1 1228985768",
+    "P hedge99 23088638",
+    "P alpha -292611",
+    "P BK1 104429783",
+    "P desk1 14027961",
+    "P alpha -29954498",
+    "P hedge99 12054236",
+    "P b2 90139494",
+    "P b2 1929686824",
+    "P BK1 12355072",
+    "P desk1 12362628",
+    "P alpha 15499",
+    "P hedge99 12386903",
+    "P b2 6394199",
+    "P hedge99 27140005",
+    "P desk1 1231506269",
+    "P BK1 12354961",
+    "P desk1 12451588",
+    "P alpha 15249",
+    "P hedge99 12434477",
+    "P b2 6385328",
+    "P alpha -449400",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P BK1 -5561750861",
+    "P alpha -249260",
+    "P alpha -248149",
+    "P BK1 -5561752750",
+    "P BK1 -5563734250",
+    "P desk1 1236562513126",
+    "P desk1 1236562463119",
+    "R ???????? FMT",
+    "P BK1 -57507611",
+    "P desk1 12365712225",
+    "P alpha 695",
+    "P hedge99 12434399",
+    "P b2 6420152",
+    "P desk1 1236562373053",
+    "P BK1 1228995332",
+    "P BK1 -4064513",
+    "P desk1 12365752236",
+    "P alpha 1066",
+    "P hedge99 12434399",
+    "P b2 6377476",
+    "P b2 1837260110",
+    "R ???????? FMT",
+    "P BK1 1218397337",
+    "P desk1 1236631164",
+    "P alpha 197138",
+    "P hedge99 24228602",
+    "P b2 4309014",
+    "P desk1 1236362490701",
+    "P hedge99 26238324",
+    "P BK1 -64816",
+    "P desk1 12363724180",
+    "P alpha -55040",
+    "P hedge99 142524",
+    "P b2 18525923",
+    "P alpha -316285",
+    "P b2 1849930857",
+    "P BK1 -63582",
+    "P desk1 12363724170",
+    "P alpha -52302",
+    "P hedge99 142524",
+    "P b2 18525949",
+    "R ???????? FMT",
+    "P BK1 1222406139",
+    "P desk1 1236391542",
+    "P alpha 258108",
+    "P hedge99 29314687",
+    "P b2 1128675",
+    "R ???????? FMT",
+    "P b2 723352725",
+    "R bk1 PAIR",
+    "P alpha -109312",
+    "P desk1 1229949804",
+    "P desk1 1229947609",
+    "R ???????? FMT",
+    "P BK1 1623046847",
+    "P hedge99 26314688",
+    "P b2 187346080",
+    "P BK1 1623152575",
+    "R ???????? FMT",
+    "P BK1 1623152950",
+    "X 89 25 44"
+   ]
+  },
+  {
+   "input": [
+    "T b2 JPYUSD B 2501 10007",
+    "V GBPUSD=10007;USDJPY=9002;EURJPY=1",
+    "T b2 EURUSD B 2501 13337",
+    "V USDJPY=9999999,NZDUSD=10001",
+    "t bk1 EURUSD B 1 1",
+    "T alpha USDJPY S 2000 9999999",
+    "T B2 GBPUSD B 2501 1",
+    "T Desk1 AUDUSD S 50000 10007",
+    "V NZDUSD=1,AUDUSD=15000,",
+    "T bk1 AUDUSD S 25 10001 extra tail",
+    "V USDJPY=9999999,NZDUSD=10007,NZDUSD=1610",
+    "T bk1 EURUSD X 1 1",
+    "t bk1 EURUSD B 1 1",
+    "V ",
+    "T alpha EURJPY B 0 9999999",
+    "V NZDUSD=9002,EURJPY=1300",
+    "T bk1 JPYUSD S 30000 9002",
+    "T alpha EURUSD S 50000 15000",
+    "T Desk1 AUDUSD S 1 10000",
+    "T alpha USDJPY B 1 1 extra tail",
+    "T hedge99 JPYUSD B 333 13337",
+    "T desk1 EURUSD B 30000 12500",
+    "T bk1 USDJPY S 0 9999999",
+    "T B2 JPYUSD B 20000 1300",
+    "T bk1 USDJPY S 25 1300",
+    "V EURJPY=7",
+    "T desk1 EURUSD S 12345678 1300",
+    "V NZDUSD=9002,NZDUSD=1,GBPUSD=10000 tail",
+    "V EURUSD=13337",
+    "T Desk1 EURUSD S 0 12500",
+    "Q noise",
+    "V AUDUSD=1610,EURJPY=10001,NZDUSD=9002",
+    "V GBPUSD==9999999,NZDUSD=10000",
+    "V USDJPY==10001,EURUSD=1,GBPUSD=13337",
+    "T B2 EURJPY S 333 1",
+    "T bk1 USDJPY B 1 10001",
+    "t bk1 EURUSD B 1 1",
+    "V ",
+    "T B2 NZDUSD B 12345678 15000",
+    "T hedge99 EURUSD B 2501 10000",
+    "T bk1 EURJPY B 333 13337 extra tail",
+    "T bk1 EURUSD B 12345678 13337",
+    "T bk1 GBPUSD B 25 7",
+    "T B2 NZDUSD B 0 12500 extra tail",
+    "V USDJPY==1300",
+    "T b2 GBPUSD B 2501 10001",
+    "V GBPUSD=90",
+    "T hedge99 EURJPY S 0 7",
+    "T bk1 EURJPY S 30000 10000",
+    "Q noise",
+    "V EURJPY=13337,EURUSD=13337,EURJPY=10007",
+    "T BK1 USDJPY B 50000 10007",
+    "T Desk1 GBPUSD S 1 10000",
+    "V AUDUSD=15000,AUDUSD=9002",
+    "T Desk1 NZDUSD B 2501 9002",
+    "T alpha EURJPY S 90000 13337",
+    "T bk1 EURUSD B",
+    "t bk1 EURUSD B 1 1",
+    "T alpha NZDUSD B 30000 1610",
+    "T bk1 EURUSD B 1 0",
+    "V NZDUSD=13337,AUDUSD=7,NZDUSD=1",
+    "T desk1 EURUSD B 20000 12500",
+    "T b2 EURUSD B 1 9002",
+    "T bk1 EURUSD X 1 1",
+    "T bk1 EURUS B 1 1",
+    "T b2 AUDUSD S 90000 1300",
+    "T Desk1 EURUSD B 30000 1610",
+    "V JPYUSD=1300,AUDUSD=7,USDJPY=10007",
+    "V EURUSD=10001",
+    "T bk1 EURUSD B",
+    "T b2 EURJPY B 1111 7",
+    "T BK1 JPYUSD S 50000 1",
+    "V USDJPY=7,GBPUSD=9002,AUDUSD=10007",
+    "T toolongid EURUSD B 1 1",
+    "V EURJPY=12500",
+    "T Desk1 JPYUSD B 12345678 7",
+    "T B2 USDJPY S 50000 10001",
+    "T alpha USDJPY S 1111 9002 extra tail",
+    "V GBPUSD=15000,USDJPY=10000",
+    "T BK1 JPYUSD B 12345678 10001",
+    "T bk1 AUDUSD S 25 15000",
+    "T bk1 NZDUSD B 1111 10001",
+    "V AUDUSD=1300,JPYUSD=15000",
+    "T desk1 AUDUSD B 90000 15000",
+    "V AUDUSD=1300,",
+    "V EURUSD=10001,NZDUSD=7,JPYUSD=9002",
+    "T B2 NZDUSD B 0 1300",
+    "V NZDUSD=10007,EURJPY=9999999,EURJPY=1500",
+    "T b2 AUDUSD B 2501 10007",
+    "V USDJPY=9999999,EURUSD=12500 tail",
+    "T bk1 EURUSD B 1 0",
+    "T BK1 JPYUSD B 333 10007",
+    "V EURJPY=10000",
+    "T Desk1 EURUSD B 333 15000",
+    "T desk1 AUDUSD S 25 13337",
+    "T hedge99 EURUSD S 50000 9999999",
+    "T Desk1 USDJPY S 25 1610",
+    "T alpha EURUSD S 2000 1610",
+    "V EURJPY=9999999,NZDUSD=10007,AUDUSD=10001",
+    "T BK1 USDJPY B 0 10001 extra tail",
+    "T BK1 NZDUSD S 1111 13337",
+    "T hedge99 AUDUSD S 25 9999999",
+    "T B2 USDJPY B 2000 15000",
+    "T desk1 USDJPY S 1 1610",
+    "T b2 JPYUSD S 1 12500",
+    "T B2 AUDUSD B 1111 10001",
+    "V NZDUSD=1300,AUDUSD=10000",
+    "T alpha GBPUSD B 90000 9002",
+    "V ",
+    "T BK1 AUDUSD B 1111 1300",
+    "T b2 EURJPY S 90000 9999999",
+    "T alpha JPYUSD S 0 9999999",
+    "T alpha EURJPY B 20000 10007 extra tail",
+    "T b2 JPYUSD B 12345678 7",
+    "T b2 GBPUSD B 25 10001",
+    "T Desk1 JPYUSD S 20000 1610",
+    "T B2 NZDUSD B 2000 10001 extra tail",
+    "V NZDUSD=1610,AUDUSD=1,AUDUSD=1610",
+    "V USDJPY=13337,AUDUSD=15000,GBPUSD=1610",
+    "T BK1 USDJPY B 50000 10000",
+    "T b2 EURJPY S 20000 1300 extra tail",
+    "T BK1 GBPUSD S 50000 10007 extra tail",
+    "T BK1 EURUSD S 1111 9002",
+    "T desk1 JPYUSD B 333 10001",
+    "T bk1 NZDUSD S 0 1300",
+    "t bk1 EURUSD B 1 1",
+    "T desk1 NZDUSD S 2501 15000",
+    "T Desk1 AUDUSD B 12345678 12500 extra tail",
+    "T bk1 NZDUSD B 20000 9999999",
+    "T b2 GBPUSD S 90000 1300",
+    "T hedge99 EURUSD S 50000 1 extra tail",
+    "V JPYUSD=9999999,GBPUSD=10001,JPYUSD=10000 tail",
+    "T b2 GBPUSD S 0 10001",
+    "T alpha JPYUSD S 20000 7",
+    "T desk1 NZDUSD S 30000 10000",
+    "V AUDUSD=7,EURUSD=13337",
+    "T hedge99 NZDUSD B 333 1 extra tail",
+    "V ",
+    "T desk1 NZDUSD B 2501 10007",
+    "T B2 EURUSD B 25 13337",
+    "T B2 EURJPY S 20000 1610",
+    "T desk1 NZDUSD B 0 9002",
+    "T bk1 NZDUSD S 333 13337",
+    "V EURUSD=12500,NZDUSD=10007",
+    "T b2 USDJPY B 90000 10007",
+    "T alpha EURJPY B 50000 10007",
+    "T hedge99 JPYUSD B 2000 10007 extra tail",
+    "V AUDUSD=1300,USDJPY=161",
+    "T desk1 GBPUSD B 30000 13337",
+    "T BK1 GBPUSD S 333 9999999",
+    "T alpha EURJPY S 2000 1610",
+    "T Desk1 EURJPY S 0 9002 extra tail",
+    "T Desk1 NZDUSD S 20000 9999999",
+    "V USDJPY=10000,EURJPY=9999999",
+    "T bk1 EURUSD B 25 9002"
+   ],
+   "expected": [
+    "P b2 2503",
+    "R ???????? FMT",
+    "P b2 5839",
+    "P b2 5838",
+    "R ???????? FMT",
+    "P alpha -199999980",
+    "P b2 5839",
+    "P Desk1 -50035",
+    "R ???????? FMT",
+    "P bk1 -25",
+    "P b2 5838",
+    "P alpha -199999980",
+    "P Desk1 -50035",
+    "P bk1 -25",
+    "R bk1 SIDE",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P b2 5838",
+    "P alpha -2000000",
+    "P Desk1 -50035",
+    "P bk1 -25",
+    "P bk1 -27031",
+    "P alpha -200074980",
+    "P Desk1 -50001",
+    "P alpha -75020",
+    "P hedge99 444",
+    "P Desk1 -12501",
+    "P b2 6261",
+    "P bk1 -27356",
+    "P b2 6261",
+    "P alpha -75000",
+    "P Desk1 -12501",
+    "P bk1 -27034",
+    "P hedge99 444",
+    "P Desk1 -1644881",
+    "R ???????? FMT",
+    "P b2 6261",
+    "P alpha -66685",
+    "P Desk1 -16475421",
+    "P bk1 -27034",
+    "P hedge99 444",
+    "R ???????? FMT",
+    "P b2 6261",
+    "P alpha -66685",
+    "P Desk1 -16433470",
+    "P bk1 -27013",
+    "P hedge99 444",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P b2 6258",
+    "P bk1 -29410",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "P b2 18524775",
+    "P hedge99 2945",
+    "P bk1 15002",
+    "P bk1 16480433",
+    "P bk1 16480433",
+    "R ???????? FMT",
+    "P b2 18529778",
+    "P b2 18524823",
+    "P alpha -66685",
+    "P Desk1 -16433470",
+    "P bk1 16438841",
+    "P hedge99 2945",
+    "P bk1 13470804",
+    "R ???????? FMT",
+    "P b2 18491499",
+    "P alpha -66685",
+    "P Desk1 -16433470",
+    "P bk1 13469620",
+    "P hedge99 3780",
+    "P bk1 18468244",
+    "P Desk1 -16433471",
+    "P b2 18524489",
+    "P alpha -66685",
+    "P Desk1 -16470432",
+    "P bk1 16458700",
+    "P hedge99 3780",
+    "P Desk1 -16468181",
+    "P alpha -12070005",
+    "R bk1 FMT",
+    "R ???????? FMT",
+    "P alpha -12065175",
+    "R bk1 RATE",
+    "P b2 7207",
+    "P alpha -186715",
+    "P Desk1 -16425456",
+    "P bk1 16458723",
+    "P hedge99 3780",
+    "P Desk1 -15369634",
+    "P b2 -26866",
+    "R bk1 SIDE",
+    "R bk1 PAIR",
+    "P b2 -38566",
+    "P Desk1 -1974810",
+    "P b2 6061",
+    "P alpha -386755",
+    "P Desk1 -1974810",
+    "P bk1 21432941",
+    "P hedge99 3379",
+    "P b2 6311",
+    "P alpha -172035",
+    "P Desk1 -12266940",
+    "P bk1 12363336",
+    "P hedge99 2544",
+    "R bk1 FMT",
+    "P b2 6660",
+    "P bk1 14379226",
+    "P b2 -78898",
+    "P alpha -170175",
+    "P Desk1 -12316941",
+    "P bk1 12320712",
+    "P hedge99 2544",
+    "R ???????? FMT",
+    "P b2 18352",
+    "P alpha -11300003",
+    "P Desk1 -12316941",
+    "P bk1 8638562",
+    "P hedge99 2544",
+    "P Desk1 -12308300",
+    "P b2 -4982148",
+    "P alpha -11579964",
+    "P b2 -5074926",
+    "P alpha -473502",
+    "P Desk1 -12308300",
+    "P bk1 17307433",
+    "P hedge99 2544",
+    "P bk1 25896923",
+    "P bk1 25896873",
+    "P bk1 25897984",
+    "P b2 -15736",
+    "P alpha -165612",
+    "P Desk1 6245111",
+    "P bk1 30759464",
+    "P hedge99 3001",
+    "P Desk1 6311589",
+    "R ???????? FMT",
+    "P b2 -21825",
+    "P alpha -165594",
+    "P Desk1 -1093347",
+    "P bk1 23401400",
+    "P hedge99 2801",
+    "P b2 12334551",
+    "P alpha -1373094",
+    "P Desk1 -1090846",
+    "P bk1 22994590",
+    "P hedge99 2801",
+    "P b2 7308690",
+    "R ???????? FMT",
+    "R bk1 RATE",
+    "P bk1 29175249",
+    "P b2 12324820",
+    "P alpha -9023094",
+    "P Desk1 -1090846",
+    "P bk1 21705928",
+    "P hedge99 2801",
+    "P Desk1 -7221959",
+    "P Desk1 -7228625",
+    "P hedge99 -47498672",
+    "P Desk1 -7229027",
+    "P alpha -9289351",
+    "P b2 90047065",
+    "P alpha -8999980561",
+    "P Desk1 -7241963",
+    "P bk1 -2942027119",
+    "P hedge99 -47498672",
+    "P bk1 -2937080605",
+    "P hedge99 -47523672",
+    "P b2 82897064",
+    "P Desk1 -7242379",
+    "P b2 82904934",
+    "P b2 82906045",
+    "P b2 2262680",
+    "P alpha -90007573",
+    "P Desk1 -7244145",
+    "P bk1 -4995524",
+    "P hedge99 -47498697",
+    "P alpha -9000233554",
+    "R ???????? FMT",
+    "P bk1 -2937080418",
+    "P b2 -8927837967",
+    "P alpha -7239354",
+    "P b2 -8927857434",
+    "P b2 -8927859909",
+    "P Desk1 -16373706",
+    "P b2 -8917115934",
+    "P b2 -87303691",
+    "P alpha 4317",
+    "P Desk1 -16406751",
+    "P bk1 -4995303",
+    "P hedge99 -47498676",
+    "P b2 -93753343",
+    "P alpha -473882",
+    "P Desk1 -16356688",
+    "P bk1 1621407",
+    "P hedge99 -47498709",
+    "P bk1 -2932078997",
+    "P b2 -5951283",
+    "P bk1 -2932128986",
+    "P bk1 -2933363320",
+    "P Desk1 -6013878",
+    "R ???????? FMT",
+    "P Desk1 -6014281",
+    "P Desk1 9407823",
+    "P bk1 -2913363322",
+    "P b2 -5963096",
+    "P hedge99 252",
+    "R ???????? FMT",
+    "P alpha -7408747",
+    "P Desk1 9377823",
+    "P b2 1910690",
+    "P alpha -124243",
+    "P Desk1 -4052412",
+    "P bk1 19121539",
+    "P hedge99 -129735",
+    "P hedge99 -129734",
+    "R ???????? FMT",
+    "P Desk1 -4053363",
+    "P b2 -5832706",
+    "P b2 -6493294",
+    "P bk1 -2927987311",
+    "P b2 12272251",
+    "P alpha -94700",
+    "P Desk1 -3023321",
+    "P bk1 -1892019",
+    "P hedge99 -121241",
+    "P b2 14477440",
+    "P alpha -2436684",
+    "P hedge99 -119206",
+    "P b2 12392718",
+    "P alpha -45524",
+    "P Desk1 -1421863",
+    "P bk1 -1830896",
+    "P hedge99 -119209",
+    "P Desk1 -1381867",
+    "P bk1 -2989121612",
+    "P alpha -379710",
+    "P Desk1 -48853344",
+    "P b2 -12905652805",
+    "P alpha -2200331283",
+    "P Desk1 -48855904",
+    "P bk1 -2979284974",
+    "P hedge99 -119209",
+    "P bk1 -2983603080",
+    "X 88 27 28"
+   ]
+  }
+ ]
+}

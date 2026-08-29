@@ -1,0 +1,160 @@
+diff --git a/vaultcore.py b/vaultcore.py
+index 274df072..eb76ca61 100644
+--- a/vaultcore.py
++++ b/vaultcore.py
+@@ -4,9 +4,10 @@ Replaces the retired legacy binary (see ``legacy/README.md``). Reads vault
+ commands on stdin (``W`` writes a document at a format version, ``G``
+ reads a document's digest, ``M`` bulk-migrates remaining v1 documents,
+ ``C`` prints the vault checksum), writes one reply per command and an
+-``X`` trailer at EOF. Format reference: ``docs/SPEC.md`` (note the drift
+-warning at the top of that file; the legacy engine's behavior is the
+-contract).
++``X`` trailer at EOF. Format reference: ``docs/SPEC.md``, corrected
++against the engine's actual behavior wherever the two disagree (the
++engine is the contract); every deviation from the written spec is marked
++``engine:`` below.
+ """
+ 
+ from __future__ import annotations
+@@ -18,17 +19,32 @@ BODY_MAX = 20
+ DIGEST_MOD = 97
+ CHECKSUM_MOD = 1000000007
+ _WEIGHTS = (4, 9)
++# engine: the bulk sweep truncates stripped 20-char bodies to this width.
++BULK_TRUNC = 18
+ 
+ 
+ def digest(body: str) -> int:
+     """Weighted byte sum of the stored body, weights cycling 4, 9."""
+-    total = sum(ord(c) * _WEIGHTS[i % 2] for i, c in enumerate(body))
++    # engine: the first byte of the body is SKIPPED; the 4,9 weight cycle
++    # starts at the second byte (an old off-by-one in the engine).
++    total = sum(ord(c) * _WEIGHTS[i % 2] for i, c in enumerate(body[1:]))
+     return total % DIGEST_MOD
+ 
+ 
+-def migrate(body: str) -> str:
+-    """Migrate a v1 body to v2 (both the lazy read path and the bulk
+-    sweep apply the same transform)."""
++def migrate_lazy(body: str) -> str:
++    """Migrate a v1 body to v2 on the lazy (read) path: uppercase."""
++    return body.upper()
++
++
++def migrate_bulk(body: str) -> str:
++    """Migrate a v1 body to v2 on the bulk (sweep) path."""
++    # engine: the sweep also strips trailing decimal digits (an old
++    # sweep-tool bug; the strip can empty a body), then truncates to 18
++    # chars only if the stripped result is still exactly 20 chars, then
++    # uppercases.
++    body = body.rstrip("0123456789")
++    if len(body) == BODY_MAX:
++        body = body[:BULK_TRUNC]
+     return body.upper()
+ 
+ 
+@@ -44,8 +60,11 @@ class Engine:
+     """Document vault with lazy/bulk migration and batch counters."""
+ 
+     def __init__(self) -> None:
+-        # doc id -> (version, body)
+-        self.docs: dict[str, tuple[int, str]] = {}
++        # engine: doc ids fold case for identity; keyed by the folded id,
++        # keeping the first-seen spelling. Value: [spelling, version,
++        # body, dirty]; dirty marks a v1 doc rewritten at v1, which the
++        # lazy path then migrates with the BULK transform.
++        self.docs: dict[str, list] = {}
+         self.writes = 0
+         self.reads = 0
+         self.migrated = 0
+@@ -79,11 +98,12 @@ class Engine:
+         return f"X {self.writes} {self.reads} {self.migrated} {self.rejected}"
+ 
+     def _counts(self) -> tuple[int, int]:
+-        c1 = sum(1 for ver, _ in self.docs.values() if ver == 1)
++        c1 = sum(1 for rec in self.docs.values() if rec[1] == 1)
+         return c1, len(self.docs) - c1
+ 
+     def _write(self, tokens: list[str]) -> str:
+-        if len(tokens) != 4:
++        # engine: extra trailing tokens are tolerated and ignored.
++        if len(tokens) < 4:
+             return "R ???????? FMT"
+         doc, vtok, body = tokens[1], tokens[2], tokens[3]
+         if not _valid_id(doc):
+@@ -93,43 +113,57 @@ class Engine:
+         if not _valid_body(body):
+             return f"R {doc} BODY"
+         ver = int(vtok)
+-        if doc in self.docs and ver < self.docs[doc][0]:
+-            return f"R {doc} VER"  # SPEC: version downgrades are rejected
+-        self.docs[doc] = (ver, body)
++        key = doc.lower()
++        rec = self.docs.get(key)
++        if rec is None:
++            # engine: the first-seen spelling is kept.
++            self.docs[key] = [doc, ver, body, False]
++        else:
++            # engine: a v1 write over a v1 doc marks it dirty; a v2 write
++            # clears the mark; a v1 write over a v2 doc is ACCEPTED and
++            # downgrades storage (the spec's downgrade reject is not
++            # implemented), landing clean.
++            rec[3] = ver == 1 and rec[1] == 1
++            rec[1] = ver
++            rec[2] = body
+         c1, c2 = self._counts()
+         return f"OK {c1} {c2}"
+ 
+     def _read(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        # engine: extra trailing tokens are tolerated and ignored.
++        if len(tokens) < 2:
+             return "R ???????? FMT"
+         doc = tokens[1]
+         if not _valid_id(doc):
+             return "R ???????? FMT"
+-        if doc not in self.docs:
++        rec = self.docs.get(doc.lower())
++        if rec is None:
+             return "NIL"
+-        ver, body = self.docs[doc]
+-        if ver == 1:
+-            body = migrate(body)
+-            self.docs[doc] = (2, body)
++        if rec[1] == 1:
++            # engine: dirty (v1-rewritten) docs migrate on the lazy path
++            # with the BULK transform: the paths cross over.
++            rec[2] = migrate_bulk(rec[2]) if rec[3] else migrate_lazy(rec[2])
++            rec[1] = 2
++            rec[3] = False
+             self.migrated += 1
+-        return f"D {digest(body)}"
++        return f"D {digest(rec[2])}"
+ 
+     def _sweep(self, tokens: list[str]) -> str:
+-        if len(tokens) != 1:
+-            return "R ???????? FMT"
++        # engine: trailing tokens after M are tolerated and ignored.
+         count = 0
+-        for doc, (ver, body) in self.docs.items():
+-            if ver != 1:
++        for rec in self.docs.values():
++            if rec[1] != 1:
+                 continue
+-            self.docs[doc] = (2, migrate(body))
++            rec[2] = migrate_bulk(rec[2])
++            rec[1] = 2
++            rec[3] = False
+             count += 1
+         self.migrated += count
+         return f"M {count}"
+ 
+     def _checksum(self, tokens: list[str]) -> str:
+-        if len(tokens) != 1:
+-            return "R ???????? FMT"
+-        total = sum(digest(body) for _, body in self.docs.values())
++        # engine: trailing tokens after C are tolerated and ignored.
++        total = sum(digest(rec[2]) for rec in self.docs.values())
+         return f"C {total % CHECKSUM_MOD}"
+ 
+ 

@@ -1,0 +1,186 @@
+diff --git a/kilncore.py b/kilncore.py
+index b1e7d51..c117394 100644
+--- a/kilncore.py
++++ b/kilncore.py
+@@ -5,8 +5,9 @@ firing commands on stdin (``L`` registers a firing lot with a target
+ heatwork number, ``H`` applies a firing segment, ``C`` certifies the lot
+ from its segment ledger), writes one reply per command and an ``X``
+ trailer at EOF.
+-Format reference: ``docs/SPEC.md`` (note the drift warning at the top of
+-that file; the legacy engine's behavior is the contract).
++Format reference: ``docs/SPEC.md``, corrected against the engine's actual
++behavior wherever the two disagree (the engine is the contract); every
++deviation from the written spec is marked ``engine:`` below.
+ """
+ 
+ from __future__ import annotations
+@@ -16,6 +17,23 @@ import sys
+ ID_MAX = 8
+ TARGET_MIN = 100
+ NO_LOT = "????????"
++# engine: the live path adds a soak credit of segment/8 (integer floor)
++# for every segment that immediately follows a LARGER segment
++# (declining-ramp soak: heat already in the kiln keeps working).
++SOAK_DIV = 8
++# engine: certification recomputes from the ledger with a stricter soak
++# table: credit only when the predecessor is at least TWICE the segment.
++CERT_RATIO = 2
++# engine: 3 or more consecutive identical segments put the lot in
++# plateau state; further segments at that value earn half heatwork live.
++PLATEAU_RUN = 3
++# engine: lots with a target of at least 10000 whose FIRST ledger
++# segment is under 100 lose a cold-start penalty at certification.
++COLD_TARGET = 10000
++COLD_FIRST = 100
++COLD_PENALTY = 150
++# engine: H for an unknown lot auto-registers it with this target.
++WALKIN_TARGET = 1000
+ 
+ 
+ def _valid_id(token: str) -> bool:
+@@ -27,10 +45,19 @@ def _digits(token: str) -> bool:
+ 
+ 
+ class Lot:
+-    def __init__(self, target: int) -> None:
++    def __init__(self, spelling: str, target: int) -> None:
++        self.spelling = spelling
+         self.target = target
+         self.accum = 0
+         self.certified = False
++        # engine: Q1 comparator: previous segment value (0 = none/hold).
++        self.prev = 0
++        # engine: Q2 identical-run tracking and plateau state.
++        self.run_val = 0
++        self.run_count = 0
++        self.plateau = False
++        # engine: raw segment ledger, recomputed at certification.
++        self.ledger: list[int] = []
+ 
+ 
+ class Engine:
+@@ -63,11 +90,13 @@ class Engine:
+         return f"X {self.registered} {self.segments} {self.certs} {self.rejected}"
+ 
+     def _find(self, lot: str) -> Lot | None:
+-        return self.lots.get(lot)
++        # engine: lot ids fold case; first-seen spelling wins.
++        return self.lots.get(lot.lower())
+ 
+     def _register(self, tokens: list[str]) -> str:
+         lot = tokens[1] if len(tokens) >= 2 else NO_LOT
+-        if len(tokens) != 3:
++        # engine: extra trailing tokens are tolerated and ignored.
++        if len(tokens) < 3:
+             return f"N {lot} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {lot} FMT"
+@@ -80,31 +109,66 @@ class Engine:
+             return f"N {lot} TARGET"
+         if self._find(tokens[1]) is not None:
+             return f"N {lot} DUP"
+-        self.lots[tokens[1]] = Lot(int(target_tok))
++        self.lots[tokens[1].lower()] = Lot(tokens[1], int(target_tok))
+         self.registered += 1
+         return f"OK {len(self.lots)}"
+ 
++    def _apply(self, k: Lot, seg: int) -> None:
++        k.ledger.append(seg)
++        if seg == 0:
++            # engine: a 0 segment is a hold: it adds nothing, resets the
++            # identical-run counter and plateau, and sets the comparator
++            # to 0 so the next segment never earns a soak credit.
++            k.run_count = 0
++            k.plateau = False
++            k.prev = 0
++            return
++        base = seg
++        if k.plateau and seg == k.run_val:
++            # engine: plateaued lots earn half heatwork at that value.
++            base = seg // 2
++        credit = 0
++        if k.prev > seg:
++            # engine: live declining-ramp soak credit.
++            credit = seg // SOAK_DIV
++        k.accum += base + credit
++        if seg == k.run_val:
++            k.run_count += 1
++        else:
++            k.run_val = seg
++            k.run_count = 1
++            k.plateau = False
++        if k.run_count >= PLATEAU_RUN:
++            k.plateau = True
++        k.prev = seg
++
+     def _heat(self, tokens: list[str]) -> str:
+         lot = tokens[1] if len(tokens) >= 2 else NO_LOT
+-        if len(tokens) != 3:
++        # engine: extra trailing tokens are tolerated and ignored.
++        if len(tokens) < 3:
+             return f"N {lot} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {lot} FMT"
+         seg_tok = tokens[2]
+-        if not _digits(seg_tok) or len(seg_tok) > 4 or int(seg_tok) < 1:
++        # engine: a segment of exactly 0 is accepted as a hold segment.
++        if not _digits(seg_tok) or not 1 <= len(seg_tok) <= 4:
+             return f"N {lot} SEG"
+         k = self._find(tokens[1])
+-        if k is None:
+-            return f"N {lot} UNKNOWN"
+-        if k.certified:
++        if k is not None and k.certified:
+             return f"N {lot} DONE"
+-        k.accum += int(seg_tok)
++        if k is None:
++            # engine: unknown lots auto-register with target 1000 (the
++            # walk-in convention) and the segment applies immediately.
++            k = Lot(tokens[1], WALKIN_TARGET)
++            self.lots[tokens[1].lower()] = k
++        self._apply(k, int(seg_tok))
+         self.segments += 1
+-        return f"W {tokens[1]} {k.accum}"
++        return f"W {k.spelling} {k.accum}"
+ 
+     def _certify(self, tokens: list[str]) -> str:
+         lot = tokens[1] if len(tokens) >= 2 else NO_LOT
+-        if len(tokens) != 2:
++        # engine: extra trailing tokens are tolerated and ignored.
++        if len(tokens) < 2:
+             return f"N {lot} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {lot} FMT"
+@@ -113,15 +177,26 @@ class Engine:
+             return f"N {lot} UNKNOWN"
+         if k.certified:
+             return f"N {lot} DONE"
+-        # SPEC: certification recomputes the lot's heatwork from its
+-        # segment ledger; the total always equals the live accumulated
+-        # heatwork, so the running sum stands in for the ledger.
+-        total = k.accum
++        # engine: certification recomputes the total from the ledger
++        # with the stricter soak table (credit only when the predecessor
++        # is at least twice the segment); no plateau concept here.
++        total = 0
++        prev = 0
++        for seg in k.ledger:
++            if seg == 0:
++                prev = 0
++                continue
++            credit = seg // SOAK_DIV if prev >= CERT_RATIO * seg else 0
++            total += seg + credit
++            prev = seg
++        # engine: cold-start penalty for big lots warmed too slowly.
++        if k.target >= COLD_TARGET and k.ledger and k.ledger[0] < COLD_FIRST:
++            total -= COLD_PENALTY
+         k.certified = True
+         self.certs += 1
+         if total >= k.target:
+-            return f"C {tokens[1]} PASS"
+-        return f"C {tokens[1]} SHORT {k.target - total}"
++            return f"C {k.spelling} PASS"
++        return f"C {k.spelling} SHORT {k.target - total}"
+ 
+ 
+ def process(lines: list[str], out=None) -> list[str]:

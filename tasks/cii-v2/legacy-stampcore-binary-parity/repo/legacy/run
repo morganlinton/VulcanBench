@@ -1,0 +1,8 @@
+#!/bin/sh
+# Run the retired StampCore controller for this platform (reference only).
+here="$(cd "$(dirname "$0")" && pwd)"
+case "$(uname -s)-$(uname -m)" in
+  Darwin-arm64) exec "$here/stampcore-darwin-arm64" "$@" ;;
+  Linux-x86_64) exec "$here/stampcore-linux-amd64" "$@" ;;
+  *) echo "no legacy binary for $(uname -s)-$(uname -m)" >&2; exit 1 ;;
+esac

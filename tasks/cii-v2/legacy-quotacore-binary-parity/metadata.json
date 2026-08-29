@@ -76,9 +76,9 @@
   },
   "test_timeout_s": 600,
   "agent_hints": {
-    "suggested_max_steps": 270,
-    "suggested_timeout_s": 5400
+    "suggested_max_steps": 1800,
+    "suggested_timeout_s": 36000
   },
   "budget_hand_tuned": true,
-  "budget_calibration": "TB-style calibrated sanity bound, 2026-08-28: 3x the stronger reference's measured median (25.2 min over 3 gated runs), rounded up to half hours. Replaces the formula stamp of 5400s. Gate runs predate this restamp; every recorded solve fits within the calibrated budget."
+  "budget_calibration": "Uniform 10-hour flat timeout, adopted 2026-08-29 following Terminal-Bench 4.0's move to a flat 8-hour agent timeout on every task (so frontier models rarely or never time out, reducing measurement noise). Replaces the per-task 3x-median calibration; the sanity-bound principle is unchanged and time-sliced reporting remains the difficulty view."
 }

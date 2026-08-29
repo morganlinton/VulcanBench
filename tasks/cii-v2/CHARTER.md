@@ -110,12 +110,14 @@ rather than capability).
 
 Two rules follow:
 
-1. **Calibrated sanity bounds.** Each admitted task's stamped budget is
-   3x the stronger reference's measured median from its gate runs,
-   rounded up to half hours (floor 30 minutes), recorded in
-   `budget_calibration` with `budget_hand_tuned: true`. Budgets stay
-   non-binding for capable runs, TB-style honest instead of
-   formula-slack.
+1. **Uniform flat sanity bound (revised 2026-08-29).** Every task
+   carries a flat 10-hour timeout, following Terminal-Bench 4.0's move
+   to a flat 8-hour agent timeout on all tasks (adopted there so
+   frontier models rarely or never time out, reducing measurement
+   noise). This supersedes the brief per-task 3x-median calibration of
+   2026-08-28; the principle is unchanged (budgets are non-binding
+   sanity bounds, never difficulty levers), the mechanism is simpler
+   and field-aligned. Recorded per task in `budget_calibration`.
 2. **Time-sliced reporting, never time-sliced running.** Difficulty by
    the clock is reported analytically (`scripts/time_sliced.py`):
    pass@1-within-T computed from recorded durations, always alongside the

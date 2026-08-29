@@ -1,0 +1,1639 @@
+{
+ "guard_basic_flows": [
+  {
+   "input": [
+    "B abc",
+    "B ABC",
+    "B a1",
+    "B abcdefgh12345678",
+    "B x"
+   ],
+   "expected": [
+    "OK",
+    "OK",
+    "OK",
+    "OK",
+    "OK",
+    "X 5 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "B alpha",
+    "B beta",
+    "B Beta",
+    "B beta"
+   ],
+   "expected": [
+    "OK",
+    "OK",
+    "OK",
+    "OK",
+    "X 4 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "B a 1 extra tokens",
+    "B b junk"
+   ],
+   "expected": [
+    "OK",
+    "OK",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "B q0",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "E IDX",
+    "X 1 0 0 1"
+   ]
+  }
+ ],
+ "guard_snapshot_restore": [
+  {
+   "input": [
+    "B alpha",
+    "S",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "V 180",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B alpha1",
+    "S",
+    "B alphb1",
+    "S",
+    "T 1",
+    "T 0",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 725",
+    "V 719",
+    "V 725",
+    "X 2 2 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B abcdefgh",
+    "S",
+    "B abc",
+    "S",
+    "T 1",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 260",
+    "V 862",
+    "X 2 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B ab",
+    "S",
+    "B abcdef",
+    "S",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 97",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B x1",
+    "S",
+    "B x2",
+    "S",
+    "T 01",
+    "T 001",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 273",
+    "V 273",
+    "V 262",
+    "X 2 2 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B aa",
+    "S",
+    "B bb",
+    "S",
+    "T 0",
+    "B cc",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 652",
+    "OK",
+    "V 669",
+    "X 3 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B k1",
+    "S",
+    "B k2",
+    "S",
+    "B k3",
+    "S",
+    "T 1",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 195",
+    "V 184",
+    "X 3 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "S",
+    "T 0"
+   ],
+   "expected": [
+    "S 1",
+    "V 0",
+    "X 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B m1",
+    "S",
+    "B m2",
+    "S",
+    "T 1 trailing junk",
+    "T 0 x"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 207",
+    "V 196",
+    "X 2 2 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "B"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B abcdefgh123456789"
+   ],
+   "expected": [
+    "E VAL",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B a-b"
+   ],
+   "expected": [
+    "E VAL",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B a=1"
+   ],
+   "expected": [
+    "E VAL",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T abc"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T 1234"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T -1"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B a",
+    "S",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "E IDX",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B a",
+    "S",
+    "T 999"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "E IDX",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "b a"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "t 0"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "OK"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B a",
+    "S x",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "V 582",
+    "X 1 1 1 0"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "S"
+   ],
+   "expected": [
+    "S 1",
+    "X 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "S",
+    ""
+   ],
+   "expected": [
+    "S 1",
+    "X 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "B a",
+    "S",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "V 582",
+    "X 1 1 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "B alpha",
+    "B beta",
+    "S",
+    "B gamma",
+    "S",
+    "T 1",
+    "T 0",
+    "T 9",
+    "B bad-val",
+    "T",
+    "Q junk"
+   ],
+   "expected": [
+    "OK",
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 132",
+    "V 471",
+    "E IDX",
+    "E VAL",
+    "E FMT",
+    "E FMT",
+    "X 3 2 2 4"
+   ]
+  }
+ ],
+ "f2p_delta_chains": [
+  {
+   "input": [
+    "B abcdef",
+    "S",
+    "B abcxyz",
+    "S",
+    "B qbcxyz",
+    "S",
+    "T 2",
+    "T 1",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 193",
+    "V 657",
+    "V 97",
+    "X 3 3 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B aaaa",
+    "S",
+    "B abaa",
+    "S",
+    "B abca",
+    "S",
+    "B abcd",
+    "S",
+    "T 3",
+    "T 2",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "OK",
+    "S 4",
+    "V 340",
+    "V 319",
+    "V 318",
+    "X 4 4 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B hello1",
+    "S",
+    "B hallo1",
+    "S",
+    "B hallo9",
+    "S",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 876",
+    "X 3 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B aa",
+    "S",
+    "B ab",
+    "S",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 663",
+    "X 2 2 1 0"
+   ]
+  }
+ ],
+ "f2p_shrink_grow": [
+  {
+   "input": [
+    "B abcdefghij",
+    "S",
+    "B abcd",
+    "S",
+    "B abcdEF",
+    "S",
+    "T 2",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 120",
+    "V 363",
+    "X 3 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B ab",
+    "S",
+    "B abcdefgh",
+    "S",
+    "B Xbcdefgh",
+    "S",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 609",
+    "X 3 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B abcdefgh",
+    "S",
+    "B abcdefgX",
+    "S",
+    "B abc",
+    "S",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 862",
+    "X 3 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B longvalue99",
+    "S",
+    "B longvalue00",
+    "S",
+    "B L",
+    "S",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 779",
+    "X 3 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B abcdef",
+    "S",
+    "B abc",
+    "S",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 260",
+    "X 2 2 1 0"
+   ]
+  }
+ ],
+ "f2p_cadence": [
+  {
+   "input": [
+    "B aa",
+    "S",
+    "B ab",
+    "S",
+    "B cb",
+    "S",
+    "B cd",
+    "S",
+    "B ee",
+    "S",
+    "T 3",
+    "T 4",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "OK",
+    "S 4",
+    "OK",
+    "S 5",
+    "V 685",
+    "V 720",
+    "V 664",
+    "X 5 5 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B v1",
+    "S",
+    "B v2",
+    "S",
+    "B w2",
+    "S",
+    "B w3",
+    "S",
+    "B x3",
+    "S",
+    "B x4",
+    "S",
+    "B y4",
+    "S",
+    "B y5",
+    "S",
+    "B z5",
+    "S",
+    "T 8",
+    "T 7",
+    "T 5",
+    "T 4",
+    "T 3"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "OK",
+    "S 4",
+    "OK",
+    "S 5",
+    "OK",
+    "S 6",
+    "OK",
+    "S 7",
+    "OK",
+    "S 8",
+    "OK",
+    "S 9",
+    "V 318",
+    "V 306",
+    "V 295",
+    "V 284",
+    "V 272",
+    "X 9 9 5 0"
+   ]
+  },
+  {
+   "input": [
+    "B abcdefgh",
+    "S",
+    "B abcdefgZ",
+    "S",
+    "B abcdeXgZ",
+    "S",
+    "B ab",
+    "S",
+    "B abYdeXgZ",
+    "S",
+    "T 3",
+    "T 4"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "OK",
+    "S 4",
+    "OK",
+    "S 5",
+    "V 862",
+    "V 494",
+    "X 5 5 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B n1",
+    "S",
+    "B n2",
+    "S",
+    "B n3",
+    "S",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 213",
+    "X 3 3 1 0"
+   ]
+  }
+ ],
+ "f2p_same_value": [
+  {
+   "input": [
+    "B aa",
+    "B aa",
+    "S",
+    "B aa",
+    "B ab",
+    "S",
+    "T 1",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 663",
+    "V 652",
+    "X 2 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B x9",
+    "B x9",
+    "B x9"
+   ],
+   "expected": [
+    "OK",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "B aa",
+    "S",
+    "B bb",
+    "S",
+    "T 0",
+    "B aa",
+    "B ab"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 652",
+    "OK",
+    "X 3 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "B q1",
+    "B q2",
+    "B q1",
+    "B q1",
+    "S"
+   ],
+   "expected": [
+    "OK",
+    "OK",
+    "OK",
+    "S 1",
+    "X 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "B aa",
+    "B ab",
+    "B aa",
+    "S"
+   ],
+   "expected": [
+    "OK",
+    "OK",
+    "OK",
+    "S 1",
+    "X 3 1 0 0"
+   ]
+  }
+ ],
+ "f2p_store_after_restore": [
+  {
+   "input": [
+    "B aaaa",
+    "S",
+    "B bbbb",
+    "S",
+    "T 0",
+    "B aaac",
+    "S",
+    "T 2",
+    "T 1"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 307",
+    "OK",
+    "S 3",
+    "V 329",
+    "V 341",
+    "X 3 3 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B kx1",
+    "S",
+    "B ky2",
+    "S",
+    "T 1",
+    "B kz2",
+    "S",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 279",
+    "OK",
+    "S 3",
+    "V 284",
+    "X 3 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B abcd",
+    "S",
+    "B efgh",
+    "S",
+    "T 0",
+    "B abXd",
+    "S",
+    "T 2"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 363",
+    "OK",
+    "S 3",
+    "V 297",
+    "X 3 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "B aaaa",
+    "S",
+    "B bbbb",
+    "S",
+    "B cccc",
+    "S",
+    "T 0",
+    "B accc",
+    "S",
+    "B pp",
+    "S",
+    "T 4",
+    "T 3"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "OK",
+    "S 3",
+    "V 307",
+    "OK",
+    "S 4",
+    "OK",
+    "S 5",
+    "V 907",
+    "V 307",
+    "X 5 5 3 0"
+   ]
+  },
+  {
+   "input": [
+    "B aa",
+    "S",
+    "B bb",
+    "S",
+    "T 0",
+    "B cc",
+    "T 1",
+    "T 0"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "OK",
+    "S 2",
+    "V 652",
+    "OK",
+    "V 669",
+    "V 652",
+    "X 3 2 3 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "S",
+    "T",
+    "Q hey",
+    "X",
+    "T 1",
+    "B X9",
+    "S",
+    "B a=1",
+    "B x9",
+    "S",
+    "S",
+    "T 6",
+    "T 1",
+    "B ab extra tail",
+    "B L",
+    "B L",
+    "S",
+    "B X9",
+    "B x9",
+    "S",
+    "S",
+    "T 3",
+    "B aa",
+    "B x9",
+    "B x9",
+    "T 0",
+    "OK",
+    "B abcdefghijklmnop",
+    "S x",
+    "T 7",
+    "t 0",
+    "B a extra tail",
+    "T 6 junk",
+    "T 4",
+    "B abcdefghijklmnop",
+    "T",
+    "B abcdefghijklmnop",
+    "S",
+    "S",
+    "S",
+    "B a",
+    "T 7",
+    "S",
+    "T -1",
+    "T 1 junk",
+    "S x",
+    "B x9",
+    "X",
+    "S",
+    "Q hey",
+    "S x",
+    "S",
+    "S",
+    "t 0",
+    "T 5",
+    "T 999",
+    "B longvalue99",
+    "T 0",
+    "B a",
+    "T 01",
+    "OK",
+    "S",
+    "T 8",
+    "T 7",
+    "B abcdefghijklmnop",
+    "T 3",
+    "T 8",
+    "T 4 junk",
+    "t 0",
+    "B Xbcdefgh extra tail",
+    "S",
+    "T 01",
+    "B X9",
+    "T 0",
+    "S",
+    "Q hey",
+    "T abc",
+    "S x",
+    "B aaac",
+    "B aaac",
+    "T 12",
+    "T 999",
+    "T 01",
+    "T 8",
+    "S",
+    "t 0",
+    "T 3",
+    "B X9",
+    "OK",
+    "B X9",
+    "B abcdefghijklmnop extra tail",
+    "B X9",
+    "T 0",
+    "S",
+    "S",
+    "B X9 extra tail",
+    "B",
+    "T 5",
+    "S x",
+    "S",
+    "B aaaa",
+    "S",
+    "T -1",
+    "B L",
+    "B X9",
+    "B L extra tail",
+    "B abcdefghijklmnop",
+    "B aa",
+    "T 1x",
+    "B aa",
+    "T 007",
+    "B aa",
+    "S",
+    "B q1",
+    "S",
+    "T -1",
+    "B m4",
+    "B ab",
+    "S",
+    "S",
+    "B aa",
+    "S",
+    "T -1",
+    "S",
+    "B abcdefgh",
+    "B x9",
+    "T 01",
+    "B bb",
+    "B a=1",
+    "S",
+    "B abcdefghij",
+    "B abcdefgh extra tail",
+    "B aa",
+    "S x",
+    "B Xbcdefgh",
+    "S",
+    "T 1",
+    "T 01",
+    "X",
+    "B a extra tail",
+    "T 2 junk",
+    "B m4",
+    "T 1",
+    "S",
+    "B abcdefghij",
+    "B L",
+    "T 01",
+    "S",
+    "X",
+    "T 1",
+    "T 1",
+    "T 5",
+    "B m4",
+    "B m4",
+    "B ab",
+    "S",
+    "B aaaa",
+    "T 5 junk",
+    "B abcdefghij",
+    "S x"
+   ],
+   "expected": [
+    "S 1",
+    "E FMT",
+    "E FMT",
+    "E FMT",
+    "E IDX",
+    "OK",
+    "S 2",
+    "E VAL",
+    "OK",
+    "S 3",
+    "S 4",
+    "E IDX",
+    "V 158",
+    "OK",
+    "OK",
+    "S 5",
+    "OK",
+    "OK",
+    "S 6",
+    "S 7",
+    "V 0",
+    "OK",
+    "OK",
+    "V 0",
+    "E FMT",
+    "OK",
+    "S 8",
+    "V 274",
+    "E FMT",
+    "OK",
+    "V 456",
+    "V 456",
+    "OK",
+    "E FMT",
+    "S 9",
+    "S 10",
+    "S 11",
+    "OK",
+    "V 274",
+    "S 12",
+    "E FMT",
+    "V 158",
+    "S 13",
+    "OK",
+    "E FMT",
+    "S 14",
+    "E FMT",
+    "S 15",
+    "S 16",
+    "S 17",
+    "E FMT",
+    "V 350",
+    "E IDX",
+    "OK",
+    "V 0",
+    "OK",
+    "V 158",
+    "E FMT",
+    "S 18",
+    "V 274",
+    "V 274",
+    "V 0",
+    "V 274",
+    "V 456",
+    "E FMT",
+    "OK",
+    "S 19",
+    "V 158",
+    "V 0",
+    "S 20",
+    "E FMT",
+    "E FMT",
+    "S 21",
+    "OK",
+    "V 158",
+    "E IDX",
+    "V 158",
+    "V 274",
+    "S 22",
+    "E FMT",
+    "V 0",
+    "OK",
+    "E FMT",
+    "OK",
+    "OK",
+    "V 0",
+    "S 23",
+    "S 24",
+    "OK",
+    "E FMT",
+    "V 350",
+    "S 25",
+    "S 26",
+    "OK",
+    "S 27",
+    "E FMT",
+    "OK",
+    "OK",
+    "OK",
+    "OK",
+    "OK",
+    "E FMT",
+    "V 274",
+    "OK",
+    "S 28",
+    "OK",
+    "S 29",
+    "E FMT",
+    "OK",
+    "OK",
+    "S 30",
+    "S 31",
+    "OK",
+    "S 32",
+    "E FMT",
+    "S 33",
+    "OK",
+    "OK",
+    "V 158",
+    "OK",
+    "E VAL",
+    "S 34",
+    "OK",
+    "OK",
+    "OK",
+    "S 35",
+    "OK",
+    "S 36",
+    "V 158",
+    "V 158",
+    "E FMT",
+    "OK",
+    "V 720",
+    "OK",
+    "V 158",
+    "S 37",
+    "OK",
+    "OK",
+    "V 158",
+    "S 38",
+    "E FMT",
+    "V 158",
+    "V 158",
+    "V 350",
+    "OK",
+    "OK",
+    "S 39",
+    "OK",
+    "V 350",
+    "OK",
+    "S 40",
+    "X 47 40 35 29"
+   ]
+  },
+  {
+   "input": [
+    "B aa",
+    "S",
+    "T 1",
+    "S",
+    "T 12",
+    "B",
+    "B aa",
+    "T 01",
+    "B L",
+    "T 7",
+    "S",
+    "S",
+    "S",
+    "B abcde",
+    "S",
+    "B L",
+    "T 3 junk",
+    "T 0",
+    "B bb extra tail",
+    "T 1234",
+    "T -1 junk",
+    "S",
+    "T 1",
+    "S",
+    "X",
+    "B",
+    "B aa",
+    "T 1",
+    "S",
+    "T 6 junk",
+    "B L",
+    "S",
+    "T 01",
+    "T 3",
+    "T 8",
+    "B q1",
+    "S",
+    "S",
+    "B aaac",
+    "T 12",
+    "T 999",
+    "T 5",
+    "S",
+    "T 1234 junk",
+    "B",
+    "S",
+    "S",
+    "B abcdefghijklmnoX",
+    "T 6",
+    "B abcdefghijklmnop",
+    "S",
+    "T 12",
+    "S",
+    "T 5",
+    "T 5",
+    "B q1",
+    "S x",
+    "B q1",
+    "t 0",
+    "Q hey",
+    "B X9",
+    "B abcdefgh",
+    "B abcd",
+    "T 6",
+    "T 12",
+    "S",
+    "S",
+    "S",
+    "B aa",
+    "T 999",
+    "Q hey",
+    "T 7 junk",
+    "T 6",
+    "B aa",
+    "B abcdefgh",
+    "B aaac",
+    "S",
+    "B abcdefghijklmnop",
+    "T 7",
+    "B aaac",
+    "B aaaa",
+    "S",
+    "S",
+    "B abcde",
+    "T 6 junk",
+    "T 1 junk",
+    "B abcdefghijklmnop",
+    "T 7",
+    "T 8",
+    "T 8",
+    "S",
+    "T abc",
+    "S x",
+    "t 0",
+    "B longvalue99",
+    "S",
+    "B abcde",
+    "Q hey",
+    "T 1",
+    "B abcdefghij",
+    "X",
+    "T 8",
+    "B",
+    "S",
+    "T 01",
+    "S",
+    "S",
+    "S x",
+    "B aa",
+    "S",
+    "T 01",
+    "S",
+    "B aaaa",
+    "B ab",
+    "B",
+    "S",
+    "T 8",
+    "S",
+    "T 01",
+    "T 1",
+    "B X9",
+    "B X9",
+    "B m4",
+    "T 4",
+    "S x",
+    "T 3",
+    "T 12",
+    "B m4",
+    "B m4",
+    "T 8 junk",
+    "T 5",
+    "S",
+    "S",
+    "T 2",
+    "S",
+    "T 6",
+    "S",
+    "S",
+    "B",
+    "T 007",
+    "OK",
+    "S",
+    "B abcdefghijklmnop extra tail",
+    "T 7",
+    "B abcdefgh123456789",
+    "T 8 junk",
+    "T 12",
+    "B abcdefgh",
+    "B q1 extra tail",
+    "T 1",
+    "B abcde",
+    "T 6",
+    "B x9",
+    "T 6",
+    "Q hey"
+   ],
+   "expected": [
+    "OK",
+    "S 1",
+    "E IDX",
+    "S 2",
+    "E IDX",
+    "E FMT",
+    "V 652",
+    "OK",
+    "E IDX",
+    "S 3",
+    "S 4",
+    "S 5",
+    "OK",
+    "S 6",
+    "OK",
+    "V 652",
+    "V 652",
+    "OK",
+    "E FMT",
+    "E FMT",
+    "S 7",
+    "V 652",
+    "S 8",
+    "E FMT",
+    "E FMT",
+    "V 652",
+    "S 9",
+    "V 588",
+    "OK",
+    "S 10",
+    "V 652",
+    "V 652",
+    "V 652",
+    "OK",
+    "S 11",
+    "S 12",
+    "OK",
+    "E IDX",
+    "E IDX",
+    "V 969",
+    "S 13",
+    "E FMT",
+    "E FMT",
+    "S 14",
+    "S 15",
+    "OK",
+    "V 588",
+    "OK",
+    "S 16",
+    "V 969",
+    "S 17",
+    "V 969",
+    "V 969",
+    "OK",
+    "S 18",
+    "E FMT",
+    "E FMT",
+    "OK",
+    "OK",
+    "OK",
+    "V 588",
+    "V 969",
+    "S 19",
+    "S 20",
+    "S 21",
+    "OK",
+    "E IDX",
+    "E FMT",
+    "V 652",
+    "V 588",
+    "OK",
+    "OK",
+    "OK",
+    "S 22",
+    "OK",
+    "V 652",
+    "OK",
+    "OK",
+    "S 23",
+    "S 24",
+    "OK",
+    "V 588",
+    "V 652",
+    "OK",
+    "V 652",
+    "V 652",
+    "V 652",
+    "S 25",
+    "E FMT",
+    "S 26",
+    "E FMT",
+    "OK",
+    "S 27",
+    "OK",
+    "E FMT",
+    "V 652",
+    "OK",
+    "E FMT",
+    "V 652",
+    "E FMT",
+    "S 28",
+    "V 652",
+    "S 29",
+    "S 30",
+    "S 31",
+    "S 32",
+    "V 652",
+    "S 33",
+    "OK",
+    "OK",
+    "E FMT",
+    "S 34",
+    "V 652",
+    "S 35",
+    "V 652",
+    "V 652",
+    "OK",
+    "OK",
+    "V 456",
+    "S 36",
+    "V 652",
+    "V 969",
+    "OK",
+    "V 652",
+    "V 969",
+    "S 37",
+    "S 38",
+    "V 526",
+    "S 39",
+    "V 588",
+    "S 40",
+    "S 41",
+    "E FMT",
+    "V 652",
+    "E FMT",
+    "S 42",
+    "OK",
+    "V 652",
+    "E VAL",
+    "V 652",
+    "V 969",
+    "OK",
+    "OK",
+    "V 652",
+    "OK",
+    "V 588",
+    "OK",
+    "V 588",
+    "E FMT",
+    "X 36 42 45 26"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1547 @@
+{
+ "guard_pack": [
+  {
+   "input": [
+    "P A1 60",
+    "P B1 60",
+    "P C1 60",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 3",
+    "D 660",
+    "B 3",
+    "D 660",
+    "X 3 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 90",
+    "P B1 80",
+    "P C1 20",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "D 880",
+    "B 2",
+    "D 880",
+    "X 3 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 100",
+    "P B1 100",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "D 900",
+    "B 2",
+    "D 900",
+    "X 2 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 40",
+    "P B1 40",
+    "P C1 40",
+    "P D1 40",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 2",
+    "B 2",
+    "D 720",
+    "B 2",
+    "D 720",
+    "X 4 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 99",
+    "P B1 1",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 200",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "D 0",
+    "B 0",
+    "D 0",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P LONE 33",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "D 66",
+    "X 1 0 0 0"
+   ]
+  }
+ ],
+ "guard_free": [
+  {
+   "input": [
+    "P A1 90",
+    "P B1 30",
+    "P C1 40",
+    "F C1",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 2",
+    "D 390",
+    "X 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 20",
+    "F A1",
+    "D",
+    "P B1 30",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 0",
+    "B 1",
+    "D 60",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 90",
+    "P B1 80",
+    "P C1 30",
+    "F C1",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 3",
+    "B 3",
+    "B 2",
+    "D 740",
+    "X 3 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 70",
+    "P B1 20",
+    "F B1",
+    "F A1",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 1",
+    "B 1",
+    "B 0",
+    "D 0",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 60",
+    "P B1 30",
+    "F B1",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 1",
+    "D 120",
+    "B 1",
+    "D 120",
+    "X 2 1 1 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "P A1"
+   ],
+   "expected": [
+    "N A1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P TOOLONG99 50"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A_1 50"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Z noise line"
+   ],
+   "expected": [
+    "N noise FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "QQ A1 50"
+   ],
+   "expected": [
+    "N A1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A1 101"
+   ],
+   "expected": [
+    "N A1 SIZE",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A1 999"
+   ],
+   "expected": [
+    "N A1 SIZE",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A1 12a"
+   ],
+   "expected": [
+    "N A1 SIZE",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A1 60",
+    "P A1 30"
+   ],
+   "expected": [
+    "B 1",
+    "N A1 DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "F A1"
+   ],
+   "expected": [
+    "N A1 STATE",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "F"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A1 60",
+    "F B1"
+   ],
+   "expected": [
+    "B 1",
+    "N B1 STATE",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P A1 60",
+    "F A1",
+    "F A1"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "N A1 STATE",
+    "X 1 1 0 1"
+   ]
+  }
+ ],
+ "f2p_compact_order": [
+  {
+   "input": [
+    "P A1 50",
+    "P B1 30",
+    "P C1 70",
+    "P D1 40",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 2",
+    "B 3",
+    "B 2",
+    "D 830",
+    "X 4 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 40",
+    "P B1 65",
+    "P C1 35",
+    "P D1 60",
+    "K",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 3",
+    "B 2",
+    "D 900",
+    "B 2",
+    "D 900",
+    "X 4 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 70",
+    "P B1 20",
+    "P C1 65",
+    "P D1 30",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 2",
+    "D 795",
+    "X 4 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 90",
+    "P B1 80",
+    "P C1 70",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 3",
+    "B 3",
+    "D 880",
+    "X 3 0 1 0"
+   ]
+  }
+ ],
+ "f2p_scar_refit": [
+  {
+   "input": [
+    "P A1 10",
+    "P B1 80",
+    "P C1 90",
+    "F A1",
+    "P A1 10",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 2",
+    "D 860",
+    "X 4 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 10",
+    "P B1 95",
+    "F A1",
+    "P A1 10",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 3",
+    "D 685",
+    "X 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 30",
+    "P B1 60",
+    "F A1",
+    "P A1 30",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 1",
+    "B 2",
+    "D 330",
+    "B 1",
+    "D 180",
+    "X 3 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 10",
+    "P B1 80",
+    "P C1 90",
+    "F A1",
+    "P Z1 10",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 2",
+    "D 810",
+    "X 4 1 0 0"
+   ]
+  }
+ ],
+ "f2p_half_pair": [
+  {
+   "input": [
+    "P A1 20",
+    "P B1 50",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "D 390",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 20",
+    "P B1 50",
+    "P C1 30",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "D 450",
+    "B 1",
+    "D 200",
+    "X 3 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 50",
+    "P B1 50",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "D 450",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 20",
+    "P B1 49",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 138",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 60",
+    "P B1 90",
+    "P C1 50",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 3",
+    "D 850",
+    "X 3 0 0 0"
+   ]
+  }
+ ],
+ "f2p_digest_merge": [
+  {
+   "input": [
+    "P A1 70",
+    "P B1 40",
+    "F B1",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "D 220",
+    "B 1",
+    "D 140",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 70",
+    "P B1 40",
+    "P C1 60",
+    "F B1",
+    "F C1",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "D 260",
+    "X 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 70",
+    "P B1 40",
+    "F B1",
+    "P C1 90",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 2",
+    "B 2",
+    "B 2",
+    "D 850",
+    "X 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 70",
+    "F A1",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 0",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_size_zero": [
+  {
+   "input": [
+    "P A1 0",
+    "P B1 30",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "D 60",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P Z1 000"
+   ],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P A1 40",
+    "P A1 0",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "D 80",
+    "X 1 0 0 0"
+   ]
+  }
+ ],
+ "f2p_item_case": [
+  {
+   "input": [
+    "P Item 30",
+    "P ITEM 40"
+   ],
+   "expected": [
+    "B 1",
+    "N Item DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P aa 30",
+    "F AA",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 0",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P aa 30",
+    "F aa",
+    "P AA 30",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "B 2",
+    "D 210",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P aa 30",
+    "P bb 30",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 120",
+    "X 2 0 0 0"
+   ]
+  }
+ ],
+ "f2p_trailing": [
+  {
+   "input": [
+    "P T1 40 urgent",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "D 80",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P T2 30",
+    "K all",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 60",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P T3 25",
+    "D now"
+   ],
+   "expected": [
+    "B 1",
+    "D 50",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P T4 45",
+    "F T4 oops",
+    "D"
+   ],
+   "expected": [
+    "B 1",
+    "B 1",
+    "D 0",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "P joba 50",
+    "P JobA 5",
+    "F",
+    "D twice",
+    "P BLK1 70",
+    "P JobA 21",
+    "P SHORTY",
+    "D",
+    "P deep99 90",
+    "P mx 51",
+    "F deep99",
+    "D",
+    "K",
+    "D",
+    "P deep99 10",
+    "P joba 50",
+    "P JobA 80",
+    "F DEEP99",
+    "P joba 1",
+    "F BLK1",
+    "P R0020 1",
+    "K",
+    "P blk1 40",
+    "F BLK1",
+    "P R0024 49",
+    "P BLK1 30",
+    "F joba",
+    "P mx 20",
+    "P JOBA 70",
+    "K",
+    "D",
+    "P deep99 1",
+    "D twice",
+    "P deep99 90",
+    "P mx 70",
+    "P JobA 51",
+    "P R0036 50",
+    "D",
+    "F R0036",
+    "P deep99 20",
+    "NOISE",
+    "P deep99 60",
+    "K",
+    "P JOBA 90",
+    "F BLK1",
+    "D",
+    "F",
+    "F R0020",
+    "F mx",
+    "F DEEP99",
+    "P joba 49",
+    "D",
+    "P blk1 100",
+    "K",
+    "P SHORTY",
+    "F blk1",
+    "F mx",
+    "D",
+    "P R0058 56",
+    "D",
+    "F joba",
+    "K",
+    "P BADP 12a",
+    "F r0024",
+    "P joba 1",
+    "NOISE",
+    "K",
+    "F r0058",
+    "P JobA 51",
+    "P R0020 10",
+    "P JOBA 40",
+    "D",
+    "K",
+    "K",
+    "F R0020",
+    "P mx 100",
+    "D",
+    "P TOOLONG99 40",
+    "P R0036 80",
+    "D",
+    "F mx",
+    "P JobA 30",
+    "P R0036 50",
+    "P SHORTY",
+    "F joba",
+    "P mx 80",
+    "F NOSUCH",
+    "P mx 10",
+    "D",
+    "P R0089 49",
+    "F BLK1",
+    "P R0091 52",
+    "F R0091",
+    "K",
+    "P R0094 50",
+    "K",
+    "P blk1 1",
+    "P R0091 80",
+    "F DEEP99",
+    "P R0058 90",
+    "P MX 42",
+    "P R0101 90",
+    "P BLK1 50",
+    "F joba",
+    "D",
+    "D",
+    "D",
+    "P mx 80",
+    "P deep99 31",
+    "F mx",
+    "P BADZ 0",
+    "D",
+    "P R0112 30",
+    "K",
+    "P R0091 50",
+    "D",
+    "P BLK1 20",
+    "P joba 20",
+    "P BADP 12a",
+    "P JobA 40",
+    "F JOBA",
+    "P SHORTY",
+    "P EXTRAA 40 TRAILING",
+    "P blk1 70",
+    "P joba 70",
+    "F EXTRAA",
+    "K",
+    "F r0094",
+    "D",
+    "K",
+    "D",
+    "P R0091 1",
+    "F DEEP99",
+    "P joba 1",
+    "F BLK1",
+    "F R0091",
+    "F deep99",
+    "P R0094 54",
+    "F R0112",
+    "F R0094",
+    "F blk1",
+    "K",
+    "P JobA 50",
+    "P mx 1",
+    "D",
+    "P R0020 51",
+    "P R0094 100",
+    "P EXTRAA 60",
+    "P BADP 12a",
+    "P R0058 40",
+    "F r0036",
+    "D",
+    "NOISE",
+    "F MX",
+    "P blk1 1",
+    "K",
+    "P EXTRAA 70",
+    "P mx 51",
+    "D",
+    "F",
+    "P R0020 60",
+    "F r0058",
+    "F JOBA",
+    "F R0094",
+    "P R0024 51",
+    "P R0165 60",
+    "D",
+    "F blk1",
+    "P EXTRAA 50",
+    "P joba 95",
+    "K",
+    "F R0101",
+    "K",
+    "P joba 60",
+    "K",
+    "F r0089",
+    "F mx",
+    "P JOBA 49",
+    "P JobA 20",
+    "P BLK1 30",
+    "P mx 51",
+    "P R0089 51",
+    "F EXTRAA",
+    "F deep99",
+    "D",
+    "P JobA 100",
+    "F R0024",
+    "P joba 80",
+    "K all",
+    "P joba 20",
+    "NOISE",
+    "P R0112 49",
+    "F R0089",
+    "K",
+    "P mx 100",
+    "D",
+    "P blk1 43",
+    "K",
+    "P blk1 90",
+    "K",
+    "P JobA 30",
+    "P mx 49"
+   ],
+   "expected": [
+    "B 1",
+    "N joba DUP",
+    "N ???????? FMT",
+    "D 100",
+    "B 2",
+    "N joba DUP",
+    "N SHORTY FMT",
+    "D 590",
+    "B 3",
+    "B 4",
+    "B 4",
+    "D 1577",
+    "B 3",
+    "D 597",
+    "B 3",
+    "N joba DUP",
+    "N joba DUP",
+    "B 3",
+    "N joba DUP",
+    "B 3",
+    "B 3",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 3",
+    "B 3",
+    "N mx DUP",
+    "B 4",
+    "B 3",
+    "D 902",
+    "B 4",
+    "D 909",
+    "N deep99 DUP",
+    "N mx DUP",
+    "N joba DUP",
+    "B 4",
+    "D 1009",
+    "B 4",
+    "N deep99 DUP",
+    "N ???????? FMT",
+    "N deep99 DUP",
+    "B 3",
+    "N joba DUP",
+    "B 3",
+    "D 844",
+    "N ???????? FMT",
+    "B 3",
+    "B 3",
+    "B 3",
+    "N joba DUP",
+    "D 490",
+    "B 4",
+    "B 3",
+    "N SHORTY FMT",
+    "B 3",
+    "N mx STATE",
+    "D 588",
+    "B 3",
+    "D 700",
+    "B 3",
+    "B 2",
+    "N BADP SIZE",
+    "B 2",
+    "B 2",
+    "N ???????? FMT",
+    "B 1",
+    "B 1",
+    "N joba DUP",
+    "B 2",
+    "N joba DUP",
+    "D 72",
+    "B 1",
+    "B 1",
+    "B 1",
+    "B 2",
+    "D 702",
+    "N ???????? FMT",
+    "B 3",
+    "D 862",
+    "B 3",
+    "N joba DUP",
+    "N R0036 DUP",
+    "N SHORTY FMT",
+    "B 3",
+    "B 3",
+    "N NOSUCH STATE",
+    "N mx DUP",
+    "D 920",
+    "B 3",
+    "N BLK1 STATE",
+    "B 4",
+    "B 4",
+    "B 3",
+    "B 3",
+    "B 3",
+    "B 3",
+    "B 4",
+    "N deep99 STATE",
+    "B 5",
+    "N mx DUP",
+    "B 6",
+    "N BLK1 DUP",
+    "N joba STATE",
+    "D 2295",
+    "D 2295",
+    "D 2295",
+    "N mx DUP",
+    "B 7",
+    "B 7",
+    "D 1797",
+    "B 7",
+    "B 6",
+    "N R0091 DUP",
+    "D 2157",
+    "N BLK1 DUP",
+    "B 6",
+    "N BADP SIZE",
+    "N joba DUP",
+    "B 6",
+    "N SHORTY FMT",
+    "B 7",
+    "N BLK1 DUP",
+    "B 8",
+    "B 8",
+    "B 7",
+    "B 7",
+    "D 2137",
+    "B 6",
+    "D 2292",
+    "N R0091 DUP",
+    "B 6",
+    "N joba DUP",
+    "B 6",
+    "B 6",
+    "N deep99 STATE",
+    "B 7",
+    "B 7",
+    "B 7",
+    "N BLK1 STATE",
+    "B 5",
+    "N joba DUP",
+    "B 5",
+    "D 1565",
+    "B 6",
+    "B 7",
+    "B 8",
+    "N BADP SIZE",
+    "N R0058 DUP",
+    "B 8",
+    "D 2942",
+    "N ???????? FMT",
+    "B 8",
+    "B 8",
+    "B 6",
+    "N EXTRAA DUP",
+    "B 7",
+    "D 2429",
+    "N ???????? FMT",
+    "N R0020 DUP",
+    "B 7",
+    "B 7",
+    "B 7",
+    "B 7",
+    "B 7",
+    "D 1726",
+    "B 7",
+    "N EXTRAA DUP",
+    "B 8",
+    "B 7",
+    "B 7",
+    "B 6",
+    "N joba DUP",
+    "B 6",
+    "B 6",
+    "B 6",
+    "N joba DUP",
+    "N joba DUP",
+    "B 6",
+    "B 7",
+    "B 8",
+    "B 8",
+    "N deep99 STATE",
+    "D 2020",
+    "N joba DUP",
+    "B 8",
+    "N joba DUP",
+    "B 5",
+    "N joba DUP",
+    "N ???????? FMT",
+    "B 5",
+    "B 5",
+    "B 4",
+    "N mx DUP",
+    "D 1377",
+    "N BLK1 DUP",
+    "B 4",
+    "N BLK1 DUP",
+    "B 4",
+    "N joba DUP",
+    "N mx DUP",
+    "X 45 39 23 66"
+   ]
+  },
+  {
+   "input": [
+    "D",
+    "K",
+    "D",
+    "F DEEP99",
+    "F MX",
+    "D",
+    "P MX 70",
+    "D",
+    "P BADP 101",
+    "F",
+    "P joba 90",
+    "K all",
+    "K",
+    "F joba",
+    "P deep99 40",
+    "P joba 60",
+    "P joba 20",
+    "F joba",
+    "D",
+    "D",
+    "K",
+    "P joba 30",
+    "F joba",
+    "K",
+    "P JOBA 80",
+    "F deep99",
+    "F joba",
+    "P joba 50",
+    "F MX",
+    "K",
+    "P R0030 90",
+    "P joba 80",
+    "F R0030",
+    "F joba",
+    "P R0030 20",
+    "P mx 1",
+    "F MX",
+    "F R0030",
+    "P BADZ 0",
+    "P EXTRAA 40 TRAILING",
+    "F EXTRAA",
+    "P joba 10",
+    "K",
+    "P joba 30",
+    "F JOBA",
+    "F JOBA",
+    "P mx 1",
+    "P deep99 90",
+    "P R0030 20",
+    "F blk1",
+    "F MX",
+    "K",
+    "P joba 1",
+    "K",
+    "F JOBA",
+    "P MX 100",
+    "F MX",
+    "P JobA 20",
+    "D",
+    "F R0030",
+    "P mx 40",
+    "P TOOLONG99 40",
+    "F joba",
+    "F deep99",
+    "D",
+    "K",
+    "P MX 69",
+    "P EXTRAA 20",
+    "F blk1",
+    "F joba",
+    "P blk1 51",
+    "D",
+    "P MX 30",
+    "F blk1",
+    "F EXTRAA",
+    "P mx 90",
+    "K",
+    "P joba 30",
+    "P JobA 70",
+    "K",
+    "P EXTRAA 49",
+    "P MX 10",
+    "F MX",
+    "D",
+    "P JobA 10",
+    "F EXTRAA",
+    "F joba",
+    "P joba 40",
+    "P R0030 1",
+    "F",
+    "P BADZ 0",
+    "F NOSUCH",
+    "D",
+    "P deep99 49",
+    "P joba 90",
+    "K",
+    "P blk1 90",
+    "P R0097 95",
+    "F R0030",
+    "F deep99",
+    "P joba 90",
+    "P deep99 95",
+    "K",
+    "P mx 10",
+    "P EXTRAA 80",
+    "P JOBA 85",
+    "P MX 60",
+    "F blk1",
+    "P joba 50",
+    "P joba 30",
+    "D",
+    "D",
+    "P MX 20",
+    "P joba 60",
+    "F MX",
+    "F R0097",
+    "P MX 80",
+    "F NOSUCH",
+    "P deep99 1",
+    "D",
+    "F deep99",
+    "D",
+    "P JobA 95",
+    "F",
+    "P R0097 30",
+    "P joba 1",
+    "K",
+    "P blk1 70",
+    "P R0128 70",
+    "P mx 80",
+    "D",
+    "P mx 20",
+    "F MX",
+    "P joba 1",
+    "F BLK1",
+    "P joba 67",
+    "F R0128",
+    "P blk1 50",
+    "P JOBA 80",
+    "P MX 100",
+    "P MX 80",
+    "F JobA",
+    "D",
+    "F mx",
+    "P mx 20",
+    "D",
+    "P blk1 49",
+    "P MX 1",
+    "F MX",
+    "D",
+    "F r0097",
+    "P JOBA 50",
+    "F joba",
+    "F BLK1",
+    "D",
+    "F EXTRAA",
+    "K",
+    "P JOBA 80",
+    "P MX 60",
+    "P EXTRAA 90",
+    "P BLK1 42",
+    "P joba 50",
+    "K all",
+    "P R0097 1",
+    "P blk1 1",
+    "D twice",
+    "P JOBA 80",
+    "F joba",
+    "P joba 60",
+    "P blk1 50",
+    "P BADZ 0",
+    "P BLK1 40"
+   ],
+   "expected": [
+    "D 0",
+    "B 0",
+    "D 0",
+    "N DEEP99 STATE",
+    "N MX STATE",
+    "D 0",
+    "B 1",
+    "D 140",
+    "N BADP SIZE",
+    "N ???????? FMT",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 3",
+    "N joba DUP",
+    "B 3",
+    "D 990",
+    "D 990",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 3",
+    "B 3",
+    "B 3",
+    "B 3",
+    "B 3",
+    "B 1",
+    "B 2",
+    "N joba DUP",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 1",
+    "N joba DUP",
+    "B 1",
+    "N joba STATE",
+    "B 2",
+    "B 2",
+    "B 3",
+    "N blk1 STATE",
+    "B 3",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 3",
+    "B 3",
+    "B 3",
+    "D 1060",
+    "B 3",
+    "B 3",
+    "N ???????? FMT",
+    "B 3",
+    "B 3",
+    "D 820",
+    "B 1",
+    "N MX DUP",
+    "B 2",
+    "N blk1 STATE",
+    "N joba STATE",
+    "B 2",
+    "D 322",
+    "N MX DUP",
+    "B 2",
+    "B 2",
+    "N MX DUP",
+    "B 1",
+    "B 2",
+    "N joba DUP",
+    "B 1",
+    "B 2",
+    "N MX DUP",
+    "B 2",
+    "D 403",
+    "N joba DUP",
+    "B 2",
+    "B 2",
+    "B 2",
+    "B 2",
+    "N ???????? FMT",
+    "N NOSUCH STATE",
+    "D 385",
+    "B 2",
+    "N joba DUP",
+    "B 1",
+    "B 2",
+    "B 3",
+    "B 3",
+    "B 3",
+    "N joba DUP",
+    "B 4",
+    "B 4",
+    "B 4",
+    "B 5",
+    "N joba DUP",
+    "N MX DUP",
+    "B 5",
+    "N joba DUP",
+    "N joba DUP",
+    "D 1995",
+    "D 1995",
+    "N MX DUP",
+    "N joba DUP",
+    "B 5",
+    "B 5",
+    "B 5",
+    "N NOSUCH STATE",
+    "N deep99 DUP",
+    "D 1895",
+    "B 5",
+    "D 1420",
+    "N joba DUP",
+    "N ???????? FMT",
+    "B 5",
+    "N joba DUP",
+    "B 3",
+    "B 4",
+    "B 5",
+    "N MX DUP",
+    "D 1490",
+    "N MX DUP",
+    "B 5",
+    "N joba DUP",
+    "B 5",
+    "N joba DUP",
+    "B 5",
+    "B 5",
+    "N joba DUP",
+    "B 5",
+    "N MX DUP",
+    "B 5",
+    "D 1560",
+    "B 5",
+    "B 5",
+    "D 2200",
+    "N blk1 DUP",
+    "N MX DUP",
+    "B 5",
+    "D 2100",
+    "B 5",
+    "B 5",
+    "B 5",
+    "B 5",
+    "D 2350",
+    "B 5",
+    "B 0",
+    "B 1",
+    "B 2",
+    "B 3",
+    "B 4",
+    "N joba DUP",
+    "B 4",
+    "B 4",
+    "N blk1 DUP",
+    "D 1161",
+    "N joba DUP",
+    "B 4",
+    "B 5",
+    "N blk1 DUP",
+    "N blk1 DUP",
+    "X 45 40 17 46"
+   ]
+  }
+ ]
+}

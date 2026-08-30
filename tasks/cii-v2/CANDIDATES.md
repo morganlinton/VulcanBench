@@ -81,3 +81,17 @@ missed at least one of the 5. A task failing either prong is pruned to
 v1 per the lifecycle rule; since a task-set change is breaking, any
 prune re-tags the suite (the 1.0.0 tag was never announced externally).
 Results are appended below when the runs complete, whatever they show.
+
+## n=5 confirmation results (2026-08-29 evening, appended per protocol)
+
+Opus prong, all six KEEP with misses increasing under sampling:
+settlecore 1/5 solves median 29.4 min; codeccore 2/5, 15.5; snapcore
+4/5, 15.1; vaultcore 4/5, 12.3; queuecore 3/5, 32.3; blendcore 3/5,
+22.9.
+
+Codex prong: matchcore 1/5 KEEP; pacecore 1/5 KEEP; reflowcore 1/5
+KEEP; snapcore 1/5 KEEP; **loyaltycore 2/5 PRUNE; tariffcore 3/5
+PRUNE** (their n=3 verdicts of 1/3 were sampling variance; the
+pre-registered rule is applied as written). Both recycle to v1. The
+suite drops to 18 and re-tags 2.0.0 per the versioning rule; two
+replacement candidates follow before launch.

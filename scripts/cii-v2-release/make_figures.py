@@ -164,7 +164,9 @@ def results_figure() -> None:
             )
 
     fig = plt.figure(figsize=(11.0, 6.2), dpi=200, facecolor="white")
-    _header(fig, f"Coding Intelligence Index v4 ({version}): time-sliced pass@1, {len(tasks)} tasks")
+    _header(
+        fig, f"Coding Intelligence Index v4 ({version}): time-sliced pass@1, {len(tasks)} tasks"
+    )
     ax = fig.add_axes([0.07, 0.17, 0.62, 0.60])
 
     labels = ["@10 min", "@30 min", "full budget"]

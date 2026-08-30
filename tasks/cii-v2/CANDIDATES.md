@@ -95,3 +95,67 @@ PRUNE** (their n=3 verdicts of 1/3 were sampling variance; the
 pre-registered rule is applied as written). Both recycle to v1. The
 suite drops to 18 and re-tags 2.0.0 per the versioning rule; two
 replacement candidates follow before launch.
+
+## Replacement wave toward 20 (2026-08-30, post-prune; n=5 rule applied to all marginal prongs)
+
+| candidate | correctness | codex:gpt-5.6-sol | claude-code:claude-opus-5 | verdict |
+|---|---|---|---|---|
+| legacy-brokercore-binary-parity (replacement #1, subagent-built: commitment-decay dilution, second-drop penalty, live-booking vs weekly-settlement asymmetry; first task under the diversity rule: no case-folding, no lenient-tokens quirks) | PASS (gold=1.0, pre=0.0, det x3; gold==binary over 95 batches + sweeps; independent gen_fixtures rerun byte-identical) | 1.0, 0.875, 0.875 (1/3, median 5.6 min); n=5 top-up per protocol: +0.875, +1.0 = **2/5** | 1.0, 1.0, 0.875 (2/3, median 14.5 min) | **PRUNE (n=5 codex prong)**: the per-booking score line was a numeric oracle; codex probed quirks one at a time in 5-6 min runs and partial-scored 0.875 repeatedly. Recycled to v1 (54 tasks). Lesson recorded: never print a number derived from the hidden quantity |
+| legacy-groovecore-binary-parity (replacement #2, subagent-built: groove-allotment wear ladder, stamper-change tax, live-cut vs batch-remaster asymmetry; diversity rule) | PASS (gold=1.0, pre=0.0, det x3; gold==binary over 75 batches + sweeps; independent rerun byte-identical) | 1.0, 0.778, 0.556 (1/3, median 11.2 min); n=5 top-up: +1.0, +0.333 = **2/5** | 1.0, 1.0, 1.0 (3/3, median 16.5 min) | **PRUNE (n=5 codex prong)**: same failure family as brokercore; the per-cut quality line exposed the wear ladder directly. Recycled to v1 (55 tasks) |
+
+Both prunes sharpen the third design law. The tasks the weaker
+reference cracked at n=5 print a fresh per-event number (a booking
+score, a cut quality) that moves when a single quirk fires; the
+admitted tasks that held at n=5 expose hidden state only through
+composites accumulated across many events, orderings, or counts.
+Replacements #3 (shedcore) and #4 (choircore) go further and use
+order-only channels: echoes, orderings, and entity counts, with no
+number derived from the hidden quantity at all.
+
+| legacy-shedcore-binary-parity (replacement #3, subagent-built: tool-shed service rota, duty accrual asymmetry, order-only channel: no printed number derived from hidden state) | PASS (gold=1.0, pre=0.0, det x3; gold==binary over 93 batches + sweeps; independent rerun byte-identical) | 1.0, 1.0 (2/3 early exit, median 5.5 min) | not run | **REJECT (effort axis)**: order-only output did not save it. Run forensics: codex disassembled the stripped binary (otool -tvV), read the quirk constants as literal immediates beside obvious branches in small clean functions, reconstructed the engine, and fuzz-verified against the binary, all in under 4 minutes. Recycled to v1 (56 tasks) |
+
+Forensic sweep across the program's codex runs: disassembly appears in
+the winning run on brokercore (1 of its 3 solves), groovecore (2 of 3
+solves), pacecore's only solve, and matchcore's only solve; it appears
+and FAILS on snapcore (0.6) and was not attempted or not decisive
+elsewhere. The design law gains a fourth clause: the compiled logic
+must not be legible under disassembly. Survivors have large,
+interleaved binaries (queuecore, the hardest task, is also the
+largest); the three rejected replacements compiled small clean
+functions with quirk constants as readable immediates. Remedy applied
+to replacements #4 and #5: quirk constants derived at runtime (never
+immediates at point of use), one shared table-driven update routine
+for both paths, data-driven dispatch, ledger as a real structure. No
+anti-RE tooling; ordinary legacy-style indirection only.
+
+| legacy-choircore-binary-parity (replacement #4, subagent-built: bench-standing seating roster, order-only channel, FIRST disassembly-hardened build: constants derived from a 4KB seed table, shared table-driven lane routine, function-pointer dispatch; builder's own otool audit showed no quirk immediates) | PASS (gold=1.0, pre=0.0, det x3; gold==binary over 78 batches + sweeps; independent rerun byte-identical) | 1.0, 1.0 (2/3 early exit, median 7.8 min) | not run | **REJECT (effort axis)**: the hardening was defeated head-on. Codex disassembled, identified the seed-table loads and offsets, then read the table bytes from the binary's data section and XOR-folded the pairs itself to recover every derived constant, finishing with 1000-case differential fuzzing against the binary. The second solve used strings, black-box probing, and fuzzing without full disassembly. Recycled to v1 (57 tasks) |
+
+Program finding, recorded before any further replacement attempt: a
+small deterministic binary is effectively white-box to a frontier
+model. Constant-hiding indirection is an unwinnable arms race (the
+model reads assembly fluently and will extract any embedded table).
+What actually separates the admitted tasks from these five consecutive
+replacement rejects is not concealment but RECONSTRUCTION BURDEN: the
+admitted tasks have state spaces where hypothesis-fixing by
+differential fuzzing stays slow (many interacting quirks, guard-trip
+risk on overgeneralization), so even a model that recovers fragments
+of the mechanics pays a long verification tail. Concealment slows the
+read; only interaction depth slows the rebuild.
+
+| legacy-ferrycore-binary-parity (replacement #5, subagent-built: standing-lean boarding order, wedged-cascade squaring divergence in the queuecore shape, full disassembly hardening, order-only channel) | PASS (gold=1.0, pre=0.0, det x3; gold==binary over 66 batches + sweeps; independent rerun byte-identical) | 1.0, 1.0, 0.375 (2/3, median 8.7 min) | not run | **REJECT (effort axis)**: all three codex runs opened with static analysis; one solved via full objdump -d reverse-engineering of the linux static binary in 13.3 min, one via otool plus probing in 8.7, and the failed 0.375 run attempted the choircore byte-extraction trick. Recycled to v1 (58 tasks) |
+
+## Replacement wave conclusion (2026-08-30, six consecutive rejects; wave halted by rule)
+
+The wave is stopped rather than continued blind. Standing record: 37
+frontier-gated candidates, 18 current admits, 19 recycles. The six
+rejects (loyaltycore and tariffcore at n=5, then brokercore,
+groovecore, shedcore, choircore, ferrycore) chart a single arc: the
+weaker reference has made static reverse-engineering of the stripped
+binary its default opening move, and on a compact single-engine binary
+it wins in 4 to 13 minutes regardless of output channel, constant
+hiding, or compounding mechanics. The admitted tasks' n=5 survival now
+reads as partly strategy-selection variance rather than robust
+resistance. Decision on how to proceed (ship the 18 with this finding
+documented, or develop a structurally different task family) is
+escalated rather than taken unilaterally; the candidate pipeline is
+paused.

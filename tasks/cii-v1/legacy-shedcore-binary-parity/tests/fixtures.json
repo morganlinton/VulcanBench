@@ -1,0 +1,2361 @@
+{
+ "guard_single_loans": [
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 6",
+    "R ann saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "T axe 4",
+    "O ann",
+    "O bob",
+    "L ann saw 6",
+    "L bob axe 9",
+    "R ann saw",
+    "R bob axe",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "L bob axe",
+    "R ann saw",
+    "R bob axe",
+    "S axe",
+    "S saw",
+    "SEND 2",
+    "X 2 2 2 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a1 7",
+    "T b2 7",
+    "T c3 7",
+    "O m1",
+    "O m2",
+    "O m3",
+    "L m1 a1 5",
+    "L m2 b2 12",
+    "L m3 c3 8",
+    "R m1 a1",
+    "R m2 b2",
+    "R m3 c3",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "L m1 a1",
+    "L m2 b2",
+    "L m3 c3",
+    "R m1 a1",
+    "R m2 b2",
+    "R m3 c3",
+    "S b2",
+    "S c3",
+    "S a1",
+    "SEND 3",
+    "X 3 3 3 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 9",
+    "O ann",
+    "L ann saw 30",
+    "R ann saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 1",
+    "O ann",
+    "L ann saw 1",
+    "R ann saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "T axe 4",
+    "O ann",
+    "O bob",
+    "L ann saw 6",
+    "R ann saw",
+    "L bob axe 9",
+    "R bob axe",
+    "S",
+    "L ann axe 4",
+    "R ann axe",
+    "L bob saw 11",
+    "R bob saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "R ann saw",
+    "L bob axe",
+    "R bob axe",
+    "S axe",
+    "S saw",
+    "SEND 2",
+    "L ann axe",
+    "R ann axe",
+    "L bob saw",
+    "R bob saw",
+    "S saw",
+    "S axe",
+    "SEND 2",
+    "X 2 2 4 4 2 0 0"
+   ]
+  }
+ ],
+ "guard_registrations": [
+  {
+   "input": [
+    "T saw 5",
+    "T axe 1",
+    "T drill 9"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "X 3 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T Saw 5",
+    "T saw 5"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "X 2 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "O ann",
+    "O Ann",
+    "O bob"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "X 0 3 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T zzzzzzz9 7",
+    "O yyyyyyy8"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "X 1 1 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 5",
+    "T saw 7"
+   ],
+   "expected": [
+    "OK 1",
+    "N saw DUP",
+    "X 1 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "O ann",
+    "O ann"
+   ],
+   "expected": [
+    "OK 1",
+    "N ann DUP",
+    "X 0 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 5",
+    "O saw"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "X 1 1 0 0 0 0 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "T toolong99 5"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T sa-w 5"
+   ],
+   "expected": [
+    "N sa-w FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 0"
+   ],
+   "expected": [
+    "N saw GRADE",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 10"
+   ],
+   "expected": [
+    "N saw GRADE",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 09"
+   ],
+   "expected": [
+    "N saw GRADE",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw x"
+   ],
+   "expected": [
+    "N saw GRADE",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw"
+   ],
+   "expected": [
+    "N saw FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 5 extra"
+   ],
+   "expected": [
+    "N saw FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "T saw 0"
+   ],
+   "expected": [
+    "OK 1",
+    "N saw GRADE",
+    "X 1 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "O"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "O ann extra"
+   ],
+   "expected": [
+    "N ann FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "O bad-id"
+   ],
+   "expected": [
+    "N bad-id FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L ann saw 5"
+   ],
+   "expected": [
+    "N ann UNKNOWN",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "O ann",
+    "L ann saw 5"
+   ],
+   "expected": [
+    "OK 1",
+    "N ann UNKNOWN",
+    "X 0 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L m-1 saw 5"
+   ],
+   "expected": [
+    "N m-1 FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann sa+w 5"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann FMT",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 0"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann DAYS",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 31"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann DAYS",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 005"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann DAYS",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 5x"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann DAYS",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann FMT",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 5 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann FMT",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L ghost saw 99"
+   ],
+   "expected": [
+    "N ghost DAYS",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "O bob",
+    "L ann saw 5",
+    "L bob saw 9"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "N bob OUT",
+    "X 1 2 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 5",
+    "L ann saw 6"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "N ann OUT",
+    "X 1 1 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "R ann saw"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann NOLOAN",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "O bob",
+    "L ann saw 5",
+    "R bob saw"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "N bob NOLOAN",
+    "X 1 2 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 5",
+    "R ann saw",
+    "R ann saw"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "N ann NOLOAN",
+    "X 1 1 1 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "R ghost saw"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "R ann drill"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann UNKNOWN",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "R ann"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N ann FMT",
+    "X 1 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S extra"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M extra"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M x y"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "t saw 5"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "o ann"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "l ann saw 5"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "r ann saw"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "s"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "m"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 5"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "T saw 5",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "O ann"
+   ],
+   "expected": [
+    "OK 1",
+    "X 0 1 0 0 0 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "M",
+    "T saw 4",
+    "T axe 4",
+    "O ann",
+    "O bob",
+    "T saw 5",
+    "L ann saw 6",
+    "L bob axe 13",
+    "R ann saw",
+    "R bob axe",
+    "L ann drill 5",
+    "Z junk",
+    "S",
+    "R bob saw"
+   ],
+   "expected": [
+    "MOK 0",
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "N saw DUP",
+    "L ann saw",
+    "L bob axe",
+    "R ann saw",
+    "R bob axe",
+    "N ann UNKNOWN",
+    "N ???????? FMT",
+    "S axe",
+    "S saw",
+    "SEND 2",
+    "N bob NOLOAN",
+    "X 2 2 2 2 1 1 4"
+   ]
+  }
+ ],
+ "f2p_loan_accrual": [
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 6",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T hi 5",
+    "T lo 2",
+    "O ann",
+    "O bob",
+    "L ann hi 2",
+    "L bob lo 6",
+    "R ann hi",
+    "R bob lo",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann hi",
+    "L bob lo",
+    "R ann hi",
+    "R bob lo",
+    "S hi",
+    "S lo",
+    "SEND 2",
+    "X 2 2 2 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 9",
+    "T b 1",
+    "T c 4",
+    "O m1",
+    "O m2",
+    "O m3",
+    "L m1 a 3",
+    "L m2 b 29",
+    "L m3 c 7",
+    "R m1 a",
+    "R m2 b",
+    "R m3 c",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "L m1 a",
+    "L m2 b",
+    "L m3 c",
+    "R m1 a",
+    "R m2 b",
+    "R m3 c",
+    "S a",
+    "S c",
+    "S b",
+    "SEND 3",
+    "X 3 3 3 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 6",
+    "S",
+    "R ann saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "S saw",
+    "SEND 1",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "T axe 2",
+    "O ann",
+    "O bob",
+    "L ann saw 6",
+    "L bob axe 5",
+    "R bob axe",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "L bob axe",
+    "R bob axe",
+    "S saw",
+    "S axe",
+    "SEND 2",
+    "X 2 2 2 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 6",
+    "R ann saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_heavy_carter": [
+  {
+   "input": [
+    "T a 2",
+    "T b 2",
+    "T c 2",
+    "T d 2",
+    "O ann",
+    "O bob",
+    "L ann a 10",
+    "L ann b 11",
+    "L ann c 12",
+    "R ann a",
+    "R ann b",
+    "R ann c",
+    "L bob d 13",
+    "R bob d",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 1",
+    "OK 2",
+    "L ann a",
+    "L ann b",
+    "L ann c",
+    "R ann a",
+    "R ann b",
+    "R ann c",
+    "L bob d",
+    "R bob d",
+    "S c",
+    "S b",
+    "S d",
+    "S a",
+    "SEND 4",
+    "X 4 2 4 4 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 2",
+    "T b 2",
+    "T d 2",
+    "O ann",
+    "O bob",
+    "L ann a 10",
+    "L ann b 11",
+    "R ann a",
+    "R ann b",
+    "L bob d 13",
+    "R bob d",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 1",
+    "OK 2",
+    "L ann a",
+    "L ann b",
+    "R ann a",
+    "R ann b",
+    "L bob d",
+    "R bob d",
+    "S d",
+    "S b",
+    "S a",
+    "SEND 3",
+    "X 3 2 3 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 3",
+    "T b 3",
+    "T c 3",
+    "O ann",
+    "O bob",
+    "L ann a 5",
+    "L ann b 5",
+    "L ann c 5",
+    "R ann a",
+    "R ann b",
+    "R ann c",
+    "S",
+    "L ann a 8",
+    "L bob b 9",
+    "R ann a",
+    "R bob b",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 1",
+    "OK 2",
+    "L ann a",
+    "L ann b",
+    "L ann c",
+    "R ann a",
+    "R ann b",
+    "R ann c",
+    "S c",
+    "S b",
+    "S a",
+    "SEND 3",
+    "L ann a",
+    "L bob b",
+    "R ann a",
+    "R bob b",
+    "S a",
+    "S b",
+    "SEND 2",
+    "X 3 2 5 5 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 2",
+    "T b 2",
+    "T c 2",
+    "O ann",
+    "L ann a 10",
+    "L ann b 11",
+    "R ann a",
+    "L ann c 12",
+    "R ann b",
+    "R ann c",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 1",
+    "L ann a",
+    "L ann b",
+    "R ann a",
+    "L ann c",
+    "R ann b",
+    "R ann c",
+    "S c",
+    "S b",
+    "S a",
+    "SEND 3",
+    "X 3 1 3 3 1 0 0"
+   ]
+  }
+ ],
+ "f2p_tie_ledger": [
+  {
+   "input": [
+    "T t1 3",
+    "T t2 3",
+    "O ann",
+    "O bob",
+    "L ann t1 7",
+    "L bob t2 7",
+    "R ann t1",
+    "R bob t2",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann t1",
+    "L bob t2",
+    "R ann t1",
+    "R bob t2",
+    "S t2",
+    "S t1",
+    "SEND 2",
+    "X 2 2 2 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 3",
+    "T t2 3",
+    "O ann",
+    "O bob",
+    "L bob t2 7",
+    "L ann t1 7",
+    "R bob t2",
+    "R ann t1",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L bob t2",
+    "L ann t1",
+    "R bob t2",
+    "R ann t1",
+    "S t1",
+    "S t2",
+    "SEND 2",
+    "X 2 2 2 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 3",
+    "T t2 3",
+    "O ann",
+    "O bob",
+    "L ann t1 7",
+    "L bob t2 7",
+    "R ann t1",
+    "R bob t2",
+    "M",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann t1",
+    "L bob t2",
+    "R ann t1",
+    "R bob t2",
+    "MOK 2",
+    "S t1",
+    "S t2",
+    "SEND 2",
+    "X 2 2 2 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 3",
+    "T t2 3",
+    "O ann",
+    "O bob",
+    "L ann t1 7",
+    "L bob t2 7",
+    "R ann t1",
+    "R bob t2",
+    "M",
+    "L ann t1 4",
+    "R ann t1",
+    "L bob t2 4",
+    "R bob t2",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann t1",
+    "L bob t2",
+    "R ann t1",
+    "R bob t2",
+    "MOK 2",
+    "L ann t1",
+    "R ann t1",
+    "L bob t2",
+    "R bob t2",
+    "S t2",
+    "S t1",
+    "SEND 2",
+    "X 2 2 4 4 1 1 0"
+   ]
+  }
+ ],
+ "f2p_retirement_watch": [
+  {
+   "input": [
+    "T w 3",
+    "T f 3",
+    "O ann",
+    "O bob",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 8",
+    "L bob f 6",
+    "R ann w",
+    "R bob f",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "L bob f",
+    "R ann w",
+    "R bob f",
+    "S f",
+    "S w",
+    "SEND 2",
+    "X 2 2 5 5 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T w 1",
+    "O ann",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 1",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "SEND 0",
+    "X 1 1 4 3 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T w 1",
+    "O ann",
+    "L ann w 1",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann w",
+    "S w",
+    "SEND 1",
+    "X 1 1 1 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T w 2",
+    "O ann",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "L ann w 5",
+    "R ann w",
+    "S",
+    "M",
+    "L ann w 10",
+    "R ann w",
+    "S",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "L ann w",
+    "R ann w",
+    "S w",
+    "SEND 1",
+    "MOK 0",
+    "L ann w",
+    "R ann w",
+    "SEND 0",
+    "MOK 1",
+    "X 1 1 4 4 4 2 0"
+   ]
+  }
+ ],
+ "f2p_reckoning_drift": [
+  {
+   "input": [
+    "T saw 3",
+    "O ann",
+    "L ann saw 5",
+    "R ann saw",
+    "M",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "MOK 1",
+    "MOK 1",
+    "X 1 1 1 1 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 3",
+    "T b 3",
+    "O m",
+    "L m a 5",
+    "R m a",
+    "M",
+    "L m b 4",
+    "R m b",
+    "M",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "L m a",
+    "R m a",
+    "MOK 1",
+    "L m b",
+    "R m b",
+    "MOK 2",
+    "S a",
+    "S b",
+    "SEND 2",
+    "X 2 1 2 2 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 5",
+    "O m",
+    "L m a 6",
+    "M",
+    "R m a",
+    "S",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L m a",
+    "MOK 0",
+    "R m a",
+    "S a",
+    "SEND 1",
+    "MOK 1",
+    "X 1 1 1 1 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 4",
+    "T b 2",
+    "O m",
+    "L m a 6",
+    "R m a",
+    "S",
+    "M",
+    "L m a 3",
+    "R m a",
+    "L m b 5",
+    "R m b",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "L m a",
+    "R m a",
+    "S a",
+    "SEND 1",
+    "MOK 0",
+    "L m a",
+    "R m a",
+    "L m b",
+    "R m b",
+    "S b",
+    "S a",
+    "SEND 2",
+    "X 2 1 3 3 2 1 0"
+   ]
+  }
+ ],
+ "f2p_empty_rota": [
+  {
+   "input": [
+    "S"
+   ],
+   "expected": [
+    "SEND 0",
+    "X 0 0 0 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "SEND 0",
+    "X 1 0 0 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 5",
+    "R ann saw",
+    "S",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "SEND 0",
+    "X 1 1 1 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M",
+    "S"
+   ],
+   "expected": [
+    "MOK 0",
+    "SEND 0",
+    "X 0 0 0 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "O ann",
+    "L ann saw 5",
+    "R ann saw",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "L ann saw",
+    "R ann saw",
+    "S saw",
+    "SEND 1",
+    "X 1 1 1 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_quirk_chain": [
+  {
+   "input": [
+    "T saw 5",
+    "T axe 2",
+    "T hoe 7",
+    "O ann",
+    "O bob",
+    "L ann saw 4",
+    "L ann axe 9",
+    "L ann hoe 2",
+    "R ann saw",
+    "R ann axe",
+    "S",
+    "M",
+    "L bob saw 6",
+    "R bob saw",
+    "L ann axe 3",
+    "R ann axe",
+    "S",
+    "R ann hoe",
+    "M",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "L ann axe",
+    "L ann hoe",
+    "R ann saw",
+    "R ann axe",
+    "S saw",
+    "S axe",
+    "S hoe",
+    "SEND 3",
+    "MOK 0",
+    "L bob saw",
+    "R bob saw",
+    "L ann axe",
+    "R ann axe",
+    "S saw",
+    "S axe",
+    "SEND 2",
+    "R ann hoe",
+    "MOK 0",
+    "SEND 0",
+    "X 3 2 5 5 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 1",
+    "T b 9",
+    "O m1",
+    "O m2",
+    "O m3",
+    "L m1 a 30",
+    "R m1 a",
+    "L m2 b 1",
+    "R m2 b",
+    "S",
+    "S",
+    "M",
+    "L m3 a 2",
+    "L m2 b 2",
+    "R m3 a",
+    "R m2 b",
+    "M",
+    "S",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "L m1 a",
+    "R m1 a",
+    "L m2 b",
+    "R m2 b",
+    "S a",
+    "S b",
+    "SEND 2",
+    "SEND 0",
+    "MOK 0",
+    "L m3 a",
+    "L m2 b",
+    "R m3 a",
+    "R m2 b",
+    "MOK 0",
+    "SEND 0",
+    "MOK 0",
+    "X 2 3 4 4 3 3 0"
+   ]
+  },
+  {
+   "input": [
+    "T saw 4",
+    "T axe 4",
+    "O ann",
+    "O bob",
+    "L ann saw 6",
+    "L bob axe 9",
+    "R ann saw",
+    "R bob axe",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "L ann saw",
+    "L bob axe",
+    "R ann saw",
+    "R bob axe",
+    "S axe",
+    "S saw",
+    "SEND 2",
+    "X 2 2 2 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "O ann",
+    "L ann saw 30",
+    "X",
+    "L ann",
+    "T drill 9",
+    "L ann drill 2",
+    "M",
+    "R ann drill",
+    "S",
+    "R ann saw",
+    "R bob saw",
+    "L ann drill 5x",
+    "R dee level",
+    "R bob hoe",
+    "M",
+    "R cy level",
+    "O ann",
+    "L ann drill 30",
+    "X",
+    "O cy",
+    "L cy ghost 2",
+    "T axe x",
+    "O cy",
+    "M",
+    "S",
+    "L ann hoe 31",
+    "L cy Saw 5x",
+    "R bob Saw",
+    "L ann drill 30",
+    "S",
+    "R ann drill",
+    "S",
+    "M",
+    "R ann drill",
+    "M",
+    "L ann drill 2",
+    "S",
+    "L ann level 28",
+    "R ann drill",
+    "L ann drill 5x",
+    "O bob",
+    "L m-1 drill 12",
+    "R ann rake",
+    "O",
+    "O ann",
+    "L ann drill 09",
+    "L bob rake 30",
+    "S",
+    "R ann drill",
+    "L m-1 drill 12",
+    "R bob axe",
+    "T rake 2",
+    "L bob drill 1",
+    "R bob drill",
+    "O ann",
+    "O dee",
+    "R cy Saw",
+    "L cy drill 09",
+    "L cy rake 5x",
+    "L cy rake 1",
+    "O dee",
+    "O dee",
+    "L m-1 level 30",
+    "L cy hoe 5",
+    "R cy rake",
+    "S",
+    "L bob rake 12",
+    "L ann rake 09",
+    "O cy",
+    "M",
+    "S",
+    "L cy ghost 1",
+    "T rake x",
+    "O bob",
+    "L ann",
+    "R bob rake",
+    "R ann",
+    "L cy rake 31",
+    "T level 7",
+    "S",
+    "L dee level 09",
+    "L cy rake 09",
+    "S",
+    "T saw",
+    "L m-1 saw 09",
+    "R cy rake",
+    "L cy rake 12",
+    "R cy drill",
+    "L cy drill 28",
+    "L ann drill 31",
+    "R cy clamp",
+    "R cy rake",
+    "M",
+    "M",
+    "L cy rake 28",
+    "M",
+    "Q hey",
+    "S",
+    "L cy drill 1",
+    "L dee level 5x",
+    "L cy clamp 2",
+    "S",
+    "L m-1 axe 28",
+    "S",
+    "O cy",
+    "L cy Saw 1",
+    "R dee Saw",
+    "R ann axe",
+    "L ann rake 5x",
+    "O cy",
+    "S",
+    "S",
+    "O cy",
+    "L ann level 28",
+    "R dee level",
+    "S",
+    "S",
+    "R cy drill",
+    "M",
+    "L bob level 5",
+    "O cy",
+    "M",
+    "L bob drill 28",
+    "S",
+    "L dee rake 5x",
+    "S",
+    "R bob drill",
+    "L bob drill 2",
+    "L ghost ghost 30",
+    "R bob level",
+    "S",
+    "M",
+    "L dee level 5",
+    "R ann level",
+    "L bob Saw 2",
+    "M",
+    "S",
+    "t saw 5",
+    "S",
+    "O cy",
+    "L m-1 axe 5x",
+    "L dee clamp 30",
+    "T hoe 7",
+    "S",
+    "O bob",
+    "M",
+    "L bob hoe 1",
+    "L bob ghost 09",
+    "T saw 1",
+    "M x",
+    "L dee saw 09",
+    "R ann",
+    "t saw 5",
+    "M",
+    "L bob axe 5x",
+    "L bob drill 0",
+    "t saw 5",
+    "M",
+    "R cy rake",
+    "S",
+    "L m-1 rake 0",
+    "R dee saw",
+    "S",
+    "L bob rake 30",
+    "L dee saw 2",
+    "R bob drill",
+    "L bob drill 0",
+    "S",
+    "zzz junk line",
+    "T saw x"
+   ],
+   "expected": [
+    "OK 1",
+    "N ann UNKNOWN",
+    "N ???????? FMT",
+    "N ann FMT",
+    "OK 1",
+    "L ann drill",
+    "MOK 0",
+    "R ann drill",
+    "S drill",
+    "SEND 1",
+    "N ann UNKNOWN",
+    "N bob UNKNOWN",
+    "N ann DAYS",
+    "N dee UNKNOWN",
+    "N bob UNKNOWN",
+    "MOK 0",
+    "N cy UNKNOWN",
+    "N ann DUP",
+    "L ann drill",
+    "N ???????? FMT",
+    "OK 2",
+    "N cy UNKNOWN",
+    "N axe GRADE",
+    "N cy DUP",
+    "MOK 0",
+    "SEND 0",
+    "N ann DAYS",
+    "N cy DAYS",
+    "N bob UNKNOWN",
+    "N ann OUT",
+    "SEND 0",
+    "R ann drill",
+    "S drill",
+    "SEND 1",
+    "MOK 1",
+    "N ann NOLOAN",
+    "MOK 1",
+    "L ann drill",
+    "S drill",
+    "SEND 1",
+    "N ann UNKNOWN",
+    "R ann drill",
+    "N ann DAYS",
+    "OK 3",
+    "N m-1 FMT",
+    "N ann UNKNOWN",
+    "N ???????? FMT",
+    "N ann DUP",
+    "L ann drill",
+    "N bob UNKNOWN",
+    "S drill",
+    "SEND 1",
+    "R ann drill",
+    "N m-1 FMT",
+    "N bob UNKNOWN",
+    "OK 2",
+    "L bob drill",
+    "R bob drill",
+    "N ann DUP",
+    "OK 4",
+    "N cy UNKNOWN",
+    "L cy drill",
+    "N cy DAYS",
+    "L cy rake",
+    "N dee DUP",
+    "N dee DUP",
+    "N m-1 FMT",
+    "N cy UNKNOWN",
+    "R cy rake",
+    "S drill",
+    "S rake",
+    "SEND 2",
+    "L bob rake",
+    "N ann OUT",
+    "N cy DUP",
+    "MOK 0",
+    "SEND 0",
+    "N cy UNKNOWN",
+    "N rake GRADE",
+    "N bob DUP",
+    "N ann FMT",
+    "R bob rake",
+    "N ann FMT",
+    "N cy DAYS",
+    "OK 3",
+    "SEND 0",
+    "L dee level",
+    "L cy rake",
+    "S level",
+    "S rake",
+    "SEND 2",
+    "N saw FMT",
+    "N m-1 FMT",
+    "R cy rake",
+    "L cy rake",
+    "R cy drill",
+    "L cy drill",
+    "N ann DAYS",
+    "N cy UNKNOWN",
+    "R cy rake",
+    "MOK 2",
+    "MOK 2",
+    "L cy rake",
+    "MOK 2",
+    "N ???????? FMT",
+    "S drill",
+    "S rake",
+    "SEND 2",
+    "N cy OUT",
+    "N dee DAYS",
+    "N cy UNKNOWN",
+    "SEND 0",
+    "N m-1 FMT",
+    "SEND 0",
+    "N cy DUP",
+    "N cy UNKNOWN",
+    "N dee UNKNOWN",
+    "N ann UNKNOWN",
+    "N ann DAYS",
+    "N cy DUP",
+    "SEND 0",
+    "SEND 0",
+    "N cy DUP",
+    "N ann OUT",
+    "R dee level",
+    "SEND 0",
+    "SEND 0",
+    "R cy drill",
+    "MOK 1",
+    "L bob level",
+    "N cy DUP",
+    "MOK 1",
+    "L bob drill",
+    "S drill",
+    "SEND 1",
+    "N dee DAYS",
+    "SEND 0",
+    "R bob drill",
+    "L bob drill",
+    "N ghost UNKNOWN",
+    "R bob level",
+    "S drill",
+    "S level",
+    "SEND 2",
+    "MOK 2",
+    "L dee level",
+    "N ann NOLOAN",
+    "N bob UNKNOWN",
+    "MOK 2",
+    "S drill",
+    "S level",
+    "SEND 2",
+    "N ???????? FMT",
+    "SEND 0",
+    "N cy DUP",
+    "N m-1 FMT",
+    "N dee UNKNOWN",
+    "OK 4",
+    "SEND 0",
+    "N bob DUP",
+    "MOK 0",
+    "L bob hoe",
+    "N bob UNKNOWN",
+    "OK 5",
+    "N ???????? FMT",
+    "L dee saw",
+    "N ann FMT",
+    "N ???????? FMT",
+    "MOK 0",
+    "N bob DAYS",
+    "N bob DAYS",
+    "N ???????? FMT",
+    "MOK 0",
+    "R cy rake",
+    "S rake",
+    "SEND 1",
+    "N m-1 FMT",
+    "R dee saw",
+    "S saw",
+    "SEND 1",
+    "L bob rake",
+    "L dee saw",
+    "R bob drill",
+    "N bob DAYS",
+    "S rake",
+    "S drill",
+    "S saw",
+    "SEND 3",
+    "N ???????? FMT",
+    "N saw GRADE",
+    "X 5 4 21 17 26 16 81"
+   ]
+  },
+  {
+   "input": [
+    "M",
+    "R ann",
+    "L m-1 saw 1",
+    "L ghost level 28",
+    "M",
+    "R cy saw",
+    "L ghost clamp 28",
+    "O dee",
+    "L dee rake 12",
+    "S",
+    "t saw 5",
+    "L dee hoe 09",
+    "R dee clamp",
+    "R cy Saw",
+    "S",
+    "S",
+    "L dee level 09",
+    "S",
+    "S now",
+    "T clamp x",
+    "R dee Saw",
+    "R dee rake",
+    "R cy hoe",
+    "L dee level 1",
+    "T hoe x",
+    "L dee hoe 2",
+    "M",
+    "R ann level",
+    "L dee level 0",
+    "L dee clamp 31",
+    "R dee hoe",
+    "L ghost ghost 2",
+    "M x",
+    "S",
+    "T level 9",
+    "R bob axe",
+    "L dee level 28",
+    "L dee ghost 5",
+    "R dee level",
+    "L dee level 1",
+    "O ann",
+    "R bob rake",
+    "S",
+    "R dee level",
+    "S",
+    "O bob",
+    "O ann",
+    "R ann drill",
+    "L dee level 12",
+    "S",
+    "T saw 1",
+    "R dee level",
+    "O dee",
+    "M",
+    "L dee saw 30",
+    "R dee saw",
+    "R dee Saw",
+    "L dee Saw 5x",
+    "t saw 5",
+    "R dee saw",
+    "L dee level 31",
+    "O dee",
+    "L dee Saw 5",
+    "M",
+    "O dee",
+    "O ann",
+    "L dee drill 31",
+    "T Saw 0",
+    "L dee saw 09",
+    "O dee",
+    "M",
+    "Q hey",
+    "L dee level 09",
+    "S",
+    "M",
+    "L bob clamp 31",
+    "L dee axe 28",
+    "O ann",
+    "R ann",
+    "L dee saw 5",
+    "O bob",
+    "O cy",
+    "L ghost hoe 31",
+    "O bob",
+    "L dee hoe 1",
+    "M",
+    "R dee saw",
+    "R dee level",
+    "L bob level 5",
+    "L cy saw 30",
+    "R bob level",
+    "L bob ghost 09",
+    "L dee level 31",
+    "R cy saw",
+    "M x",
+    "R bob rake",
+    "M",
+    "S",
+    "M x",
+    "L bob saw 30",
+    "L bob level 28",
+    "R bob saw",
+    "L bob saw 2",
+    "T Saw 5",
+    "S",
+    "X",
+    "X",
+    "L cy level 09",
+    "T Saw 1",
+    "L ann Saw 0",
+    "T drill x",
+    "R ann",
+    "M",
+    "O dee",
+    "T saw",
+    "T saw 2",
+    "L bob Saw 12",
+    "L bob rake 28",
+    "zzz junk line",
+    "L ann",
+    "S",
+    "R bob level",
+    "R ann saw",
+    "M",
+    "S",
+    "S",
+    "L ann",
+    "S",
+    "S",
+    "L bob level 12",
+    "R bob saw",
+    "M",
+    "R bob level",
+    "R bob Saw",
+    "L bob Saw 28",
+    "T saw 7",
+    "T rake 2",
+    "Q hey",
+    "L cy saw 2",
+    "L ann rake 1",
+    "T saw 10",
+    "S",
+    "L ann ghost 2",
+    "M",
+    "R ann Saw",
+    "S",
+    "O ann",
+    "S",
+    "M",
+    "R bob Saw",
+    "zzz junk line",
+    "R ann rake",
+    "t saw 5",
+    "T axe 9",
+    "S",
+    "L ann Saw 12",
+    "L ann level 28",
+    "R ann level"
+   ],
+   "expected": [
+    "MOK 0",
+    "N ann FMT",
+    "N m-1 FMT",
+    "N ghost UNKNOWN",
+    "MOK 0",
+    "N cy UNKNOWN",
+    "N ghost UNKNOWN",
+    "OK 1",
+    "N dee UNKNOWN",
+    "SEND 0",
+    "N ???????? FMT",
+    "N dee UNKNOWN",
+    "N dee UNKNOWN",
+    "N cy UNKNOWN",
+    "SEND 0",
+    "SEND 0",
+    "N dee UNKNOWN",
+    "SEND 0",
+    "N ???????? FMT",
+    "N clamp GRADE",
+    "N dee UNKNOWN",
+    "N dee UNKNOWN",
+    "N cy UNKNOWN",
+    "N dee UNKNOWN",
+    "N hoe GRADE",
+    "N dee UNKNOWN",
+    "MOK 0",
+    "N ann UNKNOWN",
+    "N dee DAYS",
+    "N dee DAYS",
+    "N dee UNKNOWN",
+    "N ghost UNKNOWN",
+    "N ???????? FMT",
+    "SEND 0",
+    "OK 1",
+    "N bob UNKNOWN",
+    "L dee level",
+    "N dee UNKNOWN",
+    "R dee level",
+    "L dee level",
+    "OK 2",
+    "N bob UNKNOWN",
+    "S level",
+    "SEND 1",
+    "R dee level",
+    "S level",
+    "SEND 1",
+    "OK 3",
+    "N ann DUP",
+    "N ann UNKNOWN",
+    "L dee level",
+    "S level",
+    "SEND 1",
+    "OK 2",
+    "R dee level",
+    "N dee DUP",
+    "MOK 0",
+    "L dee saw",
+    "R dee saw",
+    "N dee UNKNOWN",
+    "N dee DAYS",
+    "N ???????? FMT",
+    "N dee NOLOAN",
+    "N dee DAYS",
+    "N dee DUP",
+    "N dee UNKNOWN",
+    "MOK 1",
+    "N dee DUP",
+    "N ann DUP",
+    "N dee DAYS",
+    "N Saw GRADE",
+    "L dee saw",
+    "N dee DUP",
+    "MOK 1",
+    "N ???????? FMT",
+    "L dee level",
+    "S saw",
+    "S level",
+    "SEND 2",
+    "MOK 0",
+    "N bob DAYS",
+    "N dee UNKNOWN",
+    "N ann DUP",
+    "N ann FMT",
+    "N dee OUT",
+    "N bob DUP",
+    "OK 4",
+    "N ghost DAYS",
+    "N bob DUP",
+    "N dee UNKNOWN",
+    "MOK 0",
+    "R dee saw",
+    "R dee level",
+    "L bob level",
+    "L cy saw",
+    "R bob level",
+    "N bob UNKNOWN",
+    "N dee DAYS",
+    "R cy saw",
+    "N ???????? FMT",
+    "N bob UNKNOWN",
+    "MOK 2",
+    "S level",
+    "S saw",
+    "SEND 2",
+    "N ???????? FMT",
+    "L bob saw",
+    "L bob level",
+    "R bob saw",
+    "L bob saw",
+    "OK 3",
+    "S level",
+    "S saw",
+    "SEND 2",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N cy OUT",
+    "N Saw DUP",
+    "N ann DAYS",
+    "N drill GRADE",
+    "N ann FMT",
+    "MOK 0",
+    "N dee DUP",
+    "N saw FMT",
+    "N saw DUP",
+    "L bob Saw",
+    "N bob UNKNOWN",
+    "N ???????? FMT",
+    "N ann FMT",
+    "S Saw",
+    "SEND 1",
+    "R bob level",
+    "N ann NOLOAN",
+    "MOK 1",
+    "S level",
+    "SEND 1",
+    "SEND 0",
+    "N ann FMT",
+    "SEND 0",
+    "SEND 0",
+    "L bob level",
+    "R bob saw",
+    "MOK 0",
+    "R bob level",
+    "R bob Saw",
+    "L bob Saw",
+    "N saw DUP",
+    "OK 4",
+    "N ???????? FMT",
+    "L cy saw",
+    "L ann rake",
+    "N saw GRADE",
+    "S Saw",
+    "S level",
+    "S rake",
+    "SEND 3",
+    "N ann UNKNOWN",
+    "MOK 1",
+    "N ann NOLOAN",
+    "S level",
+    "SEND 1",
+    "N ann DUP",
+    "SEND 0",
+    "MOK 0",
+    "R bob Saw",
+    "N ???????? FMT",
+    "R ann rake",
+    "N ???????? FMT",
+    "OK 5",
+    "S rake",
+    "SEND 1",
+    "L ann Saw",
+    "L ann level",
+    "R ann level",
+    "X 5 4 18 16 20 14 81"
+   ]
+  }
+ ]
+}

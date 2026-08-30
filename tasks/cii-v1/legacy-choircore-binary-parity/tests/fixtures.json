@@ -1,0 +1,2282 @@
+{
+ "guard_seating": [
+  {
+   "input": [
+    "E ada 3",
+    "E bea 1",
+    "E cy 2",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C ada",
+    "C cy",
+    "C bea",
+    "CEND 3",
+    "X 3 3 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 4",
+    "P ada",
+    "A ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "A ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "X 2 2 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 2",
+    "E cy 3",
+    "E dov 4",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C cy",
+    "C bea",
+    "C ada",
+    "C dov",
+    "CEND 4",
+    "WOK 0",
+    "C ada",
+    "C bea",
+    "C cy",
+    "C dov",
+    "CEND 4",
+    "X 4 3 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "P ada",
+    "A ada",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "P ada",
+    "A ada",
+    "P ada",
+    "C ada",
+    "CEND 1",
+    "X 1 2 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 2",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 1 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E Ada 2",
+    "E ADA 3",
+    "P Ada",
+    "P ADA",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P Ada",
+    "P ADA",
+    "C ADA",
+    "C Ada",
+    "CEND 2",
+    "X 2 2 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 3",
+    "P bea",
+    "A bea",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P bea",
+    "A bea",
+    "P ada",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 2 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_reseat": [
+  {
+   "input": [
+    "E ada 3",
+    "E bea 1",
+    "P ada",
+    "P bea",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "WOK 2",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 2 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "A ada",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "A ada",
+    "WOK 0",
+    "X 1 0 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 3",
+    "E bea 4",
+    "P ada",
+    "P bea",
+    "C",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "WOK 0",
+    "X 2 2 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "P ada",
+    "W",
+    "A ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "P ada",
+    "WOK 1",
+    "A ada",
+    "C ada",
+    "CEND 1",
+    "X 1 1 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 3",
+    "P ada",
+    "P bea",
+    "W",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "WOK 2",
+    "WOK 2",
+    "X 2 2 0 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "E bea 2",
+    "P bea",
+    "A bea",
+    "P ada",
+    "W",
+    "C",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P bea",
+    "A bea",
+    "P ada",
+    "WOK 1",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "WOK 0",
+    "X 2 2 1 1 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "E toolong99 2"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E a-1 2"
+   ],
+   "expected": [
+    "N a-1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada"
+   ],
+   "expected": [
+    "N ada FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 0"
+   ],
+   "expected": [
+    "N ada ROW",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 5"
+   ],
+   "expected": [
+    "N ada ROW",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 12"
+   ],
+   "expected": [
+    "N ada ROW",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada x"
+   ],
+   "expected": [
+    "N ada ROW",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 04"
+   ],
+   "expected": [
+    "N ada ROW",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2 extra"
+   ],
+   "expected": [
+    "N ada FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E ada 3"
+   ],
+   "expected": [
+    "OK 1",
+    "N ada DUP",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P ada"
+   ],
+   "expected": [
+    "N ada UNKNOWN",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "P ada extra"
+   ],
+   "expected": [
+    "OK 1",
+    "N ada FMT",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P toolong99"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "A ghost"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "A"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "A ada 2"
+   ],
+   "expected": [
+    "OK 1",
+    "N ada FMT",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C extra"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W now"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "e ada 2"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "p ada"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 9"
+   ],
+   "expected": [
+    "OK 1",
+    "N bea ROW",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E ada 0"
+   ],
+   "expected": [
+    "OK 1",
+    "N ada ROW",
+    "X 1 0 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "E ada 2",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "WOK 0",
+    "X 1 0 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W"
+   ],
+   "expected": [
+    "WOK 0",
+    "X 0 0 0 0 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "E ada 2",
+    "E bea 1",
+    "P ada",
+    "P ghost",
+    "A bea",
+    "E ada 3",
+    "Q junk",
+    "P bea",
+    "E cy 2",
+    "C",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "N ghost UNKNOWN",
+    "A bea",
+    "N ada DUP",
+    "N ???????? FMT",
+    "P bea",
+    "OK 3",
+    "C ada",
+    "C bea",
+    "C cy",
+    "CEND 3",
+    "WOK 0",
+    "X 3 2 1 1 1 3"
+   ]
+  }
+ ],
+ "f2p_carry_on": [
+  {
+   "input": [
+    "E ada 1",
+    "E bea 3",
+    "P ada",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P ada",
+    "P bea",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 3 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 3",
+    "P ada",
+    "P bea",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "P ada",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 3 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 3",
+    "P ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "X 2 3 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 3",
+    "P ada",
+    "P ada",
+    "W",
+    "C",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P ada",
+    "WOK 1",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "P ada",
+    "P bea",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 4 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 4",
+    "P ada",
+    "P ada",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P ada",
+    "P ada",
+    "P bea",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 4 0 1 0 0"
+   ]
+  }
+ ],
+ "f2p_waver": [
+  {
+   "input": [
+    "E ada 4",
+    "E bea 3",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "X 2 2 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "E bea 3",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 2 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "E bea 1",
+    "E cy 3",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P cy",
+    "P ada",
+    "C",
+    "P ada",
+    "P cy",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P cy",
+    "P ada",
+    "C cy",
+    "C ada",
+    "C bea",
+    "CEND 3",
+    "P ada",
+    "P cy",
+    "C ada",
+    "C cy",
+    "C bea",
+    "CEND 3",
+    "X 3 4 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 3",
+    "E bea 2",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P ada",
+    "P bea",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P ada",
+    "P bea",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "X 2 4 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 4",
+    "E cy 4",
+    "E dov 4",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P bea",
+    "P cy",
+    "P dov",
+    "P ada",
+    "C",
+    "P ada",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P bea",
+    "P cy",
+    "P dov",
+    "P ada",
+    "C dov",
+    "C cy",
+    "C bea",
+    "C ada",
+    "CEND 4",
+    "P ada",
+    "P ada",
+    "C ada",
+    "C dov",
+    "C cy",
+    "C bea",
+    "CEND 4",
+    "X 4 6 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "E bea 3",
+    "E cy 3",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P bea",
+    "P ada",
+    "C",
+    "A ada",
+    "P ada",
+    "P cy",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P bea",
+    "P ada",
+    "C bea",
+    "C ada",
+    "C cy",
+    "CEND 3",
+    "A ada",
+    "P ada",
+    "P cy",
+    "C cy",
+    "C ada",
+    "C bea",
+    "CEND 3",
+    "X 3 4 4 2 0 0"
+   ]
+  }
+ ],
+ "f2p_recency_ties": [
+  {
+   "input": [
+    "E ada 2",
+    "E bea 2",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "X 2 2 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 2",
+    "E cy 2",
+    "P cy",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "P cy",
+    "P ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "C cy",
+    "CEND 3",
+    "X 3 3 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 2",
+    "P ada",
+    "P bea",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "WOK 2",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 2 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 2",
+    "E cy 2",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C",
+    "W",
+    "P bea",
+    "A bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C cy",
+    "C bea",
+    "C ada",
+    "CEND 3",
+    "WOK 0",
+    "P bea",
+    "A bea",
+    "C bea",
+    "C ada",
+    "C cy",
+    "CEND 3",
+    "X 3 4 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 3",
+    "P ada",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "C bea",
+    "C ada",
+    "CEND 2",
+    "X 2 2 0 1 0 0"
+   ]
+  }
+ ],
+ "f2p_reseat_trio": [
+  {
+   "input": [
+    "E ada 1",
+    "E bea 4",
+    "E cy 3",
+    "E dov 4",
+    "P ada",
+    "P ada",
+    "P ada",
+    "P bea",
+    "P cy",
+    "P dov",
+    "C",
+    "C",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "P ada",
+    "P ada",
+    "P ada",
+    "P bea",
+    "P cy",
+    "P dov",
+    "C ada",
+    "C dov",
+    "C bea",
+    "C cy",
+    "CEND 4",
+    "C cy",
+    "C dov",
+    "C bea",
+    "C ada",
+    "CEND 4",
+    "WOK 0",
+    "C ada",
+    "C bea",
+    "C cy",
+    "C dov",
+    "CEND 4",
+    "X 4 6 0 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 4",
+    "E cy 3",
+    "E dov 3",
+    "E eve 2",
+    "P ada",
+    "P ada",
+    "P bea",
+    "P cy",
+    "P dov",
+    "P eve",
+    "C",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "P ada",
+    "P ada",
+    "P bea",
+    "P cy",
+    "P dov",
+    "P eve",
+    "C bea",
+    "C ada",
+    "C dov",
+    "C cy",
+    "C eve",
+    "CEND 5",
+    "WOK 2",
+    "C ada",
+    "C eve",
+    "C bea",
+    "C cy",
+    "C dov",
+    "CEND 5",
+    "X 5 6 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "E bea 3",
+    "E cy 2",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C",
+    "P bea",
+    "C",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A ada",
+    "A ada",
+    "A ada",
+    "P ada",
+    "P bea",
+    "P cy",
+    "C bea",
+    "C cy",
+    "C ada",
+    "CEND 3",
+    "P bea",
+    "C bea",
+    "C cy",
+    "C ada",
+    "CEND 3",
+    "WOK 0",
+    "C ada",
+    "C bea",
+    "C cy",
+    "CEND 3",
+    "X 3 4 3 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 3",
+    "E bea 1",
+    "P ada",
+    "P bea",
+    "C",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ada",
+    "P bea",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "WOK 0",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "X 2 2 0 2 1 0"
+   ]
+  }
+ ],
+ "f2p_empty_concert": [
+  {
+   "input": [
+    "C"
+   ],
+   "expected": [
+    "CEND 0",
+    "X 0 0 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C",
+    "C",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "CEND 0",
+    "CEND 0",
+    "WOK 0",
+    "CEND 0",
+    "X 0 0 0 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C",
+    "E ada 2",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "CEND 0",
+    "OK 1",
+    "P ada",
+    "C ada",
+    "CEND 1",
+    "X 1 1 0 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "C ada",
+    "CEND 1",
+    "X 1 0 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W",
+    "C",
+    "W"
+   ],
+   "expected": [
+    "WOK 0",
+    "CEND 0",
+    "WOK 0",
+    "X 0 0 0 1 2 0"
+   ]
+  }
+ ],
+ "f2p_settling_in": [
+  {
+   "input": [
+    "E ada 1",
+    "C",
+    "A ada",
+    "A ada",
+    "A ada",
+    "E new 4",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "C ada",
+    "CEND 1",
+    "A ada",
+    "A ada",
+    "A ada",
+    "OK 2",
+    "C new",
+    "C ada",
+    "CEND 2",
+    "X 2 0 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "E bea 1",
+    "C",
+    "A ada",
+    "A ada",
+    "A ada",
+    "A bea",
+    "A bea",
+    "A bea",
+    "E new 3",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "A ada",
+    "A ada",
+    "A ada",
+    "A bea",
+    "A bea",
+    "A bea",
+    "OK 3",
+    "C new",
+    "C ada",
+    "C bea",
+    "CEND 3",
+    "X 3 0 6 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 2",
+    "E bea 3",
+    "C",
+    "A ada",
+    "A ada",
+    "A ada",
+    "E n1 2",
+    "E n2 4",
+    "P bea",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "A ada",
+    "A ada",
+    "A ada",
+    "OK 3",
+    "OK 4",
+    "P bea",
+    "C n2",
+    "C bea",
+    "C n1",
+    "C ada",
+    "CEND 4",
+    "X 4 1 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "C",
+    "E new 4",
+    "P ada",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "C ada",
+    "CEND 1",
+    "OK 2",
+    "P ada",
+    "C ada",
+    "C new",
+    "CEND 2",
+    "X 2 1 0 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 4",
+    "A ada",
+    "A ada",
+    "A ada",
+    "E new 3",
+    "P new",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "A ada",
+    "A ada",
+    "A ada",
+    "OK 2",
+    "P new",
+    "C new",
+    "C ada",
+    "CEND 2",
+    "X 2 1 3 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ada 1",
+    "C",
+    "A ada",
+    "A ada",
+    "A ada",
+    "E new 4",
+    "W",
+    "C"
+   ],
+   "expected": [
+    "OK 1",
+    "C ada",
+    "CEND 1",
+    "A ada",
+    "A ada",
+    "A ada",
+    "OK 2",
+    "WOK 0",
+    "C ada",
+    "C new",
+    "CEND 2",
+    "X 2 0 3 2 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "E ada 1",
+    "C",
+    "E ada",
+    "A ada",
+    "A ada",
+    "P zz9",
+    "W",
+    "A ghost",
+    "P",
+    "P ada",
+    "C",
+    "P",
+    "P ada",
+    "P ada",
+    "A ada",
+    "P ada",
+    "A ada",
+    "A ada",
+    "E cy 1",
+    "P cy",
+    "P",
+    "P ada",
+    "E ada 2 extra",
+    "P ghost",
+    "E cy 3",
+    "E bea 1",
+    "C",
+    "W",
+    "E ada 7",
+    "P cy",
+    "A ada",
+    "C",
+    "P bea",
+    "P cy",
+    "E cy 3",
+    "E dov 2",
+    "E ada 2 extra",
+    "P bea",
+    "E eve 2",
+    "W",
+    "P dov",
+    "A ada",
+    "W",
+    "E ada 2 extra",
+    "P cy",
+    "W",
+    "A eve",
+    "A bea",
+    "P",
+    "E ada",
+    "W now",
+    "C",
+    "P dov",
+    "A dov",
+    "P bea",
+    "A bea",
+    "A ada",
+    "W",
+    "P cy",
+    "W",
+    "P dov",
+    "P eve",
+    "P bea",
+    "P ada",
+    "P eve",
+    "A eve",
+    "P cy",
+    "E fay 2",
+    "W now",
+    "W",
+    "P dov",
+    "A ada",
+    "A fay",
+    "C",
+    "E ada x",
+    "A",
+    "P eve",
+    "C",
+    "E fay 3",
+    "P cy",
+    "P eve",
+    "E ada x",
+    "A cy",
+    "P dov",
+    "E gil 4",
+    "A fay",
+    "W",
+    "A cy",
+    "C",
+    "P fay",
+    "E ada",
+    "E hob 2",
+    "W",
+    "A fay",
+    "P",
+    "E ada x",
+    "P eve",
+    "P cy",
+    "P gil",
+    "A gil",
+    "C",
+    "C",
+    "E hob 2",
+    "C",
+    "P eve",
+    "E toolong99 2",
+    "W now",
+    "E toolong99 2",
+    "P ada",
+    "X",
+    "E hob 4",
+    "P",
+    "A ada",
+    "P gil",
+    "W",
+    "A cy",
+    "C",
+    "C",
+    "P hob",
+    "E Ida 2",
+    "X",
+    "A ada",
+    "X",
+    "E toolong99 2",
+    "W",
+    "P dov",
+    "A ada",
+    "E JO 2",
+    "P bea",
+    "P JO",
+    "P hob",
+    "A hob",
+    "W",
+    "E toolong99 2",
+    "W",
+    "C",
+    "W",
+    "W now",
+    "P dov",
+    "E JO 1",
+    "P gil",
+    "W",
+    "E ada x",
+    "P zz9",
+    "C",
+    "P Ida",
+    "P JO",
+    "C now",
+    "P dov",
+    "A gil",
+    "W",
+    "P Ida",
+    "X",
+    "P eve",
+    "P dov",
+    "A zz9",
+    "P gil",
+    "A eve",
+    "P bea",
+    "P fay"
+   ],
+   "expected": [
+    "OK 1",
+    "C ada",
+    "CEND 1",
+    "N ada FMT",
+    "A ada",
+    "A ada",
+    "N zz9 UNKNOWN",
+    "WOK 0",
+    "N ghost UNKNOWN",
+    "N ???????? FMT",
+    "P ada",
+    "C ada",
+    "CEND 1",
+    "N ???????? FMT",
+    "P ada",
+    "P ada",
+    "A ada",
+    "P ada",
+    "A ada",
+    "A ada",
+    "OK 2",
+    "P cy",
+    "N ???????? FMT",
+    "P ada",
+    "N ada FMT",
+    "N ghost UNKNOWN",
+    "N cy DUP",
+    "OK 3",
+    "C cy",
+    "C bea",
+    "C ada",
+    "CEND 3",
+    "WOK 0",
+    "N ada ROW",
+    "P cy",
+    "A ada",
+    "C cy",
+    "C ada",
+    "C bea",
+    "CEND 3",
+    "P bea",
+    "P cy",
+    "N cy DUP",
+    "OK 4",
+    "N ada FMT",
+    "P bea",
+    "OK 5",
+    "WOK 2",
+    "P dov",
+    "A ada",
+    "WOK 3",
+    "N ada FMT",
+    "P cy",
+    "WOK 3",
+    "A eve",
+    "A bea",
+    "N ???????? FMT",
+    "N ada FMT",
+    "N ???????? FMT",
+    "C cy",
+    "C dov",
+    "C ada",
+    "C bea",
+    "C eve",
+    "CEND 5",
+    "P dov",
+    "A dov",
+    "P bea",
+    "A bea",
+    "A ada",
+    "WOK 0",
+    "P cy",
+    "WOK 1",
+    "P dov",
+    "P eve",
+    "P bea",
+    "P ada",
+    "P eve",
+    "A eve",
+    "P cy",
+    "OK 6",
+    "N ???????? FMT",
+    "WOK 4",
+    "P dov",
+    "A ada",
+    "A fay",
+    "C dov",
+    "C cy",
+    "C bea",
+    "C ada",
+    "C eve",
+    "C fay",
+    "CEND 6",
+    "N ada ROW",
+    "N ???????? FMT",
+    "P eve",
+    "C eve",
+    "C dov",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C fay",
+    "CEND 6",
+    "N fay DUP",
+    "P cy",
+    "P eve",
+    "N ada ROW",
+    "A cy",
+    "P dov",
+    "OK 7",
+    "A fay",
+    "WOK 2",
+    "A cy",
+    "C dov",
+    "C eve",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C fay",
+    "C gil",
+    "CEND 7",
+    "P fay",
+    "N ada FMT",
+    "OK 8",
+    "WOK 1",
+    "A fay",
+    "N ???????? FMT",
+    "N ada ROW",
+    "P eve",
+    "P cy",
+    "P gil",
+    "A gil",
+    "C eve",
+    "C cy",
+    "C gil",
+    "C ada",
+    "C bea",
+    "C dov",
+    "C fay",
+    "C hob",
+    "CEND 8",
+    "C gil",
+    "C cy",
+    "C eve",
+    "C ada",
+    "C bea",
+    "C dov",
+    "C fay",
+    "C hob",
+    "CEND 8",
+    "N hob DUP",
+    "C gil",
+    "C cy",
+    "C eve",
+    "C ada",
+    "C bea",
+    "C dov",
+    "C fay",
+    "C hob",
+    "CEND 8",
+    "P eve",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "P ada",
+    "N ???????? FMT",
+    "N hob DUP",
+    "N ???????? FMT",
+    "A ada",
+    "P gil",
+    "WOK 2",
+    "A cy",
+    "C gil",
+    "C eve",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C dov",
+    "C fay",
+    "C hob",
+    "CEND 8",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C dov",
+    "C eve",
+    "C fay",
+    "C gil",
+    "C hob",
+    "CEND 8",
+    "P hob",
+    "OK 9",
+    "N ???????? FMT",
+    "A ada",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "WOK 1",
+    "P dov",
+    "A ada",
+    "OK 10",
+    "P bea",
+    "P JO",
+    "P hob",
+    "A hob",
+    "WOK 3",
+    "N toolong99 FMT",
+    "WOK 3",
+    "C dov",
+    "C JO",
+    "C bea",
+    "C ada",
+    "C cy",
+    "C eve",
+    "C fay",
+    "C gil",
+    "C hob",
+    "C Ida",
+    "CEND 10",
+    "WOK 0",
+    "N ???????? FMT",
+    "P dov",
+    "N JO DUP",
+    "P gil",
+    "WOK 2",
+    "N ada ROW",
+    "N zz9 UNKNOWN",
+    "C gil",
+    "C dov",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C eve",
+    "C fay",
+    "C hob",
+    "C Ida",
+    "C JO",
+    "CEND 10",
+    "P Ida",
+    "P JO",
+    "N ???????? FMT",
+    "P dov",
+    "A gil",
+    "WOK 3",
+    "P Ida",
+    "N ???????? FMT",
+    "P eve",
+    "P dov",
+    "N zz9 UNKNOWN",
+    "P gil",
+    "A eve",
+    "P bea",
+    "P fay",
+    "X 10 49 27 15 17 42"
+   ]
+  },
+  {
+   "input": [
+    "P zz9",
+    "E toolong99 2",
+    "E ada 7",
+    "C",
+    "W",
+    "C",
+    "C",
+    "C now",
+    "A zz9",
+    "C",
+    "A zz9",
+    "X",
+    "W",
+    "P zz9",
+    "W",
+    "P zz9",
+    "P zz9",
+    "A zz9",
+    "E toolong99 2",
+    "W",
+    "E ada 4",
+    "W now",
+    "P ada",
+    "Q what",
+    "E ada 2 extra",
+    "E bea 2",
+    "C",
+    "W",
+    "p ada",
+    "P ada",
+    "E bea 4",
+    "P bea",
+    "E ada 7",
+    "C now",
+    "P bea",
+    "P",
+    "W now",
+    "E cy 3",
+    "E ada 2 extra",
+    "E dov 1",
+    "C",
+    "E ada 7",
+    "W",
+    "P cy",
+    "P ada",
+    "E eve 1",
+    "E eve 3",
+    "C",
+    "A eve",
+    "P dov",
+    "C",
+    "Q what",
+    "A bea",
+    "P ada",
+    "P dov",
+    "W",
+    "W",
+    "E toolong99 2",
+    "C",
+    "E fay 4",
+    "C",
+    "E toolong99 2",
+    "W",
+    "E toolong99 2",
+    "W",
+    "P bea",
+    "P",
+    "P cy",
+    "P dov",
+    "X",
+    "P cy",
+    "C",
+    "E gil 1",
+    "Q what",
+    "A dov",
+    "P eve",
+    "P fay",
+    "A ada",
+    "E dov 2",
+    "E hob 4",
+    "C",
+    "E ada 2 extra",
+    "C",
+    "P ghost",
+    "P cy",
+    "A cy",
+    "P eve",
+    "P fay",
+    "C",
+    "Q what",
+    "A dov",
+    "E Ida 3",
+    "P hob",
+    "E JO 3",
+    "A dov",
+    "W",
+    "A Ida",
+    "P JO",
+    "P fay",
+    "P bea",
+    "p ada",
+    "E ada 7",
+    "E ada 7",
+    "P ada",
+    "W",
+    "P eve",
+    "P gil",
+    "P dov",
+    "C",
+    "W",
+    "C",
+    "P JO",
+    "C now",
+    "E ada",
+    "A Ida",
+    "P gil",
+    "E toolong99 2",
+    "P Ida",
+    "P ada",
+    "P ghost",
+    "P bea",
+    "P hob",
+    "A bea",
+    "E ada 7",
+    "P JO",
+    "C",
+    "P JO",
+    "P zz9",
+    "P cy",
+    "E ada",
+    "A Ida",
+    "P hob",
+    "E ada 7",
+    "W",
+    "P ada",
+    "P cy",
+    "P gil",
+    "C",
+    "P",
+    "A eve",
+    "P ada",
+    "P ada",
+    "P JO",
+    "P ada",
+    "P dov",
+    "C",
+    "X",
+    "W",
+    "X",
+    "W",
+    "P fay",
+    "P dov",
+    "P JO",
+    "X",
+    "P ghost"
+   ],
+   "expected": [
+    "N zz9 UNKNOWN",
+    "N toolong99 FMT",
+    "N ada ROW",
+    "CEND 0",
+    "WOK 0",
+    "CEND 0",
+    "CEND 0",
+    "N ???????? FMT",
+    "N zz9 UNKNOWN",
+    "CEND 0",
+    "N zz9 UNKNOWN",
+    "N ???????? FMT",
+    "WOK 0",
+    "N zz9 UNKNOWN",
+    "WOK 0",
+    "N zz9 UNKNOWN",
+    "N zz9 UNKNOWN",
+    "N zz9 UNKNOWN",
+    "N toolong99 FMT",
+    "WOK 0",
+    "OK 1",
+    "N ???????? FMT",
+    "P ada",
+    "N ???????? FMT",
+    "N ada FMT",
+    "OK 2",
+    "C ada",
+    "C bea",
+    "CEND 2",
+    "WOK 0",
+    "N ???????? FMT",
+    "P ada",
+    "N bea DUP",
+    "P bea",
+    "N ada ROW",
+    "N ???????? FMT",
+    "P bea",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "OK 3",
+    "N ada FMT",
+    "OK 4",
+    "C bea",
+    "C ada",
+    "C cy",
+    "C dov",
+    "CEND 4",
+    "N ada ROW",
+    "WOK 0",
+    "P cy",
+    "P ada",
+    "OK 5",
+    "N eve DUP",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C dov",
+    "C eve",
+    "CEND 5",
+    "A eve",
+    "P dov",
+    "C dov",
+    "C ada",
+    "C cy",
+    "C bea",
+    "C eve",
+    "CEND 5",
+    "N ???????? FMT",
+    "A bea",
+    "P ada",
+    "P dov",
+    "WOK 2",
+    "WOK 2",
+    "N toolong99 FMT",
+    "C ada",
+    "C dov",
+    "C bea",
+    "C cy",
+    "C eve",
+    "CEND 5",
+    "OK 6",
+    "C ada",
+    "C bea",
+    "C cy",
+    "C dov",
+    "C eve",
+    "C fay",
+    "CEND 6",
+    "N toolong99 FMT",
+    "WOK 0",
+    "N toolong99 FMT",
+    "WOK 0",
+    "P bea",
+    "N ???????? FMT",
+    "P cy",
+    "P dov",
+    "N ???????? FMT",
+    "P cy",
+    "C cy",
+    "C dov",
+    "C bea",
+    "C ada",
+    "C eve",
+    "C fay",
+    "CEND 6",
+    "OK 7",
+    "N ???????? FMT",
+    "A dov",
+    "P eve",
+    "P fay",
+    "A ada",
+    "N dov DUP",
+    "OK 8",
+    "C fay",
+    "C eve",
+    "C cy",
+    "C dov",
+    "C bea",
+    "C ada",
+    "C gil",
+    "C hob",
+    "CEND 8",
+    "N ada FMT",
+    "C fay",
+    "C eve",
+    "C cy",
+    "C dov",
+    "C bea",
+    "C ada",
+    "C gil",
+    "C hob",
+    "CEND 8",
+    "N ghost UNKNOWN",
+    "P cy",
+    "A cy",
+    "P eve",
+    "P fay",
+    "C fay",
+    "C eve",
+    "C cy",
+    "C dov",
+    "C bea",
+    "C ada",
+    "C gil",
+    "C hob",
+    "CEND 8",
+    "N ???????? FMT",
+    "A dov",
+    "OK 9",
+    "P hob",
+    "OK 10",
+    "A dov",
+    "WOK 1",
+    "A Ida",
+    "P JO",
+    "P fay",
+    "P bea",
+    "N ???????? FMT",
+    "N ada ROW",
+    "N ada ROW",
+    "P ada",
+    "WOK 5",
+    "P eve",
+    "P gil",
+    "P dov",
+    "C ada",
+    "C fay",
+    "C hob",
+    "C eve",
+    "C JO",
+    "C bea",
+    "C gil",
+    "C dov",
+    "C cy",
+    "C Ida",
+    "CEND 10",
+    "WOK 5",
+    "C JO",
+    "C bea",
+    "C dov",
+    "C eve",
+    "C gil",
+    "C ada",
+    "C cy",
+    "C fay",
+    "C hob",
+    "C Ida",
+    "CEND 10",
+    "P JO",
+    "N ???????? FMT",
+    "N ada FMT",
+    "A Ida",
+    "P gil",
+    "N toolong99 FMT",
+    "P Ida",
+    "P ada",
+    "N ghost UNKNOWN",
+    "P bea",
+    "P hob",
+    "A bea",
+    "N ada ROW",
+    "P JO",
+    "C JO",
+    "C hob",
+    "C ada",
+    "C gil",
+    "C Ida",
+    "C eve",
+    "C bea",
+    "C cy",
+    "C dov",
+    "C fay",
+    "CEND 10",
+    "P JO",
+    "N zz9 UNKNOWN",
+    "P cy",
+    "N ada FMT",
+    "A Ida",
+    "P hob",
+    "N ada ROW",
+    "WOK 5",
+    "P ada",
+    "P cy",
+    "P gil",
+    "C cy",
+    "C ada",
+    "C gil",
+    "C hob",
+    "C JO",
+    "C eve",
+    "C bea",
+    "C dov",
+    "C fay",
+    "C Ida",
+    "CEND 10",
+    "N ???????? FMT",
+    "A eve",
+    "P ada",
+    "P ada",
+    "P JO",
+    "P ada",
+    "P dov",
+    "C ada",
+    "C JO",
+    "C hob",
+    "C dov",
+    "C gil",
+    "C cy",
+    "C bea",
+    "C eve",
+    "C fay",
+    "C Ida",
+    "CEND 10",
+    "N ???????? FMT",
+    "WOK 1",
+    "N ???????? FMT",
+    "WOK 1",
+    "P fay",
+    "P dov",
+    "P JO",
+    "N ???????? FMT",
+    "N ghost UNKNOWN",
+    "X 10 47 12 19 16 51"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,2255 @@
+{
+ "guard_board_flows": [
+  {
+   "input": [
+    "C c1 50",
+    "C c2 70",
+    "L l1 3000",
+    "L l2 47000",
+    "B c1 l1",
+    "B c2 l2"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "A c1 5003",
+    "A c2 7047",
+    "X 2 2 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 79",
+    "L l1 2500",
+    "B c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 7902",
+    "S c1 7902",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 80",
+    "L l1 2501",
+    "B c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 8002",
+    "S c1 8002",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 007",
+    "L l1 3000",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 703",
+    "X 1 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 100",
+    "L l1 99999999",
+    "B c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 109999",
+    "S c1 109999",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 100",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5000",
+    "X 1 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C C1 50",
+    "C c1 60",
+    "L l1 3000",
+    "B C1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "A C1 5003",
+    "X 2 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L L1 3000",
+    "L l1 4000",
+    "B c1 L1",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "A c1 5003",
+    "A c1 5007",
+    "X 1 2 2 0 0 0"
+   ]
+  }
+ ],
+ "guard_settlement_checksum": [
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5003",
+    "S c1 5003",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "C c2 60",
+    "L l1 3000",
+    "B c1 l1",
+    "W",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "A c1 5003",
+    "S c1 5003",
+    "S c2 6000",
+    "WEND 2",
+    "S c1 5003",
+    "S c2 6000",
+    "WEND 2",
+    "X 2 1 1 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "W",
+    "L l1 3000",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "S c1 5000",
+    "WEND 1",
+    "OK 1",
+    "S c1 5000",
+    "WEND 1",
+    "X 1 1 0 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 4000",
+    "W",
+    "B c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "S c1 5000",
+    "WEND 1",
+    "A c1 5004",
+    "S c1 5004",
+    "WEND 1",
+    "X 1 1 1 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L a 3000",
+    "L b 3000",
+    "L c 3000",
+    "B c1 a",
+    "B c1 b",
+    "B c1 c",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A c1 5003",
+    "A c1 5006",
+    "A c1 5009",
+    "S c1 5009",
+    "WEND 1",
+    "X 1 3 3 0 1 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "C toolong99 50"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c-1 50"
+   ],
+   "expected": [
+    "N c-1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 0"
+   ],
+   "expected": [
+    "N c1 RATING",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 101"
+   ],
+   "expected": [
+    "N c1 RATING",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 1000"
+   ],
+   "expected": [
+    "N c1 RATING",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 5x"
+   ],
+   "expected": [
+    "N c1 RATING",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1"
+   ],
+   "expected": [
+    "N c1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "C c1 60"
+   ],
+   "expected": [
+    "OK 1",
+    "N c1 DUP",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50 extra"
+   ],
+   "expected": [
+    "N c1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L toolong99 5000"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l-1 5000"
+   ],
+   "expected": [
+    "N l-1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1 99"
+   ],
+   "expected": [
+    "N l1 VALUE",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1 099"
+   ],
+   "expected": [
+    "N l1 VALUE",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1 123456789"
+   ],
+   "expected": [
+    "N l1 VALUE",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1 12x45"
+   ],
+   "expected": [
+    "N l1 VALUE",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1 5000 extra"
+   ],
+   "expected": [
+    "N l1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1"
+   ],
+   "expected": [
+    "N l1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L l1 5000",
+    "L l1 6000"
+   ],
+   "expected": [
+    "OK 1",
+    "N l1 DUP",
+    "X 0 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B c1 l1"
+   ],
+   "expected": [
+    "N c1 UNKNOWN",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "B c1 ghost"
+   ],
+   "expected": [
+    "OK 1",
+    "N c1 UNKNOWN",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1 l1 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N c1 FMT",
+    "X 1 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N c1 FMT",
+    "X 1 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "B"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1 l1",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5003",
+    "N c1 TAKEN",
+    "X 1 1 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "C c2 60",
+    "L l1 3000",
+    "B c1 l1",
+    "B c2 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "A c1 5003",
+    "N c2 TAKEN",
+    "X 2 1 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "D c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "N c1 NOBOOK",
+    "X 1 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "C c2 60",
+    "L l1 3000",
+    "B c1 l1",
+    "D c2 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "A c1 5003",
+    "N c2 NOBOOK",
+    "X 2 1 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D c1 l1"
+   ],
+   "expected": [
+    "N c1 UNKNOWN",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "D c1 ghost"
+   ],
+   "expected": [
+    "OK 1",
+    "N c1 UNKNOWN",
+    "X 1 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1 l1",
+    "D c1 l1 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5003",
+    "N c1 FMT",
+    "X 1 1 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D c1"
+   ],
+   "expected": [
+    "N c1 FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W now"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "c c1 50"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "l l1 3000"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "b c1 l1"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "d c1 l1"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "w"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "C c1 50",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "S c1 5000",
+    "WEND 1",
+    "X 1 0 0 0 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "C c1 50",
+    "C c2 80",
+    "L l1 3000",
+    "L l2 4700",
+    "B c1 l1",
+    "B c2 l2",
+    "B c1 ghost",
+    "D c1 l2",
+    "C c1 60",
+    "L l2 100",
+    "Q junk",
+    "W",
+    "B c2 l1",
+    "D c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "A c1 5003",
+    "A c2 8004",
+    "N c1 UNKNOWN",
+    "N c1 NOBOOK",
+    "N c1 DUP",
+    "N l2 DUP",
+    "N ???????? FMT",
+    "S c1 5003",
+    "S c2 8004",
+    "WEND 2",
+    "N c2 TAKEN",
+    "A c1 4997",
+    "X 2 2 2 1 1 6"
+   ]
+  }
+ ],
+ "f2p_portfolio_dilution": [
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "L l2 3000",
+    "L l3 3000",
+    "L l4 3000",
+    "L l5 3000",
+    "B c1 l1",
+    "B c1 l2",
+    "B c1 l3",
+    "B c1 l4",
+    "B c1 l5"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "A c1 5003",
+    "A c1 5006",
+    "A c1 5009",
+    "A c1 5011",
+    "A c1 5013",
+    "X 1 5 5 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "L l2 3000",
+    "L l3 3000",
+    "L l4 3000",
+    "L l5 3000",
+    "L l6 3000",
+    "L l7 3000",
+    "B c1 l1",
+    "B c1 l2",
+    "B c1 l3",
+    "B c1 l4",
+    "B c1 l5",
+    "B c1 l6",
+    "B c1 l7",
+    "W",
+    "L l8 3000",
+    "B c1 l8"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "OK 6",
+    "OK 7",
+    "A c1 5003",
+    "A c1 5006",
+    "A c1 5009",
+    "A c1 5011",
+    "A c1 5013",
+    "A c1 5015",
+    "A c1 5016",
+    "S c1 5021",
+    "WEND 1",
+    "OK 8",
+    "A c1 5022",
+    "X 1 8 8 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 60",
+    "L a 9000",
+    "L b 9000",
+    "L c 9000",
+    "L d 9000",
+    "B c1 a",
+    "B c1 b",
+    "B c1 c",
+    "B c1 d",
+    "D c1 a",
+    "L e 9000",
+    "B c1 e"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "A c1 6009",
+    "A c1 6018",
+    "A c1 6027",
+    "A c1 6035",
+    "A c1 6017",
+    "OK 5",
+    "A c1 6025",
+    "X 1 5 5 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "L l2 3000",
+    "L l3 3000",
+    "B c1 l1",
+    "B c1 l2",
+    "B c1 l3",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A c1 5003",
+    "A c1 5006",
+    "A c1 5009",
+    "S c1 5009",
+    "WEND 1",
+    "X 1 3 3 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C big 90",
+    "L x1 47000",
+    "L x2 47000",
+    "L x3 47000",
+    "L x4 47000",
+    "L x5 47000",
+    "L x6 47000",
+    "L x7 47000",
+    "L x8 47000",
+    "L x9 47000",
+    "L x10 47000",
+    "L x11 47000",
+    "L x12 47000",
+    "B big x1",
+    "B big x2",
+    "B big x3",
+    "B big x4",
+    "B big x5",
+    "B big x6",
+    "B big x7",
+    "B big x8",
+    "B big x9",
+    "B big x10",
+    "B big x11",
+    "B big x12",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "OK 6",
+    "OK 7",
+    "OK 8",
+    "OK 9",
+    "OK 10",
+    "OK 11",
+    "OK 12",
+    "A big 9047",
+    "A big 9094",
+    "A big 9141",
+    "A big 9187",
+    "A big 9233",
+    "A big 9279",
+    "A big 9324",
+    "A big 9369",
+    "A big 9414",
+    "A big 9458",
+    "A big 9502",
+    "A big 9546",
+    "S big 9564",
+    "WEND 1",
+    "X 1 12 12 0 1 0"
+   ]
+  }
+ ],
+ "f2p_settlement_drop_adjust": [
+  {
+   "input": [
+    "C c1 50",
+    "L l1 4000",
+    "B c1 l1",
+    "D c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5004",
+    "A c1 4996",
+    "S c1 4994",
+    "WEND 1",
+    "X 1 1 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 4000",
+    "L l2 4000",
+    "B c1 l1",
+    "B c1 l2",
+    "D c1 l1",
+    "D c1 l2",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "A c1 5004",
+    "A c1 5008",
+    "A c1 5000",
+    "A c1 4992",
+    "S c1 4988",
+    "WEND 1",
+    "X 1 2 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 4000",
+    "B c1 l1",
+    "D c1 l1",
+    "W",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5004",
+    "A c1 4996",
+    "S c1 4994",
+    "WEND 1",
+    "S c1 4994",
+    "WEND 1",
+    "X 1 1 1 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 90",
+    "L l1 3300",
+    "L l2 3300",
+    "B c1 l1",
+    "W",
+    "B c1 l2",
+    "D c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "A c1 9003",
+    "S c1 9003",
+    "WEND 1",
+    "A c1 9006",
+    "A c1 9000",
+    "S c1 8998",
+    "WEND 1",
+    "X 1 2 2 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 4000",
+    "B c1 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5004",
+    "S c1 5004",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  }
+ ],
+ "f2p_second_drop_penalty": [
+  {
+   "input": [
+    "C c1 50",
+    "L a 8000",
+    "L b 8000",
+    "L c 8000",
+    "B c1 a",
+    "B c1 b",
+    "D c1 a",
+    "D c1 b",
+    "B c1 c"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A c1 5008",
+    "A c1 5016",
+    "A c1 5000",
+    "A c1 4984",
+    "A c1 4988",
+    "X 1 3 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L a 8000",
+    "L b 8000",
+    "L c 8000",
+    "L d 8000",
+    "L e 8000",
+    "B c1 a",
+    "B c1 b",
+    "D c1 a",
+    "D c1 b",
+    "B c1 c",
+    "D c1 c",
+    "B c1 d",
+    "D c1 d",
+    "B c1 e"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "A c1 5008",
+    "A c1 5016",
+    "A c1 5000",
+    "A c1 4984",
+    "A c1 4988",
+    "A c1 4980",
+    "A c1 4988",
+    "A c1 4972",
+    "A c1 4980",
+    "X 1 5 5 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 70",
+    "L a 6000",
+    "L b 6000",
+    "L c 6000",
+    "B c1 a",
+    "B c1 b",
+    "D c1 a",
+    "D c1 b",
+    "W",
+    "B c1 c"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "A c1 7006",
+    "A c1 7012",
+    "A c1 7000",
+    "A c1 6988",
+    "S c1 6984",
+    "WEND 1",
+    "A c1 6987",
+    "X 1 3 3 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L a 8000",
+    "L b 8000",
+    "B c1 a",
+    "D c1 a",
+    "B c1 b"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "A c1 5008",
+    "A c1 4992",
+    "A c1 5000",
+    "X 1 2 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_preferred_lane": [
+  {
+   "input": [
+    "C hi 80",
+    "L l1 2500",
+    "B hi l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A hi 8003",
+    "S hi 8002",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C lo 79",
+    "L l1 2500",
+    "B lo l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A lo 7902",
+    "S lo 7902",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C hi 80",
+    "L l1 2499",
+    "B hi l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A hi 8002",
+    "X 1 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ace 100",
+    "L big 5000",
+    "B ace big",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A ace 10006",
+    "S ace 10005",
+    "WEND 1",
+    "X 1 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C r79 79",
+    "C r80 80",
+    "L a 2500",
+    "L b 2499",
+    "L c 5000",
+    "L d 2501",
+    "B r80 a",
+    "B r79 c",
+    "B r80 d",
+    "B r79 b"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "A r80 8003",
+    "A r79 7905",
+    "A r80 8005",
+    "A r79 7907",
+    "X 2 4 4 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C hi 80",
+    "L a 5000",
+    "B hi a",
+    "D hi a",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A hi 8006",
+    "A hi 7994",
+    "S hi 7993",
+    "WEND 1",
+    "X 1 1 1 1 1 0"
+   ]
+  }
+ ],
+ "f2p_soured_rebooking": [
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1 l1",
+    "D c1 l1",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5003",
+    "A c1 4997",
+    "N c1 TAKEN",
+    "X 1 1 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "C c2 60",
+    "L l1 3000",
+    "B c1 l1",
+    "D c1 l1",
+    "B c2 l1",
+    "D c2 l1",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "A c1 5003",
+    "A c1 4997",
+    "A c2 6003",
+    "A c2 5997",
+    "N c1 TAKEN",
+    "X 2 1 2 2 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "L l1 3000",
+    "B c1 l1",
+    "D c1 l1",
+    "W",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "A c1 5003",
+    "A c1 4997",
+    "S c1 4995",
+    "WEND 1",
+    "N c1 TAKEN",
+    "X 1 1 1 1 1 1"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "C c2 60",
+    "L l1 3000",
+    "B c2 l1",
+    "D c2 l1",
+    "B c1 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 1",
+    "A c2 6003",
+    "A c2 5997",
+    "A c1 5003",
+    "X 2 1 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_empty_settlement": [
+  {
+   "input": [
+    "W"
+   ],
+   "expected": [
+    "WEND 0",
+    "X 0 0 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W",
+    "W",
+    "W"
+   ],
+   "expected": [
+    "WEND 0",
+    "WEND 0",
+    "WEND 0",
+    "X 0 0 0 0 3 0"
+   ]
+  },
+  {
+   "input": [
+    "L l1 5000",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "WEND 0",
+    "X 0 1 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W",
+    "C c1 50",
+    "W"
+   ],
+   "expected": [
+    "WEND 0",
+    "OK 1",
+    "S c1 4950",
+    "WEND 1",
+    "X 1 0 0 0 2 0"
+   ]
+  }
+ ],
+ "f2p_late_joiner_haircut": [
+  {
+   "input": [
+    "C c1 50",
+    "W",
+    "C c2 60",
+    "L l1 4000",
+    "B c2 l1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "S c1 5000",
+    "WEND 1",
+    "OK 2",
+    "OK 1",
+    "A c2 5954",
+    "S c1 5000",
+    "S c2 5954",
+    "WEND 2",
+    "X 2 1 1 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 50",
+    "W",
+    "W",
+    "C c2 60",
+    "L l1 4000",
+    "B c2 l1"
+   ],
+   "expected": [
+    "OK 1",
+    "S c1 5000",
+    "WEND 1",
+    "S c1 5000",
+    "WEND 1",
+    "OK 2",
+    "OK 1",
+    "A c2 5904",
+    "X 2 1 1 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c1 10",
+    "W",
+    "W",
+    "W",
+    "C tiny 1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "S c1 1000",
+    "WEND 1",
+    "S c1 1000",
+    "WEND 1",
+    "S c1 1000",
+    "WEND 1",
+    "OK 2",
+    "S c1 1000",
+    "S tiny 0",
+    "WEND 2",
+    "X 2 0 0 0 4 0"
+   ]
+  },
+  {
+   "input": [
+    "W",
+    "W",
+    "C c2 30",
+    "L l1 9000",
+    "B c2 l1",
+    "W"
+   ],
+   "expected": [
+    "WEND 0",
+    "WEND 0",
+    "OK 1",
+    "OK 1",
+    "A c2 2909",
+    "S c2 2909",
+    "WEND 1",
+    "X 1 1 1 0 3 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 40",
+    "C b 40",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "S a 4000",
+    "S b 4000",
+    "WEND 2",
+    "X 2 0 0 0 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "B ghost L1",
+    "C c1 79",
+    "D c1 l1",
+    "W",
+    "C hauler1 007",
+    "C zz99 1000",
+    "L l1 2499",
+    "W",
+    "D c1 ghost2",
+    "L ghost2 2500",
+    "B c-1 ghost2",
+    "W",
+    "B ghost toolong99",
+    "B ACE l1",
+    "B c-1 lane2500",
+    "C toolong99 50",
+    "C C1 1",
+    "C c-1 007",
+    "B ACE l1",
+    "B c-1 L1",
+    "L ghost2 5000",
+    "C c-1 100",
+    "B c1 l-1",
+    "B ACE big8ld",
+    "L lane2500 5000",
+    "B c1 big8ld",
+    "B hauler1 ghost2",
+    "B c1 toolong99",
+    "W now",
+    "L ghost2 47000",
+    "L L1 2499",
+    "L toolong99 7500",
+    "B c-1 ld77",
+    "W",
+    "C hauler1 1000",
+    "B ghost lane2500",
+    "B ghost big8ld",
+    "B c-1 toolong99",
+    "L lane2500 12x45",
+    "D c1 l1",
+    "D toolong99 l1",
+    "D ghost lane2500",
+    "D ACE ghost2",
+    "C ghost 0",
+    "C hauler1 79",
+    "L big8ld 7500",
+    "W",
+    "B c-1 lane2500",
+    "B hauler1 l-1",
+    "B C1 ghost2",
+    "C ACE 9x",
+    "B ACE ld77",
+    "B hauler1 l-1",
+    "B zz99 l-1",
+    "B c1 ld77",
+    "B C1 L1",
+    "D toolong99 ld77",
+    "D c1 big8ld",
+    "B C1 toolong99",
+    "B ACE toolong99",
+    "D C1 ghost2",
+    "B toolong99 big8ld",
+    "C ACE 1000",
+    "L lane2500 47000",
+    "B hauler1 big8ld",
+    "C ghost 80",
+    "B C1 lane2500",
+    "C toolong99 9x",
+    "W",
+    "W",
+    "W",
+    "B zz99 l1",
+    "B c1 l-1",
+    "D zz99 L1",
+    "D ghost toolong99",
+    "C ghost 79",
+    "L l-1 12x45",
+    "W",
+    "D ghost l-1",
+    "W",
+    "L lane2500 999",
+    "L l1 47000",
+    "C toolong99 1",
+    "D ghost L1",
+    "B zz99 l1",
+    "B toolong99 l-1",
+    "C c1 100",
+    "B C1 big8ld",
+    "Q hey",
+    "D C1 l-1",
+    "W now",
+    "D c1 ld77",
+    "D toolong99 L1",
+    "B C1 ld77",
+    "c c1 50",
+    "D toolong99 toolong99",
+    "D C1 toolong99",
+    "B zz99 toolong99",
+    "D zz99 toolong99",
+    "W",
+    "B toolong99 l-1",
+    "W",
+    "L l1 8000",
+    "C ACE 80",
+    "D ACE l1",
+    "D zz99 toolong99",
+    "L lane2500 12x45",
+    "Q hey",
+    "C hauler1 80",
+    "B c-1 ghost2",
+    "B toolong99 l-1",
+    "B c1 l-1",
+    "B c-1 toolong99",
+    "B ACE lane2500",
+    "B c-1 big8ld",
+    "C c1 101",
+    "C toolong99 1000",
+    "L L1 2500",
+    "W",
+    "D hauler1 big8ld",
+    "W",
+    "L big8ld 2499",
+    "D ghost ghost2",
+    "D C1 l1",
+    "D c-1 lane2500",
+    "W",
+    "B ACE L1",
+    "D zz99 l1",
+    "D c1 big8ld",
+    "B ghost l1",
+    "B hauler1 l-1",
+    "D zz99 lane2500",
+    "D c1 l-1",
+    "X",
+    "B ghost L1",
+    "W now",
+    "B c-1 big8ld",
+    "B c1 L1",
+    "L l-1 2500",
+    "L ghost2 47000",
+    "L big8ld 5000",
+    "W",
+    "B zz99 l-1",
+    "C zz99 100",
+    "L lane2500 99999999",
+    "D hauler1 L1",
+    "B C1 L1",
+    "W",
+    "W",
+    "D c-1 ghost2",
+    "D c1 lane2500",
+    "L ld77 100",
+    "D zz99 toolong99",
+    "D ghost toolong99",
+    "B hauler1 ld77",
+    "b c1 l1",
+    "L lane2500 3000",
+    "D toolong99 big8ld",
+    "L big8ld 12x45",
+    "B ACE lane2500"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "OK 1",
+    "N c1 UNKNOWN",
+    "S c1 7900",
+    "WEND 1",
+    "OK 2",
+    "N zz99 RATING",
+    "OK 1",
+    "S c1 7900",
+    "S hauler1 650",
+    "WEND 2",
+    "N c1 UNKNOWN",
+    "OK 2",
+    "N c-1 FMT",
+    "S c1 7900",
+    "S hauler1 650",
+    "WEND 2",
+    "N ghost FMT",
+    "N ACE UNKNOWN",
+    "N c-1 FMT",
+    "N toolong99 FMT",
+    "OK 3",
+    "N c-1 FMT",
+    "N ACE UNKNOWN",
+    "N c-1 FMT",
+    "N ghost2 DUP",
+    "N c-1 FMT",
+    "N c1 FMT",
+    "N ACE UNKNOWN",
+    "OK 3",
+    "N c1 UNKNOWN",
+    "A hauler1 652",
+    "N c1 FMT",
+    "N ???????? FMT",
+    "N ghost2 DUP",
+    "OK 4",
+    "N toolong99 FMT",
+    "N c-1 FMT",
+    "S c1 7900",
+    "S hauler1 652",
+    "S C1 0",
+    "WEND 3",
+    "N hauler1 RATING",
+    "N ghost UNKNOWN",
+    "N ghost UNKNOWN",
+    "N c-1 FMT",
+    "N lane2500 VALUE",
+    "N c1 NOBOOK",
+    "N toolong99 FMT",
+    "N ghost UNKNOWN",
+    "N ACE UNKNOWN",
+    "N ghost RATING",
+    "N hauler1 DUP",
+    "OK 5",
+    "S c1 7900",
+    "S hauler1 652",
+    "S C1 0",
+    "WEND 3",
+    "N c-1 FMT",
+    "N hauler1 FMT",
+    "N C1 TAKEN",
+    "N ACE RATING",
+    "N ACE UNKNOWN",
+    "N hauler1 FMT",
+    "N zz99 FMT",
+    "N c1 UNKNOWN",
+    "A C1 2",
+    "N toolong99 FMT",
+    "N c1 NOBOOK",
+    "N C1 FMT",
+    "N ACE FMT",
+    "N C1 NOBOOK",
+    "N toolong99 FMT",
+    "N ACE RATING",
+    "N lane2500 DUP",
+    "A hauler1 659",
+    "OK 4",
+    "A C1 7",
+    "N toolong99 FMT",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "N zz99 UNKNOWN",
+    "N c1 FMT",
+    "N zz99 UNKNOWN",
+    "N ghost FMT",
+    "N ghost DUP",
+    "N l-1 FMT",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "N ghost FMT",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "N lane2500 DUP",
+    "N l1 DUP",
+    "N toolong99 FMT",
+    "N ghost NOBOOK",
+    "N zz99 UNKNOWN",
+    "N toolong99 FMT",
+    "N c1 DUP",
+    "N C1 TAKEN",
+    "N ???????? FMT",
+    "N C1 FMT",
+    "N ???????? FMT",
+    "N c1 UNKNOWN",
+    "N toolong99 FMT",
+    "N C1 UNKNOWN",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "N C1 FMT",
+    "N zz99 FMT",
+    "N zz99 FMT",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "N toolong99 FMT",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "WEND 4",
+    "N l1 DUP",
+    "OK 5",
+    "N ACE NOBOOK",
+    "N zz99 FMT",
+    "N lane2500 VALUE",
+    "N ???????? FMT",
+    "N hauler1 DUP",
+    "N c-1 FMT",
+    "N toolong99 FMT",
+    "N c1 FMT",
+    "N c-1 FMT",
+    "N ACE TAKEN",
+    "N c-1 FMT",
+    "N c1 RATING",
+    "N toolong99 FMT",
+    "N L1 DUP",
+    "S c1 7900",
+    "S hauler1 659",
+    "S C1 7",
+    "S ghost 7750",
+    "S ACE 7400",
+    "WEND 5",
+    "A hauler1 645",
+    "S c1 7900",
+    "S hauler1 643",
+    "S C1 7",
+    "S ghost 7750",
+    "S ACE 7400",
+    "WEND 5",
+    "N big8ld DUP",
+    "N ghost NOBOOK",
+    "N C1 NOBOOK",
+    "N c-1 FMT",
+    "S c1 7900",
+    "S hauler1 643",
+    "S C1 7",
+    "S ghost 7750",
+    "S ACE 7400",
+    "WEND 5",
+    "N ACE TAKEN",
+    "N zz99 UNKNOWN",
+    "N c1 NOBOOK",
+    "A ghost 7752",
+    "N hauler1 FMT",
+    "N zz99 UNKNOWN",
+    "N c1 FMT",
+    "N ???????? FMT",
+    "N ghost TAKEN",
+    "N ???????? FMT",
+    "N c-1 FMT",
+    "N c1 TAKEN",
+    "N l-1 FMT",
+    "N ghost2 DUP",
+    "N big8ld DUP",
+    "S c1 7900",
+    "S hauler1 643",
+    "S C1 7",
+    "S ghost 7752",
+    "S ACE 7400",
+    "WEND 5",
+    "N zz99 FMT",
+    "OK 6",
+    "N lane2500 DUP",
+    "N hauler1 NOBOOK",
+    "N C1 TAKEN",
+    "S c1 7900",
+    "S hauler1 643",
+    "S C1 7",
+    "S ghost 7752",
+    "S ACE 7400",
+    "S zz99 9200",
+    "WEND 6",
+    "S c1 7900",
+    "S hauler1 643",
+    "S C1 7",
+    "S ghost 7752",
+    "S ACE 7400",
+    "S zz99 9200",
+    "WEND 6",
+    "N c-1 FMT",
+    "N c1 NOBOOK",
+    "OK 6",
+    "N zz99 FMT",
+    "N ghost FMT",
+    "A hauler1 643",
+    "N ???????? FMT",
+    "N lane2500 DUP",
+    "N toolong99 FMT",
+    "N big8ld VALUE",
+    "N ACE TAKEN",
+    "X 6 6 6 1 18 123"
+   ]
+  },
+  {
+   "input": [
+    "D C1 toolong99",
+    "D c1 big8ld",
+    "C zz99 1",
+    "C ghost 007",
+    "C zz99 0",
+    "B c-1 ld77",
+    "B hauler1 big8ld",
+    "W",
+    "B zz99 lane2500",
+    "D c1 toolong99",
+    "L l-1 3000",
+    "D zz99 l1",
+    "C toolong99 79",
+    "B c1 ld77",
+    "C C1 9x",
+    "B ACE big8ld",
+    "D C1 big8ld",
+    "L ghost2 2499",
+    "C zz99 1",
+    "C hauler1 50",
+    "C ghost 9x",
+    "D c-1 ghost2",
+    "C c-1 50",
+    "L ld77 099",
+    "B zz99 lane2500",
+    "L ghost2 8000",
+    "B C1 l-1",
+    "B toolong99 l1",
+    "W",
+    "L ld77 5000",
+    "D ghost ld77",
+    "C zz99 50",
+    "B ghost lane2500",
+    "B hauler1 lane2500",
+    "D zz99 ld77",
+    "C hauler1 50",
+    "B toolong99 ghost2",
+    "B C1 big8ld",
+    "W",
+    "B ACE l1",
+    "B c1 ld77",
+    "C c1 100",
+    "L ghost2 3000",
+    "D ACE l1",
+    "B zz99 toolong99",
+    "B c1 L1",
+    "D toolong99 big8ld",
+    "W",
+    "W",
+    "B hauler1 l-1",
+    "B ACE L1",
+    "B ghost L1",
+    "B C1 ld77",
+    "B toolong99 ld77",
+    "B",
+    "B c-1 ld77",
+    "L lane2500 2499",
+    "D zz99 l1",
+    "W",
+    "L ld77 12",
+    "D C1 lane2500",
+    "C ACE 0",
+    "W",
+    "C ghost 80",
+    "C zz99 0",
+    "B c1 lane2500",
+    "B zz99 L1",
+    "C hauler1 1000",
+    "D c-1 ld77",
+    "D ghost l1",
+    "D c1",
+    "W",
+    "D toolong99 L1",
+    "B c-1 big8ld",
+    "c c1 50",
+    "B C1 l1",
+    "B C1 toolong99",
+    "D C1 l1",
+    "D C1 lane2500",
+    "B ghost big8ld",
+    "L l-1 2499",
+    "B toolong99 lane2500",
+    "W",
+    "B C1 ghost2",
+    "B ACE ghost2",
+    "L ld77 100",
+    "C c-1 101",
+    "L toolong99 99999999",
+    "W",
+    "B ghost L1",
+    "C hauler1 79",
+    "W now",
+    "B toolong99 L1",
+    "D ACE l1",
+    "C ghost 1",
+    "B zz99 l-1",
+    "W",
+    "C toolong99 007",
+    "C ghost 79",
+    "C C1 1000",
+    "B ghost L1",
+    "B c1 big8ld",
+    "L L1 2500",
+    "L toolong99 099",
+    "B c-1 toolong99",
+    "D ACE ld77",
+    "B C1 toolong99",
+    "D hauler1 lane2500",
+    "D ghost ghost2",
+    "W",
+    "C ghost 79",
+    "B ACE ld77",
+    "W",
+    "C toolong99 101",
+    "L L1 999",
+    "L l-1 2499",
+    "X",
+    "D c1",
+    "W",
+    "C ACE 007",
+    "B toolong99 l-1",
+    "D ACE ld77",
+    "B zz99 l-1",
+    "C ACE 50",
+    "L ghost2 099",
+    "B ACE toolong99",
+    "D C1 toolong99",
+    "B toolong99 ld77",
+    "C C1 101",
+    "D hauler1 l1",
+    "B ACE toolong99",
+    "C c1 50",
+    "B zz99 toolong99",
+    "C ACE 1",
+    "D c-1 l1",
+    "L lane2500 5000",
+    "B hauler1 toolong99",
+    "C toolong99 007",
+    "D ghost toolong99",
+    "B zz99 ld77",
+    "B hauler1 toolong99",
+    "D c-1 L1",
+    "B hauler1 toolong99",
+    "B ACE ghost2",
+    "L big8ld 2500",
+    "C hauler1 101",
+    "B ACE ghost2",
+    "D hauler1 toolong99",
+    "B zz99 toolong99",
+    "C ACE 1",
+    "B zz99 big8ld",
+    "B ghost toolong99",
+    "C c-1 79",
+    "B C1 L1",
+    "C ACE 50"
+   ],
+   "expected": [
+    "N C1 FMT",
+    "N c1 UNKNOWN",
+    "OK 1",
+    "OK 2",
+    "N zz99 RATING",
+    "N c-1 FMT",
+    "N hauler1 UNKNOWN",
+    "S zz99 100",
+    "S ghost 700",
+    "WEND 2",
+    "N zz99 UNKNOWN",
+    "N c1 FMT",
+    "N l-1 FMT",
+    "N zz99 UNKNOWN",
+    "N toolong99 FMT",
+    "N c1 UNKNOWN",
+    "N C1 RATING",
+    "N ACE UNKNOWN",
+    "N C1 UNKNOWN",
+    "OK 1",
+    "N zz99 DUP",
+    "OK 3",
+    "N ghost RATING",
+    "N c-1 FMT",
+    "N c-1 FMT",
+    "N ld77 VALUE",
+    "N zz99 UNKNOWN",
+    "N ghost2 DUP",
+    "N C1 FMT",
+    "N toolong99 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "WEND 3",
+    "OK 2",
+    "N ghost NOBOOK",
+    "N zz99 DUP",
+    "N ghost UNKNOWN",
+    "N hauler1 UNKNOWN",
+    "N zz99 NOBOOK",
+    "N hauler1 DUP",
+    "N toolong99 FMT",
+    "N C1 UNKNOWN",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "WEND 3",
+    "N ACE UNKNOWN",
+    "N c1 UNKNOWN",
+    "OK 4",
+    "N ghost2 DUP",
+    "N ACE UNKNOWN",
+    "N zz99 FMT",
+    "N c1 UNKNOWN",
+    "N toolong99 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9850",
+    "WEND 4",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9850",
+    "WEND 4",
+    "N hauler1 FMT",
+    "N ACE UNKNOWN",
+    "N ghost UNKNOWN",
+    "N C1 UNKNOWN",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "N c-1 FMT",
+    "OK 3",
+    "N zz99 UNKNOWN",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9850",
+    "WEND 4",
+    "N ld77 VALUE",
+    "N C1 UNKNOWN",
+    "N ACE RATING",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9850",
+    "WEND 4",
+    "N ghost DUP",
+    "N zz99 RATING",
+    "A c1 9852",
+    "N zz99 UNKNOWN",
+    "N hauler1 RATING",
+    "N c-1 FMT",
+    "N ghost UNKNOWN",
+    "N c1 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "N toolong99 FMT",
+    "N c-1 FMT",
+    "N ???????? FMT",
+    "N C1 UNKNOWN",
+    "N C1 FMT",
+    "N C1 UNKNOWN",
+    "N C1 UNKNOWN",
+    "N ghost UNKNOWN",
+    "N l-1 FMT",
+    "N toolong99 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "N C1 UNKNOWN",
+    "N ACE UNKNOWN",
+    "N ld77 DUP",
+    "N c-1 FMT",
+    "N toolong99 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "N ghost UNKNOWN",
+    "N hauler1 DUP",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "N ACE UNKNOWN",
+    "N ghost DUP",
+    "N zz99 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "N toolong99 FMT",
+    "N ghost DUP",
+    "N C1 RATING",
+    "N ghost UNKNOWN",
+    "N c1 UNKNOWN",
+    "OK 4",
+    "N toolong99 FMT",
+    "N c-1 FMT",
+    "N ACE UNKNOWN",
+    "N C1 FMT",
+    "N hauler1 NOBOOK",
+    "N ghost NOBOOK",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "N ghost DUP",
+    "N ACE UNKNOWN",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "N toolong99 FMT",
+    "N L1 DUP",
+    "N l-1 FMT",
+    "N ???????? FMT",
+    "N c1 FMT",
+    "S zz99 100",
+    "S ghost 700",
+    "S hauler1 4950",
+    "S c1 9852",
+    "WEND 4",
+    "OK 5",
+    "N toolong99 FMT",
+    "N ACE NOBOOK",
+    "N zz99 FMT",
+    "N ACE DUP",
+    "N ghost2 VALUE",
+    "N ACE FMT",
+    "N C1 FMT",
+    "N toolong99 FMT",
+    "N C1 RATING",
+    "N hauler1 UNKNOWN",
+    "N ACE FMT",
+    "N c1 DUP",
+    "N zz99 FMT",
+    "N ACE DUP",
+    "N c-1 FMT",
+    "N lane2500 DUP",
+    "N hauler1 FMT",
+    "N toolong99 FMT",
+    "N ghost FMT",
+    "A zz99 105",
+    "N hauler1 FMT",
+    "N c-1 FMT",
+    "N hauler1 FMT",
+    "A ACE 2",
+    "OK 5",
+    "N hauler1 RATING",
+    "N ACE TAKEN",
+    "N hauler1 FMT",
+    "N zz99 FMT",
+    "N ACE DUP",
+    "A zz99 107",
+    "N ghost FMT",
+    "N c-1 FMT",
+    "N C1 UNKNOWN",
+    "N ACE DUP",
+    "X 5 5 4 0 14 127"
+   ]
+  }
+ ]
+}

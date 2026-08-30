@@ -51,7 +51,7 @@ def _header(fig, subtitle: str) -> None:
     ax_logo.axis("off")
     fig.text(0.135, 0.935, "VulcanBench", family=CHAKRA_SEMI, fontsize=20, color=INK)
     fig.text(0.135, 0.885, subtitle, family=CHAKRA_MED, fontsize=12, color=INK)
-    fig.text(0.955, 0.935, "CII v2 1.0", family=CHAKRA, fontsize=10.5, color=MUTED, ha="right")
+    fig.text(0.955, 0.935, "CII v4 1.0", family=CHAKRA, fontsize=10.5, color=MUTED, ha="right")
 
 
 def versioning_figure() -> None:
@@ -132,7 +132,7 @@ def versioning_figure() -> None:
         0.045,
         0.045,
         "version (x, y, z): the increment names what a consumer of published results must do. "
-        "CII v2 froze at 1.0.0 with 20 tasks; this freeze was an x change.",
+        "The Coding Intelligence Index v4 froze at 1.0.0 with 20 tasks; the freeze was an x change.",
         family=CHAKRA,
         fontsize=8,
         color=MUTED,
@@ -164,7 +164,7 @@ def results_figure() -> None:
             )
 
     fig = plt.figure(figsize=(11.0, 6.2), dpi=200, facecolor="white")
-    _header(fig, f"CII v2 {version}: time-sliced pass@1, {len(tasks)} tasks")
+    _header(fig, f"Coding Intelligence Index v4 ({version}): time-sliced pass@1, {len(tasks)} tasks")
     ax = fig.add_axes([0.07, 0.17, 0.62, 0.60])
 
     labels = ["@10 min", "@30 min", "full budget"]

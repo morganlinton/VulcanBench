@@ -1,0 +1,2000 @@
+{
+ "guard_single_sides": [
+  {
+   "input": [
+    "T ma 40",
+    "S ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Q ma 880",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T ma 40",
+    "T mb 75",
+    "S ma",
+    "S mb"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "Q ma 880",
+    "Q mb 775",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T ma 10",
+    "S ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Q ma 970",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T ma 90",
+    "S ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Q ma 730",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a1 88",
+    "T b2 12",
+    "S b2",
+    "S a1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "Q b2 964",
+    "Q a1 736",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T ma 040",
+    "S ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Q ma 880",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_registrations": [
+  {
+   "input": [
+    "T a 10",
+    "T b 120",
+    "T c 55"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "X 3 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T Abc 50",
+    "T abc 50"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T zzzzzzz9 99"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T a 10",
+    "T a 10"
+   ],
+   "expected": [
+    "OK 1",
+    "N a DUP",
+    "X 1 0 0 1"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "T toolong99 50"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T m-1 50"
+   ],
+   "expected": [
+    "N m-1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 9"
+   ],
+   "expected": [
+    "N ma MIN",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 09"
+   ],
+   "expected": [
+    "N ma MIN",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 121"
+   ],
+   "expected": [
+    "N ma MIN",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 1200"
+   ],
+   "expected": [
+    "N ma MIN",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 5x"
+   ],
+   "expected": [
+    "N ma MIN",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma"
+   ],
+   "expected": [
+    "N ma FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 50 extra"
+   ],
+   "expected": [
+    "N ma FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 50",
+    "T ma 60"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S ghost"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S m-1"
+   ],
+   "expected": [
+    "N m-1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T ma 50",
+    "S ma extra"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M extra"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M x y"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "t ma 50"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "s ma"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "m"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T ma 50"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "T ma 50",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T ma 50",
+    "S ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Q ma 850",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "T ma 50",
+    "T mb 80",
+    "T ma 60",
+    "S ma",
+    "S ghost",
+    "T mc 5",
+    "S mb",
+    "Q junk",
+    "M oops",
+    "S mc"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "N ma DUP",
+    "Q ma 850",
+    "N ghost UNKNOWN",
+    "N mc MIN",
+    "Q mb 760",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N mc UNKNOWN",
+    "X 2 2 0 6"
+   ]
+  }
+ ],
+ "f2p_wear_ladder": [
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "X 1 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "M",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "R aa 4",
+    "MEND 1",
+    "Q aa 880",
+    "Q aa 873",
+    "X 1 4 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "T bb 40",
+    "S aa",
+    "S bb",
+    "S aa",
+    "S bb"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "Q aa 880",
+    "Q bb 880",
+    "Q aa 873",
+    "Q bb 873",
+    "X 2 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 10",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 970",
+    "Q aa 963",
+    "Q aa 956",
+    "Q aa 949",
+    "Q aa 942",
+    "Q aa 935",
+    "X 1 6 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_stamper_tax": [
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "R aa 1",
+    "MEND 1",
+    "X 1 4 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "Q aa 852",
+    "R aa 0",
+    "MEND 1",
+    "X 1 5 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "R aa 3",
+    "MEND 1",
+    "X 1 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "R aa 1",
+    "MEND 1",
+    "Q aa 880",
+    "N aa SPENT",
+    "X 1 5 1 1"
+   ]
+  },
+  {
+   "input": [
+    "T aa 20",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M",
+    "S aa",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 940",
+    "Q aa 933",
+    "Q aa 926",
+    "Q aa 919",
+    "R aa 1",
+    "MEND 1",
+    "Q aa 940",
+    "R aa 1",
+    "MEND 1",
+    "X 1 5 2 0"
+   ]
+  }
+ ],
+ "f2p_longplay": [
+  {
+   "input": [
+    "T lp 100",
+    "S lp",
+    "S lp",
+    "S lp",
+    "S lp"
+   ],
+   "expected": [
+    "OK 1",
+    "Q lp 700",
+    "Q lp 693",
+    "Q lp 686",
+    "N lp SPENT",
+    "X 1 3 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T lp 91",
+    "S lp",
+    "S lp",
+    "S lp",
+    "S lp"
+   ],
+   "expected": [
+    "OK 1",
+    "Q lp 727",
+    "Q lp 720",
+    "Q lp 713",
+    "N lp SPENT",
+    "X 1 3 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T sp 90",
+    "S sp",
+    "S sp",
+    "S sp",
+    "S sp"
+   ],
+   "expected": [
+    "OK 1",
+    "Q sp 730",
+    "Q sp 723",
+    "Q sp 716",
+    "Q sp 709",
+    "X 1 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T lp 120",
+    "S lp",
+    "S lp",
+    "M",
+    "S lp",
+    "S lp",
+    "S lp"
+   ],
+   "expected": [
+    "OK 1",
+    "Q lp 640",
+    "Q lp 633",
+    "R lp 4",
+    "MEND 1",
+    "Q lp 640",
+    "Q lp 633",
+    "N lp SPENT",
+    "X 1 4 1 1"
+   ]
+  },
+  {
+   "input": [
+    "T lp 100",
+    "S lp",
+    "S lp",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q lp 700",
+    "Q lp 693",
+    "R lp 4",
+    "MEND 1",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_contention": [
+  {
+   "input": [
+    "T aa 40",
+    "T bb 50",
+    "T cc 60",
+    "S bb",
+    "S cc",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "Q bb 850",
+    "Q cc 820",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 844",
+    "X 3 6 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "T bb 50",
+    "S bb",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "Q bb 850",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "X 2 5 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "T bb 50",
+    "T cc 60",
+    "S bb",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "Q bb 850",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "X 3 5 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "T bb 50",
+    "T cc 100",
+    "S cc",
+    "S cc",
+    "S cc",
+    "S bb",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "Q cc 700",
+    "Q cc 693",
+    "Q cc 686",
+    "Q bb 850",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "X 3 8 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "T bb 50",
+    "T cc 60",
+    "S bb",
+    "S cc",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "Q bb 850",
+    "Q cc 820",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 844",
+    "Q aa 852",
+    "X 3 7 0 0"
+   ]
+  }
+ ],
+ "f2p_courtesy": [
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M",
+    "S aa",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "Q aa 852",
+    "Q aa 845",
+    "R aa 1",
+    "MEND 1",
+    "Q aa 880",
+    "R aa -2",
+    "MEND 1",
+    "X 1 7 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "Q aa 852",
+    "Q aa 845",
+    "R aa 1",
+    "MEND 1",
+    "R aa 1",
+    "MEND 1",
+    "X 1 6 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "Q aa 859",
+    "Q aa 852",
+    "R aa 0",
+    "MEND 1",
+    "X 1 5 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T lp 100",
+    "S lp",
+    "S lp",
+    "S lp",
+    "M",
+    "S lp"
+   ],
+   "expected": [
+    "OK 1",
+    "Q lp 700",
+    "Q lp 693",
+    "Q lp 686",
+    "R lp 1",
+    "MEND 1",
+    "N lp SPENT",
+    "X 1 3 1 1"
+   ]
+  }
+ ],
+ "f2p_idle_remaster": [
+  {
+   "input": [
+    "M"
+   ],
+   "expected": [
+    "MEND 0",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "R aa 6",
+    "MEND 1",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "M",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "R aa 5",
+    "MEND 1",
+    "R aa 5",
+    "MEND 1",
+    "X 1 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M",
+    "M"
+   ],
+   "expected": [
+    "MEND 0",
+    "MEND 0",
+    "X 0 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "M",
+    "T bb 50",
+    "M"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "R aa 5",
+    "MEND 1",
+    "OK 2",
+    "R aa 5",
+    "R bb 6",
+    "MEND 2",
+    "X 2 1 2 0"
+   ]
+  }
+ ],
+ "f2p_midrun_register": [
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "T bb 50",
+    "S bb"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "OK 2",
+    "Q bb 836",
+    "X 2 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "S aa",
+    "T bb 50",
+    "T cc 60",
+    "S cc"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "Q aa 866",
+    "OK 2",
+    "OK 3",
+    "Q cc 799",
+    "X 3 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "T bb 50",
+    "S bb",
+    "S bb"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "OK 2",
+    "Q bb 836",
+    "Q bb 829",
+    "X 2 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "S aa",
+    "S aa",
+    "M",
+    "T bb 50",
+    "S bb"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 880",
+    "Q aa 873",
+    "R aa 4",
+    "MEND 1",
+    "OK 2",
+    "Q bb 850",
+    "X 2 3 1 0"
+   ]
+  }
+ ],
+ "f2p_quirk_chain": [
+  {
+   "input": [
+    "T aa 40",
+    "T lp 100",
+    "S aa",
+    "S lp",
+    "S aa",
+    "S lp",
+    "T dd 55",
+    "S dd",
+    "S aa",
+    "S aa",
+    "M",
+    "S lp",
+    "S aa",
+    "M",
+    "S aa"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "Q aa 880",
+    "Q lp 700",
+    "Q aa 873",
+    "Q lp 693",
+    "OK 3",
+    "Q dd 821",
+    "Q aa 866",
+    "Q aa 844",
+    "R aa 1",
+    "R lp 4",
+    "R dd 5",
+    "MEND 3",
+    "Q lp 700",
+    "Q aa 880",
+    "R aa 1",
+    "R lp 3",
+    "R dd 5",
+    "MEND 3",
+    "Q aa 880",
+    "X 3 10 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 10",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "S aa",
+    "M",
+    "T bb 90",
+    "S bb",
+    "S aa",
+    "M",
+    "M",
+    "S bb"
+   ],
+   "expected": [
+    "OK 1",
+    "Q aa 970",
+    "Q aa 963",
+    "Q aa 956",
+    "Q aa 949",
+    "Q aa 942",
+    "Q aa 935",
+    "R aa 1",
+    "MEND 1",
+    "OK 2",
+    "Q bb 730",
+    "Q aa 970",
+    "R aa -2",
+    "R bb 5",
+    "MEND 2",
+    "R aa -2",
+    "R bb 5",
+    "MEND 2",
+    "Q bb 730",
+    "X 2 9 3 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa 40",
+    "T bb 50",
+    "S aa",
+    "S bb"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "Q aa 880",
+    "Q bb 850",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "S x",
+    "X",
+    "T aa 90",
+    "M",
+    "T AA 5",
+    "S aa now",
+    "T longone 040",
+    "T toolong99 10",
+    "X",
+    "S aa",
+    "M extra",
+    "S x",
+    "S lp1",
+    "S aa now",
+    "S toolong99",
+    "S toolong99",
+    "S x",
+    "M",
+    "S b2",
+    "Q hey",
+    "S ghost",
+    "X",
+    "M",
+    "Q hey",
+    "S aa",
+    "T ghost 55",
+    "S bad-id",
+    "T toolong99 10",
+    "S AA",
+    "T bad-id 4x",
+    "S aa",
+    "S longone",
+    "S bad-id",
+    "S aa now",
+    "S toolong99",
+    "S b2",
+    "S longone",
+    "S aa",
+    "S b2",
+    "T x 040",
+    "S aa",
+    "T aa 50 tail",
+    "Q hey",
+    "S x",
+    "S b2",
+    "T b2 121",
+    "M",
+    "S x",
+    "S lp1",
+    "Q hey",
+    "T lp1 040",
+    "S x",
+    "S longone",
+    "S bad-id",
+    "M",
+    "S ghost",
+    "S ghost",
+    "t aa 50",
+    "T aa 10",
+    "S aa",
+    "M",
+    "S q07",
+    "T toolong99 120",
+    "S toolong99",
+    "S aa",
+    "M",
+    "S AA",
+    "S lp1",
+    "S b2",
+    "S x",
+    "M extra",
+    "S ghost",
+    "S toolong99",
+    "S bad-id",
+    "S ghost",
+    "T aa 4x",
+    "M",
+    "S",
+    "T lp1 55",
+    "S bad-id",
+    "M",
+    "S toolong99",
+    "X",
+    "T x 1200",
+    "T q07 90",
+    "S aa",
+    "S",
+    "S AA",
+    "S bad-id",
+    "M",
+    "S toolong99",
+    "S q07",
+    "M",
+    "S bad-id",
+    "S toolong99",
+    "S b2",
+    "S toolong99",
+    "T aa",
+    "S aa",
+    "T b2 90",
+    "T b2 040",
+    "T longone 90",
+    "M",
+    "S toolong99",
+    "T aa",
+    "T longone 10",
+    "S AA",
+    "S ghost",
+    "S aa",
+    "S lp1",
+    "S ghost",
+    "M",
+    "M extra",
+    "S x",
+    "S longone",
+    "T aa 55",
+    "T q07 10",
+    "S x",
+    "S toolong99",
+    "S toolong99",
+    "T aa",
+    "S aa",
+    "S q07",
+    "S bad-id",
+    "M",
+    "T aa",
+    "S AA",
+    "S AA",
+    "S AA",
+    "S x",
+    "S toolong99",
+    "T aa 90",
+    "S q07",
+    "X",
+    "S ghost",
+    "S q07",
+    "S b2",
+    "T q07 040",
+    "T aa",
+    "S q07",
+    "M",
+    "S bad-id",
+    "S q07",
+    "S toolong99",
+    "T aa 50 tail",
+    "S ghost",
+    "S bad-id",
+    "T AA 10",
+    "M",
+    "S b2",
+    "Q hey",
+    "M",
+    "S longone",
+    "S longone",
+    "M",
+    "S AA",
+    "S b2",
+    "S toolong99",
+    "S toolong99",
+    "S aa now"
+   ],
+   "expected": [
+    "N x UNKNOWN",
+    "N ???????? FMT",
+    "OK 1",
+    "R aa 6",
+    "MEND 1",
+    "N AA MIN",
+    "N aa FMT",
+    "OK 2",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "Q aa 730",
+    "N ???????? FMT",
+    "N x UNKNOWN",
+    "N lp1 UNKNOWN",
+    "N aa FMT",
+    "N toolong99 FMT",
+    "N toolong99 FMT",
+    "N x UNKNOWN",
+    "R aa 5",
+    "R longone 6",
+    "MEND 2",
+    "N b2 UNKNOWN",
+    "N ???????? FMT",
+    "N ghost UNKNOWN",
+    "N ???????? FMT",
+    "R aa 5",
+    "R longone 6",
+    "MEND 2",
+    "N ???????? FMT",
+    "Q aa 730",
+    "OK 3",
+    "N bad-id FMT",
+    "N toolong99 FMT",
+    "N AA UNKNOWN",
+    "N bad-id FMT",
+    "Q aa 723",
+    "Q longone 880",
+    "N bad-id FMT",
+    "N aa FMT",
+    "N toolong99 FMT",
+    "N b2 UNKNOWN",
+    "Q longone 873",
+    "Q aa 716",
+    "N b2 UNKNOWN",
+    "OK 4",
+    "Q aa 709",
+    "N aa FMT",
+    "N ???????? FMT",
+    "Q x 859",
+    "N b2 UNKNOWN",
+    "N b2 MIN",
+    "R aa 0",
+    "R longone 4",
+    "R ghost 6",
+    "R x 5",
+    "MEND 4",
+    "Q x 880",
+    "N lp1 UNKNOWN",
+    "N ???????? FMT",
+    "OK 5",
+    "Q x 873",
+    "Q longone 880",
+    "N bad-id FMT",
+    "R aa 1",
+    "R longone 3",
+    "R ghost 6",
+    "R x 3",
+    "R lp1 6",
+    "MEND 5",
+    "Q ghost 835",
+    "Q ghost 828",
+    "N ???????? FMT",
+    "N aa DUP",
+    "Q aa 730",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 4",
+    "R x 3",
+    "R lp1 6",
+    "MEND 5",
+    "N q07 UNKNOWN",
+    "N toolong99 FMT",
+    "N toolong99 FMT",
+    "N aa SPENT",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 4",
+    "R x 3",
+    "R lp1 6",
+    "MEND 5",
+    "N AA UNKNOWN",
+    "Q lp1 880",
+    "N b2 UNKNOWN",
+    "Q x 865",
+    "N ???????? FMT",
+    "Q ghost 835",
+    "N toolong99 FMT",
+    "N bad-id FMT",
+    "Q ghost 813",
+    "N aa MIN",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 2",
+    "R x 2",
+    "R lp1 5",
+    "MEND 5",
+    "N ???????? FMT",
+    "N lp1 DUP",
+    "N bad-id FMT",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 2",
+    "R x 2",
+    "R lp1 5",
+    "MEND 5",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "N x MIN",
+    "OK 6",
+    "N aa SPENT",
+    "N ???????? FMT",
+    "N AA UNKNOWN",
+    "N bad-id FMT",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 2",
+    "R x 2",
+    "R lp1 5",
+    "R q07 6",
+    "MEND 6",
+    "N toolong99 FMT",
+    "Q q07 730",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 2",
+    "R x 2",
+    "R lp1 5",
+    "R q07 5",
+    "MEND 6",
+    "N bad-id FMT",
+    "N toolong99 FMT",
+    "N b2 UNKNOWN",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "N aa SPENT",
+    "OK 7",
+    "N b2 DUP",
+    "N longone DUP",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 2",
+    "R x 2",
+    "R lp1 5",
+    "R q07 5",
+    "R b2 6",
+    "MEND 7",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "N longone DUP",
+    "N AA UNKNOWN",
+    "Q ghost 835",
+    "N aa SPENT",
+    "Q lp1 880",
+    "Q ghost 828",
+    "R aa -1",
+    "R longone 3",
+    "R ghost 1",
+    "R x 2",
+    "R lp1 4",
+    "R q07 5",
+    "R b2 6",
+    "MEND 7",
+    "N ???????? FMT",
+    "Q x 880",
+    "Q longone 865",
+    "N aa DUP",
+    "N q07 DUP",
+    "Q x 873",
+    "N toolong99 FMT",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "N aa SPENT",
+    "Q q07 730",
+    "N bad-id FMT",
+    "R aa -1",
+    "R longone 2",
+    "R ghost 0",
+    "R x 1",
+    "R lp1 4",
+    "R q07 4",
+    "R b2 6",
+    "MEND 7",
+    "N aa FMT",
+    "N AA UNKNOWN",
+    "N AA UNKNOWN",
+    "N AA UNKNOWN",
+    "Q x 880",
+    "N toolong99 FMT",
+    "N aa DUP",
+    "Q q07 730",
+    "N ???????? FMT",
+    "N ghost SPENT",
+    "Q q07 708",
+    "Q b2 730",
+    "N q07 DUP",
+    "N aa FMT",
+    "Q q07 716",
+    "R aa -1",
+    "R longone 2",
+    "R ghost 0",
+    "R x -1",
+    "R lp1 4",
+    "R q07 1",
+    "R b2 5",
+    "MEND 7",
+    "N bad-id FMT",
+    "Q q07 730",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "N ghost SPENT",
+    "N bad-id FMT",
+    "OK 8",
+    "R aa -1",
+    "R longone 2",
+    "R ghost 0",
+    "R x -1",
+    "R lp1 4",
+    "R q07 1",
+    "R b2 5",
+    "R AA 6",
+    "MEND 8",
+    "Q b2 730",
+    "N ???????? FMT",
+    "R aa -1",
+    "R longone 2",
+    "R ghost 0",
+    "R x -1",
+    "R lp1 4",
+    "R q07 0",
+    "R b2 4",
+    "R AA 6",
+    "MEND 8",
+    "Q longone 880",
+    "Q longone 873",
+    "R aa -1",
+    "R longone 1",
+    "R ghost 0",
+    "R x -1",
+    "R lp1 4",
+    "R q07 0",
+    "R b2 4",
+    "R AA 6",
+    "MEND 8",
+    "Q AA 970",
+    "Q b2 730",
+    "N toolong99 FMT",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "X 8 37 18 97"
+   ]
+  },
+  {
+   "input": [
+    "S aa",
+    "M",
+    "S b2",
+    "S ghost",
+    "M",
+    "S aa",
+    "S b2",
+    "T bad-id 4x",
+    "T AA 120",
+    "M",
+    "S bad-id",
+    "S AA",
+    "S lp1",
+    "S b2",
+    "S lp1",
+    "S x",
+    "S AA",
+    "T bad-id 040",
+    "S longone",
+    "S b2",
+    "T b2 100",
+    "T aa 91",
+    "S toolong99",
+    "S x",
+    "S lp1",
+    "S aa now",
+    "S longone",
+    "S aa",
+    "S b2",
+    "S lp1",
+    "S x",
+    "T q07 10",
+    "S ghost",
+    "S toolong99",
+    "S",
+    "S aa",
+    "T ghost 91",
+    "T x 55",
+    "S b2",
+    "S x",
+    "S longone",
+    "S ghost",
+    "T longone 1200",
+    "S longone",
+    "t aa 50",
+    "T AA 09",
+    "M",
+    "M",
+    "M",
+    "S bad-id",
+    "S bad-id",
+    "S aa",
+    "S lp1",
+    "T toolong99 100",
+    "T aa 50 tail",
+    "M",
+    "M extra",
+    "S q07",
+    "S lp1",
+    "T q07 1200",
+    "S longone",
+    "M",
+    "S x",
+    "S toolong99",
+    "S b2",
+    "M",
+    "S",
+    "S AA",
+    "S lp1",
+    "T aa 120",
+    "S aa",
+    "T x 55",
+    "T longone 4x",
+    "S longone",
+    "S bad-id",
+    "T toolong99 91",
+    "M extra",
+    "T longone 100",
+    "M",
+    "T b2 91",
+    "S longone",
+    "T bad-id 121",
+    "S aa now",
+    "M",
+    "T AA 1200",
+    "T q07 09",
+    "S bad-id",
+    "T b2 91",
+    "t aa 50",
+    "T toolong99 100",
+    "T bad-id 5",
+    "T AA 100",
+    "M extra",
+    "S ghost",
+    "M extra",
+    "T toolong99 55",
+    "T lp1 90",
+    "S longone",
+    "T aa",
+    "S x",
+    "X",
+    "S bad-id",
+    "S toolong99",
+    "M",
+    "S aa",
+    "S",
+    "M",
+    "S AA",
+    "S x",
+    "T AA 100",
+    "S AA",
+    "S x",
+    "S longone",
+    "S toolong99",
+    "T aa",
+    "M",
+    "S longone",
+    "S toolong99",
+    "S AA",
+    "S lp1",
+    "T lp1 121",
+    "X",
+    "S lp1",
+    "S b2",
+    "Q hey",
+    "S aa",
+    "X",
+    "S longone",
+    "S x",
+    "S b2",
+    "S lp1",
+    "S q07",
+    "S aa",
+    "X",
+    "S q07",
+    "S lp1",
+    "T aa 50 tail",
+    "t aa 50",
+    "Q hey",
+    "M",
+    "T x 5",
+    "M",
+    "T toolong99 09",
+    "T q07 040",
+    "T longone 121",
+    "S ghost",
+    "T ghost 100",
+    "T q07 1200",
+    "S toolong99",
+    "Q hey",
+    "M",
+    "S lp1"
+   ],
+   "expected": [
+    "N aa UNKNOWN",
+    "MEND 0",
+    "N b2 UNKNOWN",
+    "N ghost UNKNOWN",
+    "MEND 0",
+    "N aa UNKNOWN",
+    "N b2 UNKNOWN",
+    "N bad-id FMT",
+    "OK 1",
+    "R AA 6",
+    "MEND 1",
+    "N bad-id FMT",
+    "Q AA 640",
+    "N lp1 UNKNOWN",
+    "N b2 UNKNOWN",
+    "N lp1 UNKNOWN",
+    "N x UNKNOWN",
+    "Q AA 633",
+    "N bad-id FMT",
+    "N longone UNKNOWN",
+    "N b2 UNKNOWN",
+    "OK 2",
+    "OK 3",
+    "N toolong99 FMT",
+    "N x UNKNOWN",
+    "N lp1 UNKNOWN",
+    "N aa FMT",
+    "N longone UNKNOWN",
+    "Q aa 713",
+    "Q b2 686",
+    "N lp1 UNKNOWN",
+    "N x UNKNOWN",
+    "OK 4",
+    "N ghost UNKNOWN",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "Q aa 706",
+    "OK 5",
+    "OK 6",
+    "Q b2 679",
+    "Q x 807",
+    "N longone UNKNOWN",
+    "Q ghost 699",
+    "N longone MIN",
+    "N longone UNKNOWN",
+    "N ???????? FMT",
+    "N AA MIN",
+    "R AA 4",
+    "R b2 4",
+    "R aa 4",
+    "R q07 6",
+    "R ghost 5",
+    "R x 5",
+    "MEND 6",
+    "R AA 4",
+    "R b2 4",
+    "R aa 4",
+    "R q07 6",
+    "R ghost 5",
+    "R x 5",
+    "MEND 6",
+    "R AA 4",
+    "R b2 4",
+    "R aa 4",
+    "R q07 6",
+    "R ghost 5",
+    "R x 5",
+    "MEND 6",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "Q aa 727",
+    "N lp1 UNKNOWN",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "R AA 4",
+    "R b2 4",
+    "R aa 3",
+    "R q07 6",
+    "R ghost 5",
+    "R x 5",
+    "MEND 6",
+    "N ???????? FMT",
+    "Q q07 970",
+    "N lp1 UNKNOWN",
+    "N q07 MIN",
+    "N longone UNKNOWN",
+    "R AA 4",
+    "R b2 4",
+    "R aa 3",
+    "R q07 5",
+    "R ghost 5",
+    "R x 5",
+    "MEND 6",
+    "Q x 835",
+    "N toolong99 FMT",
+    "Q b2 700",
+    "R AA 4",
+    "R b2 3",
+    "R aa 3",
+    "R q07 5",
+    "R ghost 5",
+    "R x 4",
+    "MEND 6",
+    "N ???????? FMT",
+    "Q AA 640",
+    "N lp1 UNKNOWN",
+    "N aa DUP",
+    "Q aa 712",
+    "N x DUP",
+    "N longone MIN",
+    "N longone UNKNOWN",
+    "N bad-id FMT",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "OK 7",
+    "R AA 3",
+    "R b2 3",
+    "R aa 2",
+    "R q07 5",
+    "R ghost 5",
+    "R x 4",
+    "R longone 6",
+    "MEND 7",
+    "N b2 DUP",
+    "Q longone 700",
+    "N bad-id FMT",
+    "N aa FMT",
+    "R AA 3",
+    "R b2 3",
+    "R aa 2",
+    "R q07 5",
+    "R ghost 5",
+    "R x 4",
+    "R longone 5",
+    "MEND 7",
+    "N AA MIN",
+    "N q07 MIN",
+    "N bad-id FMT",
+    "N b2 DUP",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "N bad-id FMT",
+    "N AA DUP",
+    "N ???????? FMT",
+    "Q ghost 727",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "OK 8",
+    "Q longone 700",
+    "N aa FMT",
+    "Q x 835",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "N toolong99 FMT",
+    "R AA 3",
+    "R b2 3",
+    "R aa 2",
+    "R q07 5",
+    "R ghost 4",
+    "R x 3",
+    "R longone 4",
+    "R lp1 6",
+    "MEND 8",
+    "Q aa 727",
+    "N ???????? FMT",
+    "R AA 3",
+    "R b2 3",
+    "R aa 1",
+    "R q07 5",
+    "R ghost 4",
+    "R x 3",
+    "R longone 4",
+    "R lp1 6",
+    "MEND 8",
+    "Q AA 625",
+    "Q x 820",
+    "N AA DUP",
+    "N AA SPENT",
+    "Q x 828",
+    "Q longone 700",
+    "N toolong99 FMT",
+    "N aa FMT",
+    "R AA 2",
+    "R b2 3",
+    "R aa 1",
+    "R q07 5",
+    "R ghost 4",
+    "R x 1",
+    "R longone 3",
+    "R lp1 6",
+    "MEND 8",
+    "Q longone 685",
+    "N toolong99 FMT",
+    "Q AA 640",
+    "Q lp1 730",
+    "N lp1 MIN",
+    "N ???????? FMT",
+    "Q lp1 723",
+    "Q b2 685",
+    "N ???????? FMT",
+    "N aa SPENT",
+    "N ???????? FMT",
+    "N longone SPENT",
+    "Q x 835",
+    "N b2 SPENT",
+    "Q lp1 716",
+    "Q q07 970",
+    "N aa SPENT",
+    "N ???????? FMT",
+    "Q q07 963",
+    "Q lp1 694",
+    "N aa FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "R AA 1",
+    "R b2 2",
+    "R aa 1",
+    "R q07 3",
+    "R ghost 4",
+    "R x 1",
+    "R longone 2",
+    "R lp1 1",
+    "MEND 8",
+    "N x MIN",
+    "R AA 1",
+    "R b2 2",
+    "R aa 1",
+    "R q07 3",
+    "R ghost 4",
+    "R x 1",
+    "R longone 2",
+    "R lp1 1",
+    "MEND 8",
+    "N toolong99 FMT",
+    "N q07 DUP",
+    "N longone MIN",
+    "Q ghost 727",
+    "N ghost DUP",
+    "N q07 MIN",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "R AA 1",
+    "R b2 2",
+    "R aa 1",
+    "R q07 3",
+    "R ghost 3",
+    "R x 0",
+    "R longone 2",
+    "R lp1 1",
+    "MEND 8",
+    "Q lp1 730",
+    "X 8 35 17 92"
+   ]
+  }
+ ]
+}

@@ -62,3 +62,22 @@ cii-v2 = 4 tasks; cii-v1 returns to 43.
 | legacy-blendcore-binary-parity (WAVE 10 replacement #3, subagent-built: settling-allowance dispense vs reconcile asymmetry with direction-reversing writeoff threshold) | PASS (gold=1.0, pre=0.0, det ×3; gold==binary over 85 batches + sweeps) | 0.889, 0.778, 0.556 (0/3, median 6.4 min) | 1.0, 1.0, 0.778 (2/3, median 23.4 min: SIXTH Opus miss) | **ADMIT (effort axis)** — invented shop-floor logic again beats the solver that swept every named mechanism. v2 = 19 tasks |
 | legacy-kilncore-binary-parity (WAVE 10 replacement #4, subagent-built: soak credits, plateau state, cold-start penalties) | PASS (gold=1.0, pre=0.0, det ×3; gold==binary over 78 batches + sweeps) | 1.0, 1.0 (2/3 early exit, median 4.5 min) | not run | **REJECT (effort axis)** — "heatwork" is real ceramics trade vocabulary (Orton cones): the invented scheme borrowed a documented concept and its nouns seeded the hypothesis space. The mechanism-name test extends to the domain's own vocabulary; safe costumes are mundane domains with purely fictional mechanisms (pacing debt, settling allowances, momentum). Recycled to v1 (51 tasks) |
 | legacy-stampcore-binary-parity (WAVE 10 replacement #5, subagent-built: invented frank-drift fees audited but never restored, staleness credits, id-shape coarse regime) | PASS (gold=1.0, pre=0.0, det ×3; gold==binary over 91 batches + sweeps) | 0.889, 0.667, 0.667 (0/3, median 7.6 min) | 1.0, 1.0, 1.0 (3/3, median 20.0 min) | **ADMIT (effort axis) — THE 20TH TASK. The charter target is reached and cii-v2 freezes at 1.0.0.** Final program ledger: 31 frontier-gated candidates, 20 admits, 11 recycled to v1; ten falsified design levers preceded the one that worked |
+
+## n=5 confirmation top-up: protocol (pre-registered 2026-08-29, before any run)
+
+Purpose: the freeze verdicts rest on n=3, and six admissions include a
+single stronger-reference miss. Before public launch, every task whose
+admission rests on a marginal prong is topped up to n=5 on that prong.
+
+Scope: (a) the six tasks Opus 5 missed at n=3 (settlecore, codeccore,
+snapcore, vaultcore, queuecore, blendcore) get +2 Opus runs; (b) the six
+tasks codex solved exactly 1/3 (matchcore, tariffcore, loyaltycore,
+snapcore, pacecore, reflowcore) get +2 codex runs. snapcore is in both.
+
+Confirmation rule, fixed now: at n=5 a task keeps its admission iff the
+weaker reference's solve rate stays at or below 1/3 (so at most 1 of 5)
+AND the stronger reference's median over all 5 runs is >= 600s or it
+missed at least one of the 5. A task failing either prong is pruned to
+v1 per the lifecycle rule; since a task-set change is breaking, any
+prune re-tags the suite (the 1.0.0 tag was never announced externally).
+Results are appended below when the runs complete, whatever they show.

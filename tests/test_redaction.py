@@ -96,3 +96,13 @@ def test_sanitize_recurses_and_caps() -> None:
     assert out["list"][0] == REDACTED
     assert out["list"][1] == 42  # non-strings pass through
     assert out["list"][2] is None
+
+
+def test_redact_never_truncates_large_text() -> None:
+    """final.patch is written via redact(), not sanitize(): a >20k-char agent
+    patch must survive byte-for-byte (a sanitize() field-cap once corrupted a
+    Fable 5.1 settlecore rewrite into an unappliable diff, silently breaking
+    regrade for that run)."""
+    big = "x" * (MAX_FIELD_CHARS * 3)
+    assert redact(big) == big
+    assert "truncated" in sanitize(big)

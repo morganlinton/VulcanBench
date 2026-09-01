@@ -48,7 +48,7 @@ from harness.evaluator.evaluate import evaluate_run
 from harness.evaluator.scorer import run_verifier, score_run
 from harness.persistence import maybe_post_run_summary
 from harness.pricing import cost_usd, has_cached_input_price, is_priced
-from harness.redaction import sanitize
+from harness.redaction import redact
 from harness.sandbox.docker_executor import (
     DockerToolExecutor,
     ResourceSpec,
@@ -249,8 +249,12 @@ def run_agent(  # noqa: PLR0915
         )
         patch = _git_diff(workspace)
         changed_files = _git_changed_files(workspace)
-        # Sanitize the published patch artifact (defense-in-depth; trace is sanitized too).
-        (run_dir / "final.patch").write_text(str(sanitize(patch)), encoding="utf-8")
+        # Redact the published patch artifact (defense-in-depth; trace is
+        # sanitized too) but NEVER length-cap it: sanitize()'s field cap
+        # truncated a >20k-char patch into a corrupt diff, which silently
+        # broke regrade for that run (found live on a Fable 5.1 settlecore
+        # rewrite). The patch is an integrity artifact, not a display field.
+        (run_dir / "final.patch").write_text(redact(patch), encoding="utf-8")
         collector.record("diff", {"patch": patch})
 
         functional, verifier_payload = _verify_with_budget(

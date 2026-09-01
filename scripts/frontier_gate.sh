@@ -1,5 +1,5 @@
 #!/bin/zsh
-# cii-v2 frontier admission gate: measure a candidate n=3 against both
+# Coding Intelligence Index v4 frontier admission gate: measure a candidate n=3 against both
 # reference frontier models and print the admit/reject verdict.
 #
 # Usage: scripts/frontier_gate.sh <task-id> [tasks-root]
@@ -11,7 +11,7 @@ export PATH="$PWD/.venv/bin:$HOME/.local/bin:$HOME/.local/node/bin:$HOME/.cargo/
 [ -f pricing.local.json ] && export VULCANBENCH_PRICING="$PWD/pricing.local.json"
 
 TASK="$1"
-ROOT="${2:-tasks/cii-v2}"
+ROOT="${2:-tasks/coding-intelligence-index-v4}"
 MODELS=(codex:gpt-5.6-sol claude-code:claude-opus-5)
 N=3
 

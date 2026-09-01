@@ -7,7 +7,7 @@ recorded duration is at most T. This is the honest form of clock-based
 difficulty: the full-budget score is always reported alongside it, and no
 model was ever cut off by the slice.
 
-Usage: python scripts/time_sliced.py [--suite cii-v2] [--slices 600,1800,3600]
+Usage: python scripts/time_sliced.py [--suite coding-intelligence-index-v4] [--slices 600,1800,3600]
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--suite", default="cii-v2")
+    parser.add_argument("--suite", default="coding-intelligence-index-v4")
     parser.add_argument("--slices", default="600,1800,3600")
     args = parser.parse_args()
     slices = [int(s) for s in args.slices.split(",")]

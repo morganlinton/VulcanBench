@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **The frontier suite directory is now `tasks/coding-intelligence-index-v4`**,
+  matching its public name (Coding Intelligence Index v4). It was previously
+  `tasks/cii-v2`, an internal build id that predated the public naming. The old
+  id keeps working everywhere: `--suite cii-v2` (and `--suite cii-v4`) resolve
+  via `SUITE_NAME_ALIASES`, task ids and recorded runs are unchanged, and
+  historical documents (charter freeze notes, candidate log, changelog entries)
+  intentionally retain the old id as history. The release assets moved to
+  `docs/results/cii-v4-release/` and `scripts/cii-v4-release/`.
+
 ### Added
 
 - **Report No. 19: Muse Spark 1.2 across the effort knob.** Published under

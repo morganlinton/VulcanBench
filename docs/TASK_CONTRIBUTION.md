@@ -192,4 +192,4 @@ port: host port}}`) into the workspace and gitignores it; the issue text
 should tell the agent to read it, and hidden tests reach services the same
 way. Environment tasks run with `--sandbox local` (the docker sandbox is
 network-disabled) and validate with `--sandbox local` plus host toolchains.
-Template: [`tasks/cii-v2/demo-compose-redis-smoke`](../tasks/cii-v2/demo-compose-redis-smoke).
+Template: [`tasks/coding-intelligence-index-v4/demo-compose-redis-smoke`](../tasks/coding-intelligence-index-v4/demo-compose-redis-smoke).

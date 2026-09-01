@@ -13,7 +13,7 @@ from harness.sandbox.docker_executor import SandboxError
 from harness.task_metadata import _validate_environment
 from harness.tasks import load_task
 
-DEMO_ROOT = Path(__file__).resolve().parents[1] / "tasks" / "cii-v2"
+DEMO_ROOT = Path(__file__).resolve().parents[1] / "tasks" / "coding-intelligence-index-v4"
 DEMO_ID = "demo-compose-redis-smoke"
 
 

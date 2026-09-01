@@ -389,10 +389,10 @@ statistical tie (which agrees with SWE-bench Pro, the format-matched external
 benchmark). Exactly one task resists all three models. CII v1 ranks frontier
 models; it does not ceiling them.
 
-`tasks/cii-v2/` is the difficulty-gated frontier successor: its
-[charter](tasks/cii-v2/CHARTER.md) requires each candidate to be measured n=3
+`tasks/coding-intelligence-index-v4/` is the difficulty-gated frontier successor: its
+[charter](tasks/coding-intelligence-index-v4/CHARTER.md) requires each candidate to be measured n=3
 against two reference frontier models before admission
-(`scripts/frontier_gate.sh`), and its [candidate log](tasks/cii-v2/CANDIDATES.md)
+(`scripts/frontier_gate.sh`), and its [candidate log](tasks/coding-intelligence-index-v4/CANDIDATES.md)
 records every verdict. It is currently empty for an honest reason: across ten
 difficulty hypotheses and five formally gated candidates, Opus 5 solved every
 gated run, the mined-PR format discriminates between frontier models but
@@ -400,7 +400,7 @@ does not beat the stronger one.
 
 ```bash
 vulcanbench run --suite cii-v1 --model codex:gpt-5.6-sol --sandbox local --no-judges
-zsh scripts/frontier_gate.sh <task-id> tasks/cii-v2   # v2 admission gate
+zsh scripts/frontier_gate.sh <task-id> tasks/coding-intelligence-index-v4   # v2 admission gate
 ```
 
 ## Voice Eval Suite

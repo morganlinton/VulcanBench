@@ -17,7 +17,9 @@ admitted ones. The suite briefly stood at 20 tasks; a pre-registered
 confirmation protocol then pruned two of them, and all six replacement
 candidates failed the admission gate for a reason worth its own section
 below. We froze at 18 rather than lower the bar. (In the repository the
-suite id is `cii-v2`; the public index numbering continues from the
+suite directory is `tasks/coding-intelligence-index-v4` (renamed from
+its internal build id `cii-v2` on 2026-09-01; the old id still resolves
+as a CLI alias); the public index numbering continues from the
 earlier VulcanBench suites.)
 
 ## Admission criteria
@@ -49,10 +51,10 @@ Results at the freeze:
 Opus 5 misses runs on six of the eighteen tasks. At the ten-minute cut
 it scores 5.9%.
 
-![Coding Intelligence Index v4 results](cii-v2-results.png)
+![Coding Intelligence Index v4 results](cii-v4-results.png)
 
 Numbers regenerate from the repository with
-`python scripts/time_sliced.py --suite cii-v2`. The time columns are
+`python scripts/time_sliced.py --suite coding-intelligence-index-v4`. The time columns are
 computed from recorded run durations after the fact; no run was stopped
 by a time cut.
 
@@ -159,7 +161,7 @@ under a ten-minute median with no miss, moves out to v1.
 ## Reproducing the results
 
 ```
-vulcanbench run --suite cii-v2 --sandbox local --no-judges
+vulcanbench run --suite coding-intelligence-index-v4 --sandbox local --no-judges
 ```
 
 Per-run scores, durations, and token counts for all 37 gate candidates

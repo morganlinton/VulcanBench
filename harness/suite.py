@@ -39,6 +39,11 @@ SUITE_ALIASES = {
 SUITE_NAME_ALIASES = {
     "cii": "cii-v1",
     "coding-intelligence-index": "cii-v1",
+    # The frontier suite's directory was renamed from its internal build id
+    # (cii-v2) to its public name on 2026-09-01. The old id stays as an alias
+    # so historical command lines, scripts, and notes keep resolving.
+    "cii-v2": "coding-intelligence-index-v4",
+    "cii-v4": "coding-intelligence-index-v4",
 }
 
 

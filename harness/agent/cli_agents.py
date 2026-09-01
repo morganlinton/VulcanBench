@@ -342,7 +342,9 @@ def _stage_codex_auth(run_scratch: Path) -> Path:
             f"codex credentials not found at {source}; run `codex login` on the host "
             "before containerized execution"
         )
-    auth_dir = run_scratch / "codex-auth"
+    # Docker bind mounts need absolute host paths; run dirs are usually
+    # relative (./runs/<id>), which docker rejects as a volume name.
+    auth_dir = (run_scratch / "codex-auth").resolve()
     auth_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, auth_dir / "auth.json")
     return auth_dir

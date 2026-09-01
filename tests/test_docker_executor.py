@@ -14,15 +14,17 @@ from typing import Any
 import docker
 import pytest
 
-from harness.agent.loop import _collect_manifest, _executor_runner
+from harness.agent.loop import _collect_manifest, _executor_runner, _executor_runner_outcome
 from harness.agent.protocol import EditFileArgs, ReadFileArgs, RunCommandArgs
 from harness.sandbox.docker_executor import (
     _SANDBOX_ENV,
     DEFAULT_IMAGE,
     DockerToolExecutor,
+    ResourceSpec,
     SandboxError,
     _docker_available,
 )
+from harness.verifier import VerifierInfrastructureError
 
 
 class FakeExecResult:
@@ -237,3 +239,87 @@ def test_live_run_command(tmp_path: Path) -> None:
         out = ex.run_command(RunCommandArgs(cmd="echo sandbox-ok"))
         assert out["exit_code"] == 0
         assert "sandbox-ok" in out["stdout"]
+
+
+# --- resource band (floor/ceiling) and OOM classification ---------------------
+
+
+def test_resource_spec_floor_ceiling_mapping(tmp_path: Path, fake_docker: FakeClient) -> None:
+    spec = ResourceSpec(
+        mem_floor="1g", mem_ceiling="4g", cpu_floor=1.0, cpu_ceiling=3.0, pids_limit=1024
+    )
+    ex = DockerToolExecutor(tmp_path, image="img", resources=spec)
+    kw = fake_docker.containers.run_kwargs
+    assert kw["mem_reservation"] == "1g"
+    assert kw["mem_limit"] == "4g"
+    assert kw["cpu_shares"] == 1024
+    assert kw["nano_cpus"] == 3_000_000_000
+    assert kw["pids_limit"] == 1024
+    assert ex.resources is spec
+    ex.close()
+
+
+def test_legacy_kwargs_become_floorless_band(tmp_path: Path, fake_docker: FakeClient) -> None:
+    ex = DockerToolExecutor(tmp_path, mem_limit="3g", cpus=1.5, pids_limit=256)
+    kw = fake_docker.containers.run_kwargs
+    assert kw["mem_limit"] == "3g"
+    assert kw["nano_cpus"] == 1_500_000_000
+    assert kw["pids_limit"] == 256
+    assert "mem_reservation" not in kw
+    assert "cpu_shares" not in kw
+    assert ex.resources == ResourceSpec(mem_ceiling="3g", cpu_ceiling=1.5, pids_limit=256)
+    ex.close()
+
+
+class OOMFakeContainer(FakeContainer):
+    """Returns SIGKILL exits for commands and a live oom_kill counter for reads."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.oom_kills = 0
+
+    def exec_run(self, cmd: Any, workdir: str | None = None, demux: bool = False) -> FakeExecResult:
+        self.exec_calls.append({"cmd": cmd, "workdir": workdir, "demux": demux})
+        shell = cmd[-1] if isinstance(cmd, list) else str(cmd)
+        if "memory.events" in shell:
+            return FakeExecResult(0, (f"low 0\noom 0\noom_kill {self.oom_kills}\n".encode(), b""))
+        return FakeExecResult(137, (b"", b"Killed\n"))
+
+
+def test_oom_kill_counted_only_when_counter_moves(tmp_path: Path, fake_docker: FakeClient) -> None:
+    container = OOMFakeContainer()
+    fake_docker.containers.container = container
+    ex = DockerToolExecutor(tmp_path, image="img")
+    # SIGKILL exit with a flat counter: a plain kill, not an OOM.
+    out = ex.run_command(RunCommandArgs(cmd="sleep 999"))
+    assert out["exit_code"] == 137
+    assert ex.oom_kill_count == 0
+    # Counter moves: the next 137 is attributed to the memory ceiling.
+    container.oom_kills = 1
+    ex.run_command(RunCommandArgs(cmd="hog-memory"))
+    assert ex.oom_kill_count == 1
+    ex.close()
+
+
+def test_verifier_oom_raises_infrastructure_error(
+    tmp_path: Path, fake_docker: FakeClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    container = OOMFakeContainer()
+    fake_docker.containers.container = container
+    ex = DockerToolExecutor(tmp_path, image="img")
+    container.oom_kills = 2
+    with pytest.raises(VerifierInfrastructureError, match="OOM"):
+        _executor_runner_outcome(ex, "pytest -q", 120)
+    ex.close()
+
+
+def test_verifier_plain_sigkill_is_not_infrastructure(
+    tmp_path: Path, fake_docker: FakeClient
+) -> None:
+    container = OOMFakeContainer()
+    fake_docker.containers.container = container
+    ex = DockerToolExecutor(tmp_path, image="img")
+    outcome = _executor_runner_outcome(ex, "pytest -q", 120)
+    assert outcome.exit_code == 137
+    assert ex.oom_kill_count == 0
+    ex.close()

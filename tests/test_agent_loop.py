@@ -237,7 +237,7 @@ def test_run_agent_budget_expiring_during_provider_does_not_finish(
     assert "test_result" not in types
 
 
-def test_final_patch_is_redacted_and_capped(
+def test_final_patch_is_redacted_but_never_truncated(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     secret = "ghp_" + "A" * 40
@@ -271,8 +271,10 @@ def test_final_patch_is_redacted_and_capped(
     patch = (tmp_path / res["run_id"] / "final.patch").read_text(encoding="utf-8")
     assert secret not in patch
     assert "[REDACTED]" in patch
-    assert "truncated" in patch
-    assert len(patch) <= MAX_FIELD_CHARS + 80
+    # Redacted but NEVER truncated: capping corrupted >20k-char patches into
+    # unappliable diffs and silently broke regrade (Fable 5.1 settlecore).
+    assert "truncated" not in patch
+    assert len(patch) > MAX_FIELD_CHARS
 
 
 def test_execute_tool_caps_run_command_timeout_to_remaining_budget() -> None:

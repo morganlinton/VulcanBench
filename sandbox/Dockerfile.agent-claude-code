@@ -1,0 +1,19 @@
+# VulcanBench containerized-agent image: Claude Code CLI.
+#
+# Build:  make agent-image-claude-code
+# Use:    vulcanbench run --task <id> --model claude-code:<model> --sandbox docker --agent-container
+#
+# Harbor-style execution: the subscription CLI runs INSIDE this container.
+# Extends the sandbox base image so the agent has the same toolchains
+# verification uses. Subscription auth is staged by the harness (macOS
+# Keychain extraction into .credentials.json) and mounted at /claude-config
+# via CLAUDE_CONFIG_DIR; never baked in.
+#
+# Pinned to the host installation's version so container and host columns
+# stay attributable; bump both together.
+FROM vulcanbench/sandbox:base
+
+ARG CLAUDE_CODE_VERSION=2.1.247
+
+RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} \
+    && claude --version

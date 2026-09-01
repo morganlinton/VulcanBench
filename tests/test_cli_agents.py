@@ -22,10 +22,14 @@ from harness.agent.cli_agents import (
     AgentContainerSpec,
     SubscriptionQuotaError,
     _agent_container_argv,
+    _stage_claude_code_auth,
     _stage_codex_auth,
     _subscription_env,
+    _sync_claude_code_auth_back,
+    _sync_codex_auth_back,
     _zcode_preflight,
     _zcode_session_limit_error,
+    default_agent_image,
     is_cli_agent_spec,
     run_claude_code_task,
     run_codex_task,
@@ -1083,7 +1087,7 @@ def test_agent_container_argv_wraps_command_with_band() -> None:
 
 def test_agent_container_rejected_by_non_codex_harnesses(tmp_path: Path) -> None:
     spec = AgentContainerSpec()
-    for runner in (run_claude_code_task, run_cursor_task, run_grok_build_task, run_zcode_task):
+    for runner in (run_cursor_task, run_grok_build_task, run_zcode_task):
         with pytest.raises(ProviderError, match="only the codex harness"):
             runner(
                 workspace=tmp_path,
@@ -1122,3 +1126,61 @@ def test_stage_codex_auth_returns_absolute_path_for_relative_scratch(
     monkeypatch.chdir(tmp_path)
     staged = _stage_codex_auth(Path("runs") / "some-run")
     assert staged.is_absolute()
+
+
+def test_stage_claude_code_auth_from_credentials_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config_home = tmp_path / "claude-home"
+    config_home.mkdir()
+    (config_home / ".credentials.json").write_text('{"claudeAiOauth": {"a": 1}}')
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(config_home))
+    staged = _stage_claude_code_auth(tmp_path / "scratch")
+    assert staged.is_absolute()
+    assert (staged / ".credentials.json").read_text() == '{"claudeAiOauth": {"a": 1}}'
+    assert json.loads((staged / ".claude.json").read_text())["hasCompletedOnboarding"] is True
+
+
+def test_default_agent_image_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("VULCANBENCH_AGENT_IMAGE", raising=False)
+    assert default_agent_image("codex") == "vulcanbench/agent-codex:latest"
+    assert default_agent_image("claude-code") == "vulcanbench/agent-claude-code:latest"
+    with pytest.raises(ProviderError, match="no image for harness"):
+        default_agent_image("cursor")
+    monkeypatch.setenv("VULCANBENCH_AGENT_IMAGE", "custom:tag")
+    assert default_agent_image("cursor") == "custom:tag"
+
+
+def test_sync_codex_auth_back_copies_changed_tokens(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    codex_home = tmp_path / "codex-home"
+    codex_home.mkdir()
+    (codex_home / "auth.json").write_text('{"token": "old"}')
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    staged = _stage_codex_auth(tmp_path / "scratch")
+    # No refresh: host untouched.
+    _sync_codex_auth_back(staged)
+    assert (codex_home / "auth.json").read_text() == '{"token": "old"}'
+    # The container refreshed (rotating the refresh token): host must follow.
+    (staged / "auth.json").write_text('{"token": "rotated"}')
+    _sync_codex_auth_back(staged)
+    assert (codex_home / "auth.json").read_text() == '{"token": "rotated"}'
+
+
+def test_sync_claude_code_auth_back_file_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config_home = tmp_path / "claude-home"
+    config_home.mkdir()
+    (config_home / ".credentials.json").write_text('{"claudeAiOauth": {"v": 1}}')
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(config_home))
+    staged = _stage_claude_code_auth(tmp_path / "scratch")
+    original = (staged / ".credentials.json").read_text()
+    # Unchanged: host untouched (and no keychain lookup attempted).
+    _sync_claude_code_auth_back(staged, original)
+    assert (config_home / ".credentials.json").read_text() == '{"claudeAiOauth": {"v": 1}}'
+    # Refreshed in-container: host file must follow.
+    (staged / ".credentials.json").write_text('{"claudeAiOauth": {"v": 2}}')
+    _sync_claude_code_auth_back(staged, original)
+    assert (config_home / ".credentials.json").read_text() == '{"claudeAiOauth": {"v": 2}}'

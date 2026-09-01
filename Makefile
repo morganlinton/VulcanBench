@@ -88,6 +88,10 @@ agent-image-codex: sandbox-image ## Build the containerized-agent image (Codex C
 	docker build -t vulcanbench/agent-codex:latest -f sandbox/Dockerfile.agent-codex .
 	@echo "✅ Built vulcanbench/agent-codex:latest for --agent-container runs"
 
+agent-image-claude-code: sandbox-image ## Build the containerized-agent image (Claude Code CLI in the sandbox base)
+	docker build -t vulcanbench/agent-claude-code:latest -f sandbox/Dockerfile.agent-claude-code .
+	@echo "✅ Built vulcanbench/agent-claude-code:latest for --agent-container runs"
+
 docker-up: ## Start local Postgres (see docker-compose.prod.yml for full stack)
 	docker compose up -d db
 

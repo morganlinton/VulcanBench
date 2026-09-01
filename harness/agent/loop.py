@@ -33,6 +33,7 @@ from harness.agent.cli_agents import (
     CliAgentAdapter,
     CliAgentOutcome,
     build_cli_prompt,
+    default_agent_image,
     get_cli_agent_adapter,
     is_cli_agent_spec,
 )
@@ -172,7 +173,15 @@ def run_agent(  # noqa: PLR0915
     summary dict (also persisted to ``<run_dir>/summary.json``).
     """
     task = load_task(task_id, tasks_root)
-    cli_adapter, provider, effort_meta = _resolve_run_engine(model, provider, effort, sandbox)
+    cli_adapter, provider, effort_meta = _resolve_run_engine(
+        model, provider, effort, sandbox, agent_container
+    )
+    if agent_container and cli_adapter is None:
+        raise SandboxError(
+            "--agent-container applies to subscription CLI harnesses "
+            "(codex:, claude-code:); API-loop runs are already containerized "
+            "by --sandbox docker"
+        )
     effective_max_steps = resolve_max_steps(task.metadata, max_steps, override=override_budgets)
     effective_timeout = resolve_agent_timeout_s(task.metadata, timeout_s, override=override_budgets)
 
@@ -229,7 +238,12 @@ def run_agent(  # noqa: PLR0915
                 network=network,
                 max_run_cost=max_run_cost,
                 agent_container_spec=(
-                    AgentContainerSpec(resources=resources) if agent_container else None
+                    AgentContainerSpec(
+                        image=default_agent_image(cli_adapter.harness_id),
+                        resources=resources,
+                    )
+                    if agent_container and cli_adapter is not None
+                    else None
                 ),
             )
         )
@@ -401,6 +415,7 @@ def _resolve_run_engine(
     provider: LLMProvider | None,
     effort: str | None,
     sandbox: str,
+    agent_container: bool = False,
 ) -> tuple[CliAgentAdapter | None, LLMProvider | None, Any]:
     """Decide whether ``model`` runs as a vendor agent CLI or via a provider.
 
@@ -418,11 +433,14 @@ def _resolve_run_engine(
         # the same directory. Forcing Cursor to local also forced the VERIFIER
         # to the host, where toolchains don't match the sandbox image, every
         # Python task failed verification with "pytest is unavailable".
-        if adapter.harness_id == "claude-code" and sandbox != "local":
+        # With --agent-container the CLI executes inside a container, so the
+        # host-execution acknowledgment no longer applies and --sandbox docker
+        # is the natural pairing (verifier in its own network-off container).
+        if adapter.harness_id == "claude-code" and sandbox != "local" and not agent_container:
             raise SandboxError(
                 f"model spec {model!r} runs a vendor agent CLI on the host with "
                 "its own tool execution; pass --sandbox local to acknowledge "
-                "host execution"
+                "host execution, or --agent-container to run it in a container"
             )
         return adapter, None, effort_config(adapter.harness_id, effort)
     provider = provider or get_provider(model)
@@ -465,7 +483,7 @@ def _execute_agent(
             max_run_cost=max_run_cost,
             effort=effort_meta.provider_value if effort_meta and effort_meta.supported else None,
             agent_container=agent_container_spec,
-        )
+        )  # spec is built per harness by the caller (image + resource band)
         if outcome.timed_out:
             deadline.record_exceeded(collector, "cli_agent")
         return (

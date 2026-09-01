@@ -34,7 +34,7 @@ from harness.leaderboard import aggregate_by_model, scan_leaderboard
 from harness.pricing import is_priced
 from harness.regrade import find_run_dirs, regrade_run
 from harness.report import build_report, to_markdown
-from harness.sandbox.docker_executor import SandboxError
+from harness.sandbox.docker_executor import ResourceSpec, SandboxError
 from harness.suite import SUITE_ALIASES, load_suite, run_suite
 from harness.tasks import list_task_ids
 from harness.validate import main as validate_main
@@ -226,6 +226,26 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
     network: bool = typer.Option(
         False, "--network/--no-network", help="Allow network in the docker sandbox"
     ),
+    mem_floor: str | None = typer.Option(
+        None,
+        "--mem-floor",
+        help="Guaranteed sandbox memory (docker mem_reservation, e.g. 2g). "
+        "Floor of the resource band; see the infrastructure-noise methodology.",
+    ),
+    mem_ceiling: str = typer.Option(
+        "2g",
+        "--mem-ceiling",
+        help="Hard sandbox memory kill threshold (docker mem_limit)",
+    ),
+    cpu_floor: float | None = typer.Option(
+        None,
+        "--cpu-floor",
+        help="Guaranteed sandbox CPUs under contention (docker cpu_shares weight)",
+    ),
+    cpu_ceiling: float = typer.Option(
+        2.0, "--cpu-ceiling", help="Hard sandbox CPU cap (docker nano_cpus)"
+    ),
+    pids_limit: int = typer.Option(512, "--pids-limit", help="Hard sandbox process-count cap"),
     repeat: int = typer.Option(1, "--repeat", help="Run each task N times (for pass@k / stderr)"),
     max_concurrency: int = typer.Option(
         1, "--max-concurrency", help="Run suite tasks in parallel (suite runs only)"
@@ -365,6 +385,13 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         "effort": effort,
         "max_run_cost": max_run_cost,
         "override_budgets": override_budgets,
+        "resources": ResourceSpec(
+            mem_floor=mem_floor,
+            mem_ceiling=mem_ceiling,
+            cpu_floor=cpu_floor,
+            cpu_ceiling=cpu_ceiling,
+            pids_limit=pids_limit,
+        ),
     }
     pass_at_1: float | None = None
     n_incomplete = 0  # errored + skipped runs (an incomplete suite)

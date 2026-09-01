@@ -49,6 +49,7 @@ from harness.pricing import cost_usd, has_cached_input_price, is_priced
 from harness.redaction import sanitize
 from harness.sandbox.docker_executor import (
     DockerToolExecutor,
+    ResourceSpec,
     SandboxError,
     _docker_available,
 )
@@ -64,7 +65,13 @@ from harness.task_metadata import (
 )
 from harness.tasks import Task, load_task, prepare_workspace, run_setup, task_hash
 from harness.tracer.collector import TraceCollector, generate_replay_html
-from harness.verifier import DEFAULT_TIMEOUT, Runner, RunnerOutcome, run_declarative_verifier
+from harness.verifier import (
+    DEFAULT_TIMEOUT,
+    Runner,
+    RunnerOutcome,
+    VerifierInfrastructureError,
+    run_declarative_verifier,
+)
 
 SYSTEM_PROMPT = (
     "You are an autonomous software engineering agent. Solve the task described "
@@ -149,6 +156,7 @@ def run_agent(  # noqa: PLR0915
     experiment_id: str | None = None,
     max_run_cost: float | None = None,
     override_budgets: bool = False,
+    resources: ResourceSpec | None = None,
 ) -> dict[str, Any]:
     """Run one evaluation: agent solves ``task_id`` with ``model``.
 
@@ -174,7 +182,7 @@ def run_agent(  # noqa: PLR0915
     agent_tmp_root, workspace = _resolve_workspace(cli_adapter, run_id, run_dir)
     prepare_workspace(task, workspace)
     _git_init(workspace)
-    executor = _make_executor(sandbox, workspace, image, network, task, collector)
+    executor = _make_executor(sandbox, workspace, image, network, task, collector, resources)
 
     # Run setup commands BEFORE the agent's wall-clock budget starts.
     # This is used by Rust tasks (cargo build --tests warm-up) and any task
@@ -839,9 +847,17 @@ def _collect_manifest(
             "mode": sandbox_mode,
             "image": getattr(executor, "image", None),
             "network": network,
+            "resources": _resource_disclosure(executor),
+            "oom_kills": getattr(executor, "oom_kill_count", None),
         },
         "tools": tools,
     } | _route_entry(model)
+
+
+def _resource_disclosure(executor: ToolProtocol) -> dict[str, Any] | None:
+    """The container resource band, or None for host execution (uncapped)."""
+    resources = getattr(executor, "resources", None)
+    return resources.to_dict() if isinstance(resources, ResourceSpec) else None
 
 
 def _minimal_manifest(
@@ -861,6 +877,8 @@ def _minimal_manifest(
             "mode": sandbox_mode,
             "image": getattr(executor, "image", None),
             "network": network,
+            "resources": _resource_disclosure(executor),
+            "oom_kills": getattr(executor, "oom_kill_count", None),
         },
         "tools": {tool: None for tool in _MANIFEST_TOOLS},
     } | _route_entry(model)
@@ -891,6 +909,7 @@ def _make_executor(
     network: bool,
     task: Task,
     collector: TraceCollector,
+    resources: ResourceSpec | None = None,
 ) -> ToolProtocol:
     """Build the tool executor for the requested sandbox mode.
 
@@ -904,14 +923,32 @@ def _make_executor(
         collector.record("sandbox", {"mode": "local"})
         return LocalToolExecutor(workspace)
     if sandbox == "docker":
-        collector.record("sandbox", {"mode": "docker", "image": resolved_image, "network": network})
-        return DockerToolExecutor(workspace, image=resolved_image, network=network)
+        collector.record(
+            "sandbox",
+            {
+                "mode": "docker",
+                "image": resolved_image,
+                "network": network,
+                "resources": (resources or ResourceSpec()).to_dict(),
+            },
+        )
+        return DockerToolExecutor(
+            workspace, image=resolved_image, network=network, resources=resources
+        )
     if sandbox == "auto":
         if _docker_available():
             collector.record(
-                "sandbox", {"mode": "docker", "image": resolved_image, "network": network}
+                "sandbox",
+                {
+                    "mode": "docker",
+                    "image": resolved_image,
+                    "network": network,
+                    "resources": (resources or ResourceSpec()).to_dict(),
+                },
             )
-            return DockerToolExecutor(workspace, image=resolved_image, network=network)
+            return DockerToolExecutor(
+                workspace, image=resolved_image, network=network, resources=resources
+            )
         if os.environ.get("VULCANBENCH_ALLOW_HOST_EXEC") != "1":
             raise SandboxError(
                 "sandbox 'auto': Docker daemon unavailable. Refusing to run "
@@ -1103,8 +1140,16 @@ def _executor_runner_outcome(executor: ToolProtocol, cmd: str, timeout: int) -> 
         res = executor.run_command(RunCommandArgs(cmd=cmd, timeout=timeout))
     except Exception as exc:
         return RunnerOutcome(124, stderr=str(exc))
+    exit_code = int(res.get("exit_code", 1))
+    if res.get("oom_killed") and isinstance(executor, DockerToolExecutor):
+        # The resource ceiling killed the verifier command. Scoring that
+        # against the model would attribute an infrastructure event to it.
+        raise VerifierInfrastructureError(
+            f"verifier command OOM-killed at the sandbox memory ceiling "
+            f"({executor.resources.mem_ceiling}): {cmd!r}"
+        )
     return RunnerOutcome(
-        int(res.get("exit_code", 1)),
+        exit_code,
         stdout=str(res.get("stdout") or res.get("result") or ""),
         stderr=str(res.get("stderr") or ""),
     )

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Agent-in-container execution mode** (`--agent-container`, codex harness
+  first): the subscription CLI runs inside a container built from the sandbox
+  base image (`make agent-image-codex`), Harbor-style, so the floor/ceiling
+  resource band bounds the agent phase as well as verification. The workspace
+  is mounted at its host path, subscription auth is a run-scoped copy of the
+  host credentials, the container (not the CLI's own Landlock sandbox, which
+  does not work under Docker) provides the write boundary, and a timeout or
+  cleanup kills the named container, not just the docker client. The
+  execution boundary is disclosed in the run summary.
+
 ### Changed
 
 - **The frontier suite directory is now `tasks/coding-intelligence-index-v4`**,

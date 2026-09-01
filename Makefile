@@ -14,7 +14,7 @@ VULCANBENCH := $(VENV_BIN)/vulcanbench
 # the venv. This makes `make ci` behave the same from any shell.
 export PATH := $(abspath $(VENV_BIN)):$(PATH)
 
-.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-all
+.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-all agent-image-codex
 .DEFAULT_GOAL := help
 
 help: ## Show this help
@@ -83,6 +83,10 @@ sandbox-image-go-1.26: sandbox-image ## Build Go 1.26 sandbox image (for repos w
 	@echo "✅ Built vulcanbench/sandbox:go-1.26, for Go modules newer than the base image's 1.23"
 
 sandbox-image-all: sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 ## Build base + Rust + Node/TS + Go-1.26 sandbox images
+
+agent-image-codex: sandbox-image ## Build the containerized-agent image (Codex CLI in the sandbox base)
+	docker build -t vulcanbench/agent-codex:latest -f sandbox/Dockerfile.agent-codex .
+	@echo "✅ Built vulcanbench/agent-codex:latest for --agent-container runs"
 
 docker-up: ## Start local Postgres (see docker-compose.prod.yml for full stack)
 	docker compose up -d db

@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from harness.agent.cli_agents import (
+    AgentContainerSpec,
     CliAgentAdapter,
     CliAgentOutcome,
     build_cli_prompt,
@@ -157,6 +158,7 @@ def run_agent(  # noqa: PLR0915
     max_run_cost: float | None = None,
     override_budgets: bool = False,
     resources: ResourceSpec | None = None,
+    agent_container: bool = False,
 ) -> dict[str, Any]:
     """Run one evaluation: agent solves ``task_id`` with ``model``.
 
@@ -226,6 +228,9 @@ def run_agent(  # noqa: PLR0915
                 effort_meta=effort_meta,
                 network=network,
                 max_run_cost=max_run_cost,
+                agent_container_spec=(
+                    AgentContainerSpec(resources=resources) if agent_container else None
+                ),
             )
         )
         patch = _git_diff(workspace)
@@ -442,6 +447,7 @@ def _execute_agent(
     effort_meta: Any,
     network: bool,
     max_run_cost: float | None,
+    agent_container_spec: AgentContainerSpec | None = None,
 ) -> tuple[int, int, bool, bool, int, CliAgentOutcome | None]:
     """Run the agent phase: the vendor CLI in the workspace, or the model loop."""
     if cli_adapter is not None:
@@ -458,6 +464,7 @@ def _execute_agent(
             network=network,
             max_run_cost=max_run_cost,
             effort=effort_meta.provider_value if effort_meta and effort_meta.supported else None,
+            agent_container=agent_container_spec,
         )
         if outcome.timed_out:
             deadline.record_exceeded(collector, "cli_agent")

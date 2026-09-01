@@ -1,0 +1,23 @@
+# VulcanBench containerized-agent image: Codex CLI.
+#
+# Build:  make agent-image-codex
+# Use:    vulcanbench run --task <id> --model codex:<model> --sandbox docker --agent-container
+#
+# Harbor-style execution: the subscription CLI runs INSIDE this container
+# instead of on the host, so the resource band (floor/ceiling) bounds the
+# agent phase too, not just verification. Extends the sandbox base image so
+# the agent has the same toolchains verification uses. Subscription auth is
+# mounted at /codex-auth by the harness (CODEX_HOME), never baked in.
+#
+# The Codex CLI version is pinned to match the host installation the program's
+# existing measurements used; bump both together.
+FROM vulcanbench/sandbox:base
+
+ARG CODEX_VERSION=0.149.0
+
+RUN npm install -g @openai/codex@${CODEX_VERSION} \
+    && codex --version
+
+# The harness runs the container as the host UID with HOME=/tmp; nothing else
+# to prepare. Network stays enabled at run time (the agent phase needs the
+# provider API); the verifier runs in a separate network-off container.

@@ -27,12 +27,14 @@ as a 0.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import re
 import shutil
 import sqlite3
 import subprocess
+import tempfile
 import threading
 import time
 import uuid
@@ -50,6 +52,7 @@ from harness.agent.providers import (
 )
 from harness.pricing import cost_usd
 from harness.redaction import sanitize
+from harness.sandbox.docker_executor import ResourceSpec
 
 CLI_AGENT_PROVIDERS = frozenset({"claude-code", "codex", "cursor", "grok-build", "zcode"})
 
@@ -242,6 +245,107 @@ def _subscription_env(extra: dict[str, str] | None = None) -> dict[str, str]:
     if extra:
         env.update(extra)
     return env
+
+
+#: Default image for containerized agent execution (Harbor-style: the CLI is
+#: installed inside the container). Built by ``make agent-image-codex``.
+DEFAULT_AGENT_IMAGE = os.environ.get("VULCANBENCH_AGENT_IMAGE", "vulcanbench/agent-codex:latest")
+
+
+@dataclass(frozen=True)
+class AgentContainerSpec:
+    """How to run a subscription CLI inside a container instead of the host.
+
+    The workspace is bind-mounted at its host path so the CLI's ``--cd`` and
+    every path in the event stream stay identical to a host run. Subscription
+    auth is a run-scoped copy of the CLI's credential file, mounted read-write
+    (CLIs refresh tokens); the copy keeps a misbehaving run from corrupting
+    the host credentials. The agent phase needs the provider API, so the
+    container runs on the default network, unlike the network-off verifier.
+    """
+
+    image: str = DEFAULT_AGENT_IMAGE
+    resources: ResourceSpec | None = None
+
+
+def _agent_container_argv(
+    spec: AgentContainerSpec,
+    workspace: Path,
+    container_name: str,
+    mounts: dict[Path, str],
+    env: dict[str, str],
+) -> list[str]:
+    """The ``docker run`` prefix that wraps a CLI command for container mode."""
+    argv = [
+        "docker",
+        "run",
+        "--rm",
+        "--interactive",
+        "--name",
+        container_name,
+        "--volume",
+        f"{workspace}:{workspace}",
+        "--workdir",
+        str(workspace),
+        "--security-opt",
+        "no-new-privileges",
+    ]
+    if hasattr(os, "getuid"):
+        argv += ["--user", f"{os.getuid()}:{os.getgid()}"]
+    for host_path, container_path in mounts.items():
+        argv += ["--volume", f"{host_path}:{container_path}"]
+    for key, value in env.items():
+        argv += ["--env", f"{key}={value}"]
+    resources = spec.resources
+    if resources is not None:
+        argv += [
+            "--memory",
+            resources.mem_ceiling,
+            "--cpus",
+            str(resources.cpu_ceiling),
+            "--pids-limit",
+            str(resources.pids_limit),
+        ]
+        if resources.mem_floor is not None:
+            argv += ["--memory-reservation", resources.mem_floor]
+        if resources.cpu_floor is not None:
+            argv += ["--cpu-shares", str(max(2, int(resources.cpu_floor * 1024)))]
+    argv.append(spec.image)
+    return argv
+
+
+def _kill_agent_container(container_name: str) -> None:
+    """Best-effort kill for a containerized agent (timeout/cleanup path).
+
+    Killing the ``docker run`` client process does not stop the container, so
+    a watchdog firing on the client alone would leave the agent running and
+    burning subscription quota in the background.
+    """
+    with contextlib.suppress(Exception):
+        subprocess.run(
+            ["docker", "kill", container_name],
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+
+
+def _stage_codex_auth(run_scratch: Path) -> Path:
+    """Copy the host Codex credentials into a run-scoped directory.
+
+    Only ``auth.json`` is staged: config is excluded by ``--ignore-user-config``
+    anyway, and session caches are irrelevant inside a fresh container.
+    """
+    source = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "auth.json"
+    if not source.is_file():
+        raise ProviderError(
+            f"codex credentials not found at {source}; run `codex login` on the host "
+            "before containerized execution"
+        )
+    auth_dir = run_scratch / "codex-auth"
+    auth_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, auth_dir / "auth.json")
+    return auth_dir
 
 
 def _fold_usage(usage: dict[str, Any]) -> tuple[int, int]:
@@ -448,6 +552,7 @@ def run_cursor_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     cursor_bin: str = "cursor-agent",
     env_overrides: dict[str, str] | None = None,
     preflight: HarnessPreflight | None = None,
+    agent_container: AgentContainerSpec | None = None,
 ) -> CliAgentOutcome:
     """Run one task through ``cursor-agent -p`` billed to the Cursor account.
 
@@ -457,6 +562,10 @@ def run_cursor_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     ledger for what a run consumed. ``max_turns`` cannot be forwarded (no such
     flag) and ``max_run_cost`` cannot be enforced live (no streamed usage).
     """
+    if agent_container is not None:
+        raise ProviderError(
+            "agent-in-container mode currently supports only the codex harness, not cursor"
+        )
     del priced_spec, max_turns
     workspace = workspace.resolve()
     if timeout_s is not None and timeout_s <= 0:
@@ -801,6 +910,7 @@ def run_grok_build_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     grok_bin: str = "grok",
     env_overrides: dict[str, str] | None = None,
     preflight: HarnessPreflight | None = None,
+    agent_container: AgentContainerSpec | None = None,
 ) -> CliAgentOutcome:
     """Run one task through ``grok -p`` billed to the Grok subscription.
 
@@ -824,6 +934,10 @@ def run_grok_build_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     network (curl in a shell still works); web tools are removed instead and
     the audit remains the check on the rest.
     """
+    if agent_container is not None:
+        raise ProviderError(
+            "agent-in-container mode currently supports only the codex harness, not grok-build"
+        )
     workspace = workspace.resolve()
     if timeout_s is not None and timeout_s <= 0:
         raise ProviderError("run budget exhausted before CLI agent start")
@@ -1556,6 +1670,7 @@ def run_zcode_task(  # noqa: PLR0912, PLR0915, linear process + harvest
     zcode_bin: str = "zcode",
     env_overrides: dict[str, str] | None = None,
     preflight: HarnessPreflight | None = None,
+    agent_container: AgentContainerSpec | None = None,
 ) -> CliAgentOutcome:
     """Run one task through ``zcode --prompt`` billed to a GLM Coding Plan.
 
@@ -1575,6 +1690,10 @@ def run_zcode_task(  # noqa: PLR0912, PLR0915, linear process + harvest
     store after the run (see :func:`_harvest_zcode_session`), so token
     receipts exist but a live ``--max-run-cost`` cap cannot be enforced.
     """
+    if agent_container is not None:
+        raise ProviderError(
+            "agent-in-container mode currently supports only the codex harness, not zcode"
+        )
     del priced_spec, max_turns
     workspace = workspace.resolve()
     if timeout_s is not None and timeout_s <= 0:
@@ -1848,6 +1967,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     claude_bin: str = "claude",
     env_overrides: dict[str, str] | None = None,
     preflight: HarnessPreflight | None = None,
+    agent_container: AgentContainerSpec | None = None,
 ) -> CliAgentOutcome:
     """Run one task with Claude Code headless in ``workspace``.
 
@@ -1857,6 +1977,10 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     API cost of the streamed usage. Partial work survives a timeout or cost
     cap and is diffed/verified by the caller, mirroring the loop's semantics.
     """
+    if agent_container is not None:
+        raise ProviderError(
+            "agent-in-container mode currently supports only the codex harness, not claude-code"
+        )
     if timeout_s is not None and timeout_s <= 0:
         raise ProviderError("run budget exhausted before CLI agent start")
 
@@ -2108,8 +2232,14 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
     codex_bin: str = "codex",
     env_overrides: dict[str, str] | None = None,
     preflight: HarnessPreflight | None = None,
+    agent_container: AgentContainerSpec | None = None,
 ) -> CliAgentOutcome:
-    """Run one task through ``codex exec --json`` using ChatGPT auth."""
+    """Run one task through ``codex exec --json`` using ChatGPT auth.
+
+    With ``agent_container`` the same command runs inside a container (the
+    image ships its own codex binary); auth is a run-scoped copy of the host
+    credentials and the workspace is mounted at its host path.
+    """
     del priced_spec, max_turns
     # The subprocess also uses this directory as cwd. Passing a relative path
     # to ``--cd`` would make Codex resolve it a second time from inside itself.
@@ -2122,16 +2252,20 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
             "enforced live; use a wall-clock --timeout for subscription runs"
         )
 
-    checked = preflight or _codex_preflight(codex_bin)
+    checked = preflight or _codex_preflight("codex" if agent_container else codex_bin)
     _require_subscription(checked)
+    # In container mode the container is the sandbox (the Harbor model), and
+    # codex's own Landlock-based workspace-write sandbox does not work under
+    # Docker's seccomp profile anyway (verified live: every file write was
+    # rejected), so the CLI sandbox is disabled there.
     cmd = [
-        codex_bin,
+        "codex" if agent_container else codex_bin,
         "exec",
         "--json",
         "--ephemeral",
         "--ignore-user-config",
         "--sandbox",
-        "workspace-write",
+        "danger-full-access" if agent_container else "workspace-write",
         "--cd",
         str(workspace),
         "--model",
@@ -2139,9 +2273,29 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
     ]
     if effort:
         cmd += ["--config", f'model_reasoning_effort="{effort}"']
-    if network:
+    if network and agent_container is None:
         cmd += ["--config", "sandbox_workspace_write.network_access=true"]
     cmd.append("-")
+
+    container_name: str | None = None
+    if agent_container is not None:
+        container_name = f"vb-agent-{uuid.uuid4().hex[:12]}"
+        scratch = (
+            stream_log_path.parent
+            if stream_log_path is not None
+            else Path(tempfile.mkdtemp(prefix="vb-agent-"))
+        )
+        auth_dir = _stage_codex_auth(scratch)
+        cmd = (
+            _agent_container_argv(
+                agent_container,
+                workspace,
+                container_name,
+                mounts={auth_dir: "/codex-auth"},
+                env={"CODEX_HOME": "/codex-auth", "HOME": "/tmp"},
+            )
+            + cmd
+        )
 
     collector.record(
         "cli_agent_start",
@@ -2149,6 +2303,11 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
             "harness": "codex",
             "argv": [*cmd[:-1], "<prompt via stdin>"],
             "harness_version": checked.version,
+            "agent_container": (
+                {"image": agent_container.image, "name": container_name}
+                if agent_container
+                else None
+            ),
         },
     )
     try:
@@ -2183,7 +2342,12 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
     stderr_thread.start()
     outcome = CliAgentOutcome(
         harness="codex",
-        execution_boundary="host-workspace; sandbox=workspace-write",
+        execution_boundary=(
+            f"container-workspace; sandbox=container (CLI sandbox off); "
+            f"image={agent_container.image}"
+            if agent_container
+            else "host-workspace; sandbox=workspace-write"
+        ),
         requested_model=model,
         harness_version=checked.version,
         auth_method=checked.auth_mode,
@@ -2193,6 +2357,9 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
 
     def _kill_on_timeout() -> None:
         killed["timeout"] = True
+        if container_name is not None:
+            # Killing the docker client alone leaves the container running.
+            _kill_agent_container(container_name)
         proc.kill()
 
     watchdog: threading.Timer | None = None
@@ -2249,6 +2416,8 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
             watchdog.cancel()
         if stream_f:
             stream_f.close()
+        if container_name is not None:
+            _kill_agent_container(container_name)
 
     proc.wait()
     stderr_thread.join(timeout=5)

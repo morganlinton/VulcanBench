@@ -1109,3 +1109,16 @@ def test_stage_codex_auth_requires_credentials(
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
     staged = _stage_codex_auth(tmp_path / "scratch2")
     assert (staged / "auth.json").read_text() == '{"token": "t"}'
+
+
+def test_stage_codex_auth_returns_absolute_path_for_relative_scratch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Docker rejects relative bind-mount sources; run dirs are usually ./runs/<id>."""
+    codex_home = tmp_path / "codex-home"
+    codex_home.mkdir()
+    (codex_home / "auth.json").write_text("{}")
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    monkeypatch.chdir(tmp_path)
+    staged = _stage_codex_auth(Path("runs") / "some-run")
+    assert staged.is_absolute()

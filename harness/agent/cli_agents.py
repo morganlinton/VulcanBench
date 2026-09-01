@@ -251,6 +251,31 @@ def _subscription_env(extra: dict[str, str] | None = None) -> dict[str, str]:
 #: installed inside the container). Built by ``make agent-image-codex``.
 DEFAULT_AGENT_IMAGE = os.environ.get("VULCANBENCH_AGENT_IMAGE", "vulcanbench/agent-codex:latest")
 
+#: Per-harness agent images (``make agent-image-<harness>``). The
+#: VULCANBENCH_AGENT_IMAGE env override wins for every harness.
+_AGENT_IMAGES = {
+    "codex": "vulcanbench/agent-codex:latest",
+    "claude-code": "vulcanbench/agent-claude-code:latest",
+}
+
+
+def default_agent_image(harness_id: str) -> str:
+    """The containerized-agent image for ``harness_id``.
+
+    Raises for harnesses without a container image so the failure is a clear
+    configuration error instead of a docker pull of a nonexistent tag.
+    """
+    override = os.environ.get("VULCANBENCH_AGENT_IMAGE")
+    if override:
+        return override
+    image = _AGENT_IMAGES.get(harness_id)
+    if image is None:
+        raise ProviderError(
+            f"agent-in-container mode has no image for harness {harness_id!r}; "
+            f"supported: {', '.join(sorted(_AGENT_IMAGES))}"
+        )
+    return image
+
 
 @dataclass(frozen=True)
 class AgentContainerSpec:
@@ -348,6 +373,108 @@ def _stage_codex_auth(run_scratch: Path) -> Path:
     auth_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, auth_dir / "auth.json")
     return auth_dir
+
+
+def _stage_claude_code_auth(run_scratch: Path) -> Path:
+    """Stage the host Claude Code subscription credentials for a container.
+
+    A Linux container reads ``.credentials.json`` from the config dir; macOS
+    hosts keep the same OAuth JSON in the Keychain instead, so it is extracted
+    with ``security``. A minimal ``.claude.json`` marks onboarding complete so
+    headless startup never blocks on a first-run prompt. Run-scoped copy for
+    the same reason as codex: a misbehaving run cannot corrupt host auth.
+    """
+    config_home = Path(os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude"))
+    file_source = config_home / ".credentials.json"
+    if file_source.is_file():
+        credentials = file_source.read_text(encoding="utf-8")
+    else:
+        try:
+            proc = subprocess.run(
+                ["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            proc = None
+        credentials = proc.stdout.strip() if proc and proc.returncode == 0 else ""
+        if not credentials:
+            raise ProviderError(
+                "Claude Code credentials not found (no .credentials.json and no "
+                "Keychain entry); sign in by running `claude` on the host before "
+                "containerized execution"
+            )
+    auth_dir = (run_scratch / "claude-code-auth").resolve()
+    auth_dir.mkdir(parents=True, exist_ok=True)
+    credentials_path = auth_dir / ".credentials.json"
+    credentials_path.write_text(credentials, encoding="utf-8")
+    credentials_path.chmod(0o600)
+    (auth_dir / ".claude.json").write_text(
+        json.dumps({"hasCompletedOnboarding": True}), encoding="utf-8"
+    )
+    return auth_dir
+
+
+def _sync_codex_auth_back(auth_dir: Path) -> None:
+    """Persist refreshed tokens from the run-scoped copy back to the host.
+
+    OAuth refresh tokens rotate: when a containerized run refreshes, the only
+    valid refresh token lives in the staged copy, and discarding it bricks
+    host auth (observed live with claude-code; the same hazard applies here).
+    Best-effort by design: auth sync must never fail a finished run.
+    """
+    with contextlib.suppress(Exception):
+        staged = auth_dir / "auth.json"
+        source = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "auth.json"
+        if staged.is_file() and source.is_file() and staged.read_bytes() != source.read_bytes():
+            shutil.copy2(staged, source)
+
+
+def _sync_claude_code_auth_back(auth_dir: Path, staged_original: str) -> None:
+    """Claude Code variant of :func:`_sync_codex_auth_back`.
+
+    The host store is either ``.credentials.json`` (Linux) or the macOS
+    Keychain entry the credentials were originally extracted from.
+    """
+    with contextlib.suppress(Exception):
+        staged = auth_dir / ".credentials.json"
+        if not staged.is_file():
+            return
+        current = staged.read_text(encoding="utf-8")
+        if current.strip() == staged_original.strip():
+            return
+        config_home = Path(os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude"))
+        file_source = config_home / ".credentials.json"
+        if file_source.is_file():
+            file_source.write_text(current, encoding="utf-8")
+            return
+        lookup = subprocess.run(
+            ["security", "find-generic-password", "-s", "Claude Code-credentials"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        match = re.search(r'"acct"<blob>="([^"]*)"', lookup.stdout + lookup.stderr)
+        if match:
+            subprocess.run(
+                [
+                    "security",
+                    "add-generic-password",
+                    "-U",
+                    "-s",
+                    "Claude Code-credentials",
+                    "-a",
+                    match.group(1),
+                    "-w",
+                    current,
+                ],
+                capture_output=True,
+                timeout=30,
+                check=False,
+            )
 
 
 def _fold_usage(usage: dict[str, Any]) -> tuple[int, int]:
@@ -1979,18 +2106,20 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     API cost of the streamed usage. Partial work survives a timeout or cost
     cap and is diffed/verified by the caller, mirroring the loop's semantics.
     """
-    if agent_container is not None:
-        raise ProviderError(
-            "agent-in-container mode currently supports only the codex harness, not claude-code"
-        )
     if timeout_s is not None and timeout_s <= 0:
         raise ProviderError("run budget exhausted before CLI agent start")
 
-    checked = preflight or _claude_preflight(claude_bin)
+    checked = preflight or _claude_preflight("claude" if agent_container else claude_bin)
     _require_subscription(checked)
 
+    # In container mode the container is the write boundary and Claude Code's
+    # own sandboxing is off: --safe-mode's backend needs privileges Docker's
+    # default profile does not grant, and --permission-mode auto only
+    # auto-grants inside that sandbox (verified live: without it, the first
+    # Write blocked on a permission request). So the container runs with
+    # permissions bypassed, the Harbor model. Disclosed in the boundary.
     cmd = [
-        claude_bin,
+        "claude" if agent_container else claude_bin,
         "-p",
         prompt,
         "--output-format",
@@ -2000,9 +2129,11 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
         model,
         "--max-turns",
         str(max_turns),
-        "--permission-mode",
-        "auto",
-        "--safe-mode",
+        *(
+            ["--dangerously-skip-permissions"]
+            if agent_container
+            else ["--permission-mode", "auto", "--safe-mode"]
+        ),
         "--no-session-persistence",
         # Hermetic runs: don't let the operator's user-level config/memory
         # leak instructions into the benchmark.
@@ -2014,9 +2145,40 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     if not network:
         cmd += ["--disallowedTools", _WEB_TOOLS]
 
+    container_name: str | None = None
+    auth_dir: Path | None = None
+    staged_original = ""
+    if agent_container is not None:
+        container_name = f"vb-agent-{uuid.uuid4().hex[:12]}"
+        scratch = (
+            stream_log_path.parent
+            if stream_log_path is not None
+            else Path(tempfile.mkdtemp(prefix="vb-agent-"))
+        )
+        auth_dir = _stage_claude_code_auth(scratch)
+        staged_original = (auth_dir / ".credentials.json").read_text(encoding="utf-8")
+        cmd = (
+            _agent_container_argv(
+                agent_container,
+                workspace.resolve(),
+                container_name,
+                mounts={auth_dir: "/claude-config"},
+                env={"CLAUDE_CONFIG_DIR": "/claude-config", "HOME": "/tmp"},
+            )
+            + cmd
+        )
+
     collector.record(
         "cli_agent_start",
-        {"harness": "claude-code", "argv": [cmd[0], "-p", "<prompt omitted>", *cmd[3:]]},
+        {
+            "harness": "claude-code",
+            "argv": [cmd[0], "-p", "<prompt omitted>", *cmd[3:]],
+            "agent_container": (
+                {"image": agent_container.image, "name": container_name}
+                if agent_container
+                else None
+            ),
+        },
     )
 
     try:
@@ -2048,7 +2210,12 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
 
     outcome = CliAgentOutcome(
         harness="claude-code",
-        execution_boundary="host-workspace; permission-mode=auto; safe-mode",
+        execution_boundary=(
+            f"container-workspace; permissions=bypass (container is the "
+            f"sandbox); image={agent_container.image}"
+            if agent_container
+            else "host-workspace; permission-mode=auto; safe-mode"
+        ),
         requested_model=model,
         harness_version=checked.version,
         auth_method=checked.auth_mode,
@@ -2058,6 +2225,9 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
 
     def _kill_on_timeout() -> None:
         killed["timeout"] = True
+        if container_name is not None:
+            # Killing the docker client alone leaves the container running.
+            _kill_agent_container(container_name)
         proc.kill()
 
     watchdog: threading.Timer | None = None
@@ -2135,6 +2305,10 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
             watchdog.cancel()
         if stream_f:
             stream_f.close()
+        if container_name is not None:
+            _kill_agent_container(container_name)
+        if auth_dir is not None:
+            _sync_claude_code_auth_back(auth_dir, staged_original)
 
     proc.wait()
     stderr_thread.join(timeout=5)
@@ -2280,6 +2454,7 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
     cmd.append("-")
 
     container_name: str | None = None
+    auth_dir: Path | None = None
     if agent_container is not None:
         container_name = f"vb-agent-{uuid.uuid4().hex[:12]}"
         scratch = (
@@ -2420,6 +2595,8 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
             stream_f.close()
         if container_name is not None:
             _kill_agent_container(container_name)
+        if auth_dir is not None:
+            _sync_codex_auth_back(auth_dir)
 
     proc.wait()
     stderr_thread.join(timeout=5)

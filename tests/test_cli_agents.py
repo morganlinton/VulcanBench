@@ -19,7 +19,10 @@ import pytest
 from harness.agent import loop as loop_mod
 from harness.agent.cli_agents import (
     _ZCODE_LIMIT_PATTERN,
+    AgentContainerSpec,
     SubscriptionQuotaError,
+    _agent_container_argv,
+    _stage_codex_auth,
     _subscription_env,
     _zcode_preflight,
     _zcode_session_limit_error,
@@ -27,12 +30,13 @@ from harness.agent.cli_agents import (
     run_claude_code_task,
     run_codex_task,
     run_cursor_task,
+    run_grok_build_task,
     run_zcode_task,
 )
 from harness.agent.loop import _resolve_run_engine, run_agent
 from harness.agent.providers import ProviderError, get_provider
 from harness.pricing import cost_usd, is_priced
-from harness.sandbox.docker_executor import SandboxError
+from harness.sandbox.docker_executor import ResourceSpec, SandboxError
 
 # Result usage: 150 uncached + 50 cache-read (0.1x) + 10 cache-write (1.25x)
 # folds to round(167.5) = 168 effective prompt tokens.
@@ -1042,3 +1046,66 @@ def test_subscription_env_blocks_system_pip_installs() -> None:
     assert env["PYTHONNOUSERSITE"] == "1"
     # Test adapters may still override explicitly.
     assert _subscription_env({"PIP_REQUIRE_VIRTUALENV": "0"})["PIP_REQUIRE_VIRTUALENV"] == "0"
+
+
+# --- agent-in-container mode --------------------------------------------------
+
+
+def test_agent_container_argv_wraps_command_with_band() -> None:
+    spec = AgentContainerSpec(
+        image="vulcanbench/agent-codex:latest",
+        resources=ResourceSpec(
+            mem_floor="1g", mem_ceiling="4g", cpu_floor=1.0, cpu_ceiling=3.0, pids_limit=1024
+        ),
+    )
+    argv = _agent_container_argv(
+        spec,
+        Path("/tmp/ws"),
+        "vb-agent-test",
+        mounts={Path("/tmp/auth"): "/codex-auth"},
+        env={"CODEX_HOME": "/codex-auth", "HOME": "/tmp"},
+    )
+    assert argv[:3] == ["docker", "run", "--rm"]
+    assert "--interactive" in argv
+    joined = " ".join(argv)
+    assert "--volume /tmp/ws:/tmp/ws" in joined
+    assert "--workdir /tmp/ws" in joined
+    assert "--volume /tmp/auth:/codex-auth" in joined
+    assert "--env CODEX_HOME=/codex-auth" in joined
+    assert "--memory 4g" in joined
+    assert "--memory-reservation 1g" in joined
+    assert "--cpus 3.0" in joined
+    assert "--cpu-shares 1024" in joined
+    assert "--pids-limit 1024" in joined
+    assert "no-new-privileges" in joined
+    assert argv[-1] == "vulcanbench/agent-codex:latest"
+
+
+def test_agent_container_rejected_by_non_codex_harnesses(tmp_path: Path) -> None:
+    spec = AgentContainerSpec()
+    for runner in (run_claude_code_task, run_cursor_task, run_grok_build_task, run_zcode_task):
+        with pytest.raises(ProviderError, match="only the codex harness"):
+            runner(
+                workspace=tmp_path,
+                prompt="p",
+                model="m",
+                priced_spec="s",
+                max_turns=1,
+                collector=_Collector(),
+                agent_container=spec,
+            )
+
+
+def test_stage_codex_auth_requires_credentials(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "nope"))
+    with pytest.raises(ProviderError, match="codex login"):
+        _stage_codex_auth(tmp_path / "scratch")
+
+    codex_home = tmp_path / "codex-home"
+    codex_home.mkdir()
+    (codex_home / "auth.json").write_text('{"token": "t"}')
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    staged = _stage_codex_auth(tmp_path / "scratch2")
+    assert (staged / "auth.json").read_text() == '{"token": "t"}'

@@ -246,6 +246,13 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         2.0, "--cpu-ceiling", help="Hard sandbox CPU cap (docker nano_cpus)"
     ),
     pids_limit: int = typer.Option(512, "--pids-limit", help="Hard sandbox process-count cap"),
+    agent_container: bool = typer.Option(
+        False,
+        "--agent-container/--no-agent-container",
+        help="Run the subscription CLI agent inside a container (codex only for "
+        "now): Harbor-style execution with the resource band applied to the "
+        "agent phase too. Requires the vulcanbench/agent-codex image.",
+    ),
     repeat: int = typer.Option(1, "--repeat", help="Run each task N times (for pass@k / stderr)"),
     max_concurrency: int = typer.Option(
         1, "--max-concurrency", help="Run suite tasks in parallel (suite runs only)"
@@ -385,6 +392,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         "effort": effort,
         "max_run_cost": max_run_cost,
         "override_budgets": override_budgets,
+        "agent_container": agent_container,
         "resources": ResourceSpec(
             mem_floor=mem_floor,
             mem_ceiling=mem_ceiling,

@@ -1,0 +1,379 @@
+diff --git a/depotcore.py b/depotcore.py
+index 5e71f24..25fda0e 100644
+--- a/depotcore.py
++++ b/depotcore.py
+@@ -1,9 +1,7 @@
+-"""DepotCore parcel-depot engine, Python implementation.
++"""DepotCore parcel-depot engine, Python implementation (engine-faithful).
+ 
+-Replaces the retired legacy binary (see ``legacy/README.md``). One depot
+-session per process: commands on stdin, result lines on stdout, trailer
+-at end of input. Format reference: ``docs/SPEC.md`` (mind the drift
+-warning; the engine's behavior is the contract).
++Replaces the retired legacy binary. Every deviation from docs/SPEC.md is
++marked ``engine:`` - the engine's behavior is the contract.
+ """
+ 
+ from __future__ import annotations
+@@ -11,11 +9,36 @@ from __future__ import annotations
+ import sys
+ 
+ BAY, SHELVED, OUT, LEDGE, GONE = 0, 1, 2, 3, 4
++
++LIFT = 15        # engine: every 3rd accepted lodge of a sender
++DISTRUST = 10    # engine: senders with 2+ accepted bounces
++DRAG = 5         # engine: per point of lane wear, at shelving time
++SAG = 40         # engine: per re-shelving of a bounced parcel
++NOTCH = 25       # engine: adjusted urges skip multiples of this
+ CAP = 4
++SHORT_CAP = 3    # engine: lanes at wear >= 3 run short rounds
++WEAR_SHORT = 3
++LIFT_EVERY = 3
++DISTRUST_AT = 2
++
++
++def _seat(u, heft):
++    # engine: every urge update lands here: clamp to 1, then any
++    # ADJUSTED urge (u != heft) sitting exactly on a multiple of 25
++    # skips up by 1. Applies on the live path and in the square's
++    # replay alike.
++    if u < 1:
++        u = 1
++    if u % NOTCH == 0 and u != heft:
++        u += 1
++    return u
+ 
+ 
+ class Parcel:
+-    __slots__ = ("pid", "sender", "lane", "heft", "state", "stamp", "bounced")
++    __slots__ = (
++        "pid", "sender", "lane", "heft", "state", "urge", "stamp",
++        "lift", "distrust", "bounces", "last_bounce_pos",
++    )
+ 
+     def __init__(self, pid, sender, lane, heft):
+         self.pid = pid
+@@ -23,20 +46,30 @@ class Parcel:
+         self.lane = lane
+         self.heft = heft
+         self.state = BAY
++        self.urge = 0
+         self.stamp = 0
+-        self.bounced = False
++        self.lift = False
++        self.distrust = False
++        self.bounces = 0
++        self.last_bounce_pos = 0
+ 
+ 
+ class Engine:
+     def __init__(self, out=None):
+         self.out = out if out is not None else sys.stdout
+-        self.senders: dict[str, bool] = {}  # registration order
++        self.senders: dict[str, dict] = {}   # id -> {"lodges", "btally"}
+         self.lane_order: list[str] = []
+-        self.shelves: dict[str, list[str]] = {}
++        self.lanes: dict[str, dict] = {}     # id -> {"wear", "shelf"}
+         self.parcels: dict[str, Parcel] = {}
+-        self.bay: list[str] = []    # lodge order
+-        self.ledge: list[str] = []  # bounce order
++        self.bay: list[str] = []             # lodge order
++        self.ledge: list[str] = []           # bounce order
+         self.stamp_next = 1
++        # engine: the event ledger. Accepted LODGEs and dispatching
++        # ROUNDs append events; each accepted BOUNCE takes a position
++        # but the per-parcel record is OVERWRITTEN, not appended. VOID
++        # rounds, SHELVEs, and WAIVEs are never ledgered.
++        self.lpos_next = 1
++        self.ledger: list[tuple] = []
+         self.window: list[str] = []
+         self.window_open = False
+         self.window_bounced: set[str] = set()
+@@ -105,7 +138,7 @@ class Engine:
+         if s in self.senders:
+             self._emit(f"R {s} DUP")
+             return
+-        self.senders[s] = True
++        self.senders[s] = {"lodges": 0, "btally": 0}
+         self.c_reg += 1
+         self._emit(f"OK {s}")
+ 
+@@ -117,10 +150,10 @@ class Engine:
+         if not self._tok_ok(l):
+             self._emit(f"R {l} FMT")
+             return
+-        if l in self.shelves:
++        if l in self.lanes:
+             self._emit(f"R {l} DUP")
+             return
+-        self.shelves[l] = []
++        self.lanes[l] = {"wear": 0, "shelf": []}
+         self.lane_order.append(l)
+         self.c_lane += 1
+         self._emit(f"OK {l}")
+@@ -144,22 +177,50 @@ class Engine:
+         if s not in self.senders:
+             self._emit(f"R {s} WHO")
+             return
+-        if l not in self.shelves:
++        if l not in self.lanes:
+             self._emit(f"R {l} DEST")
+             return
+         if pid in self.parcels:
+             self._emit(f"R {pid} DUP")
+             return
+-        self.parcels[pid] = Parcel(pid, s, l, heft)
++        snd = self.senders[s]
++        snd["lodges"] += 1
++        p = Parcel(pid, s, l, heft)
++        # engine: the lift and the distrust are decided at lodge time.
++        if snd["lodges"] % LIFT_EVERY == 0:
++            p.lift = True
++        if snd["btally"] >= DISTRUST_AT:
++            p.distrust = True
++        self.parcels[pid] = p
+         self.bay.append(pid)
++        self.ledger.append(("L", self.lpos_next, pid))
++        self.lpos_next += 1
+         self.c_lodge += 1
+         self._emit(f"OK {pid}")
+ 
+-    def _place(self, p):
++    def _place_bay(self, p):
++        # engine: restlessness starts at the heft, then the lift, the
++        # distrust, and the lane-wear drag apply, then the seat.
++        u = p.heft
++        if p.lift:
++            u += LIFT
++        if p.distrust:
++            u -= DISTRUST
++        wear = self.lanes[p.lane]["wear"]
++        if wear > 0:
++            u -= DRAG * wear
++        p.urge = _seat(u, p.heft)
+         p.stamp = self.stamp_next
+         self.stamp_next += 1
+         p.state = SHELVED
+-        self.shelves[p.lane].append(p.pid)
++        self.lanes[p.lane]["shelf"].append(p.pid)
++        self._emit(f"PUT {p.pid} {p.lane}")
++
++    def _place_ledge(self, p):
++        # engine: a returning parcel keeps its ORIGINAL stamp and sags.
++        p.urge = _seat(p.urge - SAG, p.heft)
++        p.state = SHELVED
++        self.lanes[p.lane]["shelf"].append(p.pid)
+         self._emit(f"PUT {p.pid} {p.lane}")
+ 
+     def _cmd_shelve(self, parts):
+@@ -167,14 +228,18 @@ class Engine:
+             self._emit("R SHELVE FMT")
+             return
+         n = 0
+-        for pid in self.bay:
+-            self._place(self.parcels[pid])
+-            n += 1
+-        self.bay = []
++        # engine: returns re-shelve FIRST (spec: at the back), then bay
++        # parcels grouped by lane in lane-open order (spec: lodge order).
+         for pid in self.ledge:
+-            self._place(self.parcels[pid])
++            self._place_ledge(self.parcels[pid])
+             n += 1
+         self.ledge = []
++        for l in self.lane_order:
++            for pid in self.bay:
++                if self.parcels[pid].lane == l:
++                    self._place_bay(self.parcels[pid])
++                    n += 1
++        self.bay = []
+         self._emit(f"OK {n}")
+ 
+     def _cmd_round(self, parts):
+@@ -185,31 +250,39 @@ class Engine:
+         if not self._tok_ok(l):
+             self._emit(f"R {l} FMT")
+             return
+-        if l not in self.shelves:
++        if l not in self.lanes:
+             self._emit(f"R {l} DEST")
+             return
+-        shelf = self.shelves[l]
++        lane = self.lanes[l]
+         self.c_round += 1
+-        if not shelf:
++        if not lane["shelf"]:
++            # engine: VOID rounds wear the lane but are never ledgered.
++            lane["wear"] += 1
+             self._emit(f"VOID {l}")
+             return
++        # engine: dispatch by restlessness (desc, stamp asc), not heft;
++        # a lane at wear >= 3 runs a short round of 3.
++        cap = SHORT_CAP if lane["wear"] >= WEAR_SHORT else CAP
+         self._close_window()
+         manifest = []
+-        k = min(CAP, len(shelf))
++        k = min(cap, len(lane["shelf"]))
+         for _ in range(k):
+             best = None
+-            for pid in shelf:
++            for pid in lane["shelf"]:
+                 p = self.parcels[pid]
+                 if (
+                     best is None
+-                    or p.heft > best.heft
+-                    or (p.heft == best.heft and p.stamp < best.stamp)
++                    or p.urge > best.urge
++                    or (p.urge == best.urge and p.stamp < best.stamp)
+                 ):
+                     best = p
+-            shelf.remove(best.pid)
++            lane["shelf"].remove(best.pid)
+             best.state = OUT
+             manifest.append(best.pid)
+             self._emit(f"OUT {best.pid}")
++        lane["wear"] += 1
++        self.ledger.append(("R", self.lpos_next, l, list(manifest)))
++        self.lpos_next += 1
+         self.window = manifest
+         self.window_open = True
+         self.window_bounced = set()
+@@ -234,7 +307,11 @@ class Engine:
+         p = self.parcels[pid]
+         self.window_bounced.add(pid)
+         p.state = LEDGE
+-        p.bounced = True
++        p.bounces += 1
++        # engine: the ledger keeps only the LAST bounce position.
++        p.last_bounce_pos = self.lpos_next
++        self.lpos_next += 1
++        self.senders[p.sender]["btally"] += 1
+         self.ledge.append(pid)
+         self.c_bounce += 1
+         self._emit(f"OK {pid}")
+@@ -254,18 +331,90 @@ class Engine:
+         if p.state == BAY:
+             self.bay.remove(pid)
+         else:
+-            self.shelves[p.lane].remove(pid)
++            self.lanes[p.lane]["shelf"].remove(pid)
+         p.state = GONE
+         self.c_waive += 1
+         self._emit(f"OK {pid}")
+ 
++    def _replay(self):
++        # engine: the square walks the ledger. It sees LODGE events,
++        # dispatching ROUND events (with their manifests), and ONE
++        # bounce per parcel at its last recorded position. It never
++        # sees VOID rounds, SHELVE groupings, or WAIVEs.
++        events = list(self.ledger)
++        for p in self.parcels.values():
++            if p.last_bounce_pos > 0:
++                events.append(("B", p.last_bounce_pos, p.pid))
++        events.sort(key=lambda ev: ev[1])
++        shelf_r = {l: [] for l in self.lane_order}
++        wear_r = {l: 0 for l in self.lane_order}
++        urge_r = {}
++        stamp_r = {}
++        next_stamp = 1
++        walk_lodges = {s: 0 for s in self.senders}
++        walk_btally = {s: 0 for s in self.senders}
++        for ev in events:
++            if ev[0] == "L":
++                p = self.parcels[ev[2]]
++                walk_lodges[p.sender] += 1
++                u = p.heft
++                if walk_lodges[p.sender] % LIFT_EVERY == 0:
++                    u += LIFT
++                if walk_btally[p.sender] >= DISTRUST_AT:
++                    u -= DISTRUST
++                if wear_r[p.lane] > 0:
++                    u -= DRAG * wear_r[p.lane]
++                urge_r[p.pid] = _seat(u, p.heft)
++                stamp_r[p.pid] = next_stamp
++                next_stamp += 1
++                shelf_r[p.lane].append(p.pid)
++            elif ev[0] == "R":
++                l, manifest = ev[2], ev[3]
++                wear_r[l] += 1
++                for pid in manifest:
++                    if pid in shelf_r[l]:
++                        shelf_r[l].remove(pid)
++            else:
++                p = self.parcels[ev[2]]
++                walk_btally[p.sender] += 1
++                urge_r[p.pid] = _seat(urge_r[p.pid] - SAG, p.heft)
++                stamp_r[p.pid] = next_stamp
++                next_stamp += 1
++                if p.pid in shelf_r[p.lane]:
++                    shelf_r[p.lane].remove(p.pid)
++                shelf_r[p.lane].append(p.pid)
++        return shelf_r, wear_r, urge_r, stamp_r
++
+     def _cmd_square(self, parts):
+         if len(parts) != 1:
+             self._emit("R SQUARE FMT")
+             return
+         self.c_square += 1
++        # engine: the square is a REPLAY that replaces live state, not
++        # the spec's posted recount. It closes the return window, pulls
++        # bay and ledge parcels onto the rebuilt shelves, reassigns
++        # stamps in walk order, and writes the replay's wear back over
++        # the live wear.
++        self._close_window()
++        shelf_r, wear_r, urge_r, stamp_r = self._replay()
++        on_shelves = set()
+         for l in self.lane_order:
+-            names = " ".join(self.shelves[l])
++            lane = self.lanes[l]
++            lane["shelf"] = list(shelf_r[l])
++            lane["wear"] = wear_r[l]
++            for pid in lane["shelf"]:
++                p = self.parcels[pid]
++                p.state = SHELVED
++                p.urge = urge_r[pid]
++                p.stamp = stamp_r[pid]
++                on_shelves.add(pid)
++        for p in self.parcels.values():
++            if p.pid not in on_shelves and p.state in (BAY, LEDGE, OUT):
++                p.state = GONE
++        self.bay = []
++        self.ledge = []
++        for l in self.lane_order:
++            names = " ".join(self.lanes[l]["shelf"])
+             self._emit(f"SQ {l} {names}" if names else f"SQ {l}")
+         self._emit(f"OK {len(self.lane_order)}")
+ 
+@@ -277,10 +426,10 @@ class Engine:
+         if not self._tok_ok(l):
+             self._emit(f"R {l} FMT")
+             return
+-        if l not in self.shelves:
++        if l not in self.lanes:
+             self._emit(f"R {l} DEST")
+             return
+-        names = " ".join(self.shelves[l])
++        names = " ".join(self.lanes[l]["shelf"])
+         self._emit(f"SHELF {l} {names}" if names else f"SHELF {l}")
+ 
+     def _cmd_held(self, parts):
+@@ -294,11 +443,14 @@ class Engine:
+         if s not in self.senders:
+             self._emit(f"R {s} WHO")
+             return
+-        held = [
+-            p for p in self.parcels.values() if p.sender == s and p.state == SHELVED
+-        ]
+-        held.sort(key=lambda p: p.stamp)
+-        joined = " ".join(p.pid for p in held)
++        # engine: lane-open order, shelf order within a lane (the spec
++        # says arrival order).
++        names = []
++        for l in self.lane_order:
++            for pid in self.lanes[l]["shelf"]:
++                if self.parcels[pid].sender == s:
++                    names.append(pid)
++        joined = " ".join(names)
+         self._emit(f"FOR {s} {joined}" if joined else f"FOR {s}")
+ 
+     def _cmd_roll(self, parts):

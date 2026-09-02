@@ -87,6 +87,18 @@ def _infrastructure_reason(cmd: str, outcome: RunnerOutcome) -> str | None:
     return None
 
 
+
+def _normalize_test_cmd(cmd: str) -> str:
+    # Neutralize the repo-root pyproject.toml `addopts = --cov=...` leak.
+    # pytest auto-discovers the inifile up from the workspace, so running under
+    # `runs/<task>-*/workspace` resolves rootdir to the VulcanBench repo root and
+    # inherits `--cov=harness --cov-report=... --cov-fail-under=...`. Those flags
+    # make pytest error before running any test, so functionally-correct patches
+    # are scored 0.0. Appending `-o addopts=` clears the inherited addopts so the
+    # gold tests actually run.
+    if "pytest" in cmd and "-o addopts" not in cmd: return cmd + " -o addopts="
+    return cmd
+
 def _run_group(
     entries: list[dict[str, Any]], workspace: Path, timeout: int, runner: Runner
 ) -> dict[str, bool]:
@@ -97,7 +109,7 @@ def _run_group(
         if not cmd:
             results[name] = False
             continue
-        raw_outcome = runner(str(cmd), workspace, timeout)
+        raw_outcome = runner(_normalize_test_cmd(str(cmd)), workspace, timeout)
         outcome = (
             raw_outcome
             if isinstance(raw_outcome, RunnerOutcome)

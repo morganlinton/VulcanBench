@@ -22,4 +22,6 @@ def default_test_command(workspace: Path) -> str:
         )
     if (ws / "pom.xml").exists() or (ws / "build.gradle").exists():
         return "mvn -q test 2>&1 || ./gradlew test 2>&1 || true"
-    return "python -m pytest -q --tb=no 2>&1 || true"
+    # `-o addopts=` neutralizes the repo-root pyproject.toml --cov= addopts that
+    # pytest inherits when running inside a workspace under runs/ (would error the run).
+    return "python -m pytest -q --tb=no -o addopts= 2>&1 || true"

@@ -44,6 +44,10 @@ PRICES: dict[str, dict[str, float]] = {
     "openai:o3": {"input": 2.00, "output": 8.00},
     "openai:o4-mini": {"input": 1.10, "output": 4.40},
     "anthropic:claude-fable-5": {"input": 10.00, "output": 50.00},
+    # Fable 5.1 matches Fable 5 on input/output; its cache reads are $0.25/M
+    # (75% below Fable 5), which this table does not model, so api-equivalent
+    # costs for cache-heavy agent runs are an upper bound.
+    "anthropic:claude-fable-5-1": {"input": 10.00, "output": 50.00},
     "anthropic:claude-opus-5": {"input": 5.00, "output": 25.00},
     "anthropic:claude-opus-4-8": {"input": 5.00, "output": 25.00},
     "anthropic:claude-opus-4-7": {"input": 5.00, "output": 25.00},

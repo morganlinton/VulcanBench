@@ -1,0 +1,222 @@
+{
+  "run_id": "legacy-reflowcore-binary-parity-2151cdbc",
+  "task_id": "legacy-reflowcore-binary-parity",
+  "model": "claude-code:claude-fable-5-1",
+  "steps": 30,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.847,
+    "security": 0.85,
+    "efficiency": 0.21,
+    "human_like": null,
+    "total": 0.8617,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 379,
+            "violations": 0,
+            "avg_complexity": 2.75,
+            "maintainability_index": 49.0,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 1.0,
+              "maintainability": 0.49
+            },
+            "score": 0.847
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 3,
+            "score": 0.85
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-board/legacy-reflowcore-binary-parity-2151cdbc/trace.jsonl",
+    "replay_html": "runs-board/legacy-reflowcore-binary-parity-2151cdbc/replay.html"
+  },
+  "finished_at": "2026-09-02T05:21:47.987496+00:00",
+  "total_tokens": 468846,
+  "tokens": {
+    "prompt": 387828,
+    "completion": 81018,
+    "total": 468846,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": null,
+  "cost_detail": {
+    "agent": null,
+    "judges": 0.0,
+    "total": null,
+    "model_priced": false,
+    "agent_input_tokens": 387828,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 387828,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": null,
+    "cli_reported_cost_usd": 7.0574515,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "unavailable",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1235.793,
+  "started_at": "2026-09-02T05:01:12.210813+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-fable-5-1",
+    "judge_model": "claude-code:claude-fable-5-1",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 16,
+      "loc": 571
+    }
+  },
+  "task_hash": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-ff53e7b1",
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-fable-5-1",
+    "reported_model": "claude-fable-5-1",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "8348d4ec-f50c-4e53-9ea2-14944f1c99ff",
+    "subtype": "success",
+    "num_turns": 30,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 7.0574515,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "benchmark_data_access",
+      "out_of_workspace_paths": [
+        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-reflowcore-binary-parity-2151cdbc-oqymktxk-workspace/8348d4ec-f50c-4e53-9ea2-14944f1c99ff/tasks/bu30f1qi0.output",
+        "/tmp/bad",
+        "/tmp/big.txt",
+        "/tmp/c.txt",
+        "/tmp/cmp.py",
+        "/tmp/fuzz.py",
+        "/tmp/fuzz2.log",
+        "/tmp/fuzz2.py",
+        "/tmp/p.txt",
+        "/tmp/probes.sh",
+        "/tmp/s",
+        "/tmp/s5.txt"
+      ],
+      "benchmark_data_paths": [
+        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-reflowcore-binary-parity-2151cdbc-oqymktxk-workspace/8348d4ec-f50c-4e53-9ea2-14944f1c99ff/tasks/bu30f1qi0.output"
+      ],
+      "answer_key_paths": [],
+      "contaminated": true
+    },
+    "contaminated": true
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "incremental_vs_reflow": true,
+      "width_rewrap": true,
+      "overlong_words": true,
+      "digest_spaces": true,
+      "empty_reflow": true,
+      "digit_widths": true,
+      "lenient_tokens": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "pure_append": true,
+      "reflow_neutral": true,
+      "reject_lanes": true,
+      "empty_state": true,
+      "trailer_counts": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 8/8 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-reflowcore-binary-parity-2151cdbc"
+}

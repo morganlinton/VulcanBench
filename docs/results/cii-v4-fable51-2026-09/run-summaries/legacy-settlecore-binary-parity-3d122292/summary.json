@@ -1,0 +1,212 @@
+{
+  "run_id": "legacy-settlecore-binary-parity-3d122292",
+  "task_id": "legacy-settlecore-binary-parity",
+  "model": "claude-code:claude-fable-5-1",
+  "steps": 20,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8282,
+    "security": 0.3,
+    "efficiency": 0.24,
+    "human_like": null,
+    "total": 0.7703,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 664,
+            "violations": 7,
+            "avg_complexity": 3.0625,
+            "maintainability_index": 45.54,
+            "sub_scores": {
+              "lint": 0.9789,
+              "complexity": 1.0,
+              "maintainability": 0.4554
+            },
+            "score": 0.8282
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 14,
+            "score": 0.3
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-board/legacy-settlecore-binary-parity-3d122292/trace.jsonl",
+    "replay_html": "runs-board/legacy-settlecore-binary-parity-3d122292/replay.html"
+  },
+  "finished_at": "2026-09-02T01:51:03.994080+00:00",
+  "total_tokens": 301637,
+  "tokens": {
+    "prompt": 249312,
+    "completion": 52325,
+    "total": 301637,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": null,
+  "cost_detail": {
+    "agent": null,
+    "judges": 0.0,
+    "total": null,
+    "model_priced": false,
+    "agent_input_tokens": 249312,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 249312,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": null,
+    "cli_reported_cost_usd": 5.044105500000001,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "unavailable",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 812.564,
+  "started_at": "2026-09-02T01:37:31.398673+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-fable-5-1",
+    "judge_model": "claude-code:claude-fable-5-1",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 50,
+      "loc": 936
+    }
+  },
+  "task_hash": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-ff53e7b1",
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-fable-5-1",
+    "reported_model": "claude-fable-5-1",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "8376e856-09d1-4ab3-8a3b-01bcba1b4de1",
+    "subtype": "success",
+    "num_turns": 20,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 5.044105500000001,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/tmp/b1.txt",
+        "/tmp/dis.txt",
+        "/tmp/probe.py"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "rounding_regimes": true,
+      "tier_rate_table": true,
+      "weekend_mcc_surcharge": true,
+      "eur_levy_threshold": true,
+      "fee_cap_exception": true,
+      "lenient_amount_padding": true,
+      "negative_refunds": true,
+      "leap_year_rule": true,
+      "batch_ordering": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "nominal_settlements": true,
+      "error_codes": true,
+      "empty_batch_trailer": true,
+      "multi_record_batch": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 10/10 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-settlecore-binary-parity-3d122292"
+}

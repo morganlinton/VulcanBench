@@ -1,0 +1,223 @@
+{
+  "run_id": "legacy-matchcore-order-book-parity-70dd4d70",
+  "task_id": "legacy-matchcore-order-book-parity",
+  "model": "claude-code:claude-fable-5-1",
+  "steps": 17,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8157,
+    "security": 1.0,
+    "efficiency": 0.249,
+    "human_like": null,
+    "total": 0.8858,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 251,
+            "violations": 2,
+            "avg_complexity": 4.181818181818182,
+            "maintainability_index": 40.7,
+            "sub_scores": {
+              "lint": 0.9841,
+              "complexity": 1.0,
+              "maintainability": 0.407
+            },
+            "score": 0.8157
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-board/legacy-matchcore-order-book-parity-70dd4d70/trace.jsonl",
+    "replay_html": "runs-board/legacy-matchcore-order-book-parity-70dd4d70/replay.html"
+  },
+  "finished_at": "2026-09-02T02:05:28.069192+00:00",
+  "total_tokens": 243444,
+  "tokens": {
+    "prompt": 208771,
+    "completion": 34673,
+    "total": 243444,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": null,
+  "cost_detail": {
+    "agent": null,
+    "judges": 0.0,
+    "total": null,
+    "model_priced": false,
+    "agent_input_tokens": 208771,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 208771,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": null,
+    "cli_reported_cost_usd": 3.7854165,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "unavailable",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 863.983,
+  "started_at": "2026-09-02T01:51:04.081519+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-fable-5-1",
+    "judge_model": "claude-code:claude-fable-5-1",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 423
+    }
+  },
+  "task_hash": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-ff53e7b1",
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-fable-5-1",
+    "reported_model": "claude-fable-5-1",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "c088e748-dc63-44cd-b990-58dab68d2c0a",
+    "subtype": "success",
+    "num_turns": 17,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 3.7854165,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git",
+        "/legacy/run",
+        "/matchcore.py",
+        "/tmp/cstr.txt",
+        "/tmp/dis.txt",
+        "/tmp/mc",
+        "/tmp/mc/a.txt",
+        "/tmp/mc/b.txt",
+        "/tmp/mc/big.txt",
+        "/tmp/mc/cstr.txt",
+        "/tmp/mc/dis.txt",
+        "/tmp/mc/fail_",
+        "/tmp/mc/fail_long_",
+        "/tmp/mc/fuzz.py",
+        "/tmp/mc/s.txt"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "priority_class": true,
+      "self_trade_prevention": true,
+      "cancel_replace": true,
+      "cancel_ack_quantity": true,
+      "volatility_band": true,
+      "tick_regime": true,
+      "book_hash": true,
+      "lenient_tokens": true,
+      "full_session_parity": true
+    },
+    "pass_to_pass": {
+      "basic_matching": true,
+      "time_priority": true,
+      "rejects": true,
+      "cancel_unfilled": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-matchcore-order-book-parity-70dd4d70"
+}

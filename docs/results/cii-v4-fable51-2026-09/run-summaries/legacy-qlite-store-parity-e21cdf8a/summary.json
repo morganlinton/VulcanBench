@@ -1,0 +1,236 @@
+{
+  "run_id": "legacy-qlite-store-parity-e21cdf8a",
+  "task_id": "legacy-qlite-store-parity",
+  "model": "claude-code:claude-fable-5-1",
+  "steps": 21,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8134,
+    "security": 0.8,
+    "efficiency": 0.237,
+    "human_like": null,
+    "total": 0.8508,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 1001,
+            "violations": 25,
+            "avg_complexity": 3.28125,
+            "maintainability_index": 44.45,
+            "sub_scores": {
+              "lint": 0.95,
+              "complexity": 1.0,
+              "maintainability": 0.4445
+            },
+            "score": 0.8134
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 4,
+            "score": 0.8
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-board/legacy-qlite-store-parity-e21cdf8a/trace.jsonl",
+    "replay_html": "runs-board/legacy-qlite-store-parity-e21cdf8a/replay.html"
+  },
+  "finished_at": "2026-09-02T02:20:04.042229+00:00",
+  "total_tokens": 287422,
+  "tokens": {
+    "prompt": 229835,
+    "completion": 57587,
+    "total": 287422,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": null,
+  "cost_detail": {
+    "agent": null,
+    "judges": 0.0,
+    "total": null,
+    "model_priced": false,
+    "agent_input_tokens": 229835,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 229835,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": null,
+    "cli_reported_cost_usd": 4.9490732500000005,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "unavailable",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 875.895,
+  "started_at": "2026-09-02T02:05:28.155626+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-fable-5-1",
+    "judge_model": "claude-code:claude-fable-5-1",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 16,
+      "loc": 1193
+    }
+  },
+  "task_hash": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-ff53e7b1",
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-fable-5-1",
+    "reported_model": "claude-fable-5-1",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "6020e124-2f19-43a1-ae7f-28966cd4ff6a",
+    "subtype": "success",
+    "num_turns": 21,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 4.9490732500000005,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git",
+        "/bin/sh",
+        "/legacy/run",
+        "/qlite.py",
+        "/tmp/ql",
+        "/tmp/ql/",
+        "/tmp/ql/agg.txt",
+        "/tmp/ql/bad",
+        "/tmp/ql/big.leg",
+        "/tmp/ql/big.py",
+        "/tmp/ql/big.txt",
+        "/tmp/ql/buf.txt",
+        "/tmp/ql/cap.txt",
+        "/tmp/ql/cmp.sh",
+        "/tmp/ql/cr.txt",
+        "/tmp/ql/dup.txt",
+        "/tmp/ql/find.txt",
+        "/tmp/ql/find2.txt",
+        "/tmp/ql/fuzz.py",
+        "/tmp/ql/leg.out",
+        "/tmp/ql/lines.txt",
+        "/tmp/ql/prof",
+        "/tmp/ql/py.out",
+        "/tmp/ql/range.txt",
+        "/tmp/ql/range2.txt",
+        "/tmp/ql/slots.txt",
+        "/tmp/ql/trunc.txt",
+        "/tmp/ql/valid.txt"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "slot_reuse_ordering": true,
+      "find_case_rule": true,
+      "wildcard_semantics": true,
+      "range_bounds": true,
+      "duplicate_insert_update": true,
+      "name_truncation": true,
+      "avg_truncation": true,
+      "sum_wrap": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "crud": true,
+      "find_exact_case": true,
+      "range_interior": true,
+      "fmt_errors": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-qlite-store-parity-e21cdf8a"
+}

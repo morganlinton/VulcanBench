@@ -1,0 +1,1112 @@
+{
+  "generated_at": "2026-09-02T23:06:33.169498+00:00",
+  "suite": "coding-intelligence-index-v4",
+  "totals": {
+    "n_runs": 28,
+    "n_models": 2,
+    "n_tasks": 23,
+    "total_cost_usd": 33.57268,
+    "total_marginal_cash_usd": null,
+    "total_api_equivalent_cost_usd": 33.57268,
+    "track_counts": {
+      "api": 0,
+      "subscription": 28
+    }
+  },
+  "models": [
+    {
+      "model": "claude-code:claude-fable-5-1",
+      "execution_harness": "claude-code",
+      "track": "subscription",
+      "access_mode": "subscription-included",
+      "n_tasks": 23,
+      "n_runs": 23,
+      "repeats": 1.0,
+      "solved": 19,
+      "pass_at_1": 0.8261,
+      "pass_at_1_stderr": 0.0808,
+      "pass_at_k": 0.8261,
+      "avg_total": 0.8512,
+      "avg_total_stderr": 0.0104,
+      "total_tokens": 32251259,
+      "total_cost": null,
+      "cost_known": false,
+      "total_marginal_cash_usd": null,
+      "marginal_cash_known": false,
+      "total_api_equivalent_cost_usd": null,
+      "api_equivalent_known": false,
+      "avg_duration_s": 2325.1418,
+      "avg_functional": 0.9782,
+      "avg_quality": 0.8205,
+      "avg_security": 0.9022,
+      "avg_efficiency": 0.1863,
+      "avg_human_like": null
+    },
+    {
+      "model": "claude-code:claude-fable-5",
+      "execution_harness": "claude-code",
+      "track": "subscription",
+      "access_mode": "subscription-included",
+      "n_tasks": 5,
+      "n_runs": 5,
+      "repeats": 1.0,
+      "solved": 3,
+      "pass_at_1": 0.6,
+      "pass_at_1_stderr": 0.2449,
+      "pass_at_k": 0.6,
+      "avg_total": 0.8083,
+      "avg_total_stderr": 0.035,
+      "total_tokens": 2135056,
+      "total_cost": 33.57268,
+      "cost_known": true,
+      "total_marginal_cash_usd": null,
+      "marginal_cash_known": false,
+      "total_api_equivalent_cost_usd": 33.57268,
+      "api_equivalent_known": true,
+      "avg_duration_s": 952.2182,
+      "avg_functional": 0.8956,
+      "avg_quality": 0.8173,
+      "avg_security": 0.94,
+      "avg_efficiency": 0.1614,
+      "avg_human_like": null
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "legacy-blendcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-cellarcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-codeccore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-depotcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 0,
+          "solve_rate": 0.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-freightcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-granarycore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 0,
+          "solve_rate": 0.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-hedgecore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-lodgecore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 0,
+          "solve_rate": 0.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-matchcore-order-book-parity",
+      "n_runs": 2,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5",
+          "attempts": 1,
+          "solved": 0,
+          "solve_rate": 0.0
+        },
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-metercore-binary-parity",
+      "n_runs": 2,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-pacecore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-paddockcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 0,
+          "solve_rate": 0.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-payrollcore-binary-parity",
+      "n_runs": 2,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-qlite-store-parity",
+      "n_runs": 2,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        },
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-queuecore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-quotacore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-reflowcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-schedcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-settlecore-binary-parity",
+      "n_runs": 2,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5",
+          "attempts": 1,
+          "solved": 0,
+          "solve_rate": 0.0
+        },
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-snapcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-stampcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-tallycore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    },
+    {
+      "task_id": "legacy-vaultcore-binary-parity",
+      "n_runs": 1,
+      "models": [
+        {
+          "model": "claude-code:claude-fable-5-1",
+          "attempts": 1,
+          "solved": 1,
+          "solve_rate": 1.0
+        }
+      ]
+    }
+  ],
+  "discrimination": {
+    "available": true,
+    "pass_threshold": 0.5,
+    "models": [
+      "claude-code:claude-fable-5",
+      "claude-code:claude-fable-5-1"
+    ],
+    "n_tasks": 23,
+    "all_pass": 17,
+    "all_fail": 4,
+    "discriminating": 2,
+    "no_signal_tasks": [
+      "legacy-blendcore-binary-parity",
+      "legacy-cellarcore-binary-parity",
+      "legacy-codeccore-binary-parity",
+      "legacy-depotcore-binary-parity",
+      "legacy-freightcore-binary-parity",
+      "legacy-granarycore-binary-parity",
+      "legacy-hedgecore-binary-parity",
+      "legacy-lodgecore-binary-parity",
+      "legacy-metercore-binary-parity",
+      "legacy-pacecore-binary-parity",
+      "legacy-paddockcore-binary-parity",
+      "legacy-payrollcore-binary-parity",
+      "legacy-qlite-store-parity",
+      "legacy-queuecore-binary-parity",
+      "legacy-quotacore-binary-parity",
+      "legacy-reflowcore-binary-parity",
+      "legacy-schedcore-binary-parity",
+      "legacy-snapcore-binary-parity",
+      "legacy-stampcore-binary-parity",
+      "legacy-tallycore-binary-parity",
+      "legacy-vaultcore-binary-parity"
+    ],
+    "tasks": [
+      {
+        "task_id": "legacy-blendcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-cellarcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-codeccore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-depotcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-freightcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-granarycore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-hedgecore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-lodgecore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-matchcore-order-book-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5": 0.0,
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": true,
+        "spread": 1.0
+      },
+      {
+        "task_id": "legacy-metercore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5": 1.0,
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-pacecore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-paddockcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-payrollcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0,
+          "claude-code:claude-fable-5": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-qlite-store-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5": 1.0,
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-queuecore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-quotacore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-reflowcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-schedcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-settlecore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0,
+          "claude-code:claude-fable-5": 0.0
+        },
+        "separates": true,
+        "spread": 1.0
+      },
+      {
+        "task_id": "legacy-snapcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-stampcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-tallycore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      },
+      {
+        "task_id": "legacy-vaultcore-binary-parity",
+        "solve_rates": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "separates": false,
+        "spread": 0.0
+      }
+    ],
+    "model_pairs": [
+      {
+        "a": "claude-code:claude-fable-5",
+        "b": "claude-code:claude-fable-5-1",
+        "common_tasks": 5,
+        "a_solves_b_fails": 0,
+        "b_solves_a_fails": 2,
+        "separating": 2,
+        "agree": 3
+      }
+    ]
+  },
+  "environment": {
+    "models": [
+      "claude-code:claude-fable-5",
+      "claude-code:claude-fable-5-1"
+    ],
+    "python": [
+      "3.12.14"
+    ],
+    "tools": {
+      "bandit": [
+        "bandit 1.9.4"
+      ],
+      "git": [
+        "git version 2.50.1 (Apple Git-155)"
+      ],
+      "go": [
+        "go version go1.27.0 darwin/arm64"
+      ],
+      "node": [
+        "v24.19.0"
+      ],
+      "radon": [
+        "6.0.1"
+      ],
+      "ruff": [
+        "ruff 0.16.5"
+      ]
+    }
+  },
+  "integrity": {
+    "stale": 0,
+    "stale_run_ids": [],
+    "unknown": 0,
+    "not_decontaminated": 0,
+    "not_decontaminated_run_ids": [],
+    "not_decontaminated_tasks": []
+  },
+  "calibration": {
+    "generated_at": "2026-09-02T23:06:33.169306+00:00",
+    "thresholds": {
+      "easy_min": 0.85,
+      "medium_min": 0.4
+    },
+    "criteria": {
+      "min_attempts": 5,
+      "min_models": 2
+    },
+    "excluded": {
+      "mock_runs": 0,
+      "stale_runs": 0,
+      "unknown_task_runs": 0
+    },
+    "tasks": [
+      {
+        "task_id": "demo-compose-redis-smoke",
+        "labeled_difficulty": "trivial",
+        "n_attempts": 0,
+        "n_models": 0,
+        "models": [],
+        "per_model_solve_rate": {},
+        "solve_rate": null,
+        "solve_rate_stderr": null,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-blendcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-cellarcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-codeccore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-depotcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "solve_rate": 0.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-freightcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-granarycore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "solve_rate": 0.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-hedgecore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-lodgecore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "solve_rate": 0.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-matchcore-order-book-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 2,
+        "n_models": 2,
+        "models": [
+          "claude-code:claude-fable-5",
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5": 0.0,
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 0.5,
+        "solve_rate_stderr": 0.5,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-metercore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 2,
+        "n_models": 2,
+        "models": [
+          "claude-code:claude-fable-5",
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5": 1.0,
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-pacecore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-paddockcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 0.0
+        },
+        "solve_rate": 0.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-payrollcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 2,
+        "n_models": 2,
+        "models": [
+          "claude-code:claude-fable-5",
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0,
+          "claude-code:claude-fable-5": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-qlite-store-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 2,
+        "n_models": 2,
+        "models": [
+          "claude-code:claude-fable-5",
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5": 1.0,
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-queuecore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-quotacore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-reflowcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-schedcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-settlecore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 2,
+        "n_models": 2,
+        "models": [
+          "claude-code:claude-fable-5",
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0,
+          "claude-code:claude-fable-5": 0.0
+        },
+        "solve_rate": 0.5,
+        "solve_rate_stderr": 0.5,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-snapcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-stampcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-tallycore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "legacy-vaultcore-binary-parity",
+        "labeled_difficulty": "veryhard",
+        "n_attempts": 1,
+        "n_models": 1,
+        "models": [
+          "claude-code:claude-fable-5-1"
+        ],
+        "per_model_solve_rate": {
+          "claude-code:claude-fable-5-1": 1.0
+        },
+        "solve_rate": 1.0,
+        "solve_rate_stderr": 0.0,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      },
+      {
+        "task_id": "oss-sqlglot-groupby-all-pushdown",
+        "labeled_difficulty": null,
+        "n_attempts": 0,
+        "n_models": 0,
+        "models": [],
+        "per_model_solve_rate": {},
+        "solve_rate": null,
+        "solve_rate_stderr": null,
+        "empirical_difficulty": null,
+        "status": "insufficient_data",
+        "agreement": null
+      }
+    ],
+    "summary": {
+      "n_tasks": 25,
+      "n_calibrated": 0,
+      "n_disagree": 0,
+      "n_insufficient": 25
+    }
+  },
+  "effort_sensitivity": {
+    "available": false,
+    "strata": [],
+    "warnings": []
+  }
+}

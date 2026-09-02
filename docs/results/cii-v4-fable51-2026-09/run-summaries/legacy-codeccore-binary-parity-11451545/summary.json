@@ -1,0 +1,233 @@
+{
+  "run_id": "legacy-codeccore-binary-parity-11451545",
+  "task_id": "legacy-codeccore-binary-parity",
+  "model": "claude-code:claude-fable-5-1",
+  "steps": 24,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8201,
+    "security": 1.0,
+    "efficiency": 0.228,
+    "human_like": null,
+    "total": 0.8842,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 182,
+            "violations": 1,
+            "avg_complexity": 5.25,
+            "maintainability_index": 42.75,
+            "sub_scores": {
+              "lint": 0.989,
+              "complexity": 0.9875,
+              "maintainability": 0.4275
+            },
+            "score": 0.8201
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-board/legacy-codeccore-binary-parity-11451545/trace.jsonl",
+    "replay_html": "runs-board/legacy-codeccore-binary-parity-11451545/replay.html"
+  },
+  "finished_at": "2026-09-02T03:10:03.569992+00:00",
+  "total_tokens": 364263,
+  "tokens": {
+    "prompt": 306021,
+    "completion": 58242,
+    "total": 364263,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": null,
+  "cost_detail": {
+    "agent": null,
+    "judges": 0.0,
+    "total": null,
+    "model_priced": false,
+    "agent_input_tokens": 306021,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 306021,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": null,
+    "cli_reported_cost_usd": 5.615426750000001,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "unavailable",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 997.481,
+  "started_at": "2026-09-02T02:53:26.087512+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-fable-5-1",
+    "judge_model": "claude-code:claude-fable-5-1",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 358
+    }
+  },
+  "task_hash": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-ff53e7b1",
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-fable-5-1",
+    "reported_model": "claude-fable-5-1",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "94dec035-4dd6-476e-bebc-4d454a285394",
+    "subtype": "success",
+    "num_turns": 24,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 5.615426750000001,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/bin/sh",
+        "/tmp/bdiff.py",
+        "/tmp/diff.sh",
+        "/tmp/fuzz.py",
+        "/tmp/fuzzfail_",
+        "/tmp/o1_legacy.txt",
+        "/tmp/o1_py.txt",
+        "/tmp/o_legacy.txt",
+        "/tmp/o_py.txt",
+        "/tmp/pl.py",
+        "/tmp/t1.txt",
+        "/tmp/t10.bin",
+        "/tmp/t11.bin",
+        "/tmp/t12.bin",
+        "/tmp/t2.txt",
+        "/tmp/t3.txt",
+        "/tmp/t4.txt",
+        "/tmp/t5.bin",
+        "/tmp/t6.bin",
+        "/tmp/t7.bin",
+        "/tmp/t8.bin",
+        "/tmp/t9.bin"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "memo_squeeze": true,
+      "january_audit_flag": true,
+      "prefix_case_leniency": true,
+      "acct_padding_leniency": true,
+      "null_date_decode": true,
+      "comma_memo_padding": true,
+      "check_override": true,
+      "lenient_tokens": true,
+      "round_trips": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "nominal_round_trips": true,
+      "reject_lanes": true,
+      "empty_batch_trailer": true,
+      "empty_memo_handling": true,
+      "trailer_counts": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 10/10 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-codeccore-binary-parity-11451545"
+}

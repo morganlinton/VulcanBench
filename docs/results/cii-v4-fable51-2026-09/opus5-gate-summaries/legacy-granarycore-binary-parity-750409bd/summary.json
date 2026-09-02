@@ -1,0 +1,253 @@
+{
+  "run_id": "legacy-granarycore-binary-parity-750409bd",
+  "task_id": "legacy-granarycore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 96,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.7039,
+    "security": 1.0,
+    "efficiency": 0.012,
+    "human_like": null,
+    "total": 0.8409,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 472,
+            "violations": 2,
+            "avg_complexity": 7.7272727272727275,
+            "maintainability_index": 16.07,
+            "sub_scores": {
+              "lint": 0.9915,
+              "complexity": 0.8636,
+              "maintainability": 0.1607
+            },
+            "score": 0.7039
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs/legacy-granarycore-binary-parity-750409bd/trace.jsonl",
+    "replay_html": "runs/legacy-granarycore-binary-parity-750409bd/replay.html"
+  },
+  "finished_at": "2026-08-30T15:42:30.315460+00:00",
+  "total_tokens": 1456217,
+  "tokens": {
+    "prompt": 1351025,
+    "completion": 105192,
+    "total": 1456217,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 9.384925,
+  "cost_detail": {
+    "agent": 9.384925,
+    "judges": 0.0,
+    "total": 9.384925,
+    "model_priced": true,
+    "agent_input_tokens": 1351025,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 1351025,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 9.384925,
+    "cli_reported_cost_usd": 10.140214499999997,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1938.56,
+  "started_at": "2026-08-30T15:10:11.775898+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 683
+    }
+  },
+  "task_hash": "7bda5c846f3a1d2dd0c369a2c52ce0b01fb94d01b09ef8ca645efd095485e95a",
+  "suite": null,
+  "suite_id": null,
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.247 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "328fb53e-aff0-471c-a4e0-155671b978c6",
+    "subtype": "success",
+    "num_turns": 96,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 10.140214499999997,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "benchmark_data_access",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/_quiet/",
+        "/bin/sh",
+        "/granarycore.py",
+        "/legacy/granarycore-darwin-arm64",
+        "/legacy/run",
+        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-granarycore-binary-parity-750409bd-j2lc5ra3-workspace/328fb53e-aff0-471c-a4e0-155671b978c6/tasks/b4d0owxi6.output",
+        "/tmp/gc",
+        "/tmp/gc/ann.py",
+        "/tmp/gc/ann.txt",
+        "/tmp/gc/cmp.sh",
+        "/tmp/gc/d.txt",
+        "/tmp/gc/dis.txt",
+        "/tmp/gc/f20.py",
+        "/tmp/gc/fuzz.py",
+        "/tmp/gc/fuzz2.py",
+        "/tmp/gc/fuzz3.py",
+        "/tmp/gc/fuzz4.py",
+        "/tmp/gc/fuzz5.py",
+        "/tmp/gc/fuzz6.py",
+        "/tmp/gc/fuzz7.py",
+        "/tmp/gc/fuzz8.py",
+        "/tmp/gc/fuzz9.py",
+        "/tmp/gc/in1.txt",
+        "/tmp/gc/leg.txt",
+        "/tmp/gc/lldb1.txt",
+        "/tmp/gc/mem.py",
+        "/tmp/gc/probe.py",
+        "/tmp/gc/py.txt",
+        "/tmp/gc/t",
+        "/tmp/gc/t1.txt",
+        "/tmp/gc/t2.txt",
+        "/tmp/gc/t3.txt",
+        "/tmp/gc/t4.txt",
+        "/tmp/gc/t5.txt",
+        "/tmp/gc/t6.txt",
+        "/tmp/gc/t7.txt",
+        "/tmp/gc/t8.txt",
+        "/tmp/gc/t9.txt"
+      ],
+      "benchmark_data_paths": [
+        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-granarycore-binary-parity-750409bd-j2lc5ra3-workspace/328fb53e-aff0-471c-a4e0-155671b978c6/tasks/b4d0owxi6.output"
+      ],
+      "answer_key_paths": [],
+      "contaminated": true
+    },
+    "contaminated": true
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "turn_keep": true,
+      "transfer_seep": true,
+      "turn_wear": true,
+      "fold_sag": true,
+      "fold_reserve": true,
+      "turn_tie": true,
+      "measure_toll": true,
+      "favor": true,
+      "levy": true,
+      "resquare": true,
+      "slot": true,
+      "true": true,
+      "carry": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "paths": true,
+      "turn": true,
+      "reckon": true,
+      "look": true,
+      "rejects": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 14/14 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-granarycore-binary-parity-750409bd"
+}

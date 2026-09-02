@@ -1,0 +1,214 @@
+{
+  "run_id": "legacy-metercore-binary-parity-09af962b",
+  "task_id": "legacy-metercore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 46,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8517,
+    "security": 1.0,
+    "efficiency": 0.162,
+    "human_like": null,
+    "total": 0.8822,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 132,
+            "violations": 1,
+            "avg_complexity": 5.111111111111111,
+            "maintainability_index": 53.14,
+            "sub_scores": {
+              "lint": 0.9848,
+              "complexity": 0.9944,
+              "maintainability": 0.5314
+            },
+            "score": 0.8517
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs/legacy-metercore-binary-parity-09af962b/trace.jsonl",
+    "replay_html": "runs/legacy-metercore-binary-parity-09af962b/replay.html"
+  },
+  "finished_at": "2026-08-28T18:39:32.130301+00:00",
+  "total_tokens": 351159,
+  "tokens": {
+    "prompt": 312768,
+    "completion": 38391,
+    "total": 351159,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 2.523615,
+  "cost_detail": {
+    "agent": 2.523615,
+    "judges": 0.0,
+    "total": 2.523615,
+    "model_priced": true,
+    "agent_input_tokens": 312768,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 312768,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 2.523615,
+    "cli_reported_cost_usd": 2.7965415,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 763.228,
+  "started_at": "2026-08-28T18:26:48.894102+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.4",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 289
+    }
+  },
+  "task_hash": "e639f829758e1e98b2effb3bc13183206a297e5298c3b48ed70ffbf72c6432d2",
+  "suite": null,
+  "suite_id": null,
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.247 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "20b39b6c-562c-4915-9e86-6e669f940241",
+    "subtype": "success",
+    "num_turns": 46,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 2.7965415,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/28500",
+        "/legacy/run",
+        "/tmp/dt.py",
+        "/tmp/fuzz.py",
+        "/tmp/fuzz2.py",
+        "/tmp/fuzz3.py",
+        "/tmp/in.txt"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "winter_night_tier1": true,
+      "meter_uplift": true,
+      "summer_tier2": true,
+      "rounding_regime": true,
+      "account_casefold": true,
+      "month_wrap": true,
+      "zero_kwh_skip": true,
+      "lenient_tokens": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "nominal_billing": true,
+      "error_codes": true,
+      "empty_batch_trailer": true,
+      "multi_account_batch": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-metercore-binary-parity-09af962b"
+}

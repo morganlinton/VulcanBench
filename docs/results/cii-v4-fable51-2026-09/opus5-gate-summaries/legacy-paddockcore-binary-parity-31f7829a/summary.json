@@ -1,0 +1,249 @@
+{
+  "run_id": "legacy-paddockcore-binary-parity-31f7829a",
+  "task_id": "legacy-paddockcore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 204,
+  "scores": {
+    "functional": 0.9333,
+    "quality": 0.7403,
+    "security": 1.0,
+    "efficiency": 0.0,
+    "human_like": null,
+    "total": 0.8085,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 411,
+            "violations": 1,
+            "avg_complexity": 7.75,
+            "maintainability_index": 27.83,
+            "sub_scores": {
+              "lint": 0.9951,
+              "complexity": 0.8625,
+              "maintainability": 0.2783
+            },
+            "score": 0.7403
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs/legacy-paddockcore-binary-parity-31f7829a/trace.jsonl",
+    "replay_html": "runs/legacy-paddockcore-binary-parity-31f7829a/replay.html"
+  },
+  "finished_at": "2026-09-01T00:29:06.509111+00:00",
+  "total_tokens": 5185443,
+  "tokens": {
+    "prompt": 4887517,
+    "completion": 297926,
+    "total": 5185443,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 31.885735,
+  "cost_detail": {
+    "agent": 31.885735,
+    "judges": 0.0,
+    "total": 31.885735,
+    "model_priced": true,
+    "agent_input_tokens": 4887517,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 4887517,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 31.885735,
+    "cli_reported_cost_usd": 33.2832375,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 5355.992,
+  "started_at": "2026-08-31T22:59:50.492991+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 14,
+      "loc": 614
+    }
+  },
+  "task_hash": "01f6d4392df810228a2515c63923673e15838ea865cc78afc960c2a35cfecfd0",
+  "suite": null,
+  "suite_id": null,
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.247 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "de0ad9e0-c9fe-4bd9-8a09-e43cf49b99bc",
+    "subtype": "success",
+    "num_turns": 204,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 33.2832375,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/bin/sh",
+        "/tmp/adj.py",
+        "/tmp/adj2.py",
+        "/tmp/cli_fuzz.py",
+        "/tmp/cmp.sh",
+        "/tmp/fuzz",
+        "/tmp/fuzz.py",
+        "/tmp/fuzz2.py",
+        "/tmp/fuzz3.py",
+        "/tmp/fuzz4.py",
+        "/tmp/fuzz5.py",
+        "/tmp/fuzz6.py",
+        "/tmp/fuzz7.py",
+        "/tmp/fuzz8.py",
+        "/tmp/keep.py",
+        "/tmp/mini.py",
+        "/tmp/mini2.py",
+        "/tmp/mini6.py",
+        "/tmp/orig_paddockcore.py",
+        "/tmp/p4.py",
+        "/tmp/p5.py",
+        "/tmp/p6.py",
+        "/tmp/p7.py",
+        "/tmp/p8.py",
+        "/tmp/p9.py",
+        "/tmp/pa.py",
+        "/tmp/pb.py",
+        "/tmp/pc.py",
+        "/tmp/pd.py",
+        "/tmp/pe.py",
+        "/tmp/pf.py",
+        "/tmp/probe.py",
+        "/tmp/probe2.py",
+        "/tmp/probe3.py",
+        "/tmp/s10109.txt",
+        "/tmp/t.sh"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 0.9333
+    },
+    "fail_to_pass": {
+      "stir": true,
+      "square": true,
+      "leadbook": true,
+      "haul": true,
+      "restpick": true,
+      "wake": true,
+      "muster": true,
+      "true": true,
+      "slot": true,
+      "seat": true,
+      "book": true,
+      "home": true,
+      "levy": false,
+      "gate": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "paths": true,
+      "shift": true,
+      "muster_guard": true,
+      "rejects": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 14/15 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-paddockcore-binary-parity-31f7829a"
+}

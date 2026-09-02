@@ -1,0 +1,246 @@
+{
+  "run_id": "legacy-freightcore-binary-parity-316d2274",
+  "task_id": "legacy-freightcore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 65,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8359,
+    "security": 1.0,
+    "efficiency": 0.105,
+    "human_like": null,
+    "total": 0.8732,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 157,
+            "violations": 0,
+            "avg_complexity": 5.090909090909091,
+            "maintainability_index": 45.77,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 0.9955,
+              "maintainability": 0.4577
+            },
+            "score": 0.8359
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs/legacy-freightcore-binary-parity-316d2274/trace.jsonl",
+    "replay_html": "runs/legacy-freightcore-binary-parity-316d2274/replay.html"
+  },
+  "finished_at": "2026-08-28T20:39:30.977711+00:00",
+  "total_tokens": 701906,
+  "tokens": {
+    "prompt": 633138,
+    "completion": 68768,
+    "total": 701906,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 4.88489,
+  "cost_detail": {
+    "agent": 4.88489,
+    "judges": 0.0,
+    "total": 4.88489,
+    "model_priced": true,
+    "agent_input_tokens": 633138,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 633138,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 4.88489,
+    "cli_reported_cost_usd": 5.3206885,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1095.243,
+  "started_at": "2026-08-28T20:21:15.710518+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.4",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 305
+    }
+  },
+  "task_hash": "14a467cd1464212024914c8d74da387f5886806c7ba4eb33a9ca8fb909fafbd7",
+  "suite": null,
+  "suite_id": null,
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.247 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "c372ea47-80cb-4e89-a77c-0796b9d90e30",
+    "subtype": "success",
+    "num_turns": 65,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 5.3206885,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "//100",
+        "//11000",
+        "/100.0",
+        "/10000.0",
+        "/base",
+        "/bin/sh",
+        "/legacy/run",
+        "/tmp/fc",
+        "/tmp/fc/",
+        "/tmp/fc/big1.txt",
+        "/tmp/fc/big2.txt",
+        "/tmp/fc/big3.txt",
+        "/tmp/fc/big4.txt",
+        "/tmp/fc/cmp.sh",
+        "/tmp/fc/e.a",
+        "/tmp/fc/e.b",
+        "/tmp/fc/eng",
+        "/tmp/fc/hv.txt",
+        "/tmp/fc/nn.a",
+        "/tmp/fc/nn.b",
+        "/tmp/fc/p99.txt",
+        "/tmp/fc/pa.txt",
+        "/tmp/fc/pa2.txt",
+        "/tmp/fc/patch.py",
+        "/tmp/fc/pc.txt",
+        "/tmp/fc/pd.txt",
+        "/tmp/fc/pe.leg",
+        "/tmp/fc/pe.txt",
+        "/tmp/fc/pf.leg",
+        "/tmp/fc/pf.txt",
+        "/tmp/fc/pg.txt",
+        "/tmp/fc/ph.txt",
+        "/tmp/fc/pj.txt",
+        "/tmp/fc/pm.txt",
+        "/tmp/fc/pn.txt",
+        "/tmp/fc/po.txt",
+        "/tmp/fc/pp.txt",
+        "/tmp/fc/pq.txt",
+        "/tmp/fc/pr.leg"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "x_fuel_band": true,
+      "low_class_floor": true,
+      "dim_divisor": true,
+      "dim_rounding": true,
+      "svc_order": true,
+      "remote_zone": true,
+      "zero_weight": true,
+      "lenient_tokens": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "nominal_shipments": true,
+      "reject_codes": true,
+      "empty_batch_trailer": true,
+      "multi_shipment_batch": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-freightcore-binary-parity-316d2274"
+}

@@ -26,6 +26,11 @@ PROBE=${PROBE:-claude-fable-5-1}
 SUITE="coding-intelligence-index-v4"
 WAIT=${WAIT:-1800}
 
+if pgrep -f "vulcanbench run --suite $SUITE" >/dev/null 2>&1; then
+  echo "refusing to start: a vulcanbench run is already active (pgrep -fl 'vulcanbench run')" >&2
+  exit 1
+fi
+
 quota_ready() {
   local out
   out=$(echo "reply with the single word ok" \
@@ -40,7 +45,12 @@ for level in $LEVELS; do
   outdir="$OUTROOT/$level"
   mkdir -p "$outdir"
   for attempt in $(seq 1 40); do
-    done_count=$(find "$outdir" -name summary.json 2>/dev/null | wc -l | tr -d ' ')
+    # Count DISTINCT tasks, not summary files: a killed-and-resumed sweep can
+    # race a completing run into a duplicate, and counting files would then
+    # declare the level done while a task was still missing.
+    done_count=$(find "$outdir" -name summary.json 2>/dev/null -exec \
+      python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["task_id"])' {} \; \
+      2>/dev/null | sort -u | wc -l | tr -d ' ')
     if [ "$done_count" -ge 23 ]; then
       echo "=== $MODEL effort=$level COMPLETE ($done_count/23) $(date '+%F %H:%M:%S')"
       break

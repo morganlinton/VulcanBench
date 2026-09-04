@@ -1,0 +1,232 @@
+{
+  "run_id": "legacy-qlite-store-parity-32b08b73",
+  "task_id": "legacy-qlite-store-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 50,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8216,
+    "security": 1.0,
+    "efficiency": 0.15,
+    "human_like": null,
+    "total": 0.8758,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 214,
+            "violations": 0,
+            "avg_complexity": 4.454545454545454,
+            "maintainability_index": 40.52,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 1.0,
+              "maintainability": 0.4052
+            },
+            "score": 0.8216
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-effort-opus5/max/legacy-qlite-store-parity-32b08b73/trace.jsonl",
+    "replay_html": "runs-effort-opus5/max/legacy-qlite-store-parity-32b08b73/replay.html"
+  },
+  "finished_at": "2026-09-04T09:40:37.237185+00:00",
+  "total_tokens": 384086,
+  "tokens": {
+    "prompt": 333334,
+    "completion": 50752,
+    "total": 384086,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 2.93547,
+  "cost_detail": {
+    "agent": 2.93547,
+    "judges": 0.0,
+    "total": 2.93547,
+    "model_priced": true,
+    "agent_input_tokens": 333334,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 333334,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 2.93547,
+    "cli_reported_cost_usd": 3.2262635000000013,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 802.128,
+  "started_at": "2026-09-04T09:27:15.099049+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 386
+    }
+  },
+  "task_hash": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-d39a8a6f",
+  "effort": {
+    "requested": "max",
+    "provider": "claude-code",
+    "provider_value": "max",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "3aaa420b-4c8f-4bb5-ab6b-07b02eced9d6",
+    "subtype": "success",
+    "num_turns": 50,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 3.2262635000000013,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/WEIRD",
+        "/bin/bash",
+        "/bin/sh",
+        "/diff.sh",
+        "/legacy/run",
+        "/qlite",
+        "/tmp/qw",
+        "/tmp/qw/.a",
+        "/tmp/qw/.ae",
+        "/tmp/qw/.b",
+        "/tmp/qw/.be",
+        "/tmp/qw/diff.sh",
+        "/tmp/qw/failcase.txt",
+        "/tmp/qw/ln.txt",
+        "/tmp/qw/qlite",
+        "/tmp/qw/rng.out",
+        "/tmp/qw/t1.txt"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "slot_reuse_ordering": true,
+      "find_case_rule": true,
+      "wildcard_semantics": true,
+      "range_bounds": true,
+      "duplicate_insert_update": true,
+      "name_truncation": true,
+      "avg_truncation": true,
+      "sum_wrap": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "crud": true,
+      "find_exact_case": true,
+      "range_interior": true,
+      "fmt_errors": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-qlite-store-parity-32b08b73"
+}

@@ -1,0 +1,243 @@
+{
+  "run_id": "legacy-matchcore-order-book-parity-6b9932f7",
+  "task_id": "legacy-matchcore-order-book-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 88,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8667,
+    "security": 1.0,
+    "efficiency": 0.036,
+    "human_like": null,
+    "total": 0.8707,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 450,
+            "violations": 1,
+            "avg_complexity": 4.7368421052631575,
+            "maintainability_index": 56.16,
+            "sub_scores": {
+              "lint": 0.9956,
+              "complexity": 1.0,
+              "maintainability": 0.5616
+            },
+            "score": 0.8667
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-effort-opus5/high/legacy-matchcore-order-book-parity-6b9932f7/trace.jsonl",
+    "replay_html": "runs-effort-opus5/high/legacy-matchcore-order-book-parity-6b9932f7/replay.html"
+  },
+  "finished_at": "2026-09-03T22:03:22.273198+00:00",
+  "total_tokens": 772696,
+  "tokens": {
+    "prompt": 704917,
+    "completion": 67779,
+    "total": 772696,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 5.21906,
+  "cost_detail": {
+    "agent": 5.21906,
+    "judges": 0.0,
+    "total": 5.21906,
+    "model_priced": true,
+    "agent_input_tokens": 704917,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 704917,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 5.21906,
+    "cli_reported_cost_usd": 5.646502999999999,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1204.162,
+  "started_at": "2026-09-03T21:43:18.114337+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 16,
+      "loc": 625
+    }
+  },
+  "task_hash": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-a367bb28",
+  "effort": {
+    "requested": "high",
+    "provider": "claude-code",
+    "provider_value": "high",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "ff133b01-cbb7-4f88-b960-8d99ece7b343",
+    "subtype": "success",
+    "num_turns": 88,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 5.646502999999999,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "benchmark_data_access",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/bin/bash",
+        "/bin/sh",
+        "/legacy/run",
+        "/matchcore.py",
+        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-matchcore-order-book-parity-6b9932f7-4ppgby44-workspace/ff133b01-cbb7-4f88-b960-8d99ece7b343/tasks/bgtrhibj4.output",
+        "/tmp/mc",
+        "/tmp/mc/L",
+        "/tmp/mc/big.txt",
+        "/tmp/mc/bigfuzz.log",
+        "/tmp/mc/c1.txt",
+        "/tmp/mc/case.txt",
+        "/tmp/mc/cases.py",
+        "/tmp/mc/diff.sh",
+        "/tmp/mc/fuzz.py",
+        "/tmp/mc/fuzz2.py",
+        "/tmp/mc/fuzz3.py",
+        "/tmp/mc/gen_tests.py",
+        "/tmp/mc/lvl.txt",
+        "/tmp/mc/min.py",
+        "/tmp/mc/s1.txt",
+        "/tmp/mc/t.txt",
+        "/tmp/mc/tick.txt",
+        "/tmp/mc/tick2.out",
+        "/tmp/mc/tick2.txt",
+        "/tmp/mc/tick3.out",
+        "/tmp/mc/tick3.txt"
+      ],
+      "benchmark_data_paths": [
+        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-matchcore-order-book-parity-6b9932f7-4ppgby44-workspace/ff133b01-cbb7-4f88-b960-8d99ece7b343/tasks/bgtrhibj4.output"
+      ],
+      "answer_key_paths": [],
+      "contaminated": true
+    },
+    "contaminated": true
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "priority_class": true,
+      "self_trade_prevention": true,
+      "cancel_replace": true,
+      "cancel_ack_quantity": true,
+      "volatility_band": true,
+      "tick_regime": true,
+      "book_hash": true,
+      "lenient_tokens": true,
+      "full_session_parity": true
+    },
+    "pass_to_pass": {
+      "basic_matching": true,
+      "time_priority": true,
+      "rejects": true,
+      "cancel_unfilled": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-matchcore-order-book-parity-6b9932f7"
+}

@@ -1,0 +1,259 @@
+{
+  "run_id": "legacy-depotcore-binary-parity-ce4da43c",
+  "task_id": "legacy-depotcore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 362,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.7615,
+    "security": 1.0,
+    "efficiency": 0.0,
+    "human_like": null,
+    "total": 0.8491,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 446,
+            "violations": 2,
+            "avg_complexity": 5.541666666666667,
+            "maintainability_index": 24.4,
+            "sub_scores": {
+              "lint": 0.991,
+              "complexity": 0.9729,
+              "maintainability": 0.244
+            },
+            "score": 0.7615
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-effort-opus5/low/legacy-depotcore-binary-parity-ce4da43c/trace.jsonl",
+    "replay_html": "runs-effort-opus5/low/legacy-depotcore-binary-parity-ce4da43c/replay.html"
+  },
+  "finished_at": "2026-09-03T07:13:30.632631+00:00",
+  "total_tokens": 11251971,
+  "tokens": {
+    "prompt": 10832125,
+    "completion": 419846,
+    "total": 11251971,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 64.656775,
+  "cost_detail": {
+    "agent": 64.656775,
+    "judges": 0.0,
+    "total": 64.656775,
+    "model_priced": true,
+    "agent_input_tokens": 10832125,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 10832125,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 64.656775,
+    "cli_reported_cost_usd": 66.66184900000002,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 8961.628,
+  "started_at": "2026-09-03T04:44:08.942446+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 14,
+      "loc": 632
+    }
+  },
+  "task_hash": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-e35e0d32",
+  "effort": {
+    "requested": "low",
+    "provider": "claude-code",
+    "provider_value": "low",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "631f67d8-b88a-48e1-a59a-bb580bbb4238",
+    "subtype": "success",
+    "num_turns": 362,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 66.66184900000002,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/_cmd_bounce/",
+        "/_cmd_square/",
+        "/bin/sh",
+        "/c_bounce/p",
+        "/tmp/",
+        "/tmp/bmp.py",
+        "/tmp/case2.txt",
+        "/tmp/d.sh",
+        "/tmp/dc_backup.py",
+        "/tmp/dc_best.py",
+        "/tmp/dc_final.py",
+        "/tmp/dc_keep.py",
+        "/tmp/dc_now.py",
+        "/tmp/drv.py",
+        "/tmp/eff.py",
+        "/tmp/eff2.py",
+        "/tmp/fit.py",
+        "/tmp/fuzz.py",
+        "/tmp/fuzz2.py",
+        "/tmp/fuzz3.py",
+        "/tmp/grid.json",
+        "/tmp/grid.py",
+        "/tmp/last.txt",
+        "/tmp/m1.txt",
+        "/tmp/m1b.txt",
+        "/tmp/m28.txt",
+        "/tmp/min.py",
+        "/tmp/min_out.txt",
+        "/tmp/mo.txt",
+        "/tmp/mo_",
+        "/tmp/mo_26.txt",
+        "/tmp/mo_5.txt",
+        "/tmp/mo_6.txt",
+        "/tmp/n",
+        "/tmp/n1.txt",
+        "/tmp/one.py",
+        "/tmp/par.py",
+        "/tmp/q",
+        "/tmp/q1.txt",
+        "/tmp/q91.txt"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "lift": true,
+      "notch": true,
+      "wear_drag": true,
+      "short_round": true,
+      "shelve_blocks": true,
+      "ledge_return": true,
+      "sag": true,
+      "distrust": true,
+      "held_grouping": true,
+      "square_rebuild": true,
+      "square_wear": true,
+      "square_chain": true,
+      "square_resurrect": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "flow": true,
+      "square": true,
+      "void": true,
+      "rejects": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 14/14 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-depotcore-binary-parity-ce4da43c"
+}

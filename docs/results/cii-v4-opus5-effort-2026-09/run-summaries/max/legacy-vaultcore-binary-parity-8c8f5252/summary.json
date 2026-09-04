@@ -1,0 +1,231 @@
+{
+  "run_id": "legacy-vaultcore-binary-parity-8c8f5252",
+  "task_id": "legacy-vaultcore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 57,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8538,
+    "security": 1.0,
+    "efficiency": 0.129,
+    "human_like": null,
+    "total": 0.8789,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 158,
+            "violations": 0,
+            "avg_complexity": 3.388888888888889,
+            "maintainability_index": 51.27,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 1.0,
+              "maintainability": 0.5127
+            },
+            "score": 0.8538
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-effort-opus5/max/legacy-vaultcore-binary-parity-8c8f5252/trace.jsonl",
+    "replay_html": "runs-effort-opus5/max/legacy-vaultcore-binary-parity-8c8f5252/replay.html"
+  },
+  "finished_at": "2026-09-04T12:26:44.200873+00:00",
+  "total_tokens": 602761,
+  "tokens": {
+    "prompt": 530837,
+    "completion": 71924,
+    "total": 602761,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 4.452285,
+  "cost_detail": {
+    "agent": 4.452285,
+    "judges": 0.0,
+    "total": 4.452285,
+    "model_priced": true,
+    "agent_input_tokens": 530837,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 530837,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 4.452285,
+    "cli_reported_cost_usd": 4.878553500000001,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1072.791,
+  "started_at": "2026-09-04T12:08:51.369721+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 327
+    }
+  },
+  "task_hash": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-d39a8a6f",
+  "effort": {
+    "requested": "max",
+    "provider": "claude-code",
+    "provider_value": "max",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "2dd388bc-44fa-4243-bb66-a2f880d6e043",
+    "subtype": "success",
+    "num_turns": 57,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 4.878553500000001,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/legacy/run",
+        "/return",
+        "/tmp.",
+        "/tmp/cand.py",
+        "/tmp/cr.txt",
+        "/tmp/fuzz.py",
+        "/tmp/fuzz2.py",
+        "/tmp/fuzz3.py",
+        "/tmp/fuzzbytes.py",
+        "/tmp/fuzzrun.py",
+        "/tmp/harness.py",
+        "/tmp/lg.py",
+        "/tmp/mini.py",
+        "/tmp/scenarios.py",
+        "/tmp/vaultcore_orig.py"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "sweep_vs_read": true,
+      "rewrite_dirty": true,
+      "downgrade": true,
+      "maxlen_bodies": true,
+      "digest_skew": true,
+      "doc_case_fold": true,
+      "lenient_tokens": true,
+      "checksum_drift": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "v2_flows": true,
+      "benign_migrations": true,
+      "reject_lanes": true,
+      "empty_state": true,
+      "trailer_counts": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 9/9 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-vaultcore-binary-parity-8c8f5252"
+}

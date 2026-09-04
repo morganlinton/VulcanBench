@@ -1,0 +1,252 @@
+{
+  "run_id": "legacy-queuecore-binary-parity-df438908",
+  "task_id": "legacy-queuecore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 63,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8294,
+    "security": 1.0,
+    "efficiency": 0.111,
+    "human_like": null,
+    "total": 0.8728,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 165,
+            "violations": 0,
+            "avg_complexity": 5.777777777777778,
+            "maintainability_index": 47.03,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 0.9611,
+              "maintainability": 0.4703
+            },
+            "score": 0.8294
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-effort-opus5/max/legacy-queuecore-binary-parity-df438908/trace.jsonl",
+    "replay_html": "runs-effort-opus5/max/legacy-queuecore-binary-parity-df438908/replay.html"
+  },
+  "finished_at": "2026-09-04T12:59:11.622307+00:00",
+  "total_tokens": 740732,
+  "tokens": {
+    "prompt": 637726,
+    "completion": 103006,
+    "total": 740732,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 5.76378,
+  "cost_detail": {
+    "agent": 5.76378,
+    "judges": 0.0,
+    "total": 5.76378,
+    "model_priced": true,
+    "agent_input_tokens": 637726,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 637726,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 5.76378,
+    "cli_reported_cost_usd": 6.261221499999998,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1947.339,
+  "started_at": "2026-09-04T12:26:44.291778+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 309
+    }
+  },
+  "task_hash": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-d39a8a6f",
+  "effort": {
+    "requested": "max",
+    "provider": "claude-code",
+    "provider_value": "max",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "63d72493-e771-4538-8f6c-dc4d49ccc2ca",
+    "subtype": "success",
+    "num_turns": 63,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 6.261221499999998,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/bin/sh",
+        "/item",
+        "/tmp/qcwork",
+        "/tmp/qcwork/camp",
+        "/tmp/qcwork/camp1.log",
+        "/tmp/qcwork/camp2.log",
+        "/tmp/qcwork/camp3.log",
+        "/tmp/qcwork/camp4.log",
+        "/tmp/qcwork/camp5.log",
+        "/tmp/qcwork/cand.py",
+        "/tmp/qcwork/case3.txt",
+        "/tmp/qcwork/diff.sh",
+        "/tmp/qcwork/dlq_sweep.py",
+        "/tmp/qcwork/exh.py",
+        "/tmp/qcwork/f4_",
+        "/tmp/qcwork/f4_42_3.txt",
+        "/tmp/qcwork/fuzz.py",
+        "/tmp/qcwork/fuzz2.py",
+        "/tmp/qcwork/fuzz3.py",
+        "/tmp/qcwork/fuzz4.py",
+        "/tmp/qcwork/m",
+        "/tmp/qcwork/m1.txt",
+        "/tmp/qcwork/m2.txt",
+        "/tmp/qcwork/out11.txt",
+        "/tmp/qcwork/p3.py",
+        "/tmp/qcwork/p4.py",
+        "/tmp/qcwork/probe2.py",
+        "/tmp/qcwork/probe_prio.py",
+        "/tmp/qcwork/s.txt",
+        "/tmp/qcwork/sc.txt",
+        "/tmp/qcwork/shrink.py",
+        "/tmp/qcwork/sweep.py",
+        "/tmp/qcwork/sweep2.py",
+        "/tmp/qcwork/t",
+        "/tmp/qcwork/t1.txt",
+        "/tmp/qcwork/t2.txt",
+        "/tmp/qcwork/t3.txt",
+        "/tmp/qcwork/t4.txt",
+        "/tmp/qcwork/t5.txt"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "requeue_penalty": true,
+      "tie_aging": true,
+      "sentinel": true,
+      "cap999": true,
+      "undo_two_deep": true,
+      "item_case": true,
+      "trailing": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "order": true,
+      "drain": true,
+      "rejects": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 8/8 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-queuecore-binary-parity-df438908"
+}

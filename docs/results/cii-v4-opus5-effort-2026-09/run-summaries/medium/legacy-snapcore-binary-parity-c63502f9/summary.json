@@ -1,0 +1,222 @@
+{
+  "run_id": "legacy-snapcore-binary-parity-c63502f9",
+  "task_id": "legacy-snapcore-binary-parity",
+  "model": "claude-code:claude-opus-5",
+  "steps": 36,
+  "scores": {
+    "functional": 0.5,
+    "quality": 0.8411,
+    "security": 1.0,
+    "efficiency": 0.192,
+    "human_like": null,
+    "total": 0.606,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 137,
+            "violations": 0,
+            "avg_complexity": 4.0,
+            "maintainability_index": 47.02,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 1.0,
+              "maintainability": 0.4702
+            },
+            "score": 0.8411
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "runs-effort-opus5/medium/legacy-snapcore-binary-parity-c63502f9/trace.jsonl",
+    "replay_html": "runs-effort-opus5/medium/legacy-snapcore-binary-parity-c63502f9/replay.html"
+  },
+  "finished_at": "2026-09-03T11:22:10.507454+00:00",
+  "total_tokens": 232305,
+  "tokens": {
+    "prompt": 206776,
+    "completion": 25529,
+    "total": 232305,
+    "cached_input": 0,
+    "reasoning_output": 0
+  },
+  "cost_usd": 1.672105,
+  "cost_detail": {
+    "agent": 1.672105,
+    "judges": 0.0,
+    "total": 1.672105,
+    "model_priced": true,
+    "agent_input_tokens": 206776,
+    "agent_cached_input_tokens": 0,
+    "agent_uncached_input_tokens": 206776,
+    "cache_pricing_applied": false
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": "max",
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 1.672105,
+    "cli_reported_cost_usd": 1.892868,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 619.108,
+  "started_at": "2026-09-03T11:11:51.398488+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "claude-code:claude-opus-5",
+    "judge_model": "claude-code:claude-opus-5",
+    "runtime": {
+      "python": "3.12.14",
+      "platform": "darwin",
+      "host_python": "3.12.14",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.5",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.27.0 darwin/arm64",
+      "node": "v24.19.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 304
+    }
+  },
+  "task_hash": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": "suite-166210e2",
+  "effort": {
+    "requested": "medium",
+    "provider": "claude-code",
+    "provider_value": "medium",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "claude-code",
+    "harness_version": "2.1.257 (Claude Code)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "host-workspace; permission-mode=auto; safe-mode",
+    "auth_method": "subscription",
+    "plan_name": "max",
+    "requested_model": "claude-opus-5",
+    "reported_model": "claude-opus-5",
+    "model_identity_confidence": "cli-reported",
+    "session_id": "ee2e310f-d150-4345-91fb-5aee9a785d8d",
+    "subtype": "success",
+    "num_turns": 36,
+    "cached_input_tokens": 0,
+    "reasoning_output_tokens": 0,
+    "cli_reported_cost_usd": 1.892868,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/.git/",
+        "/range",
+        "/tmp/dt.py",
+        "/tmp/fuzz.py",
+        "/tmp/fuzz2.py",
+        "/tmp/fuzz3.py"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 0.5
+    },
+    "fail_to_pass": {
+      "z0_dialect": false,
+      "duplicate_keys": true,
+      "alpha_rebuild": false,
+      "value_truncation": true,
+      "key_case_fold": true,
+      "empty_blob": false,
+      "load_count": true,
+      "lenient_tokens": true,
+      "round_trips": false,
+      "full_corpus_parity": false
+    },
+    "pass_to_pass": {
+      "live_flows": true,
+      "honest_round_trips": true,
+      "reject_lanes": true,
+      "empty_state": true,
+      "trailer_counts": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 5/10 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-snapcore-binary-parity-c63502f9"
+}

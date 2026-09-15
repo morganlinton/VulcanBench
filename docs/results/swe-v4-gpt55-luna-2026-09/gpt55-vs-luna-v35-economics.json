@@ -1,0 +1,287 @@
+{
+  "population": "runs-code-quality-maintenance-v3.5 summary, 207 runs",
+  "ledger": "comparison.json",
+  "ledger_sha256": "cc114b736cbdad27595c1a9154ab042acfa3239f373726aabe59f88fa0531b38",
+  "pricing_verified": "2026-09-11",
+  "sources": {
+    "openai": "https://developers.openai.com/api/docs/pricing"
+  },
+  "totals": {
+    "gpt55": {
+      "usd": 305.040979,
+      "usd_upper": 305.040979,
+      "tokens": 314907517,
+      "hours": 22.863073055555557,
+      "runs": 92
+    },
+    "luna": {
+      "usd": 23.69585,
+      "usd_upper": 23.69585,
+      "tokens": 623859686,
+      "hours": 38.55690694444444,
+      "runs": 115
+    }
+  },
+  "groups": {
+    "gpt55/low": {
+      "model": "gpt55",
+      "effort": "low",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 1.7947075652173912,
+        "se": 0.1926970452424152
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 1.7947075652173912,
+        "se": 0.1926970452424152
+      },
+      "usd_total": 41.278273999999996,
+      "tokens": {
+        "n": 23,
+        "mean": 1.715428347826087,
+        "se": 0.23229871805226504
+      },
+      "tokens_total": 39454852,
+      "minutes": {
+        "n": 23,
+        "mean": 8.210286231884059,
+        "se": 0.8665636722344808
+      },
+      "fallbacks": 0
+    },
+    "gpt55/medium": {
+      "model": "gpt55",
+      "effort": "medium",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 2.708066043478261,
+        "se": 0.5016670652294555
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 2.708066043478261,
+        "se": 0.5016670652294555
+      },
+      "usd_total": 62.285519,
+      "tokens": {
+        "n": 23,
+        "mean": 2.740785652173913,
+        "se": 0.635095107676212
+      },
+      "tokens_total": 63038070,
+      "minutes": {
+        "n": 23,
+        "mean": 12.403088405797101,
+        "se": 1.9385437189805725
+      },
+      "fallbacks": 0
+    },
+    "gpt55/high": {
+      "model": "gpt55",
+      "effort": "high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 4.197308130434783,
+        "se": 0.764545759697286
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 4.197308130434783,
+        "se": 0.764545759697286
+      },
+      "usd_total": 96.538087,
+      "tokens": {
+        "n": 23,
+        "mean": 4.516861,
+        "se": 1.0052726914506525
+      },
+      "tokens_total": 103887803,
+      "minutes": {
+        "n": 23,
+        "mean": 18.245584782608695,
+        "se": 2.4628805564760197
+      },
+      "fallbacks": 0
+    },
+    "gpt55/extra-high": {
+      "model": "gpt55",
+      "effort": "extra-high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 4.562569521739131,
+        "se": 0.5698215364584018
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 4.562569521739131,
+        "se": 0.5698215364584018
+      },
+      "usd_total": 104.939099,
+      "tokens": {
+        "n": 23,
+        "mean": 4.7185561739130435,
+        "se": 0.7441323102685512
+      },
+      "tokens_total": 108526792,
+      "minutes": {
+        "n": 23,
+        "mean": 20.783839855072465,
+        "se": 2.067568406636599
+      },
+      "fallbacks": 0
+    },
+    "luna/low": {
+      "model": "luna",
+      "effort": "low",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.023995782608695653,
+        "se": 0.0012330916060532804
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.023995782608695653,
+        "se": 0.0012330916060532804
+      },
+      "usd_total": 0.551903,
+      "tokens": {
+        "n": 23,
+        "mean": 0.42290621739130435,
+        "se": 0.02847585021373524
+      },
+      "tokens_total": 9726843,
+      "minutes": {
+        "n": 23,
+        "mean": 2.662527536231884,
+        "se": 0.10900985778255687
+      },
+      "fallbacks": 0
+    },
+    "luna/medium": {
+      "model": "luna",
+      "effort": "medium",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.06639808695652175,
+        "se": 0.00437247942519653
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.06639808695652175,
+        "se": 0.00437247942519653
+      },
+      "usd_total": 1.527156,
+      "tokens": {
+        "n": 23,
+        "mean": 1.3475751739130435,
+        "se": 0.11966227067229344
+      },
+      "tokens_total": 30994229,
+      "minutes": {
+        "n": 23,
+        "mean": 7.397060144927536,
+        "se": 0.40243248052154174
+      },
+      "fallbacks": 0
+    },
+    "luna/high": {
+      "model": "luna",
+      "effort": "high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.21676852173913044,
+        "se": 0.029096109421329557
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.21676852173913044,
+        "se": 0.029096109421329557
+      },
+      "usd_total": 4.985676,
+      "tokens": {
+        "n": 23,
+        "mean": 5.889062130434783,
+        "se": 0.9905516134088954
+      },
+      "tokens_total": 135448429,
+      "minutes": {
+        "n": 23,
+        "mean": 20.99510579710145,
+        "se": 2.0721589235938365
+      },
+      "fallbacks": 0
+    },
+    "luna/extra-high": {
+      "model": "luna",
+      "effort": "extra-high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.2747059565217391,
+        "se": 0.03819344758449075
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.2747059565217391,
+        "se": 0.03819344758449075
+      },
+      "usd_total": 6.318237,
+      "tokens": {
+        "n": 23,
+        "mean": 7.581839,
+        "se": 1.3374095792276197
+      },
+      "tokens_total": 174382297,
+      "minutes": {
+        "n": 23,
+        "mean": 25.42935579710145,
+        "se": 2.6095592085448867
+      },
+      "fallbacks": 0
+    },
+    "luna/max": {
+      "model": "luna",
+      "effort": "max",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.448386,
+        "se": 0.12004178943637486
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.448386,
+        "se": 0.12004178943637486
+      },
+      "usd_total": 10.312878,
+      "tokens": {
+        "n": 23,
+        "mean": 11.882951652173913,
+        "se": 3.4821592859923878
+      },
+      "tokens_total": 273307888,
+      "minutes": {
+        "n": 23,
+        "mean": 44.09918623188406,
+        "se": 10.719661343012751
+      },
+      "fallbacks": 0
+    }
+  },
+  "limitations": [
+    "Codex receipts report cumulative input, cached input and output per run; cached input is priced at the cached rate ($0.50 per million for GPT-5.5, $0.02 for Luna).",
+    "Standard tier, short-context rates; no long-context premium is inferred.",
+    "Estimates cover exposed receipts, not an independently observed API invoice."
+  ],
+  "summary_sha256": "faea0a8e7a99c02aa18e311e0340111f77ba41c8ce535f180acc6a1911f26f0a",
+  "png_sha256": "95b71073b55c462422b36d9a8bf0d27f9f42da4fbd3d58ae738ddcb9db1dc325",
+  "supporting_table": "gpt55-vs-luna-v35-economics-efforts.csv"
+}

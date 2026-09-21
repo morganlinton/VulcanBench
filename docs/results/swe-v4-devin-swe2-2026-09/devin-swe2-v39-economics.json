@@ -1,0 +1,95 @@
+{
+  "population": "Devin SWE-2 sweep population record, 68 finished runs",
+  "ledger": "comparison.json",
+  "ledger_sha256": "9473e196c55443be8daab9cd1cbdd97597dc124bf6903df2924589d86209bb68",
+  "pricing_verified": null,
+  "sources": {
+    "devin": "Devin CLI receipts (cli-agent-stream.jsonl); SWE-2 has no public API price"
+  },
+  "totals": {
+    "swe2": {
+      "tokens": 775832535,
+      "output_tokens": 12007069,
+      "hours": 53.66002111111111,
+      "runs": 68
+    }
+  },
+  "groups": {
+    "swe2/medium": {
+      "model": "swe2",
+      "effort": "medium",
+      "n": 23,
+      "tokens": {
+        "n": 23,
+        "mean": 16.802267652173914,
+        "se": 4.72967058711784
+      },
+      "output_tokens": {
+        "n": 23,
+        "mean": 220.48060869565217,
+        "se": 53.09246917063975
+      },
+      "tokens_total": 386452156,
+      "minutes": {
+        "n": 23,
+        "mean": 49.778971014492754,
+        "se": 9.590646328891255
+      },
+      "credits": 0,
+      "fallbacks": 0
+    },
+    "swe2/high": {
+      "model": "swe2",
+      "effort": "high",
+      "n": 22,
+      "tokens": {
+        "n": 22,
+        "mean": 7.526272954545455,
+        "se": 0.9441216128164233
+      },
+      "output_tokens": {
+        "n": 22,
+        "mean": 136.6646818181818,
+        "se": 16.406226969080365
+      },
+      "tokens_total": 165578005,
+      "minutes": {
+        "n": 22,
+        "mean": 35.08740681818182,
+        "se": 4.571588221704351
+      },
+      "credits": 0,
+      "fallbacks": 0
+    },
+    "swe2/max": {
+      "model": "swe2",
+      "effort": "max",
+      "n": 23,
+      "tokens": {
+        "n": 23,
+        "mean": 9.730538,
+        "se": 1.1851638018067443
+      },
+      "output_tokens": {
+        "n": 23,
+        "mean": 170.8431304347826,
+        "se": 16.39498598498466
+      },
+      "tokens_total": 223802374,
+      "minutes": {
+        "n": 23,
+        "mean": 56.64182536231884,
+        "se": 6.4667329492261585
+      },
+      "credits": 0,
+      "fallbacks": 0
+    }
+  },
+  "limitations": [
+    "SWE-2 has no public API price, so no API-equivalent cost is estimated; the sweep ran on a Devin subscription.",
+    "Tokens are the Devin CLI's per-request usage receipts, deduplicated by request id: uncached input, cache reads and output.",
+    "Devin's own credit and ACU counters are recorded from the receipts and were zero for every run of this sweep."
+  ],
+  "png_sha256": "ef600afc22fad642d92e2211e2321ebb389771db4579f8ba777a3ad61dcb4199",
+  "supporting_table": "devin-swe2-v39-economics-efforts.csv"
+}

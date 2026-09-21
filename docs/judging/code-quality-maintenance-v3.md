@@ -627,3 +627,27 @@ changes. Protocol id `code-quality-maintenance-v3.7`; run directory
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,
   and every later stage.
 - L3 follow-up change generation, per task, and its worker runner.
+
+## Amendment v3.9, September 21, 2026: the same protocol on Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or judges
+changes. Protocol id `code-quality-maintenance-v3.9`; run directory
+`runs-code-quality-maintenance-v3.9`; runner
+`harness/maintenance_review_v39.py`, derived from the v3.7 runner.
+
+- Population: the September 18 to 21, 2026 Devin SWE-2 effort sweep through
+  the Devin CLI on the same 23 tasks, one attempt per task at each of the
+  three levels SWE-2 offers (medium, high, max), 69 runs. One high run
+  (cellarcore) reached the 3-hour task budget before verification and is
+  excluded rather than judged, as the protocol requires; that cell freezes
+  with 22 submissions and the sweep's pass count for it treats the run as a
+  fail. 68 submissions.
+- Pairwise diagnostics pair the same task at two of the three levels, two
+  steps apart in the model's own ladder, as under v3.7.
+- Both neutral judges retake the identical calibration exam under v3.9
+  before any counted call. No sensitivity panels.
+- Cost: SWE-2 has no public API price, so the population record carries no
+  API-equivalent cost. Tokens, wall clock and Devin's own credit and ACU
+  counters are recorded from the receipts.
+- Publication: SWE-2 joins the Frontier v4 board as the first non-OpenAI,
+  non-Anthropic entry, on the same 33% Code quality profile.

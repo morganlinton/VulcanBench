@@ -102,6 +102,34 @@ def payload_for(stage: str, ident: str) -> dict | None:  # noqa: PLR0911, one br
     return None
 
 
+def calibration_call(ident: str) -> tuple[str, dict | None]:
+    """Kind and frozen payload of a calibration call, rebuilt the way calibrate_panel builds them."""
+    controls = [
+        v3.read(_out() / "controls" / f"control-{i}.json") for i in range(len(v3.CONTROL_FILES))
+    ]
+    head, *rest = ident.split("-")
+    if head == "control":
+        return "review", controls[int(rest[0])]
+    if head == "pair":
+        a, b = int(rest[0]), int(rest[1])
+        return "pair", {"A": controls[a], "B": controls[b]}
+    if head == "probe":
+        return "probe", v3.probe_evidence(controls[int(rest[0])], spec=v3.LEDGER_SPEC)
+    if head == "match":
+        probe = (
+            _out()
+            / "calls"
+            / "grok"
+            / "calibration"
+            / f"probe-{rest[0]}-{rest[1]}"
+            / "selected.json"
+        )
+        if not probe.exists():
+            return "match", None
+        return "match", {"key": v3.LEDGER_KEY["quirks"], "departures": v3.read(probe)["departures"]}
+    return "review", None
+
+
 def assistant_models(stream_text: str) -> set[str]:
     return {
         json.loads(line)["message"]["model"]
@@ -417,6 +445,79 @@ def accept_fallback(folder: Path, panel: str, stage: str) -> bool:
             json.dumps(
                 {
                     "event": "reviewer_fallback_accepted",
+                    "call": str(folder.relative_to(_out())),
+                    "attempt": n,
+                }
+            ),
+            flush=True,
+        )
+        return True
+    return False
+
+
+RENAME_PREFIX = "Cursor "
+
+
+def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:
+    """Cursor renamed the judge's display label while the requested model id stayed the same.
+
+    On 2026-09-21 Cursor began reporting "Grok 4.6 Medium" for the pinned model
+    id cursor-grok-4.6-medium, which the frozen v3.3 settings record as
+    "Cursor Grok 4.6 Medium". The identity guard is requested-only with the
+    display name checked, so the attempt fails on the label alone. When the
+    reported label equals the frozen display name minus the "Cursor " prefix,
+    the same model served the request: the attempt is selected unchanged and
+    the rename is recorded in the receipt. Any other label still stops.
+    """
+    if panel != "grok":
+        return False
+    if stage == "calibration":
+        kind, payload = calibration_call(folder.name)
+    else:
+        kind, payload = stage_kind(stage), payload_for(stage, folder.name)
+    if payload is None:
+        return False
+    expected = v3.read(_out() / "protocol.json")["reviewers"]["grok"]["display_name"]
+    if not expected.startswith(RENAME_PREFIX):
+        return False
+    renamed = expected[len(RENAME_PREFIX) :]
+    for n in (2, 1):
+        receipt = folder / f"attempt-{n}.json"
+        stream = folder / f"attempt-{n}.stream.jsonl"
+        if not receipt.exists() or not stream.exists():
+            continue
+        rec = json.loads(receipt.read_text())
+        if rec.get("status") != "failed" or rec.get("error") != f"Judge model changed: {renamed}":
+            continue
+        try:
+            vote = v3.parse_cursor_stream(stream.read_text())
+            if vote["model_reported"] != renamed:
+                continue
+            v3.validate(kind, vote, payload)
+        except (ValueError, json.JSONDecodeError, KeyError):
+            continue
+        if kind == "review":
+            vote["reported_score"] = vote["score"]
+            vote.update(v3.host_review_score(vote))
+        vote.update(
+            binding=rec["binding"],
+            status="complete",
+            stage=stage,
+            panel=panel,
+            kind=kind,
+            operator_review={
+                "at": datetime.now(UTC).isoformat(),
+                "finding": f"Cursor reported the display label {renamed!r} for the pinned model id; "
+                f"the frozen settings expect {expected!r}.",
+                "action": "Same model id, label renamed by the provider: attempt selected unchanged.",
+                "source_attempt": n,
+            },
+        )
+        base.save(folder / "selected.json", vote)
+        print(
+            json.dumps(
+                {
+                    "event": "display_rename_accepted",
                     "call": str(folder.relative_to(_out())),
                     "attempt": n,
                 }
@@ -801,7 +902,7 @@ def apply_rule(folder: Path) -> bool:
     return True
 
 
-def main() -> int:
+def main() -> int:  # noqa: PLR0912, one branch per operator rule
     args = sys.argv[1:]
     panel = args[args.index("--panel") + 1]
     applied = 0
@@ -824,6 +925,9 @@ def main() -> int:
             applied += 1
             continue
         if folder is not None and accept_fallback(folder, panel, folder.parent.name):
+            applied += 1
+            continue
+        if folder is not None and accept_display_rename(folder, panel, folder.parent.name):
             applied += 1
             continue
         if folder is not None and recover_match_ids(folder, panel, folder.parent.name):

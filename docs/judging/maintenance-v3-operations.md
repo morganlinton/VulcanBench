@@ -277,3 +277,26 @@ operational notes live here.
   block above). Neither judge produced a reviewer fallback.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
+
+## v3.9, September 21, 2026: Devin SWE-2
+
+- Population frozen September 21, 10:08 PDT: 68 rows (23 at medium and max,
+  22 at high), one excluded (high, cellarcore: the run reached the 3-hour
+  task budget before verification), none missing. Two submissions carry the
+  solver's own scratch directories (.work, .probe: disassembly dumps and
+  fuzz outputs) in their final files, making 370k and 200k character
+  prompts; v3.4 judged a 636k character prompt, so the evidence stands as
+  the run left it.
+- Muse Spark 1.3 passed the calibration exam under v3.9 on the first pass.
+- Grok, calibration control-7-r1 (11:07 PDT): Cursor reported the display
+  label "Grok 4.6 Medium" for the pinned model id cursor-grok-4.6-medium;
+  the frozen v3.3 settings record "Cursor Grok 4.6 Medium", and the
+  requested-only identity guard failed on the label. The binary is the
+  pinned one (sha checked at prepare) and the model id in the request is
+  unchanged, so this is a provider-side rename of the label, not a served
+  model change. New wrapper rule accept_display_rename: an attempt whose
+  only failure is that label, where the reported label equals the frozen
+  display name minus the "Cursor " prefix, is selected unchanged with the
+  finding recorded under operator_review. Any other label still stops. The
+  rule applies to every Grok call in this pass and is reported here rather
+  than per call.

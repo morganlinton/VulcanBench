@@ -177,6 +177,7 @@ NETWORK_MARKERS = (
     "ECONNREFUSED",
     "[unavailable] getaddrinfo",
 )
+STREAM_NETWORK_MARKERS = ("transport error [net-timeout]",)
 
 
 def retry_network_fault(folder: Path) -> bool:
@@ -193,15 +194,19 @@ def retry_network_fault(folder: Path) -> bool:
     if rec.get("status") != "failed" or rec.get("retryable") is not False:
         return False
     error = str(rec.get("error", ""))
-    if not any(marker in error for marker in NETWORK_MARKERS):
-        return False
     stream = folder / "attempt-1.stream.jsonl"
-    if stream.exists() and "assistant" in stream.read_text():
+    text = stream.read_text() if stream.exists() else ""
+    # Muse reports a dropped connection inside its stream's terminal record rather
+    # than on stderr, where the receipt's error text comes from.
+    terminal = next((m for m in STREAM_NETWORK_MARKERS if m in text), None)
+    if not any(marker in error for marker in NETWORK_MARKERS) and terminal is None:
+        return False
+    if "assistant" in text:
         return False
     rec["retryable"] = True
     rec["operator_review"] = {
         "at": datetime.now(UTC).isoformat(),
-        "finding": f"Judge CLI could not reach its API ({error.strip()[-120:]}); no response was produced.",
+        "finding": f"Judge CLI could not reach its API ({(terminal or error).strip()[-120:]}); no response was produced.",
         "action": "Transport fault: one fresh attempt per the protocol; receipt retained.",
     }
     receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))

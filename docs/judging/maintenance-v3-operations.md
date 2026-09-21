@@ -316,3 +316,9 @@ operational notes live here.
   alone, the failed calibration is published beside it, and the card and
   report say so. The chain resumed 12:04 PDT with Muse reviews and probes
   (logs/cii-v4-maint-v39-muse.sh).
+- Muse, primary submission-004 (12:10 PDT): the CLI's stream ended with
+  "transport error [net-timeout]: timed out waiting for response data" and
+  no assistant output; stderr carried only a session-registry warning, so
+  the receipt's error text did not match the network-fault markers. The
+  retry_network_fault rule now also reads the stream's terminal record for
+  that Muse transport marker; the call took its one fresh attempt.

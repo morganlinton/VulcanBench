@@ -7,11 +7,11 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
-## 2026-09-19: VulcanBench Decisions v1 scores typed decisions against executed tests
+## 2026-09-19: VulcanBench Verdict v1 scores typed decisions against executed tests
 
 ### Decision
 
-VulcanBench Decisions v1 (suite id `decisions-v1`) is a separate suite for
+VulcanBench Verdict v1 (suite id `verdict-v1`) is a separate suite for
 models that return a typed decision (a choice, an ordered score, or a yes/no
 probability) and cannot write code, starting with TypeSafe AI's Jev. It is
 never a column on the Frontier v4 board. Rules:
@@ -30,6 +30,12 @@ never a column on the Frontier v4 board. Rules:
 - Latency is wall clock from the operator's machine and includes the network
   round trip. It is published as indicative, with the measuring location
   stated, and is not used to rank.
+
+The name is Verdict, chosen by the owner on 2026-09-20: it says what is
+tested (judging a patch, with the tests delivering the real verdict) and
+stays vendor-neutral. "System One model" is TypeSafe's term for the class;
+use it in taglines and copy, not in the suite name. Working name before
+that was Decisions v1, which collided with this file.
 
 Owner request, in chat, 2026-09-19.
 
@@ -55,9 +61,9 @@ Owner request, in chat, 2026-09-19.
 
 ### What this touched
 
-- `harness/decisions/` (items, scoring, TypeSafe adapter),
-  `scripts/decisions-v1/build_items.py`, `tests/test_decisions.py`,
-  `.gitignore` (`decisions-v1-items/`).
+- `harness/verdict/` (items, scoring, TypeSafe adapter),
+  `scripts/verdict-v1/build_items.py`, `tests/test_verdict.py`,
+  `.gitignore` (`verdict-v1-items/`).
 
 ### Not built, and why
 

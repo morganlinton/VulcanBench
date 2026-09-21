@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from harness.decisions.scoring import noul_probs
+from harness.verdict.scoring import noul_probs
 
 API_KEY_ENV = "TYPESAFE_API_KEY"
 BASE_URL = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai")

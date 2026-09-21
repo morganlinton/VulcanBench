@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build the VulcanBench Decisions v1 item file from finished Frontier v4 runs.
+"""Build the VulcanBench Verdict v1 item file from finished Frontier v4 runs.
 
-    python scripts/decisions-v1/build_items.py --runs-root ~/dev/VulcanBench \
-        -o decisions-v1-items/items.jsonl
+    python scripts/verdict-v1/build_items.py --runs-root ~/dev/VulcanBench \
+        -o verdict-v1-items/items.jsonl
 
 The output embeds task issues and patches: it is benchmark data, is
 gitignored, and must not be published.
@@ -19,13 +19,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
-from harness.decisions.items import (  # noqa: E402
+from harness.verdict.items import (  # noqa: E402
     DEFAULT_MAX_PATCH_CHARS,
     SOURCE_SUITE,
     build_items,
     load_items,
 )
-from harness.decisions.scoring import base_rate_predictions, score  # noqa: E402
+from harness.verdict.scoring import base_rate_predictions, score  # noqa: E402
 
 # Completed Frontier v4 sweeps; in-flight (Devin), stopped (Astra rerun) and partial sweeps stay out.
 COMPLETED_RUN_DIRS = (
@@ -58,7 +58,7 @@ def main() -> int:
     parser.add_argument("--tasks-root", type=Path, default=REPO / "tasks" / SOURCE_SUITE)
     parser.add_argument("--max-patch-chars", type=int, default=DEFAULT_MAX_PATCH_CHARS)
     parser.add_argument(
-        "-o", "--out", type=Path, default=REPO / "decisions-v1-items" / "items.jsonl"
+        "-o", "--out", type=Path, default=REPO / "verdict-v1-items" / "items.jsonl"
     )
     args = parser.parse_args()
 

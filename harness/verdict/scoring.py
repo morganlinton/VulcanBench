@@ -13,7 +13,7 @@ import math
 from collections import defaultdict
 from typing import Any
 
-from harness.decisions.items import GROUND_TRUTH_REFERENCES
+from harness.verdict.items import GROUND_TRUTH_REFERENCES
 
 ECE_BINS = 10
 LOG_FLOOR = 1e-6

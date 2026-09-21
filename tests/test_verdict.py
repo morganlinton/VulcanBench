@@ -3,14 +3,14 @@ import math
 
 import pytest
 
-from harness.decisions.items import build_items, outcome_label, split_for_task
-from harness.decisions.scoring import (
+from harness.verdict.items import build_items, outcome_label, split_for_task
+from harness.verdict.scoring import (
     base_rate_predictions,
     expected_calibration_error,
     noul_probs,
     score,
 )
-from harness.decisions.typesafe_adapter import (
+from harness.verdict.typesafe_adapter import (
     TypeSafeNotConfigured,
     build_request,
     parse_answer,

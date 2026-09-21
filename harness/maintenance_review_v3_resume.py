@@ -458,7 +458,7 @@ def accept_fallback(folder: Path, panel: str, stage: str) -> bool:
 RENAME_PREFIX = "Cursor "
 
 
-def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:
+def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0912, one branch per precondition
     """Cursor renamed the judge's display label while the requested model id stayed the same.
 
     On 2026-09-21 Cursor began reporting "Grok 4.6 Medium" for the pinned model
@@ -489,13 +489,46 @@ def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:
         rec = json.loads(receipt.read_text())
         if rec.get("status") != "failed" or rec.get("error") != f"Judge model changed: {renamed}":
             continue
+        finding = (
+            f"Cursor reported the display label {renamed!r} for the pinned model id; "
+            f"the frozen settings expect {expected!r}."
+        )
         try:
             vote = v3.parse_cursor_stream(stream.read_text())
             if vote["model_reported"] != renamed:
                 continue
             v3.validate(kind, vote, payload)
-        except (ValueError, json.JSONDecodeError, KeyError):
+        except (json.JSONDecodeError, KeyError):
             continue
+        except ValueError as exc:
+            # The label check fired before the frozen validator ran, so the response
+            # never received the protocol's own treatment of a validation failure.
+            # Re-file the receipt as that failure; the frozen retry rule then applies
+            # (one fresh attempt), and the excerpt recovery rules see both receipts.
+            if str(exc) not in v3.RETRYABLE:
+                continue
+            rec.update(
+                retryable=True,
+                error=str(exc),
+                operator_review={
+                    "at": datetime.now(UTC).isoformat(),
+                    "finding": finding,
+                    "action": "Label accepted; the response then failed the frozen validator, so the "
+                    "receipt is re-filed as that failure and the protocol's retry applies.",
+                },
+            )
+            receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+            print(
+                json.dumps(
+                    {
+                        "event": "display_rename_refiled",
+                        "call": str(folder.relative_to(_out())),
+                        "error": str(exc),
+                    }
+                ),
+                flush=True,
+            )
+            return True
         if kind == "review":
             vote["reported_score"] = vote["score"]
             vote.update(v3.host_review_score(vote))
@@ -507,8 +540,7 @@ def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:
             kind=kind,
             operator_review={
                 "at": datetime.now(UTC).isoformat(),
-                "finding": f"Cursor reported the display label {renamed!r} for the pinned model id; "
-                f"the frozen settings expect {expected!r}.",
+                "finding": finding,
                 "action": "Same model id, label renamed by the provider: attempt selected unchanged.",
                 "source_attempt": n,
             },

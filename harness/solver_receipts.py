@@ -55,6 +55,37 @@ def claude_receipts(results):
     }
 
 
+def devin_receipt(run, summary):
+    # Devin's print mode streams no usage; the adapter harvests per-request
+    # receipts from the CLI's session store and records their sum in the trace.
+    usage = None
+    with (run / "trace.jsonl").open() as trace:
+        for line in trace:
+            event = json.loads(line)
+            if event.get("type") == "devin_usage":
+                usage = event["data"]
+    if usage is None:
+        raise ValueError("Missing Devin usage receipt")
+    keys = ("input_tokens", "output_tokens", "cache_read_tokens", "cache_creation_tokens")
+    for key in keys:
+        if type(usage[key]) is not int or usage[key] < 0:
+            raise ValueError("Invalid Devin token receipt")
+    prompt = usage["input_tokens"] + usage["cache_read_tokens"] + usage["cache_creation_tokens"]
+    tokens = summary["tokens"]
+    if prompt != tokens["prompt"] or usage["output_tokens"] != tokens["completion"]:
+        raise ValueError("Devin receipt/summary mismatch")
+    result = {
+        "raw_tokens": prompt + usage["output_tokens"],
+        "usage": {key: usage[key] for key in keys},
+        "result_receipts": usage["requests"],
+        "served_models": usage.get("served_models"),
+        "devin_credit_cost": usage.get("total_credit_cost"),
+        "devin_acu_cost": usage.get("total_acu_cost"),
+        "historical_summary_unit": "Raw input (uncached, cache read, cache creation) plus output",
+    }
+    return result
+
+
 def solver_receipt(run, summary):
     path = run / "cli-agent-stream.jsonl"
     events = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
@@ -89,6 +120,8 @@ def solver_receipt(run, summary):
             "result_receipts": 1,
             "historical_summary_unit": "Raw input plus output; cached input included in input",
         }
+    elif summary["model"].startswith("devin:"):
+        result = devin_receipt(run, summary)
     else:
         raise ValueError("Unknown solver")
     return {**result, "stream_sha256": digest(path.read_bytes())}

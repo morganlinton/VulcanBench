@@ -50,7 +50,7 @@ HARNESS = {"swe2": "Devin CLI"}
 # excluded rather than judged (protocol v3.9); the card discloses the short cell.
 EXPECTED = {"swe2/high": 22}
 INVALID_MARKER = "operator-invalid.json"
-PANELS = ("muse", "grok")
+PANELS = ("muse", "grok")  # replaced at load time by the summary's passing panels
 PANEL_NAMES = {"muse": "Muse Spark 1.3 (Meta)", "grok": "Grok 4.6 (xAI)"}
 SPLIT_WITHOUT_L3 = {"l1": 0.24, "l2": 0.09}
 
@@ -117,9 +117,14 @@ def load():
         {"id": i, **{k: manifest[i][k] for k in ("model", "effort", "task")}}
         for i in sorted(invalid)
     ]
+    global PANELS  # noqa: PLW0603, the passing panels are a fact of the frozen summary
+    require(summary["passing_panels"], "no passing panel")
     require(
-        set(summary["passing_panels"]) == set(PANELS), f"passing panels {summary['passing_panels']}"
+        set(summary["passing_panels"]) | set(summary["failed_panels"]) == set(PANELS),
+        f"unexpected panels {summary['passing_panels']} {summary['failed_panels']}",
     )
+    PANELS = tuple(p for p in PANELS if p in summary["passing_panels"])
+    summary["_failed_panels"] = list(summary["failed_panels"])
     require(
         protocol["weights"]["functional"] == WEIGHTS_V3["functional"]
         and protocol["weights"]["code_quality"]["total"] == WEIGHTS_V3["human_like"],
@@ -177,6 +182,7 @@ def load():
         },
     }
     coverage["unpublished_invalid_probe"] = invalid_rows
+    coverage["failed_panels"] = summary["_failed_panels"]
     return summary, protocol, rows, final, coverage
 
 
@@ -306,7 +312,12 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         left,
         2.22,
         "Combined score and runtime at every effort level SWE-2 offers, 23 tasks per effort. "
-        "Code quality judged by Muse Spark 1.3 and Grok 4.6.",
+        "Code quality judged by "
+        + (
+            "Muse Spark 1.3 and Grok 4.6."
+            if not coverage["failed_panels"]
+            else "Muse Spark 1.3 alone; Grok 4.6 failed its calibration exam for this pass."
+        ),
         15,
         color=MUTED,
     )
@@ -457,7 +468,14 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(left, 8.07, "Component", 12.5, True)
     for effort in LEVELS:
         text(cols[effort], 8.07, effort.replace("-", " ").capitalize(), 12.5, True, ha="right")
-    text(cols["max"], 8.33, "/100, mean of both judges", 10, ha="right", color=MUTED)
+    text(
+        cols["max"],
+        8.33,
+        "/100, mean of both judges" if len(PANELS) > 1 else "/100, Muse Spark 1.3",
+        10,
+        ha="right",
+        color=MUTED,
+    )
     line(left, right, 8.5, INK, 0.6)
 
     def se(stat):
@@ -468,8 +486,10 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ("    Human readability", "readability", 1, False, False),
         ("    Maintainability", "maintainability", 1, False, False),
         ("    Intent recovery", "l2", 1, False, False),
-        ("    Rated by Muse Spark 1.3", ("by_panel", "muse"), 1, False, False),
-        ("    Rated by Grok 4.6", ("by_panel", "grok"), 1, False, False),
+        *[
+            (f"    Rated by {PANEL_NAMES[p].split(' (')[0]}", ("by_panel", p), 1, False, False)
+            for p in PANELS
+        ],
         ("Standard error of Code quality", "se", 2, False, True),
     ]
     step = 0.35
@@ -506,6 +526,14 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "High is judged on 22 of 23 runs: on cellarcore the run reached the 3-hour task budget before verification, so "
         "the protocol excludes it rather than judging it; the sweep counts it as a fail.",
         "SWE-2 offers medium, high and max only. Nothing is priced: Devin publishes no API rate for SWE-2.",
+        *(
+            [
+                "Grok 4.6 failed calibration gate 16 (invented departures on the clear control) under v3.9, so the "
+                "pre-registered single-panel rule applies: Code quality here is Muse Spark 1.3 alone, not a two-judge mean."
+            ]
+            if coverage["failed_panels"]
+            else []
+        ),
     )
     for i, note in enumerate(notes):
         text(left, y - step / 2 + 0.18 + 0.24 * i, note, 11, color=MUTED)
@@ -552,8 +580,12 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                     fmt(g["readability"], 4),
                     fmt(g["maintainability"], 4),
                     fmt(g["l2"], 4),
-                    fmt(g["by_panel"]["muse"], 4),
-                    fmt(g["by_panel"]["grok"], 4),
+                    fmt(g["by_panel"]["muse"], 4)
+                    if "muse" in g["by_panel"]
+                    else "failed calibration",
+                    fmt(g["by_panel"]["grok"], 4)
+                    if "grok" in g["by_panel"]
+                    else "failed calibration",
                     fmt(g["minutes"], 4),
                     g["passed"],
                     g["fallbacks"],

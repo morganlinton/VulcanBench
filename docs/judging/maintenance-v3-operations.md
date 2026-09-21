@@ -300,3 +300,19 @@ operational notes live here.
   finding recorded under operator_review. Any other label still stops. The
   rule applies to every Grok call in this pass and is reported here rather
   than per call.
+- Grok 4.6 failed the calibration exam under v3.9 (September 21, 12:02
+  PDT) on gate 16, probe recovers documented intent: control 0 (the clear
+  control, no documented departure) must draw an empty probe on at least
+  four of five repeats, and Grok reported invented departures on two
+  repeats (three empty). Every other gate passed. Gate 16 is boolean, so
+  the one-gate 0.5 allowance cannot excuse it. Under every earlier pass
+  Grok drew exactly one non-empty repeat on control 0 (v3.5, v3.6, v3.7),
+  so this gate was always its margin. Observation, recorded and not used
+  as an excuse: the same morning Cursor relabelled the pinned model id and
+  its usage accounting changed (fewer input tokens, more cache reads on the
+  identical prompt), consistent with a serving change on the provider's
+  side. Under the pre-registered single-panel rule and the GLM precedent,
+  nothing further runs for Grok; Devin SWE-2 is judged by Muse Spark 1.3
+  alone, the failed calibration is published beside it, and the card and
+  report say so. The chain resumed 12:04 PDT with Muse reviews and probes
+  (logs/cii-v4-maint-v39-muse.sh).

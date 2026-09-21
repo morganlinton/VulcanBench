@@ -57,9 +57,7 @@ def main() -> int:
     )
     parser.add_argument("--tasks-root", type=Path, default=REPO / "tasks" / SOURCE_SUITE)
     parser.add_argument("--max-patch-chars", type=int, default=DEFAULT_MAX_PATCH_CHARS)
-    parser.add_argument(
-        "-o", "--out", type=Path, default=REPO / "verdict-v1-items" / "items.jsonl"
-    )
+    parser.add_argument("-o", "--out", type=Path, default=REPO / "verdict-v1-items" / "items.jsonl")
     args = parser.parse_args()
 
     roots = [args.runs_root / name for name in (args.run_dir or COMPLETED_RUN_DIRS)]

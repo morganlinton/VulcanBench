@@ -622,6 +622,47 @@ changes. Protocol id `code-quality-maintenance-v3.7`; run directory
 - Publication: Sol joins GPT-5.5, Luna, Terra, Astra and Fable 5.1 on the
   Frontier v4 board, completing the GPT-5.6 family.
 
+## Amendment v3.8, September 20, 2026: the same protocol on the private Routine v1 suite
+
+Nothing in the rubric, controls, gates, repeats, seed, weights or judges
+changes. Protocol id `code-quality-maintenance-v3.8`; runner
+`harness/maintenance_review_v38.py`, derived from the v3.7 runner. The run
+directory is `judging/code-quality-maintenance-v3.8` inside the private
+VulcanRoutine repository, because the frozen evidence holds private task
+content; the population record is built there too by
+`scripts/cii-v4-board/build_routine_population.py`. Nothing in this public
+tree names a routine task.
+
+- Population: VulcanBench Routine v1, twelve private routine tickets (small
+  hand-authored Python packages, one clear ticket each), every board model
+  at every effort level it offers through its own CLI: GPT-6 Astra, GPT-5.6
+  Terra, Luna and Sol (five levels each), GPT-5.5 (four), Claude Fable 5.1
+  (five) and SWE-2 through the Devin CLI (medium, high and max, the only
+  variants it has). One attempt per task and level, up to 384 submissions.
+- L2 intent recovery is not applicable, and the amendment changes no
+  arithmetic to say so. L2 scores whether a reviewer can recover a task's
+  frozen legacy quirks from the source. Routine tasks are admitted on the
+  opposite gate to Frontier v4 (one clear ticket, no hidden contracts), so
+  there is no quirk to recover. Each routine task freezes an empty quirk
+  key, every submission's L2 denominator is zero, and the rule this protocol
+  pre-registered on September 7 for a zero denominator applies as written:
+  the L2 share moves to L1 for that submission. Code quality on Routine v1
+  is therefore the L1 reviewed score of the passing panels. No probe or
+  match call is made on submissions.
+- Comparability: Routine Code quality (L1 alone, on routine tickets) and
+  Frontier Code quality (L1 plus L2, on legacy reconstruction) are different
+  constructs. They are never placed on one axis or in one ranking. Within
+  Routine v1 every model and level is scored identically, which is what the
+  routine question needs: the cheapest effort level at which a model's work
+  is both correct and maintainable.
+- Both neutral judges retake the identical calibration exam under v3.8
+  before any counted call, probe and match controls included, so the judges
+  are held to the same bar as on every Frontier amendment. No sensitivity
+  panels. Pairwise diagnostics pair the same task at a model's lowest and
+  highest level, rotating models over the seeded task order.
+- Publication is aggregate only, per model and effort level, as the routine
+  charter requires. Submission-level rows stay in the private record.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

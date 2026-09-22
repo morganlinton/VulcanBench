@@ -668,3 +668,35 @@ tree names a routine task.
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,
   and every later stage.
 - L3 follow-up change generation, per task, and its worker runner.
+
+## Amendment v3.12, September 22, 2026: Muse Spark 1.3 judged by Claude Opus 5
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.12`; run directory
+`runs-code-quality-maintenance-v3.12`; runner
+`harness/maintenance_review_v312.py`, derived from the v3.9 runner.
+
+- Population: the September 6 to 18, 2026 Muse Spark 1.3 Contributor-tier
+  effort sweep through Muse Code 1.0.3 on the same 23 tasks, one attempt per
+  task at minimal, low, medium, high and extra-high (the Contributor tier
+  offers no max). Runs that did not finish, or that changed no recognized
+  source file, are excluded rather than judged and listed with the reason;
+  each cell freezes with the submissions it has (100 of 115 runs: 21, 18,
+  20, 20, 21). The sweep's early runs (minimal and 17 low tasks) ran under
+  the former 10-hour task bound; the sweep record carries that history and
+  the card discloses it.
+- Panel: Claude Opus 5 through the Claude Code CLI, alone, under the
+  settings v3.2 froze for its Opus 5 panel (model `claude-opus-5`,
+  reasoning effort medium, CLI 2.1.261 pinned by hash, the identity and
+  subscription-quota guards, the reviewer-fallback policy of September 7
+  with the count disclosed). Opus 5 passed every gate under v3.2. It is the
+  only judge here because Muse Spark 1.3 cannot judge its own submissions
+  and Grok 4.6 and GPT-5.6 Sol failed their most recent exams. Opus 5 is
+  neutral for Meta's model and is not admitted as a neutral judge of
+  Anthropic submissions. It takes the identical calibration exam under this
+  protocol before any counted call; the one-gate 0.5 allowance applies as
+  written. If it fails, nothing is published for this population.
+- Every card and report that shows Muse's Code quality states that it is a
+  single-judge score from a different judge than the Muse and Grok panel
+  behind the rest of the Frontier v4 board, and is not placed in one ranking
+  with those scores without that note.

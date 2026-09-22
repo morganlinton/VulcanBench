@@ -277,3 +277,25 @@ operational notes live here.
   block above). Neither judge produced a reviewer fallback.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
+
+## v3.12, September 22, 2026: Muse Spark 1.3 judged by Claude Opus 5
+
+- Owner decision, September 22: Muse's sweep needs a Code quality score for
+  the four-model cards. Muse cannot judge itself; Grok 4.6 (v3.9) and
+  GPT-5.6 Sol (v3.10) failed gate 16, and the owner declined to retake Sol.
+  Claude Opus 5, which passed every gate under v3.2, takes the seat alone
+  under the v3.2 settings, CLI pin and guards.
+- Population: 99 of 115 sweep runs. Excluded, with reasons in the record:
+  14 unfinished, one that changed no source file (paddockcore at high),
+  and one whose patch cannot be reconstructed (lodgecore at medium: the
+  solver committed a binary scratch file under .tmp/ without an index
+  line, so the evidence pipeline cannot rebuild its final files). The
+  population builder now tries the reconstruction at build time and
+  excludes on failure. Paddockcore has no judged run at any level; the
+  freeze check now requires judged and excluded tasks together to cover
+  the suite. Two earlier freeze attempts stopped before any call (task
+  coverage, then the unreconstructible patch); their directories were
+  discarded, nothing counted.
+- Frozen 08:14 PDT, 99 rows (21, 18, 19, 20, 21 from minimal to extra-high).
+  Opus 5 calibration started at once, about 16 seconds per review through
+  Claude Code on the Max subscription.

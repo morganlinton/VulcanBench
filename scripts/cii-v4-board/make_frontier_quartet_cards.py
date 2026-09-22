@@ -542,7 +542,7 @@ def economics_card(rows, groups, minimal, hashes, ledger):  # noqa: PLR0915, one
         line,
         "VulcanBench Frontier v4: Astra, Fable 5.1, Muse 1.3 and Devin SWE-2",
         "API-equivalent cost and time per task at every effort level; the same runs as the score card. "
-        "Solver inference only, all on subscriptions. SWE-2 is free on Devin's plans.",
+        "Solver inference only, all on subscriptions. SWE-2 is free.",
     )
     chart_top, chart_h = 3.75, 2.9
     for panel, (x0, w) in (("usd", (0.085, 0.405)), ("minutes", (0.565, 0.39))):

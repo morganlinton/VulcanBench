@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 from harness.agent.providers import MockProvider
+from harness.evaluator import evaluate as evaluate_mod
 from harness.evaluator.evaluate import evaluate_run
+from harness.evaluator.langs import MetricResult
 
 _PATCH = "diff --git a/hello.py b/hello.py\n+print('hi')\n"
 
@@ -72,3 +74,40 @@ def test_evaluate_run_no_judge_provider(tmp_path: Path) -> None:
     )
     assert scores["human_like"] is None
     assert "no judge provider" in scores["metric_details"]["human_like"]["reason"]
+
+
+def test_evaluate_run_forwards_agent_patch_to_security(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    seen: dict[str, object] = {}
+
+    def fake_quality(*args, **kwargs):  # type: ignore[no-untyped-def]
+        return MetricResult(score=1.0)
+
+    def fake_security(
+        workspace: Path,
+        changed_files: list[str],
+        remaining_s=None,  # type: ignore[no-untyped-def]
+        *,
+        patch: str | None = None,
+    ) -> MetricResult:
+        del workspace, changed_files, remaining_s
+        seen["patch"] = patch
+        return MetricResult(score=1.0)
+
+    monkeypatch.setattr(evaluate_mod, "assess_quality", fake_quality)
+    monkeypatch.setattr(evaluate_mod, "assess_security", fake_security)
+
+    evaluate_run(
+        functional=1.0,
+        total_tokens=0,
+        steps=1,
+        workspace=_ws(tmp_path),
+        patch=_PATCH,
+        changed_files=["hello.py"],
+        issue="x",
+        verifier_payload={"scores": {"functional": 1.0}},
+        judges_enabled=False,
+    )
+
+    assert seen["patch"] == _PATCH

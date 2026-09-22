@@ -23,7 +23,8 @@ Static analysis over changed files:
 Static security analysis:
 
 - **Python**: bandit
-- **Rust**: `cargo audit` + unsafe-delta penalty
+- **Rust**: `cargo audit` + unsafe-delta penalty (0.05 per net-new `unsafe` keyword in the
+  agent's patch; `unsafe` already present in a touched file does not count)
 - **Go**: gosec (when installed)
 - **JS/TS**: npm audit (when applicable)
 

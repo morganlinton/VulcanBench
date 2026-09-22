@@ -97,7 +97,7 @@ def evaluate_run(
         _mark_budget_exceeded(budget_exceeded, "security")
         security = MetricResult(score=None, details={"reason": "run budget exceeded"})
     else:
-        security = assess_security(workspace, changed_files, remaining_s=remaining_s)
+        security = assess_security(workspace, changed_files, remaining_s=remaining_s, patch=patch)
     _record(collector, "security_detail", security.details)
 
     _warn_if_unscored("quality", quality)

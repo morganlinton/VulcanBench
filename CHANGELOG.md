@@ -252,6 +252,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Rust `unsafe_delta` now measures the agent patch, not the touched files.** The
+  security scorer counted every `unsafe` in the final contents of each changed `.rs`
+  file, so a correct patch lost 0.05 per occurrence that was already there (a shipped
+  regex gold patch scored 0.20 for 16 inherited blocks). Grading now counts the positive
+  net change on the captured patch, `max(0, added - removed)`, restricted to the Rust
+  files being scored, and reports `unsafe_added`, `unsafe_removed` and
+  `unsafe_basis = patch_net_delta`. The agent-facing `security_scan` tool has no patch
+  and keeps its whole-workspace count, reported as `unsafe_basis = workspace_count`.
+  Weight and matcher unchanged; see `docs/DECISIONS.md` (2026-09-20).
 - **Python 3.13+ installs are usable again.** `audioop` left the stdlib in 3.13 (PEP 594),
   and `harness/voice/audio.py` imports it at module scope, so on 3.13/3.14 *every*
   `vulcanbench` command died at import, not just the voice suite. The `audioop-lts`

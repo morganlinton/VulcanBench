@@ -7,8 +7,11 @@ language is ``1 - (0.4*high + 0.15*med + 0.05*low)`` clamped to [0, 1]; the
 overall score averages whichever languages were scanned.
 
 For Rust, an additional "unsafe delta" penalty applies: 0.05 is subtracted per
-new ``unsafe`` block keyword found in the changed files (clamped to [0, 1]).
-This is reported in details as ``unsafe_delta`` count and ``unsafe_penalty``.
+net-new ``unsafe`` keyword in the agent patch, ``max(0, added - removed)`` over the
+scored ``.rs`` files (clamped to [0, 1]). Details report ``unsafe_added``,
+``unsafe_removed``, ``unsafe_delta``, ``unsafe_penalty`` and ``unsafe_basis``. A
+caller with no patch (the live ``security_scan`` tool) gets the whole-file count of
+the files it names instead, reported as ``unsafe_basis = "workspace_count"``.
 """
 
 from __future__ import annotations
@@ -30,7 +33,11 @@ RemainingSeconds = Callable[[], float | None]
 
 
 def assess_security(
-    workspace: Path, changed_files: list[str], remaining_s: RemainingSeconds | None = None
+    workspace: Path,
+    changed_files: list[str],
+    remaining_s: RemainingSeconds | None = None,
+    *,
+    patch: str | None = None,
 ) -> MetricResult:
     """Assess security of the agent's changed files."""
     by_lang = group_by_language(changed_files)
@@ -42,6 +49,8 @@ def assess_security(
     for lang, files in by_lang.items():
         if _budget_exhausted(remaining_s):
             result = MetricResult(score=None, details={"reason": "run budget exceeded"})
+        elif lang == "rust":
+            result = _rust(workspace, files, remaining_s, patch=patch)
         else:
             result = _SCANNERS.get(lang, _unsupported)(workspace, files, remaining_s)
         per_lang[lang] = result.details | {"score": result.score}
@@ -238,7 +247,13 @@ def _java(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
     )
 
 
-def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | None) -> MetricResult:  # noqa: PLR0911
+def _rust(  # noqa: PLR0911
+    workspace: Path,
+    files: list[str],
+    remaining_s: RemainingSeconds | None,
+    *,
+    patch: str | None = None,
+) -> MetricResult:
     if shutil.which("cargo") is None:
         return MetricResult(
             score=None, details={"tool": "cargo audit", "reason": "cargo not on PATH"}
@@ -298,9 +313,8 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
 
     base_score = score_from_counts(high, medium, low)
 
-    # Unsafe delta: count "unsafe" keywords in changed .rs files.
-    unsafe_delta = _count_unsafe_delta(workspace, files)
-    unsafe_penalty = round(min(1.0, 0.05 * unsafe_delta), 4)
+    unsafe_details = _unsafe_details(workspace, files, patch)
+    unsafe_penalty = round(min(1.0, 0.05 * unsafe_details["unsafe_delta"]), 4)
     final_score = (
         round(max(0.0, base_score - unsafe_penalty), 4) if base_score is not None else None
     )
@@ -313,7 +327,7 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
             "high": high,
             "medium": medium,
             "low": low,
-            "unsafe_delta": unsafe_delta,
+            **unsafe_details,
             "unsafe_penalty": unsafe_penalty,
         },
     )
@@ -322,8 +336,71 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
 _UNSAFE_RE = re.compile(r"\bunsafe\b")
 
 
+def _unsafe_details(workspace: Path, files: list[str], patch: str | None) -> dict[str, Any]:
+    # Benchmark grading has the exact agent patch; the live security_scan tool
+    # does not, so it keeps the workspace count and says so.
+    if patch is None:
+        return {
+            "unsafe_delta": _count_unsafe_delta(workspace, files),
+            "unsafe_basis": "workspace_count",
+        }
+    return {**_unsafe_delta_details(patch, files), "unsafe_basis": "patch_net_delta"}
+
+
+def _unsafe_delta_details(patch: str, files: list[str]) -> dict[str, int]:
+    """Count the positive net ``unsafe`` change in the requested Rust files."""
+    rust_files = {Path(f).as_posix() for f in files if f.endswith(".rs")}
+    unsafe_added = 0
+    unsafe_removed = 0
+    for section in re.split(r"(?m)(?=^diff --git )", patch):
+        if not rust_files.intersection(_diff_section_paths(section)):
+            continue
+        in_hunk = False
+        for line in section.splitlines():
+            if line.startswith("@@"):
+                in_hunk = True
+                continue
+            if not in_hunk:
+                continue
+            if line.startswith("+"):
+                unsafe_added += len(_UNSAFE_RE.findall(line[1:]))
+            elif line.startswith("-"):
+                unsafe_removed += len(_UNSAFE_RE.findall(line[1:]))
+    return {
+        "unsafe_added": unsafe_added,
+        "unsafe_removed": unsafe_removed,
+        "unsafe_delta": max(0, unsafe_added - unsafe_removed),
+    }
+
+
+def _diff_section_paths(section: str) -> set[str]:
+    """Return normalized old/new file paths from one unified-diff section."""
+    paths: set[str] = set()
+    for line in section.splitlines():
+        if line.startswith("@@"):
+            break
+        if not line.startswith(("--- ", "+++ ")):
+            continue
+        path = _normalize_diff_path(line[4:])
+        if path is not None:
+            paths.add(path)
+    return paths
+
+
+def _normalize_diff_path(raw: str) -> str | None:
+    """Normalize a ``---``/``+++`` Git diff path for changed-file matching."""
+    path = raw.strip().split("\t", 1)[0]
+    if path == "/dev/null":
+        return None
+    if path.startswith('"') and path.endswith('"'):
+        path = path[1:-1]
+    if path.startswith(("a/", "b/")):
+        path = path[2:]
+    return Path(path).as_posix()
+
+
 def _count_unsafe_delta(workspace: Path, files: list[str]) -> int:
-    """Count ``unsafe`` keyword occurrences in the changed Rust files."""
+    """Count ``unsafe`` keywords in changed Rust files for patchless live scans."""
     count = 0
     for f in files:
         if not f.endswith(".rs"):

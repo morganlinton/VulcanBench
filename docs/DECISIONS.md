@@ -7,6 +7,74 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-20: Rust unsafe penalty measures the agent patch, not the touched files
+
+### Decision
+
+For benchmark grading, the Rust `unsafe_delta` metric is the positive net
+change in lexical `unsafe` occurrences that the agent's patch makes to the
+Rust files being scored: `max(0, unsafe_added - unsafe_removed)`, counted on
+the `+`/`-` hunk lines of the captured `final.patch`. The patch is the
+attribution boundary; text that was already in a file before the agent
+touched it is never counted. Metric details report `unsafe_added`,
+`unsafe_removed`, `unsafe_delta` and `unsafe_basis = patch_net_delta`. Net
+rather than added, so that moving or renaming an existing `unsafe fn` is not
+penalized; removing `unsafe` earns no credit. Owner decision, in chat,
+2026-09-20.
+
+The agent-facing `security_scan` tool (`LocalToolExecutor.security_scan`)
+scans every source file in the workspace and has no final patch at call time,
+so it keeps the whole-file count and reports `unsafe_basis = workspace_count`.
+The 0.05 weight per occurrence, the lexical `\bunsafe\b` matcher and the
+cargo-audit base score are unchanged.
+
+### Evidence
+
+- Until now `_count_unsafe_delta` counted every `unsafe` in the final contents
+  of each changed `.rs` file, so a correct patch lost 0.05 per occurrence that
+  was already there. `evaluate_run` had the agent patch in hand and did not
+  pass it to `assess_security`.
+- Replayed the 16 OSS-derived Rust gold patches in v3 (4), CII v1 (5),
+  VulcanCyber v1 (3) and `tasks/v4` (4) through the production evaluator, with
+  the patch and changed-file list produced by the harness's own
+  `_git_diff` / `_git_changed_files` and cargo audit mocked clean. All 16 add
+  zero `unsafe`. Three were penalized for inherited text:
+  `oss-regex-leftmost-suffix-candidate` (16 occurrences in
+  `regex-automata/src/dfa/search.rs` and `hybrid/search.rs`, security 0.20),
+  `oss-quick-xml-serialize-control-escape` (7, all inside `// NOTE: unsafe {`
+  comments in `src/escape.rs`, 0.65) and `oss-time-strftime-truncated-padding`
+  (2, 0.90). Under the patch basis all 16 score 1.0; a control patch that adds
+  two `unsafe` items on top of the regex fixture scores 0.90.
+- The quick-xml case shows the lexical matcher also counts comments and
+  strings. That is a separate defect and is not changed here.
+- No published Frontier v4 score changes: `tasks/coding-intelligence-index-v4`
+  has no Rust tasks. The two `tasks/v4` fixtures belong to the July 2026
+  contamination-clean successor of v3 (self-named "VulcanBench v4" in its
+  `suite.json`, used for Report 09's clean arm), not to Frontier v4. Whether
+  any archived v3, CII v1 or VulcanCyber v1 run moves depends on the agent's
+  own patch having touched a file with inherited `unsafe`; that needs the run
+  artifacts and is not established here.
+
+### What this touched
+
+- `harness/evaluator/evaluate.py`: passes the captured agent patch to
+  `assess_security`.
+- `harness/evaluator/security.py`: patch-aware net-delta count restricted to
+  the requested Rust files, with the patchless workspace count kept for the
+  live tool and the basis reported either way.
+- `tests/test_rust_analyzers.py`, `tests/test_evaluate.py`: the delta rule,
+  the `git diff` shapes (new, deleted, context-only, `unsafe` inside an
+  identifier), file filtering, both bases, and the `evaluate_run` plumbing.
+- `CHANGELOG.md`, `docs/METRICS.md`.
+
+### Revisit triggers
+
+- A syntax-aware Rust matcher (comments and strings excluded) replaces the
+  lexical one without moving the attribution boundary.
+- If archived runs are ever regraded for security (`harness/regrade.py` only
+  re-runs the verifier today), report separately whether any published
+  aggregate or ordering changes.
+
 ## 2026-09-18: Devin SWE-2 sweeps run medium, high and max only, unpriced
 
 ### Decision

@@ -1,6 +1,6 @@
-"""Devin SWE-2 across effort levels under the code-quality-maintenance-v3.10 protocol.
+"""Devin SWE-2 across effort levels under the code-quality-maintenance-v3.11 protocol.
 
-Reads the frozen v3.10 summary (Muse Spark 1.3 scored from its v3.9 pass, GPT-5.6 Sol judged under v3.10) (neutral panel: Muse Spark 1.3 and Grok 4.6)
+Reads the frozen v3.11 summary (Muse Spark 1.3 alone; Grok 4.6 and GPT-5.6 Sol failed calibration) (neutral panel: Muse Spark 1.3 and Grok 4.6)
 and the private manifest (functional, automated quality, security, runtime per
 run). Combined score uses the locked profile: 50% functional, 8.5% automated
 quality, 8.5% security, 33% Code quality. Until the measured-maintenance layer
@@ -39,7 +39,7 @@ from harness.retrospective_judging import digest, save  # noqa: E402
 
 LEVELS = ("medium", "high", "max")  # the only levels SWE-2 offers
 
-RUN = ROOT / "runs-code-quality-maintenance-v3.10"
+RUN = ROOT / "runs-code-quality-maintenance-v3.11"
 OUTPUT = ROOT / "docs/results/swe-v4-devin-swe2-2026-09"
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 COLORS = {"swe2": "#3B6FE0"}
@@ -48,9 +48,9 @@ NAMES = {"swe2": "Devin SWE-2"}
 HARNESS = {"swe2": "Devin CLI"}
 # One high run (cellarcore) reached the 3-hour budget before verification and is
 # excluded rather than judged (protocol v3.9); the card discloses the short cell.
-EXPECTED = {"swe2/high": 22}
+EXPECTED = {"swe2/high": 20, "swe2/max": 22}
 INVALID_MARKER = "operator-invalid.json"
-PANELS = ("sol", "muse")  # replaced at load time by the summary's passing panels
+PANELS = ("muse",)  # replaced at load time by the summary's passing panels
 PANEL_NAMES = {"sol": "GPT-5.6 Sol (OpenAI)", "muse": "Muse Spark 1.3 (Meta)"}
 SPLIT_WITHOUT_L3 = {"l1": 0.24, "l2": 0.09}
 
@@ -102,7 +102,7 @@ def load():
     summary = json.loads((RUN / "summary.json").read_text())
     manifest = {r["id"]: r for r in json.loads((RUN / "private-manifest.json").read_text())}
     protocol = json.loads((RUN / "protocol.json").read_text())
-    require(summary["protocol"] == "code-quality-maintenance-v3.10", "wrong protocol")
+    require(summary["protocol"] == "code-quality-maintenance-v3.11", "wrong protocol")
     invalid = {p.parent.name for p in (RUN / "calls").glob(f"*/probe/*/{INVALID_MARKER}")}
     unpublished = {r["id"] for r in summary["rows"] if not r.get("published")}
     require(
@@ -313,11 +313,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         2.22,
         "Combined score and runtime at every effort level SWE-2 offers, 23 tasks per effort. "
         "Code quality judged by "
-        + (
-            "Muse Spark 1.3 and GPT-5.6 Sol (Grok 4.6 failed calibration; see notes)."
-            if not coverage["failed_panels"]
-            else "Muse Spark 1.3 alone; both other judges failed calibration."
-        ),
+        + ("Muse Spark 1.3 alone (Grok 4.6 and GPT-5.6 Sol failed calibration; see notes)."),
         15,
         color=MUTED,
     )
@@ -342,7 +338,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         right,
         2.68,
-        "n=23 at every effort" if not EXPECTED else "n=23 at medium and max, n=22 judged at high",
+        "n=23 at medium, n=20 judged at high, n=22 judged at max",
         13,
         ha="right",
         color=MUTED,
@@ -525,21 +521,22 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             line(left, right, y - step / 2, RULE, 0.6)
     line(left, right, y - step / 2, INK, 1.2)
     notes = (
-        "High is judged on 22 of 23 runs: on cellarcore the run reached the 3-hour task budget before verification, so "
-        "the protocol excludes it rather than judging it; the sweep counts it as a fail.",
-        "SWE-2 offers medium, high and max only. Nothing is priced: Devin publishes no API rate for SWE-2.",
-        "Panel differs from the rest of the board: Grok 4.6 failed calibration gate 16 under v3.9, so GPT-5.6 Sol "
-        "(neutral for a Cognition model) fills the second seat under v3.10; Muse's v3.9 pass is scored unchanged.",
+        "Judged on 65 of 69 runs: one high run (cellarcore) hit the 3-hour budget before verification, and three runs "
+        "(snapcore and vaultcore at high, freightcore at max) changed no source file at all;",
+        "the protocol excludes those four rather than judging them and the sweep counts every one as a fail. SWE-2 offers "
+        "medium, high and max only, and nothing is priced: Devin publishes no API rate for SWE-2.",
+        "Panel differs from the rest of the board: Grok 4.6 (v3.9) and GPT-5.6 Sol (v3.10) both failed calibration gate 16 "
+        "(invented departures on the clear control), so Code quality here is Muse Spark 1.3 alone, not a two-judge mean.",
     )
     for i, note in enumerate(notes):
         text(left, y - step / 2 + 0.18 + 0.24 * i, note, 11, color=MUTED)
 
     suffix = "" if final else "-preliminary"
-    out = OUTPUT / f"devin-swe2-v310{suffix}.png"
+    out = OUTPUT / f"devin-swe2-v311{suffix}.png"
     fig.savefig(out, facecolor=PAPER)
     fig.savefig(out.with_suffix(".svg"), facecolor=PAPER)
     plt.close(fig)
-    table = OUTPUT / f"devin-swe2-v310{suffix}-efforts.csv"
+    table = OUTPUT / f"devin-swe2-v311{suffix}-efforts.csv"
     with table.open("w", newline="") as handle:
         writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(

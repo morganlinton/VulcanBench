@@ -21,14 +21,16 @@ from harness import retrospective_judging as base  # noqa: E402
 from harness.solver_receipts import solver_receipt  # noqa: E402
 
 TASKS = ROOT / "tasks/coding-intelligence-index-v4"
-OUTPUT = ROOT / "docs/results/swe-v4-devin-swe2-2026-09/comparison.json"
+OUTPUT = (
+    ROOT / "docs/results/swe-v4-devin-swe2-2026-09/comparison-judged.json"
+)  # v3.11 population; comparison.json is the v3.9 freeze
 MODELS = {"swe2": ("runs-effort-devin-swe2", ("medium", "high", "max"))}
 SWEEP_MODELS = {"swe2": "devin:swe-2"}
 TASK_IDS = sorted(p.name for p in TASKS.iterdir() if p.is_dir() and p.name.startswith("legacy-"))
 MISSING_REASON = "No finished run for this task and level"
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0912, one branch per exclusion reason
     rows, excluded, missing = [], [], []
     for model, (root, levels) in MODELS.items():
         for level in levels:
@@ -58,6 +60,23 @@ def main() -> None:
                     )
                     continue
                 scores = summary["scores"]
+                if scores["quality"] is None or scores["security"] is None:
+                    # No recognized source file changed: the run produced nothing to
+                    # judge (the automated quality and security metrics are undefined
+                    # by construction), so it is excluded like an unfinished run.
+                    excluded.append(
+                        {
+                            "model": model,
+                            "effort": level,
+                            "task": summary["task_id"],
+                            "run_id": run.name,
+                            "reason": "No recognized source file changed; nothing to judge",
+                            "finished": summary.get("finished"),
+                            "duration_s": summary["duration_s"],
+                            "functional": scores["functional"],
+                        }
+                    )
+                    continue
                 rows.append(
                     {
                         "model": model,

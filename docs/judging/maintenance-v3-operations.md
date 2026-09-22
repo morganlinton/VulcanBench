@@ -343,3 +343,33 @@ operational notes live here.
   while the routine sweeps use the same account for solver runs; the
   wrapper's quota rule now also recognises Codex's "usage limit" and
   "limit reached" phrasing.
+- GPT-5.6 Sol failed the calibration exam under v3.10 (September 21, 18:47
+  PDT) on the same gate 16: it reported invented departures on the clear
+  control in four of five repeats (one empty; four needed), while
+  recovering the documented quirk on control 7 every time and passing every
+  other gate, repeatability included. As with Grok, the gate is boolean and
+  the allowance cannot excuse it. Under the pre-registered rule nothing
+  further runs for Sol. The v3.10 summary was written with Muse Spark 1.3 as
+  the only passing panel and both Grok (v3.9) and Sol (v3.10) disclosed as
+  failed; Devin SWE-2's published Code quality is Muse's L1 plus L2 alone.
+  Observation for the record: both judges that failed here failed on the
+  clear control's probe, the one call that rewards saying nothing; Muse has
+  drawn an empty probe on that control in every pass since v3.4.
+- The v3.9 and v3.10 summaries could not be written: three Devin runs
+  (snapcore and vaultcore at high, freightcore at max) changed no
+  recognized source file, only file modes on the legacy binaries, so the
+  sweep's automated quality and security metrics are None and the frozen
+  composite has no value for them. The runs scored 0 functionally, and Muse
+  rated the untouched original module in each. These are non-submissions
+  that the population builder should have excluded beside the unfinished
+  run; it now does, with the reason recorded. Owner decision, September 21,
+  2026: re-freeze as v3.11 on the 65 judged submissions with Muse Spark 1.3
+  alone (no retake for Grok or Sol), reusing Muse's v3.9 calibration verdict
+  on the v3.6.1 precedent. The Muse pass repeats because the new freeze
+  changes every call's binding; the v3.9 calls stay archived.
+
+## v3.11, September 21, 2026: Devin SWE-2, judged population
+
+- Frozen September 21, 19:11 PDT: 65 rows (23 medium, 20 high, 22 max),
+  four excluded (one unfinished, three with no source change), Muse's v3.9
+  calibration verdict checked and reused. Muse reviews started at once.

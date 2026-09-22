@@ -684,3 +684,33 @@ directory `runs-code-quality-maintenance-v3.10`; runner
   Muse's v3.9 calibration passed. No Muse call is repeated.
 - Pairwise diagnostics, repeats and the summary arithmetic are v3's own
   code, unchanged.
+
+## Amendment v3.11, September 21, 2026: Devin SWE-2, judged population, Muse alone
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.11`; run directory
+`runs-code-quality-maintenance-v3.11`; runner
+`harness/maintenance_review_v311.py`, derived from the v3.9 runner.
+
+- Population: the v3.9 Devin SWE-2 sweep minus three runs that changed no
+  recognized source file (snapcore and vaultcore at high, freightcore at
+  max: file-mode changes on the legacy binaries only, functional 0). A run
+  that produced no code has nothing to judge, and the sweep's automated
+  quality and security metrics are undefined for it by construction, so
+  the population builder now excludes such a run the way it excludes an
+  unfinished one, and lists it under "excluded" with the reason. 65
+  submissions: 23 at medium, 20 at high, 22 at max. The population record
+  is `comparison-judged.json`; `comparison.json` stays as the v3.9 freeze.
+  The sweep's pass counts are unchanged; every excluded run is a fail.
+- Panel: Muse Spark 1.3 alone. Grok 4.6 failed the v3.9 exam and GPT-5.6
+  Sol failed the v3.10 exam, both on gate 16 (invented departures on the
+  clear control). Under the pre-registered single-panel rule nothing
+  further runs for either, and no judge retakes a gate it failed. Both
+  verdicts stay published and are named in the v3.11 protocol record.
+- Calibration: Muse's v3.9 verdict gates this pass and no calibration call
+  is repeated, on the v3.6.1 precedent: the exam is per judge and control
+  set, and neither changed between v3.9 and v3.11. `prepare` refuses to
+  freeze unless that verdict passed under the frozen v3.9 protocol.
+- Every card and report that shows Devin's Code quality states that it is
+  a single-judge score, not the two-judge mean behind the rest of the
+  Frontier v4 board.

@@ -374,8 +374,8 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
         text,
         line,
         "VulcanBench Frontier v4: Astra, Fable 5.1, Muse 1.3 and Devin SWE-2",
-        "Functional score and runtime at every effort level each model offers, 23 tasks per cell, "
-        "one task at a time. Same tasks and hidden tests for all four.",
+        "Combined score and time per task at every effort level each model offers, 23 tasks per cell, "
+        "one task at a time. Same tasks, hidden tests and judge protocol for all.",
     )
     chart_top, chart_h = 3.75, 2.85
     ax = fig.add_axes([0.085, yf(chart_top + chart_h), 0.405, chart_h / HEIGHT_IN], facecolor=PAPER)
@@ -383,19 +383,25 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
         text,
         0.085,
         True,
-        "Functional score",
-        "/100, share of hidden tests passed  ·  higher is better  ·  a regression scores 0",
+        "Combined score",
+        "/100  ·  50% functional, 17% lint, complexity and security, 33% Code quality  ·  higher is better",
     )
     family.style_axis(ax)
-    values = [groups[m, e]["functional"] for m in MODELS for e in LEVELS_FOR[m]]
+    scored = [
+        m
+        for m in MODELS
+        if all(groups[m, e]["combined"]["mean"] is not None for e in LEVELS_FOR[m])
+    ]
+    values = [groups[m, e]["combined"] for m in scored for e in LEVELS_FOR[m]]
     lo = 10 * math.floor(min(v["mean"] - v["se"] for v in values) / 10)
-    ax.set_ylim(lo, 104)
-    ax.set_yticks(range(lo, 101, 10))
+    hi = math.ceil(max(v["mean"] + v["se"] for v in values)) + 2
+    ax.set_ylim(lo, hi)
+    ax.set_yticks(range(lo, hi + 1, 5 if hi - lo <= 30 else 10))
     ax.set_xlim(-0.45, len(LEVELS) - 0.55)
-    for model in MODELS:
+    for model in scored:
         xs = [LEVELS.index(e) for e in LEVELS_FOR[model]]
-        ys = [groups[model, e]["functional"]["mean"] for e in LEVELS_FOR[model]]
-        es = [groups[model, e]["functional"]["se"] for e in LEVELS_FOR[model]]
+        ys = [groups[model, e]["combined"]["mean"] for e in LEVELS_FOR[model]]
+        es = [groups[model, e]["combined"]["se"] for e in LEVELS_FOR[model]]
         ax.plot(xs, ys, color=COLORS[model], linewidth=2, zorder=2)
         ax.errorbar(
             xs,
@@ -412,7 +418,9 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
             zorder=3,
         )
     ax = fig.add_axes([0.565, yf(chart_top + chart_h), 0.39, chart_h / HEIGHT_IN], facecolor=PAPER)
-    panel_titles(text, 0.565, False, "Mean runtime", "Minutes per task  ·  lower is better")
+    panel_titles(
+        text, 0.565, False, "Mean time per task", "Minutes of solver wall-clock  ·  lower is better"
+    )
     family.style_axis(ax)
     peak = grouped_bars(ax, groups, "minutes", lambda y: f"{y:.0f}")
     top = 20 * math.ceil(peak / 20) + 20
@@ -422,15 +430,24 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
     best = {
         m: max(
             (groups[m, e] for e in LEVELS_FOR[m]),
-            key=lambda g: (g["functional"]["mean"], -g["minutes"]["mean"]),
+            key=lambda g: (
+                g["combined"]["mean"] if g["combined"]["mean"] is not None else -1,
+                g["functional"]["mean"],
+                -g["minutes"]["mean"],
+            ),
         )
         for m in MODELS
     }
-    order = sorted(MODELS, key=lambda m: -best[m]["functional"]["mean"])
+    order = sorted(
+        MODELS,
+        key=lambda m: (
+            -(best[m]["combined"]["mean"] if best[m]["combined"]["mean"] is not None else -1)
+        ),
+    )
     text(
         LEFT,
         7.25,
-        "Table 1  |  Each model at its best effort level by functional score",
+        "Table 1  |  Each model at its best effort level by combined score",
         14.5,
         False,
         heading=True,
@@ -443,12 +460,11 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
         text(cols[m], 8.03, best[m]["effort"].replace("-", " "), 10, ha="right", color=MUTED)
     line(LEFT, RIGHT, 8.2, INK, 0.6)
     table_rows = [
-        ("Functional score", "functional", 2, True),
+        ("Combined score", "combined", 2, True),
+        ("Code quality", "code_quality", 1, False),
         ("Tasks fully passed", "passed", 0, False),
         ("Minutes per task", "minutes", 1, False),
-        ("Combined score (with Code quality)", "combined", 2, False),
-        ("Code quality", "code_quality", 1, False),
-        ("Standard error of functional", "se", 2, False),
+        ("Standard error of combined", "se", 2, False),
     ]
     step, y = 0.32, 8.48
     for label, key, digits, emphasis in table_rows:
@@ -457,7 +473,11 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
         for m in order:
             g = best[m]
             if key == "se":
-                shown = f"{g['functional']['se']:.2f}"
+                shown = (
+                    f"{g['combined']['se']:.2f}"
+                    if g["combined"]["se"] is not None
+                    else "not judged"
+                )
             elif key == "passed":
                 shown = f"{g['passed']}/{g['n']}"
             elif g[key]["mean"] is None:
@@ -484,9 +504,10 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
         [
             "Whiskers are one task standard error. Harnesses: Codex (Astra), Claude Code (Fable 5.1), Muse Code 1.0.3 on Meta's "
             "Contributor tier (Muse Spark 1.3, no max level), the Devin CLI (SWE-2: medium, high and max only).",
-            f"Muse's minimal level is off this axis: {minimal['functional']['mean']:.1f} functional, "
-            f"{minimal['minutes']['mean']:.0f} minutes per task. Muse's sweep has no Code quality review yet, so it has no combined "
-            "score; Astra and Fable values are from Code quality v3.4.",
+            f"Muse's sweep has no Code quality review yet, so it has no combined score and no line on the left; its functional "
+            f"score is {best['muse']['functional']['mean']:.1f} at {best['muse']['effort'].replace('-', ' ')}.",
+            f"Muse's minimal level is off the time axis at {minimal['minutes']['mean']:.0f} minutes per task. "
+            "Astra and Fable values are from Code quality v3.4 (Muse Spark 1.3 and Grok 4.6).",
             "Muse ran Low's first 17 tasks under the former 10-hour task bound and one outlasted today's 3-hour bound "
             f"(0.88 after 6.7 hours); with that run scored 0, Muse at Low is {capped_low:.1f}. Later levels ran under 3 hours.",
             f"Muse attempts ended by a provider stream error before any patch ({total_aborted} at these levels) were rerun "

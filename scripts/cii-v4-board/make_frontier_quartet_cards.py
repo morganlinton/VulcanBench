@@ -536,9 +536,8 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
             "runs (14 unfinished, one no source change, one unreconstructible patch).",
             f"Devin: v3.11, Muse Spark 1.3 alone, on {69 - len(devin_excluded)} of 69 runs (one hit the 3-hour budget, three changed no "
             "source file). Muse and Devin are single-judge scores; Grok 4.6 and GPT-5.6 Sol failed calibration on those populations.",
-            f"Muse's minimal level is off the time axis at {minimal['minutes']['mean']:.0f} minutes per task (combined "
-            f"{minimal['combined']['mean']:.2f}). Muse ran Low's first 17 tasks under the former 10-hour bound; one outlasted today's "
-            f"3-hour bound and with it scored 0 Muse at Low is {capped_low:.1f} functional.",
+            f"Muse's minimal level is off the time axis at {minimal['minutes']['mean']:.0f} minutes per task. Muse ran Low's first 17 "
+            f"tasks under the former 10-hour bound; one outlasted today's 3-hour bound (with it scored 0, Muse at Low is {capped_low:.1f} functional).",
             f"Muse attempts ended by a provider stream error before any patch ({total_aborted} at these levels) were rerun from a clean "
             "workspace; timeouts and failing patches are scored as they stand.",
         ],

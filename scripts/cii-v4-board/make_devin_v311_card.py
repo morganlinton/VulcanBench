@@ -222,7 +222,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             f"{model} {effort} has {g['n']} rows",
         )
     best = max(groups.values(), key=lambda g: g["combined"]["mean"])
-    low, high = groups["swe2", "low"], groups["swe2", "max"]
+    low, high = groups["swe2", "medium"], groups["swe2", "max"]
     headline = f"Combined score {low['combined']['mean']:.2f} to {high['combined']['mean']:.2f} from medium to max."
     sub = f"Best at {best['effort']}"
 
@@ -312,8 +312,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         left,
         2.22,
         "Combined score and runtime at every effort level SWE-2 offers, 23 tasks per effort. "
-        "Code quality judged by "
-        + ("Muse Spark 1.3 alone (Grok 4.6 and GPT-5.6 Sol failed calibration; see notes)."),
+        "Code quality judged by " + ("Muse Spark 1.3 alone; see notes."),
         15,
         color=MUTED,
     )
@@ -490,8 +489,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ],
         ("Standard error of Code quality", "se", 2, False, True),
     ]
-    step = 0.35
-    y = 8.74
+    step = 0.33
+    y = 8.66
     for label, key, digits, emphasis, group_end in table_rows:
         quiet = label.startswith("Standard error")
         text(left, y, label, 13 if emphasis else 12.5, emphasis, color=MUTED if quiet else INK)
@@ -525,11 +524,12 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "(snapcore and vaultcore at high, freightcore at max) changed no source file at all;",
         "the protocol excludes those four rather than judging them and the sweep counts every one as a fail. SWE-2 offers "
         "medium, high and max only, and nothing is priced: Devin publishes no API rate for SWE-2.",
-        "Panel differs from the rest of the board: Grok 4.6 (v3.9) and GPT-5.6 Sol (v3.10) both failed calibration gate 16 "
-        "(invented departures on the clear control), so Code quality here is Muse Spark 1.3 alone, not a two-judge mean.",
+        "Panel differs from the rest of the board: Grok 4.6 (v3.9) and GPT-5.6 Sol (v3.10) both failed calibration gate 16, "
+        "invented departures on the clear control,",
+        "so Code quality here is Muse Spark 1.3 alone rather than the two-judge mean behind every other Frontier v4 entry.",
     )
     for i, note in enumerate(notes):
-        text(left, y - step / 2 + 0.18 + 0.24 * i, note, 11, color=MUTED)
+        text(left, y - step / 2 + 0.16 + 0.22 * i, note, 11, color=MUTED)
 
     suffix = "" if final else "-preliminary"
     out = OUTPUT / f"devin-swe2-v311{suffix}.png"

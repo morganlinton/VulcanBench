@@ -351,7 +351,8 @@ def main():  # noqa: PLR0915, one linear figure
         "No cost is shown: Devin publishes no API price for SWE-2 and the sweep ran on a subscription. Devin's credit and ACU "
         "counters in the receipts were zero for every run.",
         "68 of 69 runs are here: cellarcore at high reached the 3-hour task budget before verification. Three more runs changed no "
-        "source file (snapcore, vaultcore, freightcore) and are unjudged, but their tokens and time are real and are counted.",
+        "source file",
+        "(snapcore, vaultcore, freightcore) and carry no Code quality score, but their tokens and time are real and are counted.",
         "Whiskers are one task standard error. Tokens are raw solver totals including cache reads.",
     ]
     for i, note in enumerate(notes):

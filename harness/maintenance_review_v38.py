@@ -30,6 +30,17 @@ Privacy: the frozen record holds task content, so it lives in the private
 VulcanRoutine repository (``judging/code-quality-maintenance-v3.8``), never
 in this tree. This file names no task.
 
+The protocol document is frozen as a copy. Every earlier amendment pinned
+the hash of the live ``docs/judging/code-quality-maintenance-v3.md``; on
+September 21, 2026 the Devin SWE-2 amendments (v3.9, v3.10) were being
+written into that file while the first v3.8 freeze was calibrating, and the
+freeze stopped with "Frozen input changed". A protocol that shares the
+document with concurrent protocols must own its copy: ``prepare`` copies
+the document into the run directory and the record pins that copy (plus the
+source hash, for provenance). The first freeze is retained as
+``code-quality-maintenance-v3.8-superseded-freeze1``, with its 128
+calibration receipts; no counted call had been made.
+
 The frozen v3 implementation is reused as a library. This module rebinds the
 v3 and v2 population, task and directory constants at import time and
 replaces only ``prepare``. Every other stage (calibrate, run, summarize) is
@@ -92,6 +103,7 @@ def _bind() -> None:
     v3.SCORED_PANELS = PANELS
     v3.SENSITIVITY_PANELS = ()
     v3.SENSITIVITY_OUT = OUT
+    v3.DOC = OUT / "protocol-document.md"
     v3.prepare = prepare
 
 
@@ -132,7 +144,17 @@ def select_pairs(manifest: list[dict], ordered_tasks: list[str]) -> list[list[st
     return pairs
 
 
+SOURCE_DOC = ROOT / "docs/judging/code-quality-maintenance-v3.md"
+
+
 def prepare() -> None:  # noqa: PLR0915, one linear freeze
+    OUT.mkdir(parents=True, exist_ok=True)
+    frozen_doc = OUT / "protocol-document.md"
+    if frozen_doc.exists() and frozen_doc.read_bytes() != SOURCE_DOC.read_bytes():
+        raise ValueError(
+            "Frozen protocol document already differs from the source; use a new directory"
+        )
+    frozen_doc.write_bytes(SOURCE_DOC.read_bytes())
     record = v3.read(COMPARISON)
     rows = record["rows"]
     excluded = record.get("excluded", [])
@@ -259,6 +281,8 @@ def prepare() -> None:  # noqa: PLR0915, one linear freeze
         "codex_config": list(base.CONFIG),
         "code_hashes": {str(p.relative_to(ROOT)): v3.sha(p) for p in code},
         "protocol_document_sha256": v3.sha(v3.DOC),
+        "protocol_document_frozen_copy": str(v3.DOC.relative_to(OUT)),
+        "protocol_document_source_sha256": v3.sha(SOURCE_DOC),
         "source_comparison_sha256": v3.sha(COMPARISON),
         "manifest_sha256": v3.sha(OUT / "private-manifest.json"),
         "signals_sha256": v3.sha(OUT / "signals.json"),

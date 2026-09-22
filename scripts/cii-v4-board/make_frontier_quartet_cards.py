@@ -541,26 +541,26 @@ def economics_card(rows, groups, minimal, hashes, ledger):  # noqa: PLR0915, one
         text,
         line,
         "VulcanBench Frontier v4: Astra, Fable 5.1, Muse 1.3 and Devin SWE-2",
-        "API-equivalent cost and token use at every effort level; the same runs as the score card. "
+        "API-equivalent cost and time per task at every effort level; the same runs as the score card. "
         "Solver inference only, all on subscriptions. SWE-2 is unpriced.",
     )
     chart_top, chart_h = 3.75, 2.9
-    for panel, (x0, w) in (("usd", (0.085, 0.405)), ("tokens", (0.565, 0.39))):
+    for panel, (x0, w) in (("usd", (0.085, 0.405)), ("minutes", (0.565, 0.39))):
         panel_titles(
             text,
             x0,
             panel == "usd",
-            "API-equivalent cost" if panel == "usd" else "Tokens per task",
+            "API-equivalent cost" if panel == "usd" else "Time per task",
             "USD per task at list prices  ·  lower is better  ·  ticks: upper bounds, see notes"
             if panel == "usd"
-            else "Millions of raw tokens, cache reads included  ·  lower is better",
+            else "Minutes of solver wall-clock per task  ·  lower is better",
         )
         ax = fig.add_axes([x0, yf(chart_top + chart_h), w, chart_h / HEIGHT_IN], facecolor=PAPER)
         family.style_axis(ax)
         if panel == "usd":
             peak = grouped_bars(ax, groups, "usd", lambda y: f"${y:.2f}", upper_key="usd_upper")
         else:
-            peak = grouped_bars(ax, groups, "tokens", lambda y: f"{y:.1f}M")
+            peak = grouped_bars(ax, groups, "minutes", lambda y: f"{y:.0f}")
         step = next(s for s in (0.5, 1, 2, 5, 10, 20, 50) if peak / s <= 7)
         top = step * math.ceil(peak / step) + step * 1.2
         ax.set_ylim(0, top)

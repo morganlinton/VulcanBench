@@ -1,6 +1,6 @@
 """Companion card to the Devin SWE-2 v3.11 score card: token use and runtime by effort.
 
-SWE-2 has no public API price, so nothing is priced. Reads the frozen population (private manifest: run ids, receipts,
+SWE-2 is free on Devin's plans (catalog cost tier "Free"), so cost is $0. Reads the frozen population (private manifest: run ids, receipts,
 durations) and the population record's per-run API-equivalent costs. Nothing
 is re-priced here; every number is a mean over the per-run estimates, and the
 pricing caveats are printed on the card.
@@ -63,7 +63,10 @@ def load():
     for run in record["rows"]:
         receipt = run.get("solver_receipt") or {}
         require(type(receipt.get("raw_tokens")) is int, f"no raw token receipt for {run['run_id']}")
-        require(run["api_equivalent_cost_usd"] is None, "SWE-2 is unpriced; a price appeared")
+        require(
+            run["api_equivalent_cost_usd"] is None,
+            "SWE-2 carries no metered rate; a price appeared",
+        )
         rows.append(
             {
                 "run_id": run["run_id"],
@@ -81,10 +84,10 @@ def load():
     ledger = {
         "pricing_verified": None,
         "sources": {
-            "devin": "Devin CLI receipts (cli-agent-stream.jsonl); SWE-2 has no public API price"
+            "devin": "Devin CLI receipts (cli-agent-stream.jsonl); SWE-2 is free on Devin's plans"
         },
         "limitations": [
-            "SWE-2 has no public API price, so no API-equivalent cost is estimated; the sweep ran on a Devin subscription.",
+            "SWE-2 is free on Devin's plans (catalog cost tier Free), so cost per task is $0; the sweep ran on a Devin subscription.",
             "Tokens are the Devin CLI's per-request usage receipts, deduplicated by request id: uncached input, cache reads and output.",
             "Devin's own credit and ACU counters are recorded from the receipts and were zero for every run of this sweep.",
         ],
@@ -197,7 +200,7 @@ def main():  # noqa: PLR0915, one linear figure
         left,
         2.22,
         "Token use and runtime at every effort level SWE-2 offers, 68 finished runs; "
-        "solver inference only, judging excluded. SWE-2 has no public API price.",
+        "solver inference only, judging excluded. SWE-2 is free on Devin's plans.",
         15,
         color=MUTED,
     )
@@ -300,22 +303,24 @@ def main():  # noqa: PLR0915, one linear figure
     text(
         left,
         t0,
-        "Table 1  |  Tokens and runtime at each effort level",
+        "Table 1  |  Cost, tokens and runtime at each effort level",
         14.5,
         False,
         heading=True,
     )
-    cols = {"n": 0.36, "out": 0.52, "total": 0.66, "tok": 0.80, "min": 0.94}
+    cols = {"n": 0.32, "usd": 0.45, "out": 0.59, "total": 0.72, "tok": 0.85, "min": 0.96}
     line(left, right, t0 + 0.28, INK, 1.2)
     text(left, t0 + 0.52, "Effort", 12.5, True)
     for key, label in (
         ("n", "Runs"),
+        ("usd", "$/task"),
         ("out", "Output/task"),
         ("total", "Level total"),
         ("tok", "Tokens/task"),
         ("min", "Minutes/task"),
     ):
         text(cols[key], t0 + 0.52, label, 12.5, True, ha="right")
+    text(cols["usd"], t0 + 0.78, "free model", 10, ha="right", color=MUTED)
     text(cols["out"], t0 + 0.78, "thousands", 10, ha="right", color=MUTED)
     text(cols["total"], t0 + 0.78, "raw tokens, millions", 10, ha="right", color=MUTED)
     text(cols["tok"], t0 + 0.78, "raw, millions", 10, ha="right", color=MUTED)
@@ -327,6 +332,7 @@ def main():  # noqa: PLR0915, one linear figure
         text(left, y, effort.replace("-", " ").capitalize(), 12.5)
         for key, value in (
             ("n", str(g["n"])),
+            ("usd", "$0.00"),
             ("out", f"{g['output_tokens']['mean']:.0f}K"),
             ("total", f"{g['tokens_total'] / 1e6:,.0f}M"),
             ("tok", f"{g['tokens']['mean']:.2f}M"),
@@ -339,6 +345,7 @@ def main():  # noqa: PLR0915, one linear figure
     text(left, y, "Full sweep", 13, True)
     for key, value in (
         ("n", str(tt["runs"])),
+        ("usd", "$0.00"),
         ("out", f"{tt['output_tokens'] / tt['runs'] / 1e3:.0f}K"),
         ("total", f"{tt['tokens'] / 1e6:,.0f}M"),
         ("tok", f"{tt['tokens'] / tt['runs'] / 1e6:.2f}M"),
@@ -348,8 +355,8 @@ def main():  # noqa: PLR0915, one linear figure
     y += step
     line(left, right, y - step / 2, INK, 1.2)
     notes = [
-        "No cost is shown: Devin publishes no API price for SWE-2 and the sweep ran on a subscription. Devin's credit and ACU "
-        "counters in the receipts were zero for every run.",
+        "Cost is $0: SWE-2 is free on Devin's plans (catalog cost tier Free), and its credit and ACU counters in the receipts "
+        "were zero for every run.",
         "68 of 69 runs are here: cellarcore at high reached the 3-hour task budget before verification. Three more runs changed no "
         "source file",
         "(snapcore, vaultcore, freightcore) and carry no Code quality score, but their tokens and time are real and are counted.",

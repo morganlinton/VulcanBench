@@ -4,7 +4,7 @@
   "ledger_sha256": "9473e196c55443be8daab9cd1cbdd97597dc124bf6903df2924589d86209bb68",
   "pricing_verified": null,
   "sources": {
-    "devin": "Devin CLI receipts (cli-agent-stream.jsonl); SWE-2 has no public API price"
+    "devin": "Devin CLI receipts (cli-agent-stream.jsonl); SWE-2 is free on Devin's plans"
   },
   "totals": {
     "swe2": {
@@ -86,10 +86,10 @@
     }
   },
   "limitations": [
-    "SWE-2 has no public API price, so no API-equivalent cost is estimated; the sweep ran on a Devin subscription.",
+    "SWE-2 is free on Devin's plans (catalog cost tier Free), so cost per task is $0; the sweep ran on a Devin subscription.",
     "Tokens are the Devin CLI's per-request usage receipts, deduplicated by request id: uncached input, cache reads and output.",
     "Devin's own credit and ACU counters are recorded from the receipts and were zero for every run of this sweep."
   ],
-  "png_sha256": "9104e14b16f252bce3bd3ab85d61b61d99c545078622835d52198c7396ccd4f6",
+  "png_sha256": "7e45c6ca75ed114c597db783f6fa9f9283a9eb93001e6ce2268b09e8b6de1543",
   "supporting_table": "devin-swe2-v311-economics-efforts.csv"
 }

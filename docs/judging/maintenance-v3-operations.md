@@ -299,3 +299,20 @@ operational notes live here.
 - Frozen 08:14 PDT, 99 rows (21, 18, 19, 20, 21 from minimal to extra-high).
   Opus 5 calibration started at once, about 16 seconds per review through
   Claude Code on the Max subscription.
+- Opus 5 passed the calibration exam under v3.12 with no allowance used
+  (80 calls). Reviews, repeats and pairwise diagnostics completed with two
+  structured-output retry stops handled by the existing rule.
+- Opus 5, probe submission-099: the CLI recorded the answer as a
+  StructuredOutput call with unparsed input followed by pseudo tool calls
+  named after JSON fields ("excerpt"); no tool ran (no tool_result in the
+  stream), but the frozen guard read the blocks as tool use and stopped
+  with a non-retryable receipt. New wrapper rule
+  retry_garbled_structured_output: when the only tool blocks are that
+  unparsed emission and no tool result exists, the response is a malformed
+  answer under the protocol text and takes the single fresh attempt.
+- September 22, 10:20 PDT: the pass complete (99 reviews, 5 repeats, 6
+  pairwise, 99 probes and matches; three operator rule applications, no
+  reviewer fallback). Summary written: 99 of 99 published, Opus 5 the only
+  panel. Muse Spark 1.3 combined score minimal 74.84, low 79.33, medium
+  78.96, high 80.71, extra-high 77.44; Code quality 62.0, 64.8, 63.6, 66.2,
+  61.2.

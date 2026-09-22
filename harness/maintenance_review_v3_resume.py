@@ -102,6 +102,34 @@ def payload_for(stage: str, ident: str) -> dict | None:  # noqa: PLR0911, one br
     return None
 
 
+def calibration_call(ident: str) -> tuple[str, dict | None]:
+    """Kind and frozen payload of a calibration call, rebuilt the way calibrate_panel builds them."""
+    controls = [
+        v3.read(_out() / "controls" / f"control-{i}.json") for i in range(len(v3.CONTROL_FILES))
+    ]
+    head, *rest = ident.split("-")
+    if head == "control":
+        return "review", controls[int(rest[0])]
+    if head == "pair":
+        a, b = int(rest[0]), int(rest[1])
+        return "pair", {"A": controls[a], "B": controls[b]}
+    if head == "probe":
+        return "probe", v3.probe_evidence(controls[int(rest[0])], spec=v3.LEDGER_SPEC)
+    if head == "match":
+        probe = (
+            _out()
+            / "calls"
+            / "grok"
+            / "calibration"
+            / f"probe-{rest[0]}-{rest[1]}"
+            / "selected.json"
+        )
+        if not probe.exists():
+            return "match", None
+        return "match", {"key": v3.LEDGER_KEY["quirks"], "departures": v3.read(probe)["departures"]}
+    return "review", None
+
+
 def assistant_models(stream_text: str) -> set[str]:
     return {
         json.loads(line)["message"]["model"]
@@ -149,6 +177,7 @@ NETWORK_MARKERS = (
     "ECONNREFUSED",
     "[unavailable] getaddrinfo",
 )
+STREAM_NETWORK_MARKERS = ("transport error [net-timeout]",)
 
 
 def retry_network_fault(folder: Path) -> bool:
@@ -165,20 +194,88 @@ def retry_network_fault(folder: Path) -> bool:
     if rec.get("status") != "failed" or rec.get("retryable") is not False:
         return False
     error = str(rec.get("error", ""))
-    if not any(marker in error for marker in NETWORK_MARKERS):
-        return False
     stream = folder / "attempt-1.stream.jsonl"
-    if stream.exists() and "assistant" in stream.read_text():
+    text = stream.read_text() if stream.exists() else ""
+    # Muse reports a dropped connection inside its stream's terminal record rather
+    # than on stderr, where the receipt's error text comes from.
+    terminal = next((m for m in STREAM_NETWORK_MARKERS if m in text), None)
+    if not any(marker in error for marker in NETWORK_MARKERS) and terminal is None:
+        return False
+    if "assistant" in text:
         return False
     rec["retryable"] = True
     rec["operator_review"] = {
         "at": datetime.now(UTC).isoformat(),
-        "finding": f"Judge CLI could not reach its API ({error.strip()[-120:]}); no response was produced.",
+        "finding": f"Judge CLI could not reach its API ({(terminal or error).strip()[-120:]}); no response was produced.",
         "action": "Transport fault: one fresh attempt per the protocol; receipt retained.",
     }
     receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
     print(
         json.dumps({"event": "network_fault_retry", "call": str(folder.relative_to(_out()))}),
+        flush=True,
+    )
+    return True
+
+
+TOOL_USE_ERROR = "Judge attempted tool use"
+
+
+def retry_garbled_structured_output(folder: Path) -> bool:  # noqa: PLR0911, one branch per guard
+    """The Claude CLI split a malformed structured-output emission into pseudo tool calls.
+
+    Opus 5 sometimes emits its answer as a StructuredOutput call whose input
+    the CLI could not parse (recorded under __unparsedToolInput), followed by
+    fragments that surface as tool_use blocks named after JSON fields. No tool
+    ran: the stream carries no tool_result. That is a malformed response, the
+    same class the protocol already treats as retryable, not an attempt to
+    use a tool. One fresh attempt; a second occurrence on the same call stops.
+    """
+    receipt = folder / "attempt-1.json"
+    if not receipt.exists() or (folder / "attempt-2.json").exists():
+        return False
+    rec = json.loads(receipt.read_text())
+    if rec.get("status") != "failed" or rec.get("error") != TOOL_USE_ERROR:
+        return False
+    stream = folder / "attempt-1.stream.jsonl"
+    if not stream.exists():
+        return False
+    text = stream.read_text()
+    if "__unparsedToolInput" not in text:
+        return False
+    # No real tool may have run: every tool_use is the structured-output tool or a
+    # pseudo tool the CLI refused, and every non-error tool_result answers the former.
+    names: dict[str, str] = {}
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        event = json.loads(line)
+        if event.get("type") not in ("assistant", "user"):
+            continue
+        for block in event["message"].get("content", []):
+            if block.get("type") == "tool_use":
+                names[block["id"]] = block.get("name")
+            elif block.get("type") == "tool_result":
+                content = block.get("content")
+                shown = content if isinstance(content, str) else json.dumps(content)
+                refused = "No such tool available" in shown
+                if not refused and names.get(block.get("tool_use_id")) != "StructuredOutput":
+                    return False
+    if any(name != "StructuredOutput" for name in names.values()) and not any(
+        "No such tool available" in line for line in text.splitlines()
+    ):
+        return False
+    rec["retryable"] = True
+    rec["operator_review"] = {
+        "at": datetime.now(UTC).isoformat(),
+        "finding": "Malformed structured output: the CLI recorded an unparsed StructuredOutput input and "
+        "field-named pseudo tool calls; no tool ran (no tool_result in the stream).",
+        "action": "Invalid response under the protocol text: one fresh attempt; receipt retained.",
+    }
+    receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            {"event": "garbled_structured_output_retry", "call": str(folder.relative_to(_out()))}
+        ),
         flush=True,
     )
     return True
@@ -226,7 +323,15 @@ def retry_provider_block(folder: Path) -> bool:
     return True
 
 
-QUOTA_MARKERS = ("resource_exhausted", "RetriableError", "rate limit", "rate_limit", "429")
+QUOTA_MARKERS = (
+    "resource_exhausted",
+    "RetriableError",
+    "rate limit",
+    "rate_limit",
+    "429",
+    "usage limit",  # Codex: subscription window exhausted
+    "limit reached",
+)
 QUOTA_MAX_RESUMES = 12
 
 
@@ -417,6 +522,111 @@ def accept_fallback(folder: Path, panel: str, stage: str) -> bool:
             json.dumps(
                 {
                     "event": "reviewer_fallback_accepted",
+                    "call": str(folder.relative_to(_out())),
+                    "attempt": n,
+                }
+            ),
+            flush=True,
+        )
+        return True
+    return False
+
+
+RENAME_PREFIX = "Cursor "
+
+
+def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0912, one branch per precondition
+    """Cursor renamed the judge's display label while the requested model id stayed the same.
+
+    On 2026-09-21 Cursor began reporting "Grok 4.6 Medium" for the pinned model
+    id cursor-grok-4.6-medium, which the frozen v3.3 settings record as
+    "Cursor Grok 4.6 Medium". The identity guard is requested-only with the
+    display name checked, so the attempt fails on the label alone. When the
+    reported label equals the frozen display name minus the "Cursor " prefix,
+    the same model served the request: the attempt is selected unchanged and
+    the rename is recorded in the receipt. Any other label still stops.
+    """
+    if panel != "grok":
+        return False
+    if stage == "calibration":
+        kind, payload = calibration_call(folder.name)
+    else:
+        kind, payload = stage_kind(stage), payload_for(stage, folder.name)
+    if payload is None:
+        return False
+    expected = v3.read(_out() / "protocol.json")["reviewers"]["grok"]["display_name"]
+    if not expected.startswith(RENAME_PREFIX):
+        return False
+    renamed = expected[len(RENAME_PREFIX) :]
+    for n in (2, 1):
+        receipt = folder / f"attempt-{n}.json"
+        stream = folder / f"attempt-{n}.stream.jsonl"
+        if not receipt.exists() or not stream.exists():
+            continue
+        rec = json.loads(receipt.read_text())
+        if rec.get("status") != "failed" or rec.get("error") != f"Judge model changed: {renamed}":
+            continue
+        finding = (
+            f"Cursor reported the display label {renamed!r} for the pinned model id; "
+            f"the frozen settings expect {expected!r}."
+        )
+        try:
+            vote = v3.parse_cursor_stream(stream.read_text())
+            if vote["model_reported"] != renamed:
+                continue
+            v3.validate(kind, vote, payload)
+        except (json.JSONDecodeError, KeyError):
+            continue
+        except ValueError as exc:
+            # The label check fired before the frozen validator ran, so the response
+            # never received the protocol's own treatment of a validation failure.
+            # Re-file the receipt as that failure; the frozen retry rule then applies
+            # (one fresh attempt), and the excerpt recovery rules see both receipts.
+            if str(exc) not in v3.RETRYABLE:
+                continue
+            rec.update(
+                retryable=True,
+                error=str(exc),
+                operator_review={
+                    "at": datetime.now(UTC).isoformat(),
+                    "finding": finding,
+                    "action": "Label accepted; the response then failed the frozen validator, so the "
+                    "receipt is re-filed as that failure and the protocol's retry applies.",
+                },
+            )
+            receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+            print(
+                json.dumps(
+                    {
+                        "event": "display_rename_refiled",
+                        "call": str(folder.relative_to(_out())),
+                        "error": str(exc),
+                    }
+                ),
+                flush=True,
+            )
+            return True
+        if kind == "review":
+            vote["reported_score"] = vote["score"]
+            vote.update(v3.host_review_score(vote))
+        vote.update(
+            binding=rec["binding"],
+            status="complete",
+            stage=stage,
+            panel=panel,
+            kind=kind,
+            operator_review={
+                "at": datetime.now(UTC).isoformat(),
+                "finding": finding,
+                "action": "Same model id, label renamed by the provider: attempt selected unchanged.",
+                "source_attempt": n,
+            },
+        )
+        base.save(folder / "selected.json", vote)
+        print(
+            json.dumps(
+                {
+                    "event": "display_rename_accepted",
                     "call": str(folder.relative_to(_out())),
                     "attempt": n,
                 }
@@ -801,7 +1011,7 @@ def apply_rule(folder: Path) -> bool:
     return True
 
 
-def main() -> int:
+def main() -> int:  # noqa: PLR0912, one branch per operator rule
     args = sys.argv[1:]
     panel = args[args.index("--panel") + 1]
     applied = 0
@@ -826,6 +1036,9 @@ def main() -> int:
         if folder is not None and accept_fallback(folder, panel, folder.parent.name):
             applied += 1
             continue
+        if folder is not None and accept_display_rename(folder, panel, folder.parent.name):
+            applied += 1
+            continue
         if folder is not None and recover_match_ids(folder, panel, folder.parent.name):
             applied += 1
             continue
@@ -836,6 +1049,9 @@ def main() -> int:
             applied += 1
             continue
         if folder is not None and retry_provider_block(folder):
+            applied += 1
+            continue
+        if folder is not None and retry_garbled_structured_output(folder):
             applied += 1
             continue
         if folder is not None and quota_resume(folder):

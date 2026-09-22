@@ -663,11 +663,92 @@ tree names a routine task.
 - Publication is aggregate only, per model and effort level, as the routine
   charter requires. Submission-level rows stay in the private record.
 
-## Not yet done
+## Amendment v3.9, September 21, 2026: the same protocol on Devin SWE-2
 
-- v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,
-  and every later stage.
-- L3 follow-up change generation, per task, and its worker runner.
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or judges
+changes. Protocol id `code-quality-maintenance-v3.9`; run directory
+`runs-code-quality-maintenance-v3.9`; runner
+`harness/maintenance_review_v39.py`, derived from the v3.7 runner.
+
+- Population: the September 18 to 21, 2026 Devin SWE-2 effort sweep through
+  the Devin CLI on the same 23 tasks, one attempt per task at each of the
+  three levels SWE-2 offers (medium, high, max), 69 runs. One high run
+  (cellarcore) reached the 3-hour task budget before verification and is
+  excluded rather than judged, as the protocol requires; that cell freezes
+  with 22 submissions and the sweep's pass count for it treats the run as a
+  fail. 68 submissions.
+- Pairwise diagnostics pair the same task at two of the three levels, two
+  steps apart in the model's own ladder, as under v3.7.
+- Both neutral judges retake the identical calibration exam under v3.9
+  before any counted call. No sensitivity panels.
+- Cost: SWE-2 has no public API price, so the population record carries no
+  API-equivalent cost. Tokens, wall clock and Devin's own credit and ACU
+  counters are recorded from the receipts.
+- Publication: SWE-2 joins the Frontier v4 board as the first non-OpenAI,
+  non-Anthropic entry, on the same 33% Code quality profile.
+
+## Amendment v3.10, September 21, 2026: the Sol seat for Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights
+or population changes. Protocol id `code-quality-maintenance-v3.10`; run
+directory `runs-code-quality-maintenance-v3.10`; runner
+`harness/maintenance_review_v310.py`, derived from the v3.9 runner.
+
+- Occasion: Grok 4.6 failed the v3.9 calibration exam on gate 16 (invented
+  departures on the clear control in two of five repeats). The
+  pre-registered single-panel rule would publish Devin from Muse Spark 1.3
+  alone. The owner chose instead to fill the second seat for this
+  population, so that Devin is scored by two neutral judges like every
+  other board entry. Grok's failed calibration stays published under v3.9.
+- The seat: GPT-5.6 Sol through the Codex CLI, model `gpt-5.6-sol`,
+  reasoning effort medium, the same transport, config and read-only
+  sandbox v3 already uses for its Astra sensitivity panel; the Codex CLI
+  file is pinned by hash. Sol takes the identical calibration exam
+  (controls, pairs, probe and match calls) before any counted call, and
+  the one-gate 0.5 allowance applies as written.
+- Neutrality: Sol is an OpenAI model. It is neutral for Devin SWE-2 (a
+  Cognition model) and is admitted here for Devin passes only. It is not
+  admitted as a neutral judge of any OpenAI submission; under this
+  protocol a same-family judge can only be a disclosed sensitivity panel.
+  Every card and report that shows Devin's Code quality states that its
+  panel is Muse and Sol, not the Muse and Grok panel used for the rest of
+  the Frontier v4 board.
+- Muse: its v3.9 calibration verdict, reviews and probes are scored from
+  the v3.9 directory as a scored sibling. `prepare` refuses to freeze
+  unless the v3.10 manifest and signals are byte-identical to v3.9's and
+  Muse's v3.9 calibration passed. No Muse call is repeated.
+- Pairwise diagnostics, repeats and the summary arithmetic are v3's own
+  code, unchanged.
+
+## Amendment v3.11, September 21, 2026: Devin SWE-2, judged population, Muse alone
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.11`; run directory
+`runs-code-quality-maintenance-v3.11`; runner
+`harness/maintenance_review_v311.py`, derived from the v3.9 runner.
+
+- Population: the v3.9 Devin SWE-2 sweep minus three runs that changed no
+  recognized source file (snapcore and vaultcore at high, freightcore at
+  max: file-mode changes on the legacy binaries only, functional 0). A run
+  that produced no code has nothing to judge, and the sweep's automated
+  quality and security metrics are undefined for it by construction, so
+  the population builder now excludes such a run the way it excludes an
+  unfinished one, and lists it under "excluded" with the reason. 65
+  submissions: 23 at medium, 20 at high, 22 at max. The population record
+  is `comparison-judged.json`; `comparison.json` stays as the v3.9 freeze.
+  The sweep's pass counts are unchanged; every excluded run is a fail.
+- Panel: Muse Spark 1.3 alone. Grok 4.6 failed the v3.9 exam and GPT-5.6
+  Sol failed the v3.10 exam, both on gate 16 (invented departures on the
+  clear control). Under the pre-registered single-panel rule nothing
+  further runs for either, and no judge retakes a gate it failed. Both
+  verdicts stay published and are named in the v3.11 protocol record.
+- Calibration: Muse's v3.9 verdict gates this pass and no calibration call
+  is repeated, on the v3.6.1 precedent: the exam is per judge and control
+  set, and neither changed between v3.9 and v3.11. `prepare` refuses to
+  freeze unless that verdict passed under the frozen v3.9 protocol.
+- Every card and report that shows Devin's Code quality states that it is
+  a single-judge score, not the two-judge mean behind the rest of the
+  Frontier v4 board.
 
 ## Amendment v3.12, September 22, 2026: Muse Spark 1.3 judged by Claude Opus 5
 
@@ -700,3 +781,9 @@ changes. Protocol id `code-quality-maintenance-v3.12`; run directory
   single-judge score from a different judge than the Muse and Grok panel
   behind the rest of the Frontier v4 board, and is not placed in one ranking
   with those scores without that note.
+
+## Not yet done
+
+- v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,
+  and every later stage.
+- L3 follow-up change generation, per task, and its worker runner.

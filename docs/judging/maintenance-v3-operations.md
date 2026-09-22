@@ -278,6 +278,162 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.8, September 21 to 22, 2026: the private Routine v1 suite
+
+- Population frozen September 21, 17:48 PDT, in the private VulcanRoutine
+  repository (`judging/code-quality-maintenance-v3.8`): 384 rows, twelve
+  tasks at every level each of seven models offers (Astra, Terra, Luna, Sol
+  and Fable 5.1 at five levels, GPT-5.5 at four, SWE-2 at medium, high and
+  max), no exclusions, none missing. Every routine task freezes an empty
+  quirk key, so no probe or match call is made and Code quality is the L1
+  reviewed score under v3's pre-registered zero-denominator rule.
+- First freeze superseded. The first v3.8 freeze (September 21, 16:28 PDT)
+  pinned the hash of the live protocol document, as every earlier amendment
+  did. While Grok was 48 calls into calibration (Muse had already passed),
+  the Devin SWE-2 amendments (v3.9, then v3.10) were written into that same
+  file, and `verify_frozen` stopped the chain with "Frozen input changed".
+  The pinned text cannot be reconstructed: the v3.9 section was edited in
+  place before v3.10 was added and none of it was committed. Harness PR #136
+  makes v3.8 freeze its own copy of the document inside the run directory
+  and pin that copy, with the source hash kept for provenance. The first
+  freeze is retained as `code-quality-maintenance-v3.8-superseded-freeze1`
+  with its 128 calibration receipts; no counted call had been made. Both
+  judges retook calibration under the second freeze, as receipts are bound
+  to the protocol hash.
+- Both judges passed every gate under the second freeze; neither used the
+  allowance. Muse's closest gate was g11 repeatability (shortfall 0.02);
+  Grok's was g11 (0.14).
+- Cursor display rename, every Grok call: Cursor now reports the pinned
+  model `cursor-grok-4.6-medium` as "Grok 4.6 Medium" where the frozen v3.3
+  settings record "Cursor Grok 4.6 Medium". The wrapper rule
+  accept_display_rename (added for v3.9 the same day) accepted the label on
+  489 calls; the model id requested was unchanged throughout.
+- Grok, repeat diagnostic submission-001 (September 22, 06:07 PDT): both
+  attempts quoted a `"rows": [...]` excerpt absent from the code; no
+  recovery rule accepts it and none was added. The call is a diagnostic
+  (repeats and pairs feed the operations record, not the published score),
+  so it is marked invalid in its folder (`operator-invalid.json`, rule
+  invalidate_unrecoverable_diagnostic) and the remaining 11 repeats and 24
+  pairwise calls were driven in-process under the wrapper's rules
+  (`logs/routine-v38-finish-wrapped.py`). All 384 primary reviews from both
+  judges are selected; nothing in any judge's response was altered.
+- Second attempts over the whole pass: Muse nine, Grok fifty (excluding the
+  rename retries), every one an unsupported evidence excerpt; the excerpt
+  re-wrap rule resolved all but the diagnostic above.
+- Summary: 384 of 384 published, both panels passing, no fallback reviews.
+  Combined score (50/8.5/8.5/33) at Low, by model: Astra 94.8, Terra 93.1,
+  Luna 92.5, Sol 94.4, GPT-5.5 94.9, Fable 5.1 94.2; SWE-2 93.4 at Medium.
+  Every model passed all twelve tickets at every level, so the routine
+  question is answered by cost and time: the cheapest adequate level is Low
+  for every priced model and Medium for SWE-2. Fable 5.1 is the one model
+  whose Code quality climbs steadily with effort (85.5 at Low to 93.8 at
+  Max). Routine Code quality is L1 alone and is not comparable with
+  Frontier v4 Code quality. Public aggregates: VulcanRoutine
+  `results/routine-v1-aggregates.{json,csv}`; board section: VulcanBenchCOM
+  PR #61.
+
+## v3.9, September 21, 2026: Devin SWE-2
+
+- Population frozen September 21, 10:08 PDT: 68 rows (23 at medium and max,
+  22 at high), one excluded (high, cellarcore: the run reached the 3-hour
+  task budget before verification), none missing. Two submissions carry the
+  solver's own scratch directories (.work, .probe: disassembly dumps and
+  fuzz outputs) in their final files, making 370k and 200k character
+  prompts; v3.4 judged a 636k character prompt, so the evidence stands as
+  the run left it.
+- Muse Spark 1.3 passed the calibration exam under v3.9 on the first pass.
+- Grok, calibration control-7-r1 (11:07 PDT): Cursor reported the display
+  label "Grok 4.6 Medium" for the pinned model id cursor-grok-4.6-medium;
+  the frozen v3.3 settings record "Cursor Grok 4.6 Medium", and the
+  requested-only identity guard failed on the label. The binary is the
+  pinned one (sha checked at prepare) and the model id in the request is
+  unchanged, so this is a provider-side rename of the label, not a served
+  model change. New wrapper rule accept_display_rename: an attempt whose
+  only failure is that label, where the reported label equals the frozen
+  display name minus the "Cursor " prefix, is selected unchanged with the
+  finding recorded under operator_review. Any other label still stops. The
+  rule applies to every Grok call in this pass and is reported here rather
+  than per call.
+- Grok 4.6 failed the calibration exam under v3.9 (September 21, 12:02
+  PDT) on gate 16, probe recovers documented intent: control 0 (the clear
+  control, no documented departure) must draw an empty probe on at least
+  four of five repeats, and Grok reported invented departures on two
+  repeats (three empty). Every other gate passed. Gate 16 is boolean, so
+  the one-gate 0.5 allowance cannot excuse it. Under every earlier pass
+  Grok drew exactly one non-empty repeat on control 0 (v3.5, v3.6, v3.7),
+  so this gate was always its margin. Observation, recorded and not used
+  as an excuse: the same morning Cursor relabelled the pinned model id and
+  its usage accounting changed (fewer input tokens, more cache reads on the
+  identical prompt), consistent with a serving change on the provider's
+  side. Under the pre-registered single-panel rule and the GLM precedent,
+  nothing further runs for Grok; Devin SWE-2 is judged by Muse Spark 1.3
+  alone, the failed calibration is published beside it, and the card and
+  report say so. The chain resumed 12:04 PDT with Muse reviews and probes
+  (logs/cii-v4-maint-v39-muse.sh).
+- Muse, primary submission-004 (12:10 PDT): the CLI's stream ended with
+  "transport error [net-timeout]: timed out waiting for response data" and
+  no assistant output; stderr carried only a session-registry warning, so
+  the receipt's error text did not match the network-fault markers. The
+  retry_network_fault rule now also reads the stream's terminal record for
+  that Muse transport marker; the call took its one fresh attempt.
+- September 21, 15:15 PDT: the Muse pass under v3.9 completed (68 reviews,
+  5 repeats, 6 pairwise, 68 probes and matches; one transport retry).
+  Summary written with Muse as the only passing panel.
+- Owner decision, September 21, 2026: rather than publish Devin from one
+  judge, fill the second seat with GPT-5.6 Sol through Codex for this
+  population only (Sol is neutral for a Cognition model and is not admitted
+  as a neutral judge of OpenAI submissions). Amendment v3.10: identical
+  population (manifest and signals byte-identical to v3.9, checked at
+  freeze), Muse scored from its v3.9 directory as a scored sibling, Sol
+  takes the full calibration exam and pass. The Codex CLI file is pinned by
+  hash; transport, config and read-only sandbox are the ones v3 uses for
+  its Astra sensitivity panel. Grok's v3.9 calibration failure stays
+  published and is named in the v3.10 protocol record.
+
+## v3.10, September 21, 2026: Devin SWE-2, the Sol seat
+
+- Frozen 17:44 PDT (protocol 0c8068b1). Sol calibration started at once,
+  about 35 seconds per review through Codex on the second ChatGPT account,
+  while the routine sweeps use the same account for solver runs; the
+  wrapper's quota rule now also recognises Codex's "usage limit" and
+  "limit reached" phrasing.
+- GPT-5.6 Sol failed the calibration exam under v3.10 (September 21, 18:47
+  PDT) on the same gate 16: it reported invented departures on the clear
+  control in four of five repeats (one empty; four needed), while
+  recovering the documented quirk on control 7 every time and passing every
+  other gate, repeatability included. As with Grok, the gate is boolean and
+  the allowance cannot excuse it. Under the pre-registered rule nothing
+  further runs for Sol. The v3.10 summary was written with Muse Spark 1.3 as
+  the only passing panel and both Grok (v3.9) and Sol (v3.10) disclosed as
+  failed; Devin SWE-2's published Code quality is Muse's L1 plus L2 alone.
+  Observation for the record: both judges that failed here failed on the
+  clear control's probe, the one call that rewards saying nothing; Muse has
+  drawn an empty probe on that control in every pass since v3.4.
+- The v3.9 and v3.10 summaries could not be written: three Devin runs
+  (snapcore and vaultcore at high, freightcore at max) changed no
+  recognized source file, only file modes on the legacy binaries, so the
+  sweep's automated quality and security metrics are None and the frozen
+  composite has no value for them. The runs scored 0 functionally, and Muse
+  rated the untouched original module in each. These are non-submissions
+  that the population builder should have excluded beside the unfinished
+  run; it now does, with the reason recorded. Owner decision, September 21,
+  2026: re-freeze as v3.11 on the 65 judged submissions with Muse Spark 1.3
+  alone (no retake for Grok or Sol), reusing Muse's v3.9 calibration verdict
+  on the v3.6.1 precedent. The Muse pass repeats because the new freeze
+  changes every call's binding; the v3.9 calls stay archived.
+
+## v3.11, September 21, 2026: Devin SWE-2, judged population
+
+- Frozen September 21, 19:11 PDT: 65 rows (23 medium, 20 high, 22 max),
+  four excluded (one unfinished, three with no source change), Muse's v3.9
+  calibration verdict checked and reused. Muse reviews started at once.
+- September 21, 21:48 PDT: the Muse pass complete (68 reviews including 3
+  repeats, 6 pairwise, 65 probes and matches), no second attempt and no
+  operator rule needed. Summary written: 65 of 65 published, one L2
+  redistribution (a high submission with no passed quirk family), Muse the
+  only panel. Devin SWE-2 combined score medium 82.43, high 81.42, max
+  86.14; Code quality 65.1, 66.3, 69.2.
+
 ## v3.12, September 22, 2026: Muse Spark 1.3 judged by Claude Opus 5
 
 - Owner decision, September 22: Muse's sweep needs a Code quality score for

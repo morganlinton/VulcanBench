@@ -322,3 +322,24 @@ operational notes live here.
   the receipt's error text did not match the network-fault markers. The
   retry_network_fault rule now also reads the stream's terminal record for
   that Muse transport marker; the call took its one fresh attempt.
+- September 21, 15:15 PDT: the Muse pass under v3.9 completed (68 reviews,
+  5 repeats, 6 pairwise, 68 probes and matches; one transport retry).
+  Summary written with Muse as the only passing panel.
+- Owner decision, September 21, 2026: rather than publish Devin from one
+  judge, fill the second seat with GPT-5.6 Sol through Codex for this
+  population only (Sol is neutral for a Cognition model and is not admitted
+  as a neutral judge of OpenAI submissions). Amendment v3.10: identical
+  population (manifest and signals byte-identical to v3.9, checked at
+  freeze), Muse scored from its v3.9 directory as a scored sibling, Sol
+  takes the full calibration exam and pass. The Codex CLI file is pinned by
+  hash; transport, config and read-only sandbox are the ones v3 uses for
+  its Astra sensitivity panel. Grok's v3.9 calibration failure stays
+  published and is named in the v3.10 protocol record.
+
+## v3.10, September 21, 2026: Devin SWE-2, the Sol seat
+
+- Frozen 17:44 PDT (protocol 0c8068b1). Sol calibration started at once,
+  about 35 seconds per review through Codex on the second ChatGPT account,
+  while the routine sweeps use the same account for solver runs; the
+  wrapper's quota rule now also recognises Codex's "usage limit" and
+  "limit reached" phrasing.

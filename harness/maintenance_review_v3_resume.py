@@ -259,7 +259,15 @@ def retry_provider_block(folder: Path) -> bool:
     return True
 
 
-QUOTA_MARKERS = ("resource_exhausted", "RetriableError", "rate limit", "rate_limit", "429")
+QUOTA_MARKERS = (
+    "resource_exhausted",
+    "RetriableError",
+    "rate limit",
+    "rate_limit",
+    "429",
+    "usage limit",  # Codex: subscription window exhausted
+    "limit reached",
+)
 QUOTA_MAX_RESUMES = 12
 
 

@@ -1,6 +1,6 @@
-"""Devin SWE-2 across effort levels under the code-quality-maintenance-v3.9 protocol.
+"""Devin SWE-2 across effort levels under the code-quality-maintenance-v3.10 protocol.
 
-Reads the frozen v3.9 summary (neutral panel: Muse Spark 1.3 and Grok 4.6)
+Reads the frozen v3.10 summary (Muse Spark 1.3 scored from its v3.9 pass, GPT-5.6 Sol judged under v3.10) (neutral panel: Muse Spark 1.3 and Grok 4.6)
 and the private manifest (functional, automated quality, security, runtime per
 run). Combined score uses the locked profile: 50% functional, 8.5% automated
 quality, 8.5% security, 33% Code quality. Until the measured-maintenance layer
@@ -39,7 +39,7 @@ from harness.retrospective_judging import digest, save  # noqa: E402
 
 LEVELS = ("medium", "high", "max")  # the only levels SWE-2 offers
 
-RUN = ROOT / "runs-code-quality-maintenance-v3.9"
+RUN = ROOT / "runs-code-quality-maintenance-v3.10"
 OUTPUT = ROOT / "docs/results/swe-v4-devin-swe2-2026-09"
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 COLORS = {"swe2": "#3B6FE0"}
@@ -50,8 +50,8 @@ HARNESS = {"swe2": "Devin CLI"}
 # excluded rather than judged (protocol v3.9); the card discloses the short cell.
 EXPECTED = {"swe2/high": 22}
 INVALID_MARKER = "operator-invalid.json"
-PANELS = ("muse", "grok")  # replaced at load time by the summary's passing panels
-PANEL_NAMES = {"muse": "Muse Spark 1.3 (Meta)", "grok": "Grok 4.6 (xAI)"}
+PANELS = ("sol", "muse")  # replaced at load time by the summary's passing panels
+PANEL_NAMES = {"sol": "GPT-5.6 Sol (OpenAI)", "muse": "Muse Spark 1.3 (Meta)"}
 SPLIT_WITHOUT_L3 = {"l1": 0.24, "l2": 0.09}
 
 
@@ -102,7 +102,7 @@ def load():
     summary = json.loads((RUN / "summary.json").read_text())
     manifest = {r["id"]: r for r in json.loads((RUN / "private-manifest.json").read_text())}
     protocol = json.loads((RUN / "protocol.json").read_text())
-    require(summary["protocol"] == "code-quality-maintenance-v3.9", "wrong protocol")
+    require(summary["protocol"] == "code-quality-maintenance-v3.10", "wrong protocol")
     invalid = {p.parent.name for p in (RUN / "calls").glob(f"*/probe/*/{INVALID_MARKER}")}
     unpublished = {r["id"] for r in summary["rows"] if not r.get("published")}
     require(
@@ -314,9 +314,9 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "Combined score and runtime at every effort level SWE-2 offers, 23 tasks per effort. "
         "Code quality judged by "
         + (
-            "Muse Spark 1.3 and Grok 4.6."
+            "Muse Spark 1.3 and GPT-5.6 Sol (Grok 4.6 failed calibration; see notes)."
             if not coverage["failed_panels"]
-            else "Muse Spark 1.3 alone; Grok 4.6 failed its calibration exam for this pass."
+            else "Muse Spark 1.3 alone; both other judges failed calibration."
         ),
         15,
         color=MUTED,
@@ -471,7 +471,9 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         cols["max"],
         8.33,
-        "/100, mean of both judges" if len(PANELS) > 1 else "/100, Muse Spark 1.3",
+        "/100, mean of both judges"
+        if len(PANELS) > 1
+        else f"/100, {PANEL_NAMES[PANELS[0]].split(' (')[0]}",
         10,
         ha="right",
         color=MUTED,
@@ -526,24 +528,18 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "High is judged on 22 of 23 runs: on cellarcore the run reached the 3-hour task budget before verification, so "
         "the protocol excludes it rather than judging it; the sweep counts it as a fail.",
         "SWE-2 offers medium, high and max only. Nothing is priced: Devin publishes no API rate for SWE-2.",
-        *(
-            [
-                "Grok 4.6 failed calibration gate 16 (invented departures on the clear control) under v3.9, so the "
-                "pre-registered single-panel rule applies: Code quality here is Muse Spark 1.3 alone, not a two-judge mean."
-            ]
-            if coverage["failed_panels"]
-            else []
-        ),
+        "Panel differs from the rest of the board: Grok 4.6 failed calibration gate 16 under v3.9, so GPT-5.6 Sol "
+        "(neutral for a Cognition model) fills the second seat under v3.10; Muse's v3.9 pass is scored unchanged.",
     )
     for i, note in enumerate(notes):
         text(left, y - step / 2 + 0.18 + 0.24 * i, note, 11, color=MUTED)
 
     suffix = "" if final else "-preliminary"
-    out = OUTPUT / f"devin-swe2-v39{suffix}.png"
+    out = OUTPUT / f"devin-swe2-v310{suffix}.png"
     fig.savefig(out, facecolor=PAPER)
     fig.savefig(out.with_suffix(".svg"), facecolor=PAPER)
     plt.close(fig)
-    table = OUTPUT / f"devin-swe2-v39{suffix}-efforts.csv"
+    table = OUTPUT / f"devin-swe2-v310{suffix}-efforts.csv"
     with table.open("w", newline="") as handle:
         writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(
@@ -560,7 +556,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 "maintainability",
                 "intent_recovery",
                 "muse_l1",
-                "grok_l1",
+                "sol_l1",
                 "minutes",
                 "passed",
                 "fallbacks",
@@ -580,12 +576,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                     fmt(g["readability"], 4),
                     fmt(g["maintainability"], 4),
                     fmt(g["l2"], 4),
-                    fmt(g["by_panel"]["muse"], 4)
-                    if "muse" in g["by_panel"]
-                    else "failed calibration",
-                    fmt(g["by_panel"]["grok"], 4)
-                    if "grok" in g["by_panel"]
-                    else "failed calibration",
+                    fmt(g["by_panel"]["muse"], 4) if "muse" in g["by_panel"] else "n/a",
+                    fmt(g["by_panel"]["sol"], 4) if "sol" in g["by_panel"] else "n/a",
                     fmt(g["minutes"], 4),
                     g["passed"],
                     g["fallbacks"],

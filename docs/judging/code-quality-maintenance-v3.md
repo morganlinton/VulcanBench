@@ -651,3 +651,36 @@ changes. Protocol id `code-quality-maintenance-v3.9`; run directory
   counters are recorded from the receipts.
 - Publication: SWE-2 joins the Frontier v4 board as the first non-OpenAI,
   non-Anthropic entry, on the same 33% Code quality profile.
+
+## Amendment v3.10, September 21, 2026: the Sol seat for Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights
+or population changes. Protocol id `code-quality-maintenance-v3.10`; run
+directory `runs-code-quality-maintenance-v3.10`; runner
+`harness/maintenance_review_v310.py`, derived from the v3.9 runner.
+
+- Occasion: Grok 4.6 failed the v3.9 calibration exam on gate 16 (invented
+  departures on the clear control in two of five repeats). The
+  pre-registered single-panel rule would publish Devin from Muse Spark 1.3
+  alone. The owner chose instead to fill the second seat for this
+  population, so that Devin is scored by two neutral judges like every
+  other board entry. Grok's failed calibration stays published under v3.9.
+- The seat: GPT-5.6 Sol through the Codex CLI, model `gpt-5.6-sol`,
+  reasoning effort medium, the same transport, config and read-only
+  sandbox v3 already uses for its Astra sensitivity panel; the Codex CLI
+  file is pinned by hash. Sol takes the identical calibration exam
+  (controls, pairs, probe and match calls) before any counted call, and
+  the one-gate 0.5 allowance applies as written.
+- Neutrality: Sol is an OpenAI model. It is neutral for Devin SWE-2 (a
+  Cognition model) and is admitted here for Devin passes only. It is not
+  admitted as a neutral judge of any OpenAI submission; under this
+  protocol a same-family judge can only be a disclosed sensitivity panel.
+  Every card and report that shows Devin's Code quality states that its
+  panel is Muse and Sol, not the Muse and Grok panel used for the rest of
+  the Frontier v4 board.
+- Muse: its v3.9 calibration verdict, reviews and probes are scored from
+  the v3.9 directory as a scored sibling. `prepare` refuses to freeze
+  unless the v3.10 manifest and signals are byte-identical to v3.9's and
+  Muse's v3.9 calibration passed. No Muse call is repeated.
+- Pairwise diagnostics, repeats and the summary arithmetic are v3's own
+  code, unchanged.

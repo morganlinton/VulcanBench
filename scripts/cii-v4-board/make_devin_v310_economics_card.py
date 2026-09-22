@@ -1,4 +1,4 @@
-"""Companion card to the Devin SWE-2 score card: token use and runtime by effort.
+"""Companion card to the Devin SWE-2 v3.10 score card: token use and runtime by effort.
 
 SWE-2 has no public API price, so nothing is priced. Reads the frozen population (private manifest: run ids, receipts,
 durations) and the population record's per-run API-equivalent costs. Nothing
@@ -28,7 +28,7 @@ from harness.retrospective_judging import digest, save  # noqa: E402
 
 LEVELS = ("medium", "high", "max")
 
-RUN = ROOT / "runs-code-quality-maintenance-v3.9"
+RUN = ROOT / "runs-code-quality-maintenance-v3.10"
 OUTPUT = ROOT / "docs/results/swe-v4-devin-swe2-2026-09"
 LEDGER = OUTPUT / "comparison.json"
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
@@ -357,11 +357,11 @@ def main():  # noqa: PLR0915, one linear figure
     for i, note in enumerate(notes):
         text(left, y + 0.06 + 0.26 * i, note, 11, color=MUTED)
 
-    out = OUTPUT / "devin-swe2-v39-economics.png"
+    out = OUTPUT / "devin-swe2-v310-economics.png"
     fig.savefig(out, facecolor=PAPER)
     fig.savefig(out.with_suffix(".svg"), facecolor=PAPER)
     plt.close(fig)
-    table = OUTPUT / "devin-swe2-v39-economics-efforts.csv"
+    table = OUTPUT / "devin-swe2-v310-economics-efforts.csv"
     with table.open("w", newline="") as handle:
         writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(

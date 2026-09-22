@@ -277,3 +277,57 @@ operational notes live here.
   block above). Neither judge produced a reviewer fallback.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
+
+## v3.8, September 21 to 22, 2026: the private Routine v1 suite
+
+- Population frozen September 21, 17:48 PDT, in the private VulcanRoutine
+  repository (`judging/code-quality-maintenance-v3.8`): 384 rows, twelve
+  tasks at every level each of seven models offers (Astra, Terra, Luna, Sol
+  and Fable 5.1 at five levels, GPT-5.5 at four, SWE-2 at medium, high and
+  max), no exclusions, none missing. Every routine task freezes an empty
+  quirk key, so no probe or match call is made and Code quality is the L1
+  reviewed score under v3's pre-registered zero-denominator rule.
+- First freeze superseded. The first v3.8 freeze (September 21, 16:28 PDT)
+  pinned the hash of the live protocol document, as every earlier amendment
+  did. While Grok was 48 calls into calibration (Muse had already passed),
+  the Devin SWE-2 amendments (v3.9, then v3.10) were written into that same
+  file, and `verify_frozen` stopped the chain with "Frozen input changed".
+  The pinned text cannot be reconstructed: the v3.9 section was edited in
+  place before v3.10 was added and none of it was committed. Harness PR #136
+  makes v3.8 freeze its own copy of the document inside the run directory
+  and pin that copy, with the source hash kept for provenance. The first
+  freeze is retained as `code-quality-maintenance-v3.8-superseded-freeze1`
+  with its 128 calibration receipts; no counted call had been made. Both
+  judges retook calibration under the second freeze, as receipts are bound
+  to the protocol hash.
+- Both judges passed every gate under the second freeze; neither used the
+  allowance. Muse's closest gate was g11 repeatability (shortfall 0.02);
+  Grok's was g11 (0.14).
+- Cursor display rename, every Grok call: Cursor now reports the pinned
+  model `cursor-grok-4.6-medium` as "Grok 4.6 Medium" where the frozen v3.3
+  settings record "Cursor Grok 4.6 Medium". The wrapper rule
+  accept_display_rename (added for v3.9 the same day) accepted the label on
+  489 calls; the model id requested was unchanged throughout.
+- Grok, repeat diagnostic submission-001 (September 22, 06:07 PDT): both
+  attempts quoted a `"rows": [...]` excerpt absent from the code; no
+  recovery rule accepts it and none was added. The call is a diagnostic
+  (repeats and pairs feed the operations record, not the published score),
+  so it is marked invalid in its folder (`operator-invalid.json`, rule
+  invalidate_unrecoverable_diagnostic) and the remaining 11 repeats and 24
+  pairwise calls were driven in-process under the wrapper's rules
+  (`logs/routine-v38-finish-wrapped.py`). All 384 primary reviews from both
+  judges are selected; nothing in any judge's response was altered.
+- Second attempts over the whole pass: Muse nine, Grok fifty (excluding the
+  rename retries), every one an unsupported evidence excerpt; the excerpt
+  re-wrap rule resolved all but the diagnostic above.
+- Summary: 384 of 384 published, both panels passing, no fallback reviews.
+  Combined score (50/8.5/8.5/33) at Low, by model: Astra 94.8, Terra 93.1,
+  Luna 92.5, Sol 94.4, GPT-5.5 94.9, Fable 5.1 94.2; SWE-2 93.4 at Medium.
+  Every model passed all twelve tickets at every level, so the routine
+  question is answered by cost and time: the cheapest adequate level is Low
+  for every priced model and Medium for SWE-2. Fable 5.1 is the one model
+  whose Code quality climbs steadily with effort (85.5 at Low to 93.8 at
+  Max). Routine Code quality is L1 alone and is not comparable with
+  Frontier v4 Code quality. Public aggregates: VulcanRoutine
+  `results/routine-v1-aggregates.{json,csv}`; board section: VulcanBenchCOM
+  PR #61.

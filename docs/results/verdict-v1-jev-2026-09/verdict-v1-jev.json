@@ -1,0 +1,367 @@
+{
+  "diagnostics": {
+    "confusion": {
+      "fix-localization": {
+        "blendcore.py->blendcore.py": 1,
+        "cellarcore.py->cellarcore.py": 1,
+        "codeccore.py->codeccore.py": 1,
+        "depotcore.py->depotcore.py": 1,
+        "freightcore.py->freightcore.py": 1,
+        "granarycore.py->granarycore.py": 1,
+        "hedgecore.py->hedgecore.py": 1,
+        "lodgecore.py->lodgecore.py": 1,
+        "matchcore.py->matchcore.py": 1,
+        "metercore.py->metercore.py": 1,
+        "paddockcore.py->paddockcore.py": 1,
+        "payrollcore.py->payrollcore.py": 1,
+        "queuecore.py->queuecore.py": 1,
+        "quotacore.py->quotacore.py": 1,
+        "reflowcore.py->reflowcore.py": 1,
+        "snapcore.py->snapcore.py": 1,
+        "stampcore.py->stampcore.py": 1,
+        "tallycore.py->tallycore.py": 1,
+        "vaultcore.py->vaultcore.py": 1
+      },
+      "patch-outcome": {
+        "all_pass->all_pass": 116,
+        "all_pass->partial_fix": 267,
+        "no_progress->no_progress": 1,
+        "no_progress->partial_fix": 3,
+        "partial_fix->all_pass": 2,
+        "partial_fix->partial_fix": 186,
+        "regression->partial_fix": 36
+      },
+      "patch-regression": {
+        "false->false": 172,
+        "false->true": 403,
+        "true->false": 4,
+        "true->true": 32
+      },
+      "patch-verdict": {
+        "false->false": 228,
+        "true->false": 383
+      },
+      "quality-preference": {
+        "A->A": 165,
+        "A->B": 15,
+        "B->A": 18,
+        "B->B": 113
+      }
+    },
+    "patch_verdict_accuracy_by_input_tokens": {
+      "0k-4k": {
+        "accuracy": 0.45670995670995673,
+        "n": 462
+      },
+      "4k-8k": {
+        "accuracy": 0.11538461538461539,
+        "n": 130
+      },
+      "8k+": {
+        "accuracy": 0.10526315789473684,
+        "n": 19
+      }
+    },
+    "patch_verdict_mean_p_pass": 0.2195581014729951,
+    "quality_preference_answer_balance": {
+      "A": 180,
+      "B": 131
+    },
+    "quality_preference_longer_patch_baseline": 0.44694533762057875
+  },
+  "item_counts": {
+    "fix-localization": {
+      "dev": 4,
+      "question_type": "choice",
+      "reference": "gold-patch",
+      "test": 19,
+      "total": 23
+    },
+    "patch-outcome": {
+      "dev": 134,
+      "question_type": "choice",
+      "reference": "verifier",
+      "test": 611,
+      "total": 745
+    },
+    "patch-regression": {
+      "dev": 134,
+      "question_type": "noul",
+      "reference": "verifier",
+      "test": 611,
+      "total": 745
+    },
+    "patch-verdict": {
+      "dev": 134,
+      "question_type": "noul",
+      "reference": "verifier",
+      "test": 611,
+      "total": 745
+    },
+    "quality-preference": {
+      "dev": 72,
+      "question_type": "choice",
+      "reference": "llm-panel",
+      "test": 311,
+      "total": 383
+    }
+  },
+  "model": "jev-1.13.0",
+  "phrasing_probe": {
+    "agreement": {
+      "correct vs inverted": 0.9925373134328358,
+      "correct vs would-merge": 0.9701492537313433,
+      "original vs correct": 0.9925373134328358,
+      "original vs inverted": 1.0,
+      "original vs would-merge": 0.9626865671641791,
+      "would-merge vs inverted": 0.9626865671641791
+    },
+    "cost_usd": 0.07702900800000001,
+    "model": "jev-1.13.0",
+    "true_pass_rate": 0.5671641791044776,
+    "variants": {
+      "correct": {
+        "accuracy": 0.44776119402985076,
+        "brier": 0.32763134328358207,
+        "ece": 0.3492537313432835,
+        "instructions": "This patch is a correct and complete fix for the issue.",
+        "inverted": false,
+        "mean_p_true": 0.20820895522388058,
+        "n": 134,
+        "yes_rate": 0.007462686567164179
+      },
+      "inverted": {
+        "accuracy": 0.43283582089552236,
+        "brier": 0.3350544776119403,
+        "ece": 0.35335820895522385,
+        "instructions": "This patch is broken: it does not fully fix the issue, or it breaks existing behaviour.",
+        "inverted": true,
+        "mean_p_true": 0.7794776119402985,
+        "n": 134,
+        "yes_rate": 1.0
+      },
+      "original": {
+        "accuracy": 0.43283582089552236,
+        "brier": 0.33975149253731346,
+        "ece": 0.3469402985074627,
+        "instructions": "This patch makes every hidden target test pass without breaking any existing test.",
+        "inverted": false,
+        "mean_p_true": 0.22022388059701495,
+        "n": 134,
+        "yes_rate": 0.0
+      },
+      "would-merge": {
+        "accuracy": 0.48507462686567165,
+        "brier": 0.28870522388059705,
+        "ece": 0.2423134328358209,
+        "instructions": "A careful maintainer would merge this patch as fixing the issue.",
+        "inverted": false,
+        "mean_p_true": 0.27559701492537314,
+        "n": 134,
+        "yes_rate": 0.03731343283582089
+      }
+    }
+  },
+  "results": {
+    "jev-1.13.0": {
+      "agreement_only_families": [
+        "quality-preference"
+      ],
+      "families": {
+        "fix-localization": {
+          "accuracy": 1.0,
+          "accuracy_all_items": 1.0,
+          "accuracy_stderr": 0.0,
+          "brier": 0.0,
+          "cost_usd_per_1k": 0.03906663157894737,
+          "coverage": 1.0,
+          "ece": 0.0,
+          "expected": 19,
+          "latency_ms_p50": 266.51708292774856,
+          "latency_ms_p95": 350.07923729717726,
+          "log_loss": 0.0,
+          "n": 19
+        },
+        "patch-outcome": {
+          "accuracy": 0.49754500818330605,
+          "accuracy_all_items": 0.49754500818330605,
+          "accuracy_stderr": 0.020227591024391638,
+          "brier": 0.6495227125526287,
+          "cost_usd_per_1k": 0.14832564648117838,
+          "coverage": 1.0,
+          "ece": 0.18565937608490804,
+          "expected": 611,
+          "latency_ms_p50": 305.74033316224813,
+          "latency_ms_p95": 477.27285395376384,
+          "log_loss": 1.0804792863732446,
+          "n": 611
+        },
+        "patch-regression": {
+          "accuracy": 0.33387888707037644,
+          "accuracy_all_items": 0.33387888707037644,
+          "accuracy_stderr": 0.019078774413583917,
+          "brier": 0.28448428805237314,
+          "cost_usd_per_1k": 0.1471076464811784,
+          "coverage": 1.0,
+          "ece": 0.2676759410801964,
+          "expected": 611,
+          "latency_ms_p50": 311.3901249598712,
+          "latency_ms_p95": 432.19225003849715,
+          "log_loss": 0.7638744873411537,
+          "n": 611
+        },
+        "patch-verdict": {
+          "accuracy": 0.37315875613747956,
+          "accuracy_all_items": 0.37315875613747956,
+          "accuracy_stderr": 0.019566132721657588,
+          "brier": 0.38267446808510636,
+          "cost_usd_per_1k": 0.1471076464811784,
+          "coverage": 1.0,
+          "ece": 0.40885433715220953,
+          "expected": 611,
+          "latency_ms_p50": 333.2747081294656,
+          "latency_ms_p95": 448.8441670546308,
+          "log_loss": 1.0092654667479033,
+          "n": 611
+        },
+        "quality-preference": {
+          "accuracy": 0.8971061093247589,
+          "accuracy_all_items": 0.8971061093247589,
+          "accuracy_stderr": 0.0172280652224366,
+          "brier": 0.16172475884244372,
+          "cost_usd_per_1k": 0.2991248102893891,
+          "coverage": 1.0,
+          "ece": 0.08154340836012862,
+          "expected": 311,
+          "latency_ms_p50": 362.9416658077389,
+          "latency_ms_p95": 521.6116668889299,
+          "log_loss": 0.28136978952791925,
+          "n": 311
+        }
+      },
+      "overall": {
+        "accuracy": 0.40766738660907126,
+        "accuracy_all_items": 0.40766738660907126,
+        "accuracy_stderr": 0.011418664585681772,
+        "brier": 0.43439113248901523,
+        "cost_usd_per_1k": 0.14640106911447084,
+        "coverage": 1.0,
+        "ece": 0.2781871086676702,
+        "expected": 1852,
+        "latency_ms_p50": 319.7762705385685,
+        "latency_ms_p95": 448.3716812450438,
+        "log_loss": 0.941447816372822,
+        "n": 1852
+      },
+      "split": "test"
+    },
+    "majority_floor": {
+      "agreement_only_families": [
+        "quality-preference"
+      ],
+      "families": {
+        "fix-localization": {
+          "accuracy": 0.0,
+          "accuracy_all_items": 0.0,
+          "accuracy_stderr": 0.0,
+          "brier": 0.8571428571428573,
+          "cost_usd_per_1k": null,
+          "coverage": 1.0,
+          "ece": 0.14285714285714285,
+          "expected": 19,
+          "latency_ms_p50": null,
+          "latency_ms_p95": null,
+          "log_loss": 1.9459101490553135,
+          "n": 19
+        },
+        "patch-outcome": {
+          "accuracy": 0.6268412438625205,
+          "accuracy_all_items": 0.6268412438625205,
+          "accuracy_stderr": 0.019566132721657588,
+          "brier": 0.5217138637683223,
+          "cost_usd_per_1k": null,
+          "coverage": 1.0,
+          "ece": 0.06887022936976683,
+          "expected": 611,
+          "latency_ms_p50": null,
+          "latency_ms_p95": null,
+          "log_loss": 0.8960818085409724,
+          "n": 611
+        },
+        "patch-regression": {
+          "accuracy": 0.9410801963993454,
+          "accuracy_all_items": 0.9410801963993454,
+          "accuracy_stderr": 0.009526280330230629,
+          "brier": 0.0632167471783168,
+          "cost_usd_per_1k": null,
+          "coverage": 1.0,
+          "ece": 0.08813901992875717,
+          "expected": 611,
+          "latency_ms_p50": null,
+          "latency_ms_p95": null,
+          "log_loss": 0.26263733788972904,
+          "n": 611
+        },
+        "patch-verdict": {
+          "accuracy": 0.6268412438625205,
+          "accuracy_all_items": 0.6268412438625205,
+          "accuracy_stderr": 0.019566132721657588,
+          "brier": 0.23759151357182906,
+          "cost_usd_per_1k": null,
+          "coverage": 1.0,
+          "ece": 0.06066477327428521,
+          "expected": 611,
+          "latency_ms_p50": null,
+          "latency_ms_p95": null,
+          "log_loss": 0.6682096913326725,
+          "n": 611
+        },
+        "quality-preference": {
+          "accuracy": 0.5787781350482315,
+          "accuracy_all_items": 0.5787781350482315,
+          "accuracy_stderr": 0.027998277705317157,
+          "brier": 0.5,
+          "cost_usd_per_1k": null,
+          "coverage": 1.0,
+          "ece": 0.0787781350482315,
+          "expected": 311,
+          "latency_ms_p50": null,
+          "latency_ms_p95": null,
+          "log_loss": 0.6931471805599453,
+          "n": 311
+        }
+      },
+      "overall": {
+        "accuracy": 0.7240820734341252,
+        "accuracy_all_items": 0.7240820734341252,
+        "accuracy_stderr": 0.010386359855101642,
+        "brier": 0.2801548230920617,
+        "cost_usd_per_1k": null,
+        "coverage": 1.0,
+        "ece": 0.07327921895587049,
+        "expected": 1852,
+        "latency_ms_p50": null,
+        "latency_ms_p95": null,
+        "log_loss": 0.6226921234910758,
+        "n": 1852
+      },
+      "split": "test"
+    }
+  },
+  "run": {
+    "failures": 0,
+    "items_queried": 2641,
+    "latency_ms_p50": 327.71566696465015,
+    "latency_ms_p95": 471.44270804710686,
+    "latency_note": "wall clock from the operator's machine in California; includes the network round trip",
+    "retries": 0,
+    "total_cost_usd": 0.447469428
+  },
+  "served_models": [
+    "jev-1.13.0"
+  ],
+  "source_patches": 745,
+  "split": "test",
+  "suite": "verdict-v1",
+  "suite_name": "VulcanBench Verdict v1"
+}

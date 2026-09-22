@@ -8,7 +8,7 @@ score card plots the functional score all four share and carries the
 combined score only where it exists. Devin SWE-2 rows come from its effort
 sweep (runs-effort-devin-swe2, every scored run, the budget-exceeded one at
 0) with Code quality from the v3.11 summary (Muse Spark 1.3 alone, 65 judged
-runs); SWE-2 has no public API price, so its cost is shown as unpriced.
+runs); SWE-2 is free on Devin's plans (catalog cost tier "Free"), so its cost is $0.
 Nothing is re-judged.
 
     python scripts/cii-v4-board/make_frontier_quartet_cards.py
@@ -214,8 +214,8 @@ def load_devin():
                     "minutes": s["duration_s"] / 60,
                     "code_quality": cq,
                     "combined": combined,
-                    "usd": None,
-                    "usd_upper": None,
+                    "usd": 0.0,  # SWE-2 is free on Devin's plans (catalog cost tier "Free"); no metered rate exists
+                    "usd_upper": 0.0,
                     "tokens": s["total_tokens"],
                 }
             )
@@ -542,7 +542,7 @@ def economics_card(rows, groups, minimal, hashes, ledger):  # noqa: PLR0915, one
         line,
         "VulcanBench Frontier v4: Astra, Fable 5.1, Muse 1.3 and Devin SWE-2",
         "API-equivalent cost and time per task at every effort level; the same runs as the score card. "
-        "Solver inference only, all on subscriptions. SWE-2 is unpriced.",
+        "Solver inference only, all on subscriptions. SWE-2 is free on Devin's plans.",
     )
     chart_top, chart_h = 3.75, 2.9
     for panel, (x0, w) in (("usd", (0.085, 0.405)), ("minutes", (0.565, 0.39))):
@@ -651,7 +651,7 @@ def economics_card(rows, groups, minimal, hashes, ledger):  # noqa: PLR0915, one
             f"${totals['muse']['usd']:,.0f}. Astra ticks mark its long-context upper bound "
             f"(${totals['astra']['usd_upper']:,.0f} against ${totals['astra']['usd']:,.0f}).",
             f"Muse's minimal level is off this axis: ${minimal['usd']['mean']:.2f} and {minimal['tokens']['mean']:.1f}M tokens per task. "
-            "Devin publishes no API price for SWE-2, so it has tokens and time but no cost bar; its credit and ACU counters were zero.",
+            "Devin SWE-2 is $0: the model is free on Devin's plans (catalog cost tier Free) and its credit and ACU counters were zero on every run.",
             "Whiskers are one task standard error. Tokens are raw solver totals including cache reads.",
         ],
     )

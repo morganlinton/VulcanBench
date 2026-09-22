@@ -523,7 +523,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "Judged on 65 of 69 runs: one high run (cellarcore) hit the 3-hour budget before verification, and three runs "
         "(snapcore and vaultcore at high, freightcore at max) changed no source file at all;",
         "the protocol excludes those four rather than judging them and the sweep counts every one as a fail. SWE-2 offers "
-        "medium, high and max only, and nothing is priced: Devin publishes no API rate for SWE-2.",
+        "medium, high and max only, and it is free on Devin's plans, so cost per task is \\$0.",
         "Panel differs from the rest of the board: Grok 4.6 (v3.9) and GPT-5.6 Sol (v3.10) both failed calibration gate 16, "
         "invented departures on the clear control,",
         "so Code quality here is Muse Spark 1.3 alone rather than the two-judge mean behind every other Frontier v4 entry.",

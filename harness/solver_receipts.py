@@ -122,6 +122,26 @@ def solver_receipt(run, summary):
         }
     elif summary["model"].startswith("devin:"):
         result = devin_receipt(run, summary)
+    elif summary["model"].startswith("muse-code:"):
+        # Muse Code folds its per-request usage into the run summary's token block
+        # (prompt includes cache reads; completion includes reasoning output).
+        tokens = summary["tokens"]
+        for key in ("prompt", "completion", "cached_input"):
+            if type(tokens.get(key)) is not int or tokens[key] < 0:
+                raise ValueError("Invalid Muse token summary")
+        if tokens["prompt"] + tokens["completion"] != summary["total_tokens"]:
+            raise ValueError("Muse token summary does not sum to its total")
+        result = {
+            "raw_tokens": tokens["prompt"] + tokens["completion"],
+            "usage": {
+                "input_tokens": tokens["prompt"],
+                "cached_input_tokens": tokens["cached_input"],
+                "output_tokens": tokens["completion"],
+                "reasoning_output_tokens": tokens.get("reasoning_output", 0),
+            },
+            "result_receipts": None,
+            "historical_summary_unit": "Raw input plus output; cached input included in input",
+        }
     else:
         raise ValueError("Unknown solver")
     return {**result, "stream_sha256": digest(path.read_bytes())}

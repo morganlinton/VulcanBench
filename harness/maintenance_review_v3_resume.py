@@ -217,6 +217,70 @@ def retry_network_fault(folder: Path) -> bool:
     return True
 
 
+TOOL_USE_ERROR = "Judge attempted tool use"
+
+
+def retry_garbled_structured_output(folder: Path) -> bool:  # noqa: PLR0911, one branch per guard
+    """The Claude CLI split a malformed structured-output emission into pseudo tool calls.
+
+    Opus 5 sometimes emits its answer as a StructuredOutput call whose input
+    the CLI could not parse (recorded under __unparsedToolInput), followed by
+    fragments that surface as tool_use blocks named after JSON fields. No tool
+    ran: the stream carries no tool_result. That is a malformed response, the
+    same class the protocol already treats as retryable, not an attempt to
+    use a tool. One fresh attempt; a second occurrence on the same call stops.
+    """
+    receipt = folder / "attempt-1.json"
+    if not receipt.exists() or (folder / "attempt-2.json").exists():
+        return False
+    rec = json.loads(receipt.read_text())
+    if rec.get("status") != "failed" or rec.get("error") != TOOL_USE_ERROR:
+        return False
+    stream = folder / "attempt-1.stream.jsonl"
+    if not stream.exists():
+        return False
+    text = stream.read_text()
+    if "__unparsedToolInput" not in text:
+        return False
+    # No real tool may have run: every tool_use is the structured-output tool or a
+    # pseudo tool the CLI refused, and every non-error tool_result answers the former.
+    names: dict[str, str] = {}
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        event = json.loads(line)
+        if event.get("type") not in ("assistant", "user"):
+            continue
+        for block in event["message"].get("content", []):
+            if block.get("type") == "tool_use":
+                names[block["id"]] = block.get("name")
+            elif block.get("type") == "tool_result":
+                content = block.get("content")
+                shown = content if isinstance(content, str) else json.dumps(content)
+                refused = "No such tool available" in shown
+                if not refused and names.get(block.get("tool_use_id")) != "StructuredOutput":
+                    return False
+    if any(name != "StructuredOutput" for name in names.values()) and not any(
+        "No such tool available" in line for line in text.splitlines()
+    ):
+        return False
+    rec["retryable"] = True
+    rec["operator_review"] = {
+        "at": datetime.now(UTC).isoformat(),
+        "finding": "Malformed structured output: the CLI recorded an unparsed StructuredOutput input and "
+        "field-named pseudo tool calls; no tool ran (no tool_result in the stream).",
+        "action": "Invalid response under the protocol text: one fresh attempt; receipt retained.",
+    }
+    receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            {"event": "garbled_structured_output_retry", "call": str(folder.relative_to(_out()))}
+        ),
+        flush=True,
+    )
+    return True
+
+
 PROVIDER_BLOCK_MARKERS = (
     "Request blocked",
     "model provider's usage guidelines",
@@ -985,6 +1049,9 @@ def main() -> int:  # noqa: PLR0912, one branch per operator rule
             applied += 1
             continue
         if folder is not None and retry_provider_block(folder):
+            applied += 1
+            continue
+        if folder is not None and retry_garbled_structured_output(folder):
             applied += 1
             continue
         if folder is not None and quota_resume(folder):

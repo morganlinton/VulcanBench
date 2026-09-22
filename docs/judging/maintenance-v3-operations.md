@@ -433,3 +433,42 @@ operational notes live here.
   redistribution (a high submission with no passed quirk family), Muse the
   only panel. Devin SWE-2 combined score medium 82.43, high 81.42, max
   86.14; Code quality 65.1, 66.3, 69.2.
+
+## v3.12, September 22, 2026: Muse Spark 1.3 judged by Claude Opus 5
+
+- Owner decision, September 22: Muse's sweep needs a Code quality score for
+  the four-model cards. Muse cannot judge itself; Grok 4.6 (v3.9) and
+  GPT-5.6 Sol (v3.10) failed gate 16, and the owner declined to retake Sol.
+  Claude Opus 5, which passed every gate under v3.2, takes the seat alone
+  under the v3.2 settings, CLI pin and guards.
+- Population: 99 of 115 sweep runs. Excluded, with reasons in the record:
+  14 unfinished, one that changed no source file (paddockcore at high),
+  and one whose patch cannot be reconstructed (lodgecore at medium: the
+  solver committed a binary scratch file under .tmp/ without an index
+  line, so the evidence pipeline cannot rebuild its final files). The
+  population builder now tries the reconstruction at build time and
+  excludes on failure. Paddockcore has no judged run at any level; the
+  freeze check now requires judged and excluded tasks together to cover
+  the suite. Two earlier freeze attempts stopped before any call (task
+  coverage, then the unreconstructible patch); their directories were
+  discarded, nothing counted.
+- Frozen 08:14 PDT, 99 rows (21, 18, 19, 20, 21 from minimal to extra-high).
+  Opus 5 calibration started at once, about 16 seconds per review through
+  Claude Code on the Max subscription.
+- Opus 5 passed the calibration exam under v3.12 with no allowance used
+  (80 calls). Reviews, repeats and pairwise diagnostics completed with two
+  structured-output retry stops handled by the existing rule.
+- Opus 5, probe submission-099: the CLI recorded the answer as a
+  StructuredOutput call with unparsed input followed by pseudo tool calls
+  named after JSON fields ("excerpt"); no tool ran (no tool_result in the
+  stream), but the frozen guard read the blocks as tool use and stopped
+  with a non-retryable receipt. New wrapper rule
+  retry_garbled_structured_output: when the only tool blocks are that
+  unparsed emission and no tool result exists, the response is a malformed
+  answer under the protocol text and takes the single fresh attempt.
+- September 22, 10:20 PDT: the pass complete (99 reviews, 5 repeats, 6
+  pairwise, 99 probes and matches; three operator rule applications, no
+  reviewer fallback). Summary written: 99 of 99 published, Opus 5 the only
+  panel. Muse Spark 1.3 combined score minimal 74.84, low 79.33, medium
+  78.96, high 80.71, extra-high 77.44; Code quality 62.0, 64.8, 63.6, 66.2,
+  61.2.

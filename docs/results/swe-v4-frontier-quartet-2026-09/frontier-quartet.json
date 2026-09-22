@@ -2,7 +2,7 @@
   "best_effort": {
     "astra": "max",
     "fable": "max",
-    "muse": "extra-high",
+    "muse": "high",
     "devin": "max"
   },
   "table_order": [
@@ -19,7 +19,7 @@
     "high": 0,
     "extra-high": 1
   },
-  "muse_code_quality": "not judged",
+  "muse_code_quality": "v3.12, Claude Opus 5 alone, 99 of 115 runs",
   "devin_code_quality": "v3.11, Muse Spark 1.3 alone, 65 of 69 runs",
   "devin_unjudged_runs": [
     [
@@ -47,14 +47,18 @@
     },
     "muse_sweep": {
       "protocol": "bc770fcbdd68ee34451cf628fbc81534f15d4709f53f7775b1edc3c37f9042f1",
-      "results": "a77038ebe6e5e63f99c7cb9d983248ed750e277e82377893ec0019554635315e"
+      "results": "a77038ebe6e5e63f99c7cb9d983248ed750e277e82377893ec0019554635315e",
+      "code_quality_v3.12": {
+        "summary": "371d57308c87cb223adffa9976851503a3e8cd8ecc72b54dec97132151a95769",
+        "protocol": "8d6d09d40d91ed5b720aa5353ee975efee4b5ed37fa507c287ce6ace7c972e6a"
+      }
     },
     "devin_code_quality_v3.11": {
       "summary": "f3f605603520e6f6941bd605eb1ef79a073bbe04cd6c26ab1e41eda49a8b6e09",
       "protocol": "a46cda0b67a8480569f0a323a160b86aef32cfaf16ae267f3bdef2573d930b10"
     }
   },
-  "png_sha256": "56deb4bce732ac655991fa635f6e8921c34143c1f8fe2c7971ed483566be829b",
+  "png_sha256": "870bef04509ef9ede4c0788b224239e1e27a8967a0412b47862a54556b39a7fc",
   "supporting_table": "frontier-quartet-efforts.csv",
   "visual_qa": "Requires visual inspection after rendering"
 }

@@ -51,6 +51,7 @@ LEFT, RIGHT, WIDTH_IN, HEIGHT_IN = family.LEFT, family.RIGHT, family.WIDTH_IN, f
 OUTPUT = ROOT / "docs/results/swe-v4-frontier-quartet-2026-09"
 DEVIN_ROOT = ROOT / "runs-effort-devin-swe2"
 DEVIN_JUDGED = ROOT / "runs-code-quality-maintenance-v3.11"
+MUSE_JUDGED = ROOT / "runs-code-quality-maintenance-v3.12"  # Claude Opus 5 alone
 DEVIN_SPEC = "devin:swe-2"
 JUDGED = ROOT / "runs-code-quality-maintenance-v3.4"
 LEDGER = ROOT / "docs/results/swe-v4-astra-fable51-2026-09/api-equivalent-costs.json"
@@ -132,8 +133,30 @@ def load_judged():
     return rows, hashes, ledger
 
 
+def load_muse_judged():
+    """Muse's Code quality from v3.12 (Claude Opus 5 alone), keyed by run id."""
+    summary = json.loads((MUSE_JUDGED / "summary.json").read_text())
+    require(summary["protocol"] == "code-quality-maintenance-v3.12", "wrong Muse protocol")
+    require(
+        summary["ready_for_publication"] and summary["passing_panels"] == ["claude"],
+        "v3.12 summary",
+    )
+    manifest = {r["id"]: r for r in json.loads((MUSE_JUDGED / "private-manifest.json").read_text())}
+    judged = {}
+    for entry in summary["rows"]:
+        if entry.get("published"):
+            pub = entry["published"]
+            judged[manifest[entry["id"]]["run_id"]] = (pub["code_quality"], pub["composite_v3"])
+    hashes = {
+        "summary": digest((MUSE_JUDGED / "summary.json").read_bytes()),
+        "protocol": digest((MUSE_JUDGED / "protocol.json").read_bytes()),
+    }
+    return judged, hashes
+
+
 def load_muse():
     """Muse Spark 1.3: scored sweep summaries, priced from their own token receipts."""
+    judged, judged_hashes = load_muse_judged()
     protocol = json.loads((MUSE_ROOT / "protocol.json").read_text())
     status = json.loads((MUSE_ROOT / "status.json").read_text())
     require(status["state"] == "complete", "Muse sweep not complete")
@@ -151,6 +174,7 @@ def load_muse():
             )
             usd = muse_price(s["tokens"], MUSE_CONTRIBUTOR)
             require(abs(usd - s["cost_usd"]) < 1e-4, f"price drift on {s['run_id']}")
+            cq, combined = judged.get(s["run_id"], (None, None))
             rows.append(
                 {
                     "model": "muse",
@@ -160,16 +184,20 @@ def load_muse():
                     "functional": s["scores"]["functional"],
                     "minutes": s["duration_s"] / 60,
                     "seconds": s["duration_s"],
-                    "code_quality": None,
-                    "combined": None,
+                    "code_quality": cq,
+                    "combined": combined,
                     "usd": usd,
                     "usd_upper": muse_price(s["tokens"], MUSE_STANDARD),
                     "tokens": s["total_tokens"],
                 }
             )
+    require(
+        len(judged) == 99 and sum(r["combined"] is not None for r in rows) == 99, "Muse judged rows"
+    )
     hashes = {
         "protocol": digest((MUSE_ROOT / "protocol.json").read_bytes()),
         "results": digest((MUSE_ROOT / "results.jsonl").read_bytes()),
+        "code_quality_v3.12": judged_hashes,
     }
     return rows, hashes, aborted, protocol
 
@@ -504,16 +532,15 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
         [
             "Whiskers are one task standard error. Harnesses: Codex (Astra), Claude Code (Fable 5.1), Muse Code 1.0.3 on Meta's "
             "Contributor tier (Muse Spark 1.3, no max level), the Devin CLI (SWE-2: medium, high and max only).",
-            f"Muse's sweep has no Code quality review yet, so it has no combined score and no line on the left; its functional "
-            f"score is {best['muse']['functional']['mean']:.1f} at {best['muse']['effort'].replace('-', ' ')}.",
-            f"Muse's minimal level is off the time axis at {minimal['minutes']['mean']:.0f} minutes per task. "
-            "Astra and Fable values are from Code quality v3.4 (Muse Spark 1.3 and Grok 4.6).",
-            "Muse ran Low's first 17 tasks under the former 10-hour task bound and one outlasted today's 3-hour bound "
-            f"(0.88 after 6.7 hours); with that run scored 0, Muse at Low is {capped_low:.1f}. Later levels ran under 3 hours.",
-            f"Muse attempts ended by a provider stream error before any patch ({total_aborted} at these levels) were rerun "
-            "from a clean workspace; timeouts and failing patches are scored as they stand.",
-            "Devin's Code quality is from v3.11 with Muse Spark 1.3 as the only judge (Grok 4.6 and GPT-5.6 Sol failed its "
-            f"calibration exam), on {69 - len(devin_excluded)} of 69 runs: one hit the 3-hour budget and three changed no source file.",
+            "Astra and Fable: Code quality v3.4, two judges (Muse Spark 1.3 and Grok 4.6). Muse: v3.12, Claude Opus 5 alone, on 99 of 115 "
+            "runs (14 unfinished, one no source change, one unreconstructible patch).",
+            f"Devin: v3.11, Muse Spark 1.3 alone, on {69 - len(devin_excluded)} of 69 runs (one hit the 3-hour budget, three changed no "
+            "source file). Muse and Devin are single-judge scores; Grok 4.6 and GPT-5.6 Sol failed calibration on those populations.",
+            f"Muse's minimal level is off the time axis at {minimal['minutes']['mean']:.0f} minutes per task (combined "
+            f"{minimal['combined']['mean']:.2f}). Muse ran Low's first 17 tasks under the former 10-hour bound; one outlasted today's "
+            f"3-hour bound and with it scored 0 Muse at Low is {capped_low:.1f} functional.",
+            f"Muse attempts ended by a provider stream error before any patch ({total_aborted} at these levels) were rerun from a clean "
+            "workspace; timeouts and failing patches are scored as they stand.",
         ],
     )
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -542,7 +569,7 @@ def score_card(groups, minimal, aborted, capped_low, devin_excluded, hashes):  #
             "table_order": order,
             "muse_low_functional_under_3h_bound": capped_low,
             "muse_provider_aborted_attempts": aborted,
-            "muse_code_quality": "not judged",
+            "muse_code_quality": "v3.12, Claude Opus 5 alone, 99 of 115 runs",
             "devin_code_quality": "v3.11, Muse Spark 1.3 alone, 65 of 69 runs",
             "devin_unjudged_runs": devin_excluded,
             "sources": hashes,

@@ -1,6 +1,6 @@
-# VulcanBench Verdict v1: Jev, the model that will not say a patch works
+# VulcanBench Verdict v1: Jev 1.13.0
 
-**September 22, 2026 · VulcanBench Verdict v1 · jev-1.13.0 · 2,163 test items · 745 agent patches · 23 tasks · $0.45**
+**September 22, 2026, corrected September 23 · VulcanBench Verdict v1 · jev-1.13.0 · 2,163 test items · 745 agent patches · 23 tasks · $0.45**
 
 First measurement of TypeSafe AI's Jev on software engineering. Jev is a
 "System One" model: it does not generate text, it returns a typed decision
@@ -14,26 +14,40 @@ another model. The items are real patches written by frontier coding agents
 during Frontier v4 sweeps, and the answer to "does this patch work" is what
 the hidden test suite reported when that patch was graded.
 
+> **Correction, September 23, 2026.** The first version of this report scored
+> yes/no questions at a 0.5 cutoff. Jev's probability that a patch passes
+> never exceeds 0.42, so that cutoff sat outside its output range and no item
+> could be answered "passes". The published figures were an artifact of the
+> decision rule, not of the model. This version reports the ranking (AUROC),
+> which needs no cutoff, and accuracy at a cutoff fitted on the development
+> split. Two claims did not survive and are withdrawn; see
+> [What changed in the correction](#what-changed-in-the-correction).
+
 ## Results
 
 Test split, one query per item, model pinned to `jev-1.13.0`.
 
-| Question | Items | Majority floor | Jev | Brier (Jev / floor) | ECE |
-|---|---|---|---|---|---|
-| Does this patch pass every hidden test? | 611 | 62.7% | **37.3%** | 0.383 / 0.238 | 0.409 |
-| Does it break a test that passed before? | 611 | 94.1% | **33.4%** | 0.284 / 0.063 | 0.268 |
-| Which of four outcomes did the tests report? | 611 | 62.7% | **49.8%** | 0.650 / 0.522 | 0.186 |
-| **Overall, ground truth only** | **1,852** | **72.4%** | **40.8%** | **0.434 / 0.280** | **0.278** |
-| Which of two patches is more maintainable? * | 311 | 57.9% | **89.7%** | 0.162 / 0.500 | 0.082 |
+| Question | Items | Majority floor | Jev, fitted cutoff | AUROC | Brier | ECE |
+|---|---|---|---|---|---|---|
+| Does this patch pass every hidden test? | 611 | 62.7% | **62.8%** | 0.690 | 0.383 | 0.409 |
+| Does it break a test that passed before? | 611 | 94.1% | **93.1%** | 0.652 | 0.284 | 0.268 |
+| Which of four outcomes did the tests report? | 611 | 62.7% | **49.8%** | 0.651 | 0.650 | 0.186 |
+| **Overall, ground truth only** | **1,852** | **72.4%** | **68.9%** | | **0.434** | **0.278** |
+| Which of two patches is more maintainable? * | 311 | 57.9% | **89.7%** | 0.962 | 0.162 | 0.082 |
 
 \* Reference is agreement with the Muse and Grok code-quality panel, which is
 opinion, not ground truth, so this line is reported apart and excluded from
 the overall row.
 
 The majority floor is the score for always answering a family's most common
-label, fitted on the dev split. Unanswered items would count as wrong; none
-were unanswered. Brier is binary for yes/no families and multiclass for
-choice families, so compare it within a row, never down a column.
+label. Cutoffs for the two yes/no families were fitted on the development
+split and are 0.17 and 0.72; the four-way and two-way choice families are
+decided by top-ranked option, which needs no cutoff. AUROC is the chance
+that the model ranks a true item above a false one, so it does not depend on
+where the cutoff sits, and 0.5 is chance. Brier and ECE score the
+probabilities as stated, which is where Jev does badly. Compare Brier within
+a row, never down the column: it is binary for the yes/no families and
+multiclass for the choice families.
 
 **Operations.** 2,641 queries (dev and test), zero failures, zero retries,
 $0.447 total, $0.15 per 1,000 decisions. Latency 328 ms median and 471 ms at
@@ -43,68 +57,77 @@ not used to rank anything.
 
 ## Findings
 
-### 1. Jev said no to every patch
+### 1. Jev's probabilities never reach the decision boundary
 
-On all 611 patch-verdict items, Jev's probability that the patch passes came
-out below 0.5. Its mean probability was 0.22. In reality 383 of those 611
-patches (62.7%) pass every hidden test. The model is not guessing and it is
-not noisy: it holds a confident prior that agent patches are broken and
-nothing in the diff moves it.
+Across all 611 patch-verdict items, the probability Jev gives for "this
+patch passes" runs from 0.09 to 0.42, with a mean of 0.22. In reality 383 of
+those patches, 62.7% of them, pass every hidden test. There is no input in
+this suite for which Jev states that a patch is more likely to pass than
+not.
 
-The regression question shows the same bias from the other side. Jev answered
-"this breaks an existing test" on 435 of 611 patches. Thirty-six of those
-really do regress. That is 403 false alarms against 32 true ones.
+The same compression shows on the regression question from the other side:
+the probability that a patch breaks something runs from 0.24 to 0.80 with a
+mean of 0.53, on a population where the true rate is 5.9%.
 
-This is what pushes Jev below the majority floor on every ground-truth
-family. A model that always answered "passes" would score 62.7%. Jev scores
-37.3%.
+This is a calibration failure, and a large one. A model whose stated
+probabilities are meant to be believed, asked about a class that occurs 63%
+of the time, never assigns that class more than 0.42. The expected
+calibration error of 0.409 on patch-verdict is the largest number in this
+report.
 
-### 2. It is consistently wrong, not randomly wrong
+### 2. Underneath the miscalibration, the ordering is informative
 
-We asked the same 134 dev-split patches the verdict question four ways: the
-original wording, "this patch is a correct and complete fix", "a careful
-maintainer would merge this", and an inverted form, "this patch is broken".
+The ranking survives what the cutoff destroys:
 
-| Wording | Says the patch passes | Mean probability of passing |
-|---|---|---|
-| Original | 0% | 0.22 |
-| Correct and complete fix | 1% | 0.21 |
-| A maintainer would merge it | 4% | 0.28 |
-| Inverted (patch is broken) | 0% | 0.22 |
+| Family | AUROC |
+|---|---|
+| Does this patch pass every hidden test? | 0.690 |
+| Does it break a test that passed before? | 0.652 |
+| Which of four outcomes (macro, one against the rest) | 0.651 |
+| Which of two patches is more maintainable? | 0.962 |
 
-The four wordings agree with each other on 96% to 100% of patches, and the
-inverted form mirrors the original almost exactly (0.22 passing against 0.78
-broken). TypeSafe's consistency claim holds up cleanly. The pessimism is a
-property of the model, not an artifact of how the question was phrased.
+0.5 would be chance. So Jev does rank passing patches above failing ones,
+modestly but well clear of noise, and it separates the style pairs almost
+perfectly.
 
-### 3. Accuracy falls away as the patch gets longer
+Ordering is not the same as usefulness. With a cutoff fitted on held-out
+items, accuracy on the two yes/no families lands at 62.8% and 93.1%, against
+floors of 62.7% and 94.1%. The ordering is real, but the classes are
+imbalanced enough that acting on it gains nothing over answering the most
+common label.
 
-Patch-verdict accuracy by input size:
+### 3. The four wordings agree with each other, and all of them are compressed
 
-| Input tokens | Items | Accuracy |
-|---|---|---|
-| 0k to 4k | 462 | 45.7% |
-| 4k to 8k | 130 | 11.5% |
-| 8k and above | 19 | 10.5% |
+The same 134 development-split patches were asked the verdict question four
+ways: the original wording, "this patch is a correct and complete fix", "a
+careful maintainer would merge this", and an inverted form, "this patch is
+broken".
 
-Short patches leave room for the prior to be right by accident. Long ones do
-not. Reading a large diff against an issue and deciding whether the change is
-complete is System Two work, and this is a model that has given that up by
-design.
+| Wording | Mean probability of passing |
+|---|---|
+| Original | 0.220 |
+| Correct and complete fix | 0.208 |
+| A maintainer would merge it | 0.276 |
+| Inverted (patch is broken) | 0.221 |
+
+The four agree with each other on 96% to 100% of patches, and the inverted
+form mirrors the original almost exactly. TypeSafe's consistency claim holds
+up cleanly. Rewording moves the mean by at most 0.06 and never lifts the
+distribution across 0.5, so the compression is a property of the model on
+this task rather than an artifact of how the question was put.
 
 ### 4. It reads style well
 
 On the 311 pairs where both code-quality judges preferred the same patch by
-at least 10 points, Jev picked the same patch 89.7% of the time, with a
-well-calibrated 0.082 expected calibration error. The two obvious shortcuts
-do not explain it: picking the longer patch agrees with the judges only 44.7%
-of the time, and Jev's A and B split (183 to 128) tracks the true split (180
-to 131), so there is no position bias.
+at least 10 points, Jev picked the same patch 89.7% of the time, with an
+AUROC of 0.962 and a well-calibrated 0.082 expected calibration error. The
+two obvious shortcuts do not explain it: picking the longer patch agrees
+with the judges only 44.7% of the time, and Jev's A and B split (183 to 128)
+tracks the true split (180 to 131), so there is no position bias.
 
 Judges are opinion, so this is not a correctness result. It is still the
-clearest positive signal in the suite: Jev can read the surface of code
-(naming, structure, comments, duplication) even though it cannot evaluate
-behaviour.
+clearest positive signal in the suite, and it is the one place where Jev's
+probabilities are both discriminating and honestly scaled.
 
 ### 5. The localization probe is not a result
 
@@ -115,24 +138,52 @@ correctly, and it is excluded from any claim about ability.
 
 ## What this means
 
-Two conclusions, and they point in opposite directions.
+Jev cannot be dropped in as a merge gate or a continuous-integration
+pre-filter on the strength of its own probabilities. Read literally, it says
+every patch is more likely to fail than pass, which would block everything.
+Read as a ranking, with a cutoff fitted on your own labelled data, it comes
+out about level with answering "it passes" every time.
 
-For anyone thinking of using a System One model as a merge gate or a CI
-pre-filter, the answer from this suite is no. At these numbers Jev would
-block nearly every correct patch, and its confidence would give no warning,
-because it is confidently wrong rather than uncertain.
+Where the judgment is about the shape of the code rather than its behaviour,
+the picture changes: 89.7% agreement with a calibrated judge panel, AUROC
+0.962, at 328 ms and $0.15 per 1,000 decisions. That is roughly the cost and
+latency of a database query, for a judgment that currently costs a model
+call.
 
-For anyone using it where the judgment is about the shape of the code rather
-than its behaviour, the 89.7% agreement at 328 ms and $0.15 per 1,000
-decisions is worth a look. That is roughly the cost and latency of a database
-query, for a judgment that currently costs an LLM call.
+The methodological point is the one this report had to learn the hard way. A
+model that returns probabilities can be self-consistent, well ordered and
+badly scaled all at once, and which of those you see depends entirely on the
+metric. Accuracy at a fixed cutoff measures the scaling and hides the
+ordering. AUROC measures the ordering and hides the scaling. Reporting one
+without the other produces a confident, wrong headline, which is what the
+first version of this report did.
 
-The wider point is about how this model class gets evaluated. Jev is
-self-consistent, fast, cheap, and cannot produce a malformed answer. None of
-those properties is correctness, and the first of them can look like
-correctness on a benchmark that scores agreement rather than truth. A
-reference the model cannot argue with, in this case a test suite, separates
-the two.
+## What changed in the correction
+
+Withdrawn:
+
+- **"Jev scores 40.8% against a 72.4% floor."** That was accuracy at a 0.5
+  cutoff the model never crosses. At a fitted cutoff it is 68.9% against the
+  same floor. Both numbers are in the data file; the fitted one is the fair
+  comparison, and Jev is still below the floor, by 3.5 points rather than 32.
+- **"Accuracy falls as the patch gets longer."** It does not. The share of
+  patches that pass rises with size (54%, 89%, 90% across the three buckets),
+  and at a fitted cutoff Jev's accuracy in each bucket equals that bucket's
+  majority baseline exactly. The original finding was the class balance
+  moving, seen through a broken decision rule.
+
+Retained, with the framing corrected:
+
+- The compression of the probabilities, now reported as the calibration
+  failure it is rather than as "it called every patch broken".
+- The four-wording consistency result.
+- The style-pair result and the localization probe.
+
+Changed in the suite itself: the scorer now reports AUROC and the range of
+probabilities the model actually produced, fits yes/no cutoffs on the
+development split, and prints the majority baseline beside every subgroup.
+Everything was recomputed from the stored predictions, so the correction
+cost no further queries.
 
 ## Method
 
@@ -147,9 +198,11 @@ the two.
   the alias moves and calibration is per version. Jev exposes no effort,
   temperature or seed setting, so it gets one column. A future version is a
   new column, never an overwrite of this one.
-- **Scoring.** Accuracy, Brier, log loss and expected calibration error on
-  10 bins, plus latency and cost per 1,000 decisions. Items a model declines
-  to answer count as wrong.
+- **Scoring.** AUROC, accuracy at the top-ranked answer, accuracy at a
+  development-fitted cutoff, the majority-label share, Brier, log loss,
+  expected calibration error on 10 bins, the range of probabilities produced,
+  plus latency and cost per 1,000 decisions. Items a model declines to answer
+  count as wrong.
 - **Privacy.** The item file embeds Frontier v4 issues and agent patches. It
   stays private and canaried; this directory carries metrics only.
 
@@ -158,10 +211,13 @@ the two.
 - The three patch families ask different questions about the same 745
   patches, so their errors are correlated. Any aggregate over them should be
   bootstrapped by patch, not by item.
-- No other model has been run on these items yet, so the reference points
-  here are the majority floor and the judge panel. In particular, 89.7%
-  agreement on style is not yet known to be better or worse than what a
-  frontier LLM would score on the same pairs.
+- The fitted cutoffs come from 134 development items per family. They are
+  held out from the published split, but they are not many, and a different
+  development sample would move them.
+- No other model has been run on these items, so the reference points here
+  are the majority floor and the judge panel. In particular, an AUROC of
+  0.962 on style is not yet known to be better or worse than what a frontier
+  model would score on the same pairs.
 - Every item comes from one benchmark suite, whose tasks skew toward
   binary-parity reimplementation work in Python. The patch population is not
   a sample of open-source pull requests in general.
@@ -180,4 +236,5 @@ python scripts/verdict-v1/make_jev_card.py        # the card
 ```
 
 Needs `TYPESAFE_API_KEY` in `.env`. The rules this suite runs under are
-recorded in [docs/DECISIONS.md](../../DECISIONS.md) under 2026-09-19.
+recorded in [docs/DECISIONS.md](../../DECISIONS.md), under 2026-09-19 and the
+scoring correction under 2026-09-23.

@@ -7,6 +7,59 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-23: typed-decision scoring reports ranking, not a fixed 0.5 cutoff
+
+### Decision
+
+VulcanBench Verdict v1 never reports a yes/no family's accuracy at a bare
+0.5 cutoff as a headline. Every published family carries, at minimum, its
+AUROC, the range of probabilities the model actually produced, and the
+majority-label share. Where a decision has to be made from a yes/no
+probability, the cutoff is fitted on the development split and named in the
+report; the 0.5 figure may be shown beside it as a diagnostic, never alone.
+Subgroup tables print the majority baseline for each subgroup. Owner
+request, in chat, 2026-09-22, after the owner questioned a published result.
+
+### Evidence
+
+- The first Jev report (published 2026-09-22) led with "40.8% against a
+  72.4% floor" and "it called every patch broken". Jev's probability that a
+  patch passes runs 0.09 to 0.42 across all 611 test items, so a 0.5 cutoff
+  sat outside its output range and no item could be answered "passes". The
+  headline measured the decision rule, not the model.
+- The ordering under that cutoff is informative: AUROC 0.690 on the pass
+  question, 0.652 on regression, 0.651 macro on the four-way outcome and
+  0.962 on the style pairs, against 0.5 for chance. With cutoffs fitted on
+  the development split (0.17 and 0.72) accuracy is 62.8% and 93.1% against
+  floors of 62.7% and 94.1%: level with the floor, not 32 points below it.
+- The same flaw produced a second false finding. "Accuracy falls as the
+  patch gets longer" inverted once the cutoff was fixed, because the share
+  of patches that pass rises with size (54%, 89%, 90%); at a fitted cutoff
+  each bucket's accuracy equals that bucket's majority baseline exactly.
+- The preflight had already shown probabilities clustered at 0.51 to 0.76 on
+  one family and a 0.22 mean on another. A printed probability range would
+  have caught it before publication, which is why one is now mandatory.
+
+### What this touched
+
+- `harness/verdict/scoring.py` (`auroc`, `family_auroc`, `tuned_thresholds`,
+  `majority_label_share`, `p_true_min`/`max`/`mean`,
+  `accuracy_at_threshold`), `scripts/verdict-v1/export_results.py`,
+  `scripts/verdict-v1/score_predictions.py`,
+  `scripts/verdict-v1/make_jev_card.py`, `tests/test_verdict.py`,
+  `docs/results/verdict-v1-jev-2026-09/` (report, data and card), and the
+  site report, which was corrected in place with the withdrawn numbers kept
+  visible beside the corrected ones.
+
+### Revisit triggers
+
+- A model whose probabilities do span 0.5 on these items: the fitted cutoff
+  should land near 0.5, and a large gap between the two accuracy columns
+  becomes the calibration signal to report.
+- A second model on the suite: fit its cutoffs on the same development split
+  and publish both columns for every model, so no model is flattered by a
+  cutoff chosen after seeing the test items.
+
 ## 2026-09-19: VulcanBench Verdict v1 scores typed decisions against executed tests
 
 ### Decision

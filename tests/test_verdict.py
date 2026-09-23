@@ -5,10 +5,12 @@ import pytest
 
 from harness.verdict.items import build_items, outcome_label, split_for_task
 from harness.verdict.scoring import (
+    auroc,
     base_rate_predictions,
     expected_calibration_error,
     noul_probs,
     score,
+    tuned_thresholds,
 )
 from harness.verdict.typesafe_adapter import (
     TypeSafeNotConfigured,
@@ -219,3 +221,34 @@ def test_panel_preference_needs_both_judges_to_agree(tree, tmp_path):
     assert (
         result["overall"]["n"] == 0 and result["families"]["quality-preference"]["accuracy"] == 1.0
     )
+
+
+def test_auroc_ranks_without_a_threshold():
+    assert auroc([0.9, 0.8, 0.2, 0.1], [True, True, False, False]) == 1.0
+    assert auroc([0.1, 0.2, 0.8, 0.9], [True, True, False, False]) == 0.0
+    assert auroc([0.5, 0.5, 0.5, 0.5], [True, True, False, False]) == 0.5
+    # The case this suite got wrong: probabilities far below 0.5 that still order perfectly.
+    assert auroc([0.30, 0.25, 0.15, 0.10], [True, True, False, False]) == 1.0
+    assert auroc([0.9, 0.1], [True, True]) is None
+
+
+def test_compressed_probabilities_score_zero_at_half_but_rank_perfectly():
+    items = [_noul(f"i{i}", i < 3) for i in range(6)]
+    dev = [_noul(f"d{i}", i < 3, split="dev") for i in range(6)]
+    # Never above 0.42, the shape Jev produced: a 0.5 cutoff says "false" every time.
+    scores = [0.40, 0.35, 0.30, 0.20, 0.15, 0.10]
+    predictions = [
+        {"item_id": item["item_id"], "probs": noul_probs(p)}
+        for item, p in zip(items + dev, scores * 2, strict=True)
+    ]
+    plain = score(items + dev, predictions, "test")["families"]["patch-verdict"]
+    assert plain["accuracy"] == 0.5  # every item called false; half of them are
+    assert plain["auroc"] == 1.0
+    assert (plain["p_true_min"], plain["p_true_max"]) == (0.10, 0.40)
+
+    thresholds = tuned_thresholds(items + dev, predictions)
+    assert 0.20 < thresholds["patch-verdict"] <= 0.30
+    tuned = score(items + dev, predictions, "test", thresholds)["families"]["patch-verdict"]
+    assert tuned["accuracy_at_threshold"] == 1.0
+    assert tuned["accuracy"] == 0.5  # the 0.5 decision is still reported beside it
+    assert tuned["majority_label_share"] == 0.5

@@ -7,6 +7,54 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-23: Verdict families get an answerability control before a model is blamed
+
+### Decision
+
+When a Verdict v1 family scores at or near the majority floor, it is not
+read as a verdict on the model until a frontier model has been given
+exactly the same inputs on the same items and shown that the family is
+answerable. The control runs through a subscription CLI (Codex here, to stay
+clear of the Claude subscription a concurrent sweep was using), in an empty
+read-only directory with no tools, with its cutoff fitted on the development
+split exactly as the model's was. It is published as a control note on the
+report, never as a leaderboard column. While a control that could change the
+reading of a published result is running, the results come off the site
+entirely, card and data files included, and return together with the
+control. Owner requests, in chat, 2026-09-23.
+
+### Evidence
+
+- The owner asked whether the suite was flawed after Jev and always
+  guessing tied at 63% on the pass question. All 745 fixes come from
+  binary-parity tasks whose hidden tests check undocumented behaviour of a
+  retired program, and Jev sees only the bug report and the fix, so the
+  question might have been unanswerable from its inputs.
+- Control, GPT-6 Astra at high effort, on the 611 published pass questions:
+  AUROC 0.866 (bootstrap 0.837 to 0.894) against Jev's 0.690 (0.648 to
+  0.730), a gap of 0.13 to 0.22; 72.5% at a development-fitted cutoff and
+  67.1% at 0.5, against a 62.7% floor and Jev's 62.8%. Within-task AUROC,
+  item-weighted over 19 tasks, 0.905 against 0.727. The family is
+  answerable, and Jev's shortfall is ranking as well as calibration.
+- On the 134 development fixes, drawn from only 4 tasks, the gap looked
+  small (0.817 against 0.764), and the page briefly said Jev's shortfall was
+  calibration alone. The test split corrected that, which is why results
+  were withheld rather than left up while the test-split control ran.
+
+### What this touched
+
+- `scripts/verdict-v1/run_llm_control.py` (new), `export_results.py`
+  (control blocks with bootstrap intervals and development-fitted cutoffs),
+  `docs/results/verdict-v1-jev-2026-09/` (report, data), and the site report,
+  which was withheld on 2026-09-23 and restored with the final control.
+
+### Revisit triggers
+
+- The style family has no control yet; run one before reading its 0.962
+  AUROC against any other model.
+- A second decision model on the suite reuses the same control run; no need
+  to re-query Astra unless the item set changes.
+
 ## 2026-09-23: typed-decision scoring reports ranking, not a fixed 0.5 cutoff
 
 ### Decision

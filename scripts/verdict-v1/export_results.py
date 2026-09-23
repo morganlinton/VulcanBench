@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import random
 import statistics
 import sys
 from collections import Counter, defaultdict
@@ -30,6 +31,7 @@ from harness.verdict.scoring import (  # noqa: E402
 
 LENGTH_BUCKET_TOKENS = 4000
 HISTOGRAM_STEP = 0.05
+BOOTSTRAP_DRAWS = 2000
 
 
 def item_counts(items: list[dict]) -> dict:
@@ -120,6 +122,79 @@ def diagnostics(items: dict, predictions: list[dict], split: str, threshold: flo
     }
 
 
+def binary_summary(pairs: list[tuple[float, bool]], cutoff: float | None = None) -> dict:
+    """Threshold-free and 0.5-cutoff metrics for one set of yes/no probabilities.
+
+    ``cutoff``, when given, must have been fitted on other items (the
+    development split); accuracy at it is reported beside the 0.5 figure.
+    ``auroc_ci95`` is a seeded 2,000-draw bootstrap over items.
+    """
+    scores = [p for p, _ in pairs]
+    truth = [t for _, t in pairs]
+    rng = random.Random(0)
+    draws = []
+    for _ in range(BOOTSTRAP_DRAWS):
+        sample = [pairs[rng.randrange(len(pairs))] for _ in pairs]
+        value = auroc([p for p, _ in sample], [t for _, t in sample])
+        if value is not None:
+            draws.append(value)
+    draws.sort()
+    summary = {
+        "n": len(pairs),
+        "pass_rate": sum(truth) / len(truth),
+        "majority_baseline": max(sum(truth), len(truth) - sum(truth)) / len(truth),
+        "auroc": auroc(scores, truth),
+        "auroc_ci95": [draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws))]],
+        "accuracy_at_half": sum((p >= 0.5) == t for p, t in pairs) / len(pairs),
+        "brier": sum((p - t) ** 2 for p, t in pairs) / len(pairs),
+        "p_true_min": min(scores),
+        "p_true_max": max(scores),
+        "p_true_mean": sum(scores) / len(scores),
+    }
+    if cutoff is not None:
+        summary["dev_cutoff"] = cutoff
+        summary["accuracy_at_dev_cutoff"] = sum((p >= cutoff) == t for p, t in pairs) / len(pairs)
+    return summary
+
+
+def control_block(
+    items: dict,
+    jev_predictions: list[dict],
+    path: Path,
+    control_cutoffs: dict[str, float],
+    jev_cutoffs: dict[str, float],
+) -> dict:
+    """One control run, with Jev scored on exactly the same items beside it.
+
+    Cutoffs are applied only to test-split runs: on the development split
+    they were fitted on the same items and would flatter both models.
+    """
+    control = load_items(path)
+    first = control[0]
+    split = items[first["item_id"]]["split"]
+    family = items[first["item_id"]]["family"]
+    ids = sorted({p["item_id"] for p in control})
+    jev = {p["item_id"]: p["probs"]["true"] for p in jev_predictions if p["item_id"] in set(ids)}
+    latencies = sorted(p["latency_ms"] for p in control)
+    held_out = split != "dev"
+    return {
+        "model": first["model"],
+        "effort": first.get("effort"),
+        "family": family,
+        "split": split,
+        "tool_calls": sum(p.get("tool_calls", 0) for p in control),
+        "latency_ms_p50": latencies[len(latencies) // 2],
+        "control": binary_summary(
+            [(p["probs"]["true"], bool(items[p["item_id"]]["answer"])) for p in control],
+            control_cutoffs.get(family) if held_out else None,
+        ),
+        "jev_same_items": binary_summary(
+            [(jev[i], bool(items[i]["answer"])) for i in ids if i in jev],
+            jev_cutoffs.get(family) if held_out else None,
+        ),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--items", type=Path, default=REPO / "verdict-v1-items" / "items.jsonl")
@@ -130,6 +205,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--probe", type=Path, default=REPO / "verdict-v1-items" / "probe-phrasing.json"
+    )
+    parser.add_argument(
+        "--controls-dir",
+        type=Path,
+        default=REPO / "verdict-v1-items",
+        help="where control-*.jsonl live",
     )
     parser.add_argument("--model", default="jev-1.13.0")
     parser.add_argument("--split", default="test")
@@ -183,6 +264,23 @@ def main() -> int:
     }
     if args.probe.exists():
         payload["phrasing_probe"] = json.loads(args.probe.read_text())
+    control_files = sorted(args.controls_dir.glob("control-*.jsonl"))
+    dev_controls = [
+        row for path in control_files if "-dev" in path.stem for row in load_items(path)
+    ]
+    control_cutoffs = tuned_thresholds(items, dev_controls) if dev_controls else {}
+    controls = [
+        control_block(by_id, predictions, path, control_cutoffs, thresholds)
+        for path in control_files
+    ]
+    if controls:
+        payload["controls"] = {
+            "note": (
+                "A frontier model given exactly Jev's inputs (bug report and fix, no spec, binary "
+                "or tools), to check that a family is answerable from them. Not a leaderboard column."
+            ),
+            "runs": controls,
+        }
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")

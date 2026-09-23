@@ -23,6 +23,19 @@ the hidden test suite reported when that patch was graded.
 > split. Two claims did not survive and are withdrawn; see
 > [What changed in the correction](#what-changed-in-the-correction).
 
+> **Is the pass question answerable at all? A control, added September 23,
+> 2026.** Every fix here comes from a task where an agent rebuilt a retired
+> program, and the hidden tests check agreement with that program's real
+> behaviour, including quirks the written specification gets wrong. Jev sees
+> only the bug report and the fix. To check that the question can be answered
+> from that alone, GPT-6 Astra at high effort, through Codex, was given
+> exactly the same inputs on all 611 published pass questions, with its
+> cutoff chosen on the 134 development ones, as Jev's was. See
+> [The control](#the-control) for the numbers. In short: the question is
+> answerable, and Jev's shortfall on it is real. Astra ranks the fixes far
+> better (AUROC 0.87 against 0.69) and beats always guessing by about 10
+> points, where Jev draws level with it.
+
 ## Results
 
 Test split, one query per item, model pinned to `jev-1.13.0`.
@@ -96,6 +109,10 @@ floors of 62.7% and 94.1%. The ordering is real, but the classes are
 imbalanced enough that acting on it gains nothing over answering the most
 common label.
 
+Measured against a frontier model given the same inputs, though, Jev's
+ranking on the pass question is weak: GPT-6 Astra reaches an AUROC of 0.87
+on the same 611 fixes (see [The control](#the-control)).
+
 ### 3. The four wordings agree with each other, and all of them are compressed
 
 The same 134 development-split patches were asked the verdict question four
@@ -127,7 +144,9 @@ tracks the true split (180 to 131), so there is no position bias.
 
 Judges are opinion, so this is not a correctness result. It is still the
 clearest positive signal in the suite, and it is the one place where Jev's
-probabilities are both discriminating and honestly scaled.
+probabilities are both discriminating and honestly scaled. On the pass question,
+by contrast, a frontier model ranks fixes far better than Jev does (see
+[The control](#the-control)).
 
 ### 5. The localization probe is not a result
 
@@ -136,13 +155,59 @@ Jev picked the right file on 19 of 19 items. Then we checked the items: all
 string matching. It is kept as a sanity probe that the adapter is wired
 correctly, and it is excluded from any claim about ability.
 
+## The control
+
+Every fix in this suite comes from a Frontier v4 task in which an agent
+rebuilt a retired program, and the hidden tests check byte-for-byte
+agreement with that program's real behaviour, including quirks the written
+specification gets wrong. Jev is shown only the bug report and the fix, not
+the specification, the retired program or its output. That raised a fair
+question: can "does this fix pass every test?" be answered from those inputs
+at all, or would any reader sit at the floor?
+
+To find out, GPT-6 Astra at high effort was given exactly Jev's inputs
+through Codex on a ChatGPT subscription, in an empty read-only directory with
+no tools, and asked for a probability on every pass question. Its cutoff was
+chosen on the 134 development-split questions and applied to the 611
+published ones, the same procedure as Jev's. It made no tool calls and took a
+median of 22 seconds per answer, against 0.3 seconds for Jev.
+
+| Pass question, 611 published fixes | GPT-6 Astra | Jev 1.13.0 |
+|---|---|---|
+| Always guessing | 62.7% | 62.7% |
+| Ranking (AUROC, 95% interval) | **0.87** (0.84 to 0.89) | 0.69 (0.65 to 0.73) |
+| Accuracy at a development-fitted cutoff | **72.5%** (cutoff 0.20) | 62.8% (cutoff 0.17) |
+| Accuracy at the plain 50% line | 67.1% | 37.3% |
+| Stated probability, lowest to highest | 0.00 to 0.95 | 0.09 to 0.42 |
+| Mean stated probability (true rate 62.7%) | 0.34 | 0.22 |
+
+Three things follow.
+
+- **The question is answerable.** A frontier model beats always guessing by
+  about 10 points from the same text. The hidden quirks limit how well any
+  reader can do, but they do not make the task impossible.
+- **Jev's shortfall is real, and it is ranking as well as calibration.** The
+  ranking gap, 0.18 AUROC, has a bootstrap interval of 0.13 to 0.22. Within
+  each of the 19 tasks the gap holds (item-weighted AUROC 0.91 for Astra
+  against 0.73 for Jev), so it is not an artifact of some tasks being easier.
+- **Astra is under-confident too, but usable.** Its average stated chance
+  that a fix passes is 34% where 63% do, yet its answers do cross 50%, and at
+  that plain line it still beats guessing, 67.1% against 62.7%. Jev's never
+  do.
+
+On the 134 development fixes the gap looked smaller (AUROC 0.82 against
+0.76). The development split covers only 4 tasks; the published split covers
+19, and it is the one reported here.
+
 ## What this means
 
 Jev cannot be dropped in as a merge gate or a continuous-integration
 pre-filter on the strength of its own probabilities. Read literally, it says
 every patch is more likely to fail than pass, which would block everything.
 Read as a ranking, with a cutoff fitted on your own labelled data, it comes
-out about level with answering "it passes" every time.
+out about level with answering "it passes" every time. A frontier model given
+the same inputs beats guessing by about 10 points and ranks fixes far better
+(see [The control](#the-control)), so the shortfall is Jev's, not the test's.
 
 Where the judgment is about the shape of the code rather than its behaviour,
 the picture changes: 89.7% agreement with a calibrated judge panel, AUROC
@@ -214,10 +279,13 @@ cost no further queries.
 - The fitted cutoffs come from 134 development items per family. They are
   held out from the published split, but they are not many, and a different
   development sample would move them.
-- No other model has been run on these items, so the reference points here
-  are the majority floor and the judge panel. In particular, an AUROC of
-  0.962 on style is not yet known to be better or worse than what a frontier
-  model would score on the same pairs.
+- Apart from the control on the pass question, no other model has been run
+  on these items. In particular, an AUROC of 0.962 on style is not yet known
+  to be better or worse than what a frontier model would score on the same
+  pairs.
+- The control is one frontier model at one effort level on one question. It
+  shows the pass question is answerable from the inputs and gives a
+  reference point for Jev; it is not a leaderboard entry for Astra.
 - Every item comes from one benchmark suite, whose tasks skew toward
   binary-parity reimplementation work in Python. The patch population is not
   a sample of open-source pull requests in general.

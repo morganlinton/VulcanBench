@@ -1,4 +1,89 @@
 {
+  "controls": {
+    "note": "A frontier model given exactly Jev's inputs (bug report and fix, no spec, binary or tools), to check that a family is answerable from them. Not a leaderboard column.",
+    "runs": [
+      {
+        "control": {
+          "accuracy_at_half": 0.7089552238805971,
+          "auroc": 0.8165834845735027,
+          "auroc_ci95": [
+            0.7464821763602252,
+            0.8805522208883554
+          ],
+          "brier": 0.22084877611940298,
+          "majority_baseline": 0.5671641791044776,
+          "n": 134,
+          "p_true_max": 0.93,
+          "p_true_mean": 0.3904776119402985,
+          "p_true_min": 0.001,
+          "pass_rate": 0.5671641791044776
+        },
+        "effort": "high",
+        "family": "patch-verdict",
+        "jev_same_items": {
+          "accuracy_at_half": 0.43283582089552236,
+          "auroc": 0.764065335753176,
+          "auroc_ci95": [
+            0.6855855855855856,
+            0.8370495495495496
+          ],
+          "brier": 0.3404074626865672,
+          "majority_baseline": 0.5671641791044776,
+          "n": 134,
+          "p_true_max": 0.37,
+          "p_true_mean": 0.2191044776119403,
+          "p_true_min": 0.1,
+          "pass_rate": 0.5671641791044776
+        },
+        "latency_ms_p50": 22050.352417165413,
+        "model": "codex:gpt-6-astra",
+        "split": "dev",
+        "tool_calls": 0
+      },
+      {
+        "control": {
+          "accuracy_at_dev_cutoff": 0.7250409165302782,
+          "accuracy_at_half": 0.6710310965630114,
+          "auroc": 0.8664055700609226,
+          "auroc_ci95": [
+            0.8370392417769685,
+            0.8937312346465289
+          ],
+          "brier": 0.2586198265793781,
+          "dev_cutoff": 0.2,
+          "majority_baseline": 0.6268412438625205,
+          "n": 611,
+          "p_true_max": 0.95,
+          "p_true_mean": 0.3392543371522095,
+          "p_true_min": 0.0001,
+          "pass_rate": 0.6268412438625205
+        },
+        "effort": "high",
+        "family": "patch-verdict",
+        "jev_same_items": {
+          "accuracy_at_dev_cutoff": 0.6284779050736498,
+          "accuracy_at_half": 0.37315875613747956,
+          "auroc": 0.6898905226512757,
+          "auroc_ci95": [
+            0.6483824092639737,
+            0.7304586563307494
+          ],
+          "brier": 0.38267446808510636,
+          "dev_cutoff": 0.17,
+          "majority_baseline": 0.6268412438625205,
+          "n": 611,
+          "p_true_max": 0.42,
+          "p_true_mean": 0.2195581014729951,
+          "p_true_min": 0.09,
+          "pass_rate": 0.6268412438625205
+        },
+        "latency_ms_p50": 21741.539374925196,
+        "model": "codex:gpt-6-astra",
+        "split": "test",
+        "tool_calls": 0
+      }
+    ]
+  },
   "diagnostics": {
     "confusion": {
       "fix-localization": {

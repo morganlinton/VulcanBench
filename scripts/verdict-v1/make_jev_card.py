@@ -29,6 +29,7 @@ PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 JEV = "#B8407A"
 GUESS = "#d9d7cf"
 FAILS = "#8f8e86"
+CONTROL = "#10A37F"  # OpenAI lab colour; the control is GPT-6 Astra
 WIDTH_IN, HEIGHT_IN = 16, 11.5
 LEFT, RIGHT = 0.06, 0.94
 QUESTIONS = (
@@ -46,6 +47,12 @@ def accuracy(metrics: dict) -> float:
 
 def stderr(p: float, n: int) -> float:
     return math.sqrt(p * (1 - p) / n)
+
+
+def test_control(data: dict) -> dict | None:
+    """The held-out control run on the pass question, if the export has one."""
+    runs = data.get("controls", {}).get("runs", [])
+    return next((r for r in runs if r["split"] != "dev" and r["family"] == "patch-verdict"), None)
 
 
 class Card:
@@ -154,16 +161,42 @@ def title(card: Card, data: dict) -> None:
     card.text(
         RIGHT,
         2.68,
-        "n=611 per correctness question, n=311 style pairs, n=1,852 overall",
+        "n=611 per correctness question, n=311 style pairs, n=1,852 overall, control n=611",
         13,
         ha="right",
         color=MUTED,
     )
 
 
+def labelled_bar(ax, x: float, value: float, width: float, color: str, err: float = 0.0) -> None:
+    ax.bar(
+        x,
+        value * 100,
+        width,
+        color=color,
+        edgecolor=INK,
+        linewidth=0.5,
+        yerr=err * 100 if err else None,
+        error_kw={"ecolor": INK, "elinewidth": 0.9, "capsize": 3},
+        zorder=2,
+    )
+    ax.annotate(
+        f"{value * 100:.0f}",
+        (x, (value + err) * 100),
+        xytext=(0, 5),
+        textcoords="offset points",
+        ha="center",
+        va="bottom",
+        fontsize=10.5,
+        fontfamily="IBM Plex Mono",
+        color=INK,
+    )
+
+
 def accuracy_chart(card: Card, data: dict) -> None:
     jev = data["results"][data["model"]]["families"]
     guess = data["results"]["majority_floor"]["families"]
+    control = test_control(data)
     card.text(LEFT, 3.1, "Accuracy against always guessing", 21, True, heading=True)
     card.text(
         LEFT,
@@ -173,52 +206,45 @@ def accuracy_chart(card: Card, data: dict) -> None:
         color=MUTED,
     )
     ax = card.axes(0.085, 0.405, 3.75, 3.0)
-    width = 0.36
     for i, (family, _label, _) in enumerate(QUESTIONS):
         p_jev, p_guess = accuracy(jev[family]), accuracy(guess[family])
         n = jev[family]["n"]
-        ax.bar(
-            i - width / 2, p_guess * 100, width, color=GUESS, edgecolor=INK, linewidth=0.5, zorder=2
-        )
-        ax.bar(
-            i + width / 2,
-            p_jev * 100,
-            width,
-            color=JEV,
-            edgecolor=INK,
-            linewidth=0.5,
-            yerr=stderr(p_jev, n) * 100,
-            error_kw={"ecolor": INK, "elinewidth": 0.9, "capsize": 3},
-            zorder=2,
-        )
-        for x, value, offset in (
-            (i - width / 2, p_guess, 0),
-            (i + width / 2, p_jev, stderr(p_jev, n)),
-        ):
-            ax.annotate(
-                f"{value * 100:.0f}",
-                (x, (value + offset) * 100),
-                xytext=(0, 5),
-                textcoords="offset points",
-                ha="center",
-                va="bottom",
-                fontsize=10.5,
-                fontfamily="IBM Plex Mono",
-                color=INK,
+        if control and family == "patch-verdict":
+            # Three bars: guessing, Jev, and the control on the same inputs.
+            width = 0.26
+            p_control = control["control"]["accuracy_at_dev_cutoff"]
+            labelled_bar(ax, i - width, p_guess, width, GUESS)
+            labelled_bar(ax, i, p_jev, width, JEV, stderr(p_jev, n))
+            labelled_bar(
+                ax, i + width, p_control, width, CONTROL, stderr(p_control, control["control"]["n"])
             )
+        else:
+            width = 0.36
+            labelled_bar(ax, i - width / 2, p_guess, width, GUESS)
+            labelled_bar(ax, i + width / 2, p_jev, width, JEV, stderr(p_jev, n))
     ax.set_xticks(range(len(QUESTIONS)), [label for _, label, _ in QUESTIONS])
     ax.set_xlim(-0.6, len(QUESTIONS) - 0.4)
     ax.set_ylim(0, 112)
     ax.set_yticks(range(0, 101, 25))
+    handles = [
+        Patch(facecolor=GUESS, edgecolor=INK, linewidth=0.5, label="Always guessing"),
+        Patch(facecolor=JEV, edgecolor=INK, linewidth=0.5, label="Jev"),
+    ]
+    if control:
+        handles.append(
+            Patch(
+                facecolor=CONTROL,
+                edgecolor=INK,
+                linewidth=0.5,
+                label="GPT-6 Astra, same inputs (control)",
+            )
+        )
     ax.legend(
-        handles=[
-            Patch(facecolor=GUESS, edgecolor=INK, linewidth=0.5, label="Always guessing"),
-            Patch(facecolor=JEV, edgecolor=INK, linewidth=0.5, label="Jev"),
-        ],
+        handles=handles,
         loc="upper left",
         frameon=False,
         fontsize=11,
-        ncols=2,
+        ncols=3,
         bbox_to_anchor=(0, 1.08),
     )
 
@@ -290,7 +316,7 @@ def table(card: Card, data: dict) -> float:
     overall_guess = data["results"]["majority_floor"]["overall"]
     card.text(LEFT, 7.55, "Table 1  |  Every question", 14.5, heading=True)
     card.line(LEFT, RIGHT, 7.83, INK, 1.2)
-    heads = ("Items", "Always guessing", "Jev", "Ranking (AUROC)", "Calibration error")
+    heads = ("Items", "Always guessing", "Model", "Ranking (AUROC)", "Calibration error")
     cols = (0.46, 0.585, 0.695, 0.82, 0.94)
     card.text(LEFT, 8.07, "Question", 12.5, True)
     for head, x in zip(heads, cols, strict=True):
@@ -312,7 +338,13 @@ def table(card: Card, data: dict) -> float:
     ]
     rows.append(("Overall, test-checked questions", overall_jev, overall_guess, True))
     rows.append((QUESTIONS[-1][2], jev["quality-preference"], guess["quality-preference"], False))
-    y, step = 8.74, 0.35
+    control = test_control(data)
+    if control:
+        # The control's own figures: accuracy at its development-fitted cutoff.
+        mine = dict(control["control"], accuracy=control["control"]["accuracy_at_dev_cutoff"])
+        base = {"accuracy": control["control"]["majority_baseline"]}
+        rows.append(("GPT-6 Astra (control): does the fix pass every test?", mine, base, False))
+    y, step = 8.74, 0.3
     for label, mine, base, emphasis in rows:
         values = (
             f"{mine['n']:,}",
@@ -321,7 +353,12 @@ def table(card: Card, data: dict) -> float:
             f"{mine['auroc']:.2f}" if mine.get("auroc") is not None else "",
             f"{mine['ece']:.2f}",
         )
-        card.text(LEFT, y, label, 13 if emphasis else 12.5, emphasis)
+        is_control = label.startswith("GPT-6 Astra")
+        if is_control:
+            card.line(LEFT, RIGHT, y - step / 2, RULE, 0.6)
+        card.text(
+            LEFT, y, label, 13 if emphasis else 12.5, emphasis, color=CONTROL if is_control else INK
+        )
         for value, x in zip(values, cols, strict=True):
             card.text(x, y, value, 14 if emphasis else 13.5, emphasis, numeric=True, ha="right")
         if emphasis:
@@ -340,12 +377,14 @@ def notes(card: Card, data: dict, top: float) -> None:
         "Always guessing gives each question's most common answer.",
         "*Checked against the Muse Spark 1.3 and Grok 4.6 code-quality panel, which is judgment rather than test results, "
         "so it is left out of the overall row.",
+        "Control: GPT-6 Astra (high effort) given exactly Jev's inputs on the pass question, its cutoff (0.20) tuned the same way. "
+        "It shows the question is answerable; it is not a leaderboard entry.",
         f"{run['items_queried']:,} queries, no failures, ${run['total_cost_usd']:.2f} in total, "
         f"{run['latency_ms_p50']:.0f} ms median latency measured from California. Method and every number: "
         "vulcanbench.com/benchmarks/verdict-v1-jev.html",
     )
     for i, note in enumerate(lines):
-        card.text(LEFT, top + 0.2 + 0.24 * i, note, 11, color=MUTED)
+        card.text(LEFT, top + 0.19 + 0.22 * i, note, 11, color=MUTED)
 
 
 def main() -> int:

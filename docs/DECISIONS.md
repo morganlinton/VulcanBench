@@ -60,6 +60,28 @@ request, in chat, 2026-09-22, after the owner questioned a published result.
   and publish both columns for every model, so no model is flattered by a
   cutoff chosen after seeing the test items.
 
+## 2026-09-22: Grok 4.7 runs on Cursor and Grok Build, queued serially behind Opus 5.5
+
+### Decision
+
+Grok 4.7 is swept on all three suites (Frontier v4, Routine v1, Safety v1)
+on two harnesses, Cursor and Grok Build, so the harnesses can be compared
+on identical tasks. Levels are Low, Medium, High and Extra-high; neither
+harness exposes a max level for Grok 4.7. The owner considered running
+alongside the Opus 5.5 chain and chose to keep sweeps serial (2026-09-13
+entry), so `scripts/run_grok47_all_suites.sh` waits for the Opus chain to
+finish. Owner request, in chat, 2026-09-22.
+
+### Evidence
+
+- Cursor lists `grok-4.7-low`, `-medium`, `-high` and `-xhigh` (plus
+  `-fast` tiers, not used). The adapter's bracket form
+  (`grok-4.7-low[effort=low]`, `grok-4.7[effort=high]`) is rejected with
+  "Cannot use this model", so Cursor legs pass the per-level id and no
+  `--effort`, as the Grok 4.6 Cursor sweep did.
+- Grok Build 1.0.41 lists `grok-4.7` (default); a one-line probe at
+  `--reasoning-effort xhigh` answered on subscription login.
+
 ## 2026-09-19: VulcanBench Verdict v1 scores typed decisions against executed tests
 
 ### Decision

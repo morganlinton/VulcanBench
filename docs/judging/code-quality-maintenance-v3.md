@@ -782,6 +782,41 @@ changes. Protocol id `code-quality-maintenance-v3.12`; run directory
   behind the rest of the Frontier v4 board, and is not placed in one ranking
   with those scores without that note.
 
+## Amendment v3.13, September 22, 2026: a second judge for Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.13`; run directory
+`runs-code-quality-maintenance-v3.13`; runner
+`harness/maintenance_review_v313.py`, derived from the v3.12 runner.
+
+- Occasion: v3.11 published Devin SWE-2 from one judge because Grok 4.6
+  (v3.9) and GPT-5.6 Sol (v3.10) both failed the exam on gate 16. Claude
+  Opus 5 passed the identical exam under v3.12 with no allowance used, so
+  the second seat is filled rather than left empty.
+- Population: the v3.11 freeze, byte for byte. `prepare` refuses unless the
+  manifest and signals hash equal to v3.11's and Muse's v3.11 calibration
+  passed. 65 judged submissions: 23 medium, 20 high, 22 max.
+- Panel: Muse Spark 1.3 scored from its v3.11 pass as a scored sibling, and
+  Claude Opus 5 in the second seat under the settings, identity and quota
+  guards, fallback policy and CLI pin v3.2 froze for it. Opus 5 retakes the
+  exam here before any counted call. It is neutral for a Cognition model and
+  is not admitted as a neutral judge of Anthropic submissions. If it fails,
+  nothing changes and v3.11's single-judge publication stands.
+- Comparability: a Devin score published under v3.13 is a two-judge mean of
+  Muse Spark 1.3 and Claude Opus 5, not the Muse and Grok pair behind the
+  other Frontier v4 entries. Every card and report says which pair it used.
+- The protocol document is frozen as a copy inside the run directory, as
+  v3.8 does, so concurrent protocols stop colliding on one file. Future
+  amendments should do the same.
+
+- Outcome, September 22, 2026: Claude Opus 5 failed the exam under this
+  amendment (gate 4 short by 0.10 and gate 14 on the pair control 0 against
+  control 3 outright, two failing gates, so the allowance does not apply).
+  No counted call was made. This amendment is recorded as a failed attempt:
+  Devin SWE-2 remains published under v3.11 from Muse Spark 1.3 alone, and
+  nothing on the board or in any report changes. The operations log carries
+  the detail.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

@@ -472,3 +472,30 @@ operational notes live here.
   panel. Muse Spark 1.3 combined score minimal 74.84, low 79.33, medium
   78.96, high 80.71, extra-high 77.44; Code quality 62.0, 64.8, 63.6, 66.2,
   61.2.
+
+## v3.13, September 22, 2026: Devin SWE-2, the second seat attempt
+
+- Occasion: v3.11 published Devin from one judge after Grok 4.6 and GPT-5.6
+  Sol failed the exam. Claude Opus 5 had passed the identical exam under
+  v3.12 hours earlier with no allowance used, so v3.13 offered it the second
+  seat on the byte-identical v3.11 population, with Muse scored as a sibling.
+- Opus 5 failed the exam under v3.13 on two gates, so the one-gate allowance
+  does not apply: gate 4 (formatting is presentation) missed by 0.10, and
+  gate 14 on the pair control 0 against control 3 failed outright. It scored
+  the clean control 100 in the forward order and 100 again in the reverse
+  order, where a consistent judge scores the reverse 0. That is the
+  order-consistency failure the gate exists to catch.
+- The calibration exam uses the fixed control set and is identical whatever
+  population follows it, so this is run-to-run variance in the judge, not
+  anything about Devin's evidence. Opus 5 answered the same pair
+  consistently under v3.12 (100 forward, 0 reverse) and inconsistently here.
+- No counted call was made. Under the pre-registered rule nothing further
+  runs for Opus 5 on this population and v3.11's single-judge publication
+  stands. The exam was not retaken: repeating a draw until a judge passes
+  selects on the outcome, which is what the no-retake rule prevents.
+- Recorded limitation, not acted on here: admission rests on one draw of a
+  stochastic exam. Three of the four judges offered a seat on this
+  population (Grok, Sol, Opus 5) failed a single draw, and Muse's own
+  admission is a single draw too. Whether admission should require a
+  repeated or aggregated exam is a protocol question for a future revision,
+  to be decided before a panel is under consideration rather than after.

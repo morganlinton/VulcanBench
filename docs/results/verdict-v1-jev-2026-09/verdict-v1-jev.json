@@ -48,21 +48,67 @@
         "B->B": 113
       }
     },
-    "patch_verdict_accuracy_by_input_tokens": {
+    "patch_verdict_by_input_tokens": {
       "0k-4k": {
-        "accuracy": 0.45670995670995673,
-        "n": 462
+        "accuracy_at_threshold": 0.5454545454545454,
+        "auroc": 0.5678895791242613,
+        "majority_baseline": 0.5432900432900433,
+        "n": 462,
+        "pass_rate": 0.5432900432900433
       },
       "4k-8k": {
-        "accuracy": 0.11538461538461539,
-        "n": 130
+        "accuracy_at_threshold": 0.8846153846153846,
+        "auroc": 0.884927536231884,
+        "majority_baseline": 0.8846153846153846,
+        "n": 130,
+        "pass_rate": 0.8846153846153846
       },
       "8k+": {
-        "accuracy": 0.10526315789473684,
-        "n": 19
+        "accuracy_at_threshold": 0.8947368421052632,
+        "auroc": 0.6176470588235294,
+        "majority_baseline": 0.8947368421052632,
+        "n": 19,
+        "pass_rate": 0.8947368421052632
       }
     },
     "patch_verdict_mean_p_pass": 0.2195581014729951,
+    "patch_verdict_p_true_histogram": {
+      "bins": {
+        "0.05": {
+          "fails": 2,
+          "passes": 0
+        },
+        "0.10": {
+          "fails": 31,
+          "passes": 29
+        },
+        "0.15": {
+          "fails": 90,
+          "passes": 91
+        },
+        "0.20": {
+          "fails": 91,
+          "passes": 117
+        },
+        "0.25": {
+          "fails": 12,
+          "passes": 74
+        },
+        "0.30": {
+          "fails": 1,
+          "passes": 47
+        },
+        "0.35": {
+          "fails": 1,
+          "passes": 14
+        },
+        "0.40": {
+          "fails": 0,
+          "passes": 11
+        }
+      },
+      "step": 0.05
+    },
     "quality_preference_answer_balance": {
       "A": 180,
       "B": 131
@@ -172,6 +218,7 @@
           "accuracy": 1.0,
           "accuracy_all_items": 1.0,
           "accuracy_stderr": 0.0,
+          "auroc": null,
           "brier": 0.0,
           "cost_usd_per_1k": 0.03906663157894737,
           "coverage": 1.0,
@@ -180,12 +227,14 @@
           "latency_ms_p50": 266.51708292774856,
           "latency_ms_p95": 350.07923729717726,
           "log_loss": 0.0,
+          "majority_label_share": 0.05263157894736842,
           "n": 19
         },
         "patch-outcome": {
           "accuracy": 0.49754500818330605,
           "accuracy_all_items": 0.49754500818330605,
           "accuracy_stderr": 0.020227591024391638,
+          "auroc": 0.6506932856339926,
           "brier": 0.6495227125526287,
           "cost_usd_per_1k": 0.14832564648117838,
           "coverage": 1.0,
@@ -194,12 +243,15 @@
           "latency_ms_p50": 305.74033316224813,
           "latency_ms_p95": 477.27285395376384,
           "log_loss": 1.0804792863732446,
+          "majority_label_share": 0.6268412438625205,
           "n": 611
         },
         "patch-regression": {
           "accuracy": 0.33387888707037644,
           "accuracy_all_items": 0.33387888707037644,
+          "accuracy_at_threshold": 0.9312602291325696,
           "accuracy_stderr": 0.019078774413583917,
+          "auroc": 0.6518599033816425,
           "brier": 0.28448428805237314,
           "cost_usd_per_1k": 0.1471076464811784,
           "coverage": 1.0,
@@ -208,12 +260,19 @@
           "latency_ms_p50": 311.3901249598712,
           "latency_ms_p95": 432.19225003849715,
           "log_loss": 0.7638744873411537,
-          "n": 611
+          "majority_label_share": 0.9410801963993454,
+          "n": 611,
+          "p_true_max": 0.8,
+          "p_true_mean": 0.5313093289689035,
+          "p_true_min": 0.24,
+          "threshold": 0.72
         },
         "patch-verdict": {
           "accuracy": 0.37315875613747956,
           "accuracy_all_items": 0.37315875613747956,
+          "accuracy_at_threshold": 0.6284779050736498,
           "accuracy_stderr": 0.019566132721657588,
+          "auroc": 0.6898905226512757,
           "brier": 0.38267446808510636,
           "cost_usd_per_1k": 0.1471076464811784,
           "coverage": 1.0,
@@ -222,12 +281,18 @@
           "latency_ms_p50": 333.2747081294656,
           "latency_ms_p95": 448.8441670546308,
           "log_loss": 1.0092654667479033,
-          "n": 611
+          "majority_label_share": 0.6268412438625205,
+          "n": 611,
+          "p_true_max": 0.42,
+          "p_true_mean": 0.2195581014729951,
+          "p_true_min": 0.09,
+          "threshold": 0.17
         },
         "quality-preference": {
           "accuracy": 0.8971061093247589,
           "accuracy_all_items": 0.8971061093247589,
           "accuracy_stderr": 0.0172280652224366,
+          "auroc": 0.9618108566581849,
           "brier": 0.16172475884244372,
           "cost_usd_per_1k": 0.2991248102893891,
           "coverage": 1.0,
@@ -236,13 +301,16 @@
           "latency_ms_p50": 362.9416658077389,
           "latency_ms_p95": 521.6116668889299,
           "log_loss": 0.28136978952791925,
+          "majority_label_share": 0.5787781350482315,
           "n": 311
         }
       },
       "overall": {
         "accuracy": 0.40766738660907126,
         "accuracy_all_items": 0.40766738660907126,
+        "accuracy_at_threshold": 0.6889848812095032,
         "accuracy_stderr": 0.011418664585681772,
+        "auroc": null,
         "brier": 0.43439113248901523,
         "cost_usd_per_1k": 0.14640106911447084,
         "coverage": 1.0,
@@ -251,7 +319,12 @@
         "latency_ms_p50": 319.7762705385685,
         "latency_ms_p95": 448.3716812450438,
         "log_loss": 0.941447816372822,
-        "n": 1852
+        "majority_label_share": 0.43358531317494603,
+        "n": 1852,
+        "p_true_max": 0.8,
+        "p_true_mean": 0.37543371522094926,
+        "p_true_min": 0.09,
+        "threshold": null
       },
       "split": "test"
     },
@@ -264,6 +337,7 @@
           "accuracy": 0.0,
           "accuracy_all_items": 0.0,
           "accuracy_stderr": 0.0,
+          "auroc": null,
           "brier": 0.8571428571428573,
           "cost_usd_per_1k": null,
           "coverage": 1.0,
@@ -272,12 +346,14 @@
           "latency_ms_p50": null,
           "latency_ms_p95": null,
           "log_loss": 1.9459101490553135,
+          "majority_label_share": 0.05263157894736842,
           "n": 19
         },
         "patch-outcome": {
           "accuracy": 0.6268412438625205,
           "accuracy_all_items": 0.6268412438625205,
           "accuracy_stderr": 0.019566132721657588,
+          "auroc": 0.5,
           "brier": 0.5217138637683223,
           "cost_usd_per_1k": null,
           "coverage": 1.0,
@@ -286,12 +362,14 @@
           "latency_ms_p50": null,
           "latency_ms_p95": null,
           "log_loss": 0.8960818085409724,
+          "majority_label_share": 0.6268412438625205,
           "n": 611
         },
         "patch-regression": {
           "accuracy": 0.9410801963993454,
           "accuracy_all_items": 0.9410801963993454,
           "accuracy_stderr": 0.009526280330230629,
+          "auroc": 0.5,
           "brier": 0.0632167471783168,
           "cost_usd_per_1k": null,
           "coverage": 1.0,
@@ -300,12 +378,17 @@
           "latency_ms_p50": null,
           "latency_ms_p95": null,
           "log_loss": 0.26263733788972904,
-          "n": 611
+          "majority_label_share": 0.9410801963993454,
+          "n": 611,
+          "p_true_max": 0.14705882352941177,
+          "p_true_mean": 0.14705882352941177,
+          "p_true_min": 0.14705882352941177
         },
         "patch-verdict": {
           "accuracy": 0.6268412438625205,
           "accuracy_all_items": 0.6268412438625205,
           "accuracy_stderr": 0.019566132721657588,
+          "auroc": 0.5,
           "brier": 0.23759151357182906,
           "cost_usd_per_1k": null,
           "coverage": 1.0,
@@ -314,12 +397,17 @@
           "latency_ms_p50": null,
           "latency_ms_p95": null,
           "log_loss": 0.6682096913326725,
-          "n": 611
+          "majority_label_share": 0.6268412438625205,
+          "n": 611,
+          "p_true_max": 0.5661764705882353,
+          "p_true_mean": 0.5661764705882353,
+          "p_true_min": 0.5661764705882353
         },
         "quality-preference": {
           "accuracy": 0.5787781350482315,
           "accuracy_all_items": 0.5787781350482315,
           "accuracy_stderr": 0.027998277705317157,
+          "auroc": 0.5,
           "brier": 0.5,
           "cost_usd_per_1k": null,
           "coverage": 1.0,
@@ -328,6 +416,7 @@
           "latency_ms_p50": null,
           "latency_ms_p95": null,
           "log_loss": 0.6931471805599453,
+          "majority_label_share": 0.5787781350482315,
           "n": 311
         }
       },
@@ -335,6 +424,7 @@
         "accuracy": 0.7240820734341252,
         "accuracy_all_items": 0.7240820734341252,
         "accuracy_stderr": 0.010386359855101642,
+        "auroc": null,
         "brier": 0.2801548230920617,
         "cost_usd_per_1k": null,
         "coverage": 1.0,
@@ -343,7 +433,11 @@
         "latency_ms_p50": null,
         "latency_ms_p95": null,
         "log_loss": 0.6226921234910758,
-        "n": 1852
+        "majority_label_share": 0.43358531317494603,
+        "n": 1852,
+        "p_true_max": 0.5661764705882353,
+        "p_true_mean": 0.35661764705882354,
+        "p_true_min": 0.14705882352941177
       },
       "split": "test"
     }
@@ -363,5 +457,12 @@
   "source_patches": 745,
   "split": "test",
   "suite": "verdict-v1",
-  "suite_name": "VulcanBench Verdict v1"
+  "suite_name": "VulcanBench Verdict v1",
+  "thresholds": {
+    "note": "Yes/no cutoffs fitted on the development split, because Jev's probabilities never cross 0.5. accuracy is the 0.5 decision, accuracy_at_threshold uses these, auroc needs neither.",
+    "values": {
+      "patch-regression": 0.72,
+      "patch-verdict": 0.17
+    }
+  }
 }

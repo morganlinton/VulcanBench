@@ -19,18 +19,19 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from harness.verdict.items import load_items  # noqa: E402
-from harness.verdict.scoring import base_rate_predictions, score  # noqa: E402
+from harness.verdict.scoring import base_rate_predictions, score, tuned_thresholds  # noqa: E402
 
 COLUMNS = (
     "n",
-    "coverage",
+    "majority_label_share",
     "accuracy",
-    "accuracy_stderr",
+    "accuracy_at_threshold",
+    "auroc",
+    "p_true_min",
+    "p_true_max",
     "brier",
-    "log_loss",
     "ece",
     "latency_ms_p50",
-    "latency_ms_p95",
     "cost_usd_per_1k",
 )
 
@@ -55,7 +56,8 @@ def main() -> int:
     results = {"majority-floor": score(items, base_rate_predictions(items, args.split), args.split)}
     for path in args.predictions:
         name = path.stem.removeprefix("predictions-")
-        results[name] = score(items, load_items(path), args.split)
+        predictions = load_items(path)
+        results[name] = score(items, predictions, args.split, tuned_thresholds(items, predictions))
 
     if args.json:
         print(json.dumps(results, indent=2))
@@ -70,7 +72,9 @@ def main() -> int:
             print(f"| {name} | " + " | ".join(fmt(metrics.get(c)) for c in COLUMNS) + " |")
     agreement = next(iter(results.values()))["agreement_only_families"]
     print(
-        f"\nOverall excludes judge-agreement families: {', '.join(agreement) or 'none'}. Unanswered items count as wrong."
+        f"\nOverall excludes judge-agreement families: {', '.join(agreement) or 'none'}. "
+        "Unanswered items count as wrong.\naccuracy is the 0.5 decision; accuracy_at_threshold "
+        "uses a cutoff fitted on the dev split; auroc needs no cutoff at all."
     )
     return 0
 

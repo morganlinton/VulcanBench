@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import statistics
 import sys
 from collections import Counter, defaultdict
@@ -19,9 +20,16 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from harness.verdict.items import load_items  # noqa: E402
-from harness.verdict.scoring import answer_label, base_rate_predictions, score  # noqa: E402
+from harness.verdict.scoring import (  # noqa: E402
+    answer_label,
+    auroc,
+    base_rate_predictions,
+    score,
+    tuned_thresholds,
+)
 
 LENGTH_BUCKET_TOKENS = 4000
+HISTOGRAM_STEP = 0.05
 
 
 def item_counts(items: list[dict]) -> dict:
@@ -38,7 +46,7 @@ def item_counts(items: list[dict]) -> dict:
     return counts
 
 
-def diagnostics(items: dict, predictions: list[dict], split: str) -> dict:
+def diagnostics(items: dict, predictions: list[dict], split: str, threshold: float | None) -> dict:
     """Confusion counts, length curve and the checks that keep families honest."""
     confusion: dict[str, Counter] = defaultdict(Counter)
     by_length: dict[str, list[bool]] = defaultdict(list)
@@ -52,9 +60,26 @@ def diagnostics(items: dict, predictions: list[dict], split: str) -> dict:
         if item["family"] == "patch-verdict":
             mean_p_pass.append(prediction["probs"]["true"])
             bucket = min(prediction["input_tokens"] // LENGTH_BUCKET_TOKENS, 2)
-            by_length[f"{bucket * 4}k-{(bucket + 1) * 4}k" if bucket < 2 else "8k+"].append(
-                top == answer_label(item)
+            name = f"{bucket * 4}k-{(bucket + 1) * 4}k" if bucket < 2 else "8k+"
+            decided = (
+                prediction["probs"]["true"] >= threshold if threshold is not None else top == "true"
             )
+            by_length[name].append(
+                {
+                    "correct": decided == bool(item["answer"]),
+                    "passes": bool(item["answer"]),
+                    "p_true": prediction["probs"]["true"],
+                }
+            )
+
+    # Bin counts, not per-item values: enough to draw the distribution, no item content.
+    histogram: dict[str, dict[str, int]] = defaultdict(lambda: {"passes": 0, "fails": 0})
+    for prediction in predictions:
+        item = items.get(prediction["item_id"])
+        if item is None or item["split"] != split or item["family"] != "patch-verdict":
+            continue
+        edge = math.floor(prediction["probs"]["true"] / HISTOGRAM_STEP) * HISTOGRAM_STEP
+        histogram[f"{edge:.2f}"]["passes" if item["answer"] else "fails"] += 1
 
     quality = [
         i for i in items.values() if i["family"] == "quality-preference" and i["split"] == split
@@ -70,9 +95,25 @@ def diagnostics(items: dict, predictions: list[dict], split: str) -> dict:
     )
     return {
         "confusion": {family: dict(counts) for family, counts in sorted(confusion.items())},
+        "patch_verdict_p_true_histogram": {
+            "step": HISTOGRAM_STEP,
+            "bins": {k: dict(v) for k, v in sorted(histogram.items())},
+        },
         "patch_verdict_mean_p_pass": statistics.mean(mean_p_pass) if mean_p_pass else None,
-        "patch_verdict_accuracy_by_input_tokens": {
-            k: {"accuracy": sum(v) / len(v), "n": len(v)} for k, v in sorted(by_length.items())
+        # Accuracy alone is unreadable here: the share of patches that pass rises
+        # with size, so the majority baseline moves with the bucket.
+        "patch_verdict_by_input_tokens": {
+            name: {
+                "n": len(rows),
+                "accuracy_at_threshold": sum(r["correct"] for r in rows) / len(rows),
+                "pass_rate": sum(r["passes"] for r in rows) / len(rows),
+                "majority_baseline": max(
+                    sum(r["passes"] for r in rows), len(rows) - sum(r["passes"] for r in rows)
+                )
+                / len(rows),
+                "auroc": auroc([r["p_true"] for r in rows], [r["passes"] for r in rows]),
+            }
+            for name, rows in sorted(by_length.items())
         },
         "quality_preference_longer_patch_baseline": longer / len(quality) if quality else None,
         "quality_preference_answer_balance": dict(Counter(i["answer"] for i in quality)),
@@ -102,6 +143,7 @@ def main() -> int:
 
     items = load_items(args.items)
     predictions = load_items(args.predictions)
+    thresholds = tuned_thresholds(items, predictions)
     by_id = {i["item_id"]: i for i in items}
     served = sorted({p["model"] for p in predictions})
     latencies = sorted(p["latency_ms"] for p in predictions if p.get("latency_ms") is not None)
@@ -118,9 +160,17 @@ def main() -> int:
         ),
         "results": {
             "majority_floor": score(items, base_rate_predictions(items, args.split), args.split),
-            args.model: score(items, predictions, args.split),
+            args.model: score(items, predictions, args.split, thresholds),
         },
-        "diagnostics": diagnostics(by_id, predictions, args.split),
+        "thresholds": {
+            "values": thresholds,
+            "note": (
+                "Yes/no cutoffs fitted on the development split, because Jev's "
+                "probabilities never cross 0.5. accuracy is the 0.5 decision, "
+                "accuracy_at_threshold uses these, auroc needs neither."
+            ),
+        },
+        "diagnostics": diagnostics(by_id, predictions, args.split, thresholds.get("patch-verdict")),
         "run": {
             "items_queried": len(predictions),
             "failures": 0,

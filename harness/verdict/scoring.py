@@ -123,15 +123,16 @@ def score(
     rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
     seen: set[str] = set()
     for prediction in predictions:
-        item = pool.get(prediction["item_id"])
-        if item is None:
+        matched = pool.get(prediction["item_id"])
+        if matched is None:
             continue
+        item = matched
         if item["item_id"] in seen:
             raise ValueError(f"duplicate prediction for {item['item_id']}")
         seen.add(item["item_id"])
         probs = normalized_probs(item, prediction["probs"])
         truth = answer_label(item)
-        top = max(probs, key=probs.get)
+        top = max(probs, key=lambda label: probs[label])
         rows[item["family"]].append(
             {
                 "correct": top == truth,

@@ -47,7 +47,7 @@ def diagnostics(items: dict, predictions: list[dict], split: str) -> dict:
         item = items.get(prediction["item_id"])
         if item is None or item["split"] != split:
             continue
-        top = max(prediction["probs"], key=prediction["probs"].get)
+        top = max(prediction["probs"], key=lambda label: prediction["probs"][label])
         confusion[item["family"]][f"{answer_label(item)}->{top}"] += 1
         if item["family"] == "patch-verdict":
             mean_p_pass.append(prediction["probs"]["true"])

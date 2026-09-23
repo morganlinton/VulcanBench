@@ -46,7 +46,7 @@ def main() -> int:
     for item in picked:
         prediction = predict(item, model=args.model)
         predictions.append(prediction)
-        top = max(prediction["probs"], key=prediction["probs"].get)
+        top = max(prediction["probs"], key=lambda label: prediction["probs"][label])
         truth = answer_label(item)
         print(
             f"{item['family']:18s} served={prediction['model']:12s} tokens={prediction['input_tokens']} "

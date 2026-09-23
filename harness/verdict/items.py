@@ -299,9 +299,9 @@ def build_items(
         for item in run_items(run_dir, tasks_root, max_patch_chars):
             items.setdefault(item.item_id, item)
     for task_dir in sorted(p for p in Path(tasks_root).iterdir() if p.is_dir()):
-        item = localization_item(task_dir)
-        if item:
-            items.setdefault(item.item_id, item)
+        localized = localization_item(task_dir)
+        if localized:
+            items.setdefault(localized.item_id, localized)
     # Later review dirs win, so list them oldest protocol first.
     for review_dir in review_dirs:
         for item in panel_preference_items(Path(review_dir), tasks_root):

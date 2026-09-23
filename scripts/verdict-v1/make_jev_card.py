@@ -1,270 +1,373 @@
 #!/usr/bin/env python3
-"""Render the shareable VulcanBench Verdict v1 card for Jev.
+"""Render the VulcanBench Verdict v1 model card for Jev.
 
-Three panels: accuracy against the majority-answer floor at a cutoff fitted
-on the development split, the distribution of the probabilities Jev actually
-produced, and the ranking quality that survives having no usable cutoff.
-Monochrome brand styling (see CLAUDE.md); Jev is ink, the floor is muted.
+Same house layout as the Frontier v4 model cards (masthead, title, legend,
+two charts, one table, notes; see scripts/cii-v4-board/make_sol_v37_card.py):
+accuracy against always guessing for every question, the distribution of
+Jev's stated confidence that a fix works, and a table with ranking quality
+and calibration. How the benchmark works is explained on the report page.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import sys
+import math
 from pathlib import Path
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch
+from matplotlib import font_manager
+from matplotlib.patches import FancyBboxPatch, Patch
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "scripts" / "rankings-chart"))
-
-from _common import BRAND, BRAND_MED, GRID, INK, INK2, MUTED, SURFACE, register_fonts  # noqa: E402
-from matplotlib import font_manager  # noqa: E402
-
-MONO = "IBM Plex Mono"  # brand's secondary face, used for every number on the card
-JEV = INK
-FLOOR = "#c9c8c1"
-FAIL = "#b34a3a"
-W, H, DPI = 2560, 1440, 200
-FAMILIES = [
-    ("patch-verdict", "Does this patch\npass every test?"),
-    ("patch-regression", "Does it break\nan existing test?"),
-    ("patch-outcome", "Which of four\noutcomes?"),
-    ("quality-preference", "Which patch is more\nmaintainable?*"),
-]
+PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
+# TypeSafe has no colour in the lab palette; deep magenta clears every existing
+# lab hue, and like the rest every mark stays directly labelled.
+JEV = "#B8407A"
+GUESS = "#d9d7cf"
+FAILS = "#8f8e86"
+WIDTH_IN, HEIGHT_IN = 16, 11.5
+LEFT, RIGHT = 0.06, 0.94
+QUESTIONS = (
+    ("patch-verdict", "Passes every\ntest?", "Does the fix pass every test?"),
+    ("patch-regression", "Breaks an\nexisting test?", "Does it break an existing test?"),
+    ("patch-outcome", "Which of four\noutcomes?", "Which of four test outcomes?"),
+    ("quality-preference", "Which fix is\nbetter written?*", "Which fix is better written?*"),
+)
 
 
-def decided_accuracy(metrics: dict) -> float:
-    """Accuracy at the fitted cutoff where there is one, else the top answer."""
-    return metrics.get("accuracy_at_threshold", metrics["accuracy"]) * 100
+def accuracy(metrics: dict) -> float:
+    """Share correct, at the fitted cutoff where the question has one."""
+    return metrics.get("accuracy_at_threshold", metrics["accuracy"])
 
 
-def panel_accuracy(ax, data: dict) -> None:
-    jev = data["results"][data["model"]]["families"]
-    floor = data["results"]["majority_floor"]["families"]
-    x = range(len(FAMILIES))
-    width = 0.38
-    series = (
-        (-width / 2, floor, FLOOR, "Always answer the most common label"),
-        (width / 2, jev, JEV, "Jev, at a cutoff fitted on held-out items"),
+def stderr(p: float, n: int) -> float:
+    return math.sqrt(p * (1 - p) / n)
+
+
+class Card:
+    def __init__(self) -> None:
+        self.fig = plt.figure(figsize=(WIDTH_IN, HEIGHT_IN), dpi=150, facecolor=PAPER)
+
+    @staticmethod
+    def yf(inches: float) -> float:
+        """Figure fraction for a position measured in inches from the top edge."""
+        return 1 - inches / HEIGHT_IN
+
+    def text(
+        self,
+        x,
+        y_in,
+        label,
+        size=16,
+        bold=False,
+        heading=False,
+        numeric=False,
+        ha="left",
+        color=INK,
+    ):
+        if numeric:
+            family, weight = "IBM Plex Mono", 500 if bold else 400
+        elif heading:
+            family, weight = (
+                ("Chakra Petch SemiBold" if bold else "Chakra Petch Medium"),
+                (600 if bold else 500),
+            )
+        else:
+            family, weight = "Geist", 700 if bold else 400
+        self.fig.text(
+            x,
+            self.yf(y_in),
+            label,
+            fontsize=size,
+            fontfamily=family,
+            weight=weight,
+            ha=ha,
+            va="center",
+            color=color,
+        )
+
+    def line(self, x1, x2, y_in, color=RULE, width=0.8):
+        self.fig.add_artist(
+            plt.Line2D(
+                [x1, x2],
+                [self.yf(y_in), self.yf(y_in)],
+                transform=self.fig.transFigure,
+                color=color,
+                lw=width,
+            )
+        )
+
+    def axes(self, x0, w, top_in, h_in):
+        ax = self.fig.add_axes([x0, self.yf(top_in + h_in), w, h_in / HEIGHT_IN], facecolor=PAPER)
+        ax.tick_params(axis="x", length=0, labelsize=11.5, pad=8)
+        ax.tick_params(axis="y", length=0, labelsize=11, pad=6)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.spines[["left", "bottom"]].set_color(RULE)
+        ax.grid(axis="y", color=RULE, linewidth=0.5)
+        ax.set_axisbelow(True)
+        return ax
+
+
+def masthead(card: Card) -> None:
+    logo = card.fig.add_axes([LEFT, card.yf(0.86), 0.42 / WIDTH_IN, 0.42 / HEIGHT_IN])
+    mark = logo.imshow(plt.imread(REPO / "docs/assets/vulcanbench-logo.png"))
+    mark.set_clip_path(
+        FancyBboxPatch(
+            (0, 0), 1, 1, boxstyle="round,pad=0,rounding_size=.22", transform=logo.transAxes
+        )
     )
-    for offset, source, color, label in series:
-        values = [decided_accuracy(source[family]) for family, _ in FAMILIES]
-        bars = ax.bar([i + offset for i in x], values, width, color=color, label=label, zorder=3)
-        for bar, value in zip(bars, values, strict=True):
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                value + 1.6,
-                f"{value:.0f}",
+    logo.axis("off")
+    card.text(LEFT + 0.038, 0.65, "VulcanBench", 20, True, heading=True)
+    card.text(RIGHT, 0.65, "September 2026", 14, ha="right", color=MUTED)
+    card.line(LEFT, RIGHT, 1.05, INK, 1.2)
+
+
+def title(card: Card, data: dict) -> None:
+    tests = sum(counts["test"] for counts in data["item_counts"].values())
+    card.text(LEFT, 1.78, "VulcanBench Verdict v1: Jev 1.13.0", 33, True, heading=True)
+    card.text(
+        LEFT,
+        2.22,
+        f"{tests:,} questions about {data['source_patches']} code fixes written by AI agents. "
+        "Every correctness answer is checked against the fix's real test results.",
+        15,
+        color=MUTED,
+    )
+    card.fig.add_artist(
+        plt.Line2D(
+            [LEFT + 0.004],
+            [card.yf(2.68)],
+            transform=card.fig.transFigure,
+            marker="o",
+            color=JEV,
+            markersize=8,
+            markeredgecolor=INK,
+            markeredgewidth=0.6,
+            linestyle="none",
+        )
+    )
+    card.text(LEFT + 0.018, 2.68, "Jev 1.13.0  ·  TypeSafe API", 15, True)
+    card.text(
+        RIGHT,
+        2.68,
+        "n=611 per correctness question, n=311 style pairs, n=1,852 overall",
+        13,
+        ha="right",
+        color=MUTED,
+    )
+
+
+def accuracy_chart(card: Card, data: dict) -> None:
+    jev = data["results"][data["model"]]["families"]
+    guess = data["results"]["majority_floor"]["families"]
+    card.text(LEFT, 3.1, "Accuracy against always guessing", 21, True, heading=True)
+    card.text(
+        LEFT,
+        3.42,
+        "Percent correct  ·  higher is better  ·  whiskers ±1 standard error",
+        12,
+        color=MUTED,
+    )
+    ax = card.axes(0.085, 0.405, 3.75, 3.0)
+    width = 0.36
+    for i, (family, _label, _) in enumerate(QUESTIONS):
+        p_jev, p_guess = accuracy(jev[family]), accuracy(guess[family])
+        n = jev[family]["n"]
+        ax.bar(
+            i - width / 2, p_guess * 100, width, color=GUESS, edgecolor=INK, linewidth=0.5, zorder=2
+        )
+        ax.bar(
+            i + width / 2,
+            p_jev * 100,
+            width,
+            color=JEV,
+            edgecolor=INK,
+            linewidth=0.5,
+            yerr=stderr(p_jev, n) * 100,
+            error_kw={"ecolor": INK, "elinewidth": 0.9, "capsize": 3},
+            zorder=2,
+        )
+        for x, value, offset in (
+            (i - width / 2, p_guess, 0),
+            (i + width / 2, p_jev, stderr(p_jev, n)),
+        ):
+            ax.annotate(
+                f"{value * 100:.0f}",
+                (x, (value + offset) * 100),
+                xytext=(0, 5),
+                textcoords="offset points",
                 ha="center",
                 va="bottom",
-                fontsize=13,
-                color=INK if color == JEV else INK2,
-                fontfamily=MONO,
-                fontweight=500,
+                fontsize=10.5,
+                fontfamily="IBM Plex Mono",
+                color=INK,
             )
-    ax.set_xticks(list(x))
-    ax.set_xticklabels([label for _, label in FAMILIES], fontsize=12, color=INK2)
-    ax.set_ylim(0, 108)
-    ax.set_ylabel("accuracy, percent", fontsize=12, color=INK2)
-    ax.set_title(
-        "Accuracy against the majority answer",
-        fontsize=16,
-        color=INK,
-        fontfamily=BRAND_MED,
-        pad=14,
-        loc="left",
+    ax.set_xticks(range(len(QUESTIONS)), [label for _, label, _ in QUESTIONS])
+    ax.set_xlim(-0.6, len(QUESTIONS) - 0.4)
+    ax.set_ylim(0, 112)
+    ax.set_yticks(range(0, 101, 25))
+    ax.legend(
+        handles=[
+            Patch(facecolor=GUESS, edgecolor=INK, linewidth=0.5, label="Always guessing"),
+            Patch(facecolor=JEV, edgecolor=INK, linewidth=0.5, label="Jev"),
+        ],
+        loc="upper left",
+        frameon=False,
+        fontsize=11,
+        ncols=2,
+        bbox_to_anchor=(0, 1.08),
     )
-    ax.legend(frameon=False, fontsize=12.5, loc="lower right", bbox_to_anchor=(1, 1.0), ncols=2)
 
 
-def panel_distribution(ax, data: dict) -> None:
+def confidence_chart(card: Card, data: dict) -> None:
     histogram = data["diagnostics"]["patch_verdict_p_true_histogram"]
-    step = histogram["step"]
-    edges = [float(edge) for edge in histogram["bins"]]
-    passes = [counts["passes"] for counts in histogram["bins"].values()]
+    top = data["results"][data["model"]]["families"]["patch-verdict"]["p_true_max"]
+    x0 = 0.565
+    card.text(x0 - 0.04, 3.1, "Jev's confidence that a fix works", 21, True, heading=True)
+    card.text(
+        x0 - 0.04,
+        3.42,
+        "611 fixes, split by what the tests showed  ·  a yes needs 50%",
+        12,
+        color=MUTED,
+    )
+    ax = card.axes(x0, 0.375, 3.75, 3.0)
+    step = histogram["step"] * 100
+    edges = [float(edge) * 100 for edge in histogram["bins"]]
+    works = [counts["passes"] for counts in histogram["bins"].values()]
     fails = [counts["fails"] for counts in histogram["bins"].values()]
     ax.bar(
-        edges, passes, width=step * 0.92, align="edge", color=JEV, label="really passes", zorder=3
+        edges,
+        works,
+        width=step * 0.9,
+        align="edge",
+        color=JEV,
+        edgecolor=INK,
+        linewidth=0.5,
+        zorder=2,
+        label="Fix really works",
     )
     ax.bar(
         edges,
         fails,
-        width=step * 0.92,
+        width=step * 0.9,
         align="edge",
-        bottom=passes,
-        color=FAIL,
-        label="really fails",
-        zorder=3,
+        bottom=works,
+        color=FAILS,
+        edgecolor=INK,
+        linewidth=0.5,
+        zorder=2,
+        label="Fix really fails",
     )
-    ax.axvline(0.5, color=INK2, linewidth=1.4, linestyle=(0, (4, 3)), zorder=4)
-    ax.text(
-        0.49,
-        ax.get_ylim()[1] * 0.80,
-        "0.5, where a yes\nwould begin",
-        fontsize=11.5,
-        color=INK2,
-        ha="right",
-    )
-    top = data["results"][data["model"]]["families"]["patch-verdict"]["p_true_max"]
-    ax.set_xlim(0, 0.62)
-    ax.set_xlabel(
-        f"Jev's stated probability that the patch passes (highest: {top:.2f})",
-        fontsize=12,
-        color=INK2,
-    )
-    ax.set_ylabel("patches", fontsize=12, color=INK2)
-    ax.set_title(
-        "It never claims a patch passes, though 63% of them do",
-        fontsize=15,
+    ax.axvline(50, color=INK, linewidth=1.1, linestyle=(0, (4, 3)), zorder=3)
+    peak = max(w + f for w, f in zip(works, fails, strict=True))
+    ax.set_ylim(0, peak * 1.18)
+    ax.set_xlim(0, 62)
+    ax.set_xticks(range(0, 61, 10), [f"{v}%" for v in range(0, 61, 10)])
+    last_height = works[-1] + fails[-1]
+    ax.annotate(
+        f"Highest: {top * 100:.0f}%",
+        (edges[-1] + step * 0.45, last_height),
+        xytext=(36, peak * 0.42),
+        ha="left",
+        fontsize=10.5,
+        fontfamily="IBM Plex Mono",
         color=INK,
-        fontfamily=BRAND_MED,
-        pad=14,
-        loc="left",
+        arrowprops={"arrowstyle": "-", "color": INK, "lw": 0.8},
     )
-    ax.legend(frameon=False, fontsize=12, loc="upper left")
+    ax.text(49, peak * 1.08, "Yes threshold", ha="right", va="center", fontsize=10.5, color=INK)
+    ax.legend(loc="upper left", frameon=False, fontsize=11)
 
 
-def panel_auroc(ax, data: dict) -> None:
+def table(card: Card, data: dict) -> float:
     jev = data["results"][data["model"]]["families"]
+    guess = data["results"]["majority_floor"]["families"]
+    overall_jev = data["results"][data["model"]]["overall"]
+    overall_guess = data["results"]["majority_floor"]["overall"]
+    card.text(LEFT, 7.55, "Table 1  |  Every question", 14.5, heading=True)
+    card.line(LEFT, RIGHT, 7.83, INK, 1.2)
+    heads = ("Items", "Always guessing", "Jev", "Ranking (AUROC)", "Calibration error")
+    cols = (0.46, 0.585, 0.695, 0.82, 0.94)
+    card.text(LEFT, 8.07, "Question", 12.5, True)
+    for head, x in zip(heads, cols, strict=True):
+        card.text(x, 8.07, head, 12.5, True, ha="right")
+    card.text(
+        RIGHT,
+        8.33,
+        "Accuracy in %  ·  AUROC 0.5 is chance, 1 is perfect  ·  calibration error 0 is perfect",
+        10,
+        ha="right",
+        color=MUTED,
+    )
+    card.line(LEFT, RIGHT, 8.5, INK, 0.6)
+
     rows = [
-        (label.replace("\n", " ").rstrip("*"), jev[family]["auroc"]) for family, label in FAMILIES
+        (label, jev[family], guess[family], False)
+        for family, _, label in QUESTIONS
+        if family != "quality-preference"
     ]
-    rows = [(label, value) for label, value in rows if value is not None]
-    y = range(len(rows))
-    ax.barh(list(y), [value for _, value in rows], height=0.52, color=JEV, zorder=3)
-    for i, (_, value) in enumerate(rows):
-        ax.text(
-            value + 0.012, i, f"{value:.2f}", va="center", fontsize=13, color=INK, fontfamily=MONO
+    rows.append(("Overall, test-checked questions", overall_jev, overall_guess, True))
+    rows.append((QUESTIONS[-1][2], jev["quality-preference"], guess["quality-preference"], False))
+    y, step = 8.74, 0.35
+    for label, mine, base, emphasis in rows:
+        values = (
+            f"{mine['n']:,}",
+            f"{accuracy(base) * 100:.1f}",
+            f"{accuracy(mine) * 100:.1f}",
+            f"{mine['auroc']:.2f}" if mine.get("auroc") is not None else "",
+            f"{mine['ece']:.2f}",
         )
-    ax.axvline(0.5, color=INK2, linewidth=1.4, linestyle=(0, (4, 3)), zorder=4)
-    ax.text(0.51, -0.42, "0.5, coin flip", fontsize=11.5, color=INK2)
-    ax.set_yticks(list(y))
-    ax.set_yticklabels([label for label, _ in rows], fontsize=11.5, color=INK2)
-    ax.set_ylim(len(rows) - 0.4, -0.75)
-    ax.set_xlim(0, 1.08)
-    ax.set_xlabel(
-        "AUROC: does it rank the right answer higher, whatever the cutoff",
-        fontsize=12,
-        color=INK2,
+        card.text(LEFT, y, label, 13 if emphasis else 12.5, emphasis)
+        for value, x in zip(values, cols, strict=True):
+            card.text(x, y, value, 14 if emphasis else 13.5, emphasis, numeric=True, ha="right")
+        if emphasis:
+            card.line(LEFT, RIGHT, y + step / 2, RULE, 0.6)
+        y += step
+    card.line(LEFT, RIGHT, y - step / 2, INK, 1.2)
+    return y - step / 2
+
+
+def notes(card: Card, data: dict, top: float) -> None:
+    cutoffs = data["thresholds"]["values"]
+    run = data["run"]
+    lines = (
+        "Jev's yes or no answers use a cutoff tuned on a separate set of fixes "
+        f"({cutoffs['patch-verdict']:.2f} and {cutoffs['patch-regression']:.2f}); at the usual 50% it never answers yes. "
+        "Always guessing gives each question's most common answer.",
+        "*Checked against the Muse Spark 1.3 and Grok 4.6 code-quality panel, which is judgment rather than test results, "
+        "so it is left out of the overall row.",
+        f"{run['items_queried']:,} queries, no failures, ${run['total_cost_usd']:.2f} in total, "
+        f"{run['latency_ms_p50']:.0f} ms median latency measured from California. Method and every number: "
+        "vulcanbench.com/benchmarks/verdict-v1-jev.html",
     )
-    ax.set_title(
-        "The ranking underneath carries real signal",
-        fontsize=15,
-        color=INK,
-        fontfamily=BRAND_MED,
-        pad=14,
-        loc="left",
-    )
-    ax.grid(axis="y", visible=False)
-    ax.grid(axis="x", color=GRID, linewidth=0.9, zorder=0)
+    for i, note in enumerate(lines):
+        card.text(LEFT, top + 0.2 + 0.24 * i, note, 11, color=MUTED)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument(
-        "--results",
-        type=Path,
-        default=REPO / "docs" / "results" / "verdict-v1-jev-2026-09" / "verdict-v1-jev.json",
-    )
-    parser.add_argument(
-        "-o",
-        "--out",
-        type=Path,
-        default=REPO / "docs" / "results" / "verdict-v1-jev-2026-09" / "verdict-v1-jev.png",
-    )
+    results_dir = REPO / "docs" / "results" / "verdict-v1-jev-2026-09"
+    parser.add_argument("--results", type=Path, default=results_dir / "verdict-v1-jev.json")
+    parser.add_argument("-o", "--out", type=Path, default=results_dir / "verdict-v1-jev.png")
     args = parser.parse_args()
-    register_fonts()
-    for weight in (400, 500):
-        font_manager.fontManager.addfont(
-            str(REPO / "scripts" / "rankings-chart" / f"ibm-plex-mono-{weight}.ttf")
-        )
+    for font in (REPO / "scripts" / "rankings-chart").glob("*.ttf"):
+        font_manager.fontManager.addfont(font)
+    plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
     data = json.loads(args.results.read_text())
 
-    fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI, facecolor=SURFACE)
-    gs = fig.add_gridspec(
-        2, 2, left=0.055, right=0.975, top=0.785, bottom=0.175, hspace=0.66, wspace=0.28
-    )
-    axes = [fig.add_subplot(gs[0, :]), fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1])]
-    for ax in axes:
-        ax.set_facecolor(SURFACE)
-        for side in ("top", "right"):
-            ax.spines[side].set_visible(False)
-        for side in ("left", "bottom"):
-            ax.spines[side].set_color(GRID)
-        ax.tick_params(colors=INK2, length=0)
-        ax.grid(axis="y", color=GRID, linewidth=0.9, zorder=0)
-    panel_accuracy(axes[0], data)
-    panel_distribution(axes[1], data)
-    panel_auroc(axes[2], data)
-
-    logo = plt.imread(str(REPO / "scripts" / "rankings-chart" / "vb_logo_rounded.png"))
-    logo_ax = fig.add_axes([0.055, 0.885, 0.048, 0.085])
-    logo_ax.imshow(logo)
-    logo_ax.axis("off")
-    fig.text(0.108, 0.938, "VulcanBench", fontsize=27, color=INK, fontfamily=BRAND, va="center")
-    fig.text(0.108, 0.900, "Verdict v1", fontsize=17, color=INK2, fontfamily=BRAND_MED, va="center")
-    run = data["run"]
-    fig.text(
-        0.975,
-        0.938,
-        f"Jev ({data['model']}), TypeSafe AI",
-        fontsize=19,
-        color=INK,
-        fontfamily=BRAND_MED,
-        ha="right",
-        va="center",
-    )
-    fig.text(
-        0.975,
-        0.900,
-        f"{sum(c['test'] for c in data['item_counts'].values()):,} test items · "
-        f"{data['source_patches']} agent patches · {run['latency_ms_p50']:.0f} ms median · "
-        f"${run['total_cost_usd']:.2f} total",
-        fontsize=13,
-        color=INK2,
-        ha="right",
-        va="center",
-        fontfamily=MONO,
-    )
-    fig.text(
-        0.055,
-        0.075,
-        "Answers verified by the hidden test suites of VulcanBench Frontier v4, not by another model.",
-        fontsize=12,
-        color=MUTED,
-        va="center",
-    )
-    fig.text(
-        0.055,
-        0.048,
-        "*Style is the exception: it scores agreement with the Muse and Grok code-quality panel, which is opinion, not ground truth.",
-        fontsize=12,
-        color=MUTED,
-        va="center",
-    )
-    fig.text(
-        0.055, 0.016, "vulcanbench.com", fontsize=12, color=INK2, fontfamily=BRAND_MED, va="center"
-    )
-
-    border = FancyBboxPatch(
-        (0.004, 0.004),
-        0.992,
-        0.992,
-        transform=fig.transFigure,
-        boxstyle="round,pad=0,rounding_size=0.012",
-        linewidth=1.2,
-        edgecolor=GRID,
-        facecolor="none",
-    )
-    fig.patches.append(border)
-    fig.savefig(args.out, facecolor=SURFACE)
-    print(f"wrote {args.out} ({W}x{H})")
+    card = Card()
+    masthead(card)
+    title(card, data)
+    accuracy_chart(card, data)
+    confidence_chart(card, data)
+    notes(card, data, table(card, data))
+    card.fig.savefig(args.out, facecolor=PAPER)
+    plt.close(card.fig)
+    print(f"wrote {args.out}")
     return 0
 
 

@@ -1,4 +1,4 @@
-# VulcanBench Verdict v1: Jev, the model that will not say a patch works
+# VulcanBench Verdict v1: Jev 1.13.0
 
 **September 22, 2026 · VulcanBench Verdict v1 · jev-1.13.0 · 2,163 test items · 745 agent patches · 23 tasks · $0.45**
 

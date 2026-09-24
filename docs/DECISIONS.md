@@ -7,6 +7,36 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-23: integrity audit false flag cleared on published Claude columns
+
+### Decision
+
+The filesystem integrity audit marked Claude Code runs as
+`benchmark_data_access` / `contaminated` whenever the agent read one of the
+CLI's own background-command logs
+(`/private/tmp/claude-<uid>/<slug>/<session>/tasks/<id>.output`), because it
+treated any `/tasks/` path as the benchmark task tree. PR #148 fixed the
+rule. On the owner's instruction (in chat, 2026-09-23) the audit field was
+refreshed on every affected Claude run set. Annotation only: no score,
+pass@1 or published column changes.
+
+### What carried the false flag
+
+- Published Opus 5 summaries (`docs/results/cii-v4-opus5-effort-2026-09/`):
+  8 of 93 runs (high: queuecore, settlecore, matchcore, granarycore;
+  medium: lodgecore; max: matchcore, cellarcore, snapcore). Their agent
+  streams are not on this machine, so they were re-classified from the
+  stored path lists under the new rule and carry a `reclassified` note.
+- Fable 5.1 Frontier v4 sweep (`runs-effort/`, Claude Code 2.1.259 to
+  2.1.261): 20 of 115 runs, fully re-audited from their streams.
+- Opus 5.5 sweep in progress (`runs-effort-opus55/`): 37 of 82 runs, fully
+  re-audited. Runs finished later by a chain on the pre-#148 code need the
+  same refresh.
+
+In every case the flagged paths were the run's own CLI logs; no run read a
+gold patch, hidden tests, another task or `runs/`, and none used the web.
+After the refresh all three sets report 0 contaminated runs.
+
 ## 2026-09-23: Verdict families get an answerability control before a model is blamed
 
 ### Decision

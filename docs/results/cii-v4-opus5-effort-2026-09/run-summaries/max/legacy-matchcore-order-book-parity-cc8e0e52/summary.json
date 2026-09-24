@@ -175,7 +175,7 @@
       "contaminated": false
     },
     "filesystem": {
-      "verdict": "benchmark_data_access",
+      "verdict": "out_of_workspace",
       "out_of_workspace_paths": [
         "/.git/",
         "/0000000100000dfc/",
@@ -206,15 +206,12 @@
         "/tmp/mc/legacy/matchcore-darwin-arm64",
         "/usr/local/bin/python3"
       ],
-      "benchmark_data_paths": [
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-matchcore-order-book-parity-cc8e0e52-cciem6rp-workspace/dd696a42-dbef-44ec-8eae-e445fbb3b849/tasks/bdqpm2byw.output",
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-matchcore-order-book-parity-cc8e0e52-cciem6rp-workspace/dd696a42-dbef-44ec-8eae-e445fbb3b849/tasks/bmku6z7vi.output",
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-matchcore-order-book-parity-cc8e0e52-cciem6rp-workspace/dd696a42-dbef-44ec-8eae-e445fbb3b849/tasks/bq68o1vgz.output"
-      ],
+      "benchmark_data_paths": [],
       "answer_key_paths": [],
-      "contaminated": true
+      "contaminated": false
     },
-    "contaminated": true
+    "contaminated": false,
+    "reclassified": "2026-09-23: recomputed from stored paths under PR #148 (stream not on this machine)"
   },
   "verifier": {
     "scores": {

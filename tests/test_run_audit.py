@@ -285,6 +285,18 @@ def test_fs_task_tree_under_claude_tmp_is_still_flagged(tmp_path: Path) -> None:
     assert audit["contaminated"] is True
 
 
+def test_fs_checkout_task_tree_inside_claude_tmp_still_flags(tmp_path: Path) -> None:
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    repo = "/private/tmp/claude-501/slug/VulcanBench"
+    p = _stream(
+        tmp_path, [_read(f"{repo}/tasks/coding-intelligence-index-v4/oss-task/gold_patch.diff")]
+    )
+    audit = audit_filesystem(p, ws, "oss-task", repo_root=tmp_path / "repo")
+    assert audit["verdict"] == "answer_key_access"
+    assert audit["contaminated"] is True
+
+
 def test_audit_run_combines_both_channels(tmp_path: Path) -> None:
     ws = tmp_path / "workspace"
     ws.mkdir()

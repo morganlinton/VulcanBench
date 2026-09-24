@@ -25,6 +25,7 @@ from harness.verdict.scoring import (  # noqa: E402
     answer_label,
     auroc,
     base_rate_predictions,
+    expected_calibration_error,
     score,
     tuned_thresholds,
 )
@@ -147,6 +148,10 @@ def binary_summary(pairs: list[tuple[float, bool]], cutoff: float | None = None)
         "auroc_ci95": [draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws))]],
         "accuracy_at_half": sum((p >= 0.5) == t for p, t in pairs) / len(pairs),
         "brier": sum((p - t) ** 2 for p, t in pairs) / len(pairs),
+        # Same definition as scoring.score: confidence in the top-ranked answer.
+        "ece": expected_calibration_error(
+            [max(p, 1 - p) for p, _ in pairs], [(p >= 0.5) == t for p, t in pairs]
+        ),
         "p_true_min": min(scores),
         "p_true_max": max(scores),
         "p_true_mean": sum(scores) / len(scores),

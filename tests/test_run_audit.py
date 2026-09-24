@@ -253,6 +253,50 @@ def test_fs_other_task_data_is_still_contamination(tmp_path: Path) -> None:
     assert audit["contaminated"] is True
 
 
+_CC_LOG = (
+    "/private/tmp/claude-501/-private-var-folders-q0-T-vulcanbench-legacy-x-1a2a4a6a-workspace"
+    "/a72a30a1-22df-4fb1-8c29-b09c5303d9ac/tasks/b8ae8jspq.output"
+)
+
+
+def test_fs_claude_code_background_log_is_not_benchmark_data(tmp_path: Path) -> None:
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    p = _stream(
+        tmp_path,
+        [
+            _shell(f'until [ -s "{_CC_LOG}" ]; do sleep 10; done; cat "{_CC_LOG}"'),
+            _read("/a72a30a1-22df-4fb1-8c29-b09c5303d9ac/tasks/b8ae8jspq.output"),
+            _read("/tasks/b8ae8jspq.output"),
+        ],
+    )
+    audit = audit_filesystem(p, ws, "oss-task", repo_root=tmp_path / "repo")
+    assert audit["verdict"] == "out_of_workspace"
+    assert audit["benchmark_data_paths"] == []
+    assert audit["contaminated"] is False
+
+
+def test_fs_task_tree_under_claude_tmp_is_still_flagged(tmp_path: Path) -> None:
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    p = _stream(tmp_path, [_read("/tmp/claude-501/slug/tasks/v4/oss-other/gold_patch.diff")])
+    audit = audit_filesystem(p, ws, "oss-task", repo_root=tmp_path / "repo")
+    assert audit["verdict"] == "benchmark_data_access"
+    assert audit["contaminated"] is True
+
+
+def test_fs_checkout_task_tree_inside_claude_tmp_still_flags(tmp_path: Path) -> None:
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    repo = "/private/tmp/claude-501/slug/VulcanBench"
+    p = _stream(
+        tmp_path, [_read(f"{repo}/tasks/coding-intelligence-index-v4/oss-task/gold_patch.diff")]
+    )
+    audit = audit_filesystem(p, ws, "oss-task", repo_root=tmp_path / "repo")
+    assert audit["verdict"] == "answer_key_access"
+    assert audit["contaminated"] is True
+
+
 def test_audit_run_combines_both_channels(tmp_path: Path) -> None:
     ws = tmp_path / "workspace"
     ws.mkdir()

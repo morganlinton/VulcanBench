@@ -111,7 +111,13 @@ common label.
 
 Measured against a frontier model given the same inputs, though, Jev's
 ranking on the pass question is weak: GPT-6 Astra reaches an AUROC of 0.87
-on the same 611 fixes (see [The control](#the-control)).
+on the same 611 fixes (see [The control](#the-control)). It is also weaker
+than the simplest possible heuristic. In this suite bigger fixes pass more
+often (7% of the published fixes under 50 lines pass, 90% of those over 200), so ranking
+fixes by lines changed alone scores an AUROC of 0.78, above Jev's 0.69.
+Jev's stated confidence follows fix size closely, and among the 417 fixes of
+50 to 199 lines, where size says little, its ranking falls to 0.56, near
+chance, while Astra's holds at 0.81.
 
 ### 3. The four wordings agree with each other, and all of them are compressed
 
@@ -172,16 +178,24 @@ chosen on the 134 development-split questions and applied to the 611
 published ones, the same procedure as Jev's. It made no tool calls and took a
 median of 22 seconds per answer, against 0.3 seconds for Jev.
 
-| Pass question, 611 published fixes | GPT-6 Astra | Jev 1.13.0 |
-|---|---|---|
-| Always guessing | 62.7% | 62.7% |
-| Ranking (AUROC, 95% interval) | **0.87** (0.84 to 0.89) | 0.69 (0.65 to 0.73) |
-| Accuracy at a development-fitted cutoff | **72.5%** (cutoff 0.20) | 62.8% (cutoff 0.17) |
-| Accuracy at the plain 50% line | 67.1% | 37.3% |
-| Stated probability, lowest to highest | 0.00 to 0.95 | 0.09 to 0.42 |
-| Mean stated probability (true rate 62.7%) | 0.34 | 0.22 |
+| Pass question, 611 published fixes | GPT-6 Astra | Jev 1.13.0 | Lines changed alone |
+|---|---|---|---|
+| Always guessing | 62.7% | 62.7% | 62.7% |
+| Ranking (AUROC, 95% interval) | **0.87** (0.84 to 0.89) | 0.69 (0.65 to 0.73) | 0.78 (0.75 to 0.82) |
+| Accuracy at a development-fitted cutoff | **72.5%** (cutoff 0.20) | 62.8% (cutoff 0.17) | 65.1% (127 lines) |
+| Accuracy at the plain 50% line | 67.1% | 37.3% | |
+| Stated probability, lowest to highest | 0.00 to 0.95 | 0.09 to 0.42 | |
+| Mean stated probability (true rate 62.7%) | 0.34 | 0.22 | |
 
-Three things follow.
+Ranking AUROC within each fix size:
+
+| Fix size | Fixes | Share that pass | GPT-6 Astra | Jev | Lines changed alone |
+|---|---|---|---|---|---|
+| Under 50 lines | 68 | 7% | 0.80 | 0.45 | 0.89 |
+| 50 to 199 lines | 417 | 64% | 0.81 | 0.56 | 0.65 |
+| 200 lines or more | 126 | 90% | 0.96 | 0.88 | 0.64 |
+
+Four things follow.
 
 - **The question is answerable.** A frontier model beats always guessing by
   about 10 points from the same text. The hidden quirks limit how well any
@@ -190,6 +204,11 @@ Three things follow.
   ranking gap, 0.18 AUROC, has a bootstrap interval of 0.13 to 0.22. Within
   each of the 19 tasks the gap holds (item-weighted AUROC 0.91 for Astra
   against 0.73 for Jev), so it is not an artifact of some tasks being easier.
+- **Fix size explains most of Jev's ranking, and none of Astra's.** Ranking
+  by lines changed alone beats Jev overall (0.78 against 0.69). In the middle
+  size band, which holds two thirds of the fixes, Jev is near chance (0.56)
+  and Astra is not (0.81). Jev does rank the largest fixes well (0.88), but
+  only 13 of those 126 fail, so that figure rests on few cases.
 - **Astra is under-confident too, but usable.** Its average stated chance
   that a fix passes is 34% where 63% do, yet its answers do cross 50%, and at
   that plain line it still beats guessing, 67.1% against 62.7%. Jev's never
@@ -208,6 +227,8 @@ Read as a ranking, with a cutoff fitted on your own labelled data, it comes
 out about level with answering "it passes" every time. A frontier model given
 the same inputs beats guessing by about 10 points and ranks fixes far better
 (see [The control](#the-control)), so the shortfall is Jev's, not the test's.
+Even the modest ranking Jev has is mostly available for free: sorting fixes
+by how many lines they change does better.
 
 Where the judgment is about the shape of the code rather than its behaviour,
 the picture changes: 89.7% agreement with a calibrated judge panel, AUROC

@@ -7,6 +7,37 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-24: Verdict reports a diff-size baseline beside every model's ranking
+
+### Decision
+
+On Verdict v1's pass question, ranking fixes by lines changed alone is
+reported as a baseline next to "always guessing", in the report, the data
+file and Table 1 of the model card, with its cutoff fitted on the
+development split like every other cutoff. A model's ranking is only read as
+evidence that it reads code when it beats this heuristic, overall and within
+size bands. Owner request, in chat, 2026-09-24.
+
+### Evidence
+
+- The owner asked what size of diffs the suite tests. Median fix: 108 lines
+  changed (10th to 90th percentile 45 to 277), one file, about 2,900 input
+  tokens for Jev. Pass rates climb steeply with size: on the published split,
+  7% under 50 lines, 64% at 50 to 199, 90% at 200 or more.
+- Lines changed alone ranks the 611 published pass questions at AUROC 0.785
+  (bootstrap 0.745 to 0.823) and scores 65.1% at a development-fitted cutoff
+  of 127 lines, above Jev on both (0.690, 62.8%). Jev's stated confidence
+  tracks size (AUROC 0.816 for telling above-median fixes apart); in the
+  50 to 199 line band, 417 fixes, Jev ranks at 0.558 against 0.813 for the
+  GPT-6 Astra control.
+
+### Revisit triggers
+
+- A new source of fixes whose pass rate does not rise with size: keep the
+  baseline, but expect it near 0.5.
+- Other families (regression, four-way outcome) show the same size effect:
+  add their size baselines before reading those rankings.
+
 ## 2026-09-23: integrity audit false flag cleared on published Claude columns
 
 ### Decision

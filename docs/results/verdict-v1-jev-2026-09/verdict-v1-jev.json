@@ -1,4 +1,52 @@
 {
+  "baselines": {
+    "diff_size": {
+      "accuracy_at_dev_cutoff": 0.6513911620294599,
+      "auroc": 0.7846296550776419,
+      "auroc_ci95": [
+        0.7452185324660504,
+        0.8229604709840201
+      ],
+      "by_size": {
+        "200 lines or more": {
+          "auroc_control": 0.9574540503744043,
+          "auroc_jev": 0.876786929884275,
+          "auroc_size": 0.6351259360108917,
+          "n": 126,
+          "pass_rate": 0.8968253968253969
+        },
+        "50 to 199 lines": {
+          "auroc_control": 0.813232373386296,
+          "auroc_jev": 0.5583416087388282,
+          "auroc_size": 0.6532770605759682,
+          "n": 417,
+          "pass_rate": 0.6354916067146283
+        },
+        "under 50 lines": {
+          "auroc_control": 0.7984126984126985,
+          "auroc_jev": 0.45396825396825397,
+          "auroc_size": 0.8888888888888888,
+          "n": 68,
+          "pass_rate": 0.07352941176470588
+        }
+      },
+      "dev_cutoff_lines": 127,
+      "family": "patch-verdict",
+      "lines_changed": {
+        "max": 2918,
+        "median": 107,
+        "p10": 46,
+        "p90": 280
+      },
+      "majority_baseline": 0.6268412438625205,
+      "note": "Rank fixes by added plus removed lines; say 'passes' at or above a size fitted on the development split.",
+      "size_tracking_auroc": {
+        "control": 0.742146148076717,
+        "jev": 0.8158630665380906
+      },
+      "split": "test"
+    }
+  },
   "controls": {
     "note": "A frontier model given exactly Jev's inputs (bug report and fix, no spec, binary or tools), to check that a family is answerable from them. Not a leaderboard column.",
     "runs": [

@@ -200,6 +200,91 @@ def control_block(
     }
 
 
+def lines_changed(item: dict) -> int:
+    """Added plus removed lines in the fix shown to the model (patch families only)."""
+    patch = (
+        item["state"].split("## Candidate patch", 1)[1].split("```diff", 1)[1].rsplit("```", 1)[0]
+    )
+    return sum(
+        1
+        for line in patch.splitlines()
+        if (line.startswith("+") and not line.startswith("+++"))
+        or (line.startswith("-") and not line.startswith("---"))
+    )
+
+
+def size_baseline(items: dict, jev_predictions: list[dict], control_files: list[Path]) -> dict:
+    """Diff size alone as a predictor of 'passes every test', beside Jev and any control.
+
+    A trivial heuristic: bigger fixes pass more often in this suite, so any
+    model's ranking must beat ranking by lines changed before it counts as
+    reading the code. The size cutoff is fitted on the development split,
+    like every other cutoff here, and applied to the test split.
+    """
+    family = "patch-verdict"
+    rows = {
+        split: [i for i in items.values() if i["family"] == family and i["split"] == split]
+        for split in ("dev", "test")
+    }
+    dev_pairs = [(lines_changed(i), bool(i["answer"])) for i in rows["dev"]]
+    candidates = sorted({size for size, _ in dev_pairs})
+    cutoff = max(candidates, key=lambda c: sum((size >= c) == passed for size, passed in dev_pairs))
+    test = rows["test"]
+    sizes = {i["item_id"]: lines_changed(i) for i in test}
+    truth = {i["item_id"]: bool(i["answer"]) for i in test}
+    ids = sorted(sizes)
+    scorers = {
+        "jev": {p["item_id"]: p["probs"]["true"] for p in jev_predictions if p["item_id"] in truth}
+    }
+    for path in control_files:
+        if "-test" in path.stem:
+            scorers["control"] = {p["item_id"]: p["probs"]["true"] for p in load_items(path)}
+    median = statistics.median(sizes.values())
+    buckets = {
+        "under 50 lines": (0, 50),
+        "50 to 199 lines": (50, 200),
+        "200 lines or more": (200, None),
+    }
+    by_bucket = {}
+    for name, (low, high) in buckets.items():
+        members = [i for i in ids if sizes[i] >= low and (high is None or sizes[i] < high)]
+        passed = [truth[i] for i in members]
+        by_bucket[name] = {
+            "n": len(members),
+            "pass_rate": sum(passed) / len(members),
+            "auroc_size": auroc([sizes[i] for i in members], passed),
+            **{
+                f"auroc_{name_}": auroc([score[i] for i in members], passed)
+                for name_, score in scorers.items()
+                if all(i in score for i in members)
+            },
+        }
+    summary = binary_summary([(float(sizes[i]), truth[i]) for i in ids])
+    return {
+        "family": family,
+        "split": "test",
+        "note": "Rank fixes by added plus removed lines; say 'passes' at or above a size fitted on the development split.",
+        "lines_changed": {
+            "median": median,
+            "p10": sorted(sizes.values())[int(0.1 * len(ids))],
+            "p90": sorted(sizes.values())[int(0.9 * len(ids))],
+            "max": max(sizes.values()),
+        },
+        "auroc": summary["auroc"],
+        "auroc_ci95": summary["auroc_ci95"],
+        "dev_cutoff_lines": cutoff,
+        "accuracy_at_dev_cutoff": sum((sizes[i] >= cutoff) == truth[i] for i in ids) / len(ids),
+        "majority_baseline": summary["majority_baseline"],
+        # How closely each model's stated probability follows size: AUROC of the
+        # score for telling above-median fixes from the rest (0.5 = unrelated).
+        "size_tracking_auroc": {
+            name_: auroc([score[i] for i in ids], [sizes[i] > median for i in ids])
+            for name_, score in scorers.items()
+        },
+        "by_size": by_bucket,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--items", type=Path, default=REPO / "verdict-v1-items" / "items.jsonl")
@@ -278,6 +363,7 @@ def main() -> int:
         control_block(by_id, predictions, path, control_cutoffs, thresholds)
         for path in control_files
     ]
+    payload["baselines"] = {"diff_size": size_baseline(by_id, predictions, control_files)}
     if controls:
         payload["controls"] = {
             "note": (

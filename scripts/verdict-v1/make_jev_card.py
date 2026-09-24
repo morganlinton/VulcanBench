@@ -344,21 +344,32 @@ def table(card: Card, data: dict) -> float:
         mine = dict(control["control"], accuracy=control["control"]["accuracy_at_dev_cutoff"])
         base = {"accuracy": control["control"]["majority_baseline"]}
         rows.append(("GPT-6 Astra (control): does the fix pass every test?", mine, base, False))
-    y, step = 8.74, 0.3
+    size = data.get("baselines", {}).get("diff_size")
+    if size:
+        # A heuristic, not a model: rank fixes by lines changed. No probabilities, so no calibration.
+        mine = {
+            "n": jev["patch-verdict"]["n"],
+            "accuracy": size["accuracy_at_dev_cutoff"],
+            "auroc": size["auroc"],
+            "ece": None,
+        }
+        base = {"accuracy": size["majority_baseline"]}
+        rows.append(("Diff size alone (lines changed): does it pass?", mine, base, False))
+    y, step = 8.74, 0.28
     for label, mine, base, emphasis in rows:
         values = (
             f"{mine['n']:,}",
             f"{accuracy(base) * 100:.1f}",
             f"{accuracy(mine) * 100:.1f}",
             f"{mine['auroc']:.2f}" if mine.get("auroc") is not None else "",
-            f"{mine['ece']:.2f}",
+            f"{mine['ece']:.2f}" if mine.get("ece") is not None else "",
         )
         is_control = label.startswith("GPT-6 Astra")
+        is_heuristic = label.startswith("Diff size")
         if is_control:
             card.line(LEFT, RIGHT, y - step / 2, RULE, 0.6)
-        card.text(
-            LEFT, y, label, 13 if emphasis else 12.5, emphasis, color=CONTROL if is_control else INK
-        )
+        color = CONTROL if is_control else (MUTED if is_heuristic else INK)
+        card.text(LEFT, y, label, 13 if emphasis else 12.5, emphasis, color=color)
         for value, x in zip(values, cols, strict=True):
             card.text(x, y, value, 14 if emphasis else 13.5, emphasis, numeric=True, ha="right")
         if emphasis:
@@ -377,14 +388,14 @@ def notes(card: Card, data: dict, top: float) -> None:
         "Always guessing gives each question's most common answer.",
         "*Checked against the Muse Spark 1.3 and Grok 4.6 code-quality panel, which is judgment rather than test results, "
         "so it is left out of the overall row.",
-        "Control: GPT-6 Astra (high effort) given exactly Jev's inputs on the pass question, its cutoff (0.20) tuned the same way. "
-        "It shows the question is answerable; it is not a leaderboard entry.",
+        "Baselines on the pass question, cutoffs tuned on separate fixes: GPT-6 Astra (high effort) on exactly Jev's inputs, "
+        "and ranking fixes by lines changed alone (at least 127). Neither is a leaderboard entry.",
         f"{run['items_queried']:,} queries, no failures, ${run['total_cost_usd']:.2f} in total, "
         f"{run['latency_ms_p50']:.0f} ms median latency measured from California. Method and every number: "
         "vulcanbench.com/benchmarks/verdict-v1-jev.html",
     )
     for i, note in enumerate(lines):
-        card.text(LEFT, top + 0.19 + 0.22 * i, note, 11, color=MUTED)
+        card.text(LEFT, top + 0.17 + 0.21 * i, note, 11, color=MUTED)
 
 
 def main() -> int:

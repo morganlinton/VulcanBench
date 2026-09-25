@@ -90,7 +90,7 @@ def test_floor_takes_the_best_shortcut():
     items = [_pair_item(i, correct_first=i % 4 != 0, unit=f"u{i}") for i in range(40)]
     rows = item_rows(items, [])
     floor, name = floor_for(rows)
-    assert name in {"majority", "shortcut:larger"}
+    assert name in {"majority@0", "shortcut:larger"}
     assert floor == pytest.approx(0.75)
 
 
@@ -180,7 +180,7 @@ def test_score_families_with_per_item_levels_score_by_position():
     fam = score(items, right, samples=20)["families"]["estimate-band"]
     assert fam["accuracy"] == 1.0
     assert fam["mean_level_error"] == 0.0
-    assert fam["floor_strategy"] in {"majority", "uniform"}
+    assert fam["floor_strategy"].startswith("majority@") or fam["floor_strategy"] == "uniform"
     assert fam["brier_skill"] > 0
 
 
@@ -212,3 +212,27 @@ def test_item_id_changes_when_content_changes():
 
     assert build("premises v1").item_id == build("premises v1").item_id
     assert build("premises v1").item_id != build("premises v2").item_id
+
+
+def test_bootstrap_interval_brackets_the_point_estimate():
+    items = []
+    for i in range(400):
+        it = _pair_item(i, correct_first=i % 2 == 0, unit=f"u{i % 80}")
+        it["split"] = "test"
+        items.append(it)
+    # Right on 70% of items.
+    preds = [
+        {
+            "item_id": it["item_id"],
+            "probs": {it["answer"]: 0.9}
+            if n % 10 < 7
+            else {("B" if it["answer"] == "A" else "A"): 0.9},
+        }
+        for n, it in enumerate(items)
+    ]
+    result = score(items, preds, samples=300)
+    value = result["indices"]["verdict_index"]["value"]
+    lo, hi = result["indices"]["verdict_index"]["ci95"]
+    assert lo < value < hi
+    # Roughly symmetric: the fixed floor strategy removes the downward bias.
+    assert abs((hi - value) - (value - lo)) < 0.5 * (hi - lo)

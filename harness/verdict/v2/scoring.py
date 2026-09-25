@@ -82,18 +82,35 @@ def item_rows(
     return rows
 
 
-def floor_for(rows: Sequence[dict[str, Any]]) -> tuple[float, str]:
-    """Best trivial accuracy on these rows and the name of the strategy."""
+def strategy_accuracy(rows: Sequence[dict[str, Any]], strategy: str) -> float:
+    """Accuracy of one trivial strategy: ``majority@<position>``, ``uniform``
+    or ``shortcut:<name>``."""
     n = len(rows)
-    candidates = {
-        "majority": Counter(r["truth_index"] for r in rows).most_common(1)[0][1] / n,
-        "uniform": sum(1 / len(r["labels"]) for r in rows) / n,
-    }
-    names = {name for r in rows for name in r["shortcuts"]}
-    for name in names:
-        candidates[f"shortcut:{name}"] = sum(r["shortcuts"].get(name, False) for r in rows) / n
-    best = max(candidates, key=lambda name: candidates[name])
-    return candidates[best], best
+    if strategy == "uniform":
+        return sum(1 / len(r["labels"]) for r in rows) / n
+    if strategy.startswith("majority@"):
+        position = int(strategy.split("@", 1)[1])
+        return sum(bool(r["truth_index"] == position) for r in rows) / n
+    name = strategy.split(":", 1)[1]
+    return sum(bool(r["shortcuts"].get(name, False)) for r in rows) / n
+
+
+def floor_for(rows: Sequence[dict[str, Any]], strategy: str | None = None) -> tuple[float, str]:
+    """Best trivial accuracy on these rows and the strategy that gives it.
+
+    With ``strategy`` given, that strategy's accuracy instead. Bootstrap
+    resamples pass the strategy chosen on the real data: re-picking the best
+    of several noisy strategies in every resample inflates the floor and
+    biases the interval low.
+    """
+    if strategy is not None:
+        return strategy_accuracy(rows, strategy), strategy
+    majority = Counter(r["truth_index"] for r in rows).most_common(1)[0][0]
+    candidates = [f"majority@{majority}", "uniform"]
+    candidates += [f"shortcut:{name}" for name in sorted({n for r in rows for n in r["shortcuts"]})]
+    scored = {c: strategy_accuracy(rows, c) for c in candidates}
+    best = max(candidates, key=lambda c: scored[c])
+    return scored[best], best
 
 
 def skill(accuracy: float, floor: float) -> float:
@@ -137,10 +154,12 @@ def ranking(rows: Sequence[dict[str, Any]]) -> float | None:
     return sum(values) / len(values) if values else None
 
 
-def family_point(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
+def family_point(
+    rows: Sequence[dict[str, Any]], floor_strategy: str | None = None
+) -> dict[str, Any]:
     n = len(rows)
     accuracy = sum(r["correct"] for r in rows) / n
-    floor, floor_name = floor_for(rows)
+    floor, floor_name = floor_for(rows, floor_strategy)
     out: dict[str, Any] = {
         "n": n,
         "answered": sum(r["answered"] for r in rows),
@@ -207,7 +226,11 @@ def score(
     draws: dict[str, list[float]] = defaultdict(list)
     for _ in range(samples):
         resampled = _resample(rows_by_family, rng)
-        fams = {f: family_point(rows) for f, rows in resampled.items() if rows}
+        fams = {
+            f: family_point(rows, families[f]["floor_strategy"])
+            for f, rows in resampled.items()
+            if rows
+        }
         for f, values in fams.items():
             draws[f"family:{f}"].append(values["skill"])
         for name, value in _indices(fams).items():

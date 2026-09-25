@@ -71,9 +71,11 @@ class Runs:
             "model": "demo:model",
             "finished": finished,
             "effort": {"requested": "low"},
+            # True: the real hash; False: a hash no current task matches (edited
+            # after grading); None: a run from before task hashing.
             "task_hash": task_hash(load_task(task_dir.name, task_dir.parent))
             if exact_hash
-            else "stale",
+            else ("stale" if exact_hash is False else None),
             "integrity_audit": {"contaminated": contaminated},
             "verifier": {
                 "fail_to_pass": dict(results),
@@ -120,8 +122,9 @@ def test_load_archive_filters_and_dedupes(tmp_path):
     runs.add(task, _patch("leak", 10), _all(TARGETS), contaminated=True)
     runs.add(task, "", _all(TARGETS))
     runs.add(task, f"--- a/g\n+++ b/g\n{gold_lines}", _all(TARGETS))  # recites the gold
-    runs.add(task, _patch("stale-ok", 10), _all(TARGETS), exact_hash=False)  # name fallback
-    runs.add(task, _patch("renamed", 10), {"other": True}, exact_hash=False)  # unresolvable
+    runs.add(task, _patch("prehash-ok", 10), _all(TARGETS), exact_hash=None)  # name fallback
+    runs.add(task, _patch("renamed", 10), {"other": True}, exact_hash=None)  # unresolvable
+    runs.add(task, _patch("edited", 10), _all(TARGETS), exact_hash=False)  # graded on old task
     Runs(tmp_path / "runs-contaminated").add(task, _patch("quarantined", 10), _all(TARGETS))
 
     archive = A.load_archive(_ctx(tmp_path).run_roots, (tasks,))
@@ -133,7 +136,7 @@ def test_load_archive_filters_and_dedupes(tmp_path):
     assert archive.skipped["contaminated"] == 1
     assert archive.skipped["empty patch"] == 1
     assert archive.skipped["gold recitation"] == 1
-    assert archive.skipped["task definition not found"] == 1
+    assert archive.skipped["task definition not found"] == 2
     assert archive.skipped["excluded archive dir"] == 1
     # Exact-hash and name-fallback runs are graded against different definitions.
     assert len({p.group for p in archive.patches}) == 2
@@ -476,7 +479,7 @@ def test_failing_test_name_fallback_needs_identical_copies(tmp_path):
     runs = Runs(tmp_path / "runs-fallback")
     first = _task(tasks, "v8", "copied-task")
     second = _task(tasks, "v9", "copied-task")
-    runs.add(first, _patch("stale", 20), _all(TARGETS, ["gamma_case"]), exact_hash=False)
+    runs.add(first, _patch("prehash", 20), _all(TARGETS, ["gamma_case"]), exact_hash=None)
     opts = {"failing_prior_share": 1.0}
     assert len(A.build_failing_test(_ctx(tmp_path, options=opts))) == 1
     # A second copy whose test differs: the graded version is unknown, so drop.

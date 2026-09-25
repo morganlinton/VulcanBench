@@ -191,8 +191,14 @@ A family that fails is rebuilt once or cut. Cuts are listed in the report.
 
 - Item files are private, gitignored (`verdict-v2-items/`) and canaried,
   like v1. Software items embed benchmark tasks.
-- Generated families use a fixed build seed recorded in the item file; a
-  re-run of the suite uses the same seed, a new version uses a new one.
+- Generated families use a fixed build seed (20260924) recorded in
+  `items.manifest.json` beside the item file, with the commit, per-family
+  counts and the item file's SHA-256; that manifest is the freeze record.
+  A re-run of the suite uses the same seed, a new version uses a new one.
+- Ground truth was re-derived independently on a fixed 5% sample per family
+  (`scripts/verdict-v2/audit_ground_truth.py`, 2026-09-25): 298 of 298
+  matched. Archive runs whose recorded task hash matches no current task
+  (edited after grading) are excluded.
 - Mined sources (OSS PRs, advisories) must post-date 2026-06-01.
 - Dev split is used only for fitting and prompt wording; results are test
   split only.

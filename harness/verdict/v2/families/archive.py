@@ -8,9 +8,10 @@ was replaced by the generated ``incident-root-cause`` (DECISIONS, 2026-09-24).
 Sources are every suite in the archive whose runs carry per-test verifier
 results (v1, v2, v3, the python-1 pool, Frontier v4, v4-new and their screens),
 not only Frontier v4. A run is resolved to the task definition it was graded
-against by its recorded ``task_hash``; when the task has since been edited, a
-task directory with the same id and the same fail-to-pass test names is used
-instead, and anything else is skipped. ``source_unit`` is the task id.
+against by its recorded ``task_hash``; a run whose recorded hash matches no
+current task directory (the task was edited after grading) is skipped. Only
+runs from before task hashing fall back to a task directory with the same id
+and the same fail-to-pass test names. ``source_unit`` is the task id.
 
 Filters applied before any family sees a patch:
 
@@ -136,6 +137,9 @@ class Patch:
     def source(self) -> dict[str, Any]:
         return {
             "run_id": self.run_id,
+            # The run directory too: some archived run ids were mangled by a
+            # secret scrubber and are not unique.
+            "run_dir": str(self.run_dir),
             "model": self.model,
             "effort": self.effort,
             "suite": self.suite,
@@ -276,6 +280,11 @@ class _TaskResolver:
             for cand in cands:
                 if self._task_hash(cand) == recorded_hash:
                     return cand, True
+            # A recorded hash that no current directory matches means the task
+            # was edited after grading: what an item would show may not be what
+            # was graded, so the run is skipped (ground-truth audit, 2026-09-25).
+            return None
+        # Runs from before task hashing: fall back to identical target names.
         names = frozenset(targets)
         for cand in cands:
             if self._target_names(cand) == names and (cand / "issue.md").is_file():

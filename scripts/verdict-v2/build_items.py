@@ -9,7 +9,11 @@ builder are listed as unbuilt. Writes no item content to stdout.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
+import subprocess
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 
@@ -75,7 +79,38 @@ def main() -> int:
         return 1
     write_items(items, args.out)
     print(f"wrote {len(items)} items to {args.out}")
+    write_manifest(args, items)
     return 0
+
+
+def write_manifest(args: argparse.Namespace, items: list) -> None:
+    """Record how the item file was built, next to it: the freeze record."""
+
+    def git(*cmd: str) -> str:
+        return subprocess.run(
+            ["git", *cmd], cwd=REPO, capture_output=True, text=True, check=False
+        ).stdout.strip()
+
+    counts: dict[str, Counter[str]] = {}
+    for item in items:
+        counts.setdefault(item.family, Counter())[item.split] += 1
+    manifest = {
+        "suite": "verdict-v2",
+        "built_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "seed": args.seed,
+        "per_family": args.per_family,
+        "families_requested": args.family,
+        "data_root": str(args.data_root),
+        "git_commit": git("rev-parse", "HEAD"),
+        # Uncommitted changes to builders make the commit an incomplete record.
+        "git_dirty": bool(git("status", "--porcelain", "--", "harness", "scripts")),
+        "items": len(items),
+        "items_sha256": hashlib.sha256(args.out.read_bytes()).hexdigest(),
+        "per_family_splits": {f: dict(c) for f, c in sorted(counts.items())},
+    }
+    path = args.out.with_suffix(".manifest.json")
+    path.write_text(json.dumps(manifest, indent=2) + "\n")
+    print(f"wrote manifest to {path}")
 
 
 if __name__ == "__main__":

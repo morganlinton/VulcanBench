@@ -3,6 +3,7 @@ import random
 import pytest
 
 from harness.verdict.typesafe_adapter import build_request, parse_answer
+from harness.verdict.v2.gate import admission
 from harness.verdict.v2.items import (
     choice_question,
     make_item,
@@ -122,3 +123,32 @@ def test_score_questions_round_trip_through_the_adapter():
     assert request["questions"]["q"]["criteria"] == levels
     body = {"answers": {"q": {"type": "score", "probabilities": {"0": 0.2, "1": 0.7, "2": 0.1}}}}
     assert parse_answer(item, body) == {"patch": 0.2, "minor": 0.7, "major": 0.1}
+
+
+def test_gate_admits_an_answerable_unshortcuttable_family_and_explains_failures():
+    items = []
+    for i in range(600):
+        it = _pair_item(i, correct_first=i % 2 == 0, unit=f"u{i % 60}")
+        # Shortcut "larger" is right half the time on a balanced family.
+        it["split"] = "dev" if i < 40 else "test"
+        items.append(it)
+    pilot = items[:40]
+    # Reference right on 34 of 40 (skill 70).
+    reference = [
+        {
+            "item_id": it["item_id"],
+            "probs": {it["answer"]: 0.8, ("B" if it["answer"] == "A" else "A"): 0.2}
+            if n < 34
+            else {it["answer"]: 0.2, ("B" if it["answer"] == "A" else "A"): 0.8},
+        }
+        for n, it in enumerate(pilot)
+    ]
+    gate = admission(items, pilot, reference)["patch-pair"]
+    assert gate["admitted"], gate["failed"]
+    assert gate["reference_skill"] == pytest.approx(70.0)
+
+    saturated = [{"item_id": it["item_id"], "probs": {it["answer"]: 1.0}} for it in pilot]
+    failed = admission(items[:100], pilot, saturated)["patch-pair"]
+    assert not failed["admitted"]
+    assert any("outside 40 to 95" in f for f in failed["failed"])
+    assert any("test items" in f for f in failed["failed"])

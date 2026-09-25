@@ -7,6 +7,57 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-24: Verdict v2 is a 20-family suite scored above the best shortcut
+
+### Decision
+
+VulcanBench Verdict v2 (suite id `verdict-v2`) replaces Verdict v1 as the
+typed-decision suite. It covers twenty families in eight areas across two
+pillars: Software (reading code, reviewing changes, finding bugs, security,
+testing, operations) and General (logic, math, tables, rules and policy).
+Spec: [VERDICT_V2.md](VERDICT_V2.md). Rules:
+
+- Every answer comes from execution, a deterministic tool, or a generator
+  that built the item. Never from a model's opinion, so v1's
+  `quality-preference` family has no v2 counterpart.
+- Items are balanced by construction (pairs, uniform option positions, 50%
+  base rate for yes/no) and the floor is printed per family.
+- Headline unit is skill: `100 * (acc - floor) / (1 - floor)` on the model's
+  own top answer, where floor is the best of majority, uniform guess and the
+  family's shortcut baselines. Verdict Index is the mean skill over shipped
+  families, with Software and General sub-indices; Calibration Index (mean
+  Brier skill score) is published beside it and never folded in. Intervals
+  are bootstrapped by source unit; overlapping intervals are "not separated".
+- A family ships only if, on a 30-item pilot, the GPT-6 Astra reference
+  (high effort, Codex on the subscription, same state, no tools) scores skill
+  40 to 95, the best shortcut scores 15 or less, and the family has at least
+  200 test items from at least 20 source units.
+- Chart rows are Jev (pinned) and GPT-6 Astra labelled as a reference row.
+  No other LLM rows in v2.
+
+Owner decisions, in chat, 2026-09-24: build a well-rounded v2 because the
+v1 headline tied the floor at 63 and covered one skill; include a General
+pillar beyond software; show Jev plus one reference model.
+
+### Evidence
+
+- v1: four of five families asked about the same 745 patches; "always
+  passes" scored 62.7% and Jev 62.8% on the pass question; lines changed
+  alone out-ranked Jev (AUROC 0.785 against 0.690). See the 2026-09-19,
+  2026-09-23 and 2026-09-24 entries.
+- docs.typesafe.ai (read 2026-09-24): `score` questions take an ordered
+  `criteria` list of 2 to 10 levels and return per-level `probabilities`;
+  `choice` allows 255 options; 32k tokens for state plus the longest
+  question; `jev-1.13.0` is still the only versioned id.
+
+### Revisit triggers
+
+- A family fails the gate twice: cut it and list it in the report rather
+  than loosening the gate.
+- The reference row beats Jev by less than the interval on most families:
+  the suite may be too easy to separate models; raise distractor difficulty.
+- TypeSafe ships a new Jev version: new column under its pinned id.
+
 ## 2026-09-24: Verdict reports a diff-size baseline beside every model's ranking
 
 ### Decision

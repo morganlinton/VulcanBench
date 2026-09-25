@@ -1,0 +1,187 @@
+"""QuotaCore metering engine, Python implementation.
+
+Replaces the retired legacy binary (see ``legacy/README.md``). One batch
+per process: usage events on stdin, result lines on stdout, trailer at
+end of input. Format reference: ``docs/SPEC.md`` (mind the drift warning;
+the engine's behavior is the contract).
+
+Behavioral notes (engine contract, where it differs from the spec):
+- Input is consumed in fgets(buf, 512) units: at most 511 bytes per
+  chunk, cut short after the first newline. Each chunk is processed
+  independently.
+- A chunk is cut at the first NUL, CR, or LF byte; an empty result is
+  ignored silently, otherwise it is split on ASCII whitespace, with
+  tokens over 63 chars split into 63-char pieces (extra fields beyond
+  the first five are ignored).
+- Keys are 1-8 ASCII alphanumerics, matched case-insensitively; output
+  echoes the first-seen spelling. Calls are 1-7 ASCII digits; regions
+  are 2 ASCII letters (any case) and do affect premium pricing
+  (P + BR/IN is billed at 5 cents per block instead of 6).
+- A valid zero-call event is silently dropped (no output, no counts,
+  no state change).
+- Tier changes are accepted one step up (F->S, S->P); anything else is
+  rejected TIER.
+- The first accepted event per key consumes calls - calls // 10 quota
+  units when it fits within the quota (otherwise the full call count,
+  same as later events).
+- Crossing into overage bills the overage portion for the key's first
+  event but the whole event for later ones; blocks are ceil(n / 100)
+  minus one when n % 100 == 50.
+"""
+
+from __future__ import annotations
+
+import sys
+
+QUOTAS = {"F": 10_000, "S": 100_000, "P": 1_000_000}
+RATES = {"F": 12, "S": 9, "P": 6}
+_TIER_RANK = {"F": 0, "S": 1, "P": 2}
+# Premium per-block rate keyed by upper-cased region; default is RATES.
+_REGION_RATES = {("P", "BR"): 5, ("P", "IN"): 5}
+
+# fgets(buf, 512) consumes at most 511 bytes per call.
+_CHUNK_SIZE = 511
+
+
+def _is_key(tok: bytes) -> bool:
+    return 1 <= len(tok) <= 8 and tok.isalnum()
+
+
+def _blocks(n: int) -> int:
+    if n <= 0:
+        return 0
+    return (n + 99) // 100 - (1 if n % 100 == 50 else 0)
+
+
+class Engine:
+    def __init__(self, out=None):
+        self.tier: dict[str, str] = {}
+        self.used: dict[str, int] = {}
+        self.spelling: dict[str, str] = {}
+        self.count_ok = 0
+        self.count_rej = 0
+        self.sum_charges = 0
+        self.out = out if out is not None else sys.stdout
+
+    def _emit(self, line: str) -> None:
+        self.out.write(line + "\n")
+
+    def _reject(self, key: str, code: str) -> None:
+        self._emit(f"R {key} {code}")
+        self.count_rej += 1
+
+    def handle_chunk(self, chunk: bytes) -> None:
+        end = len(chunk)
+        for i, b in enumerate(chunk):
+            if b == 0 or b == 13 or b == 10:  # NUL, CR, LF
+                end = i
+                break
+        chunk = chunk[:end]
+        if not chunk:
+            return
+        parts = chunk.split()
+        # The engine scans each field into a 64-byte buffer: tokens
+        # longer than 63 characters are split into 63-char pieces (the
+        # tail pieces act as extra fields).
+        if any(len(p) > 63 for p in parts):
+            split: list[bytes] = []
+            for p in parts:
+                while len(p) > 63:
+                    split.append(p[:63])
+                    p = p[63:]
+                split.append(p)
+            parts = split
+        if not parts:
+            self._reject("????????", "FMT")
+            return
+        if parts[0] != b"Q" or len(parts) < 5 or not _is_key(parts[1]):
+            # The engine scans the op with "%7s": when the first token is
+            # longer than 7 characters, the key scan continues inside it,
+            # so the echo candidate is the token's tail from offset 7.
+            if len(parts[0]) > 7:
+                cand = parts[0][7:]
+            elif len(parts) > 1:
+                cand = parts[1]
+            else:
+                cand = b""
+            echo = cand.decode("ascii") if _is_key(cand) else "????????"
+            self._reject(echo, "FMT")
+            return
+        key = parts[1].decode("ascii")
+        calls_tok, tier_b, region_b = parts[2], parts[3], parts[4]
+        if not (1 <= len(calls_tok) <= 7 and calls_tok.isdigit()):
+            self._reject(key, "CALLS")
+            return
+        if tier_b not in (b"F", b"S", b"P"):
+            self._reject(key, "TIER")
+            return
+        if not (len(region_b) == 2 and region_b.isalpha()):
+            self._reject(key, "REGION")
+            return
+        calls = int(calls_tok)
+        if calls == 0:
+            return
+        tier = tier_b.decode("ascii")
+        region = region_b.decode("ascii").upper()
+        ckey = key.upper()
+
+        first = ckey not in self.tier
+        if first:
+            self.tier[ckey] = tier
+            self.used[ckey] = 0
+            self.spelling[ckey] = key
+        else:
+            old = _TIER_RANK[self.tier[ckey]]
+            new = _TIER_RANK[tier]
+            if new < old or new > old + 1:
+                self._reject(self.spelling[ckey], "TIER")
+                return
+            if new == old + 1:
+                self.tier[ckey] = tier
+
+        rate = _REGION_RATES.get((self.tier[ckey], region), RATES[self.tier[ckey]])
+        limit = QUOTAS[self.tier[ckey]]
+        used = self.used[ckey]
+        remaining = limit - used
+        if calls <= remaining:
+            charge = 0
+        elif first:
+            charge = _blocks(calls - remaining) * rate
+        else:
+            charge = _blocks(calls) * rate
+        used += calls
+        if first and calls <= limit:
+            used -= calls // 10
+        self.used[ckey] = used
+
+        left = max(0, limit - used)
+        self._emit(f"B {self.spelling[ckey]} {charge} {left}")
+        self.count_ok += 1
+        self.sum_charges += charge
+
+    def handle(self, line: str) -> None:
+        self.handle_chunk(line.encode("utf-8", "replace"))
+
+    def finish(self) -> None:
+        self._emit(f"X {self.count_ok} {self.count_rej} {self.sum_charges}")
+
+
+def main() -> None:
+    data = sys.stdin.buffer.read()
+    engine = Engine()
+    pos = 0
+    total = len(data)
+    while pos < total:
+        nl = data.find(b"\n", pos, pos + _CHUNK_SIZE)
+        if nl == -1:
+            chunk = data[pos : pos + _CHUNK_SIZE]
+            pos += _CHUNK_SIZE
+        else:
+            chunk = data[pos : nl + 1]
+            pos = nl + 1
+        engine.handle_chunk(chunk)
+    engine.finish()
+
+
+if __name__ == "__main__":
+    main()

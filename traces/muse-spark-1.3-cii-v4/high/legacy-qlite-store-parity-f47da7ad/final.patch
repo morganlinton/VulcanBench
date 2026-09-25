@@ -1,0 +1,240 @@
+diff --git a/qlite.py b/qlite.py
+index b1e0443..bd954da 100644
+--- a/qlite.py
++++ b/qlite.py
+@@ -13,22 +13,35 @@ import sys
+ 
+ CAPACITY = 4096
+ SCORE_MIN, SCORE_MAX = -999_999, 999_999
++NAME_STORED_MAX = 12
++
++_SCORE_RE = re.compile(r"[+-]?\d+")
+ 
+ 
+ class Store:
+     def __init__(self, out=None):
+-        self.rows: list[dict] = []  # insertion order
++        # Slot storage: deleted rows leave holes that later inserts reuse
++        # in LIFO order; scans iterate in slot order.
++        self.slots: list[dict | None] = []
++        self.free: list[int] = []
+         self.out = out if out is not None else sys.stdout
+ 
++    @property
++    def rows(self) -> list[dict]:
++        return [row for row in self.slots if row is not None]
++
+     def _emit(self, line: str) -> None:
+         self.out.write(line + "\n")
+ 
+-    def _find(self, record_id: str) -> dict | None:
+-        for row in self.rows:
+-            if row["id"] == record_id:
+-                return row
++    def _index(self, record_id: str) -> int | None:
++        for i, row in enumerate(self.slots):
++            if row is not None and row["id"] == record_id:
++                return i
+         return None
+ 
++    def _live_count(self) -> int:
++        return sum(1 for row in self.slots if row is not None)
++
+     # -- commands -----------------------------------------------------------
+ 
+     def ins(self, record_id: str, name: str, score_token: str) -> None:
+@@ -36,47 +49,52 @@ class Store:
+         if not _alnum(record_id, 1, 8) or not _alnum(name, 1, 16) or score is None:
+             self._emit("ERR FMT")
+             return
+-        if self._find(record_id) is not None:
+-            self._emit("ERR DUPKEY")
++        idx = self._index(record_id)
++        if idx is not None:
++            # Duplicate id updates the stored score in place; the stored
++            # (possibly truncated) name is kept.
++            self.slots[idx]["score"] = score
++            self._emit("OK")
+             return
+-        if len(self.rows) >= CAPACITY:
++        if self._live_count() >= CAPACITY:
+             self._emit("ERR FULL")
+             return
+-        self.rows.append({"id": record_id, "name": name, "score": score})
++        row = {"id": record_id, "name": name[:NAME_STORED_MAX], "score": score}
++        if self.free:
++            self.slots[self.free.pop()] = row
++        else:
++            self.slots.append(row)
+         self._emit("OK")
+ 
+     def delete(self, record_id: str) -> None:
+         if not _alnum(record_id, 1, 8):
+             self._emit("ERR FMT")
+             return
+-        row = self._find(record_id)
+-        if row is None:
++        idx = self._index(record_id)
++        if idx is None:
+             self._emit("ERR NOTFOUND")
+             return
+-        self.rows.remove(row)
++        self.slots[idx] = None
++        self.free.append(idx)
+         self._emit("OK")
+ 
+     def get(self, record_id: str) -> None:
+         if not _alnum(record_id, 1, 8):
+             self._emit("ERR FMT")
+             return
+-        row = self._find(record_id)
+-        if row is None:
++        idx = self._index(record_id)
++        if idx is None:
+             self._emit("ERR NOTFOUND")
+             return
+-        self._emit(_row(row))
++        self._emit(_row(self.slots[idx]))
+ 
+     def find(self, pattern: str) -> None:
+         if not 0 < len(pattern) <= 17:
+             self._emit("ERR FMT")
+             return
+-        regex = re.compile(
+-            "^" + ".*".join(re.escape(part) for part in pattern.split("*")) + "$",
+-            re.IGNORECASE,
+-        )
+         count = 0
+-        for row in self.rows:
+-            if regex.match(row["name"]):
++        for row in self.slots:
++            if row is not None and _name_match(row["name"], pattern):
+                 self._emit(_row(row))
+                 count += 1
+         self._emit(f"END {count}")
+@@ -87,48 +105,72 @@ class Store:
+             self._emit("ERR FMT")
+             return
+         count = 0
+-        for row in self.rows:
+-            if lo <= row["score"] <= hi:
++        for row in self.slots:
++            if row is None:
++                continue
++            score = row["score"]
++            if lo == hi:
++                hit = score == lo
++            else:
++                hit = lo <= score < hi
++            if hit:
+                 self._emit(_row(row))
+                 count += 1
+         self._emit(f"END {count}")
+ 
+     def list_all(self) -> None:
+-        for row in self.rows:
+-            self._emit(_row(row))
+-        self._emit(f"END {len(self.rows)}")
++        count = 0
++        for row in self.slots:
++            if row is not None:
++                self._emit(_row(row))
++                count += 1
++        self._emit(f"END {count}")
+ 
+     def sum_scores(self) -> None:
+-        self._emit(f"SUM {sum(row['score'] for row in self.rows)}")
++        # The engine accumulates into a 32-bit signed register.
++        total = sum(row["score"] for row in self.slots if row is not None)
++        total = ((total + 2**31) % 2**32) - 2**31
++        self._emit(f"SUM {total}")
+ 
+     def avg_scores(self) -> None:
+-        if not self.rows:
++        live = [row for row in self.slots if row is not None]
++        if not live:
+             self._emit("ERR EMPTY")
+             return
+-        self._emit(f"AVG {sum(row['score'] for row in self.rows) // len(self.rows)}")
++        total = sum(row["score"] for row in live)
++        n = len(live)
++        # Truncation toward zero (C-style integer division).
++        quotient = abs(total) // n
++        if total < 0:
++            quotient = -quotient
++        self._emit(f"AVG {quotient}")
+ 
+     # -- line protocol ------------------------------------------------------
+ 
+     def handle(self, line: str) -> None:
+-        parts = line.rstrip("\r\n").split()
++        text = line.rstrip("\r\n")
++        if text == "":
++            return
++        parts = text.split()
+         if not parts:
++            self._emit("ERR FMT")
+             return
+         cmd = parts[0]
+-        if cmd == "INS" and len(parts) == 4:
++        if cmd == "INS" and len(parts) >= 4:
+             self.ins(parts[1], parts[2], parts[3])
+-        elif cmd == "DEL" and len(parts) == 2:
++        elif cmd == "DEL" and len(parts) >= 2:
+             self.delete(parts[1])
+-        elif cmd == "GET" and len(parts) == 2:
++        elif cmd == "GET" and len(parts) >= 2:
+             self.get(parts[1])
+-        elif cmd == "FIND" and len(parts) == 2:
++        elif cmd == "FIND" and len(parts) >= 2:
+             self.find(parts[1])
+-        elif cmd == "RANGE" and len(parts) == 3:
++        elif cmd == "RANGE" and len(parts) >= 3:
+             self.range(parts[1], parts[2])
+-        elif cmd == "LIST" and len(parts) == 1:
++        elif cmd == "LIST" and len(parts) >= 1:
+             self.list_all()
+-        elif cmd == "SUM" and len(parts) == 1:
++        elif cmd == "SUM" and len(parts) >= 1:
+             self.sum_scores()
+-        elif cmd == "AVG" and len(parts) == 1:
++        elif cmd == "AVG" and len(parts) >= 1:
+             self.avg_scores()
+         else:
+             self._emit("ERR FMT")
+@@ -138,11 +180,34 @@ def _row(row: dict) -> str:
+     return f"ROW {row['id']} {row['name']} {row['score']}"
+ 
+ 
++def _name_match(name: str, pattern: str) -> bool:
++    # Only a single trailing '*' acts as a wildcard (prefix match); any
++    # other '*' is a literal character that can never match an
++    # alphanumeric name. The first character compares case-sensitively,
++    # the rest case-insensitively.
++    if pattern == "*":
++        return True
++    if pattern.endswith("*") and pattern.count("*") == 1:
++        prefix = pattern[:-1]
++        if len(name) < len(prefix):
++            return False
++        if name[0] != prefix[0]:
++            return False
++        return name[1 : len(prefix)].lower() == prefix[1:].lower()
++    if len(name) != len(pattern):
++        return False
++    if name[0] != pattern[0]:
++        return False
++    return name[1:].lower() == pattern[1:].lower()
++
++
+ def _alnum(value: str, lo: int, hi: int) -> bool:
+-    return lo <= len(value) <= hi and value.isalnum()
++    return lo <= len(value) <= hi and value.isascii() and value.isalnum()
+ 
+ 
+ def _parse_score(token: str) -> int | None:
++    if _SCORE_RE.fullmatch(token) is None:
++        return None
+     try:
+         value = int(token)
+     except ValueError:

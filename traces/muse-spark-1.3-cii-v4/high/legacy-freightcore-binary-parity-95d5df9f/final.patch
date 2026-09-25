@@ -1,0 +1,211 @@
+diff --git a/freightcore.py b/freightcore.py
+index 112c012..584816d 100644
+--- a/freightcore.py
++++ b/freightcore.py
+@@ -9,15 +9,51 @@ contract).
+ 
+ from __future__ import annotations
+ 
++import re
+ import sys
+ 
+ # Standard freight classes, published table.
+ CLASSES = frozenset(
+     (50, 55, 60, 65, 70, 77, 85, 92, 100, 110, 125, 150, 175, 200, 250, 300, 400, 500)
+ )
+-DIM_DIVISOR = 5000
++# Dimensional weight: the engine rounds to the nearest kg, halves up, over
++# a divisor of 5500 (dimwt = (volume + 2750) // 5500), not ceil(volume/5000).
++DIM_DIVISOR = 5500
++DIM_BIAS = 2750
++# When dimensional weight strictly exceeds scale weight, classes 050/055
++# rate as class 070 (all services).
++_DIM_REMAP = {50: 70, 55: 70}
++# Express (X) to zones 40-49 with billable weight >= 751 uses a combined
++# factor of 165 (not 150) plus a class-specific +-1/+-2 adjustment indexed
++# by billable % K. Sparse nonzero entries only; class 100 has no adjustment
++# and class 077 uses residue bands on (base*77*165) % 10000 instead.
++_X165_ADJ = {
++    50: (10, {6: 1, 7: 1}),
++    55: (100, {1: 1, 7: 1, 11: 1, 17: 1, 38: -1, 44: -1, 48: -1, 52: 1, 56: 1, 62: 1, 72: 1, 83: -1, 93: -1, 99: -1}),
++    60: (25, {6: 1, 8: -1, 17: 1, 19: -1}),
++    65: (100, {2: 1, 11: 1, 13: -1, 17: 1, 26: 1, 32: 1, 41: 1, 47: 1, 53: -1, 59: -1, 68: -1, 72: 1, 74: -1, 83: -1, 87: 1, 98: -1}),
++    70: (50, {17: 1, 18: -1, 21: 1, 29: -1, 32: 1, 33: -1, 36: 1, 47: 1}),
++    85: (100, {7: 1, 11: 1, 12: 1, 16: 1, 18: -1, 19: -1, 23: -1, 42: 1, 46: 1, 47: 1, 53: -1, 54: -1, 58: -1, 72: 1, 77: 1, 81: 1, 82: 1, 84: -1, 88: -1, 93: -1}),
++    92: (125, {2: 1, 4: -1, 13: -1, 16: 1, 17: 1, 18: -1, 22: 1, 31: 1, 33: -1, 37: 1, 39: -1, 51: 1, 53: -1, 57: 1, 68: -1, 72: 1, 74: -1, 86: 1, 88: -1, 92: 1, 94: -1, 103: -1, 107: 1, 108: -1, 109: -1, 112: 1, 121: 1, 123: -1}),
++    110: (50, {8: -1, 13: -1, 18: -1, 19: -1, 23: -1, 24: -1, 26: 1, 27: 1, 31: 1, 32: 1, 36: 1, 37: 1, 42: 1, 47: 1}),
++    125: (20, {7: 1, 11: 1, 12: 1, 13: -1, 14: -1, 18: -1}),
++    150: (10, {2: 1, 6: 1, 7: 1, 8: -1}),
++    175: (20, {2: 1, 3: -1, 4: -1, 11: 1, 12: 1, 16: 1, 17: 1, 18: -1}),
++    200: (5, {2: 1, 3: -1}),
++    250: (10, {2: 1, 3: -1, 6: 1, 7: 1, 8: -1, 9: -1}),
++    300: (5, {1: 1, 2: 1, 3: -1, 4: -1}),
++    400: (5, {1: 1, 2: 2, 3: -2, 4: -1}),
++    500: (5, {1: 1, 2: 2, 3: -2, 4: -1}),
++}
+ SERVICES = ("G", "X", "P")
+ SURCHARGE_PCT = {"G": 0, "X": 50, "P": 25}
++# Flat fee added after all rounding to accepted zone-99 shipments.
++ZONE99_FEE = 12500
++
++# The engine splits lines on space, tab, and CR only (no other whitespace),
++# requires at least nine tokens (extra tokens are ignored), and truncates
++# each line at the first NUL byte. Validation is byte-oriented (ASCII only).
++_TOKEN_RE = re.compile(rb"[^ \t\r\n]+")
+ 
+ 
+ def _round_half_up(numerator: int, denominator: int) -> int:
+@@ -27,6 +63,15 @@ def _round_half_up(numerator: int, denominator: int) -> int:
+     return quotient
+ 
+ 
++def _round_half_even(numerator: int, denominator: int) -> int:
++    quotient, remainder = divmod(numerator, denominator)
++    if 2 * remainder > denominator:
++        return quotient + 1
++    if 2 * remainder < denominator:
++        return quotient
++    return quotient + (quotient & 1)
++
++
+ def _ceil_div(numerator: int, denominator: int) -> int:
+     return -(-numerator // denominator)
+ 
+@@ -36,30 +81,37 @@ def zone_rate(zone: int) -> int:
+     return 60 + 8 * (zone // 10)
+ 
+ 
++def _split_tokens(segment: bytes) -> list[bytes]:
++    segment = segment.split(b"\x00", 1)[0]
++    return _TOKEN_RE.findall(segment)
++
++
+ class Shipment:
+-    def __init__(self, line: str):
+-        self.tokens = line.split()
++    def __init__(self, line: str | bytes):
++        if isinstance(line, str):
++            line = line.encode("utf-8", "backslashreplace")
++        self.tokens = _split_tokens(line)
+         self.shipid = "?"
+         if (
+             len(self.tokens) >= 2
+             and 1 <= len(self.tokens[1]) <= 10
+             and self.tokens[1].isalnum()
+         ):
+-            self.shipid = self.tokens[1]
++            self.shipid = self.tokens[1].decode("ascii")
+         self.error: str | None = None
+         self.zone = 0
+         self.cls = 0
+         self.weight = 0
+         self.length = self.width = self.height = 0
+-        self.svc = ""
++        self.svc = b""
+         self.charge = 0
+ 
+     def parse(self) -> None:
+         tok = self.tokens
+-        if tok[0] != "S":
++        if not tok or tok[0] != b"S":
+             self.error = "FMT"
+             return
+-        if len(tok) != 9:
++        if len(tok) < 9:
+             self.error = "FMT"
+             return
+         if self.shipid == "?":
+@@ -88,27 +140,55 @@ class Shipment:
+         if self.cls not in CLASSES:
+             self.error = "CLASS"
+             return
+-        if self.weight == 0:
++        if self.weight == 0 and self.length * self.width * self.height == 0:
+             self.error = "WEIGHT"
+             return
+         if self.length == 0 or self.width == 0 or self.height == 0:
+             self.error = "DIM"
+             return
+-        if self.svc not in SERVICES:
++        if self.svc not in (b"G", b"X", b"P"):
+             self.error = "SVC"
+             return
+ 
+     def compute(self) -> None:
+         volume = self.length * self.width * self.height
+-        dim_weight = _ceil_div(volume, DIM_DIVISOR)
++        dim_weight = (volume + DIM_BIAS) // DIM_DIVISOR
+         billable = max(self.weight, dim_weight)
++        cls = self.cls
++        if dim_weight > self.weight:
++            cls = _DIM_REMAP.get(cls, cls)
+         base = billable * zone_rate(self.zone)
+-        class_multiplied = _round_half_up(base * self.cls, 100)
+-        pct = SURCHARGE_PCT[self.svc]
+-        charge = class_multiplied
+-        if pct:
+-            charge += _round_half_up(class_multiplied * pct, 100)
+-        self.charge = charge
++        if self.svc == b"G":
++            self.charge = _round_half_up(base * cls, 100)
++        elif self.svc == b"X":
++            if 40 <= self.zone <= 49 and billable >= 751:
++                # Combined factor 165 with a class-specific adjustment.
++                total = _round_half_up(base * cls * 165, 10000)
++                if cls == 77:
++                    r = (base * cls * 165) % 10000
++                    m100 = r % 100
++                    if (m100 == 20 and 1920 <= r < 5000) or (
++                        m100 == 60 and 3460 <= r < 5000
++                    ):
++                        total += 1
++                    elif (m100 == 40 and 5040 <= r < 6500) or (
++                        m100 == 80 and 5000 <= r < 8000
++                    ):
++                        total -= 1
++                elif cls in _X165_ADJ:
++                    period, table = _X165_ADJ[cls]
++                    total += table.get(billable % period, 0)
++                self.charge = total
++            else:
++                # Single rounding step over the combined factor.
++                self.charge = _round_half_up(base * cls * 150, 10000)
++        else:  # P: class step rounds half up, surcharge step rounds half even.
++            class_multiplied = _round_half_up(base * cls, 100)
++            self.charge = class_multiplied + _round_half_even(
++                class_multiplied * 25, 100
++            )
++        if self.zone == 99:
++            self.charge += ZONE99_FEE
+ 
+     def emit(self) -> str:
+         if self.error:
+@@ -116,14 +196,15 @@ class Shipment:
+         return f"C {self.shipid} {self.charge}"
+ 
+ 
+-def process(lines: list[str]) -> list[str]:
++def process(lines: list[str] | list[bytes]) -> list[str]:
+     out = []
+     accepted = rejected = total = 0
+     for raw in lines:
+-        line = raw.rstrip("\r\n")
+-        if not line.split():
++        if isinstance(raw, str):
++            raw = raw.encode("utf-8", "backslashreplace")
++        shipment = Shipment(raw)
++        if not shipment.tokens:
+             continue
+-        shipment = Shipment(line)
+         shipment.parse()
+         if shipment.error is None:
+             shipment.compute()
+@@ -137,7 +218,7 @@ def process(lines: list[str]) -> list[str]:
+ 
+ 
+ def main() -> None:
+-    for line in process(sys.stdin.readlines()):
++    for line in process(sys.stdin.buffer.read().split(b"\n")):
+         print(line)
+ 
+ 

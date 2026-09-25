@@ -196,3 +196,19 @@ def test_option_text_shortcuts_find_the_option_nearest_the_rest():
     assert guesses["text-medoid"] in {"A", "B", "C"}
     pair = {"question": choice_question("Which?", {"A": "x", "B": "y"})}
     assert option_text_shortcuts(pair) == {}
+
+
+def test_item_id_changes_when_content_changes():
+    def build(state):
+        return make_item(
+            family="entailment",
+            key="same-key",
+            source_unit="u",
+            state=state,
+            question=noul_question("Follows?"),
+            answer=True,
+            reference="generator",
+        )
+
+    assert build("premises v1").item_id == build("premises v1").item_id
+    assert build("premises v1").item_id != build("premises v2").item_id

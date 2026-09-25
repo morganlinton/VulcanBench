@@ -129,8 +129,13 @@ def make_item(
     shortcuts: dict[str, str] | None = None,
     source: dict[str, Any] | None = None,
 ) -> Item:
+    # The id covers the content, not only the builder's key: a rebuilt item
+    # whose state, question or answer changed gets a new id, so predictions
+    # saved against the old version can never be scored against the new one.
+    content = json.dumps([state, question, answer], sort_keys=True)
+    digest = hashlib.sha256(content.encode()).hexdigest()[:16]
     item = Item(
-        item_id=item_id(family, key),
+        item_id=item_id(family, f"{key}:{digest}"),
         family=family,
         split=split_for_unit(source_unit),
         source_unit=source_unit,

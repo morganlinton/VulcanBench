@@ -63,6 +63,11 @@ def item_rows(
                 "type": item["question"]["type"],
                 "labels": labels,
                 "truth": truth,
+                # Position of the answer in the question's list: families
+                # whose option texts differ per item (bands, clause numbers,
+                # file paths) share positions, not labels.
+                "truth_index": labels.index(truth),
+                "top_index": labels.index(top),
                 "probs": probs,
                 "answered": prediction is not None,
                 "correct": prediction is not None and top == truth,
@@ -81,7 +86,7 @@ def floor_for(rows: Sequence[dict[str, Any]]) -> tuple[float, str]:
     """Best trivial accuracy on these rows and the name of the strategy."""
     n = len(rows)
     candidates = {
-        "majority": Counter(r["truth"] for r in rows).most_common(1)[0][1] / n,
+        "majority": Counter(r["truth_index"] for r in rows).most_common(1)[0][1] / n,
         "uniform": sum(1 / len(r["labels"]) for r in rows) / n,
     }
     names = {name for r in rows for name in r["shortcuts"]}
@@ -98,13 +103,13 @@ def skill(accuracy: float, floor: float) -> float:
 
 
 def brier_skill(rows: Sequence[dict[str, Any]]) -> float | None:
-    """1 minus model Brier over the Brier of forecasting the label frequencies."""
-    counts = Counter(r["truth"] for r in rows)
+    """1 minus model Brier over the Brier of forecasting the answer-position frequencies."""
+    counts = Counter(r["truth_index"] for r in rows)
     n = len(rows)
     reference = 0.0
     for r in rows:
-        base = {label: counts.get(label, 0) / n for label in r["labels"]}
-        reference += sum((p - (label == r["truth"])) ** 2 for label, p in base.items())
+        base = [counts.get(i, 0) / n for i in range(len(r["labels"]))]
+        reference += sum((p - (i == r["truth_index"])) ** 2 for i, p in enumerate(base))
     reference /= n
     if reference <= 0:
         return None
@@ -152,14 +157,7 @@ def family_point(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
         "log_loss": sum(r["log_loss"] for r in rows) / n,
     }
     if rows[0]["type"] == "score":
-        index = {label: i for i, label in enumerate(rows[0]["labels"])}
-        out["mean_level_error"] = (
-            sum(
-                abs(index[max(r["probs"], key=lambda k: r["probs"][k])] - index[r["truth"]])
-                for r in rows
-            )
-            / n
-        )
+        out["mean_level_error"] = sum(abs(r["top_index"] - r["truth_index"]) for r in rows) / n
     return out
 
 

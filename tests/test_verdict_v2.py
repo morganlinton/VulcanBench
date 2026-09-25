@@ -154,3 +154,26 @@ def test_gate_admits_an_answerable_unshortcuttable_family_and_explains_failures(
     assert not failed["admitted"]
     assert any("outside 40 to 95" in f for f in failed["failed"])
     assert any("test items" in f for f in failed["failed"])
+
+
+def test_score_families_with_per_item_levels_score_by_position():
+    items = []
+    for i in range(20):
+        levels = [f"{i * 10 + k} to {i * 10 + k + 1}" for k in range(3)]
+        it = make_item(
+            family="estimate-band",
+            key=f"e{i}",
+            source_unit=f"estimate-band-g{i:02d}",
+            state="s",
+            question=score_question("Which band?", levels),
+            answer=levels[i % 3],
+            reference="generator",
+        ).__dict__
+        it["split"] = "test"
+        items.append(it)
+    right = [{"item_id": it["item_id"], "probs": {it["answer"]: 0.9}} for it in items]
+    fam = score(items, right, samples=20)["families"]["estimate-band"]
+    assert fam["accuracy"] == 1.0
+    assert fam["mean_level_error"] == 0.0
+    assert fam["floor_strategy"] in {"majority", "uniform"}
+    assert fam["brier_skill"] > 0

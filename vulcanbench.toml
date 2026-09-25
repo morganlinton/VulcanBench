@@ -1,0 +1,12 @@
+# VulcanBench operator settings, read by the harness at run time.
+# Loaded by harness/settings.py; every path that starts a benchmark run
+# (vulcanbench run, vulcanbench effort-sweep, run_agent, the sweep launchers)
+# checks it before any model call.
+
+[effort]
+# Effort levels that must never run, for any model, harness or suite.
+# Decision 2026-09-16 (docs/DECISIONS.md): "ultra" is a client-side mode that
+# providers map onto their highest tier, not a distinct API effort, and the
+# board publishes Low to Max only. A request for a blocked level is refused
+# with an error before a run starts.
+blocked = ["ultra"]

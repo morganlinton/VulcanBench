@@ -138,7 +138,7 @@ def _render_task_toml(metadata: dict, org: str) -> str:
         f"canary = {_toml_str(metadata.get('canary', ''))}",
         "",
         "[agent]",
-        # Our uniform 10-hour flat timeout (metadata agent_hints.suggested_timeout_s).
+        # Our uniform flat timeout (metadata agent_hints.suggested_timeout_s; 3 hours since 2026-09-13).
         f"timeout_sec = {_agent_timeout_sec(metadata)}",
         "",
         "[verifier]",

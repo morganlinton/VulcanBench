@@ -117,6 +117,9 @@ _PER_MILLION = 1_000_000.0
 # rates, so their ``cost_usd`` is the *hypothetical* API cost of the same
 # tokens. The run summary marks these with ``cli_agent.billing`` so the
 # number is never mistaken for actual spend.
+# No "devin:" alias on purpose: Devin's SWE models have no public API price
+# (the catalog lists SWE-2 as cost tier "Free"), so devin: specs stay unpriced
+# and the economics receipt reports the API-equivalent value as unavailable.
 _SPEC_ALIASES = {
     "claude-code:": "anthropic:",
     "codex:": "openai:",

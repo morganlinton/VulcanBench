@@ -110,14 +110,22 @@ rather than capability).
 
 Two rules follow:
 
-1. **Uniform flat sanity bound (revised 2026-08-29).** Every task
-   carries a flat 10-hour timeout, following Terminal-Bench 4.0's move
-   to a flat 8-hour agent timeout on all tasks (adopted there so
-   frontier models rarely or never time out, reducing measurement
-   noise). This supersedes the brief per-task 3x-median calibration of
-   2026-08-28; the principle is unchanged (budgets are non-binding
-   sanity bounds, never difficulty levers), the mechanism is simpler
-   and field-aligned. Recorded per task in `budget_calibration`.
+1. **Uniform flat sanity bound (revised 2026-09-13, 3 hours).** Every
+   task carries a flat 3-hour timeout (10800 s), recorded in
+   `suite.json` `flat_budget` and stamped into each task's
+   `agent_hints`. It replaces the 10-hour bound adopted 2026-08-29
+   (itself following Terminal-Bench 4.0's flat 8 hours). The revision
+   was measured, not guessed: across 392 recorded v4 runs the slowest
+   passing run took 168 minutes and every run past 3 hours failed
+   (eight Muse Spark 1.3 runs and one GPT-5.5 run that overran the old
+   cap to 16 hours through a launcher-kill bug, since fixed), so the
+   shorter bound changes no result while capping how long a stuck run
+   can hold a serial sweep. The principle is unchanged:
+   budgets are non-binding sanity bounds, never difficulty levers. Runs
+   before 2026-09-13 ran under the 10-hour bound and stay comparable,
+   since no run in either regime was bound below 3 hours. Full evidence
+   and revisit triggers in `docs/DECISIONS.md`. Recorded per task in
+   `budget_calibration`.
 2. **Time-sliced reporting, never time-sliced running.** Difficulty by
    the clock is reported analytically (`scripts/time_sliced.py`):
    pass@1-within-T computed from recorded durations, always alongside the

@@ -289,7 +289,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     line(left, right, 1.05, INK, 1.2)
 
     # Title
-    text(left, 1.78, "VulcanBench-SWE v4: Astra vs. Fable 5.1", 33, True, heading=True)
+    text(left, 1.78, "VulcanBench Frontier v4: Astra vs. Fable 5.1", 33, True, heading=True)
     text(
         left,
         2.22,

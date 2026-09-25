@@ -513,6 +513,310 @@ run directory `runs-code-quality-maintenance-v3.4`.
   Contributor tier; the judge uses the Standard tier and a separate session
   store. Contention shows up only as pauses, never as changed results.
 
+## Amendment v3.5, September 13, 2026: the same protocol on GPT-5.5 and Luna
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or judges
+changes. The amendment applies the protocol to a second population and
+simplifies the layout. Protocol id `code-quality-maintenance-v3.5`; run
+directory `runs-code-quality-maintenance-v3.5`; runner
+`harness/maintenance_review_v35.py`, which reuses the frozen v3 implementation
+as a library and replaces only the population freeze.
+
+- Population: the September 2026 GPT-5.5 and GPT-5.6 Luna effort sweeps
+  through Codex on the same 23 tasks, one attempt per task and level. GPT-5.5
+  has four levels because its API has no max level; Luna has five. 207
+  submissions when every run is judgeable.
+- A run that did not finish cleanly is excluded rather than judged, with the
+  reason recorded in the population record and the protocol. The first
+  GPT-5.5 extra-high attempt on paddockcore overran the ten-hour cap because
+  a harness bug left the Codex worker alive after the launcher was killed; it
+  was graded as a timeout for the functional score and is not a valid capped
+  attempt for review. The task is re-run once at extra-high under the fixed
+  harness, disclosed as such; if the re-run also fails to finish, the cell is
+  published with 22 judged submissions.
+- Both neutral judges score in this one directory. Muse Spark 1.3 and Grok
+  4.6 keep their v3.4 and v3.3 settings and binary pins, and each retakes the
+  identical calibration exam under v3.5 before any counted call, because the
+  protocol requires the exam before scoring a population, not once per judge.
+- No sensitivity panels. Astra and Opus 5 are not run.
+- The v3.4 record is unchanged and, because this amendment edits this
+  document, v3.4 is re-run from a git worktree pinned at its freeze commit
+  (`VulcanBench-frozen-v34`), as v3.2 and v3.3 are.
+
+## Amendment v3.6, September 15, 2026: the same protocol on GPT-5.6 Terra
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or judges
+changes. The amendment applies the protocol to a third population, the
+September 2026 GPT-5.6 Terra effort sweep through Codex, so that Terra can
+join GPT-5.5, Luna, Astra and Fable 5.1 on one board scored the same way.
+Protocol id `code-quality-maintenance-v3.6`; run directory
+`runs-code-quality-maintenance-v3.6`; runner
+`harness/maintenance_review_v36.py`, which reuses the frozen v3 implementation
+as a library and replaces only the population freeze, as v3.5 does.
+
+- Population: GPT-5.6 Terra at all five levels on the same 23 tasks, one
+  attempt per task and level, 115 submissions when every run is judgeable.
+- A run that did not finish cleanly is excluded rather than judged, with the
+  reason recorded, as in v3.5.
+- A task and level with no attempt is recorded under `missing` in the
+  population record and the protocol, with the reason, and the cell is
+  published with the submissions it has. At the freeze, paddockcore at max
+  has no attempt: from 06:00 PDT on September 15 every launch was refused by
+  the Codex API with "You've hit your usage limit ... try again at Sep 19th,
+  2026 1:10 AM" before any work, so the cell freezes at 22. One refused
+  attempt is kept under `runs-effort-terra/max-quota-refused/` as evidence.
+  When the quota window reopens the task is run once at max and judged as a
+  separate top-up freeze (v3.6.1) that adds one submission to this cell
+  under the same calibration; the v3.6 record is not rewritten.
+- Both neutral judges score in this one directory with their v3.4 and v3.3
+  settings and binary pins, and each retakes the identical calibration exam
+  under v3.6 before any counted call.
+- Diagnostics: with a single model in the population, the pairwise checks
+  pair the same task at two effort levels two steps apart in the level
+  order, one pair per level, skipping a pair whose submission is missing.
+- No sensitivity panels.
+- The v3.5 record is unchanged and, because this amendment edits this
+  document, v3.5 would be re-run from a git worktree pinned at its freeze
+  commit, as v3.2 to v3.4 are.
+
+## Amendment v3.6.1, September 17, 2026: the Terra top-up
+
+Protocol id `code-quality-maintenance-v3.6.1`; run directory
+`runs-code-quality-maintenance-v3.6.1`; runner
+`harness/maintenance_review_v361.py`, derived from the v3.6 runner.
+
+- Population: only the runs the v3.6 protocol recorded as missing, once
+  they exist. The v3.6.1 freeze refuses any run already judged under v3.6
+  and any run not on the v3.6 missing list, and checks that each cell's new
+  rows plus its v3.6 rows plus any remaining gaps make 23.
+- Calibration: both judges' v3.6 verdicts gate the top-up. The exam is per
+  population and the top-up belongs to the v3.6 population; no new
+  calibration calls are made. The v3.6.1 protocol record carries the hashes
+  of the v3.6 protocol, summary, manifest and both calibration files, and
+  the runner's gate checks the v3.6 verdict against the frozen v3.6
+  protocol rather than against its own.
+- Diagnostics: each top-up submission is reviewed twice (primary and
+  repeat); there are no pairwise checks.
+- The run itself: paddockcore at max, made on September 17 after the owner
+  switched the Codex CLI to a second ChatGPT account (Pro plan) so the
+  quota window did not have to be waited out. Same CLI version, same
+  harness, same task hash; the account is the only change and is recorded
+  here and in the population record.
+- Publication merges the v3.6 and v3.6.1 directories; the v3.6 record is
+  not rewritten. Aggregates for the max cell are recomputed over all 23.
+
+## Amendment v3.7, September 18, 2026: the same protocol on GPT-5.6 Sol
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or judges
+changes. Protocol id `code-quality-maintenance-v3.7`; run directory
+`runs-code-quality-maintenance-v3.7`; runner
+`harness/maintenance_review_v37.py`, derived from the v3.6 runner.
+
+- Population: the September 17 to 18, 2026 GPT-5.6 Sol effort sweep through
+  Codex on the same 23 tasks, one attempt per task and level, all five
+  levels complete, 115 submissions. The sweep ran on the second ChatGPT
+  account (Pro plan) throughout, so no account change occurs inside it.
+- Both neutral judges retake the identical calibration exam under v3.7
+  before any counted call. No sensitivity panels. Pairwise diagnostics pair
+  the same task at two effort levels, as under v3.6.
+- Publication: Sol joins GPT-5.5, Luna, Terra, Astra and Fable 5.1 on the
+  Frontier v4 board, completing the GPT-5.6 family.
+
+## Amendment v3.8, September 20, 2026: the same protocol on the private Routine v1 suite
+
+Nothing in the rubric, controls, gates, repeats, seed, weights or judges
+changes. Protocol id `code-quality-maintenance-v3.8`; runner
+`harness/maintenance_review_v38.py`, derived from the v3.7 runner. The run
+directory is `judging/code-quality-maintenance-v3.8` inside the private
+VulcanRoutine repository, because the frozen evidence holds private task
+content; the population record is built there too by
+`scripts/cii-v4-board/build_routine_population.py`. Nothing in this public
+tree names a routine task.
+
+- Population: VulcanBench Routine v1, twelve private routine tickets (small
+  hand-authored Python packages, one clear ticket each), every board model
+  at every effort level it offers through its own CLI: GPT-6 Astra, GPT-5.6
+  Terra, Luna and Sol (five levels each), GPT-5.5 (four), Claude Fable 5.1
+  (five) and SWE-2 through the Devin CLI (medium, high and max, the only
+  variants it has). One attempt per task and level, up to 384 submissions.
+- L2 intent recovery is not applicable, and the amendment changes no
+  arithmetic to say so. L2 scores whether a reviewer can recover a task's
+  frozen legacy quirks from the source. Routine tasks are admitted on the
+  opposite gate to Frontier v4 (one clear ticket, no hidden contracts), so
+  there is no quirk to recover. Each routine task freezes an empty quirk
+  key, every submission's L2 denominator is zero, and the rule this protocol
+  pre-registered on September 7 for a zero denominator applies as written:
+  the L2 share moves to L1 for that submission. Code quality on Routine v1
+  is therefore the L1 reviewed score of the passing panels. No probe or
+  match call is made on submissions.
+- Comparability: Routine Code quality (L1 alone, on routine tickets) and
+  Frontier Code quality (L1 plus L2, on legacy reconstruction) are different
+  constructs. They are never placed on one axis or in one ranking. Within
+  Routine v1 every model and level is scored identically, which is what the
+  routine question needs: the cheapest effort level at which a model's work
+  is both correct and maintainable.
+- Both neutral judges retake the identical calibration exam under v3.8
+  before any counted call, probe and match controls included, so the judges
+  are held to the same bar as on every Frontier amendment. No sensitivity
+  panels. Pairwise diagnostics pair the same task at a model's lowest and
+  highest level, rotating models over the seeded task order.
+- Publication is aggregate only, per model and effort level, as the routine
+  charter requires. Submission-level rows stay in the private record.
+
+## Amendment v3.9, September 21, 2026: the same protocol on Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or judges
+changes. Protocol id `code-quality-maintenance-v3.9`; run directory
+`runs-code-quality-maintenance-v3.9`; runner
+`harness/maintenance_review_v39.py`, derived from the v3.7 runner.
+
+- Population: the September 18 to 21, 2026 Devin SWE-2 effort sweep through
+  the Devin CLI on the same 23 tasks, one attempt per task at each of the
+  three levels SWE-2 offers (medium, high, max), 69 runs. One high run
+  (cellarcore) reached the 3-hour task budget before verification and is
+  excluded rather than judged, as the protocol requires; that cell freezes
+  with 22 submissions and the sweep's pass count for it treats the run as a
+  fail. 68 submissions.
+- Pairwise diagnostics pair the same task at two of the three levels, two
+  steps apart in the model's own ladder, as under v3.7.
+- Both neutral judges retake the identical calibration exam under v3.9
+  before any counted call. No sensitivity panels.
+- Cost: SWE-2 has no public API price, so the population record carries no
+  API-equivalent cost. Tokens, wall clock and Devin's own credit and ACU
+  counters are recorded from the receipts.
+- Publication: SWE-2 joins the Frontier v4 board as the first non-OpenAI,
+  non-Anthropic entry, on the same 33% Code quality profile.
+
+## Amendment v3.10, September 21, 2026: the Sol seat for Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights
+or population changes. Protocol id `code-quality-maintenance-v3.10`; run
+directory `runs-code-quality-maintenance-v3.10`; runner
+`harness/maintenance_review_v310.py`, derived from the v3.9 runner.
+
+- Occasion: Grok 4.6 failed the v3.9 calibration exam on gate 16 (invented
+  departures on the clear control in two of five repeats). The
+  pre-registered single-panel rule would publish Devin from Muse Spark 1.3
+  alone. The owner chose instead to fill the second seat for this
+  population, so that Devin is scored by two neutral judges like every
+  other board entry. Grok's failed calibration stays published under v3.9.
+- The seat: GPT-5.6 Sol through the Codex CLI, model `gpt-5.6-sol`,
+  reasoning effort medium, the same transport, config and read-only
+  sandbox v3 already uses for its Astra sensitivity panel; the Codex CLI
+  file is pinned by hash. Sol takes the identical calibration exam
+  (controls, pairs, probe and match calls) before any counted call, and
+  the one-gate 0.5 allowance applies as written.
+- Neutrality: Sol is an OpenAI model. It is neutral for Devin SWE-2 (a
+  Cognition model) and is admitted here for Devin passes only. It is not
+  admitted as a neutral judge of any OpenAI submission; under this
+  protocol a same-family judge can only be a disclosed sensitivity panel.
+  Every card and report that shows Devin's Code quality states that its
+  panel is Muse and Sol, not the Muse and Grok panel used for the rest of
+  the Frontier v4 board.
+- Muse: its v3.9 calibration verdict, reviews and probes are scored from
+  the v3.9 directory as a scored sibling. `prepare` refuses to freeze
+  unless the v3.10 manifest and signals are byte-identical to v3.9's and
+  Muse's v3.9 calibration passed. No Muse call is repeated.
+- Pairwise diagnostics, repeats and the summary arithmetic are v3's own
+  code, unchanged.
+
+## Amendment v3.11, September 21, 2026: Devin SWE-2, judged population, Muse alone
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.11`; run directory
+`runs-code-quality-maintenance-v3.11`; runner
+`harness/maintenance_review_v311.py`, derived from the v3.9 runner.
+
+- Population: the v3.9 Devin SWE-2 sweep minus three runs that changed no
+  recognized source file (snapcore and vaultcore at high, freightcore at
+  max: file-mode changes on the legacy binaries only, functional 0). A run
+  that produced no code has nothing to judge, and the sweep's automated
+  quality and security metrics are undefined for it by construction, so
+  the population builder now excludes such a run the way it excludes an
+  unfinished one, and lists it under "excluded" with the reason. 65
+  submissions: 23 at medium, 20 at high, 22 at max. The population record
+  is `comparison-judged.json`; `comparison.json` stays as the v3.9 freeze.
+  The sweep's pass counts are unchanged; every excluded run is a fail.
+- Panel: Muse Spark 1.3 alone. Grok 4.6 failed the v3.9 exam and GPT-5.6
+  Sol failed the v3.10 exam, both on gate 16 (invented departures on the
+  clear control). Under the pre-registered single-panel rule nothing
+  further runs for either, and no judge retakes a gate it failed. Both
+  verdicts stay published and are named in the v3.11 protocol record.
+- Calibration: Muse's v3.9 verdict gates this pass and no calibration call
+  is repeated, on the v3.6.1 precedent: the exam is per judge and control
+  set, and neither changed between v3.9 and v3.11. `prepare` refuses to
+  freeze unless that verdict passed under the frozen v3.9 protocol.
+- Every card and report that shows Devin's Code quality states that it is
+  a single-judge score, not the two-judge mean behind the rest of the
+  Frontier v4 board.
+
+## Amendment v3.12, September 22, 2026: Muse Spark 1.3 judged by Claude Opus 5
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.12`; run directory
+`runs-code-quality-maintenance-v3.12`; runner
+`harness/maintenance_review_v312.py`, derived from the v3.9 runner.
+
+- Population: the September 6 to 18, 2026 Muse Spark 1.3 Contributor-tier
+  effort sweep through Muse Code 1.0.3 on the same 23 tasks, one attempt per
+  task at minimal, low, medium, high and extra-high (the Contributor tier
+  offers no max). Runs that did not finish, or that changed no recognized
+  source file, are excluded rather than judged and listed with the reason;
+  each cell freezes with the submissions it has (100 of 115 runs: 21, 18,
+  20, 20, 21). The sweep's early runs (minimal and 17 low tasks) ran under
+  the former 10-hour task bound; the sweep record carries that history and
+  the card discloses it.
+- Panel: Claude Opus 5 through the Claude Code CLI, alone, under the
+  settings v3.2 froze for its Opus 5 panel (model `claude-opus-5`,
+  reasoning effort medium, CLI 2.1.261 pinned by hash, the identity and
+  subscription-quota guards, the reviewer-fallback policy of September 7
+  with the count disclosed). Opus 5 passed every gate under v3.2. It is the
+  only judge here because Muse Spark 1.3 cannot judge its own submissions
+  and Grok 4.6 and GPT-5.6 Sol failed their most recent exams. Opus 5 is
+  neutral for Meta's model and is not admitted as a neutral judge of
+  Anthropic submissions. It takes the identical calibration exam under this
+  protocol before any counted call; the one-gate 0.5 allowance applies as
+  written. If it fails, nothing is published for this population.
+- Every card and report that shows Muse's Code quality states that it is a
+  single-judge score from a different judge than the Muse and Grok panel
+  behind the rest of the Frontier v4 board, and is not placed in one ranking
+  with those scores without that note.
+
+## Amendment v3.13, September 22, 2026: a second judge for Devin SWE-2
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes. Protocol id `code-quality-maintenance-v3.13`; run directory
+`runs-code-quality-maintenance-v3.13`; runner
+`harness/maintenance_review_v313.py`, derived from the v3.12 runner.
+
+- Occasion: v3.11 published Devin SWE-2 from one judge because Grok 4.6
+  (v3.9) and GPT-5.6 Sol (v3.10) both failed the exam on gate 16. Claude
+  Opus 5 passed the identical exam under v3.12 with no allowance used, so
+  the second seat is filled rather than left empty.
+- Population: the v3.11 freeze, byte for byte. `prepare` refuses unless the
+  manifest and signals hash equal to v3.11's and Muse's v3.11 calibration
+  passed. 65 judged submissions: 23 medium, 20 high, 22 max.
+- Panel: Muse Spark 1.3 scored from its v3.11 pass as a scored sibling, and
+  Claude Opus 5 in the second seat under the settings, identity and quota
+  guards, fallback policy and CLI pin v3.2 froze for it. Opus 5 retakes the
+  exam here before any counted call. It is neutral for a Cognition model and
+  is not admitted as a neutral judge of Anthropic submissions. If it fails,
+  nothing changes and v3.11's single-judge publication stands.
+- Comparability: a Devin score published under v3.13 is a two-judge mean of
+  Muse Spark 1.3 and Claude Opus 5, not the Muse and Grok pair behind the
+  other Frontier v4 entries. Every card and report says which pair it used.
+- The protocol document is frozen as a copy inside the run directory, as
+  v3.8 does, so concurrent protocols stop colliding on one file. Future
+  amendments should do the same.
+
+- Outcome, September 22, 2026: Claude Opus 5 failed the exam under this
+  amendment (gate 4 short by 0.10 and gate 14 on the pair control 0 against
+  control 3 outright, two failing gates, so the allowance does not apply).
+  No counted call was made. This amendment is recorded as a failed attempt:
+  Devin SWE-2 remains published under v3.11 from Muse Spark 1.3 alone, and
+  nothing on the board or in any report changes. The operations log carries
+  the detail.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

@@ -1,0 +1,4166 @@
+{
+ "cells": {
+  "sol/extra-high": 23,
+  "sol/high": 23,
+  "sol/low": 23,
+  "sol/max": 23,
+  "sol/medium": 23
+ },
+ "excluded": [],
+ "levels": {
+  "sol": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "sol": "GPT-5.6 Sol in Codex"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": 0.724305,
+   "duration_s": 246.922,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T01:02:39.771334+00:00",
+   "functional": 0.7778,
+   "model": "sol",
+   "quality": 0.8206,
+   "reported_tokens": 668385,
+   "run_id": "legacy-blendcore-binary-parity-1f274ed7",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 668385,
+    "result_receipts": 1,
+    "stream_sha256": "f5d3df16c17cdb1f6043751c6cd6822eea3a04ae37a9e79142bd98d496c026e1",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 573952,
+     "input_tokens": 661073,
+     "output_tokens": 7312,
+     "reasoning_output_tokens": 2320
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-blendcore-binary-parity-1f274ed7",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "ae068d39e65f01a14cb0b1d405dcc0166bd538077d368026ffbdfe5d02d30823",
+    "summary": "757ecb24cfab480d03f49ac4edae1041316a91e399ae939a1667a6e96e40aad3",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-18T00:58:32.844486+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.15661,
+   "duration_s": 1843.256,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T02:12:09.303508+00:00",
+   "functional": 0.5,
+   "model": "sol",
+   "quality": 0.7541,
+   "reported_tokens": 5429502,
+   "run_id": "legacy-cellarcore-binary-parity-4f0888dc",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5429502,
+    "result_receipts": 1,
+    "stream_sha256": "3acde1ea223a55cd92ec19e7d56c2c22183651fac8e5fa5e3b6a21a9ea9d5324",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5297664,
+     "input_tokens": 5397615,
+     "output_tokens": 31887,
+     "reasoning_output_tokens": 13225
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-cellarcore-binary-parity-4f0888dc",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "8f64024e4e8b0530860c130bbf34c830c7dc1f97e01b37c3ebede6f75fb4bbae",
+    "summary": "498db58338c1547c58a745de13dbac34356480ddf13809471f077c5da784059f",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-18T01:41:26.040576+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.767035,
+   "duration_s": 369.722,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T23:33:40.272065+00:00",
+   "functional": 0.5,
+   "model": "sol",
+   "quality": 0.8225,
+   "reported_tokens": 903290,
+   "run_id": "legacy-codeccore-binary-parity-16fa8a2e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 903290,
+    "result_receipts": 1,
+    "stream_sha256": "ce9200ffafcd2fbbe131a20782c3ba94d9bb7b0600b56bbb7c3df4f7b1726958",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 853248,
+     "input_tokens": 889192,
+     "output_tokens": 14098,
+     "reasoning_output_tokens": 3582
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-codeccore-binary-parity-16fa8a2e",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "0c14b2a672d5a92c9a39c6233971e0d08052fedd5c65aa3c3dc17f71a2010d99",
+    "summary": "3df33a980e686f5c665d4537973c35f1fdba7aaa9e5e216d8df95f6acb62e00a",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-17T23:27:30.543859+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.361345,
+   "duration_s": 763.528,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T01:30:32.083404+00:00",
+   "functional": 0.7143,
+   "model": "sol",
+   "quality": 0.7389,
+   "reported_tokens": 3433057,
+   "run_id": "legacy-depotcore-binary-parity-e2c95df4",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3433057,
+    "result_receipts": 1,
+    "stream_sha256": "292442a277bdbde8afce0ff2e849d76dd7adcda5d7269e225fee04638ae3cd6f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3272192,
+     "input_tokens": 3407494,
+     "output_tokens": 25563,
+     "reasoning_output_tokens": 10928
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-depotcore-binary-parity-e2c95df4",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "36d0b53a2e4440c88dbe532725177f1738a7e0f198dac24dc10efb0da52b7352",
+    "summary": "0960c136ba2dcdeacd07999b4eef7632518d714edb3b23e3eb38ca0022d46a7f",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-18T01:17:48.547375+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.225175,
+   "duration_s": 512.074,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T23:27:30.417281+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7913,
+   "reported_tokens": 1508705,
+   "run_id": "legacy-freightcore-binary-parity-be0c0d52",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1508705,
+    "result_receipts": 1,
+    "stream_sha256": "cad874b095a1bc367e6523a2e840bb0cb45555d630df6bb468518e126fa09fae",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1426048,
+     "input_tokens": 1488447,
+     "output_tokens": 20258,
+     "reasoning_output_tokens": 7843
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-freightcore-binary-parity-be0c0d52",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "3e8589cc2a783faa449e5d94dd1662b6a762f12a4e3115b60b2f11dbc22bec16",
+    "summary": "d5d8d400eb6b45c3bb379600a6eca68b497e46a69bc24989a5ec706e4c31cbe4",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-17T23:18:58.339054+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.868537,
+   "duration_s": 611.623,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T01:17:48.398366+00:00",
+   "functional": 0.5,
+   "model": "sol",
+   "quality": 0.7086,
+   "reported_tokens": 2831919,
+   "run_id": "legacy-granarycore-binary-parity-c99fcd5e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2831919,
+    "result_receipts": 1,
+    "stream_sha256": "43a9a4813714a10a37a7aa38f5eee15da3ad8351cf11142f32da13d4b3c140ca",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2731392,
+     "input_tokens": 2808552,
+     "output_tokens": 23367,
+     "reasoning_output_tokens": 7269
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-granarycore-binary-parity-c99fcd5e",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "0f9c8403dd05d073646639d04ef3f03a34427d3c9042aab8a8152f764760f580",
+    "summary": "adbe92935b531f896da36e446d309f4f5f895ae6812e48f55f9e3f2adfd546cf",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-18T01:07:36.766508+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.288726,
+   "duration_s": 695.367,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:28:16.301450+00:00",
+   "functional": 0.5,
+   "model": "sol",
+   "quality": 0.8119,
+   "reported_tokens": 3403168,
+   "run_id": "legacy-hedgecore-binary-parity-8295f14c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3403168,
+    "result_receipts": 1,
+    "stream_sha256": "d5cb814dbd32e25e5b06108936d91fbde5af702639432ecac0bef89e64a30ffd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3277696,
+     "input_tokens": 3373433,
+     "output_tokens": 29735,
+     "reasoning_output_tokens": 12442
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-hedgecore-binary-parity-8295f14c",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "4b9c36e381c9c4ce31b4781c7ed08f0e0f6f7f51f93bfa2de49429c2ff1fe4ab",
+    "summary": "18346838763ab7fe4c0d42660388bd167da7c56df777afa61396e6359bdb623e",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-18T00:16:40.928794+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.368565,
+   "duration_s": 653.669,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T01:41:25.905802+00:00",
+   "functional": 0.0833,
+   "model": "sol",
+   "quality": 0.7681,
+   "reported_tokens": 1615474,
+   "run_id": "legacy-lodgecore-binary-parity-4dcbd7ad",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1615474,
+    "result_receipts": 1,
+    "stream_sha256": "3ea3fef94513a6b3ff635645e2ba7af642030cf15fa28fad39e94bf4629d56e2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1523072,
+     "input_tokens": 1591116,
+     "output_tokens": 24358,
+     "reasoning_output_tokens": 12263
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-lodgecore-binary-parity-4dcbd7ad",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "d2b6dd1eabcfc0f92300676d2fde8fed12f6de7fa4116da8e447a6c5ae1eecfa",
+    "summary": "ba81ac64cd520adbcfd51aaa0dfef7926e0aaf9a3a07b53a85a1800e16fc7db9",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-18T01:30:32.229606+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.188591,
+   "duration_s": 486.505,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T22:55:46.600712+00:00",
+   "functional": 0.7778,
+   "model": "sol",
+   "quality": 0.7691,
+   "reported_tokens": 1391123,
+   "run_id": "legacy-matchcore-order-book-parity-033fcb40",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1391123,
+    "result_receipts": 1,
+    "stream_sha256": "098e23e76e9266dd62197e3389714b01dfa4491b5917200a389236258fd0feb7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1299968,
+     "input_tokens": 1372124,
+     "output_tokens": 18999,
+     "reasoning_output_tokens": 7291
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-matchcore-order-book-parity-033fcb40",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "e1f0239035352447118fff0bf19ba15546c97b1e27f7f1a33f90a867216372bf",
+    "summary": "716841abf49c183cda06a753fd29568260e39194b6612778a79991ab5efa97e0",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-17T22:47:40.090766+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.667603,
+   "duration_s": 344.413,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T23:18:58.207897+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8142,
+   "reported_tokens": 765708,
+   "run_id": "legacy-metercore-binary-parity-a28e4bd4",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 765708,
+    "result_receipts": 1,
+    "stream_sha256": "8331256259acafe8dcdca034e85a46f23c162cc0055c35f82a5b08d74f1639fd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 717568,
+     "input_tokens": 753957,
+     "output_tokens": 11751,
+     "reasoning_output_tokens": 3033
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-metercore-binary-parity-a28e4bd4",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "5f1e038ebaed2d0095179374a4ef72bfaba7255fd1505b9953c42907dd02fcee",
+    "summary": "46729329cf21656ffdff8d265962713f6438bd58e35b03b9d9635f3f559794aa",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-17T23:13:13.789910+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.798411,
+   "duration_s": 472.827,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:58:32.711611+00:00",
+   "functional": 0.0,
+   "model": "sol",
+   "quality": 0.8239,
+   "reported_tokens": 891850,
+   "run_id": "legacy-pacecore-binary-parity-b33a8a30",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 891850,
+    "result_receipts": 1,
+    "stream_sha256": "f0124d16f2e1bf6baa6312615448b6f5f80421d1d001164889beb38d0ca128ba",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 839168,
+     "input_tokens": 876099,
+     "output_tokens": 15751,
+     "reasoning_output_tokens": 6431
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-pacecore-binary-parity-b33a8a30",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "5f58585eb7d6a62262a69bb80f79d940db67721499d0833e1fa42de5240ad63f",
+    "summary": "19b2745ef51c7984dafd2917dab66b226a8e02ce181b029982d76b700cd8372f",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-18T00:50:39.878297+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.32855,
+   "duration_s": 643.432,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T02:22:52.939936+00:00",
+   "functional": 0.2667,
+   "model": "sol",
+   "quality": 0.656,
+   "reported_tokens": 1698344,
+   "run_id": "legacy-paddockcore-binary-parity-03b3f49b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1698344,
+    "result_receipts": 1,
+    "stream_sha256": "3e44d68ee120f9b07ef28603c6aa9e6a5705df766c22b3325b8e5a7d8e8dc299",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1624576,
+     "input_tokens": 1674366,
+     "output_tokens": 23978,
+     "reasoning_output_tokens": 9256
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-paddockcore-binary-parity-03b3f49b",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "ab4b7b2036c806d93ac7398154f281d4a25f5bbc534a6329a0b16e40171aea8b",
+    "summary": "b273116a91fa6dafda72efaf8e952189be9c74fd958de70d856e3a969c8b9a55",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-18T02:12:09.501673+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.313708,
+   "duration_s": 806.214,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T23:13:13.645193+00:00",
+   "functional": 0.9,
+   "model": "sol",
+   "quality": 0.8017,
+   "reported_tokens": 3419779,
+   "run_id": "legacy-payrollcore-binary-parity-16e926cd",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3419779,
+    "result_receipts": 1,
+    "stream_sha256": "44251724c61164f8c188e2fbdc5c441a465d244589837852da0fa655553625c4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3297920,
+     "input_tokens": 3388085,
+     "output_tokens": 31694,
+     "reasoning_output_tokens": 12427
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-payrollcore-binary-parity-16e926cd",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "e92912d52ea1d910ef02ed6fe36c68f1c2bc5d8c473a72f52a99fd8f2e81c9e4",
+    "summary": "1d28ed94c96afc2377e48d6f01d9bad0453ffae4e081942dc09f41b8f22eb643",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-17T22:59:47.423388+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.555078,
+   "duration_s": 240.541,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T22:59:47.291136+00:00",
+   "functional": 0.0,
+   "model": "sol",
+   "quality": 0.7975,
+   "reported_tokens": 508988,
+   "run_id": "legacy-qlite-store-parity-01ef118a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 508988,
+    "result_receipts": 1,
+    "stream_sha256": "42e94a0b8916d7318943a3a795f6aa6d02cf3acaec1a1b0462c3c1718db5edb2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 453376,
+     "input_tokens": 499533,
+     "output_tokens": 9455,
+     "reasoning_output_tokens": 2898
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-qlite-store-parity-01ef118a",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "6220408d9cf9b3a855e59fb48961295429017ff0a88616f1806c3c5b7be33785",
+    "summary": "f8441ecf9ff7d3c6bbe09375a7d1ddf5cc8b1d38a27e36e24974c40a7d389df9",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-17T22:55:46.745357+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.320838,
+   "duration_s": 908.881,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:16:40.779374+00:00",
+   "functional": 0.625,
+   "model": "sol",
+   "quality": 0.7989,
+   "reported_tokens": 1684259,
+   "run_id": "legacy-queuecore-binary-parity-013cad64",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1684259,
+    "result_receipts": 1,
+    "stream_sha256": "5526b05ea3c6ae9fb88f98700c16271bb7d3e3192069a74a404c6fe40be5c6bf",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1612544,
+     "input_tokens": 1659949,
+     "output_tokens": 24310,
+     "reasoning_output_tokens": 5389
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-queuecore-binary-parity-013cad64",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "502108ccbf37ce66d91c64f74ff805dbc884af024bfbd1a131a6d703ad702ff5",
+    "summary": "09fa81991954026e35e7e9bff990d260e42711f05f154670483541bb082019d3",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-18T00:01:31.889073+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.956346,
+   "duration_s": 441.612,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T23:41:02.038880+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8096,
+   "reported_tokens": 898189,
+   "run_id": "legacy-quotacore-binary-parity-c283192f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 898189,
+    "result_receipts": 1,
+    "stream_sha256": "fee41df21745a04ba1f11c020139c03772211fbf81d483e681e5577caed38e88",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 798976,
+     "input_tokens": 883195,
+     "output_tokens": 14994,
+     "reasoning_output_tokens": 6996
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-quotacore-binary-parity-c283192f",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "4889d803aa4bd16d0f5bd338bd9f8ca636fdb2b3364b56dc3e8966aed188d481",
+    "summary": "27328a242c90101efa1ec897c1b643e22ddad37b64846467f3bed4ff1cfb4eef",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-17T23:33:40.422895+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.226978,
+   "duration_s": 506.264,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:43:18.567337+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8252,
+   "reported_tokens": 1451335,
+   "run_id": "legacy-reflowcore-binary-parity-21b42bd8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1451335,
+    "result_receipts": 1,
+    "stream_sha256": "167fee1896887ade3f468a5ae1edcd5db8fb5b3d0a4439c4988b8ff96ad09e7e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1368576,
+     "input_tokens": 1429553,
+     "output_tokens": 21782,
+     "reasoning_output_tokens": 10794
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-reflowcore-binary-parity-21b42bd8",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "e921a07b33303339afcfc57a6f0c47b3ea8719914aeb40f8f3c0e36f09b749ba",
+    "summary": "bb224107271819dfeae8987ba72ee72427843cfee4b8ee607ca2ef514a098b8a",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-18T00:34:52.283742+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.677742,
+   "duration_s": 395.521,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:34:51.984519+00:00",
+   "functional": 0.875,
+   "model": "sol",
+   "quality": 0.7966,
+   "reported_tokens": 612894,
+   "run_id": "legacy-schedcore-binary-parity-5c4a5283",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 612894,
+    "result_receipts": 1,
+    "stream_sha256": "24f6f333ff200359cad8c593672399c094cafec39bbd7f3aa5221b341c5ff3fd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 552576,
+     "input_tokens": 599429,
+     "output_tokens": 13465,
+     "reasoning_output_tokens": 3542
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-schedcore-binary-parity-5c4a5283",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "eee08de302a828286b4bf524b424f06e2fa27b169e343b3a561c17dddbc797ad",
+    "summary": "7352f08f01dd4738c6f02ad4006f5bc9d8dc883f037403056b2719c1aa8a04d0",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-18T00:28:16.456795+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.850162,
+   "duration_s": 580.247,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T22:47:39.960531+00:00",
+   "functional": 0.5,
+   "model": "sol",
+   "quality": 0.7846,
+   "reported_tokens": 2707698,
+   "run_id": "legacy-settlecore-binary-parity-c6d27473",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2707698,
+    "result_receipts": 1,
+    "stream_sha256": "03f31df40a72534374a2375d0b3bae6f8e5fef5907ab1228857f46c974034fe7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2603264,
+     "input_tokens": 2683253,
+     "output_tokens": 24445,
+     "reasoning_output_tokens": 10113
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-settlecore-binary-parity-c6d27473",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "a13da213f33110a6a189ee331b2cdaabd14ae581dc011bd06b73d86bdd83dde9",
+    "summary": "cb8c4414a408e9f08193978563f3ead6f36944ef6e62529ea93d43f68fcbb36e",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-17T22:37:59.707126+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.897675,
+   "duration_s": 758.664,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-17T23:53:40.851581+00:00",
+   "functional": 0.6,
+   "model": "sol",
+   "quality": 0.8207,
+   "reported_tokens": 2465546,
+   "run_id": "legacy-snapcore-binary-parity-6ed783eb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2465546,
+    "result_receipts": 1,
+    "stream_sha256": "fb3f8c47999fc74b8701f4a39d70b7a1647a92a9ee3d88b13a350f4c65219bc8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2350848,
+     "input_tokens": 2434387,
+     "output_tokens": 31159,
+     "reasoning_output_tokens": 7902
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-snapcore-binary-parity-6ed783eb",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "46c7075ae214a6e0f61d2d32dd65290840d815b98acd85bdee850d6ab874878c",
+    "summary": "b79962cc1e79ff76066b1ffe394197c4fe41ee3240787fc34c9c380a9c31437d",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-17T23:41:02.174999+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.7231,
+   "duration_s": 296.714,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T01:07:36.625531+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8236,
+   "reported_tokens": 874583,
+   "run_id": "legacy-stampcore-binary-parity-81261311",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 874583,
+    "result_receipts": 1,
+    "stream_sha256": "c7c899631d41d17a015b57fc4635905e9f9215c6acdba951bf43a9709436d852",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 811520,
+     "input_tokens": 865443,
+     "output_tokens": 9140,
+     "reasoning_output_tokens": 2761
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-stampcore-binary-parity-81261311",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "7b4044ead4077edf7c03d11e9fb4ba7b59ea460f46ef401d98d9a055fa245534",
+    "summary": "1af3ec25eb7aa25b439d187b15412789010faa818c4f49c9ba49191f5b6a4dea",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-18T01:02:39.905897+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.971827,
+   "duration_s": 441.01,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:50:39.754785+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8035,
+   "reported_tokens": 996264,
+   "run_id": "legacy-tallycore-binary-parity-c9149716",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 996264,
+    "result_receipts": 1,
+    "stream_sha256": "652b491f8cea0692ddebce67b4d0d3e7e4d965f81be46b95c4f82ac522b98d30",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 901888,
+     "input_tokens": 981666,
+     "output_tokens": 14598,
+     "reasoning_output_tokens": 7328
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-tallycore-binary-parity-c9149716",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "3b8e44de6f6b0fd2946aa4dad81be11f50bcd8a35d50e0252ee16c8c3d2cf1b4",
+    "summary": "91b2b36b1106b075a4dc9ca103372ef15cc64c5c01ffed97dc1bb1d70b76e245",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-18T00:43:18.739670+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.023954,
+   "duration_s": 470.766,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-18T00:01:31.758173+00:00",
+   "functional": 0.7778,
+   "model": "sol",
+   "quality": 0.8411,
+   "reported_tokens": 1101514,
+   "run_id": "legacy-vaultcore-binary-parity-d8367aa0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1101514,
+    "result_receipts": 1,
+    "stream_sha256": "add62e4cefbff1974e4e1b74ac406ff705f6a16c1c03db1f5a0b1d3880cb8220",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1017344,
+     "input_tokens": 1083993,
+     "output_tokens": 17521,
+     "reasoning_output_tokens": 6809
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/low/legacy-vaultcore-binary-parity-d8367aa0",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "69a7ffbd42414d6d5eae7f49c405e718d4cbf7642c18432bfff3e6ab9f5169f9",
+    "summary": "38fc0139121fd88b875be4605dd733b2381ed07182c408948712de95b3bcafaa",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-17T23:53:40.987306+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.126874,
+   "duration_s": 557.437,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:46:23.823867+00:00",
+   "functional": 0.7778,
+   "model": "sol",
+   "quality": 0.8392,
+   "reported_tokens": 1207288,
+   "run_id": "legacy-blendcore-binary-parity-d15ed653",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1207288,
+    "result_receipts": 1,
+    "stream_sha256": "b38b7c98c14b03506d1d150758308778b9e605d73c00d719e0250e32de4a4be4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1132544,
+     "input_tokens": 1183858,
+     "output_tokens": 23430,
+     "reasoning_output_tokens": 10312
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-blendcore-binary-parity-d15ed653",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "45b91efd0436097e65d67fe1d47e95c450adc11a614b47d0d158306cce594a2d",
+    "summary": "494b38013429359f5579b7803e8c4801fe89372ffb82a1c5defb3f99c6e82713",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-18T04:37:06.380581+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.110999,
+   "duration_s": 1167.204,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T05:55:48.042268+00:00",
+   "functional": 0.6429,
+   "model": "sol",
+   "quality": 0.7621,
+   "reported_tokens": 4407533,
+   "run_id": "legacy-cellarcore-binary-parity-056ae47c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4407533,
+    "result_receipts": 1,
+    "stream_sha256": "1f213aec66614e947afa7519b7632b3fbff0cce0f46518b2f1677097868466e4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4258048,
+     "input_tokens": 4356918,
+     "output_tokens": 50615,
+     "reasoning_output_tokens": 26189
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-cellarcore-binary-parity-056ae47c",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "f05283747b3abc766f5c47d8f5256981faffbe9416e119e583bfd044dd8adc53",
+    "summary": "4e046ac08c39eac7e28b9614ac48b70bf38e7fa0bde0e4180dca9e82d8dc3c81",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-18T05:36:20.832225+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.033351,
+   "duration_s": 431.698,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:26:30.186124+00:00",
+   "functional": 0.7,
+   "model": "sol",
+   "quality": 0.8115,
+   "reported_tokens": 1292637,
+   "run_id": "legacy-codeccore-binary-parity-29f4d910",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1292637,
+    "result_receipts": 1,
+    "stream_sha256": "0532d43b383ad8ccb8f34ef7f6fe18a184473b188ae3b30683f934b25dd7b5c0",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1223808,
+     "input_tokens": 1275855,
+     "output_tokens": 16782,
+     "reasoning_output_tokens": 7726
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-codeccore-binary-parity-29f4d910",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "355658e1104a5e899429479a784ea35eaafd68da90bbee4746e9f694dc98f80c",
+    "summary": "17660833ebcb3eaf58f648b163765caf057a52dc68a5f25779d35ce60921053a",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-18T03:19:18.482440+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.930328,
+   "duration_s": 751.371,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T05:20:24.255987+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7306,
+   "reported_tokens": 4196362,
+   "run_id": "legacy-depotcore-binary-parity-4f731fe9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4196362,
+    "result_receipts": 1,
+    "stream_sha256": "2b8f3bb105126129d7d4d492cb5a11ac030c10e0f9e0c0e454a2bf5779f4cfff",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3994240,
+     "input_tokens": 4163603,
+     "output_tokens": 32759,
+     "reasoning_output_tokens": 18208
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-depotcore-binary-parity-4f731fe9",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "7613797be7b441d3d58692b25a0feeef72517e89926154087e3079ced4930af4",
+    "summary": "dfd89df52f5efe2e715dd41b2ef93cb415755319d7dac1e57228ec37eb97deaa",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-18T05:07:52.878562+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.374442,
+   "duration_s": 469.091,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:19:18.343904+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.81,
+   "reported_tokens": 1677817,
+   "run_id": "legacy-freightcore-binary-parity-25cbc299",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1677817,
+    "result_receipts": 1,
+    "stream_sha256": "65c4e63919b4c11f40fdeb26ae22f17725af909fbdc559de196f86ca7d408c70",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1575296,
+     "input_tokens": 1656927,
+     "output_tokens": 20890,
+     "reasoning_output_tokens": 10450
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-freightcore-binary-parity-25cbc299",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "aca9421ff4cc9edb59763938d60bbacbadd71e3987b86dd4d54445c3508c80a1",
+    "summary": "cb46d06908cd417432753aa6f56c2b1b105b3ee2d836a91bcd8bb231f2d75f61",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-18T03:11:29.246775+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.597609,
+   "duration_s": 954.182,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T05:07:52.734850+00:00",
+   "functional": 0.9286,
+   "model": "sol",
+   "quality": 0.6459,
+   "reported_tokens": 5722827,
+   "run_id": "legacy-granarycore-binary-parity-45f4ba25",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5722827,
+    "result_receipts": 1,
+    "stream_sha256": "d491ee4a40694b47e64a83923f16a7156b0a68e711174de3e496a8bb1575659a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5521792,
+     "input_tokens": 5686280,
+     "output_tokens": 36547,
+     "reasoning_output_tokens": 16463
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-granarycore-binary-parity-45f4ba25",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "8e43cc6405b6ee12a193a3fd474381152c98f0b130a36596f65dc7ef48547505",
+    "summary": "8b5b17fbb07cebcd8ec8a9c8a7ced7673d6c671f82b6ffd98d84c5a52f07ea53",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-18T04:51:58.545380+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.062635,
+   "duration_s": 383.11,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:05:43.302943+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8163,
+   "reported_tokens": 1272370,
+   "run_id": "legacy-hedgecore-binary-parity-fdc1620c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1272370,
+    "result_receipts": 1,
+    "stream_sha256": "10aeb7f792479197c6d522b3c222a7308299d7d1422916ba2791ff9c59e1934b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1188608,
+     "input_tokens": 1256611,
+     "output_tokens": 15759,
+     "reasoning_output_tokens": 7029
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-hedgecore-binary-parity-fdc1620c",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "bae281228d0896125d24b6758958831366584f42bc9ab6db44fa47807148eba1",
+    "summary": "e65516c10ce02bc41e7ccc0021036e9f7f491abffaeafbdfc46f53c0fe525235",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-18T03:59:20.187174+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 5.107166,
+   "duration_s": 2330.062,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T06:53:05.809987+00:00",
+   "functional": 0.75,
+   "model": "sol",
+   "quality": 0.7474,
+   "reported_tokens": 7817714,
+   "run_id": "legacy-lodgecore-binary-parity-9aa67a7e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7817714,
+    "result_receipts": 1,
+    "stream_sha256": "555820d6af7f056f1ff599580a018e8da2660a14944d49c1684ba67813d407d4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 7589376,
+     "input_tokens": 7745335,
+     "output_tokens": 72379,
+     "reasoning_output_tokens": 32001
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-lodgecore-binary-parity-9aa67a7e",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "d3200620ab625bc7bbdbfffd8ae6fd045ee4e6a3f1a6c3ec9cd9c63685998036",
+    "summary": "e80a01cac85d62810112dc2c9f3061100d7a4b3c0459ffa756fcb04daaea6098",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-18T06:14:15.736048+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.03357,
+   "duration_s": 525.86,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T02:48:26.665018+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7642,
+   "reported_tokens": 1201482,
+   "run_id": "legacy-matchcore-order-book-parity-1125587d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1201482,
+    "result_receipts": 1,
+    "stream_sha256": "5b48038b9d8bfff1ab4f4757aeaf620cb7688bdd96e6a2e849121b2e23ee82aa",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1122304,
+     "input_tokens": 1184736,
+     "output_tokens": 16746,
+     "reasoning_output_tokens": 7363
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-matchcore-order-book-parity-1125587d",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "8cd86c8f124fe93d08a6f57dea8fafb2471387e381b568d8d357bd113a20d4ad",
+    "summary": "ffb536d53023106d113485cf6ccaf7c011a12d5aaf862703e00024a5e38e11fe",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-18T02:39:40.799333+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.85187,
+   "duration_s": 440.996,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:11:29.101774+00:00",
+   "functional": 0.7778,
+   "model": "sol",
+   "quality": 0.8129,
+   "reported_tokens": 878457,
+   "run_id": "legacy-metercore-binary-parity-5f8492bc",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 878457,
+    "result_receipts": 1,
+    "stream_sha256": "46ac83371f7ac73932b77377b301b7a092eeec427ba24c5763b9061bc9beadc9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 804224,
+     "input_tokens": 863879,
+     "output_tokens": 14578,
+     "reasoning_output_tokens": 4616
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-metercore-binary-parity-5f8492bc",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "8def85fa57ebfee4d9255854b294ba6c280de30bc71784c88a779e5f92b7f77c",
+    "summary": "baae59d0c53ab4708a47baba30ff18a4c2afc90032c1a8c5b68cef09c13aeb32",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-18T03:04:08.099275+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.682765,
+   "duration_s": 324.301,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:37:06.245323+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8148,
+   "reported_tokens": 687552,
+   "run_id": "legacy-pacecore-binary-parity-b8fc4243",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 687552,
+    "result_receipts": 1,
+    "stream_sha256": "f025383148e42d64af83feff12574e78eb1259c90bd35379faa14b9f1ac634bc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 629632,
+     "input_tokens": 675100,
+     "output_tokens": 12452,
+     "reasoning_output_tokens": 6076
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-pacecore-binary-parity-b8fc4243",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "58572f1ac5b88c2d87697c9a2406e37ba1ae6f76a83b3190bd61f4e6093e5f9c",
+    "summary": "c89b72f49db7b81837cf60598432b358620d4df69fa2fa060563cfc87bdc49a0",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-18T04:31:41.939491+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 4.260914,
+   "duration_s": 1107.401,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T06:14:15.588458+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.6944,
+   "reported_tokens": 6797191,
+   "run_id": "legacy-paddockcore-binary-parity-60d860b2",
+   "security": 0.95,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6797191,
+    "result_receipts": 1,
+    "stream_sha256": "63022e8f227a41a2651ef737678a9c3d031348cf13b8eeca8aaac124853fb1ce",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6544896,
+     "input_tokens": 6757580,
+     "output_tokens": 39611,
+     "reasoning_output_tokens": 22247
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-paddockcore-binary-parity-60d860b2",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "a00cd013a4931a65e43bbc028a22b50dd9134736bd245d9b3f460c8365bc9a97",
+    "summary": "14b9ffe1f4af4d0b7b2c109ff6a9248f911150abc7c3e1354b89ecf7b5a7f687",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-18T05:55:48.179460+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.492546,
+   "duration_s": 674.98,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:04:07.965079+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8045,
+   "reported_tokens": 1726842,
+   "run_id": "legacy-payrollcore-binary-parity-c5e2f8a0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1726842,
+    "result_receipts": 1,
+    "stream_sha256": "01e5a106ab92dfa5a25793c10c3e18d293164f60f46e5c435de90b9f8d28f811",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1635584,
+     "input_tokens": 1697262,
+     "output_tokens": 29580,
+     "reasoning_output_tokens": 11828
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-payrollcore-binary-parity-c5e2f8a0",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "846a7040b7b5d3f63935697bc1051d5fb180b4e1cb7d84f70cf4ac44eda30955",
+    "summary": "4e3412544e53a9e824e46221adcd3aef8b25e77a311829843a2c5335288ce00f",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-18T02:52:52.977509+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.510138,
+   "duration_s": 266.043,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T02:52:52.848625+00:00",
+   "functional": 0.7778,
+   "model": "sol",
+   "quality": 0.7987,
+   "reported_tokens": 456125,
+   "run_id": "legacy-qlite-store-parity-baee846d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 456125,
+    "result_receipts": 1,
+    "stream_sha256": "6be3c91aaba5e1a69d015af403c5bb89b8f48015bb718d8ce3f037626d46197d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 412416,
+     "input_tokens": 445479,
+     "output_tokens": 10646,
+     "reasoning_output_tokens": 4225
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-qlite-store-parity-baee846d",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "fa98ab5b4acc0b69c6aab432c38e0d5f8622fb2431ab7cbb28577bf5ca2e6fd2",
+    "summary": "473fa733de46d8088e9963826d7214935e41bc097682842d68b62e641076d233",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-18T02:48:26.801082+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.041315,
+   "duration_s": 639.564,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:59:20.056447+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7808,
+   "reported_tokens": 1031592,
+   "run_id": "legacy-queuecore-binary-parity-5a4d75f5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1031592,
+    "result_receipts": 1,
+    "stream_sha256": "7cac9186cd9dd3a14cbe1ec0e693f85c9a02422370d6fe39617eaafad324a5bd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 955648,
+     "input_tokens": 1009387,
+     "output_tokens": 22205,
+     "reasoning_output_tokens": 11927
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-queuecore-binary-parity-5a4d75f5",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "8a1ab60400608683b9221735ace412728f46e115282880f720d133bba0c08eb9",
+    "summary": "a065303f26fe8dc9f2a5a22adb022340c529190c0748b506771564fbc9f74a48",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-18T03:48:40.487828+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.77466,
+   "duration_s": 409.793,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:33:20.111240+00:00",
+   "functional": 0.8,
+   "model": "sol",
+   "quality": 0.8448,
+   "reported_tokens": 786077,
+   "run_id": "legacy-quotacore-binary-parity-9de78075",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 786077,
+    "result_receipts": 1,
+    "stream_sha256": "3b75e1e3794c616c0cef2126640ba1cb33168288733eae9626781f852d768bef",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 734080,
+     "input_tokens": 769012,
+     "output_tokens": 17065,
+     "reasoning_output_tokens": 7799
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-quotacore-binary-parity-9de78075",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "6411f1498bd66a1b3c4e7e6fce92bd05c932948561a891c1bab8baa963923bff",
+    "summary": "d32a0ef60409f4a3810fd83cff67261d09358ac765b47022c57f52702cda54b6",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-18T03:26:30.314096+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.269603,
+   "duration_s": 591.897,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:24:01.949788+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8425,
+   "reported_tokens": 1310308,
+   "run_id": "legacy-reflowcore-binary-parity-f15d645a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1310308,
+    "result_receipts": 1,
+    "stream_sha256": "d03e2d0fa8185bb4ca95a2ef822dbe4f3bd9848d6bba48fd78ec328dfc6b0241",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1211008,
+     "input_tokens": 1286058,
+     "output_tokens": 24250,
+     "reasoning_output_tokens": 9709
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-reflowcore-binary-parity-f15d645a",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "f46cd64cc260f7c11bf63a7ab8c336ab2652f4e46f4158de8f76ed7dfd1a63df",
+    "summary": "f44570b666fad8c849865e1d1d0ea6e758f8458db842e9f20eee76188514f152",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-18T04:14:10.045800+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.795667,
+   "duration_s": 506.452,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:14:09.894579+00:00",
+   "functional": 0.875,
+   "model": "sol",
+   "quality": 0.7988,
+   "reported_tokens": 814004,
+   "run_id": "legacy-schedcore-binary-parity-ad7c0a09",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 814004,
+    "result_receipts": 1,
+    "stream_sha256": "57d28f132da5e078ecc09800c51ed271cbe3f3d79aa0636b5834a6bc4c254951",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 761088,
+     "input_tokens": 796531,
+     "output_tokens": 17473,
+     "reasoning_output_tokens": 6711
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-schedcore-binary-parity-ad7c0a09",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "3ef069990df048543495675a6c7633320854a570370268070eeb234ed288b9d1",
+    "summary": "ebd2dd4025bae92d35066c5f2db9cff03f19152eeea1b8797644c6cb3a54a13c",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-18T04:05:43.436974+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.497278,
+   "duration_s": 1004.908,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T02:39:40.666032+00:00",
+   "functional": 0.8,
+   "model": "sol",
+   "quality": 0.7808,
+   "reported_tokens": 2828178,
+   "run_id": "legacy-settlecore-binary-parity-82a71779",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2828178,
+    "result_receipts": 1,
+    "stream_sha256": "1c36dee6a2c73a10aeaa657940dcec4196b466d2ed7cff3d1544fcf29df0d686",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2615296,
+     "input_tokens": 2790701,
+     "output_tokens": 37477,
+     "reasoning_output_tokens": 12373
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-settlecore-binary-parity-82a71779",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "35c32dbdfb0ed1d50f92a8c38ce86decb57d0facba92ec261aa5fb4b52005761",
+    "summary": "44a8655bdc08fc0552dc7860dfe8a4454568f7e2bfd9100172bf3cdcf71d13f6",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-18T02:22:55.748697+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.97613,
+   "duration_s": 337.697,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:38:57.979059+00:00",
+   "functional": 0.8,
+   "model": "sol",
+   "quality": 0.8241,
+   "reported_tokens": 1076499,
+   "run_id": "legacy-snapcore-binary-parity-86b5fa06",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1076499,
+    "result_receipts": 1,
+    "stream_sha256": "a87068f88e4532be4bc104ce6c5dee1f8e0615d0cb131393e4e6c488b73b53c7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 982656,
+     "input_tokens": 1063518,
+     "output_tokens": 12981,
+     "reasoning_output_tokens": 5693
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-snapcore-binary-parity-86b5fa06",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "4b98b362c3f5cd534ccc2322e5a3aa7593db6df1a39487d88c6dc674a42fd11e",
+    "summary": "8a1caec68efad650c71262d6a6556d0e2cd79d28722a2e2ef04bc6583da7f101",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-18T03:33:20.277837+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.040326,
+   "duration_s": 334.446,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:51:58.413221+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8186,
+   "reported_tokens": 1309327,
+   "run_id": "legacy-stampcore-binary-parity-2c4067c0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1309327,
+    "result_receipts": 1,
+    "stream_sha256": "7cd6aab89a3819791d3f382b9db41e4fc730d999c1fbfd6227e39c756219b922",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1227904,
+     "input_tokens": 1295360,
+     "output_tokens": 13967,
+     "reasoning_output_tokens": 6999
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-stampcore-binary-parity-2c4067c0",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "ee25d2d9a875564a0950fae347512120bd33e9f7616ee5efc710bc50e3a2b28e",
+    "summary": "d70cab3b08e4fb5fac78500e097170a6f9cc9ba0bded1e2cd9992d9ffef9cc05",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-18T04:46:23.961482+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.296928,
+   "duration_s": 459.715,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T04:31:41.802562+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8168,
+   "reported_tokens": 1456780,
+   "run_id": "legacy-tallycore-binary-parity-19c3872d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1456780,
+    "result_receipts": 1,
+    "stream_sha256": "5ec3ffae953d6a1c5216886e049bbc9782135a3ce2e8f7fd9b715afc92726ee1",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1335040,
+     "input_tokens": 1439533,
+     "output_tokens": 17247,
+     "reasoning_output_tokens": 7550
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-tallycore-binary-parity-19c3872d",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "a3d58659d741a6a20a1447c3905e484a1ca46ec8c1c58ec9ba2fd7bd23727585",
+    "summary": "2d818ee6a1e4ff42f264dab4809661bf2499375f29be2be28bb0fc7d731c431b",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-18T04:24:02.081415+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.582345,
+   "duration_s": 582.247,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-18T03:48:40.357911+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8445,
+   "reported_tokens": 1970963,
+   "run_id": "legacy-vaultcore-binary-parity-e80e275c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1970963,
+    "result_receipts": 1,
+    "stream_sha256": "c5650aec43211114c08d1225b1864fb7d30f5f0d3677e2ed7ed3b56a945467be",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1859072,
+     "input_tokens": 1946516,
+     "output_tokens": 24447,
+     "reasoning_output_tokens": 9356
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/medium/legacy-vaultcore-binary-parity-e80e275c",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "ff5a8bbd788f031e0c38ae5578e1c1f1ef7878c864666143557f9931d129aa24",
+    "summary": "abde6c7b21480249187ae049ea2ac760451d590b39b9417dbc1dbba590dbd98c",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-18T03:38:58.103295+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.01107,
+   "duration_s": 424.652,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:58:31.743343+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8189,
+   "reported_tokens": 962074,
+   "run_id": "legacy-blendcore-binary-parity-3817276b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 962074,
+    "result_receipts": 1,
+    "stream_sha256": "a33c3c5495e2ec94f9ccb0f5a7bca5524cb8cc493b05d7eaa995257773ee434a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 862336,
+     "input_tokens": 945375,
+     "output_tokens": 16699,
+     "reasoning_output_tokens": 9149
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-blendcore-binary-parity-3817276b",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "3915d712650cc430d962bd3eb824ab5e4be3b8c6e322445ee86e60181aaa06ac",
+    "summary": "77f96f2596b71aafeb0a5e48627e7d469410b63679c5e2bcc70eddc25c6794eb",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-18T08:51:27.085534+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 10.853631,
+   "duration_s": 3923.213,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T10:42:44.367060+00:00",
+   "functional": 0.7857,
+   "model": "sol",
+   "quality": 0.7437,
+   "reported_tokens": 17532511,
+   "run_id": "legacy-cellarcore-binary-parity-55472977",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 17532511,
+    "result_receipts": 1,
+    "stream_sha256": "06012e9879d81e47d39f159b119d0cfeee62f76020f1490c7730d66cd931d1c9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 17052288,
+     "input_tokens": 17400522,
+     "output_tokens": 131989,
+     "reasoning_output_tokens": 50198
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-cellarcore-binary-parity-55472977",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "0cc90d5538bcfbe973d249bd30f822c56a6c5bd94367713002022c560f34feea",
+    "summary": "65e5866821f4430292958b6c77df27e731709c9f69024b7f55f8a9d7fe641b4b",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-18T09:37:21.130354+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.099546,
+   "duration_s": 451.929,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:44:59.000259+00:00",
+   "functional": 0.7,
+   "model": "sol",
+   "quality": 0.8153,
+   "reported_tokens": 1172308,
+   "run_id": "legacy-codeccore-binary-parity-8318982d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1172308,
+    "result_receipts": 1,
+    "stream_sha256": "32147cb73fa7690cd336d0a242f9eb08389dfd77a8d0c5741bb5e96bd063e8e7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1069184,
+     "input_tokens": 1156097,
+     "output_tokens": 16211,
+     "reasoning_output_tokens": 7721
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-codeccore-binary-parity-8318982d",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "d6b5455c36b4614a4ef138fad14f9443f0bf0ac451d8ef3a64b9fd9191c52d3c",
+    "summary": "eb8786d022e8db1bc2e08ff95379c477f66935aa0b57759e3821abad85c1a670",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-18T07:37:27.065228+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.209494,
+   "duration_s": 1221.742,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T09:22:57.308247+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7255,
+   "reported_tokens": 4359387,
+   "run_id": "legacy-depotcore-binary-parity-4dbc69cc",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4359387,
+    "result_receipts": 1,
+    "stream_sha256": "5fbaa3da0618b438c3d657d88ade101820b735c33216a5b28488b6839db3ca31",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4168704,
+     "input_tokens": 4310682,
+     "output_tokens": 48705,
+     "reasoning_output_tokens": 24702
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-depotcore-binary-parity-4dbc69cc",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "bac56a14324e2df69d3b6af91e0884214994a67f7e432f1705708ff6c90389eb",
+    "summary": "3349f585efbbd4b48df8ae13b1fdecbaa93a0de6d428c7daa33f0b7047993f31",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-18T09:02:35.559485+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.835166,
+   "duration_s": 384.589,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:37:26.939761+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7938,
+   "reported_tokens": 745209,
+   "run_id": "legacy-freightcore-binary-parity-3d7eebc9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 745209,
+    "result_receipts": 1,
+    "stream_sha256": "6b9bec1b997573aaba1ce6f2deda893e612f0a500a8c329a4a629d9b408bbc46",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 673664,
+     "input_tokens": 727739,
+     "output_tokens": 17470,
+     "reasoning_output_tokens": 9666
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-freightcore-binary-parity-3d7eebc9",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "1b5bdaa6b0aa1ba8886ba8abf99db99cb4195ca8006d15ae6691438c54bacda4",
+    "summary": "acb651b893740ffb9822c1b531ace3e69cc018668896a6ab9b4126e957f10f8a",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-18T07:31:02.345677+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 4.122834,
+   "duration_s": 852.52,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T11:34:42.281869+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.6121,
+   "reported_tokens": 6641927,
+   "run_id": "legacy-granarycore-binary-parity-a528b6f6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6641927,
+    "result_receipts": 1,
+    "stream_sha256": "a30ab94c4af2abd560f4e21b561e04dc10e181551b11ea2344bcc308168d6751",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6370176,
+     "input_tokens": 6611442,
+     "output_tokens": 30485,
+     "reasoning_output_tokens": 15674
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-granarycore-binary-parity-a528b6f6",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "403939254b890788684a765ba673cc70f647377c5eea17651d29590947147b44",
+    "summary": "185a773f2a5c96a3e98a96cc2b5574981e2eefbfc49ea5b5b213ea080ddd9b8d",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-18T11:20:29.755346+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.405986,
+   "duration_s": 569.198,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:25:50.914099+00:00",
+   "functional": 0.75,
+   "model": "sol",
+   "quality": 0.818,
+   "reported_tokens": 1710903,
+   "run_id": "legacy-hedgecore-binary-parity-b304676c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1710903,
+    "result_receipts": 1,
+    "stream_sha256": "21a8c3d057ad794d0c364b0df81f192c7164f7919f0d92dadf3224c97a87f2b9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1620096,
+     "input_tokens": 1686233,
+     "output_tokens": 24670,
+     "reasoning_output_tokens": 11404
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-hedgecore-binary-parity-b304676c",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "18f591fd09c0298756d308eb7627778af0ce9d342dc4dad8bda5ae41d42bf1f8",
+    "summary": "082f3bd7cfbd4d04fd562299cae9a1c702d1691caa8a2ee9b283737b2a9c79b4",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-18T08:16:21.709877+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.493112,
+   "duration_s": 863.495,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T09:37:20.947186+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7377,
+   "reported_tokens": 5466226,
+   "run_id": "legacy-lodgecore-binary-parity-efd32fc9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5466226,
+    "result_receipts": 1,
+    "stream_sha256": "f10cdd752106e257658730f1a9b265eb774fda10273d52715efdb5f136fa7f57",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5249920,
+     "input_tokens": 5433231,
+     "output_tokens": 32995,
+     "reasoning_output_tokens": 13784
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-lodgecore-binary-parity-efd32fc9",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "7d87efa9351de7d2c136f6e407c0fe4fccfd85c80270e0e8ad5fa7249983bc15",
+    "summary": "271c8567cbc937cf591c24b91b27fcb3252444d219d0628c6ba3545ac2512f40",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-18T09:22:57.443708+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.07755,
+   "duration_s": 423.988,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:08:55.655073+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7429,
+   "reported_tokens": 1160041,
+   "run_id": "legacy-matchcore-order-book-parity-2f86aab5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1160041,
+    "result_receipts": 1,
+    "stream_sha256": "ffc4bbd1614234f9cde72b90064bffbee83db55e400a9ef08d63868cfa54e268",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1064064,
+     "input_tokens": 1143290,
+     "output_tokens": 16751,
+     "reasoning_output_tokens": 8186
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-matchcore-order-book-parity-2f86aab5",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "5759a94e1d5d756e46312045a7126149fcd340e559b9146146a72e4c93d3707e",
+    "summary": "5ffb7f6aec226e3d166ba768a34afdc40254d30d670bb07aa42ae833dd5b2f92",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-18T07:01:51.661988+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.023934,
+   "duration_s": 422.566,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:31:02.210345+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8053,
+   "reported_tokens": 1154085,
+   "run_id": "legacy-metercore-binary-parity-0a4853d8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1154085,
+    "result_receipts": 1,
+    "stream_sha256": "2696e2ab6e4df9b6f8925bb71765339f64545e55dd8968533ca85ade804c4efa",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1083904,
+     "input_tokens": 1134732,
+     "output_tokens": 19353,
+     "reasoning_output_tokens": 10856
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-metercore-binary-parity-0a4853d8",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "98d5f79503a2949f7c2c37d359e1e117e209864c9f51d3b3496aa69df8ef3f0b",
+    "summary": "555a1526b29f370f44f3a4240bb4871e763f7ecc1f1424a3320f7154588734c9",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-18T07:23:59.637044+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.64473,
+   "duration_s": 296.373,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:51:26.943149+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8187,
+   "reported_tokens": 580333,
+   "run_id": "legacy-pacecore-binary-parity-f0e6ba20",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 580333,
+    "result_receipts": 1,
+    "stream_sha256": "8814d46d56e54e8626837c7f766944f5e555b394b616cfdf8b44d0e2492e5b95",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 517376,
+     "input_tokens": 568711,
+     "output_tokens": 11622,
+     "reasoning_output_tokens": 6339
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-pacecore-binary-parity-f0e6ba20",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "63fecbe9333a24d7b872658aa111849e0745097710d0ca589b4c79a65f476b34",
+    "summary": "88208850a78ad5b26f1df5f0f8b42043a04fd03b2077da0e1ce0e533eed4e433",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-18T08:46:30.565143+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 5.992384,
+   "duration_s": 1346.773,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T11:05:11.280415+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.6963,
+   "reported_tokens": 10678584,
+   "run_id": "legacy-paddockcore-binary-parity-a5d896de",
+   "security": 0.95,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 10678584,
+    "result_receipts": 1,
+    "stream_sha256": "5857530252babe01c07ff93482998d11ea76dd0d6bfb709fcfacaa17310676a9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 10407680,
+     "input_tokens": 10631978,
+     "output_tokens": 46606,
+     "reasoning_output_tokens": 24353
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-paddockcore-binary-parity-a5d896de",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "2bf9117d686f4b1916ff3685416333c0b2446c530ffd128dd388617a6d0019a0",
+    "summary": "e91da8455207372bdb9286c950bf0567cbc892731a12bcf6db5973b10213ccd9",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-18T10:42:44.501126+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.240037,
+   "duration_s": 473.915,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:23:59.413819+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7928,
+   "reported_tokens": 1355774,
+   "run_id": "legacy-payrollcore-binary-parity-d897b6ba",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1355774,
+    "result_receipts": 1,
+    "stream_sha256": "18019d1d9b720bd3d52a515f3e795018ca137834cdbf43f46f5e1d965d3eae6d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1258112,
+     "input_tokens": 1334140,
+     "output_tokens": 21634,
+     "reasoning_output_tokens": 8794
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-payrollcore-binary-parity-d897b6ba",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "15fa339faefe665e18de35db41171c7e95d38ab1008d2c3b796a891e325e250a",
+    "summary": "0a0940f9a3ec64348856d15b10c15af7950f5fa2af2423aa6c94c490ddccc865",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-18T07:16:05.492365+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.986241,
+   "duration_s": 429.558,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:16:05.356187+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.781,
+   "reported_tokens": 1044209,
+   "run_id": "legacy-qlite-store-parity-679b7279",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1044209,
+    "result_receipts": 1,
+    "stream_sha256": "9dcf3d89682a80f835bf697830cee6a10f4b1607332c277157caf7f8444ef042",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 960512,
+     "input_tokens": 1027506,
+     "output_tokens": 16703,
+     "reasoning_output_tokens": 7412
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-qlite-store-parity-679b7279",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "9550d943c44e118ebffc70c951dbd4254d3e379e31fd229ae32508a022d61312",
+    "summary": "7018338fd6cdcd295f91b93059d6e068f8426f4ab2227c2035e765c998be475a",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-18T07:08:55.792285+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.00433,
+   "duration_s": 508.587,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:16:21.566224+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7599,
+   "reported_tokens": 940096,
+   "run_id": "legacy-queuecore-binary-parity-cb4fe925",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 940096,
+    "result_receipts": 1,
+    "stream_sha256": "d896293aba6db15dfc8bf6b962495be756b7e6d9c3ef0cf89960bbe21915f33a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 860544,
+     "input_tokens": 918727,
+     "output_tokens": 21369,
+     "reasoning_output_tokens": 11589
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-queuecore-binary-parity-cb4fe925",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "d07f0dc4e9590d8f9492606033d9b5dba039a6759595b483bc6c07c681d53ea5",
+    "summary": "465f24fd9847421714dba4e9e211e1d3150b547e2e7709c9e21afcdc3c7e0bc1",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-18T08:07:52.973114+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.936294,
+   "duration_s": 353.727,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:50:52.868234+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7877,
+   "reported_tokens": 1029444,
+   "run_id": "legacy-quotacore-binary-parity-4e44d958",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1029444,
+    "result_receipts": 1,
+    "stream_sha256": "bc4c4eb3916931f514d76b99695b989ac5ec109e15bf10336c5fe7c71c41363a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 945536,
+     "input_tokens": 1015541,
+     "output_tokens": 13903,
+     "reasoning_output_tokens": 6719
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-quotacore-binary-parity-4e44d958",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "71f569f5709f1e2f2c6d22e074b5e897dbe8c2b1950c0d56eb3123eb2328cc40",
+    "summary": "93a25300f519f7eb9d94f0ae3b3ac1277ee7068e4bf15977204e8ce2aa4e6120",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-18T07:44:59.136703+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.846074,
+   "duration_s": 638.432,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:45:25.943464+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8411,
+   "reported_tokens": 796913,
+   "run_id": "legacy-reflowcore-binary-parity-80911ae7",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 796913,
+    "result_receipts": 1,
+    "stream_sha256": "2a14b1a1a9c6b8afe0c89330376aae873e0e9d05f9adf401977bbb2da31c621d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 731136,
+     "input_tokens": 778756,
+     "output_tokens": 18157,
+     "reasoning_output_tokens": 10567
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-reflowcore-binary-parity-80911ae7",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "f51284aa29ed2f1811afdaa522514697048b5b1084e11da6eb2ccdf4f5cd6df2",
+    "summary": "3bbdfe3b2a050c3969449c9eafbf61cd7d3c8891a12816494869fe348e22fad0",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-18T08:34:47.506818+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.119944,
+   "duration_s": 536.272,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:34:47.344843+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7603,
+   "reported_tokens": 1197106,
+   "run_id": "legacy-schedcore-binary-parity-74e72009",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1197106,
+    "result_receipts": 1,
+    "stream_sha256": "6e3e4ab31c4989639c04134b1fa7f7522e2b1ebcf968bfd7a98208151ff9c816",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1109760,
+     "input_tokens": 1176690,
+     "output_tokens": 20416,
+     "reasoning_output_tokens": 9805
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-schedcore-binary-parity-74e72009",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "e75664239a8a7124750097c0a19d4d89c71eb358f421df9bf8187527dbb2fb1f",
+    "summary": "7004ed6c48a9312f600ebd74d78793820a541d0e30e3eec89d273c09f5f625e8",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-18T08:25:51.065645+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.277441,
+   "duration_s": 522.798,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:01:51.517517+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7727,
+   "reported_tokens": 1121129,
+   "run_id": "legacy-settlecore-binary-parity-2d5963e9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1121129,
+    "result_receipts": 1,
+    "stream_sha256": "e876aed6c6ae11de728f46377cd98bf97b4ae0354b11f190d328a92089aa8cf1",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 993152,
+     "input_tokens": 1098112,
+     "output_tokens": 23017,
+     "reasoning_output_tokens": 12166
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-settlecore-binary-parity-2d5963e9",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "20bf25b6215d9d15b4aa36b3c01778267229f2abebda8fac01261efe8f287f4b",
+    "summary": "75c1bbbc320b927e98aa115936ec0c24ebebd5198ba5706ba2e3f2913cb484a4",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-18T06:53:08.712715+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.105062,
+   "duration_s": 447.05,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T07:58:20.055538+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8188,
+   "reported_tokens": 1155844,
+   "run_id": "legacy-snapcore-binary-parity-36b9da7b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1155844,
+    "result_receipts": 1,
+    "stream_sha256": "cbc9657578750c16e3976a29c56712fd5a9dac81c8f001f954efa81afaf51591",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1053696,
+     "input_tokens": 1138657,
+     "output_tokens": 17187,
+     "reasoning_output_tokens": 7808
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-snapcore-binary-parity-36b9da7b",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "dd26969efa9f21e4ac4e0ab45bbb552d3f78a4c2f2ffb32b0459a57ed491637a",
+    "summary": "dd971f9e92e78157ce524d2ba8fcca6f01371047ae41271f26bf1aa10f26b64c",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-18T07:50:53.002279+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.715917,
+   "duration_s": 292.819,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T11:20:29.613281+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8156,
+   "reported_tokens": 696412,
+   "run_id": "legacy-stampcore-binary-parity-da74d97d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 696412,
+    "result_receipts": 1,
+    "stream_sha256": "6d6f604025c602bb77768a7274cd608eb6a45b0beee617e93ca903f675d7f89f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 630272,
+     "input_tokens": 683959,
+     "output_tokens": 12453,
+     "reasoning_output_tokens": 7086
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-stampcore-binary-parity-da74d97d",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "3de458c00752f026f7fa86bed746a3f68e352d42878e0f4864f794b60e0e0e81",
+    "summary": "93acaf5561c8c6277052fb7c563d4208cb8a31e8b4bc1d8b422e60fa07a1c230",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-18T11:15:36.788918+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.730223,
+   "duration_s": 625.193,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T11:15:36.635278+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.808,
+   "reported_tokens": 2218455,
+   "run_id": "legacy-tallycore-binary-parity-049b4cad",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2218455,
+    "result_receipts": 1,
+    "stream_sha256": "e87a195c393143cd65b004eec8a8d7e6f606dda61195d35f751ab645f5581cdd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2082048,
+     "input_tokens": 2196469,
+     "output_tokens": 21986,
+     "reasoning_output_tokens": 11347
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-tallycore-binary-parity-049b4cad",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "52b1bc5b2406e95f4711fbe52f535a00469e11071748173d854855d3e2b8a804",
+    "summary": "9034cb8e97ee5c4db363e45082421ff7780f3c8a2c5411074a668572606b9ba6",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-18T11:05:11.435721+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.31126,
+   "duration_s": 572.643,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-18T08:07:52.847188+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8317,
+   "reported_tokens": 1343715,
+   "run_id": "legacy-vaultcore-binary-parity-6268ec77",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1343715,
+    "result_receipts": 1,
+    "stream_sha256": "65233c4ea54093ff23d9a1e2fb8b6cc6b1e673ab03f70c081b38d89ec31c1990",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1229440,
+     "input_tokens": 1321066,
+     "output_tokens": 22649,
+     "reasoning_output_tokens": 11553
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/high/legacy-vaultcore-binary-parity-6268ec77",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "e0d9d67805134a65d17ed33f8350dce274a4bd61889133dee94abff12b6fa51d",
+    "summary": "a458aa9a6da73f3d6cfee65f17f3a3100eee807205acb696e645604185a3a636",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-18T07:58:20.199384+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.079872,
+   "duration_s": 411.991,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T14:21:23.866531+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8208,
+   "reported_tokens": 1213136,
+   "run_id": "legacy-blendcore-binary-parity-61b905b3",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1213136,
+    "result_receipts": 1,
+    "stream_sha256": "41fee24ebfcf941b9f66aa9f91a61b3497dc4812ae93778059ded2bfed23d56c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1129600,
+     "input_tokens": 1194768,
+     "output_tokens": 18368,
+     "reasoning_output_tokens": 9697
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-blendcore-binary-parity-61b905b3",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "a508e053f2baf456224e8e2917f917f6dd58a572d84390bf3a2ac7a354d13883",
+    "summary": "5119a0aca23324d8d731020186f39650066afdc0da1344dd22f942cbb9218af0",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-18T14:14:31.868544+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.072834,
+   "duration_s": 812.917,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T15:21:35.950852+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7477,
+   "reported_tokens": 2636475,
+   "run_id": "legacy-cellarcore-binary-parity-aa9cadda",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2636475,
+    "result_receipts": 1,
+    "stream_sha256": "bb8d53064d77dbfe2d2f20bd0b0c459c233530a1fbf33febf26c62fbfb9d61c2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2468096,
+     "input_tokens": 2610720,
+     "output_tokens": 25755,
+     "reasoning_output_tokens": 16464
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-cellarcore-binary-parity-aa9cadda",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "b2cfa30dc9481ccdf827d9e737d7520e4c35be25fc404b6e2299983799e0f5aa",
+    "summary": "74593502bbbfd989fb3c77e7d72fff7bf0c372ad5860f7185226e8a52dc0b112",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-18T15:08:03.026157+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.767992,
+   "duration_s": 713.422,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:40:15.511898+00:00",
+   "functional": 0.7,
+   "model": "sol",
+   "quality": 0.8022,
+   "reported_tokens": 1769194,
+   "run_id": "legacy-codeccore-binary-parity-d2a17e20",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1769194,
+    "result_receipts": 1,
+    "stream_sha256": "1671eb3628b2520e65399234f65d7810ce95d68e2a28ea4302c27faee5fcb2a1",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1623680,
+     "input_tokens": 1735665,
+     "output_tokens": 33529,
+     "reasoning_output_tokens": 17078
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-codeccore-binary-parity-d2a17e20",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "976a90a3aec03d58c6d9633892566dbd6a98f158f18efa2c0b9d29bbcff6c2b5",
+    "summary": "1ab0bd852acda9aefbb37da662c841691c8b0849049781248c4ce8b6d9d0b2d7",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-18T12:28:22.082629+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.798998,
+   "duration_s": 624.039,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T14:54:45.326699+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7336,
+   "reported_tokens": 2232108,
+   "run_id": "legacy-depotcore-binary-parity-c69db7d6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2232108,
+    "result_receipts": 1,
+    "stream_sha256": "c7d2bc7b11efd7f0b8dc613a22f21465e3f9b0d2c695bfb73f7bdf77ce1735fd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2097536,
+     "input_tokens": 2205752,
+     "output_tokens": 26356,
+     "reasoning_output_tokens": 14404
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-depotcore-binary-parity-c69db7d6",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "66364e553249289217d3fe6ba7787136759bac56ad243e5c410258a224351490",
+    "summary": "7acd0f18ec836fdbcca68e7c39c368c99df2c26f3d189370720318c0739481b3",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-18T14:44:21.280640+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.262605,
+   "duration_s": 471.886,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:28:21.940572+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8006,
+   "reported_tokens": 1358900,
+   "run_id": "legacy-freightcore-binary-parity-35ecec2a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1358900,
+    "result_receipts": 1,
+    "stream_sha256": "d40ec97437d2439e833f7d3929f2b8881618eb980f281efc4ff8848f59eeffbc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1252992,
+     "input_tokens": 1337789,
+     "output_tokens": 21111,
+     "reasoning_output_tokens": 11256
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-freightcore-binary-parity-35ecec2a",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "7cc2031ff209e413524b895ab83d7fce38719e49aefd9699d00f6ce4f5a00144",
+    "summary": "df3d4d622a08c5f937863d89651225e53ea9017cebe3f44ddb04f6f8a6635ce7",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-18T12:20:30.048761+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.966589,
+   "duration_s": 942.113,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T14:44:21.128757+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.5779,
+   "reported_tokens": 6197616,
+   "run_id": "legacy-granarycore-binary-parity-590a7bda",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6197616,
+    "result_receipts": 1,
+    "stream_sha256": "5a40ead5ca6f4c8841175e39979e494d3d866b4f8a85ee8222d7684fadc233fc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5969152,
+     "input_tokens": 6156049,
+     "output_tokens": 41567,
+     "reasoning_output_tokens": 23074
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-granarycore-binary-parity-590a7bda",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "b8a5e23a271cb2a3ba54cdfac47b3ac1f7cb4ce0f4d61a55587d3e43310f5362",
+    "summary": "fda389f51c483705db993e65c65c0358302bd6720c399839f0aca5486df4cbd5",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-18T14:28:39.008430+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.316786,
+   "duration_s": 595.406,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T13:28:07.833512+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8055,
+   "reported_tokens": 1339363,
+   "run_id": "legacy-hedgecore-binary-parity-b5b0c546",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1339363,
+    "result_receipts": 1,
+    "stream_sha256": "178070c1c87779111d4ed2019132fdab0d503599ea635b9a914598fc5b7043e7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1244416,
+     "input_tokens": 1311911,
+     "output_tokens": 27452,
+     "reasoning_output_tokens": 15851
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-hedgecore-binary-parity-b5b0c546",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "dc5c8ee71646e211894635d67582a7639aac5a4525b3e1cc623b1e50be77d6fb",
+    "summary": "ac81e22e3ae7ba7d34b89d386fa04f93d187cdf0eec9a65776e33564c2bbd267",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-18T13:18:12.421174+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.62522,
+   "duration_s": 797.378,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T15:08:02.865376+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.727,
+   "reported_tokens": 3700677,
+   "run_id": "legacy-lodgecore-binary-parity-a0b28093",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3700677,
+    "result_receipts": 1,
+    "stream_sha256": "256b5b93c76f6a9827dcbae70c0b773822ac6a26a3cf57feb963118ffde6e3f7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3519360,
+     "input_tokens": 3669914,
+     "output_tokens": 30763,
+     "reasoning_output_tokens": 18133
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-lodgecore-binary-parity-a0b28093",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "35a048b91383f6ea30728a75a597e667d0f3f96994f0112d074872a60170b256",
+    "summary": "b6a9fc88d8fbfdcbeceeec965a718fd60e0c0ef078ce02ac6a941df4fe968eaa",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-18T14:54:45.481218+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.319287,
+   "duration_s": 697.513,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T11:54:39.664279+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7433,
+   "reported_tokens": 1416133,
+   "run_id": "legacy-matchcore-order-book-parity-47db369e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1416133,
+    "result_receipts": 1,
+    "stream_sha256": "a7bc4d9c06b3c6dc69c3c0321cfa07c0f9a876a820d79abb93c682f9db95b327",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1306368,
+     "input_tokens": 1393778,
+     "output_tokens": 22355,
+     "reasoning_output_tokens": 12078
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-matchcore-order-book-parity-47db369e",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "25b9efee93f409cbec1a2336a88f483fbb2667e68d8a6c6619297ac7885a4bd1",
+    "summary": "587c6315d1b5f4a12d1742b407f14b34c91b060cec6cb61641410b7b888e09e3",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-18T11:43:02.144741+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.834689,
+   "duration_s": 456.648,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:20:29.905609+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8105,
+   "reported_tokens": 753965,
+   "run_id": "legacy-metercore-binary-parity-b085b1b2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 753965,
+    "result_receipts": 1,
+    "stream_sha256": "f95991dbda1fce7da4e2a0bbdcbd92e0932caa8454c277108a3c0b8fa894f415",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 684032,
+     "input_tokens": 736381,
+     "output_tokens": 17584,
+     "reasoning_output_tokens": 9939
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-metercore-binary-parity-b085b1b2",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "563d447a7614702b185a9ba1ad5bfcd4a1fa93786d05f9a7b4669624c7337096",
+    "summary": "ee2595f70c474986a94d2225d0ed6b76204927df9ab814b69570ae4088defc09",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-18T12:12:53.252592+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.132711,
+   "duration_s": 522.532,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T14:14:31.733227+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.81,
+   "reported_tokens": 1181469,
+   "run_id": "legacy-pacecore-binary-parity-a94a8bfd",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1181469,
+    "result_receipts": 1,
+    "stream_sha256": "635bb1a588995ca940c3c54c823dcbfa4fef6cd9957e128c13d2ab0d1ccafc7c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1089408,
+     "input_tokens": 1160925,
+     "output_tokens": 20544,
+     "reasoning_output_tokens": 12688
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-pacecore-binary-parity-a94a8bfd",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "5101ce77d2f47936cf0e9d7e8bd2a8452846bdb8b1f6ab505415ce1c3d8a0fdf",
+    "summary": "5d3db629eb551f1a6e12ad80ba0bb537760f9a0314bc8ce38015879a4045dbf3",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-18T14:05:49.196098+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 4.756546,
+   "duration_s": 1046.681,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T15:39:02.767030+00:00",
+   "functional": 0.9333,
+   "model": "sol",
+   "quality": 0.6832,
+   "reported_tokens": 7311267,
+   "run_id": "legacy-paddockcore-binary-parity-e36413ad",
+   "security": 0.9,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7311267,
+    "result_receipts": 1,
+    "stream_sha256": "178f29d580f4ca179282057d186f83af70219c11bfac43bc00172b808be76a16",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 7008256,
+     "input_tokens": 7264942,
+     "output_tokens": 46325,
+     "reasoning_output_tokens": 30412
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-paddockcore-binary-parity-e36413ad",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "8fdbe0dcf9d75f3d608c6ead5d990266c2e60bfae8c8e171b7c9ad12eed567b1",
+    "summary": "2857360511f92b565dbf06ce57d50ac0288b0862f1fe9d68cea03c892f4a2e3f",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-18T15:21:36.079869+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.055278,
+   "duration_s": 454.978,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:12:53.101318+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8004,
+   "reported_tokens": 855453,
+   "run_id": "legacy-payrollcore-binary-parity-618e0569",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 855453,
+    "result_receipts": 1,
+    "stream_sha256": "fbe7e325083db8a96ea1e54f0214e689116b2806869f2e07152d562ac713119a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 747264,
+     "input_tokens": 835227,
+     "output_tokens": 20226,
+     "reasoning_output_tokens": 11249
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-payrollcore-binary-parity-618e0569",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "e90be58699901543cd316c3e83299bd7de7c5b147ef7e343e6146ad7d87ffd12",
+    "summary": "da0dde1a13e62dc30639b944ee55d67bd80171a8fec66d49977770425768df38",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-18T12:05:18.117190+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.271846,
+   "duration_s": 637.964,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:05:17.789703+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7854,
+   "reported_tokens": 1363371,
+   "run_id": "legacy-qlite-store-parity-da2f077d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1363371,
+    "result_receipts": 1,
+    "stream_sha256": "ed6891fc6fe21183f34d1e9c5276355aa22ee367ca61edc0a87e0c8e521d0bfd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1266944,
+     "input_tokens": 1339661,
+     "output_tokens": 23710,
+     "reasoning_output_tokens": 12770
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-qlite-store-parity-da2f077d",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "1ded9a7dedde43793aebfa3d449945ed1035721f68cabc8dfad31cd752142cc2",
+    "summary": "b66c9d7c3a7841b2ba32423740c5632e457faed17a6090349db6591d14112e32",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-18T11:54:39.818503+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.163554,
+   "duration_s": 560.723,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T13:18:12.280852+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7656,
+   "reported_tokens": 1032015,
+   "run_id": "legacy-queuecore-binary-parity-4e6f08ef",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1032015,
+    "result_receipts": 1,
+    "stream_sha256": "a47e45f6266362b1a15e810366062557eade0f5c0ee869ddf0dc11555c3b200d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 933376,
+     "input_tokens": 1007287,
+     "output_tokens": 24728,
+     "reasoning_output_tokens": 14351
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-queuecore-binary-parity-4e6f08ef",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "90677a8e73fc57736b92b3ab3170c373c61c05b863c00eccf054dccf8f7b7bf1",
+    "summary": "685b009ef1569a21a2be3a844a37eb3b6dbac0ef740d6e139ef28c0d1db6e8c9",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-18T13:08:51.552143+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.148595,
+   "duration_s": 536.91,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:49:12.581159+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8034,
+   "reported_tokens": 1201788,
+   "run_id": "legacy-quotacore-binary-parity-ca2673f5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1201788,
+    "result_receipts": 1,
+    "stream_sha256": "7c85e5b5957f6d47e2d75692b25e6393185def82c3942078274cc9b1cb511a23",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1118208,
+     "input_tokens": 1178851,
+     "output_tokens": 22937,
+     "reasoning_output_tokens": 12370
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-quotacore-binary-parity-ca2673f5",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "305db1099fe0f1196987bd431a27a19c2d39b2b46f2794bdd6ed621230c9d2d4",
+    "summary": "d7ce3a6c595571d7ee9223fc11a3aa9002813f8d492b07e1d4bf4b96e5c18be2",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-18T12:40:15.665945+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.257668,
+   "duration_s": 980.81,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T13:53:07.841061+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8328,
+   "reported_tokens": 1260733,
+   "run_id": "legacy-reflowcore-binary-parity-28d8f500",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1260733,
+    "result_receipts": 1,
+    "stream_sha256": "13513180886b95132af8a3e4707f676c89e85cb04af5c1e2c77246acb7ee4746",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1180800,
+     "input_tokens": 1231632,
+     "output_tokens": 29101,
+     "reasoning_output_tokens": 15298
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-reflowcore-binary-parity-28d8f500",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "bccda2e761c950a1a63e7ed6a63b317407969faf257edda087feb7ac528535e5",
+    "summary": "ccb3a0444691cbc220139052931b868ea7de75409848a9d7fbbadb365d698036",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-18T13:36:47.024426+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.077396,
+   "duration_s": 518.916,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T13:36:46.892141+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7603,
+   "reported_tokens": 1098397,
+   "run_id": "legacy-schedcore-binary-parity-88489d77",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1098397,
+    "result_receipts": 1,
+    "stream_sha256": "349f55a050d907cdcce236b37bab012e403826468dfe574ab12a7baba831a858",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1018880,
+     "input_tokens": 1076411,
+     "output_tokens": 21986,
+     "reasoning_output_tokens": 12824
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-schedcore-binary-parity-88489d77",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "04a46f54a194f8781408c3e5f1a9e8fcb6a2dd7acc3e96b11cbf11c770c04fa6",
+    "summary": "b31707e23c2174e7056b9573527366d1510d9bf0734c231c707356d7aad8e75c",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-18T13:28:07.971260+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.138264,
+   "duration_s": 496.999,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T11:43:02.008198+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7528,
+   "reported_tokens": 976654,
+   "run_id": "legacy-settlecore-binary-parity-f4d55a7d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 976654,
+    "result_receipts": 1,
+    "stream_sha256": "1fba0c34a0de43347b3b47c8b715789dfe7ee4ca402887a3216577432b90f1dc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 868480,
+     "input_tokens": 954268,
+     "output_tokens": 22386,
+     "reasoning_output_tokens": 13085
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-settlecore-binary-parity-f4d55a7d",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "c36f560514a4e4fba9f6168cadadcf526d3b68e155381513ae4ac9fdfd79f806",
+    "summary": "b0d6eb2b791123a8b700d5eeba206e8302bc9245de46065f2836b47e5e01744b",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-18T11:34:45.002825+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.045362,
+   "duration_s": 426.826,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T12:56:19.534648+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8091,
+   "reported_tokens": 1032195,
+   "run_id": "legacy-snapcore-binary-parity-80fee844",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1032195,
+    "result_receipts": 1,
+    "stream_sha256": "1e5d836d995023532be26f2ceaa976865600da38a27521b974db8c9f82ce3730",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 944256,
+     "input_tokens": 1012451,
+     "output_tokens": 19744,
+     "reasoning_output_tokens": 12410
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-snapcore-binary-parity-80fee844",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "491bdb5aa6ffc19a41789eefc6bf729862cff1e028f9bda0b41e9e2d08790cd0",
+    "summary": "60a6dc824ea4cf48318a0153912bbffc2c5d4561325cf9ef8aef2f68314a0c74",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-18T12:49:12.703600+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.079681,
+   "duration_s": 434.822,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T14:28:38.863499+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.82,
+   "reported_tokens": 1226237,
+   "run_id": "legacy-stampcore-binary-parity-b000d1e8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1226237,
+    "result_receipts": 1,
+    "stream_sha256": "41a6325a2c29b37c4e92e130013ee75aa8de5fa2c58a86716a485ae3426d6eee",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1139072,
+     "input_tokens": 1209025,
+     "output_tokens": 17212,
+     "reasoning_output_tokens": 9253
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-stampcore-binary-parity-b000d1e8",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "206a1a944f87e817759c4dc1e14fac3e85ba285dcf4f82f22393ae9917a236b7",
+    "summary": "472df7e75e69e3714cab39e5e8a6a1a86ef75d8f5e52f2ed9517778ed52934be",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-18T14:21:24.036158+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.753898,
+   "duration_s": 761.084,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T14:05:49.063644+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8071,
+   "reported_tokens": 1902612,
+   "run_id": "legacy-tallycore-binary-parity-c937cbc2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1902612,
+    "result_receipts": 1,
+    "stream_sha256": "123a18b6b0e5e4e04bf26a98f7215e42c16125ea152c1fbc249a302e86d1ead0",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1757824,
+     "input_tokens": 1873136,
+     "output_tokens": 29476,
+     "reasoning_output_tokens": 16038
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-tallycore-binary-parity-c937cbc2",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "c074535f1761a37f5f1c4305f8feade41551d74c0dea3322b48edb3a98665f16",
+    "summary": "2ea1afe5d8e18772ed54cc8d50ad27a1a49bc409722cfbf2b57493622faddf47",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-18T13:53:07.971572+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.085275,
+   "duration_s": 751.733,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-18T13:08:51.407707+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8306,
+   "reported_tokens": 929218,
+   "run_id": "legacy-vaultcore-binary-parity-dc9cccac",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 929218,
+    "result_receipts": 1,
+    "stream_sha256": "f3a7a54d62b3511fba9c57ee82056335c629527fce4909da184a8eb87b67c999",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 818048,
+     "input_tokens": 909632,
+     "output_tokens": 19586,
+     "reasoning_output_tokens": 11683
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/extra-high/legacy-vaultcore-binary-parity-dc9cccac",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "287dbe21bf63e2689a8d81333c2ea39fc82a44470481b7db8e01f9d4955e4851",
+    "summary": "023d913220703faeab2d5a716fc3858127ca35148bffce726e97b19c6aeab073",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-18T12:56:19.669291+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.315877,
+   "duration_s": 580.132,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T18:39:27.613580+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8256,
+   "reported_tokens": 1390846,
+   "run_id": "legacy-blendcore-binary-parity-3da5651d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1390846,
+    "result_receipts": 1,
+    "stream_sha256": "db27fd6f7794df296d83c8400436126052b395af0d75dc7fce24ecdf3646e0b8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1288192,
+     "input_tokens": 1366472,
+     "output_tokens": 24374,
+     "reasoning_output_tokens": 15704
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-blendcore-binary-parity-3da5651d",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "81baeebe3c75de2cf946b13113304e484c851a214ecd87d7bd79e4d8bc4a13df",
+    "summary": "0eefdb32ced3587b01c6d4ab9b01d64f51eba9b87bc745dbdd15654dcb34cfe1",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-18T18:29:47.476805+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.311952,
+   "duration_s": 879.455,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T19:49:46.808748+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7381,
+   "reported_tokens": 5097196,
+   "run_id": "legacy-cellarcore-binary-parity-b4446e69",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5097196,
+    "result_receipts": 1,
+    "stream_sha256": "78c5058231a58805d43ec8e2f3bc18199e38eeb69b3938286320fb16b8d8642a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4896640,
+     "input_tokens": 5062754,
+     "output_tokens": 34442,
+     "reasoning_output_tokens": 20422
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-cellarcore-binary-parity-b4446e69",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "94f8b37022daa158d3b5fd7d74eb777380c1dfcf65554ff9e4287d703d8254a4",
+    "summary": "f9511b89cf742c459ccfdb303993baabe9c6345e1e35e14d105a59c3456bad20",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-18T19:35:07.347308+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.615292,
+   "duration_s": 588.595,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:51:38.147872+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7989,
+   "reported_tokens": 1911551,
+   "run_id": "legacy-codeccore-binary-parity-1d63b8e9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1911551,
+    "result_receipts": 1,
+    "stream_sha256": "3eb8bca225aac8df679ca7784e6195b141c81f2b5bd431542cccc9cbc175a14d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1795840,
+     "input_tokens": 1884419,
+     "output_tokens": 27132,
+     "reasoning_output_tokens": 16359
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-codeccore-binary-parity-1d63b8e9",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "f0fd6080ddcaef4a6318e6b5926aef1295b417101935875ca62725070b72355d",
+    "summary": "b4ffa8fc3177f5998d23d53e379209f94db38c1f3fc7ac9b9e1e862bf60ba85d",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-18T16:41:49.546858+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.355424,
+   "duration_s": 864.65,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T19:19:43.282161+00:00",
+   "functional": 0.9286,
+   "model": "sol",
+   "quality": 0.7314,
+   "reported_tokens": 3005400,
+   "run_id": "legacy-depotcore-binary-parity-ef88609a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3005400,
+    "result_receipts": 1,
+    "stream_sha256": "41505dee1c676a83f70eb7bf5287791cc9ee888cd1504cc921de5a51180423d2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2832640,
+     "input_tokens": 2972192,
+     "output_tokens": 33208,
+     "reasoning_output_tokens": 21906
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-depotcore-binary-parity-ef88609a",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "868fb687ff93e0c9e8ba7e3588ce98bcf3c20dd157c99eb5cc39d0712329311e",
+    "summary": "90c2bb21785fd9e5bdd9947d3bae280fa8fe74f018bc0e8334c5f8433f41a751",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-18T19:05:18.626324+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.330919,
+   "duration_s": 590.145,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:41:49.410263+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8002,
+   "reported_tokens": 1345729,
+   "run_id": "legacy-freightcore-binary-parity-1094fd04",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1345729,
+    "result_receipts": 1,
+    "stream_sha256": "0936f19c9499daa74b1b488937073387f7f9831a9572eb8ec4f9ff3890174849",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1248768,
+     "input_tokens": 1318006,
+     "output_tokens": 27723,
+     "reasoning_output_tokens": 15269
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-freightcore-binary-parity-1094fd04",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "e7192297fd4622115dc05e624e6d86630358e58e47829cd15f97ed8f6a87706a",
+    "summary": "135bd21582b9a55276dbe7ca58147be3650f150e9449ac8a382c4dc9bf090981",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-18T16:31:59.259675+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.494614,
+   "duration_s": 969.064,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T19:05:18.477158+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.5947,
+   "reported_tokens": 4353104,
+   "run_id": "legacy-granarycore-binary-parity-492ace40",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4353104,
+    "result_receipts": 1,
+    "stream_sha256": "4dc73b32f8483ea96de63a03d357df2185c088ca42d6b091bb98b4e8281363ec",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4057216,
+     "input_tokens": 4310093,
+     "output_tokens": 43011,
+     "reasoning_output_tokens": 27856
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-granarycore-binary-parity-492ace40",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "3a29cb31e17cfdf6c47cde663eb3a2a7d85840a9cf17b8a2273794233f2e2d6d",
+    "summary": "e4e436187eb672557d89ff46dd5d53098c2d745f836267b82bed430292fc3d5d",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-18T18:49:09.406434+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.644091,
+   "duration_s": 732.057,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T17:48:45.371396+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.805,
+   "reported_tokens": 1871942,
+   "run_id": "legacy-hedgecore-binary-parity-f72af0ec",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1871942,
+    "result_receipts": 1,
+    "stream_sha256": "cd07346ae16355da5c0891318c6d4e8120cbf9d574a2e2c2a088030e51d59714",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1774208,
+     "input_tokens": 1837975,
+     "output_tokens": 33967,
+     "reasoning_output_tokens": 21448
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-hedgecore-binary-parity-f72af0ec",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "a5e910409b651b2469a3b5bf0d939c665cc43268e62371634d903e05e88d4872",
+    "summary": "c168c5ffdc95af68c957fb77605a42c79b1d27c6d2569a29fcecbd97983ebc72",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-18T17:36:33.308927+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.681698,
+   "duration_s": 923.778,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T19:35:07.210164+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7306,
+   "reported_tokens": 5591942,
+   "run_id": "legacy-lodgecore-binary-parity-73d10164",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5591942,
+    "result_receipts": 1,
+    "stream_sha256": "7419c786df039110453af31138058c7d2fd94ffbab61fe81bfa9dbccfd44ce95",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5353984,
+     "input_tokens": 5555175,
+     "output_tokens": 36767,
+     "reasoning_output_tokens": 21753
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-lodgecore-binary-parity-73d10164",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "ddf9198d5483c85d3b4b1a5fca81957fe230f1e6a90d1ea77ebf495e5db1ab77",
+    "summary": "5d828d555007742624246a95a8f450ab7e6b47e274fc0ba45b50a9288ebf9f02",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-18T19:19:43.424500+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.486387,
+   "duration_s": 677.953,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:01:42.503877+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7535,
+   "reported_tokens": 1633252,
+   "run_id": "legacy-matchcore-order-book-parity-c12c5d93",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1633252,
+    "result_receipts": 1,
+    "stream_sha256": "07789b9bcdcc52746d1f49f99412a5ababc22cbfdc8a9d632e6ba6ec9eb53d56",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1523968,
+     "input_tokens": 1605773,
+     "output_tokens": 27479,
+     "reasoning_output_tokens": 16910
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-matchcore-order-book-parity-c12c5d93",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "32c895fee271f7c9ec177bec0ad172b53b1bcd1c756b2102339d68d2d4b59ddd",
+    "summary": "294abce626e2fd5bed45f046feebe47d4d01b26b96087bb2a88cfc0ad70bb03e",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-18T15:50:24.544621+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.084425,
+   "duration_s": 557.062,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:31:59.127054+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7931,
+   "reported_tokens": 1013183,
+   "run_id": "legacy-metercore-binary-parity-3c51a416",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1013183,
+    "result_receipts": 1,
+    "stream_sha256": "be76728d983906a638ae11b5137d0f0e57c9454a9917ad0249c13659c0cf7f5b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 934272,
+     "input_tokens": 988491,
+     "output_tokens": 24692,
+     "reasoning_output_tokens": 12951
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-metercore-binary-parity-3c51a416",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "171adc0293736385a566ea2bc65815deb8f8795ec908516384aca013570c20dc",
+    "summary": "c5e18a69fab9533079652ed572e41bd06fb5baf649a8d4caaa180eb92ce4e01f",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-18T16:22:42.058937+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.955558,
+   "duration_s": 485.748,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T18:29:47.342598+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8191,
+   "reported_tokens": 840860,
+   "run_id": "legacy-pacecore-binary-parity-d2866e53",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 840860,
+    "result_receipts": 1,
+    "stream_sha256": "de0ce1eed7107f0d734705588cc279e7d12e72c37d0e406078b9f64f8f81f654",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 758656,
+     "input_tokens": 820655,
+     "output_tokens": 20205,
+     "reasoning_output_tokens": 13428
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-pacecore-binary-parity-d2866e53",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "d2291521133415d10c55ab475b4aa6eed99d9e1912df63cc7a4e64a9c79570a7",
+    "summary": "3e7221abfa945edb278a1e3f7d8b9d6e8d604faaf55f757d3aa507c9036e01c9",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-18T18:21:41.589464+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.614319,
+   "duration_s": 976.783,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T20:06:03.730923+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.6908,
+   "reported_tokens": 5160587,
+   "run_id": "legacy-paddockcore-binary-parity-d89fd543",
+   "security": 0.9,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5160587,
+    "result_receipts": 1,
+    "stream_sha256": "e3d96830c3ff44877a1585dc687edf2d57392367c8924f6de6dadc9e2e50a7cd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4908288,
+     "input_tokens": 5120474,
+     "output_tokens": 40113,
+     "reasoning_output_tokens": 27087
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-paddockcore-binary-parity-d89fd543",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "38da4152c79f3889aa805355f733b94894dfe76e13fbe20df63fb6257e0546e9",
+    "summary": "28be0d40578394b1dfa392f9342e9e60d03daf44b790db0dd2ef92130d2d3173",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-18T19:49:46.942628+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.880857,
+   "duration_s": 514.853,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:22:41.927600+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7968,
+   "reported_tokens": 582027,
+   "run_id": "legacy-payrollcore-binary-parity-c908abcd",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 582027,
+    "result_receipts": 1,
+    "stream_sha256": "a6148ec6592eb90c64b79d2fc327242edf982784f62af1da59f0162302048018",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 500352,
+     "input_tokens": 559901,
+     "output_tokens": 22126,
+     "reasoning_output_tokens": 14902
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-payrollcore-binary-parity-c908abcd",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "e6dfe642e3d92885d0d4ed870542dbf07a0bb89ca72ae7ea832b9443bd36d11e",
+    "summary": "44209e5fb220fc2558f2714820651f66130495ef2927719e133ecfaa8ff77c15",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-18T16:14:07.070122+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.37872,
+   "duration_s": 744.295,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:14:06.930167+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7787,
+   "reported_tokens": 1490564,
+   "run_id": "legacy-qlite-store-parity-236a0eeb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1490564,
+    "result_receipts": 1,
+    "stream_sha256": "e7e84e81060442aee03ddda8221aff60e660eb3b478f2dec350a316157b93845",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1397760,
+     "input_tokens": 1462539,
+     "output_tokens": 28025,
+     "reasoning_output_tokens": 15463
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-qlite-store-parity-236a0eeb",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "afa37893b10f2e423fb5bb2df157dff6f9c3c87dbf7fe9995924b6b26dd2d5bb",
+    "summary": "b58dc1d1f0a42c7981801410cb108d46553f1e4b8de082aeb8b2e6c093cc2869",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-18T16:01:42.629401+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.510763,
+   "duration_s": 887.097,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T17:36:33.174751+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7601,
+   "reported_tokens": 1648750,
+   "run_id": "legacy-queuecore-binary-parity-406a7d48",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1648750,
+    "result_receipts": 1,
+    "stream_sha256": "2b579caffe328bc8464247a3a478351b703986e057c0274f27892efc1d09eec9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1552128,
+     "input_tokens": 1617286,
+     "output_tokens": 31464,
+     "reasoning_output_tokens": 18925
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-queuecore-binary-parity-406a7d48",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "8a2c664079ee65ff091b6b5508777041d47e88686a3f005ca042dacfb60f9e67",
+    "summary": "4d3e6ca89265152ead74bf17a848a6e15a245b8482ebc20fe3bbbbd32b1f3932",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-18T17:21:46.071549+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.02657,
+   "duration_s": 495.961,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T16:59:54.257895+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8041,
+   "reported_tokens": 964768,
+   "run_id": "legacy-quotacore-binary-parity-d300694b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 964768,
+    "result_receipts": 1,
+    "stream_sha256": "bf9d59764451268d54395aa1800ff0506c90607ece527699d1b046219df043a2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 888704,
+     "input_tokens": 941841,
+     "output_tokens": 22927,
+     "reasoning_output_tokens": 13159
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-quotacore-binary-parity-d300694b",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "2678cb84973edf6ef2ce3d234755eb39798b17386bbd01e7654a219f22908c60",
+    "summary": "3846a17d5f745ed97568f40701ff62e0c08b0e37e0c2ca4980fdba51197fdb82",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-18T16:51:38.291379+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.420488,
+   "duration_s": 623.662,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T18:09:29.715624+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8337,
+   "reported_tokens": 1510182,
+   "run_id": "legacy-reflowcore-binary-parity-c51fbfe0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1510182,
+    "result_receipts": 1,
+    "stream_sha256": "5120f2dedf3f715646d3fa4e94ece72b064c4291e7921c8a23eeaaef005b6256",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1413760,
+     "input_tokens": 1480851,
+     "output_tokens": 29331,
+     "reasoning_output_tokens": 19106
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-reflowcore-binary-parity-c51fbfe0",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "f143d2e931be713587ec0da4d5991a12e2607483a4fbb7253b1a545a6aafe581",
+    "summary": "055d8a360a6c2f6a2d0fa148ffea62a170b7d3c126f6b7341171e648bb3a4888",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-18T17:59:06.048744+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.371522,
+   "duration_s": 620.411,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T17:59:05.917511+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7531,
+   "reported_tokens": 1385874,
+   "run_id": "legacy-schedcore-binary-parity-75610ac6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1385874,
+    "result_receipts": 1,
+    "stream_sha256": "2db504818ce219f2afc4a788670547808e631563af3f73f4c1da6af1409041e1",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1276544,
+     "input_tokens": 1359400,
+     "output_tokens": 26474,
+     "reasoning_output_tokens": 14430
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-schedcore-binary-parity-75610ac6",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "5243f7353673a02431d5e936cf4fde309505c48f2af6a4909edbf692571fd042",
+    "summary": "a7ff14494dcd4885d4d4ab48b5bd01d96c462ddde9487f20a77bd996afc0463a",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-18T17:48:45.500216+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.525378,
+   "duration_s": 678.918,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T15:50:24.402508+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.7579,
+   "reported_tokens": 1605667,
+   "run_id": "legacy-settlecore-binary-parity-7b20117c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1605667,
+    "result_receipts": 1,
+    "stream_sha256": "81f8962a884ecf3833fb1920d2b13a4528320dda320973b48e2b6476eb177d46",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1495296,
+     "input_tokens": 1575306,
+     "output_tokens": 30361,
+     "reasoning_output_tokens": 19274
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-settlecore-binary-parity-7b20117c",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "d21290cd44d88c365f09168ae26ea046fed54b2022882d272d33784ae9a00a17",
+    "summary": "56bee16ce22598befcad0994d871363ef3e42b11438e06f5bae23a5b09a282a0",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-18T15:39:05.478938+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.84816,
+   "duration_s": 755.344,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T17:12:29.749389+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8185,
+   "reported_tokens": 2253632,
+   "run_id": "legacy-snapcore-binary-parity-03d2934c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2253632,
+    "result_receipts": 1,
+    "stream_sha256": "6e7155a9d3c26f1bf0c794f9b1b5e723fea9d5e3c8c4ed63886f51486e8e022a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2124160,
+     "input_tokens": 2223594,
+     "output_tokens": 30038,
+     "reasoning_output_tokens": 17626
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-snapcore-binary-parity-03d2934c",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "fee2a93fb58db2eed7054b047494385d1f818f864e2c1d428605145a5086b909",
+    "summary": "5f9cdd67f74913d6664d966736e55ff24f5e3aa06a44a8108fddd9c5de93e8d6",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-18T16:59:54.398351+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.213394,
+   "duration_s": 581.509,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T18:49:09.258743+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8227,
+   "reported_tokens": 1215415,
+   "run_id": "legacy-stampcore-binary-parity-ff5566d1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1215415,
+    "result_receipts": 1,
+    "stream_sha256": "807422bd7f553363b90fd9c7950fb50356068ad4b5eabbba74b945825f5c5a98",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1124736,
+     "input_tokens": 1190366,
+     "output_tokens": 25049,
+     "reasoning_output_tokens": 16496
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-stampcore-binary-parity-ff5566d1",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "a9daa45f21b496480a86b00e2abdd2caa5c1e721ae900a4e79be89675cac0ff2",
+    "summary": "8eee95eae1481799dea974dde666cee79f27eb09e1627b95749bf5415ad548bc",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-18T18:39:27.744545+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.725035,
+   "duration_s": 731.596,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T18:21:41.450964+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.8091,
+   "reported_tokens": 1881410,
+   "run_id": "legacy-tallycore-binary-parity-0ea41c30",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1881410,
+    "result_receipts": 1,
+    "stream_sha256": "758a2939e4ab4339e9c870a9b8150c565bcc52e935acae6e47c7b75aee488856",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1748608,
+     "input_tokens": 1850511,
+     "output_tokens": 30899,
+     "reasoning_output_tokens": 20041
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-tallycore-binary-parity-0ea41c30",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "7365578f40fdaa6db2f62a559dca525afc2009c489bf7f7ea1c57e669ecd8755",
+    "summary": "da0e7907248eb915e9e0a5141abf9d425546bfbc01aad7c279e1fd32bb2be53c",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-18T18:09:29.849460+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.999647,
+   "duration_s": 556.042,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-18T17:21:45.937023+00:00",
+   "functional": 1.0,
+   "model": "sol",
+   "quality": 0.817,
+   "reported_tokens": 817903,
+   "run_id": "legacy-vaultcore-binary-parity-392df5e5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 817903,
+    "result_receipts": 1,
+    "stream_sha256": "0a0872a7aaabfc1278e25131419577a59c3d0f2482756467b7a49ff4035a88b5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 729088,
+     "input_tokens": 795856,
+     "output_tokens": 22047,
+     "reasoning_output_tokens": 14071
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-sol/max/legacy-vaultcore-binary-parity-392df5e5",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "0bb3fa44499b4113b8cecd6922e714b98db478f79576af71f6588492d066beb3",
+    "summary": "2564b26bee38da9744a518aa9fe20d2afb3a007f5a30b6d3529ff021a1d2066d",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-18T17:12:29.890035+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4"
+}

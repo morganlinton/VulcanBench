@@ -1,0 +1,4137 @@
+{
+ "cells": {
+  "terra/extra-high": 23,
+  "terra/high": 23,
+  "terra/low": 23,
+  "terra/max": 22,
+  "terra/medium": 23
+ },
+ "excluded": [],
+ "levels": {
+  "terra": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [
+  {
+   "effort": "max",
+   "model": "terra",
+   "reason": "No attempt could run: every launch from 2026-09-15 06:00 PDT was refused by the Codex API with 'You've hit your usage limit ... try again at Sep 19th, 2026 1:10 AM' before any work; one refused attempt is kept under runs-effort-terra/max-quota-refused/ as evidence",
+   "task": "legacy-paddockcore-binary-parity"
+  }
+ ],
+ "models": {
+  "terra": "GPT-5.6 Terra in Codex"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": 1.048783,
+   "duration_s": 527.692,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:45:21.679057+00:00",
+   "functional": 0.4444,
+   "model": "terra",
+   "quality": 0.8471,
+   "reported_tokens": 2277312,
+   "run_id": "legacy-blendcore-binary-parity-55f952ff",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2277312,
+    "result_receipts": 1,
+    "stream_sha256": "e8bce8633a935800a0a82da49417f3b908ef1da3b8c4d8ab1e5df669fc467c40",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2148352,
+     "input_tokens": 2253575,
+     "output_tokens": 23737,
+     "reasoning_output_tokens": 10293
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-blendcore-binary-parity-55f952ff",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "66c1a8dd537b33baaafe91f83a0efadc5c5b483cabf8bda8c2188f356463c623",
+    "summary": "89e62ea626c2bf3b86dddde92e8d8aa8888d19a11c8924248c55a56dd8c44cf6",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-14T12:36:33.982801+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.727044,
+   "duration_s": 405.959,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:18:55.566226+00:00",
+   "functional": 0.0714,
+   "model": "terra",
+   "quality": 0.7729,
+   "reported_tokens": 1350783,
+   "run_id": "legacy-cellarcore-binary-parity-7e5594a3",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1350783,
+    "result_receipts": 1,
+    "stream_sha256": "c406962fb4a73e127687ea26fd5082fc6790d36a41c9c5b6ec6b61bb430519ff",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1250560,
+     "input_tokens": 1332673,
+     "output_tokens": 18110,
+     "reasoning_output_tokens": 7328
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-cellarcore-binary-parity-7e5594a3",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "67dce784c624ce0540709437bd3a42a23b33cc273aeb620e3882f3a3fd8c0146",
+    "summary": "b30cde9dc1097e2a1fda81e46a4059645117e1843ed9558b6f65306b148884f8",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-14T13:12:09.601437+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.582717,
+   "duration_s": 378.305,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:36:40.386563+00:00",
+   "functional": 0.5,
+   "model": "terra",
+   "quality": 0.8208,
+   "reported_tokens": 1075301,
+   "run_id": "legacy-codeccore-binary-parity-994b8684",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1075301,
+    "result_receipts": 1,
+    "stream_sha256": "2e41d493c53a02878dea0577f5fc4c762d95702cd7454211c0c8fff2a5b00f2f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1006336,
+     "input_tokens": 1058578,
+     "output_tokens": 16723,
+     "reasoning_output_tokens": 5088
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-codeccore-binary-parity-994b8684",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "8048122c93deb9b8ce990deadb8395a69a7760dbab575d51639a293b16457c91",
+    "summary": "70f651cd0bb546548891d27fb791a869fa7f15306d397163542cab6c22bd85f5",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-14T11:30:22.076326+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.219341,
+   "duration_s": 635.708,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:06:19.714755+00:00",
+   "functional": 0.6429,
+   "model": "terra",
+   "quality": 0.7571,
+   "reported_tokens": 2415152,
+   "run_id": "legacy-depotcore-binary-parity-34709956",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2415152,
+    "result_receipts": 1,
+    "stream_sha256": "a7907b2daa3698f36642d327a0fa70e76b0df7f5d1e1f12873b1d8fefc023094",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2255104,
+     "input_tokens": 2385696,
+     "output_tokens": 29456,
+     "reasoning_output_tokens": 17254
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-depotcore-binary-parity-34709956",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "15e8a94a090f38742738cb0fc8484d80fecb291159109bd706162c98440e5dd0",
+    "summary": "0570c35c7d02cd5edfeac93ca39a906b4005fdad148c27e118812fcc6feb1fa0",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-14T12:55:44.003536+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.505459,
+   "duration_s": 266.363,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:30:21.947861+00:00",
+   "functional": 0.7778,
+   "model": "terra",
+   "quality": 0.8051,
+   "reported_tokens": 988967,
+   "run_id": "legacy-freightcore-binary-parity-9d75c097",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 988967,
+    "result_receipts": 1,
+    "stream_sha256": "87af99a15e11c51fd19129a8cb8f4783594183f7671522a859af91b59a6ce465",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 919808,
+     "input_tokens": 977079,
+     "output_tokens": 11888,
+     "reasoning_output_tokens": 5268
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-freightcore-binary-parity-9d75c097",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "4555f32b42462df7c799cc127b4a624e089e4ce71c2d86760c7cba91e877f31e",
+    "summary": "118b7f7916cc2ce2833bcc7ff148044a43fc582e02d794341f8b2f23d8a5cdcb",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-14T11:25:55.581690+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.532854,
+   "duration_s": 334.751,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:55:43.871233+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.7362,
+   "reported_tokens": 977634,
+   "run_id": "legacy-granarycore-binary-parity-65a6031a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 977634,
+    "result_receipts": 1,
+    "stream_sha256": "a054b960bacfe22cb5640a84607cc2e5324b95b0b7200db8efdc032d7459918b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 907008,
+     "input_tokens": 963643,
+     "output_tokens": 13991,
+     "reasoning_output_tokens": 6496
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-granarycore-binary-parity-65a6031a",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "c3b6fafa1199a1cdafaab8ca10e08360f4094aa94c749d1a14ab4c165ee78b85",
+    "summary": "34f8c039e65904f1a65a91ed45361cfa22daccdec8a9246f99fcd2788f068a71",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-14T12:50:09.117277+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.56284,
+   "duration_s": 369.697,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:09:40.973425+00:00",
+   "functional": 0.625,
+   "model": "terra",
+   "quality": 0.8281,
+   "reported_tokens": 896471,
+   "run_id": "legacy-hedgecore-binary-parity-d54d43a0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 896471,
+    "result_receipts": 1,
+    "stream_sha256": "724c38af45981e1b02f2c577c29a7a13da0c02fe0260599f172db43d95da5b48",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 817152,
+     "input_tokens": 880382,
+     "output_tokens": 16089,
+     "reasoning_output_tokens": 6538
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-hedgecore-binary-parity-d54d43a0",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "1fcd88aab63055569bc5a4df57063ab1b5a0481ceb6878550de4f1f1a50825a0",
+    "summary": "24c61b9e13454e314a89b1cd08ce92bb5c8c455aad0a875d26e8dde70d449449",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-14T12:03:31.271217+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.536655,
+   "duration_s": 349.617,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:12:09.461343+00:00",
+   "functional": 0.25,
+   "model": "terra",
+   "quality": 0.768,
+   "reported_tokens": 1062931,
+   "run_id": "legacy-lodgecore-binary-parity-ff09cd02",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1062931,
+    "result_receipts": 1,
+    "stream_sha256": "391dc1ffe53ba9590d5fe086b53502848353e0a02c7965c33122db60422301b8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 998912,
+     "input_tokens": 1048785,
+     "output_tokens": 14146,
+     "reasoning_output_tokens": 4850
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-lodgecore-binary-parity-ff09cd02",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "241da7fbb70c7d19743eba050df04c57f0f4a6f6ad8f74e42c3a3a73ff08f982",
+    "summary": "48ea485ed2ff46fd409ec25f9d5c6ca5fb048fe32a882a39c96a08b9f41118f1",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-14T13:06:19.840121+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.523066,
+   "duration_s": 323.321,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:03:53.484007+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.8004,
+   "reported_tokens": 922075,
+   "run_id": "legacy-matchcore-order-book-parity-dbcc17a8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 922075,
+    "result_receipts": 1,
+    "stream_sha256": "13b179300f6a28fdbb05a1ff998ecd5ae591d9126fde0c9c1264408af62aa438",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 838656,
+     "input_tokens": 910332,
+     "output_tokens": 11743,
+     "reasoning_output_tokens": 3155
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-matchcore-order-book-parity-dbcc17a8",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "12674dc981e3520a86950c0098225c68bdc4d0e2af77262a8da378b3bb42e9dd",
+    "summary": "328d4341f81da55c44ae1be2957bd42b9513eb8cbb70722788e7c99809486b9e",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-14T10:58:30.158833+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.814481,
+   "duration_s": 508.696,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:25:55.448162+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8148,
+   "reported_tokens": 1501472,
+   "run_id": "legacy-metercore-binary-parity-c588c52f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1501472,
+    "result_receipts": 1,
+    "stream_sha256": "6d88f324847ad2dc1d59c338cd60905df8fe508b46cacff501df5eba04531cdf",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1385728,
+     "input_tokens": 1481634,
+     "output_tokens": 19838,
+     "reasoning_output_tokens": 6174
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-metercore-binary-parity-c588c52f",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "d274827cd57bd127f3bb0f8bfbec829807306036764ed98ebec94f6f00af65a4",
+    "summary": "52dd9a77af079f69823c36ee76f5373ebb07848054f8f84a565164c5a076bd94",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-14T11:17:26.746227+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.864113,
+   "duration_s": 622.202,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:36:33.846702+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.8344,
+   "reported_tokens": 1705923,
+   "run_id": "legacy-pacecore-binary-parity-d227e111",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1705923,
+    "result_receipts": 1,
+    "stream_sha256": "9d3b7164858c76f1a4c5b1cab9e36c25c36f6ef1376c9fdc2772efe4626d321c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1608704,
+     "input_tokens": 1681977,
+     "output_tokens": 23946,
+     "reasoning_output_tokens": 11523
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-pacecore-binary-parity-d227e111",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "6eab8015a98f1caffd5bb95ba0b55fb75240d64ded7f59c63c3d2d4699bc5c99",
+    "summary": "388784d5c900fe83f12ec5fcfc8c1d2a4f19785d89a10785a07b14cf59822cba",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-14T12:26:11.640882+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.480277,
+   "duration_s": 305.898,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:24:01.594310+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.6825,
+   "reported_tokens": 643026,
+   "run_id": "legacy-paddockcore-binary-parity-c2c31530",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 643026,
+    "result_receipts": 1,
+    "stream_sha256": "fcce35d9de5fb6c82bd48ba70a137999de657c996fca2a2726995bf92be6388e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 561408,
+     "input_tokens": 629910,
+     "output_tokens": 13116,
+     "reasoning_output_tokens": 6509
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-paddockcore-binary-parity-c2c31530",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "2c09540550b9a89a78f32f1fbd30e39382d7f9dd585ce7c8b30a5595919e1389",
+    "summary": "2069fef441132ef03ce537baf0d1ff98e6b3575803a39e8bdf5ce08e607bf389",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-14T13:18:55.693414+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.102251,
+   "duration_s": 567.542,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:17:26.604519+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.8182,
+   "reported_tokens": 2353790,
+   "run_id": "legacy-payrollcore-binary-parity-04b0fe87",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2353790,
+    "result_receipts": 1,
+    "stream_sha256": "019341a18160bd27632d780ba1af46a6dd6f7c556fa769f98395ccf57eec886f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2217728,
+     "input_tokens": 2328306,
+     "output_tokens": 25484,
+     "reasoning_output_tokens": 13083
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-payrollcore-binary-parity-04b0fe87",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "87d16bd09560b9ff3648d5ceb94cf94e38636946f37a613aec70a92893f6783c",
+    "summary": "875b9e6f73039cb499f64e1b0999d52ed61f2de1fe912102a8a933b74eb5d86c",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-14T11:07:59.056624+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.438488,
+   "duration_s": 245.302,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:07:58.929775+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.8021,
+   "reported_tokens": 680158,
+   "run_id": "legacy-qlite-store-parity-a3a6cc24",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 680158,
+    "result_receipts": 1,
+    "stream_sha256": "192730cc40bb2d5c89081a4c9f83b8ab39eddc1168dde67a99b8ff76717b8d08",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 606976,
+     "input_tokens": 669427,
+     "output_tokens": 10731,
+     "reasoning_output_tokens": 3923
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-qlite-store-parity-a3a6cc24",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "17c371475a2d0dc79f34a1c713b6c09621ed6855fbbfa87940a14793231f74e3",
+    "summary": "76e827ae5d2a251666cc3b6602e927166256d858f8c0dfdb07c4e0f2c7fa25f0",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-14T11:03:53.624205+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.617719,
+   "duration_s": 387.792,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:03:31.125073+00:00",
+   "functional": 0.375,
+   "model": "terra",
+   "quality": 0.8268,
+   "reported_tokens": 973063,
+   "run_id": "legacy-queuecore-binary-parity-23ac9dee",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 973063,
+    "result_receipts": 1,
+    "stream_sha256": "e2cc6c6dfc5b8baa8a51056b1d01c88c622f9e7b35115ab77402fbf9225ebfd9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 883968,
+     "input_tokens": 955608,
+     "output_tokens": 17455,
+     "reasoning_output_tokens": 8374
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-queuecore-binary-parity-23ac9dee",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "bf6a93a2e1d61e6af97b24123250722c1ce7790eada5c0d888cbbd6bae3afdaf",
+    "summary": "5c8c0ed453372aac0dab8b5968ef6441f34a18e001a07b36a9a08319e271a507",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-14T11:57:03.328122+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.646941,
+   "duration_s": 454.295,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:44:14.825216+00:00",
+   "functional": 0.8,
+   "model": "terra",
+   "quality": 0.8337,
+   "reported_tokens": 1216481,
+   "run_id": "legacy-quotacore-binary-parity-18276bc3",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1216481,
+    "result_receipts": 1,
+    "stream_sha256": "240f09649d9476ffc88dd5ae4ddeb5d1f85722fd28cbb9b51a4a2e10885cab9f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1139456,
+     "input_tokens": 1198362,
+     "output_tokens": 18119,
+     "reasoning_output_tokens": 6563
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-quotacore-binary-parity-18276bc3",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "f91df34d4df212f9d5ca43b658f8853bab6bb3a98f875b77eefd5d8f549fa653",
+    "summary": "cc0ea15ea5c5ea2530f0665720db9fb39de4913001e917e0dd6756447c3870ed",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-14T11:36:40.525051+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.539776,
+   "duration_s": 332.776,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:19:49.052061+00:00",
+   "functional": 0.5,
+   "model": "terra",
+   "quality": 0.8494,
+   "reported_tokens": 891223,
+   "run_id": "legacy-reflowcore-binary-parity-dadd15f6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 891223,
+    "result_receipts": 1,
+    "stream_sha256": "71c18cf8c98a977136aa0d28b7f88192eaf02c1e7da18bc4d4ff962b1249486e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 816128,
+     "input_tokens": 876118,
+     "output_tokens": 15105,
+     "reasoning_output_tokens": 6590
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-reflowcore-binary-parity-dadd15f6",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "17245c2601e503510088a6235aa20fb254e8d55247336ed03a7fc09d3478c329",
+    "summary": "b96a9fb9eecf01c431234bdf7325d23b996bc541344b821eb147d02ab4d46578",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-14T12:14:16.273349+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.370141,
+   "duration_s": 275.017,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:14:16.127489+00:00",
+   "functional": 0.25,
+   "model": "terra",
+   "quality": 0.7704,
+   "reported_tokens": 549226,
+   "run_id": "legacy-schedcore-binary-parity-41ef2630",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 549226,
+    "result_receipts": 1,
+    "stream_sha256": "6304474698ebac3db8fde891d775536d2f61b4da22facb715048250eeff8d3d2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 499456,
+     "input_tokens": 537560,
+     "output_tokens": 11666,
+     "reasoning_output_tokens": 4368
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-schedcore-binary-parity-41ef2630",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "f98596634e6fb8a0473ed20947b586adfe6813fae20a2a5fa0412c678531b648",
+    "summary": "7cb6d660f9c23f838c819ee8914c835dcd8fa198f9178e9046351851f126cc5a",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-14T12:09:41.105664+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.764386,
+   "duration_s": 480.484,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T10:58:30.023741+00:00",
+   "functional": 0.4,
+   "model": "terra",
+   "quality": 0.7985,
+   "reported_tokens": 1321287,
+   "run_id": "legacy-settlecore-binary-parity-4e440a12",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1321287,
+    "result_receipts": 1,
+    "stream_sha256": "5f87f2afe8823e8fc57f718848c03b53226677e5bec3aed1c20e8d416267e6f9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1204992,
+     "input_tokens": 1302675,
+     "output_tokens": 18612,
+     "reasoning_output_tokens": 4541
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-settlecore-binary-parity-4e440a12",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "34f6aa66948fdd161b85d6b5255cd6547736ffe4cedff3baa046d50413c09436",
+    "summary": "3d38c0a96cad33f55eab92e199704d59d487eaac2a70223507e61fa05d48aac4",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-14T10:50:29.533599+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.651095,
+   "duration_s": 456.117,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:51:51.089659+00:00",
+   "functional": 0.5,
+   "model": "terra",
+   "quality": 0.8401,
+   "reported_tokens": 1091260,
+   "run_id": "legacy-snapcore-binary-parity-89b1cc62",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1091260,
+    "result_receipts": 1,
+    "stream_sha256": "12f0a775e31d748e1b3d16a40a3735cc15d274ce0f34ccae41dbd9926500dfb2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 988160,
+     "input_tokens": 1075603,
+     "output_tokens": 15657,
+     "reasoning_output_tokens": 4224
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-snapcore-binary-parity-89b1cc62",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "d4f88529a63ae15321ae25f586cc3e9062654d9c5ba3abe0fd9a6c30ae68b8e9",
+    "summary": "6cf3668d3ef34636013e78d29800886513f15a5e3d34ba14a02c3315dc3a286b",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-14T11:44:14.966503+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.622827,
+   "duration_s": 287.17,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:50:08.984265+00:00",
+   "functional": 0.6667,
+   "model": "terra",
+   "quality": 0.8312,
+   "reported_tokens": 1108801,
+   "run_id": "legacy-stampcore-binary-parity-5c300022",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1108801,
+    "result_receipts": 1,
+    "stream_sha256": "1f60057e61611d906aa806f1f593439463ae929d40c3147255bb6b0c21a9f848",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 999424,
+     "input_tokens": 1096841,
+     "output_tokens": 11960,
+     "reasoning_output_tokens": 4434
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-stampcore-binary-parity-5c300022",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "91d903a3714b165c41adc981856ac7ac7a02399e62d61475f6426b4b15c9da2b",
+    "summary": "0317dc812bfd14bf7e162d5f6dff31a8b42089f9954f5e400c2f28410cf181b2",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-14T12:45:21.810383+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.62472,
+   "duration_s": 382.299,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T12:26:11.496549+00:00",
+   "functional": 0.625,
+   "model": "terra",
+   "quality": 0.8263,
+   "reported_tokens": 968011,
+   "run_id": "legacy-tallycore-binary-parity-c26607a4",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 968011,
+    "result_receipts": 1,
+    "stream_sha256": "fb84917846b4cb4352abc6de855541a25f2d8668b5d978535c069682bbade1bc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 870400,
+     "input_tokens": 951482,
+     "output_tokens": 16529,
+     "reasoning_output_tokens": 8753
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-tallycore-binary-parity-c26607a4",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "49af22e72173faf87c58f2a2319f726059f04b7c5f11d7d89ae03394831e6fdc",
+    "summary": "9fba417012f5a17d591bb4b260974bebfd01ec27f8b6ccefc1d6a9c24b9fa623",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-14T12:19:49.192151+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.506131,
+   "duration_s": 311.965,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-14T11:57:03.192008+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8437,
+   "reported_tokens": 909737,
+   "run_id": "legacy-vaultcore-binary-parity-fbd514c8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 909737,
+    "result_receipts": 1,
+    "stream_sha256": "993a488f99600544e3c9ccfef96b242122098249ccaee03a8222300f32318835",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 839168,
+     "input_tokens": 896787,
+     "output_tokens": 12950,
+     "reasoning_output_tokens": 5599
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/low/legacy-vaultcore-binary-parity-fbd514c8",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "8be5839dd3d8b857995015ce9ad1efe95ecfe876b11a00e5f451b32d75a5a00e",
+    "summary": "31a611120cadef0a4f3e38d89e1cc7be410b4411ba77cdcd5490f432b10af1b5",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-14T11:51:51.222694+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.588445,
+   "duration_s": 286.109,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:39:12.670930+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8279,
+   "reported_tokens": 963570,
+   "run_id": "legacy-blendcore-binary-parity-5a00f9fe",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 963570,
+    "result_receipts": 1,
+    "stream_sha256": "a910a9fa0f020ea921d5d8e1bdf349f17773bcb299b3407e1e92dd1bbeea1b0f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 862464,
+     "input_tokens": 950515,
+     "output_tokens": 13055,
+     "reasoning_output_tokens": 6526
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-blendcore-binary-parity-5a00f9fe",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "7cf0e26dc7f5ff93647e84ffee52f582cc8be63504f36129db82da036e676e82",
+    "summary": "d6e295b42a415d3777b221632764d91038f4ce9df1cee2fb8375e921658ef678",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-14T15:34:26.557882+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.25327,
+   "duration_s": 620.029,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T16:16:43.831411+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.7683,
+   "reported_tokens": 2636819,
+   "run_id": "legacy-cellarcore-binary-parity-79d9a153",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2636819,
+    "result_receipts": 1,
+    "stream_sha256": "debfd06300aa8850d49afcf90ca0fd4fd9e6aa5cf6a5370920d25a0e9b2231ed",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2471936,
+     "input_tokens": 2609085,
+     "output_tokens": 27734,
+     "reasoning_output_tokens": 10726
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-cellarcore-binary-parity-79d9a153",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "4f83037bcff2fee26ab28a24f3dfd673c0b65a06278949b36bf09585f7430f1b",
+    "summary": "b9a79031b22aa90770d5003fb7983429f2d9a703263b0119b2ca3cfd23c4e3db",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-14T16:06:23.794411+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.817276,
+   "duration_s": 490.19,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:16:08.738962+00:00",
+   "functional": 0.5,
+   "model": "terra",
+   "quality": 0.8346,
+   "reported_tokens": 1760318,
+   "run_id": "legacy-codeccore-binary-parity-2b39438d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1760318,
+    "result_receipts": 1,
+    "stream_sha256": "95acc2c2480c76cb84b0913bd420566f8d977cd672b074b76a5b4162cc267df8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1667840,
+     "input_tokens": 1740117,
+     "output_tokens": 20201,
+     "reasoning_output_tokens": 8074
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-codeccore-binary-parity-2b39438d",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "874203f800953c3c1e965e34d7e4f300236b46fc109baae74d356009b6c89fb0",
+    "summary": "64b94d52cae40309ebc3c54e6976a0b54e2dc70870c0d7724154ba61b0572ffc",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-14T14:07:58.542557+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.832163,
+   "duration_s": 527.967,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:58:55.036091+00:00",
+   "functional": 0.5714,
+   "model": "terra",
+   "quality": 0.7728,
+   "reported_tokens": 1295890,
+   "run_id": "legacy-depotcore-binary-parity-a90010c9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1295890,
+    "result_receipts": 1,
+    "stream_sha256": "1f9eb0062d93b8b2379e082cf9f545a12b759702bc4acb5afea9b42acdf68595",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1181440,
+     "input_tokens": 1271110,
+     "output_tokens": 24780,
+     "reasoning_output_tokens": 13459
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-depotcore-binary-parity-a90010c9",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "90fdfa36c482117bc63ce80a07fae7ffc0d7087d49dfa8304b0f1771ed6c31cd",
+    "summary": "1fb830d92bcadaec10dc671579b26c4b855f687405aeed931db0444615bbd5a7",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-14T15:50:07.064489+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.583083,
+   "duration_s": 386.299,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:07:58.407163+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8315,
+   "reported_tokens": 867250,
+   "run_id": "legacy-freightcore-binary-parity-d63a286a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 867250,
+    "result_receipts": 1,
+    "stream_sha256": "eb118a8897bdc3f4128f779bc53502c4e6c13792f788690e1af33d0306f3775f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 783616,
+     "input_tokens": 849868,
+     "output_tokens": 17382,
+     "reasoning_output_tokens": 9532
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-freightcore-binary-parity-d63a286a",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "f0a75a128e2619443604ac9ec3819e38953e02557a991c079f1171afd67b9675",
+    "summary": "db4e6ad68fc40840448e9148631c64320f8b3940a415a9145d25f8597630ac8d",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-14T14:01:32.100372+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.651155,
+   "duration_s": 403.074,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:50:06.929275+00:00",
+   "functional": 0.2857,
+   "model": "terra",
+   "quality": 0.7066,
+   "reported_tokens": 1263656,
+   "run_id": "legacy-granarycore-binary-parity-1f00a5fe",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1263656,
+    "result_receipts": 1,
+    "stream_sha256": "88a1fbbf3d683bc872a7f0ea9625fea55bfe2afc2548c6cf7738a4ed85c5da64",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1186048,
+     "input_tokens": 1246062,
+     "output_tokens": 17594,
+     "reasoning_output_tokens": 6696
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-granarycore-binary-parity-1f00a5fe",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "bd2dff3dcf6e521c2779219a1935c45dfbb2fe0ccec5ab1c5cd2fc78e7d37089",
+    "summary": "4257fb6e0b1403c09ba6bdd2fdf56da2463a2794c2fd60021123fbf436281630",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-14T15:43:23.851469+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.641387,
+   "duration_s": 431.861,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:59:46.137456+00:00",
+   "functional": 0.625,
+   "model": "terra",
+   "quality": 0.839,
+   "reported_tokens": 1128716,
+   "run_id": "legacy-hedgecore-binary-parity-53af9172",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1128716,
+    "result_receipts": 1,
+    "stream_sha256": "050d62844f95207318d56f42cb8d8b609b4ba6818dd63ff8a03f5aa9f3467fcb",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1051648,
+     "input_tokens": 1109645,
+     "output_tokens": 19071,
+     "reasoning_output_tokens": 8382
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-hedgecore-binary-parity-53af9172",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "ce4f4f62cafa7ebbf8e0afdc99f8ad7cad57e217f89da49b2baa4a3d5f5169a5",
+    "summary": "342d13d3624628fcc4816d27bfba592baa50fafaa94a61a8f2d4b078581b7768",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-14T14:52:34.271644+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.812872,
+   "duration_s": 448.491,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T16:06:23.660695+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.7656,
+   "reported_tokens": 1437877,
+   "run_id": "legacy-lodgecore-binary-parity-1ede0908",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1437877,
+    "result_receipts": 1,
+    "stream_sha256": "2daca522eeeb93308b872d09cf64a4999cca2d1fca3e5a2f6c7d4ca37160ec4c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1320960,
+     "input_tokens": 1417366,
+     "output_tokens": 20511,
+     "reasoning_output_tokens": 9903
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-lodgecore-binary-parity-1ede0908",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "6f20b60aaa9a442ca7afccb75b22fb2eb48231f1808e987757a25582d488a723",
+    "summary": "6475fc22b09bfc3e1c894f86cf6ddaf7c74b54e25d46c5da47a119536132b567",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-14T15:58:55.164859+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.617476,
+   "duration_s": 338.794,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:39:35.356373+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7939,
+   "reported_tokens": 1181305,
+   "run_id": "legacy-matchcore-order-book-parity-1908fb86",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1181305,
+    "result_receipts": 1,
+    "stream_sha256": "d3476fa680e68cdcfedcdac0829ede1a381021d458c0547e9414db10a553cb86",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1095168,
+     "input_tokens": 1166657,
+     "output_tokens": 14648,
+     "reasoning_output_tokens": 7308
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-matchcore-order-book-parity-1908fb86",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "82fde7ae5319a329ecbfe15231b8dbb651c0f625005fae092841d1708e8ff8dc",
+    "summary": "68d2c07d277935664260323001a421b87c0de4644e2bcb096ab6d55ba0bbc606",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-14T13:33:56.557499+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.804597,
+   "duration_s": 554.608,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:01:31.947517+00:00",
+   "functional": 0.6667,
+   "model": "terra",
+   "quality": 0.8153,
+   "reported_tokens": 1356168,
+   "run_id": "legacy-metercore-binary-parity-d21fee13",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1356168,
+    "result_receipts": 1,
+    "stream_sha256": "016ce785a1514eec2f458ca7b0ad8f5410dd134ebc1912dd3034af9a860d8f96",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1245184,
+     "input_tokens": 1333920,
+     "output_tokens": 22248,
+     "reasoning_output_tokens": 9556
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-metercore-binary-parity-d21fee13",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "e69c8fb5fdcbb940e891e4a24e788914f99c0ab4e364f6dcb586a62d659cc2f6",
+    "summary": "09ad60c110c1a0f41f9e96d77bd63be856549d9b0fc600cf82792a666b9bcb28",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-14T13:52:17.332635+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.882484,
+   "duration_s": 579.483,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:34:26.424781+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.8384,
+   "reported_tokens": 1622303,
+   "run_id": "legacy-pacecore-binary-parity-e25fa664",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1622303,
+    "result_receipts": 1,
+    "stream_sha256": "380db5dc1688e893cc15ee2acba8950d6ebc44bce1018bcf4c1b2d70e80d828d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1501184,
+     "input_tokens": 1599947,
+     "output_tokens": 22356,
+     "reasoning_output_tokens": 9207
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-pacecore-binary-parity-e25fa664",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "e331177d1bc7fa61458d0f6c6085123c6bc572b36ad46bd57f436fea34a34fac",
+    "summary": "e49cf8590a1cc06d04a1ba2285f9be85b8ddfeb68fa6a365612d136704d55a3c",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-14T15:24:46.936954+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.889594,
+   "duration_s": 512.05,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T16:25:16.019691+00:00",
+   "functional": 0.3333,
+   "model": "terra",
+   "quality": 0.7281,
+   "reported_tokens": 1558499,
+   "run_id": "legacy-paddockcore-binary-parity-c5fbf211",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1558499,
+    "result_receipts": 1,
+    "stream_sha256": "363fdcfd6947da7da7fbb1f9162e2bf6adcd1b79d51eb37f8014aea8bf4a19ea",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1438208,
+     "input_tokens": 1534401,
+     "output_tokens": 24098,
+     "reasoning_output_tokens": 12287
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-paddockcore-binary-parity-c5fbf211",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "736e82211f797c6d72e291300ad6f6365daba94afc2342bbd8e0d1fb048856b4",
+    "summary": "d897ca3dab302f330c125f85b0cf5f0170f694f77605a4148bab2f7f8358ff8d",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-14T16:16:43.964000+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.889758,
+   "duration_s": 461.232,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:52:17.186931+00:00",
+   "functional": 0.8,
+   "model": "terra",
+   "quality": 0.8018,
+   "reported_tokens": 2019422,
+   "run_id": "legacy-payrollcore-binary-parity-a34fbddb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2019422,
+    "result_receipts": 1,
+    "stream_sha256": "05c99b450e2ba202635d63b1faeb984a51fca9ac877d010a346c7104dcc36505",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1916928,
+     "input_tokens": 1999411,
+     "output_tokens": 20011,
+     "reasoning_output_tokens": 7686
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-payrollcore-binary-parity-a34fbddb",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "c0498b928005ea539b770c9217d7f73dd7cf23fe42a89a3194f428a83a7d45f1",
+    "summary": "82b9b6270975fdb853ddc581efe6d6a793e871b975fb4e7b02ceb650ee5c8a49",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-14T13:44:35.948329+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.479253,
+   "duration_s": 300.254,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:44:35.752510+00:00",
+   "functional": 0.6667,
+   "model": "terra",
+   "quality": 0.8211,
+   "reported_tokens": 664889,
+   "run_id": "legacy-qlite-store-parity-502e2b2f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 664889,
+    "result_receipts": 1,
+    "stream_sha256": "7fe66277896e27fb6aa8d3ac25f996ba3d9503453418a7c9d44dfc2f7d95864e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 587264,
+     "input_tokens": 651470,
+     "output_tokens": 13419,
+     "reasoning_output_tokens": 4979
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-qlite-store-parity-502e2b2f",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "64fbfb799a7be0eebf96567e30065c5d3cb6bf5daf2811bee2dff640b0ef746e",
+    "summary": "a0357dd7a668b7f4d0bd16b85de6b2b94405b1ddd789034c0fc3e7fa11df5f7c",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-14T13:39:35.492523+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.111084,
+   "duration_s": 711.748,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:52:34.141661+00:00",
+   "functional": 0.625,
+   "model": "terra",
+   "quality": 0.822,
+   "reported_tokens": 2175552,
+   "run_id": "legacy-queuecore-binary-parity-5a3b5db1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2175552,
+    "result_receipts": 1,
+    "stream_sha256": "9e82924a9f047c4c7a5788ccf1152f6d3466901d797139c95d5519aee1611c6e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2054656,
+     "input_tokens": 2143719,
+     "output_tokens": 31833,
+     "reasoning_output_tokens": 12857
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-queuecore-binary-parity-5a3b5db1",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "6510a97f9d850699ee6df8807afd5d7cad466845931a1ded59bfeb8189dcdf5a",
+    "summary": "2c410bd7e07b0b7bb6cb92c65dc8a9b9e076d2b3608e87e4faf4c5af33f73105",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-14T14:40:42.386969+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.780389,
+   "duration_s": 484.098,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:24:12.980680+00:00",
+   "functional": 0.8,
+   "model": "terra",
+   "quality": 0.8587,
+   "reported_tokens": 1192787,
+   "run_id": "legacy-quotacore-binary-parity-66281e9c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1192787,
+    "result_receipts": 1,
+    "stream_sha256": "e0083acafbd918a1a57482176f7fac8d422c9e2287f5dd42d8baa908cd0cc96a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1081344,
+     "input_tokens": 1169946,
+     "output_tokens": 22841,
+     "reasoning_output_tokens": 13703
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-quotacore-binary-parity-66281e9c",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "5898fc2d0b2afc49a36dc34847b104a51b4781fd3b576f7822a7d94e945907e3",
+    "summary": "4677b5c7f8ef7e5e3ffa52c8c0f291444797960e83f2b6b72de56375f50999dd",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-14T14:16:08.878681+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.916781,
+   "duration_s": 524.418,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:14:05.027245+00:00",
+   "functional": 0.75,
+   "model": "terra",
+   "quality": 0.8372,
+   "reported_tokens": 1600417,
+   "run_id": "legacy-reflowcore-binary-parity-cb719560",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1600417,
+    "result_receipts": 1,
+    "stream_sha256": "343d26fa4f7dd1388cf01e59b356c5273352517381f8647c5c1064c76a4f8070",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1471744,
+     "input_tokens": 1576357,
+     "output_tokens": 24060,
+     "reasoning_output_tokens": 10803
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-reflowcore-binary-parity-cb719560",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "d826b7979b659139f6995681393bd259d206692aa1a5a404399ec263f9f52603",
+    "summary": "b36c5426bf89ef9c3b366c4b14398650bd2a055c6f62ed0f6ec9ef3d1a7bc9f4",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-14T15:05:20.603214+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.609648,
+   "duration_s": 334.201,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:05:20.465512+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7957,
+   "reported_tokens": 1042109,
+   "run_id": "legacy-schedcore-binary-parity-ff5384fa",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1042109,
+    "result_receipts": 1,
+    "stream_sha256": "0c19d4df02949e84fac3ec7f617451dfbda18a3aaf5fc3a435e4d5049b16a2c5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 950016,
+     "input_tokens": 1026956,
+     "output_tokens": 15153,
+     "reasoning_output_tokens": 7693
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-schedcore-binary-parity-ff5384fa",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "baff8578aee0330b4e4b0bb3fbcc535c13ee2bdec841569c9605dba9f8956914",
+    "summary": "15354e1b2c34f2ba551f79329648b6a1cf3611ceb6f48db4f4cc33ef097fe20b",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-14T14:59:46.259941+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.133966,
+   "duration_s": 592.097,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T13:33:56.412519+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.8021,
+   "reported_tokens": 2650110,
+   "run_id": "legacy-settlecore-binary-parity-b103d8a6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2650110,
+    "result_receipts": 1,
+    "stream_sha256": "1b203638f8bc9f8bd42b1883bca848ea08542a259bf59383c93025cbb38f89fa",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2524928,
+     "input_tokens": 2624828,
+     "output_tokens": 25282,
+     "reasoning_output_tokens": 6810
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-settlecore-binary-parity-b103d8a6",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "665a84eb87349254f8c56dab496cc4ea977084754834efb3d2cbed9edabb55d9",
+    "summary": "798352a870097252d747977e790dcf52b663085c459bd0eaf2cb631bdb470349",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-14T13:24:04.307754+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.772742,
+   "duration_s": 553.986,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:33:27.100215+00:00",
+   "functional": 0.5,
+   "model": "terra",
+   "quality": 0.8446,
+   "reported_tokens": 1226584,
+   "run_id": "legacy-snapcore-binary-parity-29a3014e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1226584,
+    "result_receipts": 1,
+    "stream_sha256": "c4fb26c54ce31168dd41ad6b0866b8adbc8ee33956846211400a45870e43d0af",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1111296,
+     "input_tokens": 1205603,
+     "output_tokens": 20981,
+     "reasoning_output_tokens": 7406
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-snapcore-binary-parity-29a3014e",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "78a2dab4b53816d911a273a6b69c7af679f0ffb23fa4cbaf9492b5b0fff23aea",
+    "summary": "398a8488e69ce33b83c8d55a96a9daa712f2a7b2206693b3fe6084d1eab9f5bc",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-14T14:24:13.107903+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.44658,
+   "duration_s": 250.907,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:43:23.718576+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8208,
+   "reported_tokens": 714111,
+   "run_id": "legacy-stampcore-binary-parity-6f479969",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 714111,
+    "result_receipts": 1,
+    "stream_sha256": "ad6886830cb34c9b0dcd4b5554c31d92206b9746130229d949c847554191ecf4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 642048,
+     "input_tokens": 703070,
+     "output_tokens": 11041,
+     "reasoning_output_tokens": 5187
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-stampcore-binary-parity-6f479969",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "174c907e65f07cc0a8da9a55902fab5a3e7eeaded0300debd5a5512f1248e025",
+    "summary": "4eddb3157177b2b33b1aaec211578dc27dd1f4b9a899752d16a1458afb25a3b3",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-14T15:39:12.808936+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.958532,
+   "duration_s": 641.616,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T15:24:46.806631+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.831,
+   "reported_tokens": 1623578,
+   "run_id": "legacy-tallycore-binary-parity-b30e92de",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1623578,
+    "result_receipts": 1,
+    "stream_sha256": "ed4ead629a27f2b9afb65da38758b90f5576799c0163214f9d70bfd6a9c98cd7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1491712,
+     "input_tokens": 1597136,
+     "output_tokens": 26442,
+     "reasoning_output_tokens": 15519
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-tallycore-binary-parity-b30e92de",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "efabed047c6db0400c68f67ab27c66a1e7a325c1862cd171f9162f10b22dd6a5",
+    "summary": "c6f59da72573428c74fbbcb91157006f351de5abd558a766953edc16741955c8",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-14T15:14:05.185613+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.712054,
+   "duration_s": 434.981,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-14T14:40:42.227404+00:00",
+   "functional": 0.5556,
+   "model": "terra",
+   "quality": 0.8553,
+   "reported_tokens": 1387477,
+   "run_id": "legacy-vaultcore-binary-parity-fde9b7b4",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1387477,
+    "result_receipts": 1,
+    "stream_sha256": "f711031c6bbbfd7aca72bf11cfb3400b5c98bb8124ebf2643cb912a5bbfa40e6",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1302272,
+     "input_tokens": 1368390,
+     "output_tokens": 19087,
+     "reasoning_output_tokens": 7490
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/medium/legacy-vaultcore-binary-parity-fde9b7b4",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "d31c26cecae59f4cf83581af86fd6c7fcc80cf8d722beef0bc75a3a4969afb64",
+    "summary": "6b2351cacf43f05eb7c9bdb97e462321167748bf8ae1a999ee125e0396de4134",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-14T14:33:27.240413+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.744653,
+   "duration_s": 451.7,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T19:35:26.070825+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8363,
+   "reported_tokens": 1399665,
+   "run_id": "legacy-blendcore-binary-parity-c40733f8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1399665,
+    "result_receipts": 1,
+    "stream_sha256": "46079f6088c43f41c7eca2b0ee8eee168cfb69d4824de9175d552d5aa469e51e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1304064,
+     "input_tokens": 1380078,
+     "output_tokens": 19587,
+     "reasoning_output_tokens": 10763
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-blendcore-binary-parity-c40733f8",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "cc2153f174398dbe9b21791f29dacc7155ac5f9424e10dd9b93329efc3c1c9e4",
+    "summary": "7f6408911a02d7c7d4ac6006823117dad0046add6f11612e2df2ac51581ad3cd",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-14T19:27:54.367419+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.734424,
+   "duration_s": 1131.428,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T21:01:56.699464+00:00",
+   "functional": 0.6429,
+   "model": "terra",
+   "quality": 0.7692,
+   "reported_tokens": 7575051,
+   "run_id": "legacy-cellarcore-binary-parity-e27ea2fa",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7575051,
+    "result_receipts": 1,
+    "stream_sha256": "0bb0f7711196f709b207cd10802f761593d123e801cc59fdf90e7afdd307efbc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 7299072,
+     "input_tokens": 7528278,
+     "output_tokens": 46773,
+     "reasoning_output_tokens": 22236
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-cellarcore-binary-parity-e27ea2fa",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "125bf71d881bdf32ea9f1341fb10d0b65bcfec37b9c40f4fe11725d8e5969d5b",
+    "summary": "f64b3b2bd65fdc1e44cb955abed96a1466afaba0be0d4810a0d1c7f69b6b85f2",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-14T20:43:05.263527+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.679554,
+   "duration_s": 404.883,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T17:38:41.681184+00:00",
+   "functional": 0.6,
+   "model": "terra",
+   "quality": 0.8099,
+   "reported_tokens": 1097419,
+   "run_id": "legacy-codeccore-binary-parity-af43aa16",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1097419,
+    "result_receipts": 1,
+    "stream_sha256": "4108d625e0c08755afa62e06ff6234b76b8d5c39487935f133e3eda9c110ff4a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1003008,
+     "input_tokens": 1077985,
+     "output_tokens": 19434,
+     "reasoning_output_tokens": 9296
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-codeccore-binary-parity-af43aa16",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "59a1596032fd7170ab3eb21027f8541c070247b27a92b7cf878ada1441fbe474",
+    "summary": "f01ce67c2b4f63751b51c9eb9c665df650a87feb92be6f9cf585b28595bbaa86",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-14T17:31:56.793566+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.07365,
+   "duration_s": 887.74,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T20:22:14.988585+00:00",
+   "functional": 0.5714,
+   "model": "terra",
+   "quality": 0.7593,
+   "reported_tokens": 5594329,
+   "run_id": "legacy-depotcore-binary-parity-f1474333",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5594329,
+    "result_receipts": 1,
+    "stream_sha256": "d8340da481d1a92717ac188378494e89f03860ab981f24cc852e94b64e8dfbc4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5390336,
+     "input_tokens": 5555481,
+     "output_tokens": 38848,
+     "reasoning_output_tokens": 19076
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-depotcore-binary-parity-f1474333",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "a8f9caf062474a14920f60b97a77973fe9c1f745822e9fa0d3490aec8196ee5c",
+    "summary": "37c443d1343ec266eccaddd80a26e927a8bbc9779e93dbc29978f995bd9a88e0",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-14T20:07:27.242518+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.398492,
+   "duration_s": 873.335,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T17:31:56.665329+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8182,
+   "reported_tokens": 2658497,
+   "run_id": "legacy-freightcore-binary-parity-af645d10",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2658497,
+    "result_receipts": 1,
+    "stream_sha256": "e1726f13d13c09784cd7f10ac33c5f660372645f18220bcfb4a165a2da776d6e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2498560,
+     "input_tokens": 2618582,
+     "output_tokens": 39915,
+     "reasoning_output_tokens": 18878
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-freightcore-binary-parity-af645d10",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "695b03296e95c26729172eda3f522844b01848485f8a1e892fa6bd25237dd474",
+    "summary": "e195d5cb8ab5c0e97debc35d8bb1071f9b3e44180cefd56a11d36dade3c738c7",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-14T17:17:23.324349+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.521417,
+   "duration_s": 1156.121,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T20:07:27.108385+00:00",
+   "functional": 0.6429,
+   "model": "terra",
+   "quality": 0.6768,
+   "reported_tokens": 6336378,
+   "run_id": "legacy-granarycore-binary-parity-3b563f79",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6336378,
+    "result_receipts": 1,
+    "stream_sha256": "cc7388c131f3e9f3124f4602bb2ce39ca24e79cbf6feeb562b8d3206791280ac",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6068224,
+     "input_tokens": 6285387,
+     "output_tokens": 50991,
+     "reasoning_output_tokens": 26896
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-granarycore-binary-parity-3b563f79",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "f4808fdfbb7818f869accd949523bd24f5cca66505d0ae201a977941f98e55f0",
+    "summary": "3a48f786b6fb342182785409f604c182c8e1d5941e1729021bf2b6db9ae6f701",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-14T19:48:10.980826+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.248704,
+   "duration_s": 763.884,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T18:38:04.660867+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8333,
+   "reported_tokens": 2527549,
+   "run_id": "legacy-hedgecore-binary-parity-c57d272a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2527549,
+    "result_receipts": 1,
+    "stream_sha256": "676f498c1aa3a88befb34933ec9c4822bcbe5eb5e3cf095581f18e8726ee0093",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2383872,
+     "input_tokens": 2494530,
+     "output_tokens": 33019,
+     "reasoning_output_tokens": 16036
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-hedgecore-binary-parity-c57d272a",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "627dd18181c6dcd309a3e2af222c9cbc2f21d2282d2843c63ddc2cd434e8ad86",
+    "summary": "caf2efc86d1e87de55291cfb63e8818e1b8d801842f72d9df55e4a91b48d7417",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-14T18:25:20.770391+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.647817,
+   "duration_s": 1249.978,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T20:43:05.105984+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7577,
+   "reported_tokens": 7001297,
+   "run_id": "legacy-lodgecore-binary-parity-ded48f08",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7001297,
+    "result_receipts": 1,
+    "stream_sha256": "66d7728eab4c0a3d6211883ec66a72a281ddd9b731fd4acadfe42da6f58974ca",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6717696,
+     "input_tokens": 6953675,
+     "output_tokens": 47622,
+     "reasoning_output_tokens": 27778
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-lodgecore-binary-parity-ded48f08",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "c88424e057fa96d98b21db47c162efaf2ea18a9d9c3590f71e242233a4cb8ee7",
+    "summary": "48f593361fbeda54ef8d29a646444a6484ade64d64e9d1f523a5bbfaa0b12cb9",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-14T20:22:15.118785+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.23374,
+   "duration_s": 767.122,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T16:45:58.286825+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.7896,
+   "reported_tokens": 2294159,
+   "run_id": "legacy-matchcore-order-book-parity-64c0df7b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2294159,
+    "result_receipts": 1,
+    "stream_sha256": "f950b83c4bb2073457c917a4063265512f98e7f62ca617ff3eebc4482187866e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2125824,
+     "input_tokens": 2263140,
+     "output_tokens": 31019,
+     "reasoning_output_tokens": 11524
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-matchcore-order-book-parity-64c0df7b",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "2cf54e4085f88a54153131b3752b6f09fbf17d201bf872e69af3c39e8d3c9f5a",
+    "summary": "1ee2dc804988854121cffd3906b65b015cc2f21bb1c1263114e2b76d5a7c53eb",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-14T16:33:11.158453+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.008067,
+   "duration_s": 632.131,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T17:17:23.188570+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8328,
+   "reported_tokens": 1765328,
+   "run_id": "legacy-metercore-binary-parity-401659f5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1765328,
+    "result_receipts": 1,
+    "stream_sha256": "c3e8b2298c5d89987f4335ae4b172b06b2da21aeb89b22bf76189921d03235d2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1630208,
+     "input_tokens": 1737790,
+     "output_tokens": 27538,
+     "reasoning_output_tokens": 11440
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-metercore-binary-parity-401659f5",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "23c815df0abee94ac9ecd3b5ccab6c7145d4ccf517b3ca56479ee6619f8317d4",
+    "summary": "9dd55760da72dca0135b7edc9f81ee8af3f430e86e7386ab5d09487324205489",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-14T17:06:51.051351+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.65706,
+   "duration_s": 467.878,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T19:27:54.240779+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8259,
+   "reported_tokens": 958551,
+   "run_id": "legacy-pacecore-binary-parity-d6330997",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 958551,
+    "result_receipts": 1,
+    "stream_sha256": "7245ec4ddd66c70e23fdedd5fc6c61b45d03e5faa0193518f73c10bdaa0d570c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 865024,
+     "input_tokens": 938532,
+     "output_tokens": 20019,
+     "reasoning_output_tokens": 10568
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-pacecore-binary-parity-d6330997",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "a694fcc6cfb3d2d8ce420b40c622698d5831a9e773ad934ee58391eb2c0911c2",
+    "summary": "240a3fe0c3e20d1b6be16fbf2cf7aab64a402a3d9e42fa4edb798f1c3a47be54",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-14T19:20:06.357604+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.323695,
+   "duration_s": 778.001,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T21:14:54.838477+00:00",
+   "functional": 0.2,
+   "model": "terra",
+   "quality": 0.7318,
+   "reported_tokens": 2323092,
+   "run_id": "legacy-paddockcore-binary-parity-55c9f4d4",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2323092,
+    "result_receipts": 1,
+    "stream_sha256": "1a41cdb90dfc4b0357286ff0cbf51a84d07970cd671006108357520c9ca623df",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2155776,
+     "input_tokens": 2285152,
+     "output_tokens": 37940,
+     "reasoning_output_tokens": 22785
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-paddockcore-binary-parity-55c9f4d4",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "39ceac628f017313be2f7810684bd84ffdadbee5369f0165b72e6e22d96b2657",
+    "summary": "9b2345cf0cd8bf14bb883f33f02712eab6b1934d758c894be63a806d8e9f9650",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-14T21:01:56.832298+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.310143,
+   "duration_s": 838.613,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T17:06:50.903116+00:00",
+   "functional": 0.9,
+   "model": "terra",
+   "quality": 0.79,
+   "reported_tokens": 2111539,
+   "run_id": "legacy-payrollcore-binary-parity-e4c142ab",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2111539,
+    "result_receipts": 1,
+    "stream_sha256": "45ee7b4154ed0c21292fe8ded5d70ff8b0d9ca9519c508c6297957f8b8de77f4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1940480,
+     "input_tokens": 2071987,
+     "output_tokens": 39552,
+     "reasoning_output_tokens": 20061
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-payrollcore-binary-parity-e4c142ab",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "fed8c5052e087fd46ff8d93d3ba7f497e8d7d16f4daa19ece08cb68ecc3ac0fa",
+    "summary": "9ec19b00f536eb89d22f0f3c5892c7966f24f16347e29566c252badba0b2eb26",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-14T16:52:52.283114+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.593321,
+   "duration_s": 413.713,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T16:52:52.138200+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8,
+   "reported_tokens": 845315,
+   "run_id": "legacy-qlite-store-parity-82ec6dab",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 845315,
+    "result_receipts": 1,
+    "stream_sha256": "e6d2ac8863aaa09597944831035a4c06ec2dc29cf9691695a50722ec890764ba",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 761344,
+     "input_tokens": 826825,
+     "output_tokens": 18490,
+     "reasoning_output_tokens": 9583
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-qlite-store-parity-82ec6dab",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "1e29177a06408e84cb4d54fbc022f8ad9d7800e0702daa7e0e41085650a49144",
+    "summary": "2f06730d1a448933c2d3a1b7b4c6c0b7bd6a99aacb5d2aacf9fa006e138490db",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-14T16:45:58.419249+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.116263,
+   "duration_s": 1281.497,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T18:25:20.639518+00:00",
+   "functional": 0.625,
+   "model": "terra",
+   "quality": 0.8189,
+   "reported_tokens": 5043769,
+   "run_id": "legacy-queuecore-binary-parity-752dfad1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5043769,
+    "result_receipts": 1,
+    "stream_sha256": "59533f44ca1d7131540a1f13c87e1838072a9a2414bd37ffd094ed8aaba2c171",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4843776,
+     "input_tokens": 4991967,
+     "output_tokens": 51802,
+     "reasoning_output_tokens": 23537
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-queuecore-binary-parity-752dfad1",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "51e438d19c3956281c712a4104633e6985662e359e49c11963a8801c32c1e00f",
+    "summary": "4d26b331696d6c1b728aecad0eca203d916d8d85bacdae1a6c2b08c80f0d334c",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-14T18:03:59.133701+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.632941,
+   "duration_s": 402.162,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T17:45:23.983492+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8414,
+   "reported_tokens": 1026155,
+   "run_id": "legacy-quotacore-binary-parity-33f4f68b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1026155,
+    "result_receipts": 1,
+    "stream_sha256": "2f3807bcbd84e5f1adb209bb1d35b824b59d5095a59bb404ec5bf5a46b2378aa",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 946944,
+     "input_tokens": 1006513,
+     "output_tokens": 19642,
+     "reasoning_output_tokens": 10837
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-quotacore-binary-parity-33f4f68b",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "0a08e92831970e65264305850d62328b0d94f899a12f865a32d4a2c1ffda8211",
+    "summary": "27b8fc2bc6cb2417e3d9ac9625ee8afd49dd9b2c50292b39354cdd25e57b02aa",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-14T17:38:41.817574+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.201722,
+   "duration_s": 822.039,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T19:00:56.037718+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8046,
+   "reported_tokens": 2252225,
+   "run_id": "legacy-reflowcore-binary-parity-eb0647fe",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2252225,
+    "result_receipts": 1,
+    "stream_sha256": "65293922823411137b5049ec2308ca70b6afc8f9369ca46e9df07e74ce5c5807",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2119936,
+     "input_tokens": 2216464,
+     "output_tokens": 35761,
+     "reasoning_output_tokens": 18885
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-reflowcore-binary-parity-eb0647fe",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "089affedec944f6a2c7da507ddcddcd4fb333fa913a7ea0784b8177256bfbf4d",
+    "summary": "8706537125d24173e6412d36c45d9612301b6b695edacb16de4cf1417a240399",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-14T18:47:13.994286+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.8845,
+   "duration_s": 549.066,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T18:47:13.869821+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.7935,
+   "reported_tokens": 1402837,
+   "run_id": "legacy-schedcore-binary-parity-db09fd35",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1402837,
+    "result_receipts": 1,
+    "stream_sha256": "6a1faa83e6f4c2e046fb8fb2f04a051bf9e707360fc800a03ee831599af239df",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1281024,
+     "input_tokens": 1376936,
+     "output_tokens": 25901,
+     "reasoning_output_tokens": 13281
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-schedcore-binary-parity-db09fd35",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "5544195ba0a720ebbff8d3030ba828a836f82749747f5b5626cccdaf3b10d42c",
+    "summary": "3fb625c31578495cfe7cf380948e2c8e6baa336866e1a0b9a018f64d110f964d",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-14T18:38:04.798825+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.710112,
+   "duration_s": 472.399,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T16:33:11.026099+00:00",
+   "functional": 0.3,
+   "model": "terra",
+   "quality": 0.8141,
+   "reported_tokens": 1183757,
+   "run_id": "legacy-settlecore-binary-parity-ba98efbb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1183757,
+    "result_receipts": 1,
+    "stream_sha256": "38328c61c6a23ff2bf7cdc53da0527252045a34a666307071f3c990ee0619468",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1099008,
+     "input_tokens": 1161482,
+     "output_tokens": 22275,
+     "reasoning_output_tokens": 10000
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-settlecore-binary-parity-ba98efbb",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "f610704df3dc62aea6e328020cee8d957b3dab563695f0cbcdb5fd9ae8faee23",
+    "summary": "49197047d6d0159f24a0f8920591720d8ddbd29656bd5657a2e9142bb46f2f80",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-14T16:25:18.621411+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.043332,
+   "duration_s": 645.071,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T17:56:09.202679+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8307,
+   "reported_tokens": 2093222,
+   "run_id": "legacy-snapcore-binary-parity-f2b26abd",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2093222,
+    "result_receipts": 1,
+    "stream_sha256": "ca62ba45a09a6d74bd22c439bf208b68874faf6dbc62fd04ee48d290b0161ca4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1968896,
+     "input_tokens": 2066123,
+     "output_tokens": 27099,
+     "reasoning_output_tokens": 9239
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-snapcore-binary-parity-f2b26abd",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "23a504f0f60a72a72d79835280f44e47328f6de17d732eeb7b716702ae8ffbca",
+    "summary": "ba12b9875e18079865a9afa0fa9d1931766f388081f307e623fda8b7de851376",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-14T17:45:24.123772+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.184473,
+   "duration_s": 764.625,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T19:48:10.839778+00:00",
+   "functional": 0.7778,
+   "model": "terra",
+   "quality": 0.8244,
+   "reported_tokens": 2260314,
+   "run_id": "legacy-stampcore-binary-parity-4f665484",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2260314,
+    "result_receipts": 1,
+    "stream_sha256": "02cb8b34b3b1b284b1b6d70ce903cccc2e6cd5a601099c6907321b8b0b9f0dad",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2121728,
+     "input_tokens": 2227221,
+     "output_tokens": 33093,
+     "reasoning_output_tokens": 16011
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-stampcore-binary-parity-4f665484",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "d045ebb1633520bde45557bb557d616d7146733fd7fc32e7e18f05e523532d04",
+    "summary": "f0ad03be745d7e472a0f387addbdaabe1ad0a3bf08b50609e5d68c7d895cce54",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-14T19:35:26.207403+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.166053,
+   "duration_s": 1150.047,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T19:20:06.228447+00:00",
+   "functional": 0.75,
+   "model": "terra",
+   "quality": 0.8296,
+   "reported_tokens": 4692155,
+   "run_id": "legacy-tallycore-binary-parity-fea2554c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4692155,
+    "result_receipts": 1,
+    "stream_sha256": "a28d9ca1c26c395ce962da183a51777578c5b0f376eb34ee5d7100bff8bba645",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4459776,
+     "input_tokens": 4636703,
+     "output_tokens": 55452,
+     "reasoning_output_tokens": 35912
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-tallycore-binary-parity-fea2554c",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "1da1c0f6da0486b4bf9b2a0a68fd4f03ff08f4109ee6e362ef1abe3c8d5c8e40",
+    "summary": "e2746bd64527c6f257275eb2161c27a64f0fa83cb29e80816ac551e8c3ca5982",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-14T19:00:56.174119+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.794864,
+   "duration_s": 469.592,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-14T18:03:58.934791+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8541,
+   "reported_tokens": 1350535,
+   "run_id": "legacy-vaultcore-binary-parity-1145d1fb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1350535,
+    "result_receipts": 1,
+    "stream_sha256": "c29f33bd501dfc2f87f68f02ae664c5ab95804a68f044a5819068fa0bf9cdd84",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1245184,
+     "input_tokens": 1327939,
+     "output_tokens": 22596,
+     "reasoning_output_tokens": 11241
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/high/legacy-vaultcore-binary-parity-1145d1fb",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "c617932b5ed6cafbae88cf43d044aa6cb3bf726e29c36dfbe87f243335413f45",
+    "summary": "22dad8b8e2be19d128c050d2783900f6b00c37ce757f25b2606a5cd2a39a78fd",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-14T17:56:09.337567+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.331993,
+   "duration_s": 727.262,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T00:40:05.092763+00:00",
+   "functional": 0.8889,
+   "model": "terra",
+   "quality": 0.8215,
+   "reported_tokens": 2475200,
+   "run_id": "legacy-blendcore-binary-parity-21659ff7",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2475200,
+    "result_receipts": 1,
+    "stream_sha256": "535b57754d979c69e50af280cfda1f9e70fe6c1e4455a19c15140d9f8f72f1a9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2307840,
+     "input_tokens": 2439038,
+     "output_tokens": 36162,
+     "reasoning_output_tokens": 21506
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-blendcore-binary-parity-21659ff7",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "b723ae4162e83d2aeb6b1c9b3066949b104d48f77c54260b814b1e3a37e35ad3",
+    "summary": "49bb2af703fa2f6d7afe7e49ca06373bf7ac3e8187440d49d031906a1f11cc18",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-15T00:27:57.824656+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 6.80761,
+   "duration_s": 2469.744,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T03:58:37.750317+00:00",
+   "functional": 0.9286,
+   "model": "terra",
+   "quality": 0.7489,
+   "reported_tokens": 22737343,
+   "run_id": "legacy-cellarcore-binary-parity-bc74353b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 22737343,
+    "result_receipts": 1,
+    "stream_sha256": "f9de294a0743ef456b91e6ebcb05bb9ae7f4abd5f760d8e441e2f1462302bafd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 22323200,
+     "input_tokens": 22632734,
+     "output_tokens": 104609,
+     "reasoning_output_tokens": 50888
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-cellarcore-binary-parity-bc74353b",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "053a35c28185ab2527263d18d7c8532327511fd663ff81e3bc6eaec255968f04",
+    "summary": "511939c03450a8092fb0f959fc987569b97fac6206bbdc8f05dc0b507e14cd8c",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-15T03:17:27.990089+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.611833,
+   "duration_s": 422.634,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:19:24.470088+00:00",
+   "functional": 0.6,
+   "model": "terra",
+   "quality": 0.8258,
+   "reported_tokens": 757649,
+   "run_id": "legacy-codeccore-binary-parity-d9c3a623",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 757649,
+    "result_receipts": 1,
+    "stream_sha256": "3614718502b56831e65d6527dfaa3c3d96fa434f0d02346c755c0dbc1e971400",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 669952,
+     "input_tokens": 736961,
+     "output_tokens": 20688,
+     "reasoning_output_tokens": 13278
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-codeccore-binary-parity-d9c3a623",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "2c02e5b8a3df3263410541bb80648458f5b0b82b143d07ec14e05ac91bc01fe1",
+    "summary": "98b7724b45d346538b97636f1868e3276546234054a4d487e8c398379c019dcc",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-14T22:12:21.831036+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.703567,
+   "duration_s": 1324.617,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T01:40:22.249265+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7511,
+   "reported_tokens": 6270602,
+   "run_id": "legacy-depotcore-binary-parity-1b0833fd",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6270602,
+    "result_receipts": 1,
+    "stream_sha256": "944ee2064f0509d76f619e705c1efec91a169b7b2f50dcaa4ef929d42d78e022",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5959424,
+     "input_tokens": 6211903,
+     "output_tokens": 58699,
+     "reasoning_output_tokens": 37875
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-depotcore-binary-parity-1b0833fd",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "69d1f4ba1736fb99c565c73eb91ac17373683b8c71eb25ed9a7e230a6609154a",
+    "summary": "45f2eafbe547bac42405630d92b438105888f24beea5963f845f39fd0f7c3071",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-15T01:18:17.625286+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.753381,
+   "duration_s": 512.953,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:12:21.687389+00:00",
+   "functional": 0.7778,
+   "model": "terra",
+   "quality": 0.8241,
+   "reported_tokens": 878773,
+   "run_id": "legacy-freightcore-binary-parity-560f8949",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 878773,
+    "result_receipts": 1,
+    "stream_sha256": "5f95d659a0369283262a5a10fe3859a2fc3866883121af7ffc199aaca92d64c3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 768256,
+     "input_tokens": 852898,
+     "output_tokens": 25875,
+     "reasoning_output_tokens": 14196
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-freightcore-binary-parity-560f8949",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "e1e8b600c7cbe2c9718facd6831b14ec6f37887253a8c25a25d30fe3a9f478b6",
+    "summary": "25032e0dcbc96f0c620c8c7a020ce4c5acd9e48543c58ee500292818ab29ec28",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-14T22:03:48.729315+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 4.357655,
+   "duration_s": 1816.03,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T01:18:17.467800+00:00",
+   "functional": 0.9286,
+   "model": "terra",
+   "quality": 0.6291,
+   "reported_tokens": 12603333,
+   "run_id": "legacy-granarycore-binary-parity-bf96f7f1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 12603333,
+    "result_receipts": 1,
+    "stream_sha256": "3c32746ce9fcfd69dbaa931ffc38da6aebc783b4d99363c23bf56a657fd2f352",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 12224512,
+     "input_tokens": 12526077,
+     "output_tokens": 77256,
+     "reasoning_output_tokens": 46628
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-granarycore-binary-parity-bf96f7f1",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "e494e8f18344823ec301d3e99cb2a696cdf33a4e3c5fb3580e4cc8a480f64c7b",
+    "summary": "5697ba6ebee39fad5b9c7724882d6b83b2db884b53851da78e9400b56517eb9c",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-15T00:48:01.429396+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.051352,
+   "duration_s": 697.356,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T23:11:36.872002+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8205,
+   "reported_tokens": 1553939,
+   "run_id": "legacy-hedgecore-binary-parity-ffcf6d31",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1553939,
+    "result_receipts": 1,
+    "stream_sha256": "db65331b8e814cfc976be5746fb2cc0e3471c6f24d692029ed400eedb3640d5e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1414400,
+     "input_tokens": 1520369,
+     "output_tokens": 33570,
+     "reasoning_output_tokens": 17777
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-hedgecore-binary-parity-ffcf6d31",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "d83ae876293a6aede4eb58116ee8ea065ee48c4730c41e8fc932e4cff5b04d4d",
+    "summary": "576b230a79bdc9e3dc02f81ca5b3b78c895d6eb8f802d7ce04fd0618544e9c05",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-14T22:59:59.510683+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 13.820285,
+   "duration_s": 5825.424,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T03:17:27.842370+00:00",
+   "functional": 0.0,
+   "model": "terra",
+   "quality": 0.7352,
+   "reported_tokens": 40800192,
+   "run_id": "legacy-lodgecore-binary-parity-3ca6dce5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 40800192,
+    "result_receipts": 1,
+    "stream_sha256": "7aaada306f7e22af21d91251beabc2c52d97c2163e57d1e1b7cf3c5e07c3ecf3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 39762688,
+     "input_tokens": 40538273,
+     "output_tokens": 261919,
+     "reasoning_output_tokens": 133147
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-lodgecore-binary-parity-3ca6dce5",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "b787a14829a620bedf13cfa70e0af88f74d39f1b7776b01e333c556e93cda665",
+    "summary": "6ad67c704d4544b0188126dca0124a9e64b31ddb31e469c5177a996cc7cd1c49",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-15T01:40:22.393577+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.913936,
+   "duration_s": 533.999,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T21:33:36.751985+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.795,
+   "reported_tokens": 1702455,
+   "run_id": "legacy-matchcore-order-book-parity-c3bc12bf",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1702455,
+    "result_receipts": 1,
+    "stream_sha256": "8ffa8eb667d8aebe86a839e3188edbeec30e3fe0a08c76c05a1d37124733fed3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1583104,
+     "input_tokens": 1678540,
+     "output_tokens": 23915,
+     "reasoning_output_tokens": 12259
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-matchcore-order-book-parity-c3bc12bf",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "cb6a47eb1534cdf004bb1ae14df839703523741e53258dc39cdd832597093cc1",
+    "summary": "ce6e553aea15f5ecf6c7c7a56db123ca84f47ff673a447293e607a82f9180b45",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-14T21:24:42.747517+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.676837,
+   "duration_s": 502.71,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:03:48.596445+00:00",
+   "functional": 0.7778,
+   "model": "terra",
+   "quality": 0.8097,
+   "reported_tokens": 976092,
+   "run_id": "legacy-metercore-binary-parity-6784b440",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 976092,
+    "result_receipts": 1,
+    "stream_sha256": "4f1c7c3979a26010a948c544cbd32e84a696cd4c2c3a470ddcc2aa04468a10ee",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 889600,
+     "input_tokens": 953477,
+     "output_tokens": 22615,
+     "reasoning_output_tokens": 12734
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-metercore-binary-parity-6784b440",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "bc1233295a8385176a840f68567f38565894178b687d08e8044eddf0c2b04653",
+    "summary": "7669b93242095abea90bc77b3f4d49f6b2a9ccb3dc3292c2ab8c350b7cb15cf2",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-14T21:55:25.881018+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.139606,
+   "duration_s": 615.758,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T00:27:57.695234+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.824,
+   "reported_tokens": 1779032,
+   "run_id": "legacy-pacecore-binary-parity-e02c551b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1779032,
+    "result_receipts": 1,
+    "stream_sha256": "edf4e36ac38626b586d185251bdcd39344f0c8935c3f1615e48412939b574681",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1597440,
+     "input_tokens": 1749741,
+     "output_tokens": 29291,
+     "reasoning_output_tokens": 16623
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-pacecore-binary-parity-e02c551b",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "e60ac51d07823b92137f22b29d2efad7d4e3a65a95a1f7938f3920b8005744ca",
+    "summary": "b3a7865b861f9197140ae914fa0e1144ff8493ba1fdee701f19310d08a14d2ef",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-15T00:17:41.930387+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 6.16701,
+   "duration_s": 2333.098,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T04:37:31.007168+00:00",
+   "functional": 0.6667,
+   "model": "terra",
+   "quality": 0.7136,
+   "reported_tokens": 15999721,
+   "run_id": "legacy-paddockcore-binary-parity-b6cefe60",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 15999721,
+    "result_receipts": 1,
+    "stream_sha256": "3328ea8e5750b51490efe71f2c122101aa3c46c996e8cd977ce2871054633037",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 15294464,
+     "input_tokens": 15892123,
+     "output_tokens": 107598,
+     "reasoning_output_tokens": 50710
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-paddockcore-binary-parity-b6cefe60",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "f2c10e4fe9b62af5f1884271b93c482b72686446e930e9a60955ec069e012726",
+    "summary": "475cd069c4dd45f9be8caf47e90288efdac7060cf5d019f69f1ba3a193cf15a5",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-15T03:58:37.895800+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.004817,
+   "duration_s": 661.983,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T21:55:25.744539+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8023,
+   "reported_tokens": 1626855,
+   "run_id": "legacy-payrollcore-binary-parity-1831fc7b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1626855,
+    "result_receipts": 1,
+    "stream_sha256": "4b81bc448d1f3b13c8467b85b7d1b4918c2f2e23220a6cb316aa0b2fc44cc16d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1508096,
+     "input_tokens": 1594351,
+     "output_tokens": 32504,
+     "reasoning_output_tokens": 20369
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-payrollcore-binary-parity-1831fc7b",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "1ffa333765663a335b9ce64e7c2655c26a9e71daca08f02cf566fb16e04d2aa6",
+    "summary": "75931c63eaa1b3471ca879035641e16e63157fb99c3067905ee8d798971536cd",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-14T21:44:23.756912+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.985367,
+   "duration_s": 646.749,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T21:44:23.631458+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8092,
+   "reported_tokens": 1574037,
+   "run_id": "legacy-qlite-store-parity-8ea7b096",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1574037,
+    "result_receipts": 1,
+    "stream_sha256": "e3497cffa25865411efd7da80d07e0d7f19ed3e501a162a775ebd982be1d1f01",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1457408,
+     "input_tokens": 1541852,
+     "output_tokens": 32185,
+     "reasoning_output_tokens": 15459
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-qlite-store-parity-8ea7b096",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "60a7e6f28c007fcbf66a999f7957205e5b51047f2bdd677eb59519e82033af3e",
+    "summary": "cf08e87744ad5310d9ccc8378b2ff6298623a88871cd85037d0f035e12f2df30",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-14T21:33:36.877860+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.851138,
+   "duration_s": 621.251,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:59:59.372601+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7965,
+   "reported_tokens": 1173911,
+   "run_id": "legacy-queuecore-binary-parity-6c24fe3b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1173911,
+    "result_receipts": 1,
+    "stream_sha256": "b156694e69d45f0645616115a718e1e90a1b94202f429ecc6835dc1606426d81",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1066240,
+     "input_tokens": 1144414,
+     "output_tokens": 29497,
+     "reasoning_output_tokens": 15391
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-queuecore-binary-parity-6c24fe3b",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "249e6ba06faa83613df960ef9390a0fe1fe227e01fc7d72b0c37180c1ab8148d",
+    "summary": "4f06920831d55ed24f437ed22765929b22a5061272854c1d9e1ac6c57d73e78a",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-14T22:49:38.118770+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.626503,
+   "duration_s": 494.074,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:27:38.683743+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8333,
+   "reported_tokens": 800188,
+   "run_id": "legacy-quotacore-binary-parity-1f9e39d1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 800188,
+    "result_receipts": 1,
+    "stream_sha256": "7413bca6cdf433c549998fd87319d51965a89ddbc60483eba3188a6db3957802",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 722176,
+     "input_tokens": 777225,
+     "output_tokens": 22963,
+     "reasoning_output_tokens": 12662
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-quotacore-binary-parity-1f9e39d1",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "d9886a55c022c3ba1d9bee8d2b1366316f0dd350e79c76a8beb349a8879c3a15",
+    "summary": "9b98db7d8bf7fa57a8c2ed0e0e4a7778911e1e27918ffd8b8aeb37880757b2c3",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-14T22:19:24.604315+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.070368,
+   "duration_s": 1431.36,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T23:48:39.879141+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.828,
+   "reported_tokens": 3912164,
+   "run_id": "legacy-reflowcore-binary-parity-13777a44",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3912164,
+    "result_receipts": 1,
+    "stream_sha256": "92f7c9de991a4ef1987bae099da7e6a5d5d264ce32a6f31815aeb33236a53b4b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3710464,
+     "input_tokens": 3846242,
+     "output_tokens": 65922,
+     "reasoning_output_tokens": 35592
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-reflowcore-binary-parity-13777a44",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "ca47597aab51f151bf89177801caaae7dd0dc8efb32b93405edbc68818ed7b9d",
+    "summary": "d1ec69b6c36432e459e098f8ab30a2defc63da4bd4aed9747bc454f9f2ade6f7",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-14T23:24:48.508475+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.089045,
+   "duration_s": 791.346,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T23:24:48.383335+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7887,
+   "reported_tokens": 1638356,
+   "run_id": "legacy-schedcore-binary-parity-cbf6d9c2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1638356,
+    "result_receipts": 1,
+    "stream_sha256": "f887fda3a9e721c087d284932d0f9eb167c7b12b93707f772e617daadd5ca264",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1505536,
+     "input_tokens": 1601885,
+     "output_tokens": 36471,
+     "reasoning_output_tokens": 22185
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-schedcore-binary-parity-cbf6d9c2",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "236835f847fef055d7e9d18304719eca38c3311b3aacd84475bb4ef583b4e839",
+    "summary": "15521c7ebd9a3cbc579f11c3359326eb63e92890f3f3bfcd427fd0e26d1d2f0a",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-14T23:11:37.032889+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.9352,
+   "duration_s": 584.876,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T21:24:42.616921+00:00",
+   "functional": 0.7,
+   "model": "terra",
+   "quality": 0.7951,
+   "reported_tokens": 1455824,
+   "run_id": "legacy-settlecore-binary-parity-3cafb67f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1455824,
+    "result_receipts": 1,
+    "stream_sha256": "4e59685815d61499b441c5276a7b04151b3a0d12fe805068a5a187e10ab27c3e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1336064,
+     "input_tokens": 1426337,
+     "output_tokens": 29487,
+     "reasoning_output_tokens": 17959
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-settlecore-binary-parity-3cafb67f",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "3fbe3be649ed56bda829e90947caa38bdc5f025db3d633e26b6c78eda85ae53e",
+    "summary": "c35824fc2ee478daa093562416500f888c78919b81484ec7d21a06281c2162f2",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-14T21:14:57.733162+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.169398,
+   "duration_s": 676.762,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:38:55.602596+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8386,
+   "reported_tokens": 2297750,
+   "run_id": "legacy-snapcore-binary-parity-ea91b597",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2297750,
+    "result_receipts": 1,
+    "stream_sha256": "9b0bf6e723fabffc23106e425aa9cb4587c3ba251b92badc6df8093eb0b938eb",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2161664,
+     "input_tokens": 2266002,
+     "output_tokens": 31748,
+     "reasoning_output_tokens": 18724
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-snapcore-binary-parity-ea91b597",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "4bdfce466636f42540329b3641b977feb855df4794fe19e30b0209078222cecc",
+    "summary": "0e2a124cac441b00388746dda18e93bfa181cbfa506d0aee4147aeb77933c9f6",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-14T22:27:38.833758+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.772514,
+   "duration_s": 476.051,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T00:48:01.277259+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8239,
+   "reported_tokens": 1198988,
+   "run_id": "legacy-stampcore-binary-parity-a7a2d601",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1198988,
+    "result_receipts": 1,
+    "stream_sha256": "fc985848887b28af0cc22dbbb2ac48692225e7af1ef2e31fb9c10803b26d0ae5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1091584,
+     "input_tokens": 1176133,
+     "output_tokens": 22855,
+     "reasoning_output_tokens": 15000
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-stampcore-binary-parity-a7a2d601",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "4a077ba930349ac71dfbddf0d88b030e68358d055d4748761301c6cd98f8c1cc",
+    "summary": "3e2a6a40cae16e7b41ec2e63a3a09141ea8e0e8e15c5e026bb5af26585f19d56",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-15T00:40:05.221268+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 3.661021,
+   "duration_s": 1741.768,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-15T00:17:41.793625+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8455,
+   "reported_tokens": 9045383,
+   "run_id": "legacy-tallycore-binary-parity-3b30e270",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9045383,
+    "result_receipts": 1,
+    "stream_sha256": "8b8ba53d6418719e2024ccaeafcc60656f41f1086f3b25fc6655894036f2f4f2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 8691456,
+     "input_tokens": 8962350,
+     "output_tokens": 83033,
+     "reasoning_output_tokens": 55010
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-tallycore-binary-parity-3b30e270",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "112e056bd911ad437d67bdb1873e51afe533c37e3695f0d11c3a1c9d271325a2",
+    "summary": "14b11eaa24172012a1ed7f51d43cb7b156c62b2b080ceeac257a6bc8bc7d788f",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-14T23:48:40.017436+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.917315,
+   "duration_s": 642.234,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-14T22:49:37.982527+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8368,
+   "reported_tokens": 1420072,
+   "run_id": "legacy-vaultcore-binary-parity-9274ba01",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1420072,
+    "result_receipts": 1,
+    "stream_sha256": "5634bc37c3a835bbe46e289a8602e2bbfe6d882df7815f2442761330c4c11943",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1305088,
+     "input_tokens": 1390565,
+     "output_tokens": 29507,
+     "reasoning_output_tokens": 18964
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/extra-high/legacy-vaultcore-binary-parity-9274ba01",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "70ced6773173240e55074167cdaf2ac152d37fcb969944fe4187905dfcb3d9be",
+    "summary": "90eea1729d9964f7d6d99a98793e430856022d6eaa8b4c8e3a0f44a01ba47439",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-14T22:38:55.743302+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.381044,
+   "duration_s": 964.593,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T08:59:32.535324+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8202,
+   "reported_tokens": 2531083,
+   "run_id": "legacy-blendcore-binary-parity-0af003e6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2531083,
+    "result_receipts": 1,
+    "stream_sha256": "a66e5b38d48b8a82e22c46e9fc4fb90711366e83dd796edfc736484ddba1b4e8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2377984,
+     "input_tokens": 2489267,
+     "output_tokens": 41816,
+     "reasoning_output_tokens": 25443
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-blendcore-binary-parity-0af003e6",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "e6f019a6a63502997b6283fdbe7639a01efc57a001547ea8fa2976e664b4403d",
+    "summary": "6f9b23c1733a95556caf0d396c4c6a1397eab21349a78c657717c34323a28e39",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-15T08:43:27.935970+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 6.4533,
+   "duration_s": 2649.184,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T11:26:50.737169+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7431,
+   "reported_tokens": 18311787,
+   "run_id": "legacy-cellarcore-binary-parity-b05ea7e4",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 18311787,
+    "result_receipts": 1,
+    "stream_sha256": "ea34d833051b625f4861efd3023c9b25c75738c0c579068877172f13c56002cc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 17729024,
+     "input_tokens": 18195740,
+     "output_tokens": 116047,
+     "reasoning_output_tokens": 68579
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-cellarcore-binary-parity-b05ea7e4",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "bdf89388486695511fb53837f5bdbb6cc437c27cf1652baaf5f9fbf289fb6eda",
+    "summary": "ca3b524127f3ee7bd48b0593de232930da53e34ae94e5461642fa5db83de67b1",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-15T10:42:41.539011+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.71191,
+   "duration_s": 1134.335,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T06:18:28.629966+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7841,
+   "reported_tokens": 2994749,
+   "run_id": "legacy-codeccore-binary-parity-764928fa",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2994749,
+    "result_receipts": 1,
+    "stream_sha256": "0be69a614e0295e4bb45b7f29cff4c9e56de66be980a805b038717ab2fd121af",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2813440,
+     "input_tokens": 2939073,
+     "output_tokens": 55676,
+     "reasoning_output_tokens": 34632
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-codeccore-binary-parity-764928fa",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "511a97faeb431896b714a19fd4fee16b7bd5350061db1bd10b1372ad8703b95a",
+    "summary": "3aa1788e09f3353afd41c8ad4c778945d5665a0244cf38c935017af22769d77f",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-15T05:59:34.287970+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.640957,
+   "duration_s": 955.408,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T09:59:54.808349+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.73,
+   "reported_tokens": 3449653,
+   "run_id": "legacy-depotcore-binary-parity-7723ba3e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3449653,
+    "result_receipts": 1,
+    "stream_sha256": "1de1023a06b9b0f9a1082a38b106db948e63d46acc6d5495d41e5cc85e1278da",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3251712,
+     "input_tokens": 3409992,
+     "output_tokens": 39661,
+     "reasoning_output_tokens": 24108
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-depotcore-binary-parity-7723ba3e",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "31550d319ff5903176f2bb5aa510dfd620ced677cec1d445845fc7b6583f15c0",
+    "summary": "2ab647bd6888020118133c0bf0c6f583622e0aa209250bb1aa779c475ddaa1d9",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-15T09:43:59.393055+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.149595,
+   "duration_s": 822.773,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T05:59:34.141341+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.798,
+   "reported_tokens": 1605187,
+   "run_id": "legacy-freightcore-binary-parity-43831bef",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1605187,
+    "result_receipts": 1,
+    "stream_sha256": "f036dd9ff6234044d3e86d817306ff39a81449e701dbef8975aad4517e58a324",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1471488,
+     "input_tokens": 1563503,
+     "output_tokens": 41684,
+     "reasoning_output_tokens": 27079
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-freightcore-binary-parity-43831bef",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "a63bf0e7a05b1771f98d021c3f25d8c03a187a0a3e336b8f7c930b26ba11031a",
+    "summary": "ef8a1199001b295528595bf33767aa9a0427192fb37c642feeb60d06f0c6aa64",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-15T05:45:51.362831+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 5.149658,
+   "duration_s": 2073.25,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T09:43:59.260861+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7136,
+   "reported_tokens": 15338347,
+   "run_id": "legacy-granarycore-binary-parity-9738b783",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 15338347,
+    "result_receipts": 1,
+    "stream_sha256": "42d29d6872fa86034cc5ddab32488dd0071561000b167cb0be1fce430bdb2a6a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 14923776,
+     "input_tokens": 15248069,
+     "output_tokens": 90278,
+     "reasoning_output_tokens": 50603
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-granarycore-binary-parity-9738b783",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "13dc34f5f967f795e10ddb44617b67e27c28b8cccb17a02c1ba1bf489af8c809",
+    "summary": "0c1a719575592c0d56416f0e2fd3bb615eef3c9f7b079eb94ebabbb79e595778",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-15T09:09:26.001009+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.298556,
+   "duration_s": 920.121,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T07:31:17.945995+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8104,
+   "reported_tokens": 2043031,
+   "run_id": "legacy-hedgecore-binary-parity-4a1c7e4b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2043031,
+    "result_receipts": 1,
+    "stream_sha256": "fc04b4d312ed09e1c71eb2ae8801c3efba68a15011a8088349d8712128d16245",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1887232,
+     "input_tokens": 2000502,
+     "output_tokens": 42529,
+     "reasoning_output_tokens": 26197
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-hedgecore-binary-parity-4a1c7e4b",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "ee7fc759824bc7a978b7044b931a39235c6c4434b2d8aa5852d22cddb421066a",
+    "summary": "03b88f1771a3287604efa5b6350f22426bcf9c913484ca4e892b7d8affb6bc03",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-15T07:15:57.819953+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 5.608853,
+   "duration_s": 2566.452,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T10:42:41.406837+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7281,
+   "reported_tokens": 14604905,
+   "run_id": "legacy-lodgecore-binary-parity-76d935c5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 14604905,
+    "result_receipts": 1,
+    "stream_sha256": "304acd36619b3325d23407c9b14bfaee312fcc7e283d80376a66e1ecd277d89b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 14027776,
+     "input_tokens": 14496067,
+     "output_tokens": 108838,
+     "reasoning_output_tokens": 66575
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-lodgecore-binary-parity-76d935c5",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "5aac674fcf083365580213edeae3d1119981425c14872c6ffb257198c41978d4",
+    "summary": "a3fc36d4fae1d040c3798a839c104dc751bdd9a5fe4a8475dfd963be2db6416b",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-15T09:59:54.943249+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.194343,
+   "duration_s": 870.055,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T05:09:34.872052+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7849,
+   "reported_tokens": 1784871,
+   "run_id": "legacy-matchcore-order-book-parity-f820c76b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1784871,
+    "result_receipts": 1,
+    "stream_sha256": "805efca4f7694f51cbff26d70fcdc6ef0e616b4b9a57f62a80911c44d198c168",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1643776,
+     "input_tokens": 1743843,
+     "output_tokens": 41028,
+     "reasoning_output_tokens": 23918
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-matchcore-order-book-parity-f820c76b",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "e617f84691c6286b9e9fe1da41cbd7d668a9dbe8993c32e2976f7ef546090e96",
+    "summary": "fd12a3be9238bb1cb385c03d775525dcf54b24cde12e0fbe0169a47aa05d74b7",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-15T04:55:04.811870+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.187936,
+   "duration_s": 817.067,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T05:45:51.227098+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7911,
+   "reported_tokens": 1831111,
+   "run_id": "legacy-metercore-binary-parity-d6bac114",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1831111,
+    "result_receipts": 1,
+    "stream_sha256": "30d98e77fe9dca578c1df60739287435ff345333b195dfd8c23bd26d9d4200a6",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1689344,
+     "input_tokens": 1791459,
+     "output_tokens": 39652,
+     "reasoning_output_tokens": 23542
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-metercore-binary-parity-d6bac114",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "b0b9ab8d2dff3bed9a5cae4ab911e0dbef93069e7afc046b59607ed214484ac9",
+    "summary": "c2554c377a99fef5799ea98eeb3e9a446aaa70e743b117f66b980483ad891b4d",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-15T05:32:14.153858+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.180543,
+   "duration_s": 708.932,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T08:43:27.802226+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8243,
+   "reported_tokens": 2213219,
+   "run_id": "legacy-pacecore-binary-parity-d9a913c2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2213219,
+    "result_receipts": 1,
+    "stream_sha256": "45cf9c348439b8d41889a57a4619afbee2bef69d6d899fde7d055d17e274f86d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2068480,
+     "input_tokens": 2180819,
+     "output_tokens": 32400,
+     "reasoning_output_tokens": 20645
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-pacecore-binary-parity-d9a913c2",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "310462302ae6514e4fe7a63f7a4b100b2c4d15991a9a83cef1e7a5ecd77b0d5f",
+    "summary": "9bae3549c810fdeffecdb027deb2e0bf6dd9fad21a4d5519164e37e769effa2d",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-15T08:31:38.865828+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.859137,
+   "duration_s": 652.536,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T05:32:14.032318+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8168,
+   "reported_tokens": 1067987,
+   "run_id": "legacy-payrollcore-binary-parity-8f6ac067",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1067987,
+    "result_receipts": 1,
+    "stream_sha256": "df93b63a1370d3b709500390394c27cc7420bf2701fed64fbc2c3fc79fb83a43",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 963584,
+     "input_tokens": 1035554,
+     "output_tokens": 32433,
+     "reasoning_output_tokens": 20789
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-payrollcore-binary-parity-8f6ac067",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "063e2a31672574e264fdf08590572183bf474eb3abc6278e1ce13b56c23e2b59",
+    "summary": "9e94d33e27ad8ed6534eb429e35500200e0ac74178ab4c79fc5a2d86c496a5da",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-15T05:21:21.491541+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.069304,
+   "duration_s": 706.328,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T05:21:21.347205+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7947,
+   "reported_tokens": 1556784,
+   "run_id": "legacy-qlite-store-parity-ef95575c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1556784,
+    "result_receipts": 1,
+    "stream_sha256": "52676b7d3f027280e3fcbee6285360a101791e95e9246c7c5ecddf31153430fa",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1414144,
+     "input_tokens": 1522394,
+     "output_tokens": 34390,
+     "reasoning_output_tokens": 20731
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-qlite-store-parity-ef95575c",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "091c12dce5415f57fc3b3bf45dbf45b1de7454297b0e2c65c70efa04d1e2bd1c",
+    "summary": "b4b9bec6280f1eb9e58a7926a1256ad7f34534e62b00a346e9dcda3349732c3b",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-15T05:09:35.014004+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.394155,
+   "duration_s": 966.589,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T07:15:57.673792+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7755,
+   "reported_tokens": 2485283,
+   "run_id": "legacy-queuecore-binary-parity-276b15ad",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2485283,
+    "result_receipts": 1,
+    "stream_sha256": "800e859e0479488c4f9b6a1776c4cbc3bff2708735bdbd678bfa24a02a3dd851",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2341376,
+     "input_tokens": 2439994,
+     "output_tokens": 45289,
+     "reasoning_output_tokens": 27598
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-queuecore-binary-parity-276b15ad",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "f7861c4383281c2f0d886c933652c2ca86bb7f619435955b4e11b68f49aab92d",
+    "summary": "afffda0b61b2081db624da81a3643e437884d02578be51b6b2d3264999b1ea6e",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-15T06:59:51.079204+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.901238,
+   "duration_s": 681.583,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T06:29:50.354170+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8216,
+   "reported_tokens": 1232152,
+   "run_id": "legacy-quotacore-binary-parity-1d43f175",
+   "security": 0.85,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1232152,
+    "result_receipts": 1,
+    "stream_sha256": "f937c4b721dfc431db392ab2bdd5cf4cb43b6577c60512cedb9851791090be50",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1113600,
+     "input_tokens": 1201581,
+     "output_tokens": 30571,
+     "reasoning_output_tokens": 17791
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-quotacore-binary-parity-1d43f175",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "b04d3f4673ab6a7dc524e57709373d7f753dfad53b8c9c989c6667da0d311a80",
+    "summary": "fd99e4a323798b68680ebcd5e59c98fa949c03031c5c462abb27e94f493aa869",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-15T06:18:28.766434+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 2.189717,
+   "duration_s": 1419.687,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T08:12:10.614788+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8295,
+   "reported_tokens": 4334437,
+   "run_id": "legacy-reflowcore-binary-parity-3ba63588",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4334437,
+    "result_receipts": 1,
+    "stream_sha256": "e65e5f71efa349e5a0e928bb46a0c3fd43c52883a7e780f77758e49ba86b969f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4098560,
+     "input_tokens": 4272012,
+     "output_tokens": 62425,
+     "reasoning_output_tokens": 35309
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-reflowcore-binary-parity-3ba63588",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "eda27f258fa3e0ac556f392f3807c019c80bf93b02675b1aff06575080b46c61",
+    "summary": "f555ec266dfff98ee0d5fd0cc8fd698623dd4689d8635f599df016fd84a8de51",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-15T07:48:30.919390+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.455509,
+   "duration_s": 1032.701,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T07:48:30.785041+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7695,
+   "reported_tokens": 2361409,
+   "run_id": "legacy-schedcore-binary-parity-ef1aa941",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2361409,
+    "result_receipts": 1,
+    "stream_sha256": "c37289a3685502c09010d279f97143f6a1503a16a7868501710b8be51287b7f9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2188544,
+     "input_tokens": 2314558,
+     "output_tokens": 46851,
+     "reasoning_output_tokens": 29959
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-schedcore-binary-parity-ef1aa941",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "047d00ab3a632db9835d26a014d9990dc40202ae146dc5f89253865711322592",
+    "summary": "c692d0e4f8490b0df5e20ffb0614a0c6aa3bd7ae6b97ac393ccc23daa0ddf622",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-15T07:31:18.078823+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.660447,
+   "duration_s": 1050.837,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T04:55:04.675997+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.7769,
+   "reported_tokens": 2947535,
+   "run_id": "legacy-settlecore-binary-parity-546dc4f5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2947535,
+    "result_receipts": 1,
+    "stream_sha256": "fa1e94cb1173d586a2c5073b5466cebdb3f47b69e6bf85ccfb3fc43360ced636",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2772224,
+     "input_tokens": 2894117,
+     "output_tokens": 53418,
+     "reasoning_output_tokens": 30090
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-settlecore-binary-parity-546dc4f5",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "1838f51891fd2f5d8a53f7e3a99e4c98fdaee7f6cf25af623bf9978fff5c75aa",
+    "summary": "31bb3b96895432e6792be577c2cf18b7138aad84d83590ce28262dacbbff4bd6",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-15T04:37:33.832593+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.564662,
+   "duration_s": 936.004,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T06:45:26.503124+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8335,
+   "reported_tokens": 3132639,
+   "run_id": "legacy-snapcore-binary-parity-a74e767f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3132639,
+    "result_receipts": 1,
+    "stream_sha256": "aaaaad555f7a5321d8933366528c1a7aaaba92476eed71524aa0358d9c0f449b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2953472,
+     "input_tokens": 3090555,
+     "output_tokens": 42084,
+     "reasoning_output_tokens": 26195
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-snapcore-binary-parity-a74e767f",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "35f382f0115748c342d256ded9221150791f512a37b1dda7154212ddfae4035b",
+    "summary": "cfbffdc95bb9ea36064348f207bc6d4cef7f5e229db3d8766f76c5df75306d80",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-15T06:29:50.491652+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.948235,
+   "duration_s": 593.18,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T09:09:25.862990+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.818,
+   "reported_tokens": 1702500,
+   "run_id": "legacy-stampcore-binary-parity-f592222e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1702500,
+    "result_receipts": 1,
+    "stream_sha256": "87e24670f450d5b6fa1ba023aa6d24b150a15f382f9152d9fc7fc874aa508d6e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1588224,
+     "input_tokens": 1674908,
+     "output_tokens": 27592,
+     "reasoning_output_tokens": 18985
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-stampcore-binary-parity-f592222e",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "983c933e208602c7b6873df0aba0c56f77dc0ddd4842e5db288b628091a2181d",
+    "summary": "9efa8b04830ad426d2b068404c90a9643fe35939006603b25592e28599e72fe1",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-15T08:59:32.678481+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.547716,
+   "duration_s": 1167.966,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T08:31:38.730137+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8203,
+   "reported_tokens": 2426792,
+   "run_id": "legacy-tallycore-binary-parity-33d158cf",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2426792,
+    "result_receipts": 1,
+    "stream_sha256": "a801df433f72181bd1828930a5ec60de8555f46134a479d70631fd15fed40dd4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2245120,
+     "input_tokens": 2375231,
+     "output_tokens": 51561,
+     "reasoning_output_tokens": 33715
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-tallycore-binary-parity-33d158cf",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "52e4ac5e4673ca2ee3f6f94a0fe6b253009c2735b143b5534ad0a734fe242c06",
+    "summary": "5b9e6c9ad87f17f39a659f679e4873a2d3574d8964410584c2c45ed9920560ec",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-15T08:12:10.756478+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 1.285002,
+   "duration_s": 864.292,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-15T06:59:50.941842+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.8474,
+   "reported_tokens": 2063813,
+   "run_id": "legacy-vaultcore-binary-parity-304f8e45",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2063813,
+    "result_receipts": 1,
+    "stream_sha256": "789c37e3a76f547d5465e7fbcdf91e806dc02f11f5ab25364b9f6779758490fe",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1899008,
+     "input_tokens": 2024358,
+     "output_tokens": 39455,
+     "reasoning_output_tokens": 23639
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-vaultcore-binary-parity-304f8e45",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "8f9afc487fb9340f16090f4636e56f0b8c5e668f80d6181cfba69887b80dcb1f",
+    "summary": "8b971d4a746a30bb029d0635db54bf7f6a8c924fbda22863cd53ef65b0782f78",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-15T06:45:26.642830+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4"
+}

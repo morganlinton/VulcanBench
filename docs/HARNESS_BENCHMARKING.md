@@ -14,6 +14,7 @@ Release A supports:
 | Cursor CLI | `cursor:<model>` | `cursor-agent login` (Cursor account/credits) | Cursor sandbox enabled + force-allow; Vulcan setup/verifier may use Docker |
 | Grok Build | `grok-build:<model>` | `grok login` (grok.com OIDC) | custom kernel profile: workspace writes + repo reads denied (Seatbelt/Landlock); Vulcan setup/verifier may use Docker |
 | ZCode | `zcode:<model>` | `zcode login` (Z.ai OAuth, GLM Coding Plan) | ZCode permission mode `yolo` on the host workspace; web tools removed and the Browser Use plugin disabled; Vulcan setup/verifier may use Docker |
+| Devin CLI | `devin:<model>` | `devin auth login` (Devin account) | Devin print mode, permission mode `dangerous`, on the host workspace with an isolated config home; web tools disabled through the per-run config; Vulcan setup/verifier may use Docker |
 
 Cursor-specific limits: `cursor-agent` streams no token usage or cost, so
 token counts are recorded as zero and the economics receipt marks the
@@ -197,6 +198,83 @@ billing. VulcanBench never copies login tokens into run artifacts. External CLI
 processes receive a minimal environment rather than the caller's entire shell
 environment, and provider API keys are not inherited.
 
+Devin-specific notes (verified on `devin` 3000.10.31, Homebrew cask
+`devin-cli`, 2026-09-18; the CLI is Cognition's local terminal agent, the
+same runtime Devin Desktop drives over ACP, so re-verify on every CLI update
+before a sweep):
+
+- **Install and sign in.** `brew install --cask devin-cli`, then
+  `devin auth login`. The May 2026 builds (`2026.5.x`, installed by the
+  older curl installer into `~/.local/bin`) have a dead `devin update`
+  channel, no `devin models` command and no per-run `disabled_tools`; the
+  preflight refuses anything older than 3000.10.21 and names the cask. Keep
+  `/opt/homebrew/bin` ahead of `~/.local/bin` on `PATH` (the sweep launcher
+  does). The login is `credentials.toml` under the data home
+  (`~/.local/share/devin`); the preflight checks it for presence only and
+  confirms with `devin auth status`, which makes no model call.
+- **Effort is the model id's last token, not a flag.** The account catalog
+  (`devin models list --format json`) lists one `model_uid` per effort
+  variant: `swe-2-medium`, `swe-2-high` and `swe-2-max` for SWE-2 (no low,
+  no xhigh), `claude-fable-5-1-xhigh` and so on for other families, with
+  `-fast` / `-priority` speed suffixes after the effort token. The adapter
+  takes the family (`--model swe-2`) plus `--effort` and composes the uid;
+  any uid the catalog does not carry is refused before a model call. This
+  matters because the CLI otherwise falls back silently: its log records
+  "configured `agent.model` did not resolve to an available, allowed model;
+  starting on the default" and carries on. A bare family without `--effort`
+  is refused for the same reason (an exact uid such as `swe-2-high` is
+  accepted). The served model is proven from every response's
+  `generation_model` receipt and a mismatch fails the run; the effort token
+  of that served uid is `reported_effort`.
+- **Print mode prints only the final text; the record lives in sqlite.**
+  `devin --config=<run config> --model <uid> --permission-mode dangerous
+  --respect-workspace-trust=false --export=<run_dir>/devin-session/export.json
+  --prompt-file <prompt> -p`, stdin closed, in the workspace (print mode
+  refuses an untrusted directory by default, and the workspace is a fresh
+  tmp perimeter, so trust is asserted per run on the command line and as
+  `respect_workspace_trust: false` in the run config). Every message, tool call (`tool_calls`
+  with `id`, `name`, `arguments`) and per-request receipt (`metadata.metrics`:
+  input, output, cache read and cache creation tokens, plus `request_id` and
+  `generation_model`) is in `~/.local/share/devin/cli/sessions.db`
+  (`sessions`, `message_nodes`, `tool_call_state`). After the run the adapter
+  finds the session by workspace directory and start time, copies it into
+  `<run_dir>/devin-session/` (`session.json` with Devin's own
+  `total_credit_cost` / `total_acu_cost`, `messages.jsonl`, `tool_calls.jsonl`,
+  `cli-log.txt` with any model-resolution warnings), appends normalized
+  `tool_call` / `tool_result` lines to `cli-agent-stream.jsonl` for the
+  integrity audit (Devin's `read` takes `file_path` and `exec` takes
+  `command`; the normalized line carries `path` and `command` so the
+  filesystem audit sees them), and sums usage. The CLI stores each assistant
+  message twice with identical receipts, so receipts are deduplicated by
+  `request_id` and a conflicting copy is an error, never a double count.
+  `max_turns` cannot be forwarded (no step cap in print mode); `--timeout`
+  is the hard boundary and `--max-run-cost` is rejected.
+- **No API-equivalent price.** SWE models exist only inside Devin; the
+  catalog lists SWE-2 at cost tier "Free" (through 2026-10-10) with no
+  per-token rate, so `devin:` specs are unpriced: `cost_usd` is `None`, the
+  economics receipt reports `api_equivalent_cost_usd` as unavailable, and the
+  ledger of what a run consumed is Devin's credit and ACU counters in
+  `session.json` plus the token receipts. Do not add a `devin:` pricing
+  alias to make the number appear.
+- **Web denial and context hygiene are per run, never the user's config.**
+  The run gets its own `XDG_CONFIG_HOME` holding a generated `config.json`
+  (`agent.model` pinned to the uid, `auto_update: false`, and unless
+  `--network` is passed `disabled_tools: ["webfetch", "web_search",
+  "browser_preview", "close_browser_preview"]` plus a permission deny on
+  those tools and `Fetch(*)`); the same file is passed as `--config`. The
+  denial is proven per run, not assumed: the ATIF export the CLI writes
+  (`devin-session/export.json`) lists the agent's `tool_definitions`, the
+  adapter records those names in the trace (`devin_usage.tool_names`) and a
+  non-network run that still exposes any of the disabled tools fails closed.
+  Verified live on 2026-09-18: the agent listed 23 tools, none of them web,
+  and reported both a fetch and a search as impossible. That keeps the user's rules, skills and MCP servers out of
+  the benchmark context (skills under `~/.agents/skills` and
+  `~/.claude/skills` are HOME-based and still load; recorded as a boundary
+  caveat). `DEVIN_MODEL` and `DEVIN_PERMISSION_MODE` are not inherited.
+  Devin has no kernel sandbox in this configuration: shell runs on the host,
+  so the filesystem channel is the workspace perimeter plus the audit, as
+  for ZCode and Cursor.
+
 ## Run with an explicit harness
 
 ```bash
@@ -221,6 +299,16 @@ vulcanbench run --task hello-world \
   --billing subscription \
   --model glm-5.3 \
   --effort extra-high \
+  --no-judges
+
+# Devin CLI (Cognition's SWE-2) through a Devin account; effort selects the
+# catalog variant swe-2-high
+vulcanbench run --task hello-world \
+  --harness devin \
+  --billing subscription \
+  --model swe-2 \
+  --effort high \
+  --sandbox local \
   --no-judges
 ```
 

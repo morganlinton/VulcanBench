@@ -1,0 +1,59 @@
+{
+ "cells": {
+  "terra/max": 1
+ },
+ "excluded": [],
+ "levels": {
+  "terra": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "terra": "GPT-5.6 Terra in Codex"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": 6.158641,
+   "duration_s": 2680.565,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-17T16:29:45.527590+00:00",
+   "functional": 1.0,
+   "model": "terra",
+   "quality": 0.6867,
+   "reported_tokens": 15678328,
+   "run_id": "legacy-paddockcore-binary-parity-7e5dc890",
+   "security": 0.95,
+   "solver_cli_version": "codex-cli 0.153.4",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 15678328,
+    "result_receipts": 1,
+    "stream_sha256": "74de029a2a088b959971b1fc944044c0ce62e17437a64b2c58fbf2da5c9cd925",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 14993920,
+     "input_tokens": 15562421,
+     "output_tokens": 115907,
+     "reasoning_output_tokens": 72098
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-terra/max/legacy-paddockcore-binary-parity-7e5dc890",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "049250c60891a9332d23891254af69c17ade15d7cfc3103ce6409c37e3d7dbee",
+    "summary": "704b4077e2ee143cc5e0ceaa3f6b67d31ccffad0905a9c5a1cb1b20e254e6d65",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-17T15:45:04.949576+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4",
+ "top_up_of": "runs-code-quality-maintenance-v3.6"
+}

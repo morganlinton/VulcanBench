@@ -145,6 +145,23 @@ _ZCODE_EFFORT_VALUES = {
 }
 
 
+# Devin CLI (Cognition). Effort is not a flag: it is the last token of the
+# model id in the account catalog (swe-2-medium / swe-2-high / swe-2-max,
+# claude-fable-5-1-xhigh, ...), so the adapter composes "<model>-<value>" and
+# refuses any uid `devin models list` does not carry before the run starts.
+# The catalog's effort tokens are minimal/low/medium/high/xhigh/max; which of
+# them a family exposes is per family (SWE-2: medium, high and max only), and
+# an absent variant is a refusal in the adapter, not a silent default here.
+_DEVIN_EFFORT_VALUES = {
+    "minimal": "minimal",
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "extra-high": "xhigh",
+    "max": "max",
+}
+
+
 def zai_supports_effort(model: str | None) -> bool:
     """Whether a Z.ai GLM model exposes the ``reasoning_effort`` knob."""
     if not model:
@@ -163,6 +180,7 @@ _PROVIDER_EFFORT_MAPS = {
     "cursor": _CURSOR_EFFORT_VALUES,
     "grok-build": _GROK_BUILD_EFFORT_VALUES,
     "zcode": _ZCODE_EFFORT_VALUES,
+    "devin": _DEVIN_EFFORT_VALUES,
 }
 
 

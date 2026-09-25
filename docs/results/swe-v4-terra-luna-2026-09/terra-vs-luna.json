@@ -1,0 +1,167 @@
+{
+  "final": true,
+  "coverage": {
+    "submissions_with_both_reviews": 230,
+    "submissions_total": 230,
+    "submissions_with_probes": 230,
+    "per_panel_reviews": {
+      "muse": 230,
+      "grok": 230
+    },
+    "per_panel_probes": {
+      "muse": 218,
+      "grok": 218
+    }
+  },
+  "headline": "Terra leads by 4.9 points at 33% Code quality.",
+  "subtitle": "Terra 2.2\u00d7 faster",
+  "selected": {
+    "terra": {
+      "model": "terra",
+      "effort": "max",
+      "n": 23,
+      "combined": {
+        "n": 23,
+        "mean": 89.05345625895843,
+        "se": 0.7139143952236725
+      },
+      "combined_20pct": {
+        "n": 23,
+        "mean": 91.18972974851236,
+        "se": 0.5118763823018084
+      },
+      "code_quality": {
+        "n": 23,
+        "mean": 72.51973569908351,
+        "se": 1.985418348981069
+      },
+      "readability": {
+        "n": 23,
+        "mean": 66.84782608695652,
+        "se": 2.3754125694744483
+      },
+      "maintainability": {
+        "n": 23,
+        "mean": 72.91666666666667,
+        "se": 1.82431305918166
+      },
+      "l2": {
+        "n": 23,
+        "mean": 79.55304055847535,
+        "se": 2.8477537138963607
+      },
+      "minutes": {
+        "n": 23,
+        "mean": 19.7351,
+        "se": 2.255842671029675
+      },
+      "passed": 23,
+      "fallbacks": 0,
+      "by_panel": {
+        "muse": {
+          "n": 23,
+          "mean": 70.19927536231884,
+          "se": 1.9269126602869817
+        },
+        "grok": {
+          "n": 23,
+          "mean": 69.56521739130434,
+          "se": 2.178882385733615
+        }
+      }
+    },
+    "luna": {
+      "model": "luna",
+      "effort": "max",
+      "n": 23,
+      "combined": {
+        "n": 23,
+        "mean": 84.14689600616774,
+        "se": 1.3493907885648762
+      },
+      "combined_20pct": {
+        "n": 23,
+        "mean": 87.18402129491062,
+        "se": 1.329513234536996
+      },
+      "code_quality": {
+        "n": 23,
+        "mean": 65.35054125716181,
+        "se": 1.3331516197707853
+      },
+      "readability": {
+        "n": 23,
+        "mean": 55.79710144927536,
+        "se": 1.5660314820392842
+      },
+      "maintainability": {
+        "n": 23,
+        "mean": 64.31159420289855,
+        "se": 1.562455246537863
+      },
+      "l2": {
+        "n": 23,
+        "mean": 79.47372374002809,
+        "se": 2.5007736959556808
+      },
+      "minutes": {
+        "n": 23,
+        "mean": 44.09918623188406,
+        "se": 10.719661343012751
+      },
+      "passed": 19,
+      "fallbacks": 0,
+      "by_panel": {
+        "muse": {
+          "n": 23,
+          "mean": 57.97101449275362,
+          "se": 1.5254988375374718
+        },
+        "grok": {
+          "n": 23,
+          "mean": 62.13768115942029,
+          "se": 1.371535727517495
+        }
+      }
+    }
+  },
+  "matched_effort_leads_terra": {
+    "combined": 5,
+    "code_quality": 5,
+    "runtime": 3
+  },
+  "complete_efforts": [
+    "low",
+    "medium",
+    "high",
+    "extra-high",
+    "max"
+  ],
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "source_hashes": {
+    "runs-code-quality-maintenance-v3.5": {
+      "summary": "faea0a8e7a99c02aa18e311e0340111f77ba41c8ce535f180acc6a1911f26f0a",
+      "protocol": "e2c2afdb5149cd3999ce10b79daa7830f768c56147d75c6e88958777405a65fb"
+    },
+    "runs-code-quality-maintenance-v3.6": {
+      "summary": "e3ddd51feb26ec3a0808c83d7461ff041a05b9d72dad8f156030c9dc399e050f",
+      "protocol": "f6214c5c99d75e61a5803811700cec86ddbcd3c0ef727d1af5d276c2998ac486"
+    },
+    "runs-code-quality-maintenance-v3.6.1": {
+      "summary": "1618fa700ca78131bd583c3e83d035b67bdba946d584395861d122cf57c0dbad",
+      "protocol": "72f79a5afb5a3b5a413c08c57cbeaff8195d944e7f12e7147f70b50e988fc49a"
+    }
+  },
+  "png_sha256": "225d082efc1ae1119be774b467778c117b702827f4c8aab20bfb95a7bae4a5ce",
+  "supporting_table": "terra-vs-luna-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

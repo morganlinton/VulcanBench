@@ -2,7 +2,8 @@
 
 Claude Code reads CLAUDE.md; other agents (Cursor, Codex, Grok, and similar)
 read this file. The project notes, brand, and chart-integrity rules live in
-[CLAUDE.md](CLAUDE.md); read it as well. The rule below is the one that applies
+[CLAUDE.md](CLAUDE.md); read it as well. Run-condition decisions (timeouts,
+concurrency) and their evidence are in [docs/DECISIONS.md](docs/DECISIONS.md). The rule below is the one that applies
 to every agent and every kind of output.
 
 ## Writing conventions (applies to ALL output)

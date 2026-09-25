@@ -295,3 +295,23 @@ def test_anthropic_max_is_noop_metadata() -> None:
 def test_unknown_provider_effort_rejected() -> None:
     with pytest.raises(ValueError, match="not supported for provider"):
         effort_config("acme", "medium")
+
+
+def test_devin_effort_composes_catalog_tokens() -> None:
+    """Devin bakes effort into the model id; the map yields the catalog token."""
+    for requested, sent in {
+        "minimal": "minimal",
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "extra-high": "xhigh",
+        "max": "max",
+    }.items():
+        cfg = effort_config("devin", requested)
+        assert cfg is not None
+        assert cfg.as_summary() == {
+            "requested": requested,
+            "provider": "devin",
+            "provider_value": sent,
+            "supported": True,
+        }

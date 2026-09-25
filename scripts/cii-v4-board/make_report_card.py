@@ -419,7 +419,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915, linear top-to-bottom page layout
         "stripped legacy binary whose undocumented behavior is the contract, a drifted written "
         "spec, and hidden tests grading byte parity over generated corpora. Claude Code CLI on a "
         "Claude Max subscription, host execution on one Apple Silicon machine, shipped default "
-        "reasoning effort, judges disabled, uniform 10-hour timeout, one attempt per task. "
+        "reasoning effort, judges disabled, flat 10-hour timeout (3 hours from 2026-09-13), one attempt per task. "
         "Admission required a weaker reference to solve at most one run in three and a stronger "
         "reference to need ten minutes median or miss outright. Dollar figures are api-equivalent "
         "at list price (\\$10 and \\$50 per M tokens), an upper bound: these runs were billed to "

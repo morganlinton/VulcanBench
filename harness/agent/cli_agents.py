@@ -1,7 +1,7 @@
 """Run models inside their own agent CLI (subscription billing).
 
-``claude-code:<model>``, ``codex:<model>``, ``cursor:<model>``, ``grok-build:<model>``
-and ``zcode:<model>`` run a task
+``claude-code:<model>``, ``codex:<model>``, ``cursor:<model>``, ``grok-build:<model>``,
+``zcode:<model>``, ``muse-code:<model>`` and ``devin:<model>`` run a task
 in the product's headless CLI instead of the VulcanBench agent loop.  The
 external harness owns its prompts, context management, and tools; everything
 downstream (git diff, verifier, evaluator, scoring) remains under VulcanBench.
@@ -56,7 +56,7 @@ from harness.redaction import sanitize
 from harness.sandbox.docker_executor import ResourceSpec
 
 CLI_AGENT_PROVIDERS = frozenset(
-    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code"}
+    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code", "devin"}
 )
 
 # Claude Code's headless result text when a subscription window is exhausted
@@ -2781,6 +2781,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
         from harness.agent.muse_code import MuseCodeAdapter  # noqa: PLC0415
 
         return MuseCodeAdapter()
+    if name == "devin":
+        # Same lazy import: devin_cli builds on this module's helpers.
+        from harness.agent.devin_cli import DevinAdapter  # noqa: PLC0415
+
+        return DevinAdapter()
     try:
         return _CLI_AGENT_ADAPTERS[name]
     except KeyError as exc:

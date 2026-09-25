@@ -62,6 +62,7 @@ def test_harness_list_json() -> None:
         "claude-code",
         "codex",
         "cursor",
+        "devin",
         "grok-build",
         "muse-code",
         "zcode",

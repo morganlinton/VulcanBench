@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Devin CLI harness** (`--harness devin`, `devin:<model>` specs,
+  `harness/agent/devin_cli.py`): runs a task in Cognition's local Devin agent
+  (`devin -p`, permission mode `dangerous`) on the signed-in Devin account,
+  built for SWE-2, a model that exists only inside Devin. Effort is the last
+  token of Devin's model id, so `--model swe-2 --effort medium|high|max`
+  composes `swe-2-<effort>` and refuses any uid the account catalog
+  (`devin models list`) does not carry rather than letting the CLI fall back
+  to a default variant. Print mode prints only the final text, so messages,
+  tool calls and per-request token receipts (with the served
+  `generation_model`, proven against the request) are harvested from the
+  CLI's sqlite session store into `<run_dir>/devin-session/` and the audit
+  stream. Web tools are disabled through a per-run config in an isolated
+  config home. `devin:` specs are unpriced (no public per-token rate; the
+  catalog lists SWE-2 as "Free"), so cost is recorded as unavailable
+  alongside Devin's own credit and ACU counters. Sweep launcher:
+  `scripts/cii-v4-board/run_devin_effort_sweep.sh`.
+
 - **Agent-in-container execution mode** (`--agent-container`, codex harness
   first): the subscription CLI runs inside a container built from the sandbox
   base image (`make agent-image-codex`), Harbor-style, so the floor/ceiling

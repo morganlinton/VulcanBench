@@ -165,6 +165,20 @@ A family that fails is rebuilt once or cut. Cuts are listed in the report.
   deserialization, open redirect as SSRF; advisories whose CWEs map to no
   family or to two are dropped, and no class exceeds 20% of items.
 
+- `code-output` (2026-09-25): wrong options were all one edit from the
+  true output, so the option closest to the others was right 88.7% of the
+  time, an unrecorded shortcut behind most of Jev's pilot 95. Wrong options
+  now also come as clusters and chains around a wrong output, and `medoid`
+  and `outlier` shortcuts are recorded and held at chance. Outputs with
+  memory addresses are rejected. Jev 45, reference 100 on 30 dev items.
+- `bug-function` (2026-09-25): options are the functions the failing test
+  can reach through the static call graph (5 to 20), edits are ones that
+  look natural (swapped arguments, one local for another, a negated
+  condition), and the failure shown is the test's own assertion with no
+  library frames, because crash messages named the buggy function. The
+  family therefore no longer covers diagnosing crashes. 15 modules outside
+  networkx (networkx is 58% of items). Jev 70, reference 100 on 30 dev items.
+
 ## Rows on the chart
 
 - **Jev** (pinned version, one column: the API has no effort setting).

@@ -6,8 +6,9 @@ mando ship their tests). The package is copied once into a temp directory;
 every run hard-links that copy into a fresh directory, overwrites the one
 module with a mutant, and runs pytest on the test file with a JUnit report.
 One run per mutant gives the outcome of every test in the file, which labels
-both families: the planted bug's failing tests (``bug-function``) and, per
-related test, killed or not (``mutant-kill``).
+both families: the planted bug's failing tests (``bug-function``, built in
+``code_gen_bugs`` from its own mutants) and, per related test, killed or not
+(``mutant-kill``).
 """
 
 from __future__ import annotations
@@ -34,13 +35,8 @@ from harness.verdict.v2.families.code_gen_exec import (
     tree_hash,
 )
 from harness.verdict.v2.families.code_gen_mutate import Mutant, mutants
-from harness.verdict.v2.families.code_gen_select import (
-    ChoiceBalancer,
-    ChoiceConfig,
-    above_median,
-    balance_noul,
-)
-from harness.verdict.v2.items import Item, choice_question, make_item, noul_question
+from harness.verdict.v2.families.code_gen_select import above_median, balance_noul
+from harness.verdict.v2.items import Item, make_item, noul_question
 from harness.verdict.v2.registry import BuildContext
 
 PYTEST_TIMEOUT = 30.0
@@ -510,11 +506,6 @@ def unit_key(unit: LibUnit, source: str) -> str:
 
 # ----------------------------------------------------------------- builders
 
-MIN_OPTIONS = 6
-MAX_OPTIONS = 20
-STATE_BUDGET = 100_000
-
-
 _LOADED: dict[tuple[int, str], list[UnitData]] = {}
 
 
@@ -538,168 +529,8 @@ def _load_all(ws: Workspace, seed: int) -> list[UnitData]:
     return out
 
 
-def _tokens(text: str) -> set[str]:
-    spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", text)
-    return {t.lower() for t in re.split(r"[^A-Za-z0-9]+|_", spaced) if len(t) >= 3}
-
-
 def _identifiers(text: str) -> list[str]:
     return re.findall(r"[A-Za-z_][A-Za-z0-9_]*", text)
-
-
-def bug_shortcuts(
-    options: list[str],
-    functions: dict[str, FunctionInfo],
-    visible: str,
-    test_source: str,
-) -> dict[str, str]:
-    seen = _tokens(visible)
-    overlap = max(options, key=lambda o: (len(_tokens(o.split(".")[-1]) & seen), -options.index(o)))
-    longest = max(
-        options,
-        key=lambda o: (functions[o].end - functions[o].start, -options.index(o)),
-    )
-    first_called = options[0]
-    bare_to_option = {o.split(".")[-1]: o for o in options}
-    for ident in _identifiers(test_source):
-        if ident in bare_to_option:
-            first_called = bare_to_option[ident]
-            break
-    return {"overlap": overlap, "longest": longest, "first_called": first_called}
-
-
-BUG_WINDOW = 6
-
-
-@dataclass(frozen=True)
-class BugView:
-    """One way to present a planted bug: which failing test is shown."""
-
-    data: UnitData
-    rec: MutantRecord
-    test_id: str
-    failure: str
-
-
-def _bug_configs(data: UnitData, rec: MutantRecord, rng: random.Random) -> list[ChoiceConfig]:
-    functions = {f.name: f for f in data.functions}
-    answer = rec.function.name
-    failing = [t for t in killed(rec, data.baseline) if rec.outcome.failures.get(t)]
-    pool = [n for n in functions if n != answer]
-    configs = []
-    for test_id in failing[:3]:
-        test = data.tests[test_id]
-        failure = clean_failure(
-            rec.outcome.failures[test_id], data.unit.tests, [f.bare for f in data.functions]
-        )
-        visible = f"{test_id}\n{failure}\n{test.source}"
-        for _ in range(6):
-            options = [answer, *rng.sample(pool, min(len(pool), MAX_OPTIONS - 1))]
-            rng.shuffle(options)
-            configs.append(
-                ChoiceConfig(
-                    dict(zip(options, options, strict=True)),
-                    answer,
-                    bug_shortcuts(options, functions, visible, test.source),
-                    payload=BugView(data, rec, test_id, failure),
-                )
-            )
-    return configs
-
-
-def build_bug_function(ctx: BuildContext) -> list[Item]:
-    family = "bug-function"
-    runner = runner_for(ctx, "libs")
-    with workspace(runner) as ws:
-        datas = load_all(ws, ctx.seed)
-    rng = random.Random(f"{ctx.seed}:{family}")
-    candidates: dict[str, list[MutantRecord]] = {}
-    units_by_module = {d.unit.module: d for d in datas}
-    for data in datas:
-        if len(data.functions) < MIN_OPTIONS:
-            continue
-        recs = [
-            r
-            for r in data.records
-            if any(r.outcome.failures.get(t) for t in killed(r, data.baseline))
-        ]
-        rng.shuffle(recs)
-        # Distinct functions first within a unit, then repeats.
-        rank: dict[str, int] = {}
-        keyed = []
-        for i, rec in enumerate(recs):
-            keyed.append((rank.get(rec.function.name, 0), i, rec))
-            rank[rec.function.name] = rank.get(rec.function.name, 0) + 1
-        if keyed:
-            candidates[data.unit.module] = [r for _, _, r in sorted(keyed, key=lambda x: x[:2])]
-    units = sorted(candidates)
-    balancer = ChoiceBalancer(position_weight=0.05)
-    items: list[Item] = []
-    while len(items) < ctx.per_family and any(candidates[m] for m in units):
-        for module in units:
-            if len(items) >= ctx.per_family or not candidates[module]:
-                continue
-            data = units_by_module[module]
-            configs = [
-                c for rec in candidates[module][:BUG_WINDOW] for c in _bug_configs(data, rec, rng)
-            ]
-            chosen = balancer.choose(configs)
-            view = chosen.payload
-            assert isinstance(view, BugView)
-            candidates[module].remove(view.rec)
-            item = _bug_item(ctx, family, view, chosen)
-            if item is not None:
-                items.append(item)
-    return items
-
-
-def _bug_item(ctx: BuildContext, family: str, view: BugView, chosen: ChoiceConfig) -> Item | None:
-    data, rec, test_id, failure = view.data, view.rec, view.test_id, view.failure
-    unit = data.unit
-    answer = rec.function.name
-    test = data.tests[test_id]
-    failing = killed(rec, data.baseline)
-    others_failing = [t for t in failing if t != test_id]
-    listed = ", ".join(others_failing[:8]) + (" and more" if len(others_failing) > 8 else "")
-    options = list(chosen.texts)
-    version = package_version(unit.package)
-    header = (
-        f"Module: {unit.module} ({unit.package} {version}).\n"
-        "One function in this module has a planted bug: a single small edit. The package's "
-        "own test suite for the module now fails.\n\n"
-        f"Failing test: {unit.tests}::{test_id}\n"
-        f"Other tests failing in the same run ({len(others_failing)}): {listed or 'none'}\n\n"
-        f"Test source:\n```python\n{test.source}\n```\n\n"
-        "Failure output (line numbers, frames inside library code, and names of this module's "
-        "functions are redacted):\n"
-        f"```\n{failure}\n```\n\n"
-        f"Candidate functions: {', '.join(options)}\n"
-    )
-    module_block = (
-        f"\nModule source, as it is now (with the bug):\n```python\n{rec.mutant.source}```\n"
-    )
-    state = header + module_block if len(header) + len(module_block) <= STATE_BUDGET else header
-    if len(state) > STATE_BUDGET:
-        return None
-    question = choice_question("Which function contains the planted bug?", dict.fromkeys(options))
-    return make_item(
-        family=family,
-        key=f"{ctx.seed}:{unit.module}:{rec.mutant.source}:{test_id}",
-        source_unit=f"{family}:{unit.module}",
-        state=plain_dashes(state),
-        question=question,
-        answer=answer,
-        reference="execution",
-        shortcuts=chosen.shortcuts,
-        source={
-            "module": unit.module,
-            "tests": unit.tests,
-            "package_version": version,
-            "mutation": rec.mutant.kind,
-            "failing_tests": len(failing),
-            "module_source_included": state != header,
-        },
-    )
 
 
 @dataclass(frozen=True)

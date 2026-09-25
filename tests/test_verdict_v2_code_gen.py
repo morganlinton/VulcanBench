@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from harness.verdict.v2.families import code_gen
+from harness.verdict.v2.families import code_gen, code_gen_bugs
 from harness.verdict.v2.families.code_gen_exec import Job, Runner
 from harness.verdict.v2.families.code_gen_libs import (
     LibUnit,
@@ -30,8 +30,11 @@ from harness.verdict.v2.families.code_gen_select import (
     ChoiceConfig,
     balance_noul,
     longest,
+    medoid,
     most_common_shape,
     nearest_center,
+    outlier,
+    token_distance,
 )
 from harness.verdict.v2.families.code_gen_specs import SPECS, is_round
 from harness.verdict.v2.families.code_gen_types import TEMPLATES as TYPE_TEMPLATES
@@ -146,6 +149,17 @@ def test_shortcut_helpers():
     assert nearest_center(texts, "median") in {"A", "C"}
 
 
+def test_medoid_finds_the_centre_of_a_star_of_single_edits():
+    star = {"A": "1 2 3", "B": "1 2 4", "C": "9 2 3", "D": "1 7 3"}
+    assert token_distance("1 2 3", "1 2 4") == 1
+    assert token_distance("[1, 2]", "[1, 2, 3]") == 2
+    assert medoid(star) == "A"
+    # A cluster around a wrong answer moves the centre off the truth.
+    cluster = {"A": "1 2 3", "B": "1 2 4", "C": "1 5 4", "D": "8 2 4"}
+    assert medoid(cluster) == "B"
+    assert outlier({"A": "1 2 3", "B": "1 2 4", "C": "9 9 9", "D": "1 2 5"}) == "C"
+
+
 def test_choice_balancer_drives_a_biased_shortcut_to_chance():
     rng = random.Random(0)
     balancer = ChoiceBalancer()
@@ -256,6 +270,8 @@ def test_code_output_small_build_is_verified_and_deterministic(tmp_path):
         out = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=True).stdout
         assert item.question["descriptions"][item.answer] == out.strip("\n")
         assert len(set(item.question["descriptions"].values())) == 4
+        assert item.source["structure"] in {"star", "cluster", "chain"}
+        assert {"medoid", "outlier"} <= set(item.shortcuts)
     again = code_gen.build_code_output(ctx)
     assert [i.to_json() for i in again] == [i.to_json() for i in items]
 
@@ -433,3 +449,144 @@ def test_builds_do_not_depend_on_worker_count(tmp_path, family):
         )
     )
     assert [i.to_json() for i in a] == [i.to_json() for i in b]
+
+
+# ---------------------------------------------------------- bug-function
+
+CHAIN_MODULE = textwrap.dedent(
+    """\
+    def _scale(values, factor):
+        out = []
+        for v in values:
+            out.append(v * factor)
+        return out
+
+
+    def _shift(values, offset):
+        out = []
+        for v in values:
+            out.append(v + offset)
+        return out
+
+
+    def _window(values, lo, hi):
+        kept = [v for v in values if lo <= v < hi]
+        return _dedupe(sorted(kept))
+
+
+    def _dedupe(values):
+        out = []
+        for v in values:
+            if not out or out[-1] != v:
+                out.append(v)
+        return out
+
+
+    def normalise(values, lo, hi):
+        base = min(values)
+        shifted = _shift(values, -base)
+        return _window(_scale(shifted, 2), lo, hi)
+
+
+    def unrelated(text):
+        words = text.split()
+        return len(words)
+    """
+)
+CHAIN_TESTS = textwrap.dedent(
+    """\
+    from chainpkg.ops import normalise, unrelated
+
+
+    def test_normalise():
+        assert normalise([3, 4, 6, 9], 0, 10) == [0, 2, 6]
+
+
+    def test_normalise_window():
+        assert normalise([1, 2, 3], 1, 5) == [2, 4]
+
+
+    def test_unrelated():
+        assert unrelated("a b c") == 3
+    """
+)
+
+
+def test_extra_mutants_are_idiomatic_single_edits():
+    source = textwrap.dedent(
+        """\
+        def f(a, b, flag):
+            if flag:
+                return max(a, b)
+            total = a - b
+            return total
+        """
+    )
+    found = code_gen_bugs.extra_mutants(source, (2, 5))
+    kinds = {m.kind for m in found}
+    assert {"swap-args", "wrong-name", "negate"} <= kinds
+    for m in found:
+        ast.parse(m.source)
+        changed = [
+            i
+            for i, (x, y) in enumerate(zip(source.splitlines(), m.source.splitlines(), strict=True))
+            if x != y
+        ]
+        assert len(changed) == 1 and "not (" not in m.after and "pass" not in m.after
+
+
+def test_bug_mutants_skip_planted_looking_edits():
+    functions = module_functions(CHAIN_MODULE)
+    picked = code_gen_bugs.bug_mutants(CHAIN_MODULE, functions, random.Random(1), 200)
+    assert picked
+    assert all(m.kind not in {"delete", "negate-if"} for _, m in picked)
+    assert all(
+        code_gen_bugs._natural(m) or m.kind in {"swap-args", "wrong-name", "negate"}
+        for _, m in picked
+    )
+
+
+def test_only_assertion_failures_count_as_behavioural():
+    assert code_gen_bugs.behavioural(
+        "t.py:<line>: in test_a\n    assert f(1) == 2\nE   assert 3 == 2"
+    )
+    assert code_gen_bugs.behavioural("E   Failed: DID NOT RAISE <class 'ValueError'>")
+    crash = (
+        "t.py:<line>: in test_a\n    ... (2 frame(s) inside library code omitted)\nE   KeyError: 0"
+    )
+    assert not code_gen_bugs.behavioural(crash)
+    assert not code_gen_bugs.behavioural("E   UnboundLocalError: cannot access local variable 'x'")
+
+
+def test_call_graph_distances_follow_the_test():
+    functions = module_functions(CHAIN_MODULE)
+    graph = code_gen_bugs.call_graph(CHAIN_MODULE, functions)
+    dist = graph.distances("assert normalise([1], 0, 1) == []")
+    assert dist == {"normalise": 0, "_scale": 1, "_shift": 1, "_window": 1, "_dedupe": 2}
+    assert "unrelated" not in dist
+
+
+def test_bug_function_options_are_the_call_path(tmp_path):
+    pkg = tmp_path / "src" / "chainpkg"
+    (pkg / "tests").mkdir(parents=True)
+    (pkg / "__init__.py").write_text("")
+    (pkg / "tests" / "__init__.py").write_text("")
+    (pkg / "ops.py").write_text(CHAIN_MODULE)
+    (pkg / "tests" / "test_ops.py").write_text(CHAIN_TESTS)
+    unit = LibUnit("chainpkg/ops.py", "chainpkg/tests/test_ops.py")
+    ctx = BuildContext(
+        seed=3,
+        repo=tmp_path,
+        per_family=6,
+        options={"workers": 2, "bug_units": (unit,), "bug_sources": {"chainpkg": pkg}},
+    )
+    items = code_gen_bugs.build_bug_function(ctx)
+    assert items
+    path = {"normalise", "_scale", "_shift", "_window", "_dedupe"}
+    for item in items:
+        validate(item)
+        assert set(item.question["options"]) <= path
+        assert item.answer in path
+        assert item.source["mutation"] not in {"delete", "negate-if"}
+        assert {"first_called", "direct_callee", "deepest"} <= set(item.shortcuts)
+        assert _dash_free(item.state)

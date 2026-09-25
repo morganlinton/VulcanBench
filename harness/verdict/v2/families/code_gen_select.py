@@ -10,6 +10,7 @@ many true items as false ones, which pins every shortcut at 50%.
 
 from __future__ import annotations
 
+import difflib
 import random
 import re
 import statistics
@@ -63,6 +64,37 @@ def nearest_center(texts: dict[str, str], center: str) -> str:
     return first_label_max(
         [label for label in labels if label in values], lambda label: -abs(values[label] - target)
     )
+
+
+_TOKEN = re.compile(r"\w+|[^\w\s]")
+
+
+def token_distance(a: str, b: str) -> int:
+    """Tokens that differ between two outputs (a substitution counts once)."""
+    ta, tb = _TOKEN.findall(a), _TOKEN.findall(b)
+    if len(ta) == len(tb):
+        return sum(x != y for x, y in zip(ta, tb, strict=True))
+    ops = difflib.SequenceMatcher(None, ta, tb, autojunk=False).get_opcodes()
+    return sum(max(i2 - i1, j2 - j1) for tag, i1, i2, j1, j2 in ops if tag != "equal")
+
+
+def _spread(texts: dict[str, str]) -> dict[str, float]:
+    return {
+        label: float(sum(token_distance(text, other) for o, other in texts.items() if o != label))
+        for label, text in texts.items()
+    }
+
+
+def medoid(texts: dict[str, str]) -> str:
+    """Option closest to all the others: the centre of a star of single edits."""
+    spread = _spread(texts)
+    return first_label_max(list(texts), lambda label: -spread[label])
+
+
+def outlier(texts: dict[str, str]) -> str:
+    """Option farthest from all the others."""
+    spread = _spread(texts)
+    return first_label_max(list(texts), lambda label: spread[label])
 
 
 @dataclass

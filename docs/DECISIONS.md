@@ -7,6 +7,46 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-25: Verdict v2 gate caps the model under test, not the reference
+
+### Decision
+
+Amends the 2026-09-24 Verdict v2 entry after its pilot. A family is
+admitted when, on the 30-item dev pilot, the GPT-6 Astra reference (high
+effort) scores skill of at least 40, which shows the family is answerable,
+and Jev scores skill below 90, which shows it still measures Jev. The
+reference no longer has an upper bound. The shortcut rule (skill at most 15)
+is measured on the full build rather than the 30 pilot items. The item-count
+and source-unit rules are unchanged. This change was made after seeing
+pilot results and is disclosed in the report. Owner decision, in chat,
+2026-09-25.
+
+### Evidence
+
+- Pilot, 600 items (30 per family, dev split): the reference scored skill
+  100 on 14 of 20 families. Items were inspected by hand for leaks (option
+  text, question wording, state); none found. The reference reasons through
+  generated puzzles at length; Jev answers without reasoning and spread from
+  14 to 96 on those same families, which is the separation v1 lacked.
+- Under the original rule only 4 of 20 families passed. Hardening the rest
+  until the reference fell below 95 would have pushed Jev to the floor on
+  most of them.
+- 30 pilot items put a shortcut's accuracy within about 18 points by chance
+  alone: vuln-pair's best shortcut read skill 40 on the pilot and 12 on the
+  full build.
+- Under the amended rule 16 of 20 pass. bug-function (Jev 96) and
+  code-output (Jev 95) need hardening, failing-test (reference 39) needs
+  more answerable states, weakness-class (keyword shortcut 15.2) needs
+  rebalancing.
+
+### Revisit triggers
+
+- A future System One model approaches 90 on most families: the suite has
+  run out of headroom; harden rather than raise the ceiling.
+- A family passes only because Jev is at or below the floor while the
+  reference is also weak (below 60): check that it is answerable from the
+  state before reading Jev's number.
+
 ## 2026-09-24: Verdict v2 is a 20-family suite scored above the best shortcut
 
 ### Decision

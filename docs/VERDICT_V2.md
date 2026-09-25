@@ -123,18 +123,21 @@ Builders balance items so these land near chance; the admission gate checks it.
 
 ## Admission gate (per family, applied in the pilot)
 
-A family ships only if all hold on its pilot items:
+Amended 2026-09-25 after the pilot (DECISIONS entry of that date). A family
+ships only if all hold:
 
-1. The reference model (GPT-6 Astra, high effort, through Codex on the
-   subscription, same state, no tools) scores skill between 40 and 95:
-   answerable, and not saturated.
-2. The best shortcut baseline scores skill of 15 or less.
-3. At least 200 test items from at least 20 independent source units,
+1. On the 30-item dev pilot, the reference model (GPT-6 Astra, high effort,
+   through Codex on the subscription, same state, no tools) scores skill of
+   at least 40: the family is answerable. No upper bound: a reasoning
+   reference at high effort solves generated puzzles perfectly.
+2. On the same pilot, Jev scores skill below 90: the family still measures
+   the model under test.
+3. On the full build, the best shortcut scores skill of 15 or less.
+4. At least 200 test items from at least 20 independent source units,
    split into dev and test by source unit.
-4. Ground truth re-verified on a 5% random sample by re-execution.
+5. Ground truth re-verified on a 5% random sample by re-execution.
 
-A family that fails is rebuilt once (harder distractors, better balancing)
-or cut. Cuts are listed in the report. The pilot is 30 items per family.
+A family that fails is rebuilt once or cut. Cuts are listed in the report.
 
 ## Changes during the build
 

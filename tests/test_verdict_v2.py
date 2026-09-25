@@ -127,33 +127,38 @@ def test_score_questions_round_trip_through_the_adapter():
     assert parse_answer(item, body) == {"patch": 0.2, "minor": 0.7, "major": 0.1}
 
 
-def test_gate_admits_an_answerable_unshortcuttable_family_and_explains_failures():
+def test_gate_bounds_the_reference_below_and_the_subject_above():
     items = []
     for i in range(600):
         it = _pair_item(i, correct_first=i % 2 == 0, unit=f"u{i % 60}")
-        # Shortcut "larger" is right half the time on a balanced family.
         it["split"] = "dev" if i < 40 else "test"
         items.append(it)
     pilot = items[:40]
-    # Reference right on 34 of 40 (skill 70).
-    reference = [
-        {
-            "item_id": it["item_id"],
-            "probs": {it["answer"]: 0.8, ("B" if it["answer"] == "A" else "A"): 0.2}
-            if n < 34
-            else {it["answer"]: 0.2, ("B" if it["answer"] == "A" else "A"): 0.8},
-        }
-        for n, it in enumerate(pilot)
-    ]
-    gate = admission(items, pilot, reference)["patch-pair"]
-    assert gate["admitted"], gate["failed"]
-    assert gate["reference_skill"] == pytest.approx(70.0)
 
-    saturated = [{"item_id": it["item_id"], "probs": {it["answer"]: 1.0}} for it in pilot]
-    failed = admission(items[:100], pilot, saturated)["patch-pair"]
-    assert not failed["admitted"]
-    assert any("outside 40 to 95" in f for f in failed["failed"])
-    assert any("test items" in f for f in failed["failed"])
+    def answers(n_right):
+        out = []
+        for n, it in enumerate(pilot):
+            other = "B" if it["answer"] == "A" else "A"
+            pick = it["answer"] if n < n_right else other
+            out.append(
+                {
+                    "item_id": it["item_id"],
+                    "probs": {pick: 0.8, (other if pick == it["answer"] else it["answer"]): 0.2},
+                }
+            )
+        return out
+
+    perfect, middling = answers(40), answers(30)
+    gate = admission(items, pilot, perfect, middling)["patch-pair"]
+    assert gate["admitted"], gate["failed"]  # a perfect reference proves answerability
+    assert gate["reference_skill"] == pytest.approx(100.0)
+    assert gate["subject_skill"] == pytest.approx(50.0)
+
+    saturated = admission(items, pilot, perfect, answers(39))["patch-pair"]
+    assert any("at or above 90" in f for f in saturated["failed"])
+    unanswerable = admission(items[:100], pilot, answers(22), middling)["patch-pair"]
+    assert any("below 40" in f for f in unanswerable["failed"])
+    assert any("test items" in f for f in unanswerable["failed"])
 
 
 def test_score_families_with_per_item_levels_score_by_position():

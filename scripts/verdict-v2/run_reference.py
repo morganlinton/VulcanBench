@@ -145,6 +145,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--items", type=Path, default=ITEMS / "pilot.jsonl")
     parser.add_argument("--family", action="append", help="only these families (repeatable)")
+    parser.add_argument("--split", default=None, help="dev or test; default both")
     parser.add_argument("--model", default="gpt-6-astra")
     parser.add_argument("--effort", default="high")
     parser.add_argument("--workers", type=int, default=3)
@@ -154,7 +155,11 @@ def main() -> int:
     check_effort_allowed(args.effort)
     out = args.out or ITEMS / f"reference-{args.model}-{args.effort}-{args.items.stem}.jsonl"
 
-    items = [i for i in load_items(args.items) if not args.family or i["family"] in args.family]
+    items = [
+        i
+        for i in load_items(args.items)
+        if (not args.family or i["family"] in args.family) and args.split in (None, i["split"])
+    ]
     done = (
         {json.loads(line)["item_id"] for line in out.read_text().splitlines() if line.strip()}
         if out.exists()

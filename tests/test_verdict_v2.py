@@ -3,7 +3,7 @@ import random
 import pytest
 
 from harness.verdict.typesafe_adapter import build_request, parse_answer
-from harness.verdict.v2.gate import admission
+from harness.verdict.v2.gate import admission, option_text_shortcuts
 from harness.verdict.v2.items import (
     choice_question,
     make_item,
@@ -182,3 +182,17 @@ def test_score_families_with_per_item_levels_score_by_position():
     assert fam["mean_level_error"] == 0.0
     assert fam["floor_strategy"] in {"majority", "uniform"}
     assert fam["brier_skill"] > 0
+
+
+def test_option_text_shortcuts_find_the_option_nearest_the_rest():
+    item = {
+        "question": choice_question(
+            "Which output?",
+            {"A": "total 41", "B": "total 42", "C": "total 43", "D": "error: missing key"},
+        )
+    }
+    guesses = option_text_shortcuts(item)
+    assert guesses["text-outlier"] == "D"
+    assert guesses["text-medoid"] in {"A", "B", "C"}
+    pair = {"question": choice_question("Which?", {"A": "x", "B": "y"})}
+    assert option_text_shortcuts(pair) == {}

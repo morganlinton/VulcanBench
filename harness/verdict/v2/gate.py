@@ -11,6 +11,7 @@ what is being judged.
 
 from __future__ import annotations
 
+import difflib
 from collections import defaultdict
 from collections.abc import Sequence
 from typing import Any
@@ -25,6 +26,34 @@ SUBJECT_SKILL_MAX = 90.0
 SHORTCUT_SKILL_MAX = 15.0
 MIN_TEST_ITEMS = 200
 MIN_SOURCE_UNITS = 20
+
+
+def option_text_shortcuts(item: dict[str, Any]) -> dict[str, str]:
+    """Generic shortcuts over the option texts, applied to every choice family.
+
+    When wrong options are built as small edits of the right one, the right
+    one is the option most similar to the rest (``text-medoid``). code-output
+    leaked this way (88.7% on its first build) without any builder recording
+    it, so the gate now checks it everywhere, with its mirror
+    ``text-outlier``.
+    """
+    q = item["question"]
+    if q["type"] != "choice" or len(q["options"]) < 3:
+        return {}
+    descriptions = q.get("descriptions") or {}
+    texts = {str(o): str(descriptions.get(o) or o) for o in q["options"]}
+    if len(set(texts.values())) < len(texts):
+        return {}
+
+    def closeness(option: str) -> float:
+        return sum(
+            difflib.SequenceMatcher(None, texts[option], texts[other], autojunk=False).ratio()
+            for other in texts
+            if other != option
+        )
+
+    ranked = sorted(texts, key=closeness)
+    return {"text-medoid": ranked[-1], "text-outlier": ranked[0]}
 
 
 def shortcut_skills(rows: Sequence[dict[str, Any]]) -> dict[str, float]:
@@ -64,7 +93,13 @@ def admission(
         units[item["family"]].add(item["source_unit"])
         if item["split"] == "test":
             test_items[item["family"]] += 1
-    full_rows = _family_rows(all_items, [])
+    full_rows = _family_rows(
+        [
+            {**i, "shortcuts": {**i.get("shortcuts", {}), **option_text_shortcuts(i)}}
+            for i in all_items
+        ],
+        [],
+    )
     reference_rows = _family_rows(pilot_items, reference_predictions)
     subject_rows = _family_rows(pilot_items, subject_predictions)
 

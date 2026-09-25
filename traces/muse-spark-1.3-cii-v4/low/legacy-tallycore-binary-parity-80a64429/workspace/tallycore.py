@@ -1,0 +1,232 @@
+"""TallyCore ranked-ballot tally engine, Python implementation.
+
+Replaces the retired legacy binary (see ``legacy/README.md``). Reads tally
+commands on stdin (``C`` registers a candidate, ``V`` casts a ranked
+ballot and reports the running leader, ``W`` runs the instant-runoff
+recount and starts a new round), writes one reply per command and an
+``X`` trailer at EOF. Format reference: ``docs/SPEC.md`` (note the drift
+warning at the top of that file; the legacy engine's behavior is the
+contract).
+"""
+
+from __future__ import annotations
+
+import sys
+
+ID_MAX = 8
+CAND_MAX = 64
+BALLOT_MAX = 4096
+
+
+def _valid_id(token: str) -> bool:
+    return 1 <= len(token) <= ID_MAX and token.isascii() and token.isalnum()
+
+
+class Engine:
+    """Ranked-ballot tally engine with recount rounds and batch counters."""
+
+    def __init__(self) -> None:
+        self.cands: list[str] = []  # registration order
+        self.ballots: list[list[int]] = []  # current round, candidate indices
+        self.total_ballots = 0
+        self.rounds = 0
+        self.rejected = 0
+        # Engine: recount tie-break history for the next round: this
+        # round's first-choice ballots led by i, plus one per led
+        # ballot ranking every candidate, plus one per later mention
+        # of i on a ballot with three or more choices when i won the
+        # round, plus a quarter of the previous snapshot. A round
+        # never uses its own snapshot.
+        self.snap: list[int] | None = None
+
+    def handle(self, line: str) -> list[str]:
+        if line == "W":
+            return self._recount()
+        if line == "C" or line.startswith("C "):
+            return [self._register(line.split())]
+        if line == "V" or line.startswith("V "):
+            return [self._vote(line.split())]
+        return [self._reject("????????", "FMT")]
+
+    def trailer(self) -> str:
+        return (
+            f"X {len(self.cands)} {self.total_ballots} "
+            f"{self.rounds} {self.rejected}"
+        )
+
+    def _reject(self, echo: str, code: str) -> str:
+        self.rejected += 1
+        return f"N {echo} {code}"
+
+    def _canon(self, entry: str) -> int:
+        # Engine: candidate ids match case-insensitively; the first
+        # registration's spelling is kept for output.
+        for i, c in enumerate(self.cands):
+            if c.lower() == entry.lower():
+                return i
+        return -1
+
+    def _register(self, tokens: list[str]) -> str:
+        # Engine: only the first argument is used; extras are ignored.
+        if len(tokens) < 2:
+            return self._reject("????????", "FMT")
+        cand = tokens[1]
+        if not _valid_id(cand):
+            return self._reject("????????", "FMT")
+        if self.ballots:
+            return self._reject(cand, "LATE")
+        if self._canon(cand) < 0:
+            if len(self.cands) >= CAND_MAX:
+                return self._reject("????????", "FMT")
+            self.cands.append(cand)
+        return f"OK {len(self.cands)}"
+
+    def _vote(self, tokens: list[str]) -> str:
+        # Engine: only the first argument is used; extras are ignored.
+        if len(tokens) < 2:
+            return self._reject("????????", "FMT")
+        entries = tokens[1].split(",")
+        if any(not _valid_id(e) for e in entries):
+            return self._reject("????????", "FMT")
+        kept: list[int] = []
+        for entry in entries:
+            # Engine: unknown entries are skipped, not rejected; the
+            # ballot is rejected only when nothing recognizable remains.
+            c = self._canon(entry)
+            if c < 0:
+                continue
+            if c in kept:
+                return self._reject(entry, "DUP")
+            kept.append(c)
+        if not kept:
+            return self._reject(entries[0], "CAND")
+        if len(self.ballots) >= BALLOT_MAX:
+            return self._reject("????????", "FMT")
+        self.ballots.append(kept)
+        self.total_ballots += 1
+        # Running leader: first-choice counts, ties broken by
+        # registration order.
+        counts = [0] * len(self.cands)
+        for ballot in self.ballots:
+            counts[ballot[0]] += 1
+        lead = max(range(len(self.cands)), key=lambda c: (counts[c], -c))
+        return f"LEAD {self.cands[lead]}"
+
+    def _tallies(self, alive: list[bool], dead: list[bool], n: int) -> list[int]:
+        tally = [0] * len(self.cands)
+        for b, ballot in enumerate(self.ballots):
+            if dead[b]:
+                continue
+            if len(ballot) == n:
+                # Engine: a ballot ranking every candidate counts
+                # double while held by its first choice. After its
+                # first choice falls it transfers on, unless it is
+                # too short (then it dies with its first choice).
+                if alive[ballot[0]]:
+                    tally[ballot[0]] += 2
+                elif len(ballot) >= 4:
+                    for c in ballot[1:]:
+                        if alive[c]:
+                            tally[c] += 1
+                            break
+            elif len(ballot) >= 3:
+                # Engine: a partial ballot with three or more choices
+                # transfers to its next surviving choice, counting
+                # single.
+                for c in ballot:
+                    if alive[c]:
+                        tally[c] += 1
+                        break
+            elif alive[ballot[0]]:
+                # Engine: a shorter partial ballot dies with its
+                # first choice; it never transfers.
+                tally[ballot[0]] += 1
+        return tally
+
+    def _recount(self) -> list[str]:
+        if not self.ballots:
+            return [self._reject("????????", "FMT")]
+        n = len(self.cands)
+        # Engine: tie-break history from the previous round (a round
+        # never uses its own snapshot).
+        snap = self.snap if self.snap is not None else [0] * n
+        alive = [True] * n
+        dead = [False] * len(self.ballots)  # exhausted ballots drop out
+        out: list[str] = []
+        remaining = n
+        while remaining > 1:
+            tally = self._tallies(alive, dead, n)
+            # Engine elimination order (the spec drifted; the engine is
+            # the contract): fewest current votes plus history quarter;
+            # ties eliminate the LONGEST name, then the LAST registered
+            # candidate first.
+            def key1(c: int) -> int:
+                hist = snap[c] // 4 if c < len(snap) else 0
+                return tally[c] + hist
+            contenders = [c for c in range(n) if alive[c]]
+            victim = min(
+                contenders, key=lambda c: (key1(c), -len(self.cands[c]), -c)
+            )
+            out.append(f"ELIM {self.cands[victim]}")
+            alive[victim] = False
+            remaining -= 1
+        winner = next(c for c in range(n) if alive[c])
+        out.append(f"WIN {self.cands[winner]}")
+        # Engine: history snapshot for the next round: this round's
+        # counts plus a quarter of the previous snapshot. A
+        # first choice on a full ranking led by the round winner
+        # counts double. The winner-mention bonus fires only on
+        # ballots of three to five choices, or on full rankings.
+        # Other mentions score on full rankings, or on ballots of
+        # four or more choices not led by the winner.
+        snap_next = [0] * n
+        for ballot in self.ballots:
+            snap_next[ballot[0]] += 1
+            if len(ballot) == n and ballot[0] == winner:
+                snap_next[ballot[0]] += 1
+        for ballot in self.ballots:
+            if (
+                3 <= len(ballot) <= 5
+                or (len(ballot) == 6 and n - len(ballot) <= 2)
+                or (len(ballot) == n and n >= 3)
+            ):
+                if winner in ballot[1:]:
+                    snap_next[winner] += 1
+                elif (len(ballot) == n and n >= 3) or (
+                    len(ballot) >= 4
+                    and (ballot[0] != winner or len(ballot) >= 5)
+                ):
+                    for c in ballot[1:]:
+                        snap_next[c] += 1
+        if self.snap is not None:
+            while len(self.snap) < n:
+                self.snap.append(0)
+            for c in range(n):
+                snap_next[c] += self.snap[c] // 4
+        self.snap = snap_next
+        self.ballots = []
+        self.rounds += 1
+        return out
+
+
+def process(lines: list[str], out=None) -> list[str]:
+    engine = Engine()
+    replies = []
+    for raw in lines:
+        line = raw.rstrip("\r\n")
+        if not line:
+            continue
+        replies.extend(engine.handle(line))
+    replies.append(engine.trailer())
+    if out is not None:
+        for reply in replies:
+            print(reply, file=out)
+    return replies
+
+
+def main() -> None:
+    process(sys.stdin.readlines(), out=sys.stdout)
+
+
+if __name__ == "__main__":
+    main()

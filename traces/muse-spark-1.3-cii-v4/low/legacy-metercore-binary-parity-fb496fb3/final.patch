@@ -1,0 +1,112 @@
+diff --git a/metercore.py b/metercore.py
+index 04d0617..6088106 100644
+--- a/metercore.py
++++ b/metercore.py
+@@ -14,17 +14,26 @@ TIER1_LIMIT = 500
+ TIER2_LIMIT = 2000
+ # rate in tenths of a cent per kwh
+ RATE_TENTHS = (140, 190, 260)
+-BAND_PCT = {"D": 100, "N": 70, "W": 85}
++BAND_PCT = {"D": 100, "W": 85}
++# engine: night band pays 70% except tier-1 energy in Dec-Feb (months
++# 12, 01, 02, and the accepted out-of-range month 13), which pays 60%.
++NIGHT_PCT = 70
++NIGHT_TIER1_WINTER_PCT = 60
++NIGHT_TIER1_SUMMER_MONTHS = (3, 4, 5, 6, 7, 8, 9, 10, 11)
++# engine: the summer surcharge applies to tier-2 and tier-3 energy.
+ SUMMER_MONTHS = (6, 7, 8, 9)
+ SUMMER_PCT = 110
++# engine: legacy-analog meters carry a +3% surcharge on the reading fee.
++LEGACY_PCT = 103
+ 
+ ERROR_CODES = ("FMT", "MONTH", "KWH", "BAND", "METER")
+ 
+ 
+ def _round_nearest(numerator: int, denominator: int) -> int:
+-    """Round to the nearest cent (halves up), per the spec's billing rule."""
++    """Round to the nearest cent, halves to even (engine behavior)."""
+     quotient, remainder = divmod(numerator, denominator)
+-    if 2 * remainder >= denominator:
++    twice = 2 * remainder
++    if twice > denominator or (twice == denominator and quotient % 2 == 1):
+         return quotient + 1
+     return quotient
+ 
+@@ -43,16 +52,28 @@ def _slices(prev: int, kwh: int) -> tuple[int, int, int]:
+     return s1, s2, kwh - s1 - s2
+ 
+ 
+-def _reading_fee(prev: int, kwh: int, month: int, band: str) -> int:
+-    fee = 0
++def _band_pct(band: str, tier: int, month: int) -> int:
++    if band == "N":
++        if tier == 0 and month not in NIGHT_TIER1_SUMMER_MONTHS:
++            return NIGHT_TIER1_WINTER_PCT
++        return NIGHT_PCT
++    return BAND_PCT[band]
++
++
++def _reading_fee(prev: int, kwh: int, month: int, band: str, meter: str) -> int:
++    units = 0
+     for tier, slice_kwh in enumerate(_slices(prev, kwh)):
+         if slice_kwh == 0:
+             continue
+-        # spec: the summer surcharge applies to tier-3 energy only.
+-        season = SUMMER_PCT if month in SUMMER_MONTHS and tier == 2 else 100
+-        units = slice_kwh * RATE_TENTHS[tier] * BAND_PCT[band] * season
+-        fee += _round_nearest(units, 100_000)
+-    return fee
++        # engine: the summer surcharge applies to tier-2 and tier-3 energy.
++        season = SUMMER_PCT if month in SUMMER_MONTHS and tier >= 1 else 100
++        units += slice_kwh * RATE_TENTHS[tier] * _band_pct(band, tier, month) * season
++    denominator = 100_000
++    if meter == "L":
++        units *= LEGACY_PCT
++        denominator *= 100
++    # engine: each reading's exact total is rounded once, halves to even.
++    return _round_nearest(units, denominator)
+ 
+ 
+ def process(lines: list[str]) -> list[str]:
+@@ -69,7 +90,9 @@ def process(lines: list[str]) -> list[str]:
+         month = kwh = 0
+         band = ""
+ 
+-        if len(tokens) != 6 or tokens[0] != "M":
++        # engine: lines with more than six tokens are accepted; only the
++        # first six are validated.
++        if len(tokens) < 6 or tokens[0] != "M":
+             error = "FMT"
+         elif not (1 <= len(tokens[1]) <= 8 and tokens[1].isalnum() and tokens[1].isascii()):
+             error = "FMT"
+@@ -77,7 +100,8 @@ def process(lines: list[str]) -> list[str]:
+             error = "MONTH"
+         else:
+             month = int(tokens[2])
+-            if not 1 <= month <= 12:
++            # engine: month 13 is accepted (billed without summer adjustments).
++            if not 1 <= month <= 13:
+                 error = "MONTH"
+         if error is None:
+             if not (1 <= len(tokens[3]) <= 6 and tokens[3].isdigit()):
+@@ -97,10 +121,17 @@ def process(lines: list[str]) -> list[str]:
+             rejected += 1
+             continue
+ 
+-        account = accounts.get(tokens[1])
++        # engine: a zero-kwh reading is a no-op that creates no account.
++        if kwh == 0:
++            continue
++
++        # engine: accounts are merged case-insensitively; the B line shows
++        # the first-seen spelling.
++        key = tokens[1].upper()
++        account = accounts.get(key)
+         if account is None:
+-            account = accounts[tokens[1]] = Account(tokens[1])
+-        fee = _reading_fee(account.counter, kwh, month, band)
++            account = accounts[key] = Account(tokens[1])
++        fee = _reading_fee(account.counter, kwh, month, band, tokens[5])
+         account.counter += kwh
+         account.total_kwh += kwh
+         account.bill += fee

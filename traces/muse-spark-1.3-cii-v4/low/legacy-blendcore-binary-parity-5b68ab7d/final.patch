@@ -1,0 +1,181 @@
+diff --git a/blendcore.py b/blendcore.py
+index 44d312f..5eb9576 100644
+--- a/blendcore.py
++++ b/blendcore.py
+@@ -16,6 +16,14 @@ import sys
+ ID_MAX = 8
+ NO_TANK = "????????"
+ 
++# Engine constants (observed from the legacy binary, not the spec).
++TANK_CAP = 9999999  # live/book volume clamps here on fill
++SHORT_TOL = 20  # overdraw within this grants a short (partial) pour
++RES_DIV = 500  # per-dispense residue: amount // 500 held back live
++RES_W_AT = 1000  # 'W' pigments double the residue at/above this pour
++GAP_EVAP_AT = 51  # reconcile evaporates when the book/live gap
++GAP_EVAP_NEG = -25500  # ... reaches this (or this far negative)
++
+ 
+ def _valid_id(token: str) -> bool:
+     return 1 <= len(token) <= ID_MAX and token.isascii() and token.isalnum()
+@@ -25,12 +33,23 @@ def _digits(token: str) -> bool:
+     return token.isascii() and token.isdigit()
+ 
+ 
++def _fold(token: str) -> str:
++    return token.lower()
++
++
++def _is_white_base(pigment: str) -> bool:
++    return "W" in pigment
++
++
+ class Tank:
+-    def __init__(self, pigment: str, volume: int) -> None:
++    def __init__(self, display: str, pigment: str, volume: int) -> None:
++        self.display = display
+         self.pigment = pigment
+         self.volume = volume
+         self.fills = volume
+         self.dispensed = 0
++        self.synced = 0
++        self.residue = 0
+ 
+ 
+ class Engine:
+@@ -38,22 +57,25 @@ class Engine:
+ 
+     def __init__(self) -> None:
+         self.tanks: dict[str, Tank] = {}
+-        self.jobs: dict[str, int] = {}
++        self.jobs: dict[str, list] = {}
+         self.fills = 0
+         self.dispenses = 0
+         self.reconciles = 0
+         self.rejected = 0
+ 
+     def handle(self, line: str) -> list[str]:
+-        tokens = line.split()
+-        if not tokens:
+-            return []
+         if line == "R":
+             replies = self._reconcile()
+-        elif tokens[0] == "T":
+-            replies = [self._fill(tokens)]
+-        elif tokens[0] == "D":
+-            replies = [self._dispense(tokens)]
++        elif line.startswith("T ") or line.startswith("D "):
++            # Space-separated; runs of spaces collapse, other
++            # whitespace (tabs, ...) stays inside tokens. Extra
++            # trailing tokens are ignored.
++            tokens = [line[0]] + line[2:].split(" ")
++            tokens = [tok for tok in tokens if tok != ""]
++            if tokens[0] == "T":
++                replies = [self._fill(tokens)]
++            else:
++                replies = [self._dispense(tokens)]
+         else:
+             replies = [f"N {NO_TANK} FMT"]
+         if replies and replies[0].startswith("N "):
+@@ -68,7 +90,7 @@ class Engine:
+ 
+     def _fill(self, tokens: list[str]) -> str:
+         tank = tokens[1] if len(tokens) >= 2 else NO_TANK
+-        if len(tokens) != 4:
++        if len(tokens) < 4:
+             return f"N {tank} FMT"
+         if not _valid_id(tokens[1]) or not _valid_id(tokens[2]):
+             return f"N {tank} FMT"
+@@ -76,20 +98,24 @@ class Engine:
+         if not _digits(vol_tok) or not 2 <= len(vol_tok) <= 7:
+             return f"N {tank} VOL"
+         volume = int(vol_tok)
+-        t = self.tanks.get(tokens[1])
++        key = _fold(tokens[1])
++        t = self.tanks.get(key)
+         if t is not None:
+             if t.pigment != tokens[2]:
+                 return f"N {tank} PIGMENT"
+-            t.volume += volume
+-            t.fills += volume
++            # The tank holds at most TANK_CAP available volume;
++            # overfill past capacity is lost. The allowance grows by
++            # what has been reconciled out of the tank.
++            t.fills = min(t.fills + volume, TANK_CAP + t.synced)
++            t.volume = min(t.volume + volume, TANK_CAP)
+         else:
+-            self.tanks[tokens[1]] = Tank(tokens[2], volume)
++            self.tanks[key] = Tank(tokens[1], tokens[2], volume)
+         self.fills += 1
+         return f"OK {len(self.tanks)}"
+ 
+     def _dispense(self, tokens: list[str]) -> str:
+         tank = tokens[2] if len(tokens) >= 3 else NO_TANK
+-        if len(tokens) != 4:
++        if len(tokens) < 4:
+             return f"N {tank} FMT"
+         if not _valid_id(tokens[1]) or not _valid_id(tokens[2]):
+             return f"N {tank} FMT"
+@@ -97,25 +123,52 @@ class Engine:
+         if not _digits(amt_tok) or len(amt_tok) > 6 or int(amt_tok) < 1:
+             return f"N {tank} AMT"
+         amount = int(amt_tok)
+-        t = self.tanks.get(tokens[2])
++        key = _fold(tokens[2])
++        t = self.tanks.get(key)
+         if t is None:
+             return f"N {tank} FMT"
+-        if amount > t.volume:
++        if amount <= t.volume:
++            fee = amount // RES_DIV
++            if _is_white_base(t.pigment) and amount >= RES_W_AT:
++                fee *= 2
++            t.volume = max(0, t.volume - amount - fee)
++            t.residue += fee
++            credited = amount
++        elif amount - t.volume <= SHORT_TOL:
++            credited = t.volume
++            t.volume = 0
++        else:
+             return f"N {tank} DRY"
+-        t.volume -= amount
+-        t.dispensed += amount
+-        total = self.jobs.get(tokens[1], 0) + amount
+-        self.jobs[tokens[1]] = total
++        t.dispensed += credited
++        job_key = _fold(tokens[1])
++        entry = self.jobs.get(job_key)
++        if entry is None:
++            entry = [tokens[1], 0]
++            self.jobs[job_key] = entry
++        entry[1] += credited
+         self.dispenses += 1
+-        return f"J {tokens[1]} {total}"
++        return f"J {entry[0]} {entry[1]}"
+ 
+     def _reconcile(self) -> list[str]:
+         replies = []
+-        for tank_id, t in self.tanks.items():
+-            # SPEC: the book volume is fills minus dispenses; reconcile
+-            # is an identity check against the live volume.
++        for t in self.tanks.values():
+             book = t.fills - t.dispensed
+-            replies.append(f"B {tank_id} {book}")
++            gap = book - t.volume
++            if t.residue >= GAP_EVAP_AT and (
++                gap >= GAP_EVAP_AT or gap <= GAP_EVAP_NEG
++            ):
++                # C-style truncating division, like the engine.
++                raw = min(t.residue, book)
++                evap = raw // 2 if raw >= 0 else -((-raw) // 2)
++            else:
++                evap = 0
++            t.dispensed += evap
++            t.volume = t.fills - t.dispensed
++            if t.volume < 0:
++                t.volume = 0
++            t.synced = t.dispensed
++            t.residue = 0
++            replies.append(f"B {t.display} {t.volume}")
+         replies.append(f"REND {len(self.tanks)}")
+         self.reconciles += 1
+         return replies

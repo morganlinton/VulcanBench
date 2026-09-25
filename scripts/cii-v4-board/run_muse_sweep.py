@@ -19,7 +19,7 @@ from harness.tasks import load_task, task_hash
 ROOT = Path(__file__).resolve().parents[2]
 SUITE = ROOT / "tasks/coding-intelligence-index-v4"
 OUT = ROOT / "runs-muse13-contributor-cii-v4-v2"
-LEVELS = ["minimal", "low", "medium", "high", "extra-high", "ultra"]
+LEVELS = ["minimal", "low", "medium", "high", "extra-high"]
 MODEL = "muse-code:muse-spark-1.3-contributor"
 BINARY = Path.home() / ".local/bin/muse-bin-1.0.3-R2198.1"
 BINARY_SHA256 = "4c0f960028b603174af7df7bd5051d8c35d6c1aa372a37d18bc770926a0577a7"
@@ -63,6 +63,13 @@ def result_summary(result):
     summary = result["summary"]
     assert result["run_id"] == summary["run_id"]
     scores = summary["scores"]
+    details = scores.get("metric_details") or {}
+    no_source = (details.get("quality") or {}).get("reason") == "no recognized source files changed"
+    if no_source and scores["functional"] == 0.0:
+        # The harness scores a run whose patch touches no recognized source
+        # file as functional 0.0 and skips the analyzers. That is a scored
+        # failure, not a grading gap.
+        return summary
     if scores.get("budget_exceeded"):
         # The harness scores a run that exhausts its wall-clock budget as a
         # failure (functional 0.0) and skips the quality and security
@@ -133,7 +140,8 @@ def main():
         "effort_provenance": "Explicit CLI flags, live no-task probes passed; provider does not echo effort",
         "ultra": "Client-side mode mapped to provider's highest supported reasoning tier; may change delegation; not a distinct higher API effort",
         "excluded_efforts": {
-            "max": "Meta documents max as Standard-only; successful CLI acceptance does not prove effective max reasoning"
+            "max": "Meta documents max as Standard-only; successful CLI acceptance does not prove effective max reasoning",
+            "ultra": "Blocked board-wide by vulcanbench.toml [effort].blocked (decision 2026-09-16): a client-side mode mapped onto the provider's highest tier, not a distinct API effort, and the board publishes Low to Max only",
         },
         "price_source": "https://dev.meta.ai/docs/pricing-rate-limits/",
         "runtime_caveat": "Local host, concurrent Fable sweep; no CPU pinning",
@@ -160,6 +168,35 @@ def main():
                 "change": "Re-pinned source hashes to the versions merged in PR #107 (commit 0faabb8c): type annotations, a run_task wrapper delegating to _run, and ruff formatting",
                 "reason": "The shared checkout moved to a branch carrying the merged files; the diff against the previously pinned sources is cosmetic and the Muse tests pass unchanged",
                 "state_at_amendment": "minimal: 23/23 complete; low through ultra not started",
+                "solver_conditions_changed": False,
+            },
+            {
+                "at": "2026-09-15T15:50:00+00:00",
+                "change": "Task timeouts follow the suite restamp in PR #114 (commit ff3bf1ec): flat 10800 s (3 h) per task instead of 36000 s (blendcore 5400 s)",
+                "reason": "Suite-wide policy change recorded in docs/DECISIONS.md on 2026-09-13; the same bound was applied mid-sweep to the in-flight GPT-5.6 Luna run. Task hashes are unchanged; only agent_hints budgets moved",
+                "state_at_amendment": "minimal: 23/23 complete under 10 h; low: 17/23 complete under 10 h; remaining 6 low tasks and medium through ultra run under 3 h",
+                "solver_conditions_changed": True,
+                "comparability_note": "Under a 3 h cap, 6 minimal runs (tallycore, granarycore, depotcore, lodgecore, cellarcore, paddockcore) and 1 low run (tallycore) would have scored 0; four of them scored 0.43 to 0.64 and low tallycore 0.875 as recorded. Minimal mean 0.717 as scored versus 0.620 if capped; low-so-far 0.842 versus 0.791",
+            },
+            {
+                "at": "2026-09-18T06:10:00+00:00",
+                "change": "Sweep driver accepts harness summaries whose patch changed no recognized source file (functional 0.0, analyzers skipped) as scored failures instead of pausing",
+                "reason": "paddockcore (high) finished inside its budget but its patch contained only probe text files; the harness scored it 0/15 and skipped quality and security by design",
+                "state_at_amendment": "minimal, low, medium complete; high 22/23 complete plus paddockcore scored 0; extra-high and ultra not started",
+                "solver_conditions_changed": False,
+            },
+            {
+                "at": "2026-09-18T16:30:00+00:00",
+                "change": "Re-pinned harness/effort.py to the working-tree version carrying an in-progress Devin CLI effort map (uncommitted work by another session on branch frontier-rename)",
+                "reason": "The added _DEVIN_EFFORT_VALUES table and its registry entry do not touch the muse-code effort map; the Muse tests pass against the tree",
+                "state_at_amendment": "extra-high 21/23 complete; ultra not started",
+                "solver_conditions_changed": False,
+            },
+            {
+                "at": "2026-09-18T20:30:00+00:00",
+                "change": "Dropped ultra from the sweep levels; the sweep ends at extra-high with 5 levels x 23 tasks",
+                "reason": "vulcanbench.toml [effort].blocked refuses ultra at every entry point (owner decision 2026-09-16, docs/DECISIONS.md), and that record directs this protocol to drop ultra at its next stop",
+                "state_at_amendment": "minimal, low, medium, high, extra-high complete (115 scored runs); no ultra run was ever attempted",
                 "solver_conditions_changed": False,
             },
         ],

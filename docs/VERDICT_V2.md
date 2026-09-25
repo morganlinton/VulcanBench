@@ -68,8 +68,8 @@ no item exists anywhere online and none can be memorised.
 | Logic | `entailment` | noul | Does the conclusion follow from the premises? | SAT solver; nonsense predicate names block world knowledge |
 | Math | `word-problem` | choice (4) | Multi-step problem with random numbers | Computed; distractors are common slips (wrong operation order, dropped step, unit error) |
 | Math | `estimate-band` | score (5) | Which band contains this computed quantity? | Computed |
-| Tables | `table-lookup` | choice (list) | Which row or group answers this question about a table? | pandas over a generated 30 to 200 row table |
-| Tables | `table-count-band` | score (5) | How many rows match this filter? | pandas |
+| Tables | `table-lookup` | choice (list) | Which row or group answers this question about a table? | Computed over a generated 30 to 200 row table |
+| Tables | `table-count-band` | score (5) | How many rows match this filter? | Computed over the table |
 | Rules and policy | `policy-decision` | noul | Under this policy, is this case allowed? | Rule engine that generated the policy |
 | Rules and policy | `policy-clause` | choice (list) | Which clause decides this case? | Rule engine |
 

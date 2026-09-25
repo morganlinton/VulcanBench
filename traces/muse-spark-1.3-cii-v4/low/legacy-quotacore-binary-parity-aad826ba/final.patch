@@ -1,0 +1,142 @@
+diff --git a/quotacore.py b/quotacore.py
+index 0213fe1..309df36 100644
+--- a/quotacore.py
++++ b/quotacore.py
+@@ -8,17 +8,27 @@ the engine's behavior is the contract).
+ 
+ from __future__ import annotations
+ 
+-import math
+ import sys
+ 
+ QUOTAS = {"F": 10_000, "S": 100_000, "P": 1_000_000}
+ RATES = {"F": 12, "S": 9, "P": 6}
++NEXT_TIER = {"F": "S", "S": "P"}
++PREMIUM_DISCOUNT_REGIONS = frozenset({"IN", "BR"})
++PREMIUM_DISCOUNT_RATE = 5
++
++
++def _blocks(n: int) -> int:
++    blocks = (n + 99) // 100
++    if n % 100 == 50:
++        blocks -= 1
++    return blocks
+ 
+ 
+ class Engine:
+     def __init__(self, out=None):
+         self.tier: dict[str, str] = {}
+         self.used: dict[str, int] = {}
++        self.shown: dict[str, str] = {}
+         self.count_ok = 0
+         self.count_rej = 0
+         self.sum_charges = 0
+@@ -32,43 +42,86 @@ class Engine:
+         self.count_rej += 1
+ 
+     def handle(self, line: str) -> None:
+-        parts = line.rstrip("\r\n").split()
++        raw = line.rstrip("\r\n")
++        if raw == "":
++            return
++        parts = raw.split()
+         if not parts:
++            self._emit("R ???????? FMT")
++            self.count_rej += 1
+             return
++        if len(parts[0]) > 7:
++            shown_key = parts[0][7:]
++        else:
++            shown_key = parts[1] if len(parts) > 1 else ""
++        key_ok = (
++            1 <= len(shown_key) <= 8
++            and shown_key.isascii()
++            and shown_key.isalnum()
++        )
+         key = parts[1] if len(parts) > 1 else ""
+-        key_ok = 1 <= len(key) <= 8 and key.isalnum()
+-        if parts[0] != "Q" or len(parts) != 5 or not key_ok:
+-            self._emit(f"R {key if key_ok else '????????'} FMT")
++        if parts[0] != "Q" or len(parts) < 5 or not key_ok:
++            self._emit(f"R {shown_key if key_ok else '????????'} FMT")
+             self.count_rej += 1
+             return
+-        _, key, calls_tok, tier, region = parts
+-        if not (calls_tok.isdigit() and 1 <= len(calls_tok) <= 7):
++        key = shown_key
++        _, key, calls_tok, tier, region = parts[:5]
++        if not (
++            calls_tok.isascii()
++            and calls_tok.isdigit()
++            and 1 <= len(calls_tok) <= 7
++        ):
+             self._reject(key, "CALLS")
+             return
+         calls = int(calls_tok)
+         if tier not in ("F", "S", "P"):
+             self._reject(key, "TIER")
+             return
+-        if not (len(region) == 2 and region.isalpha() and region.isupper()):
++        if not (
++            len(region) == 2 and region.isascii() and region.isalpha()
++        ):
+             self._reject(key, "REGION")
+             return
+-
+-        if key not in self.tier:
+-            self.tier[key] = tier
+-            self.used[key] = 0
+-        elif tier != self.tier[key]:
+-            self._reject(key, "TIER")
++        if calls == 0:
+             return
+ 
+-        limit = QUOTAS[self.tier[key]]
+-        used = self.used[key]
+-        within = max(0, min(calls, limit - used))
+-        over = calls - within
+-        charge = math.ceil(over / 100) * RATES[self.tier[key]]
+-        self.used[key] = used + calls
+-
+-        left = max(0, limit - self.used[key])
+-        self._emit(f"B {key} {charge} {left}")
++        nkey = key.lower()
++        if nkey not in self.tier:
++            new_key = True
++            self.tier[nkey] = tier
++            self.used[nkey] = 0
++            self.shown[nkey] = key
++        else:
++            new_key = False
++            if tier != self.tier[nkey]:
++                if NEXT_TIER.get(self.tier[nkey]) != tier:
++                    self._reject(self.shown[nkey], "TIER")
++                    return
++                self.tier[nkey] = tier
++
++        cur = self.tier[nkey]
++        limit = QUOTAS[cur]
++        rate = RATES[cur]
++        if cur == "P" and region.upper() in PREMIUM_DISCOUNT_REGIONS:
++            rate = PREMIUM_DISCOUNT_RATE
++        used = self.used[nkey]
++        if new_key:
++            if calls <= limit:
++                charge = 0
++                used += calls - calls // 10
++            else:
++                charge = _blocks(calls - limit) * rate
++                used += calls
++        else:
++            if calls <= limit - used:
++                charge = 0
++            else:
++                charge = _blocks(calls) * rate
++            used += calls
++        self.used[nkey] = used
++
++        left = max(0, limit - used)
++        self._emit(f"B {self.shown[nkey]} {charge} {left}")
+         self.count_ok += 1
+         self.sum_charges += charge
+ 

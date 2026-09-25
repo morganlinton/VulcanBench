@@ -1,0 +1,204 @@
+diff --git a/schedcore.py b/schedcore.py
+index 6d99202..9379a6a 100644
+--- a/schedcore.py
++++ b/schedcore.py
+@@ -8,18 +8,36 @@ warning; the engine's behavior is the contract).
+ 
+ from __future__ import annotations
+ 
++import re
+ import sys
+ 
++_ID = re.compile(r"[A-Za-z0-9]{1,8}\Z")
++_PRIO = re.compile(r"[0-9]{1,2}\Z")
++
+ 
+ class Job:
+-    __slots__ = ("name", "prio", "deps", "defseq", "executed")
++    __slots__ = (
++        "name",
++        "key",
++        "prio",
++        "deps",
++        "defseq",
++        "seq",
++        "fails",
++        "executed",
++        "poisoned",
++    )
+ 
+     def __init__(self, name: str, prio: int, deps: list[str], defseq: int):
+         self.name = name
++        self.key = name.lower()
+         self.prio = prio
+         self.deps = deps
+         self.defseq = defseq
++        self.seq = defseq
++        self.fails = 0
+         self.executed = False
++        self.poisoned = False
+ 
+ 
+ class Engine:
+@@ -27,6 +45,7 @@ class Engine:
+         self.jobs: list[Job] = []
+         self.by_name: dict[str, Job] = {}
+         self.def_next = 1
++        self.reseq = 0
+         self.c_def = 0
+         self.c_exec = 0
+         self.c_fail = 0
+@@ -40,6 +59,15 @@ class Engine:
+         self._emit(f"R {echo} {code}")
+         self.c_rej += 1
+ 
++    @staticmethod
++    def _eff(j: Job) -> int:
++        if j.fails == 0:
++            base = j.prio
++            if len(set(j.deps)) >= 2 and j.prio % 10 == 0:
++                base += 1
++            return base
++        return max(1, j.prio - 7 * (j.fails - 1))
++
+     def _deps_ready(self, j: Job) -> bool:
+         for d in j.deps:
+             k = self.by_name.get(d)
+@@ -48,20 +76,24 @@ class Engine:
+         return True
+ 
+     def handle(self, line: str) -> None:
+-        parts = line.rstrip("\r\n").split()
++        text = line.rstrip("\r\n")
++        if text == "":
++            return
++        parts = text.split()
+         if not parts:
++            self._reject("????????", "FMT")
+             return
+         kind = parts[0]
+         job = parts[1] if len(parts) > 1 else ""
+-        job_ok = 1 <= len(job) <= 8 and job.isalnum()
++        job_ok = _ID.match(job) is not None
+         echo = job if job_ok else "????????"
+ 
+         if kind == "J":
+-            if len(parts) != 4 or not job_ok:
++            if len(parts) < 4 or not job_ok:
+                 self._reject(echo, "FMT")
+                 return
+             ptok = parts[2]
+-            if not (ptok.isdigit() and 1 <= len(ptok) <= 2):
++            if _PRIO.match(ptok) is None:
+                 self._reject(job, "PRIO")
+                 return
+             prio = int(ptok)
+@@ -72,47 +104,52 @@ class Engine:
+             deps: list[str] = []
+             bad = False
+             if dtok != "0":
++                key = job.lower()
+                 for part in dtok.split(","):
+-                    if not (1 <= len(part) <= 8 and part.isalnum()):
+-                        bad = True
+-                        break
+-                    if part == job:  # self-dependency
++                    if _ID.match(part) is None:
+                         bad = True
+                         break
+-                    if part in deps:  # dep lists must be unique
++                    if part.lower() == key:  # self-dependency
+                         bad = True
+                         break
+-                    deps.append(part)
++                    deps.append(part.lower())
+             if bad:
+                 self._reject(job, "DEPS")
+                 return
+-            if job in self.by_name:
+-                self._reject(job, "DUP")
++            if job.lower() in self.by_name:
++                self._reject(self.by_name[job.lower()].name, "DUP")
+                 return
+             j = Job(job, prio, deps, self.def_next)
+             self.def_next += 1
+             self.jobs.append(j)
+-            self.by_name[job] = j
++            self.by_name[j.key] = j
+             self.c_def += 1
+             self._emit(f"OK {self.c_def}")
+             return
+ 
+         if kind == "G":
+-            if len(parts) != 1:
+-                self._reject(echo, "FMT")
+-                return
++            for j in self.jobs:
++                if j.executed or j.poisoned:
++                    continue
++                for d in j.deps:
++                    if d not in self.by_name:
++                        j.poisoned = True
++                        break
+             executed_this = 0
+             while True:
+                 best: Job | None = None
+                 for j in self.jobs:
+-                    if j.executed:
++                    if j.executed or j.poisoned:
+                         continue
+                     if not self._deps_ready(j):
+                         continue
+                     if (
+                         best is None
+-                        or j.prio > best.prio
+-                        or (j.prio == best.prio and j.defseq < best.defseq)
++                        or self._eff(j) > self._eff(best)
++                        or (
++                            self._eff(j) == self._eff(best)
++                            and j.seq < best.seq
++                        )
+                     ):
+                         best = j
+                 if best is None:
+@@ -126,25 +163,34 @@ class Engine:
+             return
+ 
+         if kind == "F":
+-            if len(parts) != 2 or not job_ok:
++            if len(parts) < 2 or not job_ok:
+                 self._reject(echo, "FMT")
+                 return
+-            j = self.by_name.get(job)
+-            if j is None or not j.executed:
++            j = self.by_name.get(job.lower())
++            if j is None:
+                 self._reject(job, "STATE")
+                 return
++            if not j.executed:
++                self._reject(j.name, "STATE")
++                return
++            self.reseq -= 1
++            j.seq = self.reseq
+             j.executed = False
+-            invalidated = {j.name}
++            j.fails += 1
++            invalidated = {j.key}
+             count = 1
+             changed = True
+             while changed:
+                 changed = False
+-                for k in self.jobs:
++                for k in reversed(self.jobs):
+                     if not k.executed:
+                         continue
+                     if any(d in invalidated for d in k.deps):
++                        self.reseq -= 1
++                        k.seq = self.reseq
+                         k.executed = False
+-                        invalidated.add(k.name)
++                        k.fails += 1
++                        invalidated.add(k.key)
+                         count += 1
+                         changed = True
+             self.c_fail += 1

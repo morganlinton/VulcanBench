@@ -1,0 +1,173 @@
+{
+  "run_id": "legacy-depotcore-binary-parity-d560557c",
+  "task_id": "legacy-depotcore-binary-parity",
+  "model": "muse-code:muse-spark-1.3-contributor",
+  "steps": 412,
+  "scores": {
+    "functional": 0.0,
+    "quality": null,
+    "security": null,
+    "efficiency": 0.0,
+    "human_like": null,
+    "total": 0.0,
+    "budget_exceeded": true,
+    "metric_details": {
+      "quality": {
+        "reason": "run budget exceeded"
+      },
+      "security": {
+        "reason": "run budget exceeded"
+      },
+      "human_like": {
+        "reason": "run budget exceeded"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "/Users/morganlinton/dev/VulcanBench/runs-muse13-contributor-cii-v4-v2/low/legacy-depotcore-binary-parity-d560557c/trace.jsonl",
+    "replay_html": "/Users/morganlinton/dev/VulcanBench/runs-muse13-contributor-cii-v4-v2/low/legacy-depotcore-binary-parity-d560557c/replay.html"
+  },
+  "finished_at": "2026-09-15T21:52:01.750073+00:00",
+  "total_tokens": 75373201,
+  "tokens": {
+    "prompt": 74668920,
+    "completion": 704281,
+    "total": 75373201,
+    "cached_input": 71664144,
+    "reasoning_output": 562101
+  },
+  "cost_usd": 0.584662,
+  "cost_detail": {
+    "agent": 0.584662,
+    "judges": 0.0,
+    "total": 0.584662,
+    "model_priced": true,
+    "agent_input_tokens": 74668920,
+    "agent_cached_input_tokens": 71664144,
+    "agent_uncached_input_tokens": 3004776,
+    "cache_pricing_applied": true
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": null,
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 0.584662,
+    "cli_reported_cost_usd": null,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens-with-cache-pricing",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 10804.059,
+  "started_at": "2026-09-15T18:51:57.661906+00:00",
+  "finished": false,
+  "cost_capped": false,
+  "manifest": {
+    "model": "muse-code:muse-spark-1.3-contributor",
+    "judge_model": "muse-code:muse-spark-1.3-contributor",
+    "runtime": {
+      "python": "3.14.3",
+      "platform": "darwin",
+      "host_python": "3.14.3",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": null,
+      "ruff": null,
+      "bandit": null,
+      "radon": null,
+      "go": null,
+      "node": null
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 8,
+      "loc": 485
+    }
+  },
+  "task_hash": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": null,
+  "effort": {
+    "requested": "low",
+    "provider": "muse-code",
+    "provider_value": "low",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "muse-code",
+    "harness_version": "Muse Code 1.0.3 (1.0.3-R2198.1)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "macOS outer sandbox; workspace/session writes; shared-temp/checkout/prior-session read deny; explicit TMPDIR context; web tools off unless network requested; shell network not isolated",
+    "auth_method": "subscription",
+    "plan_name": null,
+    "requested_model": "muse-spark-1.3-contributor",
+    "reported_model": "muse-spark-1.3-contributor",
+    "model_identity_confidence": "provider-reported",
+    "session_id": "309a0db3-39ae-4d5c-83fd-0b2dc86313b6",
+    "subtype": "no-terminal-event",
+    "num_turns": 412,
+    "cached_input_tokens": 71664144,
+    "reasoning_output_tokens": 562101,
+    "cli_reported_cost_usd": null,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "clean",
+      "out_of_workspace_paths": [],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 0.0,
+      "error": "run budget exceeded before verification"
+    },
+    "budget_exceeded": true
+  },
+  "replay_command": "vulcanbench replay legacy-depotcore-binary-parity-d560557c"
+}

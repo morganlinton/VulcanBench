@@ -1,0 +1,126 @@
+diff --git a/metercore.py b/metercore.py
+index 04d0617..4fa493f 100644
+--- a/metercore.py
++++ b/metercore.py
+@@ -14,19 +14,27 @@ TIER1_LIMIT = 500
+ TIER2_LIMIT = 2000
+ # rate in tenths of a cent per kwh
+ RATE_TENTHS = (140, 190, 260)
+-BAND_PCT = {"D": 100, "N": 70, "W": 85}
++BAND_PCT = {"D": 100, "W": 85}
++# Night band is tier- and season-dependent: 60% in tier 1 during winter
++# months (01, 02, 12, 13), 70% otherwise and in all higher tiers.
++N_TIER_PCT = (60, 70, 70)
++WINTER_MONTHS = (1, 2, 12, 13)
+ SUMMER_MONTHS = (6, 7, 8, 9)
+ SUMMER_PCT = 110
++METER_PCT = {"S": 100, "L": 103}
+ 
+ ERROR_CODES = ("FMT", "MONTH", "KWH", "BAND", "METER")
+ 
+ 
+ def _round_nearest(numerator: int, denominator: int) -> int:
+-    """Round to the nearest cent (halves up), per the spec's billing rule."""
++    """Round to the nearest cent, halves to even, as the engine does."""
+     quotient, remainder = divmod(numerator, denominator)
+-    if 2 * remainder >= denominator:
++    twice = 2 * remainder
++    if twice < denominator:
++        return quotient
++    if twice > denominator:
+         return quotient + 1
+-    return quotient
++    return quotient + 1 if quotient % 2 == 1 else quotient
+ 
+ 
+ class Account:
+@@ -43,16 +51,31 @@ def _slices(prev: int, kwh: int) -> tuple[int, int, int]:
+     return s1, s2, kwh - s1 - s2
+ 
+ 
+-def _reading_fee(prev: int, kwh: int, month: int, band: str) -> int:
+-    fee = 0
++def _band_pct(band: str, tier: int, month: int) -> int:
++    if band == "N":
++        if tier == 0 and month in WINTER_MONTHS:
++            return N_TIER_PCT[0]
++        return 70
++    return BAND_PCT[band]
++
++
++def _reading_fee(prev: int, kwh: int, month: int, band: str, meter: str) -> int:
++    # The engine sums the exact (unrounded) cost of the reading's tier
++    # slices, then rounds the reading total once.
++    total = 0
+     for tier, slice_kwh in enumerate(_slices(prev, kwh)):
+         if slice_kwh == 0:
+             continue
+-        # spec: the summer surcharge applies to tier-3 energy only.
+-        season = SUMMER_PCT if month in SUMMER_MONTHS and tier == 2 else 100
+-        units = slice_kwh * RATE_TENTHS[tier] * BAND_PCT[band] * season
+-        fee += _round_nearest(units, 100_000)
+-    return fee
++        # engine: summer surcharge applies above tier 1, not tier 3 only.
++        season = SUMMER_PCT if month in SUMMER_MONTHS and tier >= 1 else 100
++        total += (
++            slice_kwh
++            * RATE_TENTHS[tier]
++            * _band_pct(band, tier, month)
++            * season
++            * METER_PCT[meter]
++        )
++    return _round_nearest(total, 10_000_000)
+ 
+ 
+ def process(lines: list[str]) -> list[str]:
+@@ -69,7 +92,7 @@ def process(lines: list[str]) -> list[str]:
+         month = kwh = 0
+         band = ""
+ 
+-        if len(tokens) != 6 or tokens[0] != "M":
++        if len(tokens) < 6 or tokens[0] != "M":
+             error = "FMT"
+         elif not (1 <= len(tokens[1]) <= 8 and tokens[1].isalnum() and tokens[1].isascii()):
+             error = "FMT"
+@@ -77,7 +100,7 @@ def process(lines: list[str]) -> list[str]:
+             error = "MONTH"
+         else:
+             month = int(tokens[2])
+-            if not 1 <= month <= 12:
++            if not 1 <= month <= 13:
+                 error = "MONTH"
+         if error is None:
+             if not (1 <= len(tokens[3]) <= 6 and tokens[3].isdigit()):
+@@ -97,19 +120,28 @@ def process(lines: list[str]) -> list[str]:
+             rejected += 1
+             continue
+ 
+-        account = accounts.get(tokens[1])
++        if kwh == 0:
++            # engine: zero-kwh readings neither bill nor open an account.
++            continue
++
++        key = tokens[1].upper()
++        account = accounts.get(key)
+         if account is None:
+-            account = accounts[tokens[1]] = Account(tokens[1])
+-        fee = _reading_fee(account.counter, kwh, month, band)
++            account = accounts[key] = Account(tokens[1])
++        fee = _reading_fee(account.counter, kwh, month, band, tokens[5])
+         account.counter += kwh
+         account.total_kwh += kwh
+         account.bill += fee
+ 
+     grand = 0
++    shown = 0
+     for account in accounts.values():
++        if account.total_kwh == 0:
++            continue
+         out.append(f"B {account.shown} {account.total_kwh} {account.bill}")
+         grand += account.bill
+-    out.append(f"X {len(accounts)} {rejected} {grand}")
++        shown += 1
++    out.append(f"X {shown} {rejected} {grand}")
+     return out
+ 
+ 

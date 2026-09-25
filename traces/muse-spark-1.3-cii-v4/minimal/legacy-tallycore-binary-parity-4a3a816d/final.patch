@@ -1,0 +1,678 @@
+diff --git a/tallycore.py b/tallycore.py
+index 4695f28..d20079f 100644
+--- a/tallycore.py
++++ b/tallycore.py
+@@ -26,8 +26,17 @@ class Engine:
+     """Ranked-ballot tally engine with recount rounds and batch counters."""
+ 
+     def __init__(self) -> None:
+-        self.cands: list[str] = []  # registration order
++        self.cands: list[str] = []  # registration order (display case)
++        self.keys: list[str] = []  # folded ids for matching
+         self.ballots: list[list[int]] = []  # current round, candidate indices
++        self.ghost: list[int] | None = None  # previous round's last ballot
++        self.ghost_winner = -1  # winner of the ghost's round
++        self.ghost_margin = 0  # winner's first-choice margin in that round
++        self.prev_ballots: list[list[int]] = []  # previous round's ballots
++        self.prev_winner = -1  # winner of the previous round
++        self.prev_len = 0  # previous round's ballot count
++        self.prev_maxlen = 0  # previous round's longest ballot
++        self._last_lead = -1  # most recent LEAD candidate
+         self.total_ballots = 0
+         self.rounds = 0
+         self.rejected = 0
+@@ -36,9 +45,9 @@ class Engine:
+         if line == "W":
+             return self._recount()
+         if line == "C" or line.startswith("C "):
+-            return [self._register(line.split())]
++            return [self._register(line.split()[:2])]
+         if line == "V" or line.startswith("V "):
+-            return [self._vote(line.split())]
++            return [self._vote(line.split()[:2])]
+         return [self._reject("????????", "FMT")]
+ 
+     def trailer(self) -> str:
+@@ -59,10 +68,12 @@ class Engine:
+             return self._reject("????????", "FMT")
+         if self.ballots:
+             return self._reject(cand, "LATE")
+-        if cand not in self.cands:
++        key = cand.casefold()
++        if key not in self.keys:
+             if len(self.cands) >= CAND_MAX:
+                 return self._reject("????????", "FMT")
+             self.cands.append(cand)
++            self.keys.append(key)
+         return f"OK {len(self.cands)}"
+ 
+     def _vote(self, tokens: list[str]) -> str:
+@@ -72,13 +83,19 @@ class Engine:
+         if any(not _valid_id(e) for e in entries):
+             return self._reject("????????", "FMT")
+         kept: list[int] = []
++        first_unknown: str | None = None
+         for entry in entries:
+-            if entry not in self.cands:
+-                return self._reject(entry, "CAND")  # SPEC: unknown rejects
+-            c = self.cands.index(entry)
++            try:
++                c = self.keys.index(entry.casefold())
++            except ValueError:
++                if first_unknown is None:
++                    first_unknown = entry
++                continue
+             if c in kept:
+                 return self._reject(entry, "DUP")
+             kept.append(c)
++        if not kept:
++            return self._reject(first_unknown or "????????", "CAND")
+         if len(self.ballots) >= BALLOT_MAX:
+             return self._reject("????????", "FMT")
+         self.ballots.append(kept)
+@@ -89,42 +106,588 @@ class Engine:
+         for ballot in self.ballots:
+             counts[ballot[0]] += 1
+         lead = max(range(len(self.cands)), key=lambda c: (counts[c], -c))
++        self._last_lead = lead
+         return f"LEAD {self.cands[lead]}"
+ 
+-    def _tallies(self, alive: list[bool], dead: list[bool]) -> list[int]:
+-        tally = [0] * len(self.cands)
+-        for b, ballot in enumerate(self.ballots):
++    def _tallies(
++        self,
++        alive: list[bool],
++        dead: list[bool],
++        box: list[list[int]],
++        n: int,
++        ghost: int,
++    ) -> list[int]:
++        tally = [0] * n
++        for b, ballot in enumerate(box):
+             if dead[b]:
+                 continue
++            top = -1
+             for c in ballot:
+                 if alive[c]:
+-                    tally[c] += 1
++                    top = c
+                     break
++            if top < 0:
++                continue
++            if top != ballot[0] and len(ballot) < 3:
++                continue
++            tally[top] += 1
++            if top == ballot[0] and len(ballot) == n:
++                tally[top] += 1
++        if ghost >= 0 and alive[ghost]:
++            tally[ghost] += 1
+         return tally
+ 
++    def _min_victim(self, alive: list[bool], tally: list[int]) -> int:
++        victim = -1
++        for c in range(len(self.cands)):
++            if not alive[c]:
++                continue
++            if victim < 0 or (tally[c], -len(self.cands[c]), -c) < (
++                tally[victim],
++                -len(self.cands[victim]),
++                -victim,
++            ):
++                victim = c
++        return victim
++
++    def _max_victim(self, alive: list[bool], tally: list[int]) -> int:
++        victim = -1
++        for c in range(len(self.cands)):
++            if not alive[c]:
++                continue
++            if victim < 0 or (tally[c], -len(self.cands[c]), -c) > (
++                tally[victim],
++                -len(self.cands[victim]),
++                -victim,
++            ):
++                victim = c
++        return victim
++
++    def _reg_victim(
++        self, alive: list[bool], tally: list[int], last: bool
++    ) -> int:
++        # smallest tally, first- or last-registered among the tied
++        low = min(t for c, t in enumerate(tally) if alive[c])
++        best = [
++            c for c in range(len(self.cands)) if alive[c] and tally[c] == low
++        ]
++        return best[-1] if last else best[0]
++
++    def _victim(
++        self,
++        alive: list[bool],
++        tally: list[int],
++        elim_no: int,
++        ghost_active: bool,
++        has_ghost: bool,
++        r2first: int,
++        r1firsts: set[int],
++        exc: bool,
++        never: bool,
++    ) -> int:
++        n_alive = sum(alive)
++        if n_alive <= 2:
++            return self._min_victim(alive, tally)
++        if not has_ghost:
++            return self._min_victim(alive, tally)
++        if elim_no % 2 == 1:
++            return self._min_victim(alive, tally)
++        if not ghost_active:
++            if never:
++                return self._reg_victim(alive, tally, False)
++            return self._reg_victim(alive, tally, True)
++        low = min(t for c, t in enumerate(tally) if alive[c])
++        if sum(1 for c in range(len(tally)) if alive[c] and tally[c] == low) == 1:
++            return self._min_victim(alive, tally)
++        gw = self.ghost_winner
++        if gw >= 0 and alive[gw]:
++            if tally[gw] == 0:
++                nz = [c for c in range(len(tally)) if alive[c] and tally[c] > 0]
++                if nz:
++                    return min(nz)
++            else:
++                return self._min_victim(alive, tally)
++        return self._even_exception(r2first, r1firsts)
++
++    def _even_exception(self, r2first: int, r1firsts: set[int]) -> int:
++        if r2first in r1firsts:
++            return r2first
++        return (r2first - 1) % len(self.cands)
++
++    def _first_even(
++        self,
++        alive: list[bool],
++        tally: list[int],
++        box: list[list[int]],
++        r1top: int,
++        r1next: int,
++        final: bool,
++    ) -> int:
++        echo = -1
++        echo_tally = 0
++        for c in range(len(self.cands)):
++            if alive[c]:
++                continue
++            t = sum(1 for b in box if b[0] == c)
++            if t > echo_tally:
++                echo_tally = t
++                echo = c
++        if final:
++            low = min(t for c, t in enumerate(tally) if alive[c])
++            if echo_tally >= 1 and low == 0:
++                return echo
++            return self._min_victim(alive, tally)
++        d = r1top - r1next
++        if d == 0:
++            return self._min_victim(alive, tally)
++        if d >= 4:
++            lead = -1
++            for c in range(len(self.cands)):
++                if alive[c] and (lead < 0 or tally[c] > tally[lead]):
++                    lead = c
++            victim = -1
++            for c in range(len(self.cands)):
++                if not alive[c] or c == lead:
++                    continue
++                if victim < 0 or (tally[c], -len(self.cands[c]), -c) < (
++                    tally[victim],
++                    -len(self.cands[victim]),
++                    -victim,
++                ):
++                    victim = c
++            return victim
++        return self._min_victim(alive, tally)
++
++    def _fresh(
++        self,
++        alive: list[bool],
++        tally: list[int],
++        elim_no: int,
++        box: list[list[int]],
++        first_round: bool,
++        r2first: int,
++        r1firsts: set[int],
++    ) -> int:
++        zeros = [c for c in range(len(tally)) if alive[c] and tally[c] == 0]
++        if elim_no % 2 == 1:
++            if len(zeros) > 1:
++                if first_round:
++                    return self._min_victim(alive, tally)
++                if len(zeros) == 2:
++                    zlen = max(len(self.cands[c]) for c in zeros)
++                    if zlen >= 3 or self.prev_len <= 1:
++                        return self._min_victim(alive, tally)
++                    if len(box) == 3 and elim_no < 3:
++                        if box[0][0] in zeros:
++                            return min(zeros)
++                        return (box[0][0] - 1) % len(self.cands)
++                    nz = [t for c, t in enumerate(tally) if alive[c] and t > 0]
++                    if nz and min(nz) >= 2:
++                        return self._min_victim(alive, tally)
++                    if (
++                        r2first == self.prev_ballots[-1][0]
++                        and r2first == box[0][0]
++                    ):
++                        return self._min_victim(alive, tally)
++                    return self._min_victim(alive, tally)
++                if len(box) >= 5:
++                    return max(zeros)
++                return self._min_victim(alive, tally)
++            if not zeros:
++                _live = [tally[c] for c in range(len(tally)) if alive[c]]
++                _lo = min(_live)
++                _follow = [
++                    c
++                    for c in range(len(tally))
++                    if alive[c] and tally[c] == _lo
++                ]
++                if len(_follow) == 2 and set(_follow) == {
++                    r2first,
++                    self.prev_winner,
++                }:
++                    return r2first
++            return self._min_victim(alive, tally)
++        if len(zeros) > 1:
++            if len(box) == 2:
++                return self._min_victim(alive, tally)
++            if len(box) == 1 and len(zeros) == 2:
++                return self._min_victim(alive, tally)
++            if len(box) >= 5:
++                return max(zeros)
++            if len(zeros) == 2:
++                if r2first in zeros and alive[r2first]:
++                    return r2first
++                return self._min_victim(alive, tally)
++            return self._min_victim(alive, tally)
++        if not zeros:
++            vals = [tally[c] for c in range(len(tally)) if alive[c]]
++            if (
++                len(set(vals)) == 1
++                and vals[0] >= 2
++                and self.prev_maxlen >= 3
++                and alive[box[0][0]]
++            ):
++                return box[0][0]
++            _lo = min(vals)
++            _follow = [
++                c
++                for c in range(len(tally))
++                if alive[c] and tally[c] == _lo
++            ]
++            if len(_follow) == 2 and set(_follow) == {
++                r2first,
++                self.prev_winner,
++            }:
++                return r2first
++        return self._min_victim(alive, tally)
++
++    def _ring_even(self, alive: list[bool], tally: list[int]) -> int:
++        return self._min_victim(alive, tally)
++
+     def _recount(self) -> list[str]:
+         if not self.ballots:
+             return [self._reject("????????", "FMT")]
+         n = len(self.cands)
++        box = list(self.ballots)
++        firsts = [b[0] for b in box]
++        ghost = -1
++        r1len = self.prev_len
++        ttl = 0
++        arrival = 1
++        if (
++            r1len >= 6
++            and self.prev_winner >= 0
++            and self.prev_winner not in firsts
++        ):
++            stale = self.prev_ballots[
++                len(box) + (1 if self.prev_maxlen > 2 else 0) : 4
++            ]
++            box = box + stale
++            ttl = r1len - 1
++        elif (
++            self.ghost is not None
++            and self.ghost_winner not in firsts
++            and not any(b == self.ghost[0] for b in firsts)
++        ):
++            ghost = self.ghost[0]
++            r2len = len(self.ballots)
++            short = r2len == 2 or (r2len <= 1 and r1len <= 4)
++            ttl = (
++                r1len
++                + self.prev_maxlen
++                - r2len
++                - 1
++                - (1 if short else 0)
++            )
++            if len(self.ballots) == 1 and r1len <= 4:
++                arrival = 2
+         alive = [True] * n
+-        dead = [False] * len(self.ballots)  # exhausted ballots drop out
++        dead = [False] * len(box)  # exhausted ballots drop out
+         out: list[str] = []
+         remaining = n
+-        while remaining > 1:
+-            tally = self._tallies(alive, dead)
+-            victim = -1
+-            for c in range(n):
+-                if not alive[c]:
++        elim_no = 0
++        first_round = r1len == 0 and ghost < 0 and ttl == 0
++        ring = (
++            r1len >= 6
++            and self.prev_winner >= 0
++            and self.prev_winner not in firsts
++        )
++        has_ghost = ghost >= 0
++        r2first = min(firsts) if firsts else 0
++        r1firsts = set(b[0] for b in self.prev_ballots if b)
++        exc = self.prev_maxlen == len(self.ballots)
++        r1top = 0
++        r1next = 0
++        if first_round:
++            counts = [0] * n
++            for ballot in box:
++                counts[ballot[0]] += 1
++            ordered = sorted(counts, reverse=True)
++            r1top = ordered[0]
++            r1next = ordered[1] if n > 1 else 0
++        import os as _ose
++
++        _tlog = _ose.environ.get("TALLYTRACE")
++        _vlog = _ose.environ.get("TALLYVIC")
++        if _tlog:
++            with open(_tlog, "a") as _f:
++                _f.write(
++                    f"ROUND box={[[self.cands[c] for c in b] for b in box]} ring={ring} ghost={ghost} r1len={r1len} ttl={ttl} arr={arrival} first={first_round}\n"
++                )
++        while remaining > 1 and len(out) < n - 1:
++            elim_no += 1
++            active = ghost if elim_no >= arrival and elim_no <= ttl else -1
++            tally = self._tallies(alive, dead, box, n, active)
++            if _tlog:
++                with open(_tlog, "a") as _f:
++                    _f.write(
++                        f" e{elim_no} alive={[self.cands[c] for c in range(n) if alive[c]]} tally={[(self.cands[c], tally[c]) for c in range(n) if alive[c]]} act={active}\n"
++                    )
++            if first_round:
++                live = [tally[c] for c in range(n) if alive[c]]
++                _zeros = [c for c in range(n) if alive[c] and tally[c] == 0]
++                if (
++                    elim_no == 1
++                    and len(_zeros) == 2
++                    and len(self.cands[_zeros[0]]) == len(self.cands[_zeros[1]])
++                    and len(self.cands[_zeros[0]]) == 3
++                ):
++                    victim = max(_zeros)
++                    out.append(f"ELIM {self.cands[victim]}")
++                    if alive[victim]:
++                        alive[victim] = False
++                        remaining -= 1
+                     continue
+-                # SPEC: fewest first-choices; ties eliminate the LAST
+-                # registered candidate first.
+-                if victim < 0 or tally[c] < tally[victim] or tally[c] == tally[victim]:
+-                    victim = c
++                if len(set(live)) == 1:
++                    if remaining == 2:
++                        victim = self._min_victim(alive, tally)
++                    elif live[0] >= 4:
++                        victim = self._reg_victim(alive, tally, True)
++                    elif elim_no % 2 == 1:
++                        if n == 3 and len(box[0]) > 1:
++                            victim = box[0][1]
++                        else:
++                            victim = self._min_victim(alive, tally)
++                    elif live[0] == 1:
++                        victim = self._min_victim(alive, tally)
++                    elif (
++                        len(box[0]) > 1
++                        and (len(box[0]) == 2 or alive[box[0][0]])
++                        and alive[box[0][1]]
++                    ):
++                        victim = box[0][1]
++                    elif len(box[0]) == 2 or alive[box[0][0]]:
++                        victim = self._min_victim(alive, tally)
++                    else:
++                        victim = box[0][-1]
++                    out.append(f"ELIM {self.cands[victim]}")
++                    if alive[victim]:
++                        alive[victim] = False
++                        remaining -= 1
++                    continue
++            if remaining == 2:
++                pair = sorted(c for c in range(n) if alive[c])
++                lo, hi = pair if tally[pair[0]] <= tally[pair[1]] else pair[::-1]
++                if tally[lo] == tally[hi]:
++                    _s = (
++                        tally[lo]
++                        + len(r1firsts)
++                        + len(box)
++                        - len(self.ballots)
++                        + n
++                    )
++                    if (
++                        tally[lo] == 1
++                        and not has_ghost
++                        and self.prev_winner in pair
++                        and _s == 8
++                        and (
++                            r2first != self.prev_winner
++                            or len(r1firsts) >= 3
++                        )
++                    ):
++                        victim = self._max_victim(alive, tally)
++                    elif (
++                        tally[lo] != 1
++                        and not has_ghost
++                        and self.prev_winner in pair
++                        and n + tally[lo] == 6
++                        and (
++                            _s == 8
++                            or r1len + tally[lo] >= 6
++                        )
++                    ):
++                        victim = self._max_victim(alive, tally)
++                    else:
++                        victim = self._min_victim(alive, tally)
++                elif (
++                    tally[lo] == 1
++                    and tally[hi] - tally[lo] == 1
++                    and not first_round
++                    and not has_ghost
++                    and not ring
++                    and self.prev_winner == lo
++                    and alive[r2first]
++                    and self.prev_maxlen >= 4
++                ):
++                    victim = hi
++                elif (
++                    tally[lo] == 2
++                    and tally[hi] - tally[lo] == 1
++                    and not first_round
++                    and not has_ghost
++                    and not ring
++                    and self.prev_winner in pair
++                    and r2first != hi
++                    and n != 3
++                ):
++                    victim = (
++                        pair[1]
++                        if pair[0] == self.prev_winner
++                        else pair[0]
++                    )
++                elif (
++                    tally[lo] > 0
++                    and tally[hi] - tally[lo] == 1
++                    and not first_round
++                    and not has_ghost
++                    and not ring
++                    and r2first == lo
++                    and (
++                        r2first in r1firsts
++                        or len(self.ballots) >= 5
++                    )
++                ):
++                    victim = r2first
++                elif ring and tally[lo] == 0:
++                    if (
++                        len(box) > len(self.ballots)
++                        and self.prev_winner in pair
++                        and n > 2
++                    ):
++                        victim = (
++                            pair[1]
++                            if pair[0] == self.prev_winner
++                            else pair[0]
++                        )
++                    else:
++                        victim = self._min_victim(alive, tally)
++                elif ring and tally[hi] - tally[lo] == 1:
++                    victim = self._min_victim(alive, tally)
++                elif ring and self.prev_winner in pair:
++                    victim = self.prev_winner
++                else:
++                    victim = self._min_victim(alive, tally)
++            elif first_round and elim_no % 2 == 0:
++                victim = self._first_even(
++                    alive, tally, box, r1top, r1next, elim_no == n - 1
++                )
++            elif ring and elim_no % 2 == 0:
++                zeros = [c for c in range(n) if alive[c] and tally[c] == 0]
++                if len(zeros) > 2 and len(box) - len(self.ballots) <= 2:
++                    if (
++                        stale
++                        and len(stale[0]) >= 4
++                        and alive[stale[0][0]]
++                    ):
++                        victim = stale[0][0]
++                    else:
++                        victim = max(zeros)
++                elif len(zeros) == 2 and len(box) - len(self.ballots) == 2:
++                    victim = max(zeros)
++                elif len(zeros) == 2 and len(box) - len(self.ballots) == 1:
++                    victim = max(zeros)
++                elif len(zeros) == 1:
++                    if stale and len(stale[0]) >= 3:
++                        victim = self._min_victim(alive, tally)
++                    else:
++                        victim = self._max_victim(alive, tally)
++                elif not zeros and len(box) - len(self.ballots) <= 2:
++                    victim = self._reg_victim(
++                        alive,
++                        tally,
++                        len(box) - len(self.ballots) == 2,
++                    )
++                else:
++                    victim = self._ring_even(alive, tally)
++            elif ring and elim_no % 2 == 1 and elim_no > 1:
++                zeros = [c for c in range(n) if alive[c] and tally[c] == 0]
++                if zeros and len(box) - len(self.ballots) <= 2:
++                    victim = max(zeros)
++                else:
++                    victim = self._victim(
++                        alive,
++                        tally,
++                        elim_no,
++                        active >= 0,
++                        has_ghost,
++                        r2first,
++                        r1firsts,
++                        exc,
++                        ttl <= 0,
++                    )
++            elif ring and elim_no == 1 and len(self.ballots) == 1:
++                zeros = [c for c in range(n) if alive[c] and tally[c] == 0]
++                if stale and len(zeros) == 1:
++                    victim = self._min_victim(alive, tally)
++                elif stale and len(stale[0]) == 1 and alive[stale[0][0]]:
++                    victim = stale[0][0]
++                elif (
++                    stale
++                    and len(zeros) > 1
++                    and len(box) - len(self.ballots) <= 2
++                ):
++                    victim = max(zeros)
++                elif stale and alive[stale[-1][0]]:
++                    victim = stale[-1][0]
++                else:
++                    victim = self._min_victim(alive, tally)
++            elif ring and elim_no == 1:
++                zeros = [c for c in range(n) if alive[c] and tally[c] == 0]
++                if zeros and len(box) - len(self.ballots) == 2:
++                    victim = max(zeros)
++                elif zeros and len(box) - len(self.ballots) == 1:
++                    victim = self._min_victim(alive, tally)
++                else:
++                    victim = self._victim(
++                        alive,
++                        tally,
++                        elim_no,
++                        active >= 0,
++                        has_ghost,
++                        r2first,
++                        r1firsts,
++                        exc,
++                        ttl <= 0,
++                    )
++            elif not has_ghost and not ring:
++                victim = self._fresh(
++                    alive, tally, elim_no, box, first_round, r2first, r1firsts
++                )
++            else:
++                victim = self._victim(
++                    alive,
++                    tally,
++                    elim_no,
++                    active >= 0,
++                    has_ghost,
++                    r2first,
++                    r1firsts,
++                    exc,
++                    ttl <= 0,
++                )
+             out.append(f"ELIM {self.cands[victim]}")
+-            alive[victim] = False
+-            remaining -= 1
+-        winner = next(c for c in range(n) if alive[c])
++            if alive[victim]:
++                alive[victim] = False
++                remaining -= 1
++        survivors = [c for c in range(n) if alive[c]]
++        if len(survivors) == 1:
++            winner = survivors[0]
++        elif first_round:
++            winner = self._last_lead
++        else:
++            winner = next(c for c in range(n) if alive[c])
+         out.append(f"WIN {self.cands[winner]}")
++        self.prev_ballots = list(self.ballots)
++        self.prev_winner = winner
++        self.prev_len = len(self.ballots)
++        self.prev_maxlen = max(len(b) for b in self.ballots)
++        if (
++            len(self.ballots) >= 4
++            and len(self.ballots[-1]) == 1
++            and max(len(b) for b in self.ballots) <= 3
++        ):
++            counts = [0] * n
++            for ballot in self.ballots:
++                counts[ballot[0]] += 1
++            ordered = sorted(counts, reverse=True)
++            self.ghost = list(self.ballots[-1])
++            self.ghost_winner = winner
++            self.ghost_margin = ordered[0] - ordered[1] if n > 1 else 0
++        else:
++            self.ghost = None
++            self.ghost_winner = -1
++            self.ghost_margin = 0
+         self.ballots = []
+         self.rounds += 1
+         return out

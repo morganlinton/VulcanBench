@@ -1,0 +1,1166 @@
+{
+ "guard_brackets": [
+  {
+   "input": [
+    "P EMP001 05 80000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 63040",
+    "X 1 0 63040"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 100000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 78800",
+    "X 1 0 78800"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 100100 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 78869",
+    "X 1 0 78869"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 400000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 285200",
+    "X 1 0 285200"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 400100 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 285259",
+    "X 1 0 285259"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 900000 S TX 000"
+   ],
+   "expected": [
+    "W EMP001 624200",
+    "X 1 0 624200"
+   ]
+  }
+ ],
+ "guard_states_and_status": [
+  {
+   "input": [
+    "P EMP001 05 150000 S TX 000"
+   ],
+   "expected": [
+    "W EMP001 120700",
+    "X 1 0 120700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S FL 000"
+   ],
+   "expected": [
+    "W EMP001 120700",
+    "X 1 0 120700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S WA 000"
+   ],
+   "expected": [
+    "W EMP001 120700",
+    "X 1 0 120700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S NV 000"
+   ],
+   "expected": [
+    "W EMP001 120700",
+    "X 1 0 120700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 113200",
+    "X 1 0 113200"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 200000 H OH 000"
+   ],
+   "expected": [
+    "W EMP001 147600",
+    "X 1 0 147600"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 200000 H CA 000"
+   ],
+   "expected": [
+    "W EMP001 147600",
+    "X 1 0 147600"
+   ]
+  }
+ ],
+ "guard_levy_under_cap": [
+  {
+   "input": [
+    "P EMP001 05 500000 S OH 000",
+    "P EMP001 05 500000 S OH 000",
+    "P EMP001 05 500000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 344000",
+    "W EMP001 344000",
+    "W EMP001 344000",
+    "X 3 0 1032000"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "P EMP001 00 150000 S OH 000"
+   ],
+   "expected": [
+    "R EMP001 PERIOD",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 28 150000 S OH 000"
+   ],
+   "expected": [
+    "R EMP001 PERIOD",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 5 150000 S OH 000"
+   ],
+   "expected": [
+    "R EMP001 PERIOD",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 X OH 000"
+   ],
+   "expected": [
+    "R EMP001 STATUS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S oh 000"
+   ],
+   "expected": [
+    "R EMP001 STATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OHI 000"
+   ],
+   "expected": [
+    "R EMP001 STATE",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OH ab1"
+   ],
+   "expected": [
+    "R EMP001 FLAGS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OH AB"
+   ],
+   "expected": [
+    "R EMP001 FLAGS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 1234567890 S OH 000"
+   ],
+   "expected": [
+    "R EMP001 GROSS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P TOOLONGID9 05 100 S OH 000"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 100 S OH"
+   ],
+   "expected": [
+    "R EMP001 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Z noise line"
+   ],
+   "expected": [
+    "R noise FMT",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_household_surtax": [
+  {
+   "input": [
+    "P EMP001 05 250100 H CA 000"
+   ],
+   "expected": [
+    "W EMP001 182069",
+    "X 1 0 182069"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 500000 H NY 000"
+   ],
+   "expected": [
+    "W EMP001 342000",
+    "X 1 0 342000"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 250000 H CA 000"
+   ],
+   "expected": [
+    "W EMP001 182000",
+    "X 1 0 182000"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 500000 H OH 000"
+   ],
+   "expected": [
+    "W EMP001 344000",
+    "X 1 0 344000"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 500000 S CA 000"
+   ],
+   "expected": [
+    "W EMP001 344000",
+    "X 1 0 344000"
+   ]
+  }
+ ],
+ "f2p_levy_cap_crossing": [
+  {
+   "input": [
+    "P EMP001 05 700000 S OH 000",
+    "P EMP001 05 700000 S OH 000",
+    "P EMP001 05 700000 S OH 000",
+    "P EMP001 05 700000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 461600",
+    "W EMP001 461600",
+    "W EMP001 461600",
+    "W EMP001 505000",
+    "X 4 0 1889800"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 800000 S OH 000",
+    "P EMP001 05 800000 S OH 000",
+    "P EMP001 05 100000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 520400",
+    "W EMP001 520400",
+    "W EMP001 85000",
+    "X 3 0 1125800"
+   ]
+  }
+ ],
+ "f2p_married_relief_order": [
+  {
+   "input": [
+    "P EMP001 05 100050 M OH 000"
+   ],
+   "expected": [
+    "W EMP001 79636",
+    "X 1 0 79636"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 123450 M OH 000"
+   ],
+   "expected": [
+    "W EMP001 96109",
+    "X 1 0 96109"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 350050 M OH 000"
+   ],
+   "expected": [
+    "W EMP001 255636",
+    "X 1 0 255636"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 987654 M OH 000"
+   ],
+   "expected": [
+    "W EMP001 650444",
+    "X 1 0 650444"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 100000 M OH 000"
+   ],
+   "expected": [
+    "W EMP001 79600",
+    "X 1 0 79600"
+   ]
+  }
+ ],
+ "f2p_state_sd": [
+  {
+   "input": [
+    "P EMP001 05 150000 S SD 000"
+   ],
+   "expected": [
+    "W EMP001 120700",
+    "X 1 0 120700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S ND 000"
+   ],
+   "expected": [
+    "W EMP001 113200",
+    "X 1 0 113200"
+   ]
+  }
+ ],
+ "f2p_flag_recapture": [
+  {
+   "input": [
+    "P EMP001 05 150000 S OH XBA"
+   ],
+   "expected": [
+    "W EMP001 111700",
+    "X 1 0 111700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OH BXQ"
+   ],
+   "expected": [
+    "W EMP001 111700",
+    "X 1 0 111700"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OH XQA"
+   ],
+   "expected": [
+    "W EMP001 113200",
+    "X 1 0 113200"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 150000 S OH BQA"
+   ],
+   "expected": [
+    "W EMP001 113200",
+    "X 1 0 113200"
+   ]
+  }
+ ],
+ "f2p_bonus_period": [
+  {
+   "input": [
+    "P EMP001 27 150000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 108200",
+    "X 1 0 108200"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 27 60000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 46280",
+    "X 1 0 46280"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 26 150000 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 113200",
+    "X 1 0 113200"
+   ]
+  }
+ ],
+ "f2p_zero_gross": [
+  {
+   "input": [
+    "P EMP001 05 0 S OH 000"
+   ],
+   "expected": [
+    "R EMP001 GROSS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 1 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 1",
+    "X 1 0 1"
+   ]
+  }
+ ],
+ "f2p_id_case_fold": [
+  {
+   "input": [
+    "P EmpA1 05 900000 S OH 000",
+    "P EMPA1 05 900000 S OH 000"
+   ],
+   "expected": [
+    "W EmpA1 579200",
+    "W EmpA1 579200",
+    "X 2 0 1158400"
+   ]
+  },
+  {
+   "input": [
+    "P alpha 05 100000 S OH 000",
+    "P ALPHA 05 100000 S OH 000",
+    "P beta 05 100000 S OH 000"
+   ],
+   "expected": [
+    "W alpha 78800",
+    "W alpha 78800",
+    "W beta 78800",
+    "X 3 0 236400"
+   ]
+  }
+ ],
+ "f2p_rounding_regime": [
+  {
+   "input": [
+    "P EMP001 05 10010 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 7888",
+    "X 1 0 7888"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 30030 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 23663",
+    "X 1 0 23663"
+   ]
+  },
+  {
+   "input": [
+    "P EMP001 05 70070 S OH 000"
+   ],
+   "expected": [
+    "W EMP001 55215",
+    "X 1 0 55215"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "P Mixer99 99 250118 S WA XQA",
+    "P EMPA1 26 404308 H CA 000",
+    "P BIGEARN 01 700556 S OH XQA",
+    "P EMPA1 00 406582 M ND QRS",
+    "P R0004 27 225350246 M TX 000",
+    "P BIGEARN 13 636949 S TX XBA",
+    "P empa1 26 249238 M NY BQA",
+    "P WORKR7 26 407064 H ND QRS",
+    "P SHORTY 05 100 S OH",
+    "P empa1 26 710463 H NY BQA",
+    "P BIGEARN 00 932137523 H WA QRS",
+    "P BIGEARN 26 405489 M ND QRS",
+    "P empa1 13 471277549 H TX XBA",
+    "P Mixer99 26 397225 M NY QRS",
+    "P BIGEARN 13 101324 S SD XQA",
+    "P R0015 27 400642 S OH xba",
+    "P BIGEARN 26 100179 S OH QRS",
+    "P EXTRAA 05 100 S OH 000 TRAILING",
+    "P Mixer99 00 354750769 M WA 000",
+    "P SHORTY 05 100 S OH",
+    "P empa1 13 109920 H ND xba",
+    "P BIGEARN 13 392795 H WA QRS",
+    "P WORKR7 00 463065538 H WA xba",
+    "P empa1 13 102817 M WA BQA",
+    "P BIGEARN 26 548984 H ND BQA",
+    "P R0025 13 979650216 M WA BQA",
+    "P R0026 26 100432 S CA BQA",
+    "P empa1 00 879571919 S ND 000",
+    "P WORKR7 01 988161213 S NY XQA",
+    "P SHORTY 05 100 S OH",
+    "P Mixer99 27 117347938 M SD QRS",
+    "P R0031 27 401410 S CA BQA",
+    "P R0032 27 646806216 H WA 000",
+    "P WORKR7 99 408853 H NY QRS",
+    "P empa1 00 404689 H TX XBA",
+    "P SHORTY 05 100 S OH",
+    "P empa1 99 205879450 M TX XQA",
+    "P BIGEARN 00 399420 S CA xba",
+    "P R0038 01 406670 S SD BQA",
+    "P R0039 26 396766 H SD XQA",
+    "P WORKR7 99 250921 M WA 000",
+    "P R0041 99 920884959 H ND XQA",
+    "P WORKR7 99 570347 M NY XBA",
+    "P EMPA1 27 401611 M NY QRS",
+    "P SHORTY 05 100 S OH",
+    "P R0045 13 94013 S NY 000",
+    "P BIGEARN 01 92658 M SD QRS",
+    "P BIGEARN 00 295663284 M CA BQA",
+    "P SHORTY 05 100 S OH",
+    "P R0049 13 397590 M OH BQA",
+    "P EMPA1 26 408291 S TX xba",
+    "P empa1 01 786057568 M NY BQA",
+    "P WORKR7 99 100195 H TX 000",
+    "P EMPA1 01 777935 H ND xba",
+    "P BADPER 5 100 S OH 000",
+    "P EMPA1 99 606986 M OH 000",
+    "P R0056 27 105184 M CA BQA",
+    "P WORKR7 01 242803 H ND 000",
+    "P R0058 26 873754 M CA XQA",
+    "P WORKR7 13 246779 H OH QRS",
+    "P WORKR7 00 259986 M ND XQA",
+    "P EMPA1 00 400250 H CA XBA",
+    "P Mixer99 99 92897 M WA 000",
+    "P BIGEARN 13 255480 M WA XQA",
+    "P WORKR7 26 247329 S ND XBA",
+    "P BIGEARN 13 816387 S CA XQA",
+    "P R0066 01 250445 S SD 000",
+    "P Mixer99 99 693338351 H WA xba",
+    "P BADPER 5 100 S OH 000",
+    "P Mixer99 99 601334 S CA XBA",
+    "P BIGEARN 00 709036 H NY 000",
+    "P empa1 00 258561 H TX QRS",
+    "P R0072 26 400807 S NY XBA",
+    "P empa1 00 255081 H CA QRS",
+    "P Mixer99 00 884209 M OH 000",
+    "P EMPA1 00 292161206 S ND 000",
+    "P Mixer99 00 257637 S NY XQA",
+    "P BIGEARN 99 91068 M CA 000",
+    "P R0078 27 163407174 M OH XBA",
+    "P R0079 01 100707 H TX 000",
+    "P BIGEARN 00 244119 M CA QRS",
+    "P BADPER 5 100 S OH 000",
+    "P EXTRAA 05 100 S OH 000 TRAILING",
+    "P empa1 26 403646 M CA BQA",
+    "P BIGEARN 99 395845 S OH XBA",
+    "P BIGEARN 99 735555 H OH QRS",
+    "P Mixer99 13 333986283 S WA XBA",
+    "P empa1 27 243068 M SD xba",
+    "P R0088 00 95308 S TX XBA",
+    "P empa1 13 91185 S NY QRS",
+    "P EMPA1 00 892578 H NY XQA",
+    "P BIGEARN 26 397948 H SD QRS",
+    "P R0092 26 250828 M ND XQA",
+    "P empa1 27 713385 H CA XBA",
+    "P EMPA1 13 105577 H CA xba",
+    "P EMPA1 26 94098 H CA XQA",
+    "P BADPER 5 100 S OH 000",
+    "P Mixer99 99 204999228 M ND XBA",
+    "P WORKR7 01 773087 M WA 000",
+    "P EMPA1 13 259198 S OH xba",
+    "P WORKR7 00 228144876 S WA XBA",
+    "P BIGEARN 26 390620 M NY QRS",
+    "P Mixer99 26 728977777 M SD xba",
+    "P R0103 26 582307 H CA xba",
+    "P EMPA1 27 401347 M SD XBA",
+    "P BIGEARN 01 104662 M NY XBA",
+    "P WORKR7 13 248254 S WA 000",
+    "P empa1 27 402326 H CA BQA",
+    "P Mixer99 26 105721 M NY xba",
+    "P EMPA1 99 91340 H NY 000",
+    "P WORKR7 26 395771 M WA xba",
+    "P BIGEARN 00 735990 M WA 000",
+    "P Mixer99 01 255115 S CA BQA",
+    "P R0113 99 345756298 H SD xba",
+    "P empa1 01 257467 H TX BQA",
+    "P WORKR7 13 751511 H ND BQA",
+    "P empa1 00 257152 H ND 000",
+    "P WORKR7 27 259857 H TX 000",
+    "P WORKR7 99 408412 S NY BQA",
+    "P BIGEARN 00 662482 S WA QRS",
+    "P empa1 26 96969 H NY XBA",
+    "P Mixer99 99 399840 S OH 000",
+    "P empa1 13 32448761 S NY QRS",
+    "P Mixer99 26 393947 S NY XQA",
+    "P Mixer99 01 692046336 S TX BQA",
+    "P R0125 99 250069 M TX BQA",
+    "P BIGEARN 00 254428 S OH QRS",
+    "P empa1 13 93335 H NY XQA",
+    "P BIGEARN 00 259944 H SD xba",
+    "P BIGEARN 01 102018 S CA XBA",
+    "P empa1 26 98329 H CA xba",
+    "P WORKR7 00 250471648 S TX QRS",
+    "P empa1 26 396837 S NY BQA",
+    "P EMPA1 99 125159175 H SD QRS",
+    "P EMPA1 00 408678 H OH xba",
+    "P BIGEARN 26 820051 H CA XBA",
+    "P BIGEARN 00 405036 H OH XBA",
+    "P empa1 99 92664 S NY 000",
+    "P Mixer99 27 390798 S SD XBA",
+    "P EMPA1 13 589374 H OH XQA",
+    "P R0140 27 250646 S CA QRS",
+    "P EMPA1 99 214898272 H SD QRS",
+    "P empa1 13 511128 S NY BQA",
+    "P BIGEARN 27 690081 M NY QRS",
+    "P Mixer99 01 90224 M SD QRS",
+    "P empa1 26 824683608 M WA xba",
+    "P EMPA1 01 527173 H NY XBA",
+    "P BIGEARN 01 400645 H CA xba",
+    "P EMPA1 00 249719 H WA XBA",
+    "P Mixer99 01 249667 S OH xba",
+    "P empa1 26 101881 S TX 000",
+    "P BIGEARN 01 104898 H OH BQA",
+    "P EMPA1 26 396015 H OH xba",
+    "P EXTRAA 05 100 S OH 000 TRAILING",
+    "P R0154 27 94781 M SD XQA",
+    "P EMPA1 00 257508 H TX XBA",
+    "P Mixer99 26 90832 S OH 000",
+    "P EMPA1 26 927910223 S SD xba",
+    "P R0158 00 91840 H ND BQA",
+    "P empa1 13 782401026 S SD XBA",
+    "P WORKR7 27 407073 S CA QRS",
+    "P BIGEARN 13 242135 H SD XQA",
+    "P Mixer99 01 98109 H ND 000",
+    "P Mixer99 27 396652 H ND XQA",
+    "P EMPA1 13 546248 S OH 000",
+    "P Mixer99 01 245643 S ND XQA",
+    "P EMPA1 27 624188 H WA BQA",
+    "P R0167 13 395920 S TX XQA",
+    "P BIGEARN 99 97447 M NY XQA",
+    "P empa1 00 242161 S CA XBA",
+    "P WORKR7 01 393674595 H OH 000",
+    "P EMPA1 01 254379 H WA BQA",
+    "P empa1 99 223011977 S WA XBA",
+    "P BIGEARN 99 244104 M ND 000",
+    "P EMPA1 01 533857 M NY XBA",
+    "P empa1 01 400439 H OH QRS",
+    "P Mixer99 13 255050 M TX xba",
+    "P WORKR7 27 316143512 M NY xba"
+   ],
+   "expected": [
+    "R Mixer99 PERIOD",
+    "W EMPA1 287647",
+    "W BIGEARN 461927",
+    "R EMPA1 PERIOD",
+    "W R0004 149204863",
+    "W BIGEARN 450004",
+    "W EMPA1 184663",
+    "W WORKR7 289354",
+    "R SHORTY FMT",
+    "W EMPA1 461543",
+    "R BIGEARN PERIOD",
+    "W BIGEARN 294160",
+    "W EMPA1 296012301",
+    "W Mixer99 288847",
+    "W BIGEARN 91059",
+    "R R0015 FLAGS",
+    "W BIGEARN 85134",
+    "W EXTRAA 79",
+    "R Mixer99 PERIOD",
+    "R SHORTY FMT",
+    "R empa1 FLAGS",
+    "W BIGEARN 324236",
+    "R WORKR7 PERIOD",
+    "W EMPA1 93099",
+    "W BIGEARN 406840",
+    "W R0025 648574443",
+    "W R0026 79097",
+    "R empa1 PERIOD",
+    "W WORKR7 581088793",
+    "R SHORTY FMT",
+    "W Mixer99 77707335",
+    "W R0031 261030",
+    "W R0032 412687366",
+    "R WORKR7 PERIOD",
+    "R empa1 PERIOD",
+    "R SHORTY FMT",
+    "R empa1 PERIOD",
+    "R BIGEARN PERIOD",
+    "W R0038 309455",
+    "W R0039 302814",
+    "R WORKR7 PERIOD",
+    "R R0041 PERIOD",
+    "R WORKR7 PERIOD",
+    "W EMPA1 293686",
+    "R SHORTY FMT",
+    "W R0045 74082",
+    "W BIGEARN 84133",
+    "R BIGEARN PERIOD",
+    "R SHORTY FMT",
+    "W R0049 289102",
+    "R EMPA1 FLAGS",
+    "W EMPA1 529848802",
+    "R WORKR7 PERIOD",
+    "R EMPA1 FLAGS",
+    "R BADPER PERIOD",
+    "R EMPA1 PERIOD",
+    "W R0056 78650",
+    "W WORKR7 192102",
+    "W R0058 580737",
+    "W WORKR7 195084",
+    "R WORKR7 PERIOD",
+    "R EMPA1 PERIOD",
+    "R Mixer99 PERIOD",
+    "W BIGEARN 217672",
+    "W WORKR7 193024",
+    "W BIGEARN 580652",
+    "W R0066 194828",
+    "R Mixer99 PERIOD",
+    "R BADPER PERIOD",
+    "R Mixer99 PERIOD",
+    "R BIGEARN PERIOD",
+    "R empa1 PERIOD",
+    "W R0072 281667",
+    "R empa1 PERIOD",
+    "R Mixer99 PERIOD",
+    "R EMPA1 PERIOD",
+    "R Mixer99 PERIOD",
+    "R BIGEARN PERIOD",
+    "W R0078 98394118",
+    "W R0079 84322",
+    "R BIGEARN PERIOD",
+    "R BADPER PERIOD",
+    "W EXTRAA 79",
+    "W EMPA1 318058",
+    "R BIGEARN PERIOD",
+    "R BIGEARN PERIOD",
+    "W Mixer99 230500535",
+    "R empa1 FLAGS",
+    "R R0088 PERIOD",
+    "W EMPA1 77508",
+    "R EMPA1 PERIOD",
+    "W BIGEARN 328358",
+    "W R0092 185783",
+    "W EMPA1 471299",
+    "R EMPA1 FLAGS",
+    "W EMPA1 79983",
+    "R BADPER PERIOD",
+    "R Mixer99 PERIOD",
+    "W WORKR7 605715",
+    "R EMPA1 FLAGS",
+    "R WORKR7 PERIOD",
+    "W BIGEARN 308415",
+    "R Mixer99 FLAGS",
+    "R R0103 FLAGS",
+    "W EMPA1 309562",
+    "W BIGEARN 88325",
+    "W WORKR7 208603",
+    "W EMPA1 282466",
+    "R Mixer99 FLAGS",
+    "R EMPA1 PERIOD",
+    "R WORKR7 FLAGS",
+    "R BIGEARN PERIOD",
+    "W Mixer99 201336",
+    "R R0113 PERIOD",
+    "W EMPA1 215974",
+    "W WORKR7 538482",
+    "R empa1 PERIOD",
+    "W WORKR7 206900",
+    "R WORKR7 PERIOD",
+    "R BIGEARN PERIOD",
+    "W EMPA1 81454",
+    "R Mixer99 PERIOD",
+    "W EMPA1 21141695",
+    "W Mixer99 305461",
+    "W Mixer99 484482435",
+    "R R0125 PERIOD",
+    "R BIGEARN PERIOD",
+    "W EMPA1 79334",
+    "R BIGEARN PERIOD",
+    "W BIGEARN 85493",
+    "R empa1 FLAGS",
+    "R WORKR7 PERIOD",
+    "W EMPA1 307628",
+    "R EMPA1 PERIOD",
+    "R EMPA1 PERIOD",
+    "W BIGEARN 566431",
+    "R BIGEARN PERIOD",
+    "R empa1 PERIOD",
+    "W Mixer99 294651",
+    "W EMPA1 433093",
+    "W R0140 172380",
+    "R EMPA1 PERIOD",
+    "W EMPA1 382234",
+    "W BIGEARN 488115",
+    "W Mixer99 81924",
+    "R empa1 FLAGS",
+    "W EMPA1 384847",
+    "R BIGEARN FLAGS",
+    "R EMPA1 PERIOD",
+    "R Mixer99 FLAGS",
+    "W EMPA1 91505",
+    "W BIGEARN 88673",
+    "R EMPA1 FLAGS",
+    "W EXTRAA 79",
+    "W R0154 76065",
+    "R EMPA1 PERIOD",
+    "W Mixer99 77207",
+    "R EMPA1 FLAGS",
+    "R R0158 PERIOD",
+    "W EMPA1 539906708",
+    "W WORKR7 289597",
+    "W BIGEARN 203708",
+    "W Mixer99 83393",
+    "W Mixer99 282823",
+    "W EMPA1 405062",
+    "W Mixer99 194232",
+    "W EMPA1 461932",
+    "W R0167 302189",
+    "R BIGEARN PERIOD",
+    "R empa1 PERIOD",
+    "W WORKR7 255938487",
+    "W EMPA1 213503",
+    "R empa1 PERIOD",
+    "R BIGEARN PERIOD",
+    "W EMPA1 400481",
+    "W EMPA1 310285",
+    "R Mixer99 FLAGS",
+    "R WORKR7 FLAGS",
+    "X 91 87 4345069235"
+   ]
+  },
+  {
+   "input": [
+    "P R0000 13 114646395 M OH XQA",
+    "P EXTRAA 05 100 S OH 000 TRAILING",
+    "P EMPA1 26 91758 M WA QRS",
+    "P R0003 27 401396 H ND 000",
+    "P WORKR7 27 106777 H NY BQA",
+    "P EMPA1 01 548821290 M WA XBA",
+    "P EMPA1 27 242716 H SD QRS",
+    "P Mixer99 99 631350 S OH XBA",
+    "P R0008 00 257239 H CA QRS",
+    "P Mixer99 99 402245 H OH XQA",
+    "P EMPA1 27 256970 H NY XQA",
+    "P Mixer99 26 911628309 M WA XBA",
+    "P EMPA1 26 398900 H OH BQA",
+    "P R0013 13 103328 M TX BQA",
+    "P EMPA1 27 90597 M TX XBA",
+    "P R0015 00 390130 S OH BQA",
+    "P EMPA1 27 92605 S CA QRS",
+    "P R0017 13 242168 H TX XBA",
+    "P Mixer99 00 250492 H TX xba",
+    "P R0019 00 250455 H SD xba",
+    "P Mixer99 01 403368 S NY BQA",
+    "P R0021 00 259190 M ND XQA",
+    "P R0022 26 536353725 S CA XBA",
+    "P empa1 13 626640 M TX 000",
+    "P EMPA1 99 578470 S ND BQA",
+    "P R0025 27 248092 H ND XBA",
+    "P R0026 13 107884 H WA XBA",
+    "P R0027 99 101005 S TX xba",
+    "P Mixer99 26 252871 S SD 000",
+    "P Mixer99 01 866195 H OH xba",
+    "P Mixer99 26 394497 S CA XQA",
+    "P empa1 01 393492 H WA BQA",
+    "P R0032 01 880967515 H CA QRS",
+    "P EMPA1 01 390094 H NY BQA",
+    "P BIGEARN 13 109106647 H OH XQA",
+    "P SHORTY 05 100 S OH",
+    "P SHORTY 05 100 S OH",
+    "P Mixer99 00 102769 M ND xba",
+    "P R0038 26 103811 S WA xba",
+    "P EMPA1 01 402594 H ND XQA",
+    "P BIGEARN 13 256013 H WA XBA",
+    "P R0041 26 399124 H ND 000",
+    "P empa1 27 810817 M OH xba",
+    "P EMPA1 99 258664 H WA XQA",
+    "P BIGEARN 27 789617 H NY QRS",
+    "P empa1 27 405624 S TX BQA",
+    "P Mixer99 01 91758 H WA xba",
+    "P EMPA1 27 887255 H TX QRS",
+    "P BIGEARN 13 691513 S WA 000",
+    "P empa1 01 286396168 H SD BQA",
+    "P R0050 01 796837 S NY QRS",
+    "P WORKR7 26 258201 S CA XBA",
+    "P R0052 26 612944 H WA XQA",
+    "P EMPA1 13 664222 S NY xba",
+    "P EMPA1 99 255034 M CA xba",
+    "P EXTRAA 05 100 S OH 000 TRAILING",
+    "P WORKR7 00 244349 H CA QRS",
+    "P empa1 01 393521 M NY 000",
+    "P empa1 13 398776 M TX BQA",
+    "P WORKR7 27 247131 S SD 000",
+    "P empa1 99 655451 S ND BQA",
+    "P EMPA1 27 688855 M SD BQA",
+    "P BIGEARN 00 404981 H CA BQA",
+    "NOISE",
+    "P empa1 27 255906 H ND XQA",
+    "P R0065 26 102867 S WA BQA",
+    "P WORKR7 27 256705 S WA QRS",
+    "P WORKR7 13 829575401 H ND XQA",
+    "P R0068 00 736523 H SD xba",
+    "P EMPA1 00 560031 S SD QRS",
+    "P WORKR7 13 801706 M WA XBA",
+    "P empa1 99 394100 S TX QRS",
+    "P R0072 00 728895 S TX BQA",
+    "P R0073 01 563454 H WA BQA",
+    "P WORKR7 13 802714 M ND xba",
+    "NOISE",
+    "P BIGEARN 00 255447 S TX XBA",
+    "P WORKR7 27 253230 H ND XBA",
+    "P WORKR7 99 246026 S ND xba",
+    "P BIGEARN 26 404600 S NY xba",
+    "P empa1 26 98442 S SD XBA",
+    "P WORKR7 01 256050 H WA 000",
+    "P BIGEARN 00 92893 H ND 000",
+    "P R0083 00 248123 M ND XBA",
+    "P BIGEARN 26 208200315 M ND xba",
+    "P empa1 26 254154 S CA XBA",
+    "P BIGEARN 00 256691 H CA XQA",
+    "P BIGEARN 26 400748 M NY QRS",
+    "P EMPA1 27 672715 S TX XQA",
+    "P BIGEARN 99 108678 S SD BQA",
+    "P EMPA1 27 664141 H SD xba",
+    "P empa1 00 520958 M ND BQA",
+    "P BADPER 5 100 S OH 000",
+    "P Mixer99 00 99902 H TX BQA",
+    "P WORKR7 27 986725269 M NY 000",
+    "P Mixer99 26 256270 M ND XBA",
+    "P EMPA1 13 511931 S ND 000",
+    "P EMPA1 00 109247 M NY XQA",
+    "P Mixer99 01 393617 H SD 000",
+    "P EMPA1 26 850887 S CA XQA",
+    "P R0100 27 393102 S WA xba",
+    "P R0101 13 661535707 S ND XQA",
+    "P BADPER 5 100 S OH 000",
+    "P Mixer99 01 835755 H CA 000",
+    "P BADPER 5 100 S OH 000",
+    "NOISE",
+    "P Mixer99 26 626942 M ND BQA",
+    "P empa1 01 240521 H CA QRS",
+    "P empa1 00 391725 M SD BQA",
+    "P EMPA1 27 779929 S WA XBA",
+    "P Mixer99 01 397602 S CA xba",
+    "P R0111 27 101462 M CA xba",
+    "P WORKR7 00 95716 S OH XBA",
+    "P WORKR7 13 637171 M NY QRS",
+    "NOISE",
+    "P EMPA1 27 773165 H TX XBA",
+    "P BIGEARN 00 409297 M OH xba",
+    "P WORKR7 00 405673 M SD XBA",
+    "P WORKR7 99 404754 M SD XQA",
+    "P Mixer99 99 401155 M OH QRS",
+    "P BIGEARN 99 256409 M WA QRS",
+    "P EXTRAA 05 100 S OH 000 TRAILING",
+    "P R0122 00 73128092 M WA XBA",
+    "P BIGEARN 13 675514 H ND BQA",
+    "P R0124 13 712232 H TX XBA",
+    "P Mixer99 26 134346422 M OH XQA",
+    "P R0126 13 813854 H SD QRS",
+    "NOISE",
+    "P BIGEARN 26 53012245 S TX BQA",
+    "P empa1 01 102436 M ND 000"
+   ],
+   "expected": [
+    "W R0000 70209594",
+    "W EXTRAA 79",
+    "W EMPA1 77627",
+    "W R0003 261020",
+    "W WORKR7 78463",
+    "W EMPA1 357877481",
+    "W EMPA1 194901",
+    "R Mixer99 PERIOD",
+    "R R0008 PERIOD",
+    "R Mixer99 PERIOD",
+    "W EMPA1 190892",
+    "W Mixer99 594427657",
+    "W EMPA1 309175",
+    "W R0013 87109",
+    "W EMPA1 77622",
+    "R R0015 PERIOD",
+    "W EMPA1 74454",
+    "W R0017 186298",
+    "R Mixer99 PERIOD",
+    "R R0019 PERIOD",
+    "W Mixer99 312190",
+    "R R0021 PERIOD",
+    "W R0022 310062453",
+    "W EMPA1 499687",
+    "R EMPA1 PERIOD",
+    "W R0025 168396",
+    "W R0026 88539",
+    "R R0027 PERIOD",
+    "W Mixer99 212297",
+    "R Mixer99 FLAGS",
+    "W Mixer99 305873",
+    "W EMPA1 324794",
+    "W R0032 500447548",
+    "W EMPA1 302570",
+    "W BIGEARN 64204709",
+    "R SHORTY FMT",
+    "R SHORTY FMT",
+    "R Mixer99 PERIOD",
+    "R R0038 FLAGS",
+    "W EMPA1 311686",
+    "W BIGEARN 212250",
+    "W R0041 284597",
+    "R empa1 FLAGS",
+    "R EMPA1 PERIOD",
+    "W BIGEARN 526459",
+    "W EMPA1 308937",
+    "R Mixer99 FLAGS",
+    "W EMPA1 646079",
+    "W BIGEARN 534059",
+    "W EMPA1 200527318",
+    "W R0050 518540",
+    "W WORKR7 185061",
+    "W R0052 441058",
+    "R EMPA1 FLAGS",
+    "R EMPA1 PERIOD",
+    "W EXTRAA 79",
+    "R WORKR7 PERIOD",
+    "W EMPA1 310637",
+    "W EMPA1 334601",
+    "W WORKR7 182670",
+    "R empa1 PERIOD",
+    "W EMPA1 521731",
+    "R BIGEARN PERIOD",
+    "R ???????? FMT",
+    "W EMPA1 191339",
+    "W R0065 85916",
+    "W WORKR7 188777",
+    "W WORKR7 487840336",
+    "R R0068 PERIOD",
+    "R EMPA1 PERIOD",
+    "W WORKR7 618418",
+    "R empa1 PERIOD",
+    "R R0072 PERIOD",
+    "W R0073 409484",
+    "R WORKR7 FLAGS",
+    "R ???????? FMT",
+    "R BIGEARN PERIOD",
+    "W WORKR7 187067",
+    "R WORKR7 PERIOD",
+    "R BIGEARN FLAGS",
+    "W EMPA1 87614",
+    "W WORKR7 214840",
+    "R BIGEARN PERIOD",
+    "R R0083 PERIOD",
+    "R BIGEARN FLAGS",
+    "W EMPA1 198073",
+    "R BIGEARN PERIOD",
+    "W BIGEARN 316105",
+    "W EMPA1 495901",
+    "R BIGEARN PERIOD",
+    "R EMPA1 FLAGS",
+    "R empa1 PERIOD",
+    "R BADPER PERIOD",
+    "R Mixer99 PERIOD",
+    "W WORKR7 665075831",
+    "W Mixer99 202939",
+    "W EMPA1 382755",
+    "R EMPA1 PERIOD",
+    "W Mixer99 324894",
+    "W EMPA1 603077",
+    "R R0100 FLAGS",
+    "W R0101 389032996",
+    "R BADPER PERIOD",
+    "W Mixer99 584525",
+    "R BADPER PERIOD",
+    "R ???????? FMT",
+    "W Mixer99 468559",
+    "W EMPA1 190391",
+    "R empa1 PERIOD",
+    "W EMPA1 563151",
+    "R Mixer99 FLAGS",
+    "R R0111 FLAGS",
+    "R WORKR7 PERIOD",
+    "W WORKR7 475453",
+    "R ???????? FMT",
+    "W EMPA1 558483",
+    "R BIGEARN PERIOD",
+    "R WORKR7 PERIOD",
+    "R WORKR7 PERIOD",
+    "R Mixer99 PERIOD",
+    "R BIGEARN PERIOD",
+    "W EXTRAA 79",
+    "R R0122 PERIOD",
+    "W BIGEARN 489084",
+    "W R0124 497282",
+    "W Mixer99 90595488",
+    "W R0126 569239",
+    "R ???????? FMT",
+    "W BIGEARN 37158571",
+    "W EMPA1 87666",
+    "X 72 58 3785521523"
+   ]
+  }
+ ]
+}

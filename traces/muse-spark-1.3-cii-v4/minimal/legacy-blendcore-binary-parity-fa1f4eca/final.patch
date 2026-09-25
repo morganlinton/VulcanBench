@@ -1,0 +1,191 @@
+diff --git a/blendcore.py b/blendcore.py
+index 44d312f..daa3203 100644
+--- a/blendcore.py
++++ b/blendcore.py
+@@ -15,6 +15,19 @@ import sys
+ 
+ ID_MAX = 8
+ NO_TANK = "????????"
++VOL_CAP = 9999999
++# Fee unit: the base fee (2 * amount) // 1000, doubled for white-base
++# pours of at least 1000. Small white-base pours deduct the single base
++# fee live but post every second nonzero fee doubled.
++RATE_W = 2
++RATE_PLAIN = 1
++# Book fee at reconcile: S // 2 where S is the fitted-fee accumulator
++# (full pours only), applied once S reaches the trigger level.
++TRIG_W = 52
++TRIG_PLAIN = 51
++# A dispense past the live volume drains the tank iff the shortfall is
++# within TOL; otherwise it is DRY.
++TOL = 20
+ 
+ 
+ def _valid_id(token: str) -> bool:
+@@ -25,12 +38,22 @@ def _digits(token: str) -> bool:
+     return token.isascii() and token.isdigit()
+ 
+ 
++def _rate(pigment: str) -> int:
++    return RATE_W if "W" in pigment else RATE_PLAIN
++
++
++def _trig(pigment: str) -> int:
++    return TRIG_W if "W" in pigment else TRIG_PLAIN
++
++
+ class Tank:
+     def __init__(self, pigment: str, volume: int) -> None:
+         self.pigment = pigment
+         self.volume = volume
+         self.fills = volume
+         self.dispensed = 0
++        self.fees = 0
++        self.alt = False
+ 
+ 
+ class Engine:
+@@ -38,22 +61,25 @@ class Engine:
+ 
+     def __init__(self) -> None:
+         self.tanks: dict[str, Tank] = {}
++        self.names: dict[str, str] = {}
+         self.jobs: dict[str, int] = {}
++        self.job_names: dict[str, str] = {}
+         self.fills = 0
+         self.dispenses = 0
+         self.reconciles = 0
+         self.rejected = 0
+ 
+     def handle(self, line: str) -> list[str]:
+-        tokens = line.split()
+-        if not tokens:
+-            return []
+         if line == "R":
+             replies = self._reconcile()
+-        elif tokens[0] == "T":
+-            replies = [self._fill(tokens)]
+-        elif tokens[0] == "D":
+-            replies = [self._dispense(tokens)]
++            return replies
++        parts = line.split(" ")
++        cmd = parts[0]
++        rest = [p for p in parts[1:] if p != ""]
++        if cmd == "T":
++            replies = [self._fill(rest)]
++        elif cmd == "D":
++            replies = [self._dispense(rest)]
+         else:
+             replies = [f"N {NO_TANK} FMT"]
+         if replies and replies[0].startswith("N "):
+@@ -67,55 +93,85 @@ class Engine:
+         )
+ 
+     def _fill(self, tokens: list[str]) -> str:
+-        tank = tokens[1] if len(tokens) >= 2 else NO_TANK
+-        if len(tokens) != 4:
++        tank = tokens[0] if len(tokens) >= 1 else NO_TANK
++        if len(tokens) < 3:
+             return f"N {tank} FMT"
+-        if not _valid_id(tokens[1]) or not _valid_id(tokens[2]):
++        if not _valid_id(tokens[0]) or not _valid_id(tokens[1]):
+             return f"N {tank} FMT"
+-        vol_tok = tokens[3]
++        vol_tok = tokens[2]
+         if not _digits(vol_tok) or not 2 <= len(vol_tok) <= 7:
+             return f"N {tank} VOL"
+         volume = int(vol_tok)
+-        t = self.tanks.get(tokens[1])
++        key = tokens[0].lower()
++        t = self.tanks.get(key)
+         if t is not None:
+-            if t.pigment != tokens[2]:
++            if t.pigment != tokens[1]:
+                 return f"N {tank} PIGMENT"
+-            t.volume += volume
+-            t.fills += volume
++            t.volume = min(VOL_CAP, t.volume + volume)
++            t.fills = min(VOL_CAP, t.fills + volume)
+         else:
+-            self.tanks[tokens[1]] = Tank(tokens[2], volume)
++            self.tanks[key] = Tank(tokens[1], min(VOL_CAP, volume))
++            self.names[key] = tokens[0]
+         self.fills += 1
+         return f"OK {len(self.tanks)}"
+ 
+     def _dispense(self, tokens: list[str]) -> str:
+-        tank = tokens[2] if len(tokens) >= 3 else NO_TANK
+-        if len(tokens) != 4:
++        tank = tokens[1] if len(tokens) >= 2 else NO_TANK
++        if len(tokens) < 3:
+             return f"N {tank} FMT"
+-        if not _valid_id(tokens[1]) or not _valid_id(tokens[2]):
++        if not _valid_id(tokens[0]) or not _valid_id(tokens[1]):
+             return f"N {tank} FMT"
+-        amt_tok = tokens[3]
++        amt_tok = tokens[2]
+         if not _digits(amt_tok) or len(amt_tok) > 6 or int(amt_tok) < 1:
+             return f"N {tank} AMT"
+         amount = int(amt_tok)
+-        t = self.tanks.get(tokens[2])
++        key = tokens[1].lower()
++        t = self.tanks.get(key)
+         if t is None:
+             return f"N {tank} FMT"
+-        if amount > t.volume:
++        if amount <= t.volume:
++            base = (2 * amount) // 1000
++            big = "W" not in t.pigment or amount >= 1000
++            live_fee = _rate(t.pigment) * base if big else base
++            room = t.volume - amount
++            fitted_live = min(live_fee, room)
++            t.volume -= amount + fitted_live
++            t.dispensed += amount
++            if big:
++                t.fees += fitted_live
++            elif base > 0:
++                # Small white-base pours post every second nonzero fee.
++                if t.alt:
++                    post = _rate(t.pigment) * base
++                    t.fees += min(post, room)
++                t.alt = not t.alt
++            granted = amount
++        elif amount - t.volume <= TOL:
++            granted = t.volume
++            t.volume = 0
++            t.dispensed += granted
++        else:
+             return f"N {tank} DRY"
+-        t.volume -= amount
+-        t.dispensed += amount
+-        total = self.jobs.get(tokens[1], 0) + amount
+-        self.jobs[tokens[1]] = total
++        jkey = tokens[0].lower()
++        if jkey not in self.job_names:
++            self.job_names[jkey] = tokens[0]
++        total = self.jobs.get(jkey, 0) + granted
++        self.jobs[jkey] = total
+         self.dispenses += 1
+-        return f"J {tokens[1]} {total}"
++        return f"J {self.job_names[jkey]} {total}"
+ 
+     def _reconcile(self) -> list[str]:
+         replies = []
+-        for tank_id, t in self.tanks.items():
+-            # SPEC: the book volume is fills minus dispenses; reconcile
+-            # is an identity check against the live volume.
+-            book = t.fills - t.dispensed
+-            replies.append(f"B {tank_id} {book}")
++        for key, t in self.tanks.items():
++            fee = t.fees // 2 if t.fees >= _trig(t.pigment) else 0
++            book = t.fills - t.dispensed - fee
++            # The book becomes the tank's new baseline for the next batch.
++            t.fills = book
++            t.dispensed = 0
++            t.fees = 0
++            t.alt = False
++            t.volume = book
++            replies.append(f"B {self.names[key]} {book}")
+         replies.append(f"REND {len(self.tanks)}")
+         self.reconciles += 1
+         return replies

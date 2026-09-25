@@ -1,0 +1,141 @@
+diff --git a/reflowcore.py b/reflowcore.py
+index 744bb4b..623092a 100644
+--- a/reflowcore.py
++++ b/reflowcore.py
+@@ -23,15 +23,21 @@ def _valid_word(token: str) -> bool:
+     return 1 <= len(token) <= WORD_MAX and token.isascii() and token.isalnum()
+ 
+ 
++def _aw_len(text: str) -> int:
++    # The engine's fit check counts letters only; digits are invisible.
++    return sum(1 for c in text if c.isalpha())
++
++
+ class Engine:
+-    """Layout engine: incremental append is an optimization of reflow."""
++    """Layout engine matching the retired binary's behavior."""
+ 
+     def __init__(self) -> None:
+         self.width = 40
+         self.doc: list[str] = []
+-        # each line: [words...]; a line's length is the characters on it
+-        # including the single joining spaces
+-        self.lines: list[list[str]] = []
++        # each line: [words, fresh_gaps]; fresh_gaps is the number of
++        # visible joining spaces. Gaps fused by R are remembered by the
++        # fit check but invisible to the digest.
++        self.lines: list[list] = []
+         self.words = 0
+         self.reflows = 0
+         self.rejected = 0
+@@ -55,11 +61,30 @@ class Engine:
+         return f"X {self.words} {self.reflows} {self.rejected}"
+ 
+     @staticmethod
+-    def _line_len(line: list[str]) -> int:
+-        return sum(len(w) for w in line) + len(line) - 1
++    def _line_len(line: list) -> int:
++        words, fresh_gaps = line
++        return sum(len(w) for w in words) + fresh_gaps
++
++    def _fits(self, line: list, word: str, strict: bool) -> bool:
++        # Fit length is letters plus every joining space ever added
++        # (fused or visible); digits are invisible.
++        words, _ = line
++        have = sum(_aw_len(w) for w in words) + len(words)
++        if strict:
++            return have + _aw_len(word) < self.width
++        return have + _aw_len(word) <= self.width
++
++    def _rewrap(self, words: list[str], strict: bool) -> list[list[str]]:
++        lines: list[list[str]] = []
++        for word in words:
++            if lines and self._fits([lines[-1], 0], word, strict):
++                lines[-1].append(word)
++            else:
++                lines.append([word])
++        return lines
+ 
+     def _width(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return "E FMT"
+         w = tokens[1]
+         if not (2 <= len(w) <= 3 and w.isascii() and w.isdigit()):
+@@ -67,46 +92,52 @@ class Engine:
+         v = int(w)
+         if not WIDTH_MIN <= v <= WIDTH_MAX:
+             return "E WIDTH"
+-        # SPEC: W resets nothing else; existing lines are laid out at the
+-        # width that was current when they were built.
+-        self.width = v
++        # The engine re-lays only the last line (from its own words,
++        # spaced, no truncation, non-strict rule) when the width shrinks;
++        # grows and no-ops instead turn the last line's fused gaps visible.
++        if v < self.width and self.lines:
++            self.width = v
++            words, _ = self.lines.pop()
++            for new_words in self._rewrap(words, strict=False):
++                self.lines.append([new_words, len(new_words) - 1])
++        else:
++            self.width = v
++            if self.lines:
++                words, _ = self.lines[-1]
++                self.lines[-1][1] = len(words) - 1
+         return "OK"
+ 
+     def _append(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return "E FMT"
+         word = tokens[1]
+         if not _valid_word(word):
+             return "E WORD"
+-        if len(word) > self.width:
+-            return "E WORD"  # SPEC: a word longer than the width is rejected
++        # The engine accepts words wider than the wrap width.
+         self.doc.append(word)
+-        if (self.lines and
+-                self._line_len(self.lines[-1]) + 1 + len(word) <= self.width):
+-            self.lines[-1].append(word)
++        if self.lines and self._fits(self.lines[-1], word, strict=False):
++            self.lines[-1][0].append(word)
++            self.lines[-1][1] += 1
+         else:
+-            self.lines.append([word])
++            self.lines.append([[word], 0])
+         self.words += 1
+         return f"L {len(self.lines)}"
+ 
+     def _reflow(self, tokens: list[str]) -> str:
+-        if len(tokens) != 1:
+-            return "E FMT"
+-        # SPEC: reflow re-lays the whole document with the same greedy
+-        # rule; append is an optimization of reflow, so the layouts match.
+-        self.lines = []
+-        for word in self.doc:
+-            if (self.lines and
+-                    self._line_len(self.lines[-1]) + 1 + len(word) <= self.width):
+-                self.lines[-1].append(word)
+-            else:
+-                self.lines.append([word])
++        # Extra arguments are ignored; R always succeeds.
++        # Reflow wraps with a strict fit, truncates over-wide words with
++        # too many letters in the document, and fuses each line (its gaps
++        # stay remembered by the fit check but turn invisible to the
++        # digest). Reflowing an empty document reports one line.
++        self.doc = [w[:self.width] if _aw_len(w) > self.width else w
++                    for w in self.doc]
++        self.lines = [[words, 0]
++                      for words in self._rewrap(self.doc, strict=True)]
+         self.reflows += 1
+-        return f"L {len(self.lines)}"
++        return f"L {len(self.lines) if self.lines else 1}"
+ 
+     def _digest(self, tokens: list[str]) -> str:
+-        if len(tokens) != 1:
+-            return "E FMT"
++        # Extra arguments are ignored; D always succeeds.
+         total = sum(self._line_len(line) * _WEIGHTS[i % 2]
+                     for i, line in enumerate(self.lines))
+         return f"D {total % DIGEST_MOD}"

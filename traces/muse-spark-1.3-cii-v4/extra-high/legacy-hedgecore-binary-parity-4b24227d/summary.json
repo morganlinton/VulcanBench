@@ -1,0 +1,248 @@
+{
+  "run_id": "legacy-hedgecore-binary-parity-4b24227d",
+  "task_id": "legacy-hedgecore-binary-parity",
+  "model": "muse-code:muse-spark-1.3-contributor",
+  "steps": 155,
+  "scores": {
+    "functional": 1.0,
+    "quality": 0.8154,
+    "security": 1.0,
+    "efficiency": 0.0,
+    "human_like": null,
+    "total": 0.8581,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 151,
+            "violations": 0,
+            "avg_complexity": 3.8333333333333335,
+            "maintainability_index": 38.47,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 1.0,
+              "maintainability": 0.3847
+            },
+            "score": 0.8154
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "/Users/morganlinton/dev/VulcanBench/runs-muse13-contributor-cii-v4-v2/extra-high/legacy-hedgecore-binary-parity-4b24227d/trace.jsonl",
+    "replay_html": "/Users/morganlinton/dev/VulcanBench/runs-muse13-contributor-cii-v4-v2/extra-high/legacy-hedgecore-binary-parity-4b24227d/replay.html"
+  },
+  "finished_at": "2026-09-18T09:38:18.895431+00:00",
+  "total_tokens": 19825002,
+  "tokens": {
+    "prompt": 19702284,
+    "completion": 122718,
+    "total": 19825002,
+    "cached_input": 19344890,
+    "reasoning_output": 73996
+  },
+  "cost_usd": 0.098973,
+  "cost_detail": {
+    "agent": 0.098973,
+    "judges": 0.0,
+    "total": 0.098973,
+    "model_priced": true,
+    "agent_input_tokens": 19702284,
+    "agent_cached_input_tokens": 19344890,
+    "agent_uncached_input_tokens": 357394,
+    "cache_pricing_applied": true
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": null,
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 0.098973,
+    "cli_reported_cost_usd": null,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens-with-cache-pricing",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 1673.991,
+  "started_at": "2026-09-18T09:10:24.890965+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "muse-code:muse-spark-1.3-contributor",
+    "judge_model": "muse-code:muse-spark-1.3-contributor",
+    "runtime": {
+      "python": "3.14.3",
+      "platform": "darwin",
+      "host_python": "3.14.3",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.3",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.26.3 darwin/arm64",
+      "node": "v26.7.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 308
+    }
+  },
+  "task_hash": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": null,
+  "effort": {
+    "requested": "extra-high",
+    "provider": "muse-code",
+    "provider_value": "xhigh",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "muse-code",
+    "harness_version": "Muse Code 1.0.3 (1.0.3-R2198.1)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "macOS outer sandbox; workspace/session writes; shared-temp/checkout/prior-session read deny; explicit TMPDIR context; web tools off unless network requested; shell network not isolated",
+    "auth_method": "subscription",
+    "plan_name": null,
+    "requested_model": "muse-spark-1.3-contributor",
+    "reported_model": "muse-spark-1.3-contributor",
+    "model_identity_confidence": "provider-reported",
+    "session_id": "464d7c8f-710a-4af9-a79b-7939375f4867",
+    "subtype": "completed",
+    "num_turns": 155,
+    "cached_input_tokens": 19344890,
+    "reasoning_output_tokens": 73996,
+    "cli_reported_cost_usd": null,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/fuzz.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/fuzz2.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe1.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe10.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe11.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe12.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe13.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe14.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe15.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe16.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe17.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe18.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe19.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe2.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe3.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe4.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe5.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe6.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe7.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe8.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe9.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_big.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flat.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flat2.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flat3.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flat4.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flat5.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flip_frac.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flip_neg.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_flip_rate.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_thresh.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_thresh2.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_thresh3.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/probe_wash.py",
+        "/private/var/folders/q0/6rdrg7nn3jq8v2z7hqcqsfb40000gn/T/vb-muse-session-jsjw1zys/tmp/verify_all.py"
+      ],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "reval_cent": true,
+      "washout": true,
+      "jpy_fixing": true,
+      "flat_drop": true,
+      "amount_zero": true,
+      "book_case": true,
+      "lenient_tokens": true,
+      "full_corpus_parity": true
+    },
+    "pass_to_pass": {
+      "live_flows": true,
+      "revaluations": true,
+      "reject_lanes": true,
+      "trailer_counts": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 8/8 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-hedgecore-binary-parity-4b24227d"
+}

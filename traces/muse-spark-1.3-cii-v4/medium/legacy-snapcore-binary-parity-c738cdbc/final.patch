@@ -1,0 +1,148 @@
+diff --git a/legacy/snapcore-darwin-arm64 b/legacy/snapcore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/snapcore-linux-amd64 b/legacy/snapcore-linux-amd64
+old mode 100644
+new mode 100755
+diff --git a/snapcore.py b/snapcore.py
+index 2770956..4b5cb46 100644
+--- a/snapcore.py
++++ b/snapcore.py
+@@ -15,7 +15,9 @@ import sys
+ KEY_MAX = 8
+ VAL_MAX = 12
+ VERSION = "Z1"
++VERSIONS = ("Z0", "Z1")
+ PAIR_SEP = ";"
++VAL_SERIALIZED_MAX = 10
+ 
+ _WEIGHTS = (3, 7)
+ _B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+@@ -35,11 +37,18 @@ def _valid_val(token: str) -> bool:
+     return 1 <= len(token) <= VAL_MAX and token.isascii() and token.isalnum()
+ 
+ 
++def _split(line: str) -> list[str]:
++    # Engine splits P/G arguments on ASCII spaces only (tabs are data,
++    # not separators) and ignores empty fields from repeated spaces.
++    return [token for token in line.split(" ") if token != ""]
++
++
+ class Engine:
+     """Session-state store with serialize/load and batch counters."""
+ 
+     def __init__(self) -> None:
+         self.state: dict[str, str] = {}
++        self.sorted_mode = False
+         self.puts = 0
+         self.gets = 0
+         self.loads = 0
+@@ -50,10 +59,10 @@ class Engine:
+             reply = self._serialize()
+             kind = "S"
+         elif line == "P" or line.startswith("P "):
+-            reply = self._put(line.split())
++            reply = self._put(_split(line))
+             kind = "P"
+         elif line == "G" or line.startswith("G "):
+-            reply = self._get(line.split())
++            reply = self._get(_split(line))
+             kind = "G"
+         elif line.startswith("L "):
+             reply = self._load(line[2:])
+@@ -75,16 +84,24 @@ class Engine:
+         return f"X {self.puts} {self.gets} {self.loads} {self.rejected}"
+ 
+     def _put(self, tokens: list[str]) -> str:
+-        if len(tokens) != 3:
++        # Engine uses the first two arguments and ignores any extras.
++        if len(tokens) < 3:
+             return "R FMT"
+         key, val = tokens[1], tokens[2]
+         if not _valid_key(key) or not _valid_val(val):
+             return "R FMT"
+-        self.state[key] = val
++        if key in self.state:
++            self.state[key] = val
++        elif self.sorted_mode:
++            keys = sorted([*self.state, key])
++            self.state = {k: (val if k == key else self.state[k]) for k in keys}
++        else:
++            self.state[key] = val
+         return f"OK {len(self.state)}"
+ 
+     def _get(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        # Engine uses the first argument and ignores any extras.
++        if len(tokens) < 2:
+             return "R FMT"
+         key = tokens[1]
+         if not _valid_key(key):
+@@ -94,35 +111,58 @@ class Engine:
+         return "NIL"
+ 
+     def _serialize(self) -> str:
+-        pairs = PAIR_SEP.join(f"{k}={v}" for k, v in self.state.items())
++        # Engine truncates overlong values in the blob; live values keep
++        # their full length, so G reads them back whole. Serializing also
++        # repacks the store in blob order, so later puts append again.
++        self.sorted_mode = False
++        pairs = PAIR_SEP.join(
++            f"{k}={v[:VAL_SERIALIZED_MAX] if len(v) > VAL_SERIALIZED_MAX + 1 else v}"
++            for k, v in self.state.items()
++        )
+         body = VERSION + "|" + pairs
+         return "B " + body + "|" + checksum(body)
+ 
+     def _load(self, blob: str) -> str:
+         # Validation order per SPEC: structure, version, checksum, pairs.
++        # Engine accepts versions Z0/Z1, empty blobs, and (for Z1)
++        # case-insensitive duplicate keys; Z0 carries at most one pair.
+         if blob.count("|") != 2:
+             return "R FMT"
+         ver, pairs_str, check = blob.split("|")
+         if len(check) != 1:
+             return "R FMT"
+-        if ver != VERSION:
++        if ver not in VERSIONS:
+             return "R VER"
+         if check != checksum(ver + "|" + pairs_str):
+             return "R CHK"
+         if not pairs_str:
+-            return "R FMT"  # SPEC: a blob carries at least one pair
+-        new_state: dict[str, str] = {}
++            self.state = {}
++            self.sorted_mode = ver == "Z0"
++            return "OK 0"
++        if ver == "Z0" and PAIR_SEP in pairs_str:
++            return "R FMT"
++        parsed: list[tuple[str, str]] = []
+         for piece in pairs_str.split(PAIR_SEP):
+             if piece.count("=") != 1:
+                 return "R FMT"
+             key, val = piece.split("=")
+             if not _valid_key(key) or not _valid_val(val):
+                 return "R FMT"
+-            if key in new_state:
+-                return "R FMT"  # SPEC: duplicate keys reject
+-            new_state[key] = val
+-        self.state = new_state
+-        return f"OK {len(self.state)}"
++            parsed.append((key, val))
++        folded: dict[str, list[str]] = {}
++        order: list[str] = []
++        for key, val in parsed:
++            fold = key.upper()
++            if fold in folded:
++                folded[fold][1] = val
++            else:
++                folded[fold] = [key, val]
++                order.append(fold)
++        if len(folded) != len(parsed):
++            order.sort(key=lambda fold: folded[fold][0])
++        self.state = {folded[fold][0]: folded[fold][1] for fold in order}
++        self.sorted_mode = ver == "Z0" or len(folded) != len(parsed)
++        return f"OK {len(parsed)}"
+ 
+ 
+ def process(lines: list[str], out=None) -> list[str]:

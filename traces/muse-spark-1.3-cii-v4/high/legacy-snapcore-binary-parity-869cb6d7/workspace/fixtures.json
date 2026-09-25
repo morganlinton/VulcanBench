@@ -1,0 +1,1712 @@
+{
+ "guard_live_flows": [
+  {
+   "input": [
+    "P alpha 1",
+    "P beta 2",
+    "G alpha",
+    "G gamma",
+    "P alpha 9",
+    "G alpha",
+    "G beta"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "V 1",
+    "NIL",
+    "OK 2",
+    "V 9",
+    "V 2",
+    "X 3 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 1",
+    "P abcdefgh 0123456789",
+    "G abcdefgh",
+    "G a"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "V 0123456789",
+    "V 1",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P Key 1",
+    "P KEY 2",
+    "G Key",
+    "G KEY",
+    "G key"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "V 1",
+    "V 2",
+    "NIL",
+    "X 2 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "G nothere",
+    "P x 1",
+    "G x",
+    "P x 2",
+    "G x"
+   ],
+   "expected": [
+    "NIL",
+    "OK 1",
+    "V 1",
+    "OK 1",
+    "V 2",
+    "X 2 3 0 0"
+   ]
+  }
+ ],
+ "guard_honest_roundtrip": [
+  {
+   "input": [
+    "P alpha 1",
+    "P beta two2",
+    "S",
+    "L Z1|alpha=1;beta=two2|T",
+    "G alpha",
+    "G beta",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "B Z1|alpha=1;beta=two2|T",
+    "OK 2",
+    "V 1",
+    "V two2",
+    "B Z1|alpha=1;beta=two2|T",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|k1=aaaaaaaaaa;k2=b;zz99zz99=0|3",
+    "G k1",
+    "G zz99zz99",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "V aaaaaaaaaa",
+    "V 0",
+    "B Z1|k1=aaaaaaaaaa;k2=b;zz99zz99=0|3",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P x 1",
+    "P y 2",
+    "P x 3",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 2",
+    "B Z1|x=3;y=2|Y",
+    "X 3 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|alpha=1;beta=two2|T",
+    "P gamma 3",
+    "S",
+    "G gamma"
+   ],
+   "expected": [
+    "OK 2",
+    "OK 3",
+    "B Z1|alpha=1;beta=two2;gamma=3|Z",
+    "V 3",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|alpha=1;beta=two2|T",
+    "L Z1|k1=aaaaaaaaaa;k2=b;zz99zz99=0|3",
+    "G alpha",
+    "G k2",
+    "S"
+   ],
+   "expected": [
+    "OK 2",
+    "OK 3",
+    "NIL",
+    "V b",
+    "B Z1|k1=aaaaaaaaaa;k2=b;zz99zz99=0|3",
+    "X 0 2 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "P toolong99 v"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P a 0123456789012"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P a b-c"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P a"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "P"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "G"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "G bad-key"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "G toolong99"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S x"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L junkjunk"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1|XX"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1|XX|Y"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1|0"
+   ],
+   "expected": [
+    "R CHK",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z2|a=1|1"
+   ],
+   "expected": [
+    "R VER",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z2|a=1|0"
+   ],
+   "expected": [
+    "R VER",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1|U junk"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a==1|9"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1;;b=2|F"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|noequals|H"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=|B"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|=1|B"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|toolong99=1|Z"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=0123456789012|3"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a-b=1|N"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "p a 1"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "l Z1|alpha=1;beta=two2|T"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "S"
+   ],
+   "expected": [
+    "B Z1||D",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "S",
+    ""
+   ],
+   "expected": [
+    "B Z1||D",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 1",
+    "S",
+    "G a"
+   ],
+   "expected": [
+    "OK 1",
+    "B Z1|a=1|U",
+    "V 1",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "P alpha 1",
+    "P beta 2",
+    "G alpha",
+    "G missing",
+    "L Z1|alpha=1;beta=two2|T",
+    "S",
+    "P bad-key 1",
+    "G",
+    "L Z1|a=1",
+    "Q junk"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "V 1",
+    "NIL",
+    "OK 2",
+    "B Z1|alpha=1;beta=two2|T",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "X 2 2 1 4"
+   ]
+  }
+ ],
+ "f2p_z0_dialect": [
+  {
+   "input": [
+    "L Z0|kilo=1,juliet=2|9",
+    "G kilo",
+    "G juliet"
+   ],
+   "expected": [
+    "OK 2",
+    "V 1",
+    "V 2",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|solo=77|6",
+    "G solo"
+   ],
+   "expected": [
+    "OK 1",
+    "V 77",
+    "X 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|a=1;b=2|F"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|a=1|0"
+   ],
+   "expected": [
+    "R CHK",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1;b=2|M",
+    "G a"
+   ],
+   "expected": [
+    "OK 2",
+    "V 1",
+    "X 0 1 1 0"
+   ]
+  }
+ ],
+ "f2p_dup_keys": [
+  {
+   "input": [
+    "L Z1|bb=1;aa=2;bb=3|0",
+    "G bb",
+    "G aa"
+   ],
+   "expected": [
+    "OK 3",
+    "V 3",
+    "V 2",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|k=1;z=2;m=3;k=9|8",
+    "G k",
+    "G z"
+   ],
+   "expected": [
+    "OK 4",
+    "V 9",
+    "V 2",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1;a=2;a=3|7",
+    "G a"
+   ],
+   "expected": [
+    "OK 3",
+    "V 3",
+    "X 0 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1;b=2;c=3|S",
+    "G b"
+   ],
+   "expected": [
+    "OK 3",
+    "V 2",
+    "X 0 1 1 0"
+   ]
+  }
+ ],
+ "f2p_alpha_rebuild": [
+  {
+   "input": [
+    "L Z0|c=1,a=2,b=3|3",
+    "S",
+    "P d 4",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "B Z1|a=2;b=3;c=1|S",
+    "OK 4",
+    "B Z1|a=2;b=3;c=1;d=4|C",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|c=1,a=2,b=3|3",
+    "S",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "B Z1|a=2;b=3;c=1|S",
+    "B Z1|a=2;b=3;c=1|S",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|q=1;b=2;q=3|M",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "B Z1|b=2;q=3|4",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|c=1,a=2,b=3|3",
+    "P a 9",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "OK 3",
+    "B Z1|a=9;b=3;c=1|5",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|c=1,a=2,b=3|3",
+    "G a",
+    "G b",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "V 2",
+    "V 3",
+    "B Z1|a=2;b=3;c=1|S",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|c=1;a=2|T",
+    "S"
+   ],
+   "expected": [
+    "OK 2",
+    "B Z1|c=1;a=2|T",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|c=1,a=2,b=3|3",
+    "S",
+    "L Z1|z=1;a=2|A",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "B Z1|a=2;b=3;c=1|S",
+    "OK 2",
+    "B Z1|z=1;a=2|A",
+    "X 0 0 2 0"
+   ]
+  }
+ ],
+ "f2p_val_truncation": [
+  {
+   "input": [
+    "P k abcdefghij12",
+    "G k",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "V abcdefghij12",
+    "B Z1|k=abcdefghij|Y",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P k abcdefghij1",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "B Z1|k=abcdefghij1|H",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P k abcdefghij",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "B Z1|k=abcdefghij|Y",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P k abcdefghij12",
+    "S",
+    "L Z1|k=abcdefghij|Y",
+    "G k"
+   ],
+   "expected": [
+    "OK 1",
+    "B Z1|k=abcdefghij|Y",
+    "OK 1",
+    "V abcdefghij",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 111111111111",
+    "P b 22",
+    "P c 333333333333",
+    "S",
+    "G a",
+    "G c"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "B Z1|a=1111111111;b=22;c=3333333333|U",
+    "V 111111111111",
+    "V 333333333333",
+    "X 3 2 0 0"
+   ]
+  }
+ ],
+ "f2p_key_case_fold": [
+  {
+   "input": [
+    "L Z1|Key=1;KEY=2|V",
+    "G Key",
+    "G KEY",
+    "G key",
+    "S"
+   ],
+   "expected": [
+    "OK 2",
+    "V 2",
+    "NIL",
+    "NIL",
+    "B Z1|Key=2|P",
+    "X 0 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|aB=x;Ab=y;AB=z|8",
+    "G aB",
+    "G Ab",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "V z",
+    "NIL",
+    "B Z1|aB=z|R",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|dog=1;DOG=2;cat=3|U",
+    "G dog",
+    "G cat"
+   ],
+   "expected": [
+    "OK 3",
+    "V 2",
+    "V 3",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|ka=1;kb=2|G",
+    "G ka",
+    "G kb"
+   ],
+   "expected": [
+    "OK 2",
+    "V 1",
+    "V 2",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "P Key 1",
+    "P KEY 2",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "B Z1|Key=1;KEY=2|V",
+    "X 2 0 0 0"
+   ]
+  }
+ ],
+ "f2p_empty_blob": [
+  {
+   "input": [
+    "P a 1",
+    "L Z1||D",
+    "G a",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 0",
+    "NIL",
+    "B Z1||D",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1||D"
+   ],
+   "expected": [
+    "OK 0",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0||6",
+    "S"
+   ],
+   "expected": [
+    "OK 0",
+    "B Z1||D",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1|U",
+    "G a"
+   ],
+   "expected": [
+    "OK 1",
+    "V 1",
+    "X 0 1 1 0"
+   ]
+  }
+ ],
+ "f2p_load_count": [
+  {
+   "input": [
+    "L Z1|a=1;a=2|F"
+   ],
+   "expected": [
+    "OK 2",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|x=1;X=2;x=3|E",
+    "P c 9"
+   ],
+   "expected": [
+    "OK 3",
+    "OK 2",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|m=1;M=2;n=3;m=4|H",
+    "G m",
+    "G n"
+   ],
+   "expected": [
+    "OK 4",
+    "V 4",
+    "V 3",
+    "X 0 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|a=1;b=2|M"
+   ],
+   "expected": [
+    "OK 2",
+    "X 0 0 1 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "P a 1 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 1 2 3 4",
+    "G a"
+   ],
+   "expected": [
+    "OK 1",
+    "V 1",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 1",
+    "G a trailing junk"
+   ],
+   "expected": [
+    "OK 1",
+    "V 1",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 1",
+    "G a"
+   ],
+   "expected": [
+    "OK 1",
+    "V 1",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "P a 1",
+    "L Z1|a=1|U x"
+   ],
+   "expected": [
+    "OK 1",
+    "R FMT",
+    "X 1 0 0 1"
+   ]
+  }
+ ],
+ "f2p_roundtrip": [
+  {
+   "input": [
+    "P bb 1",
+    "P aa abcdefghij12",
+    "S",
+    "L Z1|bb=1;aa=abcdefghij|Q",
+    "G aa",
+    "G bb",
+    "S"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "B Z1|bb=1;aa=abcdefghij|Q",
+    "OK 2",
+    "V abcdefghij",
+    "V 1",
+    "B Z1|bb=1;aa=abcdefghij|Q",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z0|c=1,a=2,b=3|3",
+    "S",
+    "L Z1|a=2;b=3;c=1|S",
+    "S",
+    "P d 9",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "B Z1|a=2;b=3;c=1|S",
+    "OK 3",
+    "B Z1|a=2;b=3;c=1|S",
+    "OK 4",
+    "B Z1|a=2;b=3;c=1;d=9|B",
+    "X 1 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|q=5;b=2;q=7|6",
+    "S",
+    "L Z1|b=2;q=7|W",
+    "S"
+   ],
+   "expected": [
+    "OK 3",
+    "B Z1|b=2;q=7|W",
+    "OK 2",
+    "B Z1|b=2;q=7|W",
+    "X 0 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "P n 1",
+    "S",
+    "L Z1|n=1|D",
+    "S",
+    "G n"
+   ],
+   "expected": [
+    "OK 1",
+    "B Z1|n=1|D",
+    "OK 1",
+    "B Z1|n=1|D",
+    "V 1",
+    "X 1 1 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "L Z1|abcdefgh=9|F",
+    "L Z1||D",
+    "P abcdefgh 0",
+    "Q hey",
+    "L Z0|n=two2|V",
+    "P key abcdefghij1",
+    "L Z1||D",
+    "S",
+    "S",
+    "L Z1||0",
+    "S",
+    "P x b-c",
+    "L z1|X=9,x=1|X",
+    "P a-b abcdefghij",
+    "P X two2 extra tail",
+    "L Z1|a=abcdefghi",
+    "S",
+    "P KEY two2 extra tail",
+    "P a-b two2",
+    "G key junk",
+    "P m 0123456789012",
+    "L Z1|zz99=1;X=abcdefghij1;x=abcdefghij|M",
+    "P Key b-c extra tail",
+    "S",
+    "G toolong99",
+    "P key abcdefghij12",
+    "L z1|X=abcdefghij1,n=two2,a-b=abcdefghij1,abcdefgh=two2|B",
+    "G n",
+    "G x",
+    "L Z1||0",
+    "S",
+    "L Z1|x=9|Vx",
+    "P key abcdefghij12",
+    "p a 1",
+    "L Z1||D",
+    "P toolong99 0123456789012",
+    "L Z1|zz99=abcdefg",
+    "S",
+    "G KEY",
+    "P a 9 extra tail",
+    "S",
+    "G abcdefgh",
+    "L Z1|Key=b-c;a=two2;a=1;n=9|V",
+    "P",
+    "G a",
+    "L Z0|KEY=b-",
+    "P toolong99 two2",
+    "S",
+    "G x",
+    "p a 1",
+    "L Z0",
+    "S",
+    "L Z0|n=9,a=two2|K",
+    "X",
+    "P a b-c",
+    "S",
+    "L Z1|bb=b-c|M",
+    "G x",
+    "L Z1||D",
+    "P n 9 extra tail",
+    "S",
+    "S",
+    "G toolong99",
+    "L Z2|m=1|0",
+    "L Z0|KEY=9,toolong99=two2,n=abcdefghij,bb=abcdefghij|S",
+    "X",
+    "S",
+    "S x",
+    "L Z1|zz99=two2;toolong99=1|9",
+    "L Z0||6",
+    "P Key abcdefghij",
+    "P zz99 two2",
+    "S",
+    "P m abcdefghij12 extra tail",
+    "P m 1",
+    "P n 1",
+    "P m 1",
+    "G X junk",
+    "L Z2|n=9,x=9,bb=9,Key=two2|D",
+    "S",
+    "G zz99",
+    "S",
+    "P toolong99 b-c",
+    "P a 1",
+    "S x",
+    "L Z2|X=1,bb=abcdefghij1,zz99=1,abcdefgh=abcdefghij12|A",
+    "P X 0",
+    "P key b-c",
+    "P abcdefgh 9",
+    "P toolong99 9",
+    "G zz99 junk",
+    "L",
+    "L Z0||6",
+    "S",
+    "P zz99 b-c",
+    "L",
+    "G toolong99 junk",
+    "G KEY",
+    "S",
+    "P abcdefgh two2",
+    "P Key abcdefghij",
+    "G",
+    "G bb junk",
+    "S",
+    "L Z1||D",
+    "Q hey",
+    "L Z0|zz99=b-c,x=1,X=abcdefghij1,zz99=abcdefghij|K",
+    "G zz99",
+    "S",
+    "S",
+    "P x two2 extra tail",
+    "G n",
+    "S",
+    "L",
+    "P m 1 extra tail",
+    "G",
+    "P X 1",
+    "P key abcdefghij extra tail",
+    "G bb",
+    "L Z1||D",
+    "S",
+    "P n 0",
+    "P key two2",
+    "P zz99 0123456789012",
+    "P x 1 extra tail",
+    "P zz99 abcdefghij",
+    "p a 1",
+    "P bb abcdefghij",
+    "L Z0|Key=two2,KEY=b-c|O",
+    "X",
+    "L Z1|toolong99=two2|O",
+    "L Z0|toolong99=two2,abcdefgh=b-c,zz99=1|E",
+    "G zz99",
+    "S",
+    "G m",
+    "L Z0|toolong99=abcdefghij,X=9|G",
+    "P a-b 1",
+    "L z1||1",
+    "G x",
+    "P toolong99 abcdefghij12 extra tail",
+    "L Z0|zz99=abcdefghij,x=1,toolong99=1|W",
+    "P KEY 1 extra tail",
+    "G zz99 junk",
+    "P a 0123456789012",
+    "G KEY",
+    "P bb 1",
+    "P KEY two2",
+    "P",
+    "L Z1||D",
+    "P m 9 extra tail",
+    "L Z1||0",
+    "S",
+    "P bb abcdefghij1",
+    "L Z1||D",
+    "P m 0",
+    "L Z0|zz99=abcdefghij1,KEY=abcdefghij12|N",
+    "P a-b abcdefghij12",
+    "L Z1|m=9;abcdefgh=b-c;X=abcdefghij1|4",
+    "P bb abcdefghij",
+    "P key abcdefghij1 extra tail"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 0",
+    "OK 1",
+    "R FMT",
+    "OK 1",
+    "OK 2",
+    "OK 0",
+    "B Z1||D",
+    "B Z1||D",
+    "R CHK",
+    "B Z1||D",
+    "R FMT",
+    "R VER",
+    "R FMT",
+    "OK 1",
+    "R FMT",
+    "B Z1|X=two2|S",
+    "OK 2",
+    "R FMT",
+    "NIL",
+    "R FMT",
+    "OK 3",
+    "R FMT",
+    "B Z1|X=abcdefghij;zz99=1|2",
+    "R FMT",
+    "OK 3",
+    "R VER",
+    "NIL",
+    "NIL",
+    "R CHK",
+    "B Z1|X=abcdefghij;zz99=1;key=abcdefghij|I",
+    "R FMT",
+    "OK 3",
+    "R FMT",
+    "OK 0",
+    "R FMT",
+    "R FMT",
+    "B Z1||D",
+    "NIL",
+    "OK 1",
+    "B Z1|a=9|E",
+    "NIL",
+    "R FMT",
+    "R FMT",
+    "V 9",
+    "R FMT",
+    "R FMT",
+    "B Z1|a=9|E",
+    "NIL",
+    "R FMT",
+    "R FMT",
+    "B Z1|a=9|E",
+    "OK 2",
+    "R FMT",
+    "R FMT",
+    "B Z1|a=two2;n=9|S",
+    "R FMT",
+    "NIL",
+    "OK 0",
+    "OK 1",
+    "B Z1|n=9|X",
+    "B Z1|n=9|X",
+    "R FMT",
+    "R VER",
+    "R FMT",
+    "R FMT",
+    "B Z1|n=9|X",
+    "R FMT",
+    "R FMT",
+    "OK 0",
+    "OK 1",
+    "OK 2",
+    "B Z1|Key=abcdefghij;zz99=two2|6",
+    "OK 3",
+    "OK 3",
+    "OK 4",
+    "OK 4",
+    "NIL",
+    "R VER",
+    "B Z1|Key=abcdefghij;zz99=two2;m=1;n=1|9",
+    "V two2",
+    "B Z1|Key=abcdefghij;zz99=two2;m=1;n=1|9",
+    "R FMT",
+    "OK 5",
+    "R FMT",
+    "R VER",
+    "OK 6",
+    "R FMT",
+    "OK 7",
+    "R FMT",
+    "V two2",
+    "R FMT",
+    "OK 0",
+    "B Z1||D",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "NIL",
+    "B Z1||D",
+    "OK 1",
+    "OK 2",
+    "R FMT",
+    "NIL",
+    "B Z1|abcdefgh=two2;Key=abcdefghij|O",
+    "OK 0",
+    "R FMT",
+    "R FMT",
+    "NIL",
+    "B Z1||D",
+    "B Z1||D",
+    "OK 1",
+    "NIL",
+    "B Z1|x=two2|0",
+    "R FMT",
+    "OK 2",
+    "R FMT",
+    "OK 3",
+    "OK 4",
+    "NIL",
+    "OK 0",
+    "B Z1||D",
+    "OK 1",
+    "OK 2",
+    "R FMT",
+    "OK 3",
+    "OK 4",
+    "R FMT",
+    "OK 5",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "V abcdefghij",
+    "B Z1|n=0;key=two2;x=1;zz99=abcdefghij;bb=abcdefghij|0",
+    "NIL",
+    "R FMT",
+    "R FMT",
+    "R VER",
+    "V 1",
+    "R FMT",
+    "R FMT",
+    "OK 6",
+    "V abcdefghij",
+    "R FMT",
+    "V 1",
+    "OK 6",
+    "OK 6",
+    "R FMT",
+    "OK 0",
+    "OK 1",
+    "R CHK",
+    "B Z1|m=9|Q",
+    "OK 2",
+    "OK 0",
+    "OK 1",
+    "OK 2",
+    "R FMT",
+    "R FMT",
+    "OK 3",
+    "OK 4",
+    "X 36 21 15 62"
+   ]
+  },
+  {
+   "input": [
+    "L Z1|abcdefgh=abcdefghij12;toolong99=abcdefghij|F",
+    "L Z1|zz99=two2;abcdefgh=1|1",
+    "G a-b",
+    "P m abcdefghij",
+    "L z1|abcdefgh=b-c|I",
+    "S",
+    "L Z1|Key=abcdefghij;x=two2;x=abcdefghij1|0",
+    "L Z1|n=abcdefghij12;bb=1;toolong99=9|0",
+    "S",
+    "G",
+    "G toolong99",
+    "S",
+    "G x",
+    "L z1||Z",
+    "L Z1|x=9|V",
+    "P a-b b-c",
+    "L Z2|m=abcdefghij12,x=1|Q",
+    "L Z1|a-b=abcdefghij;x=9;a-b=1|B",
+    "G abcdefgh",
+    "L Z0|KEY=9,x=1,zz99=abcdefghij|3",
+    "P key 9",
+    "P x 9",
+    "P Key 9",
+    "G KEY",
+    "G toolong99",
+    "P zz99 abcdefghij12",
+    "L Z0|zz99=abcdefghij1,abcdefgh=9,abcdefgh=1,X=b-c|O",
+    "G bb",
+    "L z1|m=b-c,a-b=abcdefghij12|6",
+    "L Z1|bb=abcdefghij12;zz99=b-c;x=abcdefghij1;X=1|A",
+    "L Z0|n=two2,X=abcdefghij1,toolong99=b-c|3",
+    "L z1|m=1,m=abcdefghij12|6",
+    "P m abcdefghij1",
+    "G m junk",
+    "S",
+    "P KEY 0123456789012",
+    "P a-b abcdefghij",
+    "P toolong99 two2",
+    "P n 0123456789012",
+    "P x 1",
+    "L Z1|KEY=two2;a-b=b-c;bb=b-c|N",
+    "G KEY",
+    "P a two2",
+    "L Z1||D",
+    "S",
+    "P toolong99 0123456789012",
+    "L",
+    "G key",
+    "G toolong99",
+    "G a-b",
+    "L Z2|Key=abcdefghij",
+    "P m b-c",
+    "S",
+    "S x",
+    "L Z1|n=1;a=9;Key=b-c;bb=1|Z",
+    "G KEY",
+    "P",
+    "L z1|bb=b-c,zz99=9,bb=abcdefghij12,m=two2|0",
+    "P",
+    "L Z2|x=abcdefghij,zz99=b-c|3",
+    "P x abcdefghij1",
+    "L Z1|n=abcdefghij12;a=9;n=b-c;abcdefgh=b-c|K",
+    "S",
+    "L Z1||D tail",
+    "P a abcdefghij",
+    "G bb",
+    "S",
+    "L Z1||0",
+    "L Z0|toolong99=1,n=1,zz99=b-c|V",
+    "G abcdefgh",
+    "G abcdefgh",
+    "S",
+    "G zz99 junk",
+    "P Key two2 extra tail",
+    "G n",
+    "P a 0123456789012",
+    "L z1||1",
+    "P abcdefgh abcdefghij1",
+    "L Z1|Key=9;Key=1;zz99=1;X=abcdefghij12|F",
+    "L Z2|KEY=b-c,m=abcdefghij12,n=9,KEY=9|9",
+    "P x 0",
+    "P abcdefgh 0123456789012",
+    "G a",
+    "P a abcdefghij12",
+    "G abcdefgh",
+    "L z1|x=abcdefghij12,zz99=1,a-b=abcdefghij12|0",
+    "P abcdefgh two2",
+    "L Z0|bb=abcdefghij1,n=two2,Key=9,a=two2|5",
+    "L Z2|n=1,m=1,Key=two2,Key=two2|0",
+    "P",
+    "P n 0",
+    "G abcdefgh",
+    "P m 0123456789012 extra tail",
+    "L Z1|m=abcdefghij12;a-b=abcdefghij;KEY=abcdefghij12|N",
+    "G n",
+    "G a junk",
+    "P X 1",
+    "G toolong99",
+    "P a-b 0",
+    "S",
+    "L Z1||0",
+    "G a-b",
+    "P x b-c",
+    "p a 1",
+    "L Z0|m=abcdefghij12|0",
+    "P",
+    "L Z0|x=abcdefghij,zz99=abcdefghij12|1",
+    "S x",
+    "P Key 0123456789012",
+    "P",
+    "S",
+    "G X",
+    "G x junk",
+    "P X 0",
+    "G a",
+    "P m 9",
+    "P n 0123456789012",
+    "G bb",
+    "G a junk",
+    "P x 0123456789012",
+    "S",
+    "P KEY b-c",
+    "P a 9",
+    "P n two2",
+    "P zz99 0123456789012",
+    "P zz99 abcdefghij12",
+    "P key abcdefghij12",
+    "G",
+    "L Z1||D|Y",
+    "P n abcdefghij1",
+    "L Z2|a-b=9,bb=abcdefghij1|H",
+    "G a-b",
+    "S",
+    "G m",
+    "L Z1||D",
+    "P zz99 0123456789012",
+    "G key",
+    "S",
+    "P Key 1",
+    "S",
+    "S",
+    "S",
+    "S",
+    "L",
+    "P Key 9",
+    "G key junk",
+    "G KEY",
+    "S",
+    "L",
+    "L z1|X=abcdefghij,toolong99=b-c,Key=abcdefghij1|0",
+    "S",
+    "P x two2 extra tail",
+    "L Z2||0",
+    "P abcdefgh two2",
+    "S"
+   ],
+   "expected": [
+    "R FMT",
+    "OK 2",
+    "R FMT",
+    "OK 3",
+    "R VER",
+    "B Z1|zz99=two2;abcdefgh=1;m=abcdefghij|P",
+    "R CHK",
+    "R CHK",
+    "B Z1|zz99=two2;abcdefgh=1;m=abcdefghij|P",
+    "R FMT",
+    "R FMT",
+    "B Z1|zz99=two2;abcdefgh=1;m=abcdefghij|P",
+    "NIL",
+    "R VER",
+    "OK 1",
+    "R FMT",
+    "R VER",
+    "R FMT",
+    "NIL",
+    "OK 3",
+    "OK 4",
+    "OK 4",
+    "OK 5",
+    "V 9",
+    "R FMT",
+    "OK 5",
+    "R FMT",
+    "NIL",
+    "R VER",
+    "R CHK",
+    "R FMT",
+    "R VER",
+    "OK 6",
+    "V abcdefghij1",
+    "B Z1|KEY=9;Key=9;key=9;m=abcdefghij1;x=9;zz99=abcdefghij|7",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "OK 6",
+    "R FMT",
+    "V 9",
+    "OK 7",
+    "OK 0",
+    "B Z1||D",
+    "R FMT",
+    "R FMT",
+    "NIL",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "B Z1||D",
+    "R FMT",
+    "R FMT",
+    "NIL",
+    "R FMT",
+    "R VER",
+    "R FMT",
+    "R VER",
+    "OK 1",
+    "R FMT",
+    "B Z1|x=abcdefghij1|0",
+    "R FMT",
+    "OK 2",
+    "NIL",
+    "B Z1|x=abcdefghij1;a=abcdefghij|K",
+    "R CHK",
+    "R FMT",
+    "NIL",
+    "NIL",
+    "B Z1|x=abcdefghij1;a=abcdefghij|K",
+    "NIL",
+    "OK 3",
+    "NIL",
+    "R FMT",
+    "R VER",
+    "OK 4",
+    "OK 4",
+    "R VER",
+    "OK 4",
+    "R FMT",
+    "NIL",
+    "OK 5",
+    "NIL",
+    "R VER",
+    "OK 6",
+    "OK 4",
+    "R VER",
+    "R FMT",
+    "OK 4",
+    "NIL",
+    "R FMT",
+    "R FMT",
+    "V 0",
+    "V two2",
+    "OK 5",
+    "R FMT",
+    "R FMT",
+    "B Z1|Key=9;X=1;a=two2;bb=abcdefghij1;n=0|I",
+    "R CHK",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "R CHK",
+    "R FMT",
+    "OK 2",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "B Z1|x=abcdefghij;zz99=abcdefghij|G",
+    "NIL",
+    "V abcdefghij",
+    "OK 3",
+    "NIL",
+    "OK 4",
+    "R FMT",
+    "NIL",
+    "NIL",
+    "R FMT",
+    "B Z1|x=abcdefghij;zz99=abcdefghij;X=0;m=9|A",
+    "R FMT",
+    "OK 5",
+    "OK 6",
+    "R FMT",
+    "OK 6",
+    "OK 7",
+    "R FMT",
+    "R FMT",
+    "OK 7",
+    "R VER",
+    "R FMT",
+    "B Z1|x=abcdefghij;zz99=abcdefghij;X=0;m=9;a=9;n=abcdefghij1;key=abcdefghij|I",
+    "V 9",
+    "OK 0",
+    "R FMT",
+    "NIL",
+    "B Z1||D",
+    "OK 1",
+    "B Z1|Key=1|I",
+    "B Z1|Key=1|I",
+    "B Z1|Key=1|I",
+    "B Z1|Key=1|I",
+    "R FMT",
+    "OK 1",
+    "NIL",
+    "NIL",
+    "B Z1|Key=9|2",
+    "R FMT",
+    "R VER",
+    "B Z1|Key=9|2",
+    "OK 2",
+    "R VER",
+    "OK 3",
+    "B Z1|Key=9;x=two2;abcdefgh=two2|A",
+    "X 28 27 8 71"
+   ]
+  }
+ ]
+}

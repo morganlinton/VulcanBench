@@ -1,0 +1,269 @@
+diff --git a/freightcore.py b/freightcore.py
+index 112c012..b98d7fe 100644
+--- a/freightcore.py
++++ b/freightcore.py
+@@ -15,9 +15,23 @@ import sys
+ CLASSES = frozenset(
+     (50, 55, 60, 65, 70, 77, 85, 92, 100, 110, 125, 150, 175, 200, 250, 300, 400, 500)
+ )
+-DIM_DIVISOR = 5000
+-SERVICES = ("G", "X", "P")
+-SURCHARGE_PCT = {"G": 0, "X": 50, "P": 25}
++DIM_DIVISOR = 5500
++SERVICES = (b"G", b"X", b"P")
++# Zone 99 carries a flat $125.00 remote surcharge, added after rounding.
++ZONE99_FLAT = 12500
++# Express shipments billed over 750 kg in zones 40-49 take a 65% surcharge
++# on the base instead of the usual 50%.
++EXPRESS_BULK_ZONE_LO = 40
++EXPRESS_BULK_ZONE_HI = 49
++EXPRESS_BULK_MIN_BILLABLE = 750
++EXPRESS_PCT = 50
++EXPRESS_BULK_PCT = 65
++# The engine reads stdin with fgets into a 1024-byte buffer, so long input
++# lines are processed as successive 1023-byte chunks.
++FGETS_CHUNK = 1023
++# Token separators used by the engine's splitter.
++_DELIMS = (b" ", b"\t", b"\r", b"\n")
++_MASK64 = (1 << 64) - 1
+ 
+ 
+ def _round_half_up(numerator: int, denominator: int) -> int:
+@@ -27,8 +41,42 @@ def _round_half_up(numerator: int, denominator: int) -> int:
+     return quotient
+ 
+ 
+-def _ceil_div(numerator: int, denominator: int) -> int:
+-    return -(-numerator // denominator)
++def _round_half_even(numerator: int, denominator: int) -> int:
++    quotient, remainder = divmod(numerator, denominator)
++    twice = 2 * remainder
++    if twice > denominator or (twice == denominator and quotient % 2 == 1):
++        return quotient + 1
++    return quotient
++
++
++def _to_signed64(value: int) -> int:
++    value &= _MASK64
++    return value - (1 << 64) if value >= (1 << 63) else value
++
++
++def _is_digits(token: bytes) -> bool:
++    return len(token) > 0 and all(48 <= c <= 57 for c in token)
++
++
++def _is_alnum_ascii(token: bytes) -> bool:
++    return len(token) > 0 and all(
++        48 <= c <= 57 or 65 <= c <= 90 or 97 <= c <= 122 for c in token
++    )
++
++
++def _split_tokens(chunk: bytes) -> list[bytes]:
++    tokens: list[bytes] = []
++    current = bytearray()
++    for byte in chunk:
++        if byte in (32, 9, 13, 10):
++            if current:
++                tokens.append(bytes(current))
++                current = bytearray()
++        else:
++            current.append(byte)
++    if current:
++        tokens.append(bytes(current))
++    return tokens
+ 
+ 
+ def zone_rate(zone: int) -> int:
+@@ -37,45 +85,45 @@ def zone_rate(zone: int) -> int:
+ 
+ 
+ class Shipment:
+-    def __init__(self, line: str):
+-        self.tokens = line.split()
+-        self.shipid = "?"
++    def __init__(self, tokens: list[bytes]):
++        self.tokens = tokens
++        self.shipid = b"?"
+         if (
+-            len(self.tokens) >= 2
+-            and 1 <= len(self.tokens[1]) <= 10
+-            and self.tokens[1].isalnum()
++            len(tokens) >= 2
++            and 1 <= len(tokens[1]) <= 10
++            and _is_alnum_ascii(tokens[1])
+         ):
+-            self.shipid = self.tokens[1]
+-        self.error: str | None = None
++            self.shipid = tokens[1]
++        self.error: bytes | None = None
+         self.zone = 0
+         self.cls = 0
+         self.weight = 0
+         self.length = self.width = self.height = 0
+-        self.svc = ""
++        self.svc = b""
+         self.charge = 0
+ 
+     def parse(self) -> None:
+         tok = self.tokens
+-        if tok[0] != "S":
+-            self.error = "FMT"
++        if not tok or tok[0] != b"S":
++            self.error = b"FMT"
+             return
+-        if len(tok) != 9:
+-            self.error = "FMT"
++        if len(tok) < 9:
++            self.error = b"FMT"
+             return
+-        if self.shipid == "?":
+-            self.error = "FMT"
++        if self.shipid == b"?":
++            self.error = b"FMT"
+             return
+         zone, cls, weight = tok[2], tok[3], tok[4]
+         dims = tok[5:8]
+         svc = tok[8]
+         if (
+-            not (len(zone) == 2 and zone.isdigit())
+-            or not (len(cls) == 3 and cls.isdigit())
+-            or not (1 <= len(weight) <= 6 and weight.isdigit())
+-            or not all(1 <= len(d) <= 4 and d.isdigit() for d in dims)
++            not (len(zone) == 2 and _is_digits(zone))
++            or not (len(cls) == 3 and _is_digits(cls))
++            or not (1 <= len(weight) <= 6 and _is_digits(weight))
++            or not all(1 <= len(d) <= 4 and _is_digits(d) for d in dims)
+             or len(svc) != 1
+         ):
+-            self.error = "FMT"
++            self.error = b"FMT"
+             return
+         self.zone = int(zone)
+         self.cls = int(cls)
+@@ -83,62 +131,99 @@ class Shipment:
+         self.length, self.width, self.height = (int(d) for d in dims)
+         self.svc = svc
+         if self.zone == 0:
+-            self.error = "ZONE"
++            self.error = b"ZONE"
+             return
+         if self.cls not in CLASSES:
+-            self.error = "CLASS"
+-            return
+-        if self.weight == 0:
+-            self.error = "WEIGHT"
++            self.error = b"CLASS"
+             return
+         if self.length == 0 or self.width == 0 or self.height == 0:
+-            self.error = "DIM"
++            if self.weight == 0:
++                self.error = b"WEIGHT"
++            else:
++                self.error = b"DIM"
+             return
+         if self.svc not in SERVICES:
+-            self.error = "SVC"
++            self.error = b"SVC"
+             return
+ 
+     def compute(self) -> None:
+         volume = self.length * self.width * self.height
+-        dim_weight = _ceil_div(volume, DIM_DIVISOR)
++        dim_weight = _round_half_up(volume, DIM_DIVISOR)
+         billable = max(self.weight, dim_weight)
+         base = billable * zone_rate(self.zone)
+-        class_multiplied = _round_half_up(base * self.cls, 100)
+-        pct = SURCHARGE_PCT[self.svc]
+-        charge = class_multiplied
+-        if pct:
+-            charge += _round_half_up(class_multiplied * pct, 100)
++        cls = self.cls
++        if dim_weight > self.weight and cls in (50, 55):
++            cls = 70
++        class_multiplied = _round_half_up(base * cls, 100)
++        if self.svc == b"X":
++            if (
++                billable > EXPRESS_BULK_MIN_BILLABLE
++                and EXPRESS_BULK_ZONE_LO <= self.zone <= EXPRESS_BULK_ZONE_HI
++            ):
++                pct = EXPRESS_BULK_PCT
++            else:
++                pct = EXPRESS_PCT
++            subtotal = base + _round_half_up(base * pct, 100)
++            charge = _round_half_up(subtotal * cls, 100)
++        elif self.svc == b"P":
++            charge = class_multiplied + _round_half_even(class_multiplied, 4)
++        else:
++            charge = class_multiplied
++        if self.zone == 99:
++            charge += ZONE99_FLAT
+         self.charge = charge
+ 
+-    def emit(self) -> str:
++    def emit(self) -> bytes:
+         if self.error:
+-            return f"R {self.shipid} {self.error}"
+-        return f"C {self.shipid} {self.charge}"
++            return b"R " + self.shipid + b" " + self.error
++        return b"C " + self.shipid + b" " + str(self.charge).encode("ascii")
++
++
++def _iter_chunks(data: bytes):
++    start = 0
++    end = len(data)
++    while start < end:
++        newline = data.find(b"\n", start)
++        if newline < 0:
++            piece = data[start:]
++            start = end
++        else:
++            piece = data[start : newline + 1]
++            start = newline + 1
++        while len(piece) > FGETS_CHUNK:
++            yield piece[:FGETS_CHUNK]
++            piece = piece[FGETS_CHUNK:]
++        yield piece
+ 
+ 
+-def process(lines: list[str]) -> list[str]:
++def process(data: bytes) -> list[bytes]:
+     out = []
+     accepted = rejected = total = 0
+-    for raw in lines:
+-        line = raw.rstrip("\r\n")
+-        if not line.split():
++    for chunk in _iter_chunks(data):
++        if b"\x00" in chunk:
++            chunk = chunk.split(b"\x00", 1)[0]
++        tokens = _split_tokens(chunk)
++        if not tokens:
+             continue
+-        shipment = Shipment(line)
++        shipment = Shipment(tokens)
+         shipment.parse()
+         if shipment.error is None:
+             shipment.compute()
+-            accepted += 1
+-            total += shipment.charge
++            accepted = (accepted + 1) & _MASK64
++            total = (total + shipment.charge) & _MASK64
+         else:
+-            rejected += 1
++            rejected = (rejected + 1) & _MASK64
+         out.append(shipment.emit())
+-    out.append(f"X {accepted} {rejected} {total}")
++    out.append(
++        b"X %d %d %d"
++        % (_to_signed64(accepted), _to_signed64(rejected), _to_signed64(total))
++    )
+     return out
+ 
+ 
+ def main() -> None:
+-    for line in process(sys.stdin.readlines()):
+-        print(line)
++    data = sys.stdin.buffer.read()
++    sys.stdout.buffer.write(b"\n".join(process(data)) + b"\n")
+ 
+ 
+ if __name__ == "__main__":

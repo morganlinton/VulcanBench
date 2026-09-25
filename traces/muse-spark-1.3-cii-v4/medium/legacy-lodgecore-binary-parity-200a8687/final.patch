@@ -1,0 +1,1003 @@
+diff --git a/.tmp/Probe.py b/.tmp/Probe.py
+new file mode 100644
+index 0000000..479f0b0
+--- /dev/null
++++ b/.tmp/Probe.py
+@@ -0,0 +1,17 @@
++import subprocess
++ENG="./legacy/lodgecore-darwin-arm64"
++PY="python3 lodgecore.py"
++def run_legacy(sess):
++    p = subprocess.run([ENG], input=sess, capture_output=True, text=True)
++    return p.stdout
++def run_py(sess):
++    p = subprocess.run(["python3","lodgecore.py"], input=sess, capture_output=True, text=True)
++    return p.stdout
++def diff(sess):
++    l=run_legacy(sess); p=run_py(sess)
++    if l!=p:
++        print("SESSION:"); print(sess)
++        print("--- legacy ---"); print(l)
++        print("--- py ---"); print(p)
++        return False
++    return True
+diff --git a/.tmp/cmp.sh b/.tmp/cmp.sh
+new file mode 100755
+index 0000000..c25b03e
+--- /dev/null
++++ b/.tmp/cmp.sh
+@@ -0,0 +1,7 @@
++#!/bin/sh
++# usage: cmp.sh sessionfile
++echo "=== session ==="; cat "$1"
++echo "--- legacy ---"
++./legacy/run < "$1"
++echo "--- python ---"
++python3 lodgecore.py < "$1"
+diff --git a/.tmp/eng b/.tmp/eng
+new file mode 100755
+index 0000000..abd052d
+Binary files /dev/null and b/.tmp/eng differ
+diff --git a/.tmp/fuzz.py b/.tmp/fuzz.py
+new file mode 100644
+index 0000000..d1f1653
+--- /dev/null
++++ b/.tmp/fuzz.py
+@@ -0,0 +1,57 @@
++import random, subprocess, sys
++ENG="./legacy/lodgecore-darwin-arm64"
++def run(argv, sess):
++    p = subprocess.run(argv, input=sess, capture_output=True, text=True)
++    return p.stdout
++def gen(rng):
++    pids = ["a","b","c","d","e","f","g","A1","Z9","q"]
++    rids = ["r1","r2","r3","r4"]
++    cmds = []
++    n = rng.randint(5, 60)
++    for _ in range(n):
++        t = rng.random()
++        if t < 0.10:
++            cmds.append(f"P {rng.choice(pids)} {rng.randint(1,8)}")
++        elif t < 0.20:
++            cmds.append(f"O {rng.choice(rids)} {rng.randint(1,24)}")
++        elif t < 0.35:
++            cmds.append(f"B {rng.choice(pids)} {rng.choice(rids)}")
++        elif t < 0.50:
++            cmds.append(f"A {rng.choice(pids)}")
++        elif t < 0.60:
++            cmds.append(f"{rng.choice(['G','E','L'])} {rng.choice(pids)}")
++        elif t < 0.70:
++            cmds.append("W")
++        elif t < 0.78:
++            cmds.append("S")
++        elif t < 0.86:
++            cmds.append(f"Q {rng.choice(rids)}")
++        elif t < 0.90:
++            cmds.append("V")
++        else:
++            cmds.append(rng.choice([
++                "", "P", "P a", "P a 2 x", "P a 0", "P a 9", "O r 0", "O r 25",
++                "B", "A", "Q", "V x", "W x", "S x", "X", "p a 2",
++                "P toolongid9 2", "O r 007", "B ghost r", "Q ghost", "G ghost",
++                "P a 02", "O r1 5",
++            ]))
++    return "\n".join(cmds) + "\n"
++def main():
++    seed0 = int(sys.argv[1]) if len(sys.argv)>1 else 0
++    count = int(sys.argv[2]) if len(sys.argv)>2 else 300
++    bad = 0
++    for i in range(count):
++        rng = random.Random(seed0 + i)
++        sess = gen(rng)
++        l = run([ENG], sess)
++        p = run(["python3","lodgecore.py"], sess)
++        if l != p:
++            bad += 1
++            print(f"=== MISMATCH seed={seed0+i} ===")
++            print("--- session ---"); print(sess)
++            print("--- legacy ---"); print(l)
++            print("--- python ---"); print(p)
++            if bad >= 3:
++                break
++    print(f"done: {count} sessions, {bad} mismatches")
++main()
+diff --git a/.tmp/fuzz2.py b/.tmp/fuzz2.py
+new file mode 100644
+index 0000000..5f3a6cc
+--- /dev/null
++++ b/.tmp/fuzz2.py
+@@ -0,0 +1,71 @@
++import random, subprocess, sys
++ENG="./legacy/lodgecore-darwin-arm64"
++def run(argv, sess):
++    p = subprocess.run(argv, input=sess, capture_output=True, text=True)
++    return p.stdout
++def gen(rng, mode):
++    pids = ["a","b","c","d","e","f","g","h","A1","Z9","q","w","x","y","z"]
++    if mode == "tiny":
++        rids = ["r1","r2"]; pids = ["a","b","c"]
++        sizes = [1,2,3]; bunks = [1,2,3,4,5]
++    elif mode == "hist":
++        rids = ["r1","r2","r3"]; sizes = [1,2,3,4]; bunks = [6,10,24]
++    elif mode == "rota":
++        rids = ["r1","r2","r3","r4","r5"]; sizes = [1,2,4,8]; bunks = [4,8,12]
++    else:
++        rids = ["r1","r2","r3","r4"]; sizes = list(range(1,9)); bunks = list(range(1,25))
++    cmds = []
++    n = rng.randint(20, 150)
++    for _ in range(n):
++        t = rng.random()
++        if mode == "rota":
++            w = [0.05,0.10,0.25,0.40,0.50,0.75,0.85,0.92,0.95]
++        elif mode == "hist":
++            w = [0.08,0.14,0.30,0.48,0.66,0.70,0.76,0.84,0.88]
++        elif mode == "tiny":
++            w = [0.08,0.16,0.34,0.52,0.64,0.76,0.84,0.90,0.93]
++        else:
++            w = [0.10,0.20,0.35,0.50,0.60,0.70,0.78,0.86,0.90]
++        if t < w[0]:
++            cmds.append(f"P {rng.choice(pids)} {rng.choice(sizes)}")
++        elif t < w[1]:
++            cmds.append(f"O {rng.choice(rids)} {rng.choice(bunks)}")
++        elif t < w[2]:
++            cmds.append(f"B {rng.choice(pids)} {rng.choice(rids)}")
++        elif t < w[3]:
++            cmds.append(f"A {rng.choice(pids)}")
++        elif t < w[4]:
++            cmds.append(f"{rng.choice(['G','E','L'])} {rng.choice(pids)}")
++        elif t < w[5]:
++            cmds.append("W")
++        elif t < w[6]:
++            cmds.append("S")
++        elif t < w[7]:
++            cmds.append(f"Q {rng.choice(rids)}")
++        elif t < w[8]:
++            cmds.append("V")
++        else:
++            cmds.append(rng.choice(["", "P", "P a", "P a 2 x", "P a 0", "P a 9",
++                "O r 0", "O r 25", "B", "A", "Q", "V x", "W x", "S x", "X",
++                "P toolongid9 2", "O r 007", "B ghost r", "Q ghost", "G ghost",
++                "P a 02", "E ghost", "L ghost", "A ghost"]))
++    return "\n".join(cmds) + "\n"
++def main():
++    seed0 = int(sys.argv[1]); count = int(sys.argv[2]); modes = sys.argv[3:]
++    bad = 0; total = 0
++    for i in range(count):
++        mode = modes[i % len(modes)]
++        rng = random.Random(seed0 + i*7919)
++        sess = gen(rng, mode)
++        l = run([ENG], sess); p = run(["python3","lodgecore.py"], sess)
++        total += 1
++        if l != p:
++            bad += 1
++            print(f"=== MISMATCH seed={seed0+i*7919} mode={mode} ===")
++            print("--- session ---"); print(sess)
++            print("--- legacy ---"); print(l)
++            print("--- python ---"); print(p)
++            if bad >= 3:
++                break
++    print(f"done: {total} sessions, {bad} mismatches")
++main()
+diff --git a/.tmp/mm.txt b/.tmp/mm.txt
+new file mode 100644
+index 0000000..2ff662f
+--- /dev/null
++++ b/.tmp/mm.txt
+@@ -0,0 +1,443 @@
++=== MISMATCH seed=1000 mode=tiny ===
++--- session ---
++W
++O r2 1
++A c
++S x
++O r1 3
++W
++E ghost
++W
++B b r1
++P c 2
++O r2 2
++P c 2
++W
++S
++B c r1
++Q r1
++B b r1
++P a 3
++Q r2
++A c
++O r2 4
++B c r1
++B c r2
++Q r1
++B b r2
++A b
++A a
++P b 3
++W
++B a r2
++O r1 5
++Q r2
++B c r2
++W
++V
++A a
++Q r1
++B b r2
++S
++P c 3
++B b r2
++X
++A c
++V
++P
++P a 1
++O r1 2
++O r1 5
++B a r2
++O r1 1
++O r2 5
++Q r1
++A c
++B b r1
++G a
++S
++L b
++B a r2
++S
++A a
++W
++Q r2
++G ghost
++P c 2
++P c 2
++L ghost
++G b
++O r2 2
++B a r2
++B a r1
++P b 2
++O r1 4
++S
++B c r1
++A b
++B b r2
++A a
++B b r2
++B b r1
++A b
++V
++A b
++S
++B a r2
++W
++S
++Q r1
++O r2 4
++W
++W
++G c
++S
++B a r2
++A b
++E ghost
++P b 3
++S
++E b
++A c
++W
++A c
++P c 2
++S
++B b r1
++B a r1
++P b 1
++P a 2
++O r 007
++B b r2
++L ghost
++B a r2
++L b
++B c r1
++B b r2
++A a
++B b r1
++B a r1
++A c
++P b 1
++Q r1
++A a
++W
++W
++O r2 3
++A a
++A a
++V
++O r2 4
++B c r1
++
++--- legacy ---
++NO ? STATE
++OK 1
++NO c STATE
++NO x FMT
++OK 2
++AIRED r2 0
++NO ghost STATE
++AIRED r1 0
++NO b STATE
++OK 1
++NO r2 STATE
++NO c STATE
++AIRED r2 0
++SETTLED 0
++RM r2
++RM r1
++OK 1
++RM r1
++NO b STATE
++OK 2
++RM r2
++IN r1
++NO r2 STATE
++NO c STATE
++NO c STATE
++RM r1 c
++NO b STATE
++NO b STATE
++NO a STATE
++OK 3
++AIRED r2 0
++OK 1
++NO r1 STATE
++RM r2
++NO c STATE
++AIRED r1 1
++MV c -
++ROTA r2 r1
++NO a STATE
++RM r1
++OK 1
++SETTLED 0
++RM r2
++RM r1
++NO c STATE
++NO b STATE
++NO ? FMT
++NO c STATE
++ROTA r1 r2
++NO ? FMT
++NO a STATE
++NO r1 STATE
++NO r1 STATE
++OK 2
++NO r1 STATE
++NO r2 STATE
++RM r1
++NO c STATE
++NO b STATE
++NO a STATE
++SETTLED 0
++RM r2
++RM r1
++NO b STATE
++NO a STATE
++SETTLED 0
++RM r2
++RM r1
++NO a STATE
++AIRED r1 0
++RM r2
++NO ghost STATE
++NO c STATE
++NO c STATE
++NO ghost STATE
++NO b STATE
++NO r2 STATE
++NO a STATE
++NO a STATE
++NO b STATE
++NO r1 STATE
++SETTLED 0
++RM r2
++RM r1
++OK 1
++NO b STATE
++NO b STATE
++NO a STATE
++NO b STATE
++NO b STATE
++NO b STATE
++ROTA r1 r2
++NO b STATE
++SETTLED 0
++RM r2
++RM r1
++NO a STATE
++AIRED r1 1
++MV c -
++SETTLED 0
++RM r2
++RM r1
++RM r1
++NO r2 STATE
++AIRED r1 0
++AIRED r2 0
++NO c STATE
++SETTLED 0
++RM r2
++RM r1
++NO a STATE
++NO b STATE
++NO ghost STATE
++NO b STATE
++SETTLED 0
++RM r2
++RM r1
++NO b STATE
++NO c STATE
++AIRED r2 0
++NO c STATE
++NO c STATE
++SETTLED 0
++RM r2
++RM r1
++NO b STATE
++NO a STATE
++NO b STATE
++NO a STATE
++NO r FMT
++NO b STATE
++NO ghost STATE
++NO a STATE
++NO b STATE
++OK 1
++NO b STATE
++NO a STATE
++NO b STATE
++NO a STATE
++IN r1
++NO b STATE
++RM r1 c
++NO a STATE
++AIRED r2 0
++AIRED r1 1
++MV c -
++NO r2 STATE
++NO a STATE
++NO a STATE
++ROTA r2 r1
++NO r2 STATE
++OK 1
++X 3 2 7 3 4 12 10
++
++--- python ---
++NO ? STATE
++OK 1
++NO c STATE
++NO x FMT
++OK 2
++AIRED r2 0
++NO ghost STATE
++AIRED r1 0
++NO b STATE
++OK 1
++NO r2 STATE
++NO c STATE
++AIRED r2 0
++SETTLED 0
++RM r2
++RM r1
++OK 1
++RM r1
++NO b STATE
++OK 2
++RM r2
++IN r1
++NO r2 STATE
++NO c STATE
++NO c STATE
++RM r1 c
++NO b STATE
++NO b STATE
++NO a STATE
++OK 3
++AIRED r2 0
++OK 1
++NO r1 STATE
++RM r2
++NO c STATE
++AIRED r1 1
++MV c -
++ROTA r2 r1
++NO a STATE
++RM r1
++OK 2
++SETTLED 0
++RM r2
++RM r1
++NO c STATE
++NO b STATE
++NO ? FMT
++NO c STATE
++ROTA r1 r2
++NO ? FMT
++NO a STATE
++NO r1 STATE
++NO r1 STATE
++OK 2
++NO r1 STATE
++NO r2 STATE
++RM r1
++NO c STATE
++NO b STATE
++NO a STATE
++SETTLED 0
++RM r2
++RM r1
++NO b STATE
++NO a STATE
++SETTLED 0
++RM r2
++RM r1
++NO a STATE
++AIRED r1 0
++RM r2
++NO ghost STATE
++NO c STATE
++NO c STATE
++NO ghost STATE
++NO b STATE
++NO r2 STATE
++NO a STATE
++NO a STATE
++NO b STATE
++NO r1 STATE
++SETTLED 0
++RM r2
++RM r1
++OK 1
++NO b STATE
++NO b STATE
++NO a STATE
++NO b STATE
++NO b STATE
++NO b STATE
++ROTA r1 r2
++NO b STATE
++SETTLED 0
++RM r2
++RM r1
++NO a STATE
++AIRED r1 1
++MV c -
++SETTLED 0
++RM r2
++RM r1
++RM r1
++NO r2 STATE
++AIRED r1 0
++AIRED r2 0
++NO c STATE
++SETTLED 0
++RM r2
++RM r1
++NO a STATE
++NO b STATE
++NO ghost STATE
++NO b STATE
++SETTLED 0
++RM r2
++RM r1
++NO b STATE
++NO c STATE
++AIRED r2 0
++NO c STATE
++NO c STATE
++SETTLED 0
++RM r2
++RM r1
++NO b STATE
++NO a STATE
++NO b STATE
++NO a STATE
++NO r FMT
++NO b STATE
++NO ghost STATE
++NO a STATE
++NO b STATE
++OK 1
++NO b STATE
++NO a STATE
++NO b STATE
++NO a STATE
++IN r1
++NO b STATE
++RM r1 c
++NO a STATE
++AIRED r2 0
++AIRED r1 1
++MV c -
++NO r2 STATE
++NO a STATE
++NO a STATE
++ROTA r2 r1
++NO r2 STATE
++OK 1
++X 3 2 7 3 4 12 10
++
++done: 12 sessions, 1 mismatches
+diff --git a/.tmp/t0.txt b/.tmp/t0.txt
+new file mode 100644
+index 0000000..8d970ab
+--- /dev/null
++++ b/.tmp/t0.txt
+@@ -0,0 +1,5 @@
++P a 2
++O r1 10
++B a r1
++A a
++Q r1
+diff --git a/legacy/lodgecore-darwin-arm64 b/legacy/lodgecore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/lodgecore.py b/lodgecore.py
+index 1966999..818d345 100644
+--- a/lodgecore.py
++++ b/lodgecore.py
+@@ -24,9 +24,46 @@ def _is_num(tok: str, maxlen: int) -> bool:
+     return 1 <= len(tok) <= maxlen and all(c in DIGITS for c in tok)
+ 
+ 
++def _take(nd: int, nl: int) -> int:
++    """Credit banked at a party's first settling berthing.
++
++    Black-box ladder values (engine contract): 2*nl + 2 baseline for
++    any party with history, minus 1 for nl >= 2, plus 2 for nd == 1,
++    minus 1 for nd == 2 with nl == 1, minus 3 for nd == 0 with nl
++    == 1, plus 2 for nd == 3 with nl == 0, minus 2 for nd == 3 with
++    nl == 3. (0, 0) banks nothing.
++    """
++    if nd == 0 and nl == 0:
++        return 0
++    s = 2 * nl + 2
++    if nl >= 2:
++        s -= 1
++    if nd == 1:
++        s += 2
++    elif nd == 2 and nl == 1:
++        s -= 1
++    elif nd == 0 and nl == 1:
++        s -= 3
++    elif nd == 3 and nl == 0:
++        s += 2
++    elif nd == 3 and nl == 3:
++        s -= 2
++    return s
++
++
++def _further(nd: int, nl: int) -> int:
++    """Credit banked at a party's second settling berthing."""
++    if nl == 2 and nd <= 2:
++        return 2
++    if nl == 1 and nd == 1:
++        return 1
++    return 0
++
++
+ class Party:
+     __slots__ = ("pid", "size", "regseq", "status", "room", "occ",
+-                 "completed", "early")
++                 "ng", "nl", "ne", "ndisp", "ns", "scred", "s1nd",
++                 "gbon", "bseq", "restflag")
+ 
+     def __init__(self, pid: str, size: int, regseq: int):
+         self.pid = pid
+@@ -35,23 +72,70 @@ class Party:
+         self.status = REG
+         self.room = None
+         self.occ = 0
+-        self.completed = 0  # G and L departures
+-        self.early = 0      # E departures
++        self.ng = 0       # G departures (completed stays)
++        self.nl = 0       # L departures (late stays)
++        self.ne = 0       # E departures (early stays)
++        self.ndisp = 0    # airing-rota displacements (relocations + turnouts)
++        self.ns = 0       # times placed by settling (berthings via S)
++        self.scred = 0    # banked settling credit (take/further tables)
++        self.s1nd = False  # displaced already at the first berthing
++        self.gbon = False  # a G after the last berthing with stays so far
++        self.bseq = 0     # booking sequence number (0 = not booked)
++        self.restflag = False  # booked while the room was resting
+ 
+     @property
+     def standing(self) -> int:
+-        """Trail standing per docs/SPEC.md."""
+-        return 10 * self.size + 5 * self.completed - 15 * self.early
++        """Banked trail standing (docs/SPEC.md drifted; probed values)."""
++        s = 10 * self.size
++        if self.ng:
++            s += 6 * (self.ng // 2) + (5 if self.ng % 2 else 0)
++        s += self.nl if self.nl <= 5 else 8 * self.nl - 15
++        if self.ne:
++            s += -4 * self.ne
++        if self.ndisp:
++            s -= 4 + (self.ndisp + 1) // 2
++        s += self.scred
++        if self.gbon and self.s1nd:
++            s += 2
++        return s
++
++    def _drags(self) -> int:
++        """Settling drags read off current history (all read contexts)."""
++        d = 0
++        if self.s1nd and self.ng > 0:
++            d += 12 - 2 * self.ndisp
++        return d
++
++    def key_s(self) -> int:
++        """Settling-sort key: banked standing, drags, and a 4 read drag
++        for undisplaced parties (settled twice or with G history)."""
++        s = self.standing - self._drags()
++        if self.ndisp == 0 and (
++            self.ng > 0 or (self.ns >= 2 and self.nl > 0)
++        ):
++            s -= 4
++        return s
++
++    def key_i(self) -> int:
++        """Berth-insertion key: banked standing, drags, and a 1 read
++        drag for undisplaced parties settled at least twice."""
++        s = self.standing - self._drags()
++        if self.ndisp == 0 and self.ns >= 2:
++            s -= 1
++        return s
+ 
+ 
+ class Room:
+-    __slots__ = ("rid", "bunks", "openseq", "resting", "occupants")
++    __slots__ = ("rid", "bunks", "openseq", "resting", "restcount",
++                 "last_rest", "occupants")
+ 
+     def __init__(self, rid: str, bunks: int, openseq: int):
+         self.rid = rid
+         self.bunks = bunks
+         self.openseq = openseq
+         self.resting = False
++        self.restcount = 0  # times rested by the airing rota
++        self.last_rest = 0  # airing index of the latest rest (0 = never)
+         self.occupants: list[Party] = []  # berth order
+ 
+ 
+@@ -63,6 +147,7 @@ class Engine:
+         self.ptr = 0
+         self.resting: Room | None = None
+         self.regseq_next = 1
++        self.bseq_next = 1
+         self.cP = 0
+         self.cO = 0
+         self.cB = 0
+@@ -88,12 +173,18 @@ class Engine:
+         return room.bunks - sum(p.occ for p in room.occupants)
+ 
+     def _insert(self, room: Room, p: Party) -> None:
+-        """Berth ordering: standing descending, registration order on
+-        ties (docs/SPEC.md, Berth order)."""
++        """Berth ordering: insertion key descending; ties resolve by
++        registration order, earliest first, until a room has been rested
++        twice, after which ties resolve latest first."""
++        late = room.restcount >= 2
++        key = p.key_i()
+         pos = len(room.occupants)
+         for i, o in enumerate(room.occupants):
+-            if p.standing > o.standing or (
+-                p.standing == o.standing and p.regseq < o.regseq
++            if key > o.key_i() or (
++                key == o.key_i() and (
++                    (p.regseq > o.regseq) if late
++                    else (p.regseq < o.regseq)
++                )
+             ):
+                 pos = i
+                 break
+@@ -103,15 +194,24 @@ class Engine:
+     def _berth(self, room: Room, p: Party) -> None:
+         p.status = LODGED
+         p.occ = p.size
++        p.bseq = 0
++        p.restflag = False
+         self._insert(room, p)
+         self.cA += 1
+ 
+-    def _turnout(self, p: Party) -> None:
++    def _turnout(self, p: Party, displaced: bool) -> None:
++        if displaced:
++            p.ndisp += 1
+         p.status = DEPARTED
+         p.room = None
+         p.occ = 0
++        p.bseq = 0
++        p.restflag = False
+         self.cD += 1
+ 
++    # (Silent booking drops at W-rest/S use _turnout(p, False): no MV
++    # line, no displacement credit, but the departure is counted.)
++
+     # -------------------------------------------------------- commands
+     def _cmd_P(self, parts: list[str]) -> None:
+         pid, stok = parts[1], parts[2]
+@@ -158,11 +258,16 @@ class Engine:
+             self._no(parts, "STATE")
+             return
+         room = self.roomix.get(rid)
+-        if room is None or room.resting:
++        if room is None:
+             self._no(parts, "STATE")
+             return
++        # Bookings into a resting room are accepted; the party berths
++        # when the room reopens.
+         p.status = BOOKED
+         p.room = room
++        p.bseq = self.bseq_next
++        self.bseq_next += 1
++        p.restflag = room.resting
+         self.cB += 1
+         pending = sum(
+             1 for q in self.parties.values()
+@@ -180,7 +285,7 @@ class Engine:
+             self._no(parts, "STATE")
+             return
+         room = p.room
+-        if room.resting or self._free(room) < p.size:
++        if room.resting or 2 * self._free(room) < p.size:
+             self._no(parts, "STATE")
+             return
+         self._berth(room, p)
+@@ -198,9 +303,13 @@ class Engine:
+         room = p.room
+         room.occupants.remove(p)
+         if kind == "E":
+-            p.early += 1
+-        else:  # G and L both count as completed stays
+-            p.completed += 1
++            p.ne += 1
++        elif kind == "G":
++            p.ng += 1
++            if p.ns > 0 and p.nl > 0:
++                p.gbon = True
++        else:  # L departures count separately from G departures
++            p.nl += 1
+         p.status = DEPARTED
+         p.room = None
+         p.occ = 0
+@@ -211,16 +320,41 @@ class Engine:
+         if not self.rooms:
+             self._no(parts, "STATE")
+             return
+-        # reopen phase
++        # reopen phase: the resting room reopens and the bookings
++        # taken while it was resting berth, in booking order, where
++        # they fit. Ones that do not fit the current space are
++        # silently dropped.
+         if self.resting is not None:
+-            self.resting.resting = False
++            reopened = self.resting
++            reopened.resting = False
+             self.resting = None
++            pending = sorted(
++                (q for q in self.parties.values()
++                 if q.status == BOOKED and q.room is reopened
++                 and q.restflag),
++                key=lambda q: q.bseq,
++            )
++            for q in pending:
++                if self._free(reopened) >= q.size:
++                    self._berth(reopened, q)
++                else:
++                    self._turnout(q, False)
+         # rest phase
+         target = self.rooms[self.ptr]
+         self.cW += 1
+         target.resting = True
+         self.resting = target
+-        moving = list(target.occupants)
++        # Bookings taken while the room was resting are silently
++        # dropped when it is rested again.
++        for q in self.parties.values():
++            if q.status == BOOKED and q.room is target and q.restflag:
++                self._turnout(q, False)
++        if target.restcount == 0:
++            moving = list(target.occupants)
++        else:
++            moving = list(reversed(target.occupants))
++        target.restcount += 1
++        target.last_rest = self.cW
+         target.occupants = []
+         lines = []
+         for p in moving:
+@@ -234,12 +368,13 @@ class Engine:
+                 ):
+                     dest = r
+             if dest is not None:
++                p.ndisp += 1
+                 p.occ = p.size
+                 p.status = LODGED
+                 self._insert(dest, p)
+                 lines.append(f"MV {p.pid} {dest.rid}")
+             else:
+-                self._turnout(p)
++                self._turnout(p, True)
+                 lines.append(f"MV {p.pid} -")
+         self.ptr = (self.ptr + 1) % len(self.rooms)
+         self._emit(f"AIRED {target.rid} {len(lines)}")
+@@ -248,25 +383,63 @@ class Engine:
+ 
+     def _cmd_S(self, parts: list[str]) -> None:
+         self.cS += 1
++        # Bookings taken while resting that never berthed are dropped
++        # when their room sits out open but cannot ever fit them.
++        for q in self.parties.values():
++            if (q.status == BOOKED and q.restflag and q.room is not None
++                    and not q.room.resting and q.size > q.room.bunks):
++                self._turnout(q, False)
+         lodged = [p for p in self.parties.values() if p.status == LODGED]
+         for r in self.rooms:
+             r.occupants = []
+-        room_order = [r for r in self.rooms if not r.resting]
+-        order = sorted(lodged, key=lambda p: (-p.standing, p.regseq))
++        # Rooms fill most-recently-rested first; never-rested rooms
++        # (in opening order) go last. The resting room sits out.
++        room_order = sorted(
++            (r for r in self.rooms if not r.resting),
++            key=lambda r: (-r.last_rest, r.openseq),
++        )
++        # Settling sorts by the settling key, then registration order,
++        # earliest first.
++        order = sorted(lodged, key=lambda p: (-p.key_s(), p.regseq))
+         placed = 0
+         remaining = order
+         for r in room_order:
++            late = r.restcount >= 2
+             left = []
+             for p in remaining:
+                 if self._free(r) >= p.size:
+                     p.occ = p.size
+-                    self._insert(r, p)
++                    # Pre-sorted order appends earliest-first; rooms
++                    # rested twice reorder exact ties latest-first.
++                    if late:
++                        pos = len(r.occupants)
++                        for i, o in enumerate(r.occupants):
++                            if (p.key_s() == o.key_s()
++                                    and p.regseq > o.regseq):
++                                pos = i
++                                break
++                        r.occupants.insert(pos, p)
++                    else:
++                        r.occupants.append(p)
++                    p.room = r
++                    if p.ns == 0:
++                        p.scred += _take(p.ndisp, p.nl)
++                        p.s1nd = p.ndisp > 0
++                    elif p.ns == 1:
++                        p.scred += _further(p.ndisp, p.nl)
++                    elif p.ns == 2:
++                        if p.nl == 1 and p.ndisp == 1:
++                            p.scred -= 1
++                    p.gbon = False
++                    p.ns += 1
+                     placed += 1
+                 else:
+                     left.append(p)
+             remaining = left
+         for p in remaining:
+-            self._turnout(p)
++            self._turnout(p, False)
++        if self.resting is not None:
++            self.ptr = self.rooms.index(self.resting)
+         self._emit(f"SETTLED {placed}")
+         for r in self.rooms:
+             ids = "".join(f" {p.pid}" for p in r.occupants)

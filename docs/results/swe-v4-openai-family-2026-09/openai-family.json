@@ -1,0 +1,88 @@
+{
+  "rows": 551,
+  "best_effort": {
+    "astra": "max",
+    "sol": "max",
+    "terra": "max",
+    "gpt55": "extra-high",
+    "luna": "max"
+  },
+  "table_order": [
+    "astra",
+    "terra",
+    "sol",
+    "luna",
+    "gpt55"
+  ],
+  "expected_rows": {
+    "astra/low": 23,
+    "astra/medium": 23,
+    "astra/high": 23,
+    "astra/extra-high": 23,
+    "astra/max": 23,
+    "sol/low": 23,
+    "sol/medium": 23,
+    "sol/high": 23,
+    "sol/extra-high": 23,
+    "sol/max": 22,
+    "terra/low": 23,
+    "terra/medium": 23,
+    "terra/high": 23,
+    "terra/extra-high": 23,
+    "terra/max": 23,
+    "gpt55/low": 23,
+    "gpt55/medium": 23,
+    "gpt55/high": 23,
+    "gpt55/extra-high": 23,
+    "luna/low": 23,
+    "luna/medium": 23,
+    "luna/high": 23,
+    "luna/extra-high": 23,
+    "luna/max": 23
+  },
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "sources": {
+    "summaries": {
+      "runs-code-quality-maintenance-v3.4": {
+        "summary": "e0d51a74c7e6e0c4c1656e1c87b16d14b24edfbafd7b69035b5db41201786a62",
+        "protocol": "1d80e0974526f8d825f14921c9102c8eda47ec312a0981783475149e31fd8524"
+      },
+      "runs-code-quality-maintenance-v3.7": {
+        "summary": "042ed949f87f33f4a79347fc4c183eae1910aea34c7be007a800dfbcf6ea1ce9",
+        "protocol": "6f78884f8164f60ad93e3f981cf61fb6edb91882c2fdad3416112f520468e771"
+      },
+      "runs-code-quality-maintenance-v3.6": {
+        "summary": "e3ddd51feb26ec3a0808c83d7461ff041a05b9d72dad8f156030c9dc399e050f",
+        "protocol": "f6214c5c99d75e61a5803811700cec86ddbcd3c0ef727d1af5d276c2998ac486"
+      },
+      "runs-code-quality-maintenance-v3.6.1": {
+        "summary": "1618fa700ca78131bd583c3e83d035b67bdba946d584395861d122cf57c0dbad",
+        "protocol": "72f79a5afb5a3b5a413c08c57cbeaff8195d944e7f12e7147f70b50e988fc49a"
+      },
+      "runs-code-quality-maintenance-v3.5": {
+        "summary": "faea0a8e7a99c02aa18e311e0340111f77ba41c8ce535f180acc6a1911f26f0a",
+        "protocol": "e2c2afdb5149cd3999ce10b79daa7830f768c56147d75c6e88958777405a65fb"
+      }
+    },
+    "ledgers": {
+      "astra": "7fa4c18e7c8045b74a9b06527d30c38a0d652d2f7fbeff3029e0e4a3fdf15883",
+      "gpt55": "cc114b736cbdad27595c1a9154ab042acfa3239f373726aabe59f88fa0531b38",
+      "luna": "cc114b736cbdad27595c1a9154ab042acfa3239f373726aabe59f88fa0531b38",
+      "terra": "5834b8e04f2cf92bc8bea24858ab3e6cb96fd58019d3cc7bfbc3a3891f5ff2d9",
+      "terra_topup": "c108da749ef061e43dcb1a8370a5c35cc64f947911aa3a07de8c2640c9af00b4",
+      "sol": "d87d8e8ab958c098908078fe1edc3afe84786ec6ef34413e70715a613394427a"
+    }
+  },
+  "png_sha256": "2e9e79d7fac3124d367d5c5b30cbb1e20a4eb1ee566ffcf651b00c38a89dd104",
+  "supporting_table": "openai-family-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

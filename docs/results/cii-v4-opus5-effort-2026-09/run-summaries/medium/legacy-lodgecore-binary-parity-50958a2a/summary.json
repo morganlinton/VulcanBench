@@ -175,7 +175,7 @@
       "contaminated": false
     },
     "filesystem": {
-      "verdict": "benchmark_data_access",
+      "verdict": "out_of_workspace",
       "out_of_workspace_paths": [
         "/.git/",
         "/20fe6649-d1e5-4100-846b-a8d21c0f7eb4/tasks/bw05fx1sr.output",
@@ -216,14 +216,12 @@
         "/tmp/t1.txt",
         "/tmp/xv.py"
       ],
-      "benchmark_data_paths": [
-        "/20fe6649-d1e5-4100-846b-a8d21c0f7eb4/tasks/bw05fx1sr.output",
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-lodgecore-binary-parity-50958a2a-y-nownrv-workspace/20fe6649-d1e5-4100-846b-a8d21c0f7eb4/tasks/"
-      ],
+      "benchmark_data_paths": [],
       "answer_key_paths": [],
-      "contaminated": true
+      "contaminated": false
     },
-    "contaminated": true
+    "contaminated": false,
+    "reclassified": "2026-09-23: recomputed from stored paths under PR #148 (stream not on this machine)"
   },
   "verifier": {
     "scores": {

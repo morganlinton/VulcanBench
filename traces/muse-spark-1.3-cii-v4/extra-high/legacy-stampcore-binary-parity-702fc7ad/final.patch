@@ -1,0 +1,149 @@
+diff --git a/stampcore.py b/stampcore.py
+index 867c3b8..d97575f 100644
+--- a/stampcore.py
++++ b/stampcore.py
+@@ -24,16 +24,20 @@ def _valid_id(token: str) -> bool:
+ 
+ 
+ def _digits(token: str) -> bool:
+-    return token.isascii() and token.isdigit()
++    return len(token) > 0 and all("0" <= c <= "9" for c in token)
++
++
++def _key(meter: str) -> str:
++    return meter.lower()
+ 
+ 
+ class Meter:
+     def __init__(self, balance: int) -> None:
+         self.balance = balance
+-        self.initial = balance
+-        self.franked = 0  # ledger: total postage franked
+-        self.credits = 0  # ledger: total return credits granted
++        self.audit_post = 0  # sum of franked postage since last audit
++        self.drift = 0  # accumulated (deducted - postage) since last audit
+         self.last = 0  # last franked postage (return-credit rate)
++        self.prev = 0  # previous last (used when drift > 30)
+         self.pool = 0  # franks not yet consumed by returns
+ 
+ 
+@@ -49,7 +53,14 @@ class Engine:
+         self.rejected = 0
+ 
+     def handle(self, line: str) -> str:
+-        tokens = line.split()
++        # Legacy truncates at first CR/LF (strcspn) and splits on spaces only.
++        cut = len(line)
++        for sep in ("\r", "\n"):
++            idx = line.find(sep)
++            if idx != -1 and idx < cut:
++                cut = idx
++        line = line[:cut]
++        tokens = [t for t in line.split(" ") if t != ""]
+         if not tokens:
+             return ""
+         if tokens[0] == "M":
+@@ -73,11 +84,11 @@ class Engine:
+         )
+ 
+     def _find(self, meter: str) -> Meter | None:
+-        return self.meters.get(meter)
++        return self.meters.get(_key(meter))
+ 
+     def _register(self, tokens: list[str]) -> str:
+         meter = tokens[1] if len(tokens) >= 2 else NO_METER
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return f"N {meter} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {meter} FMT"
+@@ -86,13 +97,13 @@ class Engine:
+             return f"N {meter} BAL"
+         if self._find(tokens[1]) is not None:
+             return f"N {meter} DUP"
+-        self.meters[tokens[1]] = Meter(int(balance))
++        self.meters[_key(tokens[1])] = Meter(int(balance))
+         self.registered += 1
+         return f"OK {len(self.meters)}"
+ 
+     def _frank(self, tokens: list[str]) -> str:
+         meter = tokens[1] if len(tokens) >= 2 else NO_METER
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return f"N {meter} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {meter} FMT"
+@@ -103,10 +114,25 @@ class Engine:
+         m = self._find(tokens[1])
+         if m is None:
+             return f"N {meter} UNKNOWN"
+-        if post > m.balance:
++        digit_low = (
++            "0" <= tokens[1][-1] <= "9" and m.balance <= 9999
++        )
++        if digit_low and post <= 24:
++            return f"N {meter} POST"
++        if digit_low:
++            base = ((post + 24) // 25) * 25
++        else:
++            base = post
++        before = m.audit_post
++        after = before + post
++        step = after // 2000 - before // 2000
++        total = base + step
++        if total > m.balance:
+             return f"N {meter} LOW"
+-        m.balance -= post
+-        m.franked += post
++        m.balance -= total
++        m.drift += (base - post) + step
++        m.audit_post = after
++        m.prev = m.last
+         m.last = post
+         m.pool += 1
+         self.franks += 1
+@@ -114,7 +140,7 @@ class Engine:
+ 
+     def _return(self, tokens: list[str]) -> str:
+         meter = tokens[1] if len(tokens) >= 2 else NO_METER
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return f"N {meter} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {meter} FMT"
+@@ -125,27 +151,27 @@ class Engine:
+         m = self._find(tokens[1])
+         if m is None:
+             return f"N {meter} UNKNOWN"
+-        if returned > m.pool:
+-            return f"N {meter} RET"
+-        credit = returned * m.last
++        n = returned if returned < m.pool else m.pool
++        rate = m.prev if m.drift > 30 else m.last
++        credit = n * rate
+         m.balance += credit
+-        m.credits += credit
+-        m.pool -= returned
++        m.pool -= n
+         self.returns += 1
+         return f"K {tokens[1]} {credit}"
+ 
+     def _audit(self, tokens: list[str]) -> str:
+         meter = tokens[1] if len(tokens) >= 2 else NO_METER
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return f"N {meter} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {meter} FMT"
+         m = self._find(tokens[1])
+         if m is None:
+             return f"N {meter} UNKNOWN"
+-        expected = m.initial - m.franked + m.credits
+-        delta = expected - m.balance
++        delta = m.drift
+         self.audits += 1
++        m.drift = 0
++        m.audit_post = 0
+         if delta == 0:
+             return f"Z {tokens[1]} MATCH"
+         return f"Z {tokens[1]} DRIFT {delta}"

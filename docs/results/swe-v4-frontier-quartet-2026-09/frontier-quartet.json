@@ -1,0 +1,64 @@
+{
+  "best_effort": {
+    "astra": "max",
+    "fable": "max",
+    "muse": "high",
+    "devin": "max"
+  },
+  "table_order": [
+    "fable",
+    "astra",
+    "devin",
+    "muse"
+  ],
+  "muse_low_functional_under_3h_bound": 62.77782608695652,
+  "muse_provider_aborted_attempts": {
+    "minimal": 9,
+    "low": 1,
+    "medium": 0,
+    "high": 0,
+    "extra-high": 1
+  },
+  "muse_code_quality": "v3.12, Claude Opus 5 alone, 99 of 115 runs",
+  "devin_code_quality": "v3.11, Muse Spark 1.3 alone, 65 of 69 runs",
+  "devin_unjudged_runs": [
+    [
+      "high",
+      "legacy-cellarcore-binary-parity"
+    ],
+    [
+      "high",
+      "legacy-snapcore-binary-parity"
+    ],
+    [
+      "high",
+      "legacy-vaultcore-binary-parity"
+    ],
+    [
+      "max",
+      "legacy-freightcore-binary-parity"
+    ]
+  ],
+  "sources": {
+    "code_quality_v3.4": {
+      "summary": "e0d51a74c7e6e0c4c1656e1c87b16d14b24edfbafd7b69035b5db41201786a62",
+      "protocol": "1d80e0974526f8d825f14921c9102c8eda47ec312a0981783475149e31fd8524",
+      "ledger": "7fa4c18e7c8045b74a9b06527d30c38a0d652d2f7fbeff3029e0e4a3fdf15883"
+    },
+    "muse_sweep": {
+      "protocol": "bc770fcbdd68ee34451cf628fbc81534f15d4709f53f7775b1edc3c37f9042f1",
+      "results": "a77038ebe6e5e63f99c7cb9d983248ed750e277e82377893ec0019554635315e",
+      "code_quality_v3.12": {
+        "summary": "371d57308c87cb223adffa9976851503a3e8cd8ecc72b54dec97132151a95769",
+        "protocol": "8d6d09d40d91ed5b720aa5353ee975efee4b5ed37fa507c287ce6ace7c972e6a"
+      }
+    },
+    "devin_code_quality_v3.11": {
+      "summary": "f3f605603520e6f6941bd605eb1ef79a073bbe04cd6c26ab1e41eda49a8b6e09",
+      "protocol": "a46cda0b67a8480569f0a323a160b86aef32cfaf16ae267f3bdef2573d930b10"
+    }
+  },
+  "png_sha256": "ad15c81617d0553b8fbaedba07a232f6452ab14d46eee862ee8e281e7ed5b338",
+  "supporting_table": "frontier-quartet-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

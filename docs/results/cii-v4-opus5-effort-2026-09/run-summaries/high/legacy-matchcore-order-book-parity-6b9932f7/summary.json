@@ -175,7 +175,7 @@
       "contaminated": false
     },
     "filesystem": {
-      "verdict": "benchmark_data_access",
+      "verdict": "out_of_workspace",
       "out_of_workspace_paths": [
         "/.git/",
         "/bin/bash",
@@ -205,13 +205,12 @@
         "/tmp/mc/tick3.out",
         "/tmp/mc/tick3.txt"
       ],
-      "benchmark_data_paths": [
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-matchcore-order-book-parity-6b9932f7-4ppgby44-workspace/ff133b01-cbb7-4f88-b960-8d99ece7b343/tasks/bgtrhibj4.output"
-      ],
+      "benchmark_data_paths": [],
       "answer_key_paths": [],
-      "contaminated": true
+      "contaminated": false
     },
-    "contaminated": true
+    "contaminated": false,
+    "reclassified": "2026-09-23: recomputed from stored paths under PR #148 (stream not on this machine)"
   },
   "verifier": {
     "scores": {

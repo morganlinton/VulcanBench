@@ -51,7 +51,8 @@ from pathlib import Path
 from typing import Any
 
 # Cursor/Claude Code camel-case forms plus Grok Build's snake-case tool
-# titles as they appear in trace updates ("title":"web_search").
+# titles as they appear in trace updates ("title":"web_search") and Devin's
+# lower-case "webfetch".
 _WEB_MARKERS = (
     "webSearchToolCall",
     "webFetchToolCall",
@@ -59,6 +60,7 @@ _WEB_MARKERS = (
     '"WebFetch"',
     '"web_search"',
     '"web_fetch"',
+    '"webfetch"',
 )
 _URL_RE = re.compile(r"https?://[^\s\"'\\]+")
 
@@ -178,6 +180,19 @@ _PATH_RE = re.compile(
 _CMD_RE = re.compile(r'"command"\s*:\s*"((?:[^"\\]|\\.)*)"')
 _ANSWER_KEY_PARTS = ("gold_patch", "/tests/", "metadata.json")
 
+# Claude Code keeps background-command logs in its own temp dir, as
+# ``/private/tmp/claude-<uid>/<cwd-slug>/<session-uuid>/tasks/<id>.output``.
+# Those ``/tasks/`` paths are the CLI's plumbing, not the benchmark task tree,
+# so they must not count as benchmark data (they flagged 33 of the first 69
+# Opus 5.5 Frontier v4 runs as contaminated). The shell-word scan can also
+# cut the path at the slug, leaving ``/<session-uuid>/tasks/<id>.output`` or
+# a bare ``/tasks/<id>.output``, so those fragments are matched too.
+_CLI_TASK_LOG_RE = re.compile(
+    r"^(?:/(?:private/)?tmp/claude-\d+/[^/]+)?"
+    r"(?:/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?"
+    r"/tasks/(?:b[a-z0-9]{8}\.output)?$"
+)
+
 FS_VERDICTS = ("clean", "out_of_workspace", "benchmark_data_access", "answer_key_access")
 
 
@@ -225,7 +240,7 @@ def audit_filesystem(  # noqa: PLR0912, linear path-scan over one stream
                     if raw == "/dev" or raw.startswith("/dev/"):
                         continue
                     outside.add(raw)
-                    in_tasks = "/tasks/" in raw
+                    in_tasks = "/tasks/" in raw and not _CLI_TASK_LOG_RE.match(raw)
                     in_runs = f"{root}/runs" in raw or ("/runs/" in raw and str(root) in raw)
                     if not (in_tasks or in_runs):
                         continue

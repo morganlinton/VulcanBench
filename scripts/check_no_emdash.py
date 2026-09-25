@@ -54,6 +54,7 @@ EXCLUDE_EXACT = {
 # scratch) and generated lockfiles.
 EXCLUDE_PREFIXES = (
     "tasks/",
+    "traces/",  # published agent traces: model output kept verbatim
     ".claude/",
     "node_modules/",
     "dashboard/node_modules/",

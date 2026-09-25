@@ -23,13 +23,16 @@ from typing import Any
 # before publishing numbers, and use the override file for anything that must be
 # exact.
 PRICES: dict[str, dict[str, float]] = {
-    # GPT-5.6 list prices. Cached input is a cache read; cache writes and the
-    # >272K long-context tier are not exposed by every harness receipt and are
-    # therefore not inferred here.
-    "openai:gpt-5.6-sol": {"input": 5.00, "cached_input": 0.50, "output": 30.00},
-    "openai:gpt-5.6-terra": {"input": 2.50, "cached_input": 0.25, "output": 15.00},
-    "openai:gpt-5.6-luna": {"input": 1.00, "cached_input": 0.10, "output": 6.00},
-    "openai:gpt-5.5": {"input": 5.00, "output": 30.00},
+    # OpenAI list prices, standard tier, short context, checked 2026-09-11 at
+    # developers.openai.com/api/docs/pricing. Cached input is a cache read;
+    # cache writes and the >272K long-context tier are not exposed by every
+    # harness receipt and are therefore not inferred here. Reports published
+    # before this date priced the GPT-5.6 family at the earlier list prices
+    # (Sol 5/0.5/30, Terra 2.5/0.25/15, Luna 1/0.1/6) and are not rewritten.
+    "openai:gpt-5.6-sol": {"input": 4.00, "cached_input": 0.40, "output": 20.00},
+    "openai:gpt-5.6-terra": {"input": 2.00, "cached_input": 0.20, "output": 12.00},
+    "openai:gpt-5.6-luna": {"input": 0.20, "cached_input": 0.02, "output": 1.20},
+    "openai:gpt-5.5": {"input": 5.00, "cached_input": 0.50, "output": 30.00},
     "openai:gpt-5.5-pro": {"input": 30.00, "output": 180.00},
     "openai:gpt-5.4": {"input": 2.50, "output": 15.00},
     "openai:gpt-5.4-mini": {"input": 0.75, "output": 4.50},
@@ -114,6 +117,9 @@ _PER_MILLION = 1_000_000.0
 # rates, so their ``cost_usd`` is the *hypothetical* API cost of the same
 # tokens. The run summary marks these with ``cli_agent.billing`` so the
 # number is never mistaken for actual spend.
+# No "devin:" alias on purpose: Devin's SWE models have no public API price
+# (the catalog lists SWE-2 as cost tier "Free"), so devin: specs stay unpriced
+# and the economics receipt reports the API-equivalent value as unavailable.
 _SPEC_ALIASES = {
     "claude-code:": "anthropic:",
     "codex:": "openai:",

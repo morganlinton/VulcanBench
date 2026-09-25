@@ -1,0 +1,85 @@
+diff --git a/snapcore.py b/snapcore.py
+index 2770956..5f0a066 100644
+--- a/snapcore.py
++++ b/snapcore.py
+@@ -50,10 +50,10 @@ class Engine:
+             reply = self._serialize()
+             kind = "S"
+         elif line == "P" or line.startswith("P "):
+-            reply = self._put(line.split())
++            reply = self._put([t for t in line.split(" ") if t])
+             kind = "P"
+         elif line == "G" or line.startswith("G "):
+-            reply = self._get(line.split())
++            reply = self._get([t for t in line.split(" ") if t])
+             kind = "G"
+         elif line.startswith("L "):
+             reply = self._load(line[2:])
+@@ -75,7 +75,7 @@ class Engine:
+         return f"X {self.puts} {self.gets} {self.loads} {self.rejected}"
+ 
+     def _put(self, tokens: list[str]) -> str:
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return "R FMT"
+         key, val = tokens[1], tokens[2]
+         if not _valid_key(key) or not _valid_val(val):
+@@ -84,7 +84,7 @@ class Engine:
+         return f"OK {len(self.state)}"
+ 
+     def _get(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return "R FMT"
+         key = tokens[1]
+         if not _valid_key(key):
+@@ -94,7 +94,10 @@ class Engine:
+         return "NIL"
+ 
+     def _serialize(self) -> str:
+-        pairs = PAIR_SEP.join(f"{k}={v}" for k, v in self.state.items())
++        pairs = PAIR_SEP.join(
++            f"{k}={v[:10] if len(v) == VAL_MAX else v}"
++            for k, v in self.state.items()
++        )
+         body = VERSION + "|" + pairs
+         return "B " + body + "|" + checksum(body)
+ 
+@@ -105,24 +108,31 @@ class Engine:
+         ver, pairs_str, check = blob.split("|")
+         if len(check) != 1:
+             return "R FMT"
+-        if ver != VERSION:
++        if ver not in ("Z0", VERSION):
+             return "R VER"
+         if check != checksum(ver + "|" + pairs_str):
+             return "R CHK"
+         if not pairs_str:
+-            return "R FMT"  # SPEC: a blob carries at least one pair
++            self.state = {}
++            return "OK 0"
+         new_state: dict[str, str] = {}
++        folded: dict[str, str] = {}
++        count = 0
+         for piece in pairs_str.split(PAIR_SEP):
+             if piece.count("=") != 1:
+                 return "R FMT"
+             key, val = piece.split("=")
+             if not _valid_key(key) or not _valid_val(val):
+                 return "R FMT"
+-            if key in new_state:
+-                return "R FMT"  # SPEC: duplicate keys reject
+-            new_state[key] = val
++            count += 1
++            low = key.lower()
++            if low in folded:
++                new_state[folded[low]] = val
++            else:
++                folded[low] = key
++                new_state[key] = val
+         self.state = new_state
+-        return f"OK {len(self.state)}"
++        return f"OK {count}"
+ 
+ 
+ def process(lines: list[str], out=None) -> list[str]:

@@ -1,0 +1,443 @@
+=== MISMATCH seed=1000 mode=tiny ===
+--- session ---
+W
+O r2 1
+A c
+S x
+O r1 3
+W
+E ghost
+W
+B b r1
+P c 2
+O r2 2
+P c 2
+W
+S
+B c r1
+Q r1
+B b r1
+P a 3
+Q r2
+A c
+O r2 4
+B c r1
+B c r2
+Q r1
+B b r2
+A b
+A a
+P b 3
+W
+B a r2
+O r1 5
+Q r2
+B c r2
+W
+V
+A a
+Q r1
+B b r2
+S
+P c 3
+B b r2
+X
+A c
+V
+P
+P a 1
+O r1 2
+O r1 5
+B a r2
+O r1 1
+O r2 5
+Q r1
+A c
+B b r1
+G a
+S
+L b
+B a r2
+S
+A a
+W
+Q r2
+G ghost
+P c 2
+P c 2
+L ghost
+G b
+O r2 2
+B a r2
+B a r1
+P b 2
+O r1 4
+S
+B c r1
+A b
+B b r2
+A a
+B b r2
+B b r1
+A b
+V
+A b
+S
+B a r2
+W
+S
+Q r1
+O r2 4
+W
+W
+G c
+S
+B a r2
+A b
+E ghost
+P b 3
+S
+E b
+A c
+W
+A c
+P c 2
+S
+B b r1
+B a r1
+P b 1
+P a 2
+O r 007
+B b r2
+L ghost
+B a r2
+L b
+B c r1
+B b r2
+A a
+B b r1
+B a r1
+A c
+P b 1
+Q r1
+A a
+W
+W
+O r2 3
+A a
+A a
+V
+O r2 4
+B c r1
+
+--- legacy ---
+NO ? STATE
+OK 1
+NO c STATE
+NO x FMT
+OK 2
+AIRED r2 0
+NO ghost STATE
+AIRED r1 0
+NO b STATE
+OK 1
+NO r2 STATE
+NO c STATE
+AIRED r2 0
+SETTLED 0
+RM r2
+RM r1
+OK 1
+RM r1
+NO b STATE
+OK 2
+RM r2
+IN r1
+NO r2 STATE
+NO c STATE
+NO c STATE
+RM r1 c
+NO b STATE
+NO b STATE
+NO a STATE
+OK 3
+AIRED r2 0
+OK 1
+NO r1 STATE
+RM r2
+NO c STATE
+AIRED r1 1
+MV c -
+ROTA r2 r1
+NO a STATE
+RM r1
+OK 1
+SETTLED 0
+RM r2
+RM r1
+NO c STATE
+NO b STATE
+NO ? FMT
+NO c STATE
+ROTA r1 r2
+NO ? FMT
+NO a STATE
+NO r1 STATE
+NO r1 STATE
+OK 2
+NO r1 STATE
+NO r2 STATE
+RM r1
+NO c STATE
+NO b STATE
+NO a STATE
+SETTLED 0
+RM r2
+RM r1
+NO b STATE
+NO a STATE
+SETTLED 0
+RM r2
+RM r1
+NO a STATE
+AIRED r1 0
+RM r2
+NO ghost STATE
+NO c STATE
+NO c STATE
+NO ghost STATE
+NO b STATE
+NO r2 STATE
+NO a STATE
+NO a STATE
+NO b STATE
+NO r1 STATE
+SETTLED 0
+RM r2
+RM r1
+OK 1
+NO b STATE
+NO b STATE
+NO a STATE
+NO b STATE
+NO b STATE
+NO b STATE
+ROTA r1 r2
+NO b STATE
+SETTLED 0
+RM r2
+RM r1
+NO a STATE
+AIRED r1 1
+MV c -
+SETTLED 0
+RM r2
+RM r1
+RM r1
+NO r2 STATE
+AIRED r1 0
+AIRED r2 0
+NO c STATE
+SETTLED 0
+RM r2
+RM r1
+NO a STATE
+NO b STATE
+NO ghost STATE
+NO b STATE
+SETTLED 0
+RM r2
+RM r1
+NO b STATE
+NO c STATE
+AIRED r2 0
+NO c STATE
+NO c STATE
+SETTLED 0
+RM r2
+RM r1
+NO b STATE
+NO a STATE
+NO b STATE
+NO a STATE
+NO r FMT
+NO b STATE
+NO ghost STATE
+NO a STATE
+NO b STATE
+OK 1
+NO b STATE
+NO a STATE
+NO b STATE
+NO a STATE
+IN r1
+NO b STATE
+RM r1 c
+NO a STATE
+AIRED r2 0
+AIRED r1 1
+MV c -
+NO r2 STATE
+NO a STATE
+NO a STATE
+ROTA r2 r1
+NO r2 STATE
+OK 1
+X 3 2 7 3 4 12 10
+
+--- python ---
+NO ? STATE
+OK 1
+NO c STATE
+NO x FMT
+OK 2
+AIRED r2 0
+NO ghost STATE
+AIRED r1 0
+NO b STATE
+OK 1
+NO r2 STATE
+NO c STATE
+AIRED r2 0
+SETTLED 0
+RM r2
+RM r1
+OK 1
+RM r1
+NO b STATE
+OK 2
+RM r2
+IN r1
+NO r2 STATE
+NO c STATE
+NO c STATE
+RM r1 c
+NO b STATE
+NO b STATE
+NO a STATE
+OK 3
+AIRED r2 0
+OK 1
+NO r1 STATE
+RM r2
+NO c STATE
+AIRED r1 1
+MV c -
+ROTA r2 r1
+NO a STATE
+RM r1
+OK 2
+SETTLED 0
+RM r2
+RM r1
+NO c STATE
+NO b STATE
+NO ? FMT
+NO c STATE
+ROTA r1 r2
+NO ? FMT
+NO a STATE
+NO r1 STATE
+NO r1 STATE
+OK 2
+NO r1 STATE
+NO r2 STATE
+RM r1
+NO c STATE
+NO b STATE
+NO a STATE
+SETTLED 0
+RM r2
+RM r1
+NO b STATE
+NO a STATE
+SETTLED 0
+RM r2
+RM r1
+NO a STATE
+AIRED r1 0
+RM r2
+NO ghost STATE
+NO c STATE
+NO c STATE
+NO ghost STATE
+NO b STATE
+NO r2 STATE
+NO a STATE
+NO a STATE
+NO b STATE
+NO r1 STATE
+SETTLED 0
+RM r2
+RM r1
+OK 1
+NO b STATE
+NO b STATE
+NO a STATE
+NO b STATE
+NO b STATE
+NO b STATE
+ROTA r1 r2
+NO b STATE
+SETTLED 0
+RM r2
+RM r1
+NO a STATE
+AIRED r1 1
+MV c -
+SETTLED 0
+RM r2
+RM r1
+RM r1
+NO r2 STATE
+AIRED r1 0
+AIRED r2 0
+NO c STATE
+SETTLED 0
+RM r2
+RM r1
+NO a STATE
+NO b STATE
+NO ghost STATE
+NO b STATE
+SETTLED 0
+RM r2
+RM r1
+NO b STATE
+NO c STATE
+AIRED r2 0
+NO c STATE
+NO c STATE
+SETTLED 0
+RM r2
+RM r1
+NO b STATE
+NO a STATE
+NO b STATE
+NO a STATE
+NO r FMT
+NO b STATE
+NO ghost STATE
+NO a STATE
+NO b STATE
+OK 1
+NO b STATE
+NO a STATE
+NO b STATE
+NO a STATE
+IN r1
+NO b STATE
+RM r1 c
+NO a STATE
+AIRED r2 0
+AIRED r1 1
+MV c -
+NO r2 STATE
+NO a STATE
+NO a STATE
+ROTA r2 r1
+NO r2 STATE
+OK 1
+X 3 2 7 3 4 12 10
+
+done: 12 sessions, 1 mismatches

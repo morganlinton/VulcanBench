@@ -1,0 +1,89 @@
+diff --git a/settlecore.py b/settlecore.py
+index da4b878..c4d3e70 100644
+--- a/settlecore.py
++++ b/settlecore.py
+@@ -15,7 +15,7 @@ RECLEN = 80
+ OUTLEN = 47
+ 
+ RATE_BP = {
+-    1: 25, 2: 50, 3: 75, 4: 100, 5: 150, 6: 200, 7: 250, 8: 300, 9: 350,
++    1: 25, 2: 50, 3: 75, 4: 100, 5: 150, 6: 200, 7: 245, 8: 300, 9: 350,
+ }
+ FEE_CAP = 250_000
+ 
+@@ -34,7 +34,16 @@ def check_char(data: str, upto: int) -> str:
+ 
+ 
+ def _round_nearest(numerator: int, denominator: int) -> int:
+-    """Round to the nearest unit (halves up), per the spec's fee rule."""
++    """Round to the nearest unit, halves to even, per the engine."""
++    quotient, remainder = divmod(numerator, denominator)
++    twice = 2 * remainder
++    if twice > denominator or (twice == denominator and quotient % 2 == 1):
++        return quotient + 1
++    return quotient
++
++
++def _round_half_up(numerator: int, denominator: int) -> int:
++    """Round to the nearest unit, halves up, per the engine (JPY)."""
+     quotient, remainder = divmod(numerator, denominator)
+     if 2 * remainder >= denominator:
+         return quotient + 1
+@@ -43,7 +52,7 @@ def _round_nearest(numerator: int, denominator: int) -> int:
+ 
+ def _days_in_month(year: int, month: int) -> int:
+     days = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+-    if month == 2 and year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
++    if month == 2 and year % 4 == 0:
+         return 29
+     return days[month - 1]
+ 
+@@ -80,12 +89,12 @@ class Record:
+         if not stripped or not stripped.isalnum():
+             self.error = "ERRACCT"
+             return
+-        sign, digits = raw[12], raw[13:24]
+-        if sign not in "+-" or not digits.isdigit():
++        sign, digits = raw[12], raw[13:24].lstrip(" ")
++        if sign not in "+-" or not digits or not digits.isdigit():
+             self.error = "ERRAMT"
+             return
+         self.negative = sign == "-"
+-        if self.negative:
++        if self.negative and self.type != "RF":
+             self.error = "ERRAMT"
+             return
+         self.amount = int(digits)
+@@ -115,9 +124,19 @@ class Record:
+             return
+         self.mcc = int(mcc)
+ 
++    def _fee_piece(self, rate_bp: int) -> int:
++        if self.currency == "JPY":
++            return _round_half_up(self.amount * rate_bp, 10_000)
++        if self.type == "RF":
++            return self.amount * rate_bp // 10_000
++        return _round_nearest(self.amount * rate_bp, 10_000)
++
+     def compute(self) -> None:
+-        fee = _round_nearest(self.amount * RATE_BP[self.tier], 10_000)
+-        fee = min(fee, FEE_CAP)
++        fee = self._fee_piece(RATE_BP[self.tier])
++        if self.currency == "EUR" and self.amount > 5_000_000:
++            fee += _round_half_up(self.amount * 10, 10_000)
++        if self.tier != 9:
++            fee = min(fee, FEE_CAP)
+         self.fee = fee
+         if self.type == "RF":
+             self.net = -(self.amount - fee)
+@@ -149,7 +168,9 @@ def process(lines: list[str]) -> list[str]:
+             record.compute()
+         records.append(record)
+ 
+-    out = [record.emit() for record in records]
++    ordered = [r for r in records if r.error is None]
++    ordered += [r for r in records if r.error is not None]
++    out = [record.emit() for record in ordered]
+     accepted = sum(1 for r in records if r.error is None)
+     rejected = len(records) - accepted
+     fee_sum = sum(r.fee for r in records if r.error is None)

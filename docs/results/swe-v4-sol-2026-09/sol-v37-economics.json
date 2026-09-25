@@ -1,0 +1,168 @@
+{
+  "population": "runs-code-quality-maintenance-v3.7 population, 115 runs",
+  "ledger": "comparison.json",
+  "ledger_sha256": "d87d8e8ab958c098908078fe1edc3afe84786ec6ef34413e70715a613394427a",
+  "pricing_verified": "2026-09-11",
+  "sources": {
+    "openai": "https://developers.openai.com/api/docs/pricing"
+  },
+  "totals": {
+    "sol": {
+      "usd": 195.554616,
+      "usd_upper": 195.554616,
+      "tokens": 250810944,
+      "hours": 21.108794444444445,
+      "runs": 115
+    }
+  },
+  "groups": {
+    "sol/low": {
+      "model": "sol",
+      "effort": "low",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 1.3591678695652174,
+        "se": 0.1430501817414369
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 1.3591678695652174,
+        "se": 0.1430501817414369
+      },
+      "usd_total": 31.260861,
+      "tokens": {
+        "n": 23,
+        "mean": 1.7939814782608696,
+        "se": 0.25789841940332764
+      },
+      "tokens_total": 41261574,
+      "minutes": {
+        "n": 23,
+        "mean": 9.775197101449276,
+        "se": 1.1392878044828727
+      },
+      "fallbacks": 0
+    },
+    "sol/medium": {
+      "model": "sol",
+      "effort": "medium",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 1.7151938695652174,
+        "se": 0.26025884464319954
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 1.7151938695652174,
+        "se": 0.26025884464319954
+      },
+      "usd_total": 39.449459,
+      "tokens": {
+        "n": 23,
+        "mean": 2.2576489130434783,
+        "se": 0.43159609618046024
+      },
+      "tokens_total": 51925925,
+      "minutes": {
+        "n": 23,
+        "mean": 11.051054347826087,
+        "se": 1.5394926257119426
+      },
+      "fallbacks": 0
+    },
+    "sol/high": {
+      "model": "sol",
+      "effort": "high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 2.045315652173913,
+        "se": 0.4848889937807314
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 2.045315652173913,
+        "se": 0.4848889937807314
+      },
+      "usd_total": 47.04226,
+      "tokens": {
+        "n": 23,
+        "mean": 2.8288123913043477,
+        "se": 0.838679590232756
+      },
+      "tokens_total": 65062685,
+      "minutes": {
+        "n": 23,
+        "mean": 12.015965217391305,
+        "se": 2.596821842769139
+      },
+      "fallbacks": 0
+    },
+    "sol/extra-high": {
+      "model": "sol",
+      "effort": "extra-high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 1.6091715652173912,
+        "se": 0.2013867239560599
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 1.6091715652173912,
+        "se": 0.2013867239560599
+      },
+      "usd_total": 37.010946,
+      "tokens": {
+        "n": 23,
+        "mean": 1.9125641739130435,
+        "se": 0.34855951112695505
+      },
+      "tokens_total": 43988976,
+      "minutes": {
+        "n": 23,
+        "mean": 10.619051449275362,
+        "se": 0.6488265306456645
+      },
+      "fallbacks": 0
+    },
+    "sol/max": {
+      "model": "sol",
+      "effort": "max",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 1.7735256521739131,
+        "se": 0.18446994169064573
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 1.7735256521739131,
+        "se": 0.18446994169064573
+      },
+      "usd_total": 40.79109,
+      "tokens": {
+        "n": 23,
+        "mean": 2.111816695652174,
+        "se": 0.3091131116740664
+      },
+      "tokens_total": 48571784,
+      "minutes": {
+        "n": 23,
+        "mean": 11.605152173913043,
+        "se": 0.5389363147377524
+      },
+      "fallbacks": 0
+    }
+  },
+  "limitations": [
+    "Codex receipts report cumulative input, cached input and output per run; cached input is priced at the cached rate ($0.40 per million for Sol against $4.00 uncached, $20.00 output).",
+    "Standard tier, short-context rates; no long-context premium is inferred.",
+    "Estimates cover exposed receipts, not an independently observed API invoice."
+  ],
+  "summary_sha256": "042ed949f87f33f4a79347fc4c183eae1910aea34c7be007a800dfbcf6ea1ce9",
+  "png_sha256": "c7156544e958ab1f3a52a063350d24732576ce0ffeaf44603f3bc7f4b6410c8a",
+  "supporting_table": "sol-v37-economics-efforts.csv"
+}

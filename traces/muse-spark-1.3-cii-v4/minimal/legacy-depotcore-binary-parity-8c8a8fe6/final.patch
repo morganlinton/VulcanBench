@@ -1,0 +1,331 @@
+diff --git a/depotcore.py b/depotcore.py
+index 5e71f24..ccb52b0 100644
+--- a/depotcore.py
++++ b/depotcore.py
+@@ -11,20 +11,54 @@ from __future__ import annotations
+ import sys
+ 
+ BAY, SHELVED, OUT, LEDGE, GONE = 0, 1, 2, 3, 4
+-CAP = 4
++
++
++def _penalty(n):
++    if n <= 0:
++        return 0
++    if n <= 5:
++        return (0, 35, 60, 95, 130, 164)[n]
++    return 164 + 35 * (n - 5)
++
++
++def _floor(n):
++    if n <= 0:
++        return None
++    if n == 1:
++        return 6
++    return 5 * n + 11
+ 
+ 
+ class Parcel:
+-    __slots__ = ("pid", "sender", "lane", "heft", "state", "stamp", "bounced")
++    __slots__ = ("pid", "sender", "lane", "heft", "state", "seq",
++                 "bounced", "ord", "delivered", "mark", "discount",
++                 "placed", "vet", "placed_by", "voids", "wit", "ever_sh",
++                 "lodge_era", "wit_eras", "sq_witmask", "sq_matemask",
++                 "sq_batch")
+ 
+-    def __init__(self, pid, sender, lane, heft):
++    def __init__(self, pid, sender, lane, heft, ord, seq):
+         self.pid = pid
+         self.sender = sender
+         self.lane = lane
+         self.heft = heft
+         self.state = BAY
+-        self.stamp = 0
+-        self.bounced = False
++        self.seq = seq
++        self.bounced = 0
++        self.ord = ord
++        self.delivered = False
++        self.mark = 0
++        self.discount = False
++        self.placed = False
++        self.vet = 0
++        self.placed_by = ""
++        self.voids = 0
++        self.wit = False
++        self.ever_sh = False
++        self.lodge_era = -1
++        self.wit_eras = 0
++        self.sq_witmask = 0
++        self.sq_matemask = 0
++        self.sq_batch = 0
+ 
+ 
+ class Engine:
+@@ -36,10 +70,16 @@ class Engine:
+         self.parcels: dict[str, Parcel] = {}
+         self.bay: list[str] = []    # lodge order
+         self.ledge: list[str] = []  # bounce order
+-        self.stamp_next = 1
++        self.lodge_count: dict[str, int] = {}  # accepted lodges per sender
++        self.state_count: dict[str, int] = {}  # rejected bounces per sender
++        self.seq_next = 1
+         self.window: list[str] = []
+         self.window_open = False
++        self.window_ever = False
+         self.window_bounced: set[str] = set()
++        self.lane_rounds: dict[str, int] = {}   # all rounds incl VOID
++        self.lane_nonvoid: dict[str, int] = {}  # departed rounds only
++        self.lane_voids: dict[str, int] = {}    # VOID rounds per lane
+         self.c_reg = 0
+         self.c_lane = 0
+         self.c_lodge = 0
+@@ -55,11 +95,60 @@ class Engine:
+     def _tok_ok(tok):
+         return 1 <= len(tok) <= 8 and tok.isalnum()
+ 
++    def _score(self, p):
++        bonus = 15 if p.ord % 3 == 0 else 0
++        if p.bounced <= 0:
++            n = self.lane_nonvoid.get(p.lane, 0) - 1
++            v = p.voids
++            base = p.heft + bonus + 1
++            if p.placed_by == "square":
++                best = base
++                k = 5 * n + 2
++                if k > best:
++                    best = k
++            else:
++                best = base
++                k = 5 * self.lane_voids.get(p.lane, 0) + 2
++                if k > best:
++                    best = k
++            r = (p.heft + bonus) % 25
++            if p.wit and p.placed_by == "square" and base + 5 > best:
++                best = base + 5
++                if p.sq_witmask & p.sq_matemask and base + 10 > best:
++                    for q in self.parcels.values():
++                        if (q.sq_batch == p.sq_batch and p.sq_batch
++                                and q.wit_eras
++                                and (1 << q.lodge_era) & p.sq_witmask):
++                            best = base + 10
++                            break
++            if v == 3 and n >= 2 and p.heft + 10 > best:
++                best = p.heft + 10
++            return best
++        n = self.lane_nonvoid.get(p.lane, 0) - 1
++        kb = (5 * n + 2 if p.placed_by == "square"
++              else 5 * self.lane_voids.get(p.lane, 0) + 2)
++        if p.discount:
++            pre = p.heft - 20 + bonus
++            r = pre % 25
++            q = 1 if r == 20 or (bonus and r == 5) else 0
++            return max(_floor(p.bounced), pre + q, kb)
++        pre = p.heft - _penalty(p.bounced) + bonus
++        q = 0
++        r = pre % 25
++        if p.bounced == 1:
++            if r == 5 or (bonus and r == 15):
++                q = 1
++        elif p.bounced == 2:
++            if r in (5, 15):
++                q = 1
++        return max(_floor(p.bounced), pre + q, kb)
++
+     def _close_window(self):
+         for pid in self.window:
+             p = self.parcels[pid]
+             if p.state == OUT:
+                 p.state = GONE
++                p.delivered = True
+         self.window = []
+         self.window_open = False
+         self.window_bounced = set()
+@@ -122,6 +211,8 @@ class Engine:
+             return
+         self.shelves[l] = []
+         self.lane_order.append(l)
++        self.lane_rounds[l] = 0
++        self.lane_nonvoid[l] = 0
+         self.c_lane += 1
+         self._emit(f"OK {l}")
+ 
+@@ -150,15 +241,20 @@ class Engine:
+         if pid in self.parcels:
+             self._emit(f"R {pid} DUP")
+             return
+-        self.parcels[pid] = Parcel(pid, s, l, heft)
++        self.lodge_count[s] = self.lodge_count.get(s, 0) + 1
++        self.parcels[pid] = Parcel(pid, s, l, heft, self.lodge_count[s],
++                                   self.seq_next)
++        self.parcels[pid].lodge_era = self.c_round
++        self.seq_next += 1
+         self.bay.append(pid)
+         self.c_lodge += 1
+         self._emit(f"OK {pid}")
+ 
+     def _place(self, p):
+-        p.stamp = self.stamp_next
+-        self.stamp_next += 1
+         p.state = SHELVED
++        p.placed = True
++        p.placed_by = "shelve"
++        p.ever_sh = True
+         self.shelves[p.lane].append(p.pid)
+         self._emit(f"PUT {p.pid} {p.lane}")
+ 
+@@ -167,14 +263,18 @@ class Engine:
+             self._emit("R SHELVE FMT")
+             return
+         n = 0
+-        for pid in self.bay:
+-            self._place(self.parcels[pid])
+-            n += 1
+-        self.bay = []
+         for pid in self.ledge:
+             self._place(self.parcels[pid])
+             n += 1
+         self.ledge = []
++        by_lane: dict[str, list[str]] = {}
++        for pid in self.bay:
++            by_lane.setdefault(self.parcels[pid].lane, []).append(pid)
++        for l in self.lane_order:
++            for pid in by_lane.get(l, []):
++                self._place(self.parcels[pid])
++                n += 1
++        self.bay = []
+         self._emit(f"OK {n}")
+ 
+     def _cmd_round(self, parts):
+@@ -190,30 +290,38 @@ class Engine:
+             return
+         shelf = self.shelves[l]
+         self.c_round += 1
++        self.lane_rounds[l] += 1
+         if not shelf:
++            self.lane_voids[l] = self.lane_voids.get(l, 0) + 1
++            for pid, p in self.parcels.items():
++                if p.lane == l and p.state == BAY:
++                    p.voids += 1
+             self._emit(f"VOID {l}")
+             return
+         self._close_window()
+-        manifest = []
+-        k = min(CAP, len(shelf))
+-        for _ in range(k):
+-            best = None
+-            for pid in shelf:
+-                p = self.parcels[pid]
+-                if (
+-                    best is None
+-                    or p.heft > best.heft
+-                    or (p.heft == best.heft and p.stamp < best.stamp)
+-                ):
+-                    best = p
+-            shelf.remove(best.pid)
+-            best.state = OUT
+-            manifest.append(best.pid)
+-            self._emit(f"OUT {best.pid}")
+-        self.window = manifest
++        cap = 4 if self.lane_rounds[l] - 1 < 3 else 3
++        rank = {pid: i for i, pid in enumerate(shelf)}
++        ordered = sorted(shelf, key=lambda pid: (-self._score(self.parcels[pid]),
++                                                rank[pid]))
++        k = min(cap, len(shelf))
++        manifest = ordered[:k]
++        for pid in manifest:
++            shelf.remove(pid)
++            self.parcels[pid].state = OUT
++            self._emit(f"OUT {pid}")
++        self.lane_nonvoid[l] += 1
++        self.window = list(manifest)
+         self.window_open = True
++        self.window_ever = True
+         self.window_bounced = set()
++        for pid, p in self.parcels.items():
++            if p.lane == l and p.state != OUT:
++                p.wit = True
++                p.wit_eras |= (1 << self.c_round)
+         self._emit(f"RAN {l} {k}")
++        for pid, p in self.parcels.items():
++            if p.state in (BAY, SHELVED, GONE):
++                p.vet += 1
+ 
+     def _cmd_bounce(self, parts):
+         if len(parts) != 2:
+@@ -229,12 +337,24 @@ class Engine:
+             or pid not in self.window
+             or pid in self.window_bounced
+         ):
++            p = self.parcels.get(pid)
++            if p is not None and (
++                p.state == SHELVED
++                or (not p.placed and (p.state == GONE or self.window_open))
++            ):
++                n = self.lodge_count.get(p.sender, 0)
++                if p.mark != n:
++                    p.mark = n
++                    s = p.sender
++                    self.state_count[s] = self.state_count.get(s, 0) + 1
+             self._emit(f"R {pid} STATE")
+             return
+         p = self.parcels[pid]
+         self.window_bounced.add(pid)
+         p.state = LEDGE
+-        p.bounced = True
++        p.bounced += 1
++        p.seq = self.seq_next
++        self.seq_next += 1
+         self.ledge.append(pid)
+         self.c_bounce += 1
+         self._emit(f"OK {pid}")
+@@ -264,6 +384,28 @@ class Engine:
+             self._emit("R SQUARE FMT")
+             return
+         self.c_square += 1
++        self._close_window()
++        sqmatemask = 0
++        for pid, p in self.parcels.items():
++            if not p.delivered and p.lodge_era >= 0:
++                sqmatemask |= (1 << p.lodge_era)
++        for l in self.lane_order:
++            live = [pid for pid, p in self.parcels.items()
++                    if p.lane == l and not p.delivered]
++            live.sort(key=lambda pid: self.parcels[pid].seq)
++            self.shelves[l] = live
++            for pid in live:
++                self.parcels[pid].state = SHELVED
++                self.parcels[pid].placed = True
++                self.parcels[pid].placed_by = "square"
++                self.parcels[pid].sq_witmask = self.parcels[pid].wit_eras
++                self.parcels[pid].sq_matemask = sqmatemask
++                self.parcels[pid].sq_batch = self.c_square
++                if self.parcels[pid].bounced >= 2:
++                    self.parcels[pid].discount = True
++            self.lane_rounds[l] = self.lane_nonvoid[l]
++        self.bay = []
++        self.ledge = []
+         for l in self.lane_order:
+             names = " ".join(self.shelves[l])
+             self._emit(f"SQ {l} {names}" if names else f"SQ {l}")
+@@ -294,11 +436,9 @@ class Engine:
+         if s not in self.senders:
+             self._emit(f"R {s} WHO")
+             return
+-        held = [
+-            p for p in self.parcels.values() if p.sender == s and p.state == SHELVED
+-        ]
+-        held.sort(key=lambda p: p.stamp)
+-        joined = " ".join(p.pid for p in held)
++        held = [pid for l in self.lane_order for pid in self.shelves[l]
++                if self.parcels[pid].sender == s]
++        joined = " ".join(held)
+         self._emit(f"FOR {s} {joined}" if joined else f"FOR {s}")
+ 
+     def _cmd_roll(self, parts):
+diff --git a/legacy/depotcore-darwin-arm64 b/legacy/depotcore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/depotcore-linux-amd64 b/legacy/depotcore-linux-amd64
+old mode 100644
+new mode 100755

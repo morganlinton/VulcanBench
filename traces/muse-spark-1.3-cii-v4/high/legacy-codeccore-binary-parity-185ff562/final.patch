@@ -1,0 +1,113 @@
+diff --git a/codeccore.py b/codeccore.py
+index 738e6b7..e614e65 100644
+--- a/codeccore.py
++++ b/codeccore.py
+@@ -16,7 +16,9 @@ RECLEN = 48
+ ACCT_WIDTH = 10
+ AMOUNT_WIDTH = 11
+ MEMO_WIDTH = 15
+-MEMO_MAX = 15
++MEMO_MAX = 20
++# Amounts above this (in cents) encoded with a January date carry the flag.
++FLAG_AMOUNT = 10000000
+ 
+ _WEIGHTS = (2, 5, 3)
+ _B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+@@ -38,14 +40,14 @@ def _days_in_month(year: int, month: int) -> int:
+ 
+ 
+ def _valid_date(field: str) -> bool:
+-    if len(field) != 8 or not field.isdigit():
++    if len(field) != 8 or not (field.isascii() and field.isdigit()):
+         return False
+     year, month, day = int(field[:4]), int(field[4:6]), int(field[6:8])
+     return year >= 1900 and 1 <= month <= 12 and 1 <= day <= _days_in_month(year, month)
+ 
+ 
+ def _valid_acct(token: str) -> bool:
+-    return 1 <= len(token) <= ACCT_WIDTH and token.isalnum()
++    return 1 <= len(token) <= ACCT_WIDTH and token.isascii() and token.isalnum()
+ 
+ 
+ def _printable(text: str) -> bool:
+@@ -62,7 +64,7 @@ class Engine:
+ 
+     def handle(self, line: str) -> str:
+         if line == "E" or line.startswith("E "):
+-            reply = self._encode(line.split())
++            reply = self._encode([t for t in line.split(" ") if t != ""])
+         elif line == "D" or line.startswith("D "):
+             reply = self._decode(line[2:])
+         else:
+@@ -82,12 +84,12 @@ class Engine:
+         echo = NO_ACCT
+         if len(tokens) >= 2 and _valid_acct(tokens[1]):
+             echo = tokens[1]
+-        if len(tokens) != 5:
++        if len(tokens) < 5:
+             return f"R FMT {echo}"
+         acct, amount, date, memo = tokens[1:5]
+         if not _valid_acct(acct):
+             return f"R FMT {NO_ACCT}"
+-        if not 1 <= len(amount) <= AMOUNT_WIDTH or not amount.isdigit():
++        if not 1 <= len(amount) <= AMOUNT_WIDTH or not (amount.isascii() and amount.isdigit()):
+             return f"R FMT {acct}"
+         if not _valid_date(date):
+             return f"R FMT {acct}"
+@@ -97,8 +99,11 @@ class Engine:
+             return f"R FMT {acct}"
+         if len(memo) > MEMO_MAX:
+             return f"R FMT {acct}"
+-        stored = memo
+-        flag = "N"
++        if len(memo) > MEMO_WIDTH:
++            stored = memo[:12] + "~" + memo[-2:]
++        else:
++            stored = memo
++        flag = "H" if date[4:6] == "01" and int(amount) > FLAG_AMOUNT else "N"
+         body = (
+             "VX"
+             + acct.rjust(ACCT_WIDTH, "*")
+@@ -110,27 +115,32 @@ class Engine:
+         return "V " + body + check_char(body)
+ 
+     def _decode(self, arg: str) -> str:
+-        if len(arg) != RECLEN:
++        if len(arg) < RECLEN:
+             return "R LEN"
+-        record = arg
+-        if record[:2] != "VX":
++        if len(arg) > RECLEN:
++            if arg[RECLEN] != " ":
++                return "R LEN"
++            record = arg[:RECLEN]
++        else:
++            record = arg
++        if record[:2].upper() != "VX":
+             return "R FMT"
+-        if record[RECLEN - 1] != check_char(record):
++        if record[RECLEN - 1] != "Z" and record[RECLEN - 1] != check_char(
++            record[:2].upper() + record[2 : RECLEN - 1]
++        ):
+             return "R CHK"
+-        acct = record[2:12].lstrip("*")
+-        if not acct or not acct.isalnum():
++        acct = record[2:12].strip("* ")
++        if not acct or not (acct.isascii() and acct.isalnum()):
+             return "R FMT"
+         amount = record[12:23]
+-        if not amount.isdigit():
++        if not (amount.isascii() and amount.isdigit()):
+             return "R FMT"
+         date = record[23:31]
+-        if not _valid_date(date):
++        if date != "00000000" and not _valid_date(date):
+             return "R FMT"
+         memo = record[31:46].rstrip(".")
+         if not _printable(memo):
+             return "R FMT"
+-        if record[46] != "N":
+-            return "R FMT"
+         return f"P {acct} {int(amount)} {date} {memo or '_'}"
+ 
+ 

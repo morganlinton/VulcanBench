@@ -13,6 +13,29 @@ use "to" for ranges (for example "10 to 20", not "10–20").
 
 Keep headings plain (no decorative dashes around them) on shareable assets.
 
+## Suite names
+
+The public name of `tasks/coding-intelligence-index-v4` is **VulcanBench
+Frontier v4** (renamed from VulcanBench-SWE v4 on 2026-09-18; URL slugs,
+file names and run directories keep `swe-v4` and are never renamed). Its
+private routine companion is VulcanBench Routine v1, and the private conduct
+suite in the VulcanConduct repo (suite id `conduct-v1`) is VulcanBench Safety v1
+(renamed from VulcanConduct v1 on 2026-09-18). Use the public names in
+anything user-facing; never write "SWE v4" for new material.
+
+## Operating decisions
+
+Run-condition decisions (task timeouts, sweep concurrency, and why) are
+logged with their evidence in [docs/DECISIONS.md](docs/DECISIONS.md). Read
+the relevant entry before changing budgets, concurrency, or sweep launchers,
+and add an entry when a decision like that is made. Current: v4 tasks carry
+a flat 3-hour timeout; sweeps run one task at a time.
+
+Operator settings live in [vulcanbench.toml](vulcanbench.toml). Effort levels
+listed under `[effort].blocked` (currently "ultra") never run on any model,
+harness or suite; the harness refuses them before a model call. Do not work
+around the block or add an ultra column anywhere.
+
 ## Brand: logo and typography
 
 Use these whenever producing anything user-facing or shareable (charts, reports,

@@ -1,0 +1,318 @@
+diff --git a/depotcore.py b/depotcore.py
+index 5e71f24..189d58c 100644
+--- a/depotcore.py
++++ b/depotcore.py
+@@ -10,12 +10,26 @@ from __future__ import annotations
+ 
+ import sys
+ 
+-BAY, SHELVED, OUT, LEDGE, GONE = 0, 1, 2, 3, 4
+-CAP = 4
++BAY, SHELVED, OUT, LEDGE, GONE, WAIVED = 0, 1, 2, 3, 4, 5
+ 
+ 
+ class Parcel:
+-    __slots__ = ("pid", "sender", "lane", "heft", "state", "stamp", "bounced")
++    __slots__ = (
++        "pid",
++        "sender",
++        "lane",
++        "heft",
++        "state",
++        "stamp",
++        "bounces",
++        "lodge_seq",
++        "r_placed",
++        "touch",
++        "nshelve",
++        "bounce_seqs",
++        "cleared",
++        "burned",
++    )
+ 
+     def __init__(self, pid, sender, lane, heft):
+         self.pid = pid
+@@ -24,7 +38,14 @@ class Parcel:
+         self.heft = heft
+         self.state = BAY
+         self.stamp = 0
+-        self.bounced = False
++        self.bounces = 0
++        self.lodge_seq = 0
++        self.r_placed = 0
++        self.touch = 0
++        self.nshelve = 0
++        self.bounce_seqs = []
++        self.cleared = False
++        self.burned = False
+ 
+ 
+ class Engine:
+@@ -36,6 +57,10 @@ class Engine:
+         self.parcels: dict[str, Parcel] = {}
+         self.bay: list[str] = []    # lodge order
+         self.ledge: list[str] = []  # bounce order
++        self.lane_rounds: dict[str, int] = {}    # completed rounds per lane
++        self.lane_full_rounds: dict[str, int] = {}  # completed non-void rounds
++        self.lodge_seq_next = 1  # shared ordering for lodges and bounces
++        self.seq_next = 1
+         self.stamp_next = 1
+         self.window: list[str] = []
+         self.window_open = False
+@@ -121,6 +146,8 @@ class Engine:
+             self._emit(f"R {l} DUP")
+             return
+         self.shelves[l] = []
++        self.lane_rounds[l] = 0
++        self.lane_full_rounds[l] = 0
+         self.lane_order.append(l)
+         self.c_lane += 1
+         self._emit(f"OK {l}")
+@@ -150,33 +177,90 @@ class Engine:
+         if pid in self.parcels:
+             self._emit(f"R {pid} DUP")
+             return
+-        self.parcels[pid] = Parcel(pid, s, l, heft)
++        p = Parcel(pid, s, l, heft)
++        p.lodge_seq = self.lodge_seq_next
++        p.r_placed = self.lane_full_rounds[l]
++        self.lodge_seq_next += 1
++        p.touch = self.seq_next
++        self.seq_next += 1
++        self.parcels[pid] = p
+         self.bay.append(pid)
+         self.c_lodge += 1
+         self._emit(f"OK {pid}")
+ 
+-    def _place(self, p):
++    def _place(self, p, put=True, shelved=True, set_r=True):
+         p.stamp = self.stamp_next
+         self.stamp_next += 1
++        if shelved:
++            p.nshelve += 1
++        if set_r:
++            p.r_placed = self.lane_full_rounds[p.lane]
+         p.state = SHELVED
+         self.shelves[p.lane].append(p.pid)
+-        self._emit(f"PUT {p.pid} {p.lane}")
++        if put:
++            self._emit(f"PUT {p.pid} {p.lane}")
+ 
+     def _cmd_shelve(self, parts):
+         if len(parts) != 1:
+             self._emit("R SHELVE FMT")
+             return
+         n = 0
+-        for pid in self.bay:
+-            self._place(self.parcels[pid])
+-            n += 1
+-        self.bay = []
+         for pid in self.ledge:
+             self._place(self.parcels[pid])
+             n += 1
+         self.ledge = []
++        for l in self.lane_order:
++            for pid in self.bay:
++                if self.parcels[pid].lane == l:
++                    self._place(self.parcels[pid])
++                    n += 1
++        self.bay = []
+         self._emit(f"OK {n}")
+ 
++    def _standing_rank(self, p):
++        same_standing = 0
++        rank = 0
++        for q in self.parcels.values():
++            if q.sender == p.sender and q.lodge_seq <= p.lodge_seq:
++                rank += 1
++        return rank
++
++    def _sender_pb(self, p):
++        parcels = 0
++        bounces = 0
++        for q in self.parcels.values():
++            if q.sender == p.sender and q.lane == p.lane:
++                pre = sum(1 for t in q.bounce_seqs if t < p.lodge_seq)
++                if pre > 0:
++                    parcels += 1
++                    bounces += pre
++        return parcels * bounces
++
++    def _raw(self, p, f_now):
++        eff = p.heft
++        if self._standing_rank(p) % 3 == 0:
++            eff += 15
++            if p.bounces > 0:
++                eff += 2
++        eff -= 35 * p.bounces
++        eff += 5 * (f_now - p.r_placed)
++        if p.bounces >= 5:
++            eff += 1
++        if p.bounces == 0:
++            pb = self._sender_pb(p)
++            if pb >= 2:
++                eff -= 10
++                if pb >= 6:
++                    eff += 1
++        return eff
++
++    def _eff(self, p, r_now, f_now):
++        eff = self._raw(p, f_now)
++        floor = 5 * r_now + 1
++        if eff < floor:
++            eff = floor
++        return eff
++
+     def _cmd_round(self, parts):
+         if len(parts) != 2:
+             self._emit("R ROUND FMT")
+@@ -190,26 +274,68 @@ class Engine:
+             return
+         shelf = self.shelves[l]
+         self.c_round += 1
++        r_now = self.lane_rounds[l]
++        self.lane_rounds[l] = r_now + 1
+         if not shelf:
+             self._emit(f"VOID {l}")
+             return
+         self._close_window()
++        f_now = self.lane_full_rounds[l]
++        self.lane_full_rounds[l] = f_now + 1
++        for pid in self.bay:
++            self.parcels[pid].burned = True
++        orig_pos = {pid: i for i, pid in enumerate(shelf)}
++        effs = {pid: self._eff(self.parcels[pid], r_now, f_now) for pid in shelf}
++        raws = {pid: self._raw(self.parcels[pid], f_now) for pid in shelf}
+         manifest = []
+-        k = min(CAP, len(shelf))
++        cap = 4 if r_now < 3 else 3
++        k = min(cap, len(shelf))
+         for _ in range(k):
++            top = max(effs[pid] for pid in shelf)
++            tied = [q for q in shelf if effs[q] == top]
++            if any(orig_pos[q] == 0 for q in tied):
++                newer_wins = False
++                if len(tied) == 2:
++                    ns = {self.parcels[q].nshelve for q in tied}
++                    if ns == {0, 1}:
++                        older = min(
++                            tied, key=lambda q: self.parcels[q].stamp
++                        )
++                        if any(
++                            r.state not in (OUT, GONE)
++                            and r.nshelve == 0
++                            and r.pid != older
++                            and r.pid not in tied
++                            for r in self.parcels.values()
++                        ):
++                            newer_wins = True
++            else:
++                by_stamp = sorted(
++                    tied, key=lambda q: self.parcels[q].stamp
++                )
++                newer_wins = (
++                    self.parcels[by_stamp[-1]].nshelve == 1
++                    and self.parcels[by_stamp[0]].nshelve != 1
++                )
+             best = None
++            best_key = None
+             for pid in shelf:
+                 p = self.parcels[pid]
+-                if (
+-                    best is None
+-                    or p.heft > best.heft
+-                    or (p.heft == best.heft and p.stamp < best.stamp)
+-                ):
++                key = (
++                    (effs[pid], p.stamp)
++                    if newer_wins
++                    else (effs[pid], -p.stamp)
++                )
++                if best is None or key > best_key:
+                     best = p
++                    best_key = key
+             shelf.remove(best.pid)
+             best.state = OUT
+             manifest.append(best.pid)
+             self._emit(f"OUT {best.pid}")
++        emptied = not shelf and (not self.bay or k == 1)
++        for pid in manifest:
++            self.parcels[pid].cleared = emptied
+         self.window = manifest
+         self.window_open = True
+         self.window_bounced = set()
+@@ -234,7 +360,12 @@ class Engine:
+         p = self.parcels[pid]
+         self.window_bounced.add(pid)
+         p.state = LEDGE
+-        p.bounced = True
++        p.bounces += 1
++        p.r_placed = self.lane_full_rounds[p.lane]
++        p.bounce_seqs.append(self.lodge_seq_next)
++        self.lodge_seq_next += 1
++        p.touch = self.seq_next
++        self.seq_next += 1
+         self.ledge.append(pid)
+         self.c_bounce += 1
+         self._emit(f"OK {pid}")
+@@ -255,7 +386,7 @@ class Engine:
+             self.bay.remove(pid)
+         else:
+             self.shelves[p.lane].remove(pid)
+-        p.state = GONE
++        p.state = WAIVED
+         self.c_waive += 1
+         self._emit(f"OK {pid}")
+ 
+@@ -264,9 +395,34 @@ class Engine:
+             self._emit("R SQUARE FMT")
+             return
+         self.c_square += 1
++        self._close_window()
+         for l in self.lane_order:
+-            names = " ".join(self.shelves[l])
++            self.lane_rounds[l] = self.lane_full_rounds[l]
++        for l in self.lane_order:
++            kept = [
++                pid
++                for pid, p in self.parcels.items()
++                if p.lane == l
++                and p.state in (SHELVED, WAIVED, LEDGE, BAY)
++                and (p.state != SHELVED or pid in self.shelves[l])
++            ]
++            kept.sort(key=lambda pid: self.parcels[pid].touch)
++            shelf = self.shelves[l]
++            shelf.clear()
++            for pid in kept:
++                p = self.parcels[pid]
++                if p.state == SHELVED and p.nshelve < 1:
++                    p.nshelve = 1
++                self._place(
++                    p,
++                    put=False,
++                    shelved=False,
++                    set_r=(p.state == BAY and not p.burned),
++                )
++            names = " ".join(shelf)
+             self._emit(f"SQ {l} {names}" if names else f"SQ {l}")
++        self.bay = []
++        self.ledge = []
+         self._emit(f"OK {len(self.lane_order)}")
+ 
+     def _cmd_list(self, parts):
+@@ -294,10 +450,11 @@ class Engine:
+         if s not in self.senders:
+             self._emit(f"R {s} WHO")
+             return
++        lane_pos = {l: i for i, l in enumerate(self.lane_order)}
+         held = [
+             p for p in self.parcels.values() if p.sender == s and p.state == SHELVED
+         ]
+-        held.sort(key=lambda p: p.stamp)
++        held.sort(key=lambda p: (lane_pos[p.lane], p.stamp))
+         joined = " ".join(p.pid for p in held)
+         self._emit(f"FOR {s} {joined}" if joined else f"FOR {s}")
+ 
+diff --git a/legacy/depotcore-darwin-arm64 b/legacy/depotcore-darwin-arm64
+old mode 100644
+new mode 100755

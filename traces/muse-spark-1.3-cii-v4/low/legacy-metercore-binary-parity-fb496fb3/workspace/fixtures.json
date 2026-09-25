@@ -1,0 +1,1124 @@
+{
+ "guard_nominal": [
+  {
+   "input": [
+    "M ALPHA1 04 300 D S"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  },
+  {
+   "input": [
+    "M BRAVO2 03 500 D S"
+   ],
+   "expected": [
+    "B BRAVO2 500 7000",
+    "X 1 0 7000"
+   ]
+  },
+  {
+   "input": [
+    "M C3 05 1 D S"
+   ],
+   "expected": [
+    "B C3 1 14",
+    "X 1 0 14"
+   ]
+  },
+  {
+   "input": [
+    "M DELTA 04 440 W S"
+   ],
+   "expected": [
+    "B DELTA 440 5236",
+    "X 1 0 5236"
+   ]
+  },
+  {
+   "input": [
+    "M E5E5E5E5 04 999999 D S"
+   ],
+   "expected": [
+    "B E5E5E5E5 999999 25983474",
+    "X 1 0 25983474"
+   ]
+  },
+  {
+   "input": [
+    "M FOXTROT 04 400 D S",
+    "M FOXTROT 05 300 D S",
+    "M FOXTROT 04 1500 D S",
+    "M FOXTROT 03 250 D S"
+   ],
+   "expected": [
+    "B FOXTROT 2450 47200",
+    "X 1 0 47200"
+   ]
+  },
+  {
+   "input": [
+    "M GOLF7 04 500 W S",
+    "M GOLF7 05 240 W S"
+   ],
+   "expected": [
+    "B GOLF7 740 9826",
+    "X 1 0 9826"
+   ]
+  }
+ ],
+ "guard_errors": [
+  {
+   "input": [
+    "Z ALPHA1 04 100 D S"
+   ],
+   "expected": [
+    "R ALPHA1 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M TOOLONG99 04 100 D S"
+   ],
+   "expected": [
+    "R TOOLONG99 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M BAD-ID 04 100 D S"
+   ],
+   "expected": [
+    "R BAD-ID FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 45 100 D S"
+   ],
+   "expected": [
+    "R ALPHA1 MONTH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 4 100 D S"
+   ],
+   "expected": [
+    "R ALPHA1 MONTH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 ab 100 D S"
+   ],
+   "expected": [
+    "R ALPHA1 MONTH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 1234567 D S"
+   ],
+   "expected": [
+    "R ALPHA1 KWH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 12x4 D S"
+   ],
+   "expected": [
+    "R ALPHA1 KWH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 100 X S"
+   ],
+   "expected": [
+    "R ALPHA1 BAND",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 100 DN S"
+   ],
+   "expected": [
+    "R ALPHA1 BAND",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 100 D Q"
+   ],
+   "expected": [
+    "R ALPHA1 METER",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 100 D"
+   ],
+   "expected": [
+    "R ALPHA1 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M"
+   ],
+   "expected": [
+    "R ? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "totally malformed"
+   ],
+   "expected": [
+    "R malformed FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 100 X S",
+    "M OK1 04 100 D S",
+    "M ALPHA1 04 100 D Q"
+   ],
+   "expected": [
+    "R ALPHA1 BAND",
+    "R ALPHA1 METER",
+    "B OK1 100 1400",
+    "X 1 2 1400"
+   ]
+  }
+ ],
+ "guard_empty_batch": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "guard_multi_account": [
+  {
+   "input": [
+    "M HOTEL 04 200 D S",
+    "M INDIA 05 700 W S",
+    "M HOTEL 03 350 D S",
+    "M JULIET9 04 60 D S"
+   ],
+   "expected": [
+    "B HOTEL 550 7950",
+    "B INDIA 700 9180",
+    "B JULIET9 60 840",
+    "X 3 0 17970"
+   ]
+  }
+ ],
+ "f2p_winter_night_tier1": [
+  {
+   "input": [
+    "M ALPHA1 12 300 N S"
+   ],
+   "expected": [
+    "B ALPHA1 300 2520",
+    "X 1 0 2520"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 01 300 N S"
+   ],
+   "expected": [
+    "B ALPHA1 300 2520",
+    "X 1 0 2520"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 02 300 N S"
+   ],
+   "expected": [
+    "B ALPHA1 300 2520",
+    "X 1 0 2520"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 03 300 N S"
+   ],
+   "expected": [
+    "B ALPHA1 300 2940",
+    "X 1 0 2940"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 11 300 N S"
+   ],
+   "expected": [
+    "B ALPHA1 300 2940",
+    "X 1 0 2940"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 12 300 D S"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 400 D S",
+    "M ALPHA1 01 200 N S"
+   ],
+   "expected": [
+    "B ALPHA1 600 7770",
+    "X 1 0 7770"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 500 D S",
+    "M ALPHA1 12 200 N S"
+   ],
+   "expected": [
+    "B ALPHA1 700 9660",
+    "X 1 0 9660"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 02 500 N S"
+   ],
+   "expected": [
+    "B ALPHA1 500 4200",
+    "X 1 0 4200"
+   ]
+  }
+ ],
+ "f2p_meter_uplift": [
+  {
+   "input": [
+    "M ALPHA1 04 300 D L"
+   ],
+   "expected": [
+    "B ALPHA1 300 4326",
+    "X 1 0 4326"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 300 D S"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 500 D L"
+   ],
+   "expected": [
+    "B ALPHA1 500 7210",
+    "X 1 0 7210"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 490 D S",
+    "M ALPHA1 05 10 D L"
+   ],
+   "expected": [
+    "B ALPHA1 500 7004",
+    "X 1 0 7004"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 490 D L",
+    "M ALPHA1 03 20 D L"
+   ],
+   "expected": [
+    "B ALPHA1 510 7406",
+    "X 1 0 7406"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 1990 D L",
+    "M ALPHA1 04 40 D L"
+   ],
+   "expected": [
+    "B ALPHA1 2030 37368",
+    "X 1 0 37368"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 123456 W L"
+   ],
+   "expected": [
+    "B ALPHA1 123456 2795783",
+    "X 1 0 2795783"
+   ]
+  }
+ ],
+ "f2p_summer_tier2": [
+  {
+   "input": [
+    "M ALPHA1 06 800 D S"
+   ],
+   "expected": [
+    "B ALPHA1 800 13270",
+    "X 1 0 13270"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 09 800 D S"
+   ],
+   "expected": [
+    "B ALPHA1 800 13270",
+    "X 1 0 13270"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 05 800 D S"
+   ],
+   "expected": [
+    "B ALPHA1 800 12700",
+    "X 1 0 12700"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 10 800 D S"
+   ],
+   "expected": [
+    "B ALPHA1 800 12700",
+    "X 1 0 12700"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 07 400 D S"
+   ],
+   "expected": [
+    "B ALPHA1 400 5600",
+    "X 1 0 5600"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 08 2500 D S"
+   ],
+   "expected": [
+    "B ALPHA1 2500 52650",
+    "X 1 0 52650"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 1900 D S",
+    "M ALPHA1 06 300 D S"
+   ],
+   "expected": [
+    "B ALPHA1 2200 41410",
+    "X 1 0 41410"
+   ]
+  }
+ ],
+ "f2p_rounding": [
+  {
+   "input": [
+    "M ALPHA1 04 15 W S"
+   ],
+   "expected": [
+    "B ALPHA1 15 178",
+    "X 1 0 178"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 35 W S"
+   ],
+   "expected": [
+    "B ALPHA1 35 416",
+    "X 1 0 416"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 55 W S"
+   ],
+   "expected": [
+    "B ALPHA1 55 654",
+    "X 1 0 654"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 25 W S"
+   ],
+   "expected": [
+    "B ALPHA1 25 298",
+    "X 1 0 298"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 498 D S",
+    "M ALPHA1 04 4 N S"
+   ],
+   "expected": [
+    "B ALPHA1 502 7018",
+    "X 1 0 7018"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 499 W S",
+    "M ALPHA1 05 2 W S"
+   ],
+   "expected": [
+    "B ALPHA1 501 5966",
+    "X 1 0 5966"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 1999 N S",
+    "M ALPHA1 04 2 N S"
+   ],
+   "expected": [
+    "B ALPHA1 2001 24869",
+    "X 1 0 24869"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 497 W S",
+    "M ALPHA1 03 6 N S"
+   ],
+   "expected": [
+    "B ALPHA1 503 5983",
+    "X 1 0 5983"
+   ]
+  }
+ ],
+ "f2p_casefold": [
+  {
+   "input": [
+    "M abc1 04 300 D S",
+    "M ABC1 04 300 D S"
+   ],
+   "expected": [
+    "B abc1 600 8900",
+    "X 1 0 8900"
+   ]
+  },
+  {
+   "input": [
+    "M MiXeD 04 400 D S",
+    "M mixed 04 200 D S",
+    "M MIXED 04 100 D S"
+   ],
+   "expected": [
+    "B MiXeD 700 10800",
+    "X 1 0 10800"
+   ]
+  },
+  {
+   "input": [
+    "M k9 04 450 D S",
+    "M K9 12 100 N S"
+   ],
+   "expected": [
+    "B k9 550 7385",
+    "X 1 0 7385"
+   ]
+  }
+ ],
+ "f2p_month_wrap": [
+  {
+   "input": [
+    "M ALPHA1 13 300 D S"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 13 300 N S"
+   ],
+   "expected": [
+    "B ALPHA1 300 2520",
+    "X 1 0 2520"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 00 300 D S"
+   ],
+   "expected": [
+    "R ALPHA1 MONTH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 14 300 D S"
+   ],
+   "expected": [
+    "R ALPHA1 MONTH",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 13 0 D S"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "f2p_zero_kwh": [
+  {
+   "input": [
+    "M ZERO1 04 0 D S"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ZERO1 04 0 D S",
+    "M ZERO1 04 0 D S"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M AA 04 0 D S",
+    "M BB 04 100 D S",
+    "M AA 05 50 D S"
+   ],
+   "expected": [
+    "B BB 100 1400",
+    "B AA 50 700",
+    "X 2 0 2100"
+   ]
+  },
+  {
+   "input": [
+    "M CC 04 0 D S",
+    "M cc 04 200 D S"
+   ],
+   "expected": [
+    "B cc 200 2800",
+    "X 1 0 2800"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 0 D S",
+    "M ALPHA1 04 300 D S"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "M ALPHA1 04 300 D S LEGACY9"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 300 D S x y z"
+   ],
+   "expected": [
+    "B ALPHA1 300 4200",
+    "X 1 0 4200"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 04 100 D"
+   ],
+   "expected": [
+    "R ALPHA1 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ALPHA1 12 250 W L 0"
+   ],
+   "expected": [
+    "B ALPHA1 250 3064",
+    "X 1 0 3064"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "M delta 05 500 D Q",
+    "M ALPHA1 aa 999999 W L",
+    "M alpha1 13 12x4 D Q",
+    "M TOOLONG99 02 2001 X S",
+    "M DELTA 4 100 W S x 9",
+    "M DELTA 13 0 D Q",
+    "M ALPHA1 01 1 W S",
+    "M k9 05 123456 W S",
+    "Z DELTA 12 123456 D S",
+    "M TOOLONG99 02 999999 X L",
+    "M ALPHA1 00 25 N S",
+    "M TOOLONG99 06 1 N L",
+    "M k9 00 501 N L",
+    "M ALPHA1 03 123456 N L EXTRA",
+    "Z TOOLONG99 03 1234567 D S",
+    "M K9 10 300 N S",
+    "M TOOLONG99 11 1999 W S",
+    "M BRAVO2 4 490 X L",
+    "M LONGACC1 09 2001 X Q",
+    "M delta 13 12x4 N L",
+    "M BAD-ID 05 501 D Q",
+    "M k9 02 1234567 W L",
+    "M delta 09 0 N Q x 9",
+    "M k9 11 501 W L",
+    "M TOOLONG99 4 999999 X L",
+    "M C3 06 1999 W S",
+    "M delta 02 500 W L",
+    "M delta 00 0 X L",
+    "M C3 4 1500 N S",
+    "M delta 11 1500 N L",
+    "M LONGACC1 12 501 D S",
+    "M alpha1 00 501 W Q",
+    "M K9 06 123456 N Q",
+    "M BAD-ID 13 15 D S",
+    "Z K9 09 0 X L",
+    "M DELTA aa 999999 X L",
+    "M k9 03 25 N L",
+    "M BRAVO2 06 500 W S",
+    "M TOOLONG99 09 1234567 D L",
+    "M alpha1 05 1999 N Q",
+    "Z alpha1 13 501 N L EXTRA",
+    "M C3 aa 490 D S",
+    "Z TOOLONG99 01 7 N S",
+    "M LONGACC1 06 1234567 D Q",
+    "M delta 02 123456 N S EXTRA",
+    "M LONGACC1 03 2000 N Q",
+    "M K9 4 500 D L",
+    "M BRAVO2 03 0 W Q",
+    "M K9 00 7 N L",
+    "M BRAVO2 03 1500 X L",
+    "M LONGACC1 aa 0 N L",
+    "M DELTA 09 7 W S",
+    "M C3 4 999999 N S",
+    "M ALPHA1 00 100 N Q",
+    "M C3 aa 100 W L",
+    "M K9 13 100 W S",
+    "M ALPHA1 01 490 W L",
+    "M ALPHA1 12 0 W L",
+    "M LONGACC1 01 0 W S",
+    "M k9",
+    "M alpha1 01 25 W L",
+    "M k9 09 1 D L",
+    "M BAD-ID 01 12x4 W L",
+    "M LONGACC1 01 1 W S",
+    "M TOOLONG99 aa 1234567 N Q EXTRA",
+    "M TOOLONG99 01 500 W Q",
+    "M BRAVO2 02 15 X L",
+    "M K9 05 0 W S",
+    "M k9 06 300 X Q",
+    "M E5E5E5E5 01 2001 W Q x 9",
+    "M BRAVO2 10 123456 W L",
+    "M K9 12 25 N L",
+    "M E5E5E5E5 00 2000 D S",
+    "M BRAVO2 06 7 W L",
+    "M k9 13 123456 N S",
+    "M ALPHA1 09 25 D Q",
+    "M ALPHA1 06 999999 N S",
+    "M k9 05 1500 N L",
+    "Z BRAVO2 11 12x4 D Q",
+    "M BRAVO2 02 12x4 W L EXTRA",
+    "M DELTA 09 12x4 D Q",
+    "Z LONGACC1 10 300 N L x 9",
+    "M DELTA 13 0 D S",
+    "M C3 10 15 W S",
+    "M TOOLONG99 01 2001 W L",
+    "M C3",
+    "M BRAVO2 03 2000 D L",
+    "M LONGACC1 4 0 D S",
+    "M E5E5E5E5 4 15 W S",
+    "Z LONGACC1 05 1234567 W L",
+    "M E5E5E5E5 4 1500 D S",
+    "M E5E5E5E5 03 490 W S",
+    "M ALPHA1 4 2000 D S",
+    "M ALPHA1 03 1999 N Q",
+    "M C3 05 123456 N Q",
+    "M E5E5E5E5 12 300 D S",
+    "M BRAVO2 12 123456 W S",
+    "M ALPHA1 aa 1 W L",
+    "M K9 4 490 D Q",
+    "M E5E5E5E5 4 1500 D L",
+    "M K9 09 100 D S",
+    "M TOOLONG99 13 0 D L",
+    "M alpha1 01 1500 N L EXTRA",
+    "Z ALPHA1 10 501 N Q",
+    "M C3 13 15 D Q",
+    "M C3 03 500 W S",
+    "M E5E5E5E5 00 15 N L",
+    "M K9 01 1 W L x 9",
+    "M C3 00 7 N S",
+    "M C3 4 0 X L",
+    "M K9 02 300 X Q",
+    "M C3 00 501 X Q",
+    "M delta 13 501 X Q x 9",
+    "M K9 06 12x4 D Q",
+    "Z BAD-ID 00",
+    "M BAD-ID 06 500 D S",
+    "M TOOLONG99 03 500 D L",
+    "M DELTA 09 12x4 N S",
+    "M BRAVO2 4 2001 D Q",
+    "M E5E5E5E5 05 1999 D L"
+   ],
+   "expected": [
+    "R delta METER",
+    "R ALPHA1 MONTH",
+    "R alpha1 KWH",
+    "R TOOLONG99 FMT",
+    "R DELTA MONTH",
+    "R DELTA METER",
+    "R DELTA FMT",
+    "R TOOLONG99 FMT",
+    "R ALPHA1 MONTH",
+    "R TOOLONG99 FMT",
+    "R k9 MONTH",
+    "R TOOLONG99 FMT",
+    "R TOOLONG99 FMT",
+    "R BRAVO2 MONTH",
+    "R LONGACC1 BAND",
+    "R delta KWH",
+    "R BAD-ID FMT",
+    "R k9 KWH",
+    "R delta METER",
+    "R TOOLONG99 FMT",
+    "R delta MONTH",
+    "R C3 MONTH",
+    "R alpha1 MONTH",
+    "R K9 METER",
+    "R BAD-ID FMT",
+    "R K9 FMT",
+    "R DELTA MONTH",
+    "R TOOLONG99 FMT",
+    "R alpha1 METER",
+    "R alpha1 FMT",
+    "R C3 MONTH",
+    "R TOOLONG99 FMT",
+    "R LONGACC1 KWH",
+    "R LONGACC1 METER",
+    "R K9 MONTH",
+    "R BRAVO2 METER",
+    "R K9 MONTH",
+    "R BRAVO2 BAND",
+    "R LONGACC1 MONTH",
+    "R C3 MONTH",
+    "R ALPHA1 MONTH",
+    "R C3 MONTH",
+    "R k9 FMT",
+    "R BAD-ID FMT",
+    "R TOOLONG99 FMT",
+    "R TOOLONG99 FMT",
+    "R BRAVO2 BAND",
+    "R k9 BAND",
+    "R E5E5E5E5 METER",
+    "R E5E5E5E5 MONTH",
+    "R ALPHA1 METER",
+    "R BRAVO2 FMT",
+    "R BRAVO2 KWH",
+    "R DELTA KWH",
+    "R LONGACC1 FMT",
+    "R TOOLONG99 FMT",
+    "R C3 FMT",
+    "R LONGACC1 MONTH",
+    "R E5E5E5E5 MONTH",
+    "R LONGACC1 FMT",
+    "R E5E5E5E5 MONTH",
+    "R ALPHA1 MONTH",
+    "R ALPHA1 METER",
+    "R C3 METER",
+    "R ALPHA1 MONTH",
+    "R K9 MONTH",
+    "R E5E5E5E5 MONTH",
+    "R TOOLONG99 FMT",
+    "R ALPHA1 FMT",
+    "R C3 METER",
+    "R E5E5E5E5 MONTH",
+    "R C3 MONTH",
+    "R C3 MONTH",
+    "R K9 BAND",
+    "R C3 MONTH",
+    "R delta BAND",
+    "R K9 KWH",
+    "R BAD-ID FMT",
+    "R BAD-ID FMT",
+    "R TOOLONG99 FMT",
+    "R DELTA KWH",
+    "R BRAVO2 MONTH",
+    "B ALPHA1 1125471 22362252",
+    "B k9 249465 5012295",
+    "B C3 2514 43956",
+    "B delta 125463 2273745",
+    "B LONGACC1 502 7035",
+    "B BRAVO2 249419 5589099",
+    "B E5E5E5E5 2789 56290",
+    "X 7 82 35344672"
+   ]
+  },
+  {
+   "input": [
+    "Z",
+    "M BAD-ID 12 0 W L",
+    "M BRAVO2 11 7 X L",
+    "M ALPHA1 11 490 D Q",
+    "M BAD-ID 01 1500 D",
+    "M ALPHA1 13 12x4 D S",
+    "M delta 4 1234567 N L",
+    "M alpha1 12 15 D Q",
+    "M BRAVO2 11 1999 D L",
+    "M LONGACC1 11 490 D S",
+    "M TOOLONG99 00 501 D Q x 9",
+    "M delta 02 123456 W L",
+    "M BAD-ID 01 490 D S",
+    "M delta aa 999999 D L",
+    "M ALPHA1 09 12x4 N L",
+    "M ALPHA1 10 500 W Q",
+    "M LONGACC1 12 2000 D S EXTRA",
+    "M k9 10 2001 N L",
+    "M BAD-ID 10 1500 X L",
+    "M E5E5E5E5 aa 1 D Q",
+    "M BAD-ID 13 999999 X S x 9",
+    "M TOOLONG99 00 12x4 D S",
+    "M delta 10 2000 W S",
+    "Z TOOLONG99 01 1234567 D S",
+    "M k9 00 2000 D L",
+    "M TOOLONG99 03 1999 X L",
+    "M E5E5E5E5 13 7 N L",
+    "M E5E5E5E5 11 1 W S",
+    "M E5E5E5E5 01 2001 W Q",
+    "M delta 11 999999 W S",
+    "M K9 02 2000 D Q",
+    "M LONGACC1 13 2001 N L",
+    "Z C3 09 1234567 W S",
+    "M DELTA 00 12x4 X L",
+    "M ALPHA1 13 0 W Q",
+    "M E5E5E5E5 05 15 W L",
+    "M K9 12 12x4 W L",
+    "M K9 01 100 D L",
+    "M alpha1 10 100 W L",
+    "M delta 4 2000 W Q",
+    "M DELTA 06 1500 W L",
+    "Z LONGACC1 12 1234567 W S",
+    "M BRAVO2 10 0 N S",
+    "M BRAVO2 12 123456 N L",
+    "M alpha1 06 1 N S",
+    "M ALPHA1 13 1500 N L EXTRA",
+    "M DELTA 4 123456 W L",
+    "M BAD-ID 13 15 N L",
+    "M",
+    "M BAD-ID 06 500 D L",
+    "M ALPHA1 aa 501 X Q",
+    "M LONGACC1 13 501 D L",
+    "M DELTA 10 25 N Q",
+    "M alpha1 09 490 D Q",
+    "M ALPHA1 02 1 D L",
+    "M alpha1 05 300 D S",
+    "M k9 11 1 X Q x 9",
+    "M BAD-ID 06 300 D S",
+    "M BRAVO2 09 300 N S",
+    "M E5E5E5E5 03 25 N L x 9",
+    "M k9 aa 2001 D L",
+    "M BAD-ID 03 15 X S",
+    "M TOOLONG99 01 300 W S",
+    "M ALPHA1 13 100 W L EXTRA",
+    "M k9 06 15 W S",
+    "M LONGACC1 05 2000 D S",
+    "M K9 05 1999 D L",
+    "M DELTA 10 15 D L",
+    "M ALPHA1 03 1500 D S",
+    "Z C3 aa",
+    "M E5E5E5E5 11 123456 W S",
+    "M TOOLONG99 12 500 W L EXTRA",
+    "M delta 03 1999 D S",
+    "M C3 13 15 X L",
+    "M k9 4 1 W Q",
+    "M ALPHA1 03 7 X L",
+    "M ALPHA1 09 15 D",
+    "M delta 03 7 W L",
+    "M BRAVO2 4 300 D L",
+    "M BRAVO2 05 500 N L",
+    "M K9 11 500 D S",
+    "M TOOLONG99 00 0 D L",
+    "M DELTA 09 15 N L",
+    "M E5E5E5E5 11 15 W S",
+    "M LONGACC1 11 100 N Q",
+    "M delta 05 100 X L",
+    "M TOOLONG99 12 501 D S",
+    "M BAD-ID 02 2000 W L",
+    "M BAD-ID 06 999999 D Q",
+    "M DELTA 03 2000 N L",
+    "M LONGACC1 aa 490 X Q",
+    "M k9 13 25 X L",
+    "M LONGACC1 02 1 D S",
+    "M alpha1 11 12x4 X L",
+    "M alpha1 12 15 D S",
+    "M alpha1 01 0 N Q",
+    "M LONGACC1 4 123456 W L",
+    "M LONGACC1 03 15 N S",
+    "M alpha1 4 12x4 X L",
+    "M K9 10 2001 N S",
+    "M delta 02 501 W L",
+    "M BRAVO2 06 15 W S",
+    "M alpha1 aa 12x4 X S",
+    "Z K9 00",
+    "M K9 10 490 X L",
+    "M E5E5E5E5 12 1234567 W L",
+    "M BAD-ID 02 1500 W L",
+    "M BAD-ID 11 7 W S",
+    "M DELTA 06 0 N S",
+    "M DELTA 09 2001 W S",
+    "M BAD-ID 01 2000 N L",
+    "M ALPHA1 12 500 N S",
+    "M ALPHA1 00 7 W L",
+    "M LONGACC1 aa 2000 N L",
+    "M E5E5E5E5 03 490 N S",
+    "M alpha1 01 100 D L",
+    "M alpha1 10 15 X S",
+    "M BRAVO2 4 1500 W L",
+    "M BAD-ID 00 1234567 W L",
+    "M K9 00 490 D S"
+   ],
+   "expected": [
+    "R ? FMT",
+    "R BAD-ID FMT",
+    "R BRAVO2 BAND",
+    "R ALPHA1 METER",
+    "R BAD-ID FMT",
+    "R ALPHA1 KWH",
+    "R delta MONTH",
+    "R alpha1 METER",
+    "R TOOLONG99 FMT",
+    "R BAD-ID FMT",
+    "R delta MONTH",
+    "R ALPHA1 KWH",
+    "R ALPHA1 METER",
+    "R BAD-ID FMT",
+    "R E5E5E5E5 MONTH",
+    "R BAD-ID FMT",
+    "R TOOLONG99 FMT",
+    "R TOOLONG99 FMT",
+    "R k9 MONTH",
+    "R TOOLONG99 FMT",
+    "R E5E5E5E5 METER",
+    "R K9 METER",
+    "R C3 FMT",
+    "R DELTA MONTH",
+    "R ALPHA1 METER",
+    "R K9 KWH",
+    "R delta MONTH",
+    "R LONGACC1 FMT",
+    "R DELTA MONTH",
+    "R BAD-ID FMT",
+    "R ? FMT",
+    "R BAD-ID FMT",
+    "R ALPHA1 MONTH",
+    "R DELTA METER",
+    "R alpha1 METER",
+    "R k9 BAND",
+    "R BAD-ID FMT",
+    "R k9 MONTH",
+    "R BAD-ID FMT",
+    "R TOOLONG99 FMT",
+    "R C3 FMT",
+    "R TOOLONG99 FMT",
+    "R C3 BAND",
+    "R k9 MONTH",
+    "R ALPHA1 BAND",
+    "R ALPHA1 FMT",
+    "R BRAVO2 MONTH",
+    "R TOOLONG99 FMT",
+    "R LONGACC1 METER",
+    "R delta BAND",
+    "R TOOLONG99 FMT",
+    "R BAD-ID FMT",
+    "R BAD-ID FMT",
+    "R LONGACC1 MONTH",
+    "R k9 BAND",
+    "R alpha1 KWH",
+    "R alpha1 METER",
+    "R LONGACC1 MONTH",
+    "R alpha1 MONTH",
+    "R alpha1 MONTH",
+    "R K9 FMT",
+    "R K9 BAND",
+    "R E5E5E5E5 KWH",
+    "R BAD-ID FMT",
+    "R BAD-ID FMT",
+    "R BAD-ID FMT",
+    "R ALPHA1 MONTH",
+    "R LONGACC1 MONTH",
+    "R alpha1 BAND",
+    "R BRAVO2 MONTH",
+    "R BAD-ID FMT",
+    "R K9 MONTH",
+    "B BRAVO2 126270 2366590",
+    "B LONGACC1 7008 151467",
+    "B delta 1133493 25127904",
+    "B k9 6616 131608",
+    "B E5E5E5E5 124009 2724601",
+    "B alpha1 4117 78335",
+    "X 6 72 30580505"
+   ]
+  }
+ ]
+}

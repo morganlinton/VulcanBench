@@ -26,17 +26,35 @@ Usage: python -m harness.maintenance_review_v3_resume calibrate --panel claude
 
 from __future__ import annotations
 
+import fcntl
+import importlib
 import json
+import os
 import re
 import subprocess
 import sys
 import time
+import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 
-from harness import maintenance_review_v3 as v3
 from harness import retrospective_judging as base
-from harness.maintenance_review_v3 import OUT
+
+# The protocol module to drive. v3.5 reuses the frozen v3 implementation with
+# its population and directories rebound, so the wrapper must look those up on
+# the module at call time rather than importing them by value.
+MODULE = os.environ.get("VB_MAINT_MODULE", "harness.maintenance_review_v3")
+importlib.import_module(
+    MODULE
+)  # a later protocol module rebinds the frozen v3 implementation on import
+# The helpers (read, validate, excerpt_supported, ...) live on the frozen
+# implementation, and so do the rebound OUT and population constants.
+v3 = importlib.import_module("harness.maintenance_review_v3")
+
+
+def _out():
+    return v3.OUT
+
 
 SUBTYPE = "error_max_structured_output_retries"
 EXCERPT_ERROR = "Unsupported evidence excerpt"
@@ -58,30 +76,58 @@ def stage_kind(stage: str) -> str:
 def payload_for(stage: str, ident: str) -> dict | None:  # noqa: PLR0911, one branch per stage
     """Rebuild the frozen payload for a call so a recovered response can be validated."""
     if stage in ("primary", "repeat"):
-        return v3.read(OUT / "evidence" / f"{ident}.json")
+        return v3.read(_out() / "evidence" / f"{ident}.json")
     if stage == "calibration":
         if ident.startswith("control-"):
-            return v3.read(OUT / "controls" / f"control-{ident.split('-')[1]}.json")
+            return v3.read(_out() / "controls" / f"control-{ident.split('-')[1]}.json")
         return None
     if stage == "pairwise":
         a, b = ident.split("-submission-")
         b = "submission-" + b
         return {
-            "A": v3.read(OUT / "evidence" / f"{a}.json"),
-            "B": v3.read(OUT / "evidence" / f"{b}.json"),
+            "A": v3.read(_out() / "evidence" / f"{a}.json"),
+            "B": v3.read(_out() / "evidence" / f"{b}.json"),
         }
     if stage == "probe":
-        return v3.probe_evidence(v3.read(OUT / "evidence" / f"{ident}.json"))
+        return v3.probe_evidence(v3.read(_out() / "evidence" / f"{ident}.json"))
     if stage == "match":
-        probe = OUT / "calls" / "claude" / "probe" / ident / "selected.json"
+        probe = _out() / "calls" / "claude" / "probe" / ident / "selected.json"
         if not probe.exists():
             return None
-        row = next(r for r in v3.read(OUT / "private-manifest.json") if r["id"] == ident)
+        row = next(r for r in v3.read(_out() / "private-manifest.json") if r["id"] == ident)
         return {
             "key": v3.load_key(row["task"])["quirks"],
             "departures": v3.read(probe)["departures"],
         }
     return None
+
+
+def calibration_call(ident: str) -> tuple[str, dict | None]:
+    """Kind and frozen payload of a calibration call, rebuilt the way calibrate_panel builds them."""
+    controls = [
+        v3.read(_out() / "controls" / f"control-{i}.json") for i in range(len(v3.CONTROL_FILES))
+    ]
+    head, *rest = ident.split("-")
+    if head == "control":
+        return "review", controls[int(rest[0])]
+    if head == "pair":
+        a, b = int(rest[0]), int(rest[1])
+        return "pair", {"A": controls[a], "B": controls[b]}
+    if head == "probe":
+        return "probe", v3.probe_evidence(controls[int(rest[0])], spec=v3.LEDGER_SPEC)
+    if head == "match":
+        probe = (
+            _out()
+            / "calls"
+            / "grok"
+            / "calibration"
+            / f"probe-{rest[0]}-{rest[1]}"
+            / "selected.json"
+        )
+        if not probe.exists():
+            return "match", None
+        return "match", {"key": v3.LEDGER_KEY["quirks"], "departures": v3.read(probe)["departures"]}
+    return "review", None
 
 
 def assistant_models(stream_text: str) -> set[str]:
@@ -118,13 +164,174 @@ def retry_external_kill(folder: Path) -> bool:
     }
     receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
     print(
-        json.dumps({"event": "external_kill_retry", "call": str(folder.relative_to(OUT))}),
+        json.dumps({"event": "external_kill_retry", "call": str(folder.relative_to(_out()))}),
         flush=True,
     )
     return True
 
 
-QUOTA_MARKERS = ("resource_exhausted", "RetriableError", "rate limit", "rate_limit", "429")
+NETWORK_MARKERS = (
+    "ENOTFOUND",
+    "ECONNRESET",
+    "ETIMEDOUT",
+    "ECONNREFUSED",
+    "[unavailable] getaddrinfo",
+)
+STREAM_NETWORK_MARKERS = ("transport error [net-timeout]",)
+
+
+def retry_network_fault(folder: Path) -> bool:
+    """A judge CLI that could not reach its API (DNS or connection failure) produced no response.
+
+    Grants the single fresh attempt the protocol allows for transport faults
+    when only attempt 1 exists, its error is a network-layer failure, and its
+    stream carries no model output.
+    """
+    receipt = folder / "attempt-1.json"
+    if not receipt.exists() or (folder / "attempt-2.json").exists():
+        return False
+    rec = json.loads(receipt.read_text())
+    if rec.get("status") != "failed" or rec.get("retryable") is not False:
+        return False
+    error = str(rec.get("error", ""))
+    stream = folder / "attempt-1.stream.jsonl"
+    text = stream.read_text() if stream.exists() else ""
+    # Muse reports a dropped connection inside its stream's terminal record rather
+    # than on stderr, where the receipt's error text comes from.
+    terminal = next((m for m in STREAM_NETWORK_MARKERS if m in text), None)
+    if not any(marker in error for marker in NETWORK_MARKERS) and terminal is None:
+        return False
+    if "assistant" in text:
+        return False
+    rec["retryable"] = True
+    rec["operator_review"] = {
+        "at": datetime.now(UTC).isoformat(),
+        "finding": f"Judge CLI could not reach its API ({(terminal or error).strip()[-120:]}); no response was produced.",
+        "action": "Transport fault: one fresh attempt per the protocol; receipt retained.",
+    }
+    receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+    print(
+        json.dumps({"event": "network_fault_retry", "call": str(folder.relative_to(_out()))}),
+        flush=True,
+    )
+    return True
+
+
+TOOL_USE_ERROR = "Judge attempted tool use"
+
+
+def retry_garbled_structured_output(folder: Path) -> bool:  # noqa: PLR0911, one branch per guard
+    """The Claude CLI split a malformed structured-output emission into pseudo tool calls.
+
+    Opus 5 sometimes emits its answer as a StructuredOutput call whose input
+    the CLI could not parse (recorded under __unparsedToolInput), followed by
+    fragments that surface as tool_use blocks named after JSON fields. No tool
+    ran: the stream carries no tool_result. That is a malformed response, the
+    same class the protocol already treats as retryable, not an attempt to
+    use a tool. One fresh attempt; a second occurrence on the same call stops.
+    """
+    receipt = folder / "attempt-1.json"
+    if not receipt.exists() or (folder / "attempt-2.json").exists():
+        return False
+    rec = json.loads(receipt.read_text())
+    if rec.get("status") != "failed" or rec.get("error") != TOOL_USE_ERROR:
+        return False
+    stream = folder / "attempt-1.stream.jsonl"
+    if not stream.exists():
+        return False
+    text = stream.read_text()
+    if "__unparsedToolInput" not in text:
+        return False
+    # No real tool may have run: every tool_use is the structured-output tool or a
+    # pseudo tool the CLI refused, and every non-error tool_result answers the former.
+    names: dict[str, str] = {}
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        event = json.loads(line)
+        if event.get("type") not in ("assistant", "user"):
+            continue
+        for block in event["message"].get("content", []):
+            if block.get("type") == "tool_use":
+                names[block["id"]] = block.get("name")
+            elif block.get("type") == "tool_result":
+                content = block.get("content")
+                shown = content if isinstance(content, str) else json.dumps(content)
+                refused = "No such tool available" in shown
+                if not refused and names.get(block.get("tool_use_id")) != "StructuredOutput":
+                    return False
+    if any(name != "StructuredOutput" for name in names.values()) and not any(
+        "No such tool available" in line for line in text.splitlines()
+    ):
+        return False
+    rec["retryable"] = True
+    rec["operator_review"] = {
+        "at": datetime.now(UTC).isoformat(),
+        "finding": "Malformed structured output: the CLI recorded an unparsed StructuredOutput input and "
+        "field-named pseudo tool calls; no tool ran (no tool_result in the stream).",
+        "action": "Invalid response under the protocol text: one fresh attempt; receipt retained.",
+    }
+    receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            {"event": "garbled_structured_output_retry", "call": str(folder.relative_to(_out()))}
+        ),
+        flush=True,
+    )
+    return True
+
+
+PROVIDER_BLOCK_MARKERS = (
+    "Request blocked",
+    "model provider's usage guidelines",
+    "ActionRequiredError",
+)
+
+
+def retry_provider_block(folder: Path) -> bool:
+    """The judge CLI's provider refused to serve the request and no response was produced.
+
+    Cursor surfaces xAI's content filter as an ActionRequiredError before any
+    model output. When the identical prompt served under earlier protocol
+    versions, the block is a transport fault, not a judgment: the protocol's
+    single fresh attempt applies, with the receipt retained. A second block on
+    the same call is left for a person.
+    """
+    receipt = folder / "attempt-1.json"
+    if not receipt.exists() or (folder / "attempt-2.json").exists():
+        return False
+    rec = json.loads(receipt.read_text())
+    if rec.get("status") != "failed" or rec.get("retryable") is not False:
+        return False
+    error = str(rec.get("error", ""))
+    if not any(marker in error for marker in PROVIDER_BLOCK_MARKERS):
+        return False
+    stream = folder / "attempt-1.stream.jsonl"
+    if stream.exists() and "assistant" in stream.read_text():
+        return False
+    rec["retryable"] = True
+    rec["operator_review"] = {
+        "at": datetime.now(UTC).isoformat(),
+        "finding": f"Provider blocked the request before any output ({error.strip()[-120:]}).",
+        "action": "Transport fault: one fresh attempt per the protocol; receipt retained.",
+    }
+    receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+    print(
+        json.dumps({"event": "provider_block_retry", "call": str(folder.relative_to(_out()))}),
+        flush=True,
+    )
+    return True
+
+
+QUOTA_MARKERS = (
+    "resource_exhausted",
+    "RetriableError",
+    "rate limit",
+    "rate_limit",
+    "429",
+    "usage limit",  # Codex: subscription window exhausted
+    "limit reached",
+)
 QUOTA_MAX_RESUMES = 12
 
 
@@ -156,7 +363,11 @@ def quota_resume(folder: Path) -> bool:
     if prior >= QUOTA_MAX_RESUMES:
         print(
             json.dumps(
-                {"event": "quota_stop_limit", "call": str(folder.relative_to(OUT)), "stops": prior}
+                {
+                    "event": "quota_stop_limit",
+                    "call": str(folder.relative_to(_out())),
+                    "stops": prior,
+                }
             ),
             flush=True,
         )
@@ -179,7 +390,7 @@ def quota_resume(folder: Path) -> bool:
         json.dumps(
             {
                 "event": "quota_resume",
-                "call": str(folder.relative_to(OUT)),
+                "call": str(folder.relative_to(_out())),
                 "prior_stops": prior,
                 "wait_s": wait,
             }
@@ -254,7 +465,7 @@ def recover_match_ids(folder: Path, panel: str, stage: str) -> bool:
             json.dumps(
                 {
                     "event": "match_id_recovery_applied",
-                    "call": str(folder.relative_to(OUT)),
+                    "call": str(folder.relative_to(_out())),
                     "attempt": attempt,
                 }
             ),
@@ -311,7 +522,112 @@ def accept_fallback(folder: Path, panel: str, stage: str) -> bool:
             json.dumps(
                 {
                     "event": "reviewer_fallback_accepted",
-                    "call": str(folder.relative_to(OUT)),
+                    "call": str(folder.relative_to(_out())),
+                    "attempt": n,
+                }
+            ),
+            flush=True,
+        )
+        return True
+    return False
+
+
+RENAME_PREFIX = "Cursor "
+
+
+def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0912, one branch per precondition
+    """Cursor renamed the judge's display label while the requested model id stayed the same.
+
+    On 2026-09-21 Cursor began reporting "Grok 4.6 Medium" for the pinned model
+    id cursor-grok-4.6-medium, which the frozen v3.3 settings record as
+    "Cursor Grok 4.6 Medium". The identity guard is requested-only with the
+    display name checked, so the attempt fails on the label alone. When the
+    reported label equals the frozen display name minus the "Cursor " prefix,
+    the same model served the request: the attempt is selected unchanged and
+    the rename is recorded in the receipt. Any other label still stops.
+    """
+    if panel != "grok":
+        return False
+    if stage == "calibration":
+        kind, payload = calibration_call(folder.name)
+    else:
+        kind, payload = stage_kind(stage), payload_for(stage, folder.name)
+    if payload is None:
+        return False
+    expected = v3.read(_out() / "protocol.json")["reviewers"]["grok"]["display_name"]
+    if not expected.startswith(RENAME_PREFIX):
+        return False
+    renamed = expected[len(RENAME_PREFIX) :]
+    for n in (2, 1):
+        receipt = folder / f"attempt-{n}.json"
+        stream = folder / f"attempt-{n}.stream.jsonl"
+        if not receipt.exists() or not stream.exists():
+            continue
+        rec = json.loads(receipt.read_text())
+        if rec.get("status") != "failed" or rec.get("error") != f"Judge model changed: {renamed}":
+            continue
+        finding = (
+            f"Cursor reported the display label {renamed!r} for the pinned model id; "
+            f"the frozen settings expect {expected!r}."
+        )
+        try:
+            vote = v3.parse_cursor_stream(stream.read_text())
+            if vote["model_reported"] != renamed:
+                continue
+            v3.validate(kind, vote, payload)
+        except (json.JSONDecodeError, KeyError):
+            continue
+        except ValueError as exc:
+            # The label check fired before the frozen validator ran, so the response
+            # never received the protocol's own treatment of a validation failure.
+            # Re-file the receipt as that failure; the frozen retry rule then applies
+            # (one fresh attempt), and the excerpt recovery rules see both receipts.
+            if str(exc) not in v3.RETRYABLE:
+                continue
+            rec.update(
+                retryable=True,
+                error=str(exc),
+                operator_review={
+                    "at": datetime.now(UTC).isoformat(),
+                    "finding": finding,
+                    "action": "Label accepted; the response then failed the frozen validator, so the "
+                    "receipt is re-filed as that failure and the protocol's retry applies.",
+                },
+            )
+            receipt.write_text(json.dumps(rec, indent=2, sort_keys=True))
+            print(
+                json.dumps(
+                    {
+                        "event": "display_rename_refiled",
+                        "call": str(folder.relative_to(_out())),
+                        "error": str(exc),
+                    }
+                ),
+                flush=True,
+            )
+            return True
+        if kind == "review":
+            vote["reported_score"] = vote["score"]
+            vote.update(v3.host_review_score(vote))
+        vote.update(
+            binding=rec["binding"],
+            status="complete",
+            stage=stage,
+            panel=panel,
+            kind=kind,
+            operator_review={
+                "at": datetime.now(UTC).isoformat(),
+                "finding": finding,
+                "action": "Same model id, label renamed by the provider: attempt selected unchanged.",
+                "source_attempt": n,
+            },
+        )
+        base.save(folder / "selected.json", vote)
+        print(
+            json.dumps(
+                {
+                    "event": "display_rename_accepted",
+                    "call": str(folder.relative_to(_out())),
                     "attempt": n,
                 }
             ),
@@ -529,7 +845,7 @@ def recover_excerpts(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR
                 json.dumps(
                     {
                         "event": "excerpt_recovery_applied",
-                        "call": str(folder.relative_to(OUT)),
+                        "call": str(folder.relative_to(_out())),
                         "attempt": attempt,
                         "holders": sorted(recovered),
                     }
@@ -540,10 +856,122 @@ def recover_excerpts(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR
     return False
 
 
+INVALID_MARKER = "operator-invalid.json"
+
+
+def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0911, one return per precondition
+    """Both probe attempts failed only on an excerpt that no recovery rule accepts.
+
+    A quote with a token added, changed, or invented is a fabrication under the
+    protocol, so the response is invalid. The frozen summary already defines
+    the outcome: a submission without a valid match from a passing panel is
+    left unpublished (its L1 review stands but no score is published for it).
+    The wrapper records the finding in the call folder and the remaining probes
+    continue; nothing about the judgment is altered or filled in.
+    """
+    if stage != "probe" or (folder / INVALID_MARKER).exists():
+        return False
+    receipts = [folder / f"attempt-{n}.json" for n in (1, 2)]
+    if not all(r.exists() for r in receipts):
+        return False
+    if any(json.loads(r.read_text()).get("error") != EXCERPT_ERROR for r in receipts):
+        return False
+    evidence = payload_for(stage, folder.name)
+    if evidence is None:
+        return False
+    source = list(v3.strings(evidence))
+    unsupported = {}
+    for attempt in (1, 2):
+        stream = folder / f"attempt-{attempt}.stream.jsonl"
+        if not stream.exists():
+            return False
+        try:
+            vote = v3.parse_stream_for(panel, stream.read_text())
+        except (ValueError, json.JSONDecodeError, KeyError):
+            return False
+        bad = [
+            d["excerpt"]
+            for d in vote.get("departures", [])
+            if rewrap_excerpt(d["excerpt"], source) is None
+        ]
+        if not bad:
+            return False  # recoverable after all; leave it to recover_excerpts
+        unsupported[str(attempt)] = bad
+    rec = {
+        "at": datetime.now(UTC).isoformat(),
+        "finding": "Both attempts quoted an excerpt absent from the evidence that no recovery "
+        "rule accepts (a token added, changed, or invented).",
+        "action": "Probe invalid; no match call is made. The frozen summary leaves the "
+        "submission unpublished for this panel. Remaining probes continue.",
+        "unsupported_excerpts": unsupported,
+    }
+    (folder / INVALID_MARKER).write_text(json.dumps(rec, indent=2, sort_keys=True))
+    print(
+        json.dumps({"event": "probe_invalidated", "call": str(folder.relative_to(_out()))}),
+        flush=True,
+    )
+    return True
+
+
+def invalidated_probes(panel: str) -> set[str]:
+    return {
+        d.name
+        for d in (_out() / "calls" / panel / "probe").glob("*/")
+        if (d / INVALID_MARKER).exists()
+    }
+
+
+def run_probes_skipping(panel: str, skipped: set[str]) -> int:
+    """Drive the frozen probe stage in-process, skipping invalidated submissions.
+
+    Mirrors the frozen run_probes exactly (same calls, same lock) except that
+    invalidated rows are not called again, since the frozen command would stop
+    on them every time. Returns a process-style exit code for the main loop.
+    """
+    try:
+        protocol = v3.verify_frozen()
+        v3.require_passed(panel)
+        with (_out() / f".{panel}.lock").open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            for row in v3.read(_out() / "private-manifest.json"):
+                if row["id"] in skipped:
+                    continue
+                evidence = v3.read(_out() / "evidence" / f"{row['id']}.json")
+                key = v3.load_key(row["task"])
+                probe = v3.call(
+                    panel, "probe", row["id"], "probe", v3.probe_evidence(evidence), protocol
+                )
+                v3.call(
+                    panel,
+                    "match",
+                    row["id"],
+                    "match",
+                    {"key": key["quirks"], "departures": probe["departures"]},
+                    protocol,
+                )
+    except Exception:  # the main loop applies operator rules to whatever stopped
+        traceback.print_exc()
+        return 1
+    print(
+        json.dumps(
+            {"event": "probe_stage_skipped_invalid", "panel": panel, "skipped": sorted(skipped)}
+        ),
+        flush=True,
+    )
+    return 0
+
+
+def run_stage_once(args: list[str], panel: str) -> int:
+    skipped = invalidated_probes(panel) if args and args[0] == "probe" else set()
+    if skipped:
+        return run_probes_skipping(panel, skipped)
+    return subprocess.run([sys.executable, "-u", "-m", MODULE, *args], check=False).returncode
+
+
 def newest_unresolved(panel: str) -> Path | None:
     stopped = [
         d
-        for d in (OUT / "calls" / panel).glob("*/*/")
+        for d in (_out() / "calls" / panel).glob("*/*/")
         if not (d / "selected.json").exists() and (d / "attempt-1.json").exists()
     ]
     return max(stopped, key=lambda d: (d / "attempt-1.json").stat().st_mtime) if stopped else None
@@ -577,21 +1005,19 @@ def apply_rule(folder: Path) -> bool:
     }
     (folder / "attempt-1.json").write_text(json.dumps(receipt, indent=2, sort_keys=True))
     print(
-        json.dumps({"event": "operator_rule_applied", "call": str(folder.relative_to(OUT))}),
+        json.dumps({"event": "operator_rule_applied", "call": str(folder.relative_to(_out()))}),
         flush=True,
     )
     return True
 
 
-def main() -> int:
+def main() -> int:  # noqa: PLR0912, one branch per operator rule
     args = sys.argv[1:]
     panel = args[args.index("--panel") + 1]
     applied = 0
     while True:
-        proc = subprocess.run(
-            [sys.executable, "-u", "-m", "harness.maintenance_review_v3", *args], check=False
-        )
-        if proc.returncode == 0:
+        returncode = run_stage_once(args, panel)
+        if returncode == 0:
             print(
                 json.dumps({"event": "stage_complete", "operator_rule_applications": applied}),
                 flush=True,
@@ -604,13 +1030,28 @@ def main() -> int:
         if folder is not None and recover_excerpts(folder, panel, folder.parent.name):
             applied += 1
             continue
+        if folder is not None and invalidate_unrecoverable_probe(folder, panel, folder.parent.name):
+            applied += 1
+            continue
         if folder is not None and accept_fallback(folder, panel, folder.parent.name):
+            applied += 1
+            continue
+        if folder is not None and accept_display_rename(folder, panel, folder.parent.name):
             applied += 1
             continue
         if folder is not None and recover_match_ids(folder, panel, folder.parent.name):
             applied += 1
             continue
         if folder is not None and retry_external_kill(folder):
+            applied += 1
+            continue
+        if folder is not None and retry_network_fault(folder):
+            applied += 1
+            continue
+        if folder is not None and retry_provider_block(folder):
+            applied += 1
+            continue
+        if folder is not None and retry_garbled_structured_output(folder):
             applied += 1
             continue
         if folder is not None and quota_resume(folder):
@@ -627,7 +1068,7 @@ def main() -> int:
                 ),
                 flush=True,
             )
-            return proc.returncode
+            return returncode
 
 
 if __name__ == "__main__":

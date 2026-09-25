@@ -1,0 +1,983 @@
+diff --git a/legacy/paddockcore-darwin-arm64 b/legacy/paddockcore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/paddockcore.py b/paddockcore.py
+index 66bb6ae..61667f6 100644
+--- a/paddockcore.py
++++ b/paddockcore.py
+@@ -15,8 +15,8 @@ def _id_ok(s: str) -> bool:
+     return 1 <= len(s) <= 8 and s.isalnum() and s.isascii()
+ 
+ 
+-def _num_ok(s: str, maxlen: int) -> bool:
+-    return 1 <= len(s) <= maxlen and s.isdigit() and s.isascii()
++def _num_ok(s: str) -> bool:
++    return 1 <= len(s) <= 2 and s.isdigit() and s.isascii()
+ 
+ 
+ class Engine:
+@@ -26,12 +26,22 @@ class Engine:
+         self.pseq: dict[str, int] = {}
+         self.porder: list[str] = []
+         self.where: dict[str, str | None] = {}
++        self.hflag: dict[str, bool] = {}
++        self.uflag: dict[str, bool] = {}
++        self.vbon: dict[str, int] = {}
++        self.turned: dict[str, bool] = {}
++        self.led: dict[str, int] = {}
+         self.fields: dict[str, dict] = {}
+         self.forder: list[str] = []
++        self.pending: set[str] = set()
++        self.pool_open = True
++        self.tainted = False
++        self.barned: set[str] = set()
++        self.shift_count = 0
++        self.prev_reloc = False
+         self.next_pseq = 0
+         self.next_fseq = 0
+-        self.shift_count = 0
+-        self.rota_ptr = 0
++        self.touch_tick = 0
+         self.c_n = 0
+         self.c_f = 0
+         self.c_g = 0
+@@ -46,8 +56,112 @@ class Engine:
+     def _reject(self, code: str) -> None:
+         self._emit(f"NAY {code}")
+ 
+-    def _open_fields(self) -> list[dict]:
+-        return [self.fields[n] for n in self.forder if not self.fields[n]["resting"]]
++    def _occupants(self, fname: str) -> list[str]:
++        return [p for p in self.fields[fname]["slots"] if p is not None]
++
++    def _touch(self, fname: str) -> None:
++        self.touch_tick += 1
++        self.fields[fname]["touch"] = self.touch_tick
++
++    def _remove(self, pony: str) -> None:
++        cur = self.where[pony]
++        if cur is None:
++            return
++        f = self.fields[cur]
++        try:
++            idx = f["slots"].index(pony)
++        except ValueError:
++            idx = None
++        if idx is not None:
++            f["slots"][idx] = None
++        self.where[pony] = None
++
++    def _place_append(self, pony: str, dest: str) -> None:
++        self.fields[dest]["slots"].append(pony)
++        self.where[pony] = dest
++
++    def _wake_and_choose_rest(self) -> str | None:
++        self.shift_count += 1
++        resting = [n for n in self.forder if self.fields[n]["resting"]]
++        torest = set()
++        for n in resting:
++            if self.shift_count >= self.fields[n].get("rs", -99) + 2:
++                torest.add(n)
++        if self.prev_reloc:
++            torest.update(resting)
++        for n in sorted(torest, key=lambda n: self.fields[n]["seq"]):
++            self.fields[n]["resting"] = False
++            self._emit(f"WAKE {n}")
++        self.prev_reloc = False
++        open_names = [
++            n for n in self.forder if not self.fields[n]["resting"]
++        ]
++        if not open_names:
++            return None
++        return min(
++            open_names,
++            key=lambda n: (self.fields[n]["touch"], self.fields[n]["seq"]),
++        )
++
++    def _relocate(self, rested: str) -> None:
++        occ = self._occupants(rested)
++        if not occ:
++            return
++        self.prev_reloc = True
++        order = sorted(
++            occ,
++            key=lambda p: (
++                -self._eff(p),
++                -self.build[p],
++                self.pseq[p],
++            ),
++        )
++        for pony in order:
++            dest = None
++            dest_room = 0
++            cands = sorted(self.forder, key=lambda n: self.fields[n]["seq"])
++            for n in cands:
++                if n == rested or self.fields[n]["resting"]:
++                    continue
++                room = self.fields[n]["span"] - len(self._occupants(n))
++                if room <= 0:
++                    continue
++                if dest is None or room > dest_room:
++                    dest, dest_room = n, room
++            self._remove(pony)
++            if dest is None:
++                self.barned.add(pony)
++                self._emit(f"BARN {pony}")
++            else:
++                self._place_append(pony, dest)
++                self._touch(dest)
++                self._emit(f"PUT {pony} {dest}")
++
++    def _eff(self, pony: str) -> int:
++        return (
++            self.build[pony]
++            + self.vbon[pony]
++            + (1 if self.turned[pony] else 0)
++            + self.led[pony]
++        )
++
++    def _order_key(self, pony: str):
++        # V (OUT) band: base value, fewer lead moves, weaker effective,
++        # then stake order.
++        return (
++            -self.build[pony],
++            self.led[pony],
++            self._eff(pony),
++            self.pseq[pony],
++        )
++
++    def _uorder_key(self, pony: str):
++        return (
++            -self._eff(pony),
++            self.hflag[pony],
++            not self.uflag[pony],
++            self.pseq[pony],
++        )
+ 
+     def handle(self, line: str) -> None:
+         parts = line.rstrip("\r\n").split()
+@@ -56,7 +170,7 @@ class Engine:
+         kind = parts[0]
+ 
+         if kind == "N":
+-            if len(parts) != 3 or not _id_ok(parts[1]) or not _num_ok(parts[2], 2):
++            if len(parts) != 3 or not _id_ok(parts[1]) or not _num_ok(parts[2]):
+                 self._reject("FORM")
+                 return
+             val = int(parts[2])
+@@ -71,12 +185,17 @@ class Engine:
+             self.pseq[parts[1]] = self.next_pseq
+             self.porder.append(parts[1])
+             self.where[parts[1]] = None
++            self.hflag[parts[1]] = False
++            self.uflag[parts[1]] = False
++            self.vbon[parts[1]] = 0
++            self.turned[parts[1]] = False
++            self.led[parts[1]] = 0
+             self.c_n += 1
+             self._emit(f"OK {len(self.porder)}")
+             return
+ 
+         if kind == "F":
+-            if len(parts) != 3 or not _id_ok(parts[1]) or not _num_ok(parts[2], 2):
++            if len(parts) != 3 or not _id_ok(parts[1]) or not _num_ok(parts[2]):
+                 self._reject("FORM")
+                 return
+             span = int(parts[2])
+@@ -90,11 +209,12 @@ class Engine:
+             self.fields[parts[1]] = {
+                 "span": span,
+                 "seq": self.next_fseq,
+-                "roster": [],
++                "slots": [],
+                 "resting": False,
+-                "rest_shift": 0,
++                "touch": -1,
+             }
+             self.forder.append(parts[1])
++            self._touch(parts[1])
+             self.c_f += 1
+             self._emit(f"OK {len(self.forder)}")
+             return
+@@ -107,6 +227,7 @@ class Engine:
+                 self._reject("STRAY")
+                 return
+             if parts[2] not in self.fields:
++                self.tainted = True
+                 self._reject("WILD")
+                 return
+             f = self.fields[parts[2]]
+@@ -114,13 +235,24 @@ class Engine:
+                 self._reject("SHUT")
+                 return
+             if self.where[parts[1]] is not None:
++                self.tainted = False
+                 self._reject("TWICE")
+                 return
+-            if len(f["roster"]) >= f["span"]:
++            if len(self._occupants(parts[2])) >= f["span"]:
+                 self._reject("CRAM")
+                 return
+-            f["roster"].append(parts[1])
+-            self.where[parts[1]] = parts[2]
++            virgin = len(self._occupants(parts[2])) == 0
++            self._place_append(parts[1], parts[2])
++            self._touch(parts[2])
++            self.turned[parts[1]] = True
++            self.tainted = True
++            if (
++                not virgin
++                and self.pool_open
++                and not self.hflag[parts[1]]
++                and parts[1] not in self.barned
++            ):
++                self.pending.add(parts[1])
+             self.c_g += 1
+             self._emit("OK")
+             return
+@@ -132,12 +264,12 @@ class Engine:
+             if parts[1] not in self.build:
+                 self._reject("STRAY")
+                 return
+-            cur = self.where[parts[1]]
+-            if cur is None:
++            if self.where[parts[1]] is None:
+                 self._reject("IDLE")
+                 return
+-            self.fields[cur]["roster"].remove(parts[1])
+-            self.where[parts[1]] = None
++            self._remove(parts[1])
++            self.turned[parts[1]] = False
++            self.hflag[parts[1]] = True
+             self.c_h += 1
+             self._emit("OK")
+             return
+@@ -150,6 +282,7 @@ class Engine:
+                 self._reject("STRAY")
+                 return
+             if parts[2] not in self.fields:
++                self.tainted = True
+                 self._reject("WILD")
+                 return
+             f = self.fields[parts[2]]
+@@ -161,14 +294,19 @@ class Engine:
+                 self._reject("IDLE")
+                 return
+             if cur == parts[2]:
++                self.hflag[parts[1]] = False
++                self.uflag[parts[1]] = False
++                self.tainted = False
+                 self._reject("TWICE")
+                 return
+-            if len(f["roster"]) >= f["span"]:
++            if len(self._occupants(parts[2])) >= f["span"]:
+                 self._reject("CRAM")
+                 return
+-            self.fields[cur]["roster"].remove(parts[1])
+-            f["roster"].append(parts[1])
+-            self.where[parts[1]] = parts[2]
++            self._remove(parts[1])
++            self._place_append(parts[1], parts[2])
++            self._touch(parts[2])
++            self.tainted = True
++            self.led[parts[1]] += 1
+             self.c_l += 1
+             self._emit("OK")
+             return
+@@ -178,10 +316,18 @@ class Engine:
+                 self._reject("FORM")
+                 return
+             outs = [n for n in self.porder if self.where[n] is not None]
+-            outs.sort(key=lambda n: (-self.build[n], self.pseq[n]))
++            outs.sort(key=self._order_key)
+             self._emit(f"OUT {len(outs)}")
+             for name in outs:
+                 self._emit(f"P {name}")
++            out_set = set(outs)
++            for n in self.porder:
++                self.hflag[n] = False
++                if n in out_set:
++                    self.uflag[n] = False
++            if not self.pending and self.tainted and not outs:
++                self.pool_open = False
++            self.pending = set()
+             return
+ 
+         if kind == "R":
+@@ -191,9 +337,9 @@ class Engine:
+             if parts[1] not in self.fields:
+                 self._reject("WILD")
+                 return
+-            f = self.fields[parts[1]]
+-            self._emit(f"FLD {parts[1]} {len(f['roster'])}")
+-            for name in f["roster"]:
++            occ = self._occupants(parts[1])
++            self._emit(f"FLD {parts[1]} {len(occ)}")
++            for name in occ:
+                 self._emit(f"P {name}")
+             return
+ 
+@@ -202,55 +348,27 @@ class Engine:
+                 self._reject("FORM")
+                 return
+             self.c_s += 1
+-            self.shift_count += 1
+-            # rested fields wake at the start of the second shift after
+-            waking = [
+-                self.fields[n] for n in self.forder
+-                if self.fields[n]["resting"]
+-                and self.shift_count >= self.fields[n]["rest_shift"] + 2
+-            ]
+-            waking.sort(key=lambda f: f["seq"])
+-            for f in waking:
+-                f["resting"] = False
+-                name = next(n for n in self.forder if self.fields[n] is f)
+-                self._emit(f"WAKE {name}")
+-            # rest the next open field in stake-order rotation
+-            open_fields = self._open_fields()
+-            rested = None
+-            if open_fields:
+-                after = [f for f in open_fields if f["seq"] > self.rota_ptr]
+-                pool = after if after else open_fields
+-                rested = min(pool, key=lambda f: f["seq"])
+-                self.rota_ptr = rested["seq"]
+-                rname = next(n for n in self.forder if self.fields[n] is rested)
+-                self._emit(f"REST {rname}")
+-                rested["resting"] = True
+-                rested["rest_shift"] = self.shift_count
+-            # move its ponies out, roster order, most room first
+-            if rested is not None and rested["roster"]:
+-                rname = next(n for n in self.forder if self.fields[n] is rested)
+-                for pony in list(rested["roster"]):
+-                    dest = None
+-                    dest_key = None
+-                    for n in self.forder:
+-                        f = self.fields[n]
+-                        if f["resting"] or n == rname:
+-                            continue
+-                        room = f["span"] - len(f["roster"])
+-                        if room <= 0:
+-                            continue
+-                        key = (-room, f["seq"])
+-                        if dest is None or key < dest_key:
+-                            dest, dest_key = n, key
+-                    rested["roster"].remove(pony)
+-                    if dest is None:
+-                        self.where[pony] = None
+-                        self._emit(f"BARN {pony}")
+-                    else:
+-                        self.fields[dest]["roster"].append(pony)
+-                        self.where[pony] = dest
+-                        self._emit(f"PUT {pony} {dest}")
+-            # list the open fields in stake order
++            rested = self._wake_and_choose_rest()
++            if rested is not None:
++                self._emit(f"REST {rested}")
++                self.fields[rested]["resting"] = True
++                self.fields[rested]["rs"] = self.shift_count
++            listed = [n for n in self.forder if not self.fields[n]["resting"]]
++            if len(self.forder) == 1:
++                bonus = 0
++            else:
++                bonus = 4 - len(listed)
++            for n in self.porder:
++                if n in self.pending and self.where[n] is not None:
++                    self.vbon[n] += bonus
++                if self.hflag[n] or self.uflag[n]:
++                    self.hflag[n] = False
++                    self.uflag[n] = False
++            if not self.pending and self.tainted:
++                self.pool_open = False
++            self.pending = set()
++            if rested is not None:
++                self._relocate(rested)
+             listed = [n for n in self.forder if not self.fields[n]["resting"]]
+             self._emit(f"SHIFT {len(listed)}")
+             for name in listed:
+@@ -262,11 +380,17 @@ class Engine:
+                 self._reject("FORM")
+                 return
+             self.c_u += 1
+-            ranked = sorted(
+-                self.porder, key=lambda n: (-self.build[n], self.pseq[n])
+-            )
+-            self._emit(f"MUSTER {len(ranked)}")
+-            for name in ranked:
++            for n in self.porder:
++                self.uflag[n] = n in self.pending
++            if not self.pending and self.tainted:
++                self.pool_open = False
++            self.pending = set()
++            out = [n for n in self.porder if self.where[n] is not None]
++            barn = [n for n in self.porder if self.where[n] is None]
++            out.sort(key=self._uorder_key)
++            barn.sort(key=self._uorder_key)
++            self._emit(f"MUSTER {len(self.porder)}")
++            for name in out + barn:
+                 self._emit(f"P {name}")
+             return
+ 
+diff --git a/tmpfuzz/leg_err.txt b/tmpfuzz/leg_err.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/tmpfuzz/leg_out.txt b/tmpfuzz/leg_out.txt
+new file mode 100644
+index 0000000..86894bb
+--- /dev/null
++++ b/tmpfuzz/leg_out.txt
+@@ -0,0 +1,86 @@
++OK 1
++OK 2
++OK 3
++OK 4
++OK 1
++OK 2
++OK 3
++OK 4
++NAY STRAY
++NAY FORM
++NAY FORM
++NAY FORM
++FLD f2 0
++MUSTER 4
++P n4
++P n3
++P n2
++P n1
++NAY IDLE
++NAY STRAY
++NAY FORM
++NAY FORM
++NAY FORM
++OK
++NAY STRAY
++NAY FORM
++FLD f1 0
++NAY FORM
++NAY FORM
++NAY FORM
++NAY STRAY
++NAY WILD
++NAY STRAY
++REST f1
++SHIFT 3
++F f2
++F f3
++F f4
++NAY WILD
++NAY STRAY
++NAY STRAY
++NAY WILD
++NAY FORM
++NAY WILD
++NAY SHUT
++NAY TWICE
++NAY FORM
++REST f2
++SHIFT 2
++F f3
++F f4
++NAY WILD
++NAY STRAY
++NAY FORM
++NAY IDLE
++NAY WILD
++NAY STRAY
++NAY FORM
++NAY STRAY
++NAY IDLE
++NAY FORM
++NAY TWICE
++NAY FORM
++NAY WILD
++NAY WILD
++NAY WILD
++NAY FORM
++OK
++OK
++MUSTER 4
++P n3
++P n4
++P n2
++P n1
++NAY FORM
++NAY TWICE
++NAY STRAY
++NAY FORM
++WAKE f1
++REST f1
++SHIFT 2
++F f3
++F f4
++NAY STRAY
++FLD f2 0
++END 4 4 2 1 0 3 2
+diff --git a/tmpfuzz/pc_case_21_168.txt b/tmpfuzz/pc_case_21_168.txt
+new file mode 100644
+index 0000000..3db32e7
+--- /dev/null
++++ b/tmpfuzz/pc_case_21_168.txt
+@@ -0,0 +1,26 @@
++N n1 5
++N n2 18
++N n3 13
++N n4 20
++N n5 1
++F f1 6
++F f2 17
++G n4 f5
++G n1 f1
++G n6 f1
++V
++S
++C n1
++G n4 f1
++S
++G n2 f5
++V
++C n2
++G n1 f2
++Q
++G n1 f1
++L n3 f1
++C n1
++C n1
++G n3 f5
++C n5
+diff --git a/tmpfuzz/pc_case_21_35.txt b/tmpfuzz/pc_case_21_35.txt
+new file mode 100644
+index 0000000..a0836c0
+--- /dev/null
++++ b/tmpfuzz/pc_case_21_35.txt
+@@ -0,0 +1,40 @@
++N n1 30
++N n2 16
++N n3 8
++N n4 1
++F f1 22
++F f2 24
++R f2
++G n3 f4
++V
++H n6
++C n2
++C n4
++G n6 f4
++F f1 0
++C n3
++C n6
++L n2 f4
++C n4
++Z
++G n4 f6
++U
++S
++G n2 f2
++G n1 f2
++S
++G n5 f5
++L n4 f4
++C n5
++C n4
++F dup 9
++C n2
++G n2 f1
++H n3
++G n2 f3
++Q
++L n4 f6
++G n6 f2
++L n3 f4
++C n4
++C n5
+diff --git a/tmpfuzz/pc_case_21_5.txt b/tmpfuzz/pc_case_21_5.txt
+new file mode 100644
+index 0000000..084a952
+--- /dev/null
++++ b/tmpfuzz/pc_case_21_5.txt
+@@ -0,0 +1,41 @@
++N n1 9
++N n2 12
++N n3 2
++F f1 2
++F f2 19
++G n6 f4
++G n1 f2
++C n5
++G n2 f6
++G n5 f4
++G n2 f2
++H n6
++L n5 f6
++R f1
++G n3 f4
++H n4
++C n3
++R f2
++Z
++U
++C n4
++G n4 f6
++C n1
++C n2
++V
++C n6
++C n2
++C n5
++H n4
++G n5 f5
++L n4 f6
++C n3
++C n2
++L n2 f3
++S
++C n3
++S
++C n4
++C n1
++C n6
++G n1 f2
+diff --git a/tmpfuzz/pc_case_7_235.txt b/tmpfuzz/pc_case_7_235.txt
+new file mode 100644
+index 0000000..60c60dc
+--- /dev/null
++++ b/tmpfuzz/pc_case_7_235.txt
+@@ -0,0 +1,38 @@
++N n1 18
++N n2 1
++N n3 3
++N n4 30
++N n5 24
++F f1 4
++F f2 14
++G n2 f3
++G n2 f1
++G n5 f1
++L n5 f1
++U x
++Z
++G n6 f6
++G n3 f3
++G n3 f2
++C n5
++L n6 f1
++C n2
++C n3
++S
++U
++V
++C n1
++G n5 f1
++G n5 f2
++S
++C n1
++L n3 f4
++L n1 f2
++C n1
++G n1 f3
++L n1 f5
++C n1
++C n4
++C n3
++S
++G n4 f6
+diff --git a/tmpfuzz/pc_case_7_281.txt b/tmpfuzz/pc_case_7_281.txt
+new file mode 100644
+index 0000000..c17a808
+--- /dev/null
++++ b/tmpfuzz/pc_case_7_281.txt
+@@ -0,0 +1,48 @@
++N n1 5
++N n2 10
++N n3 11
++N n4 9
++N n5 11
++F f1 9
++F f2 25
++G n3 f2
++C n1
++L n2 f3
++H n1 x
++M
++L n1 f3
++H n1
++H n5
++H n4
++U
++G n5 f2
++C n4
++G n2 f2
++H n4
++C n2
++V x
++C n5
++C n1
++C n4
++G n4 f2
++L n4 f6
++H n1
++S
++G n4 f6
++S
++G n5 f1
++S
++Z
++C n1
++S
++G n6 f5
++C n3
++R f1
++G n3 f6
++S
++C n6
++L n2 f2
++G n4 f2
++G n6 f2
++H n3
++S
+diff --git a/tmpfuzz/pc_case_7_321.txt b/tmpfuzz/pc_case_7_321.txt
+new file mode 100644
+index 0000000..a3a1b6c
+--- /dev/null
++++ b/tmpfuzz/pc_case_7_321.txt
+@@ -0,0 +1,48 @@
++N n1 9
++N n2 9
++N n3 30
++F f1 7
++F f2 27
++F f3 15
++F f4 23
++F f5 22
++G n2 f6
++R fx
++H n4
++G n2 f3
++C n2
++C n3
++G n6 f6
++G n2 f4
++H n3
++R f1
++U
++H n6
++L n2 f2
++M
++L n6 f1
++G n1 f5
++G n5 f1
++N n1 0
++G n6 f6
++C n1
++H n2
++S
++G n4 f2
++L n5 f2
++S
++G n4 f6
++S
++L n5 f6
++G n2 f2
++C n5
++C n6
++L n3 f5
++C n5
++G n4 f6
++C n1
++V
++V x
++S
++C n1
++S
+diff --git a/tmpfuzz/pc_case_99_152.txt b/tmpfuzz/pc_case_99_152.txt
+new file mode 100644
+index 0000000..1d58c59
+--- /dev/null
++++ b/tmpfuzz/pc_case_99_152.txt
+@@ -0,0 +1,63 @@
++N n1 14
++N n2 8
++F f1 20
++F f2 7
++F f3 26
++F f4 24
++F f5 16
++G n1 f1
++C n1
++C n1
++G n5 f2
++Q
++G n4 f1
++G n1 f2
++S
++G n1 f5
++L n5 f3
++C n2
++G n4 f1
++C n1
++G n4 f5
++G n1 f2
++C n5
++L n6 f4
++G n2 f6
++L n6 f5
++G n6 f1
++C n3
++G n6 f4
++C n1
++L n6 f6
++G n2 f3
++C n1
++L n2 f1
++H n4
++C n3
++L n5 f6
++Q
++G n3 f5
++Q
++N n1 0
++G n6 f2
++G n2 f2
++S
++G n5 f4
++S
++G n4 f5
++H n5
++G n1 f6
++R f2
++H n4
++C n2
++R
++C n1
++G n5 f1
++C n5
++U
++S
++H n5
++S
++U
++G n4 f1
++R fx
+diff --git a/tmpfuzz/pc_case_99_288.txt b/tmpfuzz/pc_case_99_288.txt
+new file mode 100644
+index 0000000..666d7eb
+--- /dev/null
++++ b/tmpfuzz/pc_case_99_288.txt
+@@ -0,0 +1,64 @@
++N n1 14
++N n2 9
++N n3 4
++N n4 22
++F f1 15
++F f2 7
++L n5 f6
++G n5 f3
++G n5 f3
++G n5 f4
++C n3
++C n5
++H n3
++C n5
++G n1 f2
++G n3 f1
++G n2 f1
++C n5
++S
++C n3
++C n4
++G n4 f5
++G n1 f5
++G n5 f5
++L n1
++H n3
++S
++G n1 f4
++G n2 f2
++G n2 f2
++H n6
++L n1 f3
++S x
++S
++C n6
++S
++L n2 f2
++L n5 f1
++G n3 f3
++S
++G n1 f3
++R fx
++G n4 f5
++C n1
++G n1 f5
++C n5
++G n5 f1
++G n5 f3
++C n3
++C n3
++C n6
++Q
++G n2 f3
++V
++S
++Q
++L n2 f4
++G n1 f3
++C n1
++G n1 f1
++F dup 9
++V
++G n4 f6
++H n1
+diff --git a/tmpfuzz/pc_case_99_99.txt b/tmpfuzz/pc_case_99_99.txt
+new file mode 100644
+index 0000000..3cb8727
+--- /dev/null
++++ b/tmpfuzz/pc_case_99_99.txt
+@@ -0,0 +1,44 @@
++N n1 28
++N n2 1
++N n3 22
++F f1 18
++C n4
++G n2 f4
++F dup 9
++F f1 0
++L n6 f5
++C n3
++H n2
++H n4
++L n6 f3
++G n2 f5
++C n4
++C n5
++G n3 f5
++G n3 f1
++H n6
++G n1 f6
++C n5
++G n2 f1
++G n1 f5
++C n3
++L n4 f5
++S
++G n4 f4
++G n6 f3
++G n4 f2
++G n1 f6
++S
++C n1
++C n2
++C n1
++G n6 f6
++L n3 f4
++S
++C n2
++C n3
++G n2 f2
++G n6 f4
++C n1
++Q
++L n1 f6

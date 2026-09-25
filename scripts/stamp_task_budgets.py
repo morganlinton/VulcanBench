@@ -8,6 +8,11 @@ task carries positive ``agent_hints.suggested_max_steps`` and
 ``harness.task_metadata.complexity_scaled_budgets`` (repo_scale baseline x
 task_complexity multiplier) and writes them into each task's ``metadata.json``.
 
+A suite may declare a uniform bound instead of the formula: ``suite.json``
+``flat_budget`` (``suggested_max_steps`` and ``suggested_timeout_s``) applies to
+every task the manifest lists (the Coding Intelligence Index v4 does this; the
+rationale is in docs/DECISIONS.md). Tasks not listed fall back to the formula.
+
 A task may deliberately deviate from the formula (a measured hand-tune): set
 ``agent_hints.budget_hand_tuned: true`` and the stamper leaves its values alone
 (``--check`` reports it as HAND-TUNED, not a mismatch).
@@ -45,6 +50,22 @@ def _task_dirs(target: Path) -> list[Path]:
     return sorted(p.parent for p in target.glob("*/metadata.json"))
 
 
+def _suite_flat_budget(task_dir: Path) -> dict[str, int] | None:
+    """The suite-wide flat budget, if the enclosing ``suite.json`` declares one
+    and lists this task."""
+    manifest = task_dir.parent / "suite.json"
+    if not manifest.is_file():
+        return None
+    suite = json.loads(manifest.read_text(encoding="utf-8"))
+    flat = suite.get("flat_budget")
+    if not isinstance(flat, dict) or task_dir.name not in (suite.get("tasks") or []):
+        return None
+    return {
+        "suggested_max_steps": int(flat["suggested_max_steps"]),
+        "suggested_timeout_s": int(flat["suggested_timeout_s"]),
+    }
+
+
 def stamp(task_dir: Path, check: bool) -> str:
     """Stamp (or verify) one task; returns 'ok' | 'stamped' | 'hand-tuned' | 'mismatch'."""
     meta_path = task_dir / "metadata.json"
@@ -52,7 +73,7 @@ def stamp(task_dir: Path, check: bool) -> str:
     hints = metadata.get("agent_hints")
     if not isinstance(hints, dict):
         hints = {}
-    expected = complexity_scaled_budgets(
+    expected = _suite_flat_budget(task_dir) or complexity_scaled_budgets(
         repo_scale(metadata), task_complexity(metadata), task_difficulty(metadata)
     )
 

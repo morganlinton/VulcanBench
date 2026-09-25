@@ -38,7 +38,7 @@ See `astra-vs-fable51-clean.json` for the selected source data and
 
 ## Scope
 
-VulcanBench-SWE v4: 23 matched tasks, five efforts, two solver/harness combinations, 230 original solver runs and 1,380 selected retrospective ratings. All saved solver summaries, patches, task definitions, and issue text passed source-hash checks.
+VulcanBench Frontier v4: 23 matched tasks, five efforts, two solver/harness combinations, 230 original solver runs and 1,380 selected retrospective ratings. All saved solver summaries, patches, task definitions, and issue text passed source-hash checks.
 
 ## Results
 

@@ -1,0 +1,116 @@
+diff --git a/hedgecore.py b/hedgecore.py
+index 3d6bda9..f9d4927 100644
+--- a/hedgecore.py
++++ b/hedgecore.py
+@@ -17,6 +17,7 @@ PAIR_LEN = 6
+ AMT_DIGITS = 8
+ RATE_DIGITS = 7
+ DIVISOR = 10_000
++JPY_DIVISOR = 100
+ 
+ 
+ def _round_half_even(numerator: int, denominator: int) -> int:
+@@ -46,6 +47,10 @@ def _valid_int(token: str, max_digits: int) -> bool:
+     return 1 <= len(token) <= max_digits and token.isdigit()
+ 
+ 
++def _divisor(pair: str) -> int:
++    return JPY_DIVISOR if pair.endswith("JPY") else DIVISOR
++
++
+ class Book:
+     def __init__(self) -> None:
+         self.pos: dict[str, int] = {}
+@@ -53,14 +58,25 @@ class Book:
+ 
+     def netvalue(self) -> int:
+         return sum(
+-            _round_half_even(self.pos[pair] * self.rate[pair], DIVISOR)
++            _round_half_even(self.pos[pair] * self.rate[pair], _divisor(pair))
+             for pair in self.pos
+         )
+ 
++    def reval_netvalue(self, fixes: dict[str, int]) -> int:
++        total_tenths = 0
++        for pair in self.pos:
++            if pair in fixes and pair.endswith("JPY"):
++                divisor = JPY_DIVISOR
++            else:
++                divisor = DIVISOR
++            total_tenths += (self.pos[pair] * self.rate[pair] * 10) // divisor
++        return (total_tenths + 5) // 10
++
+ 
+ class Engine:
+     def __init__(self, out=None) -> None:
+         self.books: dict[str, Book] = {}
++        self.display: dict[str, str] = {}
+         self.trades = 0
+         self.revals = 0
+         self.rejected = 0
+@@ -87,10 +103,10 @@ class Engine:
+     def _trade(self, tokens: list[str]) -> None:
+         book = tokens[1] if len(tokens) > 1 else ""
+         book_ok = _valid_book(book)
+-        if len(tokens) != 6 or not book_ok:
++        if len(tokens) < 6 or not book_ok:
+             self._reject(book if book_ok else "????????", "FMT")
+             return
+-        _, book, pair, side, amt_tok, rate_tok = tokens
++        _, book, pair, side, amt_tok, rate_tok = tokens[:6]
+         if not _valid_pair(pair):
+             self._reject(book, "PAIR")
+             return
+@@ -100,20 +116,30 @@ class Engine:
+         if not _valid_int(amt_tok, AMT_DIGITS):
+             self._reject(book, "AMT")
+             return
+-        amount = int(amt_tok)
+-        if amount == 0:
+-            self._reject(book, "AMT")
+-            return
+         if not _valid_int(rate_tok, RATE_DIGITS) or int(rate_tok) == 0:
+             self._reject(book, "RATE")
+             return
++        amount = int(amt_tok)
++        if amount == 0:
++            return
+         rate = int(rate_tok)
+ 
+-        entry = self.books.setdefault(book, Book())
++        key = book.upper()
++        entry = self.books.get(key)
++        if entry is None:
++            entry = Book()
++            self.books[key] = entry
++            self.display[key] = book
+         delta = amount if side == "B" else -amount
+-        entry.pos[pair] = entry.pos.get(pair, 0) + delta
+-        entry.rate[pair] = rate
+-        self._emit(f"P {book} {entry.netvalue()}")
++        old_pos = entry.pos.get(pair, 0)
++        new_pos = old_pos + delta
++        if old_pos != 0 and new_pos != 0 and (old_pos < 0) != (new_pos < 0):
++            stored_rate = rate - 5
++        else:
++            stored_rate = rate
++        entry.pos[pair] = new_pos
++        entry.rate[pair] = stored_rate
++        self._emit(f"P {self.display[key]} {entry.netvalue()}")
+         self.trades += 1
+ 
+     def _reval(self, arg: str) -> None:
+@@ -134,11 +160,11 @@ class Engine:
+                 self._reject("????????", "FMT")
+                 return
+             fixes[pair] = int(rate_tok)
+-        for book, entry in self.books.items():
++        for key, entry in self.books.items():
+             for pair in entry.pos:
+                 if pair in fixes:
+                     entry.rate[pair] = fixes[pair]
+-            self._emit(f"P {book} {entry.netvalue()}")
++            self._emit(f"P {self.display[key]} {entry.reval_netvalue(fixes)}")
+         self.revals += 1
+ 
+     def finish(self) -> None:

@@ -1,0 +1,121 @@
+diff --git a/matchcore.py b/matchcore.py
+index e42f6c1..66906b6 100644
+--- a/matchcore.py
++++ b/matchcore.py
+@@ -13,6 +13,10 @@ import sys
+ PRICE_MAX = 10_000_000
+ QTY_MAX = 999_999
+ HASH_MOD = 1_000_000_007
++TICK_LIMIT = 100_000
++TICK_STEP = 5
++BAND = 500
++LOT_SIZE = 100
+ 
+ 
+ class Order:
+@@ -74,18 +78,28 @@ class Engine:
+         if not is_market and not 0 < price < PRICE_MAX:
+             self._emit(f"R {clordid} PRICE")
+             return
+-        if self._find_live(acct, clordid) is not None:
+-            self._emit(f"R {clordid} DUP")
++        if not is_market and price > TICK_LIMIT and price % TICK_STEP != 0:
++            self._emit(f"R {clordid} TICK")
+             return
++        existing = self._find_live(acct, clordid)
++        if existing is not None:
++            existing.live = False
++            self._emit(f"X {existing.clordid} {existing.orig}")
+ 
+         remaining = qty
++        ref: int | None = None
+         while remaining:
+             counter = self._best_counter(side, price, is_market)
+             if counter is None:
+                 break
+             if counter.acct == acct:
+-                self._emit(f"R {clordid} STP")
+-                return
++                counter.live = False
++                self._emit(f"X {counter.clordid} {counter.orig}")
++                continue
++            if ref is None:
++                ref = counter.price
++            elif abs(counter.price - ref) > BAND:
++                break
+             take = min(remaining, counter.qty)
+             self._emit(f"F {counter.clordid} {clordid} {counter.price} {take}")
+             counter.qty -= take
+@@ -107,7 +121,7 @@ class Engine:
+             self._emit(f"R {clordid} UNKNOWN")
+             return
+         order.live = False
+-        self._emit(f"X {order.clordid} {order.qty}")
++        self._emit(f"X {order.clordid} {order.orig}")
+ 
+     def end_session(self) -> None:
+         bid = ask = 0
+@@ -119,7 +133,8 @@ class Engine:
+                 bid = max(bid, order.price)
+             elif ask == 0 or order.price < ask:
+                 ask = order.price
+-            book_hash = (book_hash + order.price * order.qty) % HASH_MOD
++            if order.qty >= LOT_SIZE:
++                book_hash = (book_hash + order.price * order.qty) % HASH_MOD
+         self._emit(f"S {bid} {ask} {book_hash}")
+ 
+     # -- line protocol ------------------------------------------------------
+@@ -128,12 +143,15 @@ class Engine:
+         line = line.rstrip("\r\n")
+         if not line:
+             return
+-        parts = line.split(" ")
+-        if parts == ["E"]:
++        if line == "E":
+             self.end_session()
+             return
+-        if parts[0] == "N" and len(parts) == 7:
+-            _, acct, clordid, side, type_, price, qty = parts
++        if line[0].isspace():
++            self._emit("R ???????? FMT")
++            return
++        parts = line.split()
++        if parts[0] == "N" and len(parts) >= 7:
++            _, acct, clordid, side, type_, price, qty = parts[:7]
+             if (
+                 _token(acct, 4, 4)
+                 and _token(clordid, 1, 8)
+@@ -146,22 +164,28 @@ class Engine:
+             ):
+                 self.new_order(acct, clordid, side, type_, int(price), int(qty))
+                 return
+-            self._emit(f"R {clordid if _token(clordid, 1, 8) else '????????'} FMT")
++            self._emit(f"R {_echo(parts)} FMT")
+             return
+-        if parts[0] == "C" and len(parts) == 3:
+-            _, acct, clordid = parts
++        if parts[0] == "C" and len(parts) >= 3:
++            _, acct, clordid = parts[:3]
+             if _token(acct, 4, 4) and _token(clordid, 1, 8):
+                 self.cancel(acct, clordid)
+                 return
+-            self._emit(f"R {clordid if _token(clordid, 1, 8) else '????????'} FMT")
++            self._emit(f"R {_echo(parts)} FMT")
+             return
+-        self._emit("R ???????? FMT")
++        self._emit(f"R {_echo(parts)} FMT")
+ 
+ 
+ def _token(value: str, lo: int, hi: int) -> bool:
+     return lo <= len(value) <= hi and value.isalnum()
+ 
+ 
++def _echo(parts: list[str]) -> str:
++    if len(parts) >= 3 and _token(parts[2], 1, 8):
++        return parts[2]
++    return "????????"
++
++
+ def main() -> None:
+     engine = Engine()
+     for line in sys.stdin:

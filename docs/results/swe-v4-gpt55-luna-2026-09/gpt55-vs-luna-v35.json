@@ -1,0 +1,154 @@
+{
+  "final": true,
+  "coverage": {
+    "submissions_with_both_reviews": 207,
+    "submissions_total": 207,
+    "submissions_with_probes": 207,
+    "per_panel_reviews": {
+      "muse": 207,
+      "grok": 207
+    },
+    "per_panel_probes": {
+      "muse": 197,
+      "grok": 197
+    }
+  },
+  "headline": "Luna leads by 5.7 points at 33% Code quality.",
+  "subtitle": "GPT-5.5 2.1\u00d7 faster",
+  "selected": {
+    "gpt55": {
+      "model": "gpt55",
+      "effort": "extra-high",
+      "n": 23,
+      "combined": {
+        "n": 23,
+        "mean": 78.45621023107327,
+        "se": 2.5077671432411135
+      },
+      "combined_20pct": {
+        "n": 23,
+        "mean": 81.25325982383887,
+        "se": 2.4787887508181465
+      },
+      "code_quality": {
+        "n": 23,
+        "mean": 67.6666252061509,
+        "se": 1.4892585934153446
+      },
+      "readability": {
+        "n": 23,
+        "mean": 59.60144927536232,
+        "se": 1.6502148863424266
+      },
+      "maintainability": {
+        "n": 23,
+        "mean": 69.47463768115942,
+        "se": 1.45620666300235
+      },
+      "l2": {
+        "n": 23,
+        "mean": 76.00950981385763,
+        "se": 2.837086626262435
+      },
+      "minutes": {
+        "n": 23,
+        "mean": 20.783839855072465,
+        "se": 2.067568406636599
+      },
+      "passed": 11,
+      "fallbacks": 0,
+      "by_panel": {
+        "muse": {
+          "n": 23,
+          "mean": 62.77173913043478,
+          "se": 1.6634951493678507
+        },
+        "grok": {
+          "n": 23,
+          "mean": 66.30434782608695,
+          "se": 1.4913803051291525
+        }
+      }
+    },
+    "luna": {
+      "model": "luna",
+      "effort": "max",
+      "n": 23,
+      "combined": {
+        "n": 23,
+        "mean": 84.14689600616774,
+        "se": 1.3493907885648762
+      },
+      "combined_20pct": {
+        "n": 23,
+        "mean": 87.18402129491062,
+        "se": 1.329513234536996
+      },
+      "code_quality": {
+        "n": 23,
+        "mean": 65.35054125716181,
+        "se": 1.3331516197707853
+      },
+      "readability": {
+        "n": 23,
+        "mean": 55.79710144927536,
+        "se": 1.5660314820392842
+      },
+      "maintainability": {
+        "n": 23,
+        "mean": 64.31159420289855,
+        "se": 1.562455246537863
+      },
+      "l2": {
+        "n": 23,
+        "mean": 79.47372374002809,
+        "se": 2.5007736959556808
+      },
+      "minutes": {
+        "n": 23,
+        "mean": 44.09918623188406,
+        "se": 10.719661343012751
+      },
+      "passed": 19,
+      "fallbacks": 0,
+      "by_panel": {
+        "muse": {
+          "n": 23,
+          "mean": 57.97101449275362,
+          "se": 1.5254988375374718
+        },
+        "grok": {
+          "n": 23,
+          "mean": 62.13768115942029,
+          "se": 1.371535727517495
+        }
+      }
+    }
+  },
+  "matched_effort_leads_gpt55": {
+    "combined": 2,
+    "code_quality": 0,
+    "runtime": 2
+  },
+  "complete_efforts": [
+    "low",
+    "medium",
+    "high",
+    "extra-high"
+  ],
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "summary_sha256": "faea0a8e7a99c02aa18e311e0340111f77ba41c8ce535f180acc6a1911f26f0a",
+  "protocol_sha256": "e2c2afdb5149cd3999ce10b79daa7830f768c56147d75c6e88958777405a65fb",
+  "png_sha256": "82fe91c5b2b0b03b6f545aa896af4cc72ba247f189677c82f7e54407c7228de0",
+  "supporting_table": "gpt55-vs-luna-v35-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

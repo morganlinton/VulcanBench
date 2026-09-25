@@ -105,17 +105,37 @@ def _python(
     except subprocess.TimeoutExpired:
         return MetricResult(score=None, details={"tool": "bandit", "reason": "timed out"})
     try:
-        totals = json.loads(proc.stdout or "{}").get("metrics", {}).get("_totals", {})
+        results = json.loads(proc.stdout or "{}").get("results", [])
     except json.JSONDecodeError:
         return MetricResult(
             score=None, details={"tool": "bandit", "reason": "could not parse bandit output"}
         )
-    high = int(totals.get("SEVERITY.HIGH", 0))
-    medium = int(totals.get("SEVERITY.MEDIUM", 0))
-    low = int(totals.get("SEVERITY.LOW", 0))
-    return MetricResult(
-        score=score_from_counts(high, medium, low),
-        details={"tool": "bandit", "high": high, "medium": medium, "low": low},
+    counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
+    skipped_test_asserts = 0
+    for finding in results:
+        if finding.get("test_id") == "B101" and _is_test_file(finding.get("filename", "")):
+            skipped_test_asserts += 1  # an assert in a test is the test, not a weakness
+            continue
+        severity = str(finding.get("issue_severity", "")).upper()
+        if severity in counts:
+            counts[severity] += 1
+    high, medium, low = counts["HIGH"], counts["MEDIUM"], counts["LOW"]
+    details: dict[str, Any] = {"tool": "bandit", "high": high, "medium": medium, "low": low}
+    if skipped_test_asserts:
+        details["skipped_test_asserts"] = skipped_test_asserts
+    return MetricResult(score=score_from_counts(high, medium, low), details=details)
+
+
+def _is_test_file(filename: str) -> bool:
+    """Test code by the usual conventions: a tests/ directory or a test_*.py / *_test.py name."""
+    path = Path(filename)
+    name = path.name
+    return (
+        "tests" in path.parts[:-1]
+        or "test" in path.parts[:-1]
+        or name.startswith("test_")
+        or name.endswith("_test.py")
+        or name == "conftest.py"
     )
 
 

@@ -1,0 +1,49 @@
+{
+  "final": true,
+  "coverage": {
+    "submissions_with_both_reviews": 114,
+    "submissions_total": 114,
+    "submissions_with_probes": 114,
+    "per_panel_reviews": {
+      "muse": 114,
+      "grok": 114
+    },
+    "per_panel_probes": {
+      "muse": 114,
+      "grok": 114
+    },
+    "unpublished_invalid_probe": [
+      {
+        "id": "submission-023",
+        "model": "sol",
+        "effort": "max",
+        "task": "legacy-codeccore-binary-parity"
+      }
+    ]
+  },
+  "headline": "Combined score 69.05 to 87.18 from low to max.",
+  "subtitle": "Best at max",
+  "best_effort": "max",
+  "expected_rows": {
+    "sol/low": 23,
+    "sol/medium": 23,
+    "sol/high": 23,
+    "sol/extra-high": 23,
+    "sol/max": 22
+  },
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "summary_sha256": "042ed949f87f33f4a79347fc4c183eae1910aea34c7be007a800dfbcf6ea1ce9",
+  "protocol_sha256": "6f78884f8164f60ad93e3f981cf61fb6edb91882c2fdad3416112f520468e771",
+  "png_sha256": "6c6cba2bf5d1636082db71afb193fbf1d9b925f600f18089cceb49a4ff0e8b1b",
+  "supporting_table": "sol-v37-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

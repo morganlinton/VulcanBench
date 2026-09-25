@@ -21,7 +21,7 @@ def test_known_model_cost() -> None:
 
 
 def test_gpt_56_sol_cost_uses_cached_input_rate() -> None:
-    # 1M total input, 800K cache reads: 200K*$5 + 800K*$0.50 + 100K*$30.
+    # 1M total input, 800K cache reads: 200K*$4 + 800K*$0.40 + 100K*$20 (list of 2026-09-11).
     assert (
         pricing.cost_usd(
             "openai:gpt-5.6-sol",
@@ -29,13 +29,13 @@ def test_gpt_56_sol_cost_uses_cached_input_rate() -> None:
             100_000,
             cached_input_tokens=800_000,
         )
-        == 4.4
+        == 3.12
     )
     assert pricing.has_cached_input_price("codex:gpt-5.6-sol") is True
 
 
 def test_cached_count_is_clamped_to_total_input() -> None:
-    assert pricing.cost_usd("openai:gpt-5.6-sol", 100, 0, cached_input_tokens=1_000) == 0.00005
+    assert pricing.cost_usd("openai:gpt-5.6-sol", 100, 0, cached_input_tokens=1_000) == 0.00004
 
 
 def test_unknown_model_is_none() -> None:
@@ -66,7 +66,7 @@ def test_env_override_merges_fields_into_builtin_rate(
     pricing.reset_cache()
     # The local input override must not erase the official cached-input field.
     assert (
-        pricing.cost_usd("openai:gpt-5.6-sol", 1_000_000, 0, cached_input_tokens=1_000_000) == 0.5
+        pricing.cost_usd("openai:gpt-5.6-sol", 1_000_000, 0, cached_input_tokens=1_000_000) == 0.4
     )
 
 

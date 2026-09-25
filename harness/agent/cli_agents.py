@@ -1,7 +1,7 @@
 """Run models inside their own agent CLI (subscription billing).
 
-``claude-code:<model>``, ``codex:<model>``, ``cursor:<model>``, ``grok-build:<model>``
-and ``zcode:<model>`` run a task
+``claude-code:<model>``, ``codex:<model>``, ``cursor:<model>``, ``grok-build:<model>``,
+``zcode:<model>``, ``muse-code:<model>`` and ``devin:<model>`` run a task
 in the product's headless CLI instead of the VulcanBench agent loop.  The
 external harness owns its prompts, context management, and tools; everything
 downstream (git diff, verifier, evaluator, scoring) remains under VulcanBench.
@@ -32,6 +32,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import sqlite3
 import subprocess
 import tempfile
@@ -55,7 +56,7 @@ from harness.redaction import sanitize
 from harness.sandbox.docker_executor import ResourceSpec
 
 CLI_AGENT_PROVIDERS = frozenset(
-    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code"}
+    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code", "devin"}
 )
 
 # Claude Code's headless result text when a subscription window is exhausted
@@ -210,6 +211,20 @@ def is_cli_agent_spec(spec: str) -> bool:
 def build_cli_prompt(issue: str) -> str:
     """The kickoff prompt handed to the agent CLI for a task."""
     return f"# Issue\n\n{issue}{_ISSUE_SUFFIX}"
+
+
+def _kill_process_group(proc: subprocess.Popen[str]) -> None:
+    """Kill a CLI launcher and everything it spawned.
+
+    The npm ``codex`` launcher execs a native worker in the same session; killing
+    only the launcher left the worker running under launchd and still writing
+    to our pipe, so a 10-hour cap once turned into a 16-hour run. Each adapter
+    starts its CLI in a new session, so the whole group can be signalled.
+    """
+    with contextlib.suppress(ProcessLookupError, PermissionError, OSError):
+        os.killpg(proc.pid, signal.SIGKILL)
+    with contextlib.suppress(ProcessLookupError, OSError):
+        proc.kill()
 
 
 def _subscription_env(extra: dict[str, str] | None = None) -> dict[str, str]:
@@ -764,6 +779,7 @@ def run_cursor_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
             encoding="utf-8",
             errors="replace",
             stdout=subprocess.PIPE,
+            start_new_session=True,
             stderr=subprocess.PIPE,
         )
     except FileNotFoundError as exc:
@@ -796,7 +812,7 @@ def run_cursor_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
 
     def _kill_on_timeout() -> None:
         killed["timeout"] = True
-        proc.kill()
+        _kill_process_group(proc)
 
     watchdog: threading.Timer | None = None
     if timeout_s is not None:
@@ -1138,6 +1154,7 @@ def run_grok_build_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
             encoding="utf-8",
             errors="replace",
             stdout=subprocess.PIPE,
+            start_new_session=True,
             stderr=subprocess.PIPE,
         )
     except FileNotFoundError as exc:
@@ -1172,7 +1189,7 @@ def run_grok_build_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
 
     def _kill_on_timeout() -> None:
         killed["timeout"] = True
-        proc.kill()
+        _kill_process_group(proc)
 
     watchdog: threading.Timer | None = None
     if timeout_s is not None:
@@ -1887,6 +1904,7 @@ def run_zcode_task(  # noqa: PLR0912, PLR0915, linear process + harvest
             errors="replace",
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
+            start_new_session=True,
             stderr=subprocess.PIPE,
         )
     except FileNotFoundError as exc:
@@ -1920,7 +1938,7 @@ def run_zcode_task(  # noqa: PLR0912, PLR0915, linear process + harvest
 
     def _kill_on_timeout() -> None:
         killed["timeout"] = True
-        proc.kill()
+        _kill_process_group(proc)
 
     watchdog: threading.Timer | None = None
     if timeout_s is not None:
@@ -2192,6 +2210,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
             encoding="utf-8",
             errors="replace",
             stdout=subprocess.PIPE,
+            start_new_session=True,
             stderr=subprocess.PIPE,
         )
     except FileNotFoundError as e:
@@ -2230,7 +2249,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
         if container_name is not None:
             # Killing the docker client alone leaves the container running.
             _kill_agent_container(container_name)
-        proc.kill()
+        _kill_process_group(proc)
 
     watchdog: threading.Timer | None = None
     if timeout_s is not None:
@@ -2499,6 +2518,7 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
             errors="replace",
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            start_new_session=True,
             stderr=subprocess.PIPE,
         )
     except FileNotFoundError as exc:
@@ -2539,7 +2559,7 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
         if container_name is not None:
             # Killing the docker client alone leaves the container running.
             _kill_agent_container(container_name)
-        proc.kill()
+        _kill_process_group(proc)
 
     watchdog: threading.Timer | None = None
     if timeout_s is not None:
@@ -2761,6 +2781,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
         from harness.agent.muse_code import MuseCodeAdapter  # noqa: PLC0415
 
         return MuseCodeAdapter()
+    if name == "devin":
+        # Same lazy import: devin_cli builds on this module's helpers.
+        from harness.agent.devin_cli import DevinAdapter  # noqa: PLC0415
+
+        return DevinAdapter()
     try:
         return _CLI_AGENT_ADAPTERS[name]
     except KeyError as exc:

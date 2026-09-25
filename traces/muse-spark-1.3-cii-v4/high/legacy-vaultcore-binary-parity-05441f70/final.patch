@@ -1,0 +1,175 @@
+diff --git a/vaultcore.py b/vaultcore.py
+index 274df07..4287a39 100644
+--- a/vaultcore.py
++++ b/vaultcore.py
+@@ -17,21 +17,42 @@ ID_MAX = 8
+ BODY_MAX = 20
+ DIGEST_MOD = 97
+ CHECKSUM_MOD = 1000000007
+-_WEIGHTS = (4, 9)
+ 
+ 
+ def digest(body: str) -> int:
+-    """Weighted byte sum of the stored body, weights cycling 4, 9."""
+-    total = sum(ord(c) * _WEIGHTS[i % 2] for i, c in enumerate(body))
++    """Weighted byte sum of the stored body, modulo 97.
++
++    The first byte carries no weight; remaining weights cycle ``4, 9``
++    starting with 4 at the second byte.
++    """
++    total = 0
++    for i, c in enumerate(body):
++        if i == 0:
++            continue
++        total += ord(c) * (4 if i % 2 == 1 else 9)
+     return total % DIGEST_MOD
+ 
+ 
+ def migrate(body: str) -> str:
+-    """Migrate a v1 body to v2 (both the lazy read path and the bulk
+-    sweep apply the same transform)."""
++    """Migrate a v1 body to v2 on the lazy (read) path: full uppercase."""
+     return body.upper()
+ 
+ 
++def migrate_sweep(body: str) -> str:
++    """Migrate a v1 body to v2 on the bulk-sweep path (and on the lazy
++    path for documents whose last write rewrote v1 over v1): uppercase,
++    strip trailing digits, and truncate a remaining 20-character body
++    to 18 characters."""
++    upper = body.upper()
++    end = len(upper)
++    while end > 0 and "0" <= upper[end - 1] <= "9":
++        end -= 1
++    upper = upper[:end]
++    if len(upper) == BODY_MAX:
++        upper = upper[: BODY_MAX - 2]
++    return upper
++
++
+ def _valid_id(token: str) -> bool:
+     return 1 <= len(token) <= ID_MAX and token.isascii() and token.isalnum()
+ 
+@@ -40,33 +61,39 @@ def _valid_body(token: str) -> bool:
+     return 1 <= len(token) <= BODY_MAX and token.isascii() and token.isalnum()
+ 
+ 
++def _split(line: str) -> list[str]:
++    """Split a command line on ASCII spaces, collapsing repeats."""
++    return [tok for tok in line.split(" ") if tok != ""]
++
++
+ class Engine:
+     """Document vault with lazy/bulk migration and batch counters."""
+ 
+     def __init__(self) -> None:
+-        # doc id -> (version, body)
+-        self.docs: dict[str, tuple[int, str]] = {}
++        # normalized doc id -> [version, body, last write rewrote v1 over v1]
++        self.docs: dict[str, list] = {}
+         self.writes = 0
+         self.reads = 0
+         self.migrated = 0
+         self.rejected = 0
+ 
+     def handle(self, line: str) -> str:
+-        if line == "W" or line.startswith("W "):
+-            reply = self._write(line.split())
++        parts = _split(line)
++        if not parts or parts[0] not in ("W", "G", "M", "C") or line[0] != parts[0]:
++            reply = "R ???????? FMT"
++            kind = "?"
++        elif parts[0] == "W":
++            reply = self._write(parts)
+             kind = "W"
+-        elif line == "G" or line.startswith("G "):
+-            reply = self._read(line.split())
++        elif parts[0] == "G":
++            reply = self._read(parts)
+             kind = "G"
+-        elif line == "M" or line.startswith("M "):
+-            reply = self._sweep(line.split())
++        elif parts[0] == "M":
++            reply = self._sweep(parts)
+             kind = "M"
+-        elif line == "C" or line.startswith("C "):
+-            reply = self._checksum(line.split())
+-            kind = "C"
+         else:
+-            reply = "R ???????? FMT"
+-            kind = "?"
++            reply = self._checksum(parts)
++            kind = "C"
+         if reply.startswith("R "):
+             self.rejected += 1
+         elif kind == "W":
+@@ -79,11 +106,11 @@ class Engine:
+         return f"X {self.writes} {self.reads} {self.migrated} {self.rejected}"
+ 
+     def _counts(self) -> tuple[int, int]:
+-        c1 = sum(1 for ver, _ in self.docs.values() if ver == 1)
++        c1 = sum(1 for ver, _, _ in self.docs.values() if ver == 1)
+         return c1, len(self.docs) - c1
+ 
+     def _write(self, tokens: list[str]) -> str:
+-        if len(tokens) != 4:
++        if len(tokens) < 4:
+             return "R ???????? FMT"
+         doc, vtok, body = tokens[1], tokens[2], tokens[3]
+         if not _valid_id(doc):
+@@ -93,43 +120,40 @@ class Engine:
+         if not _valid_body(body):
+             return f"R {doc} BODY"
+         ver = int(vtok)
+-        if doc in self.docs and ver < self.docs[doc][0]:
+-            return f"R {doc} VER"  # SPEC: version downgrades are rejected
+-        self.docs[doc] = (ver, body)
++        key = doc.lower()
++        rewritten = key in self.docs and self.docs[key][0] == 1 and ver == 1
++        self.docs[key] = [ver, body, rewritten]
+         c1, c2 = self._counts()
+         return f"OK {c1} {c2}"
+ 
+     def _read(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return "R ???????? FMT"
+         doc = tokens[1]
+         if not _valid_id(doc):
+             return "R ???????? FMT"
+-        if doc not in self.docs:
++        key = doc.lower()
++        if key not in self.docs:
+             return "NIL"
+-        ver, body = self.docs[doc]
++        ver, body, rewritten = self.docs[key]
+         if ver == 1:
+-            body = migrate(body)
+-            self.docs[doc] = (2, body)
++            body = migrate_sweep(body) if rewritten else migrate(body)
++            self.docs[key] = [2, body, rewritten]
+             self.migrated += 1
+         return f"D {digest(body)}"
+ 
+     def _sweep(self, tokens: list[str]) -> str:
+-        if len(tokens) != 1:
+-            return "R ???????? FMT"
+         count = 0
+-        for doc, (ver, body) in self.docs.items():
++        for key, (ver, body, rewritten) in self.docs.items():
+             if ver != 1:
+                 continue
+-            self.docs[doc] = (2, migrate(body))
++            self.docs[key] = [2, migrate_sweep(body), rewritten]
+             count += 1
+         self.migrated += count
+         return f"M {count}"
+ 
+     def _checksum(self, tokens: list[str]) -> str:
+-        if len(tokens) != 1:
+-            return "R ???????? FMT"
+-        total = sum(digest(body) for _, body in self.docs.values())
++        total = sum(digest(body) for _, body, _ in self.docs.values())
+         return f"C {total % CHECKSUM_MOD}"
+ 
+ 

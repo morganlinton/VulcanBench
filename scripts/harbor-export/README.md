@@ -85,7 +85,7 @@ Sources for each claim (all fetched 2026-09-01):
 | `tests/` (pytest suite: `conftest.py`, `oss_tests.py`, `reg_tests.py`, `fixtures.json`) | `tests/` (copied unchanged) plus a generated `tests/test.sh` | Uploaded to `/tests` only after the agent phase (shared verifier mode), so fixtures and expected outputs are never agent-visible. |
 | `metadata.json` `id` | `[task].name = "vulcanbench/<id>"` | |
 | `metadata.json` `category`, `difficulty`, `languages`, `canary` | `[metadata]` | `decontamination_notes` and the per-test command lists are deliberately NOT exported. |
-| `metadata.json` `agent_hints.suggested_timeout_s` (36000, the uniform 10-hour flat timeout) | `[agent].timeout_sec = 36000.0` | |
+| `metadata.json` `agent_hints.suggested_timeout_s` (10800, the uniform 3-hour flat timeout since 2026-09-13; 36000 before) | `[agent].timeout_sec = 10800.0` | |
 | `metadata.json` `test_timeout_s` (600, per test command) x 19 test commands | `[verifier].timeout_sec = 11400.0` | Our budget is per command; Harbor runs the whole suite once, so the equivalent upper bound is the product. Actual suite runtime is under 10 seconds. |
 | grader `"tests"`: all fail_to_pass plus all pass_to_pass must pass | `test.sh` writes `1` to `/logs/verifier/reward.txt` iff the full pytest run exits 0, else `0` | All-or-nothing, matching our grading. |
 | `gold_patch.diff` | omitted | Would enable Harbor's optional `solution/solve.sh` oracle, but the reference solution must not ship in the export. |

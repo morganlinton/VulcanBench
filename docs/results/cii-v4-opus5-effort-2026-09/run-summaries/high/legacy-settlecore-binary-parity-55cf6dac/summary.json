@@ -175,7 +175,7 @@
       "contaminated": false
     },
     "filesystem": {
-      "verdict": "benchmark_data_access",
+      "verdict": "out_of_workspace",
       "out_of_workspace_paths": [
         "/.git/",
         "/10000",
@@ -198,15 +198,12 @@
         "/tmp/sc/gen.py",
         "/tmp/sc/probe.py"
       ],
-      "benchmark_data_paths": [
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-settlecore-binary-parity-55cf6dac-r8lo0l8e-workspace/b815f630-147b-4618-8c3d-2c8c075c6372/tasks/blrx224se.output",
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-settlecore-binary-parity-55cf6dac-r8lo0l8e-workspace/b815f630-147b-4618-8c3d-2c8c075c6372/tasks/bqnya5dfz.output",
-        "/private/tmp/claude-501/-private-var-folders-8c-l0jw07rj1l90scrh6fbl1m-w0000gn-T-vulcanbench-legacy-settlecore-binary-parity-55cf6dac-r8lo0l8e-workspace/b815f630-147b-4618-8c3d-2c8c075c6372/tasks/bye3cg6r9.output"
-      ],
+      "benchmark_data_paths": [],
       "answer_key_paths": [],
-      "contaminated": true
+      "contaminated": false
     },
-    "contaminated": true
+    "contaminated": false,
+    "reclassified": "2026-09-23: recomputed from stored paths under PR #148 (stream not on this machine)"
   },
   "verifier": {
     "scores": {

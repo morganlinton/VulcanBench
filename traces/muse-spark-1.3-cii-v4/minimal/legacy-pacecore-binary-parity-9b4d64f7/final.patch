@@ -1,0 +1,133 @@
+diff --git a/pacecore.py b/pacecore.py
+index a173493..873debe 100644
+--- a/pacecore.py
++++ b/pacecore.py
+@@ -23,7 +23,11 @@ def _valid_id(token: str) -> bool:
+ 
+ 
+ def _digits(token: str) -> bool:
+-    return token.isascii() and token.isdigit()
++    return len(token) >= 1 and token.isascii() and token.isdigit()
++
++
++OVERNIGHT_END = 5  # hours 00-05 pace at half rate for large accounts
++OVERNIGHT_DAILY_MIN = 1000000  # effective overnight halving threshold
+ 
+ 
+ class Campaign:
+@@ -34,6 +38,8 @@ class Campaign:
+         self.spent = 0
+         self.grants = [0] * HOURS
+         self.accrued = -1
++        self.debt = 0
++        self.zest = False
+ 
+ 
+ class Engine:
+@@ -46,8 +52,12 @@ class Engine:
+         self.trueups = 0
+         self.rejected = 0
+ 
++    @staticmethod
++    def _key(camp: str) -> str:
++        return camp.lower()
++
+     def handle(self, line: str) -> str:
+-        tokens = line.split()
++        tokens = [t for t in line.split(" ") if t != ""]
+         if not tokens:
+             return ""
+         if tokens[0] == "C":
+@@ -66,11 +76,11 @@ class Engine:
+         return f"X {self.created} {self.requests} {self.trueups} {self.rejected}"
+ 
+     def _find(self, camp: str) -> Campaign | None:
+-        return self.camps.get(camp)
++        return self.camps.get(self._key(camp))
+ 
+     def _create(self, tokens: list[str]) -> str:
+         camp = tokens[1] if len(tokens) >= 2 else NO_CAMP
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return f"N {camp} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {camp} FMT"
+@@ -79,24 +89,28 @@ class Engine:
+             return f"N {camp} BUDGET"
+         if self._find(tokens[1]) is not None:
+             return f"N {camp} DUP"
+-        self.camps[tokens[1]] = Campaign(int(budget))
++        self.camps[self._key(tokens[1])] = Campaign(int(budget))
+         self.created += 1
+         return f"OK {len(self.camps)}"
+ 
+     def _accrue(self, c: Campaign, hour: int) -> None:
+         slice_ = (c.daily + c.carry) // HOURS
+         for _h in range(c.accrued + 1, hour + 1):
+-            c.avail += slice_
++            if _h == 0:
++                c.avail += max(0, slice_ - c.debt)
++                c.debt = 0
++            else:
++                c.avail += slice_
+         c.accrued = hour
+ 
+     def _spend(self, tokens: list[str]) -> str:
+         camp = tokens[1] if len(tokens) >= 2 else NO_CAMP
+-        if len(tokens) != 4:
++        if len(tokens) < 4:
+             return f"N {camp} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {camp} FMT"
+         hour_tok, req_tok = tokens[2], tokens[3]
+-        if not _digits(hour_tok) or len(hour_tok) != 2 or int(hour_tok) > 23:
++        if not _digits(hour_tok) or len(hour_tok) > 2 or int(hour_tok) > 23:
+             return f"N {camp} HOUR"
+         hour = int(hour_tok)
+         if not _digits(req_tok) or len(req_tok) > 7 or int(req_tok) < 1:
+@@ -107,24 +121,33 @@ class Engine:
+             return f"N {camp} FMT"
+         if hour < c.accrued:
+             return f"N {camp} ORDER"
++        if hour > c.accrued:
++            c.zest = False
+         self._accrue(c, hour)
+-        granted = min(req, c.avail)
++        limit = c.avail
++        if c.daily >= OVERNIGHT_DAILY_MIN and hour <= OVERNIGHT_END:
++            limit = c.avail // 2
++        if c.zest:
++            return f"N {camp} REQ"
++        granted = min(req, limit)
+         c.avail -= granted
+         c.spent += granted
+         c.grants[hour] += granted
++        c.zest = req == limit
+         self.requests += 1
+         return f"P {granted}"
+ 
+     def _trueup(self, tokens: list[str]) -> str:
+         camp = tokens[1] if len(tokens) >= 2 else NO_CAMP
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return f"N {camp} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {camp} FMT"
+         c = self._find(tokens[1])
+         if c is None:
+             return f"N {camp} FMT"
+-        total = c.spent
++        cap = c.daily // HOURS
++        total = sum(min(g, cap) for g in c.grants)
+         raw = max(0, c.daily - total)
+         carry = min(raw, c.daily // CARRY_CAP_DIV)
+         c.carry = carry
+@@ -132,6 +155,8 @@ class Engine:
+         c.grants = [0] * HOURS
+         c.avail = 0
+         c.accrued = -1
++        c.debt = raw - carry
++        c.zest = False
+         self.trueups += 1
+         return f"U {total} {carry}"
+ 

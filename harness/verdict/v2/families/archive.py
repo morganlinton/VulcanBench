@@ -28,6 +28,7 @@ Item files embed task issues and agent patches: keep them private.
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import os
@@ -544,7 +545,584 @@ def build_patch_pair(ctx: BuildContext) -> list[Item]:
 
 
 # ---------------------------------------------------------------------------
-# failing-test
+# failing-test: what each hidden target test checks
+#
+# The pilot (2026-09-25) showed the reference at skill 39 when the state held
+# only target names, so the state now carries each listed target's source from
+# the task's hidden test files: the test function, the helpers, fixtures and
+# constants it reaches, and, for tests driven by JSON fixture files, the case
+# inputs it runs (never the expected outputs or the whole fixture blob). A
+# target whose source cannot be located exactly drops its items.
+
+TEST_CODE_MAX_CHARS = 8_000  # a longer test function drops the item instead of being cut
+HELPER_MAX_CHARS = 3_000  # a longer helper or data constant is cut, with a marker line
+CASES_MAX_CHARS = 3_000  # fixture case inputs shown per test
+_EXPECTED_KEYS = frozenset({"expected", "expect", "output", "outputs", "want", "result", "stdout"})
+
+_PYTEST_ID = re.compile(r"(?:^|\s)((?:[\w.-]+/)*[\w.-]+\.py)::([\w:\[\]-]+)")
+_NODE_PATTERN = re.compile(r"--test-name-pattern=(?:'([^']*)'|\"([^\"]*)\")")
+_NODE_FILE = re.compile(r"(?:^|\s)((?:[\w.-]+/)*[\w.-]+\.[cm]?[jt]sx?)(?=\s|$)")
+_GO_RUN = re.compile(r"-run\s+(?:'\^?(\w+)\$?'|\"\^?(\w+)\$?\"|\^?(\w+)\$?)(?=\s|$)")
+_CARGO_TEST = re.compile(r"--test\s+([\w-]+)\s+(\w+)\s*$")
+_FENCE_BY_SUFFIX = {
+    ".py": "python",
+    ".ts": "typescript",
+    ".tsx": "typescript",
+    ".mts": "typescript",
+    ".cts": "typescript",
+    ".go": "go",
+    ".rs": "rust",
+}
+
+
+def _fence(rel: str) -> str:
+    return _FENCE_BY_SUFFIX.get(Path(rel).suffix, "javascript")
+
+
+def _comment(rel: str) -> str:
+    return "#" if rel.endswith(".py") else "//"
+
+
+@dataclass(frozen=True)
+class TargetSpec:
+    kind: str  # pytest, node, go or cargo
+    file: str | None  # path relative to the hidden tests directory, when the command names it
+    name: str  # test function (pytest, go, cargo) or test title (node)
+
+
+@dataclass(frozen=True)
+class TargetSource:
+    kind: str
+    file: str  # the test's file, relative to the hidden tests directory
+    code: str
+    helpers: tuple[tuple[str, int, str], ...]  # (file, line, code) the test reaches
+    cases: str  # fixture case inputs, rendered; empty when the test reads no fixture file
+
+    @property
+    def text(self) -> str:
+        return f"{self.code}\n{self.cases}"
+
+
+def _node_target(cmd: str) -> TargetSpec | None:
+    m = _NODE_PATTERN.search(cmd)
+    if not m:
+        return None
+    pattern = m.group(1) if m.group(1) is not None else m.group(2)
+    files = _NODE_FILE.findall(cmd)
+    body = pattern[1:-1]
+    # Only literal, anchored titles: unescape \x and refuse unescaped regex operators.
+    if not (pattern.startswith("^") and pattern.endswith("$")) or not files:
+        return None
+    if re.search(r"(?<!\\)[*+?()\[\]{}|]", body):
+        return None
+    return TargetSpec("node", files[-1], re.sub(r"\\(.)", r"\1", body))
+
+
+def parse_target_cmd(cmd: str) -> TargetSpec | None:
+    """Which test a fail-to-pass command runs, or None for forms that select loosely."""
+    m = _PYTEST_ID.search(cmd)
+    if m and "pytest" in cmd:
+        return TargetSpec("pytest", m.group(1), re.sub(r"\[.*\]$", "", m.group(2)))
+    if "--test-name-pattern" in cmd:
+        return _node_target(cmd)
+    m = _GO_RUN.search(cmd)
+    if m and cmd.lstrip().startswith("go test"):
+        return TargetSpec("go", None, next(g for g in m.groups() if g))
+    m = _CARGO_TEST.search(cmd)
+    if m and "cargo test" in cmd:
+        return TargetSpec("cargo", f"{m.group(1)}.rs", m.group(2))
+    return None
+
+
+def _cut(code: str, limit: int, comment: str) -> str:
+    if len(code) <= limit:
+        return code
+    kept: list[str] = []
+    lines = code.splitlines()
+    used = 0
+    for line in lines:
+        if used + len(line) + 1 > limit and kept:
+            break
+        kept.append(line)
+        used += len(line) + 1
+    return "\n".join([*kept, f"{comment} ... ({len(lines) - len(kept)} more lines not shown)"])
+
+
+# -- Python (ast) ------------------------------------------------------------
+
+
+def _py_binds(node: Any) -> list[str]:
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return [node.name]
+    if isinstance(node, ast.Assign):
+        return [n.id for t in node.targets for n in ast.walk(t) if isinstance(n, ast.Name)]
+    if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+        return [node.target.id]
+    if isinstance(node, ast.Import):
+        return [a.asname or a.name.split(".")[0] for a in node.names]
+    if isinstance(node, ast.ImportFrom):
+        return [a.asname or a.name for a in node.names if a.name != "*"]
+    return []
+
+
+class _PyModule:
+    def __init__(self, path: Path, rel: str) -> None:
+        text = path.read_text(errors="replace")
+        self.rel = rel
+        self.lines = text.splitlines()
+        self.tree = ast.parse(text)
+        self.symbols: dict[str, Any] = {}
+        for node in self.tree.body:
+            for name in _py_binds(node):
+                self.symbols[name] = node  # the last binding wins, as at import time
+
+    def segment(self, node: Any) -> str:
+        first = min([node.lineno, *(d.lineno for d in getattr(node, "decorator_list", []))])
+        return "\n".join(self.lines[first - 1 : node.end_lineno])
+
+
+def _is_fixture(node: Any) -> bool:
+    return any("fixture" in ast.unparse(d) for d in getattr(node, "decorator_list", []))
+
+
+def _py_refs(node: Any) -> tuple[set[str], set[str]]:
+    """(names the node reads, argument names pytest would fill from fixtures)."""
+    names = {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+    args: set[str] = set()
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+        args = {a.arg for a in [*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs]}
+    return names, args
+
+
+def _py_strings(node: Any) -> list[str]:
+    return [
+        n.value for n in ast.walk(node) if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    ]
+
+
+def _python_source(
+    tests_dir: Path, spec: TargetSpec, modules: dict[str, _PyModule]
+) -> TargetSource:
+    def module(rel: str) -> _PyModule:
+        if rel not in modules:
+            modules[rel] = _PyModule(tests_dir / rel, rel)
+        return modules[rel]
+
+    if spec.file is None:
+        raise LookupError("no test file")
+    mod = module(spec.file)
+    parts = spec.name.split("::")
+    tops = [n for n in mod.tree.body if getattr(n, "name", None) == parts[0]]
+    if not tops:
+        raise LookupError("test not found")
+    node: Any = tops[-1]
+    if len(parts) == 2:  # a method: show the whole class, which holds its setup
+        if not isinstance(node, ast.ClassDef) or not any(
+            getattr(n, "name", None) == parts[1] for n in node.body
+        ):
+            raise LookupError("test method not found")
+    elif len(parts) != 1 or not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+        raise LookupError("unsupported test selector")
+    code = mod.segment(node)
+    if len(code) > TEST_CODE_MAX_CHARS:
+        raise LookupError("test too long")
+
+    siblings = {p.stem: p.relative_to(tests_dir).as_posix() for p in tests_dir.glob("*.py")}
+    conftest = module("conftest.py") if (tests_dir / "conftest.py").is_file() else None
+
+    def resolve(name: str, where: _PyModule, as_fixture: bool) -> tuple[_PyModule, Any] | None:
+        found = where.symbols.get(name)
+        if isinstance(found, ast.ImportFrom) and not found.level and found.module in siblings:
+            original = next(a.name for a in found.names if (a.asname or a.name) == name)
+            return resolve(original, module(siblings[found.module]), False)
+        if found is not None:
+            return where, found
+        if as_fixture and conftest is not None and where is not conftest:
+            hit = conftest.symbols.get(name)
+            if hit is not None and _is_fixture(hit):
+                return conftest, hit
+        return None
+
+    helpers: dict[tuple[str, int], str] = {}
+    queue: list[tuple[_PyModule, Any]] = [(mod, node)]
+    seen = {(mod.rel, node.lineno)}
+    while queue:
+        where, current = queue.pop()
+        names, args = _py_refs(current)
+        refs = [(n, n in args) for n in sorted(names | args)]
+        for name, as_fixture in refs:
+            hit = resolve(name, where, as_fixture)
+            if hit is None:
+                continue
+            owner, found = hit
+            key = (owner.rel, found.lineno)
+            if key in seen:
+                continue
+            seen.add(key)
+            helpers[key] = _cut(owner.segment(found), HELPER_MAX_CHARS, "#")
+            if not isinstance(found, ast.Import | ast.ImportFrom):
+                queue.append((owner, found))
+    return TargetSource(
+        kind="pytest",
+        file=spec.file,
+        code=code,
+        helpers=tuple((f, line, c) for (f, line), c in sorted(helpers.items())),
+        cases=_fixture_cases(tests_dir, _py_strings(node)),
+    )
+
+
+def _fixture_cases(tests_dir: Path, strings: Sequence[str]) -> str:
+    """Case inputs for every JSON fixture key the test names, without expected values."""
+    wanted = set(strings)
+    blocks = []
+    for path in sorted(tests_dir.rglob("*.json")):
+        try:
+            data = json.loads(path.read_text(errors="replace"))
+        except ValueError:
+            continue
+        if not isinstance(data, dict):
+            continue
+        rel = path.relative_to(tests_dir).as_posix()
+        for key in sorted(wanted & set(data)):
+            blocks.append(_render_cases(rel, key, data[key]))
+    return "\n\n".join(blocks)
+
+
+def _render_cases(rel: str, key: str, value: Any) -> str:
+    cases = value if isinstance(value, list) else [value]
+    lines: list[str] = []
+    used = 0
+    dropped_keys = False
+    for case in cases:
+        shown = case
+        if isinstance(case, dict):
+            kept = {k: v for k, v in case.items() if k.lower() not in _EXPECTED_KEYS}
+            dropped_keys |= len(kept) < len(case)
+            shown = next(iter(kept.values())) if len(kept) == 1 else kept
+        line = json.dumps(shown, ensure_ascii=False)
+        if lines and used + len(line) > CASES_MAX_CHARS:
+            break
+        if len(line) > CASES_MAX_CHARS:
+            line = line[:CASES_MAX_CHARS] + " ..."
+        lines.append(line)
+        used += len(line)
+    what = "input fields only, expected outputs not shown" if dropped_keys else "as stored"
+    count = f"{len(lines)} of {len(cases)} cases shown" if isinstance(value, list) else "one value"
+    body = "\n".join(lines)
+    return (
+        f"Case inputs from `{rel}` key `{key}` ({what}; {count}), one per line:\n\n"
+        f"```json\n{body}\n```"
+    )
+
+
+# -- brace languages (JavaScript/TypeScript, Go, Rust) -------------------------
+
+
+def _string_end(text: str, i: int, kind: str) -> int | None:
+    quote = text[i]
+    raw = quote == "`" and kind == "go"
+    j = i + 1
+    while j < len(text):
+        c = text[j]
+        if c == "\\" and not raw:
+            j += 2
+            continue
+        if c == quote:
+            return j + 1
+        if c == "\n" and quote in "'\"":
+            return None
+        j += 1
+    return None
+
+
+_RUST_CHAR = re.compile(r"'(?:\\[^']{1,10}|[^\\'])'")
+
+
+def _skip(text: str, i: int, kind: str) -> int | None:
+    """End of a comment, string or char literal starting at ``i``; ``i`` if none starts there."""
+    if text.startswith("//", i):
+        j = text.find("\n", i)
+        return len(text) if j < 0 else j
+    if text.startswith("/*", i):
+        j = text.find("*/", i + 2)
+        return None if j < 0 else j + 2
+    ch = text[i]
+    if ch == "'" and kind == "cargo":
+        m = _RUST_CHAR.match(text, i)
+        return m.end() if m else i + 1  # otherwise a lifetime
+    if ch in "\"'`":
+        return _string_end(text, i, kind)
+    return i
+
+
+def _bracket_end(text: str, i: int, kind: str) -> int | None:
+    """Index just past the bracket closing the one at ``text[i]``."""
+    closing = {"(": ")", "[": "]", "{": "}"}
+    stack: list[str] = []
+    while i < len(text):
+        j = _skip(text, i, kind)
+        if j is None:
+            return None
+        if j != i:
+            i = j
+            continue
+        ch = text[i]
+        if ch in closing:
+            stack.append(closing[ch])
+        elif ch in ")]}":
+            if not stack or stack.pop() != ch:
+                return None
+            if not stack:
+                return i + 1
+        i += 1
+    return None
+
+
+def _statement_end(text: str, start: int, kind: str) -> int | None:
+    """End of a top-level declaration: a semicolon, or a line that does not continue."""
+    i = start
+    while i < len(text):
+        j = _skip(text, i, kind)
+        if j is None:
+            return None
+        if j != i:
+            i = j
+            continue
+        ch = text[i]
+        if ch in "([{":
+            end = _bracket_end(text, i, kind)
+            if end is None:
+                return None
+            i = end
+            continue
+        if ch == ";":
+            return i + 1
+        if ch == "\n":
+            before = text[start:i].rstrip()
+            if before and before[-1] not in "=,+-*/&|?:.(<>":
+                return i
+        i += 1
+    return len(text)
+
+
+_DECLS = {
+    "node": [
+        r"^(?:export\s+)?(?:async\s+)?function\*?\s+([A-Za-z_$][\w$]*)",
+        r"^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)",
+        r"^(?:export\s+)?class\s+([A-Za-z_$][\w$]*)",
+    ],
+    "go": [r"^func\s+(\w+)", r"^(?:var|const|type)\s+(\w+)"],
+    "cargo": [
+        r"^(?:pub(?:\([\w:]+\))?\s+)?fn\s+(\w+)",
+        r"^(?:pub\s+)?(?:const|static|struct|enum|type)\s+(\w+)",
+    ],
+}
+# Lines that bind several names at once: imports, destructuring requires, use.
+_MULTI_DECLS = {
+    "node": [r"^import\s+(.+?)\s+from\s", r"^(?:const|let|var)\s+\{([^}]*)\}\s*="],
+    "go": [],
+    "cargo": [r"^use\s+(.+?);"],
+}
+_IDENT = re.compile(r"[A-Za-z_$][\w$]*")
+
+
+def _brace_decls(text: str, kind: str) -> dict[str, int]:
+    """Top-level declared name -> offset of its declaration."""
+    out: dict[str, int] = {}
+    for pattern in _DECLS[kind]:
+        for m in re.finditer(pattern, text, re.M):
+            out.setdefault(m.group(1), m.start())
+    for pattern in _MULTI_DECLS[kind]:
+        for m in re.finditer(pattern, text, re.M):
+            for name in _IDENT.findall(m.group(1)):
+                out.setdefault(name, m.start())
+    return out
+
+
+def _test_anchor(text: str, spec: TargetSpec) -> tuple[int, int] | None:
+    """(start of the test's first line, index of the bracket that opens its body or call)."""
+    if spec.kind == "node":
+        pattern = (
+            r"\b(?:test|it)(?:\.(?:only|skip|todo))?\s*(\()\s*(['\"`])"
+            + re.escape(spec.name)
+            + r"\2"
+        )
+        found = list(re.finditer(pattern, text))
+        if len(found) != 1:
+            return None
+        return text.rfind("\n", 0, found[0].start()) + 1, found[0].start(1)
+    if spec.kind == "go":
+        found = list(re.finditer(rf"^func\s+{re.escape(spec.name)}\s*(\()", text, re.M))
+    else:
+        found = list(
+            re.finditer(
+                rf"^[ \t]*(?:pub\s+)?(?:async\s+)?fn\s+{re.escape(spec.name)}\s*(\()", text, re.M
+            )
+        )
+    if len(found) != 1:
+        return None
+    params_end = _bracket_end(text, found[0].start(1), spec.kind)
+    if params_end is None:
+        return None
+    brace = text.find("{", params_end)
+    if brace < 0:
+        return None
+    start = found[0].start()
+    while spec.kind == "cargo" and start > 0:  # keep #[test] and other attributes
+        prev = text.rfind("\n", 0, start - 1) + 1
+        if not text[prev:start].strip().startswith("#["):
+            break
+        start = prev
+    return start, brace
+
+
+def _brace_files(tests_dir: Path, spec: TargetSpec) -> list[Path]:
+    if spec.file is None:  # go test -run names no file
+        return sorted(p for p in tests_dir.rglob("*_test.go") if p.is_file())
+    named = tests_dir / spec.file
+    if named.is_file():
+        return [named]
+    return sorted(p for p in tests_dir.rglob(Path(spec.file).name) if p.is_file())
+
+
+def _brace_source(tests_dir: Path, spec: TargetSpec) -> TargetSource:
+    files = _brace_files(tests_dir, spec)
+    hits = []
+    for path in files:
+        text = path.read_text(errors="replace")
+        anchor = _test_anchor(text, spec)
+        if anchor is not None:
+            hits.append((path, text, anchor))
+    if len(hits) != 1:
+        raise LookupError("test not found exactly once")
+    path, text, (start, bracket) = hits[0]
+    end = _bracket_end(text, bracket, spec.kind)
+    if end is None:
+        raise LookupError("unbalanced test source")
+    if spec.kind == "node" and text[end : end + 1] == ";":
+        end += 1
+    code = text[start:end]
+    if len(code) > TEST_CODE_MAX_CHARS:
+        raise LookupError("test too long")
+
+    rel = path.relative_to(tests_dir).as_posix()
+    decls = _brace_decls(text, spec.kind)
+    helpers: dict[int, str] = {}
+    queue = [code]
+    seen = {start}
+    while queue:
+        for name in sorted(set(_IDENT.findall(queue.pop()))):
+            offset = decls.get(name)
+            if offset is None or offset in seen or start <= offset < end:
+                continue
+            seen.add(offset)
+            stop = _statement_end(text, offset, spec.kind)
+            if stop is None:
+                raise LookupError("unbalanced helper source")
+            body = text[offset:stop]
+            helpers[offset] = _cut(body, HELPER_MAX_CHARS, "//")
+            queue.append(body)
+    line_of = {o: text.count("\n", 0, o) + 1 for o in helpers}
+    return TargetSource(
+        kind=spec.kind,
+        file=rel,
+        code=code,
+        helpers=tuple((rel, line_of[o], c) for o, c in sorted(helpers.items())),
+        cases="",
+    )
+
+
+def extract_test_source(
+    tests_dir: Path, cmd: str, modules: dict[str, _PyModule] | None = None
+) -> TargetSource | None:
+    """The hidden test a fail-to-pass command runs, or None when it cannot be located exactly."""
+    spec = parse_target_cmd(cmd)
+    if spec is None or not tests_dir.is_dir():
+        return None
+    try:
+        if spec.kind == "pytest":
+            if spec.file is None or not (tests_dir / spec.file).is_file():
+                return None
+            return _python_source(tests_dir, spec, {} if modules is None else modules)
+        return _brace_source(tests_dir, spec)
+    except (LookupError, OSError, SyntaxError, ValueError):
+        return None
+
+
+def task_test_sources(task_dir: Path) -> dict[str, TargetSource]:
+    """Every fail-to-pass target of a task whose hidden test source was located."""
+    try:
+        meta = json.loads((task_dir / "metadata.json").read_text())
+        spec = (meta.get("tests") or {}).get("fail_to_pass") or []
+    except (OSError, ValueError, AttributeError):
+        return {}
+    modules: dict[str, _PyModule] = {}
+    out = {}
+    for target in spec:
+        found = extract_test_source(task_dir / "tests", str(target.get("cmd") or ""), modules)
+        if found is not None:
+            out[str(target.get("name"))] = found
+    return out
+
+
+def _group_sources(
+    ctx: BuildContext, archive: Archive, group: str, cache: dict[Path, dict[str, TargetSource]]
+) -> dict[str, TargetSource]:
+    """Target sources for a patch group, or {} when they are not known to be what was graded.
+
+    An exact task-hash match means the hidden tests on disk are the graded ones.
+    A group resolved by target names alone is kept only when every task copy
+    with those target names shows identical sources, so a copy whose tests
+    changed cannot slip in.
+    """
+    task = archive.tasks[group]
+
+    def sources(task_dir: Path) -> dict[str, TargetSource]:
+        if task_dir not in cache:
+            cache[task_dir] = task_test_sources(task_dir)
+        return cache[task_dir]
+
+    found = sources(task.root)
+    if ":names:" not in group:
+        return found
+    resolver = _TaskResolver(ctx.tasks_roots)
+    names = resolver._target_names(task.root)
+    for other in resolver.candidates(task.task_id):
+        same_targets = other != task.root and resolver._target_names(other) == names
+        if same_targets and sources(other) != found:
+            return {}
+    return found
+
+
+def _join_helpers(codes: Sequence[str]) -> str:
+    """Helpers in file order; runs of one-line helpers (imports, constants) stay together."""
+    out = ""
+    for i, code in enumerate(codes):
+        if i:
+            one_line = "\n" not in code and "\n" not in codes[i - 1]
+            out += "\n" if one_line else "\n\n"
+        out += code.rstrip()
+    return out
+
+
+def render_test_sources(options: Sequence[str], sources: dict[str, TargetSource]) -> str:
+    parts = ["The source of each listed test, from the task's hidden test files."]
+    for name in options:
+        src = sources[name]
+        parts.append(f"### `{name}`\n\n```{_fence(src.file)}\n{src.code.rstrip()}\n```")
+        if src.cases:
+            parts.append(src.cases)
+    by_file: dict[str, dict[int, str]] = defaultdict(dict)
+    for name in options:
+        for rel, line, code in sources[name].helpers:
+            by_file[rel][line] = code
+    if by_file:
+        parts.append("## Helpers and fixtures these tests use")
+        for rel in sorted(by_file):
+            body = _join_helpers([by_file[rel][line] for line in sorted(by_file[rel])])
+            parts.append(f"```{_fence(rel)}\n{_comment(rel)} {rel}\n{body}\n```")
+    return "\n\n".join(parts)
+
 
 FAILING_ONE_INSTRUCTIONS = (
     "With this patch applied, every listed hidden target test passes except exactly one. "
@@ -557,10 +1135,14 @@ FAILING_SUBSET_INSTRUCTIONS = (
 
 
 def failing_shortcuts(
-    options: Sequence[str], patch: str, issue: str, prior: Counter[str]
+    options: Sequence[str],
+    patch: str,
+    issue: str,
+    prior: Counter[str],
+    sources: dict[str, TargetSource] | None = None,
 ) -> dict[str, str]:
     patch_tokens, issue_tokens = tokens(patch), tokens(issue)
-    return {
+    out = {
         "patch-overlap": _pick([len(tokens(o) & patch_tokens) for o in options], options),
         "issue-overlap": _pick([len(tokens(o) & issue_tokens) for o in options], options),
         "first-listed": options[0],
@@ -569,6 +1151,12 @@ def failing_shortcuts(
         # Leave-one-out: the target that fails most often in the task's other patches.
         "task-prior": _pick([prior[o] for o in options], options),
     }
+    if sources:
+        texts = [sources[o].text for o in options]
+        out["source-patch-overlap"] = _pick([len(tokens(t) & patch_tokens) for t in texts], options)
+        out["source-issue-overlap"] = _pick([len(tokens(t) & issue_tokens) for t in texts], options)
+        out["longest-source"] = _pick([len(t) for t in texts], options)
+    return out
 
 
 @dataclass(frozen=True)
@@ -578,18 +1166,30 @@ class _FailingCandidate:
     options: tuple[str, ...]  # shown order
     answer: str
     shortcuts: dict[str, str]
+    state: str
 
     @property
     def prior_hit(self) -> bool:
         return self.shortcuts["task-prior"] == self.answer
 
 
+def _failing_state(issue: str, patch: str, tests: str) -> str:
+    return (
+        f"## Issue\n\n{issue}\n\n## Candidate patch\n\n{_fenced(patch)}\n\n"
+        f"## Hidden target tests\n\n{tests}\n"
+    )
+
+
 def _failing_candidates(ctx: BuildContext, archive: Archive) -> list[_FailingCandidate]:
     family = "failing-test"
-    max_failed = int((ctx.options or {}).get("failing_max_failed", FAILING_MAX_FAILED))
+    opts = ctx.options or {}
+    max_failed = int(opts.get("failing_max_failed", FAILING_MAX_FAILED))
+    with_sources = bool(opts.get("failing_sources", True))
+    cache: dict[Path, dict[str, TargetSource]] = {}
     out = []
     for group, patches in archive.by_group().items():
         issue = archive.tasks[group].issue
+        sources = _group_sources(ctx, archive, group, cache) if with_sources else {}
         for p in patches:
             failing, names = p.failing, [n for n, _ in p.targets]
             if not p.passing or not failing or len(failing) > max_failed:
@@ -604,13 +1204,25 @@ def _failing_candidates(ctx: BuildContext, archive: Archive) -> list[_FailingCan
             keep = min(failing, key=lambda n: (prior[n], _order_key(ctx.seed, family, p.sha + n)))
             options = sorted(n for n in names if n == keep or n not in failing)
             random.Random(f"{ctx.seed}:{family}:{p.sha}").shuffle(options)
+            if with_sources and not all(o in sources for o in options):
+                continue
+            if with_sources:
+                tests = render_test_sources(options, sources)
+            else:
+                tests = "\n".join(f"- {o}" for o in options)
+            state = _failing_state(issue, p.text, tests)
+            if len(state) > MAX_STATE_CHARS:
+                continue
             out.append(
                 _FailingCandidate(
                     order=_order_key(ctx.seed, family, p.sha),
                     patch=p,
                     options=tuple(options),
                     answer=keep,
-                    shortcuts=failing_shortcuts(options, p.text, issue, prior),
+                    shortcuts=failing_shortcuts(
+                        options, p.text, issue, prior, sources if with_sources else None
+                    ),
+                    state=state,
                 )
             )
     return sorted(out, key=lambda c: c.order)
@@ -651,21 +1263,13 @@ def build_failing_test(ctx: BuildContext) -> list[Item]:
     items: list[Item] = []
     for cand in sorted(chosen, key=lambda c: c.order):
         p = cand.patch
-        issue = archive.tasks[p.group].issue
-        listing = "\n".join(f"- {o}" for o in cand.options)
-        state = (
-            f"## Issue\n\n{issue}\n\n## Candidate patch\n\n{_fenced(p.text)}\n\n"
-            f"## Hidden target tests\n\n{listing}\n"
-        )
-        if len(state) > MAX_STATE_CHARS:
-            continue
         subset = len(cand.options) < len(p.targets)
         items.append(
             make_item(
                 family=family,
                 key=f"{p.task_id}:{p.sha}",
                 source_unit=p.task_id,
-                state=state,
+                state=cand.state,
                 question=choice_question(
                     FAILING_SUBSET_INSTRUCTIONS if subset else FAILING_ONE_INSTRUCTIONS,
                     dict.fromkeys(cand.options),

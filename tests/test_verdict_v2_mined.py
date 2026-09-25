@@ -331,6 +331,8 @@ def test_weakness_class_labels_from_cwe_and_caps_classes(tmp_path):
     counts = Counter(i.answer for i in items)
     assert set(counts) <= set(mined.WEAKNESS_CLASSES)
     assert max(counts.values()) <= 0.2 * 40 + 1
+    keyword_hits = sum(i.shortcuts["keywords"] == i.answer for i in items)
+    assert keyword_hits <= mined.WEAKNESS_KEYWORD_CAP * len(items)
     for item in items:
         assert set(item.question["options"]) == set(mined.WEAKNESS_CLASSES)
         assert "CWE" not in item.state and "CVE" not in item.state

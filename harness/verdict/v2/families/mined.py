@@ -1386,6 +1386,14 @@ def _advisory_source(record: dict[str, Any], pair: FixPair) -> dict[str, Any]:
     }
 
 
+WEAKNESS_CLASS_CAP = 0.2
+# Share of items the keyword rule may answer correctly. Shortcut skill is
+# measured against the most common answer position (about 12% here), so 0.26
+# read skill 15.2 on the full build (2026-09-25). At 0.22 the rule stays at or
+# below skill 13.3 even if the position floor fell to uniform guessing (10%).
+WEAKNESS_KEYWORD_CAP = 0.22
+
+
 def build_weakness_class(ctx: BuildContext) -> list[Item]:
     pairs = advisory_pairs(
         mined_dir(ctx), fix_after_cutoff=bool((ctx.options or {}).get("fix_after_cutoff", True))
@@ -1417,8 +1425,8 @@ def build_weakness_class(ctx: BuildContext) -> list[Item]:
         )
     rng = random.Random(f"{ctx.seed}:weakness-class")
     opts = ctx.options or {}
-    class_cap = float(opts.get("weakness_cap", 0.2))
-    keyword_cap = float(opts.get("weakness_keyword_cap", 0.26))
+    class_cap = float(opts.get("weakness_cap", WEAKNESS_CLASS_CAP))
+    keyword_cap = float(opts.get("weakness_keyword_cap", WEAKNESS_KEYWORD_CAP))
     # Cap the largest classes first, then the keyword rules, then spread over repos.
     per_class = max(1, math.ceil(class_cap * min(ctx.per_family, len(candidates))))
     by_class: dict[str, list[Candidate]] = defaultdict(list)

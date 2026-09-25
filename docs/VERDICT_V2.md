@@ -55,7 +55,7 @@ with exactly one correct, position randomised, so the floor is exactly 50%.
 | Testing | `mutant-kill` | noul | Does this test catch this change? | Run the test against the mutant | Generated over real OSS modules |
 | Testing | `expected-value` | noul | Is this assertion's expected value correct for the spec? | Reference implementation | Generated |
 | Operations | `incident-root-cause` | choice (list) | Logs from several services during an incident: which service caused it? | The simulation that generated the logs | Generated |
-| Operations | `semver-impact` | score (3) | Patch, minor or major version bump? | cargo-semver-checks, griffe, api-extractor | Mined library releases |
+| Operations | `semver-impact` | score (3) | Patch, minor or major version bump? | In-house deterministic public-API differ for Python (no external differ is installed) | Mined merged PRs in Python libraries |
 
 ### General pillar
 
@@ -147,6 +147,20 @@ or cut. Cuts are listed in the report. The pilot is 30 items per family.
   passed, whatever the number of failing targets. Capping patches at two
   failing targets left 70 items once the task-prior shortcut (61 to 72%
   uncapped) was held to 25%.
+
+- `semver-impact` (2026-09-24) is labelled by an in-house Python API
+  differ in `harness/verdict/v2/families/mined.py`, not cargo-semver-checks
+  or griffe (neither is installed). Public means no leading underscore and
+  no underscore or `internal` module path; removed or changed-signature
+  public names are major, added ones minor, anything else patch. The item
+  instructions state the convention. It ignores `__all__` and cross-module
+  inheritance, so some labels will differ from maintainers' intent.
+- `vuln-pair` and `weakness-class` (2026-09-24) require the fix commit
+  itself, not only the advisory, to date from 2026-06-01 or later.
+  `weakness-class` collapses CWEs into ten families (`CWE_FAMILIES` in
+  `mined.py`): prototype pollution and mass assignment count as
+  deserialization, open redirect as SSRF; advisories whose CWEs map to no
+  family or to two are dropped, and no class exceeds 20% of items.
 
 ## Rows on the chart
 

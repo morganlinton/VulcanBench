@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
+import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -54,8 +55,20 @@ class Item:
         return json.dumps({"suite": SUITE_ID, "canary": CANARY, **asdict(self)}, sort_keys=True)
 
 
+_SEED_GROUP = re.compile(r"-g(\d+)$")
+
+
 def split_for_unit(source_unit: str) -> str:
-    """Dev or test, by a stable hash of the source unit so splits never drift."""
+    """Dev or test, stable for a given source unit so splits never drift.
+
+    Generated families name their units ``<family>-g<k>``; every fifth group
+    goes to dev, so each such family gets exactly a fifth of its groups (a
+    hash split left one with 3 dev groups of 50). Real sources (tasks, repos)
+    split by hash.
+    """
+    group = _SEED_GROUP.search(source_unit)
+    if group:
+        return "dev" if int(group.group(1)) % round(1 / DEV_FRACTION) == 0 else "test"
     digest = hashlib.sha256(f"{SUITE_ID}:{source_unit}".encode()).hexdigest()
     return "dev" if int(digest[:8], 16) / 0xFFFFFFFF < DEV_FRACTION else "test"
 

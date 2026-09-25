@@ -41,6 +41,8 @@ def test_split_is_stable_and_by_unit():
     assert split_for_unit("task-a") == split_for_unit("task-a")
     splits = {split_for_unit(f"unit-{i}") for i in range(200)}
     assert splits == {"dev", "test"}
+    groups = [split_for_unit(f"entailment-g{k:02d}") for k in range(50)]
+    assert groups.count("dev") == 10
 
 
 def test_make_item_rejects_llm_references_and_bad_answers():

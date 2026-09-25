@@ -47,14 +47,14 @@ with exactly one correct, position randomised, so the floor is exactly 50%.
 | Reading code | `code-output` | choice (4) | What does this short program print? | Execute it; distractors are outputs of mutated versions | Generated |
 | Reading code | `type-check-pair` | choice (pair) | Which snippet passes the type checker? | mypy, tsc or cargo check | Generated from real-library snippets plus single-edit mutations |
 | Reviewing changes | `patch-pair` | choice (pair) | Two patches for one issue: which passes the hidden tests? | Frontier v4 verifier | Run archive, pairs matched on lines changed |
-| Reviewing changes | `failing-test` | choice (list) | Given a failing patch and the hidden test names, which test fails? | Per-test verifier results | Run archive, patches with exactly one failing target |
+| Reviewing changes | `failing-test` | choice (list) | Given a patch, which of the listed hidden tests fails? Exactly one listed test fails; the rest passed | Per-test verifier results | Run archive |
 | Finding bugs | `fix-file` | choice (list) | Which file does the fix touch? | The merged fix | Multi-file OSS tasks (v4-new, VulcanCyber, Routine) plus mined post-cutoff PRs |
 | Finding bugs | `bug-function` | choice (list) | Given a failing test's output, which function holds the planted bug? | The planted mutation, confirmed killed by the test | Generated over real OSS modules |
 | Security | `vuln-pair` | choice (pair) | Before and after a security fix: which version is vulnerable? | The fix commit | VulcanCyber pool plus mined 2026 advisories |
 | Security | `weakness-class` | choice (about 10) | Which weakness class is this? | Advisory CWE, collapsed to about 10 families | Mined 2026 advisories |
 | Testing | `mutant-kill` | noul | Does this test catch this change? | Run the test against the mutant | Generated over real OSS modules |
 | Testing | `expected-value` | noul | Is this assertion's expected value correct for the spec? | Reference implementation | Generated |
-| Operations | `ci-failure` | choice (about 6) | Why did this CI run fail? | Structured failure fields in the run archive | Run archive logs |
+| Operations | `incident-root-cause` | choice (list) | Logs from several services during an incident: which service caused it? | The simulation that generated the logs | Generated |
 | Operations | `semver-impact` | score (3) | Patch, minor or major version bump? | cargo-semver-checks, griffe, api-extractor | Mined library releases |
 
 ### General pillar
@@ -113,7 +113,8 @@ only. The ones known in advance:
 | `fix-file` | File with most token overlap with the issue; largest file |
 | `vuln-pair` | Longer version; version with more input checks by keyword count |
 | `code-output`, `word-problem` | Most frequent option shape; option nearest the mean |
-| `ci-failure` | Keyword rules over the log tail |
+| `failing-test` | Leave-one-out task prior (the test this task's other patches fail most) |
+| `incident-root-cause` | First service to log an error, most errors, most depended on |
 | `table-lookup` | First row; row with largest value in the named column |
 | All `noul` | Statement length; majority |
 | All `score` | Middle level; majority level |
@@ -134,6 +135,18 @@ A family ships only if all hold on its pilot items:
 
 A family that fails is rebuilt once (harder distractors, better balancing)
 or cut. Cuts are listed in the report. The pilot is 30 items per family.
+
+## Changes during the build
+
+- `ci-failure` (2026-09-24) was replaced by `incident-root-cause`. The run
+  archive records only per-test pass or fail, not test output, so there was
+  nothing to label; re-running stored patches would compete with the live
+  serial sweeps, and a 12-patch trial reproduced only AssertionError, so the
+  label would have been nearly one class.
+- `failing-test` (2026-09-24) shows one failing target plus the targets that
+  passed, whatever the number of failing targets. Capping patches at two
+  failing targets left 70 items once the task-prior shortcut (61 to 72%
+  uncapped) was held to 25%.
 
 ## Rows on the chart
 
@@ -166,10 +179,10 @@ v4 chains.
 1. Framework: family registry, skill and index scoring with bootstrap by
    source unit, shortcut baseline hooks, per-family builders writing one
    JSONL.
-2. Archive families: `patch-pair`, `failing-test`, `ci-failure`.
+2. Archive families: `patch-pair`, `failing-test`.
 3. General families (all generated): the eight general families.
 4. Generated software families: `code-output`, `type-check-pair`,
-   `mutant-kill`, `expected-value`, `bug-function`.
+   `mutant-kill`, `expected-value`, `bug-function`, `incident-root-cause`.
 5. Mined families: `fix-file`, `vuln-pair`, `weakness-class`,
    `semver-impact`.
 6. Pilot (30 items per family, Jev plus reference), gate, rebuild or cut.

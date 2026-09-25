@@ -123,13 +123,13 @@ FAMILIES: tuple[Family, ...] = (
         "Is this assertion's expected value correct for the spec?",
     ),
     Family(
-        "ci-failure",
+        "incident-root-cause",
         "software",
         "Operations",
         "choice",
-        "verifier",
-        "archive",
-        "Why did this CI run fail?",
+        "generator",
+        "ops_gen",
+        "Given logs from several services during an incident, which service caused it?",
     ),
     Family(
         "semver-impact",

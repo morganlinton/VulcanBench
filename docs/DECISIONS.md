@@ -50,6 +50,11 @@ pillar beyond software; show Jev plus one reference model.
   `choice` allows 255 options; 32k tokens for state plus the longest
   question; `jev-1.13.0` is still the only versioned id.
 
+Build changes the same day: `ci-failure` was replaced by the generated
+`incident-root-cause` (the archive keeps no hidden-test output to label),
+and `failing-test` shows one failing target plus the passing ones for any
+number of failing targets. Details in the spec's "Changes during the build".
+
 ### Revisit triggers
 
 - A family fails the gate twice: cut it and list it in the report rather

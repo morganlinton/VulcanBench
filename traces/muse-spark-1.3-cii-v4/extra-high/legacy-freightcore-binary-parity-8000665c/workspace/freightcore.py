@@ -1,0 +1,210 @@
+"""FreightCore shipment rating engine, Python implementation.
+
+Replaces the retired legacy binary (see ``legacy/README.md``). Reads one
+shipment per line on stdin, writes one response line per shipment and a
+batch trailer on stdout. Format reference: ``docs/SPEC.md`` (note the
+drift warning at the top of that file; the legacy engine's behavior is the
+contract).
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+
+# Standard freight classes, published table.
+CLASSES = frozenset(
+    (50, 55, 60, 65, 70, 77, 85, 92, 100, 110, 125, 150, 175, 200, 250, 300, 400, 500)
+)
+# Dimensional-weight divisor and rounding: the engine rounds
+# len*wid*hgt/5500 to the nearest kg (half up), not up at 5000.
+DIM_DIVISOR = 5500
+SERVICES = ("G", "X", "P")
+SURCHARGE_PCT = {"G": 0, "X": 50, "P": 25}
+# Flat fee added after rating to accepted zone-99 shipments.
+ZONE99_FEE = 12500
+# The engine reads stdin with a 1024-byte buffer, so over-long input lines
+# are processed as successive 1023-byte chunks (cut after a newline).
+_READ_CHUNK = 1023
+
+_TOKEN_SEP = re.compile(r"[ \t\r]+")
+
+
+def _round_half_up(numerator: int, denominator: int) -> int:
+    quotient, remainder = divmod(numerator, denominator)
+    if 2 * remainder >= denominator:
+        return quotient + 1
+    return quotient
+
+
+def _round_half_even(numerator: int, denominator: int) -> int:
+    quotient, remainder = divmod(numerator, denominator)
+    if 2 * remainder != denominator:
+        return quotient + (2 * remainder > denominator)
+    return quotient + (quotient & 1)
+
+
+def _ceil_div(numerator: int, denominator: int) -> int:
+    return -(-numerator // denominator)
+
+
+def _is_alnum_ascii(text: str) -> bool:
+    return 1 <= len(text) <= 10 and all(
+        "0" <= c <= "9" or "A" <= c <= "Z" or "a" <= c <= "z" for c in text
+    )
+
+
+def _is_digits_ascii(text: str, min_len: int, max_len: int) -> bool:
+    return min_len <= len(text) <= max_len and all("0" <= c <= "9" for c in text)
+
+
+def _fgets_chunks(stream: str):
+    """Split a text stream the way the engine's buffered reads do."""
+    pos = 0
+    end = len(stream)
+    if end == 0:
+        yield ""
+        return
+    while pos < end:
+        stop = min(pos + _READ_CHUNK, end)
+        newline = stream.find("\n", pos, stop)
+        if newline == -1:
+            if stop == end:
+                yield stream[pos:]
+                return
+            yield stream[pos:stop]
+            pos = stop
+        else:
+            yield stream[pos : newline + 1]
+            pos = newline + 1
+
+
+def zone_rate(zone: int) -> int:
+    """Per-kg rate in cents: 60 + 8 * (zone div 10)."""
+    return 60 + 8 * (zone // 10)
+
+
+class Shipment:
+    def __init__(self, line: str):
+        # The engine works on C strings: input truncates at the first NUL.
+        # Fields split on spaces, tabs, and carriage returns only.
+        self.tokens = [
+            tok for tok in _TOKEN_SEP.split(line.split("\x00", 1)[0]) if tok != ""
+        ]
+        self.shipid = "?"
+        if len(self.tokens) >= 2 and _is_alnum_ascii(self.tokens[1]):
+            self.shipid = self.tokens[1]
+        self.error: str | None = None
+        self.zone = 0
+        self.cls = 0
+        self.weight = 0
+        self.length = self.width = self.height = 0
+        self.svc = ""
+        self.charge = 0
+
+    def parse(self) -> None:
+        tok = self.tokens
+        if not tok or tok[0] != "S":
+            self.error = "FMT"
+            return
+        if len(tok) < 9:
+            self.error = "FMT"
+            return
+        if self.shipid == "?":
+            self.error = "FMT"
+            return
+        zone, cls, weight = tok[2], tok[3], tok[4]
+        dims = tok[5:8]
+        svc = tok[8]
+        if (
+            not _is_digits_ascii(zone, 2, 2)
+            or not _is_digits_ascii(cls, 3, 3)
+            or not _is_digits_ascii(weight, 1, 6)
+            or not all(_is_digits_ascii(d, 1, 4) for d in dims)
+            or len(svc) != 1
+        ):
+            self.error = "FMT"
+            return
+        self.zone = int(zone)
+        self.cls = int(cls)
+        self.weight = int(weight)
+        self.length, self.width, self.height = (int(d) for d in dims)
+        self.svc = svc
+        if self.zone == 0:
+            self.error = "ZONE"
+            return
+        if self.cls not in CLASSES:
+            self.error = "CLASS"
+            return
+        if self.length == 0 or self.width == 0 or self.height == 0:
+            self.error = "DIM"
+            return
+        if self.svc not in SERVICES:
+            self.error = "SVC"
+            return
+
+    def compute(self) -> None:
+        volume = self.length * self.width * self.height
+        dim_weight = _round_half_up(volume, DIM_DIVISOR)
+        dim_based = dim_weight > self.weight
+        billable = dim_weight if dim_based else self.weight
+        # Dimensionally rated light freight uses a 70% factor.
+        factor = 70 if dim_based and self.cls in (50, 55) else self.cls
+        base = billable * zone_rate(self.zone)
+        if self.svc == "X" and 40 <= self.zone <= 49 and base > 69000:
+            # Express lanes in zones 40-49 add 65% on larger shipments,
+            # rated in two steps: 165% of base first, then the class.
+            charge = _round_half_up(
+                _round_half_up(base * 165, 100) * factor, 100
+            )
+        elif self.svc == "X":
+            # Express is rated in one step: base * class * 150%, half up.
+            charge = _round_half_up(base * factor * 150, 10000)
+        else:
+            charge = _round_half_up(base * factor, 100)
+            if self.svc == "P":
+                # Priority adds 25% of the class-multiplied amount,
+                # rounded to even.
+                charge += _round_half_even(charge * 25, 100)
+        if self.zone == 99:
+            charge += ZONE99_FEE
+        self.charge = charge
+
+    def emit(self) -> str:
+        if self.error:
+            return f"R {self.shipid} {self.error}"
+        return f"C {self.shipid} {self.charge}"
+
+
+def process(lines: list[str]) -> list[str]:
+    out = []
+    accepted = rejected = total = 0
+    for raw in lines:
+        for chunk in _fgets_chunks(raw):
+            line = chunk[:-1] if chunk.endswith("\n") else chunk
+            shipment = Shipment(line)
+            if not shipment.tokens:
+                continue
+            shipment.parse()
+            if shipment.error is None:
+                shipment.compute()
+                accepted += 1
+                total += shipment.charge
+            else:
+                rejected += 1
+            out.append(shipment.emit())
+    out.append(f"X {accepted} {rejected} {total}")
+    return out
+
+
+def main() -> None:
+    stream = getattr(sys.stdin, "buffer", sys.stdin).read()
+    if isinstance(stream, bytes):
+        # Byte-oriented input like the engine; never fails to decode.
+        stream = stream.decode("latin-1")
+    for line in process([stream]):
+        print(line)
+
+
+if __name__ == "__main__":
+    main()

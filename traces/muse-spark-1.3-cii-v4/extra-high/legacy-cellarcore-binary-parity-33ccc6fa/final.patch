@@ -1,0 +1,282 @@
+diff --git a/cellarcore.py b/cellarcore.py
+index a2ca875..5262d19 100644
+--- a/cellarcore.py
++++ b/cellarcore.py
+@@ -26,28 +26,35 @@ def _is_num(tok: str, maxlen: int) -> bool:
+ 
+ class Wheel:
+     __slots__ = (
+-        "wid", "cls", "state", "lay_seq", "settle", "rack",
+-        "taps_since_grade",
++        "wid", "cls", "state", "lay_seq", "reused", "settle", "rack",
++        "taps_total", "taps_since_turn", "shifts_total", "survived",
++        "slump_mark",
+     )
+ 
+-    def __init__(self, wid: str, cls: int, lay_seq: int):
++    def __init__(self, wid: str, cls: int, lay_seq: int, reused: bool = False):
+         self.wid = wid
+         self.cls = cls
+         self.state = SILL
+         self.lay_seq = lay_seq
++        self.reused = reused
+         self.settle = cls
+         self.rack = None
+-        self.taps_since_grade = 0
++        self.taps_total = 0
++        self.taps_since_turn = 0
++        self.shifts_total = 0
++        self.survived = 0
++        self.slump_mark = None
+ 
+ 
+ class Rack:
+-    __slots__ = ("rid", "span", "open_seq", "order")
++    __slots__ = ("rid", "span", "open_seq", "order", "lifetime_slumps")
+ 
+     def __init__(self, rid: str, span: int, open_seq: int):
+         self.rid = rid
+         self.span = span
+         self.open_seq = open_seq
+         self.order: list[Wheel] = []   # standing order, front first
++        self.lifetime_slumps = 0
+ 
+ 
+ class Engine:
+@@ -67,6 +74,9 @@ class Engine:
+         self.grade_no = 0
+         self.cLAY = self.cRACK = self.cBED = self.cTAP = 0
+         self.cSHIFT = self.cTURN = self.cGRADE = self.cRET = 0
++        self.ledger_R: dict[str, int] = {}  # lifetime racked taps per name
++        self.ledger_S: dict[str, int] = {}  # lifetime shifts per name
++        self.slump_count: dict[str, int] = {}  # lifetime slumps per name
+ 
+     # ---------------------------------------------------------- output
+     def _emit(self, line: str) -> None:
+@@ -78,9 +88,18 @@ class Engine:
+ 
+     # ------------------------------------------------------- mechanics
+     def _wins(self, a: Wheel, ka: int, b: Wheel, kb: int) -> bool:
+-        """Standing comparator: settle descending, ties by lay order."""
++        """Standing comparator: primary descending, ties by tap history,
++        reuse flag, then lay order."""
+         if ka != kb:
+             return ka > kb
++        a_tap = 1 if a.taps_total > 0 else 0
++        b_tap = 1 if b.taps_total > 0 else 0
++        if a_tap != b_tap:
++            return a_tap > b_tap
++        if a.taps_total != b.taps_total:
++            return a.taps_total < b.taps_total
++        if a.reused != b.reused:
++            return (not a.reused) and b.reused
+         return a.lay_seq < b.lay_seq
+ 
+     def _insert(self, rack: Rack, w: Wheel) -> None:
+@@ -103,6 +122,29 @@ class Engine:
+             srt.insert(pos, w)
+         rack.order = srt
+ 
++    def _turn_order(self) -> list[Rack]:
++        return sorted(
++            self.rack_list,
++            key=lambda r: (1 if r.lifetime_slumps >= 3 else 0, r.open_seq),
++        )
++
++    def _ledger(self, w: Wheel) -> int:
++        return (
++            w.cls
++            - 3 * self.ledger_R.get(w.wid, 0)
++            - 5 * self.ledger_S.get(w.wid, 0)
++        )
++
++    def _any_taps(self, w: Wheel) -> bool:
++        return w.taps_total > 0 or self.ledger_R.get(w.wid, 0) > 0
++
++    def _grade_key(self, w: Wheel) -> int:
++        r = self.ledger_R.get(w.wid, 0)
++        g = w.cls - 4 * r
++        if r > 0 or w.taps_total > 0:
++            g -= 1
++        return g
++
+     # -------------------------------------------------------- commands
+     def _cmd_LAY(self, parts: list[str]) -> None:
+         wid, ctok = parts[1], parts[2]
+@@ -113,11 +155,19 @@ class Engine:
+         if not 1 <= cls <= 999:
+             self._reject(parts, "RNG")
+             return
+-        if wid in self.wheels:
++        old = self.wheels.get(wid)
++        if old is not None and old.state != RETIRED:
+             self._reject(parts, "DUP")
+             return
++        reused = old is not None and old.state == RETIRED
++        if wid not in self.ledger_R:
++            self.ledger_R[wid] = 0
++            self.ledger_S[wid] = 0
++            self.slump_count[wid] = 0
+         self.lay_seq += 1
+-        w = Wheel(wid, cls, self.lay_seq)
++        w = Wheel(wid, cls, self.lay_seq, reused=reused)
++        if reused:
++            w.survived = old.survived
+         self.wheels[wid] = w
+         self.sill.append(w)
+         self.cLAY += 1
+@@ -158,6 +208,20 @@ class Engine:
+             self._reject(parts, "FULL")
+             return
+         self.sill.remove(w)
++        mark = w.slump_mark
++        if mark is not None:
++            if mark is r:
++                if self._any_taps(w):
++                    w.settle = w.cls - 1
++                else:
++                    w.settle = w.cls
++            else:
++                base = self._ledger(w)
++                if self._any_taps(w):
++                    w.settle = base - 1
++                else:
++                    w.settle = base
++            w.slump_mark = None
+         self._insert(r, w)
+         w.state = RACKED
+         w.rack = r
+@@ -176,8 +240,23 @@ class Engine:
+         if w.state == RETIRED:
+             self._reject(parts, "STATE")
+             return
++        if w.state == RACKED:
++            flipped = (w.survived % 2 == 1)
++        else:
++            flipped = False
++        w.taps_total += 1
++        w.taps_since_turn += 1
++        if w.state == RACKED:
++            self.ledger_R[wid] = self.ledger_R.get(wid, 0) + 1
+         w.settle -= 3
+-        w.taps_since_grade += 1
++        if flipped:
++            w.settle -= 2
++        if w.taps_total == 1:
++            w.settle -= 1
++        elif w.taps_since_turn > 1:
++            w.settle -= 4
++        elif not flipped:
++            w.settle -= 1
+         self.cTAP += 1
+         self._emit(f"OK {w.wid}")
+ 
+@@ -197,7 +276,14 @@ class Engine:
+         if len(r.order) >= r.span:
+             self._reject(parts, "FULL")
+             return
++        flipped = (w.survived % 2 == 1)
++        w.shifts_total += 1
++        self.ledger_S[wid] = self.ledger_S.get(wid, 0) + 1
+         w.settle -= 5
++        if flipped:
++            w.settle -= 2
++        if w.shifts_total > 1:
++            w.settle -= 4
+         w.rack.order.remove(w)
+         self._insert(r, w)
+         w.rack = r
+@@ -208,19 +294,52 @@ class Engine:
+         self.turn_no += 1
+         self.cTURN += 1
+         self._emit(f"TR {self.turn_no}")
+-        for r in self.rack_list:
++        for r in self._turn_order():
+             pre = list(r.order)
+-            slumped = [w for w in pre if w.settle <= 0]
+-            if slumped:
+-                r.order = [w for w in r.order if w.settle > 0]
+-            self._relist(r)
++            kept: list[Wheel] = []
++            slumped: list[Wheel] = []
++            for w in pre:
++                surv_after = w.survived + 1
++                age = surv_after - 1 if surv_after >= 1 else 0
++                if age < 0:
++                    age = 0
++                base = self._ledger(w)
++                thresh = 8 + self.slump_count.get(w.wid, 0)
++                if base - age < thresh:
++                    slumped.append(w)
++                else:
++                    kept.append((w, surv_after, age))
++            # relist kept with recomputed settle
++            for w, surv_after, age in kept:
++                base = self._ledger(w)
++                if self._any_taps(w):
++                    w.settle = base - 1 - age
++                else:
++                    w.settle = base - age
++                w.survived = surv_after
++                w.taps_since_turn = 0
++            # rebuild standing order for kept
++            new_order = [w for w, _, _ in kept]
++            srt: list[Wheel] = []
++            for w in new_order:
++                pos = len(srt)
++                for i, o in enumerate(srt):
++                    if self._wins(w, w.settle, o, o.settle):
++                        pos = i
++                        break
++                srt.insert(pos, w)
++            r.order = srt
+             self._emit(f"RK {r.rid}")
+             for w in r.order:
+                 self._emit(f"W {w.wid}")
+             for w in slumped:
+                 w.state = SILL
+                 w.rack = None
++                w.slump_mark = r
++                w.taps_since_turn = 0
+                 self.sill.append(w)
++                r.lifetime_slumps += 1
++                self.slump_count[w.wid] = self.slump_count.get(w.wid, 0) + 1
+                 self._emit(f"DN {w.wid}")
+ 
+     def _cmd_GRADE(self, parts: list[str]) -> None:
+@@ -232,23 +351,22 @@ class Engine:
+             pool.extend(r.order)
+         graded: list[Wheel] = []
+         for w in pool:
++            kw = self._grade_key(w)
+             pos = len(graded)
+             for i, o in enumerate(graded):
+-                if self._wins(w, w.settle, o, o.settle):
++                if self._wins(w, kw, o, self._grade_key(o)):
+                     pos = i
+                     break
+             graded.insert(pos, w)
+         for w in graded:
+             self._emit(f"G {w.wid}")
+         for w in graded:
+-            if w.taps_since_grade >= 4:
++            if self.ledger_R.get(w.wid, 0) >= 4:
+                 w.rack.order.remove(w)
+                 w.rack = None
+                 w.state = RETIRED
+                 self.cRET += 1
+                 self._emit(f"RET {w.wid}")
+-        for w in self.wheels.values():
+-            w.taps_since_grade = 0
+ 
+     def _cmd_VIEW(self, parts: list[str]) -> None:
+         rid = parts[1]
+@@ -263,7 +381,7 @@ class Engine:
+         self._emit(f"ON {r.rid}{ids}")
+ 
+     def _cmd_HALL(self, parts: list[str]) -> None:
+-        ids = "".join(" " + r.rid for r in self.rack_list)
++        ids = "".join(" " + r.rid for r in self._turn_order())
+         self._emit(f"HALL{ids}")
+         wids = "".join(" " + w.wid for w in self.sill)
+         self._emit(f"SILL{wids}")

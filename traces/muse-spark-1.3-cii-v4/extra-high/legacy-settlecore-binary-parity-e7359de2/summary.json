@@ -1,0 +1,214 @@
+{
+  "run_id": "legacy-settlecore-binary-parity-e7359de2",
+  "task_id": "legacy-settlecore-binary-parity",
+  "model": "muse-code:muse-spark-1.3-contributor",
+  "steps": 85,
+  "scores": {
+    "functional": 0.3,
+    "quality": 0.7675,
+    "security": 1.0,
+    "efficiency": 0.045,
+    "human_like": null,
+    "total": 0.4662,
+    "metric_details": {
+      "quality": {
+        "languages": {
+          "python": {
+            "tool": "ruff+radon",
+            "loc": 169,
+            "violations": 0,
+            "avg_complexity": 7.2,
+            "maintainability_index": 33.49,
+            "sub_scores": {
+              "lint": 1.0,
+              "complexity": 0.89,
+              "maintainability": 0.3349
+            },
+            "score": 0.7675
+          }
+        }
+      },
+      "security": {
+        "languages": {
+          "python": {
+            "tool": "bandit",
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "score": 1.0
+          }
+        }
+      },
+      "human_like": {
+        "reason": "judges disabled"
+      }
+    }
+  },
+  "artifacts": {
+    "trace": "/Users/morganlinton/dev/VulcanBench/runs-muse13-contributor-cii-v4-v2/extra-high/legacy-settlecore-binary-parity-e7359de2/trace.jsonl",
+    "replay_html": "/Users/morganlinton/dev/VulcanBench/runs-muse13-contributor-cii-v4-v2/extra-high/legacy-settlecore-binary-parity-e7359de2/replay.html"
+  },
+  "finished_at": "2026-09-18T06:08:36.542867+00:00",
+  "total_tokens": 8843587,
+  "tokens": {
+    "prompt": 8760200,
+    "completion": 83387,
+    "total": 8843587,
+    "cached_input": 8589061,
+    "reasoning_output": 45017
+  },
+  "cost_usd": 0.050969,
+  "cost_detail": {
+    "agent": 0.050969,
+    "judges": 0.0,
+    "total": 0.050969,
+    "model_priced": true,
+    "agent_input_tokens": 8760200,
+    "agent_cached_input_tokens": 8589061,
+    "agent_uncached_input_tokens": 171139,
+    "cache_pricing_applied": true
+  },
+  "economics": {
+    "billing_mode": "subscription-included",
+    "cost_basis": "subscription-plus-api-equivalent",
+    "marginal_cash_usd": null,
+    "overage_cash_usd": null,
+    "grading_cash_usd": null,
+    "grading_api_equivalent_usd": 0.0,
+    "plan_name": null,
+    "plan_fee_usd": null,
+    "allocated_plan_cost_usd": null,
+    "api_equivalent_cost_usd": 0.050969,
+    "cli_reported_cost_usd": null,
+    "quota": null,
+    "measurement_quality": {
+      "marginal_cash_usd": "unavailable",
+      "overage_cash_usd": "unavailable",
+      "allocated_plan_cost_usd": "unavailable",
+      "api_equivalent_cost_usd": "estimated-from-reported-tokens-with-cache-pricing",
+      "grading_cash_usd": "unavailable",
+      "grading_api_equivalent_usd": "estimated-from-reported-tokens",
+      "quota": "unavailable"
+    }
+  },
+  "duration_s": 842.36,
+  "started_at": "2026-09-18T05:54:34.170132+00:00",
+  "finished": true,
+  "cost_capped": false,
+  "manifest": {
+    "model": "muse-code:muse-spark-1.3-contributor",
+    "judge_model": "muse-code:muse-spark-1.3-contributor",
+    "runtime": {
+      "python": "3.14.3",
+      "platform": "darwin",
+      "host_python": "3.14.3",
+      "host_platform": "darwin"
+    },
+    "sandbox": {
+      "mode": "local",
+      "image": null,
+      "network": false,
+      "resources": null,
+      "oom_kills": null
+    },
+    "tools": {
+      "git": "git version 2.50.1 (Apple Git-155)",
+      "ruff": "ruff 0.16.3",
+      "bandit": "bandit 1.9.4",
+      "radon": "6.0.1",
+      "go": "go version go1.26.3 darwin/arm64",
+      "node": "v26.7.0"
+    },
+    "task": {
+      "repo_scale": "micro",
+      "task_complexity": "localized",
+      "languages": [
+        "python"
+      ],
+      "difficulty": "veryhard",
+      "file_count": 15,
+      "loc": 327
+    }
+  },
+  "task_hash": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+  "suite": "coding-intelligence-index-v4",
+  "suite_id": null,
+  "effort": {
+    "requested": "extra-high",
+    "provider": "muse-code",
+    "provider_value": "xhigh",
+    "supported": true
+  },
+  "cli_agent": {
+    "harness": "muse-code",
+    "harness_version": "Muse Code 1.0.3 (1.0.3-R2198.1)",
+    "billing": "subscription",
+    "cost_basis": "api-equivalent",
+    "execution_boundary": "macOS outer sandbox; workspace/session writes; shared-temp/checkout/prior-session read deny; explicit TMPDIR context; web tools off unless network requested; shell network not isolated",
+    "auth_method": "subscription",
+    "plan_name": null,
+    "requested_model": "muse-spark-1.3-contributor",
+    "reported_model": "muse-spark-1.3-contributor",
+    "model_identity_confidence": "provider-reported",
+    "session_id": "b35aed94-90db-4f70-8f61-3c8ffc8822e3",
+    "subtype": "completed",
+    "num_turns": 85,
+    "cached_input_tokens": 8589061,
+    "reasoning_output_tokens": 45017,
+    "cli_reported_cost_usd": null,
+    "cli_total_tokens": null,
+    "reported_effort": null,
+    "sandbox_profile": null
+  },
+  "integrity_audit": {
+    "web": {
+      "verdict": "no_web",
+      "web_searches": 0,
+      "web_fetches": 0,
+      "web_blocked": 0,
+      "hosts": [],
+      "upstream": {
+        "repo": "",
+        "pr": "",
+        "commit": ""
+      },
+      "contaminated": false
+    },
+    "filesystem": {
+      "verdict": "clean",
+      "out_of_workspace_paths": [],
+      "benchmark_data_paths": [],
+      "answer_key_paths": [],
+      "contaminated": false
+    },
+    "contaminated": false
+  },
+  "verifier": {
+    "scores": {
+      "functional": 0.3
+    },
+    "fail_to_pass": {
+      "rounding_regimes": false,
+      "tier_rate_table": true,
+      "weekend_mcc_surcharge": false,
+      "eur_levy_threshold": false,
+      "fee_cap_exception": false,
+      "lenient_amount_padding": false,
+      "negative_refunds": false,
+      "leap_year_rule": true,
+      "batch_ordering": true,
+      "full_corpus_parity": false
+    },
+    "pass_to_pass": {
+      "nominal_settlements": true,
+      "error_codes": true,
+      "empty_batch_trailer": true,
+      "multi_record_batch": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 3/10 passing"
+    ]
+  },
+  "replay_command": "vulcanbench replay legacy-settlecore-binary-parity-e7359de2"
+}

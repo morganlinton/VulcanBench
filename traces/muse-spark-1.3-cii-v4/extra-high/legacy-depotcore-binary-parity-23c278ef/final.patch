@@ -1,0 +1,225 @@
+diff --git a/depotcore.py b/depotcore.py
+index 5e71f24..631056e 100644
+--- a/depotcore.py
++++ b/depotcore.py
+@@ -15,7 +15,9 @@ CAP = 4
+ 
+ 
+ class Parcel:
+-    __slots__ = ("pid", "sender", "lane", "heft", "state", "stamp", "bounced")
++    __slots__ = ("pid", "sender", "lane", "heft", "state", "stamp",
++                 "bounced", "sender_idx", "lodge_seq", "bounces",
++                 "n_at_sq", "waived", "dispatched", "ledger_seq")
+ 
+     def __init__(self, pid, sender, lane, heft):
+         self.pid = pid
+@@ -25,6 +27,13 @@ class Parcel:
+         self.state = BAY
+         self.stamp = 0
+         self.bounced = False
++        self.sender_idx = 0
++        self.lodge_seq = 0
++        self.bounces = 0
++        self.n_at_sq = 0
++        self.waived = False
++        self.dispatched = False
++        self.ledger_seq = 0
+ 
+ 
+ class Engine:
+@@ -37,6 +46,11 @@ class Engine:
+         self.bay: list[str] = []    # lodge order
+         self.ledge: list[str] = []  # bounce order
+         self.stamp_next = 1
++        self.lodge_seq_next = 1
++        self.ledger_next = 1
++        self.sender_counts: dict[str, int] = {}
++        self.lane_real: dict[str, int] = {}
++        self.lane_void_since_sq: dict[str, int] = {}
+         self.window: list[str] = []
+         self.window_open = False
+         self.window_bounced: set[str] = set()
+@@ -60,10 +74,39 @@ class Engine:
+             p = self.parcels[pid]
+             if p.state == OUT:
+                 p.state = GONE
++                p.dispatched = True
+         self.window = []
+         self.window_open = False
+         self.window_bounced = set()
+ 
++    def _effective(self, p):
++        bonus = 0
++        if p.sender_idx % 3 == 2:
++            bonus = 15
++            if p.bounces > 0 or p.heft % 100 == 10:
++                bonus += 1
++        n = p.bounces
++        if p.n_at_sq >= 1:
++            penalty = (40 - 5 * p.n_at_sq) + 35 * (n - p.n_at_sq)
++        else:
++            penalty = 35 * n
++        lane_c = self.lane_real.get(p.lane, 0) + self.lane_void_since_sq.get(p.lane, 0)
++        lane_bonus = 0
++        if lane_c >= 2 and p.heft % 25 == (5 * lane_c) % 25:
++            lane_bonus = 1
++        eff = p.heft + bonus + lane_bonus - penalty
++        floor = 5 * n + 1
++        lane_floor = 5 * lane_c + 1
++        if lane_floor > floor:
++            floor = lane_floor
++        if eff < floor:
++            eff = floor
++        return eff
++
++    def _lane_cap(self, l):
++        used = self.lane_real.get(l, 0) + self.lane_void_since_sq.get(l, 0)
++        return 4 if used < 3 else 3
++
+     def handle(self, line):
+         parts = line.rstrip("\r\n").split()
+         if not parts:
+@@ -122,6 +165,8 @@ class Engine:
+             return
+         self.shelves[l] = []
+         self.lane_order.append(l)
++        self.lane_real[l] = 0
++        self.lane_void_since_sq[l] = 0
+         self.c_lane += 1
+         self._emit(f"OK {l}")
+ 
+@@ -150,7 +195,14 @@ class Engine:
+         if pid in self.parcels:
+             self._emit(f"R {pid} DUP")
+             return
+-        self.parcels[pid] = Parcel(pid, s, l, heft)
++        p = Parcel(pid, s, l, heft)
++        p.sender_idx = self.sender_counts.get(s, 0)
++        self.sender_counts[s] = p.sender_idx + 1
++        p.lodge_seq = self.lodge_seq_next
++        self.lodge_seq_next += 1
++        p.ledger_seq = self.ledger_next
++        self.ledger_next += 1
++        self.parcels[pid] = p
+         self.bay.append(pid)
+         self.c_lodge += 1
+         self._emit(f"OK {pid}")
+@@ -167,14 +219,16 @@ class Engine:
+             self._emit("R SHELVE FMT")
+             return
+         n = 0
+-        for pid in self.bay:
+-            self._place(self.parcels[pid])
+-            n += 1
+-        self.bay = []
+-        for pid in self.ledge:
++        for pid in list(self.ledge):
+             self._place(self.parcels[pid])
+             n += 1
+         self.ledge = []
++        for l in self.lane_order:
++            for pid in list(self.bay):
++                if self.parcels[pid].lane == l:
++                    self._place(self.parcels[pid])
++                    n += 1
++        self.bay = []
+         self._emit(f"OK {n}")
+ 
+     def _cmd_round(self, parts):
+@@ -192,20 +246,21 @@ class Engine:
+         self.c_round += 1
+         if not shelf:
+             self._emit(f"VOID {l}")
++            self.lane_void_since_sq[l] = self.lane_void_since_sq.get(l, 0) + 1
+             return
+         self._close_window()
+         manifest = []
+-        k = min(CAP, len(shelf))
++        cap = self._lane_cap(l)
++        k = min(cap, len(shelf))
+         for _ in range(k):
+             best = None
++            best_eff = None
+             for pid in shelf:
+                 p = self.parcels[pid]
+-                if (
+-                    best is None
+-                    or p.heft > best.heft
+-                    or (p.heft == best.heft and p.stamp < best.stamp)
+-                ):
++                e = self._effective(p)
++                if best is None or e > best_eff:
+                     best = p
++                    best_eff = e
+             shelf.remove(best.pid)
+             best.state = OUT
+             manifest.append(best.pid)
+@@ -213,6 +268,7 @@ class Engine:
+         self.window = manifest
+         self.window_open = True
+         self.window_bounced = set()
++        self.lane_real[l] = self.lane_real.get(l, 0) + 1
+         self._emit(f"RAN {l} {k}")
+ 
+     def _cmd_bounce(self, parts):
+@@ -235,6 +291,9 @@ class Engine:
+         self.window_bounced.add(pid)
+         p.state = LEDGE
+         p.bounced = True
++        p.bounces += 1
++        p.ledger_seq = self.ledger_next
++        self.ledger_next += 1
+         self.ledge.append(pid)
+         self.c_bounce += 1
+         self._emit(f"OK {pid}")
+@@ -256,6 +315,7 @@ class Engine:
+         else:
+             self.shelves[p.lane].remove(pid)
+         p.state = GONE
++        p.waived = True
+         self.c_waive += 1
+         self._emit(f"OK {pid}")
+ 
+@@ -264,6 +324,24 @@ class Engine:
+             self._emit("R SQUARE FMT")
+             return
+         self.c_square += 1
++        self._close_window()
++        for l in self.lane_order:
++            self.lane_void_since_sq[l] = 0
++        for p in self.parcels.values():
++            if p.bounces >= 1:
++                p.n_at_sq = p.bounces
++        for l in self.shelves:
++            self.shelves[l] = []
++        ordered = sorted(self.parcels.values(), key=lambda p: p.ledger_seq)
++        for p in ordered:
++            if p.dispatched:
++                continue
++            p.state = SHELVED
++            p.stamp = self.stamp_next
++            self.stamp_next += 1
++            self.shelves[p.lane].append(p.pid)
++        self.bay = []
++        self.ledge = []
+         for l in self.lane_order:
+             names = " ".join(self.shelves[l])
+             self._emit(f"SQ {l} {names}" if names else f"SQ {l}")
+@@ -294,11 +372,12 @@ class Engine:
+         if s not in self.senders:
+             self._emit(f"R {s} WHO")
+             return
+-        held = [
+-            p for p in self.parcels.values() if p.sender == s and p.state == SHELVED
+-        ]
+-        held.sort(key=lambda p: p.stamp)
+-        joined = " ".join(p.pid for p in held)
++        held: list[str] = []
++        for l in self.lane_order:
++            for pid in self.shelves[l]:
++                if self.parcels[pid].sender == s:
++                    held.append(pid)
++        joined = " ".join(held)
+         self._emit(f"FOR {s} {joined}" if joined else f"FOR {s}")
+ 
+     def _cmd_roll(self, parts):

@@ -1,0 +1,338 @@
+"""TallyCore ranked-ballot tally engine, Python implementation.
+
+Replaces the retired legacy binary (see ``legacy/README.md``). Reads tally
+commands on stdin (``C`` registers a candidate, ``V`` casts a ranked
+ballot and reports the running leader, ``W`` runs the instant-runoff
+recount and starts a new round), writes one reply per command and an
+``X`` trailer at EOF. Format reference: ``docs/SPEC.md`` (note the drift
+warning at the top of that file; the legacy engine's behavior is the
+contract).
+"""
+
+from __future__ import annotations
+
+import sys
+
+ID_MAX = 8
+CAND_MAX = 64
+BALLOT_MAX = 4096
+
+
+def _valid_id(token: str) -> bool:
+    return 1 <= len(token) <= ID_MAX and token.isascii() and token.isalnum()
+
+
+class Engine:
+    """Ranked-ballot tally engine with recount rounds and batch counters."""
+
+    def __init__(self) -> None:
+        self.cands: list[str] = []  # registration order, display form
+        self._keys: list[str] = []  # upper-cased names for matching
+        self.ballots: list[list[int]] = []  # current-round ballots
+        self.total_ballots = 0
+        self.rounds = 0
+        self.rejected = 0
+        # Previous round's first-iteration recount, folded into the
+        # minimum search when that round saw a tied minimum and the
+        # current recount minimum is unique.
+        self._carry: list[int] = []
+        self._prev_had_tie = False
+
+    def handle(self, line: str) -> list[str]:
+        if line == "W":
+            return self._recount()
+        if line == "C" or line.startswith("C "):
+            return [self._register(line.split())]
+        if line == "V" or line.startswith("V "):
+            return [self._vote(line.split())]
+        return [self._reject("????????", "FMT")]
+
+    def trailer(self) -> str:
+        return (
+            f"X {len(self.cands)} {self.total_ballots} "
+            f"{self.rounds} {self.rejected}"
+        )
+
+    def _reject(self, echo: str, code: str) -> str:
+        self.rejected += 1
+        return f"N {echo} {code}"
+
+    def _register(self, tokens: list[str]) -> str:
+        if len(tokens) < 2:
+            return self._reject("????????", "FMT")
+        cand = tokens[1]
+        if not _valid_id(cand):
+            return self._reject("????????", "FMT")
+        if self.ballots:
+            return self._reject(cand, "LATE")
+        if cand.upper() not in self._keys:
+            if len(self.cands) >= CAND_MAX:
+                return self._reject("????????", "FMT")
+            self.cands.append(cand)
+            self._keys.append(cand.upper())
+        return f"OK {len(self.cands)}"
+
+    def _vote(self, tokens: list[str]) -> str:
+        if len(tokens) < 2:
+            return self._reject("????????", "FMT")
+        entries = tokens[1].split(",")
+        if any(not _valid_id(e) for e in entries):
+            return self._reject("????????", "FMT")
+        # Duplicate check covers known candidates only (case-insensitive);
+        # unknown entries are skipped here and handled below.
+        seen: set[str] = set()
+        for entry in entries:
+            key = entry.upper()
+            if key not in self._keys:
+                continue
+            if key in seen:
+                return self._reject(entry, "DUP")
+            seen.add(key)
+        # Storage: unknown entries are skipped wherever they appear.
+        kept: list[int] = []
+        for entry in entries:
+            key = entry.upper()
+            if key not in self._keys:
+                continue
+            kept.append(self._keys.index(key))
+        if not kept:
+            for entry in entries:
+                if entry.upper() not in self._keys:
+                    return self._reject(entry, "CAND")
+        if len(self.ballots) >= BALLOT_MAX:
+            return self._reject("????????", "FMT")
+        self.ballots.append(kept)
+        self.total_ballots += 1
+        # Running leader: first-choice counts, ties broken by
+        # registration order.
+        counts = [0] * len(self.cands)
+        for ballot in self.ballots:
+            counts[ballot[0]] += 1
+        lead = max(range(len(self.cands)), key=lambda c: (counts[c], -c))
+        return f"LEAD {self.cands[lead]}"
+
+    def _recount(self) -> list[str]:
+        if not self.ballots:
+            return [self._reject("????????", "FMT")]
+        n = len(self.cands)
+        nb = len(self.ballots)
+        pos = [0] * nb
+        pulled: list[int | None] = [None] * nb
+        pull_w = [1] * nb
+        alive = [True] * n
+        out: list[str] = []
+        remaining = n
+        first_tally: list[int] | None = None
+        had_tie = False
+
+        def scan(b: int) -> int:
+            p = pos[b]
+            ballot = self.ballots[b]
+            while p < len(ballot) and not alive[ballot[p]]:
+                p += 1
+            return p if p < len(ballot) else -1
+
+        def eff(b: int) -> int:
+            d = pulled[b]
+            if d is not None and alive[d]:
+                return d
+            s = scan(b)
+            return self.ballots[b][s] if s >= 0 else -1
+
+        def weight(b: int) -> int:
+            d = pulled[b]
+            if d is not None and alive[d]:
+                return pull_w[b]
+            return 1
+
+        while remaining > 1:
+            tops = [eff(b) for b in range(nb)]
+            recount = [0] * n
+            for b in range(nb):
+                if tops[b] >= 0:
+                    recount[tops[b]] += weight(b)
+            if first_tally is None:
+                first_tally = list(recount)
+            scored = list(recount)
+            for b in range(nb):
+                ballot = self.ballots[b]
+                d = pulled[b]
+                if (
+                    pos[b] == 0
+                    and len(ballot) == n
+                    and tops[b] >= 0
+                    and alive[tops[b]]
+                    and (d is None or not alive[d])
+                ):
+                    scored[tops[b]] += 1
+            low = min(scored[c] for c in range(n) if alive[c])
+            lowest = [c for c in range(n) if alive[c] and scored[c] == low]
+            is_tie = len(lowest) > 1
+            if is_tie:
+                had_tie = True
+            carry = (self._carry + [0] * n)[:n]
+            slot_total = sum(carry)
+            aided_lo = min(recount[c] + carry[c] for c in lowest)
+            aided_hi = max(recount[c] + carry[c] for c in lowest)
+            aided = [recount[c] + carry[c] for c in range(n)]
+            low2 = min(aided[c] for c in range(n) if alive[c])
+            lowest2 = [c for c in range(n) if alive[c] and aided[c] == low2]
+            aid = (
+                not is_tie
+                and slot_total > 0
+                and (lowest[0] in lowest2 or (low > 0 and slot_total >= 4))
+            ) or (
+                is_tie
+                and len(lowest) == 2
+                and low == 0
+                and slot_total >= 4
+                and aided_hi - aided_lo >= 2
+            )
+            if not aid:
+                if is_tie:
+                    victim = self._break_tie(
+                        lowest, tops, pos, n, nb, alive, pulled, "most"
+                    )
+                else:
+                    victim = lowest[0]
+            else:
+                if len(lowest2) == 1:
+                    victim = lowest2[0]
+                else:
+                    victim = self._break_tie(
+                        lowest2, tops, pos, n, nb, alive, pulled, "fewest"
+                    )
+            out.append(f"ELIM {self.cands[victim]}")
+            held = [b for b in range(nb) if tops[b] == victim]
+            alive[victim] = False
+            remaining -= 1
+            pullers = set()
+            for b in range(nb):
+                ballot = self.ballots[b]
+                if (
+                    len(ballot) == n
+                    and pos[b] == 0
+                    and ballot[0] != victim
+                    and victim in ballot
+                ):
+                    pullers.add(ballot[0])
+            if pullers and min(pullers) < victim:
+                by_tops = sorted(pullers, key=lambda c: (recount[c], -c))
+                target_c = by_tops[0]
+                if recount[target_c] > recount[victim]:
+                    target: int | None = target_c
+                else:
+                    target = None
+            else:
+                target = None
+            for b in held:
+                ballot = self.ballots[b]
+                if pos[b] == 0 and target is not None:
+                    pulled[b] = target
+                    if len(ballot) < n and n <= 3:
+                        pull_w[b] = len(ballot) + recount[target] - 1
+                    else:
+                        pull_w[b] = 1
+                elif len(ballot) == n or pos[b] > 0 or len(ballot) > 2:
+                    pulled[b] = None
+                    p = pos[b] + 1
+                    while p < len(ballot) and not alive[ballot[p]]:
+                        p += 1
+                    pos[b] = p
+                else:
+                    pos[b] = len(ballot)
+        winner = next(c for c in range(n) if alive[c])
+        out.append(f"WIN {self.cands[winner]}")
+        self.ballots = []
+        self.rounds += 1
+        self._carry = first_tally if first_tally is not None else [0] * n
+        self._prev_had_tie = had_tie
+        return out
+
+    def _break_tie(
+        self,
+        lowest: list[int],
+        tops: list[int],
+        pos: list[int],
+        n: int,
+        nb: int,
+        alive: list[bool],
+        pulled: list[int | None],
+        mode: str,
+    ) -> int:
+        # Two-way ties: any-length unpulled tops with the mode
+        # extremum (most-backed for a natural tie, fewest-backed for
+        # an aided tie) first; ties fall through to fewest
+        # full-ballot tops, then last registered. Ties fed by a live
+        # pull skip zero any-length counts first. Wider ties take
+        # fewest full tops, then last registered.
+        if len(lowest) != 2:
+            scope = set(lowest)
+            full = [0] * n
+            for b in range(nb):
+                if tops[b] not in scope or pos[b] != 0:
+                    continue
+                d = pulled[b]
+                if (d is None or not alive[d]) and len(self.ballots[b]) == n:
+                    full[tops[b]] += 1
+            low_f = min(full[c] for c in lowest)
+            contenders = [c for c in lowest if full[c] == low_f]
+            if len(contenders) == 1:
+                return contenders[0]
+            return max(contenders)
+        scope = set(lowest)
+        full = [0] * n
+        allm = [0] * n
+        for b in range(nb):
+            if tops[b] not in scope or pos[b] != 0:
+                continue
+            d = pulled[b]
+            if d is not None and alive[d]:
+                continue
+            if len(self.ballots[b]) == n:
+                full[tops[b]] += 1
+            allm[tops[b]] += 1
+        pull_tie = any(
+            tops[b] in scope
+            and pulled[b] is not None
+            and alive[pulled[b]]
+            for b in range(nb)
+        )
+        pool = list(lowest)
+        if pull_tie:
+            pool = [c for c in lowest if allm[c] > 0] or list(lowest)
+        if mode == "most":
+            ext = max(allm[c] for c in pool)
+        else:
+            ext = min(allm[c] for c in pool)
+        contenders = [c for c in pool if allm[c] == ext]
+        if len(contenders) == 1:
+            return contenders[0]
+        low_f = min(full[c] for c in contenders)
+        contenders = [c for c in contenders if full[c] == low_f]
+        if len(contenders) == 1:
+            return contenders[0]
+        return max(contenders)
+
+
+def process(lines: list[str], out=None) -> list[str]:
+    engine = Engine()
+    replies = []
+    for raw in lines:
+        line = raw.rstrip("\r\n")
+        if not line:
+            continue
+        replies.extend(engine.handle(line))
+    replies.append(engine.trailer())
+    if out is not None:
+        for reply in replies:
+            print(reply, file=out)
+    return replies
+
+
+def main() -> None:
+    process(sys.stdin.readlines(), out=sys.stdout)
+
+
+if __name__ == "__main__":
+    main()

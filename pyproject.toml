@@ -106,6 +106,7 @@ exclude = [
   "runs",
   "tasks",  # task fixtures include intentionally-buggy code + per-language tests
   "exports",  # generated benchmark exports mirror task fixtures verbatim
+  "traces",  # published agent traces: model-written workspaces kept verbatim
   "dashboard",
   # Frozen by the Code quality protocol: runs-code-quality-maintenance-*/protocol.json
   # binds these files by SHA-256, so lint or format edits would invalidate the record.

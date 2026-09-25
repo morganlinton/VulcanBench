@@ -1,0 +1,172 @@
+diff --git a/matchcore.py b/matchcore.py
+index e42f6c1..dec1333 100644
+--- a/matchcore.py
++++ b/matchcore.py
+@@ -13,6 +13,15 @@ import sys
+ PRICE_MAX = 10_000_000
+ QTY_MAX = 999_999
+ HASH_MOD = 1_000_000_007
++TICK_MIN = 100_000
++HASH_QTY_MIN = 100
++SWEEP_GAP_MAX = 500
++
++_ALNUM = frozenset(
++    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
++)
++_DIGITS = frozenset("0123456789")
++_WS = frozenset(" \t\r\v\f")
+ 
+ 
+ class Order:
+@@ -74,22 +83,32 @@ class Engine:
+         if not is_market and not 0 < price < PRICE_MAX:
+             self._emit(f"R {clordid} PRICE")
+             return
+-        if self._find_live(acct, clordid) is not None:
+-            self._emit(f"R {clordid} DUP")
++        if not is_market and price > TICK_MIN and price % 5 != 0:
++            self._emit(f"R {clordid} TICK")
+             return
++        old = self._find_live(acct, clordid)
++        if old is not None:
++            old.live = False
++            self._emit(f"X {old.clordid} {old.orig}")
+ 
+         remaining = qty
++        first_px: int | None = None
+         while remaining:
+             counter = self._best_counter(side, price, is_market)
+             if counter is None:
+                 break
+             if counter.acct == acct:
+-                self._emit(f"R {clordid} STP")
+-                return
++                counter.live = False
++                self._emit(f"X {counter.clordid} {counter.orig}")
++                continue
++            if first_px is not None and abs(counter.price - first_px) > SWEEP_GAP_MAX:
++                break
+             take = min(remaining, counter.qty)
+             self._emit(f"F {counter.clordid} {clordid} {counter.price} {take}")
+             counter.qty -= take
+             remaining -= take
++            if first_px is None:
++                first_px = counter.price
+             if counter.qty == 0:
+                 counter.live = False
+ 
+@@ -107,7 +126,7 @@ class Engine:
+             self._emit(f"R {clordid} UNKNOWN")
+             return
+         order.live = False
+-        self._emit(f"X {order.clordid} {order.qty}")
++        self._emit(f"X {order.clordid} {order.orig}")
+ 
+     def end_session(self) -> None:
+         bid = ask = 0
+@@ -119,7 +138,8 @@ class Engine:
+                 bid = max(bid, order.price)
+             elif ask == 0 or order.price < ask:
+                 ask = order.price
+-            book_hash = (book_hash + order.price * order.qty) % HASH_MOD
++            if order.qty >= HASH_QTY_MIN:
++                book_hash = (book_hash + order.price * order.qty) % HASH_MOD
+         self._emit(f"S {bid} {ask} {book_hash}")
+ 
+     # -- line protocol ------------------------------------------------------
+@@ -128,38 +148,72 @@ class Engine:
+         line = line.rstrip("\r\n")
+         if not line:
+             return
+-        parts = line.split(" ")
+-        if parts == ["E"]:
++        if line == "E":
+             self.end_session()
+             return
+-        if parts[0] == "N" and len(parts) == 7:
+-            _, acct, clordid, side, type_, price, qty = parts
+-            if (
+-                _token(acct, 4, 4)
+-                and _token(clordid, 1, 8)
+-                and side in ("B", "S")
+-                and type_ in ("L", "M", "I")
+-                and price.isdigit()
+-                and 1 <= len(price) <= 7
+-                and qty.isdigit()
+-                and 1 <= len(qty) <= 6
+-            ):
+-                self.new_order(acct, clordid, side, type_, int(price), int(qty))
+-                return
+-            self._emit(f"R {clordid if _token(clordid, 1, 8) else '????????'} FMT")
++        if line[0] == "N":
++            fields = _scan(line, 1, ("s", "s", "c", "c", "s", "s"))
++            if len(fields) == 6:
++                acct, clordid, side, type_, price, qty = fields
++                if (
++                    _token(acct, 4, 4)
++                    and _token(clordid, 1, 8)
++                    and side in ("B", "S")
++                    and type_ in ("L", "M", "I")
++                    and _digits(price, 1, 7)
++                    and _digits(qty, 1, 6)
++                ):
++                    self.new_order(acct, clordid, side, type_, int(price), int(qty))
++                    return
++            self._emit(f"R {_echo(fields)} FMT")
+             return
+-        if parts[0] == "C" and len(parts) == 3:
+-            _, acct, clordid = parts
+-            if _token(acct, 4, 4) and _token(clordid, 1, 8):
+-                self.cancel(acct, clordid)
++        if line[0] == "C":
++            fields = _scan(line, 1, ("s", "s"))
++            if len(fields) == 2:
++                acct, clordid = fields
++                if _token(acct, 4, 4) and _token(clordid, 1, 8):
++                    self.cancel(acct, clordid)
++                    return
++                self._emit(f"R {_echo(fields)} FMT")
+                 return
+-            self._emit(f"R {clordid if _token(clordid, 1, 8) else '????????'} FMT")
++            self._emit("R ???????? FMT")
+             return
+         self._emit("R ???????? FMT")
+ 
+ 
++def _scan(line: str, pos: int, kinds: tuple) -> list:
++    fields: list[str] = []
++    n = len(line)
++    for kind in kinds:
++        while pos < n and line[pos] in _WS:
++            pos += 1
++        if kind == "c":
++            if pos >= n:
++                break
++            fields.append(line[pos])
++            pos += 1
++        else:
++            start = pos
++            while pos < n and line[pos] not in _WS:
++                pos += 1
++            if pos == start:
++                break
++            fields.append(line[start:pos])
++    return fields
++
++
++def _echo(fields: list) -> str:
++    if len(fields) >= 2 and _token(fields[1], 1, 8):
++        return fields[1]
++    return "????????"
++
++
+ def _token(value: str, lo: int, hi: int) -> bool:
+-    return lo <= len(value) <= hi and value.isalnum()
++    return lo <= len(value) <= hi and all(c in _ALNUM for c in value)
++
++
++def _digits(value: str, lo: int, hi: int) -> bool:
++    return lo <= len(value) <= hi and all(c in _DIGITS for c in value)
+ 
+ 
+ def main() -> None:

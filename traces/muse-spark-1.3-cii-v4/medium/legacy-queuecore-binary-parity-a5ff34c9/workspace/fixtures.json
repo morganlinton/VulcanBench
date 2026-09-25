@@ -1,0 +1,1566 @@
+{
+ "guard_order": [
+  {
+   "input": [
+    "N A1 500",
+    "N B1 700",
+    "N C1 600",
+    "D",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I B1",
+    "I C1",
+    "I A1",
+    "EMPTY",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 300",
+    "N B1 300",
+    "N C1 300",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I A1",
+    "I B1",
+    "I C1",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 999",
+    "N B1 1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 400",
+    "D",
+    "N B1 500",
+    "N A1 450",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "OK 2",
+    "I B1",
+    "I A1",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "D",
+    "D"
+   ],
+   "expected": [
+    "EMPTY",
+    "EMPTY",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N LONE 250",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I LONE",
+    "EMPTY",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_drain": [
+  {
+   "input": [
+    "K",
+    "K"
+   ],
+   "expected": [
+    "OK 0",
+    "OK 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "K",
+    "D",
+    "K",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "I A1",
+    "OK 0",
+    "EMPTY",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N B1 600",
+    "K",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 2",
+    "I B1",
+    "I A1",
+    "EMPTY",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "N A1"
+   ],
+   "expected": [
+    "R A1 FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N TOOLONG99 500"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A_1 500"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Z noise line"
+   ],
+   "expected": [
+    "R noise FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "QQ A1 500"
+   ],
+   "expected": [
+    "R A1 FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 0"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 000"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 1000"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 12a"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N A1 600"
+   ],
+   "expected": [
+    "OK 1",
+    "R A1 STATE",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "F A1"
+   ],
+   "expected": [
+    "R A1 STATE",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "F"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "F A1"
+   ],
+   "expected": [
+    "OK 1",
+    "R A1 STATE",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N B1 400",
+    "D",
+    "F B1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "R B1 STATE",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N B1 600",
+    "D",
+    "F A1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I B1",
+    "R A1 STATE",
+    "X 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_requeue_penalty": [
+  {
+   "input": [
+    "N A1 500",
+    "N B1 495",
+    "D",
+    "F A1",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I B1",
+    "I A1",
+    "EMPTY",
+    "X 2 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N B1 485",
+    "D",
+    "F A1",
+    "D",
+    "F A1",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I B1",
+    "I A1",
+    "EMPTY",
+    "X 2 4 2 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "D",
+    "F A1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "I A1",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_tie_aging": [
+  {
+   "input": [
+    "N B1 505",
+    "N A1 515",
+    "N C1 505",
+    "D",
+    "F A1",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I A1",
+    "OK 3",
+    "I B1",
+    "I A1",
+    "I C1",
+    "X 3 4 1 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 300",
+    "D",
+    "F A1",
+    "D",
+    "F A1",
+    "D",
+    "F A1",
+    "N B1 300",
+    "N C1 300",
+    "K",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "I A1",
+    "DLQ A1",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I B1",
+    "I C1",
+    "I A1",
+    "X 3 6 3 1"
+   ]
+  },
+  {
+   "input": [
+    "N B1 500",
+    "N A1 500",
+    "D",
+    "F B1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I B1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "X 2 3 1 0"
+   ]
+  }
+ ],
+ "f2p_sentinel": [
+  {
+   "input": [
+    "N A1 110",
+    "N B1 90",
+    "D",
+    "F A1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "DLQ A1",
+    "I B1",
+    "EMPTY",
+    "X 2 2 1 1"
+   ]
+  },
+  {
+   "input": [
+    "N A1 210",
+    "D",
+    "F A1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "DLQ A1",
+    "EMPTY",
+    "X 1 1 1 1"
+   ]
+  },
+  {
+   "input": [
+    "N A1 120",
+    "D",
+    "F A1",
+    "D",
+    "F A1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "I A1",
+    "DLQ A1",
+    "EMPTY",
+    "X 1 2 2 1"
+   ]
+  },
+  {
+   "input": [
+    "N A1 110",
+    "D",
+    "F A1",
+    "K",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "DLQ A1",
+    "OK 1",
+    "I A1",
+    "EMPTY",
+    "X 1 2 1 1"
+   ]
+  },
+  {
+   "input": [
+    "N A1 111",
+    "D",
+    "F A1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "I A1",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 105",
+    "D",
+    "F A1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I A1",
+    "OK 1",
+    "I A1",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_cap999": [
+  {
+   "input": [
+    "N B1 990",
+    "N A1 999",
+    "D",
+    "F A1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I B1",
+    "I A1",
+    "X 2 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 999",
+    "N B1 990",
+    "D",
+    "F A1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "X 2 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 999",
+    "N B1 980",
+    "D",
+    "F A1",
+    "D",
+    "F A1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "X 2 4 2 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 998",
+    "N B1 989",
+    "D",
+    "F A1",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "OK 2",
+    "I B1",
+    "I A1",
+    "X 2 3 1 0"
+   ]
+  }
+ ],
+ "f2p_undo_two_deep": [
+  {
+   "input": [
+    "N A1 500",
+    "N B1 400",
+    "D",
+    "D",
+    "F B1",
+    "F A1",
+    "D",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "EMPTY",
+    "X 2 4 2 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N B1 400",
+    "N C1 300",
+    "D",
+    "D",
+    "D",
+    "F C1",
+    "F B1",
+    "F A1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I A1",
+    "I B1",
+    "I C1",
+    "OK 1",
+    "OK 2",
+    "R A1 STATE",
+    "X 3 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "N A1 500",
+    "N B1 400",
+    "D",
+    "D",
+    "F A1"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I A1",
+    "I B1",
+    "R A1 STATE",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "f2p_item_case": [
+  {
+   "input": [
+    "N Job1 500",
+    "N JOB1 400"
+   ],
+   "expected": [
+    "OK 1",
+    "R Job1 STATE",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N Job1 500",
+    "D",
+    "F JOB1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I Job1",
+    "OK 1",
+    "I Job1",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "N aa 300",
+    "D",
+    "N AA 300",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I aa",
+    "OK 1",
+    "I aa",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N aa 300",
+    "N bb 300",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "I aa",
+    "I bb",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "f2p_trailing": [
+  {
+   "input": [
+    "N T1 500 urgent",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I T1",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N T2 400",
+    "D now"
+   ],
+   "expected": [
+    "OK 1",
+    "I T2",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "K all"
+   ],
+   "expected": [
+    "OK 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "N T3 300",
+    "D",
+    "F T3 oops",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "I T3",
+    "OK 1",
+    "I T3",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "N WRK1 105",
+    "D",
+    "D",
+    "F JobA",
+    "K",
+    "N deep99 990",
+    "K",
+    "N SHORTY",
+    "F WRK1",
+    "D",
+    "D",
+    "F WRK1",
+    "F DEEP99",
+    "F MX",
+    "D",
+    "N JOBA 999",
+    "N joba 200",
+    "K",
+    "D",
+    "F deep99",
+    "N WRK1 105",
+    "D",
+    "N R0022 990",
+    "D",
+    "N BADP 1000",
+    "D",
+    "N JOBA 111",
+    "F R0022",
+    "N JOBA 105",
+    "D",
+    "D",
+    "N MX 100",
+    "N JOBA 110",
+    "N deep99 1",
+    "F JOBA",
+    "D",
+    "N JobA 105",
+    "D",
+    "D",
+    "N WRK1 1",
+    "D",
+    "N EXTRAA 500 TRAILING",
+    "D",
+    "F EXTRAA",
+    "D",
+    "F extraa",
+    "K",
+    "D",
+    "F extraa",
+    "N deep99 200",
+    "K",
+    "F wrk1",
+    "N wrk1 990",
+    "D",
+    "K",
+    "D",
+    "D",
+    "D",
+    "F deep99",
+    "F wrk1",
+    "D",
+    "D",
+    "F deep99",
+    "K",
+    "K all",
+    "D",
+    "D",
+    "N mx 197",
+    "N BADP 12a",
+    "N joba 300",
+    "N joba 111",
+    "N JOBA 300",
+    "K",
+    "N JobA 210",
+    "N wrk1 740",
+    "N JobA 500",
+    "N MX 120",
+    "D",
+    "N wrk1 90",
+    "N JobA 90",
+    "N WRK1 200",
+    "D",
+    "K all",
+    "N MX 100",
+    "N JobA 100",
+    "D",
+    "N deep99 105",
+    "N JobA 200",
+    "D",
+    "K",
+    "N MX 883",
+    "N mx 90",
+    "N JOBA 300",
+    "D twice",
+    "D",
+    "N WRK1 990",
+    "D",
+    "D",
+    "D",
+    "N R0099 980",
+    "D",
+    "N joba 120",
+    "N joba 111",
+    "D",
+    "N EXTRAA 500 TRAILING",
+    "N joba 210",
+    "N BADP 1000",
+    "N JobA 500",
+    "D",
+    "F JOBA",
+    "N JobA 111",
+    "D",
+    "D",
+    "N joba 990",
+    "D",
+    "F JOBA",
+    "N JOBA 210",
+    "D",
+    "D",
+    "N WRK1 1",
+    "F JOBA",
+    "N JOBA 200",
+    "N R0122 110",
+    "D",
+    "D",
+    "D",
+    "F joba",
+    "F JOBA",
+    "N JOBA 100",
+    "N BADP 12a",
+    "N JobA 999",
+    "D",
+    "F joba",
+    "D",
+    "D",
+    "D",
+    "F NOSUCH",
+    "D",
+    "D",
+    "N JOBA 210",
+    "F WRK1",
+    "N joba 105",
+    "F wrk1",
+    "D",
+    "F WRK1",
+    "N WRK1 105",
+    "F JobA",
+    "N joba 300",
+    "K",
+    "F deep99",
+    "D",
+    "D",
+    "D",
+    "F WRK1",
+    "N R0154 999",
+    "N BADP 1000",
+    "D",
+    "N JobA 300",
+    "K all",
+    "D",
+    "N JobA 100",
+    "K",
+    "N JobA 629",
+    "F R0154",
+    "D",
+    "D",
+    "D",
+    "N wrk1 200",
+    "N EXTRAA 500 TRAILING",
+    "F joba",
+    "D",
+    "N joba 786",
+    "N WRK1 110",
+    "D",
+    "N R0174 111",
+    "N R0175 210",
+    "F JOBA",
+    "F JobA",
+    "F EXTRAA",
+    "N mx 105",
+    "N deep99 105",
+    "D",
+    "F JOBA",
+    "N mx 500",
+    "N deep99 980",
+    "N joba 980",
+    "N R0186 105",
+    "N JOBA 200",
+    "F joba",
+    "D",
+    "F JOBA",
+    "D",
+    "N MX 500",
+    "D",
+    "N JOBA 110",
+    "F R0175"
+   ],
+   "expected": [
+    "OK 1",
+    "I WRK1",
+    "EMPTY",
+    "R JobA STATE",
+    "OK 0",
+    "OK 1",
+    "OK 1",
+    "R SHORTY FMT",
+    "OK 2",
+    "I deep99",
+    "I WRK1",
+    "OK 1",
+    "OK 2",
+    "R MX STATE",
+    "I deep99",
+    "OK 2",
+    "R JOBA STATE",
+    "OK 2",
+    "I JOBA",
+    "R deep99 STATE",
+    "R WRK1 STATE",
+    "I WRK1",
+    "OK 1",
+    "I R0022",
+    "R BADP PRIO",
+    "EMPTY",
+    "OK 1",
+    "OK 2",
+    "R JOBA STATE",
+    "I R0022",
+    "I JOBA",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "R JOBA STATE",
+    "I JOBA",
+    "OK 3",
+    "I JOBA",
+    "I MX",
+    "OK 2",
+    "I deep99",
+    "OK 2",
+    "I EXTRAA",
+    "OK 2",
+    "I EXTRAA",
+    "OK 2",
+    "OK 2",
+    "I EXTRAA",
+    "DLQ EXTRAA",
+    "OK 2",
+    "OK 3",
+    "R WRK1 STATE",
+    "R WRK1 STATE",
+    "I EXTRAA",
+    "OK 2",
+    "I deep99",
+    "I WRK1",
+    "EMPTY",
+    "R deep99 STATE",
+    "DLQ WRK1",
+    "EMPTY",
+    "EMPTY",
+    "OK 1",
+    "OK 2",
+    "OK 2",
+    "I deep99",
+    "I WRK1",
+    "OK 1",
+    "R BADP PRIO",
+    "OK 2",
+    "R JOBA STATE",
+    "R JOBA STATE",
+    "OK 2",
+    "R JOBA STATE",
+    "OK 3",
+    "R JOBA STATE",
+    "R MX STATE",
+    "I WRK1",
+    "OK 3",
+    "R JOBA STATE",
+    "R WRK1 STATE",
+    "I JOBA",
+    "OK 2",
+    "R MX STATE",
+    "OK 3",
+    "I MX",
+    "OK 3",
+    "R JOBA STATE",
+    "I deep99",
+    "OK 2",
+    "OK 3",
+    "R MX STATE",
+    "R JOBA STATE",
+    "I MX",
+    "I JOBA",
+    "R WRK1 STATE",
+    "I WRK1",
+    "EMPTY",
+    "EMPTY",
+    "OK 1",
+    "I R0099",
+    "OK 1",
+    "R JOBA STATE",
+    "I JOBA",
+    "OK 1",
+    "OK 2",
+    "R BADP PRIO",
+    "R JOBA STATE",
+    "I EXTRAA",
+    "R JOBA STATE",
+    "R JOBA STATE",
+    "I JOBA",
+    "EMPTY",
+    "OK 1",
+    "I JOBA",
+    "OK 1",
+    "R JOBA STATE",
+    "I JOBA",
+    "EMPTY",
+    "OK 1",
+    "OK 2",
+    "R JOBA STATE",
+    "OK 3",
+    "I JOBA",
+    "I R0122",
+    "I WRK1",
+    "R JOBA STATE",
+    "R JOBA STATE",
+    "OK 1",
+    "R BADP PRIO",
+    "R JOBA STATE",
+    "I JOBA",
+    "DLQ JOBA",
+    "EMPTY",
+    "EMPTY",
+    "EMPTY",
+    "R NOSUCH STATE",
+    "EMPTY",
+    "EMPTY",
+    "R JOBA STATE",
+    "OK 1",
+    "R JOBA STATE",
+    "R WRK1 STATE",
+    "I WRK1",
+    "OK 1",
+    "R WRK1 STATE",
+    "R JOBA STATE",
+    "R JOBA STATE",
+    "OK 2",
+    "R deep99 STATE",
+    "I JOBA",
+    "I WRK1",
+    "EMPTY",
+    "DLQ WRK1",
+    "OK 1",
+    "R BADP PRIO",
+    "I R0154",
+    "OK 1",
+    "OK 2",
+    "I JOBA",
+    "OK 2",
+    "OK 2",
+    "R JOBA STATE",
+    "R R0154 STATE",
+    "I JOBA",
+    "I WRK1",
+    "EMPTY",
+    "OK 1",
+    "OK 2",
+    "R JOBA STATE",
+    "I EXTRAA",
+    "OK 2",
+    "R WRK1 STATE",
+    "I JOBA",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "R JOBA STATE",
+    "OK 5",
+    "OK 6",
+    "OK 7",
+    "I JOBA",
+    "OK 7",
+    "R MX STATE",
+    "R deep99 STATE",
+    "R JOBA STATE",
+    "OK 8",
+    "R JOBA STATE",
+    "R JOBA STATE",
+    "I JOBA",
+    "DLQ JOBA",
+    "I EXTRAA",
+    "R MX STATE",
+    "I R0175",
+    "R JOBA STATE",
+    "DLQ R0175",
+    "X 38 51 20 6"
+   ]
+  },
+  {
+   "input": [
+    "N WRK1 105",
+    "N JOBA 111",
+    "N R0002 300",
+    "D",
+    "N mx 100",
+    "K",
+    "D",
+    "N mx 100",
+    "N JobA 500",
+    "N WRK1 110",
+    "N SHORTY",
+    "N JobA 1",
+    "D",
+    "N mx 200",
+    "D",
+    "F WRK1",
+    "D",
+    "K",
+    "N WRK1 980",
+    "N JOBA 210",
+    "N deep99 100",
+    "D",
+    "N deep99 210",
+    "D twice",
+    "F DEEP99",
+    "N wrk1 200",
+    "K",
+    "D",
+    "K",
+    "N wrk1 100",
+    "D",
+    "N JobA 1",
+    "D twice",
+    "N joba 999",
+    "D",
+    "F mx",
+    "N deep99 980",
+    "N R0037 210",
+    "N MX 90",
+    "D",
+    "D",
+    "D",
+    "N WRK1 300",
+    "F mx",
+    "F R0037",
+    "N JOBA 999",
+    "N wrk1 300",
+    "D",
+    "D",
+    "N deep99 105",
+    "F WRK1",
+    "N JobA 999",
+    "F JobA",
+    "N EXTRAA 500 TRAILING",
+    "N deep99 210",
+    "N wrk1 999",
+    "N WRK1 100",
+    "N wrk1 990",
+    "F NOSUCH",
+    "K",
+    "D",
+    "N JobA 200",
+    "N joba 105",
+    "D",
+    "N MX 1",
+    "N MX 110",
+    "D",
+    "N wrk1 990",
+    "D",
+    "F wrk1",
+    "F WRK1",
+    "N deep99 110",
+    "F WRK1",
+    "D",
+    "N deep99 111",
+    "F R0037",
+    "D",
+    "D",
+    "D",
+    "NOISE",
+    "N joba 500",
+    "N WRK1 1",
+    "N WRK1 111",
+    "N JOBA 210",
+    "N WRK1 204",
+    "N deep99 100",
+    "F mx",
+    "N mx 90",
+    "F wrk1",
+    "N WRK1 110",
+    "N mx 980",
+    "N R0091 100",
+    "N mx 210",
+    "N MX 100",
+    "F wrk1",
+    "N wrk1 100",
+    "F JobA",
+    "N joba 100",
+    "D",
+    "D",
+    "F deep99",
+    "N R0101 500",
+    "N R0102 300",
+    "N joba 90",
+    "N R0104 990",
+    "N MX 210",
+    "N joba 500",
+    "D",
+    "N deep99 210",
+    "N BADP 12a",
+    "D",
+    "N deep99 1",
+    "N MX 980",
+    "D",
+    "N JobA 110",
+    "D",
+    "N deep99 500",
+    "K",
+    "N BADP 1000",
+    "D",
+    "F WRK1",
+    "D",
+    "N mx 210",
+    "N R0123 999",
+    "N R0124 210",
+    "N JOBA 980",
+    "D",
+    "D twice",
+    "D",
+    "K",
+    "D",
+    "D",
+    "N mx 120",
+    "D",
+    "F mx",
+    "N MX 111",
+    "N R0136 120",
+    "K",
+    "D",
+    "N deep99 990",
+    "F R0136",
+    "F JobA",
+    "N R0142 1",
+    "F JobA",
+    "N JOBA 980",
+    "D",
+    "D",
+    "D",
+    "N mx 999",
+    "F deep99",
+    "N WRK1 100",
+    "D",
+    "N MX 111",
+    "D",
+    "D",
+    "D",
+    "D twice",
+    "D",
+    "N wrk1 100",
+    "D",
+    "N JOBA 110",
+    "N WRK1 300",
+    "N WRK1 90",
+    "K",
+    "K",
+    "N WRK1 999",
+    "D",
+    "D",
+    "F JOBA",
+    "N SHORTY",
+    "F wrk1",
+    "D"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I R0002",
+    "OK 3",
+    "OK 3",
+    "I JOBA",
+    "R mx STATE",
+    "OK 3",
+    "R WRK1 STATE",
+    "R SHORTY FMT",
+    "R JOBA STATE",
+    "I JOBA",
+    "R mx STATE",
+    "I WRK1",
+    "OK 2",
+    "I mx",
+    "OK 1",
+    "R WRK1 STATE",
+    "OK 2",
+    "OK 3",
+    "I JOBA",
+    "R deep99 STATE",
+    "I deep99",
+    "OK 2",
+    "R WRK1 STATE",
+    "OK 2",
+    "I WRK1",
+    "OK 1",
+    "OK 2",
+    "I WRK1",
+    "OK 2",
+    "I deep99",
+    "R JOBA STATE",
+    "I JOBA",
+    "R mx STATE",
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "I deep99",
+    "I R0037",
+    "I mx",
+    "OK 1",
+    "OK 2",
+    "DLQ R0037",
+    "OK 3",
+    "R WRK1 STATE",
+    "I JOBA",
+    "I WRK1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "R JOBA STATE",
+    "OK 5",
+    "R deep99 STATE",
+    "R WRK1 STATE",
+    "R WRK1 STATE",
+    "R WRK1 STATE",
+    "R NOSUCH STATE",
+    "OK 6",
+    "I JOBA",
+    "OK 6",
+    "R JOBA STATE",
+    "I EXTRAA",
+    "R mx STATE",
+    "R mx STATE",
+    "I WRK1",
+    "OK 5",
+    "I WRK1",
+    "DLQ WRK1",
+    "R WRK1 STATE",
+    "R deep99 STATE",
+    "R WRK1 STATE",
+    "I R0037",
+    "R deep99 STATE",
+    "DLQ R0037",
+    "I JOBA",
+    "I deep99",
+    "I mx",
+    "R ???????? FMT",
+    "OK 1",
+    "R WRK1 STATE",
+    "R WRK1 STATE",
+    "R JOBA STATE",
+    "R WRK1 STATE",
+    "OK 2",
+    "OK 3",
+    "R mx STATE",
+    "R WRK1 STATE",
+    "R WRK1 STATE",
+    "R mx STATE",
+    "OK 4",
+    "R mx STATE",
+    "R mx STATE",
+    "R WRK1 STATE",
+    "R WRK1 STATE",
+    "R JOBA STATE",
+    "R JOBA STATE",
+    "I JOBA",
+    "I deep99",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "OK 6",
+    "OK 7",
+    "R mx STATE",
+    "R JOBA STATE",
+    "I R0104",
+    "R deep99 STATE",
+    "R BADP PRIO",
+    "I R0101",
+    "R deep99 STATE",
+    "R mx STATE",
+    "I R0102",
+    "R JOBA STATE",
+    "I R0091",
+    "R deep99 STATE",
+    "OK 5",
+    "R BADP PRIO",
+    "I WRK1",
+    "OK 5",
+    "I WRK1",
+    "R mx STATE",
+    "OK 5",
+    "OK 6",
+    "R JOBA STATE",
+    "I R0123",
+    "I R0037",
+    "I R0124",
+    "OK 3",
+    "I JOBA",
+    "I deep99",
+    "R mx STATE",
+    "I mx",
+    "DLQ mx",
+    "R mx STATE",
+    "OK 1",
+    "OK 2",
+    "I R0136",
+    "OK 2",
+    "OK 3",
+    "R JOBA STATE",
+    "OK 4",
+    "R JOBA STATE",
+    "OK 5",
+    "I deep99",
+    "I JOBA",
+    "I R0136",
+    "R mx STATE",
+    "R deep99 STATE",
+    "OK 3",
+    "I WRK1",
+    "R mx STATE",
+    "I mx",
+    "I R0142",
+    "EMPTY",
+    "EMPTY",
+    "EMPTY",
+    "OK 1",
+    "I WRK1",
+    "OK 1",
+    "OK 2",
+    "R WRK1 STATE",
+    "OK 2",
+    "OK 2",
+    "R WRK1 STATE",
+    "I WRK1",
+    "I JOBA",
+    "DLQ JOBA",
+    "R SHORTY FMT",
+    "OK 1",
+    "I WRK1",
+    "X 36 49 14 5"
+   ]
+  }
+ ]
+}

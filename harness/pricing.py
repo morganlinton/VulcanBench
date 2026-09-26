@@ -29,6 +29,11 @@ PRICES: dict[str, dict[str, float]] = {
     # harness receipt and are therefore not inferred here. Reports published
     # before this date priced the GPT-5.6 family at the earlier list prices
     # (Sol 5/0.5/30, Terra 2.5/0.25/15, Luna 1/0.1/6) and are not rewritten.
+    # GPT-6 Sol and Luna, checked 2026-09-25 at developers.openai.com/api/docs/pricing
+    # and each model page. Prompts over 272K input tokens bill the whole request
+    # at 2x input/cache and 1.5x output; that tier is not inferred here.
+    "openai:gpt-6-sol": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
+    "openai:gpt-6-luna": {"input": 0.10, "cached_input": 0.01, "output": 0.50},
     "openai:gpt-5.6-sol": {"input": 4.00, "cached_input": 0.40, "output": 20.00},
     "openai:gpt-5.6-terra": {"input": 2.00, "cached_input": 0.20, "output": 12.00},
     "openai:gpt-5.6-luna": {"input": 0.20, "cached_input": 0.02, "output": 1.20},

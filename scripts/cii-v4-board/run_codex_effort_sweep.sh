@@ -12,9 +12,15 @@ set -u
 cd "$(dirname "$0")/../.."
 # Detached runs start with the bare macOS PATH; include the authenticated Codex CLI.
 export PATH="/Users/morganlinton/.nvm/versions/node/v22.11.0/bin:$PWD/.venv/bin:$PATH"
+# CODEX_BIN_DIR pins a specific Codex CLI for one sweep without touching the
+# global install (docs/DECISIONS.md 2026-09-25: GPT-6 Luna and Sol need 0.155.0+).
+if [ -n "${CODEX_BIN_DIR:-}" ]; then
+  export PATH="$CODEX_BIN_DIR:$PATH"
+fi
 
 MODEL=${MODEL:?set MODEL, e.g. gpt-5.5 or gpt-5.6-luna}
 OUTROOT=${OUTROOT:?set OUTROOT, e.g. runs-effort-gpt55}
+echo "=== $MODEL using $(command -v codex) ($(codex --version 2>&1))"
 LEVELS=${LEVELS:-"low medium high extra-high max"}
 SUITE="coding-intelligence-index-v4"
 QUOTA_WAIT=${QUOTA_WAIT:-1800}
@@ -87,6 +93,9 @@ $(tail -c 800 "$d/cli-agent-stream.jsonl")"
       *"refresh token has expired"*|*"sign in again"*|*"Please log out"*|*"not logged in"*)
         echo "=== $MODEL effort=$level AUTH FAILURE at $done_count/23: the Codex subscription login has expired. Run 'codex login', then rerun this script. $(date '+%F %H:%M:%S')"
         exit 3 ;;
+      *"is not supported when using Codex"*)
+        echo "=== $MODEL effort=$level MODEL REFUSED at $done_count/23: this Codex CLI or account cannot run $MODEL (see the run stream). Set CODEX_BIN_DIR to a newer CLI. $(date '+%F %H:%M:%S')"
+        exit 4 ;;
       *"limit reached"*|*"usage limit"*|*"quota"*|*"Quota"*|*"rate limit"*)
         echo "=== $MODEL effort=$level quota exhausted at $done_count/23 (exit=$status), waiting ${QUOTA_WAIT}s $(date '+%H:%M:%S')"
         sleep "$QUOTA_WAIT" ;;

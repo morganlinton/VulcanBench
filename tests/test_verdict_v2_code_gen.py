@@ -1,6 +1,7 @@
 """Fast tests for the generated Software families of Verdict v2."""
 
 import ast
+import importlib.util
 import json
 import random
 import re
@@ -41,6 +42,11 @@ from harness.verdict.v2.families.code_gen_types import TEMPLATES as TYPE_TEMPLAT
 from harness.verdict.v2.families.code_gen_types import mypy_check, mypy_version, render
 from harness.verdict.v2.items import answer_label, labels_for, validate
 from harness.verdict.v2.registry import BuildContext, builder_for
+
+# The Python 3.14 smoke job installs the package without dev tools, mypy included.
+needs_mypy = pytest.mark.skipif(
+    importlib.util.find_spec("mypy") is None, reason="mypy not installed"
+)
 
 SAMPLE = textwrap.dedent(
     """\
@@ -217,6 +223,7 @@ def test_pad_program_wraps_short_programs():
     assert js.startswith("function main() {") and js.rstrip().endswith("main();")
 
 
+@needs_mypy
 def test_type_templates_base_passes_mypy(tmp_path):
     version = mypy_version()
     values = {
@@ -294,6 +301,7 @@ def test_expected_value_build_is_balanced_and_labels_hold(tmp_path):
         assert (actual == eval(expected)) is item.answer
 
 
+@needs_mypy
 def test_type_check_pair_small_build_verified_by_mypy(tmp_path):
     items = code_gen.BUILDERS["type-check-pair"](_ctx(tmp_path, 6))
     _check_items(items, "type-check-pair", 6)

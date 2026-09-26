@@ -73,8 +73,14 @@ def stage_kind(stage: str) -> str:
     }[stage]
 
 
-def payload_for(stage: str, ident: str) -> dict | None:  # noqa: PLR0911, one branch per stage
-    """Rebuild the frozen payload for a call so a recovered response can be validated."""
+def payload_for(stage: str, ident: str, panel: str = "claude") -> dict | None:  # noqa: PLR0911, one branch per stage
+    """Rebuild the frozen payload for a call so a recovered response can be validated.
+
+    A match call's payload is the same panel's own selected probe. ``panel``
+    defaults to "claude" (the only panel with probes when this was written); every
+    caller that holds a call folder passes that folder's panel (fixed 2026-09-25:
+    Grok's first post-rename match call under v3.15 found no payload and stopped).
+    """
     if stage in ("primary", "repeat"):
         return v3.read(_out() / "evidence" / f"{ident}.json")
     if stage == "calibration":
@@ -91,7 +97,7 @@ def payload_for(stage: str, ident: str) -> dict | None:  # noqa: PLR0911, one br
     if stage == "probe":
         return v3.probe_evidence(v3.read(_out() / "evidence" / f"{ident}.json"))
     if stage == "match":
-        probe = _out() / "calls" / "claude" / "probe" / ident / "selected.json"
+        probe = _out() / "calls" / panel / "probe" / ident / "selected.json"
         if not probe.exists():
             return None
         row = next(r for r in v3.read(_out() / "private-manifest.json") if r["id"] == ident)
@@ -415,7 +421,7 @@ def recover_match_ids(folder: Path, panel: str, stage: str) -> bool:
         return False
     if any(json.loads(r.read_text()).get("error") != MATCH_ORDER_ERROR for r in receipts):
         return False
-    payload = payload_for(stage, folder.name)
+    payload = payload_for(stage, folder.name, folder.parent.parent.name)
     if payload is None:
         return False
     expected = [q["id"] for q in payload["key"]]
@@ -479,7 +485,7 @@ def accept_fallback(folder: Path, panel: str, stage: str) -> bool:
     if panel != "claude":
         return False
     kind = stage_kind(stage)
-    payload = payload_for(stage, folder.name)
+    payload = payload_for(stage, folder.name, folder.parent.parent.name)
     if payload is None:
         return False
     for n in (2, 1):
@@ -551,7 +557,7 @@ def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:  # noqa
     if stage == "calibration":
         kind, payload = calibration_call(folder.name)
     else:
-        kind, payload = stage_kind(stage), payload_for(stage, folder.name)
+        kind, payload = stage_kind(stage), payload_for(stage, folder.name, panel)
     if payload is None:
         return False
     expected = v3.read(_out() / "protocol.json")["reviewers"]["grok"]["display_name"]
@@ -876,7 +882,7 @@ def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool
         return False
     if any(json.loads(r.read_text()).get("error") != EXCERPT_ERROR for r in receipts):
         return False
-    evidence = payload_for(stage, folder.name)
+    evidence = payload_for(stage, folder.name, folder.parent.parent.name)
     if evidence is None:
         return False
     source = list(v3.strings(evidence))

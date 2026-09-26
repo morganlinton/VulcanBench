@@ -278,6 +278,71 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.15, September 24 to 25, 2026: Claude Opus 5.5 on Frontier v4
+
+- Population frozen September 24, 20:39 PDT: 114 rows of 115 runs (high
+  depotcore excluded as an incomplete source run, an empty patch after a
+  safeguard classifier stop), none missing. 30 rows were partly written by
+  claude-opus-4-8 through Claude Code's refusal fallback (medium 3, high 7,
+  extra-high 8, max 12). Each row records `fallback` and replies by model.
+- Both judges passed every gate; neither used the allowance.
+- Ran alongside the Opus 5.5 Safety v1 sweep at the owner's request. Judging
+  windows: September 24, 20:40 to September 25, 07:01 PDT, and September 25,
+  07:05 to 11:47 PDT.
+- Stop, Grok, match submission-001 (September 25, 07:01): the display-rename
+  rule (Cursor reports "Grok 4.6 Medium") declined because the wrapper's
+  `payload_for` rebuilt a match payload from `calls/claude/probe/...`
+  regardless of panel, found none, and stopped. This was the first Grok match
+  call since the rename (v3.8 has no probe stage; Grok failed v3.9's exam).
+  Fix in `harness/maintenance_review_v3_resume.py`: `payload_for` takes the
+  panel, defaulting to claude, and every caller holding a call folder passes
+  that folder's panel. No frozen file changed, no response was altered, and
+  the stage resumed from where it stopped. In the resumed stage the wrapper
+  applied 230 rules: 227 display-rename acceptances, 1 rename re-filed as a
+  validation failure (then retried under the frozen rule), and 2 network-fault
+  retries.
+- Summary: 114 of 114 published, both panels passing, no reviewer fallbacks.
+  Combined score by level: low 86.36, medium 90.86, high 91.11 (n=22),
+  extra-high 90.68, max 90.22. Code quality 72.53 at low to 79.98 at
+  extra-high. Extra-high's two panel means are equal to the last digit by
+  coincidence: 19 of 23 per-submission scores differ and the differences sum
+  to zero on the rubric's 2.08-point grid.
+- Cost note for cards: the harness's `api_equivalent_cost_usd` omits
+  fallback-model usage (extra-high tallycore $0.15 against Claude Code's
+  $19.69 list-price total). The Opus 5.5 card uses `cli_reported_cost_usd`,
+  which matches Claude Code's final total on all 115 runs.
+
+## v3.14, September 22 to 23, 2026: Claude Opus 5.5 on Routine v1
+
+- Population frozen September 22, 20:15 PDT, in the private VulcanRoutine
+  repository (`judging/code-quality-maintenance-v3.14`): 60 rows, twelve
+  tasks at low, medium, high, extra-high and max, none excluded or missing.
+  Built by `build_routine_population.py --opus55` into its own record so
+  v3.8's pinned comparison hash is untouched (verified before and after).
+- Both judges passed every gate; neither used the allowance. Narrowest
+  graded margins: Muse 0.10 (g04 and g11), Grok 0.18 (g11) and 0.20 (g04).
+- Ran alongside the Frontier v4 Opus 5.5 sweep at the owner's request (the
+  v3.8 chain had waited for sweeps). The judges share no Claude quota. The
+  judging windows were September 22, 20:16 to 23:33 PDT and September 23,
+  05:46 to 06:07 PDT; Frontier runs inside those windows are the ones to
+  check against the serial speed rule.
+- Grok, primary submission-054 (opus55 at extra-high): both attempts quoted
+  evidence excerpts absent from the code; no recovery rule accepts them and
+  none was added. Owner decision, September 23: new wrapper rule
+  invalidate_unrecoverable_primary marks the call invalid in its folder
+  (`operator-invalid.json`) and the stage was finished in-process
+  (`logs/routine-v314-finish-grok.py`). The frozen summarize publishes a
+  submission from the passing panels with a valid review, so
+  submission-054 is scored from Muse alone. Receipts for both attempts are
+  retained; nothing in any response was altered. The display-rename rule
+  accepted the Cursor "Grok 4.6 Medium" label as in v3.8.
+- Summary: 60 of 60 published, both panels passing, no fallback reviews.
+  Combined score by level: low 94.2, medium 95.3, high 95.9, extra-high
+  96.7, max 96.5. Code quality 85.5 at low to 93.3 at extra-high. Cheapest
+  adequate level (within 3 points of best): low, as for every other priced
+  model. Aggregates now join v3.14 cells beside v3.8's, each cell naming its
+  protocol.
+
 ## v3.8, September 21 to 22, 2026: the private Routine v1 suite
 
 - Population frozen September 21, 17:48 PDT, in the private VulcanRoutine

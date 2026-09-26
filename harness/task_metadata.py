@@ -115,7 +115,28 @@ MAX_SNAPSHOT_BYTES = 100 * 1024 * 1024
 LIST_FILES_CAP = 500
 SEARCH_CODE_CAP = 100
 CODE_SUFFIXES = frozenset(
-    {".py", ".go", ".ts", ".tsx", ".js", ".jsx", ".java", ".rs", ".rb", ".cs"}
+    {
+        ".py",
+        ".go",
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+        ".java",
+        ".rs",
+        ".rb",
+        ".cs",
+        ".c",
+        ".h",
+        ".cc",
+        ".cpp",
+        ".cxx",
+        ".hh",
+        ".hpp",
+        ".hxx",
+    }
 )
 _PLACEHOLDER_COMMIT = re.compile(r"^0+$|^0+1$|^0+2$")
 

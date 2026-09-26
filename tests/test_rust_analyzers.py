@@ -25,6 +25,14 @@ def _which_none(_name: str) -> None:
     return None
 
 
+# A lockfile with one registry crate, so cargo audit has something to audit.
+_LOCK_WITH_DEPS = (
+    '[[package]]\nname = "demo"\nversion = "0.1.0"\n\n'
+    '[[package]]\nname = "itoa"\nversion = "1.0.11"\n'
+    'source = "registry+https://github.com/rust-lang/crates.io-index"\n'
+)
+
+
 def _mock_subprocess_run(outputs: dict[str, Any]):
     """Return a mock subprocess.run that responds to specific command prefixes."""
 
@@ -68,7 +76,10 @@ def test_quality_rust_cargo_fmt_unformatted(
         "run",
         _mock_subprocess_run(
             {
-                "cargo fmt": {"returncode": 1, "stderr": "main.rs\n"},
+                "cargo fmt": {
+                    "returncode": 1,
+                    "stdout": f"Diff in {(tmp_path / 'main.rs').resolve()}:1:\n-fn main ( ) {{ }}\n",
+                },
                 "cargo clippy": {"returncode": 0, "stdout": ""},
             }
         ),
@@ -106,7 +117,7 @@ def test_security_rust_no_cargo_lock(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
 def test_security_rust_clean_audit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     (tmp_path / "main.rs").write_text("fn main() {}\n")
-    (tmp_path / "Cargo.lock").write_text("# lockfile\n")
+    (tmp_path / "Cargo.lock").write_text(_LOCK_WITH_DEPS)
     monkeypatch.setattr(security.shutil, "which", lambda name: "/usr/bin/cargo")
     audit_output = json.dumps({"vulnerabilities": {"count": 0, "list": []}})
     monkeypatch.setattr(
@@ -125,7 +136,7 @@ def test_security_rust_clean_audit(tmp_path: Path, monkeypatch: pytest.MonkeyPat
 
 def test_security_rust_vulnerabilities(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     (tmp_path / "main.rs").write_text("fn main() {}\n")
-    (tmp_path / "Cargo.lock").write_text("# lockfile\n")
+    (tmp_path / "Cargo.lock").write_text(_LOCK_WITH_DEPS)
     monkeypatch.setattr(security.shutil, "which", lambda name: "/usr/bin/cargo")
     audit_output = json.dumps(
         {
@@ -184,7 +195,7 @@ def test_security_rust_budget_exhausted(tmp_path: Path, monkeypatch: pytest.Monk
     # installed, otherwise this asserts the wrong branch on machines without it.
     monkeypatch.setattr(security.shutil, "which", lambda name: "/usr/bin/cargo")
     (tmp_path / "main.rs").write_text("fn main() {}\n")
-    (tmp_path / "Cargo.lock").write_text("# lockfile\n")
+    (tmp_path / "Cargo.lock").write_text(_LOCK_WITH_DEPS)
     result = security._rust(tmp_path, ["main.rs"], remaining_s=lambda: -1.0)
     assert result.score is None
     assert "budget" in result.details.get("reason", "").lower()
@@ -198,8 +209,10 @@ def test_quality_rust_clippy_warnings(tmp_path: Path, monkeypatch: pytest.Monkey
     monkeypatch.setattr(quality.shutil, "which", lambda name: "/usr/bin/cargo")
     clippy_msg = json.dumps(
         {
-            "reason": "diagnostic",
-            "message": {"spans": [{"file_name": str((tmp_path / "main.rs").resolve())}]},
+            # Cargo's real shape: rustc diagnostics under "compiler-message",
+            # span paths relative to the crate root.
+            "reason": "compiler-message",
+            "message": {"level": "warning", "spans": [{"file_name": "main.rs"}]},
         }
     )
     monkeypatch.setattr(

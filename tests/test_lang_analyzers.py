@@ -39,13 +39,15 @@ def test_quality_java_missing_checkstyle(tmp_path: Path, monkeypatch: pytest.Mon
 # --- security: missing toolchains / preconditions -> reason, no score ----------
 
 
-def test_security_js_no_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    (tmp_path / "app.js").write_text("console.log(1)\n")
+def test_security_ts_no_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # TypeScript still relies on npm audit alone; JavaScript is scored by the
+    # pinned eslint-plugin-security (tests/test_multilang_analyzers.py).
+    (tmp_path / "app.ts").write_text("console.log(1)\n")
     # npm "present", but no package.json in the workspace.
     monkeypatch.setattr(security.shutil, "which", lambda name: "/usr/bin/npm")
-    result = security.assess_security(tmp_path, ["app.js"])
+    result = security.assess_security(tmp_path, ["app.ts"])
     assert result.score is None
-    assert "package.json" in result.details["languages"]["javascript"]["reason"]
+    assert "package.json" in result.details["languages"]["typescript"]["reason"]
 
 
 def test_security_go_missing_gosec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

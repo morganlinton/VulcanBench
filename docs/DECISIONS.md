@@ -7,6 +7,56 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-25: GPT-6 Luna and Sol run on a pinned Codex CLI 0.155.0, ahead of Grok 4.7
+
+### Decision
+
+GPT-6 Luna (`gpt-6-luna`) and GPT-6 Sol (`gpt-6-sol`) are swept on
+VulcanBench Frontier v4 at Low, Medium, High, Extra-high and Max, through
+Codex on the ChatGPT Pro subscription, one run at a time
+(`scripts/run_gpt6_luna_sol_v4.sh`, Luna first). These are new models, not
+the GPT-5.6 Luna and Sol already on the board; outputs go to
+`runs-effort-gpt6-luna/` and `runs-effort-gpt6-sol/`. Owner request in
+chat, 2026-09-25. The owner chose to run them before the paused Grok 4.7
+chain, which resumes after this chain exits.
+
+These two columns run on Codex CLI 0.155.0, installed in its own prefix
+(`~/.local/vulcanbench-codex-0.155.0`) and put first on PATH through
+`CODEX_BIN_DIR` for this chain only. The global CLI stays at 0.153.4, so
+every other Codex column and rerun is unchanged. The bump is disclosed as
+a footnote on the GPT-6 Luna and Sol columns, as with the Claude Code bump
+for Opus 5.5 (2026-09-22 entry); incumbent Codex columns are not
+re-baselined.
+
+### Evidence
+
+The bump was not optional. On 0.153.4 both models are refused before any
+work, while GPT-6 Astra answers on the same login:
+
+    400 invalid_request_error: The 'gpt-6-luna' model is not supported
+    when using Codex with a ChatGPT account.
+
+One-line probes on 2026-09-25 (low effort, "Reply with the single word
+OK."): 0.153.4 and 0.154.0 refused; 0.155.0, 0.155.1, 0.156.0, 0.156.1 and
+0.157.0 answered for both models. 0.157.1 (published minutes earlier) does
+not start on Node 22.11. So 0.155.0 is the lowest release that runs the
+models, and the pin goes no further. The first launch on 0.153.4 produced
+70 refused run folders and no summaries; they were moved out of the tree
+and are not part of any cell.
+
+List prices, checked 2026-09-25 at developers.openai.com/api/docs/pricing
+and each model page (USD per 1M tokens, standard tier, short context):
+Sol $2.00 input, $0.20 cached input, $10.00 output; Luna $0.10, $0.01,
+$0.50. Prompts over 272K input tokens bill the whole request at 2x input
+and cache, 1.5x output. Both models expose effort `none` to `max` in the
+API; Codex lists low to max for Luna and adds ultra for Sol, which stays
+blocked (`vulcanbench.toml`).
+
+### Revisit when
+
+- the global Codex CLI is upgraded for another reason: record which
+  columns ran on which version;
+- a GPT-6 Luna or Sol run fails in a way 0.153.4 columns never did.
 ## 2026-09-24: Verdict reports a diff-size baseline beside every model's ranking
 
 ### Decision

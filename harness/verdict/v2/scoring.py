@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import math
 import random
+import statistics
 from collections import Counter, defaultdict
 from collections.abc import Sequence
 from typing import Any
@@ -243,13 +244,20 @@ def score(
             return None
         return [values[int(0.025 * len(values))], values[int(0.975 * len(values)) - 1]]
 
+    def stderr(key: str) -> float | None:
+        # Standard deviation of the bootstrap draws: the +/-1 SE whisker on cards.
+        values = draws.get(key, [])
+        return statistics.pstdev(values) if len(values) > 1 else None
+
     for f, values in families.items():
         values["skill_ci95"] = interval(f"family:{f}")
+        values["skill_se"] = stderr(f"family:{f}")
     return {
         "split": split,
         "families": families,
         "indices": {
-            name: {"value": value, "ci95": interval(name)} for name, value in point.items()
+            name: {"value": value, "ci95": interval(name), "se": stderr(name)}
+            for name, value in point.items()
         },
     }
 

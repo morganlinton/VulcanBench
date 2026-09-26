@@ -3,7 +3,9 @@
 Request and response shapes follow docs.typesafe.ai as read on 2026-09-19:
 ``POST /v1/systemone`` with ``state``, ``model`` and ``questions``; every
 question carries ``type``, ``instructions`` and ``criteria``; answers come
-back under ``answers`` keyed by question id. Not yet exercised against the
+back under ``answers`` keyed by question id. Score questions (read
+2026-09-24) take ``criteria`` as an ordered list of 2 to 10 levels and
+answer with ``probabilities`` keyed by level index. Not yet exercised against the
 live service: run the preflight before publishing any number from it.
 """
 
@@ -39,6 +41,9 @@ def build_request(item: dict[str, Any], model: str = DEFAULT_MODEL) -> dict[str,
     if spec["type"] == "choice":
         descriptions = spec.get("descriptions") or {}
         question["criteria"] = {option: descriptions.get(option) for option in spec["options"]}
+    elif spec["type"] == "score":
+        # Ordered low to high; the API numbers each level by its index.
+        question["criteria"] = list(spec["levels"])
     return {"state": item["state"], "model": model, "questions": {QUESTION_KEY: question}}
 
 
@@ -46,6 +51,9 @@ def parse_answer(item: dict[str, Any], body: dict[str, Any]) -> dict[str, float]
     answer = body["answers"][QUESTION_KEY]
     if item["question"]["type"] == "noul":
         return noul_probs(float(answer["noul"]))
+    if item["question"]["type"] == "score":
+        levels = item["question"]["levels"]
+        return {str(levels[int(k)]): float(v) for k, v in answer["probabilities"].items()}
     return {str(k): float(v) for k, v in answer["probabilities"].items()}
 
 

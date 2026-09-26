@@ -57,6 +57,102 @@ blocked (`vulcanbench.toml`).
 - the global Codex CLI is upgraded for another reason: record which
   columns ran on which version;
 - a GPT-6 Luna or Sol run fails in a way 0.153.4 columns never did.
+## 2026-09-25: Verdict v2 gate caps the model under test, not the reference
+
+### Decision
+
+Amends the 2026-09-24 Verdict v2 entry after its pilot. A family is
+admitted when, on the 30-item dev pilot, the GPT-6 Astra reference (high
+effort) scores skill of at least 40, which shows the family is answerable,
+and Jev scores skill below 90, which shows it still measures Jev. The
+reference no longer has an upper bound. The shortcut rule (skill at most 15)
+is measured on the full build rather than the 30 pilot items. The item-count
+and source-unit rules are unchanged. This change was made after seeing
+pilot results and is disclosed in the report. Owner decision, in chat,
+2026-09-25.
+
+### Evidence
+
+- Pilot, 600 items (30 per family, dev split): the reference scored skill
+  100 on 14 of 20 families. Items were inspected by hand for leaks (option
+  text, question wording, state); none found. The reference reasons through
+  generated puzzles at length; Jev answers without reasoning and spread from
+  14 to 96 on those same families, which is the separation v1 lacked.
+- Under the original rule only 4 of 20 families passed. Hardening the rest
+  until the reference fell below 95 would have pushed Jev to the floor on
+  most of them.
+- 30 pilot items put a shortcut's accuracy within about 18 points by chance
+  alone: vuln-pair's best shortcut read skill 40 on the pilot and 12 on the
+  full build.
+- Under the amended rule 16 of 20 pass. bug-function (Jev 96) and
+  code-output (Jev 95) need hardening, failing-test (reference 39) needs
+  more answerable states, weakness-class (keyword shortcut 15.2) needs
+  rebalancing.
+
+### Revisit triggers
+
+- A future System One model approaches 90 on most families: the suite has
+  run out of headroom; harden rather than raise the ceiling.
+- A family passes only because Jev is at or below the floor while the
+  reference is also weak (below 60): check that it is answerable from the
+  state before reading Jev's number.
+
+## 2026-09-24: Verdict v2 is a 20-family suite scored above the best shortcut
+
+### Decision
+
+VulcanBench Verdict v2 (suite id `verdict-v2`) replaces Verdict v1 as the
+typed-decision suite. It covers twenty families in eight areas across two
+pillars: Software (reading code, reviewing changes, finding bugs, security,
+testing, operations) and General (logic, math, tables, rules and policy).
+Spec: [VERDICT_V2.md](VERDICT_V2.md). Rules:
+
+- Every answer comes from execution, a deterministic tool, or a generator
+  that built the item. Never from a model's opinion, so v1's
+  `quality-preference` family has no v2 counterpart.
+- Items are balanced by construction (pairs, uniform option positions, 50%
+  base rate for yes/no) and the floor is printed per family.
+- Headline unit is skill: `100 * (acc - floor) / (1 - floor)` on the model's
+  own top answer, where floor is the best of majority, uniform guess and the
+  family's shortcut baselines. Verdict Index is the mean skill over shipped
+  families, with Software and General sub-indices; Calibration Index (mean
+  Brier skill score) is published beside it and never folded in. Intervals
+  are bootstrapped by source unit; overlapping intervals are "not separated".
+- A family ships only if, on a 30-item pilot, the GPT-6 Astra reference
+  (high effort, Codex on the subscription, same state, no tools) scores skill
+  40 to 95, the best shortcut scores 15 or less, and the family has at least
+  200 test items from at least 20 source units.
+- Chart rows are Jev (pinned) and GPT-6 Astra labelled as a reference row.
+  No other LLM rows in v2.
+
+Owner decisions, in chat, 2026-09-24: build a well-rounded v2 because the
+v1 headline tied the floor at 63 and covered one skill; include a General
+pillar beyond software; show Jev plus one reference model.
+
+### Evidence
+
+- v1: four of five families asked about the same 745 patches; "always
+  passes" scored 62.7% and Jev 62.8% on the pass question; lines changed
+  alone out-ranked Jev (AUROC 0.785 against 0.690). See the 2026-09-19,
+  2026-09-23 and 2026-09-24 entries.
+- docs.typesafe.ai (read 2026-09-24): `score` questions take an ordered
+  `criteria` list of 2 to 10 levels and return per-level `probabilities`;
+  `choice` allows 255 options; 32k tokens for state plus the longest
+  question; `jev-1.13.0` is still the only versioned id.
+
+Build changes the same day: `ci-failure` was replaced by the generated
+`incident-root-cause` (the archive keeps no hidden-test output to label),
+and `failing-test` shows one failing target plus the passing ones for any
+number of failing targets. Details in the spec's "Changes during the build".
+
+### Revisit triggers
+
+- A family fails the gate twice: cut it and list it in the report rather
+  than loosening the gate.
+- The reference row beats Jev by less than the interval on most families:
+  the suite may be too easy to separate models; raise distractor difficulty.
+- TypeSafe ships a new Jev version: new column under its pinned id.
+
 ## 2026-09-24: Verdict reports a diff-size baseline beside every model's ranking
 
 ### Decision

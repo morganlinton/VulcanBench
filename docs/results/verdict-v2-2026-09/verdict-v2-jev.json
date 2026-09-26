@@ -1,0 +1,1222 @@
+{
+  "suite": "verdict-v2",
+  "suite_name": "VulcanBench Verdict v2",
+  "split": "test",
+  "freeze": {
+    "items_sha256": "ab5a28280bf80e97b0aa91583a95c1ece8402130520614402f5696543be4481e",
+    "git_commit": "693377075baf8d3b7f77efbd359b82b72970387d",
+    "seed": 20260924,
+    "items_total": 5926
+  },
+  "rows": {
+    "jev-1.13.0": {
+      "role": "subject"
+    },
+    "gpt-6-astra-high (reference)": {
+      "role": "reference",
+      "note": "Shows each family is answerable from the same inputs; not a leaderboard entry.",
+      "tool_answers_dropped": 0
+    }
+  },
+  "families": {
+    "code-output": {
+      "pillar": "software",
+      "area": "Reading code",
+      "question_type": "choice",
+      "reference": "execution",
+      "summary": "What does this short program print?",
+      "test_items": 233,
+      "test_source_units": 27
+    },
+    "type-check-pair": {
+      "pillar": "software",
+      "area": "Reading code",
+      "question_type": "choice",
+      "reference": "tool",
+      "summary": "Which of two snippets passes the type checker?",
+      "test_items": 205,
+      "test_source_units": 15
+    },
+    "patch-pair": {
+      "pillar": "software",
+      "area": "Reviewing changes",
+      "question_type": "choice",
+      "reference": "verifier",
+      "summary": "Two size-matched patches for one issue: which passes the hidden tests?",
+      "test_items": 268,
+      "test_source_units": 36
+    },
+    "failing-test": {
+      "pillar": "software",
+      "area": "Reviewing changes",
+      "question_type": "choice",
+      "reference": "verifier",
+      "summary": "Given a failing patch, which hidden test fails?",
+      "test_items": 210,
+      "test_source_units": 33
+    },
+    "fix-file": {
+      "pillar": "software",
+      "area": "Finding bugs",
+      "question_type": "choice",
+      "reference": "merged-fix",
+      "summary": "Which file does the fix touch?",
+      "test_items": 257,
+      "test_source_units": 91
+    },
+    "bug-function": {
+      "pillar": "software",
+      "area": "Finding bugs",
+      "question_type": "choice",
+      "reference": "execution",
+      "summary": "Given a failing test's output, which function holds the planted bug?",
+      "test_items": 266,
+      "test_source_units": 26
+    },
+    "vuln-pair": {
+      "pillar": "software",
+      "area": "Security",
+      "question_type": "choice",
+      "reference": "merged-fix",
+      "summary": "Before and after a security fix: which version is vulnerable?",
+      "test_items": 240,
+      "test_source_units": 212
+    },
+    "weakness-class": {
+      "pillar": "software",
+      "area": "Security",
+      "question_type": "choice",
+      "reference": "advisory",
+      "summary": "Which weakness class is this vulnerability?",
+      "test_items": 240,
+      "test_source_units": 194
+    },
+    "mutant-kill": {
+      "pillar": "software",
+      "area": "Testing",
+      "question_type": "noul",
+      "reference": "execution",
+      "summary": "Does this test catch this change?",
+      "test_items": 206,
+      "test_source_units": 29
+    },
+    "expected-value": {
+      "pillar": "software",
+      "area": "Testing",
+      "question_type": "noul",
+      "reference": "execution",
+      "summary": "Is this assertion's expected value correct for the spec?",
+      "test_items": 227,
+      "test_source_units": 21
+    },
+    "incident-root-cause": {
+      "pillar": "software",
+      "area": "Operations",
+      "question_type": "choice",
+      "reference": "generator",
+      "summary": "Given logs from several services during an incident, which service caused it?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "semver-impact": {
+      "pillar": "software",
+      "area": "Operations",
+      "question_type": "score",
+      "reference": "tool",
+      "summary": "Is this API change a patch, minor or major version bump?",
+      "test_items": 262,
+      "test_source_units": 103
+    },
+    "constraint-pick": {
+      "pillar": "general",
+      "area": "Logic",
+      "question_type": "choice",
+      "reference": "generator",
+      "summary": "Which assignment satisfies every rule?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "entailment": {
+      "pillar": "general",
+      "area": "Logic",
+      "question_type": "noul",
+      "reference": "generator",
+      "summary": "Does the conclusion follow from the premises?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "word-problem": {
+      "pillar": "general",
+      "area": "Math",
+      "question_type": "choice",
+      "reference": "generator",
+      "summary": "Multi-step word problem: which answer is right?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "estimate-band": {
+      "pillar": "general",
+      "area": "Math",
+      "question_type": "score",
+      "reference": "generator",
+      "summary": "Which band contains this computed quantity?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "table-lookup": {
+      "pillar": "general",
+      "area": "Tables",
+      "question_type": "choice",
+      "reference": "generator",
+      "summary": "Which row or group answers this question about the table?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "table-count-band": {
+      "pillar": "general",
+      "area": "Tables",
+      "question_type": "score",
+      "reference": "generator",
+      "summary": "How many rows match this filter?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "policy-decision": {
+      "pillar": "general",
+      "area": "Rules and policy",
+      "question_type": "noul",
+      "reference": "generator",
+      "summary": "Under this policy, is this case allowed?",
+      "test_items": 240,
+      "test_source_units": 48
+    },
+    "policy-clause": {
+      "pillar": "general",
+      "area": "Rules and policy",
+      "question_type": "choice",
+      "reference": "generator",
+      "summary": "Which clause decides this case?",
+      "test_items": 240,
+      "test_source_units": 48
+    }
+  },
+  "pillars": {
+    "general": [
+      "constraint-pick",
+      "entailment",
+      "word-problem",
+      "estimate-band",
+      "table-lookup",
+      "table-count-band",
+      "policy-decision",
+      "policy-clause"
+    ],
+    "software": [
+      "code-output",
+      "type-check-pair",
+      "patch-pair",
+      "failing-test",
+      "fix-file",
+      "bug-function",
+      "vuln-pair",
+      "weakness-class",
+      "mutant-kill",
+      "expected-value",
+      "incident-root-cause",
+      "semver-impact"
+    ]
+  },
+  "shortcuts": {
+    "bug-function": {
+      "best_shortcut": "first_called",
+      "best_shortcut_skill": 5.38116591928251,
+      "shortcuts_checked": 9
+    },
+    "code-output": {
+      "best_shortcut": "text-medoid",
+      "best_shortcut_skill": 9.826589595375726,
+      "shortcuts_checked": 8
+    },
+    "constraint-pick": {
+      "best_shortcut": "text-outlier",
+      "best_shortcut_skill": 5.555555555555558,
+      "shortcuts_checked": 5
+    },
+    "entailment": {
+      "best_shortcut": "negation_false",
+      "best_shortcut_skill": 1.6666666666666607,
+      "shortcuts_checked": 3
+    },
+    "estimate-band": {
+      "best_shortcut": "naive_slip",
+      "best_shortcut_skill": 3.124999999999999,
+      "shortcuts_checked": 4
+    },
+    "expected-value": {
+      "best_shortcut": "assertion_above_median",
+      "best_shortcut_skill": -1.801801801801793,
+      "shortcuts_checked": 2
+    },
+    "failing-test": {
+      "best_shortcut": "longest-source",
+      "best_shortcut_skill": 7.271583406468012,
+      "shortcuts_checked": 11
+    },
+    "fix-file": {
+      "best_shortcut": "text-medoid",
+      "best_shortcut_skill": 1.293103448275862,
+      "shortcuts_checked": 5
+    },
+    "incident-root-cause": {
+      "best_shortcut": "deepest_leaf",
+      "best_shortcut_skill": 0.0,
+      "shortcuts_checked": 11
+    },
+    "mutant-kill": {
+      "best_shortcut": "diff_above_median",
+      "best_shortcut_skill": 2.941176470588234,
+      "shortcuts_checked": 4
+    },
+    "patch-pair": {
+      "best_shortcut": "larger-patch",
+      "best_shortcut_skill": 0.7518796992481336,
+      "shortcuts_checked": 4
+    },
+    "policy-clause": {
+      "best_shortcut": "last_option",
+      "best_shortcut_skill": 6.975057181282673,
+      "shortcuts_checked": 8
+    },
+    "policy-decision": {
+      "best_shortcut": "long_statement",
+      "best_shortcut_skill": 1.6666666666666607,
+      "shortcuts_checked": 3
+    },
+    "semver-impact": {
+      "best_shortcut": "private_paths",
+      "best_shortcut_skill": -1.9999999999999938,
+      "shortcuts_checked": 3
+    },
+    "table-count-band": {
+      "best_shortcut": "first_condition_only",
+      "best_shortcut_skill": 0.0,
+      "shortcuts_checked": 3
+    },
+    "table-lookup": {
+      "best_shortcut": "extreme_row",
+      "best_shortcut_skill": 0.0,
+      "shortcuts_checked": 7
+    },
+    "type-check-pair": {
+      "best_shortcut": "cast_or_ignore",
+      "best_shortcut_skill": 0.0,
+      "shortcuts_checked": 3
+    },
+    "vuln-pair": {
+      "best_shortcut": "shorter",
+      "best_shortcut_skill": 19.999999999999996,
+      "shortcuts_checked": 4
+    },
+    "weakness-class": {
+      "best_shortcut": "keywords",
+      "best_shortcut_skill": 13.20754716981132,
+      "shortcuts_checked": 3
+    },
+    "word-problem": {
+      "best_shortcut": "text-medoid",
+      "best_shortcut_skill": 3.333333333333336,
+      "shortcuts_checked": 7
+    }
+  },
+  "results": {
+    "jev-1.13.0": {
+      "split": "test",
+      "families": {
+        "bug-function": {
+          "n": 266,
+          "answered": 266,
+          "source_units": 26,
+          "accuracy": 0.8045112781954887,
+          "floor": 0.20676691729323307,
+          "floor_strategy": "shortcut:first_called",
+          "skill": 75.35545023696683,
+          "ranking": null,
+          "brier_skill": 0.6808751219922384,
+          "ece": 0.06483975089238242,
+          "log_loss": 0.616956346782435,
+          "skill_ci95": [
+            65.55555555555554,
+            84.43396226415094
+          ],
+          "skill_se": 4.749410635243521
+        },
+        "code-output": {
+          "n": 233,
+          "answered": 233,
+          "source_units": 27,
+          "accuracy": 0.5536480686695279,
+          "floor": 0.2575107296137339,
+          "floor_strategy": "majority@3",
+          "skill": 39.884393063583815,
+          "ranking": 0.8108897081036347,
+          "brier_skill": 0.09624545940989226,
+          "ece": 0.2379641912689123,
+          "log_loss": 1.3121359278018763,
+          "skill_ci95": [
+            29.213483146067414,
+            51.16279069767442
+          ],
+          "skill_se": 5.638824007036748
+        },
+        "constraint-pick": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.5208333333333334,
+          "floor": 0.25,
+          "floor_strategy": "majority@1",
+          "skill": 36.111111111111114,
+          "ranking": 0.784224537037037,
+          "brier_skill": 0.184498485982156,
+          "ece": 0.06565404040404042,
+          "log_loss": 1.0884908964256437,
+          "skill_ci95": [
+            28.57142857142857,
+            43.71584699453552
+          ],
+          "skill_se": 3.880447403774525
+        },
+        "entailment": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.8791666666666667,
+          "floor": 0.5083333333333333,
+          "floor_strategy": "shortcut:negation_false",
+          "skill": 75.42372881355932,
+          "ranking": 0.9474305555555556,
+          "brier_skill": 0.6289416666666667,
+          "ece": 0.03704166666666675,
+          "log_loss": 0.30730124389896274,
+          "skill_ci95": [
+            67.71653543307089,
+            82.78688524590164
+          ],
+          "skill_se": 3.82350975595032
+        },
+        "estimate-band": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.4125,
+          "floor": 0.225,
+          "floor_strategy": "shortcut:naive_slip",
+          "skill": 24.19354838709677,
+          "ranking": null,
+          "brier_skill": 0.14520320035370815,
+          "ece": 0.10599031986531987,
+          "log_loss": 1.2798925862354986,
+          "mean_level_error": 0.7416666666666667,
+          "skill_ci95": [
+            15.343915343915343,
+            33.51063829787234
+          ],
+          "skill_se": 4.659346631751013
+        },
+        "expected-value": {
+          "n": 227,
+          "answered": 227,
+          "source_units": 21,
+          "accuracy": 0.7180616740088106,
+          "floor": 0.5110132158590308,
+          "floor_strategy": "majority@0",
+          "skill": 42.34234234234235,
+          "ranking": 0.8419928549238894,
+          "brier_skill": 0.26801843740292186,
+          "ece": 0.0910132158590308,
+          "log_loss": 0.539227034782874,
+          "skill_ci95": [
+            28.7037037037037,
+            55.9322033898305
+          ],
+          "skill_se": 7.005961009654754
+        },
+        "failing-test": {
+          "n": 210,
+          "answered": 210,
+          "source_units": 33,
+          "accuracy": 0.26666666666666666,
+          "floor": 0.2619047619047619,
+          "floor_strategy": "shortcut:longest-source",
+          "skill": 0.6451612903225783,
+          "ranking": null,
+          "brier_skill": 0.0635382987278883,
+          "ece": 0.17700144300144302,
+          "log_loss": 1.7390036050059148,
+          "skill_ci95": [
+            -13.736263736263737,
+            15.384615384615389
+          ],
+          "skill_se": 7.508048113592721
+        },
+        "fix-file": {
+          "n": 257,
+          "answered": 257,
+          "source_units": 91,
+          "accuracy": 0.6147859922178989,
+          "floor": 0.10894941634241245,
+          "floor_strategy": "shortcut:token_overlap",
+          "skill": 56.76855895196507,
+          "ranking": null,
+          "brier_skill": 0.43690403726217386,
+          "ece": 0.06842510710214988,
+          "log_loss": 1.327931991261549,
+          "skill_ci95": [
+            49.99999999999999,
+            63.47826086956522
+          ],
+          "skill_se": 3.549803544948996
+        },
+        "incident-root-cause": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.8416666666666667,
+          "floor": 0.1375,
+          "floor_strategy": "majority@0",
+          "skill": 81.64251207729467,
+          "ranking": null,
+          "brier_skill": 0.7324838277782909,
+          "ece": 0.03853072390572397,
+          "log_loss": 0.47171681443632146,
+          "skill_ci95": [
+            75.62189054726367,
+            86.95652173913044
+          ],
+          "skill_se": 2.8773255671123312
+        },
+        "mutant-kill": {
+          "n": 206,
+          "answered": 206,
+          "source_units": 29,
+          "accuracy": 0.6553398058252428,
+          "floor": 0.5194174757281553,
+          "floor_strategy": "shortcut:diff_above_median",
+          "skill": 28.28282828282829,
+          "ranking": 0.7679581447963801,
+          "brier_skill": 0.1641717006033181,
+          "ece": 0.07839805825242717,
+          "log_loss": 0.6161951040074879,
+          "skill_ci95": [
+            6.741573033707882,
+            46.23655913978495
+          ],
+          "skill_se": 10.089421850478445
+        },
+        "patch-pair": {
+          "n": 268,
+          "answered": 268,
+          "source_units": 36,
+          "accuracy": 0.6865671641791045,
+          "floor": 0.5074626865671642,
+          "floor_strategy": "shortcut:larger-patch",
+          "skill": 36.36363636363635,
+          "ranking": 0.759927596769702,
+          "brier_skill": 0.17051649122806556,
+          "ece": 0.10772388059701493,
+          "log_loss": 0.6041795885402798,
+          "skill_ci95": [
+            17.460317460317455,
+            51.66666666666667
+          ],
+          "skill_se": 8.913097977218001
+        },
+        "policy-clause": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.5333333333333333,
+          "floor": 0.175,
+          "floor_strategy": "shortcut:last_option",
+          "skill": 43.43434343434344,
+          "ranking": null,
+          "brier_skill": 0.27284224034105253,
+          "ece": 0.21974957912457913,
+          "log_loss": 1.3918980551104965,
+          "skill_ci95": [
+            30.65326633165829,
+            55.28846153846154
+          ],
+          "skill_se": 6.130641204723556
+        },
+        "policy-decision": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.725,
+          "floor": 0.5083333333333333,
+          "floor_strategy": "shortcut:long_statement",
+          "skill": 44.06779661016949,
+          "ranking": 0.8211458333333334,
+          "brier_skill": 0.2693483333333333,
+          "ece": 0.06954166666666668,
+          "log_loss": 0.5471543020558289,
+          "skill_ci95": [
+            26.95652173913043,
+            58.33333333333333
+          ],
+          "skill_se": 8.097061841589905
+        },
+        "semver-impact": {
+          "n": 262,
+          "answered": 262,
+          "source_units": 103,
+          "accuracy": 0.7900763358778626,
+          "floor": 0.42748091603053434,
+          "floor_strategy": "majority@1",
+          "skill": 63.33333333333334,
+          "ranking": 0.9061771029826664,
+          "brier_skill": 0.49666859698278853,
+          "ece": 0.09132893823733511,
+          "log_loss": 0.7650154812423829,
+          "mean_level_error": 0.2786259541984733,
+          "skill_ci95": [
+            53.164556962025316,
+            72.29729729729729
+          ],
+          "skill_se": 4.781167736957571
+        },
+        "table-count-band": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.48333333333333334,
+          "floor": 0.2,
+          "floor_strategy": "majority@0",
+          "skill": 35.416666666666664,
+          "ranking": null,
+          "brier_skill": 0.24566979166666902,
+          "ece": 0.034375,
+          "log_loss": 1.0770607129813443,
+          "mean_level_error": 0.5583333333333333,
+          "skill_ci95": [
+            29.166666666666664,
+            41.66666666666666
+          ],
+          "skill_se": 3.298199896700281
+        },
+        "table-lookup": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.4375,
+          "floor": 0.2625,
+          "floor_strategy": "majority@1",
+          "skill": 23.72881355932203,
+          "ranking": null,
+          "brier_skill": 0.1240503544780529,
+          "ece": 0.14335648148148147,
+          "log_loss": 1.230914336344799,
+          "skill_ci95": [
+            16.393442622950822,
+            30.93922651933702
+          ],
+          "skill_se": 3.735508650122101
+        },
+        "type-check-pair": {
+          "n": 205,
+          "answered": 205,
+          "source_units": 15,
+          "accuracy": 0.9463414634146341,
+          "floor": 0.5804878048780487,
+          "floor_strategy": "majority@0",
+          "skill": 87.20930232558139,
+          "ranking": 0.9903263631033808,
+          "brier_skill": 0.831579099081493,
+          "ece": 0.040731707317073096,
+          "log_loss": 0.14972610360391242,
+          "skill_ci95": [
+            71.6981132075472,
+            96.87500000000001
+          ],
+          "skill_se": 6.541178819290381
+        },
+        "vuln-pair": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 212,
+          "accuracy": 0.6916666666666667,
+          "floor": 0.6,
+          "floor_strategy": "shortcut:shorter",
+          "skill": 22.916666666666668,
+          "ranking": 0.9023611111111111,
+          "brier_skill": 0.09285333333333334,
+          "ece": 0.19333333333333333,
+          "log_loss": 0.948813684142273,
+          "skill_ci95": [
+            6.024096385542149,
+            36.95652173913044
+          ],
+          "skill_se": 7.955065743504596
+        },
+        "weakness-class": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 194,
+          "accuracy": 0.6958333333333333,
+          "floor": 0.23333333333333334,
+          "floor_strategy": "shortcut:keywords",
+          "skill": 60.32608695652174,
+          "ranking": null,
+          "brier_skill": 0.4508574625758913,
+          "ece": 0.13882449494949498,
+          "log_loss": 1.8417227651622043,
+          "skill_ci95": [
+            52.74725274725275,
+            67.6328502415459
+          ],
+          "skill_se": 3.895650856311379
+        },
+        "word-problem": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.5666666666666667,
+          "floor": 0.26666666666666666,
+          "floor_strategy": "shortcut:smallest",
+          "skill": 40.90909090909091,
+          "ranking": 0.827199074074074,
+          "brier_skill": 0.25693275005951766,
+          "ece": 0.08917971380471387,
+          "log_loss": 0.9886405237114888,
+          "skill_ci95": [
+            30.246913580246915,
+            50.82872928176795
+          ],
+          "skill_se": 5.286778399815843
+        }
+      },
+      "indices": {
+        "verdict_index": {
+          "value": 45.91776856912014,
+          "ci95": [
+            43.146807299679104,
+            48.43011847835393
+          ],
+          "se": 1.362572167319758
+        },
+        "software_index": {
+          "value": 49.589189324253596,
+          "ci95": [
+            45.49702925593087,
+            53.139508785453245
+          ],
+          "se": 1.9167032888897808
+        },
+        "general_index": {
+          "value": 40.41063743641997,
+          "ci95": [
+            36.79009602318492,
+            43.913676822705824
+          ],
+          "se": 1.8321838871456566
+        },
+        "calibration_index": {
+          "value": 0.3306099344629726,
+          "ci95": [
+            0.3018723826429165,
+            0.35419060299440003
+          ],
+          "se": 0.013258892092781647
+        }
+      }
+    },
+    "gpt-6-astra-high (reference)": {
+      "split": "test",
+      "families": {
+        "bug-function": {
+          "n": 266,
+          "answered": 266,
+          "source_units": 26,
+          "accuracy": 1.0,
+          "floor": 0.20676691729323307,
+          "floor_strategy": "shortcut:first_called",
+          "skill": 100.0,
+          "ranking": null,
+          "brier_skill": 0.9999989913444026,
+          "ece": 0.00023718045112774977,
+          "log_loss": 0.00023752862379123186,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 6.406180170362105e-15
+        },
+        "code-output": {
+          "n": 233,
+          "answered": 233,
+          "source_units": 27,
+          "accuracy": 1.0,
+          "floor": 0.2575107296137339,
+          "floor_strategy": "majority@3",
+          "skill": 99.99999999999999,
+          "ranking": 1.0,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 5.9244054551253914e-15
+        },
+        "constraint-pick": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.25,
+          "floor_strategy": "majority@1",
+          "skill": 100.0,
+          "ranking": 1.0,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 7.673963521572304e-15
+        },
+        "entailment": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.5083333333333333,
+          "floor_strategy": "shortcut:negation_false",
+          "skill": 100.0,
+          "ranking": 1.0,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            100.0,
+            100.0
+          ],
+          "skill_se": 0.0
+        },
+        "estimate-band": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.225,
+          "floor_strategy": "shortcut:naive_slip",
+          "skill": 100.0,
+          "ranking": null,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "mean_level_error": 0.0,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 6.5744365714311785e-15
+        },
+        "expected-value": {
+          "n": 227,
+          "answered": 227,
+          "source_units": 21,
+          "accuracy": 1.0,
+          "floor": 0.5110132158590308,
+          "floor_strategy": "majority@0",
+          "skill": 100.0,
+          "ranking": 1.0,
+          "brier_skill": 0.999999947110904,
+          "ece": 1.3215859030801802e-05,
+          "log_loss": 1.3222471368945387e-05,
+          "skill_ci95": [
+            100.0,
+            100.0
+          ],
+          "skill_se": 2.714896299033119e-15
+        },
+        "failing-test": {
+          "n": 210,
+          "answered": 210,
+          "source_units": 33,
+          "accuracy": 0.7761904761904762,
+          "floor": 0.2619047619047619,
+          "floor_strategy": "shortcut:longest-source",
+          "skill": 69.6774193548387,
+          "ranking": null,
+          "brier_skill": 0.5208447759394671,
+          "ece": 0.19401809523809516,
+          "log_loss": 1.0739272028271307,
+          "skill_ci95": [
+            54.54545454545455,
+            84.61538461538461
+          ],
+          "skill_se": 7.657430213729195
+        },
+        "fix-file": {
+          "n": 257,
+          "answered": 257,
+          "source_units": 91,
+          "accuracy": 0.8210116731517509,
+          "floor": 0.10894941634241245,
+          "floor_strategy": "shortcut:token_overlap",
+          "skill": 79.91266375545851,
+          "ranking": null,
+          "brier_skill": 0.7150616563711347,
+          "ece": 0.07853208745647602,
+          "log_loss": 0.5889274798794126,
+          "skill_ci95": [
+            73.70892018779342,
+            85.97285067873302
+          ],
+          "skill_se": 3.168658129819657
+        },
+        "incident-root-cause": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 0.9916666666666667,
+          "floor": 0.1375,
+          "floor_strategy": "majority@0",
+          "skill": 99.03381642512078,
+          "ranking": null,
+          "brier_skill": 0.9858250991333293,
+          "ece": 0.022519583333333405,
+          "log_loss": 0.033373568959181324,
+          "skill_ci95": [
+            97.5609756097561,
+            100.0
+          ],
+          "skill_se": 0.6776211534072429
+        },
+        "mutant-kill": {
+          "n": 206,
+          "answered": 206,
+          "source_units": 29,
+          "accuracy": 0.9563106796116505,
+          "floor": 0.5194174757281553,
+          "floor_strategy": "shortcut:diff_above_median",
+          "skill": 90.9090909090909,
+          "ranking": 0.9971248114630468,
+          "brier_skill": 0.8766757929864253,
+          "ece": 0.029572815533980452,
+          "log_loss": 0.10260620365276407,
+          "skill_ci95": [
+            79.34782608695653,
+            99.01960784313725
+          ],
+          "skill_se": 5.043007418151843
+        },
+        "patch-pair": {
+          "n": 268,
+          "answered": 268,
+          "source_units": 36,
+          "accuracy": 0.7910447761194029,
+          "floor": 0.5074626865671642,
+          "floor_strategy": "shortcut:larger-patch",
+          "skill": 57.575757575757564,
+          "ranking": 0.9012252854358117,
+          "brier_skill": 0.29608939504315945,
+          "ece": 0.16111194029850734,
+          "log_loss": 0.6556851357159027,
+          "skill_ci95": [
+            34.426229508196734,
+            76.15384615384616
+          ],
+          "skill_se": 10.624880446844124
+        },
+        "policy-clause": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.175,
+          "floor_strategy": "shortcut:last_option",
+          "skill": 100.0,
+          "ranking": null,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 5.853901964493314e-15
+        },
+        "policy-decision": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.5083333333333333,
+          "floor_strategy": "shortcut:long_statement",
+          "skill": 100.0,
+          "ranking": 1.0,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            100.0,
+            100.0
+          ],
+          "skill_se": 0.0
+        },
+        "semver-impact": {
+          "n": 262,
+          "answered": 262,
+          "source_units": 103,
+          "accuracy": 0.8854961832061069,
+          "floor": 0.42748091603053434,
+          "floor_strategy": "majority@1",
+          "skill": 80.00000000000001,
+          "ranking": 0.9712507749859816,
+          "brier_skill": 0.6495747223690813,
+          "ece": 0.10905343511450383,
+          "log_loss": 0.6417669802807324,
+          "mean_level_error": 0.14122137404580154,
+          "skill_ci95": [
+            72.6027397260274,
+            86.58536585365853
+          ],
+          "skill_se": 3.560473141386366
+        },
+        "table-count-band": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.2,
+          "floor_strategy": "majority@0",
+          "skill": 100.0,
+          "ranking": null,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "mean_level_error": 0.0,
+          "skill_ci95": [
+            100.0,
+            100.0
+          ],
+          "skill_se": 0.0
+        },
+        "table-lookup": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.2625,
+          "floor_strategy": "majority@1",
+          "skill": 100.0,
+          "ranking": null,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 5.7885296240531976e-15
+        },
+        "type-check-pair": {
+          "n": 205,
+          "answered": 205,
+          "source_units": 15,
+          "accuracy": 1.0,
+          "floor": 0.5804878048780487,
+          "floor_strategy": "majority@0",
+          "skill": 100.0,
+          "ranking": 1.0,
+          "brier_skill": 0.9999953928082861,
+          "ece": 0.00024390243902439046,
+          "log_loss": 0.00024446674007077527,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 4.353047156307286e-15
+        },
+        "vuln-pair": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 212,
+          "accuracy": 0.95,
+          "floor": 0.6,
+          "floor_strategy": "shortcut:shorter",
+          "skill": 87.5,
+          "ranking": 0.9753125,
+          "brier_skill": 0.80391435,
+          "ece": 0.03775416666666666,
+          "log_loss": 0.22142098782061437,
+          "skill_ci95": [
+            79.48717948717949,
+            93.61702127659574
+          ],
+          "skill_se": 3.648617821299404
+        },
+        "weakness-class": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 194,
+          "accuracy": 0.7708333333333334,
+          "floor": 0.23333333333333334,
+          "floor_strategy": "shortcut:keywords",
+          "skill": 70.10869565217392,
+          "ranking": null,
+          "brier_skill": 0.5522616440435262,
+          "ece": 0.18207416462479592,
+          "log_loss": 1.121643248359868,
+          "skill_ci95": [
+            63.29787234042553,
+            76.8361581920904
+          ],
+          "skill_se": 3.4858544792909227
+        },
+        "word-problem": {
+          "n": 240,
+          "answered": 240,
+          "source_units": 48,
+          "accuracy": 1.0,
+          "floor": 0.26666666666666666,
+          "floor_strategy": "shortcut:smallest",
+          "skill": 100.0,
+          "ranking": 1.0,
+          "brier_skill": 1.0,
+          "ece": 0.0,
+          "log_loss": 0.0,
+          "skill_ci95": [
+            99.99999999999999,
+            100.00000000000001
+          ],
+          "skill_se": 5.961682209593996e-15
+        }
+      },
+      "indices": {
+        "verdict_index": {
+          "value": 91.73587218362202,
+          "ci95": [
+            90.13712777350102,
+            93.11749679733347
+          ],
+          "se": 0.7735651264462774
+        },
+        "software_index": {
+          "value": 86.22645363937004,
+          "ci95": [
+            83.5618796225017,
+            88.52916132888913
+          ],
+          "se": 1.2892752107437957
+        },
+        "general_index": {
+          "value": 100.0,
+          "ci95": [
+            100.0,
+            100.0
+          ],
+          "se": 0.0
+        },
+        "calibration_index": {
+          "value": 0.8700120883574858,
+          "ci95": [
+            0.8453861302076838,
+            0.8905098146085407
+          ],
+          "se": 0.01144563009002743
+        }
+      }
+    }
+  },
+  "separated": {
+    "verdict_index": true,
+    "software_index": true,
+    "general_index": true
+  },
+  "probability_ranges": {
+    "jev-1.13.0": {
+      "entailment": {
+        "min": 0.01,
+        "median": 0.57,
+        "max": 0.99,
+        "share_above_half": 0.5458333333333333
+      },
+      "expected-value": {
+        "min": 0.02,
+        "median": 0.74,
+        "max": 0.98,
+        "share_above_half": 0.7268722466960352
+      },
+      "mutant-kill": {
+        "min": 0.1,
+        "median": 0.65,
+        "max": 0.97,
+        "share_above_half": 0.7233009708737864
+      },
+      "policy-decision": {
+        "min": 0.03,
+        "median": 0.62,
+        "max": 0.98,
+        "share_above_half": 0.6
+      }
+    },
+    "gpt-6-astra-high (reference)": {
+      "entailment": {
+        "min": 0.0,
+        "median": 0.5,
+        "max": 1.0,
+        "share_above_half": 0.5
+      },
+      "expected-value": {
+        "min": 0.0,
+        "median": 1.0,
+        "max": 1.0,
+        "share_above_half": 0.5110132158590308
+      },
+      "mutant-kill": {
+        "min": 0.0,
+        "median": 0.97,
+        "max": 1.0,
+        "share_above_half": 0.5388349514563107
+      },
+      "policy-decision": {
+        "min": 0.0,
+        "median": 0.5,
+        "max": 1.0,
+        "share_above_half": 0.5
+      }
+    }
+  },
+  "run": {
+    "jev-1.13.0": {
+      "answered": 4774,
+      "latency_ms_p50": 294.56833307631314,
+      "latency_ms_p95": 415.10020894929767,
+      "total_cost_usd": 0.5767825980000001,
+      "models_served": [
+        "jev-1.13.0"
+      ]
+    },
+    "gpt-6-astra-high (reference)": {
+      "answered": 4774,
+      "latency_ms_p50": 7188.5025831870735,
+      "latency_ms_p95": 17809.6077919472,
+      "total_cost_usd": null,
+      "models_served": [
+        "codex:gpt-6-astra"
+      ]
+    }
+  },
+  "notes": [
+    "Skill is 100 * (accuracy - floor) / (1 - floor); floor is the best of majority position, uniform guess and the family's shortcut baselines on the test split.",
+    "Intervals are 95% bootstrap intervals resampling source units.",
+    "The admission gate was amended after the pilot (DECISIONS 2026-09-25): the reference only has to reach skill 40, and a family is too easy when Jev reaches 90.",
+    "Jev latency is wall clock from the operator's machine in California and includes the network round trip; indicative only."
+  ]
+}

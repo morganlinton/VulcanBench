@@ -32,6 +32,7 @@ import json
 import math
 import statistics
 import sys
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -62,7 +63,11 @@ OPUS_RUN = ROOT / "runs-code-quality-maintenance-v3.15"
 OUTPUT = ROOT / "docs/results/swe-v4-opus55-2026-09"
 MODELS = ("opus55", "astra", "fable")
 NAMES = {"opus55": "Claude Opus 5.5", "astra": "GPT-6 Astra", "fable": "Claude Fable 5.1"}
-HARNESS = {"opus55": "Claude Code 2.1.280", "astra": "Codex", "fable": "Claude Code 2.1.259 to 2.1.261"}
+HARNESS = {
+    "opus55": "Claude Code 2.1.280",
+    "astra": "Codex",
+    "fable": "Claude Code 2.1.259 to 2.1.261",
+}
 # Validated with the dataviz palette checker on #f7f5f0: CVD separation sits in
 # the 6 to 8 floor band and contrast is under 3:1, both legal only with
 # secondary encoding, which the distinct markers, direct labels and table give.
@@ -152,7 +157,9 @@ def load_opus55():
     require(summary["protocol"] == "code-quality-maintenance-v3.15", "wrong Opus 5.5 protocol")
     require(summary["ready_for_publication"], "v3.15 summary not final")
     require(set(summary["passing_panels"]) == set(family.PANELS), "v3.15 panels")
-    require(protocol["weights"]["code_quality"]["total"] == WEIGHTS_V3["human_like"], "weights drift")
+    require(
+        protocol["weights"]["code_quality"]["total"] == WEIGHTS_V3["human_like"], "weights drift"
+    )
     manifest = {r["id"]: r for r in json.loads((OPUS_RUN / "private-manifest.json").read_text())}
     rows = []
     for entry in summary["rows"]:
@@ -160,22 +167,45 @@ def load_opus55():
         cq, _, _ = family.code_quality(entry)
         src = Path(run["source_directory"])
         s = json.loads((src / "summary.json").read_text())
-        rows.append({"model": "opus55", "effort": entry["effort"], "task": entry["task"], "run_dir": src,
-                     "functional": run["functional"], "minutes": run["duration_s"] / 60, "code_quality": cq,
-                     "combined": family.composite(run, cq, WEIGHTS_V3["human_like"]),
-                     "usd": s["economics"]["cli_reported_cost_usd"]})
-    comparison = json.loads((ROOT / "docs/results/swe-v4-opus55-2026-09/comparison.json").read_text())
+        rows.append(
+            {
+                "model": "opus55",
+                "effort": entry["effort"],
+                "task": entry["task"],
+                "run_dir": src,
+                "functional": run["functional"],
+                "minutes": run["duration_s"] / 60,
+                "code_quality": cq,
+                "combined": family.composite(run, cq, WEIGHTS_V3["human_like"]),
+                "usd": s["economics"]["cli_reported_cost_usd"],
+            }
+        )
+    comparison = json.loads(
+        (ROOT / "docs/results/swe-v4-opus55-2026-09/comparison.json").read_text()
+    )
     for ex in comparison["excluded"]:  # not judged, but it ran: counts in passed, time and cost
         src = ROOT / "runs-effort-opus55" / ex["effort"] / ex["run_id"]
         s = json.loads((src / "summary.json").read_text())
-        rows.append({"model": "opus55", "effort": ex["effort"], "task": ex["task"], "run_dir": src,
-                     "functional": s["scores"]["functional"], "minutes": s["duration_s"] / 60,
-                     "code_quality": None, "combined": None, "usd": s["economics"]["cli_reported_cost_usd"]})
-    return rows, {"summary": digest((OPUS_RUN / "summary.json").read_bytes()),
-                  "protocol": digest((OPUS_RUN / "protocol.json").read_bytes())}
+        rows.append(
+            {
+                "model": "opus55",
+                "effort": ex["effort"],
+                "task": ex["task"],
+                "run_dir": src,
+                "functional": s["scores"]["functional"],
+                "minutes": s["duration_s"] / 60,
+                "code_quality": None,
+                "combined": None,
+                "usd": s["economics"]["cli_reported_cost_usd"],
+            }
+        )
+    return rows, {
+        "summary": digest((OPUS_RUN / "summary.json").read_bytes()),
+        "protocol": digest((OPUS_RUN / "protocol.json").read_bytes()),
+    }
 
 
-def main():  # noqa: PLR0915, one linear figure
+def main():  # noqa: PLR0912, PLR0915, one linear figure
     judged, v34_hashes, _ledger = load_judged()
     man34 = {r["run_id"]: r for r in json.loads((JUDGED / "private-manifest.json").read_text())}
     for r in judged:
@@ -188,13 +218,22 @@ def main():  # noqa: PLR0915, one linear figure
         for e in LEVELS:
             rs = [r for r in rows if r["model"] == m and r["effort"] == e]
             require(len(rs) == 23, f"{m} {e}: {len(rs)} rows")
-            g = {"n": len(rs), "combined": mean_se(r["combined"] for r in rs),
-                 "code_quality": mean_se(r["code_quality"] for r in rs),
-                 "passed": sum(r["functional"] == 1 for r in rs), "usd": mean_se(r["usd"] for r in rs),
-                 "minutes": mean_se(r["minutes"] for r in rs), "fb_runs": 0, "fb_share": None}
+            g = {
+                "n": len(rs),
+                "combined": mean_se(r["combined"] for r in rs),
+                "code_quality": mean_se(r["code_quality"] for r in rs),
+                "passed": sum(r["functional"] == 1 for r in rs),
+                "usd": mean_se(r["usd"] for r in rs),
+                "minutes": mean_se(r["minutes"] for r in rs),
+                "fb_runs": 0,
+                "fb_share": None,
+            }
             if m in CLAUDE_MAIN:
                 counts = [replies(r["run_dir"]) for r in rs]
-                other = [sum(v for k, v in c.items() if k not in (CLAUDE_MAIN[m], "<synthetic>")) for c in counts]
+                other = [
+                    sum(v for k, v in c.items() if k not in (CLAUDE_MAIN[m], "<synthetic>"))
+                    for c in counts
+                ]
                 g["fb_runs"] = sum(o > 0 for o in other)
                 g["fb_share"] = 100 * sum(other) / max(1, sum(sum(c.values()) for c in counts))
             groups[m, e] = g
@@ -207,33 +246,78 @@ def main():  # noqa: PLR0915, one linear figure
     yf = lambda i: 1 - i / H  # noqa: E731
 
     def text(x, y, s, size=13, bold=False, heading=False, numeric=False, ha="left", color=INK):
-        fam = "IBM Plex Mono" if numeric else ("Chakra Petch SemiBold" if bold else "Chakra Petch Medium") if heading else "Geist"
-        wt = (500 if bold else 400) if numeric else ((600 if bold else 500) if heading else (700 if bold else 400))
-        return fig.text(x, yf(y), s, fontsize=size, fontfamily=fam, weight=wt, ha=ha, va="center", color=color)
+        fam = (
+            "IBM Plex Mono"
+            if numeric
+            else ("Chakra Petch SemiBold" if bold else "Chakra Petch Medium")
+            if heading
+            else "Geist"
+        )
+        wt = (
+            (500 if bold else 400)
+            if numeric
+            else ((600 if bold else 500) if heading else (700 if bold else 400))
+        )
+        return fig.text(
+            x, yf(y), s, fontsize=size, fontfamily=fam, weight=wt, ha=ha, va="center", color=color
+        )
 
     def line(x1, x2, y, color=RULE, width=0.8):
-        fig.add_artist(plt.Line2D([x1, x2], [yf(y), yf(y)], transform=fig.transFigure, color=color, lw=width))
+        fig.add_artist(
+            plt.Line2D([x1, x2], [yf(y), yf(y)], transform=fig.transFigure, color=color, lw=width)
+        )
 
     left, right = 0.06, 0.94
     logo = fig.add_axes([left, yf(0.86), 0.42 / W, 0.42 / H])
     mark = logo.imshow(plt.imread(ROOT / "docs/assets/vulcanbench-logo.png"))
-    mark.set_clip_path(FancyBboxPatch((0, 0), 1, 1, boxstyle="round,pad=0,rounding_size=.22", transform=logo.transAxes))
+    mark.set_clip_path(
+        FancyBboxPatch(
+            (0, 0), 1, 1, boxstyle="round,pad=0,rounding_size=.22", transform=logo.transAxes
+        )
+    )
     logo.axis("off")
     text(left + 0.038, 0.65, "VulcanBench", 20, True, heading=True)
     text(right, 0.65, "September 2026", 14, ha="right", color=MUTED)
     line(left, right, 1.05, INK, 1.2)
 
     best = {m: max(LEVELS, key=lambda e: groups[m, e]["combined"]["mean"]) for m in MODELS}
-    text(left, 1.72, "VulcanBench Frontier v4: Claude Opus 5.5, GPT-6 Astra and Claude Fable 5.1", 30, True, heading=True)
+    text(
+        left,
+        1.72,
+        "VulcanBench Frontier v4: Claude Opus 5.5, GPT-6 Astra and Claude Fable 5.1",
+        30,
+        True,
+        heading=True,
+    )
     order = sorted(MODELS, key=lambda m: -groups[m, best[m]]["combined"]["mean"])
-    head = "  ·  ".join(f"{NAMES[m]} {groups[m, best[m]]['combined']['mean']:.2f} at {best[m].replace('-', ' ')}" for m in order)
+    head = "  ·  ".join(
+        f"{NAMES[m]} {groups[m, best[m]]['combined']['mean']:.2f} at {best[m].replace('-', ' ')}"
+        for m in order
+    )
     text(left, 2.22, f"Best combined score per model: {head}.", 15)
-    text(left, 2.60, "23 hard legacy-reconstruction tasks per effort level. Code quality judged by Muse Spark 1.3 and Grok 4.6.", 13.5, color=MUTED)
+    text(
+        left,
+        2.60,
+        "23 hard legacy-reconstruction tasks per effort level. Code quality judged by Muse Spark 1.3 and Grok 4.6.",
+        13.5,
+        color=MUTED,
+    )
 
     x = left
     for m in MODELS:
-        fig.add_artist(plt.Line2D([x + 0.004], [yf(3.05)], transform=fig.transFigure, marker=MARKERS[m], color=COLORS[m],
-                                  markersize=9, markeredgecolor=INK, markeredgewidth=0.6, linestyle="none"))
+        fig.add_artist(
+            plt.Line2D(
+                [x + 0.004],
+                [yf(3.05)],
+                transform=fig.transFigure,
+                marker=MARKERS[m],
+                color=COLORS[m],
+                markersize=9,
+                markeredgecolor=INK,
+                markeredgewidth=0.6,
+                linestyle="none",
+            )
+        )
         label = f"{NAMES[m]}{' (with fallback)' if m in CLAUDE_MAIN else ''}"
         text(x + 0.016, 3.05, label, 13, True)
         x += {"opus55": 0.30, "astra": 0.16, "fable": 0}[m]
@@ -250,7 +334,13 @@ def main():  # noqa: PLR0915, one linear figure
         return ax
 
     text(left, 3.62, "Combined score", 20, True, heading=True)
-    text(left, 3.94, "/100  ·  higher is better  ·  focused scale  ·  whiskers +/-1 se", 12, color=MUTED)
+    text(
+        left,
+        3.94,
+        "/100  ·  higher is better  ·  focused scale  ·  whiskers +/-1 se",
+        12,
+        color=MUTED,
+    )
     ax = axis(0.085, 0.40, 4.25, 3.2)
     vals = [groups[m, e]["combined"] for m in MODELS for e in LEVELS]
     lo = math.floor(min(v["mean"] - v["se"] for v in vals)) - 1
@@ -261,23 +351,67 @@ def main():  # noqa: PLR0915, one linear figure
         ys = [groups[m, e]["combined"]["mean"] for e in LEVELS]
         es = [groups[m, e]["combined"]["se"] for e in LEVELS]
         ax.plot(range(5), ys, color=COLORS[m], lw=2, zorder=2)
-        ax.errorbar(range(5), ys, yerr=es, fmt=MARKERS[m], color=COLORS[m], markersize=8, markeredgecolor=INK,
-                    markeredgewidth=0.6, ecolor=INK, elinewidth=0.8, capsize=3, zorder=3)
-        ax.annotate(NAMES[m].replace("Claude ", "").replace("GPT-6 ", ""), (4, ys[-1]), xytext=(9, 0),
-                    textcoords="offset points", va="center", fontsize=10.5, color=INK, fontfamily="Geist", weight=700)
+        ax.errorbar(
+            range(5),
+            ys,
+            yerr=es,
+            fmt=MARKERS[m],
+            color=COLORS[m],
+            markersize=8,
+            markeredgecolor=INK,
+            markeredgewidth=0.6,
+            ecolor=INK,
+            elinewidth=0.8,
+            capsize=3,
+            zorder=3,
+        )
+        ax.annotate(
+            NAMES[m].replace("Claude ", "").replace("GPT-6 ", ""),
+            (4, ys[-1]),
+            xytext=(9, 0),
+            textcoords="offset points",
+            va="center",
+            fontsize=10.5,
+            color=INK,
+            fontfamily="Geist",
+            weight=700,
+        )
 
     text(0.56, 3.62, "Cost per task", 20, True, heading=True)
-    text(0.56, 3.94, "USD, API-equivalent at list prices  ·  every serving model included", 12, color=MUTED)
+    text(
+        0.56,
+        3.94,
+        "USD, API-equivalent at list prices  ·  every serving model included",
+        12,
+        color=MUTED,
+    )
     ax = axis(0.585, 0.355, 4.25, 3.2)
     shifts = {"opus55": -0.26, "astra": 0.0, "fable": 0.26}
     top = max(groups[m, e]["usd"]["mean"] for m in MODELS for e in LEVELS)
     ax.set_ylim(0, top * 1.22)
     for m in MODELS:
         ys = [groups[m, e]["usd"]["mean"] for e in LEVELS]
-        ax.bar([i + shifts[m] for i in range(5)], ys, width=0.25, color=COLORS[m], edgecolor=INK, linewidth=0.5, zorder=2)
+        ax.bar(
+            [i + shifts[m] for i in range(5)],
+            ys,
+            width=0.25,
+            color=COLORS[m],
+            edgecolor=INK,
+            linewidth=0.5,
+            zorder=2,
+        )
         for i, y in enumerate(ys):
-            ax.annotate(f"{y:.1f}", (i + shifts[m], y), xytext=(0, 3), textcoords="offset points", ha="center",
-                        va="bottom", fontsize=8.5, fontfamily="IBM Plex Mono", color=INK)
+            ax.annotate(
+                f"{y:.1f}",
+                (i + shifts[m], y),
+                xytext=(0, 3),
+                textcoords="offset points",
+                ha="center",
+                va="bottom",
+                fontsize=8.5,
+                fontfamily="IBM Plex Mono",
+                color=INK,
+            )
 
     ty = 8.35
     text(left, ty, "Table 1  |  Every effort level", 14.5, heading=True)
@@ -290,20 +424,52 @@ def main():  # noqa: PLR0915, one linear figure
     y = ty + 0.98
     for m in MODELS:
         text(left, y, NAMES[m], 13, True)
-        fig.add_artist(plt.Line2D([left - 0.012], [yf(y)], transform=fig.transFigure, marker=MARKERS[m], color=COLORS[m],
-                                  markersize=7, markeredgecolor=INK, markeredgewidth=0.5, linestyle="none"))
-        measures = [("Combined score", lambda g: f"{g['combined']['mean']:.2f}" + ("*" if g["combined"]["n"] < 23 else ""), True),
-                    ("Tasks passed of 23", lambda g: str(g["passed"]), False),
-                    ("Cost per task, USD", lambda g: f"{g['usd']['mean']:.2f}", False)]
+        fig.add_artist(
+            plt.Line2D(
+                [left - 0.012],
+                [yf(y)],
+                transform=fig.transFigure,
+                marker=MARKERS[m],
+                color=COLORS[m],
+                markersize=7,
+                markeredgecolor=INK,
+                markeredgewidth=0.5,
+                linestyle="none",
+            )
+        )
+        measures = [
+            (
+                "Combined score",
+                lambda g: f"{g['combined']['mean']:.2f}" + ("*" if g["combined"]["n"] < 23 else ""),
+                True,
+            ),
+            ("Tasks passed of 23", lambda g: str(g["passed"]), False),
+            ("Cost per task, USD", lambda g: f"{g['usd']['mean']:.2f}", False),
+        ]
         if m in CLAUDE_MAIN:
-            measures.append(("Opus 4.8 share of replies (runs)", lambda g: f"{g['fb_share']:.1f}% ({g['fb_runs']})", False))
+            measures.append(
+                (
+                    "Opus 4.8 share of replies (runs)",
+                    lambda g: f"{g['fb_share']:.1f}% ({g['fb_runs']})",
+                    False,
+                )
+            )
         for label, fn, strong in measures:
             y += 0.30
             text(left + 0.012, y, label, 12, color=INK if strong else MUTED)
             for e in LEVELS:
                 g = groups[m, e]
                 emph = strong and e == best[m]
-                text(cols[e], y, fn(g), 13 if strong else 12, emph, numeric=True, ha="right", color=INK)
+                text(
+                    cols[e],
+                    y,
+                    fn(g),
+                    13 if strong else 12,
+                    emph,
+                    numeric=True,
+                    ha="right",
+                    color=INK,
+                )
         y += 0.40
         line(left, right, y - 0.2, RULE, 0.6)
     line(left, right, y - 0.2, INK, 1.2)
@@ -319,7 +485,6 @@ def main():  # noqa: PLR0915, one linear figure
         "Claude bases include the fallback model's usage. Opus 5.5 ran on a newer Claude Code than Fable 5.1, so small gaps between "
         "them are harness confounded (Opus 5.5 on 2.1.280, Fable 5.1 on 2.1.259 to 2.1.261).",
     ]
-    import textwrap
     yy = y + 0.12
     for n in notes:
         for w in textwrap.wrap(n, 200):
@@ -335,14 +500,48 @@ def main():  # noqa: PLR0915, one linear figure
     table = OUTPUT / "opus55-astra-fable-efforts.csv"
     with table.open("w", newline="") as fh:
         w = csv.writer(fh, lineterminator="\n")
-        w.writerow(["model", "effort", "n", "judged", "combined", "combined_se", "code_quality", "passed",
-                    "usd_per_task", "minutes", "opus48_reply_share_pct", "fallback_runs"])
+        w.writerow(
+            [
+                "model",
+                "effort",
+                "n",
+                "judged",
+                "combined",
+                "combined_se",
+                "code_quality",
+                "passed",
+                "usd_per_task",
+                "minutes",
+                "opus48_reply_share_pct",
+                "fallback_runs",
+            ]
+        )
         for (m, e), g in groups.items():
-            w.writerow([m, e, g["n"], g["combined"]["n"], f"{g['combined']['mean']:.4f}", f"{g['combined']['se']:.4f}",
-                        f"{g['code_quality']['mean']:.4f}", g["passed"], f"{g['usd']['mean']:.4f}",
-                        f"{g['minutes']['mean']:.4f}", "" if g["fb_share"] is None else f"{g['fb_share']:.2f}", g["fb_runs"]])
-    save(out.with_suffix(".json"), {"sources": {"v3.4": v34_hashes, "v3.15": v315_hashes}, "best": best,
-                                    "png_sha256": digest(out.read_bytes()), "table": table.name})
+            w.writerow(
+                [
+                    m,
+                    e,
+                    g["n"],
+                    g["combined"]["n"],
+                    f"{g['combined']['mean']:.4f}",
+                    f"{g['combined']['se']:.4f}",
+                    f"{g['code_quality']['mean']:.4f}",
+                    g["passed"],
+                    f"{g['usd']['mean']:.4f}",
+                    f"{g['minutes']['mean']:.4f}",
+                    "" if g["fb_share"] is None else f"{g['fb_share']:.2f}",
+                    g["fb_runs"],
+                ]
+            )
+    save(
+        out.with_suffix(".json"),
+        {
+            "sources": {"v3.4": v34_hashes, "v3.15": v315_hashes},
+            "best": best,
+            "png_sha256": digest(out.read_bytes()),
+            "table": table.name,
+        },
+    )
     print(out)
     for m in order:
         print(f"  {NAMES[m]:<18} best {best[m]:<10} {groups[m, best[m]]['combined']['mean']:.2f}")

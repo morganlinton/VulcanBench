@@ -24,9 +24,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from collections import Counter  # noqa: E402
+
 from harness import retrospective_judging as base  # noqa: E402
 from harness.solver_receipts import solver_receipt  # noqa: E402
-from collections import Counter  # noqa: E402
 
 TASKS = ROOT / "tasks/coding-intelligence-index-v4"
 OUTPUT = ROOT / "docs/results/swe-v4-opus55-2026-09/comparison.json"

@@ -817,6 +817,68 @@ changes. Protocol id `code-quality-maintenance-v3.13`; run directory
   nothing on the board or in any report changes. The operations log carries
   the detail.
 
+## Amendment v3.14, September 22, 2026: Claude Opus 5.5 on the private Routine v1 suite
+
+Nothing in the rubric, controls, gates, repeats, seed, weights, judges or the
+L2 ruling changes from v3.8. Protocol id `code-quality-maintenance-v3.14`;
+runner `harness/maintenance_review_v314.py`, derived from the v3.8 runner
+with only the population constants changed. The run directory is
+`judging/code-quality-maintenance-v3.14` inside the private VulcanRoutine
+repository, for the same privacy reason as v3.8.
+
+- Population: the September 22, 2026 Claude Opus 5.5 sweep of Routine v1
+  through Claude Code 2.1.280, at low, medium, high, extra-high and max, one
+  attempt per task and level: 60 submissions, none excluded or missing.
+- Why not re-freeze v3.8: v3.8 is published at 384 of 384 and pins the hash
+  of its comparison record. Adding a model to that record would break
+  verification of the published result, so v3.14 reads a separate record
+  (`results/private/routine-v1-comparison-opus55.json`, built by
+  `build_routine_population.py --opus55`) and leaves every v3.8 input as
+  frozen.
+- Judges: Muse Spark 1.3 and Grok 4.6, the v3.8 pair under the same pinned
+  binaries, both neutral for an Anthropic submission. Both retake the
+  identical calibration exam under v3.14 before any counted call. A single
+  failing panel is disclosed and the passing one publishes; two failures
+  stop the amendment and nothing is published.
+- Comparability: v3.14 cells join the v3.8 cells in one Routine v1 table,
+  since everything that defines the score is shared. They come from a
+  separate judging session of stochastic judges, and every card and
+  aggregate that mixes them says so. Routine Code quality stays L1 alone
+  and is never placed beside Frontier v4 Code quality.
+- The protocol document is frozen as a copy inside the run directory.
+
+## Amendment v3.15, September 24, 2026: Claude Opus 5.5 on Frontier v4
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+judges changes from v3.7. Protocol id `code-quality-maintenance-v3.15`; run
+directory `runs-code-quality-maintenance-v3.15`; runner
+`harness/maintenance_review_v315.py`, derived from the v3.7 runner with the
+population constants changed and the protocol document frozen as a copy, as
+v3.8 and v3.13 do. Population record:
+`docs/results/swe-v4-opus55-2026-09/comparison.json`, built by
+`scripts/cii-v4-board/build_opus55_population.py`.
+
+- Population: the September 2026 Claude Opus 5.5 sweep of Frontier v4
+  through Claude Code 2.1.280, low through max, one attempt per task and
+  level: 115 runs, 114 judged. High depotcore is excluded as an incomplete
+  source run: a safeguard classifier stop cut off the turn that would have
+  written the module, so there is no code to review.
+- Solver fallback: the sweep ran with Claude Code's refusal fallback on,
+  following Artificial Analysis (DECISIONS.md, 2026-09-24). 30 judged
+  submissions were partly written by claude-opus-4-8 (medium 3, high 7,
+  extra-high 8, max 12). They are judged like every other submission; the
+  judges see code, not transcripts. Each manifest row records `fallback`
+  and replies by model, and every published cell states its fallback share.
+- Judges: Muse Spark 1.3 and Grok 4.6, the v3.7 pair under the same pinned
+  binaries, both neutral for an Anthropic submission. Both retake the exam
+  under v3.15 before any counted call. Grok failed gate 16 on the Devin
+  SWE-2 population (v3.9); it passed the v3.7 and v3.8 exams, and this exam
+  decides its seat here. One failing panel is disclosed and the passing one
+  publishes; two failures stop the amendment.
+- Comparability: Frontier Code quality is L1 plus L2, as for every Frontier
+  entry judged by this pair, and is never placed beside Routine Code
+  quality.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

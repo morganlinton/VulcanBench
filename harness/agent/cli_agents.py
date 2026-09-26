@@ -79,6 +79,11 @@ _SAFE_ENV_KEYS = frozenset(
         "CODEX_HOME",
         "CLAUDE_CONFIG_DIR",
         "GROK_HOME",
+        # Claude Code: operator switch that turns off the automatic refusal
+        # fallback (a safeguard refusal otherwise finishes the session on
+        # another model, e.g. claude-opus-4-8, with no error). Off for solver
+        # runs from 2026-09-24; see docs/DECISIONS.md.
+        "CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK",
         # ZCode: alternate node binary for the npm launcher, and the storage /
         # credential roots a user may have relocated. No ZCODE_API_KEY /
         # ZCODE_BASE_URL: those select API-key billing and are deliberately absent.

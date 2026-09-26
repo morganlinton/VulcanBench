@@ -19,7 +19,7 @@ from pathlib import Path
 from harness.panel_comparison import OUTPUT, read, require
 from harness.retrospective_judging import LEVELS, digest, save
 
-VERIFIED_DATE = "2026-09-06"
+VERIFIED_DATE = "2026-09-22"
 SOURCES = {
     "astra": "https://developers.openai.com/api/docs/models/gpt-6-astra",
     "claude": "https://platform.claude.com/docs/en/about-claude/pricing",
@@ -28,6 +28,7 @@ SOURCES = {
 # USD per million tokens: uncached input, cache read, 5m write, 1h write, output.
 CLAUDE_RATES = {
     "claude-fable-5-1": (10, 0.25, 12.5, 20, 50),
+    "claude-opus-5-5": (4, 0.2, 5, 8, 20),
     "claude-opus-5": (5, 0.5, 6.25, 10, 25),
     "claude-opus-4-8": (5, 0.5, 6.25, 10, 25),
     "claude-haiku-4-5-20251001": (1, 0.1, 1.25, 2, 5),

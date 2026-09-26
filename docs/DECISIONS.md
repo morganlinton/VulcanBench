@@ -97,6 +97,106 @@ pilot results and is disclosed in the report. Owner decision, in chat,
   reference is also weak (below 60): check that it is answerable from the
   state before reading Jev's number.
 
+## 2026-09-24: Claude Code refusal fallback stays on, disclosed (Artificial Analysis convention)
+
+### Decision (final, same day)
+
+The owner's standing rule for fallbacks is to follow Artificial Analysis.
+Artificial Analysis publishes Opus 5.5 only as "Claude Opus 5.5 (Adaptive
+Reasoning, <effort> Effort, Default Fallback)", with the fallback enabled
+and every run counted. Its methodology page states no separate rule for
+fallback-served responses; its general rules are pass@1, retries on API
+failures, and blocked questions allowed to lower scores. So VulcanBench:
+
+- runs Claude Code solvers with the refusal fallback ON (the CLI default;
+  the launcher unsets `CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK`);
+- counts every run, including ones partly served by the fallback model;
+- labels the column "Claude Opus 5.5 (with fallback)" and, going beyond
+  Artificial Analysis, publishes per level how many runs fell back and the
+  fallback model's share of replies.
+
+The fallback-off experiment below ran for about five hours. Its 21
+finished runs and 63 refused attempts are kept in
+`runs-effort-opus55-nofallback-archive/` and are not part of any published
+cell. The 28 original fallback-on runs were restored. The
+`_SAFE_ENV_KEYS` entry stays: it is inert unless the variable is set.
+
+### Superseded first decision (same day)
+
+(Superseded.) Claude Code solver runs set `CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK=1`. When a
+safeguard classifier refuses a turn, the session now stops that turn instead
+of silently finishing on another model. Every Opus 5.5 run in which another
+model wrote any reply was archived, not deleted, and is rerun under the new
+setting. The Opus 5.5 column publishes Opus 5.5's own work only, and a
+classifier stop that zeroes a run is disclosed as a stop.
+
+### Evidence
+
+Claude Code 2.1.280 ships an automatic refusal fallback. In a headless `-p`
+run nobody can answer its "switch models?" prompt, so it takes the
+declined path, which retries on the fallback model: `claude-opus-4-8`. The
+stream records one `model_refusal_fallback` event, and every later reply
+carries the fallback model id. The run summary's `reported_model` and the
+harness's model checks still said Opus 5.5 for most such runs, so the swap
+went unnoticed until the replies were counted.
+
+Counted from the streams on 2026-09-24:
+
+| suite | runs with any Opus 4.8 reply | of |
+|---|---|---|
+| Frontier v4 | 27 (medium 3, high 7, extra-high 8, max 9 including one in flight) | 93 |
+| Safety v1 | 1 (low hedgecore, 244 of 252 replies) | 10 |
+| Routine v1 | 0 | 60 |
+
+2,730 replies across those runs came from Opus 4.8. In several, most of
+the session was Opus 4.8 (extra-high tallycore 236 of 263). Low had none;
+the classifier fires more often as effort and turn count rise.
+
+### How it is applied
+
+- `harness/agent/cli_agents.py`: the variable is added to
+  `_SAFE_ENV_KEYS`. The solver environment is an allowlist, so exporting it
+  in a launcher alone does nothing (verified). Unset, the behaviour is
+  unchanged for every other sweep.
+- `scripts/run_opus55_all_suites.sh` exports it for both remaining legs.
+- Archived runs: `runs-effort-opus55-fallback-archive/` and
+  `VulcanConduct/runs/runs-conduct-v1-opus55-fallback-archive/`.
+- Routine v1 and its v3.14 judging are unaffected (no fallback in any run).
+
+### Comparability
+
+Runs 1 to 92 ran with the fallback on. The kept runs are exactly those in
+which it never fired, so they are the same measurement as a run with it
+off. The reruns may stop outright where the old runs switched models, so a
+rerun cell can score lower than the archived one; the archived score is the
+wrong comparison, because it was partly Opus 4.8.
+
+The published Fable 5.1 Frontier v4 column (Claude Code 2.1.259 to 2.1.261)
+also contains refusal fallbacks, checked 2026-09-25 by counting
+assistant-message models: 11 of 115 runs have claude-opus-4-8 replies (low 1,
+medium 3, high 2, extra-high 3, max 2; reply share 6.9, 34.1, 23.9, 40.3 and
+12.3%). Its v3.4 manifest already records those 11 as `fallback`. So both
+Claude Frontier columns are "with fallback" under the same convention. The
+published Opus 5 column has not been checked yet.
+
+### What the fallback-off experiment showed
+
+With the fallback off, a whole-request refusal (category `cyber`, during
+disassembly of the legacy binaries) ends Claude Code with "API Error: Opus
+5.5's safeguards flagged this session". The harness classed that as an
+infrastructure error and retried, so a refused task was re-run until an
+attempt was not refused (high stampcore: 15 refused attempts). That makes
+fallback-off pass rates conditional on not being refused, which is why it
+was not a clean alternative either.
+
+### Revisit triggers
+
+- A Claude column where classifier stops zero many runs: consider the Cyber
+  Verification Program or a documented retry rule, not the fallback.
+- Any CLI update: confirm the variable name still gates the fallback (the
+  first classifier stop should emit `model_refusal_no_fallback`).
+
+
 ## 2026-09-24: Verdict v2 is a 20-family suite scored above the best shortcut
 
 ### Decision
@@ -314,6 +414,91 @@ request, in chat, 2026-09-22, after the owner questioned a published result.
 - A second model on the suite: fit its cutoffs on the same development split
   and publish both columns for every model, so no model is flattered by a
   cutoff chosen after seeing the test items.
+
+## 2026-09-22: Claude Code CLI bumped to 2.1.280 for Opus 5.5
+
+### Decision
+
+Claude Opus 5.5 (`claude-opus-5-5`) columns run on Claude Code 2.1.280.
+Every earlier Claude column on the board was produced on 2.1.261 or
+earlier. The bump is disclosed as a footnote on the Opus 5.5 columns
+rather than papered over, and the incumbent Claude columns are not
+re-baselined.
+
+Opus 5.5 also ships a different vendor default effort than its
+predecessors: medium, where Opus 5 and every other Claude column on the
+board default to high. The headline Opus 5.5 column is medium, labelled
+as the shipped default. The full Low to Max sweep runs as usual, so a
+high-vs-high reading against the incumbents stays available from the
+effort card.
+
+### Evidence
+
+The bump was not optional. On 2.1.261 the API refuses the model outright,
+before any run starts:
+
+    API Error: 400 Claude Code 2.1.261 does not support this model;
+    version 2.1.280 or newer is required.
+
+So the choice was not "2.1.261 or 2.1.280", it was "2.1.280 or no Opus 5.5
+column at all". 2.1.280 is the exact minimum the API names; the CLI was
+updated to that version and no further.
+
+Vendor facts verified 2026-09-22 against platform.claude.com, not recalled:
+
+| | Opus 5.5 | Opus 5 |
+|---|---|---|
+| API id | `claude-opus-5-5` | `claude-opus-5` |
+| Base input | $4 / MTok | $5 / MTok |
+| Output | $20 / MTok | $25 / MTok |
+| Cache hits | $0.20 / MTok (0.05x) | $0.50 / MTok (0.1x) |
+| Default effort | medium | high |
+
+The 0.05x cache-hit multiplier is an Opus 5.5 exception to the standard
+0.1x; it is stated explicitly in the price table rather than defaulted,
+or api-equivalent costs for cache-heavy agent runs would be overstated.
+
+`claude-opus-5.5` (dotted) is rejected client-side and is not an alias.
+
+### Why the columns are still comparable, and where they are not
+
+`harness/agent/cli_agents.py` already warns that the harness is part of a
+column's identity. Two things bound the risk here. The CLI moved 19 patch
+versions inside one minor line, not across a major one, and the run
+conditions the board actually ranks on (flat 3-hour task timeout, serial
+sweeps, effort vocabulary) are set by the harness and the suite, not by
+the CLI. What the bump could still move is solver behavior inside a run:
+tool-loop changes in the CLI are not visible to the harness, and no
+measurement here isolates them.
+
+That residual is why the footnote exists. Treat a small Opus 5.5 margin
+over an incumbent Claude column as harness-confounded, not as a clean win.
+
+### What this touched
+
+- `harness/pricing.py`: `anthropic:claude-opus-5-5` added, with an
+  explicit `cached_input` for the 0.05x rate.
+- `harness/api_equivalent_costs.py`: `claude-opus-5-5` added to
+  `CLAUDE_RATES` as (4, 0.2, 5, 8, 20); `VERIFIED_DATE` moved to
+  2026-09-22 after re-checking every existing Claude row against the
+  live pricing page (all unchanged).
+- The `claude-opus-5` carve-out in the cost reconciliation (an observed
+  missing model-specific TTL on one internal call) was deliberately NOT
+  widened to Opus 5.5. If 5.5 receipts show the same quirk, extend it
+  then, with the receipt as evidence.
+- No effort-map change was needed: `_CLAUDE_CODE_EFFORT_VALUES` is keyed
+  by harness, not by model.
+
+### Revisit triggers
+
+- A Claude column that needs a CLI newer than 2.1.280: re-baselining the
+  incumbents becomes cheaper than accumulating per-column footnotes.
+- Any Opus 5.5 result that beats an incumbent Claude column by less than
+  the sweep's own repeat-to-repeat spread: the harness delta is a live
+  alternative explanation, say so rather than ranking on it.
+- Anthropic changing Opus 5.5's default effort away from medium: the
+  headline column's label stops matching the vendor default.
+
 
 ## 2026-09-22: Grok 4.7 runs on Cursor and Grok Build, queued serially behind Opus 5.5
 

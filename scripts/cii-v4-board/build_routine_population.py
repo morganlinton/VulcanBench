@@ -11,7 +11,8 @@ listed under "duplicates".
 The record names private tasks, so it is written inside the private
 repository (``results/private/routine-v1-comparison.json``), never here.
 
-    python scripts/cii-v4-board/build_routine_population.py
+    python scripts/cii-v4-board/build_routine_population.py            # v3.8 population
+    python scripts/cii-v4-board/build_routine_population.py --opus55   # v3.14 population
 """
 
 from __future__ import annotations
@@ -55,6 +56,19 @@ MODELS = {
         "SWE-2 in Devin CLI",
     ),
 }
+# Claude Opus 5.5 is judged under its own protocol (v3.14), not added to v3.8:
+# v3.8 pins the SHA-256 of OUTPUT, so rebuilding that file with a new model
+# would break verification of the published record. ``--opus55`` writes a
+# separate comparison record for v3.14 and leaves OUTPUT untouched.
+OPUS55_MODELS = {
+    "opus55": (
+        "runs-routine-v1-opus55",
+        ALL_LEVELS,
+        "claude-code:claude-opus-5-5",
+        "Claude Opus 5.5 in Claude Code",
+    ),
+}
+OPUS55_OUTPUT = ROUTINE / "results/private/routine-v1-comparison-opus55.json"
 MISSING_REASON = "No finished run for this task and level"
 
 
@@ -168,9 +182,10 @@ def build(models: dict, runs_root: Path, tasks_root: Path) -> dict:  # noqa: PLR
 
 
 def main() -> None:
-    record = build(MODELS, ROUTINE / "runs", TASKS)
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n")
+    models, output = (OPUS55_MODELS, OPUS55_OUTPUT) if "--opus55" in sys.argv else (MODELS, OUTPUT)
+    record = build(models, ROUTINE / "runs", TASKS)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n")
     print(
         f"{len(record['rows'])} rows, {len(record['excluded'])} excluded, {len(record['missing'])} missing, "
         f"{len(record['duplicates'])} duplicates; cells: {record['cells']}"

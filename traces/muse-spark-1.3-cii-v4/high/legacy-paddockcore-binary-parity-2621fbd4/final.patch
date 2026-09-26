@@ -1,0 +1,149 @@
+diff --git a/probe_c.txt b/probe_c.txt
+new file mode 100644
+index 0000000..18b9754
+--- /dev/null
++++ b/probe_c.txt
+@@ -0,0 +1,11 @@
++N A 50
++N B 50
++N C 50
++F f1 5
++F f2 5
++G A f1
++G B f1
++G C f1
++L B f2
++U
++V
+diff --git a/probe_d.txt b/probe_d.txt
+new file mode 100644
+index 0000000..8f7d107
+--- /dev/null
++++ b/probe_d.txt
+@@ -0,0 +1,11 @@
++N A 50
++N B 50
++F f1 2
++F f2 2
++F f3 2
++G B f2
++G A f3
++L B f1
++U
++S
++V
+diff --git a/probe_e.txt b/probe_e.txt
+new file mode 100644
+index 0000000..2e3f2c1
+--- /dev/null
++++ b/probe_e.txt
+@@ -0,0 +1,14 @@
++N A 50
++N B 50
++N C 50
++F f1 5
++F f2 5
++F f3 5
++G A f1
++G B f1
++G C f1
++H B
++G B f1
++U
++S
++V
+diff --git a/probe_f.txt b/probe_f.txt
+new file mode 100644
+index 0000000..fbfe138
+--- /dev/null
++++ b/probe_f.txt
+@@ -0,0 +1,14 @@
++N B 50
++N D 50
++F f1 3
++F f2 3
++F f3 3
++G B f1
++G D f1
++H D
++S
++G D f1
++S
++H D
++G D f1
++V
+diff --git a/probe_g.txt b/probe_g.txt
+new file mode 100644
+index 0000000..5855d16
+--- /dev/null
++++ b/probe_g.txt
+@@ -0,0 +1,10 @@
++N A 50
++N B 50
++N C 50
++F f1 3
++F f2 1
++G C f1
++G B f1
++G A f1
++L C f2
++S
+diff --git a/probe_h.txt b/probe_h.txt
+new file mode 100644
+index 0000000..14496bc
+--- /dev/null
++++ b/probe_h.txt
+@@ -0,0 +1,12 @@
++N C 50
++N D 20
++N F 50
++F f2 2
++F f3 2
++G D f2
++S
++S
++S
++G F f2
++G C f2
++S
+diff --git a/probe_i.txt b/probe_i.txt
+new file mode 100644
+index 0000000..4548e74
+--- /dev/null
++++ b/probe_i.txt
+@@ -0,0 +1,9 @@
++N Q 50
++N P 50
++N R 50
++F f1 2
++F f2 1
++G P f1
++G Q f1
++G R f2
++S
+diff --git a/probe_j.txt b/probe_j.txt
+new file mode 100644
+index 0000000..9929948
+--- /dev/null
++++ b/probe_j.txt
+@@ -0,0 +1,20 @@
++N C 50
++N D 20
++N F 50
++F f2 2
++F f3 2
++G D f2
++S
++S
++S
++G F f2
++G C f2
++S
++U
++S
++S
++G F f2
++G C f2
++V
++U
++V

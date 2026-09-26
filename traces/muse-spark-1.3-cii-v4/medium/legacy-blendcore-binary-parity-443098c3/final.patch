@@ -1,0 +1,274 @@
+diff --git a/blendcore.py b/blendcore.py
+index 44d312f..92994d1 100644
+--- a/blendcore.py
++++ b/blendcore.py
+@@ -14,122 +14,191 @@ from __future__ import annotations
+ import sys
+ 
+ ID_MAX = 8
+-NO_TANK = "????????"
++NO_TANK = b"????????"
++MAXV = 9999999
++# The legacy engine reads with fgets() into a 256 KiB buffer: each input
++# chunk holds at most this many bytes, ending early after a newline.
++CHUNK = 262143
++# A dispense that overshoots the live volume by this much (or less) still
++# grants whatever is left; anything more is rejected DRY.
++SHORT = 20
++# Reconcile halves the tracked loss, but only when it exceeds this.
++EVAP_MIN = 50
+ 
+ 
+-def _valid_id(token: str) -> bool:
+-    return 1 <= len(token) <= ID_MAX and token.isascii() and token.isalnum()
++def _valid_id(token: bytes) -> bool:
++    return (
++        1 <= len(token) <= ID_MAX
++        and token.isascii()
++        and token.isalnum()
++    )
+ 
+ 
+-def _digits(token: str) -> bool:
+-    return token.isascii() and token.isdigit()
++def _digits(token: bytes) -> bool:
++    return len(token) > 0 and token.isascii() and token.isdigit()
+ 
+ 
+ class Tank:
+-    def __init__(self, pigment: str, volume: int) -> None:
++    def __init__(self, name: bytes, pigment: bytes, volume: int) -> None:
++        self.name = name
+         self.pigment = pigment
+         self.volume = volume
+         self.fills = volume
+         self.dispensed = 0
++        self.evap = 0
+ 
+ 
+ class Engine:
+     """Blending controller with live dispense, reconcile, and counters."""
+ 
+     def __init__(self) -> None:
+-        self.tanks: dict[str, Tank] = {}
+-        self.jobs: dict[str, int] = {}
++        self.tanks: dict[bytes, Tank] = {}
++        self.jobs: dict[bytes, list] = {}
+         self.fills = 0
+         self.dispenses = 0
+         self.reconciles = 0
+         self.rejected = 0
+ 
+-    def handle(self, line: str) -> list[str]:
+-        tokens = line.split()
+-        if not tokens:
+-            return []
+-        if line == "R":
++    def handle(self, line: bytes) -> list[bytes]:
++        if line == b"R":
+             replies = self._reconcile()
+-        elif tokens[0] == "T":
+-            replies = [self._fill(tokens)]
+-        elif tokens[0] == "D":
+-            replies = [self._dispense(tokens)]
+         else:
+-            replies = [f"N {NO_TANK} FMT"]
+-        if replies and replies[0].startswith("N "):
++            parts = line.split(b" ")
++            cmd = parts[0]
++            args = [p for p in parts[1:] if p != b""]
++            if cmd == b"T":
++                replies = [self._fill(args)]
++            elif cmd == b"D":
++                replies = [self._dispense(args)]
++            else:
++                replies = [b"N " + NO_TANK + b" FMT"]
++        if replies and replies[0].startswith(b"N "):
+             self.rejected += 1
+         return replies
+ 
+-    def trailer(self) -> str:
++    def trailer(self) -> bytes:
+         return (
+-            f"X {self.fills} {self.dispenses} "
+-            f"{self.reconciles} {self.rejected}"
++            b"X "
++            + str(self.fills).encode()
++            + b" "
++            + str(self.dispenses).encode()
++            + b" "
++            + str(self.reconciles).encode()
++            + b" "
++            + str(self.rejected).encode()
+         )
+ 
+-    def _fill(self, tokens: list[str]) -> str:
+-        tank = tokens[1] if len(tokens) >= 2 else NO_TANK
+-        if len(tokens) != 4:
+-            return f"N {tank} FMT"
+-        if not _valid_id(tokens[1]) or not _valid_id(tokens[2]):
+-            return f"N {tank} FMT"
+-        vol_tok = tokens[3]
++    def _fill(self, args: list[bytes]) -> bytes:
++        tank = args[0] if len(args) >= 1 else NO_TANK
++        if len(args) < 3:
++            return b"N " + tank + b" FMT"
++        if not _valid_id(args[0]) or not _valid_id(args[1]):
++            return b"N " + tank + b" FMT"
++        vol_tok = args[2]
+         if not _digits(vol_tok) or not 2 <= len(vol_tok) <= 7:
+-            return f"N {tank} VOL"
++            return b"N " + tank + b" VOL"
+         volume = int(vol_tok)
+-        t = self.tanks.get(tokens[1])
++        t = self.tanks.get(args[0].lower())
+         if t is not None:
+-            if t.pigment != tokens[2]:
+-                return f"N {tank} PIGMENT"
+-            t.volume += volume
+-            t.fills += volume
++            if t.pigment != args[1]:
++                return b"N " + tank + b" PIGMENT"
++            t.volume = min(t.volume + volume, MAXV)
++            t.fills = min(t.fills + volume, MAXV)
+         else:
+-            self.tanks[tokens[1]] = Tank(tokens[2], volume)
++            self.tanks[args[0].lower()] = Tank(args[0], args[1], volume)
+         self.fills += 1
+-        return f"OK {len(self.tanks)}"
+-
+-    def _dispense(self, tokens: list[str]) -> str:
+-        tank = tokens[2] if len(tokens) >= 3 else NO_TANK
+-        if len(tokens) != 4:
+-            return f"N {tank} FMT"
+-        if not _valid_id(tokens[1]) or not _valid_id(tokens[2]):
+-            return f"N {tank} FMT"
+-        amt_tok = tokens[3]
++        return b"OK " + str(len(self.tanks)).encode()
++
++    def _dispense(self, args: list[bytes]) -> bytes:
++        tank = args[1] if len(args) >= 2 else NO_TANK
++        if len(args) < 3:
++            return b"N " + tank + b" FMT"
++        if not _valid_id(args[0]) or not _valid_id(args[1]):
++            return b"N " + tank + b" FMT"
++        amt_tok = args[2]
+         if not _digits(amt_tok) or len(amt_tok) > 6 or int(amt_tok) < 1:
+-            return f"N {tank} AMT"
++            return b"N " + tank + b" AMT"
+         amount = int(amt_tok)
+-        t = self.tanks.get(tokens[2])
++        t = self.tanks.get(args[1].lower())
+         if t is None:
+-            return f"N {tank} FMT"
+-        if amount > t.volume:
+-            return f"N {tank} DRY"
+-        t.volume -= amount
+-        t.dispensed += amount
+-        total = self.jobs.get(tokens[1], 0) + amount
+-        self.jobs[tokens[1]] = total
++            return b"N " + tank + b" FMT"
++        if amount > t.volume + SHORT:
++            return b"N " + tank + b" DRY"
++        if amount <= t.volume:
++            fee = amount // 500
++            if b"W" in t.pigment and amount >= 1000:
++                fee *= 2
++            drop = amount + fee
++            if drop > t.volume:
++                drop = t.volume
++            t.volume -= drop
++            t.evap += drop - amount
++            granted = amount
++        else:
++            granted = t.volume
++            t.volume = 0
++        t.dispensed += granted
++        key = args[0].lower()
++        entry = self.jobs.get(key)
++        if entry is None:
++            entry = self.jobs[key] = [args[0], 0]
++        entry[1] += granted
+         self.dispenses += 1
+-        return f"J {tokens[1]} {total}"
++        return b"J " + entry[0] + b" " + str(entry[1]).encode()
+ 
+-    def _reconcile(self) -> list[str]:
++    def _reconcile(self) -> list[bytes]:
+         replies = []
+-        for tank_id, t in self.tanks.items():
+-            # SPEC: the book volume is fills minus dispenses; reconcile
+-            # is an identity check against the live volume.
++        for _key, t in self.tanks.items():
++            # The book volume is fills minus dispenses, less half the
++            # tracked dispense loss once that loss is material; the tank's
++            # live volume (and ledger baseline) is reset to it.
+             book = t.fills - t.dispensed
+-            replies.append(f"B {tank_id} {book}")
+-        replies.append(f"REND {len(self.tanks)}")
++            if t.evap > EVAP_MIN:
++                book -= t.evap // 2
++            replies.append(b"B " + t.name + b" " + str(book).encode())
++            t.fills = book
++            t.dispensed = 0
++            t.volume = book
++            t.evap = 0
++        replies.append(b"REND " + str(len(self.tanks)).encode())
+         self.reconciles += 1
+         return replies
+ 
+ 
+-def process(lines: list[str], out=None) -> list[str]:
++def split_chunks(data: bytes) -> list[bytes]:
++    """Split raw input the way the engine's fgets() loop reads it."""
++    chunks = []
++    i = 0
++    n = len(data)
++    while i < n:
++        k = data.find(b"\n", i, i + CHUNK + 1)
++        if k == -1:
++            chunk = data[i : i + CHUNK]
++            i += CHUNK
++        else:
++            chunk = data[i:k]
++            i = k + 1
++        for sep in (b"\r", b"\x00"):
++            j = chunk.find(sep)
++            if j != -1:
++                chunk = chunk[:j]
++        if chunk != b"":
++            chunks.append(chunk)
++    return chunks
++
++
++def run(data: bytes) -> bytes:
+     engine = Engine()
+-    replies = []
+-    for raw in lines:
+-        line = raw.rstrip("\r\n")
+-        if not line:
+-            continue
+-        replies.extend(engine.handle(line))
+-    replies.append(engine.trailer())
++    out = []
++    for chunk in split_chunks(data):
++        out.extend(engine.handle(chunk))
++    out.append(engine.trailer())
++    return b"\n".join(out) + b"\n"
++
++
++def process(lines: list[str], out=None) -> list[str]:
++    data = b"\n".join(line.encode("latin-1", "replace") for line in lines)
++    replies = run(data).decode("latin-1").split("\n")[:-1]
+     if out is not None:
+         for reply in replies:
+             print(reply, file=out)
+@@ -137,7 +206,7 @@ def process(lines: list[str], out=None) -> list[str]:
+ 
+ 
+ def main() -> None:
+-    process(sys.stdin.readlines(), out=sys.stdout)
++    sys.stdout.buffer.write(run(sys.stdin.buffer.read()))
+ 
+ 
+ if __name__ == "__main__":

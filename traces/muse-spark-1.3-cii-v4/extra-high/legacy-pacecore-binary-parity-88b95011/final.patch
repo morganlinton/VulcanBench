@@ -1,0 +1,180 @@
+diff --git a/pacecore.py b/pacecore.py
+index a173493..b3b29f6 100644
+--- a/pacecore.py
++++ b/pacecore.py
+@@ -16,6 +16,8 @@ ID_MAX = 8
+ HOURS = 24
+ CARRY_CAP_DIV = 5  # carry is capped at 20 percent of the daily budget
+ NO_CAMP = "????????"
++LARGE_DAILY = 1000000
++LARGE_HOUR_MAX = 5
+ 
+ 
+ def _valid_id(token: str) -> bool:
+@@ -26,14 +28,32 @@ def _digits(token: str) -> bool:
+     return token.isascii() and token.isdigit()
+ 
+ 
++def _tokenize(line: str) -> list[str]:
++    # Legacy splits on ASCII space only (strtok with " "), collapsing
++    # runs of spaces; tabs and other bytes stay inside tokens.
++    return [t for t in line.split(" ") if t != ""]
++
++
++def _strip_eol(raw: str) -> str:
++    # Legacy truncates at the first \r or \n (strcspn).
++    pos = len(raw)
++    for sep in ("\r", "\n"):
++        idx = raw.find(sep)
++        if idx != -1 and idx < pos:
++            pos = idx
++    return raw[:pos]
++
++
+ class Campaign:
+     def __init__(self, daily: int) -> None:
+         self.daily = daily
+         self.carry = 0
++        self.excess = 0
+         self.avail = 0
+         self.spent = 0
+         self.grants = [0] * HOURS
+         self.accrued = -1
++        self.exact = False
+ 
+ 
+ class Engine:
+@@ -47,7 +67,7 @@ class Engine:
+         self.rejected = 0
+ 
+     def handle(self, line: str) -> str:
+-        tokens = line.split()
++        tokens = _tokenize(line)
+         if not tokens:
+             return ""
+         if tokens[0] == "C":
+@@ -66,11 +86,11 @@ class Engine:
+         return f"X {self.created} {self.requests} {self.trueups} {self.rejected}"
+ 
+     def _find(self, camp: str) -> Campaign | None:
+-        return self.camps.get(camp)
++        return self.camps.get(camp.lower())
+ 
+     def _create(self, tokens: list[str]) -> str:
+         camp = tokens[1] if len(tokens) >= 2 else NO_CAMP
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return f"N {camp} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {camp} FMT"
+@@ -79,26 +99,38 @@ class Engine:
+             return f"N {camp} BUDGET"
+         if self._find(tokens[1]) is not None:
+             return f"N {camp} DUP"
+-        self.camps[tokens[1]] = Campaign(int(budget))
++        self.camps[tokens[1].lower()] = Campaign(int(budget))
+         self.created += 1
+         return f"OK {len(self.camps)}"
+ 
+     def _accrue(self, c: Campaign, hour: int) -> None:
++        if hour <= c.accrued:
++            return
+         slice_ = (c.daily + c.carry) // HOURS
+-        for _h in range(c.accrued + 1, hour + 1):
+-            c.avail += slice_
++        for h in range(c.accrued + 1, hour + 1):
++            if h == 0:
++                inc = slice_ - c.excess
++                if inc < 0:
++                    inc = 0
++                c.avail += inc
++                c.excess = 0
++            else:
++                c.avail += slice_
+         c.accrued = hour
++        c.exact = False
+ 
+     def _spend(self, tokens: list[str]) -> str:
+         camp = tokens[1] if len(tokens) >= 2 else NO_CAMP
+-        if len(tokens) != 4:
++        if len(tokens) < 4:
+             return f"N {camp} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {camp} FMT"
+         hour_tok, req_tok = tokens[2], tokens[3]
+-        if not _digits(hour_tok) or len(hour_tok) != 2 or int(hour_tok) > 23:
++        if not _digits(hour_tok) or not 1 <= len(hour_tok) <= 2:
+             return f"N {camp} HOUR"
+         hour = int(hour_tok)
++        if hour > 23:
++            return f"N {camp} HOUR"
+         if not _digits(req_tok) or len(req_tok) > 7 or int(req_tok) < 1:
+             return f"N {camp} REQ"
+         req = int(req_tok)
+@@ -107,31 +139,47 @@ class Engine:
+             return f"N {camp} FMT"
+         if hour < c.accrued:
+             return f"N {camp} ORDER"
++        if hour == c.accrued and c.exact:
++            return f"N {camp} REQ"
+         self._accrue(c, hour)
+-        granted = min(req, c.avail)
++        if c.daily >= LARGE_DAILY and hour <= LARGE_HOUR_MAX:
++            effective = c.avail // 2
++        else:
++            effective = c.avail
++        granted = req if req < effective else effective
+         c.avail -= granted
+         c.spent += granted
+         c.grants[hour] += granted
++        if req == effective:
++            c.exact = True
+         self.requests += 1
+         return f"P {granted}"
+ 
+     def _trueup(self, tokens: list[str]) -> str:
+         camp = tokens[1] if len(tokens) >= 2 else NO_CAMP
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return f"N {camp} FMT"
+         if not _valid_id(tokens[1]):
+             return f"N {camp} FMT"
+         c = self._find(tokens[1])
+         if c is None:
+             return f"N {camp} FMT"
+-        total = c.spent
+-        raw = max(0, c.daily - total)
+-        carry = min(raw, c.daily // CARRY_CAP_DIV)
++        audit_slice = c.daily // HOURS
++        total = 0
++        for g in c.grants:
++            total += g if g < audit_slice else audit_slice
++        raw = c.daily - total
++        if raw < 0:
++            raw = 0
++        cap = c.daily // CARRY_CAP_DIV
++        carry = raw if raw < cap else cap
+         c.carry = carry
++        c.excess = raw - carry
+         c.spent = 0
+         c.grants = [0] * HOURS
+         c.avail = 0
+         c.accrued = -1
++        c.exact = False
+         self.trueups += 1
+         return f"U {total} {carry}"
+ 
+@@ -140,8 +188,11 @@ def process(lines: list[str], out=None) -> list[str]:
+     engine = Engine()
+     replies = []
+     for raw in lines:
+-        line = raw.rstrip("\r\n")
+-        if not line:
++        line = _strip_eol(raw)
++        if line == "" and raw != line:
++            # Line was empty or only an end-of-line marker.
++            continue
++        if line == "":
+             continue
+         reply = engine.handle(line)
+         if reply:

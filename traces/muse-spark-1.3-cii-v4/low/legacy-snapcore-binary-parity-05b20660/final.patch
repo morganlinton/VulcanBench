@@ -1,0 +1,120 @@
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/legacy/snapcore-darwin-arm64 b/legacy/snapcore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/snapcore.py b/snapcore.py
+index 2770956..ee71a2e 100644
+--- a/snapcore.py
++++ b/snapcore.py
+@@ -10,6 +10,7 @@ that file; the legacy engine's behavior is the contract).
+ 
+ from __future__ import annotations
+ 
++import bisect
+ import sys
+ 
+ KEY_MAX = 8
+@@ -22,8 +23,9 @@ _B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ 
+ 
+ def checksum(body: str) -> str:
+-    """Checksum over everything before the blob's final ``|``."""
+-    total = sum(ord(c) * _WEIGHTS[i % 2] for i, c in enumerate(body))
++    """Checksum over the bytes before the blob's final ``|``."""
++    raw = body.encode("utf-8", "surrogateescape")
++    total = sum(byte * _WEIGHTS[i % 2] for i, byte in enumerate(raw))
+     return _B36[total % 36]
+ 
+ 
+@@ -40,6 +42,10 @@ class Engine:
+ 
+     def __init__(self) -> None:
+         self.state: dict[str, str] = {}
++        # Set by a load whose blob repeats a key (case-insensitively);
++        # while set, puts insert at the byte-sorted position. A clean
++        # load or a serialize clears it.
++        self.sorted_mode = False
+         self.puts = 0
+         self.gets = 0
+         self.loads = 0
+@@ -75,16 +81,25 @@ class Engine:
+         return f"X {self.puts} {self.gets} {self.loads} {self.rejected}"
+ 
+     def _put(self, tokens: list[str]) -> str:
+-        if len(tokens) != 3:
++        if len(tokens) < 3:
+             return "R FMT"
+         key, val = tokens[1], tokens[2]
+         if not _valid_key(key) or not _valid_val(val):
+             return "R FMT"
+-        self.state[key] = val
++        if key in self.state:
++            self.state[key] = val
++        elif self.sorted_mode:
++            keys = list(self.state.keys())
++            pos = bisect.bisect_left(keys, key)
++            items = list(self.state.items())
++            items.insert(pos, (key, val))
++            self.state = dict(items)
++        else:
++            self.state[key] = val
+         return f"OK {len(self.state)}"
+ 
+     def _get(self, tokens: list[str]) -> str:
+-        if len(tokens) != 2:
++        if len(tokens) < 2:
+             return "R FMT"
+         key = tokens[1]
+         if not _valid_key(key):
+@@ -94,7 +109,10 @@ class Engine:
+         return "NIL"
+ 
+     def _serialize(self) -> str:
+-        pairs = PAIR_SEP.join(f"{k}={v}" for k, v in self.state.items())
++        self.sorted_mode = False
++        pairs = PAIR_SEP.join(
++            f"{k}={v[:10] if len(v) > 11 else v}" for k, v in self.state.items()
++        )
+         body = VERSION + "|" + pairs
+         return "B " + body + "|" + checksum(body)
+ 
+@@ -110,19 +128,32 @@ class Engine:
+         if check != checksum(ver + "|" + pairs_str):
+             return "R CHK"
+         if not pairs_str:
+-            return "R FMT"  # SPEC: a blob carries at least one pair
++            self.state = {}
++            self.sorted_mode = False
++            return "OK 0"
+         new_state: dict[str, str] = {}
++        seen: dict[str, str] = {}
++        count = 0
++        collided = False
+         for piece in pairs_str.split(PAIR_SEP):
+             if piece.count("=") != 1:
+                 return "R FMT"
+             key, val = piece.split("=")
+             if not _valid_key(key) or not _valid_val(val):
+                 return "R FMT"
+-            if key in new_state:
+-                return "R FMT"  # SPEC: duplicate keys reject
+-            new_state[key] = val
++            count += 1
++            fold = key.lower()
++            if fold in seen:
++                collided = True
++                new_state[seen[fold]] = val
++            else:
++                seen[fold] = key
++                new_state[key] = val
++        if collided:
++            new_state = dict(sorted(new_state.items()))
+         self.state = new_state
+-        return f"OK {len(self.state)}"
++        self.sorted_mode = collided
++        return f"OK {count}"
+ 
+ 
+ def process(lines: list[str], out=None) -> list[str]:

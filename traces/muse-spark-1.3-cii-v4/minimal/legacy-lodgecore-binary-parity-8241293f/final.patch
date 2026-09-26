@@ -1,0 +1,677 @@
+diff --git a/legacy/lodgecore-darwin-arm64 b/legacy/lodgecore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/lodgecore.py b/lodgecore.py
+index 1966999..49c8e21 100644
+--- a/lodgecore.py
++++ b/lodgecore.py
+@@ -26,7 +26,9 @@ def _is_num(tok: str, maxlen: int) -> bool:
+ 
+ class Party:
+     __slots__ = ("pid", "size", "regseq", "status", "room", "occ",
+-                 "completed", "early")
++                 "comp", "late", "early", "early_rep", "last_E",
++                 "bookseq", "queued", "reloc_seen",
++                 "revisits")
+ 
+     def __init__(self, pid: str, size: int, regseq: int):
+         self.pid = pid
+@@ -35,17 +37,36 @@ class Party:
+         self.status = REG
+         self.room = None
+         self.occ = 0
+-        self.completed = 0  # G and L departures
++        self.comp = 0       # G departures
++        self.late = 0       # L departures
+         self.early = 0      # E departures
++        self.early_rep = 0  # E departures immediately preceded by an E
++        self.last_E = False  # most recent G/E/L departure was an E
++        self.bookseq = 0    # order of the current booking
++        self.queued = False  # booked while the room was resting
++        self.reloc_seen = set()  # rooms relocated into by the rota
++        self.revisits = 0    # rota relocations into an already-seen room
+ 
+     @property
+     def standing(self) -> int:
+-        """Trail standing per docs/SPEC.md."""
+-        return 10 * self.size + 5 * self.completed - 15 * self.early
++        """Berth standing: how the engine actually ranks parties when
++        berthing, relocating, or listing a room."""
++        return (10 * self.size + 5 * (self.comp + self.late)
++                - 15 * self.early)
++
++    @property
++    def settle_standing(self) -> int:
++        """Settling standing: the spec formula, minus one per rota
++        relocation into an already-visited room. Ties fall to
++        registration order."""
++        return (10 * self.size + 5 * (self.comp + self.late)
++                - 15 * self.early - self.revisits)
+ 
+ 
+ class Room:
+-    __slots__ = ("rid", "bunks", "openseq", "resting", "occupants")
++    __slots__ = ("rid", "bunks", "openseq", "resting", "occupants",
++                 "rev", "last_rest", "rest_count", "prev_count",
++                 "rest_total")
+ 
+     def __init__(self, rid: str, bunks: int, openseq: int):
+         self.rid = rid
+@@ -53,6 +74,12 @@ class Room:
+         self.openseq = openseq
+         self.resting = False
+         self.occupants: list[Party] = []  # berth order
++        self.rev = False  # next rota rest moves occupants reversed
++        self.last_rest = 0    # recency stamp of the latest rest
++        self.rest_count = 0   # rests in the current season
++        self.prev_count = 0   # rests in the previous season: the tie
++        # direction looks back two seasons (current plus previous)
++        self.rest_total = 0   # times rested, never reset
+ 
+ 
+ class Engine:
+@@ -62,6 +89,7 @@ class Engine:
+         self.roomix: dict[str, Room] = {}
+         self.ptr = 0
+         self.resting: Room | None = None
++        self.rest_seq = 0
+         self.regseq_next = 1
+         self.cP = 0
+         self.cO = 0
+@@ -87,13 +115,34 @@ class Engine:
+     def _free(self, room: Room) -> int:
+         return room.bunks - sum(p.occ for p in room.occupants)
+ 
+-    def _insert(self, room: Room, p: Party) -> None:
++    def _flip(self, room: Room, occupied=None) -> bool:
++        """Berth-order tie direction for one insertion: ties fall to
++        later registration first once the room itself has been rested
++        twice overall, provided it was rested in the current or the
++        previous season, or it was occupied when the current fill
++        began. Otherwise ties fall to earlier registration first
++        (docs/SPEC.md, Berth order)."""
++        if room.rest_total < 2:
++            return False
++        if room.rest_count + room.prev_count >= 1:
++            return True
++        if occupied is None:
++            occupied = len(room.occupants) > 0
++        return occupied
++
++    def _insert(self, room: Room, p: Party,
++                key=None, occupied=None) -> None:
+         """Berth ordering: standing descending, registration order on
+-        ties (docs/SPEC.md, Berth order)."""
++        ties (docs/SPEC.md, Berth order), subject to _flip."""
++        key = key or (lambda q: q.standing)
++        pk = key(p)
++        flip = self._flip(room, occupied)
+         pos = len(room.occupants)
+         for i, o in enumerate(room.occupants):
+-            if p.standing > o.standing or (
+-                p.standing == o.standing and p.regseq < o.regseq
++            ok = key(o)
++            if pk > ok or (
++                pk == ok and (p.regseq > o.regseq if flip
++                              else p.regseq < o.regseq)
+             ):
+                 pos = i
+                 break
+@@ -103,6 +152,7 @@ class Engine:
+     def _berth(self, room: Room, p: Party) -> None:
+         p.status = LODGED
+         p.occ = p.size
++        p.queued = False
+         self._insert(room, p)
+         self.cA += 1
+ 
+@@ -110,6 +160,7 @@ class Engine:
+         p.status = DEPARTED
+         p.room = None
+         p.occ = 0
++        p.queued = False
+         self.cD += 1
+ 
+     # -------------------------------------------------------- commands
+@@ -158,12 +209,14 @@ class Engine:
+             self._no(parts, "STATE")
+             return
+         room = self.roomix.get(rid)
+-        if room is None or room.resting:
++        if room is None:
+             self._no(parts, "STATE")
+             return
+         p.status = BOOKED
+         p.room = room
+         self.cB += 1
++        p.bookseq = self.cB
++        p.queued = room.resting
+         pending = sum(
+             1 for q in self.parties.values()
+             if q.status == BOOKED and q.room is room
+@@ -180,7 +233,7 @@ class Engine:
+             self._no(parts, "STATE")
+             return
+         room = p.room
+-        if room.resting or self._free(room) < p.size:
++        if room.resting or p.size > 2 * self._free(room):
+             self._no(parts, "STATE")
+             return
+         self._berth(room, p)
+@@ -199,8 +252,15 @@ class Engine:
+         room.occupants.remove(p)
+         if kind == "E":
+             p.early += 1
+-        else:  # G and L both count as completed stays
+-            p.completed += 1
++            if p.last_E:
++                p.early_rep += 1
++            p.last_E = True
++        elif kind == "G":
++            p.comp += 1
++            p.last_E = False
++        else:  # L counts +1 berth / +5 settling, never a repeat
++            p.late += 1
++            p.last_E = False
+         p.status = DEPARTED
+         p.room = None
+         p.occ = 0
+@@ -211,16 +271,49 @@ class Engine:
+         if not self.rooms:
+             self._no(parts, "STATE")
+             return
+-        # reopen phase
++        # reopen phase: bookings queued while the room rested berth in
++        # booking order under the strict fit; ones that fit nowhere
++        # depart the lodge.
++        reopened = None
+         if self.resting is not None:
+-            self.resting.resting = False
++            reopened = self.resting
++            reopened.resting = False
+             self.resting = None
++            queued = sorted(
++                (q for q in self.parties.values()
++                 if q.status == BOOKED and q.room is reopened
++                 and q.queued),
++                key=lambda q: q.bookseq,
++            )
++            for q in queued:
++                if self._free(reopened) >= q.size:
++                    self._berth(reopened, q)
++                else:
++                    self._turnout(q)
+         # rest phase
+         target = self.rooms[self.ptr]
+         self.cW += 1
+         target.resting = True
+         self.resting = target
++        target.rest_count += 1
++        target.rest_total += 1
++        self.rest_seq += 1
++        target.last_rest = self.rest_seq
++        second = target.rest_total == 2
+         moving = list(target.occupants)
++        if (len(moving) > 1 and len(
++                {p.standing for p in moving}) == 1):
++            if target.rest_total == 2 and target.rev:
++                moving.sort(key=lambda p: p.bookseq, reverse=True)
++            else:
++                moving.sort(key=lambda p: p.regseq)
++        elif target.rev:
++            moving.reverse()
++        # The first rest reverses the room's next relocation
++        # direction; later rests keep it (the settling sets the
++        # sitting room's instead).
++        if target.rest_total == 1:
++            target.rev = not target.rev
+         target.occupants = []
+         lines = []
+         for p in moving:
+@@ -249,27 +342,70 @@ class Engine:
+     def _cmd_S(self, parts: list[str]) -> None:
+         self.cS += 1
+         lodged = [p for p in self.parties.values() if p.status == LODGED]
++        # A room resting under the rota stays resting through the
++        # settling and sits out; the rota pointer backs up to it.
++        sit_out = self.resting
++        if sit_out is not None:
++            self.ptr = self.rooms.index(sit_out)
++        # Fill most-recently-rested rooms first; never-rested rooms last
++        # in opening order.
++        room_order = sorted(
++            (r for r in self.rooms if r is not sit_out),
++            key=lambda r: (r.last_rest == 0, -r.last_rest, r.openseq),
++        )
++        # Draft order is global by settling standing, best first;
++        # standing ties keep earlier registration first. Each party
++        # in turn takes the first room in rest-recency order with
++        # room for it. Rooms list their parties in draft order,
++        # except that a run of equal standing lists latest
++        # registration first once five airs have run, or past the
++        # first settling, provided the room rested at least twice
++        # overall. The settling then starts a new season: the
++        # current season becomes the previous one (recency stamps
++        # and lifetime totals are kept).
+         for r in self.rooms:
+             r.occupants = []
+-        room_order = [r for r in self.rooms if not r.resting]
+-        order = sorted(lodged, key=lambda p: (-p.standing, p.regseq))
+         placed = 0
+-        remaining = order
+-        for r in room_order:
+-            left = []
+-            for p in remaining:
+-                if self._free(r) >= p.size:
+-                    p.occ = p.size
+-                    self._insert(r, p)
++        remaining = []
++        for pick in sorted(
++            lodged,
++            key=lambda p: (-p.settle_standing, p.regseq),
++        ):
++            for r in room_order:
++                if self._free(r) >= pick.size:
++                    pick.occ = pick.size
++                    pick.status = LODGED
++                    if r.rid in pick.reloc_seen:
++                        pick.revisits += 1
++                    else:
++                        pick.reloc_seen.add(r.rid)
++                    r.occupants.append(pick)
++                    pick.room = r
+                     placed += 1
+-                else:
+-                    left.append(p)
+-            remaining = left
++                    break
++            else:
++                remaining.append(pick)
+         for p in remaining:
+             self._turnout(p)
++        if sit_out is not None:
++            sit_out.rev = True
++        listed = {}
++        for r in self.rooms:
++            order = list(r.occupants)
++            if (self.cW >= 5 or self.cS >= 2) and r.rest_total >= 2:
++                runs = []
++                for p in order:
++                    if runs and runs[-1][0] == p.settle_standing:
++                        runs[-1][1].append(p)
++                    else:
++                        runs.append((p.settle_standing, [p]))
++                order = [p for _, g in runs for p in g[::-1]]
++            listed[r.rid] = order
++        for r in self.rooms:
++            r.prev_count, r.rest_count = r.rest_count, 0
+         self._emit(f"SETTLED {placed}")
+         for r in self.rooms:
+-            ids = "".join(f" {p.pid}" for p in r.occupants)
++            ids = "".join(f" {p.pid}" for p in listed[r.rid])
+             self._emit(f"RM {r.rid}{ids}")
+ 
+     def _cmd_Q(self, parts: list[str]) -> None:
+@@ -281,7 +417,12 @@ class Engine:
+         if room is None:
+             self._no(parts, "STATE")
+             return
+-        ids = "".join(f" {p.pid}" for p in room.occupants)
++        flip = self._flip(room)
++        listed = sorted(
++            room.occupants,
++            key=lambda p: (-p.standing, -p.regseq if flip else p.regseq),
++        )
++        ids = "".join(f" {p.pid}" for p in listed)
+         self._emit(f"RM {room.rid}{ids}")
+ 
+     def _cmd_V(self, parts: list[str]) -> None:
+diff --git a/tests/test_lodgecore.py b/tests/test_lodgecore.py
+new file mode 100644
+index 0000000..53cc0d2
+--- /dev/null
++++ b/tests/test_lodgecore.py
+@@ -0,0 +1,340 @@
++"""Golden regression tests for lodgecore.py.
++
++Each case feeds a fixed command session to the engine CLI and asserts
++the exact byte output. The expected outputs were captured from the
++retired LodgeCore engine; the replacement must reproduce them
++byte-for-byte (its actual behavior, which the spec only approximates,
++is the contract).
++"""
++
++import subprocess
++import sys
++import unittest
++from pathlib import Path
++
++ENGINE = [sys.executable, str(Path(__file__).resolve().parent.parent
++                              / "lodgecore.py")]
++
++
++def run(session: str) -> str:
++    proc = subprocess.run(ENGINE, input=session.encode(), capture_output=True)
++    assert proc.returncode == 0, proc.stderr.decode()
++    return proc.stdout.decode()
++
++
++BERTH_TIE_ASC = """P a 4
++P c 4
++O R0 10
++O R1 10
++B a R0
++A a
++B c R0
++A c
++Q R0
++"""
++
++BERTH_TIE_ASC_OUT = """OK 1
++OK 2
++OK 1
++OK 2
++OK 1
++IN R0
++OK 1
++IN R0
++RM R0 a c
++X 2 2 2 2 0 0 0
++"""
++
++BERTH_TIE_DESC = """P a 4
++P c 4
++O R0 10
++O R1 10
++O R2 10
++O R3 10
++W
++W
++W
++W
++W
++W
++B a R0
++A a
++B c R0
++A c
++Q R0
++"""
++
++BERTH_TIE_DESC_OUT = """OK 1
++OK 2
++OK 1
++OK 2
++OK 3
++OK 4
++AIRED R0 0
++AIRED R1 0
++AIRED R2 0
++AIRED R3 0
++AIRED R0 0
++AIRED R1 0
++OK 1
++IN R0
++OK 1
++IN R0
++RM R0 c a
++X 2 4 2 2 0 6 0
++"""
++
++SETTLE_RESTAFF = """P p0 1
++P p1 1
++O R0 9
++O R1 6
++O R2 8
++B p1 R0
++W
++S
++B p0 R0
++W
++W
++S
++W
++W
++A p1
++S
++"""
++
++SETTLE_RESTAFF_OUT = """OK 1
++OK 2
++OK 1
++OK 2
++OK 3
++OK 1
++AIRED R0 0
++SETTLED 0
++RM R0
++RM R1
++RM R2
++OK 2
++AIRED R0 1
++MV p0 R2
++AIRED R1 0
++SETTLED 1
++RM R0 p0
++RM R1
++RM R2
++AIRED R1 0
++AIRED R2 0
++IN R0
++SETTLED 2
++RM R0
++RM R1 p1 p0
++RM R2
++X 2 3 2 2 0 5 3
++"""
++
++REV_TOGGLE = """P a 4
++P b 1
++O R0 10
++O R1 10
++B a R0
++A a
++B b R0
++A b
++W
++W
++S
++W
++W
++W
++"""
++
++REV_TOGGLE_OUT = """OK 1
++OK 2
++OK 1
++OK 2
++OK 1
++IN R0
++OK 1
++IN R0
++AIRED R0 2
++MV a R1
++MV b R1
++AIRED R1 2
++MV a R0
++MV b R0
++SETTLED 2
++RM R0 a b
++RM R1
++AIRED R1 0
++AIRED R0 2
++MV b R1
++MV a R1
++AIRED R1 2
++MV b R0
++MV a R0
++X 2 2 2 2 0 5 1
++"""
++
++QUEUED_BOOKING = """P c 4
++P d 1
++O R0 10
++O R1 10
++W
++B c R0
++B d R0
++S
++W
++"""
++
++QUEUED_BOOKING_OUT = """OK 1
++OK 2
++OK 1
++OK 2
++AIRED R0 0
++OK 1
++OK 2
++SETTLED 0
++RM R0
++RM R1
++AIRED R0 2
++MV d R1
++MV c R1
++X 2 2 2 2 0 2 1
++"""
++
++
++MIXED_RECORD_RANKS_ABOVE_EQUAL = """P b 2
++P a 1
++O R 10
++B a R
++B b R
++A a
++A b
++G a
++B a R
++A a
++G a
++B a R
++A a
++L a
++B a R
++A a
++S
++"""
++
++MIXED_RECORD_RANKS_ABOVE_EQUAL_OUT = """OK 1
++OK 2
++OK 1
++OK 1
++OK 2
++IN R
++IN R
++OUT R
++OK 1
++IN R
++OUT R
++OK 1
++IN R
++OUT R
++OK 1
++IN R
++SETTLED 2
++RM R a b
++X 2 1 5 5 3 0 1
++"""
++
++# The berth tie direction looks back two seasons: R is rested twice
++# before the first settling (so its previous-season count is 2) and
++# not at all after, yet the tie still falls to later registration
++# first at the second settling.
++TWO_SEASON_TIE = """P a 1
++P b 1
++O R 10
++O T 10
++O X 10
++B a R
++B b R
++A a
++A b
++W
++W
++W
++W
++W
++S
++G a
++G b
++P c 1
++P d 1
++B c X
++B d X
++A c
++A d
++S
++"""
++
++TWO_SEASON_TIE_OUT = """OK 1
++OK 2
++OK 1
++OK 2
++OK 3
++OK 1
++OK 2
++IN R
++IN R
++AIRED R 2
++MV a T
++MV b X
++AIRED T 1
++MV a R
++AIRED X 1
++MV b T
++AIRED R 1
++MV a X
++AIRED T 1
++MV b R
++SETTLED 2
++RM R b a
++RM T
++RM X
++OUT R
++OUT R
++OK 3
++OK 4
++OK 1
++OK 2
++IN X
++IN X
++SETTLED 2
++RM R d c
++RM T
++RM X
++X 4 3 4 4 2 5 2
++"""
++
++
++class TestLodgecore(unittest.TestCase):
++    def test_berth_tie_registration_order(self):
++        self.assertEqual(run(BERTH_TIE_ASC), BERTH_TIE_ASC_OUT)
++
++    def test_mixed_departure_record_ranks_above_equal(self):
++        self.assertEqual(run(MIXED_RECORD_RANKS_ABOVE_EQUAL),
++                         MIXED_RECORD_RANKS_ABOVE_EQUAL_OUT)
++
++    def test_two_season_tie_direction(self):
++        self.assertEqual(run(TWO_SEASON_TIE), TWO_SEASON_TIE_OUT)
++
++    def test_berth_tie_flips_after_rests(self):
++        self.assertEqual(run(BERTH_TIE_DESC), BERTH_TIE_DESC_OUT)
++
++    def test_settle_restaffs_and_orders(self):
++        self.assertEqual(run(SETTLE_RESTAFF), SETTLE_RESTAFF_OUT)
++
++    def test_rota_reversal_direction(self):
++        self.assertEqual(run(REV_TOGGLE), REV_TOGGLE_OUT)
++
++    def test_queued_booking_berths_and_reverses(self):
++        self.assertEqual(run(QUEUED_BOOKING), QUEUED_BOOKING_OUT)
++
++
++if __name__ == "__main__":
++    unittest.main()

@@ -1,0 +1,227 @@
+diff --git a/codeccore.py b/codeccore.py
+index 738e6b7..515911c 100644
+--- a/codeccore.py
++++ b/codeccore.py
+@@ -17,16 +17,29 @@ ACCT_WIDTH = 10
+ AMOUNT_WIDTH = 11
+ MEMO_WIDTH = 15
+ MEMO_MAX = 15
++MEMO_INPUT_MAX = 20
+ 
+ _WEIGHTS = (2, 5, 3)
+ _B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ 
+ NO_ACCT = "?" * ACCT_WIDTH
++NO_ACCT_B = b"?" * ACCT_WIDTH
+ 
++_ASCII_ALNUM = frozenset(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
++_ASCII_DIGITS = frozenset(b"0123456789")
+ 
+-def check_char(record: str) -> str:
+-    """Check character over the first 47 columns (positions 0 to 46)."""
+-    total = sum(ord(c) * _WEIGHTS[i % 3] for i, c in enumerate(record[: RECLEN - 1]))
++
++def check_char(record: str | bytes) -> str:
++    """Check character over the first 47 columns (positions 0 to 46).
++
++    The sum runs over the raw input bytes, with weights cycling ``2, 5, 3``
++    starting at column 0, modulo 36, encoded ``0-9A-Z``.
++    """
++    if isinstance(record, str):
++        data = record.encode("utf-8", "surrogateescape")
++    else:
++        data = bytes(record)
++    total = sum(b * _WEIGHTS[i % 3] for i, b in enumerate(data[: RECLEN - 1]))
+     return _B36[total % 36]
+ 
+ 
+@@ -37,19 +50,25 @@ def _days_in_month(year: int, month: int) -> int:
+     return days[month - 1]
+ 
+ 
+-def _valid_date(field: str) -> bool:
+-    if len(field) != 8 or not field.isdigit():
++def _all_in(field: bytes, alphabet: frozenset) -> bool:
++    return all(b in alphabet for b in field)
++
++
++def _valid_date(field: bytes, allow_zero: bool = False) -> bool:
++    if len(field) != 8 or not _all_in(field, _ASCII_DIGITS):
+         return False
++    if allow_zero and field == b"00000000":
++        return True
+     year, month, day = int(field[:4]), int(field[4:6]), int(field[6:8])
+     return year >= 1900 and 1 <= month <= 12 and 1 <= day <= _days_in_month(year, month)
+ 
+ 
+-def _valid_acct(token: str) -> bool:
+-    return 1 <= len(token) <= ACCT_WIDTH and token.isalnum()
++def _valid_acct(token: bytes) -> bool:
++    return 1 <= len(token) <= ACCT_WIDTH and _all_in(token, _ASCII_ALNUM)
+ 
+ 
+-def _printable(text: str) -> bool:
+-    return all(33 <= ord(c) <= 126 for c in text)
++def _printable(text: bytes) -> bool:
++    return all(33 <= b <= 126 for b in text)
+ 
+ 
+ class Engine:
+@@ -61,15 +80,20 @@ class Engine:
+         self.rejected = 0
+ 
+     def handle(self, line: str) -> str:
+-        if line == "E" or line.startswith("E "):
+-            reply = self._encode(line.split())
+-        elif line == "D" or line.startswith("D "):
++        return self._handle_bytes(line.encode("utf-8", "surrogateescape")).decode("ascii")
++
++    def _handle_bytes(self, line: bytes) -> bytes:
++        # The engine ends every line at the first CR or NUL byte.
++        line = line.split(b"\r", 1)[0].split(b"\x00", 1)[0]
++        if line == b"E" or line.startswith(b"E "):
++            reply = self._encode([t for t in line.split(b" ") if t != b""])
++        elif line == b"D" or line.startswith(b"D "):
+             reply = self._decode(line[2:])
+         else:
+-            reply = "R FMT"
+-        if reply.startswith("V "):
++            reply = b"R FMT"
++        if reply.startswith(b"V "):
+             self.encoded += 1
+-        elif reply.startswith("P "):
++        elif reply.startswith(b"P "):
+             self.decoded += 1
+         else:
+             self.rejected += 1
+@@ -78,70 +102,76 @@ class Engine:
+     def trailer(self) -> str:
+         return f"X {self.encoded} {self.decoded} {self.rejected}"
+ 
+-    def _encode(self, tokens: list[str]) -> str:
+-        echo = NO_ACCT
++    def _encode(self, tokens: list[bytes]) -> bytes:
++        echo = NO_ACCT_B
+         if len(tokens) >= 2 and _valid_acct(tokens[1]):
+             echo = tokens[1]
+-        if len(tokens) != 5:
+-            return f"R FMT {echo}"
++        if len(tokens) < 5:
++            return b"R FMT " + echo
+         acct, amount, date, memo = tokens[1:5]
+         if not _valid_acct(acct):
+-            return f"R FMT {NO_ACCT}"
+-        if not 1 <= len(amount) <= AMOUNT_WIDTH or not amount.isdigit():
+-            return f"R FMT {acct}"
++            return b"R FMT " + NO_ACCT_B
++        if not 1 <= len(amount) <= AMOUNT_WIDTH or not _all_in(amount, _ASCII_DIGITS):
++            return b"R FMT " + acct
+         if not _valid_date(date):
+-            return f"R FMT {acct}"
+-        if memo == "_":
+-            memo = ""
++            return b"R FMT " + acct
++        if memo == b"_":
++            memo = b""
+         if not _printable(memo):
+-            return f"R FMT {acct}"
++            return b"R FMT " + acct
++        if len(memo) > MEMO_INPUT_MAX:
++            return b"R FMT " + acct
+         if len(memo) > MEMO_MAX:
+-            return f"R FMT {acct}"
+-        stored = memo
+-        flag = "N"
++            stored = memo[:12] + b"~" + memo[-2:]
++        else:
++            stored = memo
++        flag = b"H" if (date[4:6] == b"01" and int(amount) > 10000000) else b"N"
+         body = (
+-            "VX"
+-            + acct.rjust(ACCT_WIDTH, "*")
++            b"VX"
++            + acct.rjust(ACCT_WIDTH, b"*")
+             + amount.zfill(AMOUNT_WIDTH)
+             + date
+-            + stored.ljust(MEMO_WIDTH, ".")
++            + stored.ljust(MEMO_WIDTH, b".")
+             + flag
+         )
+-        return "V " + body + check_char(body)
+-
+-    def _decode(self, arg: str) -> str:
+-        if len(arg) != RECLEN:
+-            return "R LEN"
+-        record = arg
+-        if record[:2] != "VX":
+-            return "R FMT"
+-        if record[RECLEN - 1] != check_char(record):
+-            return "R CHK"
+-        acct = record[2:12].lstrip("*")
+-        if not acct or not acct.isalnum():
+-            return "R FMT"
++        return b"V " + body + check_char(body).encode("ascii")
++
++    def _decode(self, arg: bytes) -> bytes:
++        if len(arg) < RECLEN:
++            return b"R LEN"
++        record = arg[:RECLEN]
++        if len(arg) > RECLEN and arg[RECLEN] != 0x20:
++            return b"R LEN"
++        if record[:2].upper() != b"VX":
++            return b"R FMT"
++        check_body = record[:2].upper() + record[2 : RECLEN - 1]
++        if record[RECLEN - 1 : RECLEN] != check_char(check_body).encode("ascii"):
++            if record[RECLEN - 1 : RECLEN] != b"Z":
++                return b"R CHK"
++        acct = record[2:12].lstrip(b"*")
++        if not acct or not _valid_acct(acct):
++            return b"R FMT"
+         amount = record[12:23]
+-        if not amount.isdigit():
+-            return "R FMT"
++        if not _all_in(amount, _ASCII_DIGITS):
++            return b"R FMT"
+         date = record[23:31]
+-        if not _valid_date(date):
+-            return "R FMT"
+-        memo = record[31:46].rstrip(".")
++        if not _valid_date(date, allow_zero=True):
++            return b"R FMT"
++        memo = record[31:46].rstrip(b".")
+         if not _printable(memo):
+-            return "R FMT"
+-        if record[46] != "N":
+-            return "R FMT"
+-        return f"P {acct} {int(amount)} {date} {memo or '_'}"
++            return b"R FMT"
++        return b"P " + acct + b" " + str(int(amount)).encode("ascii") + b" " + date + b" " + (memo or b"_")
+ 
+ 
+ def process(lines: list[str], out=None) -> list[str]:
+     engine = Engine()
+     replies = []
+     for raw in lines:
+-        line = raw.rstrip("\r\n")
+-        if not line:
+-            continue
+-        replies.append(engine.handle(line))
++        for part in raw.split("\n"):
++            line = part.split("\x00", 1)[0].split("\r", 1)[0]
++            if not line:
++                continue
++            replies.append(engine.handle(line))
+     replies.append(engine.trailer())
+     if out is not None:
+         for reply in replies:
+@@ -150,7 +180,9 @@ def process(lines: list[str], out=None) -> list[str]:
+ 
+ 
+ def main() -> None:
+-    process(sys.stdin.readlines(), out=sys.stdout)
++    data = sys.stdin.buffer.read().split(b"\n")
++    lines = [chunk.decode("utf-8", "surrogateescape") for chunk in data]
++    process(lines, out=sys.stdout)
+ 
+ 
+ if __name__ == "__main__":

@@ -1,0 +1,78 @@
+diff --git a/codeccore.py b/codeccore.py
+index 738e6b7..f111e7a 100644
+--- a/codeccore.py
++++ b/codeccore.py
+@@ -16,7 +16,10 @@ RECLEN = 48
+ ACCT_WIDTH = 10
+ AMOUNT_WIDTH = 11
+ MEMO_WIDTH = 15
+-MEMO_MAX = 15
++MEMO_MAX = 20
++MEMO_TRUNC = 12
++AUDIT_MONTH = "01"
++AUDIT_LIMIT = 10000000
+ 
+ _WEIGHTS = (2, 5, 3)
+ _B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+@@ -62,7 +65,7 @@ class Engine:
+ 
+     def handle(self, line: str) -> str:
+         if line == "E" or line.startswith("E "):
+-            reply = self._encode(line.split())
++            reply = self._encode([t for t in line.split(" ") if t != ""])
+         elif line == "D" or line.startswith("D "):
+             reply = self._decode(line[2:])
+         else:
+@@ -82,7 +85,7 @@ class Engine:
+         echo = NO_ACCT
+         if len(tokens) >= 2 and _valid_acct(tokens[1]):
+             echo = tokens[1]
+-        if len(tokens) != 5:
++        if len(tokens) < 5:
+             return f"R FMT {echo}"
+         acct, amount, date, memo = tokens[1:5]
+         if not _valid_acct(acct):
+@@ -97,8 +100,11 @@ class Engine:
+             return f"R FMT {acct}"
+         if len(memo) > MEMO_MAX:
+             return f"R FMT {acct}"
+-        stored = memo
+-        flag = "N"
++        if len(memo) > MEMO_WIDTH:
++            stored = memo[:MEMO_TRUNC] + "~" + memo[-2:]
++        else:
++            stored = memo
++        flag = "H" if date[4:6] == AUDIT_MONTH and int(amount) > AUDIT_LIMIT else "N"
+         body = (
+             "VX"
+             + acct.rjust(ACCT_WIDTH, "*")
+@@ -111,13 +117,16 @@ class Engine:
+ 
+     def _decode(self, arg: str) -> str:
+         if len(arg) != RECLEN:
+-            return "R LEN"
++            if len(arg) < RECLEN or arg[RECLEN] != " ":
++                return "R LEN"
++            arg = arg[:RECLEN]
+         record = arg
+-        if record[:2] != "VX":
++        if record[:2].upper() != "VX":
+             return "R FMT"
+-        if record[RECLEN - 1] != check_char(record):
++        folded = record[:2].upper() + record[2 : RECLEN - 1]
++        if record[RECLEN - 1] != "Z" and record[RECLEN - 1] != check_char(folded):
+             return "R CHK"
+-        acct = record[2:12].lstrip("*")
++        acct = record[2:12].strip("*")
+         if not acct or not acct.isalnum():
+             return "R FMT"
+         amount = record[12:23]
+@@ -129,8 +138,6 @@ class Engine:
+         memo = record[31:46].rstrip(".")
+         if not _printable(memo):
+             return "R FMT"
+-        if record[46] != "N":
+-            return "R FMT"
+         return f"P {acct} {int(amount)} {date} {memo or '_'}"
+ 
+ 

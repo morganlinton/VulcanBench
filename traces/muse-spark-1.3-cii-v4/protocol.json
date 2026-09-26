@@ -1,0 +1,146 @@
+{
+  "model": "muse-code:muse-spark-1.3-contributor",
+  "harness_version": "Muse Code 1.0.3 (1.0.3-R2198.1)",
+  "levels": [
+    "minimal",
+    "low",
+    "medium",
+    "high",
+    "extra-high"
+  ],
+  "binary": "/Users/morganlinton/.local/bin/muse-bin-1.0.3-R2198.1",
+  "binary_sha256": "4c0f960028b603174af7df7bd5051d8c35d6c1aa372a37d18bc770926a0577a7",
+  "pricing_tier": "contributor",
+  "data_use": "Contributor permits Meta to train on submitted prompts and completions",
+  "historical_run": "runs-muse13-cii-v4 preserved separately; no old results reused",
+  "suite": "/Users/morganlinton/dev/VulcanBench/tasks/coding-intelligence-index-v4",
+  "task_hashes": {
+    "legacy-settlecore-binary-parity": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+    "legacy-matchcore-order-book-parity": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb",
+    "legacy-qlite-store-parity": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a",
+    "legacy-payrollcore-binary-parity": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96",
+    "legacy-metercore-binary-parity": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0",
+    "legacy-freightcore-binary-parity": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb",
+    "legacy-codeccore-binary-parity": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d",
+    "legacy-quotacore-binary-parity": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc",
+    "legacy-snapcore-binary-parity": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d",
+    "legacy-vaultcore-binary-parity": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6",
+    "legacy-queuecore-binary-parity": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b",
+    "legacy-hedgecore-binary-parity": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+    "legacy-schedcore-binary-parity": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448",
+    "legacy-reflowcore-binary-parity": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe",
+    "legacy-tallycore-binary-parity": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc",
+    "legacy-pacecore-binary-parity": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3",
+    "legacy-blendcore-binary-parity": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366",
+    "legacy-stampcore-binary-parity": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da",
+    "legacy-granarycore-binary-parity": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92",
+    "legacy-depotcore-binary-parity": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+    "legacy-lodgecore-binary-parity": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d",
+    "legacy-cellarcore-binary-parity": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e",
+    "legacy-paddockcore-binary-parity": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+  },
+  "tasks_per_effort": 23,
+  "billing": "account subscription, API key excluded",
+  "concurrency": 1,
+  "judging": "Saved separately after solving; same equal Astra/Claude panel as comparison",
+  "final_weights": {
+    "functional": 0.5,
+    "quality": 0.15,
+    "security": 0.15,
+    "human_like": 0.2
+  },
+  "timeouts": {
+    "legacy-settlecore-binary-parity": 10800,
+    "legacy-matchcore-order-book-parity": 10800,
+    "legacy-qlite-store-parity": 10800,
+    "legacy-payrollcore-binary-parity": 10800,
+    "legacy-metercore-binary-parity": 10800,
+    "legacy-freightcore-binary-parity": 10800,
+    "legacy-codeccore-binary-parity": 10800,
+    "legacy-quotacore-binary-parity": 10800,
+    "legacy-snapcore-binary-parity": 10800,
+    "legacy-vaultcore-binary-parity": 10800,
+    "legacy-queuecore-binary-parity": 10800,
+    "legacy-hedgecore-binary-parity": 10800,
+    "legacy-schedcore-binary-parity": 10800,
+    "legacy-reflowcore-binary-parity": 10800,
+    "legacy-tallycore-binary-parity": 10800,
+    "legacy-pacecore-binary-parity": 10800,
+    "legacy-blendcore-binary-parity": 10800,
+    "legacy-stampcore-binary-parity": 10800,
+    "legacy-granarycore-binary-parity": 10800,
+    "legacy-depotcore-binary-parity": 10800,
+    "legacy-lodgecore-binary-parity": 10800,
+    "legacy-cellarcore-binary-parity": 10800,
+    "legacy-paddockcore-binary-parity": 10800
+  },
+  "effort_provenance": "Explicit CLI flags, live no-task probes passed; provider does not echo effort",
+  "ultra": "Client-side mode mapped to provider's highest supported reasoning tier; may change delegation; not a distinct higher API effort",
+  "excluded_efforts": {
+    "max": "Meta documents max as Standard-only; successful CLI acceptance does not prove effective max reasoning",
+    "ultra": "Blocked board-wide by vulcanbench.toml [effort].blocked (decision 2026-09-16): a client-side mode mapped onto the provider's highest tier, not a distinct API effort, and the board publishes Low to Max only"
+  },
+  "price_source": "https://dev.meta.ai/docs/pricing-rate-limits/",
+  "runtime_caveat": "Local host, concurrent Fable sweep; no CPU pinning",
+  "stream_idle_timeout_secs": 900,
+  "amendments": [
+    {
+      "at": "2026-09-08T17:50:00+00:00",
+      "change": "Raised Muse Code model stream idle timeout from the 180 s default to 900 s via TBH_STREAM_IDLE_TIMEOUT_SECS",
+      "reason": "Meta Contributor stream stalls aborted 5 consecutive lodgecore attempts (minimal) plus blendcore x2 and stampcore x1; no completed run was affected",
+      "state_at_amendment": "minimal: 20/23 complete; low through ultra not started",
+      "approved_by": "user, in chat",
+      "original_protocol": "protocol-original-2026-09-06.json"
+    },
+    {
+      "at": "2026-09-09T07:10:00+00:00",
+      "change": "Sweep driver accepts harness budget-exceeded summaries (functional 0.0, quality and security skipped by design) as scored failures instead of pausing",
+      "reason": "lodgecore (minimal) exhausted its 36000 s task timeout; the driver's grading guard did not anticipate the harness's standard timeout outcome",
+      "state_at_amendment": "minimal: 20/23 complete plus lodgecore timed out; low through ultra not started",
+      "approved_by": "follows the user's standing instruction to keep the sweep going; timeouts were already described to the user as scored failures",
+      "solver_conditions_changed": false
+    },
+    {
+      "at": "2026-09-09T21:20:00+00:00",
+      "change": "Re-pinned source hashes to the versions merged in PR #107 (commit 0faabb8c): type annotations, a run_task wrapper delegating to _run, and ruff formatting",
+      "reason": "The shared checkout moved to a branch carrying the merged files; the diff against the previously pinned sources is cosmetic and the Muse tests pass unchanged",
+      "state_at_amendment": "minimal: 23/23 complete; low through ultra not started",
+      "solver_conditions_changed": false
+    },
+    {
+      "at": "2026-09-15T15:50:00+00:00",
+      "change": "Task timeouts follow the suite restamp in PR #114 (commit ff3bf1ec): flat 10800 s (3 h) per task instead of 36000 s (blendcore 5400 s)",
+      "reason": "Suite-wide policy change recorded in docs/DECISIONS.md on 2026-09-13; the same bound was applied mid-sweep to the in-flight GPT-5.6 Luna run. Task hashes are unchanged; only agent_hints budgets moved",
+      "state_at_amendment": "minimal: 23/23 complete under 10 h; low: 17/23 complete under 10 h; remaining 6 low tasks and medium through ultra run under 3 h",
+      "solver_conditions_changed": true,
+      "comparability_note": "Under a 3 h cap, 6 minimal runs (tallycore, granarycore, depotcore, lodgecore, cellarcore, paddockcore) and 1 low run (tallycore) would have scored 0; four of them scored 0.43 to 0.64 and low tallycore 0.875 as recorded. Minimal mean 0.717 as scored versus 0.620 if capped; low-so-far 0.842 versus 0.791"
+    },
+    {
+      "at": "2026-09-18T06:10:00+00:00",
+      "change": "Sweep driver accepts harness summaries whose patch changed no recognized source file (functional 0.0, analyzers skipped) as scored failures instead of pausing",
+      "reason": "paddockcore (high) finished inside its budget but its patch contained only probe text files; the harness scored it 0/15 and skipped quality and security by design",
+      "state_at_amendment": "minimal, low, medium complete; high 22/23 complete plus paddockcore scored 0; extra-high and ultra not started",
+      "solver_conditions_changed": false
+    },
+    {
+      "at": "2026-09-18T16:30:00+00:00",
+      "change": "Re-pinned harness/effort.py to the working-tree version carrying an in-progress Devin CLI effort map (uncommitted work by another session on branch frontier-rename)",
+      "reason": "The added _DEVIN_EFFORT_VALUES table and its registry entry do not touch the muse-code effort map; the Muse tests pass against the tree",
+      "state_at_amendment": "extra-high 21/23 complete; ultra not started",
+      "solver_conditions_changed": false
+    },
+    {
+      "at": "2026-09-18T20:30:00+00:00",
+      "change": "Dropped ultra from the sweep levels; the sweep ends at extra-high with 5 levels x 23 tasks",
+      "reason": "vulcanbench.toml [effort].blocked refuses ultra at every entry point (owner decision 2026-09-16, docs/DECISIONS.md), and that record directs this protocol to drop ultra at its next stop",
+      "state_at_amendment": "minimal, low, medium, high, extra-high complete (115 scored runs); no ultra run was ever attempted",
+      "solver_conditions_changed": false
+    }
+  ],
+  "boundary": "Kernel-denied checkout/prior agent sessions/shared temp artifacts; isolated writes and explicit TMPDIR guidance; web tools disabled; shell network not isolated",
+  "source_hashes": {
+    "harness/agent/muse_code.py": "9bc20c08eac33f1c5bd065f9eeda9f072a6f40fafc00aee0003fd5861d124fe8",
+    "harness/effort.py": "8bf6e3cecb6944970fc7fe7c1c1905cc821645b62ce6c9a4fb4dee07eb51172b",
+    "scripts/cii-v4-board/run_muse_sweep.py": "9359cc8dabfba54d55d7677b29bfb81293e3296900f95cf9928a8e44c2a2dd16"
+  }
+}

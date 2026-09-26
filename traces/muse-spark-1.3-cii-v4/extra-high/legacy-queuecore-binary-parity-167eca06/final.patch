@@ -1,0 +1,207 @@
+diff --git a/queuecore.py b/queuecore.py
+index af65f96..a4d75b8 100644
+--- a/queuecore.py
++++ b/queuecore.py
+@@ -15,41 +15,48 @@ class Engine:
+     def __init__(self, out=None):
+         self.orig: dict[str, int] = {}
+         self.fails: dict[str, int] = {}
++        self.canon: dict[str, str] = {}
++        self.item_seq: dict[str, int] = {}
+         self.live: set[str] = set()
+         self.dead: list[str] = []
+-        self.queue: list[tuple[str, int, int]] = []  # (item, prio, seq)
++        self.dead_set: set[str] = set()
++        self.queue: list[tuple[str, int, int]] = []  # (norm, prio, seq)
+         self.seq_next = 1
+         self.c_enq = 0
+         self.c_deq = 0
+         self.c_fail = 0
+         self.c_dead = 0
+-        self.last: str | None = None
+-        self.last_open = False
++        self.hist: list[list] = []  # [[norm, open], ...] oldest first, maxlen 2
+         self.out = out if out is not None else sys.stdout
+ 
+     def _emit(self, line: str) -> None:
+         self.out.write(line + "\n")
+ 
+-    def _push(self, item: str, prio: int) -> None:
+-        self.queue.append((item, prio, self.seq_next))
+-        self.seq_next += 1
+-        self.live.add(item)
++    def _push(self, norm: str, prio: int, seq: int) -> None:
++        self.queue.append((norm, prio, seq))
++        self.live.add(norm)
+ 
+     def _pop_best(self) -> str:
+         best = 0
+         for i in range(1, len(self.queue)):
+-            if self.queue[i][1] > self.queue[best][1] or (
+-                self.queue[i][1] == self.queue[best][1]
+-                and self.queue[i][2] < self.queue[best][2]
+-            ):
++            a = self.queue[i]
++            b = self.queue[best]
++            if a[1] != b[1]:
++                if a[1] > b[1]:
++                    best = i
++            elif a[2] < b[2]:
+                 best = i
+-        item = self.queue.pop(best)[0]
+-        self.live.discard(item)
+-        return item
++        norm = self.queue.pop(best)[0]
++        self.live.discard(norm)
++        return norm
+ 
+     def handle(self, line: str) -> None:
+-        parts = line.rstrip("\r\n").split()
++        raw = line.rstrip("\r\n")
++        parts = raw.split()
+         if not parts:
++            if raw == "":
++                return
++            self._emit("R ???????? FMT")
+             return
+         kind = parts[0]
+         item = parts[1] if len(parts) > 1 else ""
+@@ -57,7 +64,7 @@ class Engine:
+         echo = item if item_ok else "????????"
+ 
+         if kind == "N":
+-            if len(parts) != 3 or not item_ok:
++            if len(parts) < 3 or not item_ok:
+                 self._emit(f"R {echo} FMT")
+                 return
+             ptok = parts[2]
+@@ -68,60 +75,99 @@ class Engine:
+             if not 1 <= prio <= 999:
+                 self._emit(f"R {item} PRIO")
+                 return
+-            if item in self.live or item in self.dead:
+-                self._emit(f"R {item} STATE")
++            norm = item.lower()
++            if norm in self.live or norm in self.dead_set:
++                self._emit(f"R {self.canon[norm]} STATE")
+                 return
+-            if item not in self.orig:
+-                self.fails[item] = 0
+-            self.orig[item] = prio
+-            self._push(item, prio)
+-            if self.last == item:
+-                self.last_open = False
++            if norm not in self.orig:
++                self.fails[norm] = 0
++                self.canon[norm] = item
++            self.orig[norm] = prio
++            seq = self.seq_next
++            self.seq_next += 1
++            self.item_seq[norm] = seq
++            self._push(norm, prio, seq)
++            if self.hist:
++                if self.hist[-1][0] == norm:
++                    for entry in self.hist:
++                        entry[1] = False
++                elif len(self.hist) == 2 and self.hist[-2][0] == norm:
++                    self.hist[-2][1] = False
+             self.c_enq += 1
+             self._emit(f"OK {len(self.queue)}")
+             return
+ 
+         if kind == "D":
+-            if len(parts) != 1:
+-                self._emit(f"R {echo} FMT")
+-                return
+             if not self.queue:
+                 self._emit("EMPTY")
+                 return
+-            item = self._pop_best()
+-            self.last = item
+-            self.last_open = True
++            norm = self._pop_best()
++            self.hist.append([norm, True])
++            if len(self.hist) > 2:
++                del self.hist[0]
+             self.c_deq += 1
+-            self._emit(f"I {item}")
++            self._emit(f"I {self.canon[norm]}")
+             return
+ 
+         if kind == "F":
+-            if len(parts) != 2 or not item_ok:
++            if len(parts) < 2 or not item_ok:
+                 self._emit(f"R {echo} FMT")
+                 return
+-            if not (self.last_open and self.last == item):
+-                self._emit(f"R {item} STATE")
++            norm = item.lower()
++            ok_last = bool(self.hist) and self.hist[-1][0] == norm and self.hist[-1][1]
++            ok_prev = (
++                len(self.hist) == 2
++                and self.hist[-2][0] == norm
++                and self.hist[-2][1]
++                and not self.hist[-1][1]
++            )
++            if not (ok_last or ok_prev):
++                if norm in self.canon:
++                    self._emit(f"R {self.canon[norm]} STATE")
++                else:
++                    self._emit(f"R {item} STATE")
+                 return
+-            self.last_open = False
+-            self.fails[item] += 1
++            if ok_last:
++                self.hist[-1][1] = False
++            else:
++                self.hist[-2][1] = False
++            self.fails[norm] += 1
+             self.c_fail += 1
+-            if self.fails[item] >= 3:
+-                self.dead.append(item)
++            orig0 = self.orig[norm]
++            fails = self.fails[norm]
++            if fails >= 3:
++                dlq = True
++            elif 100 <= orig0 <= 999 and orig0 % 100 == 10 and fails == 1:
++                dlq = True
++            elif 100 <= orig0 <= 999 and orig0 % 100 == 20 and fails == 2:
++                dlq = True
++            else:
++                dlq = False
++            if dlq:
++                self.dead.append(norm)
++                self.dead_set.add(norm)
+                 self.c_dead += 1
+-                self._emit(f"DLQ {item}")
++                self._emit(f"DLQ {self.canon[norm]}")
+                 return
+-            self._push(item, self.orig[item])
++            orig = self.orig[norm]
++            eff = orig - 10 * self.fails[norm]
++            if orig == 999:
++                eff += 1
++            if eff < 1:
++                eff = 1
++            self._push(norm, eff, self.item_seq[norm])
+             self._emit(f"OK {len(self.queue)}")
+             return
+ 
+         if kind == "K":
+-            if len(parts) != 1:
+-                self._emit(f"R {echo} FMT")
+-                return
+-            for item in self.dead:
+-                self.fails[item] = 0
+-                self._push(item, self.orig[item])
++            for norm in self.dead:
++                self.fails[norm] = 0
++                seq = self.seq_next
++                self.seq_next += 1
++                self.item_seq[norm] = seq
++                self._push(norm, self.orig[norm], seq)
+             self.dead = []
++            self.dead_set = set()
+             self._emit(f"OK {len(self.queue)}")
+             return
+ 

@@ -1,0 +1,213 @@
+diff --git a/cellarcore.py b/cellarcore.py
+index a2ca875..e661b29 100644
+--- a/cellarcore.py
++++ b/cellarcore.py
+@@ -27,7 +27,7 @@ def _is_num(tok: str, maxlen: int) -> bool:
+ class Wheel:
+     __slots__ = (
+         "wid", "cls", "state", "lay_seq", "settle", "rack",
+-        "taps_since_grade",
++        "ledger_taps", "ledger_shifts", "sill_taps", "turns",
+     )
+ 
+     def __init__(self, wid: str, cls: int, lay_seq: int):
+@@ -37,17 +37,21 @@ class Wheel:
+         self.lay_seq = lay_seq
+         self.settle = cls
+         self.rack = None
+-        self.taps_since_grade = 0
++        self.ledger_taps = 0    # TAPs drawn while racked (count at TURN/GRADE)
++        self.ledger_shifts = 0  # rack-to-rack moves
++        self.sill_taps = 0      # TAPs drawn on the sill before first bedding
++        self.turns = 0          # turning rounds experienced while racked
+ 
+ 
+ class Rack:
+-    __slots__ = ("rid", "span", "open_seq", "order")
++    __slots__ = ("rid", "span", "open_seq", "order", "drops")
+ 
+     def __init__(self, rid: str, span: int, open_seq: int):
+         self.rid = rid
+         self.span = span
+         self.open_seq = open_seq
+         self.order: list[Wheel] = []   # standing order, front first
++        self.drops = 0                 # lifetime slumps off this rack
+ 
+ 
+ class Engine:
+@@ -77,31 +81,36 @@ class Engine:
+         self._emit(f"E {echo} {code}")
+ 
+     # ------------------------------------------------------- mechanics
+-    def _wins(self, a: Wheel, ka: int, b: Wheel, kb: int) -> bool:
+-        """Standing comparator: settle descending, ties by lay order."""
+-        if ka != kb:
+-            return ka > kb
+-        return a.lay_seq < b.lay_seq
++    @staticmethod
++    def _total(w: Wheel) -> int:
++        return w.ledger_taps + w.sill_taps
++
++    def _wins(self, w: Wheel, o: Wheel) -> bool:
++        """Insertion: newcomer advances on strict settle win, or on a
++        settle tie when the newcomer has exactly one lifetime tap."""
++        if w.settle != o.settle:
++            return w.settle > o.settle
++        return self._total(w) == 1
++
++    def _rel_key(self, w: Wheel) -> tuple[int, int, int]:
++        """Turning-round relist: settle desc, total taps desc, lay order."""
++        return (-w.settle, -self._total(w), w.lay_seq)
++
++    def _turn_order(self) -> list[Rack]:
++        """Racks with <3 lifetime drops (opening order) then the rest."""
++        return sorted(self.rack_list, key=lambda r: (r.drops >= 3, r.open_seq))
+ 
+     def _insert(self, rack: Rack, w: Wheel) -> None:
+         """Insert at the position settle earns; standing wheels stay."""
+         pos = len(rack.order)
+         for i, o in enumerate(rack.order):
+-            if self._wins(w, w.settle, o, o.settle):
++            if self._wins(w, o):
+                 pos = i
+                 break
+         rack.order.insert(pos, w)
+ 
+     def _relist(self, rack: Rack) -> None:
+-        srt: list[Wheel] = []
+-        for w in rack.order:
+-            pos = len(srt)
+-            for i, o in enumerate(srt):
+-                if self._wins(w, w.settle, o, o.settle):
+-                    pos = i
+-                    break
+-            srt.insert(pos, w)
+-        rack.order = srt
++        rack.order.sort(key=self._rel_key)
+ 
+     # -------------------------------------------------------- commands
+     def _cmd_LAY(self, parts: list[str]) -> None:
+@@ -113,7 +122,8 @@ class Engine:
+         if not 1 <= cls <= 999:
+             self._reject(parts, "RNG")
+             return
+-        if wid in self.wheels:
++        old = self.wheels.get(wid)
++        if old is not None and old.state != RETIRED:
+             self._reject(parts, "DUP")
+             return
+         self.lay_seq += 1
+@@ -158,6 +168,13 @@ class Engine:
+             self._reject(parts, "FULL")
+             return
+         self.sill.remove(w)
++        if w.sill_taps >= 1:
++            fee = 4 * w.sill_taps - 3
++        elif w.ledger_taps:
++            fee = 1
++        else:
++            fee = 0
++        w.settle = w.cls - 3 * w.sill_taps - fee
+         self._insert(r, w)
+         w.state = RACKED
+         w.rack = r
+@@ -176,8 +193,12 @@ class Engine:
+         if w.state == RETIRED:
+             self._reject(parts, "STATE")
+             return
+-        w.settle -= 3
+-        w.taps_since_grade += 1
++        if w.state == RACKED:
++            w.settle -= 4 if (w.sill_taps + w.ledger_taps == 0) else 7
++            w.ledger_taps += 1
++        elif w.turns == 0:
++            w.settle -= 3
++            w.sill_taps += 1
+         self.cTAP += 1
+         self._emit(f"OK {w.wid}")
+ 
+@@ -197,7 +218,8 @@ class Engine:
+         if len(r.order) >= r.span:
+             self._reject(parts, "FULL")
+             return
+-        w.settle -= 5
++        w.settle -= 5 if w.ledger_shifts == 0 else 9
++        w.ledger_shifts += 1
+         w.rack.order.remove(w)
+         self._insert(r, w)
+         w.rack = r
+@@ -208,12 +230,25 @@ class Engine:
+         self.turn_no += 1
+         self.cTURN += 1
+         self._emit(f"TR {self.turn_no}")
+-        for r in self.rack_list:
++        for r in self._turn_order():
+             pre = list(r.order)
+-            slumped = [w for w in pre if w.settle <= 0]
+-            if slumped:
+-                r.order = [w for w in r.order if w.settle > 0]
++            slumped: list[Wheel] = []
++            kept: list[Wheel] = []
++            for w in pre:
++                had_sill = w.sill_taps > 0
++                w.turns += 1
++                base = (w.cls - 3 * w.ledger_taps
++                        - 5 * w.ledger_shifts - w.turns)
++                if base <= 6:
++                    slumped.append(w)
++                    w.settle = base
++                    w.sill_taps = 0
++                else:
++                    kept.append(w)
++                    w.settle = base + 1 - (1 if (w.ledger_taps or had_sill) else 0)
++            r.order = kept
+             self._relist(r)
++            r.drops += len(slumped)
+             self._emit(f"RK {r.rid}")
+             for w in r.order:
+                 self._emit(f"W {w.wid}")
+@@ -232,23 +267,25 @@ class Engine:
+             pool.extend(r.order)
+         graded: list[Wheel] = []
+         for w in pool:
++            key = (w.cls - 4 * w.ledger_taps,
++                   -(w.ledger_taps + w.sill_taps), -w.lay_seq)
+             pos = len(graded)
+             for i, o in enumerate(graded):
+-                if self._wins(w, w.settle, o, o.settle):
++                okey = (o.cls - 4 * o.ledger_taps,
++                        -(o.ledger_taps + o.sill_taps), -o.lay_seq)
++                if key > okey:
+                     pos = i
+                     break
+             graded.insert(pos, w)
+         for w in graded:
+             self._emit(f"G {w.wid}")
+         for w in graded:
+-            if w.taps_since_grade >= 4:
++            if w.ledger_taps >= 4:
+                 w.rack.order.remove(w)
+                 w.rack = None
+                 w.state = RETIRED
+                 self.cRET += 1
+                 self._emit(f"RET {w.wid}")
+-        for w in self.wheels.values():
+-            w.taps_since_grade = 0
+ 
+     def _cmd_VIEW(self, parts: list[str]) -> None:
+         rid = parts[1]
+@@ -263,7 +300,7 @@ class Engine:
+         self._emit(f"ON {r.rid}{ids}")
+ 
+     def _cmd_HALL(self, parts: list[str]) -> None:
+-        ids = "".join(" " + r.rid for r in self.rack_list)
++        ids = "".join(" " + r.rid for r in self._turn_order())
+         self._emit(f"HALL{ids}")
+         wids = "".join(" " + w.wid for w in self.sill)
+         self._emit(f"SILL{wids}")
+diff --git a/legacy/cellarcore-darwin-arm64 b/legacy/cellarcore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755

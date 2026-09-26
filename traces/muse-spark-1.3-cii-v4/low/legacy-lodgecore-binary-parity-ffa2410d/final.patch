@@ -1,0 +1,325 @@
+diff --git a/legacy/README.md b/legacy/README.md
+old mode 100644
+new mode 100755
+diff --git a/legacy/lodgecore-darwin-arm64 b/legacy/lodgecore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/lodgecore-linux-amd64 b/legacy/lodgecore-linux-amd64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/lodgecore.py b/lodgecore.py
+index 1966999..500ae00 100644
+--- a/lodgecore.py
++++ b/lodgecore.py
+@@ -26,7 +26,8 @@ def _is_num(tok: str, maxlen: int) -> bool:
+ 
+ class Party:
+     __slots__ = ("pid", "size", "regseq", "status", "room", "occ",
+-                 "completed", "early")
++                 "completed", "early", "lates", "hist", "relocs", "manual",
++                 "bookseq", "autoberth")
+ 
+     def __init__(self, pid: str, size: int, regseq: int):
+         self.pid = pid
+@@ -35,23 +36,60 @@ class Party:
+         self.status = REG
+         self.room = None
+         self.occ = 0
+-        self.completed = 0  # G and L departures
++        self.completed = 0  # G departures
+         self.early = 0      # E departures
+-
+-    @property
+-    def standing(self) -> int:
+-        """Trail standing per docs/SPEC.md."""
+-        return 10 * self.size + 5 * self.completed - 15 * self.early
++        self.lates = 0      # L departures
++        self.hist: list[str] = []  # departure history ('G'/'E'/'L')
++        # relocation/auto-berth counts per room id (see Engine._standing)
++        self.relocs: dict[str, int] = {}
++        self.manual = False  # ever lodged via an accepted A command
++        self.bookseq = 0    # order of the current booking
++        self.autoberth = False  # booked while the room was resting
++
++    def reloc_penalty(self, first: Room | None) -> int:
++        """Standing lost to repeated relocations: the first countable
++        relocation is free, the 2nd-4th cost 5 each, later ones are free.
++        A relocation counts iff the party has lodged via an accepted
++        arrival and the room is not the first-opened."""
++        total = 0
++        for rid, cnt in self.relocs.items():
++            if self.manual and (first is None or rid != first.rid):
++                total += 5 * min(max(cnt - 1, 0), 3)
++        return total
++
++
++def _run_extra(hist: list[str]) -> int:
++    """Extra early-departure penalty: maximal runs of consecutive E
++    departures of length >= 2 contribute 5 x length with alternating
++    signs (+, -, +, ...); lone Es add nothing. Never negative."""
++    total = 0
++    sign = 1
++    i, n = 0, len(hist)
++    while i < n:
++        if hist[i] == "E":
++            j = i
++            while j < n and hist[j] == "E":
++                j += 1
++            if j - i >= 2:
++                total += sign * 5 * (j - i)
++                sign = -sign
++            i = j
++        else:
++            i += 1
++    return max(0, total)
+ 
+ 
+ class Room:
+-    __slots__ = ("rid", "bunks", "openseq", "resting", "occupants")
++    __slots__ = ("rid", "bunks", "openseq", "resting", "nairs", "occupants")
+ 
+     def __init__(self, rid: str, bunks: int, openseq: int):
+         self.rid = rid
+         self.bunks = bunks
+         self.openseq = openseq
+         self.resting = False
++        self.nairs = 0  # rest cycles so far, saturating at 2
++        # (relocation order: 1st forward; 2nd reversed; later
++        # reversed iff occupants' standings differ)
+         self.occupants: list[Party] = []  # berth order
+ 
+ 
+@@ -59,10 +97,12 @@ class Engine:
+     def __init__(self, out=None):
+         self.parties: dict[str, Party] = {}
+         self.rooms: list[Room] = []  # opening order
++        self.mru: list[Room] = []  # most-recently-rested first
+         self.roomix: dict[str, Room] = {}
+         self.ptr = 0
+         self.resting: Room | None = None
+         self.regseq_next = 1
++        self.bookseq_next = 1
+         self.cP = 0
+         self.cO = 0
+         self.cB = 0
+@@ -87,16 +127,41 @@ class Engine:
+     def _free(self, room: Room) -> int:
+         return room.bunks - sum(p.occ for p in room.occupants)
+ 
++    def _standing(self, p: Party) -> int:
++        """Trail standing as the engine computes it (docs/SPEC.md drifted:
++        L departures count +1, early departures in runs cost extra, and
++        repeated relocations cost standing)."""
++        first = self.rooms[0] if self.rooms else None
++        return (10 * p.size + 5 * p.completed + p.lates
++                - 15 * p.early - _run_extra(p.hist)
++                - p.reloc_penalty(first))
++
++    def _reloc_total(self, p: Party) -> int:
++        """Countable relocations for settling take order (same filter as
++        the standing penalty)."""
++        first = self.rooms[0] if self.rooms else None
++        total = 0
++        for rid, cnt in p.relocs.items():
++            if (first is None or rid != first.rid) == p.manual:
++                total += cnt
++        return total
++
+     def _insert(self, room: Room, p: Party) -> None:
+         """Berth ordering: standing descending, registration order on
+         ties (docs/SPEC.md, Berth order)."""
+         pos = len(room.occupants)
++        ps = self._standing(p)
++        pt, pr = self._reloc_total(p), p.regseq
+         for i, o in enumerate(room.occupants):
+-            if p.standing > o.standing or (
+-                p.standing == o.standing and p.regseq < o.regseq
+-            ):
++            os = self._standing(o)
++            if ps > os:
+                 pos = i
+                 break
++            if ps == os:
++                ot, orr = self._reloc_total(o), o.regseq
++                if ((pt, pr) > (ot, orr)):
++                    pos = i
++                    break
+         room.occupants.insert(pos, p)
+         p.room = room
+ 
+@@ -106,10 +171,14 @@ class Engine:
+         self._insert(room, p)
+         self.cA += 1
+ 
++    def _bump_reloc(self, p: Party, room: Room) -> None:
++        p.relocs[room.rid] = p.relocs.get(room.rid, 0) + 1
++
+     def _turnout(self, p: Party) -> None:
+         p.status = DEPARTED
+         p.room = None
+         p.occ = 0
++        p.autoberth = False
+         self.cD += 1
+ 
+     # -------------------------------------------------------- commands
+@@ -144,6 +213,7 @@ class Engine:
+             return
+         room = Room(rid, bunks, len(self.rooms) + 1)
+         self.rooms.append(room)
++        self.mru.append(room)
+         self.roomix[rid] = room
+         self.cO += 1
+         self._emit(f"OK {self.cO}")
+@@ -158,11 +228,14 @@ class Engine:
+             self._no(parts, "STATE")
+             return
+         room = self.roomix.get(rid)
+-        if room is None or room.resting:
++        if room is None:
+             self._no(parts, "STATE")
+             return
+         p.status = BOOKED
+         p.room = room
++        p.autoberth = room.resting
++        p.bookseq = self.bookseq_next
++        self.bookseq_next += 1
+         self.cB += 1
+         pending = sum(
+             1 for q in self.parties.values()
+@@ -180,9 +253,10 @@ class Engine:
+             self._no(parts, "STATE")
+             return
+         room = p.room
+-        if room.resting or self._free(room) < p.size:
++        if room.resting or 2 * self._free(room) < p.size:
+             self._no(parts, "STATE")
+             return
++        p.manual = True
+         self._berth(room, p)
+         self._emit(f"IN {room.rid}")
+ 
+@@ -199,8 +273,11 @@ class Engine:
+         room.occupants.remove(p)
+         if kind == "E":
+             p.early += 1
+-        else:  # G and L both count as completed stays
++        elif kind == "G":
+             p.completed += 1
++        else:  # L departures count +1, not a completed stay
++            p.lates += 1
++        p.hist.append(kind)
+         p.status = DEPARTED
+         p.room = None
+         p.occ = 0
+@@ -211,18 +288,61 @@ class Engine:
+         if not self.rooms:
+             self._no(parts, "STATE")
+             return
+-        # reopen phase
+-        if self.resting is not None:
+-            self.resting.resting = False
++        # reopen phase: pending bookings made while the room was resting
++        # berth automatically, in booking order (failures turn out)
++        just_auto: set[str] = set()
++        reopened = self.resting
++        if reopened is not None:
++            reopened.resting = False
+             self.resting = None
++            pending = sorted(
++                (q for q in self.parties.values()
++                 if q.status == BOOKED and q.room is reopened
++                 and q.autoberth),
++                key=lambda q: q.bookseq,
++            )
++            for q in pending:
++                q.autoberth = False
++                if self._free(reopened) >= q.size:
++                    self._bump_reloc(q, reopened)
++                    just_auto.add(q.pid)
++                    self._berth(reopened, q)
++                else:
++                    self._turnout(q)
+         # rest phase
+         target = self.rooms[self.ptr]
+         self.cW += 1
+         target.resting = True
+         self.resting = target
+-        moving = list(target.occupants)
++        self.mru.remove(target)
++        self.mru.insert(0, target)
++        if target.occupants:
++            occ = target.occupants
++            if target.nairs == 0:
++                moving = sorted(
++                    occ,
++                    key=lambda p: (-self._standing(p),
++                                   -self._reloc_total(p), -p.regseq),
++                )
++            elif target.nairs == 1:
++                moving = sorted(
++                    occ,
++                    key=lambda p: (self._standing(p),
++                                   -self._reloc_total(p), -p.regseq),
++                )
++            else:
++                moving = sorted(
++                    occ,
++                    key=lambda p: (self._standing(p),
++                                   -self._reloc_total(p), -p.regseq),
++                )
++        else:
++            moving = []
++        if target.nairs < 2:
++            target.nairs += 1
+         target.occupants = []
+         lines = []
++        first = self.rooms[0]
+         for p in moving:
+             dest = None
+             for r in self.rooms:
+@@ -234,8 +354,11 @@ class Engine:
+                 ):
+                     dest = r
+             if dest is not None:
++                p.autoberth = False
+                 p.occ = p.size
+                 p.status = LODGED
++                if p.pid not in just_auto:
++                    self._bump_reloc(p, target)
+                 self._insert(dest, p)
+                 lines.append(f"MV {p.pid} {dest.rid}")
+             else:
+@@ -248,11 +371,18 @@ class Engine:
+ 
+     def _cmd_S(self, parts: list[str]) -> None:
+         self.cS += 1
++        if self.resting is not None:
++            self.ptr = self.rooms.index(self.resting)
+         lodged = [p for p in self.parties.values() if p.status == LODGED]
+         for r in self.rooms:
+             r.occupants = []
+-        room_order = [r for r in self.rooms if not r.resting]
+-        order = sorted(lodged, key=lambda p: (-p.standing, p.regseq))
++        room_order = [r for r in self.mru if not r.resting]
++        order = sorted(
++            lodged,
++            key=lambda p: (-self._standing(p),
++                           -self._reloc_total(p),
++                           -p.regseq),
++        )
+         placed = 0
+         remaining = order
+         for r in room_order:
+@@ -260,7 +390,8 @@ class Engine:
+             for p in remaining:
+                 if self._free(r) >= p.size:
+                     p.occ = p.size
+-                    self._insert(r, p)
++                    p.room = r
++                    r.occupants.append(p)
+                     placed += 1
+                 else:
+                     left.append(p)

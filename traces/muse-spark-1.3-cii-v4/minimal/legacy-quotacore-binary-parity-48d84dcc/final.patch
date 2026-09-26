@@ -1,0 +1,137 @@
+diff --git a/legacy/quotacore-darwin-arm64 b/legacy/quotacore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/quotacore.py b/quotacore.py
+index 0213fe1..4733f30 100644
+--- a/quotacore.py
++++ b/quotacore.py
+@@ -8,17 +8,31 @@ the engine's behavior is the contract).
+ 
+ from __future__ import annotations
+ 
+-import math
+ import sys
+ 
+ QUOTAS = {"F": 10_000, "S": 100_000, "P": 1_000_000}
+ RATES = {"F": 12, "S": 9, "P": 6}
++# Premium rate override for a couple of regions (case-insensitive).
++CHEAP_P_RATE = 5
++CHEAP_P_REGIONS = {"BR", "IN"}
++
++_UPGRADES = {("F", "S"), ("S", "P")}
++
++
++def _is_key(tok: str) -> bool:
++    return 1 <= len(tok) <= 8 and tok.isascii() and tok.isalnum()
++
++
++def _blocks(amount: int) -> int:
++    # Started blocks of 100, except an exact 50-call remainder is free.
++    return amount // 100 + (1 if amount % 50 else 0)
+ 
+ 
+ class Engine:
+     def __init__(self, out=None):
+         self.tier: dict[str, str] = {}
+         self.used: dict[str, int] = {}
++        self.shown: dict[str, str] = {}
+         self.count_ok = 0
+         self.count_rej = 0
+         self.sum_charges = 0
+@@ -32,42 +46,68 @@ class Engine:
+         self.count_rej += 1
+ 
+     def handle(self, line: str) -> None:
+-        parts = line.rstrip("\r\n").split()
++        body = line.rstrip("\r\n")
++        if not body:
++            return
++        parts = body.split()
+         if not parts:
++            self._emit("R ???????? FMT")
++            self.count_rej += 1
+             return
+-        key = parts[1] if len(parts) > 1 else ""
+-        key_ok = 1 <= len(key) <= 8 and key.isalnum()
+-        if parts[0] != "Q" or len(parts) != 5 or not key_ok:
+-            self._emit(f"R {key if key_ok else '????????'} FMT")
++        raw_key = parts[1] if len(parts) > 1 else ""
++        if parts[0] != "Q" or len(parts) < 5 or not _is_key(raw_key):
++            self._emit(f"R {raw_key if _is_key(raw_key) else '????????'} FMT")
+             self.count_rej += 1
+             return
+-        _, key, calls_tok, tier, region = parts
+-        if not (calls_tok.isdigit() and 1 <= len(calls_tok) <= 7):
+-            self._reject(key, "CALLS")
++        _, _, calls_tok, tier, region = parts[:5]
++        if not (calls_tok.isascii() and calls_tok.isdigit()
++                and 1 <= len(calls_tok) <= 7):
++            self._reject(raw_key, "CALLS")
+             return
+         calls = int(calls_tok)
+         if tier not in ("F", "S", "P"):
+-            self._reject(key, "TIER")
++            self._reject(raw_key, "TIER")
+             return
+-        if not (len(region) == 2 and region.isalpha() and region.isupper()):
+-            self._reject(key, "REGION")
++        if not (len(region) == 2 and region.isascii() and region.isalpha()):
++            self._reject(raw_key, "REGION")
+             return
+-
+-        if key not in self.tier:
+-            self.tier[key] = tier
+-            self.used[key] = 0
+-        elif tier != self.tier[key]:
+-            self._reject(key, "TIER")
++        if calls == 0:
+             return
+ 
+-        limit = QUOTAS[self.tier[key]]
+-        used = self.used[key]
+-        within = max(0, min(calls, limit - used))
+-        over = calls - within
+-        charge = math.ceil(over / 100) * RATES[self.tier[key]]
+-        self.used[key] = used + calls
+-
+-        left = max(0, limit - self.used[key])
++        fold = raw_key.upper()
++        if fold not in self.tier:
++            first = True
++            self.tier[fold] = tier
++            self.used[fold] = 0
++            self.shown[fold] = raw_key
++        else:
++            first = False
++            if tier != self.tier[fold]:
++                if (self.tier[fold], tier) not in _UPGRADES:
++                    self._reject(self.shown[fold], "TIER")
++                    return
++                self.tier[fold] = tier
++        key = self.shown[fold]
++
++        limit = QUOTAS[self.tier[fold]]
++        before = self.used[fold]
++        if first and calls <= limit:
++            after = calls - calls // 10
++        else:
++            after = before + calls
++        self.used[fold] = after
++
++        if after <= limit:
++            charge = 0
++        else:
++            base = calls - limit if first else calls
++            if tier == "P" and region.upper() in CHEAP_P_REGIONS:
++                rate = CHEAP_P_RATE
++            else:
++                rate = RATES[self.tier[fold]]
++            charge = _blocks(base) * rate
++
++        left = max(0, limit - after)
+         self._emit(f"B {key} {charge} {left}")
+         self.count_ok += 1
+         self.sum_charges += charge

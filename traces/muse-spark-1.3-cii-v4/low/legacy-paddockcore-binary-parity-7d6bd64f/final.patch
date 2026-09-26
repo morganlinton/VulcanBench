@@ -1,0 +1,1412 @@
+diff --git a/cmp_tie.py b/cmp_tie.py
+new file mode 100644
+index 0000000..df0a7d0
+--- /dev/null
++++ b/cmp_tie.py
+@@ -0,0 +1,129 @@
++"""Compare wc2's d/c tie against fuzz ties with field/reloc context."""
++import os
++import sys
++
++sys.path.insert(0, ".")
++from fuzz_fit import parse, replay
++
++TMP = os.environ["TMPDIR"]
++
++
++def replay_fields(cmds, outs):
++    """Replay tracking where/reloc/led/affret. Returns (V obs with context)."""
++    where = {}
++    g = {}
++    h = {}
++    l = {}
++    reloc = {}
++    affret = {}
++    pseq = {}
++    out = list(outs)
++    oi = 0
++    obs = []
++
++    def take_prefix(prefix):
++        nonlocal oi
++        assert out[oi].startswith(prefix), f"desync {prefix!r} vs {out[oi]!r}"
++        v = out[oi][len(prefix):]
++        oi += 1
++        return v
++
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            ln = out[oi]; oi += 1
++            if ln.startswith("OK"):
++                where[t[1]] = None
++                g[t[1]] = 0; h[t[1]] = 0; l[t[1]] = 0
++                reloc[t[1]] = 0; affret[t[1]] = 0
++                pseq[t[1]] = len(pseq)
++        elif t[0] in ("F",):
++            oi += 1
++        elif t[0] in ("G", "H", "L"):
++            ln = out[oi]; oi += 1
++            if ln == "OK":
++                if t[0] == "G":
++                    where[t[1]] = t[2]; g[t[1]] += 1
++                elif t[0] == "H":
++                    where[t[1]] = None; h[t[1]] += 1
++                else:
++                    where[t[1]] = t[2]; l[t[1]] += 1
++        elif t[0] == "R":
++            ln = out[oi]; oi += 1
++            k = int(ln.split()[2])
++            oi += k
++        elif t[0] == "S":
++            oi += 1
++            is_aff = False
++            while True:
++                ln = out[oi]; oi += 1
++                if ln.startswith("WAKE"):
++                    is_aff = True  # subsequent PUTs before REST are returns
++                elif ln.startswith("REST"):
++                    is_aff = False
++                elif ln.startswith("PUT"):
++                    _, p, f = ln.split()
++                    where[p] = f
++                    reloc[p] += 1
++                    if is_aff:
++                        affret[p] += 1
++                elif ln.startswith("BARN"):
++                    _, p = ln.split()
++                    where[p] = None
++                    reloc[p] += 1
++                elif ln.startswith("SHIFT"):
++                    k = int(ln.split()[1])
++                    oi += k
++                    break
++        elif t[0] == "V":
++            k = int(take_prefix("OUT "))
++            names = [take_prefix("P ") for _ in range(k)]
++            ctx = {p: dict(g=g[p], h=h[p], l=l[p], reloc=reloc[p],
++                           aff=affret[p], pseq=pseq[p], fld=where[p])
++                   for p in names}
++            obs.append((names, ctx))
++        elif t[0] == "U":
++            k = int(take_prefix("MUSTER "))
++            oi += k
++    return obs
++
++
++def show(title, names, ctx):
++    print(f"--- {title}: V={names}")
++    for p in names:
++        print("   ", p, ctx[p])
++
++
++# wc2
++with open(f"{TMP}/wc2.txt") as fh:
++    cmds = fh.read().splitlines()
++import subprocess
++p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                   capture_output=True, text=True)
++for names, ctx in replay_fields(cmds, p.stdout.splitlines()):
++    show("wc2", names, ctx)
++
++# fuzz: find V with a cross-field g-tie ordered DESC-pseq
++n = 0
++for path in (f"{TMP}/fz11.txt", f"{TMP}/ft2.txt"):
++    for i, (cmds, outs) in enumerate(parse(path)):
++        try:
++            ob = replay_fields(cmds, outs)
++        except AssertionError:
++            continue
++        for names, ctx in ob:
++            # find adjacent pair in V with same g, different field, DESC pseq
++            for a, b in zip(names, names[1:]):
++                A, B = ctx[a], ctx[b]
++                if A["g"] == B["g"] and A["fld"] != B["fld"] \
++                        and A["pseq"] > B["pseq"] and A["l"] == 0 and B["l"] == 0:
++                    print(f"=== DESC-tie {path}#{i}: {a}{A} before {b}{B}")
++                    print("   cmds:", cmds)
++                    n += 1
++                    if n > 6:
++                        break
++            if n > 6:
++                break
++        if n > 6:
++            break
++print("done")
+diff --git a/fit_final.py b/fit_final.py
+new file mode 100644
+index 0000000..4117394
+--- /dev/null
++++ b/fit_final.py
+@@ -0,0 +1,52 @@
++"""Final fit check: V = (-build,-led,+g,+ever,+pseq); U barns."""
++import os
++import pickle
++import sys
++
++sys.path.insert(0, ".")
++from tieutil import replay_fields
++from fuzz_fit import parse
++import subprocess
++
++TMP = os.environ["TMPDIR"]
++VOBS = []
++for path in (f"{TMP}/fz11.txt", f"{TMP}/ft2.txt"):
++    for cmds, outs in parse(path):
++        try:
++            VOBS.extend([(cmds, n, c) for n, c in replay_fields(cmds, outs)])
++        except AssertionError:
++            pass
++hard = ["wc2", "ex2", "pp", "gs", "ws", "ses6", "gl", "la", "ph",
++        "l2", "av", "av2", "rf", "rf2", "ma2", "ses.txt", "ses2",
++        "ses3", "ses4", "ses5"]
++for h in hard:
++    try:
++        with open(f"{TMP}/{h}.txt") as fh:
++            cmds = fh.read().splitlines()
++    except OSError:
++        continue
++    p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                       capture_output=True, text=True)
++    try:
++        VOBS.extend([(cmds, n, c) for n, c in replay_fields(cmds, p.stdout.splitlines())])
++    except AssertionError as e:
++        print("skip", h, e)
++
++bad = 0
++for cmds, names, ctx in VOBS:
++    builds = {}
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            builds[t[1]] = int(t[2])
++
++    def key(p, builds=builds):
++        a = ctx[p]
++        return (-builds[p], -(1 if a["l"] > 0 else 0), a["g"],
++                (1 if a["ev"] else 0), a["pseq"])
++    if sorted(names, key=key) != names:
++        bad += 1
++        print("BAD:", names, "got", sorted(names, key=key))
++        print("   ", {p: (builds[p], ctx[p]) for p in names})
++        print("   ", cmds)
++print(f"V obs={len(VOBS)} bad={bad}")
+diff --git a/fit_g.py b/fit_g.py
+new file mode 100644
+index 0000000..8ccf8d5
+--- /dev/null
++++ b/fit_g.py
+@@ -0,0 +1,68 @@
++"""Collect all V/U observations and fit (led, g*, pseq) models."""
++import os
++import pickle
++import subprocess
++import sys
++
++sys.path.insert(0, ".")
++from fuzz_fit import parse, replay
++
++TMP = os.environ["TMPDIR"]
++obs = []
++for path in [f"{TMP}/fz11.txt", f"{TMP}/ft2.txt"]:
++    for cmds, outs in parse(path):
++        try:
++            obs.extend(replay(cmds, outs))
++        except AssertionError:
++            pass
++hard = ["wc2", "ex2", "pp", "gs", "ws", "ses6", "gl", "la", "ph",
++        "l2", "av", "av2", "rf", "rf2", "ma2", "ub2"]
++for h in hard:
++    try:
++        with open(f"{TMP}/{h}.txt") as fh:
++            cmds = fh.read().splitlines()
++    except OSError:
++        continue
++    p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                       capture_output=True, text=True)
++    try:
++        obs.extend(replay(cmds, p.stdout.splitlines()))
++    except AssertionError as e:
++        print("hardskip", h, e)
++print("total obs:", len(obs))
++pickle.dump(obs, open(f"{TMP}/allobs.pkl", "wb"))
++
++# per-pony: build,g,h,l,pseq. candidate g*: G-H, G-H+reloc, G, G+reloc.
++# led: boolean l>0, or count l.
++VOBS = [o for o in obs if o[0] == "V"]
++print("V obs:", len(VOBS))
++
++
++def gstar(a, mode):
++    g, h, r = a["g"], a["h"], a["reloc"]
++    if mode == "G-H":
++        return g - h
++    if mode == "G-H+R":
++        return g - h + r
++    if mode == "G":
++        return g
++    if mode == "G+R":
++        return g + r
++    raise AssertionError
++
++
++def fit(mode, ledfmt):
++    bad = 0
++    for kind, names, attrs in VOBS:
++        def key(p):
++            a = attrs[p]
++            led = (1 if a["l"] > 0 else 0) if ledfmt == "bool" else a["l"]
++            return (-a["build"], -led, gstar(a, mode), a["pseq"])
++        if sorted(names, key=key) != names:
++            bad += 1
++    return bad
++
++
++for mode in ("G-H", "G-H+R", "G", "G+R"):
++    for ledfmt in ("bool", "count"):
++        print(mode, ledfmt, "bad=", fit(mode, ledfmt))
+diff --git a/fit_vkey.py b/fit_vkey.py
+new file mode 100644
+index 0000000..5e12d75
+--- /dev/null
++++ b/fit_vkey.py
+@@ -0,0 +1,52 @@
++"""Final fit: V = (-build,-ledflag,-fresh,+g,+ever,+pseq)."""
++import os
++import sys
++
++sys.path.insert(0, ".")
++from fuzz_fit import parse
++from scan_h import replay2
++import subprocess
++
++TMP = os.environ["TMPDIR"]
++VOBS = []
++for path in (f"{TMP}/fz11.txt", f"{TMP}/ft2.txt"):
++    for cmds, outs in parse(path):
++        try:
++            for n, c in replay2(cmds, outs):
++                VOBS.append((cmds, n, c))
++        except AssertionError:
++            pass
++for h in ["wc2", "ex2", "pp", "gs", "ws", "ses6", "gl", "la", "ph",
++          "l2", "av", "av2", "rf", "rf2", "ma2", "am", "ub2", "ws",
++          "ses", "ses2", "ses3", "ses4", "ses5", "ses6"]:
++    try:
++        with open(f"{TMP}/{h}.txt") as fh:
++            cmds = fh.read().splitlines()
++    except OSError:
++        continue
++    p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                       capture_output=True, text=True)
++    try:
++        for n, c in replay2(cmds, p.stdout.splitlines()):
++            VOBS.append((cmds, n, c))
++    except AssertionError as e:
++        print("skip", h, e)
++
++bad = 0
++for cmds, names, ctx in VOBS:
++    builds = {}
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            builds[t[1]] = int(t[2])
++
++    def key(p, builds=builds):
++        a = ctx[p]
++        return (-builds[p], -int(a["led"]), -int(a["fresh"]), a["g"],
++                int(a["ev"]), a["pseq"])
++    if sorted(names, key=key) != names:
++        bad += 1
++        print("BAD:", names, "got", sorted(names, key=key))
++        print("   ", {p: (builds[p], ctx[p]) for p in names})
++        print("   ", cmds)
++print(f"V obs={len(VOBS)} bad={bad}")
+diff --git a/fuzz_fit.py b/fuzz_fit.py
+new file mode 100644
+index 0000000..35c68ac
+--- /dev/null
++++ b/fuzz_fit.py
+@@ -0,0 +1,177 @@
++"""Fit V/U ordering: replay engine-observed moves, search sort-key space."""
++import itertools
++import sys
++
++def parse(path):
++    samples = []
++    cmds, outs, mode = [], [], None
++    with open(path) as fh:
++        for line in fh:
++            line = line.rstrip("\n")
++            if line.startswith("### CMDS"):
++                if cmds or outs:
++                    samples.append((cmds, outs))
++                cmds, outs, mode = [], [], "c"
++            elif line.startswith("### OUT"):
++                mode = "o"
++            elif mode == "c":
++                cmds.append(line)
++            else:
++                outs.append(line)
++    if cmds or outs:
++        samples.append((cmds, outs))
++    return samples
++
++def replay(cmds, outs):
++    """Replay using engine-observed moves. Returns list of V/U observations.
++    Each obs: (kind, ordered_names, attr dict)."""
++    build = {}
++    pseq = {}
++    where = {}
++    g = {}
++    h = {}
++    l = {}
++    reloc = {}   # PUT count (incl affinity returns)
++    barned = {}  # ever BARNed by shift
++    out = list(outs)
++    oi = 0
++    obs = []
++
++    def emit(line):
++        nonlocal oi
++        assert out[oi] == line, f"desync: want {line!r} got {out[oi]!r} cmds={cmds}"
++        oi += 1
++
++    def take_prefix(prefix):
++        nonlocal oi
++        assert out[oi].startswith(prefix), f"desync want prefix {prefix!r} got {out[oi]!r}"
++        v = out[oi][len(prefix):]
++        oi += 1
++        return v
++
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            ln = out[oi]; oi += 1
++            if ln.startswith("OK"):
++                build[t[1]] = int(t[2])
++                pseq[t[1]] = len(pseq)
++                where[t[1]] = None
++                g[t[1]] = 0; h[t[1]] = 0; l[t[1]] = 0
++                reloc[t[1]] = 0; barned[t[1]] = 0
++        elif t[0] == "F":
++            oi += 1
++        elif t[0] in ("G", "H", "L"):
++            ln = out[oi]; oi += 1
++            if ln == "OK":
++                if t[0] == "G":
++                    where[t[1]] = t[2]; g[t[1]] += 1
++                elif t[0] == "H":
++                    where[t[1]] = None; h[t[1]] += 1
++                else:
++                    where[t[1]] = t[2]; l[t[1]] += 1
++        elif t[0] == "S":
++            # consume WAKE/REST/PUT/BARN/SHIFT/F lines (S has no own line)
++            while True:
++                ln = out[oi]; oi += 1
++                if ln.startswith("WAKE"):
++                    pass
++                elif ln.startswith("REST"):
++                    pass
++                elif ln.startswith("PUT"):
++                    _, p, f = ln.split()
++                    where[p] = f
++                    reloc[p] += 1
++                elif ln.startswith("BARN"):
++                    _, p = ln.split()
++                    where[p] = None
++                    reloc[p] += 1
++                    barned[p] += 1
++                elif ln.startswith("SHIFT"):
++                    k = int(ln.split()[1])
++                    for _ in range(k):
++                        assert out[oi].startswith("F "), out[oi]
++                        oi += 1
++                    break
++                else:
++                    raise AssertionError(f"unexpected S line {ln!r}")
++        elif t[0] == "V":
++            k = int(take_prefix("OUT "))
++            names = []
++            for _ in range(k):
++                names.append(take_prefix("P "))
++            attrs = {}
++            for p in names:
++                attrs[p] = dict(build=build[p], pseq=pseq[p], g=g[p],
++                               h=h[p], l=l[p], reloc=reloc[p],
++                               barned=barned[p], out=1)
++            obs.append(("V", names, attrs))
++        elif t[0] == "R":
++            ln = out[oi]; oi += 1
++            assert ln.startswith("FLD "), ln
++            k = int(ln.split()[2])
++            for _ in range(k):
++                assert out[oi].startswith("P "), out[oi]
++                oi += 1
++        elif t[0] == "U":
++            k = int(take_prefix("MUSTER "))
++            names = []
++            for _ in range(k):
++                names.append(take_prefix("P "))
++            attrs = {}
++            for p in names:
++                attrs[p] = dict(build=build[p], pseq=pseq[p], g=g[p],
++                               h=h[p], l=l[p], reloc=reloc[p],
++                               barned=barned[p], out=1 if where[p] else 0)
++            obs.append(("U", names, attrs))
++        else:
++            raise AssertionError(t)
++    return obs
++
++KEYS = ["build", "pseq", "g", "h", "l", "reloc", "barned", "out"]
++
++def check(obs, key):
++    """key: tuple of (attr, sign). True if sort matches all obs of that kind."""
++    for kind, names, attrs in obs:
++        if kind != check.kind:
++            continue
++        ranked = sorted(names, key=lambda p: tuple(
++            s * attrs[p][a] for a, s in key))
++        if ranked != names:
++            return False
++    return True
++
++def main():
++    path = sys.argv[1]
++    samples = parse(path)
++    obs = []
++    for cmds, outs in samples:
++        try:
++            obs.extend(replay(cmds, outs))
++        except AssertionError as e:
++            print("SKIP sample:", e)
++    print(f"samples={len(samples)} obs={len(obs)}")
++    for kind in ("V", "U"):
++        check.kind = kind
++        nob = sum(1 for o in obs if o[0] == kind)
++        print(f"== {kind} obs={nob}")
++        # try 1..3 key tuples
++        cands = [(a, s) for a in KEYS for s in (1, -1)]
++        found = []
++        for r in (1, 2, 3, 4):
++            for key in itertools.product(cands, repeat=r):
++                attrs_used = [a for a, s in key]
++                if len(set(attrs_used)) != len(attrs_used):
++                    continue
++                if check(obs, key):
++                    found.append(key)
++                    print("  MATCH", key)
++                    if len(found) > 15:
++                        break
++            if len(found) > 15:
++                break
++        if not found:
++            print("  no key tuple up to 3")
++
++if __name__ == "__main__":
++    main()
+diff --git a/fuzz_tie.py b/fuzz_tie.py
+new file mode 100644
+index 0000000..0baa066
+--- /dev/null
++++ b/fuzz_tie.py
+@@ -0,0 +1,38 @@
++"""Forced-tie fuzz: all builds 10, each pony G'd exactly once (g=1 all).
++V-order then exposes the pure tie-break."""
++import random
++import subprocess
++import sys
++
++def gen(rng):
++    names = ["a", "b", "c", "d"][:rng.randint(2, 4)]
++    flds = ["f1", "f2", "f3"][:rng.randint(2, 3)]
++    cmds = []
++    for p in names:
++        cmds.append(f"N {p} 10")
++    for f in flds:
++        cmds.append(f"F {f} {rng.choice([1, 2, 3, 9])}")
++    for p in names:
++        cmds.append(f"G {p} {rng.choice(flds)}")
++    for _ in range(rng.randint(1, 2)):
++        cmds.append("S")
++    cmds.append("V")
++    for f in flds:
++        cmds.append(f"R {f}")
++    return cmds
++
++def main():
++    seed = int(sys.argv[1]) if len(sys.argv) > 1 else 2
++    n = int(sys.argv[2]) if len(sys.argv) > 2 else 40
++    rng = random.Random(seed)
++    for i in range(n):
++        cmds = gen(rng)
++        p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                           capture_output=True, text=True)
++        print(f"### CMDS {i}")
++        print("\n".join(cmds))
++        print(f"### OUT {i}")
++        print(p.stdout, end="")
++
++if __name__ == "__main__":
++    main()
+diff --git a/fuzz_v.py b/fuzz_v.py
+new file mode 100644
+index 0000000..2bf0602
+--- /dev/null
++++ b/fuzz_v.py
+@@ -0,0 +1,62 @@
++"""Fuzz the legacy engine for V/U ordering samples."""
++import random
++import subprocess
++import sys
++
++run = ["legacy/run"]
++
++def gen_session(rng):
++    npony = rng.randint(2, 5)
++    nfield = rng.randint(2, 3)
++    names = ["a", "b", "c", "d", "e"][:npony]
++    flds = ["f1", "f2", "f3"][:nfield]
++    cmds = []
++    for i, p in enumerate(names):
++        cmds.append(f"N {p} {rng.choice([10, 10, 10, 20, 5])}")
++    for f in flds:
++        cmds.append(f"F {f} {rng.choice([1, 2, 3, 9])}")
++    # random turnouts
++    for p in names:
++        if rng.random() < 0.9:
++            cmds.append(f"G {p} {rng.choice(flds)}")
++            if rng.random() < 0.5:
++                cmds.append(f"H {p}")
++                if rng.random() < 0.7:
++                    cmds.append(f"G {p} {rng.choice(flds)}")
++    # extra G/H/L cycles to build counts
++    for _ in range(rng.randint(0, 6)):
++        p = rng.choice(names)
++        op = rng.random()
++        if op < 0.4:
++            cmds.append(f"H {p}")
++        elif op < 0.7:
++            cmds.append(f"G {p} {rng.choice(flds)}")
++        else:
++            cmds.append(f"L {p} {rng.choice(flds)}")
++    for _ in range(rng.randint(1, 3)):
++        cmds.append("S")
++        if rng.random() < 0.3:
++            p = rng.choice(names)
++            cmds.append(f"{rng.choice(['G','H'])} {p}" + (f" {rng.choice(flds)}" if rng.random() < 0.7 else ""))
++    cmds.append("V")
++    if rng.random() < 0.5:
++        cmds.append("U")
++    return cmds
++
++def main():
++    seed = int(sys.argv[1]) if len(sys.argv) > 1 else 1
++    n = int(sys.argv[2]) if len(sys.argv) > 2 else 40
++    rng = random.Random(seed)
++    out = []
++    for i in range(n):
++        cmds = gen_session(rng)
++        p = subprocess.run(run, input="\n".join(cmds) + "\n",
++                           capture_output=True, text=True)
++        out.append("### CMDS %d" % i)
++        out.extend(cmds)
++        out.append("### OUT %d" % i)
++        out.extend(p.stdout.splitlines())
++    sys.stdout.write("\n".join(out) + "\n")
++
++if __name__ == "__main__":
++    main()
+diff --git a/legacy/paddockcore-darwin-arm64 b/legacy/paddockcore-darwin-arm64
+old mode 100644
+new mode 100755
+diff --git a/legacy/paddockcore-linux-amd64 b/legacy/paddockcore-linux-amd64
+old mode 100644
+new mode 100755
+diff --git a/legacy/run b/legacy/run
+old mode 100644
+new mode 100755
+diff --git a/paddockcore.py b/paddockcore.py
+index 66bb6ae..b2391c4 100644
+--- a/paddockcore.py
++++ b/paddockcore.py
+@@ -26,12 +26,29 @@ class Engine:
+         self.pseq: dict[str, int] = {}
+         self.porder: list[str] = []
+         self.where: dict[str, str | None] = {}
++        # accepted-command counters per pony
++        self.gtotal: dict[str, int] = {}
++        self.ltotal: dict[str, int] = {}
++        # led flag: an accepted lead before the first shift rota step
++        self.ledflag: dict[str, bool] = {}
++        # shift index of the last accepted lead / turnout
++        self.lastL: dict[str, int] = {}
++        self.lastG: dict[str, int] = {}
++        # relocations by the rota (PUT or BARN lines)
++        self.reloc: dict[str, int] = {}
++        # affinity binding: field with 3+ arrivals, cleared by bring-in
++        self.bound: dict[str, str | None] = {}
++        # shift-barned flag (for the muster barn order)
++        self.barned: dict[str, bool] = {}
++        # arrival counts per (pony, field); leads move one unit src -> dest
++        self.counts: dict[tuple[str, str], int] = {}
++        self.slotmem: dict[tuple[str, str], int] = {}
+         self.fields: dict[str, dict] = {}
+         self.forder: list[str] = []
+         self.next_pseq = 0
+         self.next_fseq = 0
+         self.shift_count = 0
+-        self.rota_ptr = 0
++        self.touch_tick = 0
+         self.c_n = 0
+         self.c_f = 0
+         self.c_g = 0
+@@ -46,8 +63,64 @@ class Engine:
+     def _reject(self, code: str) -> None:
+         self._emit(f"NAY {code}")
+ 
+-    def _open_fields(self) -> list[dict]:
+-        return [self.fields[n] for n in self.forder if not self.fields[n]["resting"]]
++    def _touch(self, fname: str) -> None:
++        self.touch_tick += 1
++        self.fields[fname]["touch"] = self.touch_tick
++
++    def _occ(self, fname: str) -> int:
++        return sum(1 for p in self.fields[fname]["roster"] if p is not None)
++
++    def _vacate(self, pony: str) -> None:
++        cur = self.where[pony]
++        if cur is not None:
++            ros = self.fields[cur]["roster"]
++            try:
++                ros[ros.index(pony)] = None
++            except ValueError:
++                pass
++            self.where[pony] = None
++
++    def _arrive(self, pony: str, fname: str) -> None:
++        f = self.fields[fname]
++        ros = f["roster"]
++        idx = self.slotmem.get((pony, fname))
++        if idx is not None and idx < len(ros) and ros[idx] is None:
++            ros[idx] = pony
++        else:
++            self.slotmem[(pony, fname)] = len(ros)
++            ros.append(pony)
++        self.where[pony] = fname
++
++    def _open_names(self) -> list[str]:
++        return [n for n in self.forder if not self.fields[n]["resting"]]
++
++    def _fresh(self, pony: str) -> bool:
++        return (
++            self.lastG[pony] == self.shift_count
++            and self.shift_count >= 1
++            and self.reloc[pony] > 0
++        )
++
++    def _led_tier(self, pony: str, fld: str | None) -> int:
++        if self.lastL[pony] == self.shift_count and self.shift_count >= 1:
++            return -1
++        if self.ledflag[pony] and (
++            self.ltotal[pony] >= 2
++            or (fld is not None and not self.fields[fld]["ever"])
++        ):
++            return 1
++        return 0
++
++    def _v_key(self, pony: str) -> tuple:
++        fld = self.where[pony]
++        return (
++            -self.build[pony],
++            -self._led_tier(pony, fld),
++            -int(self._fresh(pony)),
++            self.gtotal[pony],
++            int(self.fields[fld]["ever"]) if fld is not None else 1,
++            self.pseq[pony],
++        )
+ 
+     def handle(self, line: str) -> None:
+         parts = line.rstrip("\r\n").split()
+@@ -71,6 +144,14 @@ class Engine:
+             self.pseq[parts[1]] = self.next_pseq
+             self.porder.append(parts[1])
+             self.where[parts[1]] = None
++            self.gtotal[parts[1]] = 0
++            self.ltotal[parts[1]] = 0
++            self.ledflag[parts[1]] = False
++            self.lastL[parts[1]] = -1
++            self.lastG[parts[1]] = -1
++            self.reloc[parts[1]] = 0
++            self.bound[parts[1]] = None
++            self.barned[parts[1]] = False
+             self.c_n += 1
+             self._emit(f"OK {len(self.porder)}")
+             return
+@@ -93,6 +174,9 @@ class Engine:
+                 "roster": [],
+                 "resting": False,
+                 "rest_shift": 0,
++                "rest_occ": False,
++                "ever": False,
++                "touch": -1,
+             }
+             self.forder.append(parts[1])
+             self.c_f += 1
+@@ -116,11 +200,19 @@ class Engine:
+             if self.where[parts[1]] is not None:
+                 self._reject("TWICE")
+                 return
+-            if len(f["roster"]) >= f["span"]:
++            if self._occ(parts[2]) >= f["span"]:
+                 self._reject("CRAM")
+                 return
+-            f["roster"].append(parts[1])
+-            self.where[parts[1]] = parts[2]
++            self._arrive(parts[1], parts[2])
++            self._touch(parts[2])
++            self.counts[(parts[1], parts[2])] = (
++                self.counts.get((parts[1], parts[2]), 0) + 1
++            )
++            if self.counts[(parts[1], parts[2])] >= 3:
++                self.bound[parts[1]] = parts[2]
++            self.gtotal[parts[1]] += 1
++            self.lastG[parts[1]] = self.shift_count
++            self.barned[parts[1]] = False
+             self.c_g += 1
+             self._emit("OK")
+             return
+@@ -136,8 +228,8 @@ class Engine:
+             if cur is None:
+                 self._reject("IDLE")
+                 return
+-            self.fields[cur]["roster"].remove(parts[1])
+-            self.where[parts[1]] = None
++            self._vacate(parts[1])
++            self.bound[parts[1]] = None
+             self.c_h += 1
+             self._emit("OK")
+             return
+@@ -163,12 +255,22 @@ class Engine:
+             if cur == parts[2]:
+                 self._reject("TWICE")
+                 return
+-            if len(f["roster"]) >= f["span"]:
++            if self._occ(parts[2]) >= f["span"]:
+                 self._reject("CRAM")
+                 return
+-            self.fields[cur]["roster"].remove(parts[1])
+-            f["roster"].append(parts[1])
+-            self.where[parts[1]] = parts[2]
++            if self.shift_count == 0:
++                self.ledflag[parts[1]] = True
++            self._vacate(parts[1])
++            self._arrive(parts[1], parts[2])
++            self._touch(parts[2])
++            self.counts[(parts[1], cur)] = self.counts.get((parts[1], cur), 0) - 1
++            self.counts[(parts[1], parts[2])] = (
++                self.counts.get((parts[1], parts[2]), 0) + 1
++            )
++            if self.counts[(parts[1], parts[2])] >= 3:
++                self.bound[parts[1]] = parts[2]
++            self.ltotal[parts[1]] += 1
++            self.lastL[parts[1]] = self.shift_count
+             self.c_l += 1
+             self._emit("OK")
+             return
+@@ -178,7 +280,7 @@ class Engine:
+                 self._reject("FORM")
+                 return
+             outs = [n for n in self.porder if self.where[n] is not None]
+-            outs.sort(key=lambda n: (-self.build[n], self.pseq[n]))
++            outs.sort(key=lambda n: self._v_key(n))
+             self._emit(f"OUT {len(outs)}")
+             for name in outs:
+                 self._emit(f"P {name}")
+@@ -192,8 +294,12 @@ class Engine:
+                 self._reject("WILD")
+                 return
+             f = self.fields[parts[1]]
+-            self._emit(f"FLD {parts[1]} {len(f['roster'])}")
+-            for name in f["roster"]:
++            if f["resting"]:
++                self._emit(f"FLD {parts[1]} 0")
++                return
++            shown = [p for p in f["roster"] if p is not None]
++            self._emit(f"FLD {parts[1]} {len(shown)}")
++            for name in shown:
+                 self._emit(f"P {name}")
+             return
+ 
+@@ -203,55 +309,88 @@ class Engine:
+                 return
+             self.c_s += 1
+             self.shift_count += 1
+-            # rested fields wake at the start of the second shift after
++            # waking: occupied rests return one shift sooner
+             waking = [
+-                self.fields[n] for n in self.forder
++                n
++                for n in self.forder
+                 if self.fields[n]["resting"]
+-                and self.shift_count >= self.fields[n]["rest_shift"] + 2
++                and self.shift_count
++                >= self.fields[n]["rest_shift"]
++                + (1 if self.fields[n]["rest_occ"] else 2)
+             ]
+-            waking.sort(key=lambda f: f["seq"])
+-            for f in waking:
+-                f["resting"] = False
+-                name = next(n for n in self.forder if self.fields[n] is f)
+-                self._emit(f"WAKE {name}")
+-            # rest the next open field in stake-order rotation
+-            open_fields = self._open_fields()
++            waking.sort(key=lambda n: self.fields[n]["seq"])
++            # each woken field reopens with its bound ponies' returns
++            for n in waking:
++                self.fields[n]["resting"] = False
++                self._emit(f"WAKE {n}")
++                # affinity: bound ponies led back to the reopened field
++                cands = [
++                    p
++                    for p in self.porder
++                    if self.where[p] is not None
++                    and self.bound[p] == n
++                    and self.counts.get((p, n), 0) >= 3
++                ]
++                cands.sort(key=lambda p: (-self.build[p], self.pseq[p]))
++                for pony in cands:
++                    self._vacate(pony)
++                    self._arrive(pony, n)
++                    self._touch(n)
++                    self.c_l += 1
++                    self._emit(f"PUT {pony} {n}")
++            # rest the longest-untouched open field (ties by stake order)
++            open_names = self._open_names()
+             rested = None
+-            if open_fields:
+-                after = [f for f in open_fields if f["seq"] > self.rota_ptr]
+-                pool = after if after else open_fields
+-                rested = min(pool, key=lambda f: f["seq"])
+-                self.rota_ptr = rested["seq"]
+-                rname = next(n for n in self.forder if self.fields[n] is rested)
+-                self._emit(f"REST {rname}")
+-                rested["resting"] = True
+-                rested["rest_shift"] = self.shift_count
+-            # move its ponies out, roster order, most room first
+-            if rested is not None and rested["roster"]:
+-                rname = next(n for n in self.forder if self.fields[n] is rested)
+-                for pony in list(rested["roster"]):
+-                    dest = None
+-                    dest_key = None
++            if open_names:
++                rested = min(
++                    open_names,
++                    key=lambda n: (self.fields[n]["touch"], self.fields[n]["seq"]),
++                )
++                self._emit(f"REST {rested}")
++                rf = self.fields[rested]
++                rf["resting"] = True
++                rf["rest_shift"] = self.shift_count
++                rf["rest_occ"] = self._occ(rested) > 0
++                rf["ever"] = True
++            # move its ponies out
++            if rested is not None:
++                movers = [p for p in rf["roster"] if p is not None]
++                if self.shift_count == 1:
++                    movers.sort(key=lambda p: (-self.build[p], self.pseq[p]))
++                else:
++                    movers.sort(
++                        key=lambda p: (
++                            -self.build[p],
++                            -int(self.ledflag[p]),
++                            self.gtotal[p],
++                            self.pseq[p],
++                        )
++                    )
++                for pony in movers:
++                    cands = []
+                     for n in self.forder:
+                         f = self.fields[n]
+-                        if f["resting"] or n == rname:
++                        if f["resting"]:
+                             continue
+-                        room = f["span"] - len(f["roster"])
++                        room = f["span"] - self._occ(n)
+                         if room <= 0:
+                             continue
+-                        key = (-room, f["seq"])
+-                        if dest is None or key < dest_key:
+-                            dest, dest_key = n, key
+-                    rested["roster"].remove(pony)
++                        cands.append((-room, f["ever"], f["seq"], n))
++                    dest = min(cands)[3] if cands else None
++                    self._vacate(pony)
+                     if dest is None:
+-                        self.where[pony] = None
++                        self.barned[pony] = True
++                        self.reloc[pony] += 1
+                         self._emit(f"BARN {pony}")
+                     else:
+-                        self.fields[dest]["roster"].append(pony)
+-                        self.where[pony] = dest
++                        self._arrive(pony, dest)
++                        self._touch(dest)
++                        self.reloc[pony] += 1
+                         self._emit(f"PUT {pony} {dest}")
+-            # list the open fields in stake order
+-            listed = [n for n in self.forder if not self.fields[n]["resting"]]
++            listed = [
++                n for n in self.forder if not self.fields[n]["resting"]
++            ]
++            listed.sort(key=lambda n: (self.fields[n]["ever"], self.fields[n]["seq"]))
+             self._emit(f"SHIFT {len(listed)}")
+             for name in listed:
+                 self._emit(f"F {name}")
+@@ -262,9 +401,17 @@ class Engine:
+                 self._reject("FORM")
+                 return
+             self.c_u += 1
+-            ranked = sorted(
+-                self.porder, key=lambda n: (-self.build[n], self.pseq[n])
++            outs = [n for n in self.porder if self.where[n] is not None]
++            barns = [n for n in self.porder if self.where[n] is None]
++            outs.sort(key=lambda n: self._v_key(n))
++            barns.sort(
++                key=lambda n: (
++                    -self.build[n],
++                    -int(self.barned[n]),
++                    self.pseq[n],
++                )
+             )
++            ranked = outs + barns
+             self._emit(f"MUSTER {len(ranked)}")
+             for name in ranked:
+                 self._emit(f"P {name}")
+diff --git a/run_probes.py b/run_probes.py
+new file mode 100644
+index 0000000..7637168
+--- /dev/null
++++ b/run_probes.py
+@@ -0,0 +1,44 @@
++"""Targeted probes for remaining distinctions."""
++import os
++import subprocess
++
++TMP = os.environ["TMPDIR"]
++OUT = os.path.join(TMP, "probes.txt")
++
++cases = {
++    # affinity-last vs (g,pseq): a(aff,g3,pseq-early) vs x(plain,g3,pseq-late)
++    "afflast": ["N a 10", "N x 10", "N p 10", "F f1 9", "F f2 9", "F f3 9",
++                "G a f1", "H a", "G a f1", "H a", "G a f1",
++                "G x f2", "H x", "G x f3", "H x", "G x f1",
++                "G p f2", "S", "S", "V"],
++    # freshness: q(plain,g1) vs p(fresh post-S re-G,g2)
++    "fresh": ["N q 10", "N p 10", "F f1 9", "F f2 9", "F f3 9",
++              "G q f1", "G p f2", "H p", "G p f2", "S",
++              "H p", "G p f2", "V"],
++    # led count: x(l1,g1) vs y(l2,g1), pseq x first
++    "ledcount": ["N x 10", "N y 10", "F f1 9", "F f2 9", "F f3 9",
++                 "G x f1", "L x f2", "G y f1", "L y f2", "L y f3",
++                 "V"],
++    # led vs build: weak(led,build5) vs strong(unled,build90)
++    "ledbuild": ["N w 5", "N s 90", "F f1 9", "F f2 9",
++                 "G w f1", "L w f2", "G s f1", "V"],
++    # U barn order: shift-BARN late-pseq vs H early-pseq
++    "ubarn": ["N h 10", "N m 10", "N z 10", "F f1 9", "F f2 1", "F f3 1",
++              "G m f1", "G z f1", "G h f2", "H h", "S", "U"],
++    # mover order: y(first-enrolled,l0,g1) vs x(late,l1,g1) co-movers
++    "mover": ["N y 10", "N x 10", "F f1 9", "F f2 9", "F f3 9",
++              "G y f2", "G x f2", "L x f1", "L x f2", "S", "V"],
++    # S1 order: a(g2,build90) vs b(g1,build10) co-movers at S1
++    "s1ord": ["N a 90", "N b 10", "F f1 9", "F f2 9",
++              "G a f1", "H a", "G a f1", "G b f1", "S", "V"],
++}
++
++with open(OUT, "w") as fh:
++    for name, cmds in cases.items():
++        p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                           capture_output=True, text=True)
++        fh.write(f"##### {name}\n")
++        fh.write("\n".join(cmds) + "\n-----\n")
++        fh.write(p.stdout)
++        fh.write("\n")
++print("wrote", OUT)
+diff --git a/run_probes2.py b/run_probes2.py
+new file mode 100644
+index 0000000..ad63588
+--- /dev/null
++++ b/run_probes2.py
+@@ -0,0 +1,40 @@
++"""Targeted probes batch 2 (redesigned)."""
++import os
++import subprocess
++
++TMP = os.environ["TMPDIR"]
++OUT = os.path.join(TMP, "probes2.txt")
++
++cases = {
++    # affinity-last vs (g,pseq): 3 shifts; a(aff,g3,pseq0) vs x(plain,g3,pseq1)
++    "afflast2": ["N a 10", "N x 10", "N p 10", "F f1 9", "F f2 9",
++                 "F f9 9",
++                 "G a f1", "H a", "G a f1", "H a", "G a f1",
++                 "G x f2", "H x", "G x f9", "H x", "G x f2",
++                 "G p f9", "S", "S", "S", "V"],
++    # U barns: a(g1,early,BARNED) vs c(g2,late,BARNED) vs m(H'd,mid)
++    #   + w(relocated-then-H'd: reloc1,barned0)
++    "ubarn2": ["N a 10", "N m 10", "N c 10", "N w 10", "N h 10",
++               "F f1 9", "F f2 1", "F f3 1",
++               "G a f1", "G c f1", "H c", "G c f1",
++               "G w f2", "G m f1", "G h f3",
++               "S", "H w", "H m", "S", "U"],
++    # S1 mover order with leads: y(g1,L0,pseq0) vs x(g1,L2,pseq1), S1
++    "mover2": ["N y 10", "N x 10", "N z 10", "F f1 9", "F f2 9",
++               "G y f2", "G x f2", "L x f1", "L x f2", "G z f1",
++               "S", "V"],
++    # S1 build vs g: a(g2,90) vs b(g1,10) co-movers at S1
++    "s1ord2": ["N a 90", "N b 10", "N z 10", "F f1 9", "F f2 9",
++               "G a f1", "H a", "G a f1", "G b f1", "G z f2",
++               "S", "V"],
++}
++
++with open(OUT, "w") as fh:
++    for name, cmds in cases.items():
++        p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                           capture_output=True, text=True)
++        fh.write(f"##### {name}\n")
++        fh.write("\n".join(cmds) + "\n-----\n")
++        fh.write(p.stdout)
++        fh.write("\n")
++print("wrote", OUT)
+diff --git a/run_probes3.py b/run_probes3.py
+new file mode 100644
+index 0000000..69b721c
+--- /dev/null
++++ b/run_probes3.py
+@@ -0,0 +1,36 @@
++"""Probes batch 3: mover3 (S2+ leads vs pseq), ubarn3 (barn key, grouping)."""
++import os
++import subprocess
++
++TMP = os.environ["TMPDIR"]
++OUT = os.path.join(TMP, "probes3.txt")
++
++cases = {
++    # S2+ co-movers: y(pseq0,L0,g1) vs x(pseq1,L2,g1)
++    # S1 rests empty f2; S2 rests f1 [y,x]
++    "mover3": ["N y 10", "N x 10", "F f1 9", "F f2 9", "F f3 9",
++               "G y f1", "G x f1", "L x f2", "L x f1", "G z f3",
++               "N z 10", "S", "S", "V"],
++    # U: BARNED a(g1,early) vs BARNED c(g3,late); H'd m;
++    #   barn big90 vs out small10 (grouping?)
++    "ubarn3": ["N a 10", "N m 10", "N c 10", "N B 90", "F f1 9",
++               "F f2 1", "F f3 1",
++               "G a f1", "G c f1", "H c", "G c f1", "H c", "G c f1",
++               "G m f1", "G B f2", "H B", "S", "U"],
++}
++
++with open(OUT, "w") as fh:
++    for name, cmds in cases.items():
++        if name == "mover3":
++            # N z must come before G z: fix order
++            cmds = ["N y 10", "N x 10", "N z 10", "F f1 9", "F f2 9",
++                    "F f3 9",
++                    "G y f1", "G x f1", "L x f2", "L x f1", "G z f3",
++                    "S", "S", "V"]
++        p = subprocess.run(["legacy/run"], input="\n".join(cmds) + "\n",
++                           capture_output=True, text=True)
++        fh.write(f"##### {name}\n")
++        fh.write("\n".join(cmds) + "\n-----\n")
++        fh.write(p.stdout)
++        fh.write("\n")
++print("wrote", OUT)
+diff --git a/scan_h.py b/scan_h.py
+new file mode 100644
+index 0000000..b7ce6e2
+--- /dev/null
++++ b/scan_h.py
+@@ -0,0 +1,132 @@
++"""Scan for full-ties (build,ledflag,fresh,g,ever tied) with H differing."""
++import os
++import sys
++
++sys.path.insert(0, ".")
++from fuzz_fit import parse
++from tieutil import replay_fields
++import subprocess
++
++TMP = os.environ["TMPDIR"]
++
++
++def replay2(cmds, outs):
++    """Extended ctx: shift idx, ledflag (L at shift 0), lastG idx, reloc."""
++    where = {}
++    g = {}
++    h = {}
++    l = {}
++    reloc = {}
++    pseq = {}
++    ever = {}
++    ledflag = {}
++    lastG = {}
++    shift = 0
++    out = list(outs)
++    oi = 0
++    obs = []
++
++    def take_prefix(prefix):
++        nonlocal oi
++        assert out[oi].startswith(prefix), f"desync {prefix!r} vs {out[oi]!r}"
++        v = out[oi][len(prefix):]
++        oi += 1
++        return v
++
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            ln = out[oi]; oi += 1
++            if ln.startswith("OK"):
++                where[t[1]] = None
++                g[t[1]] = 0; h[t[1]] = 0; l[t[1]] = 0
++                reloc[t[1]] = 0
++                pseq[t[1]] = len(pseq)
++                ledflag[t[1]] = False
++                lastG[t[1]] = -1
++        elif t[0] == "F":
++            oi += 1
++        elif t[0] in ("G", "H", "L"):
++            ln = out[oi]; oi += 1
++            if ln == "OK":
++                if t[0] == "G":
++                    where[t[1]] = t[2]; g[t[1]] += 1
++                    lastG[t[1]] = shift
++                elif t[0] == "H":
++                    where[t[1]] = None; h[t[1]] += 1
++                else:
++                    where[t[1]] = t[2]; l[t[1]] += 1
++                    if shift == 0:
++                        ledflag[t[1]] = True
++        elif t[0] == "R":
++            ln = out[oi]; oi += 1
++            oi += int(ln.split()[2])
++        elif t[0] == "S":
++            shift += 1
++            while True:
++                ln = out[oi]; oi += 1
++                if ln.startswith("REST"):
++                    ever[ln.split()[1]] = True
++                elif ln.startswith("PUT"):
++                    _, p, f = ln.split()
++                    where[p] = f
++                    reloc[p] += 1
++                elif ln.startswith("BARN"):
++                    _, p = ln.split()
++                    where[p] = None
++                    reloc[p] += 1
++                elif ln.startswith("SHIFT"):
++                    oi += int(ln.split()[1])
++                    break
++        elif t[0] == "V":
++            k = int(take_prefix("OUT "))
++            names = [take_prefix("P ") for _ in range(k)]
++            ctx = {p: dict(g=g[p], h=h[p], l=l[p], reloc=reloc[p],
++                           pseq=pseq[p], fld=where[p],
++                           ev=ever.get(where[p], False),
++                           led=ledflag[p],
++                           fresh=(lastG[p] == shift and shift >= 1
++                                  and reloc[p] > 0))
++                   for p in names}
++            obs.append((names, ctx))
++        elif t[0] == "U":
++            k = int(take_prefix("MUSTER "))
++            oi += k
++    return obs
++
++
++VOBS = []
++for path in (f"{TMP}/fz11.txt", f"{TMP}/ft2.txt"):
++    for cmds, outs in parse(path):
++        try:
++            for n, c in replay2(cmds, outs):
++                VOBS.append((cmds, n, c))
++        except AssertionError:
++            pass
++print("V obs:", len(VOBS))
++# find full-ties with H differing
++for cmds, names, ctx in VOBS:
++    builds = {}
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            builds[t[1]] = int(t[2])
++    j = 0
++    while j < len(names):
++        k = j
++        while (k + 1 < len(names)
++               and builds[names[k + 1]] == builds[names[j]]
++               and all(ctx[names[k + 1]][a] == ctx[names[j]][a]
++                       for a in ("led", "fresh", "g", "ev"))):
++            k += 1
++        if k > j:
++            grp = names[j:k + 1]
++            hs = [ctx[p]["h"] for p in grp]
++            ps = [ctx[p]["pseq"] for p in grp]
++            asc = all(a < b for a, b in zip(ps, ps[1:]))
++            if len(set(hs)) > 1:
++                print(("ASC " if asc else "DESC"), grp,
++                      [(p, ctx[p]) for p in grp])
++                print("   ", cmds)
++        j = k + 1
++print("done")
+diff --git a/scan_tie.py b/scan_tie.py
+new file mode 100644
+index 0000000..dc4667f
+--- /dev/null
++++ b/scan_tie.py
+@@ -0,0 +1,50 @@
++"""Scan all V-obs for cross-field same-g same-build ties; report orders."""
++import os
++import pickle
++import sys
++
++sys.path.insert(0, ".")
++from fuzz_fit import parse
++
++TMP = os.environ["TMPDIR"]
++from tieutil import replay_fields
++
++cases = []
++for path in (f"{TMP}/fz11.txt", f"{TMP}/ft2.txt"):
++    for i, (cmds, outs) in enumerate(parse(path)):
++        try:
++            ob = replay_fields(cmds, outs)
++        except AssertionError:
++            continue
++        for names, ctx in ob:
++            # group adjacent same-(build? we lack build here; use g only) g runs
++            # need build: re-derive from cmds N lines
++            builds = {}
++            for c in cmds:
++                t = c.split()
++                if t[0] == "N":
++                    builds[t[1]] = int(t[2])
++            j = 0
++            while j < len(names):
++                k = j
++                while (k + 1 < len(names)
++                       and builds[names[k + 1]] == builds[names[j]]
++                       and ctx[names[k + 1]]["g"] == ctx[names[j]]["g"]
++                       and ctx[names[k + 1]]["l"] == 0 and ctx[names[j]]["l"] == 0):
++                    k += 1
++                if k > j:
++                    grp = names[j:k + 1]
++                    flds = {ctx[p]["fld"] for p in grp}
++                    if len(flds) > 1:
++                        pseqs = [ctx[p]["pseq"] for p in grp]
++                        asc = all(a < b for a, b in zip(pseqs, pseqs[1:]))
++                        cases.append((f"{path}#{i}", grp,
++                                      [(p, ctx[p]["fld"], ctx[p]["pseq"],
++                                        ctx[p]["reloc"], ctx[p]["ev"])
++                                       for p in grp], asc))
++                j = k + 1
++print(f"cross-field ties: {len(cases)}")
++nasc = sum(1 for c in cases if c[3])
++print(f"pseq-ASC: {nasc}, non-ASC: {len(cases) - nasc}")
++for tag, grp, det, asc in cases:
++    print(("ASC  " if asc else "NONASC"), tag, grp, det)
+diff --git a/tieutil.py b/tieutil.py
+new file mode 100644
+index 0000000..87eb299
+--- /dev/null
++++ b/tieutil.py
+@@ -0,0 +1,88 @@
++def replay_fields(cmds, outs):
++    """Replay tracking where/reloc/led/affret. Returns (V obs with context)."""
++    where = {}
++    g = {}
++    h = {}
++    l = {}
++    reloc = {}
++    affret = {}
++    pseq = {}
++    ever = {}
++    out = list(outs)
++    oi = 0
++    obs = []
++
++    def take_prefix(prefix):
++        nonlocal oi
++        assert out[oi].startswith(prefix), f"desync {prefix!r} vs {out[oi]!r}"
++        v = out[oi][len(prefix):]
++        oi += 1
++        return v
++
++    for c in cmds:
++        t = c.split()
++        if t[0] == "N":
++            ln = out[oi]; oi += 1
++            if ln.startswith("OK"):
++                where[t[1]] = None
++                g[t[1]] = 0; h[t[1]] = 0; l[t[1]] = 0
++                reloc[t[1]] = 0; affret[t[1]] = 0
++                pseq[t[1]] = len(pseq)
++        elif t[0] in ("F",):
++            oi += 1
++        elif t[0] in ("G", "H", "L"):
++            ln = out[oi]; oi += 1
++            if ln == "OK":
++                if t[0] == "G":
++                    where[t[1]] = t[2]; g[t[1]] += 1
++                elif t[0] == "H":
++                    where[t[1]] = None; h[t[1]] += 1
++                else:
++                    where[t[1]] = t[2]; l[t[1]] += 1
++        elif t[0] == "R":
++            ln = out[oi]; oi += 1
++            k = int(ln.split()[2])
++            oi += k
++        elif t[0] == "S":
++            is_aff = False
++            while True:
++                ln = out[oi]; oi += 1
++                if ln.startswith("WAKE"):
++                    is_aff = True  # subsequent PUTs before REST are returns
++                elif ln.startswith("REST"):
++                    is_aff = False
++                    ever[ln.split()[1]] = True
++                elif ln.startswith("PUT"):
++                    _, p, f = ln.split()
++                    where[p] = f
++                    reloc[p] += 1
++                    if is_aff:
++                        affret[p] += 1
++                elif ln.startswith("BARN"):
++                    _, p = ln.split()
++                    where[p] = None
++                    reloc[p] += 1
++                elif ln.startswith("SHIFT"):
++                    k = int(ln.split()[1])
++                    oi += k
++                    break
++        elif t[0] == "V":
++            k = int(take_prefix("OUT "))
++            names = [take_prefix("P ") for _ in range(k)]
++            ctx = {p: dict(g=g[p], h=h[p], l=l[p], reloc=reloc[p],
++                           aff=affret[p], pseq=pseq[p], fld=where[p],
++                           ev=ever.get(where[p], False) if where[p] else None)
++                   for p in names}
++            obs.append((names, ctx))
++        elif t[0] == "U":
++            k = int(take_prefix("MUSTER "))
++            oi += k
++    return obs
++
++
++def show(title, names, ctx):
++    print(f"--- {title}: V={names}")
++    for p in names:
++        print("   ", p, ctx[p])
++
++

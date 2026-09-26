@@ -1,0 +1,217 @@
+diff --git a/granarycore.py b/granarycore.py
+index 6d4879c..51cee3d 100644
+--- a/granarycore.py
++++ b/granarycore.py
+@@ -26,6 +26,7 @@ class Engine:
+         self.mseq: dict[str, int] = {}
+         self.morder: list[str] = []
+         self.bins: dict[str, dict] = {}
++        self.folded: set[str] = set()
+         self.next_mseq = 0
+         self.next_bseq = 0
+         self.c_j = 0
+@@ -35,6 +36,11 @@ class Engine:
+         self.c_m = 0
+         self.c_t = 0
+         self.c_y = 0
++        # per-member reckoning state
++        self.m_wpen: dict[str, int] = {}
++        self.m_mpen: dict[str, int] = {}
++        self.m_draw_flag: dict[str, bool] = {}
++        self.m_draw_streak: dict[str, int] = {}
+ 
+     def _emit(self, line: str) -> None:
+         self.out.write(line + "\n")
+@@ -51,6 +57,23 @@ class Engine:
+     def _held_total(self, name: str) -> int:
+         return sum(b["holds"].get(name, 0) for b in self.bins.values())
+ 
++    def _bin_key(self, b: dict) -> int:
++        if b.get("bonus"):
++            return b["total"] + 7
++        return (
++            b["total"]
++            - b.get("w_drag", 0)
++            - b.get("m_drag", 0)
++            + b.get("p_recent", 0) // 14
++        )
++
++    def _member_key(self, name: str) -> int:
++        total = self._held_total(name)
++        pen = self.m_wpen.get(name, 0) + self.m_mpen.get(name, 0)
++        if self.m_draw_streak.get(name, 0) >= 4:
++            pen += 20
++        return total - pen
++
+     def handle(self, line: str) -> None:
+         parts = line.rstrip("\r\n").split()
+         if not parts:
+@@ -72,6 +95,10 @@ class Engine:
+             self.shares[parts[1]] = val
+             self.mseq[parts[1]] = self.next_mseq
+             self.morder.append(parts[1])
++            self.m_wpen[parts[1]] = 0
++            self.m_mpen[parts[1]] = 0
++            self.m_draw_flag[parts[1]] = False
++            self.m_draw_streak[parts[1]] = 0
+             self.c_j += 1
+             self._emit(f"OK {len(self.morder)}")
+             return
+@@ -84,7 +111,7 @@ class Engine:
+             if not 1 <= cap <= 999:
+                 self._reject("RNG")
+                 return
+-            if parts[1] in self.bins:
++            if parts[1] in self.bins or parts[1] in self.folded:
+                 self._reject("DUP")
+                 return
+             self.next_bseq += 1
+@@ -94,6 +121,14 @@ class Engine:
+                 "total": 0,
+                 "holders": [],
+                 "holds": {},
++                "w_drag": 0,
++                "m_drag": 0,
++                "p_recent": 0,
++                "first_t": False,
++                "bonus": False,
++                "prev_last": False,
++                "prev_total": None,
++                "w_flag": False,
+             }
+             self.c_o += 1
+             self._emit(f"OK {len(self.bins)}")
+@@ -122,6 +157,8 @@ class Engine:
+             b["holds"][parts[1]] = b["holds"].get(parts[1], 0) + count
+             if parts[1] not in b["holders"]:
+                 b["holders"].append(parts[1])
++            if b.get("first_t"):
++                b["p_recent"] += count
+             self.c_p += 1
+             self._emit("OK")
+             return
+@@ -147,7 +184,10 @@ class Engine:
+                 return
+             b["total"] -= count
+             b["holds"][parts[1]] -= count
+-            self._drop_if_empty(b, parts[1])
++            b["w_drag"] += count // 6
++            b["w_flag"] = True
++            self.m_wpen[parts[1]] += count // 4
++            self.m_draw_flag[parts[1]] = True
+             self.c_w += 1
+             self._emit("OK")
+             return
+@@ -188,6 +228,8 @@ class Engine:
+             dst["holds"][parts[1]] = dst["holds"].get(parts[1], 0) + count
+             if parts[1] not in dst["holders"]:
+                 dst["holders"].append(parts[1])
++            dst["m_drag"] += count // 10
++            self.m_mpen[parts[1]] += 1
+             self.c_m += 1
+             self._emit("OK")
+             return
+@@ -197,16 +239,84 @@ class Engine:
+                 self._reject("FMT")
+                 return
+             self.c_t += 1
++            # update member draw streaks (consecutive Ts with draws)
++            for name in self.morder:
++                if self.m_draw_flag.get(name, False):
++                    self.m_draw_streak[name] = self.m_draw_streak.get(name, 0) + 1
++                else:
++                    self.m_draw_streak[name] = 0
++                self.m_draw_flag[name] = False
+             order = sorted(
+-                self.bins.items(), key=lambda kv: (-kv[1]["total"], kv[1]["seq"])
++                self.bins.items(),
++                key=lambda kv: (
++                    -self._bin_key(kv[1]),
++                    len(kv[1]["holders"]),
++                    kv[1]["seq"],
++                ),
+             )
+-            self._emit(f"TURN {len(order)}")
++            # snapshot totals/keys for trailing + fold processing
++            order_totals = {name: b["total"] for name, b in order}
++            n = len(order)
++            self._emit(f"TURN {n}")
+             for name, _ in order:
+                 self._emit(f"B {name}")
+-            for name, b in order:
+-                if b["total"] == 0:
++            alive: dict[str, dict] = {name: b for name, b in order}
++            # process folds/shuts in listed order
++            for idx, (name, b) in enumerate(order):
++                if name not in alive:
++                    continue
++                cur = alive[name]
++                if cur["total"] == 0:
+                     self._emit(f"SHUT {name}")
++                    del alive[name]
+                     del self.bins[name]
++                elif cur["total"] > 0 and cur["total"] < 2 * (
++                    cur.get("w_drag", 0) + cur.get("m_drag", 0)
++                ):
++                    # find earliest earlier bin with cap space
++                    dest = None
++                    for j in range(idx):
++                        cand_name, _ = order[j]
++                        if cand_name not in alive:
++                            continue
++                        cand = alive[cand_name]
++                        if cand["total"] + cur["total"] <= cand["cap"]:
++                            dest = cand_name
++                            break
++                    if dest is not None:
++                        self._emit(f"FOLD {name} {dest}")
++                        dst = alive[dest]
++                        # pool sacks and roster (positive holders only)
++                        for holder in list(cur["holders"]):
++                            amt = cur["holds"].get(holder, 0)
++                            if amt > 0:
++                                dst["holds"][holder] = (
++                                    dst["holds"].get(holder, 0) + amt
++                                )
++                                if holder not in dst["holders"]:
++                                    dst["holders"].append(holder)
++                        dst["total"] += cur["total"]
++                        self.folded.add(name)
++                        del alive[name]
++                        del self.bins[name]
++                        self.c_m += 1
++            # update trailing + first-T state for survivors
++            for idx, (name, b) in enumerate(order):
++                if name not in self.bins:
++                    continue
++                cur = self.bins[name]
++                is_last = n > 0 and idx == n - 1
++                if (
++                    cur.get("prev_last")
++                    and is_last
++                    and cur.get("prev_total") == order_totals[name]
++                    and cur.get("w_flag")
++                ):
++                    cur["bonus"] = True
++                cur["prev_last"] = is_last
++                cur["prev_total"] = order_totals[name]
++                cur["w_flag"] = False
++                cur["first_t"] = True
+             return
+ 
+         if kind == "Y":
+@@ -214,8 +324,13 @@ class Engine:
+                 self._reject("FMT")
+                 return
+             self.c_y += 1
++            # clear per-bin transfer drag and deposit bonus
++            for b in self.bins.values():
++                b["m_drag"] = 0
++                b["p_recent"] = 0
++                b["first_t"] = False
+             ranked = sorted(
+-                self.morder, key=lambda n: (-self._held_total(n), self.mseq[n])
++                self.morder, key=lambda n: (-self._member_key(n), self.mseq[n])
+             )
+             self._emit(f"RECK {len(ranked)}")
+             for name in ranked:

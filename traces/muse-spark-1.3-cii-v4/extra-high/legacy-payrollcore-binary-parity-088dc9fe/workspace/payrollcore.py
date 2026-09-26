@@ -1,0 +1,207 @@
+"""PayrollCore withholding engine, Python implementation.
+
+Replaces the retired legacy binary (see ``legacy/README.md``). One batch
+per process: records on stdin, result lines on stdout, trailer at end of
+input. Format reference: ``docs/SPEC.md`` (mind the drift warning; the
+engine's behavior is the contract).
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+
+BRACKET_1 = 100_000
+BRACKET_2 = 400_000
+BRACKET_1_P27 = 50_000
+BRACKET_2_P27 = 200_000
+RATES_BP = (1_000, 2_000, 3_000)
+H_RATE3_BP = 3_200
+H_RATE3_STATES = ("CA", "NY")
+H_RATE3_GATE_P27 = 250_000
+MARRIED_NUM = 92
+MARRIED_DEN = 100
+STATE_BP = 500
+ZERO_TAX_STATES = ("TX", "FL", "WA", "NV", "SD")
+LEVY_BP = 620
+LEVY_CAP = 1_600_000
+FLAG_BP = 100
+MAX_EMPLOYEES = 4096
+
+_FIELD_RE = re.compile(r"[^ \t\v\f]+")
+_LINE_CUT_RE = re.compile(r"[\r\n\x00]")
+_ALNUM_BYTES = frozenset(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+
+
+def _fmt_echo(parts: list[str]) -> str:
+    raw0 = parts[0].encode("utf-8", "surrogateescape")
+    if len(raw0) > 7:
+        suffix = raw0[7:]
+        if 1 <= len(suffix) <= 8 and all(b in _ALNUM_BYTES for b in suffix):
+            return suffix.decode("ascii")
+        return "????????"
+    empid = parts[1] if len(parts) > 1 else ""
+    if 1 <= len(empid) <= 8 and empid.isascii() and empid.isalnum():
+        return empid
+    return "????????"
+
+
+class Engine:
+    def __init__(self, out=None):
+        self.ytd: dict[str, int] = {}
+        self.names: dict[str, str] = {}
+        self.count_ok = 0
+        self.count_rej = 0
+        self.sum_net = 0
+        self.out = out if out is not None else sys.stdout
+
+    def _emit(self, line: str) -> None:
+        self.out.write(line + "\n")
+
+    def _reject(self, empid: str, code: str) -> None:
+        self._emit(f"R {empid} {code}")
+        self.count_rej += 1
+
+    def handle(self, line: str) -> None:
+        text = _LINE_CUT_RE.split(line, maxsplit=1)[0]
+        if text == "":
+            return
+        parts = _FIELD_RE.findall(text)
+        if not parts:
+            self._emit("R ???????? FMT")
+            self.count_rej += 1
+            return
+        if parts[0] != "P" or len(parts) < 7:
+            self._emit(f"R {_fmt_echo(parts)} FMT")
+            self.count_rej += 1
+            return
+        _, empid, period_tok, gross_tok, status, state, flags = parts[:7]
+        if not (
+            1 <= len(empid) <= 8
+            and empid.isascii()
+            and empid.isalnum()
+        ):
+            self._emit("R ???????? FMT")
+            self.count_rej += 1
+            return
+        if not (
+            len(period_tok) == 2
+            and period_tok.isascii()
+            and period_tok.isdigit()
+        ):
+            self._reject(empid, "PERIOD")
+            return
+        period = int(period_tok)
+        if not (1 <= period <= 26 or period == 27):
+            self._reject(empid, "PERIOD")
+            return
+        if not (
+            gross_tok.isascii()
+            and gross_tok.isdigit()
+            and 1 <= len(gross_tok) <= 9
+        ):
+            self._reject(empid, "GROSS")
+            return
+        gross = int(gross_tok)
+        if gross == 0:
+            self._reject(empid, "GROSS")
+            return
+        if status not in ("S", "M", "H"):
+            self._reject(empid, "STATUS")
+            return
+        if not (
+            len(state) == 2
+            and state.isascii()
+            and state.isalpha()
+            and state.isupper()
+        ):
+            self._reject(empid, "STATE")
+            return
+        if flags != "000" and not (
+            len(flags) == 3
+            and flags.isascii()
+            and flags.isalpha()
+            and flags.isupper()
+        ):
+            self._reject(empid, "FLAGS")
+            return
+
+        key = empid.upper()
+        if key not in self.ytd:
+            if len(self.ytd) >= MAX_EMPLOYEES:
+                self._reject(empid, "FMT")
+                return
+            self.names[key] = empid
+            self.ytd[key] = 0
+
+        if period == 27:
+            b1, b2 = BRACKET_1_P27, BRACKET_2_P27
+        else:
+            b1, b2 = BRACKET_1, BRACKET_2
+        tier1 = min(gross, b1)
+        tier2 = min(max(gross - b1, 0), b2 - b1)
+        tier3 = max(gross - b2, 0)
+        rate3 = RATES_BP[2]
+        if (
+            status == "H"
+            and state in H_RATE3_STATES
+            and (period != 27 or gross > H_RATE3_GATE_P27)
+        ):
+            rate3 = H_RATE3_BP
+        fed_base = (
+            tier1 * RATES_BP[0] + tier2 * RATES_BP[1] + tier3 * rate3
+        )
+        federal = _round_half_even(fed_base, 10_000)
+        if status == "M":
+            federal = _round_half_even(
+                federal * MARRIED_NUM, MARRIED_DEN
+            )
+
+        state_tax = 0
+        if state not in ZERO_TAX_STATES:
+            state_tax = _round_half_even(gross * STATE_BP, 10_000)
+
+        ytd_before = self.ytd[key]
+        if ytd_before < LEVY_CAP:
+            levy = _round_half_up(gross * LEVY_BP, 10_000)
+        else:
+            levy = 0
+        self.ytd[key] = ytd_before + gross
+
+        flag_extra = 0
+        if "B" in flags and "X" in flags:
+            flag_extra = _round_half_up(gross * FLAG_BP, 10_000)
+
+        net = gross - federal - state_tax - levy - flag_extra
+        self._emit(f"W {self.names[key]} {net}")
+        self.count_ok += 1
+        self.sum_net += net
+
+    def finish(self) -> None:
+        self._emit(f"X {self.count_ok} {self.count_rej} {self.sum_net}")
+
+
+def _round_half_even(numerator: int, denominator: int) -> int:
+    quotient, remainder = divmod(numerator, denominator)
+    twice = 2 * remainder - denominator
+    if twice < 0:
+        return quotient
+    if twice > 0:
+        return quotient + 1
+    return quotient if quotient % 2 == 0 else quotient + 1
+
+
+def _round_half_up(numerator: int, denominator: int) -> int:
+    quotient, remainder = divmod(numerator, denominator)
+    return quotient + 1 if 2 * remainder >= denominator else quotient
+
+
+def main() -> None:
+    engine = Engine()
+    for line in sys.stdin:
+        engine.handle(line)
+    engine.finish()
+
+
+if __name__ == "__main__":
+    main()

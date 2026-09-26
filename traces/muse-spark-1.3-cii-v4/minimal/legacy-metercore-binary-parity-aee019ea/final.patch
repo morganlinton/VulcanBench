@@ -1,0 +1,132 @@
+diff --git a/metercore.py b/metercore.py
+index 04d0617..202c2ae 100644
+--- a/metercore.py
++++ b/metercore.py
+@@ -14,19 +14,40 @@ TIER1_LIMIT = 500
+ TIER2_LIMIT = 2000
+ # rate in tenths of a cent per kwh
+ RATE_TENTHS = (140, 190, 260)
+-BAND_PCT = {"D": 100, "N": 70, "W": 85}
++# Engine behavior (spec drift): the night band is discounted per tier; the
++# tier-1 night rate is 60 in deep-winter months (12, 01, 02, and the
++# engine's extra month 13) and 70 otherwise.
++def _band_pct(month: int, tier: int, band: str) -> int:
++    if band != "N" or tier > 0:
++        return {"D": 100, "N": 70, "W": 85}[band]
++    winter = month >= 12 or month <= 2
++    return 60 if winter else 70
+ SUMMER_MONTHS = (6, 7, 8, 9)
+ SUMMER_PCT = 110
++# Engine behavior (spec drift): the legacy analog meter adds 3%.
++METER_PCT = {"S": 100, "L": 103}
++# Engine behavior (spec drift): months 01..13 are accepted.
++MONTH_MAX = 13
+ 
+ ERROR_CODES = ("FMT", "MONTH", "KWH", "BAND", "METER")
+ 
+ 
+ def _round_nearest(numerator: int, denominator: int) -> int:
+-    """Round to the nearest cent (halves up), per the spec's billing rule."""
++    """Round to the nearest cent, halves to even, matching the engine."""
+     quotient, remainder = divmod(numerator, denominator)
+-    if 2 * remainder >= denominator:
++    twice = 2 * remainder
++    if twice > denominator:
+         return quotient + 1
+-    return quotient
++    if twice < denominator:
++        return quotient
++    return quotient + (quotient & 1)
++
++
++def _acct_key(shown: str) -> str:
++    # Engine behavior (spec drift): accounts merge case-insensitively.
++    return "".join(
++        chr(ord(c) + 32) if "A" <= c <= "Z" else c for c in shown
++    )
+ 
+ 
+ class Account:
+@@ -43,16 +64,19 @@ def _slices(prev: int, kwh: int) -> tuple[int, int, int]:
+     return s1, s2, kwh - s1 - s2
+ 
+ 
+-def _reading_fee(prev: int, kwh: int, month: int, band: str) -> int:
+-    fee = 0
++def _reading_fee(prev: int, kwh: int, month: int, band: str, meter: str) -> int:
++    units = 0
++    summer = month in SUMMER_MONTHS
+     for tier, slice_kwh in enumerate(_slices(prev, kwh)):
+         if slice_kwh == 0:
+             continue
+-        # spec: the summer surcharge applies to tier-3 energy only.
+-        season = SUMMER_PCT if month in SUMMER_MONTHS and tier == 2 else 100
+-        units = slice_kwh * RATE_TENTHS[tier] * BAND_PCT[band] * season
+-        fee += _round_nearest(units, 100_000)
+-    return fee
++        # Engine behavior (spec drift): the summer surcharge applies to
++        # tier-2 and tier-3 energy.
++        season = SUMMER_PCT if summer and tier >= 1 else 100
++        units += slice_kwh * RATE_TENTHS[tier] * _band_pct(month, tier, band) * season
++    # Engine behavior (spec drift): one rounding per reading over the
++    # combined slices, including the meter multiplier.
++    return _round_nearest(units * METER_PCT[meter], 10_000_000)
+ 
+ 
+ def process(lines: list[str]) -> list[str]:
+@@ -67,9 +91,11 @@ def process(lines: list[str]) -> list[str]:
+         echo = tokens[1] if len(tokens) >= 2 else "?"
+         error: str | None = None
+         month = kwh = 0
+-        band = ""
++        band = meter = ""
+ 
+-        if len(tokens) != 6 or tokens[0] != "M":
++        # Engine behavior (spec drift): trailing tokens past the sixth are
++        # ignored; only a short line is FMT.
++        if len(tokens) < 6 or tokens[0] != "M":
+             error = "FMT"
+         elif not (1 <= len(tokens[1]) <= 8 and tokens[1].isalnum() and tokens[1].isascii()):
+             error = "FMT"
+@@ -77,7 +103,7 @@ def process(lines: list[str]) -> list[str]:
+             error = "MONTH"
+         else:
+             month = int(tokens[2])
+-            if not 1 <= month <= 12:
++            if not 1 <= month <= MONTH_MAX:
+                 error = "MONTH"
+         if error is None:
+             if not (1 <= len(tokens[3]) <= 6 and tokens[3].isdigit()):
+@@ -89,18 +115,27 @@ def process(lines: list[str]) -> list[str]:
+                 error = "BAND"
+             else:
+                 band = tokens[4]
+-        if error is None and tokens[5] not in ("S", "L"):
+-            error = "METER"
++        if error is None:
++            if tokens[5] not in ("S", "L"):
++                error = "METER"
++            else:
++                meter = tokens[5]
+ 
+         if error is not None:
+             out.append(f"R {echo} {error}")
+             rejected += 1
+             continue
+ 
+-        account = accounts.get(tokens[1])
++        # Engine behavior (spec drift): a zero-kwh reading bills nothing and
++        # does not open the account.
++        if kwh == 0:
++            continue
++
++        key = _acct_key(tokens[1])
++        account = accounts.get(key)
+         if account is None:
+-            account = accounts[tokens[1]] = Account(tokens[1])
+-        fee = _reading_fee(account.counter, kwh, month, band)
++            account = accounts[key] = Account(tokens[1])
++        fee = _reading_fee(account.counter, kwh, month, band, meter)
+         account.counter += kwh
+         account.total_kwh += kwh
+         account.bill += fee

@@ -1,0 +1,128 @@
+diff --git a/metercore.py b/metercore.py
+index 04d0617..37f0367 100644
+--- a/metercore.py
++++ b/metercore.py
+@@ -15,18 +15,28 @@ TIER2_LIMIT = 2000
+ # rate in tenths of a cent per kwh
+ RATE_TENTHS = (140, 190, 260)
+ BAND_PCT = {"D": 100, "N": 70, "W": 85}
++# Night band: 60% for tier-1 energy in winter months, 70% otherwise.
++# (Spec says flat 70%; the engine discounts winter tier-1 night usage.)
++WINTER_MONTHS = (1, 2, 12, 13)
++NIGHT_WINTER_TIER1_PCT = 60
+ SUMMER_MONTHS = (6, 7, 8, 9)
+ SUMMER_PCT = 110
++# Legacy-analog meters add 3% to the reading's cost.
++# (Spec says the meter type is informational; the engine bills +3% for L.)
++LEGACY_METER_PCT = 103
+ 
+ ERROR_CODES = ("FMT", "MONTH", "KWH", "BAND", "METER")
+ 
+ 
+-def _round_nearest(numerator: int, denominator: int) -> int:
+-    """Round to the nearest cent (halves up), per the spec's billing rule."""
++def _round_half_even(numerator: int, denominator: int) -> int:
++    """Round to the nearest cent, halves to even, as the engine does."""
+     quotient, remainder = divmod(numerator, denominator)
+-    if 2 * remainder >= denominator:
++    twice = 2 * remainder - denominator
++    if twice > 0:
+         return quotient + 1
+-    return quotient
++    if twice < 0:
++        return quotient
++    return quotient + 1 if quotient % 2 else quotient
+ 
+ 
+ class Account:
+@@ -43,16 +53,27 @@ def _slices(prev: int, kwh: int) -> tuple[int, int, int]:
+     return s1, s2, kwh - s1 - s2
+ 
+ 
+-def _reading_fee(prev: int, kwh: int, month: int, band: str) -> int:
+-    fee = 0
++def _band_pct(band: str, tier: int, month: int) -> int:
++    if band == "N" and tier == 0 and month in WINTER_MONTHS:
++        return NIGHT_WINTER_TIER1_PCT
++    return BAND_PCT[band]
++
++
++def _reading_fee(prev: int, kwh: int, month: int, band: str, meter: str) -> int:
++    # The engine sums the exact cost of the reading's tier slices (with the
++    # summer surcharge on all energy above 500 kwh, not just tier 3), applies
++    # the meter factor, and rounds once per reading, halves to even.
++    numerator = 0
+     for tier, slice_kwh in enumerate(_slices(prev, kwh)):
+         if slice_kwh == 0:
+             continue
+-        # spec: the summer surcharge applies to tier-3 energy only.
+-        season = SUMMER_PCT if month in SUMMER_MONTHS and tier == 2 else 100
+-        units = slice_kwh * RATE_TENTHS[tier] * BAND_PCT[band] * season
+-        fee += _round_nearest(units, 100_000)
+-    return fee
++        season = SUMMER_PCT if month in SUMMER_MONTHS and tier >= 1 else 100
++        numerator += slice_kwh * RATE_TENTHS[tier] * _band_pct(band, tier, month) * season
++    denominator = 100_000
++    if meter == "L":
++        numerator *= LEGACY_METER_PCT
++        denominator *= 100
++    return _round_half_even(numerator, denominator)
+ 
+ 
+ def process(lines: list[str]) -> list[str]:
+@@ -68,8 +89,10 @@ def process(lines: list[str]) -> list[str]:
+         error: str | None = None
+         month = kwh = 0
+         band = ""
++        meter = ""
+ 
+-        if len(tokens) != 6 or tokens[0] != "M":
++        # The engine requires at least six tokens and ignores any extras.
++        if len(tokens) < 6 or tokens[0] != "M":
+             error = "FMT"
+         elif not (1 <= len(tokens[1]) <= 8 and tokens[1].isalnum() and tokens[1].isascii()):
+             error = "FMT"
+@@ -77,7 +100,7 @@ def process(lines: list[str]) -> list[str]:
+             error = "MONTH"
+         else:
+             month = int(tokens[2])
+-            if not 1 <= month <= 12:
++            if not 1 <= month <= 13:
+                 error = "MONTH"
+         if error is None:
+             if not (1 <= len(tokens[3]) <= 6 and tokens[3].isdigit()):
+@@ -89,18 +112,29 @@ def process(lines: list[str]) -> list[str]:
+                 error = "BAND"
+             else:
+                 band = tokens[4]
+-        if error is None and tokens[5] not in ("S", "L"):
+-            error = "METER"
++        if error is None:
++            if tokens[5] not in ("S", "L"):
++                error = "METER"
++            else:
++                meter = tokens[5]
+ 
+         if error is not None:
+             out.append(f"R {echo} {error}")
+             rejected += 1
+             continue
+ 
+-        account = accounts.get(tokens[1])
++        # A zero-kwh reading is a no-op: it emits nothing, not even an
++        # account line, and establishes neither order nor display form.
++        if kwh == 0:
++            continue
++
++        # Account identity is case-insensitive; the B line shows the
++        # first-seen (first billed) form, in first-billed order.
++        key = tokens[1].upper()
++        account = accounts.get(key)
+         if account is None:
+-            account = accounts[tokens[1]] = Account(tokens[1])
+-        fee = _reading_fee(account.counter, kwh, month, band)
++            account = accounts[key] = Account(tokens[1])
++        fee = _reading_fee(account.counter, kwh, month, band, meter)
+         account.counter += kwh
+         account.total_kwh += kwh
+         account.bill += fee

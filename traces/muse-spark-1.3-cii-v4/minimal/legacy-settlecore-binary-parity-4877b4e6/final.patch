@@ -1,0 +1,65 @@
+diff --git a/settlecore.py b/settlecore.py
+index da4b878..656bba2 100644
+--- a/settlecore.py
++++ b/settlecore.py
+@@ -33,17 +33,18 @@ def check_char(data: str, upto: int) -> str:
+     return _B36[total % 36]
+ 
+ 
+-def _round_nearest(numerator: int, denominator: int) -> int:
+-    """Round to the nearest unit (halves up), per the spec's fee rule."""
++def _round_nearest(numerator: int, denominator: int, halves_up: bool = False) -> int:
++    """Round to the nearest unit; ties go to even except when halves_up."""
+     quotient, remainder = divmod(numerator, denominator)
+-    if 2 * remainder >= denominator:
++    twice = 2 * remainder
++    if twice > denominator or (twice == denominator and (halves_up or quotient % 2 == 1)):
+         return quotient + 1
+     return quotient
+ 
+ 
+ def _days_in_month(year: int, month: int) -> int:
+     days = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+-    if month == 2 and year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
++    if month == 2 and year % 4 == 0:
+         return 29
+     return days[month - 1]
+ 
+@@ -81,11 +82,13 @@ class Record:
+             self.error = "ERRACCT"
+             return
+         sign, digits = raw[12], raw[13:24]
+-        if sign not in "+-" or not digits.isdigit():
++        digits = digits.lstrip(" ")
++        if sign not in "+-" or not digits or not digits.isdigit():
+             self.error = "ERRAMT"
+             return
++        digits = digits.rjust(11, "0")
+         self.negative = sign == "-"
+-        if self.negative:
++        if self.negative and self.type == "ST":
+             self.error = "ERRAMT"
+             return
+         self.amount = int(digits)
+@@ -116,7 +119,10 @@ class Record:
+         self.mcc = int(mcc)
+ 
+     def compute(self) -> None:
+-        fee = _round_nearest(self.amount * RATE_BP[self.tier], 10_000)
++        fee = _round_nearest(
++            self.amount * RATE_BP[self.tier], 10_000,
++            halves_up=(self.currency == "JPY"),
++        )
+         fee = min(fee, FEE_CAP)
+         self.fee = fee
+         if self.type == "RF":
+@@ -149,7 +155,8 @@ def process(lines: list[str]) -> list[str]:
+             record.compute()
+         records.append(record)
+ 
+-    out = [record.emit() for record in records]
++    ordered = [r for r in records if r.error is None] + [r for r in records if r.error is not None]
++    out = [record.emit() for record in ordered]
+     accepted = sum(1 for r in records if r.error is None)
+     rejected = len(records) - accepted
+     fee_sum = sum(r.fee for r in records if r.error is None)

@@ -25,6 +25,7 @@ OUTROOT=${OUTROOT:-runs-effort}
 PROBE=${PROBE:-claude-fable-5-1}
 SUITE="coding-intelligence-index-v4"
 WAIT=${WAIT:-1800}
+BILLING=${BILLING:-subscription}
 
 if pgrep -f "vulcanbench run --suite $SUITE" >/dev/null 2>&1; then
   echo "refusing to start: a vulcanbench run is already active (pgrep -fl 'vulcanbench run')" >&2
@@ -61,7 +62,8 @@ for level in $LEVELS; do
       continue
     fi
     echo "=== $MODEL effort=$level attempt $attempt, $done_count/23 done $(date '+%F %H:%M:%S')"
-    vulcanbench run --suite "$SUITE" --model "$MODEL" --sandbox local --no-judges \
+    vulcanbench run --suite "$SUITE" --model "$MODEL" --billing "$BILLING" \
+      --sandbox local --no-judges \
       --effort "$level" --only-missing -o "$outdir" 2>&1 | tail -3
   done
 done

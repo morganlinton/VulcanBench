@@ -1216,6 +1216,7 @@ _WORKSPACE_GITIGNORE = (
     ".coverage\n__pycache__/\n.pytest_cache/\n.ruff_cache/\n*.pyc\n.cursor/\n.grok/\n.zcode/\n"
     ".devin/\n"
     "target/\nnode_modules/\ndist/\nbuild/\n.gocache/\n.nyc_output/\n*.egg-info/\n"
+    "*.o\n*.a\n*.dSYM/\nCMakeFiles/\nCMakeCache.txt\ncmake-build-*/\nzz_hidden_build/\n"
 )
 
 

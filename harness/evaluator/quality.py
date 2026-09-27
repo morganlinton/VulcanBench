@@ -1,15 +1,19 @@
 """Code-quality metric: linting + complexity + maintainability on changed files.
 
 Scoped to the agent's changed files (grouped by language). Python is analyzed
-natively (ruff + radon). Other languages shell out to their toolchains *if
-present on PATH* and otherwise report ``None`` with a recorded reason -- never a
-silent zero. The overall score averages whichever languages were analyzed.
+natively (ruff + radon). JavaScript runs a pinned ESLint install with the
+harness's own config (``harness/data/eslint.config.mjs``); C and C++ run
+clang-tidy with a fixed check set (``harness/evaluator/cfamily.py``); Rust runs
+``cargo fmt --check`` and clippy. Each reports its tool version in its details.
+A language whose tool is missing reports ``None`` with a recorded reason, never
+a silent zero. The overall score averages whichever languages were analyzed.
 """
 
 from __future__ import annotations
 
 import json
 import math
+import os
 import shutil
 import subprocess
 from collections.abc import Callable
@@ -19,6 +23,7 @@ from typing import Any
 from radon.complexity import cc_visit
 from radon.metrics import mi_visit
 
+from harness.evaluator import cfamily
 from harness.evaluator.langs import MetricResult, group_by_language
 
 # --- Tunable scoring constants -------------------------------------------------
@@ -37,7 +42,7 @@ def assess_quality(
     workspace: Path, changed_files: list[str], remaining_s: RemainingSeconds | None = None
 ) -> MetricResult:
     """Assess code quality of the agent's changed files."""
-    by_lang = group_by_language(changed_files)
+    by_lang = group_by_language(changed_files, workspace)
     if not by_lang:
         return MetricResult(score=None, details={"reason": "no recognized source files changed"})
 
@@ -170,7 +175,95 @@ def _loc(path: Path) -> int:
         return 0
 
 
+ESLINT_DIR_DEFAULT = Path.home() / ".local" / "vulcanbench-eslint-10.11.0"
+ESLINT_CONFIG = Path(__file__).resolve().parent.parent / "data" / "eslint.config.mjs"
+
+
+def eslint_dir() -> Path:
+    """The pinned ESLint install (VULCANBENCH_ESLINT_DIR, else the default prefix)."""
+    return Path(os.environ.get("VULCANBENCH_ESLINT_DIR") or ESLINT_DIR_DEFAULT)
+
+
+def run_eslint(
+    workspace: Path, files: list[str], mode: str, timeout: int
+) -> tuple[list[dict[str, Any]], str] | str:
+    """Run the pinned ESLint in ``mode``; the reports and version, or a reason string."""
+    binary = eslint_dir() / "node_modules" / ".bin" / "eslint"
+    if not binary.exists():
+        return f"pinned eslint not installed at {eslint_dir()} (scripts/install_analyzers.sh)"
+    if shutil.which("node") is None:
+        return "node not on PATH"
+    existing = [f for f in files if (workspace / f).exists()]
+    if not existing:
+        return [], cfamily.tool_version(str(binary)) or "unknown"
+    env = {
+        **os.environ,
+        "VULCANBENCH_ESLINT_DIR": str(eslint_dir()),
+        "VULCANBENCH_ESLINT_MODE": mode,
+    }
+    try:
+        proc = subprocess.run(
+            [
+                str(binary),
+                "--config",
+                str(ESLINT_CONFIG),
+                "--format",
+                "json",
+                "--no-warn-ignored",
+                *existing,
+            ],
+            cwd=workspace,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+            env=env,
+        )
+    except subprocess.TimeoutExpired:
+        return "eslint timed out"
+    try:
+        reports = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError:
+        return f"could not parse eslint output: {proc.stderr.strip()[:200]}"
+    return reports, cfamily.tool_version(str(binary)) or "unknown"
+
+
 def _js_ts(workspace: Path, files: list[str], remaining_s: RemainingSeconds | None) -> MetricResult:
+    timeout = _timeout(180, remaining_s)
+    if timeout is None:
+        return MetricResult(score=None, details={"tool": "eslint", "reason": "run budget exceeded"})
+    js_files = [f for f in files if Path(f).suffix.lower() in {".js", ".mjs", ".cjs", ".jsx"}]
+    if not js_files:
+        return MetricResult(
+            score=None, details={"tool": "eslint", "reason": "no JavaScript files changed"}
+        )
+    result = run_eslint(workspace, js_files, "quality", timeout)
+    if isinstance(result, str):
+        return MetricResult(score=None, details={"tool": "eslint", "reason": result})
+    reports, version = result
+    issues = sum(1 for r in reports for m in r.get("messages", []) if m.get("ruleId"))
+    parse_errors = sum(
+        1 for r in reports for m in r.get("messages", []) if m.get("fatal") or not m.get("ruleId")
+    )
+    loc = sum(_loc(workspace / f) for f in js_files) or 1
+    score = _clamp(1.0 - (issues / loc) / _LINT_VIOLATIONS_PER_LOC_FLOOR)
+    if parse_errors:
+        score = _clamp(score - 0.3)
+    return MetricResult(
+        score=score,
+        details={
+            "tool": "eslint",
+            "tool_version": version,
+            "issues": issues,
+            "parse_errors": parse_errors,
+            "loc": loc,
+        },
+    )
+
+
+def _typescript(
+    workspace: Path, files: list[str], remaining_s: RemainingSeconds | None
+) -> MetricResult:
     if shutil.which("npx") is None:
         return MetricResult(score=None, details={"tool": "eslint", "reason": "npx not on PATH"})
     timeout = _timeout(180, remaining_s)
@@ -199,6 +292,45 @@ def _js_ts(workspace: Path, files: list[str], remaining_s: RemainingSeconds | No
         score=_clamp(1.0 - (errors / loc) / _LINT_VIOLATIONS_PER_LOC_FLOOR),
         details={"tool": "eslint", "issues": errors, "loc": loc},
     )
+
+
+def _c_family(lang: str) -> Callable[[Path, list[str], RemainingSeconds | None], MetricResult]:
+    checks = cfamily.QUALITY_CHECKS + (
+        "," + cfamily.QUALITY_CHECKS_CPP_EXTRA if lang == "cpp" else ""
+    )
+
+    def analyze(
+        workspace: Path, files: list[str], remaining_s: RemainingSeconds | None
+    ) -> MetricResult:
+        timeout = _timeout(300, remaining_s)
+        if timeout is None:
+            return MetricResult(
+                score=None, details={"tool": "clang-tidy", "reason": "run budget exceeded"}
+            )
+        result = cfamily.run_clang_tidy(
+            workspace, files, lang, checks, timeout, cfamily.QUALITY_CONFIG
+        )
+        if result is None:
+            return MetricResult(
+                score=None,
+                details={"tool": "clang-tidy", "reason": "clang-tidy not found or timed out"},
+            )
+        loc = sum(_loc(workspace / f) for f in files if (workspace / f).exists()) or 1
+        issues = len(result.findings)
+        score = _clamp(1.0 - (issues / loc) / _LINT_VIOLATIONS_PER_LOC_FLOOR)
+        return MetricResult(
+            score=score,
+            details={
+                "tool": "clang-tidy",
+                "tool_version": result.version,
+                "issues": issues,
+                "checks": sorted({f.check for f in result.findings}),
+                "compile_errors": result.compile_errors,
+                "loc": loc,
+            },
+        )
+
+    return analyze
 
 
 def _go(workspace: Path, files: list[str], remaining_s: RemainingSeconds | None) -> MetricResult:
@@ -290,6 +422,8 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
 
     loc = sum(_loc(workspace / f) for f in files if (workspace / f).exists()) or 1
 
+    changed_abs = {str((workspace / f).resolve()) for f in files if (workspace / f).exists()}
+
     # --- cargo fmt --check (formatting) ---
     fmt_timeout = _timeout(120, remaining_s)
     fmt_bad = 0
@@ -303,8 +437,14 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
                 timeout=fmt_timeout,
                 check=False,
             )
-            # cargo fmt --check exits 1 when files need formatting; stderr lists them.
-            fmt_bad = sum(1 for ln in fmt_proc.stderr.splitlines() if ln.strip())
+            # cargo fmt --check exits 1 when files need formatting and prints one
+            # "Diff in <abs path>:<line>:" header per hunk on stdout. Count the
+            # hunks in the changed files.
+            for ln in fmt_proc.stdout.splitlines():
+                if ln.startswith("Diff in "):
+                    path = ln[len("Diff in ") :].rsplit(":", 2)[0]
+                    if str(Path(path).resolve()) in changed_abs:
+                        fmt_bad += 1
         except subprocess.TimeoutExpired:
             return MetricResult(
                 score=None, details={"tool": "cargo fmt+clippy", "reason": "cargo fmt timed out"}
@@ -317,7 +457,7 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
     if clippy_timeout is not None:
         try:
             clippy_proc = subprocess.run(
-                ["cargo", "clippy", "--message-format=json", "--no-deps", "--"],
+                ["cargo", "clippy", "--offline", "--message-format=json", "--no-deps", "--"],
                 cwd=workspace,
                 capture_output=True,
                 text=True,
@@ -328,10 +468,11 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
             return MetricResult(
                 score=None, details={"tool": "cargo fmt+clippy", "reason": "cargo clippy timed out"}
             )
+        # Cargo wraps each rustc/clippy diagnostic as reason "compiler-message";
+        # span file names are relative to the crate root. Spanless messages are
+        # summaries ("generated 3 warnings") and are not findings. An error-level
+        # message means the crate did not build.
         try:
-            changed_abs = {
-                str((workspace / f).resolve()) for f in files if (workspace / f).exists()
-            }
             for raw_line in clippy_proc.stdout.splitlines():
                 stripped = raw_line.strip()
                 if not stripped:
@@ -340,13 +481,19 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
                     msg = json.loads(stripped)
                 except json.JSONDecodeError:
                     continue
-                if msg.get("reason") != "diagnostic":
+                if msg.get("reason") != "compiler-message":
                     continue
-                spans = msg.get("message", {}).get("spans", [])
-                if not spans:
-                    clippy_warnings += 1
+                message = msg.get("message", {})
+                if message.get("level") == "error":
+                    clippy_ok = False
                     continue
-                if any(s.get("file_name") in changed_abs for s in spans):
+                if message.get("level") != "warning":
+                    continue
+                spans = message.get("spans", [])
+                if any(
+                    str((workspace / s.get("file_name", "")).resolve()) in changed_abs
+                    for s in spans
+                ):
                     clippy_warnings += 1
         except Exception:
             clippy_ok = False
@@ -360,6 +507,7 @@ def _rust(workspace: Path, files: list[str], remaining_s: RemainingSeconds | Non
         score=score,
         details={
             "tool": "cargo fmt+clippy",
+            "tool_version": cfamily.tool_version("cargo-clippy"),
             "loc": loc,
             "unformatted": fmt_bad,
             "clippy_warnings": clippy_warnings,
@@ -378,9 +526,12 @@ def _unsupported(
 # Per-language analyzer registry.
 _ANALYZERS = {
     "python": _python,
-    "typescript": _js_ts,
+    # TypeScript keeps the workspace's own ESLint (the pinned config has no TS parser).
+    "typescript": _typescript,
     "javascript": _js_ts,
     "go": _go,
     "java": _java,
     "rust": _rust,
+    "c": _c_family("c"),
+    "cpp": _c_family("cpp"),
 }

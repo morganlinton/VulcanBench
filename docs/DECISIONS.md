@@ -7,6 +7,67 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-26: Quality and security analyzers for JavaScript, Rust, C and C++
+
+### Decision
+
+The quality and security metrics now score JavaScript, C and C++ changes, and
+the Rust analyzers count what they claim to. Owner decision 2026-09-25: the
+private Routine v2 suite (five languages) gets the same four factors in every
+language ("full parity") rather than dropping factors outside Python.
+
+- **C and C++** (new): quality runs clang-tidy with a fixed check set
+  (bugprone, performance, cognitive complexity over 25, a few readability
+  checks); security runs the clang static analyzer's memory-safety and
+  insecure-API checks plus cppcheck. Include paths are every header
+  directory and its ancestors; `.h` is C++ when the change or workspace has
+  C++ sources. The harness line counter now counts C and C++ files.
+- **JavaScript**: quality and security run a pinned ESLint with the harness's
+  own config (`harness/data/eslint.config.mjs`): recommended rules plus a few
+  maintainability rules, and `eslint-plugin-security` without
+  `detect-object-injection`. Before this, quality needed an ESLint install in
+  the workspace and security ran only `npm audit`, so dependency-free JS
+  tasks scored neither. `npm audit` still runs when dependencies are declared.
+  TypeScript is unchanged (workspace ESLint and `npm audit`), because the
+  pinned config has no TypeScript parser.
+- **Rust quality fix**: the clippy parser read `reason == "diagnostic"`
+  (cargo emits `compiler-message`) and compared relative span paths with
+  absolute ones, and the fmt check read stderr (the diff is on stdout). No
+  clippy warning or formatting hunk was ever counted, so every Rust quality
+  score recorded before this change was 1.0 unless clippy failed outright.
+  Earlier Rust runs are not re-scored; any board that compares them with new
+  Rust runs must re-score both.
+- **Rust security**: `cargo audit` runs only when `Cargo.lock` lists an
+  external crate (it otherwise fetched its database over the network to
+  report zero), and the `unsafe` penalty counts only added, non-comment
+  lines instead of every occurrence in a changed file.
+
+The new JavaScript, C and C++ security scanners, and the Rust `unsafe`
+count, score only findings on lines the change added. On sanitizer-clean
+reference code the clang analyzer reported up to 8 false positives in
+untouched functions; a whole-file count would charge every run for them
+alike. Python's bandit stays whole-file because frozen Code quality
+protocols pin its behaviour. Quality stays a density over the changed files
+in every language, like ruff.
+
+Versions are pinned by `scripts/install_analyzers.sh` (ESLint 10.11.0,
+@eslint/js 10.0.1, eslint-plugin-security 4.0.1, cppcheck 2.22.0, LLVM 23)
+and each analyzer records its version in the run's score details.
+
+### Evidence
+
+Probe on the 35 Routine v2 reference fixes (2026-09-26): every language
+scored, no missing-tool reasons, no compile errors on admitted candidates.
+Quality 0.94 to 1.0 for JavaScript, Rust, C and C++; 0.84 to 0.92 for
+Python, whose composite also weighs complexity and maintainability index.
+Levels differ by language, so compare quality within a task or suite, not
+across languages. Checks that fired repeatedly on sanitizer-clean reference
+code were turned off and are listed in `harness/evaluator/cfamily.py`.
+
+### Revisit
+
+Any analyzer version bump or check-set change is a scoring change: log it here.
+
 ## 2026-09-25: GPT-6 Luna and Sol run on a pinned Codex CLI 0.155.0, ahead of Grok 4.7
 
 ### Decision

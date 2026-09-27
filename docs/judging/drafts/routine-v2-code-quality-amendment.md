@@ -74,8 +74,10 @@ five languages are judged on the same footing within Routine v2; this differs
 from v3.8 (Routine v1 included every Python file), which is one reason the two
 suites' Code quality is never compared.
 
-Size: on the 35 Routine v2 candidates the evidence without unchanged tests is
-52 to 83 KB (median 68 KB), about 3.5 times the Frontier v4 median of 19 KB.
+Size: on the Routine v2 reference fixes the frozen evidence (serialized, with
+the issue and patch) is 84 to 109 KB per submission, median about 90 KB, about
+4.7 times the Frontier v4 median of 19 KB (measured by the runner's dry run,
+September 26, 2026).
 `prepare` refuses to freeze a submission whose evidence exceeds 200 KB rather
 than truncating it, and the freeze record lists every evidence size.
 
@@ -217,7 +219,8 @@ separately.
 
 ## Runner and records
 
-`harness/maintenance_review_v3NN.py`, derived from the v3.14 runner, with:
+Built as `harness/maintenance_review_routine_v2.py` (renamed to the amendment
+number at freeze), derived from the v3.14 runner, with:
 the language-aware evidence builder; the controls, specification and
 verifier per language; per-language calibration stages and gate evaluation;
 the per-language eligibility rule in the summary; the protocol document
@@ -233,7 +236,9 @@ amendment text.
    passes; pin Prettier (JS formatter) alongside the pinned ESLint.
 3. Build the runner; offline tests for evidence, per-language gates and the
    eligibility rule; dry run on the Routine v2 reference fixes with fake
-   review scores, as v3.8 did.
+   review scores, as v3.8 did. Done September 26, 2026: 20 offline tests and
+   the dry run (`scripts/cii-v4-board/dry_run_routine_v2_judging.py`) pass.
+   While `DRAFT` is true the runner refuses every judge call.
 4. Freeze, calibrate both judges in all five languages.
 5. Judge the population after the Routine v2 sweep; publish aggregates only.
 

@@ -113,11 +113,46 @@ and cache, 1.5x output. Both models expose effort `none` to `max` in the
 API; Codex lists low to max for Luna and adds ultra for Sol, which stays
 blocked (`vulcanbench.toml`).
 
+### Operator stop, 2026-09-26: Luna Extra-high pacecore
+
+The Extra-high pacecore run (run dir
+`legacy-pacecore-binary-parity-67916795`) started 10:27 local, worked for
+two minutes, and went silent at 10:29 right after Codex logged
+"Reconnecting... 2/5 (stream disconnected before completion: Incomplete
+response returned, reason: max_output_tokens)". Codex never made the next
+reconnect attempt or gave up. At 11:57, after about 88 idle minutes, the
+operator stopped the Codex process, which the harness records as an
+infrastructure error and re-queues. Owner decision in chat: the retry
+counts, as a client or API failure under the retry convention, and the
+stall is disclosed on the column. The stalled attempt is kept in
+`runs-effort-gpt6-luna-operator-killed/extra-high/` and is not part of any
+cell. The harness does not flush `cli-agent-stream.jsonl` per event, so
+the stream file stayed empty while the run was live; diagnose Codex stalls
+from the process and the trace, not the stream size.
+
+### Timeouts in the combined score, 2026-09-28
+
+GPT-6 Luna hit the flat 3-hour bound six times, all while working (no idle
+gap over 4 minutes): extra-high depotcore and paddockcore; max cellarcore,
+depotcore, lodgecore and paddockcore. A timed-out run has no finished
+submission, so Code quality v3.16 cannot judge it and excludes it, as v3.15
+excluded Opus 5.5's incomplete high depotcore run. With four of 23 max runs
+excluded, all of them failures, the judged mean alone flatters the top
+levels. Owner decision in chat: publish both figures. The standard combined
+score (judged runs only, comparable with every other board column) stays
+the headline cell value, and beside it a second figure counts each
+timed-out run as a combined score of 0 over all 23 runs. Pass rates always
+count timeouts as failures. The card and report page label both figures
+and state the per-level judged n (23, 23, 23, 21, 19).
+
 ### Revisit when
 
 - the global Codex CLI is upgraded for another reason: record which
   columns ran on which version;
-- a GPT-6 Luna or Sol run fails in a way 0.153.4 columns never did.
+- a GPT-6 Luna or Sol run fails in a way 0.153.4 columns never did;
+- another model's column excludes more than one run per level: apply the
+  same two-figure rule.
+
 ## 2026-09-25: Verdict v2 gate caps the model under test, not the reference
 
 ### Decision

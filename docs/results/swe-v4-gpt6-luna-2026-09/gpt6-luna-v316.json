@@ -1,0 +1,80 @@
+{
+  "final": true,
+  "coverage": {
+    "submissions_with_both_reviews": 109,
+    "submissions_total": 109,
+    "submissions_with_probes": 109,
+    "per_panel_reviews": {
+      "muse": 109,
+      "grok": 109
+    },
+    "per_panel_probes": {
+      "muse": 95,
+      "grok": 95
+    },
+    "unpublished_invalid_probe": [],
+    "timeouts": [
+      {
+        "effort": "extra-high",
+        "task": "legacy-depotcore-binary-parity",
+        "duration_s": 10800.631,
+        "functional": 0.0
+      },
+      {
+        "effort": "extra-high",
+        "task": "legacy-paddockcore-binary-parity",
+        "duration_s": 10800.65,
+        "functional": 0.0
+      },
+      {
+        "effort": "max",
+        "task": "legacy-cellarcore-binary-parity",
+        "duration_s": 10800.638,
+        "functional": 0.0
+      },
+      {
+        "effort": "max",
+        "task": "legacy-depotcore-binary-parity",
+        "duration_s": 10800.656,
+        "functional": 0.0
+      },
+      {
+        "effort": "max",
+        "task": "legacy-lodgecore-binary-parity",
+        "duration_s": 10800.664,
+        "functional": 0.0
+      },
+      {
+        "effort": "max",
+        "task": "legacy-paddockcore-binary-parity",
+        "duration_s": 10800.611,
+        "functional": 0.0
+      }
+    ]
+  },
+  "headline": "Combined score 40.83 to 81.42 from low to max.",
+  "subtitle": "Best at max",
+  "best_effort": "max",
+  "expected_rows": {
+    "gpt6luna/low": 23,
+    "gpt6luna/medium": 23,
+    "gpt6luna/high": 23,
+    "gpt6luna/extra-high": 21,
+    "gpt6luna/max": 19
+  },
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "summary_sha256": "a4fe3c64c43a61cc8327fce6612ff9f2811c7dbdb6b2c776a89da9f6aa978ba9",
+  "protocol_sha256": "db301bf81db907d13e0ecfff98699951ad918c6b5d9674237fd4a5e73fee73a1",
+  "png_sha256": "f8e8e6481eca32b7f5c401a22905ab86c69b733d15baf29c955cb9ed9f535dca",
+  "supporting_table": "gpt6-luna-v316-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

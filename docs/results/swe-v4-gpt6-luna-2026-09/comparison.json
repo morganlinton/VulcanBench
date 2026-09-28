@@ -1,0 +1,4011 @@
+{
+ "cells": {
+  "gpt6luna/extra-high": 21,
+  "gpt6luna/high": 23,
+  "gpt6luna/low": 23,
+  "gpt6luna/max": 19,
+  "gpt6luna/medium": 23
+ },
+ "excluded": [
+  {
+   "duration_s": 10800.631,
+   "effort": "extra-high",
+   "finished": false,
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "reason": "Incomplete source run: /Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-depotcore-binary-parity-603ac003",
+   "run_id": "legacy-depotcore-binary-parity-603ac003",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "duration_s": 10800.65,
+   "effort": "extra-high",
+   "finished": false,
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "reason": "Incomplete source run: /Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-paddockcore-binary-parity-cd39bec2",
+   "run_id": "legacy-paddockcore-binary-parity-cd39bec2",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "duration_s": 10800.638,
+   "effort": "max",
+   "finished": false,
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "reason": "Incomplete source run: /Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-cellarcore-binary-parity-dac665b8",
+   "run_id": "legacy-cellarcore-binary-parity-dac665b8",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "duration_s": 10800.656,
+   "effort": "max",
+   "finished": false,
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "reason": "Incomplete source run: /Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-depotcore-binary-parity-b9f0eb37",
+   "run_id": "legacy-depotcore-binary-parity-b9f0eb37",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "duration_s": 10800.664,
+   "effort": "max",
+   "finished": false,
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "reason": "Incomplete source run: /Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-lodgecore-binary-parity-f8e2291a",
+   "run_id": "legacy-lodgecore-binary-parity-f8e2291a",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "duration_s": 10800.611,
+   "effort": "max",
+   "finished": false,
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "reason": "Incomplete source run: /Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-paddockcore-binary-parity-b7fd757a",
+   "run_id": "legacy-paddockcore-binary-parity-b7fd757a",
+   "task": "legacy-paddockcore-binary-parity"
+  }
+ ],
+ "levels": {
+  "gpt6luna": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "gpt6luna": "GPT-6 Luna in Codex"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": 0.049609,
+   "duration_s": 522.591,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:53:14.669164+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8304,
+   "reported_tokens": 3179691,
+   "run_id": "legacy-blendcore-binary-parity-27488805",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3179691,
+    "result_receipts": 1,
+    "stream_sha256": "6fb86cf80b79e3aab2fa331f526dfff931757b3bf400045cfb0338189c2f8b02",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3058944,
+     "input_tokens": 3162328,
+     "output_tokens": 17363,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-blendcore-binary-parity-27488805",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "660201c4c72a6c9d575bb6cd5239da04364b68f1fc4d7676d9ec682a7e1406c5",
+    "summary": "d08365fe3e24f9c8c7bb7c9875eed80f97926ebe6d64a21bd17aef33b5c803ba",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-26T02:44:32.069348+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.017143,
+   "duration_s": 225.888,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:18:49.822740+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7703,
+   "reported_tokens": 1002074,
+   "run_id": "legacy-cellarcore-binary-parity-5d4c9fca",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1002074,
+    "result_receipts": 1,
+    "stream_sha256": "b9712a659861af013ebf8b9b0693c03d8e9eff9213d4c0f5265ec512bf97d696",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 950272,
+     "input_tokens": 995924,
+     "output_tokens": 6150,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-cellarcore-binary-parity-5d4c9fca",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "868dcb1cd963c73edf56d6721434012f7c255886a0d9f6f19e10367f91d7c8b4",
+    "summary": "961e814ba6b5cfa9e4b68d8d55c082495a3021e5d3816bc0354b13e6304d4956",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-26T03:15:03.928431+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.01736,
+   "duration_s": 214.607,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:40:40.005025+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8286,
+   "reported_tokens": 997634,
+   "run_id": "legacy-codeccore-binary-parity-a57f3882",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 997634,
+    "result_receipts": 1,
+    "stream_sha256": "bb7893c964ea341a08be3585b4d686436450859bf1875073d8c1e96defe8486f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 946688,
+     "input_tokens": 990638,
+     "output_tokens": 6996,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-codeccore-binary-parity-a57f3882",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "bbc6389faae34b1a82f7227cb45dd08cd96cf801f1f9478f475cbfd6c3e4e057",
+    "summary": "fb5dd11c671582f20584290bba952f879c2d12790e97d627567229cb344bab26",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-26T01:37:05.391555+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.049437,
+   "duration_s": 435.542,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:08:38.593701+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7563,
+   "reported_tokens": 3070287,
+   "run_id": "legacy-depotcore-binary-parity-b9ef82a9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3070287,
+    "result_receipts": 1,
+    "stream_sha256": "69a2d547bd248bb21587af9fa1dbe8ff12c55eb2fe96439bd0132902625055cb",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2931456,
+     "input_tokens": 3054689,
+     "output_tokens": 15598,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-depotcore-binary-parity-b9ef82a9",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "e031df91c5046679aed7b98fd80e53cfdc50b9dd9a520ce251b0c33c1bbaaf01",
+    "summary": "51e08b3486a2c2517ce23207c9912fd5b742bb4f2c59ac9baa1068060ae58b1d",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-26T03:01:23.043126+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.020316,
+   "duration_s": 200.505,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:37:05.240600+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8342,
+   "reported_tokens": 1058447,
+   "run_id": "legacy-freightcore-binary-parity-97125b2f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1058447,
+    "result_receipts": 1,
+    "stream_sha256": "92e4e069103bf76656dd021b36804bc50b800f20200a054b0533d6bfba834dc3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 980224,
+     "input_tokens": 1051718,
+     "output_tokens": 6729,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-freightcore-binary-parity-97125b2f",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "4d9eb74b7b47b60eae949cb7d9ae982f63d868f790a5f0f4d69fa97c8c659f95",
+    "summary": "154bc2d9ba93d5d931f559e9293e5d4ae9236610aa6239aa6302db33f27ae3d7",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-26T01:33:44.728481+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.014708,
+   "duration_s": 216.214,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:01:22.906240+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7309,
+   "reported_tokens": 755659,
+   "run_id": "legacy-granarycore-binary-parity-b01ce04e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 755659,
+    "result_receipts": 1,
+    "stream_sha256": "72a5a6f08f3ac6e76c17c7d9f9e6fb4b47141deecd4d68bc6727d3cad84a212c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 710400,
+     "input_tokens": 747965,
+     "output_tokens": 7694,
+     "reasoning_output_tokens": 284
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-granarycore-binary-parity-b01ce04e",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "6d4483b578baa9cc71c91fa85053382b31e86d091f933d13112ed06599df63f5",
+    "summary": "6ac6887816d857c595cbb007dc9ed239e756521df2a660b22828e2dfb08bc000",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-26T02:57:46.685680+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.010395,
+   "duration_s": 145.429,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:15:31.752212+00:00",
+   "functional": 0.125,
+   "model": "gpt6luna",
+   "quality": 0.8359,
+   "reported_tokens": 537351,
+   "run_id": "legacy-hedgecore-binary-parity-e2f8f784",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 537351,
+    "result_receipts": 1,
+    "stream_sha256": "89d4207f4b24d70990ba0f715278b22f3daeab8f543feb34a22367be64dc8403",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 503296,
+     "input_tokens": 532460,
+     "output_tokens": 4891,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-hedgecore-binary-parity-e2f8f784",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "b487e62758122253cc3d763bbec052aa7cf95b61e4faf0a8b27041e7400c44f8",
+    "summary": "14697d0fda66e7dbd6301a274558dfccf0a4f57a2df661ed57da26a2610df88f",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-26T02:13:06.317410+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.033511,
+   "duration_s": 385.013,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:15:03.761618+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7647,
+   "reported_tokens": 1808247,
+   "run_id": "legacy-lodgecore-binary-parity-6a5d1012",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1808247,
+    "result_receipts": 1,
+    "stream_sha256": "f5523a838accdcb5ad55f303c78081219bab39e27f33a4ef6e460e16265d7539",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1696768,
+     "input_tokens": 1794758,
+     "output_tokens": 13489,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-lodgecore-binary-parity-6a5d1012",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "8117978d7d916272bfd0ac99a449548ec48232b4ff09d0dfc0ccb18d5359426b",
+    "summary": "c5b63f58d5270309aa790ca1381f526d32221aac6ca1a84798cda72080873d27",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-26T03:08:38.739419+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.015192,
+   "duration_s": 203.39,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:20:51.544722+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7929,
+   "reported_tokens": 673784,
+   "run_id": "legacy-matchcore-order-book-parity-e0e5bad8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 673784,
+    "result_receipts": 1,
+    "stream_sha256": "e44dd54dc9b659b1f7b5ae5f2fe155bb22aaa2a8abdc630dbb7b1f6524c00e42",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 610048,
+     "input_tokens": 666989,
+     "output_tokens": 6795,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-matchcore-order-book-parity-e0e5bad8",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "bc21d8b27d075ba7ab72c24b9d7e8785428478b738e32995fb013e74ab0feca3",
+    "summary": "02e08e54bb93dfcdb79d0ca40b816c9e0127607716785a10a2bc1193053e97ff",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-26T01:17:28.148856+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.009959,
+   "duration_s": 132.603,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:33:44.565392+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8455,
+   "reported_tokens": 418654,
+   "run_id": "legacy-metercore-binary-parity-3b7eab12",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 418654,
+    "result_receipts": 1,
+    "stream_sha256": "490a765a4e2ad2cb20a481ba99a4cb98b366ecdf2ac92810ed91ea0339426600",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 372480,
+     "input_tokens": 414611,
+     "output_tokens": 4043,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-metercore-binary-parity-3b7eab12",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "46f2a5a811411997760d8db8b046ad0ca4dbfaa3e5019317b07e8e4400407625",
+    "summary": "3632f5b3b9eef80df11308762ee48c3b9a18d2c96d077fd1c7e898936e1f9e96",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-26T01:31:31.957380+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.174544,
+   "duration_s": 1075.972,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:44:31.912330+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8069,
+   "reported_tokens": 13139802,
+   "run_id": "legacy-pacecore-binary-parity-bc118842",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 13139802,
+    "result_receipts": 1,
+    "stream_sha256": "6b0db94b4c950853923fe2bdd35f7d2941658d2b4ededf8acca58390a1dfe911",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 12845824,
+     "input_tokens": 13098081,
+     "output_tokens": 41721,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-pacecore-binary-parity-bc118842",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "4fdbe7f807997826db68b35f2976aca60862595c62d27ce9a706c7a800c4aa3c",
+    "summary": "8b2e5e2e804a774bf76972f40d6d6432fe6ddc4a1dc815308f95e1a04a45f3a4",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-26T02:26:35.924249+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.016726,
+   "duration_s": 207.822,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:22:17.815537+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.6676,
+   "reported_tokens": 929587,
+   "run_id": "legacy-paddockcore-binary-parity-2fad0cd1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 929587,
+    "result_receipts": 1,
+    "stream_sha256": "d6126a46b562915d576d7e966d0d03cfdef0fcacbd0215a2fa1a57ee905d39da",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 877056,
+     "input_tokens": 922831,
+     "output_tokens": 6756,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-paddockcore-binary-parity-2fad0cd1",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "49d1b962901c9b4ac955c0115fe98947acf067350bca5c2b059069012735c720",
+    "summary": "048a4ac0712d2ac8cb52dc0e4033d0ddadee1569be5b9b769e632c6d65add7b9",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-26T03:18:49.988301+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.037416,
+   "duration_s": 430.185,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:31:31.776990+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.825,
+   "reported_tokens": 2366272,
+   "run_id": "legacy-payrollcore-binary-parity-012037e6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2366272,
+    "result_receipts": 1,
+    "stream_sha256": "d698ae1ddd68ca487af55eb01b4a72cf9cb50063543f9f1a3bbd62bb478461bd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2275072,
+     "input_tokens": 2352410,
+     "output_tokens": 13862,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-payrollcore-binary-parity-012037e6",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "bf111bc17686331e753ca334ebcf812e2524d7fc0afbea71b2057af393703ec8",
+    "summary": "9400aae09ae6d97830ceccb361875001f5510ad349b5f5554726f1d4676ef5a6",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-26T01:24:21.581337+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.013268,
+   "duration_s": 209.713,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:24:21.432184+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8225,
+   "reported_tokens": 673751,
+   "run_id": "legacy-qlite-store-parity-0908379f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 673751,
+    "result_receipts": 1,
+    "stream_sha256": "b41fea5218e259d7004feb330f0a76b718e96c6af0bd5c9332418e84e42e3cd3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 629760,
+     "input_tokens": 667323,
+     "output_tokens": 6428,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-qlite-store-parity-0908379f",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "2e098a08f4a447b888d17d2b007c4e172363d7dcd4adb018de3953a4649a6f71",
+    "summary": "e25034147188dcf7b6f7190d07d19151434093fb655e86dc52c24a90c48fad04",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-26T01:20:51.707260+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.006385,
+   "duration_s": 155.372,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:13:06.174543+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8191,
+   "reported_tokens": 260248,
+   "run_id": "legacy-queuecore-binary-parity-dffebfc7",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 260248,
+    "result_receipts": 1,
+    "stream_sha256": "5f63b6a25a112804a51981481fec4e9f761668dc6df43a004259bfc0e5692d63",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 235008,
+     "input_tokens": 256471,
+     "output_tokens": 3777,
+     "reasoning_output_tokens": 1120
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-queuecore-binary-parity-dffebfc7",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "992af8447415f5a1211d1fc2fdbae71c422913643df21518e6ba10d474ebaf27",
+    "summary": "4ae76c5fbc4e3e6d77fe16b17896e090ea77b65ccc144e13770c72dfc3a531b3",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-26T02:10:30.797988+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.055429,
+   "duration_s": 1365.103,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:03:25.253518+00:00",
+   "functional": 0.7,
+   "model": "gpt6luna",
+   "quality": 0.8045,
+   "reported_tokens": 2590662,
+   "run_id": "legacy-quotacore-binary-parity-4d295df2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2590662,
+    "result_receipts": 1,
+    "stream_sha256": "5e423b9221df84c4ca959f7415e8177d30ccf1e3c906fd06a74c4b7a10045d5a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2410752,
+     "input_tokens": 2557337,
+     "output_tokens": 33325,
+     "reasoning_output_tokens": 17027
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-quotacore-binary-parity-4d295df2",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "63aa574b3736e38bddde460f30047e876e4a1074887b040f001161125548a5b4",
+    "summary": "cc11ee1202f261146304613129e73604da7e14db1599ba71ddf5b7e9ac8c4f21",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-26T01:40:40.143037+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.018944,
+   "duration_s": 336.302,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:24:03.334746+00:00",
+   "functional": 0.375,
+   "model": "gpt6luna",
+   "quality": 0.8471,
+   "reported_tokens": 780598,
+   "run_id": "legacy-reflowcore-binary-parity-3eeb077e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 780598,
+    "result_receipts": 1,
+    "stream_sha256": "79760f40729219b40d8cdaf527c627c7dfdc0f6e5fd39df416a9628e7a39a142",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 711680,
+     "input_tokens": 768260,
+     "output_tokens": 12338,
+     "reasoning_output_tokens": 5087
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-reflowcore-binary-parity-3eeb077e",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "fddd7de6c4320fab38c11e53e3f50721e8b3e67ea591865d44a942158e376b08",
+    "summary": "ff7ceef619543d3ecffea9531320e6c62cd5ae64b2d4442b25e1ed5d0d490bce",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-26T02:18:27.027178+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.012243,
+   "duration_s": 174.979,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:18:26.882352+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7594,
+   "reported_tokens": 587475,
+   "run_id": "legacy-schedcore-binary-parity-fbe53534",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 587475,
+    "result_receipts": 1,
+    "stream_sha256": "e8da7486a03cbd878100320a5c7e955605cb28f25efc037a9d7640a96dac1df4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 545024,
+     "input_tokens": 581106,
+     "output_tokens": 6369,
+     "reasoning_output_tokens": 133
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-schedcore-binary-parity-fbe53534",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "f0ddd5d64c6021718a6564caa24fe6440a36055a67f3d23c89dd557fce9beba8",
+    "summary": "7d0d25087e854021878586163eb14463ecc026bf968e72f4745555fb4d6de4af",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-26T02:15:31.896631+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.011983,
+   "duration_s": 183.081,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T01:17:27.998502+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8041,
+   "reported_tokens": 575264,
+   "run_id": "legacy-settlecore-binary-parity-f2a71056",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 575264,
+    "result_receipts": 1,
+    "stream_sha256": "2748f54e27334f4944647d7f0c9dd307b4c193060fbc07411cd7da16cddcfe3e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 533760,
+     "input_tokens": 569027,
+     "output_tokens": 6237,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-settlecore-binary-parity-f2a71056",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "d181e6dc837c211a79095d486ee94060d41a6d3a7944c80c77654df07dbf8e90",
+    "summary": "ae5a0d7d840548cec93f3c636d7bd32f6e37e572a197601a1e399679e32200eb",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-26T01:14:24.910988+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.013213,
+   "duration_s": 225.379,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:07:10.780374+00:00",
+   "functional": 0.2,
+   "model": "gpt6luna",
+   "quality": 0.8354,
+   "reported_tokens": 627298,
+   "run_id": "legacy-snapcore-binary-parity-0a05b45b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 627298,
+    "result_receipts": 1,
+    "stream_sha256": "e2d0980b6ef449288893212489fb02e2f52ed26d25b09514068e47a6fbf37a41",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 582656,
+     "input_tokens": 619993,
+     "output_tokens": 7305,
+     "reasoning_output_tokens": 2752
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-snapcore-binary-parity-0a05b45b",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "51cfd105c7ff7bc4e6cb9fb5f1c3b50a2d6602f36b12330d3bee880e8d8d3124",
+    "summary": "dce1fdca3990e106c219c81253bf0504881ad54cff412a68f5a79fbcb3cda88f",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-26T02:03:25.395654+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.016329,
+   "duration_s": 271.704,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:57:46.525423+00:00",
+   "functional": 0.3333,
+   "model": "gpt6luna",
+   "quality": 0.8208,
+   "reported_tokens": 772645,
+   "run_id": "legacy-stampcore-binary-parity-8a772256",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 772645,
+    "result_receipts": 1,
+    "stream_sha256": "e8cb3d9031f0837008cdd2da9c1778b67187e715314052c7b9e7277819d970d7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 719616,
+     "input_tokens": 763069,
+     "output_tokens": 9576,
+     "reasoning_output_tokens": 3184
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-stampcore-binary-parity-8a772256",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "99f3ef2a6beb6a422f12cf935fca592fe3fe6c46e7e1d34ae82db2fd4db109c2",
+    "summary": "b00baff879b2f807a1b596185b0070f34ad3cf50d6d8b7f851b65734275ad3ae",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-26T02:53:14.814914+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.010851,
+   "duration_s": 152.3,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:26:35.783155+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8437,
+   "reported_tokens": 479611,
+   "run_id": "legacy-tallycore-binary-parity-9a1c1c50",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 479611,
+    "result_receipts": 1,
+    "stream_sha256": "c4fa884fd38a9cc437b8335fee03e51c81086281ecee16a8debf31c94484e9f8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 434688,
+     "input_tokens": 474581,
+     "output_tokens": 5030,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-tallycore-binary-parity-9a1c1c50",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "cdcde09a60bb5e6dafb437ab38ee78432de51aebeec05f774e698c72596b532b",
+    "summary": "6965cce914334e99e7eec811d42c47405b4451ade195cb2f73f930e883c0642e",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-26T02:24:03.477618+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.01422,
+   "duration_s": 199.743,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-09-26T02:10:30.663935+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8491,
+   "reported_tokens": 766143,
+   "run_id": "legacy-vaultcore-binary-parity-a5b429a1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 766143,
+    "result_receipts": 1,
+    "stream_sha256": "1a8e8d54928ab59603609f719e5d2c84c7f82504ce5949c377d8a2dd9d55f4ba",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 721152,
+     "input_tokens": 759869,
+     "output_tokens": 6274,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/low/legacy-vaultcore-binary-parity-a5b429a1",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "873a540893313a06be943f3b94d9a4f331a145372969f58ff4a18a897b11f716",
+    "summary": "1af5772ab77abe809ca233468f5e3fe53ca2cfeeecf3b4b3e8f3b10c1f7911de",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-26T02:07:10.915214+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.018988,
+   "duration_s": 268.488,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:27:07.809705+00:00",
+   "functional": 0.1111,
+   "model": "gpt6luna",
+   "quality": 0.8373,
+   "reported_tokens": 759578,
+   "run_id": "legacy-blendcore-binary-parity-45bfebcf",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 759578,
+    "result_receipts": 1,
+    "stream_sha256": "d57f795eee191f824e73b165576570e9da72df1e364fa398af0cd9759aae9a70",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 672000,
+     "input_tokens": 750802,
+     "output_tokens": 8776,
+     "reasoning_output_tokens": 2532
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-blendcore-binary-parity-45bfebcf",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "e4986388cfa2c733bf10bf6d00557354d5f9fc3ee385f06792c192c662795b2d",
+    "summary": "0ac8af9c7f2ab474c7f88442d210dd5288b2a2b2c71197fccd75bbdfc3cc8598",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-26T04:22:39.315167+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.007978,
+   "duration_s": 157.504,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:42:08.573190+00:00",
+   "functional": 0.1429,
+   "model": "gpt6luna",
+   "quality": 0.7603,
+   "reported_tokens": 371480,
+   "run_id": "legacy-cellarcore-binary-parity-c7ef54aa",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 371480,
+    "result_receipts": 1,
+    "stream_sha256": "e0691212ecc48b3c1ab33c17909f2495f5ac6ce6dc5918993abfe37fb64b4fd8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 341760,
+     "input_tokens": 367508,
+     "output_tokens": 3972,
+     "reasoning_output_tokens": 1315
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-cellarcore-binary-parity-c7ef54aa",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "2e6954f0914a5d1e372534e3366b0d90f8b11c07e0969d93c8d29240808d5c38",
+    "summary": "ab547189535a1e8e98f976e4c124a28323a2f61462140ccacc4860d04f971417",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-26T04:39:31.063633+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.010108,
+   "duration_s": 181.508,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:53:55.736568+00:00",
+   "functional": 0.1,
+   "model": "gpt6luna",
+   "quality": 0.8275,
+   "reported_tokens": 470848,
+   "run_id": "legacy-codeccore-binary-parity-f00286f8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 470848,
+    "result_receipts": 1,
+    "stream_sha256": "aa1441a5df6c792a4d51bc34ef8b3d0d4a1564ddd0296fde0ac3fe9da20f9d70",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 435712,
+     "input_tokens": 465255,
+     "output_tokens": 5593,
+     "reasoning_output_tokens": 1923
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-codeccore-binary-parity-f00286f8",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "7d27bd78d2808f4665978362f24c0364e310676345a3646ce101482d60f6231e",
+    "summary": "8d1c2e6038007c14f4fc0d0b06ef7a6fc8bfa1466dd4071d8c9947afc71db2ce",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-26T03:50:54.223515+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.008918,
+   "duration_s": 254.457,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:36:13.634463+00:00",
+   "functional": 0.2143,
+   "model": "gpt6luna",
+   "quality": 0.7625,
+   "reported_tokens": 366532,
+   "run_id": "legacy-depotcore-binary-parity-2913bd1c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 366532,
+    "result_receipts": 1,
+    "stream_sha256": "71ee90d0b9ce08dba826bbf164086e8406b133cfa0a5e2be706e56872ef406f7",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 326144,
+     "input_tokens": 362488,
+     "output_tokens": 4044,
+     "reasoning_output_tokens": 1699
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-depotcore-binary-parity-2913bd1c",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "48bef270dde7781319ba12025a86b7d2718d0bf68dead5f8a49a667c01c450c7",
+    "summary": "6b916757683a96da595c1a3a7598ee0788d51acf28dd6a6e2f6a685bfbb55332",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-26T04:31:59.171674+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.011344,
+   "duration_s": 439.084,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:50:54.078735+00:00",
+   "functional": 0.1111,
+   "model": "gpt6luna",
+   "quality": 0.8325,
+   "reported_tokens": 457213,
+   "run_id": "legacy-freightcore-binary-parity-d7e2186b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 457213,
+    "result_receipts": 1,
+    "stream_sha256": "6070690fd57419d265b3dc9a580585ed1bf77611e1c7d7bcb82a43aae753bf22",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 414464,
+     "input_tokens": 449902,
+     "output_tokens": 7311,
+     "reasoning_output_tokens": 3645
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-freightcore-binary-parity-d7e2186b",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "dcb7733bfe9dc4fda693c06efef0413f84a48fea7c826915ce190035e0370cda",
+    "summary": "3e78fb921b51783afe4e678edcfe76471917618f6dae8e8b919ea10cf2d968e3",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-26T03:43:34.989509+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.008089,
+   "duration_s": 158.154,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:31:59.015402+00:00",
+   "functional": 0.1429,
+   "model": "gpt6luna",
+   "quality": 0.7393,
+   "reported_tokens": 404430,
+   "run_id": "legacy-granarycore-binary-parity-6101613c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 404430,
+    "result_receipts": 1,
+    "stream_sha256": "d188f371e50367b91c47f325eba01916d5c01879dddc1fc1dd72a5095bee9241",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 376832,
+     "input_tokens": 400529,
+     "output_tokens": 3901,
+     "reasoning_output_tokens": 1686
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-granarycore-binary-parity-6101613c",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "9a07823643711bc04dd1d25a5ee03cf08a8e6bb49e6ca831a6b1963df71d3f32",
+    "summary": "7e27747bd5ec56fdc492ef0a016a7625a9ee46501fea0f48053488d872fbc045",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-26T04:29:20.856708+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.00836,
+   "duration_s": 188.886,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:10:18.437874+00:00",
+   "functional": 0.125,
+   "model": "gpt6luna",
+   "quality": 0.8336,
+   "reported_tokens": 385269,
+   "run_id": "legacy-hedgecore-binary-parity-8cea6fa0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 385269,
+    "result_receipts": 1,
+    "stream_sha256": "02db0f15d4e025b2aeb9730b9c41d2385e0d8af753d808570675769130d8acf5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 355328,
+     "input_tokens": 380738,
+     "output_tokens": 4531,
+     "reasoning_output_tokens": 1862
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-hedgecore-binary-parity-8cea6fa0",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "1bc027ea1900cbd4d31a93256e09cf81e9b06f041ebc37caac6a9b8b30a17d82",
+    "summary": "a0155d6633740386fcd932edf46202d6209890f910199eaca45bdf50e5cda4dc",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-26T04:07:09.547392+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.009519,
+   "duration_s": 197.113,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:39:30.913854+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7613,
+   "reported_tokens": 434495,
+   "run_id": "legacy-lodgecore-binary-parity-2b14e513",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 434495,
+    "result_receipts": 1,
+    "stream_sha256": "2ac16131957aab62e06342df8c7666bb2f2af08febdb882d069b641970180305",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 400384,
+     "input_tokens": 429235,
+     "output_tokens": 5260,
+     "reasoning_output_tokens": 2342
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-lodgecore-binary-parity-2b14e513",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "ba37e71e4732eed9e3047a34ef195bb5b750ab6bb976813d00316b96fd5fc3fb",
+    "summary": "41aa12a47e1b59136bee88296c4b94cc759cc8ce29301a38472b8942894f1ff3",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-26T04:36:13.795239+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.007143,
+   "duration_s": 128.086,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:29:10.828910+00:00",
+   "functional": 0.3333,
+   "model": "gpt6luna",
+   "quality": 0.7901,
+   "reported_tokens": 311663,
+   "run_id": "legacy-matchcore-order-book-parity-2da47b4a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 311663,
+    "result_receipts": 1,
+    "stream_sha256": "bd25916ae54814c83b81eb3fe64f00951426cf2edb68e86e844948f52398896b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 284672,
+     "input_tokens": 307670,
+     "output_tokens": 3993,
+     "reasoning_output_tokens": 1165
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-matchcore-order-book-parity-2da47b4a",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "7d57c54b0825a73f84a59c7f0aac1daec24860f4c3f3af5c3da2e15d967ea47c",
+    "summary": "1639bfb8dcda5ba6c1591ca64a59035f54d12058d77e6c93d7222d1f77c8d6c3",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-26T03:27:02.737885+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.006905,
+   "duration_s": 130.188,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:43:34.841217+00:00",
+   "functional": 0.2222,
+   "model": "gpt6luna",
+   "quality": 0.8465,
+   "reported_tokens": 295990,
+   "run_id": "legacy-metercore-binary-parity-6034db7c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 295990,
+    "result_receipts": 1,
+    "stream_sha256": "6f9608bf153d7510a87b6ae53473574eba4a1880eb168e2b99fd78847539bf90",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 270336,
+     "input_tokens": 291900,
+     "output_tokens": 4090,
+     "reasoning_output_tokens": 1481
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-metercore-binary-parity-6034db7c",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "ce190c5c533ce6a14c398091542c3c8eb8456f6babdef07effedff4d5e6bb519",
+    "summary": "509c714a0d0b982fa93afbb34b07a1f8bf486eb3fc4caa3c50a923fff23357a4",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-26T03:41:24.648533+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.011805,
+   "duration_s": 228.928,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:22:39.162356+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8327,
+   "reported_tokens": 475271,
+   "run_id": "legacy-pacecore-binary-parity-f7cf021d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 475271,
+    "result_receipts": 1,
+    "stream_sha256": "4fda51bf6f067e6d2808985ebd56f08db737eaafecf4c9b529453efe60ed0460",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 434944,
+     "input_tokens": 466714,
+     "output_tokens": 8557,
+     "reasoning_output_tokens": 3808
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-pacecore-binary-parity-f7cf021d",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "d838b041608a9ee90bc3a719a51aab610515ae981a090413f2778212813f0da0",
+    "summary": "7c2ca3a26cd8b885d665ffe83b3613eb53e5c1266f998a2947af7ce1b48e8975",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-26T04:18:50.229024+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.00711,
+   "duration_s": 127.46,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:44:16.198816+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.6822,
+   "reported_tokens": 281662,
+   "run_id": "legacy-paddockcore-binary-parity-ff9c23af",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 281662,
+    "result_receipts": 1,
+    "stream_sha256": "69e858484fec8506c7487b62e684a4570a56431ed398ece4cf9a61e923706e7f",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 248320,
+     "input_tokens": 278430,
+     "output_tokens": 3232,
+     "reasoning_output_tokens": 1366
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-paddockcore-binary-parity-ff9c23af",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "e5e7343868f763527103c432bf7f7e582b99ea37a57cf9d154c783347432cf4d",
+    "summary": "521cc6e8c691390908718493308aaac370f1ec0889f12e326ffc73fa44e9e46d",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-26T04:42:08.733861+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.01014,
+   "duration_s": 346.148,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:41:24.495452+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8297,
+   "reported_tokens": 430047,
+   "run_id": "legacy-payrollcore-binary-parity-61381abc",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 430047,
+    "result_receipts": 1,
+    "stream_sha256": "989d0e4a47fd20a2f0622f788f184f5049205f69823a24fd2aab09e94989aeed",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 394240,
+     "input_tokens": 423504,
+     "output_tokens": 6543,
+     "reasoning_output_tokens": 2454
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-payrollcore-binary-parity-61381abc",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "e321427b3d96740b15224e89f6d352b824d909ebc5d80457c6f0376cf9a38940",
+    "summary": "c4e287ac4935e32eefa63bc930a6b23e26bb0dd39af6c8aa26494af068dc4a15",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-26T03:35:38.342127+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.013671,
+   "duration_s": 387.195,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:35:38.184950+00:00",
+   "functional": 0.4444,
+   "model": "gpt6luna",
+   "quality": 0.794,
+   "reported_tokens": 480764,
+   "run_id": "legacy-qlite-store-parity-d7020273",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 480764,
+    "result_receipts": 1,
+    "stream_sha256": "162d462e36960b4cf152fc7b347039bbb570f7c050ef50892c763580bcc0f335",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 421632,
+     "input_tokens": 471911,
+     "output_tokens": 8853,
+     "reasoning_output_tokens": 2865
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-qlite-store-parity-d7020273",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "49e3873a295e3b3940c02bcb5812b1f2d59ed954d9fb6d858411a15960635e04",
+    "summary": "c6d420b98efb812f03a990a7ab8609a310b8269aac26ae269ce0aa8913c0d367",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-26T03:29:10.983125+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.008216,
+   "duration_s": 137.227,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:07:09.404596+00:00",
+   "functional": 0.25,
+   "model": "gpt6luna",
+   "quality": 0.8227,
+   "reported_tokens": 316925,
+   "run_id": "legacy-queuecore-binary-parity-299efd80",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 316925,
+    "result_receipts": 1,
+    "stream_sha256": "b71ae11e1d2c9d4f514b207a71857c7a14c1304639d2f1584f8247bb9dc84081",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 279296,
+     "input_tokens": 312775,
+     "output_tokens": 4150,
+     "reasoning_output_tokens": 1811
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-queuecore-binary-parity-299efd80",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "142e3ab7404567b50c2ec8af365bb4bd4aae396e517e209d447587bd52f87387",
+    "summary": "639a1c80b33cf9cd4a1585af27cddf20914ed19f758446a5070b83637c3ad729",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-26T04:04:52.173188+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.009891,
+   "duration_s": 211.11,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:57:27.001421+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8767,
+   "reported_tokens": 346699,
+   "run_id": "legacy-quotacore-binary-parity-e3c45445",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 346699,
+    "result_receipts": 1,
+    "stream_sha256": "3447d381ba7ab96d48d2eab30a9930df604530278b6c275c0b335686c5b0f4cd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 311040,
+     "input_tokens": 338661,
+     "output_tokens": 8038,
+     "reasoning_output_tokens": 4351
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-quotacore-binary-parity-e3c45445",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "fc7dd1330dc96d5724d9580fd928a65c585177ab8f766b5de90b91eb9389300e",
+    "summary": "de19d3cdf733e1ecb5ce85eee47a6b62f3a035142a2774af925f778765a71688",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-26T03:53:55.885935+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.007184,
+   "duration_s": 235.569,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:16:22.748402+00:00",
+   "functional": 0.125,
+   "model": "gpt6luna",
+   "quality": 0.852,
+   "reported_tokens": 316783,
+   "run_id": "legacy-reflowcore-binary-parity-28e1f023",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 316783,
+    "result_receipts": 1,
+    "stream_sha256": "62e0ad0ce6d8251bdaf8d030fc766fb7d7ba7a37b4b73e9d3df7d32e1db540c4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 287488,
+     "input_tokens": 313333,
+     "output_tokens": 3450,
+     "reasoning_output_tokens": 1151
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-reflowcore-binary-parity-28e1f023",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "24e22cc04c2f4b9f98e2d6df07bcc718564293b72d7f4e962ef1e8a352796f65",
+    "summary": "a35ee74942f977b85b1d31a1dce093fc3fe9e6e1010c0b22aca971836690f757",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-26T04:12:27.174694+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.006718,
+   "duration_s": 128.418,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:12:27.008831+00:00",
+   "functional": 0.375,
+   "model": "gpt6luna",
+   "quality": 0.7756,
+   "reported_tokens": 251747,
+   "run_id": "legacy-schedcore-binary-parity-a47df13d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 251747,
+    "result_receipts": 1,
+    "stream_sha256": "a027aa8254662aade87c9650f4ce468a8db581744659abe012f859eb056ec836",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 226048,
+     "input_tokens": 247028,
+     "output_tokens": 4719,
+     "reasoning_output_tokens": 1541
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-schedcore-binary-parity-a47df13d",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "e8c91dd8db687c2f70f51ce1e6b10886a05a33127aa0d655d9b7309cf5e746aa",
+    "summary": "646113bd5a14f331e410abc1c7a4b12b3c2cb9aa4fa3cdf6a4d2eafec57d60a5",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-26T04:10:18.585446+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.013542,
+   "duration_s": 281.73,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:27:02.586077+00:00",
+   "functional": 0.3,
+   "model": "gpt6luna",
+   "quality": 0.7965,
+   "reported_tokens": 577582,
+   "run_id": "legacy-settlecore-binary-parity-9c75d2db",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 577582,
+    "result_receipts": 1,
+    "stream_sha256": "8906cee3a2636381554439a110e52e744d89e470abdd3ae901d682d7a62c0ec1",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 529408,
+     "input_tokens": 569006,
+     "output_tokens": 8576,
+     "reasoning_output_tokens": 2906
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-settlecore-binary-parity-9c75d2db",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "9adce8d999ea32cd5e2bf649080edee7ce99af52032a4062cb8b138bba30b598",
+    "summary": "23f07c849a16887ebd10dfdb3f035acefa0a98968305b9d73315ab3007639b1f",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-26T03:22:20.849803+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.006874,
+   "duration_s": 132.985,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T03:59:40.136817+00:00",
+   "functional": 0.1,
+   "model": "gpt6luna",
+   "quality": 0.8456,
+   "reported_tokens": 309714,
+   "run_id": "legacy-snapcore-binary-parity-89d941ce",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 309714,
+    "result_receipts": 1,
+    "stream_sha256": "99eb9b9fb09671821bfe6aaef260ecd5cc9e6a2a88109ddf7939d036f003f8a4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 283648,
+     "input_tokens": 306136,
+     "output_tokens": 3578,
+     "reasoning_output_tokens": 850
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-snapcore-binary-parity-89d941ce",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "8174b390927648ec57917bea933a64819e542ca01ca38e9b9c5edcc1b6bce323",
+    "summary": "0ef33481600179e6fa7b195261d9749aefc2a57ea13304aac32339c0c950f45e",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-26T03:57:27.145835+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.008096,
+   "duration_s": 132.729,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:29:20.699613+00:00",
+   "functional": 0.2222,
+   "model": "gpt6luna",
+   "quality": 0.8317,
+   "reported_tokens": 380345,
+   "run_id": "legacy-stampcore-binary-parity-df0cf94a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 380345,
+    "result_receipts": 1,
+    "stream_sha256": "68c644d40982bc953d5d720a53911eaa79460c0726dbb6943ad0a8d291b65ce5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 350720,
+     "input_tokens": 376280,
+     "output_tokens": 4065,
+     "reasoning_output_tokens": 1618
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-stampcore-binary-parity-df0cf94a",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "a8456c9819bbac6de46c112065a1caf8e2e0ada892a73ea579accaa4ec9328f1",
+    "summary": "55668294843fb83c8c59387be563c5b9b2760ee27850d9564931405bc318a5ea",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-26T04:27:07.965550+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.007223,
+   "duration_s": 147.177,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:18:50.072422+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8503,
+   "reported_tokens": 338720,
+   "run_id": "legacy-tallycore-binary-parity-3b72b18c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 338720,
+    "result_receipts": 1,
+    "stream_sha256": "20e84881cfb7392386f20e0a737b735dfecd338e1114b7cedf76cbf7a4c9db7b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 311808,
+     "input_tokens": 335186,
+     "output_tokens": 3534,
+     "reasoning_output_tokens": 1357
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-tallycore-binary-parity-3b72b18c",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "3f6d897ffba876ed6a7505455b080e8c0f51cf7961f1f100b85dbba0f4a5fde0",
+    "summary": "041c12f55db31c6af9a82dee54cca33b14727af0e0addd0a202dbacc6b26f2f2",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-26T04:16:22.891136+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.011473,
+   "duration_s": 311.727,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:04:52.009435+00:00",
+   "functional": 0.1111,
+   "model": "gpt6luna",
+   "quality": 0.8456,
+   "reported_tokens": 535063,
+   "run_id": "legacy-vaultcore-binary-parity-16ba5f66",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 535063,
+    "result_receipts": 1,
+    "stream_sha256": "ef767845f5752212e7755c300be42cbe2e4ed2257234193a9e9d65b308b02ffd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 495872,
+     "input_tokens": 528576,
+     "output_tokens": 6487,
+     "reasoning_output_tokens": 2298
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/medium/legacy-vaultcore-binary-parity-16ba5f66",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "f2814a11373d9643ef928627c59fe8108a7ff44429904376153e8ba85c939cf9",
+    "summary": "a951ae4bdf1ad247225d1680c28e7089a5abacc3b3ca0208eb4ba51f90ea48d6",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-26T03:59:40.277267+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.038746,
+   "duration_s": 635.553,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T09:12:56.965139+00:00",
+   "functional": 0.3333,
+   "model": "gpt6luna",
+   "quality": 0.8281,
+   "reported_tokens": 1861780,
+   "run_id": "legacy-blendcore-binary-parity-0eb7b53e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1861780,
+    "result_receipts": 1,
+    "stream_sha256": "0858f924019c8cab5d722d4a3884caabac547770739a1cf65107c61ad4ea7597",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1759232,
+     "input_tokens": 1834533,
+     "output_tokens": 27247,
+     "reasoning_output_tokens": 17524
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-blendcore-binary-parity-0eb7b53e",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "0e7fcab551167aa3954a08628794c49ad1ad092a057c59031f65077ab07fab18",
+    "summary": "31f5968dc341c9153f411011641b314b955f16a4bf0399b406cff399934415ef",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-26T09:02:21.405468+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.111293,
+   "duration_s": 1480.147,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T10:35:20.234808+00:00",
+   "functional": 0.3571,
+   "model": "gpt6luna",
+   "quality": 0.7679,
+   "reported_tokens": 6538676,
+   "run_id": "legacy-cellarcore-binary-parity-764fcd38",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6538676,
+    "result_receipts": 1,
+    "stream_sha256": "c8312497c93d7bfd66ae747e93fa0a21b9ac3fe817bd5e0dccd4fbd7669142fc",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6313728,
+     "input_tokens": 6474524,
+     "output_tokens": 64152,
+     "reasoning_output_tokens": 41254
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-cellarcore-binary-parity-764fcd38",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "044fd6b17d0ab4417a823d2b2496981f73742aa538120106dd3502e34735648e",
+    "summary": "173621a7a856f186766c9acadbe2b5bc9bd73596d14c26cd778113cb91690e65",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-26T10:10:40.077139+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.023237,
+   "duration_s": 447.936,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T06:19:29.483762+00:00",
+   "functional": 0.3,
+   "model": "gpt6luna",
+   "quality": 0.8224,
+   "reported_tokens": 840729,
+   "run_id": "legacy-codeccore-binary-parity-6d1b427e",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 840729,
+    "result_receipts": 1,
+    "stream_sha256": "d7834dee8d6e5c42df84b8712ddf2162144d36d63a1096f4e0902d702cafc73b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 767488,
+     "input_tokens": 820135,
+     "output_tokens": 20594,
+     "reasoning_output_tokens": 13436
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-codeccore-binary-parity-6d1b427e",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "6c8b7fff67be27b7df7b7765212294bba533a4a2627728a4085293ae352a7236",
+    "summary": "3e271e1eba4de8fe8c13fff47f535c0ca41df3e6723cfcff4cdbce2775f0b0fa",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-26T06:12:01.541695+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.050605,
+   "duration_s": 800.884,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T09:47:35.546705+00:00",
+   "functional": 0.5,
+   "model": "gpt6luna",
+   "quality": 0.7557,
+   "reported_tokens": 2469895,
+   "run_id": "legacy-depotcore-binary-parity-37d52e59",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2469895,
+    "result_receipts": 1,
+    "stream_sha256": "e8904b6f904868b22ec9512e1cd67be46222ef24c07338f493a6f895f308c458",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2341632,
+     "input_tokens": 2433988,
+     "output_tokens": 35907,
+     "reasoning_output_tokens": 23431
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-depotcore-binary-parity-37d52e59",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "7d80775f6689bbbc6ed207117a56557db3f70296ce570bfd57decc1c546eb83b",
+    "summary": "620c585e0a27cf599c9522fa538aced50a86e5bd5720b0448cb396dd77d0492b",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-09-26T09:34:14.654344+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.064798,
+   "duration_s": 1211.306,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T06:12:01.408515+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.8044,
+   "reported_tokens": 3420758,
+   "run_id": "legacy-freightcore-binary-parity-f62038c3",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3420758,
+    "result_receipts": 1,
+    "stream_sha256": "320c66da20299dcc0469676596a5e024800ea2c11a55b297b247ff40da3663fa",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3266560,
+     "input_tokens": 3378977,
+     "output_tokens": 41781,
+     "reasoning_output_tokens": 23240
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-freightcore-binary-parity-f62038c3",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "f8b20e7e4ddaddea9570e515b117abefe2bd28e717efac3a8993140683fde5f9",
+    "summary": "1a48fcb3d971cbc5e39970bbcef1f585d866b0b283e4fde5885e93b8381d1108",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-26T05:51:50.094293+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.037437,
+   "duration_s": 575.884,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T09:34:14.505082+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.6941,
+   "reported_tokens": 1826608,
+   "run_id": "legacy-granarycore-binary-parity-4900b07d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1826608,
+    "result_receipts": 1,
+    "stream_sha256": "9304be350cfbe15415f54bd7e37b6c35391711ed8abbe62b63884c5081c3fc47",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1727744,
+     "input_tokens": 1800926,
+     "output_tokens": 25682,
+     "reasoning_output_tokens": 14023
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-granarycore-binary-parity-4900b07d",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "8889ac3391ddd1991c97b25bf68a80b6e8124c798b8adcc27f708c65dd33d6ab",
+    "summary": "badf34318fbbe665fd94ca7f6d78c933e231b2579e4e158bbd51617187bc8357",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-26T09:24:38.614240+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.039802,
+   "duration_s": 696.96,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T07:27:11.471501+00:00",
+   "functional": 0.625,
+   "model": "gpt6luna",
+   "quality": 0.8584,
+   "reported_tokens": 1868022,
+   "run_id": "legacy-hedgecore-binary-parity-9a9ea2d7",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1868022,
+    "result_receipts": 1,
+    "stream_sha256": "7667bf6058e20b7c0aafb8b334c4455e44f4d457792a0b2c35d16a8fb6a1d6af",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1761024,
+     "input_tokens": 1839292,
+     "output_tokens": 28730,
+     "reasoning_output_tokens": 16216
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-hedgecore-binary-parity-9a9ea2d7",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "532d26df5557d73cf1b07befa699228c352725a715e3311d963ad12454b211e4",
+    "summary": "17ec9ce09fe1f9f5a89a1134021f66cac09370d2777413f87a68fa1552aed772",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-26T07:15:34.503461+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.094369,
+   "duration_s": 1384.213,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T10:10:39.947261+00:00",
+   "functional": 0.3333,
+   "model": "gpt6luna",
+   "quality": 0.7583,
+   "reported_tokens": 5134316,
+   "run_id": "legacy-lodgecore-binary-parity-e17fc063",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5134316,
+    "result_receipts": 1,
+    "stream_sha256": "1c91dba6f5d12a0a6524a05e5b0d3b32d00931ec9b93c601b289fcb1e26643fe",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4923904,
+     "input_tokens": 5074093,
+     "output_tokens": 60223,
+     "reasoning_output_tokens": 40965
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-lodgecore-binary-parity-e17fc063",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "daeb17e19fdea587bb96e15bf0d7cf316b2bbe70c002c16cf956819bc2059a53",
+    "summary": "2c7b726ed61277397606a3dff925019d9d3799e3f617c5cd5697233f2b2de557",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-26T09:47:35.725018+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.057457,
+   "duration_s": 840.173,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T05:10:23.678345+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7749,
+   "reported_tokens": 2943587,
+   "run_id": "legacy-matchcore-order-book-parity-4218bb37",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2943587,
+    "result_receipts": 1,
+    "stream_sha256": "44856d7c1ed6e17aec5ae368f4e58966014d5dc126860d794bbb8f7821499a94",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2801664,
+     "input_tokens": 2905468,
+     "output_tokens": 38119,
+     "reasoning_output_tokens": 22120
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-matchcore-order-book-parity-4218bb37",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "9891fa5f4498a2558583f95dc4b3ec79e3efac62b68de2252ebceaf6e9c5f967",
+    "summary": "6cfd83646e357e1ddfebabaf814630529addf8655e5f00858d3219543c8f1cf6",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-26T04:56:23.498038+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.031717,
+   "duration_s": 519.599,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T05:51:49.958684+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.8308,
+   "reported_tokens": 1465084,
+   "run_id": "legacy-metercore-binary-parity-c62271c9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1465084,
+    "result_receipts": 1,
+    "stream_sha256": "e93c69deffb601f3a57f33e9a0fb70cc3bf850c88b66e5a4569b39a3606d2c94",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1374464,
+     "input_tokens": 1442807,
+     "output_tokens": 22277,
+     "reasoning_output_tokens": 12955
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-metercore-binary-parity-c62271c9",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "02533d414a93f964e12b0dd7c8eeaaf757d410a93340c1e1476c0e1761b93c7f",
+    "summary": "297a1c5e0a49ee2fb40409b210bcafd526128fa5b795cf5549bae9a6ff31ebeb",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-26T05:43:10.353211+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.037332,
+   "duration_s": 795.754,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T09:02:21.272676+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8317,
+   "reported_tokens": 1385686,
+   "run_id": "legacy-pacecore-binary-parity-e378aa6c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1385686,
+    "result_receipts": 1,
+    "stream_sha256": "de3e75a9e5edb64a3c51a5cafa1d8273e70a6c49368c5bd4d0299f00709059cf",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1273856,
+     "input_tokens": 1352159,
+     "output_tokens": 33527,
+     "reasoning_output_tokens": 23159
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-pacecore-binary-parity-e378aa6c",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "070864edb403a776754241c87dc64335be296604f0e607c30fc6b1ed5fe31641",
+    "summary": "6af369b14cb28cc8aa6fe48d17cc071351fae77b3987710da26ff8ad8407457b",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-26T08:49:05.513065+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.021199,
+   "duration_s": 456.883,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T10:42:57.261209+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.6785,
+   "reported_tokens": 786702,
+   "run_id": "legacy-paddockcore-binary-parity-ee7f2936",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 786702,
+    "result_receipts": 1,
+    "stream_sha256": "ddbb3f29ef50e8cd7819e7059b501fb2ea6bdc6c311415a7511a948a77aa4f67",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 720640,
+     "input_tokens": 768236,
+     "output_tokens": 18466,
+     "reasoning_output_tokens": 13021
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-paddockcore-binary-parity-ee7f2936",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "b26213e3c0432b75ba32a89a568cf4fe6caf4e69042f934fc74b7d06c9b32bb7",
+    "summary": "180e8cf23737efdb80c7d6dfe7ee643fe475862b8875248edac5c1be54dddd66",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-09-26T10:35:20.373010+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.055421,
+   "duration_s": 1524.906,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T05:43:10.223280+00:00",
+   "functional": 0.7,
+   "model": "gpt6luna",
+   "quality": 0.7976,
+   "reported_tokens": 2866614,
+   "run_id": "legacy-payrollcore-binary-parity-dc83e6eb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2866614,
+    "result_receipts": 1,
+    "stream_sha256": "96fd1ad78689f52b606085b8ef445ff2176ea9ed3c15926a2e1844ead99a368a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2718976,
+     "input_tokens": 2832946,
+     "output_tokens": 33668,
+     "reasoning_output_tokens": 20333
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-payrollcore-binary-parity-dc83e6eb",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "35be0e803d7b4352b18416a36db9cabc0a19e56ab53ef4be3d8c9d47222651e5",
+    "summary": "1e52e95db11f423983a3e1f708107e717a2dd87e0271b84b133984b9dca2ee5b",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-26T05:17:45.310781+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.021658,
+   "duration_s": 441.335,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T05:17:45.162886+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.7918,
+   "reported_tokens": 826264,
+   "run_id": "legacy-qlite-store-parity-77ba97f2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 826264,
+    "result_receipts": 1,
+    "stream_sha256": "308367be778438a3fb9a03c7296bb1e43a375c82554183d5948a37f0ccf2d8ce",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 758784,
+     "input_tokens": 807958,
+     "output_tokens": 18306,
+     "reasoning_output_tokens": 9690
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-qlite-store-parity-77ba97f2",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "e1d17c492b3996a9109826a0c9892582f8b4c36018da6a318569b001b5f4fbe5",
+    "summary": "0649dd88283a52c79a7bf648395915e5481981a56b1e5059ddcbb887497c77cb",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-26T05:10:23.821993+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.084532,
+   "duration_s": 1324.197,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T07:15:34.354696+00:00",
+   "functional": 0.25,
+   "model": "gpt6luna",
+   "quality": 0.8551,
+   "reported_tokens": 4283429,
+   "run_id": "legacy-queuecore-binary-parity-8adb2bcd",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4283429,
+    "result_receipts": 1,
+    "stream_sha256": "6a40a65efd2b402de57b3ed47c403f8af37004bfd96b80093818baf06e81a447",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4077568,
+     "input_tokens": 4225503,
+     "output_tokens": 57926,
+     "reasoning_output_tokens": 36197
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-queuecore-binary-parity-8adb2bcd",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "f4b48faed6e04b2e422d2265663ababb2b017512e7aa4dd2f9198c68476bb71e",
+    "summary": "6d97fb14056aa8b27a13dcb0a67e4ebbfefc76fe2cdb91b4ae3106f22140d90c",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-26T06:53:30.149676+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.049684,
+   "duration_s": 895.971,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T06:34:25.603611+00:00",
+   "functional": 0.8,
+   "model": "gpt6luna",
+   "quality": 0.8449,
+   "reported_tokens": 2485649,
+   "run_id": "legacy-quotacore-binary-parity-6a6c8b4b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2485649,
+    "result_receipts": 1,
+    "stream_sha256": "2bfa04ef9cf9bf8bbeef165080ec09501aa77f191c46fb367a046a299509b563",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2349568,
+     "input_tokens": 2454198,
+     "output_tokens": 31451,
+     "reasoning_output_tokens": 19296
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-quotacore-binary-parity-6a6c8b4b",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "288eaca10f20d98e63bcd7ab56b69a797a405fa8d1e95a1fb30036d6e55c4528",
+    "summary": "b1e5e012727e0dad23d4a816f980a8c7f914024d446915663456600f6d5610c4",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-26T06:19:29.627108+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.080604,
+   "duration_s": 1392.049,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T08:09:34.176225+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8278,
+   "reported_tokens": 4209610,
+   "run_id": "legacy-reflowcore-binary-parity-0a3ced1d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4209610,
+    "result_receipts": 1,
+    "stream_sha256": "4059c6615df3856d2a9c1746624555dcd1db68770cc1350cfa89ffea4f32af27",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4024832,
+     "input_tokens": 4154915,
+     "output_tokens": 54695,
+     "reasoning_output_tokens": 36035
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-reflowcore-binary-parity-0a3ced1d",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "2866b1d61cd9cee0ecb6bd5431f40c23ef698cc63cc45bea85dccbdc7d17ab15",
+    "summary": "b12aeedc3c12577666a505d46b0b776d1e6b1c125007b1c648f4098e5fd71ec5",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-26T07:46:22.119126+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.058795,
+   "duration_s": 1150.348,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T07:46:21.988276+00:00",
+   "functional": 0.5,
+   "model": "gpt6luna",
+   "quality": 0.7206,
+   "reported_tokens": 2725912,
+   "run_id": "legacy-schedcore-binary-parity-f27d153f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2725912,
+    "result_receipts": 1,
+    "stream_sha256": "e6ccc71cf9c04c3ebcf8fdc5c0340ad6c08c9b7aa0545fdb12121f66694569e8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2576896,
+     "input_tokens": 2680600,
+     "output_tokens": 45312,
+     "reasoning_output_tokens": 27623
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-schedcore-binary-parity-f27d153f",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "465bf7c062e5ccf4dec063807c2916116f4c9e997bbd7dff7c503da776904ba5",
+    "summary": "6bea0e106bb676183d9dc51d0e649471269ec0d6f06acf927edb63a4abe3ccba",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-26T07:27:11.633241+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.041147,
+   "duration_s": 724.173,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T04:56:23.340841+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.7916,
+   "reported_tokens": 1737602,
+   "run_id": "legacy-settlecore-binary-parity-62d3e311",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1737602,
+    "result_receipts": 1,
+    "stream_sha256": "3c3943236f37a7d3690cbe2fe4afe7dcddbd404ac8938e0f6e8e50a2d952e85d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1608448,
+     "input_tokens": 1707235,
+     "output_tokens": 30367,
+     "reasoning_output_tokens": 16220
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-settlecore-binary-parity-62d3e311",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "e37346ac3a75fba14ca3cf6ffb22196c8261b3b4cde1f77165211afca8dab6cb",
+    "summary": "7b624e30fab2371ddb79f2c9b4a843a768d8879dc0a440aef157e02b9b0bfe61",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-26T04:44:19.157992+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.060142,
+   "duration_s": 832.672,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T06:48:18.415889+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8327,
+   "reported_tokens": 3052281,
+   "run_id": "legacy-snapcore-binary-parity-bd945ba9",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3052281,
+    "result_receipts": 1,
+    "stream_sha256": "2ac9f5cc5e2f6958dd00cfb3ba875d5c1aac827d63f3d40b988396e0d834e8b5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2898688,
+     "input_tokens": 3012792,
+     "output_tokens": 39489,
+     "reasoning_output_tokens": 21907
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-snapcore-binary-parity-bd945ba9",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "bb0ca024c0c4df29baffbdf121cbfa2def2b5776f6d4550539620a1c1c89fd34",
+    "summary": "de543f8777e1ebb63d5efaaaa29c54f1c1e804f0429d57d36d2abfb622cf4172",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-26T06:34:25.735842+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.049556,
+   "duration_s": 701.338,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T09:24:38.465906+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8259,
+   "reported_tokens": 2402147,
+   "run_id": "legacy-stampcore-binary-parity-8528eb47",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2402147,
+    "result_receipts": 1,
+    "stream_sha256": "e021c8ee8ae7c4bb44f8d64a3eb4f9b69c002609b98fc8b2dac19ad8aae3bd7b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2258176,
+     "input_tokens": 2370703,
+     "output_tokens": 31444,
+     "reasoning_output_tokens": 21836
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-stampcore-binary-parity-8528eb47",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "41011a67e18f382a28d1bcc20525b46a21af3a6439a220538179b65874fdf94b",
+    "summary": "85a80d9f25534dc034fce23d90c3c67024fa5ce5a7886db35c542b3773fc521f",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-26T09:12:57.120774+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.065315,
+   "duration_s": 2371.056,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T08:49:05.375077+00:00",
+   "functional": 0.125,
+   "model": "gpt6luna",
+   "quality": 0.8438,
+   "reported_tokens": 2925800,
+   "run_id": "legacy-tallycore-binary-parity-7f6c562b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2925800,
+    "result_receipts": 1,
+    "stream_sha256": "3a2b5733d9e18219880bcbcd608bf5faf4f94f850c325cecfe3aa785e6768ccf",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2761984,
+     "input_tokens": 2872515,
+     "output_tokens": 53285,
+     "reasoning_output_tokens": 36151
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-tallycore-binary-parity-7f6c562b",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "c360a2e09e425170f9788ac2719ba225ff81bdc14b20b9d7b72e088232b89bc6",
+    "summary": "dc18ccdf97d3be606673e596d1ecfa6d2ab2e34e19c1512fcfba495ccab30f7d",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-26T08:09:34.313412+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.019132,
+   "duration_s": 311.425,
+   "effort": "high",
+   "fallback": false,
+   "finished_at": "2026-09-26T06:53:30.012609+00:00",
+   "functional": 0.1111,
+   "model": "gpt6luna",
+   "quality": 0.8414,
+   "reported_tokens": 742273,
+   "run_id": "legacy-vaultcore-binary-parity-2bc6fe22",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 742273,
+    "result_receipts": 1,
+    "stream_sha256": "34d440e239d16467fcfb85ccec54feece83a80e91160b72a0690c0d31f501208",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 672256,
+     "input_tokens": 728754,
+     "output_tokens": 13519,
+     "reasoning_output_tokens": 7322
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/high/legacy-vaultcore-binary-parity-2bc6fe22",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "b80cdc9c1ea0d4a6ad3acd29abe1a2f2b603cb80a7322f3ab1ee8a9bc3760aa4",
+    "summary": "3aa3448abd0d1cfc5adb95fe702f6c7d0fe5784da7931314415e9e3dcc978527",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-26T06:48:18.581878+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.081322,
+   "duration_s": 1797.93,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T19:24:40.087765+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8429,
+   "reported_tokens": 2982007,
+   "run_id": "legacy-blendcore-binary-parity-f350c9c5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2982007,
+    "result_receipts": 1,
+    "stream_sha256": "0c8d5e2ac7d6ed9cfc30f47ffd85004a73aa722d5e7481d69e08993a56bcfa1d",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2730496,
+     "input_tokens": 2909841,
+     "output_tokens": 72166,
+     "reasoning_output_tokens": 59895
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-blendcore-binary-parity-f350c9c5",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "8193d3b6a057ba2a3e43adbc318cb41d46013419bf07f77e61fa64917af500da",
+    "summary": "9e50fdd2b83c5cd9d6ea7a59d283ffe15c9ba35d0c2069db94e2c89d179d3d23",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-26T18:54:42.150315+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.741714,
+   "duration_s": 9087.272,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-27T04:23:34.845407+00:00",
+   "functional": 0.7857,
+   "model": "gpt6luna",
+   "quality": 0.7544,
+   "reported_tokens": 44453452,
+   "run_id": "legacy-cellarcore-binary-parity-f677b4f6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 44453452,
+    "result_receipts": 1,
+    "stream_sha256": "9802c29a0adb78b90b00cd12453d4f0f45316dc33c616d26f1e167bc23dbe020",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 43076352,
+     "input_tokens": 44020351,
+     "output_tokens": 433101,
+     "reasoning_output_tokens": 345842
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-cellarcore-binary-parity-f677b4f6",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "7962e051a16729a2f10a73e5188822472aeebc1b55fa61e6495752c3239d9684",
+    "summary": "d168f7f6f88fce1b2ad07aab8e2b8dc8e94b8aaacc9ed9b2eeb6cacec12fa761",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-09-27T01:52:07.551686+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.059577,
+   "duration_s": 1042.147,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T13:28:54.117375+00:00",
+   "functional": 0.3,
+   "model": "gpt6luna",
+   "quality": 0.8225,
+   "reported_tokens": 2490189,
+   "run_id": "legacy-codeccore-binary-parity-3375d12c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2490189,
+    "result_receipts": 1,
+    "stream_sha256": "b0b7f962c575dbf359625abdb5e2a520c857ba2500ed005365465ddfd1caf6a5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2336512,
+     "input_tokens": 2438079,
+     "output_tokens": 52110,
+     "reasoning_output_tokens": 37515
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-codeccore-binary-parity-3375d12c",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "215ecb3573873e08ad2fae18bde02a9f60380c6d3304f5d34181e37aa4f49a16",
+    "summary": "fa932695ec8c31aeeec60fb5d66883e1393c12329a5cee5c47e575e86b576e25",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-26T13:11:31.963452+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.101514,
+   "duration_s": 1547.805,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T13:11:31.801300+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.8196,
+   "reported_tokens": 4945845,
+   "run_id": "legacy-freightcore-binary-parity-3b97c051",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4945845,
+    "result_receipts": 1,
+    "stream_sha256": "5b81fbfa5cdbf3401c6bfc631a1339bb8fd434aa9d9b980ac28d50ac4fc3ca5a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4707840,
+     "input_tokens": 4869256,
+     "output_tokens": 76589,
+     "reasoning_output_tokens": 54064
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-freightcore-binary-parity-3b97c051",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "8df08f0e29f99c4a9736210e08e8175717a7c17a499996c3b96422c78a4c3af7",
+    "summary": "a18180c4d856d6e148917ac0af133029e0bdab767697bf989225419fea1b6ddc",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-26T12:45:43.985853+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.332381,
+   "duration_s": 3809.897,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T21:13:52.248940+00:00",
+   "functional": 0.5,
+   "model": "gpt6luna",
+   "quality": 0.7022,
+   "reported_tokens": 19139468,
+   "run_id": "legacy-granarycore-binary-parity-42a475b1",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 19139468,
+    "result_receipts": 1,
+    "stream_sha256": "ff4297e81febb8dc170957ef4c4478ab133b23e96844ddd9b296dce2c205725c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 18420224,
+     "input_tokens": 18948831,
+     "output_tokens": 190637,
+     "reasoning_output_tokens": 149224
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-granarycore-binary-parity-42a475b1",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "31fcb54c746001433ea3f2b7fc6cc51d0acb0dc4a06ca09eeb8f2d4486ba2681",
+    "summary": "accfcc1fae9444a6c8f88040dce2803557fc08c96e44b4a6a31d5eea9779755f",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-26T20:10:22.341904+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.144625,
+   "duration_s": 2087.901,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T15:55:16.001492+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.849,
+   "reported_tokens": 7368898,
+   "run_id": "legacy-hedgecore-binary-parity-3ab84da8",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7368898,
+    "result_receipts": 1,
+    "stream_sha256": "6202b86ad5b9d73c9398a2dfc78fd1be0de0124ac720353c5d748ba802d197a0",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 7047424,
+     "input_tokens": 7263889,
+     "output_tokens": 105009,
+     "reasoning_output_tokens": 80719
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-hedgecore-binary-parity-3ab84da8",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "7005ac1488791ad0cb06872b0b155948c425998d8f67099b06e11fd2c45b8b96",
+    "summary": "1b4642f400663c40865b07d2b3baa9a20aeb57d72a80743e6db370ccc6873b94",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-26T15:20:28.092458+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.447833,
+   "duration_s": 5894.146,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-27T01:52:07.388262+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.7391,
+   "reported_tokens": 24502105,
+   "run_id": "legacy-lodgecore-binary-parity-26a83e83",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 24502105,
+    "result_receipts": 1,
+    "stream_sha256": "fa20d411397f4cfad4eb07ba45854938f082704bf9d2c642f25db3570f6f02be",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 23497728,
+     "input_tokens": 24221060,
+     "output_tokens": 281045,
+     "reasoning_output_tokens": 240438
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-lodgecore-binary-parity-26a83e83",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "90de0fbb86bfb20a475635f2e038996a0dae9ee3c2ad5fb849fa9d351541e0b4",
+    "summary": "228e00b1b902c35c5a78547bfa278371dccd4612efe6402b8e30b4046d89d5ef",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-09-27T00:13:53.230740+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.053219,
+   "duration_s": 1010.685,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T11:37:20.264948+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.7519,
+   "reported_tokens": 2108690,
+   "run_id": "legacy-matchcore-order-book-parity-7eb0c849",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2108690,
+    "result_receipts": 1,
+    "stream_sha256": "3725f6fafcc2fe3819cc4241415eede872d1d8c880e33074d9cf38fdd5887b0b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1964288,
+     "input_tokens": 2060849,
+     "output_tokens": 47841,
+     "reasoning_output_tokens": 30809
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-matchcore-order-book-parity-7eb0c849",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "fd68ea2012a2ffccf3003722d8c7b578340a22d673fa4737b9041e62d6a4c75c",
+    "summary": "60179aad151547459ce97f9dc8ade60878ab22727ec81b4fe3285987829c04ce",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-26T11:20:29.573712+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.038805,
+   "duration_s": 742.405,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T12:45:43.840842+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.82,
+   "reported_tokens": 1437440,
+   "run_id": "legacy-metercore-binary-parity-d74954b6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1437440,
+    "result_receipts": 1,
+    "stream_sha256": "892a1b2d9d9213823815bd230e0283fe145c1165604239c6312f8b9e5aab4155",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1317632,
+     "input_tokens": 1403321,
+     "output_tokens": 34119,
+     "reasoning_output_tokens": 19010
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-metercore-binary-parity-d74954b6",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "cc4c3a8e27f6e055f7e00e739ba12946b0f128496bfac82f560f82b8806e7fc3",
+    "summary": "dee63d3768b7f955041474f31b62948ea16b5e17a8a0853ea25179ef190bf75e",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-26T12:33:21.428302+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.091081,
+   "duration_s": 3339.06,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-27T08:19:14.894974+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8286,
+   "reported_tokens": 5110998,
+   "run_id": "legacy-pacecore-binary-parity-b55ca96f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5110998,
+    "result_receipts": 1,
+    "stream_sha256": "b83c6fdfe9f90bd6e6e45e6751373a3b784b0c216920fba7c27fa4f5998c9cc4",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4854528,
+     "input_tokens": 5068775,
+     "output_tokens": 42223,
+     "reasoning_output_tokens": 33810
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-pacecore-binary-parity-b55ca96f",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "a0019eaa26eef9671e6bbece6179ecdc53e145f8454804d8bbc10e49667b61ee",
+    "summary": "5b8e187e4d7b639ecd5a61ca86cbd55ef5ac7c6ae8e78e8b89dc6c26c5805a0c",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-27T07:23:35.832180+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.157845,
+   "duration_s": 2546.864,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T12:33:21.269643+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8,
+   "reported_tokens": 7552062,
+   "run_id": "legacy-payrollcore-binary-parity-7b5deaae",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7552062,
+    "result_receipts": 1,
+    "stream_sha256": "6b10bd6dc3786b04738c71a0d59f0a98b6f779601c231b77e74f6a84bba5f8f3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 7195648,
+     "input_tokens": 7426444,
+     "output_tokens": 125618,
+     "reasoning_output_tokens": 100740
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-payrollcore-binary-parity-7b5deaae",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "8b8d71a8764347d6eb7b9680d549072e86573fb13383f658a3ca858acc4a0019",
+    "summary": "5ccdf09b7992c3a23be02b8bb0537876a1c4448789aacc2d6074593a8e70887b",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-26T11:50:54.396532+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.035122,
+   "duration_s": 813.839,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T11:50:54.245707+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8054,
+   "reported_tokens": 1193986,
+   "run_id": "legacy-qlite-store-parity-acc6cc19",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1193986,
+    "result_receipts": 1,
+    "stream_sha256": "7e53fa4fe02aaa91a615a0ddd34c66df64b5cb1e571cd1d5a36cdcfa80507fd2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1090816,
+     "input_tokens": 1159243,
+     "output_tokens": 34743,
+     "reasoning_output_tokens": 23159
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-qlite-store-parity-acc6cc19",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "1839f29a638fa150468012c712ab44a5d15d28312c2223fa3e6ee7a5b185a795",
+    "summary": "0405521504a3428036d06e1a33a78c55bc46d3fd5383e3d5e5942a13d559378a",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-26T11:37:20.400649+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.165699,
+   "duration_s": 2839.445,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T15:20:27.948887+00:00",
+   "functional": 0.625,
+   "model": "gpt6luna",
+   "quality": 0.8115,
+   "reported_tokens": 9151782,
+   "run_id": "legacy-queuecore-binary-parity-6c9f846c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9151782,
+    "result_receipts": 1,
+    "stream_sha256": "57722973d842459c586d65e9c75ecaa5797b6b5d53e3a4a4ccd37a550cc26706",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 8821504,
+     "input_tokens": 9040642,
+     "output_tokens": 111140,
+     "reasoning_output_tokens": 85082
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-queuecore-binary-parity-6c9f846c",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "ed10179e7a9b25750e67677d4dc65acea490b9fc56547d48c3d7f8a46337407b",
+    "summary": "fbc30c4af603f52996fcc615391441c041b8b569a95af089736832809586a9cd",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-26T14:33:08.495401+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.042015,
+   "duration_s": 822.277,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T13:42:36.557942+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8461,
+   "reported_tokens": 1554040,
+   "run_id": "legacy-quotacore-binary-parity-ebd1da59",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1554040,
+    "result_receipts": 1,
+    "stream_sha256": "bbc0517f8c7c5685a0126c4b0a951f3afa22605e8dab7f63c64481c1c5139e43",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1435904,
+     "input_tokens": 1514435,
+     "output_tokens": 39605,
+     "reasoning_output_tokens": 30171
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-quotacore-binary-parity-ebd1da59",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "97839266aec59d68c5408a6dcc08ed4fb24ad9dc0c2b8162e94106eedaf6b15f",
+    "summary": "9a94585e3b2d3226204c5594f4491ab0ec6545e26bd7ced9a04a001af3b12b90",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-26T13:28:54.275468+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.158846,
+   "duration_s": 2239.27,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T16:56:18.067920+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8302,
+   "reported_tokens": 8805115,
+   "run_id": "legacy-reflowcore-binary-parity-6ecc2aa6",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8805115,
+    "result_receipts": 1,
+    "stream_sha256": "c8de85560f68548253a613ac6f1e4d9bf8826f9f6d47e92039a28ac9bda4e851",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 8492032,
+     "input_tokens": 8698572,
+     "output_tokens": 106543,
+     "reasoning_output_tokens": 81175
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-reflowcore-binary-parity-6ecc2aa6",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "a37904de5470d426a71195a43685d4156ddb40e0658a13118266ad95d7e81c2c",
+    "summary": "d7a848d7dc81eafb650235cc6bcdc022e35fdb6cdc7325a5289bf36ca4a45040",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-26T16:18:58.792739+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.05551,
+   "duration_s": 1422.49,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T16:18:58.648338+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.7725,
+   "reported_tokens": 2343224,
+   "run_id": "legacy-schedcore-binary-parity-6c7a2050",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2343224,
+    "result_receipts": 1,
+    "stream_sha256": "86b8eaaea8fec29d44c0d39033a41828bc5e708d3f568a820873940f94729131",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2200832,
+     "input_tokens": 2295069,
+     "output_tokens": 48155,
+     "reasoning_output_tokens": 33992
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-schedcore-binary-parity-6c7a2050",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "e702cb6d03a78baab472165ed2d127c77021d36ce23cd2b29d576fb5022cb820",
+    "summary": "f91d8b7f9697dea00888220be4322bc1f7b7de96a4e0a09bd42d53b8859e96a0",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-26T15:55:16.150647+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.129391,
+   "duration_s": 2249.221,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T11:20:29.421694+00:00",
+   "functional": 0.7,
+   "model": "gpt6luna",
+   "quality": 0.7703,
+   "reported_tokens": 6831947,
+   "run_id": "legacy-settlecore-binary-parity-37bdacfb",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6831947,
+    "result_receipts": 1,
+    "stream_sha256": "70863830a87a226fecb001dab1a4ec30b39c10c1a541aa26c762ea055fdf7f0b",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6562304,
+     "input_tokens": 6739938,
+     "output_tokens": 92009,
+     "reasoning_output_tokens": 60200
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-settlecore-binary-parity-37bdacfb",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "c7253003595f94b25d31f93f86049b9991c2f016912271e5b2afd0c8532cea7e",
+    "summary": "6acef05a07c42cbbf7e601aae4c6a33f0c15a1894ac346edf18d31920c4aaead",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-26T10:43:00.190830+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.125948,
+   "duration_s": 1784.38,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T14:12:21.079973+00:00",
+   "functional": 0.5,
+   "model": "gpt6luna",
+   "quality": 0.8288,
+   "reported_tokens": 5823081,
+   "run_id": "legacy-snapcore-binary-parity-2fa6a34a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5823081,
+    "result_receipts": 1,
+    "stream_sha256": "9bca3e679e1b9aae0e71e7ecd9c3379198e036ac6a94aff8a41a77c8cc999e1c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5445632,
+     "input_tokens": 5738715,
+     "output_tokens": 84366,
+     "reasoning_output_tokens": 53279
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-snapcore-binary-parity-2fa6a34a",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "5c4a8681292a624a71962998047b7eaef174136480f33f4548a9271971ae9d63",
+    "summary": "1072348431fac6dee15f6a0a5f331564bdd1ce27ade8f0ae25b7f625f94213e8",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-26T13:42:36.685818+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.202529,
+   "duration_s": 2741.915,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T20:10:22.181791+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8166,
+   "reported_tokens": 11209434,
+   "run_id": "legacy-stampcore-binary-parity-fb953c33",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 11209434,
+    "result_receipts": 1,
+    "stream_sha256": "d0eabd6a710501f341db79502b2be1b503c12d0598c9d03f576fde322379b947",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 10818816,
+     "input_tokens": 11071236,
+     "output_tokens": 138198,
+     "reasoning_output_tokens": 100940
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-stampcore-binary-parity-fb953c33",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "3896f62309cd501f85167fb5aab693badc0248615045aa969d136d82656e0b28",
+    "summary": "1a26ddb45c69ebbc2c887a1450c9481f1cee6100d854c664b58a1fc45511e94e",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-26T19:24:40.252796+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.126316,
+   "duration_s": 1885.532,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T17:27:43.757961+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.827,
+   "reported_tokens": 6230274,
+   "run_id": "legacy-tallycore-binary-parity-6bbb314d",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6230274,
+    "result_receipts": 1,
+    "stream_sha256": "ab807a56d526d0721945e29cee489fda10bca31ade8caac6e03ea7a78f2782e8",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 5927424,
+     "input_tokens": 6138382,
+     "output_tokens": 91892,
+     "reasoning_output_tokens": 78700
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-tallycore-binary-parity-6bbb314d",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "4a3711fd4a15626c4113d5bdbd97785a15e6d673116d251129905784b08c779c",
+    "summary": "c6bccf3015ba1f3f2ceb0a0e52a4e5efd905dc877c0b5d0c864ceb515187a871",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-26T16:56:18.219703+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.06212,
+   "duration_s": 1247.075,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-09-26T14:33:08.351077+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.8319,
+   "reported_tokens": 2701082,
+   "run_id": "legacy-vaultcore-binary-parity-9158fd0c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2701082,
+    "result_receipts": 1,
+    "stream_sha256": "d396e2ad7a59f086acdb55ee0690df507b3bf801572a649a7fe8534621cfa614",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2536704,
+     "input_tokens": 2650295,
+     "output_tokens": 50787,
+     "reasoning_output_tokens": 36803
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/extra-high/legacy-vaultcore-binary-parity-9158fd0c",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "5953848001252ff34c3f42ab66b806d750e283d55f607aad2d4bcb0a5e88b8e1",
+    "summary": "749a8240d3bcb7e8018b8115c936c20558dc012009a142d492fd041a1cee0b09",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-26T14:12:21.270076+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.059228,
+   "duration_s": 989.342,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T17:17:54.219462+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8297,
+   "reported_tokens": 2362283,
+   "run_id": "legacy-blendcore-binary-parity-3a8e714b",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2362283,
+    "result_receipts": 1,
+    "stream_sha256": "23d598252bc0483f4213bea78a893e1121c8195f386ffd8dc3ae72ba1b9833ef",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2184448,
+     "input_tokens": 2313284,
+     "output_tokens": 48999,
+     "reasoning_output_tokens": 39645
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-blendcore-binary-parity-3a8e714b",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "30414aad957cb87f5d734b95af8a4e5da4bb0d17849f10cdc79a77b6f54fb463",
+    "summary": "bdef5db9220553dce767db03047c18c47b4fcaef46db487f0d1f5b3d701f49e2",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-09-27T17:01:24.870092+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.070108,
+   "duration_s": 1326.986,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T11:46:04.695245+00:00",
+   "functional": 0.6,
+   "model": "gpt6luna",
+   "quality": 0.8081,
+   "reported_tokens": 2786017,
+   "run_id": "legacy-codeccore-binary-parity-63b8bcc0",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2786017,
+    "result_receipts": 1,
+    "stream_sha256": "e0e4721efa23cccd99defef8a444ff2f51c0c3bfa6f56adc2f85e5151bf5486e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2588928,
+     "input_tokens": 2724743,
+     "output_tokens": 61274,
+     "reasoning_output_tokens": 42182
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-codeccore-binary-parity-63b8bcc0",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "d5c4c4125712313efff07ab471c92afbad928add2cff72ecfe22818f29402da5",
+    "summary": "e5b0b593dc1757df822706af1debd69cfdc250faa0f20c99b18d498e8dfcde79",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-09-27T11:23:57.700937+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.047401,
+   "duration_s": 999.899,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T11:23:57.529043+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.8109,
+   "reported_tokens": 1601542,
+   "run_id": "legacy-freightcore-binary-parity-bda78381",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1601542,
+    "result_receipts": 1,
+    "stream_sha256": "697bf816a518fc9d1f8c6060da00e7ca14824ecffebc81bea81855af3feba02e",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1452288,
+     "input_tokens": 1556660,
+     "output_tokens": 44882,
+     "reasoning_output_tokens": 34659
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-freightcore-binary-parity-bda78381",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "d951cc3c5dd723fb91201fce760ad271d86f4eeff177ea2810a6fc139ac8301c",
+    "summary": "9c9145e176ea4c83974f103fee507393855a6b67cbf64d7481f0d91adecf8b93",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-09-27T11:07:17.623215+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.293897,
+   "duration_s": 7128.239,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T19:31:35.540762+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.5932,
+   "reported_tokens": 14406611,
+   "run_id": "legacy-granarycore-binary-parity-540448b7",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 14406611,
+    "result_receipts": 1,
+    "stream_sha256": "297ad77ba912dddd99dc7f4859aac19a549ff06bfed19414721a67befc0af0c9",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 13552384,
+     "input_tokens": 14224234,
+     "output_tokens": 182377,
+     "reasoning_output_tokens": 146641
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-granarycore-binary-parity-540448b7",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "fa9b2d0f5dc62cd571252a0d246c5782064e2199edce4bbef51595f86ffd3438",
+    "summary": "c70cffb0c39e428043dbcf03916fcf938bda5d34d1559ce0d5f1746234ce13bf",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-09-27T17:32:47.292034+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.138577,
+   "duration_s": 3106.686,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T14:38:07.208620+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8017,
+   "reported_tokens": 6505553,
+   "run_id": "legacy-hedgecore-binary-parity-084705db",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6505553,
+    "result_receipts": 1,
+    "stream_sha256": "229d598143828ac2303547353a83bab1098c8a800c410ea06ca467163648fffd",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 6178816,
+     "input_tokens": 6395265,
+     "output_tokens": 110288,
+     "reasoning_output_tokens": 85084
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-hedgecore-binary-parity-084705db",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "a556bdf9208eb4d953dc560d1dc3625cd009a1d90c68e5676369b0cd70d9c95d",
+    "summary": "a17d21399a10ae6ce3035e4f0465a59fac7e591dffe60e4622ec1a90e9d990a2",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-09-27T13:46:20.516879+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.089428,
+   "duration_s": 1981.184,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T09:18:21.875665+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.7652,
+   "reported_tokens": 3425355,
+   "run_id": "legacy-matchcore-order-book-parity-cc53edd5",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3425355,
+    "result_receipts": 1,
+    "stream_sha256": "ec5644c0f97aedbfbda7a08d838e0894e6c33c198819da77a559ca748d43a487",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3187712,
+     "input_tokens": 3340888,
+     "output_tokens": 84467,
+     "reasoning_output_tokens": 65897
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-matchcore-order-book-parity-cc53edd5",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "18aab233931683c060c9c140a793c09d98973fa95e66cec55310a9e3f31fe74f",
+    "summary": "c5231aee29ea18a1eb047ab1dcf6f9e20b5d3a1f431e97110861988c5304991f",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-09-27T08:45:20.683474+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.048685,
+   "duration_s": 935.275,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T11:07:17.464919+00:00",
+   "functional": 0.7778,
+   "model": "gpt6luna",
+   "quality": 0.8056,
+   "reported_tokens": 1682612,
+   "run_id": "legacy-metercore-binary-parity-4934e250",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1682612,
+    "result_receipts": 1,
+    "stream_sha256": "704dc4de28388e231f030cbd91b5d8b7c3c67d67123bf413339b93dadea6cc9a",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1536256,
+     "input_tokens": 1635896,
+     "output_tokens": 46716,
+     "reasoning_output_tokens": 35219
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-metercore-binary-parity-4934e250",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "93035e4ffb9ee890265f0217b4369ffb8ecd21e4422af81b413da787d65a02df",
+    "summary": "ce7a39a3bd60e538a8486ca167fe1ea4306916cbea97dc0b19c79058199f53e7",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-09-27T10:51:42.183538+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.065226,
+   "duration_s": 1389.702,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T17:01:24.728440+00:00",
+   "functional": 0.0,
+   "model": "gpt6luna",
+   "quality": 0.8298,
+   "reported_tokens": 2593762,
+   "run_id": "legacy-pacecore-binary-parity-06ac8c28",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2593762,
+    "result_receipts": 1,
+    "stream_sha256": "316ef9004548831f81236b94765f96eddc16bb41bff3ff60b76a8d5fb6a1c991",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2415104,
+     "input_tokens": 2535739,
+     "output_tokens": 58023,
+     "reasoning_output_tokens": 44878
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-pacecore-binary-parity-06ac8c28",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "06ad5a2cb3f7e4fff1f40cece30458f425542786075a7060fe277ab81e6dc502",
+    "summary": "79b084a2c32d14066343b351d0232f4114822ea3d0277279ae06a4ef99d62f52",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-09-27T16:38:15.019542+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.092811,
+   "duration_s": 1806.022,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T10:51:42.044136+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.7942,
+   "reported_tokens": 3222397,
+   "run_id": "legacy-payrollcore-binary-parity-fef790d2",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3222397,
+    "result_receipts": 1,
+    "stream_sha256": "54c6cf04bbbc31d0d28b7a8d25aaf553effac2153359695613de606639bd380c",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2958336,
+     "input_tokens": 3130342,
+     "output_tokens": 92055,
+     "reasoning_output_tokens": 70127
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-payrollcore-binary-parity-fef790d2",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "adc5f84f6c7e0cc0d4c1e6ecc3ef7c733b8e587214e9e713d07ad2ff3a3c8bc2",
+    "summary": "26ea004948e0f9b48b77b6c1ac509c10d25127bd04bd58161c99065a60cb980b",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-09-27T10:21:36.013514+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.053709,
+   "duration_s": 3793.829,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T10:21:35.863651+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.791,
+   "reported_tokens": 2125287,
+   "run_id": "legacy-qlite-store-parity-4f6c3c9c",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2125287,
+    "result_receipts": 1,
+    "stream_sha256": "280435df1f566b8d60a53e8dad7a6dba42d3308eab9c0e0c129b7f9283f3bfec",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1976320,
+     "input_tokens": 2077665,
+     "output_tokens": 47622,
+     "reasoning_output_tokens": 33549
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-qlite-store-parity-4f6c3c9c",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "41d0eeaf1791008eda3a1fac0110a0262a86b21e34a47473aa3cc6ad71bbd045",
+    "summary": "e4db9c97db5f80da3cb6f6d92a04e6addafd7b3ee1fdbef8d36fb035b43fe573",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-09-27T09:18:22.031227+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.159246,
+   "duration_s": 2585.269,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T13:46:20.352120+00:00",
+   "functional": 0.75,
+   "model": "gpt6luna",
+   "quality": 0.8076,
+   "reported_tokens": 8733015,
+   "run_id": "legacy-queuecore-binary-parity-b8932c01",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8733015,
+    "result_receipts": 1,
+    "stream_sha256": "085aa8aae5c7a2018c34a1d2d5ee7312a96cef99fc16075e5bfb73b5c7750b30",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 8402176,
+     "input_tokens": 8627665,
+     "output_tokens": 105350,
+     "reasoning_output_tokens": 78834
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-queuecore-binary-parity-b8932c01",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "8d035a72e4394559b182092c2c98f26e3555121d68a2686e7dfd7a458bd8b65b",
+    "summary": "8eb87bd5ed38648212a090042d6347f5fa2f432a49787603b3684e5fa8ca09f9",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-09-27T13:03:15.072585+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.071151,
+   "duration_s": 1692.532,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T12:14:17.385614+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.854,
+   "reported_tokens": 3115014,
+   "run_id": "legacy-quotacore-binary-parity-7c911d45",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3115014,
+    "result_receipts": 1,
+    "stream_sha256": "7a8324446163e2c72d7dc7f6bf27b23a3fc80b69acdfe633356f76ec81e2d4f2",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2941440,
+     "input_tokens": 3054065,
+     "output_tokens": 60949,
+     "reasoning_output_tokens": 47092
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-quotacore-binary-parity-7c911d45",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "cdc3c28a19553bfeb72385e55760294994605fe55b749fd2204c78ce5d3d397c",
+    "summary": "7c224d8f59c1872d8c270ef550898038262a5ed83b228e18b6bc021fd0cc9303",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-09-27T11:46:04.846993+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.073164,
+   "duration_s": 1726.852,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T15:47:22.520543+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8359,
+   "reported_tokens": 3164000,
+   "run_id": "legacy-reflowcore-binary-parity-fc5d407f",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3164000,
+    "result_receipts": 1,
+    "stream_sha256": "6682f201b1978a691d9cfa0ebfd4b2448903a707795e392d53e2c354cde07685",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2968064,
+     "input_tokens": 3104276,
+     "output_tokens": 59724,
+     "reasoning_output_tokens": 42672
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-reflowcore-binary-parity-fc5d407f",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "3f387bf174fd99996371acecd4897ee46f8784f6b30510acd24ac8595e392d79",
+    "summary": "0ae5b2b952811f956e8fea5b34342d95205c15581fadb54d9ad6d862b7d67e78",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-09-27T15:18:35.661497+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.088764,
+   "duration_s": 2428.129,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T15:18:35.500017+00:00",
+   "functional": 0.75,
+   "model": "gpt6luna",
+   "quality": 0.7835,
+   "reported_tokens": 3465965,
+   "run_id": "legacy-schedcore-binary-parity-0f2e4cf3",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3465965,
+    "result_receipts": 1,
+    "stream_sha256": "f75c175c11600ec1d8daf47f7ee2482be2f16ec4a2040f3280c7074411bf49b3",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3239680,
+     "input_tokens": 3381618,
+     "output_tokens": 84347,
+     "reasoning_output_tokens": 58935
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-schedcore-binary-parity-0f2e4cf3",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "069d317ae7d2a1ed2df3a930073891a73029ef1374e1307222a64fc57b2e8ca0",
+    "summary": "88b646734d5228f0402907a655c22531a3271a5bd50faa9a4069c15836323f9a",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-09-27T14:38:07.363055+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.083655,
+   "duration_s": 1562.546,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T08:45:20.550996+00:00",
+   "functional": 0.5,
+   "model": "gpt6luna",
+   "quality": 0.782,
+   "reported_tokens": 3204084,
+   "run_id": "legacy-settlecore-binary-parity-cdf1f159",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3204084,
+    "result_receipts": 1,
+    "stream_sha256": "dc6e05be82895ea87f993ef397bc6204eb9c3566d6ffc5f8896e8c7092f59756",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 2987520,
+     "input_tokens": 3123776,
+     "output_tokens": 80308,
+     "reasoning_output_tokens": 57237
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-settlecore-binary-parity-cdf1f159",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "6e31cc16c95e44916073da4a73166742b826f5a1d930bd2db90500ad319cd8ab",
+    "summary": "802fe20908003a65a380441408a1fa9047ed43c8e742d0691de4b1ebb25aa5a0",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-09-27T08:19:17.996714+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.096062,
+   "duration_s": 1558.64,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T12:40:16.193161+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8432,
+   "reported_tokens": 4551316,
+   "run_id": "legacy-snapcore-binary-parity-0ca10f98",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4551316,
+    "result_receipts": 1,
+    "stream_sha256": "fd95263d9d6d9f2cee98a94cd0326260f7fc915acb722e6589f9298aa78eb603",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 4323072,
+     "input_tokens": 4476298,
+     "output_tokens": 75018,
+     "reasoning_output_tokens": 52617
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-snapcore-binary-parity-0ca10f98",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "877d05727b475265b3d2bfe91a9ed80d94bea9310187d520d3e22b35d5eb99cd",
+    "summary": "2652ca4475bc6ee674ba4c696501065fa6a68138175f12d1ca93d57afb7079fb",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-09-27T12:14:17.541627+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.05148,
+   "duration_s": 892.742,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T17:32:47.128044+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8304,
+   "reported_tokens": 2041646,
+   "run_id": "legacy-stampcore-binary-parity-a87e8639",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2041646,
+    "result_receipts": 1,
+    "stream_sha256": "bc3e295380a97f458717947ed79f0ed839642543339bedd63b4dac4f6a209668",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 1887232,
+     "input_tokens": 1998731,
+     "output_tokens": 42915,
+     "reasoning_output_tokens": 34343
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-stampcore-binary-parity-a87e8639",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "b7a16d3e3c9914df29cac238dd90fe001a7b5aa17826e6feaefe1268353b4ddc",
+    "summary": "a27b2dc6c93ae32b567256e52705d3ce2b461c89f5139e9579ca326079846c2f",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-09-27T17:17:54.379393+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.196288,
+   "duration_s": 3052.201,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T16:38:14.863649+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.8212,
+   "reported_tokens": 9740467,
+   "run_id": "legacy-tallycore-binary-parity-0f9f7180",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9740467,
+    "result_receipts": 1,
+    "stream_sha256": "0b570e447acfc3b40f3141e61640889fc0b1c264c66f0d232313f82bc4a41320",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 9324032,
+     "input_tokens": 9586957,
+     "output_tokens": 153510,
+     "reasoning_output_tokens": 131357
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-tallycore-binary-parity-0f9f7180",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "9d9ee644f46cae513e1d1a5386537175ec0a907a4a9cf6d1e8545609cccb23d7",
+    "summary": "20da9bddf8492486bdb85c7fed3f9ce532d937f4aa3a7035536a6f7c5f2941ba",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-09-27T15:47:22.653202+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.074174,
+   "duration_s": 1378.572,
+   "effort": "max",
+   "fallback": false,
+   "finished_at": "2026-09-27T13:03:14.927017+00:00",
+   "functional": 1.0,
+   "model": "gpt6luna",
+   "quality": 0.835,
+   "reported_tokens": 3299381,
+   "run_id": "legacy-vaultcore-binary-parity-4964176a",
+   "security": 1.0,
+   "solver_cli_version": "codex-cli 0.155.0",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3299381,
+    "result_receipts": 1,
+    "stream_sha256": "b6fadaf156dfa235f29b6a53ad1e88fd5adcd7a5d72f51d96af2c7041277e2e5",
+    "usage": {
+     "cache_write_input_tokens": 0,
+     "cached_input_tokens": 3107072,
+     "input_tokens": 3239701,
+     "output_tokens": 59680,
+     "reasoning_output_tokens": 40687
+    }
+   },
+   "source_directory": "/Users/morganlinton/dev/VulcanBench/runs-effort-gpt6-luna/max/legacy-vaultcore-binary-parity-4964176a",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "4340c4195f50d35a152ba0eb12eb9abbd094cb46f678efee06e6b64e0df329e3",
+    "summary": "044fa5b0e5b0f3d4277a39a166fdc40768c12faab611e359ab97047292f02763",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-09-27T12:40:16.346418+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4"
+}

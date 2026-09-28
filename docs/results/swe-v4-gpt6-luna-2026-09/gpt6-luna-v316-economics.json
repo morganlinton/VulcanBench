@@ -1,0 +1,175 @@
+{
+  "population": "runs-code-quality-maintenance-v3.16 population, 115 runs, 109 priced",
+  "ledger": "comparison.json",
+  "ledger_sha256": "6cfc0dc8f703992a247d95d2132f125862bdc4807e5c85344e779c3b248b3a31",
+  "scores_table": "gpt6-luna-v316-efforts.csv",
+  "scores_sha256": "8d26b78d6ffe8ffb3867e844bcc9d5088187b0a560814c1b18dd1936f92d292a",
+  "pricing_verified": "2026-09-25",
+  "prices_per_million": {
+    "input": 0.1,
+    "cached": 0.01,
+    "output": 0.5
+  },
+  "sources": {
+    "openai": "https://developers.openai.com/api/docs/pricing"
+  },
+  "totals": {
+    "usd": 7.25892,
+    "tokens": 366110854,
+    "hours": 52.82947861111111,
+    "priced": 109,
+    "runs": 115
+  },
+  "groups": {
+    "low": {
+      "effort": "low",
+      "priced": 23,
+      "unpriced_timeouts": 0,
+      "usd": {
+        "n": 23,
+        "mean": 0.027790478260869566,
+        "se": 0.007274311815342826
+      },
+      "usd_total": 0.639181,
+      "tokens": {
+        "n": 23,
+        "mean": 1.654399304347826,
+        "se": 0.5515117654505488
+      },
+      "tokens_total": 38051184,
+      "minutes": {
+        "n": 23,
+        "mean": 5.557563043478261,
+        "se": 1.047903222073788
+      }
+    },
+    "medium": {
+      "effort": "medium",
+      "priced": 23,
+      "unpriced_timeouts": 0,
+      "usd": {
+        "n": 23,
+        "mean": 0.009534565217391305,
+        "se": 0.0006128070346880734
+      },
+      "usd_total": 0.21929500000000002,
+      "tokens": {
+        "n": 23,
+        "mean": 0.40429652173913044,
+        "se": 0.02381409729989719
+      },
+      "tokens_total": 9298820,
+      "minutes": {
+        "n": 23,
+        "mean": 3.559326811594203,
+        "se": 0.3131111633485139
+      }
+    },
+    "high": {
+      "effort": "high",
+      "priced": 23,
+      "unpriced_timeouts": 0,
+      "usd": {
+        "n": 23,
+        "mean": 0.05191208695652174,
+        "se": 0.005020368430456266
+      },
+      "usd_total": 1.193978,
+      "tokens": {
+        "n": 23,
+        "mean": 2.5564966956521737,
+        "se": 0.3039309423606601
+      },
+      "tokens_total": 58799424,
+      "minutes": {
+        "n": 23,
+        "mean": 15.590407246376811,
+        "se": 1.67257649785497
+      }
+    },
+    "extra-high": {
+      "effort": "extra-high",
+      "priced": 21,
+      "unpriced_timeouts": 2,
+      "usd": {
+        "n": 21,
+        "mean": 0.15968628571428573,
+        "se": 0.03641089140138617
+      },
+      "usd_total": 3.353412,
+      "tokens": {
+        "n": 21,
+        "mean": 8.473100904761905,
+        "se": 2.204760868058101
+      },
+      "tokens_total": 177935119,
+      "minutes": {
+        "n": 23,
+        "mean": 52.57451956521739,
+        "se": 10.579109521244105
+      }
+    },
+    "max": {
+      "effort": "max",
+      "priced": 19,
+      "unpriced_timeouts": 4,
+      "usd": {
+        "n": 19,
+        "mean": 0.09752915789473685,
+        "se": 0.01412181073227736
+      },
+      "usd_total": 1.853054,
+      "tokens": {
+        "n": 19,
+        "mean": 4.317174052631579,
+        "se": 0.7584895504104565
+      },
+      "tokens_total": 82026307,
+      "minutes": {
+        "n": 23,
+        "mean": 60.53421449275363,
+        "se": 12.55429656356173
+      }
+    }
+  },
+  "unpriced_timeouts": [
+    {
+      "effort": "extra-high",
+      "task": "legacy-depotcore-binary-parity",
+      "duration_s": 10800.631
+    },
+    {
+      "effort": "extra-high",
+      "task": "legacy-paddockcore-binary-parity",
+      "duration_s": 10800.65
+    },
+    {
+      "effort": "max",
+      "task": "legacy-cellarcore-binary-parity",
+      "duration_s": 10800.638
+    },
+    {
+      "effort": "max",
+      "task": "legacy-depotcore-binary-parity",
+      "duration_s": 10800.656
+    },
+    {
+      "effort": "max",
+      "task": "legacy-lodgecore-binary-parity",
+      "duration_s": 10800.664
+    },
+    {
+      "effort": "max",
+      "task": "legacy-paddockcore-binary-parity",
+      "duration_s": 10800.611
+    }
+  ],
+  "limitations": [
+    "Codex receipts report cumulative input, cached input and output per run; cached input is priced at the cached rate.",
+    "Standard tier, short-context rates; Codex keeps each request within its 272K context window, so no long-context premium is inferred.",
+    "Timed-out runs have no usage receipt and are unpriced; level means cover priced runs only.",
+    "Estimates cover exposed receipts, not an independently observed API invoice."
+  ],
+  "png_sha256": "455e54800f0a61210605fd80cc139cae6392711e2fe262fc1a2b0306268cf08b",
+  "supporting_table": "gpt6-luna-v316-economics-efforts.csv"
+}

@@ -278,6 +278,28 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.16, September 28, 2026: GPT-6 Luna on Frontier v4
+
+- Population frozen September 28, 00:32 PDT: 109 rows of 115 runs, none
+  missing. Six runs that hit the flat 3-hour bound are excluded as
+  incomplete source runs (extra-high depotcore, paddockcore; max cellarcore,
+  depotcore, lodgecore, paddockcore). Each trace shows continuous work to
+  the bound, with no idle gap over 4 minutes.
+- Both judge binary pins (Muse v3.4, Cursor v3.3) matched at prepare.
+- Runs alongside the GPT-6 Sol Frontier v4 solver sweep at the owner's
+  request (2026-09-27); Sol started at 00:31 PDT. Judging window: September
+  28, 00:32 to 14:32 PDT, one uninterrupted window. Launcher
+  `logs/cii-v4-maint-v316-chain.sh`, log `logs/cii-v4-maint-v316-chain.log`.
+- Both judges passed calibration, each using the one-gate allowance: Muse
+  on gate 11 (repeatability, shortfall 0.06), Grok on gate 4 (formatting is
+  presentation, shortfall 0.10); both inside the 0.5 bound.
+- Every Grok call reported "Grok 4.6 Medium"; the display-rename rule
+  accepted it (420 applications logged), as under v3.15. No stop.
+- All 109 submissions published; no invalid probe, no fallback reviews.
+- Cards: `scripts/cii-v4-board/make_gpt6luna_v316_card.py` and
+  `make_gpt6luna_v316_economics_card.py`, both showing the judged combined
+  score and the timeouts-as-0 figure (DECISIONS.md, 2026-09-28).
+
 ## v3.15, September 24 to 25, 2026: Claude Opus 5.5 on Frontier v4
 
 - Population frozen September 24, 20:39 PDT: 114 rows of 115 runs (high

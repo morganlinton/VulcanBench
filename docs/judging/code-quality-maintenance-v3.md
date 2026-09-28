@@ -879,6 +879,36 @@ v3.8 and v3.13 do. Population record:
   entry judged by this pair, and is never placed beside Routine Code
   quality.
 
+## Amendment v3.16, September 28, 2026: GPT-6 Luna on Frontier v4
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+judges changes from v3.7. Protocol id `code-quality-maintenance-v3.16`; run
+directory `runs-code-quality-maintenance-v3.16`; runner
+`harness/maintenance_review_v316.py`, derived from the v3.15 runner with the
+population constants changed. Population record:
+`docs/results/swe-v4-gpt6-luna-2026-09/comparison.json`, built by
+`scripts/cii-v4-board/build_gpt6luna_population.py`.
+
+- Population: the September 25 to 28, 2026 GPT-6 Luna sweep of Frontier v4
+  through Codex CLI 0.155.0 on the ChatGPT Pro subscription, low through
+  max, one attempt per task and level: 115 runs, 109 judged. Six runs hit
+  the flat 3-hour task bound and are excluded as incomplete source runs:
+  extra-high depotcore and paddockcore; max cellarcore, depotcore,
+  lodgecore and paddockcore. Each was working until the bound (no idle gap
+  over 4 minutes in its trace); all six count as failed tasks in pass
+  rates. Cells: low, medium and high 23; extra-high 21; max 19.
+- Solver notes: Codex 0.155.0 is pinned for this model because 0.153.4 is
+  refused for it on a ChatGPT account (DECISIONS.md, 2026-09-25). The
+  extra-high pacecore run was stopped by the operator after an 88-minute
+  client stall and retried; the retry is the counted run.
+- Judges: Muse Spark 1.3 and Grok 4.6, the v3.7 pair under the same pinned
+  binaries, both neutral for an OpenAI submission. Both retake the exam
+  under v3.16 before any counted call. One failing panel is disclosed and
+  the passing one publishes; two failures stop the amendment.
+- Concurrency: judging runs alongside the GPT-6 Sol solver sweep on the
+  owner's request (2026-09-27). The judging window is logged in the
+  operations record for the serial speed-rule check.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

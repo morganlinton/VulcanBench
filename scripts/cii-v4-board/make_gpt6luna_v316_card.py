@@ -510,7 +510,14 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(left, 8.07, "Component", 12.5, True)
     for effort in LEVELS:
         text(cols[effort], 8.07, effort.replace("-", " ").capitalize(), 12.5, True, ha="right")
-    text(cols["max"], 8.33, "/100; Code quality rows are the mean of both judges", 10, ha="right", color=MUTED)
+    text(
+        cols["max"],
+        8.33,
+        "/100; Code quality rows are the mean of both judges",
+        10,
+        ha="right",
+        color=MUTED,
+    )
     line(left, right, 8.5, INK, 0.6)
 
     def se(stat):

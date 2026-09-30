@@ -7,6 +7,62 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-09-29: GPT-6.1 Sol runs on Frontier v4 now, on a pinned Codex 0.159.0, ahead of Grok 4.7
+
+### Decision
+
+GPT-6.1 Sol (`gpt-6.1-sol`, new in Codex on 2026-09-29) is swept on
+VulcanBench Frontier v4 at Low, Medium, High, Extra-high and Max through
+Codex on the ChatGPT Pro subscription (`scripts/run_gpt61_sol_v4.sh`,
+outputs `runs-effort-gpt61-sol/`). Owner request in chat, 2026-09-29: start
+it while GPT-6 Sol's Code quality judging (v3.17) runs. The judges use Muse
+and Cursor and the sweep uses Codex, so no quota is shared; the sweep's
+wall-clock overlaps the judging window and is disclosed on its column, as
+GPT-6 Sol's overlapped GPT-6 Luna's judging. Grok 4.7 now waits for this
+sweep too: the gate launcher was relaunched at 19:18 PDT against a hold
+(`logs/grok-hold-v2.pid`) that exits only when the GPT-6.1 Sol chain logs
+`GPT-6.1 SOL CHAIN DONE` and the v3.17 chain logs `V3.17 CHAIN DONE`.
+
+Amended the same evening (owner: same release treatment for GPT-6.1 Sol,
+judged before Grok for the same Cursor reason): the hold was replaced at
+20:14 PDT by `logs/grok-hold-v3.pid`, which also waits for GPT-6.1 Sol's
+Code quality judging (`logs/cii-v4-maint-v318-chain.log` recording
+`V3.18 CHAIN DONE`). If that judging never runs, Grok stays paused until the
+owner decides.
+
+### Evidence
+
+- Codex 0.159.2 lists the model ("Near-Astra performance for complex work
+  at a lower cost"). One-line probes on the ChatGPT account: 0.155.0,
+  0.157.0 and 0.158.0 are refused ("not supported when using Codex with a
+  ChatGPT account"); 0.159.0 and 0.159.1 answer. The column runs on 0.159.0
+  from its own prefix (`~/.local/vulcanbench-codex-0.159.0`); every other
+  Codex column keeps its version.
+- List prices, checked 2026-09-29 at developers.openai.com/api/docs/pricing
+  and the model page (USD per 1M tokens, standard, short context): $2.00
+  input, $0.10 cached input, $10.00 output; long context over 272K input
+  tokens at 2x input and cache, 1.5x output. Effort `low` to `max`; no
+  ultra is offered.
+
+## 2026-09-29: GPT-6 Sol is judged before Grok 4.7 starts
+
+### Decision
+
+GPT-6 Sol's Code quality judging (protocol v3.17, about 14 hours) runs as
+soon as its Frontier v4 sweep finishes, and the paused Grok 4.7 chain waits
+for that judging to finish. Owner decision in chat, 2026-09-29, chosen over
+running both at once: the Grok 4.6 judge runs through Cursor, and the Grok
+4.7 chain starts with its Cursor legs, so running them together would share
+Cursor limits and put judging load inside Grok 4.7's wall-clock timings.
+
+The Routine v2 gate launcher was relaunched at 11:46 PDT with
+its `GPT6_PID` pointing at a hold process (`logs/grok-hold-for-sol-judging.pid`)
+that exits only when the GPT-6 chain has exited and
+`logs/cii-v4-maint-v317-chain.log` records `V3.17 CHAIN DONE`. The launcher
+then resumes Grok as before (only if the GPT-6 log records the chain done),
+waits for Grok, and runs the gate. If Sol's judging stops early, Grok stays
+paused until the operator resolves it.
+
 ## 2026-09-26: Quality and security analyzers for JavaScript, Rust, C and C++
 
 ### Decision

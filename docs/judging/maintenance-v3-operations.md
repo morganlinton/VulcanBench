@@ -314,6 +314,15 @@ operational notes live here.
   (`operator-invalid.json`). Per the frozen summary, submission-061 is left
   unpublished, as submission-023 was under v3.7; its run still counts for
   pass rates, time and cost. Resumed by `logs/cii-v4-maint-v317-resume2.sh`.
+- Correction to the amendment: the frozen v3.17 amendment says no solver sweep
+  runs during judging. That was true when it was frozen (14:54 PDT); at 19:18
+  the owner started GPT-6.1 Sol's sweep, so it overlapped the rest of the
+  window (next item). The amendment text is hash-bound and stays as frozen.
+- GPT-6 Sol solver note (not judging): the first max depotcore attempt ended
+  after eight minutes with the API's "Selected model is at capacity"; the
+  harness recorded an infrastructure error and re-queued the task
+  ("retried 1 run(s) after infrastructure errors"). The retry is the judged
+  run; the failed attempt is in no cell. Disclosed on the site report.
 - GPT-6.1 Sol's Frontier v4 sweep (Codex) runs during this judging window at
   the owner's request (DECISIONS.md, 2026-09-29); the judges share no quota
   with it.

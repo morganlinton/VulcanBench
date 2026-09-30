@@ -278,6 +278,46 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.17, September 29 to 30, 2026: GPT-6 Sol on Frontier v4
+
+- Population frozen September 29, 14:54 PDT: 115 rows of 115 runs, none
+  excluded or missing; no run reached the 3-hour bound.
+- Both judge binary pins (Muse v3.4, Cursor v3.3) matched at prepare.
+- No solver sweep runs during judging: Grok 4.7 is held until this chain
+  prints V3.17 CHAIN DONE (DECISIONS.md, 2026-09-29). Judging window:
+  September 29, 14:54 PDT to September 30, 00:19 PDT; 00:23 to 04:31
+  (resume); then from 04:33 (resume 2) to (open). Launcher `logs/cii-v4-maint-v317-chain.sh`, resumed by
+  `logs/cii-v4-maint-v317-resume.sh`; log `logs/cii-v4-maint-v317-chain.log`.
+- Both judges passed calibration with no allowance used.
+- Stop, Grok, primary submission-035 (September 30, 00:19): both attempts
+  returned a complete, valid JSON review followed by one stray closing brace
+  (`\n}`), so parsing failed with "Extra data" before any protocol check.
+  New wrapper rule `recover_trailing_braces` (operator rule, same class as
+  the excerpt re-wrap: formatting only, no field edited): decode the first
+  JSON object, drop a remainder that is only whitespace and closing braces,
+  then apply every transport and frozen-validator check (session,
+  subscription guard, no tool use, usage, the display label as the rename
+  rule allows, schema and excerpts). Attempt 1 passed and was selected
+  (score 79.17); the dropped text is in the receipt's `operator_recovery`.
+  The owner may instead invalidate this call and score the submission from
+  Muse alone (the v3.14 `invalidate_unrecoverable_primary` precedent)
+  before publication.
+- Stop, Grok, probe submission-061 (gpt6sol medium codeccore, September 30,
+  04:31): attempt 1 was not valid JSON (a missing comma); attempt 2, after the
+  display-rename re-file, quoted `memo = record[31:46].rstrip(". ,".replace(" ",
+  "")) if False else record[31:46].rstrip(".,")`, which is not in the code.
+  This is the same codeccore line Grok misquoted under v3.7 (GPT-5.6 Sol max,
+  submission-023). No valid probe response exists after the protocol's single
+  retry. `invalidate_unrecoverable_probe` was extended to accept one
+  malformed-JSON attempt beside an unrecoverable-excerpt attempt (at least one
+  attempt must be the excerpt case) and marked the call invalid
+  (`operator-invalid.json`). Per the frozen summary, submission-061 is left
+  unpublished, as submission-023 was under v3.7; its run still counts for
+  pass rates, time and cost. Resumed by `logs/cii-v4-maint-v317-resume2.sh`.
+- GPT-6.1 Sol's Frontier v4 sweep (Codex) runs during this judging window at
+  the owner's request (DECISIONS.md, 2026-09-29); the judges share no quota
+  with it.
+
 ## v3.16, September 28, 2026: GPT-6 Luna on Frontier v4
 
 - Population frozen September 28, 00:32 PDT: 109 rows of 115 runs, none

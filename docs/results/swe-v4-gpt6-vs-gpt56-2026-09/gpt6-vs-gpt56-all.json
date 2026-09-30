@@ -1,0 +1,62 @@
+{
+  "card": "gpt6-vs-gpt56-all",
+  "models": {
+    "gpt6sol": "GPT-6 Sol",
+    "sol56": "GPT-5.6 Sol",
+    "gpt6luna": "GPT-6 Luna",
+    "luna56": "GPT-5.6 Luna"
+  },
+  "sources": {
+    "gpt6sol": {
+      "judging_run": "runs-code-quality-maintenance-v3.17",
+      "protocol": "6d73cb7d4320e20114ef70c73a6a250ca594b289ac2da84dc53963dfdd5b876f",
+      "ledger": "065f80a4dd750ecf8144f06659d71e1f39b96f85029fece9b63be5adef6d783d",
+      "list_rates_per_million": [
+        2.0,
+        0.2,
+        10.0
+      ],
+      "pricing_verified": "2026-09-25",
+      "summary": "83e6e9d1c5dfffaaae0e5b2388462f0a2df51672a4af332b32cda1797a9fce25"
+    },
+    "sol56": {
+      "judging_run": "runs-code-quality-maintenance-v3.7",
+      "protocol": "6f78884f8164f60ad93e3f981cf61fb6edb91882c2fdad3416112f520468e771",
+      "ledger": "d87d8e8ab958c098908078fe1edc3afe84786ec6ef34413e70715a613394427a",
+      "list_rates_per_million": [
+        4.0,
+        0.4,
+        20.0
+      ],
+      "pricing_verified": "2026-09-11",
+      "summary": "042ed949f87f33f4a79347fc4c183eae1910aea34c7be007a800dfbcf6ea1ce9"
+    },
+    "gpt6luna": {
+      "judging_run": "runs-code-quality-maintenance-v3.16",
+      "protocol": "db301bf81db907d13e0ecfff98699951ad918c6b5d9674237fd4a5e73fee73a1",
+      "ledger": "6cfc0dc8f703992a247d95d2132f125862bdc4807e5c85344e779c3b248b3a31",
+      "list_rates_per_million": [
+        0.1,
+        0.01,
+        0.5
+      ],
+      "pricing_verified": "2026-09-25",
+      "summary": "a4fe3c64c43a61cc8327fce6612ff9f2811c7dbdb6b2c776a89da9f6aa978ba9"
+    },
+    "luna56": {
+      "judging_run": "runs-code-quality-maintenance-v3.5",
+      "protocol": "e2c2afdb5149cd3999ce10b79daa7830f768c56147d75c6e88958777405a65fb",
+      "ledger": "cc114b736cbdad27595c1a9154ab042acfa3239f373726aabe59f88fa0531b38",
+      "list_rates_per_million": [
+        0.2,
+        0.02,
+        1.2
+      ],
+      "pricing_verified": "2026-09-11",
+      "summary": "faea0a8e7a99c02aa18e311e0340111f77ba41c8ce535f180acc6a1911f26f0a"
+    }
+  },
+  "png_sha256": "1a87a9cdbff3e9459a9fa18b5b10372ada583b94093d09c083366fc0cca8101f",
+  "supporting_table": "gpt6-vs-gpt56-all-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

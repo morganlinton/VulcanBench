@@ -33,6 +33,8 @@ PRICES: dict[str, dict[str, float]] = {
     # and each model page. Prompts over 272K input tokens bill the whole request
     # at 2x input/cache and 1.5x output; that tier is not inferred here.
     "openai:gpt-6-sol": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
+    # GPT-6.1 Sol, checked 2026-09-29 at the same pages: cached input is 5% of input.
+    "openai:gpt-6.1-sol": {"input": 2.00, "cached_input": 0.10, "output": 10.00},
     "openai:gpt-6-luna": {"input": 0.10, "cached_input": 0.01, "output": 0.50},
     "openai:gpt-5.6-sol": {"input": 4.00, "cached_input": 0.40, "output": 20.00},
     "openai:gpt-5.6-terra": {"input": 2.00, "cached_input": 0.20, "output": 12.00},

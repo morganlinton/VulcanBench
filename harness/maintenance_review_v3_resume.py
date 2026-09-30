@@ -643,6 +643,101 @@ def accept_display_rename(folder: Path, panel: str, stage: str) -> bool:  # noqa
     return False
 
 
+TRAILING_BRACES = re.compile(r"\s*\}+\s*")
+
+
+def recover_trailing_braces(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0912, one branch per precondition
+    """Grok closed a complete JSON answer with extra closing braces on both attempts.
+
+    First seen 2026-09-30 (v3.17, Grok primary submission-035): each reply was a
+    complete, valid JSON object followed by a stray "}" line, so json.loads failed
+    with "Extra data" before any protocol check ran. The answer is recovered by
+    decoding the first JSON object and dropping the remainder, only when that
+    remainder is nothing but whitespace and closing braces. The recovered answer
+    then goes through every check the transport and the frozen validator apply
+    (session, subscription guard, no tool use, usage, the Cursor display label
+    as accept_display_rename allows it, schema and excerpts). No field is edited;
+    the dropped text is recorded in the receipt. Anything else still stops.
+    """
+    if panel != "grok":
+        return False
+    receipts = [folder / f"attempt-{n}.json" for n in (1, 2)]
+    if not all(r.exists() for r in receipts):
+        return False
+    recs = [json.loads(r.read_text()) for r in receipts]
+    if any(
+        r.get("status") != "failed" or not str(r.get("error", "")).startswith("Extra data")
+        for r in recs
+    ):
+        return False
+    if stage == "calibration":
+        kind, payload = calibration_call(folder.name)
+    else:
+        kind, payload = stage_kind(stage), payload_for(stage, folder.name, panel)
+    if payload is None or kind not in ("review", "probe"):
+        return False
+    expected = v3.read(_out() / "protocol.json")["reviewers"]["grok"]["display_name"]
+    labels = {expected}
+    if expected.startswith(RENAME_PREFIX):
+        labels.add(expected[len(RENAME_PREFIX) :])
+    for n in (1, 2):
+        stream = folder / f"attempt-{n}.stream.jsonl"
+        if not stream.exists():
+            continue
+        events = [json.loads(line) for line in stream.read_text().splitlines() if line.strip()]
+        results = [e for e in events if e.get("type") == "result"]
+        if len(results) != 1:
+            continue
+        raw = v3._strip_fences(str(results[0].get("result") or "")).strip()
+        try:
+            _, end = json.JSONDecoder().raw_decode(raw)
+        except json.JSONDecodeError:
+            continue
+        remainder = raw[end:]
+        if not remainder or not TRAILING_BRACES.fullmatch(remainder):
+            continue
+        results[0]["result"] = raw[:end]
+        cleaned = "\n".join(json.dumps(e) for e in events)
+        try:
+            vote = v3.parse_cursor_stream(cleaned)
+            if vote["model_reported"] not in labels:
+                continue
+            v3.validate(kind, vote, payload)
+        except (ValueError, KeyError, RuntimeError):
+            continue
+        if kind == "review":
+            vote["reported_score"] = vote["score"]
+            vote.update(v3.host_review_score(vote))
+        vote.update(
+            binding=recs[n - 1]["binding"],
+            status="complete",
+            stage=stage,
+            panel=panel,
+            kind=kind,
+            operator_recovery={
+                "at": datetime.now(UTC).isoformat(),
+                "method": "trailing closing braces after a complete JSON object removed; no field edited",
+                "removed": remainder,
+                "source_attempt": n,
+                "label_reported": vote["model_reported"],
+            },
+        )
+        base.save(folder / "selected.json", vote)
+        print(
+            json.dumps(
+                {
+                    "event": "trailing_brace_recovery_applied",
+                    "call": str(folder.relative_to(_out())),
+                    "attempt": n,
+                    "removed": remainder,
+                }
+            ),
+            flush=True,
+        )
+        return True
+    return False
+
+
 _BULLET = re.compile(r"^\s*(?:[*+-]|\d+[.)])\s+")
 
 
@@ -863,6 +958,13 @@ def recover_excerpts(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR
 
 
 INVALID_MARKER = "operator-invalid.json"
+JSON_SYNTAX_ERRORS = (
+    "Expecting ",
+    "Extra data",
+    "Unterminated string",
+    "Invalid control character",
+    "Invalid \\escape",
+)
 
 
 def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0911, one return per precondition
@@ -880,14 +982,24 @@ def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool
     receipts = [folder / f"attempt-{n}.json" for n in (1, 2)]
     if not all(r.exists() for r in receipts):
         return False
-    if any(json.loads(r.read_text()).get("error") != EXCERPT_ERROR for r in receipts):
+    errors = [str(json.loads(r.read_text()).get("error")) for r in receipts]
+    # Each attempt is either an unrecoverable excerpt or a reply that is not valid JSON at
+    # all (added 2026-09-30, v3.17 submission-061: attempt 1 missing a comma, attempt 2 an
+    # invented quote). At least one attempt must be the excerpt case.
+    if not all(e == EXCERPT_ERROR or e.startswith(JSON_SYNTAX_ERRORS) for e in errors):
+        return False
+    if EXCERPT_ERROR not in errors:
         return False
     evidence = payload_for(stage, folder.name, folder.parent.parent.name)
     if evidence is None:
         return False
     source = list(v3.strings(evidence))
     unsupported = {}
+    malformed = {}
     for attempt in (1, 2):
+        if errors[attempt - 1] != EXCERPT_ERROR:
+            malformed[str(attempt)] = errors[attempt - 1]
+            continue
         stream = folder / f"attempt-{attempt}.stream.jsonl"
         if not stream.exists():
             return False
@@ -905,8 +1017,12 @@ def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool
         unsupported[str(attempt)] = bad
     rec = {
         "at": datetime.now(UTC).isoformat(),
-        "finding": "Both attempts quoted an excerpt absent from the evidence that no recovery "
-        "rule accepts (a token added, changed, or invented).",
+        "finding": "No valid probe response: "
+        + ("both attempts" if not malformed else "one attempt")
+        + " quoted an excerpt absent from the evidence that no recovery rule accepts "
+        "(a token added, changed, or invented)"
+        + (", and the other was not valid JSON." if malformed else "."),
+        "malformed_attempts": malformed,
         "action": "Probe invalid; no match call is made. The frozen summary leaves the "
         "submission unpublished for this panel. Remaining probes continue.",
         "unsupported_excerpts": unsupported,
@@ -1043,6 +1159,9 @@ def main() -> int:  # noqa: PLR0912, one branch per operator rule
             applied += 1
             continue
         if folder is not None and accept_display_rename(folder, panel, folder.parent.name):
+            applied += 1
+            continue
+        if folder is not None and recover_trailing_braces(folder, panel, folder.parent.name):
             applied += 1
             continue
         if folder is not None and recover_match_ids(folder, panel, folder.parent.name):

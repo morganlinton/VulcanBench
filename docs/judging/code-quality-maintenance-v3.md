@@ -909,6 +909,31 @@ population constants changed. Population record:
   owner's request (2026-09-27). The judging window is logged in the
   operations record for the serial speed-rule check.
 
+## Amendment v3.17, September 29, 2026: GPT-6 Sol on Frontier v4
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+judges changes from v3.7. Protocol id `code-quality-maintenance-v3.17`; run
+directory `runs-code-quality-maintenance-v3.17`; runner
+`harness/maintenance_review_v317.py`, derived from the v3.16 runner with the
+population constants changed. Population record:
+`docs/results/swe-v4-gpt6-sol-2026-09/comparison.json`, built by
+`scripts/cii-v4-board/build_gpt6sol_population.py`.
+
+- Population: the September 28 to 29, 2026 GPT-6 Sol sweep of Frontier v4
+  through Codex CLI 0.155.0 on the ChatGPT Pro subscription, low through
+  max, one attempt per task and level: 115 runs, all finished, all judged.
+  No run reached the flat 3-hour bound (the longest, max paddockcore, took
+  129 minutes), so no exclusion and no second combined figure applies.
+- Solver notes: Codex 0.155.0 is pinned for this model because 0.153.4 is
+  refused for it on a ChatGPT account (DECISIONS.md, 2026-09-25).
+- Judges: Muse Spark 1.3 and Grok 4.6, the v3.7 pair under the same pinned
+  binaries, both neutral for an OpenAI submission. Both retake the exam
+  under v3.17 before any counted call. One failing panel is disclosed and
+  the passing one publishes; two failures stop the amendment.
+- Concurrency: no solver sweep runs during judging. The owner held the Grok
+  4.7 chain until this amendment's chain finishes (DECISIONS.md, 2026-09-29),
+  because the Grok judge and the Grok 4.7 chain both run through Cursor.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

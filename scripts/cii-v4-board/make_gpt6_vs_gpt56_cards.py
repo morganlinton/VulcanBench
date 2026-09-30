@@ -96,6 +96,7 @@ HOLLOW = {"sol56", "luna56"}  # previous generation: hollow markers
 # Judged rows per cell where fewer than 23; every other cell is 23.
 JUDGED = {
     ("sol56", "max"): 22,
+    ("gpt6sol", "medium"): 22,
     ("gpt6luna", "extra-high"): 21,
     ("gpt6luna", "max"): 19,
 }
@@ -275,7 +276,7 @@ WIDTH_IN = 16
 
 def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one linear figure
     rows_per_model = 4
-    height_in = 9.35 + 0.33 * rows_per_model * len(models) + 0.26 * 4
+    height_in = 9.35 + 0.33 * rows_per_model * len(models) + 0.26 * (5 if len(models) > 2 else 4)
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
@@ -483,7 +484,8 @@ def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one li
         )
     if "sol56" in models:
         notes.append(
-            "GPT-5.6 Sol max is judged on 22 of 23 runs (one invalid judge probe on codeccore; that run passed and is counted and priced)."
+            "GPT-5.6 Sol max and GPT-6 Sol medium are each judged on 22 of 23 runs: one invalid judge probe on codeccore in each; "
+            "those runs are counted and priced."
         )
     if "luna56" in models:
         notes.append(
@@ -494,13 +496,19 @@ def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one li
         + ", ".join(f"{NAMES[m]} {SOURCES[m][1].rsplit('-', 1)[1]}" for m in models)
         + ") with the same rubric and judges. GPT-6 ran on Codex CLI 0.155.0, GPT-5.6 on 0.153.4 or older."
     )
+    prices = [f"{NAMES[m]} \\${SOURCES[m][4][0]:.2f} and \\${SOURCES[m][4][2]:.2f}" for m in models]
+    half = (len(prices) + 1) // 2 if len(prices) > 2 else len(prices)
     notes.append(
         "List prices per million tokens, input and output: "
-        + "; ".join(
-            f"{NAMES[m]} \\${SOURCES[m][4][0]:.2f} and \\${SOURCES[m][4][2]:.2f}" for m in models
-        )
-        + ". Solver inference only; subscription bills differ."
+        + "; ".join(prices[:half])
+        + (";" if prices[half:] else ".")
     )
+    if prices[half:]:
+        notes.append(
+            "; ".join(prices[half:]) + ". Solver inference only; subscription bills differ."
+        )
+    else:
+        notes[-1] += " Solver inference only; subscription bills differ."
     for i, note in enumerate(notes):
         text(left, y - step / 2 + 0.2 + 0.26 * i, note, 10.5, color=MUTED)
 

@@ -1,0 +1,49 @@
+{
+  "final": true,
+  "coverage": {
+    "submissions_with_both_reviews": 114,
+    "submissions_total": 114,
+    "submissions_with_probes": 114,
+    "per_panel_reviews": {
+      "muse": 114,
+      "grok": 114
+    },
+    "per_panel_probes": {
+      "muse": 114,
+      "grok": 114
+    },
+    "unpublished_invalid_probe": [
+      {
+        "id": "submission-061",
+        "model": "gpt6sol",
+        "effort": "medium",
+        "task": "legacy-codeccore-binary-parity"
+      }
+    ]
+  },
+  "headline": "Combined score 67.62 to 86.82 from low to max.",
+  "subtitle": "Best at max",
+  "best_effort": "max",
+  "expected_rows": {
+    "gpt6sol/low": 23,
+    "gpt6sol/medium": 22,
+    "gpt6sol/high": 23,
+    "gpt6sol/extra-high": 23,
+    "gpt6sol/max": 23
+  },
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "summary_sha256": "83e6e9d1c5dfffaaae0e5b2388462f0a2df51672a4af332b32cda1797a9fce25",
+  "protocol_sha256": "6d73cb7d4320e20114ef70c73a6a250ca594b289ac2da84dc53963dfdd5b876f",
+  "png_sha256": "92423c7e29206441277fc1bef4684aa7058aff156563fb5be21e553b66b262f8",
+  "supporting_table": "gpt6-sol-v317-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

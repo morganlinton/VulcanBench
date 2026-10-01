@@ -1,0 +1,168 @@
+{
+  "population": "runs-code-quality-maintenance-v3.18 population, 115 runs",
+  "ledger": "comparison.json",
+  "ledger_sha256": "7359debe2d78a801b894037ca63c599a44e3588927e5209221a3fc8c5ba1d64f",
+  "pricing_verified": "2026-09-29",
+  "sources": {
+    "openai": "https://developers.openai.com/api/docs/pricing"
+  },
+  "totals": {
+    "gpt61sol": {
+      "usd": 44.334234,
+      "usd_upper": 44.334234,
+      "tokens": 136130310,
+      "hours": 22.046433333333333,
+      "runs": 115
+    }
+  },
+  "groups": {
+    "gpt61sol/low": {
+      "model": "gpt61sol",
+      "effort": "low",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.3059761739130435,
+        "se": 0.08212864163140633
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.3059761739130435,
+        "se": 0.08212864163140633
+      },
+      "usd_total": 7.037452,
+      "tokens": {
+        "n": 23,
+        "mean": 1.2399289130434783,
+        "se": 0.5061298478221161
+      },
+      "tokens_total": 28518365,
+      "minutes": {
+        "n": 23,
+        "mean": 6.890042753623188,
+        "se": 1.7540226278530304
+      },
+      "fallbacks": 0
+    },
+    "gpt61sol/medium": {
+      "model": "gpt61sol",
+      "effort": "medium",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.3986,
+        "se": 0.14553685386132875
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.3986,
+        "se": 0.14553685386132875
+      },
+      "usd_total": 9.1678,
+      "tokens": {
+        "n": 23,
+        "mean": 1.616234652173913,
+        "se": 0.8345880328253971
+      },
+      "tokens_total": 37173397,
+      "minutes": {
+        "n": 23,
+        "mean": 10.564721014492754,
+        "se": 3.214187517499665
+      },
+      "fallbacks": 0
+    },
+    "gpt61sol/high": {
+      "model": "gpt61sol",
+      "effort": "high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.3300698695652174,
+        "se": 0.031945318758872104
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.3300698695652174,
+        "se": 0.031945318758872104
+      },
+      "usd_total": 7.591607,
+      "tokens": {
+        "n": 23,
+        "mean": 0.9080588260869565,
+        "se": 0.1434838803531334
+      },
+      "tokens_total": 20885353,
+      "minutes": {
+        "n": 23,
+        "mean": 10.221878985507246,
+        "se": 0.45684563445560405
+      },
+      "fallbacks": 0
+    },
+    "gpt61sol/extra-high": {
+      "model": "gpt61sol",
+      "effort": "extra-high",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.4345906956521739,
+        "se": 0.04221095966784895
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.4345906956521739,
+        "se": 0.04221095966784895
+      },
+      "usd_total": 9.995586,
+      "tokens": {
+        "n": 23,
+        "mean": 1.1175382173913044,
+        "se": 0.19211556006828706
+      },
+      "tokens_total": 25703379,
+      "minutes": {
+        "n": 23,
+        "mean": 15.371615942028985,
+        "se": 0.8210314433597373
+      },
+      "fallbacks": 0
+    },
+    "gpt61sol/max": {
+      "model": "gpt61sol",
+      "effort": "max",
+      "n": 23,
+      "usd": {
+        "n": 23,
+        "mean": 0.45833865217391306,
+        "se": 0.03938689079664593
+      },
+      "usd_upper": {
+        "n": 23,
+        "mean": 0.45833865217391306,
+        "se": 0.03938689079664593
+      },
+      "usd_total": 10.541789,
+      "tokens": {
+        "n": 23,
+        "mean": 1.0369485217391305,
+        "se": 0.1666569360795239
+      },
+      "tokens_total": 23849816,
+      "minutes": {
+        "n": 23,
+        "mean": 14.464176086956522,
+        "se": 0.8400917348623297
+      },
+      "fallbacks": 0
+    }
+  },
+  "limitations": [
+    "Codex receipts report cumulative input, cached input and output per run; cached input is priced at the cached rate ($0.10 per million for GPT-6.1 Sol against $2.00 uncached, $10.00 output).",
+    "Standard tier, short-context rates; Codex keeps each request within its 272K context window, so no long-context premium is inferred.",
+    "Estimates cover exposed receipts, not an independently observed API invoice."
+  ],
+  "summary_sha256": "288f844bc09e87334d6ebef0d803dc91bca7b200fa1053b1bfd1624f911b3ff6",
+  "png_sha256": "3564f3b6f0f7ce0528bac19afcc85ae6fda301d8c8c53d461413f923633c803b",
+  "supporting_table": "gpt61-sol-v318-economics-efforts.csv"
+}

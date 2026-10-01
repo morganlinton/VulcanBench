@@ -278,6 +278,58 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.18, September 30 to October 1, 2026: GPT-6.1 Sol on Frontier v4
+
+- First prepare (20:55 PDT) stopped in v2's evidence rebuild: three runs'
+  saved patches cannot be re-applied (low payrollcore and medium lodgecore
+  add test fixtures git treats as binary, so the text patch says only
+  "Binary files differ"; low cellarcore's fixture text was altered by the
+  text-mode capture, "corrupt patch"). v2's own recovery re-applies a plain
+  diff and fails the same way. The launcher started anyway and stopped at
+  calibration with no judge call (no protocol.json yet). v2 is frozen for
+  every earlier protocol, so the fix lives in the new v3.18 runner only:
+  `evidence_for` falls back, after v2 fails, to the same provenance check v2
+  uses (the saved workspace's staged text diff, normalized as the capture
+  was, must equal the run's patch) and then applies that index's `--binary`
+  diff. The three method records are frozen under `reconstruction/`. Only
+  test fixtures differ; the reviewed module is rebuilt exactly as before.
+  The partial directory was deleted and prepare rerun from scratch: 115
+  submissions, protocol c7dbb658.
+- Summary (October 1, 12:52): both judges passed with no allowance; 115 of 115
+  published, ready_for_publication true. Submission-054 is published from Muse
+  alone (reviewed layer and intent recovery), as the frozen summarize does for
+  any submission without two valid reviews; the card checks every row's Code
+  quality against the summary. Combined low to max: 86.22, 86.44, 88.23,
+  88.78, 88.35. The Grok 4.7 hold released and that chain started at 12:52.
+- Muse probe submission-083 (gpt61sol high codeccore, October 1, 03:28): attempt
+  1 wrote a raw backslash-zero into its JSON (invalid escape); attempt 2 quoted
+  `line = chunk.split(b"\0", 1)[0].split(b"\r", 1)[0].split(b"\n", 1)[0]` with
+  the escapes decoded into control characters, so the excerpt no longer
+  matched the source text. The extended `invalidate_unrecoverable_probe`
+  marked it invalid. Owner decision (October 1, morning): treat it as a
+  JSON-escaping slip, not an invented quote. New wrapper rule
+  `recover_escaped_excerpts`, placed before the invalidation rule: an
+  unsupported excerpt is respelled with control characters written back as
+  the source's escapes and must then be verbatim; the attempt must pass the
+  frozen validator otherwise. Applied at 05:52: attempt 2 selected, one
+  excerpt respelled, original in the receipt; the invalidation marker kept as
+  `operator-invalid.superseded.json`. The Muse probe stage was rerun alone
+  (its own lock, while Grok's primary stage ran) and made the one missing
+  match call. Muse: 115 of 115 probes and matches.
+- Stop, Grok, primary submission-054 (gpt61sol medium paddockcore, October 1,
+  06:01): both attempts quoted `self.standing[pony] += 2` where the code reads
+  `self.standing[parts[1]] += 2`, a changed token, which no rule recovers (the
+  new escape respelling does not apply). Same outcome as the owner's v3.14
+  decision on a Grok primary: new wrapper rule `invalidate_unrecoverable_primary`
+  (the v3.14 one-off script's condition, now in-wrapper so the display-rename
+  and other rules stay active) marked the call invalid, and the wrapper's
+  review stage skips it (`run_reviews_skipping`, repeats and pairwise in full).
+  The frozen summarize publishes submission-054 from Muse alone. Resumed by
+  `logs/cii-v4-maint-v318-resume.sh` at 06:04.
+- Judging window: September 30, 20:58 PDT to October 1, 06:01; 06:04 to
+  12:52 (resume). No solver sweep runs;
+  Grok 4.7 is held until `V3.18 CHAIN DONE` (DECISIONS.md, 2026-09-29).
+
 ## v3.17, September 29 to 30, 2026: GPT-6 Sol on Frontier v4
 
 - Population frozen September 29, 14:54 PDT: 115 rows of 115 runs, none

@@ -49,6 +49,13 @@ OUTPUT = ROOT / "docs/results/swe-v4-gpt6-vs-gpt56-2026-09"
 RESULTS = ROOT / "docs/results"
 # key: (judging run, protocol id, key in that run, population record, list rates in/cached/out per million)
 SOURCES = {
+    "gpt61sol": (
+        "runs-code-quality-maintenance-v3.18",
+        "code-quality-maintenance-v3.18",
+        "gpt61sol",
+        "swe-v4-gpt61-sol-2026-09/comparison.json",
+        (2.00, 0.10, 10.00),
+    ),
     "gpt6sol": (
         "runs-code-quality-maintenance-v3.17",
         "code-quality-maintenance-v3.17",
@@ -79,19 +86,27 @@ SOURCES = {
     ),
 }
 NAMES = {
+    "gpt61sol": "GPT-6.1 Sol",
     "gpt6sol": "GPT-6 Sol",
     "sol56": "GPT-5.6 Sol",
     "gpt6luna": "GPT-6 Luna",
     "luna56": "GPT-5.6 Luna",
 }
 HARNESS = {
+    "gpt61sol": "Codex 0.159.0",
     "gpt6sol": "Codex 0.155.0",
     "sol56": "Codex",
     "gpt6luna": "Codex 0.155.0",
     "luna56": "Codex",
 }
-COLORS = {"gpt6sol": "#10A37F", "sol56": "#7A9A2E", "gpt6luna": "#0F5E4F", "luna56": "#5EC59B"}
-MARKERS = {"gpt6sol": "D", "sol56": "D", "gpt6luna": "v", "luna56": "v"}
+COLORS = {
+    "gpt61sol": "#0B3D2E",
+    "gpt6sol": "#10A37F",
+    "sol56": "#7A9A2E",
+    "gpt6luna": "#0F5E4F",
+    "luna56": "#5EC59B",
+}
+MARKERS = {"gpt61sol": "o", "gpt6sol": "D", "sol56": "D", "gpt6luna": "v", "luna56": "v"}
 HOLLOW = {"sol56", "luna56"}  # previous generation: hollow markers
 # Judged rows per cell where fewer than 23; every other cell is 23.
 JUDGED = {
@@ -105,6 +120,11 @@ TIMEOUTS = {("gpt6luna", "extra-high"): 2, ("gpt6luna", "max"): 4}
 CARDS = {
     "luna": ("gpt6-vs-gpt56-luna", ("gpt6luna", "luna56"), "GPT-6 Luna vs. GPT-5.6 Luna"),
     "sol": ("gpt6-vs-gpt56-sol", ("gpt6sol", "sol56"), "GPT-6 Sol vs. GPT-5.6 Sol"),
+    "solfam": (
+        "sol-family-combined",
+        ("gpt61sol", "gpt6sol", "sol56"),
+        "three generations of Sol",
+    ),
     "all": (
         "gpt6-vs-gpt56-all",
         ("gpt6sol", "sol56", "gpt6luna", "luna56"),
@@ -115,6 +135,7 @@ PANELS = ("muse", "grok")
 SPLIT_WITHOUT_L3 = {"l1": 0.24, "l2": 0.09}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 PRICING_VERIFIED = {
+    "gpt61sol": "2026-09-29",
     "gpt6sol": "2026-09-25",
     "gpt6luna": "2026-09-25",
     "sol56": "2026-09-11",
@@ -139,19 +160,37 @@ def mean_se(values):
 
 
 def code_quality(row):
+    """Per-row Code quality from the panels with a valid review, as the frozen summary publishes it.
+
+    A row whose one panel has no valid primary review (an invalidated call) is
+    published from the other panel alone, reviewed layer and intent recovery.
+    """
     panels = [row["panels"][p] for p in PANELS]
-    require(all(p["l1"] is not None for p in panels), f"{row['id']}: reviews incomplete")
-    l1 = statistics.mean(p["l1"]["score"] for p in panels)
-    l2_values = [p["l2"] for p in panels if p["l2"] is not None]
+    reviewed = [p for p in panels if p["l1"] is not None]
+    require(reviewed, f"{row['id']}: no valid review")
+    if len(reviewed) < len(panels):
+        require(
+            (row.get("published") or {}).get("code_quality") is not None,
+            f"{row['id']}: reviews incomplete",
+        )
+    l1 = statistics.mean(p["l1"]["score"] for p in reviewed)
+    l2_values = [p["l2"] for p in reviewed if p["l2"] is not None]
     require(
-        all(p["l2"] is not None or p["l2_denominator"] == 0 for p in panels),
+        all(p["l2"] is not None or p["l2_denominator"] == 0 for p in reviewed),
         f"{row['id']}: probes incomplete",
     )
-    if l2_values:
-        return (
-            SPLIT_WITHOUT_L3["l1"] * l1 + SPLIT_WITHOUT_L3["l2"] * statistics.mean(l2_values)
-        ) / WEIGHTS_V3["human_like"]
-    return l1
+    cq = (
+        (SPLIT_WITHOUT_L3["l1"] * l1 + SPLIT_WITHOUT_L3["l2"] * statistics.mean(l2_values))
+        / WEIGHTS_V3["human_like"]
+        if l2_values
+        else l1
+    )
+    published = (row.get("published") or {}).get("code_quality")
+    require(
+        published is None or abs(published - cq) < 1e-6,
+        f"{row['id']}: {cq} differs from the summary's {published}",
+    )
+    return cq
 
 
 def composite(run, quality):
@@ -276,7 +315,11 @@ WIDTH_IN = 16
 
 def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one linear figure
     rows_per_model = 4
-    height_in = 9.35 + 0.33 * rows_per_model * len(models) + 0.26 * (5 if len(models) > 2 else 4)
+    height_in = (
+        9.35
+        + 0.33 * rows_per_model * len(models)
+        + 0.26 * (7 if "gpt61sol" in models else 5 if len(models) > 2 else 4)
+    )
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
@@ -487,15 +530,26 @@ def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one li
             "GPT-5.6 Sol max and GPT-6 Sol medium are each judged on 22 of 23 runs: one invalid judge probe on codeccore in each; "
             "those runs are counted and priced."
         )
+    if "gpt61sol" in models:
+        notes.append(
+            "GPT-6.1 Sol medium paddockcore has no valid Grok review (a changed quote on both attempts) and is scored from Muse alone."
+        )
     if "luna56" in models:
         notes.append(
             "GPT-5.6 Luna ran before the 3-hour bound (September 13); one of its max passes took 196 minutes."
         )
-    notes.append(
+    judged_in = (
         "Each model was judged in its own protocol run ("
         + ", ".join(f"{NAMES[m]} {SOURCES[m][1].rsplit('-', 1)[1]}" for m in models)
-        + ") with the same rubric and judges. GPT-6 ran on Codex CLI 0.155.0, GPT-5.6 on 0.153.4 or older."
+        + ") with the same rubric and judges."
     )
+    if "gpt61sol" in models:
+        notes.append(judged_in)
+        notes.append(
+            "GPT-6.1 Sol ran on Codex CLI 0.159.0, GPT-6 on 0.155.0, GPT-5.6 on 0.153.4 or older."
+        )
+    else:
+        notes.append(judged_in + " GPT-6 ran on Codex CLI 0.155.0, GPT-5.6 on 0.153.4 or older.")
     prices = [f"{NAMES[m]} \\${SOURCES[m][4][0]:.2f} and \\${SOURCES[m][4][2]:.2f}" for m in models]
     half = (len(prices) + 1) // 2 if len(prices) > 2 else len(prices)
     notes.append(

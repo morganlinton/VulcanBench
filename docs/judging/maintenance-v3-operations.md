@@ -278,6 +278,26 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.18, September 30 to October 1, 2026: GPT-6.1 Sol on Frontier v4
+
+- First prepare (20:55 PDT) stopped in v2's evidence rebuild: three runs'
+  saved patches cannot be re-applied (low payrollcore and medium lodgecore
+  add test fixtures git treats as binary, so the text patch says only
+  "Binary files differ"; low cellarcore's fixture text was altered by the
+  text-mode capture, "corrupt patch"). v2's own recovery re-applies a plain
+  diff and fails the same way. The launcher started anyway and stopped at
+  calibration with no judge call (no protocol.json yet). v2 is frozen for
+  every earlier protocol, so the fix lives in the new v3.18 runner only:
+  `evidence_for` falls back, after v2 fails, to the same provenance check v2
+  uses (the saved workspace's staged text diff, normalized as the capture
+  was, must equal the run's patch) and then applies that index's `--binary`
+  diff. The three method records are frozen under `reconstruction/`. Only
+  test fixtures differ; the reviewed module is rebuilt exactly as before.
+  The partial directory was deleted and prepare rerun from scratch: 115
+  submissions, protocol c7dbb658.
+- Judging window: September 30, 20:58 PDT to (open). No solver sweep runs;
+  Grok 4.7 is held until `V3.18 CHAIN DONE` (DECISIONS.md, 2026-09-29).
+
 ## v3.17, September 29 to 30, 2026: GPT-6 Sol on Frontier v4
 
 - Population frozen September 29, 14:54 PDT: 115 rows of 115 runs, none

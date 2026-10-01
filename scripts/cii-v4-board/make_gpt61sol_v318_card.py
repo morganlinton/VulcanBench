@@ -165,7 +165,9 @@ def load():
                     [
                         entry["panels"][p]["l2"]
                         for p in PANELS
+                        # only panels with a valid review count, as in the frozen summary
                         if entry["panels"][p]["l2"] is not None
+                        and entry["panels"][p]["l1"] is not None
                     ]
                 )
                 if layers == "l1+l2"

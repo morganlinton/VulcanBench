@@ -967,6 +967,128 @@ JSON_SYNTAX_ERRORS = (
 )
 
 
+ESCAPES = {"\x00": "\\0", "\r": "\\r", "\n": "\\n", "\t": "\\t"}
+
+
+def _escape_variants(excerpt: str) -> list[str]:
+    """Spellings of an excerpt with decoded control characters written back as source escapes."""
+    variants = []
+    for keep_newlines in (True, False):
+        out = "".join(
+            ch if (keep_newlines and ch == "\n") else ESCAPES.get(ch, ch) for ch in excerpt
+        )
+        if out != excerpt and out not in variants:
+            variants.append(out)
+    return variants
+
+
+def recover_escaped_excerpts(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0912, one branch per precondition
+    """A quote of a string literal whose escapes the judge's JSON turned into real control characters.
+
+    First seen 2026-10-01 (v3.18, Muse probe submission-083, codeccore): the
+    source line ``chunk.split(b"\\0", 1)[0].split(b"\\r", 1)...`` was quoted with a
+    raw backslash-zero on attempt 1 (invalid JSON) and as ``\\u0000``, ``\\r``, ``\\n`` on
+    attempt 2, which decode to control characters, so the excerpt no longer
+    matched the source text. That is a JSON-escaping slip, not an invented
+    quote. Each attempt that failed only on excerpts is tried: every unsupported
+    excerpt is respelled with control characters written back as the source's
+    escapes, and must then be verbatim (or verbatim after the documented re-wrap).
+    The attempt must then pass the frozen validator unchanged otherwise. The
+    other attempt may have failed on excerpts or on JSON syntax. Original
+    excerpts are recorded in the receipt.
+    """
+    receipts = [folder / f"attempt-{n}.json" for n in (1, 2)]
+    if not all(r.exists() for r in receipts) or (folder / "selected.json").exists():
+        return False
+    errors = [str(json.loads(r.read_text()).get("error")) for r in receipts]
+    if not all(e == EXCERPT_ERROR or e.startswith(JSON_SYNTAX_ERRORS) for e in errors):
+        return False
+    if stage == "calibration":
+        kind, payload = calibration_call(folder.name)
+    elif stage in ("primary", "repeat", "probe"):
+        kind, payload = stage_kind(stage), payload_for(stage, folder.name, panel)
+    else:
+        return False
+    if payload is None or kind not in ("review", "probe"):
+        return False
+    source = list(v3.strings(payload))
+    for attempt in (1, 2):
+        if errors[attempt - 1] != EXCERPT_ERROR:
+            continue
+        stream = folder / f"attempt-{attempt}.stream.jsonl"
+        if not stream.exists():
+            continue
+        try:
+            vote = v3.parse_stream_for(panel, stream.read_text())
+        except (ValueError, json.JSONDecodeError, KeyError, RuntimeError):
+            continue
+        holders = (
+            list(vote.get("dimensions", {}).items())
+            if kind == "review"
+            else list(enumerate(vote.get("departures", [])))
+        )
+        recovered, ok, escaped_any = {}, True, False
+        for label, detail in holders:
+            if rewrap_excerpt(detail["excerpt"], source) is not None:
+                span = rewrap_excerpt(detail["excerpt"], source)
+                if span != detail["excerpt"]:
+                    recovered[str(label)] = detail["excerpt"]
+                    detail["excerpt"] = span
+                continue
+            span = next(
+                (
+                    hit
+                    for variant in _escape_variants(detail["excerpt"])
+                    if (hit := rewrap_excerpt(variant, source)) is not None
+                ),
+                None,
+            )
+            if span is None:
+                ok = False
+                break
+            recovered[str(label)] = detail["excerpt"]
+            detail["excerpt"] = span
+            escaped_any = True
+        if not ok or not escaped_any:
+            continue
+        try:
+            v3.validate(kind, vote, payload)
+        except ValueError:
+            continue
+        if kind == "review":
+            vote["reported_score"] = vote["score"]
+            vote.update(v3.host_review_score(vote))
+        vote.update(
+            binding=json.loads(receipts[attempt - 1].read_text())["binding"],
+            status="complete",
+            stage=stage,
+            panel=panel,
+            kind=kind,
+            operator_recovery={
+                "at": datetime.now(UTC).isoformat(),
+                "method": "control characters in quoted string literals written back as the source's escapes; "
+                "no other field edited",
+                "original_excerpts": recovered,
+                "source_attempt": attempt,
+                "other_attempt_error": errors[2 - attempt],
+            },
+        )
+        base.save(folder / "selected.json", vote)
+        print(
+            json.dumps(
+                {
+                    "event": "escaped_excerpt_recovery_applied",
+                    "call": str(folder.relative_to(_out())),
+                    "attempt": attempt,
+                    "holders": sorted(recovered),
+                }
+            ),
+            flush=True,
+        )
+        return True
+    return False
+
+
 def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0911, one return per precondition
     """Both probe attempts failed only on an excerpt that no recovery rule accepts.
 
@@ -1083,10 +1205,147 @@ def run_probes_skipping(panel: str, skipped: set[str]) -> int:
     return 0
 
 
+def invalidated_primaries(panel: str) -> set[str]:
+    return {
+        d.name
+        for d in (_out() / "calls" / panel / "primary").glob("*/")
+        if (d / INVALID_MARKER).exists()
+    }
+
+
+def invalidate_unrecoverable_primary(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0911, one return per precondition
+    """Both primary-review attempts quoted evidence that no recovery rule accepts.
+
+    Owner decision, September 23, 2026 (v3.14, Grok primary submission-054 of
+    Opus 5.5 on Routine v1): mark the call invalid and finish the stage; the
+    frozen summarize publishes the submission from the panel with a valid
+    review alone. That decision ran from a one-off script; this rule records the
+    same outcome under the same condition so it applies in-wrapper with every
+    other rule active. Condition: both attempts failed (excerpt or JSON syntax,
+    at least one excerpt) and every unsupported excerpt stays unsupported after
+    the documented re-wrap and the escape respelling.
+    """
+    if stage != "primary" or (folder / INVALID_MARKER).exists():
+        return False
+    receipts = [folder / f"attempt-{n}.json" for n in (1, 2)]
+    if not all(r.exists() for r in receipts) or (folder / "selected.json").exists():
+        return False
+    errors = [str(json.loads(r.read_text()).get("error")) for r in receipts]
+    if not all(e == EXCERPT_ERROR or e.startswith(JSON_SYNTAX_ERRORS) for e in errors):
+        return False
+    if EXCERPT_ERROR not in errors:
+        return False
+    evidence = payload_for(stage, folder.name, panel)
+    if evidence is None:
+        return False
+    source = list(v3.strings(evidence))
+    unsupported, malformed = {}, {}
+    for attempt in (1, 2):
+        if errors[attempt - 1] != EXCERPT_ERROR:
+            malformed[str(attempt)] = errors[attempt - 1]
+            continue
+        stream = folder / f"attempt-{attempt}.stream.jsonl"
+        if not stream.exists():
+            return False
+        try:
+            vote = v3.parse_stream_for(panel, stream.read_text())
+        except (ValueError, json.JSONDecodeError, KeyError, RuntimeError):
+            return False
+        bad = [
+            d["excerpt"]
+            for d in vote.get("dimensions", {}).values()
+            if rewrap_excerpt(d["excerpt"], source) is None
+            and not any(
+                rewrap_excerpt(v, source) is not None for v in _escape_variants(d["excerpt"])
+            )
+        ]
+        if not bad:
+            return False
+        unsupported[str(attempt)] = bad
+    rec = {
+        "protocol_sha256": v3.sha(_out() / "protocol.json"),
+        "rule": "invalidate_unrecoverable_primary",
+        "reason": "both attempts failed; every unsupported excerpt is absent from the code after re-wrap and "
+        "escape respelling (a token added, changed, or invented)",
+        "effect": f"{panel} has no valid primary review for this submission; summarize publishes it from the other "
+        "panel alone",
+        "owner_decision": "2026-09-23 (v3.14 precedent)",
+        "unsupported_excerpts": unsupported,
+        "malformed_attempts": malformed,
+        "recorded_at": datetime.now(UTC).isoformat(),
+    }
+    (folder / INVALID_MARKER).write_text(json.dumps(rec, indent=1) + "\n")
+    print(
+        json.dumps({"event": "primary_invalidated", "call": str(folder.relative_to(_out()))}),
+        flush=True,
+    )
+    return True
+
+
+def run_reviews_skipping(panel: str, skipped: set[str]) -> int:
+    """Drive the frozen review stage in-process, skipping invalidated primary reviews.
+
+    Mirrors the frozen run_reviews (same calls, same lock, repeats and pairwise in
+    full) except that invalidated primaries are not called again.
+    """
+    try:
+        protocol = v3.verify_frozen()
+        v3.require_passed(panel)
+        with (_out() / f".{panel}.lock").open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            for row in v3.read(_out() / "private-manifest.json"):
+                if row["id"] in skipped:
+                    continue
+                v3.call(
+                    panel,
+                    "primary",
+                    row["id"],
+                    "review",
+                    v3.read(_out() / "evidence" / f"{row['id']}.json"),
+                    protocol,
+                )
+            selection = v3.read(_out() / "diagnostic-selection.json")
+            for ident in selection["repeats"]:
+                v3.call(
+                    panel,
+                    "repeat",
+                    ident,
+                    "review",
+                    v3.read(_out() / "evidence" / f"{ident}.json"),
+                    protocol,
+                )
+            for first, second in selection["pairs"]:
+                for a, b in [(first, second), (second, first)]:
+                    v3.call(
+                        panel,
+                        "pairwise",
+                        f"{a}-{b}",
+                        "pair",
+                        {
+                            "A": v3.read(_out() / "evidence" / f"{a}.json"),
+                            "B": v3.read(_out() / "evidence" / f"{b}.json"),
+                        },
+                        protocol,
+                    )
+    except Exception:  # the main loop applies operator rules to whatever stopped
+        traceback.print_exc()
+        return 1
+    print(
+        json.dumps(
+            {"event": "review_stage_skipped_invalid", "panel": panel, "skipped": sorted(skipped)}
+        ),
+        flush=True,
+    )
+    return 0
+
+
 def run_stage_once(args: list[str], panel: str) -> int:
     skipped = invalidated_probes(panel) if args and args[0] == "probe" else set()
     if skipped:
         return run_probes_skipping(panel, skipped)
+    skipped_primary = invalidated_primaries(panel) if args and args[0] == "run" else set()
+    if skipped_primary:
+        return run_reviews_skipping(panel, skipped_primary)
     return subprocess.run([sys.executable, "-u", "-m", MODULE, *args], check=False).returncode
 
 
@@ -1133,7 +1392,7 @@ def apply_rule(folder: Path) -> bool:
     return True
 
 
-def main() -> int:  # noqa: PLR0912, one branch per operator rule
+def main() -> int:  # noqa: PLR0912, PLR0915, one branch per operator rule
     args = sys.argv[1:]
     panel = args[args.index("--panel") + 1]
     applied = 0
@@ -1150,6 +1409,14 @@ def main() -> int:  # noqa: PLR0912, one branch per operator rule
             applied += 1
             continue
         if folder is not None and recover_excerpts(folder, panel, folder.parent.name):
+            applied += 1
+            continue
+        if folder is not None and recover_escaped_excerpts(folder, panel, folder.parent.name):
+            applied += 1
+            continue
+        if folder is not None and invalidate_unrecoverable_primary(
+            folder, panel, folder.parent.name
+        ):
             applied += 1
             continue
         if folder is not None and invalidate_unrecoverable_probe(folder, panel, folder.parent.name):

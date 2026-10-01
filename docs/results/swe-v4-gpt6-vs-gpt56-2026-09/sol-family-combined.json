@@ -1,0 +1,49 @@
+{
+  "card": "sol-family-combined",
+  "models": {
+    "gpt61sol": "GPT-6.1 Sol",
+    "gpt6sol": "GPT-6 Sol",
+    "sol56": "GPT-5.6 Sol"
+  },
+  "sources": {
+    "gpt61sol": {
+      "judging_run": "runs-code-quality-maintenance-v3.18",
+      "protocol": "c7dbb6586e59d80433f9e96210219c47f806fc9bc7cb24fb86c59f6b0cc8156c",
+      "ledger": "7359debe2d78a801b894037ca63c599a44e3588927e5209221a3fc8c5ba1d64f",
+      "list_rates_per_million": [
+        2.0,
+        0.1,
+        10.0
+      ],
+      "pricing_verified": "2026-09-29",
+      "summary": "288f844bc09e87334d6ebef0d803dc91bca7b200fa1053b1bfd1624f911b3ff6"
+    },
+    "gpt6sol": {
+      "judging_run": "runs-code-quality-maintenance-v3.17",
+      "protocol": "6d73cb7d4320e20114ef70c73a6a250ca594b289ac2da84dc53963dfdd5b876f",
+      "ledger": "065f80a4dd750ecf8144f06659d71e1f39b96f85029fece9b63be5adef6d783d",
+      "list_rates_per_million": [
+        2.0,
+        0.2,
+        10.0
+      ],
+      "pricing_verified": "2026-09-25",
+      "summary": "83e6e9d1c5dfffaaae0e5b2388462f0a2df51672a4af332b32cda1797a9fce25"
+    },
+    "sol56": {
+      "judging_run": "runs-code-quality-maintenance-v3.7",
+      "protocol": "6f78884f8164f60ad93e3f981cf61fb6edb91882c2fdad3416112f520468e771",
+      "ledger": "d87d8e8ab958c098908078fe1edc3afe84786ec6ef34413e70715a613394427a",
+      "list_rates_per_million": [
+        4.0,
+        0.4,
+        20.0
+      ],
+      "pricing_verified": "2026-09-11",
+      "summary": "042ed949f87f33f4a79347fc4c183eae1910aea34c7be007a800dfbcf6ea1ce9"
+    }
+  },
+  "png_sha256": "da186dea5e46af6fd3411b063fcf02f6d6f60051a016706fa776aeb65d756bf0",
+  "supporting_table": "sol-family-combined-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

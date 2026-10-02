@@ -188,7 +188,7 @@ def marker_style(model, size=8):
     }
 
 
-def masthead(fig, yf, text, line, title, subtitle):
+def masthead(fig, yf, text, line, title, subtitle, month="September 2026"):
     left, right = 0.06, 0.94
     logo = fig.add_axes([left, yf(0.86), 0.42 / WIDTH_IN, 0.42 / HEIGHT_IN])
     mark = logo.imshow(plt.imread(ROOT / "docs/assets/vulcanbench-logo.png"))
@@ -199,7 +199,7 @@ def masthead(fig, yf, text, line, title, subtitle):
     )
     logo.axis("off")
     text(left + 0.038, 0.65, "VulcanBench", 20, True, heading=True)
-    text(right, 0.65, "September 2026", 14, ha="right", color=MUTED)
+    text(right, 0.65, month, 14, ha="right", color=MUTED)
     line(left, right, 1.05, INK, 1.2)
     text(left, 1.78, title, 33, True, heading=True)
     text(left, 2.22, subtitle, 15, color=MUTED)

@@ -1,0 +1,1962 @@
+{
+ "guard_live_flows": [
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 00 3000",
+    "S ad1 02 5000",
+    "S ad1 02 40000",
+    "S ad1 10 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 3000",
+    "P 5000",
+    "P 22000",
+    "P 1",
+    "X 1 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "C ad2 120000",
+    "S ad1 03 9999",
+    "S ad2 03 4999",
+    "S ad2 07 5001"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P 9999",
+    "P 4999",
+    "P 5001",
+    "X 2 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C big1 999999",
+    "S big1 06 249990",
+    "S big1 07 500"
+   ],
+   "expected": [
+    "OK 1",
+    "P 249990",
+    "P 500",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 120000",
+    "S ad1 23 119990",
+    "S ad1 23 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P 119990",
+    "P 10",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 00 20000",
+    "S ad1 00 7"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "P 0",
+    "X 1 2 0 0"
+   ]
+  }
+ ],
+ "guard_even_trueups": [
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 00 10000",
+    "S ad1 01 10000",
+    "S ad1 02 10000",
+    "S ad1 03 10000",
+    "S ad1 04 10000",
+    "S ad1 05 10000",
+    "S ad1 06 10000",
+    "S ad1 07 10000",
+    "S ad1 08 10000",
+    "S ad1 09 10000",
+    "S ad1 10 10000",
+    "S ad1 11 10000",
+    "S ad1 12 10000",
+    "S ad1 13 10000",
+    "S ad1 14 10000",
+    "S ad1 15 10000",
+    "S ad1 16 10000",
+    "S ad1 17 10000",
+    "S ad1 18 10000",
+    "S ad1 19 10000",
+    "U ad1",
+    "S ad1 00 9000",
+    "S ad1 01 9000",
+    "S ad1 02 9000",
+    "S ad1 03 9000",
+    "S ad1 04 9000",
+    "S ad1 05 9000",
+    "S ad1 06 9000",
+    "S ad1 07 9000",
+    "S ad1 08 9000",
+    "S ad1 09 9000",
+    "S ad1 10 9000",
+    "S ad1 11 9000",
+    "S ad1 12 9000",
+    "S ad1 13 9000",
+    "S ad1 14 9000",
+    "S ad1 15 9000",
+    "S ad1 16 9000",
+    "S ad1 17 9000",
+    "S ad1 18 9000",
+    "S ad1 19 9000",
+    "S ad1 20 9000",
+    "S ad1 21 9000",
+    "U ad1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "U 200000 40000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "U 198000 42000",
+    "X 1 42 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad2 120000",
+    "S ad2 00 4000",
+    "S ad2 01 4000",
+    "S ad2 02 4000",
+    "S ad2 03 4000",
+    "S ad2 04 4000",
+    "S ad2 05 4000",
+    "S ad2 06 4000",
+    "S ad2 07 4000",
+    "S ad2 08 4000",
+    "S ad2 09 4000",
+    "S ad2 10 4000",
+    "S ad2 11 4000",
+    "S ad2 12 4000",
+    "S ad2 13 4000",
+    "S ad2 14 4000",
+    "S ad2 15 4000",
+    "S ad2 16 4000",
+    "S ad2 17 4000",
+    "S ad2 18 4000",
+    "S ad2 19 4000",
+    "S ad2 20 4000",
+    "S ad2 21 4000",
+    "S ad2 22 4000",
+    "S ad2 23 4000",
+    "U ad2"
+   ],
+   "expected": [
+    "OK 1",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "P 4000",
+    "U 96000 24000",
+    "X 1 24 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad3 120000",
+    "S ad3 00 5000",
+    "S ad3 01 5000",
+    "S ad3 02 5000",
+    "S ad3 03 5000",
+    "S ad3 04 5000",
+    "S ad3 05 5000",
+    "S ad3 06 5000",
+    "S ad3 07 5000",
+    "S ad3 08 5000",
+    "S ad3 09 5000",
+    "S ad3 10 5000",
+    "S ad3 11 5000",
+    "S ad3 12 5000",
+    "S ad3 13 5000",
+    "S ad3 14 5000",
+    "S ad3 15 5000",
+    "S ad3 16 5000",
+    "S ad3 17 5000",
+    "S ad3 18 5000",
+    "S ad3 19 5000",
+    "S ad3 20 5000",
+    "S ad3 21 5000",
+    "S ad3 22 5000",
+    "S ad3 23 5000",
+    "U ad3",
+    "S ad3 00 4900"
+   ],
+   "expected": [
+    "OK 1",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "P 5000",
+    "U 120000 0",
+    "P 4900",
+    "X 1 25 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad4 240000",
+    "S ad4 06 9500",
+    "S ad4 07 9500"
+   ],
+   "expected": [
+    "OK 1",
+    "P 9500",
+    "P 9500",
+    "X 1 2 0 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "C toolong99 240000"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad-1 240000"
+   ],
+   "expected": [
+    "N ad-1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 999"
+   ],
+   "expected": [
+    "N ad1 BUDGET",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 1234567890"
+   ],
+   "expected": [
+    "N ad1 BUDGET",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 12x4"
+   ],
+   "expected": [
+    "N ad1 BUDGET",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1"
+   ],
+   "expected": [
+    "N ad1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "C ad1 120000"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 24 100"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 HOUR",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 2x 100"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 HOUR",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 005 100"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 HOUR",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 05 0"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 REQ",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 05 12345678"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 REQ",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 05 12a"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 REQ",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 05"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1"
+   ],
+   "expected": [
+    "OK 1",
+    "N ad1 FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "S ghost 05 100"
+   ],
+   "expected": [
+    "N ghost FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S ad1 10 100",
+    "S ad1 05 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P 100",
+    "N ad1 ORDER",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "U ghost"
+   ],
+   "expected": [
+    "N ghost FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "U bad-id"
+   ],
+   "expected": [
+    "N bad-id FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "U"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "c ad1 240000"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "s ad1 05 100"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "C ad1 240000",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "U ad1"
+   ],
+   "expected": [
+    "OK 1",
+    "U 0 48000",
+    "X 1 0 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "C ad1 240000",
+    "C ad2 120000",
+    "S ad1 00 3000",
+    "S ghost 05 100",
+    "S ad1 24 5",
+    "U ad1",
+    "U ghost",
+    "C ad1 999",
+    "Q junk",
+    "S ad2 06 100"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P 3000",
+    "N ghost FMT",
+    "N ad1 HOUR",
+    "U 3000 48000",
+    "N ghost FMT",
+    "N ad1 BUDGET",
+    "N ???????? FMT",
+    "P 100",
+    "X 2 2 1 5"
+   ]
+  }
+ ],
+ "f2p_audit_clamp": [
+  {
+   "input": [
+    "C a 240000",
+    "S a 00 1",
+    "S a 12 90000",
+    "U a"
+   ],
+   "expected": [
+    "OK 1",
+    "P 1",
+    "P 90000",
+    "U 10001 48000",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 120000",
+    "S a 23 110000",
+    "U a"
+   ],
+   "expected": [
+    "OK 1",
+    "P 110000",
+    "U 5000 24000",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 120000",
+    "S a 10 30000",
+    "S a 11 2000",
+    "S a 20 40000",
+    "U a"
+   ],
+   "expected": [
+    "OK 1",
+    "P 30000",
+    "P 2000",
+    "P 40000",
+    "U 12000 24000",
+    "X 1 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 20 150000",
+    "U a",
+    "S a 22 100000",
+    "U a"
+   ],
+   "expected": [
+    "OK 1",
+    "P 150000",
+    "U 10000 48000",
+    "P 100000",
+    "U 10000 48000",
+    "X 1 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 00 9000",
+    "S a 01 9000",
+    "U a"
+   ],
+   "expected": [
+    "OK 1",
+    "P 9000",
+    "P 9000",
+    "U 18000 48000",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_rollover_debt": [
+  {
+   "input": [
+    "C a 120000",
+    "S a 23 110000",
+    "U a",
+    "S a 00 20000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 110000",
+    "U 5000 24000",
+    "P 0",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C b 240000",
+    "U b",
+    "S b 00 5000",
+    "U b",
+    "S b 00 5000"
+   ],
+   "expected": [
+    "OK 1",
+    "U 0 48000",
+    "P 0",
+    "U 0 48000",
+    "P 0",
+    "X 1 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c 120000",
+    "S c 23 110000",
+    "U c",
+    "S c 05 3000",
+    "U c",
+    "S c 00 9000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 110000",
+    "U 5000 24000",
+    "P 3000",
+    "U 3000 24000",
+    "P 0",
+    "X 1 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C d 120000",
+    "S d 23 110000",
+    "U d",
+    "S d 03 25000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 110000",
+    "U 5000 24000",
+    "P 18000",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C e 240000",
+    "S e 00 10000",
+    "S e 01 10000",
+    "S e 02 10000",
+    "S e 03 10000",
+    "S e 04 10000",
+    "S e 05 10000",
+    "S e 06 10000",
+    "S e 07 10000",
+    "S e 08 10000",
+    "S e 09 10000",
+    "S e 10 10000",
+    "S e 11 10000",
+    "S e 12 10000",
+    "S e 13 10000",
+    "S e 14 10000",
+    "S e 15 10000",
+    "S e 16 10000",
+    "S e 17 10000",
+    "S e 18 10000",
+    "S e 19 10000",
+    "U e",
+    "S e 00 11000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "U 200000 40000",
+    "P 11000",
+    "X 1 21 1 0"
+   ]
+  }
+ ],
+ "f2p_overnight_damper": [
+  {
+   "input": [
+    "C big 1000000",
+    "S big 05 200000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 124998",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C big 1000000",
+    "S big 00 9999999",
+    "S big 01 9999999"
+   ],
+   "expected": [
+    "OK 1",
+    "P 20833",
+    "P 31249",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C big 1000000",
+    "S big 00 41666",
+    "S big 01 50000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 20833",
+    "P 31249",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C sm 999999",
+    "S sm 05 200000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 200000",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C big 1000000",
+    "S big 06 250000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 250000",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C big 2400000",
+    "S big 03 300000",
+    "S big 06 300000",
+    "U big"
+   ],
+   "expected": [
+    "OK 1",
+    "P 200000",
+    "P 300000",
+    "U 200000 480000",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_exact_exhaustion": [
+  {
+   "input": [
+    "C a 240000",
+    "S a 00 10000",
+    "S a 00 5"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "N a REQ",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 03 40000",
+    "S a 03 1",
+    "S a 04 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 40000",
+    "N a REQ",
+    "P 1",
+    "X 1 2 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C big 1000000",
+    "S big 00 20833",
+    "S big 00 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 20833",
+    "N big REQ",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C c 240000",
+    "S c 00 10000",
+    "S c 01 4000",
+    "S c 01 6000",
+    "S c 01 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "P 4000",
+    "P 6000",
+    "N c REQ",
+    "X 1 3 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C b 240000",
+    "S b 00 20000",
+    "S b 00 5"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "P 0",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C d 240000",
+    "S d 00 4000",
+    "S d 01 16000",
+    "S d 02 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 4000",
+    "P 16000",
+    "P 1",
+    "X 1 3 0 0"
+   ]
+  }
+ ],
+ "f2p_one_digit_hours": [
+  {
+   "input": [
+    "C a 240000",
+    "S a 5 3000",
+    "S a 06 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P 3000",
+    "P 100",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 0 100",
+    "S a 1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P 100",
+    "P 100",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 120000",
+    "S a 9 45000",
+    "U a"
+   ],
+   "expected": [
+    "OK 1",
+    "P 45000",
+    "U 5000 24000",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 00 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P 100",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_case_fold": [
+  {
+   "input": [
+    "C Abc 240000",
+    "C ABC 120000"
+   ],
+   "expected": [
+    "OK 1",
+    "N ABC DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C Abc 240000",
+    "S abc 00 500",
+    "U aBC"
+   ],
+   "expected": [
+    "OK 1",
+    "P 500",
+    "U 500 48000",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ad1 240000",
+    "S AD1 00 500",
+    "U aD1"
+   ],
+   "expected": [
+    "OK 1",
+    "P 500",
+    "U 500 48000",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C Abc 240000",
+    "C abd 120000",
+    "S ABD 06 100"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P 100",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C abc 240000",
+    "S abc 00 500"
+   ],
+   "expected": [
+    "OK 1",
+    "P 500",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "C a 240000 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 00 100 tail junk"
+   ],
+   "expected": [
+    "OK 1",
+    "P 100",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "U a now please"
+   ],
+   "expected": [
+    "OK 1",
+    "U 0 48000",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C a 240000",
+    "S a 00 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P 100",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_multiday_carry": [
+  {
+   "input": [
+    "C a 240000",
+    "S a 18 200000",
+    "U a",
+    "S a 00 12000",
+    "S a 12 90000",
+    "U a",
+    "S a 00 1000"
+   ],
+   "expected": [
+    "OK 1",
+    "P 190000",
+    "U 10000 48000",
+    "P 0",
+    "P 90000",
+    "U 10000 48000",
+    "P 0",
+    "X 1 4 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C b 120000",
+    "S b 22 100000",
+    "U b",
+    "U b",
+    "S b 00 6000",
+    "S b 10 6000",
+    "U b"
+   ],
+   "expected": [
+    "OK 1",
+    "P 100000",
+    "U 5000 24000",
+    "U 0 24000",
+    "P 0",
+    "P 6000",
+    "U 5000 24000",
+    "X 1 3 3 0"
+   ]
+  },
+  {
+   "input": [
+    "C big 2400000",
+    "S big 23 2000000",
+    "U big",
+    "S big 00 100000",
+    "U big"
+   ],
+   "expected": [
+    "OK 1",
+    "P 2000000",
+    "U 100000 480000",
+    "P 0",
+    "U 0 480000",
+    "X 1 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C c 240000",
+    "S c 00 10000",
+    "S c 01 10000",
+    "S c 02 10000",
+    "S c 03 10000",
+    "S c 04 10000",
+    "S c 05 10000",
+    "S c 06 10000",
+    "S c 07 10000",
+    "S c 08 10000",
+    "S c 09 10000",
+    "S c 10 10000",
+    "S c 11 10000",
+    "S c 12 10000",
+    "S c 13 10000",
+    "S c 14 10000",
+    "S c 15 10000",
+    "S c 16 10000",
+    "S c 17 10000",
+    "S c 18 10000",
+    "S c 19 10000",
+    "U c",
+    "S c 00 9000",
+    "S c 01 9000",
+    "S c 02 9000",
+    "S c 03 9000",
+    "S c 04 9000",
+    "S c 05 9000",
+    "S c 06 9000",
+    "S c 07 9000",
+    "S c 08 9000",
+    "S c 09 9000",
+    "S c 10 9000",
+    "S c 11 9000",
+    "S c 12 9000",
+    "S c 13 9000",
+    "S c 14 9000",
+    "S c 15 9000",
+    "S c 16 9000",
+    "S c 17 9000",
+    "S c 18 9000",
+    "S c 19 9000",
+    "S c 20 9000",
+    "S c 21 9000",
+    "U c"
+   ],
+   "expected": [
+    "OK 1",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "P 10000",
+    "U 200000 40000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "P 9000",
+    "U 198000 42000",
+    "X 1 42 2 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "S BIG 2x 12a",
+    "C a 120000",
+    "C ad1 12x4",
+    "U AD1",
+    "X",
+    "C a 120000",
+    "U a",
+    "S zz99 10 9999",
+    "S",
+    "S bad-id 11 12345678",
+    "S BIG 0 200000",
+    "U a",
+    "S big 02 200000",
+    "C ad1 1000 extra",
+    "S ghost 18 0",
+    "S zz99 005 500",
+    "S BIG 09 1",
+    "S ghost 23 1",
+    "S big 005 12345678",
+    "S big 09 12345678",
+    "S Ad1 04 90000",
+    "S ghost 13 41666",
+    "S BIG 14 9999",
+    "S camp8x 5 200000",
+    "S AD1 23 1",
+    "S a",
+    "S BIG 18 90000",
+    "S",
+    "S ghost 23 12a",
+    "S zz99 2x 200000",
+    "S a 00 12a",
+    "U bad-id",
+    "C bad-id 1000000",
+    "U Ad1",
+    "U BIG now",
+    "C",
+    "S bad-id 06 90000",
+    "S bad-id 23 9999999",
+    "S AD1 17 9999999",
+    "S a 2x 9999",
+    "U bad-id",
+    "S AD1 14 200000",
+    "S ghost 5 41666",
+    "S zz99 17 500 tail junk",
+    "S ad1 03 12a",
+    "S a 20 9999",
+    "U ad1",
+    "U",
+    "U ghost",
+    "U bad-id",
+    "S ad1 10 200000",
+    "U camp8x",
+    "U Ad1 now",
+    "S AD1 23 12345678",
+    "S camp8x 00 3000",
+    "S BIG 07 0 tail junk",
+    "S big 04 12345678",
+    "S a",
+    "S ghost 2x 41666 tail junk",
+    "S a 15 500",
+    "U BIG",
+    "S AD1 08 9999",
+    "U ghost",
+    "U Ad1",
+    "C a 999 extra",
+    "U camp8x now",
+    "S bad-id 20 12a",
+    "S bad-id 005 41666",
+    "C zz99 2400000",
+    "S ghost 9 1",
+    "S ad1 07 12a tail junk",
+    "C ad1 999",
+    "S bad-id 00 12a tail junk",
+    "U camp8x",
+    "S ad1 21 3000",
+    "S camp8x 19 200000",
+    "C camp8x 1234567890",
+    "S big 19 200000",
+    "S ghost 12 200000",
+    "S camp8x 23 9999999",
+    "S ghost 00 0 tail junk",
+    "U Ad1",
+    "C",
+    "U a",
+    "U camp8x",
+    "S big 9 90000 tail junk",
+    "S Ad1 14 41666",
+    "S BIG 18 200000",
+    "S a 5 12345678",
+    "S camp8x 14 9999",
+    "C Ad1 50000",
+    "U ghost",
+    "S BIG 5 12345678",
+    "U",
+    "S ad1 07 3000",
+    "S ghost 07 3000",
+    "c a 1000",
+    "U ad1 now",
+    "S zz99 08 41666",
+    "S Ad1 09 1",
+    "C Ad1 999",
+    "S a 11 90000",
+    "U zz99",
+    "c a 1000",
+    "S a 14 9999",
+    "U AD1",
+    "Q hey",
+    "Q hey",
+    "S zz99 20 12a",
+    "U Ad1",
+    "C big 999",
+    "S zz99 07 3000",
+    "U ghost",
+    "U zz99 now",
+    "U big",
+    "S big 005 12345678",
+    "S ad1 02 1",
+    "U zz99",
+    "S ghost 18 1",
+    "S a 20 12345678",
+    "S BIG 20 12a",
+    "C AD1 2400000",
+    "S big 0 41666",
+    "S bad-id 07 9999",
+    "U bad-id",
+    "S ad1 13 3000 tail junk",
+    "C big 1000 extra",
+    "U BIG",
+    "S big 23 90000",
+    "S ghost 03 3000",
+    "U BIG now",
+    "c a 1000",
+    "S ad1 01 200000",
+    "S big 00 500",
+    "X",
+    "S ghost 00 3000 tail junk",
+    "C camp8x 50000",
+    "U ghost now",
+    "S BIG 05 3000 tail junk",
+    "S a 20 0",
+    "C big 1000000",
+    "U BIG now",
+    "S ad1 09 3000",
+    "S big 005 12a",
+    "S BIG 17 12345678",
+    "S ghost 16 9999999",
+    "S camp8x 24 1",
+    "S AD1 08 12a tail junk",
+    "U BIG now",
+    "C ad1 1000000",
+    "S ghost 08 9999999",
+    "S AD1 08 1",
+    "S bad-id 18 3000 tail junk",
+    "U ad1",
+    "S BIG 19 500",
+    "X",
+    "S Ad1 24 1",
+    "C AD1 50000",
+    "S BIG 13 9999",
+    "S big 23 200000"
+   ],
+   "expected": [
+    "N BIG HOUR",
+    "OK 1",
+    "N ad1 BUDGET",
+    "N AD1 FMT",
+    "N ???????? FMT",
+    "N a DUP",
+    "U 0 24000",
+    "N zz99 FMT",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "N BIG FMT",
+    "U 0 24000",
+    "N big FMT",
+    "OK 2",
+    "N ghost REQ",
+    "N zz99 HOUR",
+    "N BIG FMT",
+    "N ghost FMT",
+    "N big HOUR",
+    "N big REQ",
+    "P 205",
+    "N ghost FMT",
+    "N BIG FMT",
+    "N camp8x FMT",
+    "P 1",
+    "N a FMT",
+    "N BIG FMT",
+    "N ???????? FMT",
+    "N ghost REQ",
+    "N zz99 HOUR",
+    "N a REQ",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "U 42 200",
+    "N BIG FMT",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "P 850",
+    "N a HOUR",
+    "N bad-id FMT",
+    "N AD1 ORDER",
+    "N ghost FMT",
+    "N zz99 FMT",
+    "N ad1 REQ",
+    "P 9999",
+    "U 41 200",
+    "N ???????? FMT",
+    "N ghost FMT",
+    "N bad-id FMT",
+    "P 500",
+    "N camp8x FMT",
+    "U 41 200",
+    "N AD1 REQ",
+    "N camp8x FMT",
+    "N BIG REQ",
+    "N big REQ",
+    "N a FMT",
+    "N ghost HOUR",
+    "N a ORDER",
+    "N BIG FMT",
+    "P 400",
+    "N ghost FMT",
+    "U 41 200",
+    "N a BUDGET",
+    "N camp8x FMT",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "OK 3",
+    "N ghost FMT",
+    "N ad1 REQ",
+    "N ad1 BUDGET",
+    "N bad-id FMT",
+    "N camp8x FMT",
+    "P 1050",
+    "N camp8x FMT",
+    "N camp8x BUDGET",
+    "N big FMT",
+    "N ghost FMT",
+    "N camp8x FMT",
+    "N ghost REQ",
+    "U 41 200",
+    "N ???????? FMT",
+    "U 5000 24000",
+    "N camp8x FMT",
+    "N big FMT",
+    "P 700",
+    "N BIG FMT",
+    "N a REQ",
+    "N camp8x FMT",
+    "N Ad1 DUP",
+    "N ghost FMT",
+    "N BIG REQ",
+    "N ???????? FMT",
+    "N ad1 ORDER",
+    "N ghost FMT",
+    "N ???????? FMT",
+    "U 41 200",
+    "P 41666",
+    "P 1",
+    "N Ad1 BUDGET",
+    "P 66000",
+    "U 41666 480000",
+    "N ???????? FMT",
+    "P 9999",
+    "U 1 200",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N zz99 REQ",
+    "U 0 200",
+    "N big BUDGET",
+    "P 3000",
+    "N ghost FMT",
+    "U 3000 480000",
+    "N big FMT",
+    "N big HOUR",
+    "P 1",
+    "U 0 480000",
+    "N ghost FMT",
+    "N a REQ",
+    "N BIG REQ",
+    "N AD1 DUP",
+    "N big FMT",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "P 649",
+    "OK 4",
+    "U 0 200",
+    "P 1150",
+    "N ghost FMT",
+    "U 41 200",
+    "N ???????? FMT",
+    "N ad1 ORDER",
+    "P 0",
+    "N ???????? FMT",
+    "N ghost FMT",
+    "OK 5",
+    "N ghost FMT",
+    "P 250",
+    "N a REQ",
+    "N big DUP",
+    "U 41 200",
+    "N ad1 ORDER",
+    "N big HOUR",
+    "N BIG REQ",
+    "N ghost FMT",
+    "N camp8x HOUR",
+    "N AD1 REQ",
+    "U 0 200",
+    "N ad1 DUP",
+    "N ghost FMT",
+    "N AD1 ORDER",
+    "N bad-id FMT",
+    "U 42 200",
+    "P 500",
+    "N ???????? FMT",
+    "N Ad1 HOUR",
+    "N AD1 DUP",
+    "N BIG ORDER",
+    "P 650",
+    "X 5 20 19 116"
+   ]
+  },
+  {
+   "input": [
+    "C ghost 12x4 extra",
+    "X",
+    "U BIG",
+    "U AD1",
+    "S Ad1 03 9999999",
+    "U ghost now",
+    "S ad1 04 0",
+    "S big 23 200000",
+    "S AD1 14 41666",
+    "S ghost 08 12345678",
+    "U Ad1",
+    "S camp8x 0 500",
+    "S ghost 06 90000",
+    "S BIG 9 9999 tail junk",
+    "U BIG",
+    "U ghost",
+    "U ad1 now",
+    "S ghost 5 3000",
+    "U BIG now",
+    "S zz99 24 41666",
+    "S ghost 005 9999999",
+    "S bad-id 07 12345678",
+    "C ghost 50000",
+    "S a 0 3000 tail junk",
+    "S BIG 06 9999",
+    "S zz99 24 200000",
+    "U ghost",
+    "S ghost 24 12345678",
+    "S bad-id 0 0",
+    "C ghost 999",
+    "S camp8x 18 9999999",
+    "U a",
+    "S AD1 04 0",
+    "C Ad1 1234567890",
+    "U ad1",
+    "S a 02 90000",
+    "S ghost 24 41666",
+    "Q hey",
+    "S a",
+    "U",
+    "S ad1 23 90000 tail junk",
+    "U ghost",
+    "S BIG 5 500",
+    "S Ad1 07 200000 tail junk",
+    "S camp8x 21 90000 tail junk",
+    "U bad-id",
+    "U Ad1",
+    "S camp8x 21 3000",
+    "S BIG 11 1",
+    "S AD1 09 12345678",
+    "Q hey",
+    "S camp8x 08 500 tail junk",
+    "S AD1 13 3000",
+    "S ad1 03 3000",
+    "S camp8x 15 41666",
+    "S big 15 1",
+    "C ghost 1000000",
+    "U Ad1",
+    "S ad1 0 200000",
+    "U AD1 now",
+    "S camp8x 0 3000",
+    "U zz99 now",
+    "S a 5 1",
+    "S big 005 200000 tail junk",
+    "S BIG 5 9999999 tail junk",
+    "U big",
+    "S AD1 12 3000",
+    "U camp8x",
+    "S BIG 21 200000",
+    "S AD1 12 9999",
+    "X",
+    "S bad-id 14 0",
+    "S AD1 13 90000",
+    "U Ad1",
+    "S Ad1 03 3000",
+    "S Ad1 11 12345678",
+    "S zz99 19 41666",
+    "S Ad1 22 1",
+    "S Ad1 20 500",
+    "U camp8x now",
+    "U AD1",
+    "C ad1 999999",
+    "U a",
+    "S BIG 15 41666",
+    "S ghost 20 200000",
+    "S camp8x 22 3000",
+    "U ghost",
+    "S ghost 01 200000",
+    "S AD1 13 500",
+    "U ghost",
+    "U BIG",
+    "S Ad1 06 200000",
+    "S big 005 1",
+    "C ad1 1000000",
+    "S a",
+    "U a",
+    "X",
+    "S ghost 20 500",
+    "U AD1",
+    "C ghost 999",
+    "U ghost",
+    "U BIG",
+    "S zz99 15 12345678",
+    "S a 005 41666",
+    "U zz99 now",
+    "C AD1 240000",
+    "U",
+    "U bad-id",
+    "C",
+    "S AD1 16 200000",
+    "S ad1 09 500",
+    "S ghost 19 500",
+    "U a",
+    "C ad1 1000 extra",
+    "S zz99 22 500",
+    "C ad1 1234567890",
+    "U BIG",
+    "C camp8x 12x4",
+    "S zz99 14 9999",
+    "U camp8x",
+    "S big 23 1",
+    "S a",
+    "S BIG 06 90000 tail junk",
+    "U AD1 now",
+    "S bad-id 11 1",
+    "U",
+    "S big 23 12a tail junk",
+    "S a 22 3000",
+    "S ad1 13 12345678",
+    "S camp8x 00 90000",
+    "S a 11 41666",
+    "S a 13 9999999",
+    "S BIG 15 90000",
+    "S big 05 12a tail junk",
+    "S a",
+    "S bad-id 00 1",
+    "U ad1",
+    "X",
+    "U zz99",
+    "S a 02 12a",
+    "S",
+    "Q hey",
+    "C a 120000",
+    "C zz99 12x4 extra",
+    "U big",
+    "S big 005 41666 tail junk",
+    "C big 12x4",
+    "C ad1 1000",
+    "S Ad1 10 90000",
+    "S camp8x 20 3000 tail junk",
+    "S camp8x 05 12345678",
+    "S a 13 500",
+    "C a 12x4",
+    "S a 22 41666",
+    "U Ad1"
+   ],
+   "expected": [
+    "N ghost BUDGET",
+    "N ???????? FMT",
+    "N BIG FMT",
+    "N AD1 FMT",
+    "N Ad1 FMT",
+    "N ghost FMT",
+    "N ad1 REQ",
+    "N big FMT",
+    "N AD1 FMT",
+    "N ghost REQ",
+    "N Ad1 FMT",
+    "N camp8x FMT",
+    "N ghost FMT",
+    "N BIG FMT",
+    "N BIG FMT",
+    "N ghost FMT",
+    "N ad1 FMT",
+    "N ghost FMT",
+    "N BIG FMT",
+    "N zz99 HOUR",
+    "N ghost HOUR",
+    "N bad-id FMT",
+    "OK 1",
+    "N a FMT",
+    "N BIG FMT",
+    "N zz99 HOUR",
+    "U 0 10000",
+    "N ghost HOUR",
+    "N bad-id FMT",
+    "N ghost BUDGET",
+    "N camp8x FMT",
+    "N a FMT",
+    "N AD1 REQ",
+    "N Ad1 BUDGET",
+    "N ad1 FMT",
+    "N a FMT",
+    "N ghost HOUR",
+    "N ???????? FMT",
+    "N a FMT",
+    "N ???????? FMT",
+    "N ad1 FMT",
+    "U 0 10000",
+    "N BIG FMT",
+    "N Ad1 FMT",
+    "N camp8x FMT",
+    "N bad-id FMT",
+    "N Ad1 FMT",
+    "N camp8x FMT",
+    "N BIG FMT",
+    "N AD1 REQ",
+    "N ???????? FMT",
+    "N camp8x FMT",
+    "N AD1 FMT",
+    "N ad1 FMT",
+    "N camp8x FMT",
+    "N big FMT",
+    "N ghost DUP",
+    "N Ad1 FMT",
+    "N ad1 FMT",
+    "N AD1 FMT",
+    "N camp8x FMT",
+    "N zz99 FMT",
+    "N a FMT",
+    "N big HOUR",
+    "N BIG FMT",
+    "N big FMT",
+    "N AD1 FMT",
+    "N camp8x FMT",
+    "N BIG FMT",
+    "N AD1 FMT",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "N AD1 FMT",
+    "N Ad1 FMT",
+    "N Ad1 FMT",
+    "N Ad1 REQ",
+    "N zz99 FMT",
+    "N Ad1 FMT",
+    "N Ad1 FMT",
+    "N camp8x FMT",
+    "N AD1 FMT",
+    "OK 2",
+    "N a FMT",
+    "N BIG FMT",
+    "P 50000",
+    "N camp8x FMT",
+    "U 2083 10000",
+    "P 2500",
+    "P 500",
+    "U 2083 10000",
+    "N BIG FMT",
+    "N Ad1 ORDER",
+    "N big HOUR",
+    "N ad1 DUP",
+    "N a FMT",
+    "N a FMT",
+    "N ???????? FMT",
+    "P 500",
+    "U 500 199999",
+    "N ghost BUDGET",
+    "U 500 10000",
+    "N BIG FMT",
+    "N zz99 REQ",
+    "N a HOUR",
+    "N zz99 FMT",
+    "N AD1 DUP",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "N ???????? FMT",
+    "P 200000",
+    "N ad1 ORDER",
+    "P 500",
+    "N a FMT",
+    "N ad1 DUP",
+    "N zz99 FMT",
+    "N ad1 BUDGET",
+    "N BIG FMT",
+    "N camp8x BUDGET",
+    "N zz99 FMT",
+    "N camp8x FMT",
+    "N big FMT",
+    "N a FMT",
+    "N BIG FMT",
+    "U 41666 199999",
+    "N bad-id FMT",
+    "N ???????? FMT",
+    "N big REQ",
+    "N a FMT",
+    "N ad1 REQ",
+    "N camp8x FMT",
+    "N a FMT",
+    "N a FMT",
+    "N BIG FMT",
+    "N big REQ",
+    "N a FMT",
+    "N bad-id FMT",
+    "U 0 199999",
+    "N ???????? FMT",
+    "N zz99 FMT",
+    "N a REQ",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "OK 3",
+    "N zz99 BUDGET",
+    "N big FMT",
+    "N big HOUR",
+    "N big BUDGET",
+    "N ad1 DUP",
+    "P 90000",
+    "N camp8x FMT",
+    "N camp8x REQ",
+    "P 500",
+    "N a BUDGET",
+    "P 41666",
+    "U 41666 199999",
+    "X 3 9 9 134"
+   ]
+  }
+ ]
+}

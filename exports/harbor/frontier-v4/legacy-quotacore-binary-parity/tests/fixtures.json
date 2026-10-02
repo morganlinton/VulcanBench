@@ -1,0 +1,1182 @@
+{
+ "guard_within_small": [
+  {
+   "input": [
+    "Q KEY001 5 F US"
+   ],
+   "expected": [
+    "B KEY001 0 9995",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 9 S US"
+   ],
+   "expected": [
+    "B KEY001 0 99991",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 3 P US"
+   ],
+   "expected": [
+    "B KEY001 0 999997",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q MULTI1 9 F US",
+    "Q MULTI1 8 F US",
+    "Q MULTI1 7 F US"
+   ],
+   "expected": [
+    "B MULTI1 0 9991",
+    "B MULTI1 0 9983",
+    "B MULTI1 0 9976",
+    "X 3 0 0"
+   ]
+  }
+ ],
+ "guard_deep_overage": [
+  {
+   "input": [
+    "Q KEY001 30000 F US"
+   ],
+   "expected": [
+    "B KEY001 2400 0",
+    "X 1 0 2400"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 150000 S US"
+   ],
+   "expected": [
+    "B KEY001 4500 0",
+    "X 1 0 4500"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 1300000 P US"
+   ],
+   "expected": [
+    "B KEY001 18000 0",
+    "X 1 0 18000"
+   ]
+  },
+  {
+   "input": [
+    "Q OVR1 30000 F US",
+    "Q OVR1 200 F US"
+   ],
+   "expected": [
+    "B OVR1 2400 0",
+    "B OVR1 24 0",
+    "X 2 0 2424"
+   ]
+  }
+ ],
+ "guard_regions": [
+  {
+   "input": [
+    "Q KEY001 30000 F BR"
+   ],
+   "expected": [
+    "B KEY001 2400 0",
+    "X 1 0 2400"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 250000 S IN"
+   ],
+   "expected": [
+    "B KEY001 13500 0",
+    "X 1 0 13500"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 1300000 P DE"
+   ],
+   "expected": [
+    "B KEY001 18000 0",
+    "X 1 0 18000"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 1300000 P US"
+   ],
+   "expected": [
+    "B KEY001 18000 0",
+    "X 1 0 18000"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "Q KEY001 12345678 F US"
+   ],
+   "expected": [
+    "R KEY001 CALLS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 12a4 F US"
+   ],
+   "expected": [
+    "R KEY001 CALLS",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 X US"
+   ],
+   "expected": [
+    "R KEY001 TIER",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 FF US"
+   ],
+   "expected": [
+    "R KEY001 TIER",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 F B1"
+   ],
+   "expected": [
+    "R KEY001 REGION",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 F BRA"
+   ],
+   "expected": [
+    "R KEY001 REGION",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 F B"
+   ],
+   "expected": [
+    "R KEY001 REGION",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q DWN1 5 S US",
+    "Q DWN1 5 F US"
+   ],
+   "expected": [
+    "B DWN1 0 99995",
+    "R DWN1 TIER",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q JMP1 5 F US",
+    "Q JMP1 5 P US"
+   ],
+   "expected": [
+    "B JMP1 0 9995",
+    "R JMP1 TIER",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q TOOLONGK9 5 F US"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 F"
+   ],
+   "expected": [
+    "R KEY001 FMT",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "Z noise line"
+   ],
+   "expected": [
+    "R noise FMT",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_burst_bank": [
+  {
+   "input": [
+    "Q KEY001 5000 F US"
+   ],
+   "expected": [
+    "B KEY001 0 5500",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 40000 S US"
+   ],
+   "expected": [
+    "B KEY001 0 64000",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q BB1 9999 F US",
+    "Q BB1 5 F US"
+   ],
+   "expected": [
+    "B BB1 0 1000",
+    "B BB1 0 995",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 9 F US"
+   ],
+   "expected": [
+    "B KEY001 0 9991",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_crossing_rate": [
+  {
+   "input": [
+    "Q CR1 9 F US",
+    "Q CR1 15000 F US"
+   ],
+   "expected": [
+    "B CR1 0 9991",
+    "B CR1 1800 0",
+    "X 2 0 1800"
+   ]
+  },
+  {
+   "input": [
+    "Q CR2 9 S US",
+    "Q CR2 120000 S US"
+   ],
+   "expected": [
+    "B CR2 0 99991",
+    "B CR2 10800 0",
+    "X 2 0 10800"
+   ]
+  },
+  {
+   "input": [
+    "Q CR3 9 F US",
+    "Q CR3 9991 F US"
+   ],
+   "expected": [
+    "B CR3 0 9991",
+    "B CR3 0 0",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "f2p_growth_rate": [
+  {
+   "input": [
+    "Q KEY001 1200000 P BR"
+   ],
+   "expected": [
+    "B KEY001 10000 0",
+    "X 1 0 10000"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 1200000 P IN"
+   ],
+   "expected": [
+    "B KEY001 10000 0",
+    "X 1 0 10000"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 1200000 P US"
+   ],
+   "expected": [
+    "B KEY001 12000 0",
+    "X 1 0 12000"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 150000 S BR"
+   ],
+   "expected": [
+    "B KEY001 4500 0",
+    "X 1 0 4500"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 30000 F IN"
+   ],
+   "expected": [
+    "B KEY001 2400 0",
+    "X 1 0 2400"
+   ]
+  }
+ ],
+ "f2p_round_fifty": [
+  {
+   "input": [
+    "Q KEY001 10150 F US"
+   ],
+   "expected": [
+    "B KEY001 12 0",
+    "X 1 0 12"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 10050 F US"
+   ],
+   "expected": [
+    "B KEY001 0 0",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 10350 F US"
+   ],
+   "expected": [
+    "B KEY001 36 0",
+    "X 1 0 36"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 10100 F US"
+   ],
+   "expected": [
+    "B KEY001 12 0",
+    "X 1 0 12"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 100250 S US"
+   ],
+   "expected": [
+    "B KEY001 18 0",
+    "X 1 0 18"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 100300 S US"
+   ],
+   "expected": [
+    "B KEY001 27 0",
+    "X 1 0 27"
+   ]
+  }
+ ],
+ "f2p_tier_upgrade": [
+  {
+   "input": [
+    "Q UP1 9 F US",
+    "Q UP1 8 S US"
+   ],
+   "expected": [
+    "B UP1 0 9991",
+    "B UP1 0 99983",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q UP2 9 S US",
+    "Q UP2 8 P US"
+   ],
+   "expected": [
+    "B UP2 0 99991",
+    "B UP2 0 999983",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q UP3 9 F US",
+    "Q UP3 8 S US",
+    "Q UP3 7 P US"
+   ],
+   "expected": [
+    "B UP3 0 9991",
+    "B UP3 0 99983",
+    "B UP3 0 999976",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q UP4 9 P US",
+    "Q UP4 8 S US"
+   ],
+   "expected": [
+    "B UP4 0 999991",
+    "R UP4 TIER",
+    "X 1 1 0"
+   ]
+  }
+ ],
+ "f2p_region_case": [
+  {
+   "input": [
+    "Q KEY001 5 F us"
+   ],
+   "expected": [
+    "B KEY001 0 9995",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 1200000 P br"
+   ],
+   "expected": [
+    "B KEY001 10000 0",
+    "X 1 0 10000"
+   ]
+  },
+  {
+   "input": [
+    "Q KEY001 5 F bR"
+   ],
+   "expected": [
+    "B KEY001 0 9995",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_zero_calls": [
+  {
+   "input": [
+    "Q Z1 0 F US"
+   ],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q Z2 5 F US",
+    "Q Z2 0 F US",
+    "Q Z2 6 F US"
+   ],
+   "expected": [
+    "B Z2 0 9995",
+    "B Z2 0 9989",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "Q Z3 1 F US"
+   ],
+   "expected": [
+    "B Z3 0 9999",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_key_case": [
+  {
+   "input": [
+    "Q ApiK1 30000 F US",
+    "Q APIK1 200 F US"
+   ],
+   "expected": [
+    "B ApiK1 2400 0",
+    "B ApiK1 24 0",
+    "X 2 0 2424"
+   ]
+  },
+  {
+   "input": [
+    "Q aa 9 F US",
+    "Q AA 9 F US",
+    "Q bb 9 F US"
+   ],
+   "expected": [
+    "B aa 0 9991",
+    "B aa 0 9982",
+    "B bb 0 9991",
+    "X 3 0 0"
+   ]
+  }
+ ],
+ "f2p_trailing": [
+  {
+   "input": [
+    "Q TR1 30000 F US EXTRA"
+   ],
+   "expected": [
+    "B TR1 2400 0",
+    "X 1 0 2400"
+   ]
+  },
+  {
+   "input": [
+    "Q TR2 5 F US x y"
+   ],
+   "expected": [
+    "B TR2 0 9995",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "Q meterX 9648294 S IN",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q BADT 5 Z US",
+    "Q BIGCO 4 S IN",
+    "Q tiny7 102890 F US",
+    "Q BIGCO 3 P uS",
+    "Q meterX 1005211 P in",
+    "Q R0007 6400818 S US",
+    "Q ApiK1 1005484 S BR",
+    "Q BIGCO 0 S BR",
+    "Q R0010 999048 F uS",
+    "Q APIK1 102629 F uS",
+    "Q tiny7 2877706 P DE",
+    "Q tiny7 99343 F br",
+    "Q tiny7 0 P in",
+    "Q R0015 0 F br",
+    "Q BIGCO 1602050 F IN",
+    "Q SHORTY 5 F",
+    "Q meterX 1461927 S BR",
+    "Q METERX 1000364 S br",
+    "Q R0020 9963 S br",
+    "Q BIGCO 992100 S IN",
+    "Q meterX 6 S US",
+    "Q BIGCO 79328 F uS",
+    "Q BADC 12345678 F US",
+    "Q ApiK1 98040 P BR",
+    "Q APIK1 2444988 S US",
+    "Q tiny7 0 F BR",
+    "Q BIGCO 0 F DE",
+    "Q SHORTY 5 F",
+    "Q ApiK1 10436 F br",
+    "Q METERX 1004625 F US",
+    "Q BIGCO 97643 P br",
+    "Q tiny7 5 F in",
+    "Q tiny7 454650 F uS",
+    "Q APIK1 1853350 F BR",
+    "Q APIK1 0 S BR",
+    "Q BIGCO 706350 P BR",
+    "Q R0038 1496250 S US",
+    "Q meterX 0 S BR",
+    "Q METERX 457024 S uS",
+    "Q METERX 3 P IN",
+    "Q meterX 1009993 F br",
+    "Q tiny7 0 P uS",
+    "Q tiny7 9 S in",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q meterX 368750 F BR",
+    "Q METERX 237945 F uS",
+    "Q R0048 990881 P US",
+    "Q tiny7 8508055 F IN",
+    "Q BIGCO 999418 S US",
+    "Q METERX 9639 P br",
+    "Q ApiK1 3 F uS",
+    "Q R0053 610572 S DE",
+    "Q BIGCO 691450 F DE",
+    "Q BIGCO 99470 F US",
+    "Q BIGCO 100443 S US",
+    "Q METERX 5 S BR",
+    "Q METERX 95265 S IN",
+    "Q APIK1 103615 F US",
+    "Q APIK1 2514038 F br",
+    "Q ApiK1 996868 F IN",
+    "Q ApiK1 4 P DE",
+    "Q METERX 994183 F in",
+    "Q ApiK1 6536338 F BR",
+    "Q BIGCO 9422 F DE",
+    "Q APIK1 4846398 F uS",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q ApiK1 997927 P in",
+    "Q METERX 1108750 F DE",
+    "Q ApiK1 0 S br",
+    "Q tiny7 4 F br",
+    "Q ApiK1 8498722 F DE",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q METERX 991546 S US",
+    "Q BIGCO 1001850 F uS",
+    "Q tiny7 1 P IN",
+    "Q R0077 640950 S br",
+    "Q BIGCO 9883 P BR",
+    "Q tiny7 3 S br",
+    "Q ApiK1 9581 F IN",
+    "Q meterX 6 S DE",
+    "Q R0082 768550 P uS",
+    "Q APIK1 1814150 P US",
+    "Q meterX 992114 F uS",
+    "Q METERX 992813 S DE",
+    "Q meterX 8 P br",
+    "Q meterX 10767 P uS",
+    "Q APIK1 9878 F DE",
+    "Q tiny7 0 S BR",
+    "Q ApiK1 8 S IN",
+    "Q meterX 1469450 S US",
+    "Q BIGCO 2523330 P DE",
+    "Q BIGCO 990653 P DE",
+    "Q APIK1 1422150 S DE",
+    "Q ApiK1 9648 S US",
+    "Q METERX 0 S DE",
+    "Q BADR 5 F B2",
+    "Q ApiK1 1001728 S DE",
+    "Q ApiK1 9754 P US",
+    "Q APIK1 1251750 F DE",
+    "Q BIGCO 102885 S in",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q BADC 12345678 F US",
+    "Q APIK1 0 F uS",
+    "Q BIGCO 1002573 P uS",
+    "Q meterX 10221 F in",
+    "Q R0107 1007582 F DE",
+    "Q METERX 0 S br",
+    "Q tiny7 9649 S DE",
+    "NOISE",
+    "Q tiny7 8 P BR",
+    "Q BIGCO 9446 P DE",
+    "Q tiny7 95805 P US",
+    "Q meterX 990700 S in",
+    "NOISE",
+    "Q BADR 5 F B2",
+    "Q R0117 0 S DE",
+    "Q R0118 4994779 S uS",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q tiny7 995390 S US",
+    "Q tiny7 1863250 S US",
+    "Q APIK1 0 F US",
+    "Q R0123 997017 F uS",
+    "Q BIGCO 0 S BR",
+    "Q meterX 997037 F IN",
+    "Q METERX 10967 F br",
+    "Q ApiK1 993707 S in",
+    "Q meterX 1879450 F IN",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q BIGCO 9 S DE",
+    "Q R0131 990575 P IN",
+    "Q ApiK1 10257 S BR",
+    "Q R0133 1242050 S uS",
+    "Q R0134 7576532 S DE",
+    "Q APIK1 9332 P US",
+    "Q ApiK1 1006482 P br",
+    "Q R0137 1 F IN",
+    "Q ApiK1 1067550 F US",
+    "Q tiny7 98139 S in",
+    "Q APIK1 1276450 P DE",
+    "Q ApiK1 95060 S in",
+    "NOISE",
+    "Q ApiK1 1005431 F IN",
+    "Q BIGCO 1231450 F br",
+    "Q R0145 992650 F DE",
+    "Q BIGCO 1005816 P in",
+    "Q meterX 1002939 P uS",
+    "Q BIGCO 104947 P br",
+    "Q tiny7 0 S br",
+    "Q APIK1 0 S BR",
+    "Q ApiK1 104599 P in",
+    "Q APIK1 104393 F br",
+    "Q ApiK1 10078 S br",
+    "Q ApiK1 1105150 S DE",
+    "Q APIK1 362050 P uS",
+    "Q ApiK1 4911797 P uS",
+    "Q APIK1 103200 F uS",
+    "Q BADR 5 F B2",
+    "Q R0159 0 S IN",
+    "Q METERX 5 S IN",
+    "Q METERX 6 F br",
+    "Q BIGCO 2624174 F in",
+    "Q meterX 7 S BR",
+    "Q ApiK1 7 S in",
+    "Q tiny7 1009076 S in"
+   ],
+   "expected": [
+    "B meterX 859347 0",
+    "B EXTRAA 0 9995",
+    "R BADT TIER",
+    "B BIGCO 0 99996",
+    "B tiny7 11148 0",
+    "B BIGCO 0 999993",
+    "B meterX 50265 0",
+    "B R0007 567081 0",
+    "B ApiK1 81495 0",
+    "B R0010 118692 0",
+    "R ApiK1 TIER",
+    "R tiny7 TIER",
+    "B tiny7 11928 0",
+    "R BIGCO TIER",
+    "R SHORTY FMT",
+    "R meterX TIER",
+    "R meterX TIER",
+    "B R0020 0 91033",
+    "R BIGCO TIER",
+    "R meterX TIER",
+    "R BIGCO TIER",
+    "R BADC CALLS",
+    "B ApiK1 4905 0",
+    "R ApiK1 TIER",
+    "R SHORTY FMT",
+    "R ApiK1 TIER",
+    "R meterX TIER",
+    "B BIGCO 0 902350",
+    "B tiny7 12 0",
+    "B tiny7 54552 0",
+    "R ApiK1 TIER",
+    "B BIGCO 0 196000",
+    "B R0038 125658 0",
+    "R meterX TIER",
+    "B meterX 5 0",
+    "R meterX TIER",
+    "B tiny7 9 0",
+    "B EXTRAA 0 9990",
+    "R meterX TIER",
+    "R meterX TIER",
+    "B R0048 0 108207",
+    "R tiny7 TIER",
+    "R BIGCO TIER",
+    "B meterX 485 0",
+    "R ApiK1 TIER",
+    "B R0053 45954 0",
+    "R BIGCO TIER",
+    "R BIGCO TIER",
+    "R BIGCO TIER",
+    "R meterX TIER",
+    "R meterX TIER",
+    "R ApiK1 TIER",
+    "R ApiK1 TIER",
+    "R ApiK1 TIER",
+    "B ApiK1 6 0",
+    "R meterX TIER",
+    "R ApiK1 TIER",
+    "R BIGCO TIER",
+    "R ApiK1 TIER",
+    "B EXTRAA 0 9985",
+    "B ApiK1 49900 0",
+    "R meterX TIER",
+    "R tiny7 TIER",
+    "R ApiK1 TIER",
+    "B EXTRAA 0 9980",
+    "R meterX TIER",
+    "R BIGCO TIER",
+    "B tiny7 0 343102",
+    "B R0077 48681 0",
+    "B BIGCO 0 186117",
+    "R tiny7 TIER",
+    "R ApiK1 TIER",
+    "R meterX TIER",
+    "B R0082 0 308305",
+    "B ApiK1 108846 0",
+    "R meterX TIER",
+    "R meterX TIER",
+    "B meterX 5 0",
+    "B meterX 648 0",
+    "R ApiK1 TIER",
+    "R ApiK1 TIER",
+    "R meterX TIER",
+    "B BIGCO 151404 0",
+    "B BIGCO 59442 0",
+    "R ApiK1 TIER",
+    "R ApiK1 TIER",
+    "R BADR REGION",
+    "R ApiK1 TIER",
+    "B ApiK1 588 0",
+    "R ApiK1 TIER",
+    "R BIGCO TIER",
+    "B EXTRAA 0 9975",
+    "R BADC CALLS",
+    "B BIGCO 60156 0",
+    "R meterX TIER",
+    "B R0107 119712 0",
+    "R tiny7 TIER",
+    "R ???????? FMT",
+    "B tiny7 0 343094",
+    "B BIGCO 570 0",
+    "B tiny7 0 247289",
+    "R meterX TIER",
+    "R ???????? FMT",
+    "R BADR REGION",
+    "B R0118 440532 0",
+    "B EXTRAA 0 9970",
+    "R tiny7 TIER",
+    "R tiny7 TIER",
+    "B R0123 118452 0",
+    "R meterX TIER",
+    "R meterX TIER",
+    "R ApiK1 TIER",
+    "R meterX TIER",
+    "B EXTRAA 0 9965",
+    "R BIGCO TIER",
+    "B R0131 0 108482",
+    "R ApiK1 TIER",
+    "B R0133 102780 0",
+    "B R0134 672894 0",
+    "B ApiK1 564 0",
+    "B ApiK1 50325 0",
+    "B R0137 0 9999",
+    "R ApiK1 TIER",
+    "R tiny7 TIER",
+    "B ApiK1 76584 0",
+    "R ApiK1 TIER",
+    "R ???????? FMT",
+    "R ApiK1 TIER",
+    "R BIGCO TIER",
+    "B R0145 117912 0",
+    "B BIGCO 50295 0",
+    "B meterX 60180 0",
+    "B BIGCO 5250 0",
+    "B ApiK1 5230 0",
+    "R ApiK1 TIER",
+    "R ApiK1 TIER",
+    "R ApiK1 TIER",
+    "B ApiK1 21720 0",
+    "B ApiK1 294708 0",
+    "R ApiK1 TIER",
+    "R BADR REGION",
+    "R meterX TIER",
+    "R meterX TIER",
+    "R BIGCO TIER",
+    "R meterX TIER",
+    "R ApiK1 TIER",
+    "R tiny7 TIER",
+    "X 61 86 4548920"
+   ]
+  },
+  {
+   "input": [
+    "Q APIK1 0 S br",
+    "Q APIK1 1001487 F br",
+    "Q ApiK1 10013 S br",
+    "Q ApiK1 7 F uS",
+    "Q R0004 103215 S BR",
+    "Q BIGCO 999588 F BR",
+    "NOISE",
+    "Q APIK1 0 S IN",
+    "Q APIK1 102003 F IN",
+    "Q R0009 995587 S IN",
+    "Q APIK1 1 S DE",
+    "NOISE",
+    "Q R0012 8052552 P in",
+    "Q APIK1 101767 S uS",
+    "Q BIGCO 1506450 S IN",
+    "Q BIGCO 0 S uS",
+    "Q meterX 1009037 F br",
+    "Q APIK1 1004153 F br",
+    "Q meterX 1002429 S DE",
+    "Q APIK1 1337650 F in",
+    "Q ApiK1 98037 F uS",
+    "Q BADC 12345678 F US",
+    "Q ApiK1 1539650 S in",
+    "Q BIGCO 104583 P in",
+    "Q tiny7 1848413 F DE",
+    "Q BADC 12345678 F US",
+    "Q R0026 97448 F BR",
+    "Q meterX 0 P DE",
+    "Q BIGCO 9444 P br",
+    "Q meterX 1002383 F in",
+    "Q tiny7 1006841 P US",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q ApiK1 103312 S uS",
+    "Q APIK1 0 S uS",
+    "Q ApiK1 3886061 F br",
+    "Q BIGCO 297299 S DE",
+    "NOISE",
+    "Q BIGCO 1000666 S br",
+    "Q R0038 0 F IN",
+    "Q BADR 5 F B2",
+    "Q R0040 10258 S br",
+    "Q BIGCO 1817050 S DE",
+    "Q METERX 1649350 F in",
+    "Q ApiK1 5 P uS",
+    "Q METERX 10093 S IN",
+    "Q R0045 100123 F br",
+    "Q tiny7 0 S IN",
+    "Q APIK1 3189428 F BR",
+    "Q BIGCO 1270420 S IN",
+    "Q meterX 1534450 S US",
+    "Q METERX 109750 S uS",
+    "Q R0051 0 F BR",
+    "Q ApiK1 3 F BR",
+    "Q R0053 9 S DE",
+    "Q METERX 5 F US",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q APIK1 102401 P IN",
+    "Q meterX 3 F DE",
+    "Q METERX 3423400 S br",
+    "Q BADR 5 F B2",
+    "Q ApiK1 9989 F BR",
+    "Q BIGCO 0 F US",
+    "Q meterX 7662109 F BR",
+    "Q meterX 0 S IN",
+    "Q BIGCO 1192750 S BR",
+    "Q meterX 9741 S US",
+    "Q BIGCO 98343 F uS",
+    "Q ApiK1 103081 F br",
+    "Q tiny7 995207 P US",
+    "Q BADR 5 F B2",
+    "Q BIGCO 1931750 S BR",
+    "Q ApiK1 102194 F US",
+    "Q BIGCO 95461 S DE",
+    "Q APIK1 994674 F BR",
+    "Q tiny7 4 P uS",
+    "Q BIGCO 486456 S in",
+    "Q BIGCO 101969 F uS",
+    "Q METERX 1002904 S US",
+    "Q meterX 95961 S BR",
+    "Q APIK1 0 S br",
+    "Q METERX 248008 F US",
+    "NOISE",
+    "Q tiny7 990800 P US",
+    "Q R0083 100456 F US",
+    "Q METERX 995215 P IN",
+    "Q METERX 1010050 F BR",
+    "Q ApiK1 104343 P US",
+    "Q BADT 5 Z US",
+    "Q meterX 10397 S IN",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q tiny7 0 P in",
+    "Q BIGCO 6 F BR",
+    "Q R0092 993187 F in",
+    "Q SHORTY 5 F",
+    "Q meterX 6303141 S IN",
+    "Q tiny7 4 S DE",
+    "Q ApiK1 1 S DE",
+    "Q R0097 673850 P in",
+    "Q meterX 10517 P IN",
+    "Q ApiK1 96688 P BR",
+    "Q R0100 9528 F br",
+    "Q meterX 10483 F US",
+    "Q APIK1 0 F uS",
+    "Q BIGCO 7589638 F BR",
+    "Q BADT 5 Z US",
+    "Q meterX 9 S BR",
+    "Q ApiK1 0 F br",
+    "Q R0107 4914645 F uS",
+    "Q ApiK1 8934383 S US",
+    "Q tiny7 0 F uS",
+    "Q APIK1 4950902 F US",
+    "Q BIGCO 1007203 P BR",
+    "Q tiny7 0 F US",
+    "Q meterX 1009650 S DE",
+    "Q meterX 6061545 S IN",
+    "Q tiny7 2476853 F in",
+    "Q BIGCO 9201 S US",
+    "Q ApiK1 9117 F DE",
+    "Q ApiK1 9281 S uS",
+    "Q meterX 97040 S in",
+    "Q APIK1 10684 F in",
+    "Q ApiK1 950150 F in",
+    "Q SHORTY 5 F",
+    "Q R0123 885150 P br",
+    "Q meterX 98880 P in",
+    "Q R0125 9933259 F IN",
+    "Q meterX 9675 S DE",
+    "Q ApiK1 98324 F BR",
+    "Q BADR 5 F B2",
+    "Q EXTRAA 5 F US TRAILING",
+    "Q ApiK1 8802777 S br",
+    "Q BADT 5 Z US",
+    "Q BIGCO 10920 S BR",
+    "Q BIGCO 9437 F in",
+    "Q SHORTY 5 F",
+    "Q APIK1 66650 F br",
+    "Q BADR 5 F B2",
+    "Q METERX 3 F BR",
+    "Q APIK1 99630 S IN",
+    "Q METERX 100332 S in",
+    "Q BIGCO 9 S IN",
+    "Q BIGCO 0 P DE",
+    "Q R0142 4 P br",
+    "Q tiny7 5061476 S br",
+    "Q METERX 5 P IN",
+    "Q tiny7 1616950 S br",
+    "Q ApiK1 1279850 S uS",
+    "Q ApiK1 6 S BR",
+    "Q tiny7 9588 P uS",
+    "Q meterX 935350 S uS",
+    "Q METERX 1004021 S IN"
+   ],
+   "expected": [
+    "B APIK1 118980 0",
+    "B APIK1 909 0",
+    "R APIK1 TIER",
+    "B R0004 297 0",
+    "B BIGCO 118752 0",
+    "R ???????? FMT",
+    "R APIK1 TIER",
+    "B R0009 80604 0",
+    "B APIK1 9 0",
+    "R ???????? FMT",
+    "B R0012 352630 0",
+    "B APIK1 9162 0",
+    "B BIGCO 135576 0",
+    "B meterX 119892 0",
+    "R APIK1 TIER",
+    "B meterX 90225 0",
+    "R APIK1 TIER",
+    "R APIK1 TIER",
+    "R BADC CALLS",
+    "B APIK1 138564 0",
+    "B BIGCO 5230 0",
+    "B tiny7 220620 0",
+    "R BADC CALLS",
+    "B R0026 10500 0",
+    "B BIGCO 475 0",
+    "R meterX TIER",
+    "R tiny7 TIER",
+    "B EXTRAA 0 9995",
+    "B APIK1 9306 0",
+    "R APIK1 TIER",
+    "R BIGCO TIER",
+    "R ???????? FMT",
+    "R BIGCO TIER",
+    "R BADR REGION",
+    "B R0040 0 90767",
+    "R BIGCO TIER",
+    "R meterX TIER",
+    "B APIK1 6 0",
+    "B meterX 909 0",
+    "B R0045 10824 0",
+    "R APIK1 TIER",
+    "R BIGCO TIER",
+    "B meterX 138096 0",
+    "B meterX 9873 0",
+    "R APIK1 TIER",
+    "B R0053 0 99991",
+    "R meterX TIER",
+    "B EXTRAA 0 9990",
+    "B APIK1 5125 0",
+    "R meterX TIER",
+    "B meterX 308106 0",
+    "R BADR REGION",
+    "R APIK1 TIER",
+    "R meterX TIER",
+    "R BIGCO TIER",
+    "B meterX 882 0",
+    "R BIGCO TIER",
+    "R APIK1 TIER",
+    "R tiny7 TIER",
+    "R BADR REGION",
+    "R BIGCO TIER",
+    "R APIK1 TIER",
+    "R BIGCO TIER",
+    "R APIK1 TIER",
+    "R tiny7 TIER",
+    "R BIGCO TIER",
+    "R BIGCO TIER",
+    "B meterX 90270 0",
+    "B meterX 8640 0",
+    "R meterX TIER",
+    "R ???????? FMT",
+    "R tiny7 TIER",
+    "B R0083 10860 0",
+    "B meterX 49765 0",
+    "R meterX TIER",
+    "B APIK1 6264 0",
+    "R BADT TIER",
+    "R meterX TIER",
+    "B EXTRAA 0 9985",
+    "R BIGCO TIER",
+    "B R0092 117984 0",
+    "R SHORTY FMT",
+    "R meterX TIER",
+    "B tiny7 9 0",
+    "R APIK1 TIER",
+    "B R0097 0 393535",
+    "B meterX 530 0",
+    "B APIK1 4835 0",
+    "B R0100 0 1424",
+    "R meterX TIER",
+    "R BIGCO TIER",
+    "R BADT TIER",
+    "R meterX TIER",
+    "B R0107 588564 0",
+    "R APIK1 TIER",
+    "R APIK1 TIER",
+    "B BIGCO 50365 0",
+    "R meterX TIER",
+    "R meterX TIER",
+    "R tiny7 TIER",
+    "R BIGCO TIER",
+    "R APIK1 TIER",
+    "R APIK1 TIER",
+    "R meterX TIER",
+    "R APIK1 TIER",
+    "R APIK1 TIER",
+    "R SHORTY FMT",
+    "B R0123 0 203365",
+    "B meterX 4945 0",
+    "B R0125 1190796 0",
+    "R meterX TIER",
+    "R APIK1 TIER",
+    "R BADR REGION",
+    "B EXTRAA 0 9980",
+    "R APIK1 TIER",
+    "R BADT TIER",
+    "R BIGCO TIER",
+    "R BIGCO TIER",
+    "R SHORTY FMT",
+    "R APIK1 TIER",
+    "R BADR REGION",
+    "R meterX TIER",
+    "R APIK1 TIER",
+    "R meterX TIER",
+    "R BIGCO TIER",
+    "B R0142 0 999996",
+    "B tiny7 455535 0",
+    "B meterX 5 0",
+    "B tiny7 145521 0",
+    "R APIK1 TIER",
+    "R APIK1 TIER",
+    "B tiny7 576 0",
+    "R meterX TIER",
+    "R meterX TIER",
+    "X 52 82 4611016"
+   ]
+  }
+ ]
+}

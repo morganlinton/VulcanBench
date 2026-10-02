@@ -1,0 +1,1749 @@
+{
+ "guard_v2_flows": [
+  {
+   "input": [
+    "W alpha 2 LBNWGWTHXBRXVPUZGT",
+    "W beta 2 QHUT",
+    "G alpha",
+    "G beta",
+    "G gamma"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 2",
+    "D 52",
+    "D 31",
+    "NIL",
+    "X 2 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 YT",
+    "W a 2 ZRJSB",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 1",
+    "D 77",
+    "C 77",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W k1 2 JWPVBGBCKNWSZZPN",
+    "W k2 2 BNYRVOQYV",
+    "C",
+    "M",
+    "C",
+    "G k1"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 2",
+    "C 109",
+    "M 0",
+    "C 109",
+    "D 84",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "G nothere",
+    "W x 2 QQTIWHKQEOJHRKTRGGV",
+    "G x",
+    "C"
+   ],
+   "expected": [
+    "NIL",
+    "OK 0 1",
+    "D 34",
+    "C 34",
+    "X 1 2 0 0"
+   ]
+  }
+ ],
+ "guard_benign_migrations": [
+  {
+   "input": [
+    "W a 1 LBNWGWTHXBRXVPUZGT",
+    "W b 1 QHUT",
+    "G a",
+    "M",
+    "G a",
+    "G b",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "D 52",
+    "M 1",
+    "D 52",
+    "D 31",
+    "C 83",
+    "X 2 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W p 1 YT",
+    "W q 2 ZRJSB",
+    "M",
+    "C",
+    "G p",
+    "G q"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 1",
+    "M 1",
+    "C 122",
+    "D 45",
+    "D 77",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W s 1 JWPVBGBCKNWSZZPN",
+    "G s",
+    "G s",
+    "C",
+    "M"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 84",
+    "D 84",
+    "C 84",
+    "M 0",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W m1 1 BNYRVOQYV",
+    "W m2 1 QQTIWHKQEOJHRKTRGGV",
+    "W m3 1 GOGOEBLPIEITVNIA",
+    "M",
+    "M",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "OK 3 0",
+    "M 3",
+    "M 0",
+    "C 67",
+    "X 3 0 3 0"
+   ]
+  },
+  {
+   "input": [
+    "W up 1 YHJV",
+    "W up 2 EGQMNYLPRIAPAFZ",
+    "G up",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 0 1",
+    "D 9",
+    "C 9",
+    "X 2 1 0 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "W toolong99 1 abc"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a-b 1 abc"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a 3 abc"
+   ],
+   "expected": [
+    "R a VER",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a 0 abc"
+   ],
+   "expected": [
+    "R a VER",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 abcdefghijklmnopqrstu"
+   ],
+   "expected": [
+    "R a BODY",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 bad-body"
+   ],
+   "expected": [
+    "R a BODY",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a 9 abcdefghijklmnopqrstu"
+   ],
+   "expected": [
+    "R a VER",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W toolong99 9 bad-body"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a 1"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W a"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "G"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "G bad-key"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "G toolong99"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "w a 1 abc"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "g a"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W ok 2 GLBJUMIAHKGLXOVML",
+    "W ok 3 zzz",
+    "G ok"
+   ],
+   "expected": [
+    "OK 0 1",
+    "R ok VER",
+    "D 92",
+    "X 1 1 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C"
+   ],
+   "expected": [
+    "C 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M"
+   ],
+   "expected": [
+    "M 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "C",
+    "",
+    "M"
+   ],
+   "expected": [
+    "C 0",
+    "M 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "G ghost",
+    "C"
+   ],
+   "expected": [
+    "NIL",
+    "C 0",
+    "X 0 1 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "W alpha 2 VDQGIVVCWQL",
+    "W beta 1 JYJQ",
+    "G alpha",
+    "G missing",
+    "M",
+    "C",
+    "W bad-id 1 x",
+    "G",
+    "W beta 4 x",
+    "Q junk"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 1 1",
+    "D 75",
+    "NIL",
+    "M 1",
+    "C 160",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R beta VER",
+    "R ???????? FMT",
+    "X 2 2 1 4"
+   ]
+  }
+ ],
+ "f2p_sweep_vs_read": [
+  {
+   "input": [
+    "W a 1 abc7",
+    "W b 1 abc7",
+    "G a",
+    "M",
+    "G a",
+    "G b",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "D 20",
+    "M 1",
+    "D 20",
+    "D 91",
+    "C 111",
+    "X 2 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 report2024",
+    "W b 1 report2024",
+    "G a",
+    "M",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "D 0",
+    "M 1",
+    "C 58",
+    "X 2 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W solo 1 log42",
+    "M",
+    "G solo"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 82",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W solo 1 log42",
+    "G solo",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 61",
+    "C 61",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 42424242",
+    "M",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 0",
+    "C 0",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 42424242",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 70",
+    "C 70",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W e 1 abcdef",
+    "G e",
+    "M",
+    "G e",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 3",
+    "M 0",
+    "D 3",
+    "C 3",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_rewrite_dirty": [
+  {
+   "input": [
+    "W d 1 x9",
+    "W d 1 y7",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 0",
+    "D 0",
+    "C 0",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W c 1 y7",
+    "G c",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 26",
+    "C 26",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 note1",
+    "W d 1 note1",
+    "G d"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 0",
+    "D 87",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 plan88",
+    "W d 2 plan88",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 0 1",
+    "D 48",
+    "C 48",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 a5",
+    "W d 1 b5",
+    "M",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 0",
+    "M 1",
+    "D 0",
+    "C 0",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 abc",
+    "W d 1 abc",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 0",
+    "D 91",
+    "C 91",
+    "X 2 1 1 0"
+   ]
+  }
+ ],
+ "f2p_downgrade": [
+  {
+   "input": [
+    "W a 2 hello",
+    "W a 1 world9",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 1 0",
+    "D 64",
+    "C 64",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 hello",
+    "W a 1 world9",
+    "M",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 1 0",
+    "M 1",
+    "D 30",
+    "C 30",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 first1",
+    "G a",
+    "W a 1 back2",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 83",
+    "OK 1 0",
+    "D 61",
+    "C 61",
+    "X 2 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 keep",
+    "W a 1 temp3",
+    "W a 1 temp4",
+    "G a"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 1 0",
+    "OK 1 0",
+    "D 28",
+    "X 3 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 x",
+    "W a 2 y",
+    "G a"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 1",
+    "D 0",
+    "X 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_maxlen": [
+  {
+   "input": [
+    "W a 1 abcdefghijklmnopqrxy",
+    "M",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 38",
+    "C 38",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W b 1 abcdefghijklmnopqrxy",
+    "G b",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 22",
+    "C 22",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W c 1 abcdefghijklmnopqrx",
+    "M",
+    "G c"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 54",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W d 1 abcdefghijklmnopqrx9",
+    "M",
+    "G d",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 54",
+    "C 54",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W e 1 abcdefghijklmnopqr99",
+    "M",
+    "G e",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 38",
+    "C 38",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W f 1 abcdefghijklmnopqrxyz"
+   ],
+   "expected": [
+    "R f BODY",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W g 1 abcdefghijklmnopqrxy",
+    "W g 1 abcdefghijklmnopqrxy",
+    "G g",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 0",
+    "D 38",
+    "C 38",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W h 2 abcdefghijklmnopqrxy",
+    "M",
+    "G h",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "M 0",
+    "D 14",
+    "C 14",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_digest_skew": [
+  {
+   "input": [
+    "W a 2 xbc",
+    "W b 2 ybc",
+    "G a",
+    "G b"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 2",
+    "D 22",
+    "D 22",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 Abc",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "D 22",
+    "C 22",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 q",
+    "G a"
+   ],
+   "expected": [
+    "OK 0 1",
+    "D 0",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 z",
+    "W b 2 a",
+    "G a",
+    "G b",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 2",
+    "D 0",
+    "D 0",
+    "C 0",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 mix3",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 27",
+    "C 27",
+    "X 1 1 1 0"
+   ]
+  }
+ ],
+ "f2p_doc_case_fold": [
+  {
+   "input": [
+    "W Doc 1 abc",
+    "G DOC",
+    "G doc",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "D 91",
+    "D 91",
+    "C 91",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W KEY 2 first",
+    "W key 2 second",
+    "G KeY",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 1",
+    "D 25",
+    "C 25",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 x7",
+    "W A 1 y7",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 0",
+    "D 0",
+    "C 0",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W low 2 x",
+    "W other 2 y",
+    "G low",
+    "G other"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 2",
+    "D 0",
+    "D 0",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "W a 2 body extra"
+   ],
+   "expected": [
+    "OK 0 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 body x y z",
+    "G a junk",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "D 82",
+    "C 82",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M now"
+   ],
+   "expected": [
+    "M 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 x1",
+    "M please",
+    "G a trailing junk"
+   ],
+   "expected": [
+    "OK 1 0",
+    "M 1",
+    "D 0",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C now"
+   ],
+   "expected": [
+    "C 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 body",
+    "G a"
+   ],
+   "expected": [
+    "OK 0 1",
+    "D 82",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_checksum_drift": [
+  {
+   "input": [
+    "W r1 1 inv2020",
+    "W r2 1 inv2021",
+    "W r3 1 inv2022",
+    "G r1",
+    "G r2",
+    "G r3",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "OK 3 0",
+    "D 22",
+    "D 31",
+    "D 40",
+    "C 93",
+    "X 3 3 3 0"
+   ]
+  },
+  {
+   "input": [
+    "W r1 1 inv2020",
+    "W r2 1 inv2021",
+    "W r3 1 inv2022",
+    "M",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "OK 3 0",
+    "M 3",
+    "C 57",
+    "X 3 0 3 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 tag5",
+    "W b 2 tag5",
+    "C",
+    "M",
+    "C",
+    "G a",
+    "C"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 1 1",
+    "C 144",
+    "M 1",
+    "C 98",
+    "D 26",
+    "C 98",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 1 99",
+    "W b 1 x99",
+    "M",
+    "C",
+    "G a",
+    "G b"
+   ],
+   "expected": [
+    "OK 1 0",
+    "OK 2 0",
+    "M 2",
+    "C 0",
+    "D 0",
+    "D 0",
+    "X 2 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W a 2 tagged",
+    "W b 2 tagged",
+    "C"
+   ],
+   "expected": [
+    "OK 0 1",
+    "OK 0 2",
+    "C 58",
+    "X 2 0 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "C",
+    "G toolong99",
+    "W abcdefgh 1 mix3 extra tail",
+    "G Doc",
+    "W Doc 3 y7",
+    "C",
+    "W bb 2 abcdefghijklmnopqrx",
+    "W toolong99 2 mix3",
+    "G zz99",
+    "M now",
+    "M",
+    "W n 2 y7",
+    "C",
+    "W toolong99 0 mix3",
+    "C",
+    "G Doc",
+    "M",
+    "M now",
+    "W bb 2 report2024",
+    "G doc",
+    "M now",
+    "G DOC",
+    "W zz99 0 xbc",
+    "G toolong99",
+    "W m 2 z",
+    "W zz99 1 99",
+    "X",
+    "M",
+    "W abcdefgh 3 42424242",
+    "W a-b 1 inv2021",
+    "W",
+    "W a-b 0 abcdefghijklmnopqrxyz",
+    "W abcdefgh 0 abcdefghijklmnopqrxyz",
+    "W doc 1 abcdefghijklmnopqrxyz",
+    "M now",
+    "M",
+    "W toolong99 1 abc",
+    "W a",
+    "G n junk",
+    "W x 1 x9",
+    "G m",
+    "G DOC",
+    "M",
+    "W DOC 1 xbc",
+    "G toolong99 junk",
+    "W DOC 1 x9",
+    "C now",
+    "W n 1 99",
+    "G x",
+    "G m",
+    "G abcdefgh",
+    "W toolong99 x z",
+    "G zz99",
+    "G toolong99",
+    "G abcdefgh",
+    "W abcdefgh 2 ybc extra tail",
+    "W zz99 x mix3",
+    "W abcdefgh 1 y7",
+    "W Doc 3 abcdefghijklmnopqrx9",
+    "W a 1",
+    "W n 2 x9",
+    "G abcdefgh",
+    "W DOC 1 abc",
+    "G zz99",
+    "W x 1 tag5",
+    "G doc",
+    "W zz99 x abcdefghijklmnopqrx9",
+    "W Doc 0 y7",
+    "W bb 1 abcdefghijklmnopqrx",
+    "W abcdefgh 1 99",
+    "W toolong99 1 tag5",
+    "G zz99",
+    "W toolong99 2 abcdefghijklmnopqrxy",
+    "W doc 3 99",
+    "C",
+    "W bb 1 abcdefghijklmnopqrx",
+    "G abcdefgh junk",
+    "W X 1 abc7",
+    "W zz99 1 ybc",
+    "G Doc",
+    "W a 2 z",
+    "W x 1 99",
+    "W n 1 q",
+    "Q hey",
+    "M now",
+    "M",
+    "W zz99 3 x9",
+    "W DOC 1 abcdefghijklmnopqrx9",
+    "M",
+    "G bb",
+    "M",
+    "W n 2 abcdefghijklmnopqrxyz",
+    "C now",
+    "W abcdefgh x tag5",
+    "W doc x q extra tail",
+    "W X 2 abcdefghijklmnopqrxyz",
+    "G toolong99",
+    "W doc 1 q extra tail",
+    "W n 2 abcdefghijklmnopqrx9 extra tail",
+    "M",
+    "G X",
+    "W a-b 0 42424242",
+    "W abcdefgh 2 report2024",
+    "W a 1",
+    "C",
+    "G a",
+    "G bb",
+    "W toolong99 0 y7",
+    "G a-b",
+    "W Doc 0 xbc",
+    "W a 1 abc",
+    "W n 2 abc extra tail",
+    "M",
+    "G x",
+    "G a",
+    "M",
+    "W a-b 2 tag5",
+    "M",
+    "W bb 2 abc",
+    "G",
+    "M",
+    "Q hey",
+    "W bb 3 42424242",
+    "W x 1 42424242",
+    "W a-b 2 abc",
+    "G a junk",
+    "W a 1",
+    "W DOC 0 abcdefghijklmnopqrx",
+    "G a",
+    "W a",
+    "G bb",
+    "W DOC 2 abcdefghijklmnopqrxy",
+    "G abcdefgh",
+    "W bb 2 z extra tail",
+    "M",
+    "G bb junk",
+    "G zz99",
+    "M",
+    "W doc 0 inv2021",
+    "W",
+    "C now",
+    "C",
+    "W zz99 x inv2021",
+    "W a 1",
+    "C",
+    "W m 2 bad-body",
+    "W doc 2 42424242",
+    "M",
+    "C",
+    "C now",
+    "W toolong99 x bad-body",
+    "W abcdefgh 0 abcdefghijklmnopqrx9",
+    "G zz99",
+    "C",
+    "W m 3 tag5",
+    "G Doc",
+    "G toolong99",
+    "G x",
+    "M",
+    "G n"
+   ],
+   "expected": [
+    "C 0",
+    "R ???????? FMT",
+    "OK 1 0",
+    "NIL",
+    "R Doc VER",
+    "C 55",
+    "OK 1 1",
+    "R ???????? FMT",
+    "NIL",
+    "M 1",
+    "M 0",
+    "OK 0 3",
+    "C 58",
+    "R ???????? FMT",
+    "C 58",
+    "NIL",
+    "M 0",
+    "M 0",
+    "OK 0 3",
+    "NIL",
+    "M 0",
+    "NIL",
+    "R zz99 VER",
+    "R ???????? FMT",
+    "OK 0 4",
+    "OK 1 4",
+    "R ???????? FMT",
+    "M 1",
+    "R abcdefgh VER",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R abcdefgh VER",
+    "R doc BODY",
+    "M 0",
+    "M 0",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "D 26",
+    "OK 1 5",
+    "D 0",
+    "NIL",
+    "M 1",
+    "OK 1 6",
+    "R ???????? FMT",
+    "OK 1 6",
+    "C 164",
+    "OK 2 5",
+    "D 0",
+    "D 0",
+    "D 17",
+    "R ???????? FMT",
+    "D 0",
+    "R ???????? FMT",
+    "D 17",
+    "OK 2 5",
+    "R zz99 VER",
+    "OK 3 4",
+    "R Doc VER",
+    "R ???????? FMT",
+    "OK 2 5",
+    "D 26",
+    "OK 1 6",
+    "D 0",
+    "OK 2 5",
+    "D 91",
+    "R zz99 VER",
+    "R Doc VER",
+    "OK 2 5",
+    "OK 3 4",
+    "R ???????? FMT",
+    "D 0",
+    "R ???????? FMT",
+    "R doc VER",
+    "C 246",
+    "OK 3 4",
+    "D 34",
+    "OK 2 5",
+    "OK 3 4",
+    "D 91",
+    "OK 3 5",
+    "OK 3 5",
+    "OK 4 4",
+    "R ???????? FMT",
+    "M 4",
+    "M 0",
+    "R zz99 VER",
+    "OK 1 7",
+    "M 1",
+    "D 54",
+    "M 0",
+    "R n BODY",
+    "C 233",
+    "R abcdefgh VER",
+    "R doc VER",
+    "R X BODY",
+    "R ???????? FMT",
+    "OK 1 7",
+    "OK 1 7",
+    "M 1",
+    "D 0",
+    "R ???????? FMT",
+    "OK 0 8",
+    "R ???????? FMT",
+    "C 281",
+    "D 0",
+    "D 54",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R Doc VER",
+    "OK 1 7",
+    "OK 1 7",
+    "M 1",
+    "D 0",
+    "D 91",
+    "M 0",
+    "R ???????? FMT",
+    "M 0",
+    "OK 0 8",
+    "R ???????? FMT",
+    "M 0",
+    "R ???????? FMT",
+    "R bb VER",
+    "OK 1 7",
+    "R ???????? FMT",
+    "D 91",
+    "R ???????? FMT",
+    "R DOC VER",
+    "D 91",
+    "R ???????? FMT",
+    "D 22",
+    "OK 1 7",
+    "D 87",
+    "OK 1 7",
+    "M 1",
+    "D 0",
+    "D 91",
+    "M 0",
+    "R doc VER",
+    "R ???????? FMT",
+    "C 305",
+    "C 305",
+    "R zz99 VER",
+    "R ???????? FMT",
+    "C 305",
+    "R m BODY",
+    "OK 0 8",
+    "M 0",
+    "C 361",
+    "C 361",
+    "R ???????? FMT",
+    "R abcdefgh VER",
+    "D 91",
+    "C 361",
+    "R m VER",
+    "D 70",
+    "R ???????? FMT",
+    "D 0",
+    "M 0",
+    "D 22",
+    "X 34 35 14 55"
+   ]
+  },
+  {
+   "input": [
+    "W bb 0 abcdefghijklmnopqrx",
+    "M",
+    "W toolong99 3 xbc",
+    "G toolong99 junk",
+    "W bb 1 bad-body",
+    "W bb 1 abcdefghijklmnopqrxy",
+    "W DOC 1 x9",
+    "W bb 2 z",
+    "C",
+    "M",
+    "M",
+    "G toolong99",
+    "C",
+    "W DOC 1 99",
+    "G m",
+    "G doc",
+    "G n",
+    "G bb",
+    "G abcdefgh",
+    "W a-b 2 report2024",
+    "G m",
+    "W Doc x abcdefghijklmnopqrx",
+    "C",
+    "W zz99 x ybc",
+    "W toolong99 1 abcdefghijklmnopqrx",
+    "G zz99",
+    "W zz99 2 abcdefghijklmnopqrxyz extra tail",
+    "W bb 0 abcdefghijklmnopqrxyz",
+    "G bb junk",
+    "W x 1 abcdefghijklmnopqrx",
+    "G a junk",
+    "W doc 1 abcdefghijklmnopqrxy",
+    "W a-b 1 abcdefghijklmnopqrx",
+    "M now",
+    "W DOC 1 ybc",
+    "W abcdefgh 2 abcdefghijklmnopqrxy",
+    "W n 2 abcdefghijklmnopqrx extra tail",
+    "G m",
+    "G Doc",
+    "w a 1 x",
+    "C",
+    "W a-b 1 abc7",
+    "W m 2 report2024",
+    "G Doc",
+    "G doc",
+    "Q hey",
+    "W",
+    "M",
+    "M",
+    "M now",
+    "W x 2 99",
+    "G n",
+    "G a",
+    "W n 2 xbc",
+    "C",
+    "C",
+    "G doc",
+    "W doc 3 abcdefghijklmnopqrxyz extra tail",
+    "G a-b",
+    "M",
+    "M now",
+    "W DOC 1 abc7",
+    "G Doc",
+    "G doc",
+    "C",
+    "G DOC",
+    "W a 2 abcdefghijklmnopqrx9",
+    "w a 1 x",
+    "M now",
+    "G doc",
+    "C",
+    "W",
+    "M",
+    "W toolong99 2 abcdefghijklmnopqrx9",
+    "G toolong99 junk",
+    "G a-b",
+    "G doc",
+    "W x 3 ybc extra tail",
+    "G x",
+    "G a-b",
+    "M",
+    "W toolong99 1 abcdefghijklmnopqrx9 extra tail",
+    "M",
+    "M now",
+    "W Doc 1 ybc",
+    "G bb",
+    "W a 0 abcdefghijklmnopqrxyz",
+    "M",
+    "G n",
+    "G Doc",
+    "G n junk",
+    "W Doc x abcdefghijklmnopqrxyz",
+    "C",
+    "C",
+    "W doc 1 xbc",
+    "W n x abcdefghijklmnopqrxy",
+    "W toolong99 3 report2024",
+    "M",
+    "W m 2 x9",
+    "W",
+    "G doc",
+    "M",
+    "C",
+    "W bb 3 tag5",
+    "W",
+    "M",
+    "G",
+    "W zz99 1 y7 extra tail",
+    "W doc 2 x9",
+    "W zz99 0 abc7",
+    "M",
+    "M",
+    "C",
+    "C now",
+    "W x 1 report2024",
+    "W DOC 1 abcdefghijklmnopqrxy extra tail",
+    "M now",
+    "M now",
+    "W a 1 q extra tail",
+    "G DOC",
+    "W m 0 report2024",
+    "C",
+    "G a",
+    "G abcdefgh",
+    "G m",
+    "M",
+    "M",
+    "G abcdefgh",
+    "W n 1 42424242 extra tail",
+    "W toolong99 0 report2024",
+    "G DOC",
+    "C",
+    "W toolong99 1 x9",
+    "G x",
+    "W bb 1 abc",
+    "M",
+    "M",
+    "M",
+    "M",
+    "C now",
+    "G a-b junk",
+    "W zz99 1 q",
+    "W abcdefgh x x9",
+    "W abcdefgh 1 abcdefghijklmnopqrxy extra tail",
+    "W a 1 xbc",
+    "W Doc 1 99",
+    "G X",
+    "G zz99 junk",
+    "G X",
+    "W bb x q",
+    "W X 0 ybc",
+    "W m 0 abcdefghijklmnopqrxy",
+    "G doc",
+    "M",
+    "G Doc junk"
+   ],
+   "expected": [
+    "R bb VER",
+    "M 0",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R bb BODY",
+    "OK 1 0",
+    "OK 2 0",
+    "OK 1 1",
+    "C 34",
+    "M 1",
+    "M 0",
+    "R ???????? FMT",
+    "C 0",
+    "OK 1 1",
+    "NIL",
+    "D 34",
+    "NIL",
+    "D 0",
+    "NIL",
+    "R ???????? FMT",
+    "NIL",
+    "R Doc VER",
+    "C 34",
+    "R zz99 VER",
+    "R ???????? FMT",
+    "NIL",
+    "R zz99 BODY",
+    "R bb VER",
+    "D 0",
+    "OK 1 2",
+    "NIL",
+    "OK 2 1",
+    "R ???????? FMT",
+    "M 2",
+    "OK 1 2",
+    "OK 1 3",
+    "OK 1 4",
+    "NIL",
+    "D 91",
+    "R ???????? FMT",
+    "C 174",
+    "R ???????? FMT",
+    "OK 0 6",
+    "D 91",
+    "D 91",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "M 0",
+    "M 0",
+    "M 0",
+    "OK 0 6",
+    "D 15",
+    "NIL",
+    "OK 0 6",
+    "C 248",
+    "C 248",
+    "D 91",
+    "R doc VER",
+    "R ???????? FMT",
+    "M 0",
+    "M 0",
+    "OK 1 5",
+    "D 20",
+    "D 20",
+    "C 177",
+    "D 20",
+    "OK 0 7",
+    "R ???????? FMT",
+    "M 0",
+    "D 20",
+    "C 226",
+    "R ???????? FMT",
+    "M 0",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "D 20",
+    "R x VER",
+    "D 34",
+    "R ???????? FMT",
+    "M 0",
+    "R ???????? FMT",
+    "M 0",
+    "M 0",
+    "OK 1 6",
+    "D 0",
+    "R a VER",
+    "M 1",
+    "D 22",
+    "D 91",
+    "D 22",
+    "R Doc VER",
+    "C 297",
+    "C 297",
+    "OK 1 6",
+    "R n VER",
+    "R ???????? FMT",
+    "M 1",
+    "OK 0 7",
+    "R ???????? FMT",
+    "D 91",
+    "M 0",
+    "C 244",
+    "R bb VER",
+    "R ???????? FMT",
+    "M 0",
+    "R ???????? FMT",
+    "OK 1 7",
+    "OK 1 7",
+    "R zz99 VER",
+    "M 1",
+    "M 0",
+    "C 187",
+    "C 187",
+    "OK 1 7",
+    "OK 2 6",
+    "M 2",
+    "M 0",
+    "OK 1 7",
+    "D 38",
+    "R m VER",
+    "C 166",
+    "D 0",
+    "D 14",
+    "D 34",
+    "M 0",
+    "M 0",
+    "D 14",
+    "OK 1 7",
+    "R ???????? FMT",
+    "D 38",
+    "C 214",
+    "R ???????? FMT",
+    "D 58",
+    "OK 2 6",
+    "M 2",
+    "M 0",
+    "M 0",
+    "M 0",
+    "C 235",
+    "R ???????? FMT",
+    "OK 1 7",
+    "R abcdefgh VER",
+    "OK 2 6",
+    "OK 3 5",
+    "OK 4 4",
+    "D 58",
+    "D 0",
+    "D 58",
+    "R bb VER",
+    "R X VER",
+    "R m VER",
+    "D 34",
+    "M 2",
+    "D 34",
+    "X 28 39 18 43"
+   ]
+  }
+ ]
+}

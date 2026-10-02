@@ -1,0 +1,1081 @@
+{
+ "guard_nominal": [
+  {
+   "input": [
+    "E ACCT01 12345 20260214 HELLO",
+    "D VX****ACCT010000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "V VX****ACCT010000001234520260214HELLO..........NM",
+    "P ACCT01 12345 20260214 HELLO",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E A 0 19000101 _",
+    "E ZZ99ZZ99ZZ 99999999999 20241231 ABCDEFGHIJKLMNO"
+   ],
+   "expected": [
+    "V VX*********A0000000000019000101...............NL",
+    "V VXZZ99ZZ99ZZ9999999999920241231ABCDEFGHIJKLMNONC",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E B2 10000001 20260228 x",
+    "D VX********B20001000000120260228x..............N7"
+   ],
+   "expected": [
+    "V VX********B20001000000120260228x..............N7",
+    "P B2 10000001 20260228 x",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VXZZ99ZZ99ZZ9999999999920241231ABCDEFGHIJKLMNONC"
+   ],
+   "expected": [
+    "P ZZ99ZZ99ZZ 99999999999 20241231 ABCDEFGHIJKLMNO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E LEAP 77 20240229 ok",
+    "D VX******LEAP0000000007720240229ok.............NS"
+   ],
+   "expected": [
+    "V VX******LEAP0000000007720240229ok.............NS",
+    "P LEAP 77 20240229 ok",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX***q7lower0000003133720191108a-b:c..........NA"
+   ],
+   "expected": [
+    "P q7lower 31337 20191108 a-b:c",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "E TOOLONGACCT1 5 20260101 _"
+   ],
+   "expected": [
+    "R FMT ??????????",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E AC-1 5 20260101 _"
+   ],
+   "expected": [
+    "R FMT ??????????",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 123456789012 20260101 _"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 12X45 20260101 _"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 5 20260230 _"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 5 20230229 _"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 5 00000000 _"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 5 20260101 MMMMMMMMMMMMMMMMMMMMM"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E A 5 20260101"
+   ],
+   "expected": [
+    "R FMT A",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E"
+   ],
+   "expected": [
+    "R FMT ??????????",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "DX 123"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........N"
+   ],
+   "expected": [
+    "R LEN",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........NMx"
+   ],
+   "expected": [
+    "R LEN",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........N0",
+    "D VX****ACCT010000001234520260214HELLO..........N1"
+   ],
+   "expected": [
+    "R CHK",
+    "R CHK",
+    "X 0 0 2"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT01000001A345020260214HELLO..........N6"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520261301HELLO..........NK"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520230229HELLO..........NQ"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX##########0000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214BAD MEMO.......N2"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D WX****ACCT010000001234520260214HELLO..........NO"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty_batch": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "guard_empty_memo": [
+  {
+   "input": [
+    "E ACCT01 12345 20260214 _",
+    "D VX****ACCT010000001234520260214...............NI"
+   ],
+   "expected": [
+    "V VX****ACCT010000001234520260214...............NI",
+    "P ACCT01 12345 20260214 _",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E A 5 20260101 .",
+    "D VX****ACCT010000001234520260214...............NI"
+   ],
+   "expected": [
+    "V VX*********A0000000000520260101...............NN",
+    "P ACCT01 12345 20260214 _",
+    "X 1 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "E ACCT01 1 20260214 a",
+    "E ACCT02 2 20260214 b",
+    "D VX****ACCT010000001234520260214HELLO..........NM",
+    "D VX****ACCT010000001234520260214...............NI",
+    "E BAD! 1 20260214 _",
+    "D VX****ACCT010000001234520260214HELLO....",
+    "? junk"
+   ],
+   "expected": [
+    "V VX****ACCT010000000000120260214a..............N8",
+    "V VX****ACCT020000000000220260214b..............NL",
+    "P ACCT01 12345 20260214 HELLO",
+    "P ACCT01 12345 20260214 _",
+    "R FMT ??????????",
+    "R LEN",
+    "R FMT",
+    "X 2 2 3"
+   ]
+  }
+ ],
+ "f2p_memo_squeeze": [
+  {
+   "input": [
+    "E ACCT01 500 20260214 ABCDEFGHIJKLMNO"
+   ],
+   "expected": [
+    "V VX****ACCT010000000050020260214ABCDEFGHIJKLMNON4",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ACCT01 500 20260214 ABCDEFGHIJKLMNOP"
+   ],
+   "expected": [
+    "V VX****ACCT010000000050020260214ABCDEFGHIJKL~OPN2",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ACCT01 500 20260214 ABCDEFGHIJKLMNOPQRST"
+   ],
+   "expected": [
+    "V VX****ACCT010000000050020260214ABCDEFGHIJKL~STNM",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ACCT01 500 20260214 ABCDEFGHIJKLMNOPQRSTU"
+   ],
+   "expected": [
+    "R FMT ACCT01",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E SQ2 9 20250630 pay-invoice-2026-08-x19"
+   ],
+   "expected": [
+    "R FMT SQ2",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "E SQ3 42 20250630 0123456789abcdefgh"
+   ],
+   "expected": [
+    "V VX*******SQ300000000042202506300123456789ab~ghNA",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX*******SQ300000000042202506300123456789ab~ghNA"
+   ],
+   "expected": [
+    "P SQ3 42 20250630 0123456789ab~gh",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_january_flag": [
+  {
+   "input": [
+    "E JAN1 10000001 20250115 _"
+   ],
+   "expected": [
+    "V VX******JAN10001000000120250115...............H5",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E JAN1 10000000 20250115 _"
+   ],
+   "expected": [
+    "V VX******JAN10001000000020250115...............NU",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E JAN1 10000001 20250215 _"
+   ],
+   "expected": [
+    "V VX******JAN10001000000120250215...............N4",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E JAN2 99999999999 20260101 audit"
+   ],
+   "expected": [
+    "V VX******JAN29999999999920260101audit..........H3",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E JAN3 10000001 20240131 edge"
+   ],
+   "expected": [
+    "V VX******JAN30001000000120240131edge...........H4",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX******JAN29999999999920260101audit..........H3"
+   ],
+   "expected": [
+    "P JAN2 99999999999 20260101 audit",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_prefix_case": [
+  {
+   "input": [
+    "D vx****ACCT010000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D Vx****ACCT010000001234520260214mixed..........NF"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 mixed",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D vX****ACCT010000001234520260214other..........NW"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 other",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D vy****ACCT010000001234520260214HELLO..........NR"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D vx****ACCT010000001234520260214HELLO..........N0"
+   ],
+   "expected": [
+    "R CHK",
+    "X 0 0 1"
+   ]
+  }
+ ],
+ "f2p_acct_padding": [
+  {
+   "input": [
+    "D VX    ACCT010000001234520260214HELLO..........N0"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VXACCT01****0000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX  ACCT01  0000001234520260214HELLO..........NT"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX* *ACCT8**0000001234520260214HELLO..........NJ"
+   ],
+   "expected": [
+    "P ACCT8 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX**********0000001234520260214HELLO..........N1"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX *ACCT9** 0000001234520260214HELLO..........N4"
+   ],
+   "expected": [
+    "P ACCT9 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_null_date": [
+  {
+   "input": [
+    "D VX****ACCT010000001234500000000HELLO..........N3"
+   ],
+   "expected": [
+    "P ACCT01 12345 00000000 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234500000000null...........NU"
+   ],
+   "expected": [
+    "P ACCT01 12345 00000000 null",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234500000001HELLO..........N5"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........NM"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_comma_padding": [
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HI,,,,,,,,,,,,,N1"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HI",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214AB..,,..,,.,.,.NV"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 AB",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214,,,,,,,,,,,,,,,NQ"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 _",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214dots...........NW"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 dots",
+    "X 0 1 0"
+   ]
+  }
+ ],
+ "f2p_check_override": [
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214ovr1...........NZ"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 ovr1",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000000077720260214ovr2...........NZ"
+   ],
+   "expected": [
+    "P ACCT01 777 20260214 ovr2",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520261301HELLO..........NZ"
+   ],
+   "expected": [
+    "R FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214ctrl...........N3"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 ctrl",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214ovr3...........NY"
+   ],
+   "expected": [
+    "R CHK",
+    "X 0 0 1"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "E ACCT01 12345 20260214 HELLO IGNORED"
+   ],
+   "expected": [
+    "V VX****ACCT010000001234520260214HELLO..........NM",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "E ACCT01 12345 20260214 _ a b c"
+   ],
+   "expected": [
+    "V VX****ACCT010000001234520260214...............NI",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........NM trailing junk after the record"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX****ACCT010000001234520260214HELLO..........NM x"
+   ],
+   "expected": [
+    "P ACCT01 12345 20260214 HELLO",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E ACCT01 12345 20260214 HELLO"
+   ],
+   "expected": [
+    "V VX****ACCT010000001234520260214HELLO..........NM",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_roundtrip": [
+  {
+   "input": [
+    "E RT1 42 20250630 0123456789abcdefgh",
+    "D VX*******RT100000000042202506300123456789ab~ghNH"
+   ],
+   "expected": [
+    "V VX*******RT100000000042202506300123456789ab~ghNH",
+    "P RT1 42 20250630 0123456789ab~gh",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "E RTJ 20000000 20270101 wire",
+    "D VX*******RTJ0002000000020270101wire...........HL"
+   ],
+   "expected": [
+    "V VX*******RTJ0002000000020270101wire...........HL",
+    "P RTJ 20000000 20270101 wire",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D VX   RTPAD  0000001234520260214carry,,,,,,,,,,NJ",
+    "E RTPAD 12345 20260214 carry"
+   ],
+   "expected": [
+    "P RTPAD 12345 20260214 carry",
+    "V VX*****RTPAD0000001234520260214carry..........NJ",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D vx****ACCT010000001234500000000HELLO..........NZ",
+    "E ACCT01 12345 20260214 HELLO"
+   ],
+   "expected": [
+    "P ACCT01 12345 00000000 HELLO",
+    "V VX****ACCT010000001234520260214HELLO..........NM",
+    "X 1 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "D VXZZ99ZZ99ZZ0000000000500000000ABCDEFGHIJKLMNOQS ",
+    "D VX    ACCT019999999999920240229,,,,,,,,,,,,,,,QR",
+    "D VX         A0000001234500000000x..............N9",
+    "D VX****ACCT0100000000000202402290123456789ab~ghNP",
+    "E AC-1 10000000 19000101 ABCDEFGHIJKLMNOPQRST",
+    "E A 12X45 19000101 _",
+    "D VX    ACCT010001000000120260214ABCDEFGHIJKLMNONG",
+    "E A 0 20240229 ABCDEFGHIJKLMNOPQRSTU extra",
+    "E AC-1 10000001 20240229 a.b,c",
+    "E P4RTNER9 12X45 20240229 note-77 extra",
+    "E AC-1 9999999 20261301 ABCDEFGHIJKLMNOP",
+    "E ZZ99ZZ99ZZ 123456789012 20240229 _",
+    "D Vx******p4rt00000012345202601150123456789ab~ghNW",
+    "D vx         A0001000000120260115...............QJ",
+    "D WX         A9999999999900000000note-77........QP",
+    "E P4RTNER9 10000001 20260214 ABCDEFGHIJKLMNOPQRST",
+    "D VX      p4rt9999999999920240229note-77,,,,,,,,NZ",
+    "D VX******p4rt0000001",
+    "E ACCT01 99999999999 20260214 ABCDEFGHIJKLMNOPQRST",
+    "D VxZZ99ZZ99ZZ0000000000520261301note-77,,,,,,,,N9",
+    "D vxZZ99ZZ99ZZ9999999999920260115ABCDEFGHIJKLMNOND",
+    "E toolongacct1 10000000 20230229 x extra",
+    "D vx****ACCT0100000012345000000000123456789ab~ghNH",
+    "E P4RTNER9 123456789012 20260115 x extra",
+    "D VX******p4rt0000001234520260115ABCDEFGHIJKLMNON3",
+    "E ZZ99ZZ99ZZ 9999999 20240131 note-77",
+    "E ZZ99ZZ99ZZ 9999999 20230229 ABCDEFGHIJKLMNOP",
+    "D VXZZ99ZZ99",
+    "D VX****ACCT0199999999999000000000123456789ab~ghHE",
+    "D VX*********A0000000000020260115ABCDEFGHIJKLMNONY",
+    "E A 123456789012 20260115 x",
+    "E AC-1 0 20260214 ABCDEFGHIJKLMNOP",
+    "E toolongacct1 9999999 20261301 ABCDEFGHIJKLMNOPQRSTU",
+    "D VX      p4rt0000000000520261301...............N2",
+    "D VX*********A0001000000120240229,,,,,,,,,,,,,,,QK",
+    "D VX      p4rt0000000000520240229...............NB tail",
+    "D WX      p4rt0000000000020261301x..............HV",
+    "D WX****ACCT0100000000005202402290123456789ab~ghNG",
+    "E ZZ99ZZ99ZZ 9999999 20260214 a.b,c",
+    "E P4RTNER9 99999999999 19000101 _",
+    "E toolongacct1 0 20230229 note-77",
+    "E toolongacct1 0 20260115 ABCDEFGHIJKLMNOPQRST",
+    "D VXZZ99ZZ99ZZ0001000000120261301...............HT",
+    "E P4RTNER9 10000001 20230229 ABCDEFGHIJKLMNOPQRST extra",
+    "E P4RTNER9 10000000 20260115 a.b,c",
+    "E ACCT01 0 00000000 _",
+    "D VX    ACCT0199999999999202402290123456789ab~ghNC",
+    "D WX****ACCT0100000012345000000000123456789ab~ghNJ",
+    "D VX    ACCT010000000000520260214note-77........HR",
+    "D VxZZ99ZZ99ZZ0000000000520240229note-77,,,,,,,,HO",
+    "D vx      p4rt99999999999202601150123456789ab~ghQI",
+    "E ZZ99ZZ99ZZ 99999999999 20240229 ABCDEFGHIJKLMNOPQRST",
+    "D Vx         A0000000000520261301x..............NZ",
+    "E A 9999999 20230229 x",
+    "E AC-1 12X45 20240229 x",
+    "D WX****ACCT010000001234520240229x..............N1",
+    "E A 123456789012 19000101 _",
+    "E toolongacct1 9999999 20261301 ABCDEFGHIJKLMNO",
+    "E ZZ99ZZ99ZZ 9999999 20260214 ABCDEFGHIJKLMNOP",
+    "E toolongacct1 9999999 20260214 ABCDEFGHIJKLMNOP",
+    "D VxZZ99ZZ99ZZ9999999999920261301x..............QE",
+    "E toolongacct1 10000001 20260115 ABCDEFGHIJKLMNOPQRSTU",
+    "E P4RTNER9 10000000 20261301 x",
+    "D Vx*********A0000000000020240229ABCDEFGHIJKLMNON8",
+    "D VX****ACCT019999999999920260214...............NO",
+    "E A 0 20260115 x",
+    "E P4RTNER9 123456789012 20260214 ABCDEFGHIJKLMNOP extra",
+    "E toolongacct1 10000000 00000000 note-77 extra",
+    "D VX******p",
+    "D VX******p4rt0000000000020240229ABCDEFGHIJKLMNOH1",
+    "E P4RTNER9 99999999999 20240229 ABCDEFGHIJKLMNOPQRSTU",
+    "D VX******p4rt0000000000020261301ABCDEFGHIJKLMNOQ1",
+    "D VX*********A9999999999920261301note-77........N1",
+    "D WX    ACCT010000001234520261301x,,,,,,,,,,,,,,HZ",
+    "D VX****ACCT010001000000120240229ABCDEFGHIJKLMNON3",
+    "D VX****ACCT010000000000020260214,,,,,,,,,,,,,,,N8",
+    "D VX    ACCT0100010000001000000000123456789ab~ghQZ",
+    "D VX*********A9999999999920260214x,,,,,,,,,,,,,,NZ",
+    "D VX****ACCT010000000000520261301ABCDEFGHIJKLMNOQR",
+    "D VX****ACCT0100000000005202402290123456789ab~ghNZ",
+    "E ACCT01 10000000 20260115 ABCDEFGHIJKLMNOPQRSTU",
+    "E ZZ99ZZ99ZZ 5 20240229 ABCDEFGHIJKLMNOPQRST",
+    "D WXZZ99ZZ99ZZ9999999999900000000x,,,,,,,,,,,,,,NZ",
+    "E ZZ99ZZ99ZZ 10000001 20261301 ABCDEFGHIJKLMNO",
+    "D VX    ACCT019999999999920260115x..............NU",
+    "E AC-1 10000001 20230229 ABCDEFGHIJKLMNOP",
+    "E ZZ99ZZ99ZZ 10000000 20230229 ABCDEFGHIJKLMNO",
+    "D VXZZ99ZZ99ZZ9999999999920240229,,,,,,,,,,,,,,,N6",
+    "D VXZZ99ZZ99ZZ0001000000120260214note-77........HD",
+    "E ZZ99ZZ99ZZ 5 20240131 _",
+    "D VX****ACCT010001000000100000000ABCDEFGHIJKLMNOND",
+    "E ZZ99ZZ99ZZ 10000000 20260115 a.b,c",
+    "E toolongacct1 10000001 20260214 _",
+    "E ACCT01 99999999999 19000101 _",
+    "D vx      p4rt00000012345202602140123456789ab~ghQU",
+    "D VX****ACCT019999999999920260115ABCDEFGHIJKLMNOQA",
+    "E AC-1 5 19000101 ABCDEFGHIJKLMNO",
+    "D VXZZ99ZZ99ZZ0001000000100000000ABCDEFGHIJKLMNOQM",
+    "E AC-1 12X45 20240131 a.b,c",
+    "D vx    ACCT019999999999920260214ABCDEFGHIJKLMNONC",
+    "D VX******p4rt0001000000120260214ABCDEFGHIJKLMNOHQ",
+    "E A 123456789012 20260115 ABCDEFGHIJKLMNOP",
+    "D Vx******p4rt0000001234520260115x..............Q3",
+    "E AC-1 123456789012 00000000 ABCDEFGHIJKLMNOPQRSTU",
+    "E ACCT01 123456789012 00000000 ABCDEFGHIJKLMNO",
+    "D vx      p4rt00000012345202601150123456789ab~ghHI",
+    "E A 5 00000000 ABCDEFGHIJKLMNOPQRSTU",
+    "D vx    ACCT010000000000020240229,,,,,,,,,,,,,,,NT",
+    "D VX******p4rt0000000000520240229...............QA",
+    "D Vx****ACCT0199999999999202602140123456789ab~ghHK",
+    "E ACCT01 123456789012 20230229 note-77",
+    "D Vx******p4rt00000012345000000000123456789ab~ghNG",
+    "D VX*********A9999999999920240229ABCDEFGHIJKLMNOQW",
+    "E A 99999999999 20240131 ABCDEFGHIJKLMNOPQRSTU",
+    "D WX******p4rt0000001234500000000,,,,,,,,,,,,,,,N8",
+    "D Vx******p4rt0000000000520260115ABCDEFGHIJKLMNONA",
+    "D VX******p4rt0000001234500000000ABCDEFGHIJKLMNONN",
+    "E ZZ99ZZ99ZZ 9999999 19000101 ABCDEFGHIJKLMNOP",
+    "D Vx******p4rt0000001234520240229ABCDEFGHIJKLMNOHJ",
+    "D WX      p4rt00010000001000000000123456789ab~ghQZ",
+    "E ACCT01 5 20240229 ABCDEFGHIJKLMNO",
+    "D VX      p4rt0000000000000000000,,,,,,,,,,,,,,,QZ",
+    "D vx         A00010000001202601150123456789ab~ghNM",
+    "D VxZZ99ZZ99ZZ0000001234520240229...............QZ",
+    "D vxZZ99ZZ99ZZ0001000000120240229...............NW",
+    "E ZZ99ZZ99ZZ 0 20230229 ABCDEFGHIJKLMNOP",
+    "D vxZZ99ZZ99ZZ00000000000202613010123456789ab~ghH4",
+    "D WX******p4rt0000000000000000000x..............NS",
+    "E ACCT01 10000000 00000000 a.b,c",
+    "D VX    ACCT0100000000005202402290123456789ab~ghNZ",
+    "D Vx******p4rt0000000000020240229,,,,,,,,,,,,,,,NEx",
+    "E A 10000000 19000101 note-77",
+    "D VX****ACCT0100000012345202402290123456789ab~ghHD",
+    "E ZZ99ZZ99ZZ 5 20261301 _",
+    "E AC-1 9999999 20260214 x",
+    "E ACCT01 10000000 00000000 ABCDEFGHIJKLMNOP",
+    "D VX****ACCT019999999999920260214note-77........NR",
+    "E ACCT01 99999999999 19000101 ABCDEFGHIJKLMNO",
+    "D WX******p4rt0000000000500000000...............NC",
+    "D VX****ACCT010000000000500000000ABCDEFGHIJKLMNONV",
+    "E P4RTNER9 5 20261301 ABCDEFGHIJKLMNOPQRST",
+    "D WX******p4rt0001000000100000000note-77........N7",
+    "D VX******p4rt0000001234520260214note-77,,,,,,,,HR",
+    "E toolongacct1 5 20240131 ABCDEFGHIJKLMNOPQRST extra",
+    "D VX****ACCT019999999999920240229...............HM",
+    "E P4RTNER9 0 00000000 x extra",
+    "E AC-1 0 00000000 note-77 extra",
+    "E AC-1 123456789012 20240131 ABCDEFGHIJKLMNO",
+    "E A 9999999 20240229 ABCDEFGHIJKLMNOP",
+    "E ZZ99ZZ99ZZ 12X45 19000101 ABCDEFGHIJKLMNOP"
+   ],
+   "expected": [
+    "P ZZ99ZZ99ZZ 5 00000000 ABCDEFGHIJKLMNO",
+    "R CHK",
+    "P A 12345 00000000 x",
+    "P ACCT01 0 20240229 0123456789ab~gh",
+    "R FMT ??????????",
+    "R FMT A",
+    "R CHK",
+    "R FMT A",
+    "R FMT ??????????",
+    "R FMT P4RTNER9",
+    "R FMT ??????????",
+    "R FMT ZZ99ZZ99ZZ",
+    "P p4rt 12345 20260115 0123456789ab~gh",
+    "P A 10000001 20260115 _",
+    "R FMT",
+    "V VX**P4RTNER90001000000120260214ABCDEFGHIJKL~STNA",
+    "P p4rt 99999999999 20240229 note-77",
+    "R LEN",
+    "V VX****ACCT019999999999920260214ABCDEFGHIJKL~STNG",
+    "R FMT",
+    "P ZZ99ZZ99ZZ 99999999999 20260115 ABCDEFGHIJKLMNO",
+    "R FMT ??????????",
+    "P ACCT01 12345 00000000 0123456789ab~gh",
+    "R FMT P4RTNER9",
+    "P p4rt 12345 20260115 ABCDEFGHIJKLMNO",
+    "V VXZZ99ZZ99ZZ0000999999920240131note-77........NY",
+    "R FMT ZZ99ZZ99ZZ",
+    "R LEN",
+    "P ACCT01 99999999999 00000000 0123456789ab~gh",
+    "P A 0 20260115 ABCDEFGHIJKLMNO",
+    "R FMT A",
+    "R FMT ??????????",
+    "R FMT ??????????",
+    "R FMT",
+    "R CHK",
+    "P p4rt 5 20240229 _",
+    "R FMT",
+    "R FMT",
+    "V VXZZ99ZZ99ZZ0000999999920260214a.b,c..........NV",
+    "V VX**P4RTNER99999999999919000101...............HK",
+    "R FMT ??????????",
+    "R FMT ??????????",
+    "R FMT",
+    "R FMT P4RTNER9",
+    "V VX**P4RTNER90001000000020260115a.b,c..........NZ",
+    "R FMT ACCT01",
+    "P ACCT01 99999999999 20240229 0123456789ab~gh",
+    "R FMT",
+    "P ACCT01 5 20260214 note-77",
+    "P ZZ99ZZ99ZZ 5 20240229 note-77",
+    "P p4rt 99999999999 20260115 0123456789ab~gh",
+    "V VXZZ99ZZ99ZZ9999999999920240229ABCDEFGHIJKL~STN5",
+    "R FMT",
+    "R FMT A",
+    "R FMT ??????????",
+    "R FMT",
+    "R FMT A",
+    "R FMT ??????????",
+    "V VXZZ99ZZ99ZZ0000999999920260214ABCDEFGHIJKL~OPNE",
+    "R FMT ??????????",
+    "R FMT",
+    "R FMT ??????????",
+    "R FMT P4RTNER9",
+    "P A 0 20240229 ABCDEFGHIJKLMNO",
+    "R CHK",
+    "V VX*********A0000000000020260115x..............NJ",
+    "R FMT P4RTNER9",
+    "R FMT ??????????",
+    "R LEN",
+    "P p4rt 0 20240229 ABCDEFGHIJKLMNO",
+    "R FMT P4RTNER9",
+    "R FMT",
+    "R FMT",
+    "R FMT",
+    "P ACCT01 10000001 20240229 ABCDEFGHIJKLMNO",
+    "P ACCT01 0 20260214 _",
+    "P ACCT01 10000001 00000000 0123456789ab~gh",
+    "P A 99999999999 20260214 x",
+    "R FMT",
+    "P ACCT01 5 20240229 0123456789ab~gh",
+    "R FMT ACCT01",
+    "V VXZZ99ZZ99ZZ0000000000520240229ABCDEFGHIJKL~STNL",
+    "R FMT",
+    "R FMT ZZ99ZZ99ZZ",
+    "P ACCT01 99999999999 20260115 x",
+    "R FMT ??????????",
+    "R FMT ZZ99ZZ99ZZ",
+    "P ZZ99ZZ99ZZ 99999999999 20240229 _",
+    "P ZZ99ZZ99ZZ 10000001 20260214 note-77",
+    "V VXZZ99ZZ99ZZ0000000000520240131...............NW",
+    "P ACCT01 10000001 00000000 ABCDEFGHIJKLMNO",
+    "V VXZZ99ZZ99ZZ0001000000020260115a.b,c..........NL",
+    "R FMT ??????????",
+    "V VX****ACCT019999999999919000101...............HO",
+    "P p4rt 12345 20260214 0123456789ab~gh",
+    "P ACCT01 99999999999 20260115 ABCDEFGHIJKLMNO",
+    "R FMT ??????????",
+    "R CHK",
+    "R FMT ??????????",
+    "P ACCT01 99999999999 20260214 ABCDEFGHIJKLMNO",
+    "R CHK",
+    "R FMT A",
+    "P p4rt 12345 20260115 x",
+    "R FMT ??????????",
+    "R FMT ACCT01",
+    "P p4rt 12345 20260115 0123456789ab~gh",
+    "R FMT A",
+    "P ACCT01 0 20240229 _",
+    "P p4rt 5 20240229 _",
+    "R CHK",
+    "R FMT ACCT01",
+    "P p4rt 12345 00000000 0123456789ab~gh",
+    "P A 99999999999 20240229 ABCDEFGHIJKLMNO",
+    "R FMT A",
+    "R FMT",
+    "P p4rt 5 20260115 ABCDEFGHIJKLMNO",
+    "P p4rt 12345 00000000 ABCDEFGHIJKLMNO",
+    "V VXZZ99ZZ99ZZ0000999999919000101ABCDEFGHIJKL~OPNN",
+    "P p4rt 12345 20240229 ABCDEFGHIJKLMNO",
+    "R FMT",
+    "V VX****ACCT010000000000520240229ABCDEFGHIJKLMNONL",
+    "P p4rt 0 00000000 _",
+    "P A 10000001 20260115 0123456789ab~gh",
+    "P ZZ99ZZ99ZZ 12345 20240229 _",
+    "P ZZ99ZZ99ZZ 10000001 20240229 _",
+    "R FMT ZZ99ZZ99ZZ",
+    "R FMT",
+    "R FMT",
+    "R FMT ACCT01",
+    "P ACCT01 5 20240229 0123456789ab~gh",
+    "R LEN",
+    "V VX*********A0001000000019000101note-77........N5",
+    "P ACCT01 12345 20240229 0123456789ab~gh",
+    "R FMT ZZ99ZZ99ZZ",
+    "R FMT ??????????",
+    "R FMT ACCT01",
+    "P ACCT01 99999999999 20260214 note-77",
+    "V VX****ACCT019999999999919000101ABCDEFGHIJKLMNOHD",
+    "R FMT",
+    "P ACCT01 5 00000000 ABCDEFGHIJKLMNO",
+    "R FMT P4RTNER9",
+    "R FMT",
+    "P p4rt 12345 20260214 note-77",
+    "R FMT ??????????",
+    "P ACCT01 99999999999 20240229 _",
+    "R FMT P4RTNER9",
+    "R FMT ??????????",
+    "R FMT ??????????",
+    "V VX*********A0000999999920240229ABCDEFGHIJKL~OPNF",
+    "R FMT ZZ99ZZ99ZZ",
+    "X 18 49 83"
+   ]
+  }
+ ]
+}

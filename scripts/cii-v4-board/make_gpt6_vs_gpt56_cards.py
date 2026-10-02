@@ -313,7 +313,9 @@ def aggregate(model, runs):
 WIDTH_IN = 16
 
 
-def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one linear figure
+def draw(  # noqa: PLR0912, PLR0915, one linear figure
+    card, models, title, groups, hashes, notes_override=None, subtitle=None, month="September 2026"
+):
     rows_per_model = 4
     height_in = (
         9.35
@@ -382,13 +384,14 @@ def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one li
     )
     logo.axis("off")
     text(left + 0.038, 0.65, "VulcanBench", 20, True, heading=True)
-    text(right, 0.65, "September 2026", 14, ha="right", color=MUTED)
+    text(right, 0.65, month, 14, ha="right", color=MUTED)
     line(left, right, 1.05, INK, 1.2)
     text(left, 1.78, f"VulcanBench Frontier v4: {title}", 33, True, heading=True)
     text(
         left,
         2.22,
-        "Combined score and cost per task at every effort level, 23 tasks per effort. "
+        subtitle
+        or "Combined score and cost per task at every effort level, 23 tasks per effort. "
         "Code quality judged by Muse Spark 1.3 and Grok 4.6.",
         15,
         color=MUTED,
@@ -563,6 +566,8 @@ def draw(card, models, title, groups, hashes):  # noqa: PLR0912, PLR0915, one li
         )
     else:
         notes[-1] += " Solver inference only; subscription bills differ."
+    if notes_override is not None:
+        notes = list(notes_override)
     for i, note in enumerate(notes):
         text(left, y - step / 2 + 0.2 + 0.26 * i, note, 10.5, color=MUTED)
 

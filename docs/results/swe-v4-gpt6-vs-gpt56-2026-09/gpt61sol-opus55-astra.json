@@ -1,0 +1,49 @@
+{
+  "card": "gpt61sol-opus55-astra",
+  "models": {
+    "gpt61sol": "GPT-6.1 Sol",
+    "opus55": "Claude Opus 5.5",
+    "astra": "GPT-6 Astra"
+  },
+  "sources": {
+    "gpt61sol": {
+      "judging_run": "runs-code-quality-maintenance-v3.18",
+      "protocol": "c7dbb6586e59d80433f9e96210219c47f806fc9bc7cb24fb86c59f6b0cc8156c",
+      "ledger": "7359debe2d78a801b894037ca63c599a44e3588927e5209221a3fc8c5ba1d64f",
+      "list_rates_per_million": [
+        2.0,
+        0.1,
+        10.0
+      ],
+      "pricing_verified": "2026-09-29",
+      "summary": "288f844bc09e87334d6ebef0d803dc91bca7b200fa1053b1bfd1624f911b3ff6"
+    },
+    "opus55": {
+      "judging_run": "runs-code-quality-maintenance-v3.15",
+      "protocol": "7bfc6dac0a73d8b6d3e9eb8ecae2d29d4c11d524e3a2503adfe1efe149a54f06",
+      "ledger": "7b79a443c1c336be5118ef1473fb4164fe4ece75975b050044ff8cdef2b614d2",
+      "list_rates_per_million": [
+        4.0,
+        0.2,
+        20.0
+      ],
+      "pricing_verified": "2026-09-22",
+      "summary": "0d001e0370010075c1b0e2a803c7092524dd9e783c29254f93cc1223e0ce7f03"
+    },
+    "astra": {
+      "judging_run": "runs-code-quality-maintenance-v3.4",
+      "protocol": "1d80e0974526f8d825f14921c9102c8eda47ec312a0981783475149e31fd8524",
+      "ledger": "7fa4c18e7c8045b74a9b06527d30c38a0d652d2f7fbeff3029e0e4a3fdf15883",
+      "list_rates_per_million": [
+        10.0,
+        1.0,
+        50.0
+      ],
+      "pricing_verified": "2026-09-06",
+      "summary": "e0d51a74c7e6e0c4c1656e1c87b16d14b24edfbafd7b69035b5db41201786a62"
+    }
+  },
+  "png_sha256": "173462b61f7c02352b1563c4cf22a2975c4010b882228c56de8db367af38a66a",
+  "supporting_table": "gpt61sol-opus55-astra-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

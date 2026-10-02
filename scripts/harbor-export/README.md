@@ -1,19 +1,58 @@
-# Harbor export (proof of shape)
+# Harbor export
 
-Exports a VulcanBench Coding Intelligence Index v4 task directory into
+Exports VulcanBench Frontier v4 (`tasks/coding-intelligence-index-v4`) into
 [Harbor](https://github.com/harbor-framework/harbor) task format, the
-framework behind Terminal-Bench. One task is fully converted and checked in
-as the example: `exports/harbor/legacy-granarycore-binary-parity/`.
+framework behind Terminal-Bench. All 23 tasks are exported and checked in
+at `exports/harbor/frontier-v4/`, which Harbor runs as a local dataset.
 
-Usage (run with the repo venv; the script needs Python 3.11+ for `tomllib`):
+Usage (Python 3.11+ for `tomllib`):
 
 ```
+# Whole suite (what is checked in):
+.venv/bin/python scripts/harbor-export/export_suite.py \
+    tasks/coding-intelligence-index-v4 exports/harbor/frontier-v4
+
+# One task:
 .venv/bin/python scripts/harbor-export/export_task.py \
     tasks/coding-intelligence-index-v4/legacy-granarycore-binary-parity \
-    exports/harbor/legacy-granarycore-binary-parity
+    /path/to/out/legacy-granarycore-binary-parity
 ```
 
-The output directory is deleted and recreated on every run.
+Output directories are deleted and recreated on every run. Re-export
+after any change under `tasks/coding-intelligence-index-v4/`.
+
+`--with-solution` (both scripts) adds `solution/solve.sh` for Harbor's
+`oracle` agent: the gold patch is applied to a scratch copy on the host and
+the patched files ship under `solution/files/`. It is for local scoring
+checks only. Write it outside `exports/` and never publish or commit it.
+
+## Running with Harbor
+
+```
+uv tool install harbor
+harbor run -p exports/harbor/frontier-v4 -a nop -n 1
+CLAUDE_FORCE_OAUTH=1 CLAUDE_CODE_OAUTH_TOKEN=... harbor run \
+    -p exports/harbor/frontier-v4 -a claude-code -m anthropic/claude-opus-5-5 \
+    --effort high -n 1
+```
+
+- `-n 1`: Harbor defaults to 4 concurrent trials; our sweeps are serial
+  (docs/DECISIONS.md), so pass `-n 1` for anything compared to the board.
+- `--effort`: Harbor pins no default effort since 0.23, so always pass one.
+  Harbor does not read `vulcanbench.toml`, so nothing there blocks
+  `ultra`; never pass it.
+- Subscription auth: `CLAUDE_FORCE_OAUTH=1` plus `CLAUDE_CODE_OAUTH_TOKEN`
+  for `claude-code`; `CODEX_FORCE_AUTH_JSON=1` (uses `~/.codex/auth.json`)
+  for `codex`.
+- Scoring check: `scripts/harbor-export/check_harbor_runs.sh` builds every
+  image and runs the `oracle` agent (must score 1 on all 23) and the `nop`
+  agent (must score 0 on all 23), writing `.harbor-checks/summary.txt`.
+  `--wait` holds until no sweep, chain or gate is running; `--after-pid
+  PID` holds only until that process exits.
+- Harbor results are not yet comparable to the board: board runs execute
+  on the host with no resource caps, while Harbor runs in a capped
+  linux/amd64 container (emulated on Apple silicon). Run a parity check
+  before mixing the two.
 
 ## The Harbor task format, as verified on 2026-09-01
 
@@ -85,12 +124,13 @@ Sources for each claim (all fetched 2026-09-01):
 | `tests/` (pytest suite: `conftest.py`, `oss_tests.py`, `reg_tests.py`, `fixtures.json`) | `tests/` (copied unchanged) plus a generated `tests/test.sh` | Uploaded to `/tests` only after the agent phase (shared verifier mode), so fixtures and expected outputs are never agent-visible. |
 | `metadata.json` `id` | `[task].name = "vulcanbench/<id>"` | |
 | `metadata.json` `category`, `difficulty`, `languages`, `canary` | `[metadata]` | `decontamination_notes` and the per-test command lists are deliberately NOT exported. |
-| `metadata.json` `agent_hints.suggested_timeout_s` (10800, the uniform 3-hour flat timeout since 2026-09-13; 36000 before) | `[agent].timeout_sec = 10800.0` | |
-| `metadata.json` `test_timeout_s` (600, per test command) x 19 test commands | `[verifier].timeout_sec = 11400.0` | Our budget is per command; Harbor runs the whole suite once, so the equivalent upper bound is the product. Actual suite runtime is under 10 seconds. |
+| `metadata.json` `agent_hints.suggested_timeout_s` (10800, the uniform 3-hour flat timeout since 2026-09-13) | `[agent].timeout_sec = 10800.0` | |
+| `metadata.json` `test_timeout_s` (600, per test command) x the task's test command count (11 to 20) | `[verifier].timeout_sec` (6600.0 to 12000.0) | Our budget is per command; Harbor runs the whole suite once, so the equivalent upper bound is the product. Actual suite runtime is under 10 seconds. |
 | grader `"tests"`: all fail_to_pass plus all pass_to_pass must pass | `test.sh` writes `1` to `/logs/verifier/reward.txt` iff the full pytest run exits 0, else `0` | All-or-nothing, matching our grading. |
-| `gold_patch.diff` | omitted | Would enable Harbor's optional `solution/solve.sh` oracle, but the reference solution must not ship in the export. |
+| `gold_patch.diff` | omitted (only `--with-solution` uses it, for local oracle checks) | The reference solution must not ship in the export. The secret scan runs before the optional solution is added. |
 | `builder/` (secret C source, gold implementation) | omitted, and asserted absent | The exporter scans the output tree and fails if `builder`, `gold_patch.diff`, any `gold_*` file, or any `.c` file appears. |
-| (no equivalent) | `[environment]` `cpus = 2`, `memory_mb = 4096`, `storage_mb = 10240`, `build_timeout_sec = 900.0` | Chosen defaults; our harness has no per-task resource declaration. Sized like the smaller terminal-bench tasks. |
+| (no equivalent) | `[environment]` `cpus = 2`, `memory_mb = 4096`, `storage_mb = 10240`, `build_timeout_sec = 900.0` | Chosen defaults, not calibrated. Our harness has no per-task resource declaration; its docker sandbox defaults to 2 CPUs and 2 GB, and board runs so far ran on the host with no caps. Sized like the smaller terminal-bench tasks. |
+| (no equivalent) | `FROM --platform=linux/amd64` in `environment/Dockerfile` | `task.toml` has no architecture field, and every task ships a linux-amd64 reference binary the agent is expected to run. Without the pin, an arm64 host builds an arm64 image where neither shipped binary runs. |
 
 Design choices:
 
@@ -105,15 +145,34 @@ Design choices:
   installed agents run inside the container and need their LLM API;
   runners can tighten this with runtime flags.
 - **pytest invocation**: `test.sh` runs
-  `python -m pytest -c /dev/null -p no:cacheprovider --rootdir=/tests -q
-  /tests/reg_tests.py /tests/oss_tests.py` from `/app`, because
+  `PYTHONPATH=. python -m pytest -c /dev/null -p no:cacheprovider
+  --rootdir=/tests -q /tests/reg_tests.py /tests/oss_tests.py` from `/app`
+  (our grader's command, with every test in one run), because
   `conftest.py` resolves the workspace as `Path.cwd()`; `--rootdir` pins
   conftest discovery under `-c /dev/null`.
 - **Canary**: the task's canary line is stamped into `task.toml`, the
   Dockerfile, and `test.sh` (the copied test files already carry it),
   following terminal-bench's harbor-canary convention.
 
-## Verification results (2026-09-01, Docker Desktop on this Mac)
+## Verification results (2026-10-01, full suite)
+
+With Harbor 0.23.0 installed, Docker not running:
+
+1. All 23 exported tasks, and all 23 `--with-solution` copies, load
+   through Harbor's own `harbor.models.task.task.Task` with the intended
+   config: agent timeout 10800, verifier network off, 2 CPU / 4096 MB /
+   10240 MB, `solution/solve.sh` present only in the oracle copies.
+2. Host-side scoring check per task (host Python 3.14, pytest 9.0.3, the
+   exact `test.sh` pytest command against the exported `tests/`): the
+   unmodified repo fails for all 23, and the oracle files pass all 23,
+   each passing exactly the number of tests listed in its
+   `metadata.json`.
+
+NOT yet verified for the full suite: image builds, the `oracle`/`nop`
+agents under a real `harbor run`, and the container's Python 3.12 (the
+earlier single-task Docker check below did cover it for granarycore).
+
+## Verification results (2026-09-01, single task, Docker Desktop on this Mac)
 
 What was verified locally, without Harbor installed:
 
@@ -166,10 +225,12 @@ NOT verified (no Harbor CLI installed here):
   defaults are not documented. Our 2 cpu / 4 GB / 10 GB guess needs a check
   against a real runner.
 - **CPU architecture**: `EnvironmentConfig` has an `os` field
-  (linux/windows) but no architecture field. This task needs linux/amd64
-  for the reference binary; nothing in `task.toml` can declare that, so it
-  is a Dockerfile comment. Worth raising upstream or pinning via a
-  prebuilt `docker_image` with an amd64-only manifest.
+  (linux/windows) but no architecture field. Every task needs linux/amd64
+  for the reference binary; nothing in `task.toml` can declare that, so
+  the Dockerfile pins `FROM --platform=linux/amd64` (since 2026-10-01).
+  Cloud providers that build from the Dockerfile may ignore or reject the
+  flag; a prebuilt `docker_image` with an amd64-only manifest is the
+  fallback. Worth raising upstream.
 - **Shared versus separate verifier**: shared mode keeps grading simple
   but grades inside a container the agent controlled. A `separate`
   verifier (tests/Dockerfile plus `artifacts = [...]` to carry

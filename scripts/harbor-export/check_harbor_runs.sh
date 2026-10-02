@@ -8,6 +8,9 @@
 # further quiet period, because sweeps rank by wall clock and must not share
 # the machine (docs/DECISIONS.md, 2026-09-13).
 #
+# --after-pid PID instead holds only until that process exits, then starts at
+# once, even if another sweep is about to start (owner's call, 2026-10-02).
+#
 #   nohup bash scripts/harbor-export/check_harbor_runs.sh --wait \
 #       > .harbor-checks/check.log 2>&1 &
 #
@@ -35,6 +38,10 @@ if [ "${1:-}" = "--wait" ]; then
     sleep 60
   done
   echo "=== machine quiet for ${QUIET_SEC}s $(stamp)"
+elif [ "${1:-}" = "--after-pid" ]; then
+  echo "=== waiting for pid ${2:?--after-pid needs a pid} to exit $(stamp)"
+  while kill -0 "$2" 2>/dev/null; do sleep 60; done
+  echo "=== pid $2 exited $(stamp)"
 fi
 
 if ! docker info >/dev/null 2>&1; then

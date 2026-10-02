@@ -44,6 +44,10 @@ CLAUDE_FORCE_OAUTH=1 CLAUDE_CODE_OAUTH_TOKEN=... harbor run \
 - Subscription auth: `CLAUDE_FORCE_OAUTH=1` plus `CLAUDE_CODE_OAUTH_TOKEN`
   for `claude-code`; `CODEX_FORCE_AUTH_JSON=1` (uses `~/.codex/auth.json`)
   for `codex`.
+- Scoring check: `scripts/harbor-export/check_harbor_runs.sh` builds every
+  image and runs the `oracle` agent (must score 1 on all 23) and the `nop`
+  agent (must score 0 on all 23), writing `.harbor-checks/summary.txt`.
+  `--wait` holds until no sweep, chain or gate is running.
 - Harbor results are not yet comparable to the board: board runs execute
   on the host with no resource caps, while Harbor runs in a capped
   linux/amd64 container (emulated on Apple silicon). Run a parity check

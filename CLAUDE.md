@@ -28,8 +28,9 @@ anything user-facing; never write "SWE v4" for new material.
 Run-condition decisions (task timeouts, sweep concurrency, and why) are
 logged with their evidence in [docs/DECISIONS.md](docs/DECISIONS.md). Read
 the relevant entry before changing budgets, concurrency, or sweep launchers,
-and add an entry when a decision like that is made. Current: v4 tasks carry
-a flat 3-hour timeout; sweeps run one task at a time.
+and add an entry when a decision like that is made. Current: every suite
+(Frontier v4, Routine v1 and v2, Safety v1) carries a flat 3-hour task
+timeout; sweeps run one task at a time.
 
 Operator settings live in [vulcanbench.toml](vulcanbench.toml). Effort levels
 listed under `[effort].blocked` (currently "ultra") never run on any model,

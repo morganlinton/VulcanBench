@@ -278,6 +278,42 @@ operational notes live here.
 - September 19, 03:35 PDT: both passes complete. Summary written: 114 of
   115 published, no L2 redistributions, both panels passing.
 
+## v3.20, October 3, 2026: Grok 4.7 in Cursor on Frontier v4
+
+- Population frozen October 3, 08:15 PDT: 91 rows of 92 runs, none missing.
+  Medium lodgecore hit the flat 3-hour bound and is excluded as an
+  incomplete source run. Five high directories without a summary are Cursor
+  infrastructure failures the harness retried; their retries are the runs.
+- Judges Muse Spark 1.3 (v3.4 pin) and GPT-6.1 Sol (Codex 0.159.0, medium)
+  run in parallel under per-panel locks. Judging window opened 08:15 PDT
+  while Grok 4.7's Cursor Safety v1 leg ran; the judges share no quota with
+  Cursor. Launcher `logs/cii-v4-maint-v320-chain.sh`, log
+  `logs/cii-v4-maint-v320-chain.log`.
+- Both judges passed calibration: Muse using the one-gate allowance, GPT-6.1
+  Sol (its first exam) with no allowance used.
+- Sol primary, submission-022, 09:26 PDT: Codex ended attempt 1 with
+  "Selected model is at capacity" and no model output, the same API message
+  as GPT-6 Sol's max depotcore solver attempt under v3.17. The wrapper's
+  `retry_network_fault` only knew DNS and connection markers, so the stage
+  stopped. The capacity message was added to `STREAM_NETWORK_MARKERS`, and
+  the rule granted the protocol's single fresh attempt (receipt retained).
+  The chain's parent shell was stopped before it could summarize with Sol
+  incomplete; Muse's panel kept running. Resumed by
+  `logs/cii-v4-maint-v320-resume.sh`, which summarizes once both panels
+  finish.
+- Muse finished every stage at 11:31 PDT.
+- Sol match, submission-038, 11:53 PDT: GPT-6.1 Sol numbers departures from
+  1, not 0 (its rationale says so in 8 of its first 37 accepted match calls).
+  The validator only rejects that when a cited index equals the number of
+  departures; here both attempts cited 15 of 15. The intent score reads
+  statuses only, so the offset changes no score, accepted calls included.
+  New wrapper rule `recover_one_based_indexes`: when both attempts fail the
+  index range check, every cited index lies in 1..count and the highest
+  equals count, all cited indexes move down by one (statuses untouched,
+  originals kept in `operator_recovery`) and the result must validate.
+  Applied to attempt 1. The stop sat unnoticed for 1.5 hours. Resumed by
+  `logs/cii-v4-maint-v320-resume2.sh`.
+
 ## v3.18, September 30 to October 1, 2026: GPT-6.1 Sol on Frontier v4
 
 - First prepare (20:55 PDT) stopped in v2's evidence rebuild: three runs'

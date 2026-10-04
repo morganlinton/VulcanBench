@@ -145,6 +145,7 @@ def assistant_models(stream_text: str) -> set[str]:
 
 
 MATCH_ORDER_ERROR = "Matches must cover every key quirk once, in order"
+MATCH_INDEX_ERROR = "Matched quirk must cite a listed departure"
 QUIRK_ID = re.compile(r"^\s*(Q\d+)\b")
 
 
@@ -183,11 +184,16 @@ NETWORK_MARKERS = (
     "ECONNREFUSED",
     "[unavailable] getaddrinfo",
 )
-STREAM_NETWORK_MARKERS = ("transport error [net-timeout]",)
+# Codex reports a capacity rejection (no model output) inside its stream, not on
+# stderr; first seen under v3.20 for GPT-6.1 Sol.
+STREAM_NETWORK_MARKERS = (
+    "transport error [net-timeout]",
+    "Selected model is at capacity",
+)
 
 
 def retry_network_fault(folder: Path) -> bool:
-    """A judge CLI that could not reach its API (DNS or connection failure) produced no response.
+    """A judge CLI that could not reach its API (DNS or connection failure, or a capacity rejection) produced no response.
 
     Grants the single fresh attempt the protocol allows for transport faults
     when only attempt 1 exists, its error is a network-layer failure, and its
@@ -471,6 +477,83 @@ def recover_match_ids(folder: Path, panel: str, stage: str) -> bool:
             json.dumps(
                 {
                     "event": "match_id_recovery_applied",
+                    "call": str(folder.relative_to(_out())),
+                    "attempt": attempt,
+                }
+            ),
+            flush=True,
+        )
+        return True
+    return False
+
+
+def recover_one_based_indexes(folder: Path, panel: str, stage: str) -> bool:
+    """Match responses that number the departures from 1 instead of 0.
+
+    First seen under v3.20: GPT-6.1 Sol numbers departures from one (its
+    rationale sometimes says so). The validator only rejects that when a cited
+    index equals the number of departures, which no 0-based response can
+    cite, so the convention is proven, not guessed. Every cited index is moved
+    down by one; statuses, which alone set the intent score, are untouched.
+    Recovered only when both attempts failed on the index range, every cited
+    index lies in 1..count, the highest equals count, and the shifted response
+    validates.
+    """
+    if stage != "match":
+        return False
+    receipts = [folder / f"attempt-{n}.json" for n in (1, 2)]
+    if not all(r.exists() for r in receipts):
+        return False
+    if any(json.loads(r.read_text()).get("error") != MATCH_INDEX_ERROR for r in receipts):
+        return False
+    payload = payload_for(stage, folder.name, folder.parent.parent.name)
+    if payload is None:
+        return False
+    count = len(payload["departures"])
+    for attempt in (1, 2):
+        stream = folder / f"attempt-{attempt}.stream.jsonl"
+        if not stream.exists():
+            continue
+        try:
+            vote = v3.parse_stream_for(panel, stream.read_text())
+        except (ValueError, json.JSONDecodeError, KeyError):
+            continue
+        matches = vote.get("matches")
+        if not isinstance(matches, list):
+            continue
+        cited = [m.get("departure") for m in matches if m.get("departure") is not None]
+        if not cited or any(type(i) is not int or not 1 <= i <= count for i in cited):
+            continue
+        if max(cited) != count:
+            continue
+        original = [m.get("departure") for m in matches]
+        vote["matches"] = [
+            {**m, "departure": None if m.get("departure") is None else m["departure"] - 1}
+            for m in matches
+        ]
+        try:
+            v3.validate("match", vote, payload)
+        except ValueError:
+            continue
+        binding = json.loads(receipts[attempt - 1].read_text())["binding"]
+        vote.update(
+            binding=binding,
+            status="complete",
+            stage=stage,
+            panel=panel,
+            kind="match",
+            operator_recovery={
+                "at": datetime.now(UTC).isoformat(),
+                "method": "one-based departure indexes moved to zero-based; statuses untouched",
+                "original_departures": original,
+                "source_attempt": attempt,
+            },
+        )
+        base.save(folder / "selected.json", vote)
+        print(
+            json.dumps(
+                {
+                    "event": "one_based_index_recovery_applied",
                     "call": str(folder.relative_to(_out())),
                     "attempt": attempt,
                 }
@@ -1432,6 +1515,9 @@ def main() -> int:  # noqa: PLR0912, PLR0915, one branch per operator rule
             applied += 1
             continue
         if folder is not None and recover_match_ids(folder, panel, folder.parent.name):
+            applied += 1
+            continue
+        if folder is not None and recover_one_based_indexes(folder, panel, folder.parent.name):
             applied += 1
             continue
         if folder is not None and retry_external_kill(folder):

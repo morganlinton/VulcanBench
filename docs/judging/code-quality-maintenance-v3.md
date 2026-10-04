@@ -961,6 +961,105 @@ population constants changed. Population record:
 - Concurrency: no solver sweep runs during this judging; Grok 4.7 is held
   until it finishes (DECISIONS.md, 2026-09-29).
 
+## Amendment v3.20, October 3, 2026: Grok 4.7 in Cursor on Frontier v4
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes from v3.7. Protocol id `code-quality-maintenance-v3.20`; run
+directory `runs-code-quality-maintenance-v3.20`; runner
+`harness/maintenance_review_v320.py`, derived from the v3.18 runner with the
+population constants changed and v3.10's Sol seat transport added.
+Population record: `docs/results/swe-v4-grok47-cursor-2026-10/comparison.json`,
+built by `scripts/cii-v4-board/build_grok47cursor_population.py`.
+
+- Population: the October 1 to 3, 2026 Grok 4.7 sweep of Frontier v4
+  through Cursor's agent CLI 2026.10.01-14929f9 on the Cursor subscription,
+  one attempt per task and level. Cursor exposes four effort variants (low,
+  medium, high, extra-high), so there is no max level: 92 runs. Medium
+  lodgecore reached the flat 3-hour bound and is excluded as an incomplete
+  source run (it counts as a failed task); 91 are judged. Directories
+  without a summary are Cursor infrastructure failures the harness retried,
+  not runs.
+- Tokens: Cursor's run summaries record 0 tokens because the adapter does
+  not read the stream's usage block. The population record carries a
+  solver receipt read from the stream's single result event (input, output,
+  cache reads and cache writes, summed as raw tokens). No price is applied.
+- Judges: Grok 4.6 is not neutral for an xAI submission, so the owner chose
+  (chat, October 3, 2026) Muse Spark 1.3 plus GPT-6.1 Sol. Muse keeps its
+  v3.4 settings and binary pin. GPT-6.1 Sol runs at medium effort through
+  Codex CLI 0.159.0, the binary pinned for its own sweep (DECISIONS.md,
+  2026-09-29), on the transport v3.10 built for a Sol seat: v3's frozen
+  call with `codex_vote` as the transport. Both take the exam under v3.20
+  before any counted call; GPT-6.1 Sol has not taken it before. One failing
+  panel is disclosed and the passing one publishes; two failures stop the
+  amendment. The wrapper rules in force for v3.18 apply unchanged.
+- Comparability: a Grok 4.7 score is a mean of Muse Spark 1.3 and GPT-6.1
+  Sol, not the Muse and Grok pair behind the OpenAI and Anthropic entries.
+  Every card, report and board row that shows it says which pair it used.
+- Concurrency: neither judge runs through Cursor, so the judging starts
+  without waiting for the remaining Grok 4.7 legs (Cursor Safety v1, then
+  Grok Build). Judging windows are logged in
+  `logs/cii-v4-maint-v320-chain.log` and disclosed on any Grok 4.7 speed
+  figure they overlap.
+
+## Amendment v3.21, October 3, 2026: Grok 4.7 in Grok Build on Frontier v4
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+judges changes from v3.20. Protocol id `code-quality-maintenance-v3.21`; run
+directory `runs-code-quality-maintenance-v3.21`; runner
+`harness/maintenance_review_v321.py`, derived from the v3.20 runner with the
+population constants changed. Population record:
+`docs/results/swe-v4-grok47-grokbuild-2026-10/comparison.json`, built by
+`scripts/cii-v4-board/build_grok47grokbuild_population.py`.
+
+- Occasion: the owner asked on October 3, 2026 for a card comparing Grok 4.7
+  in Cursor with Grok 4.7 in Grok Build. The two harnesses ran the same 23
+  tasks at the same four levels, so the comparison needs both judged under
+  the same protocol and judges.
+- Population: Grok 4.7's Frontier v4 sweep through xAI's Grok Build CLI on
+  the Grok subscription (model `grok-4.7`, `--effort` low, medium, high and
+  extra-high; Grok Build offers no max), one attempt per task and level, 92
+  runs. Runs stopped by the flat 3-hour bound are excluded as incomplete
+  source runs and listed in the frozen population; they count as failed
+  tasks. The CLI version is read from the runs and frozen in the protocol.
+- Tokens: the solver receipt is the stream's end-event usage (input, cache
+  reads, cache writes, output), the same raw sum as the Cursor record, and
+  must equal the run summary's total. No price is applied.
+- Judges: Muse Spark 1.3 and GPT-6.1 Sol under v3.20's settings and pins.
+  Both retake the exam under v3.21. One failing panel is disclosed and the
+  passing one publishes; two failures stop the amendment. If the passing
+  panels differ from v3.20's, the comparison card says so.
+- Concurrency: frozen and launched automatically once the Grok Build
+  Frontier v4 leg finishes, so the judging overlaps Grok Build's Routine v1
+  and Safety v1 legs. Windows are logged in
+  `logs/cii-v4-maint-v321-chain.log`.
+
+## Amendment v3.22, October 4, 2026: Grok 4.7 in Cursor on Routine v1
+
+The v3.8 Routine protocol on its own population, as v3.14 is for Opus 5.5.
+Nothing in the rubric, controls, gates, repeats, seed, weights or the L2
+ruling changes. Protocol id `code-quality-maintenance-v3.22`; run directory
+`VulcanRoutine judging/code-quality-maintenance-v3.22` (private); runner
+`harness/maintenance_review_v322.py`, derived from the v3.14 runner with v3.20's
+Sol seat transport. Population record:
+`VulcanRoutine results/private/routine-v1-comparison-grok47.json`, built by
+`scripts/cii-v4-board/build_routine_population.py --grok47`.
+
+- Occasion: the owner asked on October 4, 2026 for model cards for every
+  Grok 4.7 result, which includes Routine v1.
+- Population: Grok 4.7's October 3 Routine v1 sweep through Cursor, low to
+  extra-high (no max in Cursor), 48 runs, all finished. Tokens come from the
+  Cursor stream's usage block, as on Frontier v4.
+- Judges: Muse Spark 1.3 and GPT-6.1 Sol under v3.20's settings and pins,
+  since Grok 4.6 is not neutral for an xAI submission. Both take the exam
+  under v3.22. The single-panel rule applies as in v3.14.
+- L2 stays not applicable: Code quality is the L1 reviewed score.
+- Comparability: within Routine v1, a Grok 4.7 cell is judged by a different
+  pair from the v3.8 and v3.14 cells, and the card says so.
+- Concurrency: runs while the Grok 4.7 Grok Build legs wait for a login and
+  while v3.19 judges Muse Spark 1.3 through Cursor; neither shares a quota
+  with Muse Code or Codex. Windows are logged in
+  `logs/routine-v1-maint-v322-chain.log`.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

@@ -7,6 +7,113 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-03: every suite gets the flat 3-hour task timeout
+
+### Decision
+
+Owner, in chat: "all timeouts should be 3 hours for every suite". The flat
+10800 s bound Frontier v4 adopted on 2026-09-13 now applies to every suite
+that runs agents:
+
+| Suite | Before | After |
+| --- | --- | --- |
+| Frontier v4 | 10800 s (2026-09-13) | unchanged |
+| Safety v1 (conduct-v1) | 36000 s (2026-08-29 policy) | 10800 s |
+| Routine v1 | 1800 s (2026-09-17) | 10800 s |
+| Routine v2 | 2700 s (2026-09-25) | 10800 s |
+
+Only the timeout changes; step budgets stay as they were. Retired suites
+(cii-v1, v1 to v4, hard-1, python-1, voice-v1, vulcancyber-v1) are not
+swept and were not restamped.
+
+### Evidence
+
+- The 2026-09-13 restamp covered Frontier v4 only; Safety v1 tasks were
+  forked from v4 before it and kept the 10-hour bound. The gap surfaced
+  when Grok 4.7's Cursor Safety v1 low pacecore run started a Python
+  process that ran at full CPU from 06:55 with no agent activity after
+  07:03, set to run until its 10-hour bound.
+- No prior result moves. Safety v1: the longest recorded run (Opus 5.5,
+  50 runs) took 84 minutes. Routine v1: none of 504 recorded runs came
+  within 100 s of the old 1800 s bound, so raising it changes nothing
+  recorded. Routine v2 has not been swept.
+
+### What this touched
+
+- VulcanConduct `tasks/conduct-v1`: `suite.json` gains a `flat_budget`;
+  every task's `agent_hints.suggested_timeout_s` and `budget_calibration`.
+- VulcanRoutine `tasks/routine-v1` and VulcanRoutine-v2 `tasks/routine-v2`:
+  `flat_budget` (previous value kept beside it), every task's timeout and
+  `budget_calibration`, and the charters' Budgets sections.
+- `CLAUDE.md` "Current:" line. `scripts/stamp_task_budgets.py --check`
+  passes on all four suites.
+
+### In-flight runs
+
+A run's bound is fixed when its agent starts, so the Grok 4.7 Cursor Safety
+v1 low pacecore run in progress at the change keeps its 10-hour bound. The
+remaining tasks of that invocation may keep it too, depending on when the
+suite loaded their metadata; every later invocation gets 3 hours.
+
+Outcome: the pacecore run reached its 10-hour bound at 16:55 PDT and is
+recorded as unfinished and failed (functional 0). The owner chose to treat
+it as a timeout under the 3-hour rule; any time figure that includes it
+counts it at 3 hours, with a footnote. An in-process trigger of the
+harness's own timeout handler was prepared but needed root and was
+overtaken by the bound. The Medium invocation (started 17:39) records the
+10800 s bound in its traces.
+
+## 2026-10-03: Grok 4.7 in Grok Build is judged like Cursor (v3.21), launched when its Frontier leg ends
+
+### Decision
+
+The owner asked for a card comparing Grok 4.7 in Cursor with Grok 4.7 in
+Grok Build. Grok Build's Frontier v4 sweep is judged under v3.21 with v3.20's
+judges (Muse Spark 1.3 and GPT-6.1 Sol), so both halves of the card share a
+protocol and panel.
+
+### Operation
+
+`logs/cii-v4-maint-v321-watch.sh` waits for `logs/grok47-all-suites.log` to
+reach its Grok Build Routine v1 banner (Frontier leg done) or the chain to
+finish, then builds the population, freezes it with
+`python -m harness.maintenance_review_v321 prepare`, judges both panels in
+parallel and summarizes. The card is drawn by
+`scripts/cii-v4-board/make_grok47_harness_card.py` after both summaries
+exist; publication waits for review.
+
+## 2026-10-03: Grok 4.7 is judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.20), alongside its remaining legs
+
+### Decision
+
+Grok 4.7's Frontier v4 sweep in Cursor is judged for Code quality under
+v3.20 by Muse Spark 1.3 and GPT-6.1 Sol. Owner choice in chat, 2026-10-03:
+"let's do muse plus GPT-6.1 Sol". The judging starts now rather than after
+the remaining Grok 4.7 legs.
+
+### Evidence
+
+- Grok 4.6, the usual second judge, is an xAI model and not neutral for an
+  xAI submission. GPT-6.1 Sol is the strongest OpenAI model on the board
+  and runs on the ChatGPT subscription through a Codex binary already
+  pinned for it.
+- Neither judge runs through Cursor, so the reason for queueing v3.19
+  behind the Grok 4.7 Cursor legs (a shared Cursor account) does not apply.
+  The overlap adds machine load inside Grok 4.7's remaining wall clock, the
+  same trade the owner accepted for GPT-6.1 Sol's sweep overlapping v3.17
+  judging; the windows are logged and disclosed on any speed figure they
+  touch.
+- If GPT-6.1 Sol fails its first exam, Muse publishes alone and the failed
+  exam is disclosed, under the single-panel rule.
+
+### Operation
+
+Population built by `scripts/cii-v4-board/build_grok47cursor_population.py`
+and frozen with `python -m harness.maintenance_review_v320 prepare`.
+`logs/cii-v4-maint-v320-chain.sh` (log and pid beside it) calibrates, runs
+and probes the Muse and Sol panels in parallel (per-panel locks), then
+summarizes.
+
 ## 2026-09-29: GPT-6.1 Sol runs on Frontier v4 now, on a pinned Codex 0.159.0, ahead of Grok 4.7
 
 ### Decision

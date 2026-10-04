@@ -13,6 +13,7 @@ repository (``results/private/routine-v1-comparison.json``), never here.
 
     python scripts/cii-v4-board/build_routine_population.py            # v3.8 population
     python scripts/cii-v4-board/build_routine_population.py --opus55   # v3.14 population
+    python scripts/cii-v4-board/build_routine_population.py --grok47   # v3.22 population
 """
 
 from __future__ import annotations
@@ -69,6 +70,24 @@ OPUS55_MODELS = {
     ),
 }
 OPUS55_OUTPUT = ROUTINE / "results/private/routine-v1-comparison-opus55.json"
+# Grok 4.7 in Cursor, judged under v3.22 for the same reason. Cursor carries the
+# effort in the model id, so the solver spec is per level; there is no max.
+GROK47_LEVELS = ("low", "medium", "high", "extra-high")
+GROK47_MODELS = {
+    "grok47cursor": (
+        "runs-routine-v1-grok47-cursor",
+        GROK47_LEVELS,
+        {
+            "low": "cursor:grok-4.7-low",
+            "medium": "cursor:grok-4.7-medium",
+            "high": "cursor:grok-4.7-high",
+            "extra-high": "cursor:grok-4.7-xhigh",
+        },
+        "Grok 4.7 in Cursor",
+    ),
+}
+GROK47_OUTPUT = ROUTINE / "results/private/routine-v1-comparison-grok47.json"
+CURSOR_KEYS = ("inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens")
 MISSING_REASON = "No finished run for this task and level"
 
 
@@ -78,9 +97,28 @@ def task_ids(tasks_root: Path) -> list[str]:
     )
 
 
+def _cursor_receipt(run: Path) -> dict:
+    """Cursor summaries record 0 tokens; the stream's single result event carries the usage."""
+    path = run / "cli-agent-stream.jsonl"
+    events = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    results = [e for e in events if e.get("type") == "result"]
+    if len(results) != 1 or results[0].get("subtype") != "success":
+        raise ValueError("expected one successful Cursor result")
+    usage = results[0]["usage"]
+    return {
+        "raw_tokens": sum(int(usage[k]) for k in CURSOR_KEYS),
+        "usage": {k: int(usage[k]) for k in CURSOR_KEYS},
+        "result_receipts": 1,
+        "historical_summary_unit": "Cursor stream usage: input, output, cache reads, cache writes",
+        "stream_sha256": base.digest(path.read_bytes()),
+    }
+
+
 def _receipt(run: Path, summary: dict) -> dict:
     """The solver's raw usage receipt; a receipt problem never blocks Code quality judging."""
     try:
+        if summary["model"].startswith("cursor:"):
+            return _cursor_receipt(run)
         return solver_receipt(run, summary)
     except (ValueError, KeyError, OSError) as exc:
         return {"error": f"{type(exc).__name__}: {exc}"}
@@ -98,7 +136,8 @@ def build(models: dict, runs_root: Path, tasks_root: Path) -> dict:  # noqa: PLR
                 if not summary_path.exists():
                     continue
                 summary = json.loads(summary_path.read_text())
-                if summary["model"] != spec:
+                expected = spec[level] if isinstance(spec, dict) else spec
+                if summary["model"] != expected:
                     raise ValueError(f"{run}: unexpected solver {summary['model']}")
                 task = summary["task_id"]
                 attempted.add(task)
@@ -182,7 +221,12 @@ def build(models: dict, runs_root: Path, tasks_root: Path) -> dict:  # noqa: PLR
 
 
 def main() -> None:
-    models, output = (OPUS55_MODELS, OPUS55_OUTPUT) if "--opus55" in sys.argv else (MODELS, OUTPUT)
+    if "--opus55" in sys.argv:
+        models, output = OPUS55_MODELS, OPUS55_OUTPUT
+    elif "--grok47" in sys.argv:
+        models, output = GROK47_MODELS, GROK47_OUTPUT
+    else:
+        models, output = MODELS, OUTPUT
     record = build(models, ROUTINE / "runs", TASKS)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n")

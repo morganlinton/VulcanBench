@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import pytest
 
+from harness import provenance
+
 # Base-URL overrides select which API a provider talks to; keys decide whether it
 # believes it is configured at all. Tests that need either set them explicitly.
 _ROUTING_ENV = (
@@ -45,3 +47,10 @@ def isolate_provider_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """Give every test the same empty provider environment."""
     for name in (*_ROUTING_ENV, *_CREDENTIAL_ENV):
         monkeypatch.delenv(name, raising=False)
+
+
+@pytest.fixture(autouse=True)
+def allow_dirty_checkout(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Suite runs refuse a dirty checkout; tests must not depend on the developer's
+    working tree. tests/test_provenance.py exercises the refusal explicitly."""
+    monkeypatch.setenv(provenance.ALLOW_DIRTY_ENV, "1")

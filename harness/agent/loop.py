@@ -48,6 +48,7 @@ from harness.evaluator.evaluate import evaluate_run
 from harness.evaluator.scorer import run_verifier, score_run
 from harness.persistence import maybe_post_run_summary
 from harness.pricing import cost_usd, has_cached_input_price, is_priced
+from harness.provenance import source_provenance
 from harness.redaction import redact
 from harness.sandbox.docker_executor import (
     DockerToolExecutor,
@@ -356,6 +357,7 @@ def run_agent(  # noqa: PLR0915
             "cost_capped": cost_capped,
             "manifest": manifest,
             "task_hash": task_hash(task),
+            "source": source_provenance().as_summary(),
             "suite": suite,
             "suite_id": suite_id,
             **({"effort": effort_meta.as_summary()} if effort_meta else {}),

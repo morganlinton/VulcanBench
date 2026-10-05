@@ -23,6 +23,16 @@ Each run directory under `./runs/<run_id>/` contains:
 - Toolchain versions (git, ruff, bandit, go, node, etc.)
 - Task metadata snapshot (scale, complexity, languages)
 
+## Source provenance
+
+`summary.json` (and each suite's `suite.json`) also records a `source` block:
+the commit, `git describe` (a bench tag when run from one) and dirty state of
+the checkout the harness was imported from, plus the working directory's
+checkout when it differs. Suite runs refuse to start with uncommitted changes
+under `harness/`, `tasks/`, `sandbox/` or the run config unless
+`--allow-dirty` is passed, and then the run records it. See
+[HOW_WE_WORK.md](HOW_WE_WORK.md).
+
 ## Task content hashing
 
 `task_hash` in the summary is a deterministic SHA-256 of scoring-relevant task

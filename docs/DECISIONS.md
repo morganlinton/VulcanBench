@@ -7,6 +7,55 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-05: sweeps run from tagged worktrees; published suites are frozen
+
+### Decision
+
+Owner, in chat, approving all five parts of the proposal: building suites
+and running benchmarks are kept apart. Full workflow in
+[HOW_WE_WORK.md](HOW_WE_WORK.md); in short:
+
+- Sweeps and judging rounds launch from a run worktree detached at a
+  `bench/<date>-<label>` tag with its own venv (`make bench-tag`,
+  `make run-worktree`), never from the checkout being edited.
+- `vulcanbench run --suite` and `effort-sweep` refuse uncommitted changes
+  under harness/, tasks/, sandbox/ and the run config unless
+  `--allow-dirty` (or `VULCANBENCH_ALLOW_DIRTY=1`) is passed. Every run
+  summary and suite.json records a `source` block (commit, describe, dirty).
+- Published suites carry `tasks/<suite>/suite.lock.json`; CI fails on drift.
+  Frontier v4 is frozen at version 2.0.0.
+- Engine changes and published results go in separate PRs; no new raw
+  files under traces/; no blob over 5 MiB outside tasks/
+  (`.github/workflows/pr-hygiene.yml`, override label `mixed-scope` for
+  scope only).
+
+Timeouts and concurrency do not change: 3-hour flat bound, one task at a
+time.
+
+### Evidence
+
+- `vulcanbench` is an editable install, and sweeps ran from the main
+  checkout, so a pull or a local edit during a multi-day sweep changed the
+  code later tasks ran with. Run summaries recorded `task_hash` but no
+  commit, so a mixed column could not be detected after the fact.
+- Recorded `task_hash` values against today's Frontier v4 tree: all 115
+  Muse Spark 1.3 summaries under traces/ (September 2026) match. All 197
+  summaries under docs/results/cii-v4-fable51-2026-09 and
+  docs/results/cii-v4-opus5-effort-2026-09 (runs from 2026-08-28 to
+  2026-09-04) differ for every one of the 23 tasks. No commit since
+  2026-08-25 touches those tasks' scoring files (only metadata budgets and
+  the directory rename), so the cause is not yet known; one candidate is
+  untracked files inside task repo/ trees on the machine that ran them,
+  which `task_hash` includes. Not investigated further in this change.
+- traces/ is about 550 MB across 2,465 tracked files, the largest single
+  file 37 MB, all added in one week.
+
+### Revisit when
+
+- An archive location is chosen (`VULCANBENCH_ARCHIVE`); record it here.
+- VulcanRoutine or VulcanConduct need locks or the PR hygiene check; port
+  `harness/suite_lock.py` and `scripts/check_pr_scope.py`.
+
 ## 2026-10-03: every suite gets the flat 3-hour task timeout
 
 ### Decision

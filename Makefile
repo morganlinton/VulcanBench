@@ -14,7 +14,7 @@ VULCANBENCH := $(VENV_BIN)/vulcanbench
 # the venv. This makes `make ci` behave the same from any shell.
 export PATH := $(abspath $(VENV_BIN)):$(PATH)
 
-.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-all agent-image-codex
+.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci check-suites freeze-suite bench-tag run-worktree docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-all agent-image-codex
 .DEFAULT_GOAL := help
 
 help: ## Show this help
@@ -60,7 +60,22 @@ fmt: setup ## Auto-format with ruff
 typecheck: setup ## Strict mypy
 	$(MYPY) harness backend alembic/env.py scripts/ingest_runs.py
 
-ci: lint typecheck test ## Full local CI (lint + types + fast tests)
+ci: lint typecheck check-suites test ## Full local CI (lint + types + frozen suites + fast tests)
+
+check-suites: setup ## Fail if any frozen suite drifted from its tasks/<suite>/suite.lock.json
+	$(VENV_BIN)/python -m harness.suite_lock check
+
+freeze-suite: setup ## Freeze or re-freeze a suite after a version bump: make freeze-suite SUITE=<dir>
+	@test -n "$(SUITE)" || (echo "usage: make freeze-suite SUITE=<suite dir under tasks/>" && exit 2)
+	$(VENV_BIN)/python -m harness.suite_lock freeze $(SUITE)
+
+bench-tag: ## Tag clean, pushed main for a sweep: make bench-tag LABEL=<label> [PUSH=1]
+	@test -n "$(LABEL)" || (echo "usage: make bench-tag LABEL=<label> [PUSH=1]" && exit 2)
+	bash scripts/cut_bench_tag.sh $(LABEL) $(if $(PUSH),--push,)
+
+run-worktree: ## Pinned checkout + own venv for running sweeps: make run-worktree TAG=bench/...
+	@test -n "$(TAG)" || (echo "usage: make run-worktree TAG=<bench tag>" && exit 2)
+	bash scripts/run_worktree.sh $(TAG)
 
 sandbox-image: ## Build the Docker sandbox base image (Python, Go, Node)
 	docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .

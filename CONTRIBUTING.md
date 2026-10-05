@@ -211,6 +211,11 @@ Three grading modes, chosen per task via `metadata.grader`:
 3. Write or update tests for any new behaviour. Coverage must stay at or above 80%.
 4. Fill in the PR template, describe what changed, why, and how you tested it.
 5. PRs that add or modify tasks must include `make validate-tasks` output.
+6. Keep engine changes (harness, tasks, sandbox, config) and published results
+   (`docs/results/`, `traces/`) in separate PRs. Published suites are frozen;
+   changing one means a version bump and `make freeze-suite`. The full
+   workflow, including how benchmark runs are launched, is in
+   [docs/HOW_WE_WORK.md](docs/HOW_WE_WORK.md).
 
 ## Reporting Issues
 

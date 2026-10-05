@@ -1,0 +1,28 @@
+name: PR hygiene
+
+# Keeps engine changes and published results in separate PRs, and keeps raw
+# run output and large blobs out of git. Rules and reasons: docs/HOW_WE_WORK.md.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Engine vs results scope, no new raw traces, no large blobs
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: python scripts/check_pr_scope.py --base "$BASE_SHA" --head "$HEAD_SHA" --labels "$PR_LABELS"

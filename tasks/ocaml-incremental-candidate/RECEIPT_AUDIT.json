@@ -1,0 +1,120 @@
+{
+  "audited_at": "2026-10-02T14:20:27.514330+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-incremental-candidate",
+    "version": "6b37b41277dd",
+    "n_tasks": 1,
+    "task_ids": [
+      "incremental-budgeted-propagation"
+    ],
+    "task_hashes": {
+      "incremental-budgeted-propagation": "d01b0a5fc2ca6352700e023384a2115e551c914ad5120e315fe81011891909b6"
+    }
+  },
+  "original_suite_identity_preserved": "c0a1cc221d60",
+  "earlier_candidate_identity_preserved": "e0a390e323df",
+  "code_and_conditions_unchanged": true,
+  "run_count": 3,
+  "complete_task_passes": 3,
+  "rows": [
+    {
+      "run_id": "incremental-budgeted-propagation-44e1ac87",
+      "attempt": 1,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "budget-test/budget_test.ml",
+        "budget-test/dune",
+        "src/state.ml",
+        "src/types.ml"
+      ],
+      "patch_sha256": "a9c171c823f53a34a59bca45361c1c366224a7c84233e35d85c8bfcd81c5556d",
+      "summary_sha256": "bb37b659e4917c1106aa172840f764f4efba21ea23eec01fa18975aeca7bfefb",
+      "guarded_interfaces_and_fixtures_unchanged": true,
+      "generated_build_paths": false,
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_reads_observed": false,
+      "answer_key_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 347.317,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "incremental-budgeted-propagation-88cf0aef",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "budget_test/budget_test.ml",
+        "budget_test/dune",
+        "src/state.ml",
+        "src/types.ml"
+      ],
+      "patch_sha256": "5f03d7ffced9d7b6ad19e4a2f56157a170875b7fc2761b936bbf9834276135bf",
+      "summary_sha256": "7f8e308f2290c73017bc3617fdf5cc62235fa1da9a29cfc5875ce5fdc44287b5",
+      "guarded_interfaces_and_fixtures_unchanged": true,
+      "generated_build_paths": false,
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_reads_observed": false,
+      "answer_key_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 296.405,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "incremental-budgeted-propagation-f22b5cda",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "budget_tests/budget_tests.ml",
+        "budget_tests/dune",
+        "src/state.ml",
+        "src/types.ml"
+      ],
+      "patch_sha256": "bbde4d78e8e8022cd73e848ac31f20de2c7e42d9e7376c82a5280d6cb3ecfda3",
+      "summary_sha256": "9168bc58d2f4054bc94fa380a97650736e06f58c355177417208c320b93a372d",
+      "guarded_interfaces_and_fixtures_unchanged": true,
+      "generated_build_paths": false,
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_reads_observed": false,
+      "answer_key_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 298.655,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/var/folders/8c/l0jw07rj1l90scrh6fbl1m_w0000gn/T"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "limitations": [
+    "Filesystem telemetry is observational, not native isolation.",
+    "Source review and functional grading do not establish security or OCaml quality scores."
+  ]
+}

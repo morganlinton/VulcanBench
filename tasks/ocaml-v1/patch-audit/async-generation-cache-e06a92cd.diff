@@ -1,0 +1,480 @@
+diff --git a/lib/alarm.ml b/lib/alarm.ml
+index c0f537e..d83bbbb 100644
+--- a/lib/alarm.ml
++++ b/lib/alarm.ml
+@@ -1,6 +1,33 @@
+-type t = unit
+-type handle = unit
+-let create _source = ()
+-let at _ _ _ = ()
+-let cancel _ = ()
+-let pending _ = 0
++open Async_kernel
++
++type t = { source : Time_source.t; mutable pending : int }
++type handle = {
++  owner : t;
++  mutable active : bool;
++  mutable event : Time_source.Event.t_unit option;
++}
++
++let create source = { source; pending = 0 }
++
++let at owner time callback =
++  let handle = { owner; active = true; event = None } in
++  owner.pending <- owner.pending + 1;
++  let event = Time_source.Event.run_at owner.source time (fun () ->
++    if handle.active then begin
++      handle.active <- false;
++      owner.pending <- owner.pending - 1;
++      handle.event <- None;
++      callback ()
++    end) () in
++  handle.event <- Some event;
++  handle
++
++let cancel handle =
++  if handle.active then begin
++    handle.active <- false;
++    handle.owner.pending <- handle.owner.pending - 1;
++    Option.iter (fun event -> Time_source.Event.abort_if_possible event ()) handle.event;
++    handle.event <- None
++  end
++
++let pending t = t.pending
+diff --git a/lib/cache.ml b/lib/cache.ml
+index 5e79b5a..251359a 100644
+--- a/lib/cache.ml
++++ b/lib/cache.ml
+@@ -1,10 +1,161 @@
+-type 'a t = { mutable closed:bool }
+-let create ~source:_ ~policy:_ ~worker:_ = {closed=false}
+-let get t _ = let request=Request.create () in
+-  Request.resolve request (if t.closed then Request.Closed else Request.Failed "not implemented");
++open Core
++open Async_kernel
++
++type 'a generation = {
++  id : int;
++  key : string;
++  deadline : Time_ns.t;
++  mutable live : bool;
++  mutable requests : 'a Request.t list;
++  mutable attempt : int;
++  mutable deadline_alarm : Alarm.handle option;
++  mutable retry_alarm : Alarm.handle option;
++}
++
++type 'a t = {
++  source : Time_source.t;
++  policy : Policy.t;
++  worker : string -> attempt:int -> ('a, string) result Deferred.t;
++  alarms : Alarm.t;
++  current : (string, 'a generation) Hashtbl.t;
++  generations : (int, 'a generation) Hashtbl.t;
++  values : (string, 'a * Time_ns.t) Hashtbl.t;
++  mutable next_id : int;
++  mutable closed : bool;
++}
++
++let create ~source ~policy ~worker = {
++  source; policy; worker; alarms = Alarm.create source;
++  current = Hashtbl.create (module String);
++  generations = Hashtbl.create (module Int);
++  values = Hashtbl.create (module String);
++  next_id = 0; closed = false;
++}
++
++let is_current t generation =
++  match Hashtbl.find t.current generation.key with
++  | Some current -> phys_equal current generation
++  | None -> false
++
++let retire t generation =
++  generation.live <- false;
++  Option.iter generation.deadline_alarm ~f:Alarm.cancel;
++  Option.iter generation.retry_alarm ~f:Alarm.cancel;
++  generation.deadline_alarm <- None;
++  generation.retry_alarm <- None;
++  Hashtbl.remove t.generations generation.id;
++  if is_current t generation then Hashtbl.remove t.current generation.key
++
++let finish t generation outcome =
++  if generation.live then begin
++    retire t generation;
++    let requests = generation.requests in
++    generation.requests <- [];
++    List.iter requests ~f:(fun request ->
++      Request.on_cancel request (fun () -> ());
++      Request.resolve request outcome)
++  end
++
++let eligible t generation =
++  if not generation.live then false
++  else if Time_ns.(Time_source.now t.source >= generation.deadline) then begin
++    finish t generation Request.Timed_out;
++    false
++  end else true
++
++let rec start_attempt t generation =
++  if eligible t generation then begin
++    generation.attempt <- generation.attempt + 1;
++    let attempt = generation.attempt in
++    (* The worker runs inside get; results and exceptions are processed by Async.
++       Each attempt's monitor ignores errors after that attempt finishes. *)
++    let result = Monitor.try_with ~run:`Now ~rest:(`Call (fun _ -> ()))
++      (fun () -> t.worker generation.key ~attempt) in
++    upon result (fun result ->
++      if eligible t generation then
++        match result with
++        | Ok (Ok value) ->
++          if is_current t generation then
++            Hashtbl.set t.values ~key:generation.key
++              ~data:(value, Time_ns.add (Time_source.now t.source) t.policy.ttl);
++          finish t generation (Request.Value value)
++        | Ok (Error error) -> failed_attempt t generation error
++        | Error _ -> failed_attempt t generation "worker exception")
++  end
++
++and failed_attempt t generation error =
++  if generation.attempt >= t.policy.max_attempts then
++    finish t generation (Request.Failed error)
++  else begin
++    let retry_at = Time_ns.add (Time_source.now t.source) t.policy.retry_delay in
++    (* Only the deadline alarm is needed if the retry cannot run in time. *)
++    if Time_ns.(retry_at < generation.deadline) then
++      generation.retry_alarm <- Some (Alarm.at t.alarms retry_at (fun () ->
++        generation.retry_alarm <- None;
++        start_attempt t generation))
++  end
++
++let subscribe t generation request =
++  generation.requests <- request :: generation.requests;
++  Request.on_cancel request (fun () ->
++    if generation.live then begin
++      generation.requests <- List.filter generation.requests ~f:Request.is_pending;
++      if List.is_empty generation.requests then retire t generation
++    end)
++
++let get t key =
++  let request = Request.create () in
++  if t.closed then Request.resolve request Request.Closed
++  else begin
++    let current_time = Time_source.now t.source in
++    let value = match Hashtbl.find t.values key with
++      | Some (value, expiration) when Time_ns.(current_time < expiration) -> Some value
++      | Some _ -> Hashtbl.remove t.values key; None
++      | None -> None in
++    match value with
++    | Some value -> Request.resolve request (Request.Value value)
++    | None ->
++      match Hashtbl.find t.current key with
++      | Some generation ->
++        subscribe t generation request;
++        ignore (eligible t generation : bool)
++      | None ->
++        let generation = {
++          id = t.next_id; key; deadline = Time_ns.add current_time t.policy.timeout;
++          live = true; requests = []; attempt = 0;
++          deadline_alarm = None; retry_alarm = None;
++        } in
++        t.next_id <- t.next_id + 1;
++        Hashtbl.set t.current ~key ~data:generation;
++        Hashtbl.set t.generations ~key:generation.id ~data:generation;
++        subscribe t generation request;
++        generation.deadline_alarm <- Some (Alarm.at t.alarms generation.deadline
++          (fun () ->
++            generation.deadline_alarm <- None;
++            finish t generation Request.Timed_out));
++        start_attempt t generation
++  end;
+   request
+-let invalidate _ _ = ()
+-let close t = t.closed<-true
+-let in_flight _ = 0
+-let cached _ = 0
+-let pending_alarms _ = 0
++
++let invalidate t key =
++  if not t.closed then begin
++    Hashtbl.remove t.values key;
++    Hashtbl.remove t.current key
++  end
++
++let close t =
++  if not t.closed then begin
++    t.closed <- true;
++    Hashtbl.clear t.values;
++    List.iter (Hashtbl.data t.generations) ~f:(fun generation ->
++      finish t generation Request.Closed)
++  end
++
++let in_flight t = Hashtbl.length t.generations
++
++let cached t =
++  let current_time = Time_source.now t.source in
++  Hashtbl.filter_inplace t.values ~f:(fun (_, expiration) -> Time_ns.(current_time < expiration));
++  Hashtbl.length t.values
++
++let pending_alarms t = Alarm.pending t.alarms
+diff --git a/public/dune b/public/dune
+index 9154e84..8654664 100644
+--- a/public/dune
++++ b/public/dune
+@@ -1 +1,2 @@
+-(test (name smoke) (libraries cache_engine core async_kernel))
++(test (name smoke) (modules smoke) (libraries cache_engine core async_kernel))
++(test (name regression) (modules regression) (libraries cache_engine core async_kernel))
+diff --git a/public/regression.ml b/public/regression.ml
+new file mode 100644
+index 0000000..f9a4e00
+--- /dev/null
++++ b/public/regression.ml
+@@ -0,0 +1,247 @@
++open Core
++open Core.Poly
++open Async_kernel
++
++let drain () = Async_kernel_scheduler.Expert.run_cycles_until_no_jobs_remain ()
++let span = Time_ns.Span.of_int_sec
++let time seconds = Time_ns.add Time_ns.epoch (span seconds)
++let make_source () = Time_source.create ~now:Time_ns.epoch ()
++let advance source seconds =
++  Time_source.advance_directly source ~to_:(time seconds);
++  Time_source.fire_past_alarms source
++let policy ?(ttl=5) ?(timeout=10) ?(retry=2) ?(attempts=3) () =
++  Policy.create ~ttl:(span ttl) ~timeout:(span timeout)
++    ~retry_delay:(span retry) ~max_attempts:attempts
++let expect request outcome = assert (Deferred.peek (Request.result request) = Some outcome)
++let clean cache source =
++  assert (Cache.in_flight cache = 0);
++  assert (Cache.pending_alarms cache = 0);
++  assert (Time_source.next_alarm_fires_at source = None)
++let controlled source policy =
++  let calls = ref [] in
++  let cache = Cache.create ~source:(Time_source.read_only source) ~policy
++    ~worker:(fun key ~attempt ->
++      let result = Ivar.create () in
++      calls := !calls @ [key, attempt, result];
++      Ivar.read result) in
++  cache, calls
++let complete calls index result =
++  let _, _, ivar = List.nth_exn !calls index in
++  Ivar.fill_exn ivar result;
++  drain ()
++
++let () =
++  (* Detached generations remain independent, including multiple invalidations. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ()) in
++  let a = Cache.get cache "x" in
++  let b = Cache.get cache "x" in
++  assert (List.length !calls = 1);
++  Request.cancel a; Request.cancel a;
++  expect a Request.Cancelled;
++  Cache.invalidate cache "x";
++  let c = Cache.get cache "x" in
++  Cache.invalidate cache "x";
++  let d = Cache.get cache "x" in
++  assert (Cache.in_flight cache = 3);
++  complete calls 2 (Ok 30);
++  complete calls 0 (Ok 10);
++  complete calls 1 (Ok 20);
++  expect b (Request.Value 10);
++  expect c (Request.Value 20);
++  expect d (Request.Value 30);
++  expect (Cache.get cache "x") (Request.Value 30);
++  clean cache source;
++  advance source 5;
++  assert (Cache.cached cache = 0);
++  let e = Cache.get cache "x" in
++  assert (List.length !calls = 4);
++  Request.cancel e;
++  clean cache source;
++  complete calls 3 (Ok 40);
++  assert (Cache.cached cache = 0);
++
++  (* Retry delays are measured from error processing; subscribers share attempts. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ()) in
++  let a = Cache.get cache "x" in
++  advance source 1;
++  complete calls 0 (Error "first");
++  assert (Cache.pending_alarms cache = 2);
++  let b = Cache.get cache "x" in
++  advance source 2; drain ();
++  assert (List.length !calls = 1);
++  advance source 3; drain ();
++  complete calls 1 (Error "second");
++  advance source 5; drain ();
++  let _, attempt, _ = List.nth_exn !calls 2 in
++  assert (attempt = 3);
++  complete calls 2 (Error "last");
++  expect a (Request.Failed "last"); expect b (Request.Failed "last");
++  clean cache source;
++
++  (* A due deadline wins before its alarm callback is delivered. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ()) in
++  let a = Cache.get cache "x" in
++  advance source 10;
++  complete calls 0 (Ok 1);
++  expect a Request.Timed_out;
++  clean cache source;
++  assert (Cache.cached cache = 0);
++  let b = Cache.get cache "x" in
++  advance source 20; drain ();
++  expect b Request.Timed_out;
++  clean cache source;
++
++  (* A retry exactly at the deadline is never started. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ~timeout:2 ()) in
++  let a = Cache.get cache "x" in
++  complete calls 0 (Error "retry");
++  assert (Cache.pending_alarms cache = 1);
++  advance source 2; drain ();
++  expect a Request.Timed_out;
++  assert (List.length !calls = 1);
++  clean cache source;
++
++  (* Cancelling the final subscriber aborts both retry and deadline. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ()) in
++  let a = Cache.get cache "x" in
++  complete calls 0 (Error "retry");
++  Request.cancel a;
++  clean cache source;
++  let b = Cache.get cache "x" in
++  assert (List.length !calls = 2);
++  Cache.invalidate cache "x";
++  let c = Cache.get cache "y" in
++  Cache.close cache; Cache.close cache;
++  expect b Request.Closed; expect c Request.Closed;
++  clean cache source;
++  complete calls 1 (Ok 1); complete calls 2 (Error "late");
++  expect (Cache.get cache "x") Request.Closed;
++  assert (List.length !calls = 3);
++
++  (* Worker exceptions retry, and old attempt monitors swallow late errors. *)
++  let source = make_source () in
++  let monitors = ref [] in
++  let calls = ref 0 in
++  let cache = Cache.create ~source:(Time_source.read_only source) ~policy:(policy ())
++    ~worker:(fun _ ~attempt ->
++      incr calls;
++      monitors := Monitor.current () :: !monitors;
++      match attempt with
++      | 1 -> failwith "synchronous"
++      | 2 ->
++        Async_kernel_scheduler.schedule (fun () -> failwith "asynchronous");
++        Deferred.never ()
++      | _ -> return (Ok 9)) in
++  let a = Cache.get cache "x" in
++  assert (!calls = 1);
++  drain ();
++  advance source 2; drain ();
++  Monitor.send_exn (List.last_exn !monitors) (Failure "late first attempt");
++  drain ();
++  advance source 4; drain ();
++  expect a (Request.Value 9);
++  List.iter !monitors ~f:(fun monitor -> Monitor.send_exn monitor (Failure "late"));
++  drain ();
++  clean cache source;
++
++  (* Worker reentrancy sees fully registered requests, generations and timers. *)
++  let source = make_source () in
++  let cache_ref = ref None in
++  let joined = ref None in
++  let cache = Cache.create ~source:(Time_source.read_only source) ~policy:(policy ())
++    ~worker:(fun key ~attempt:_ ->
++      let cache = Option.value_exn !cache_ref in
++      joined := Some (Cache.get cache key);
++      assert (Cache.in_flight cache = 1);
++      assert (Cache.pending_alarms cache = 1);
++      Cache.invalidate cache key;
++      Cache.close cache;
++      return (Ok 1)) in
++  cache_ref := Some cache;
++  let a = Cache.get cache "x" in
++  expect a Request.Closed;
++  expect (Option.value_exn !joined) Request.Closed;
++  drain (); clean cache source;
++
++  (* A detached retry cannot remove or populate its replacement. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ()) in
++  let a = Cache.get cache "x" in
++  Cache.invalidate cache "x";
++  let b = Cache.get cache "x" in
++  complete calls 0 (Error "detached retry");
++  complete calls 1 (Ok 2);
++  advance source 2; drain ();
++  complete calls 2 (Ok 1);
++  expect a (Request.Value 1); expect b (Request.Value 2);
++  expect (Cache.get cache "x") (Request.Value 2);
++  clean cache source;
++
++  (* A joining subscriber cannot extend an already due deadline. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ()) in
++  let a = Cache.get cache "x" in
++  Time_source.advance_directly source ~to_:(time 10);
++  let b = Cache.get cache "x" in
++  expect a Request.Timed_out; expect b Request.Timed_out;
++  clean cache source;
++  complete calls 0 (Ok 1);
++  assert (Cache.cached cache = 0);
++
++  (* Zero TTL never reuses a value; unrelated keys start independently. *)
++  let source = make_source () in
++  let cache, calls = controlled source (policy ~ttl:0 ()) in
++  let a = Cache.get cache "x" in
++  let b = Cache.get cache "y" in
++  assert (Cache.in_flight cache = 2);
++  complete calls 0 (Ok 1); complete calls 1 (Ok 2);
++  expect a (Request.Value 1); expect b (Request.Value 2);
++  assert (Cache.cached cache = 0);
++  let c = Cache.get cache "x" in
++  assert (List.length !calls = 3);
++  Request.cancel c; clean cache source;
++
++  (* Invalidation and replacement inside a worker keep both generations alive. *)
++  let source = make_source () in
++  let cache_ref = ref None in
++  let replacement = ref None in
++  let calls = ref 0 in
++  let cache = Cache.create ~source:(Time_source.read_only source) ~policy:(policy ())
++    ~worker:(fun key ~attempt:_ ->
++      incr calls;
++      if !calls = 1 then begin
++        let cache = Option.value_exn !cache_ref in
++        Cache.invalidate cache key;
++        replacement := Some (Cache.get cache key);
++        assert (Cache.in_flight cache = 2);
++        return (Ok 1)
++      end else return (Ok 2)) in
++  cache_ref := Some cache;
++  let original = Cache.get cache "x" in
++  assert (Request.is_pending original);
++  drain ();
++  expect original (Request.Value 1);
++  expect (Option.value_exn !replacement) (Request.Value 2);
++  expect (Cache.get cache "x") (Request.Value 2);
++  clean cache source;
++
++  (* Alarm cancellation also works after enqueueing; counts change before callbacks. *)
++  let source = make_source () in
++  let alarms = Alarm.create (Time_source.read_only source) in
++  let cancelled = Alarm.at alarms (time 1) (fun () -> assert false) in
++  advance source 1;
++  Alarm.cancel cancelled; Alarm.cancel cancelled;
++  drain ();
++  assert (Alarm.pending alarms = 0);
++  let fired = ref false in
++  let handle = Alarm.at alarms (time 1) (fun () ->
++    assert (Alarm.pending alarms = 0); fired := true) in
++  drain ();
++  assert !fired;
++  Alarm.cancel handle;
++  assert (Alarm.pending alarms = 0)

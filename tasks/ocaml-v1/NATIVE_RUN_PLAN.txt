@@ -1,0 +1,16 @@
+dry-run would run suite=ocaml-v1 model=codex:gpt-6.1-sol sandbox=local 
+effort=medium
+
+Cost estimate  8 tasks x 3 repeat(s) = 24 run(s) per model
+┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━┓
+┃ Model             ┃ Provider / env ┃   Low ┃   Mid ┃  High ┃ Load ≥ ┃ Conf. ┃
+┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━┩
+│ codex:gpt-6.1-sol │ codex          │ $1.15 │ $1.92 │ $3.46 │  $4.32 │ low   │
+│                   │ CODEX_API_KEY  │       │       │       │        │       │
+└───────────────────┴────────────────┴───────┴───────┴───────┴────────┴───────┘
+  • codex:gpt-6.1-sol: Limited history; defaults are conservative, load extra 
+credit.
+  • codex:gpt-6.1-sol: No history for 8 task(s); using defaults.
+
+Estimates prefer local ./runs history; bundled priors fill gaps on fresh 
+installs. Load the recommended amount per provider before starting.

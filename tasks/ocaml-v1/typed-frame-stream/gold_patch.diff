@@ -1,0 +1,53 @@
+diff --git a/lib/wire.ml b/lib/wire.ml
+--- a/lib/wire.ml
++++ b/lib/wire.ml
+@@ -1,5 +1,21 @@
+ type _ kind = Ping : unit kind | Data : string kind
+ type packet = Packet : 'a kind * int64 * 'a -> packet
+ let encode : type a. a kind -> sequence:int64 -> a -> (string,string) result =
+-  fun _ ~sequence:_ _ -> Error "not implemented"
+-let decode_body _ = Error "bad payload"
++  fun kind ~sequence payload ->
++    if sequence < 0L || sequence > 0xffffffffL then Error "bad sequence"
++    else
++      let tag, data = match kind with Ping -> 0,"" | Data -> 1,payload in
++      if String.length data > 64 then Error "bad payload" else
++      let size=5+String.length data in let out=Bytes.create (size+2) in
++      Bytes.set out 0 (Char.chr (size lsr 8)); Bytes.set out 1 (Char.chr (size land 255));
++      Bytes.set out 2 (Char.chr tag);
++      for i=0 to 3 do Bytes.set out (3+i) (Char.chr (Int64.to_int (Int64.logand 255L (Int64.shift_right_logical sequence (8*(3-i)))))) done;
++      Bytes.blit_string data 0 out 7 (String.length data); Ok(Bytes.to_string out)
++let decode_body body =
++  if String.length body < 5 then Error "bad payload" else
++  let seq=ref 0L in for i=1 to 4 do seq:=Int64.logor (Int64.shift_left !seq 8) (Int64.of_int (Char.code body.[i])) done;
++  match Char.code body.[0] with
++  | 0 when String.length body=5 -> Ok(Packet(Ping,!seq,()))
++  | 1 when String.length body<=69 -> Ok(Packet(Data,!seq,String.sub body 5 (String.length body-5)))
++  | 0 | 1 -> Error "bad payload"
++  | _ -> Error "unknown tag"
+diff --git a/lib/stream.ml b/lib/stream.ml
+--- a/lib/stream.ml
++++ b/lib/stream.ml
+@@ -1,5 +1,17 @@
+-type t = { mutable pending : string }
+-let create () = { pending="" }
+-let feed t chunk = t.pending <- t.pending ^ chunk; []
+-let finish t = if t.pending="" then Ok () else Error "truncated frame"
+-let reset t = t.pending <- ""
++type t = { mutable pending : string; mutable failed : bool }
++let create () = { pending=""; failed=false }
++let reset t = t.pending <- ""; t.failed <- false
++let feed t chunk =
++  if t.failed then [] else begin
++    t.pending <- t.pending ^ chunk;
++    let rec collect acc =
++      if String.length t.pending < 2 then List.rev acc else
++      let size=(Char.code t.pending.[0] lsl 8) lor Char.code t.pending.[1] in
++      if size < 5 || size > 69 then begin t.failed <- true; t.pending <- ""; List.rev (Error "bad length"::acc) end
++      else if String.length t.pending < size+2 then List.rev acc
++      else let body=String.sub t.pending 2 size in
++        t.pending <- String.sub t.pending (size+2) (String.length t.pending-size-2);
++        collect (Wire.decode_body body::acc)
++    in collect []
++  end
++let finish t = if t.failed then Error "bad length" else if t.pending="" then Ok () else Error "truncated frame"

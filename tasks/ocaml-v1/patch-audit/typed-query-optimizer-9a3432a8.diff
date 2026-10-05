@@ -1,0 +1,287 @@
+diff --git a/lib/optimizer.ml b/lib/optimizer.ml
+index 37698bc..9622ebe 100644
+--- a/lib/optimizer.ml
++++ b/lib/optimizer.ml
+@@ -1,5 +1,137 @@
+-type ('src, 'dst) renaming = { apply : 'a. ('src, 'a) Expr.var -> ('dst, 'a) Expr.var }
+-type ('src, 'dst) substitution = { replace : 'a. ('src, 'a) Expr.var -> ('dst, 'a) Expr.t }
+-let rename _ _ = failwith "capture-avoiding rename is not implemented"
+-let substitute _ _ = failwith "capture-avoiding substitution is not implemented"
+-let normalize term = term
++open Expr
++
++type ('src, 'dst) renaming = { apply : 'a. ('src, 'a) var -> ('dst, 'a) var }
++type ('src, 'dst) substitution = { replace : 'a. ('src, 'a) var -> ('dst, 'a) t }
++
++let lift_renaming : type src dst bound.
++    (src, dst) renaming -> (bound * src, bound * dst) renaming = fun mapping ->
++  { apply = (fun (type a) (v : (bound * src, a) var) ->
++      (match v with Z -> Z | S v -> S (mapping.apply v)
++       : (bound * dst, a) var)) }
++
++let rec rename : type src dst a.
++    (src, dst) renaming -> (src, a) t -> (dst, a) t = fun mapping term ->
++  match term with
++  | Int n -> Int n
++  | Bool b -> Bool b
++  | Var v -> Var (mapping.apply v)
++  | Read key -> Read key
++  | Add (a, b) -> Add (rename mapping a, rename mapping b)
++  | Mul (a, b) -> Mul (rename mapping a, rename mapping b)
++  | Equal (a, b) -> Equal (rename mapping a, rename mapping b)
++  | If (p, a, b) -> If (rename mapping p, rename mapping a, rename mapping b)
++  | Pair (a, b) -> Pair (rename mapping a, rename mapping b)
++  | Fst x -> Fst (rename mapping x)
++  | Snd x -> Snd (rename mapping x)
++  | Let (value, body) ->
++      Let (rename mapping value, rename (lift_renaming mapping) body)
++
++let lift_substitution : type src dst bound.
++    (src, dst) substitution -> (bound * src, bound * dst) substitution = fun mapping ->
++  { replace = (fun (type a) (v : (bound * src, a) var) ->
++      (match v with
++       | Z -> Var Z
++       | S v -> rename { apply = (fun v -> S v) } (mapping.replace v)
++       : (bound * dst, a) t)) }
++
++let rec substitute : type src dst a.
++    (src, dst) substitution -> (src, a) t -> (dst, a) t = fun mapping term ->
++  match term with
++  | Int n -> Int n
++  | Bool b -> Bool b
++  | Var v -> mapping.replace v
++  | Read key -> Read key
++  | Add (a, b) -> Add (substitute mapping a, substitute mapping b)
++  | Mul (a, b) -> Mul (substitute mapping a, substitute mapping b)
++  | Equal (a, b) -> Equal (substitute mapping a, substitute mapping b)
++  | If (p, a, b) ->
++      If (substitute mapping p, substitute mapping a, substitute mapping b)
++  | Pair (a, b) -> Pair (substitute mapping a, substitute mapping b)
++  | Fst x -> Fst (substitute mapping x)
++  | Snd x -> Snd (substitute mapping x)
++  | Let (value, body) ->
++      Let (substitute mapping value, substitute (lift_substitution mapping) body)
++
++let rec pure : type env a. (env, a) t -> bool = function
++  | Read _ -> false
++  | Int _ | Bool _ | Var _ -> true
++  | Add (a, b) | Mul (a, b) -> pure a && pure b
++  | Equal (a, b) -> pure a && pure b
++  | Pair (a, b) -> pure a && pure b
++  | If (p, a, b) -> pure p && pure a && pure b
++  | Fst x -> pure x
++  | Snd x -> pure x
++  | Let (value, body) -> pure value && pure body
++
++let rec literal : type env a. (env, a) t -> bool = function
++  | Int _ | Bool _ -> true
++  | Pair (a, b) -> literal a && literal b
++  | _ -> false
++
++let bind : type env bound.
++    (env, bound) t -> (bound * env, env) substitution = fun value ->
++  { replace = (fun (type a) (v : (bound * env, a) var) ->
++      (match v with Z -> value | S v -> Var v : (env, a) t)) }
++
++(* A successful renaming both proves the slot unused and removes it. Lifting
++   preserves inner binders while detecting uses at any outer S depth. *)
++exception Used_binding
++
++let remove_binding : type env bound a.
++    (bound * env, a) t -> (env, a) t option = fun body ->
++  let mapping : (bound * env, env) renaming =
++    { apply = (fun (type a) (v : (bound * env, a) var) ->
++        (match v with Z -> raise Used_binding | S v -> v : (env, a) var)) }
++  in
++  try Some (rename mapping body) with Used_binding -> None
++
++let rec normalize : type env a. (env, a) t -> (env, a) t = fun term ->
++  match term with
++  | Int _ | Bool _ | Var _ | Read _ -> term
++  | Add (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      (match a, b with
++       | Int a, Int b -> Int (a + b)
++       | Int 0, x | x, Int 0 -> x
++       | _ -> Add (a, b))
++  | Mul (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      (match a, b with
++       | Int a, Int b -> Int (a * b)
++       | Int 1, x | x, Int 1 -> x
++       | Int 0, x | x, Int 0 when pure x -> Int 0
++       | _ -> Mul (a, b))
++  | Equal (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      (match a, b with
++       | Int a, Int b -> Bool (a = b)
++       | _ -> Equal (a, b))
++  | If (p, a, b) ->
++      let p = normalize p in
++      let a = normalize a in
++      let b = normalize b in
++      (match p with Bool true -> a | Bool false -> b | _ -> If (p, a, b))
++  | Pair (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      Pair (a, b)
++  | Fst x ->
++      (match normalize x with
++       | Pair (a, b) when pure b -> a
++       | x -> Fst x)
++  | Snd x ->
++      (match normalize x with
++       | Pair (a, b) when pure a -> b
++       | x -> Snd x)
++  | Let (value, body) ->
++      let value = normalize value in
++      let body = normalize body in
++      if literal value then normalize (substitute (bind value) body)
++      else if pure value then
++        (match remove_binding body with
++         | Some body -> body
++         | None -> Let (value, body))
++      else Let (value, body)
+diff --git a/public/smoke.ml b/public/smoke.ml
+index 6ec0dd0..7feb5df 100644
+--- a/public/smoke.ml
++++ b/public/smoke.ml
+@@ -7,3 +7,135 @@ let () =
+   assert(!reads=["price"]);
+   assert(Eval.run ~read () (Optimizer.normalize plan)=24);
+   assert(Eval.run ~read (3,()) (Let(Int 4,Add(Var Z,Var(S Z))))=7)
++
++let check env term expected =
++  let normalized = Optimizer.normalize term in
++  assert (Measure.fingerprint normalized = Measure.fingerprint expected);
++  assert (Measure.fingerprint (Optimizer.normalize normalized) =
++          Measure.fingerprint normalized);
++  let read _ = failwith "unexpected read" in
++  assert (Eval.run ~read env term = Eval.run ~read env normalized)
++
++let () =
++  check () (Add (Int 2, Mul (Int 3, Int 4))) (Int 14);
++  check (8, ()) (Add (Int 0, Mul (Var Z, Int 1))) (Var Z);
++  check (8, ()) (Mul (Int 0, Var Z)) (Int 0);
++  check () (If (Equal (Int 2, Int 2), Int 3, Read "unselected")) (Int 3);
++  check () (Fst (Pair (Int 4, Bool true))) (Int 4);
++  check () (Snd (Pair (Int 4, Bool true))) (Bool true);
++  check ()
++    (Let (Pair (Int 4, Pair (Bool true, Int 9)),
++          If (Fst (Snd (Var Z)), Fst (Var Z), Snd (Snd (Var Z)))))
++    (Int 4);
++  check (8, ()) (Let (Var Z, Add (Var Z, Int 1)))
++    (Let (Var Z, Add (Var Z, Int 1)));
++  check (8, ()) (Let (Var Z, Var (S Z))) (Var Z);
++  check (8, ())
++    (Let (Var Z, Let (Add (Var (S Z), Int 2), Add (Var Z, Var (S (S Z))))))
++    (Let (Add (Var Z, Int 2), Add (Var Z, Var (S Z))));
++  check (8, ())
++    (Let (Var Z, Let (Add (Var (S Z), Int 2), Add (Var Z, Var (S Z)))))
++    (Let (Var Z, Let (Add (Var (S Z), Int 2), Add (Var Z, Var (S Z)))));
++  let swap : (int * (bool * unit), bool * (int * unit)) Optimizer.renaming =
++    { apply = (fun (type a) (v : (int * (bool * unit), a) var) ->
++        (match v with
++         | Z -> S Z
++         | S Z -> Z
++         | S (S _) -> .
++         : (bool * (int * unit), a) var)) }
++  in
++  let term = Let (Var Z, If (Var (S (S Z)), Var Z, Var (S Z))) in
++  assert (Measure.fingerprint (Optimizer.rename swap term) =
++          Measure.fingerprint (Let (Var (S Z), If (Var (S Z), Var Z, Var (S (S Z))))));
++  let mapping : (int * unit, int * unit) Optimizer.substitution =
++    { replace = (fun (type a) (v : (int * unit, a) var) ->
++        (match v with
++         | Z -> Add (Var Z, Int 2)
++         | S _ -> .
++         : (int * unit, a) t)) }
++  in
++  assert (Measure.fingerprint (Optimizer.substitute mapping (Var Z)) =
++          Measure.fingerprint (Add (Var Z, Int 2)));
++  let nested = Let (Read "a", Let (Read "b", Add (Var (S (S Z)), Var Z))) in
++  assert (Measure.fingerprint (Optimizer.substitute mapping nested) =
++          Measure.fingerprint
++            (Let (Read "a", Let (Read "b", Add (Add (Var (S (S Z)), Int 2), Var Z)))))
++
++exception Reader_failure of string
++
++let check_effects env term =
++  let normalized = Optimizer.normalize term in
++  assert (Measure.fingerprint (Optimizer.normalize normalized) =
++          Measure.fingerprint normalized);
++  let evaluate fail_at term =
++    let trace = ref [] in
++    let count = ref 0 in
++    let read key =
++      incr count;
++      trace := key :: !trace;
++      if !count = fail_at then raise (Reader_failure key);
++      String.length key + !count
++    in
++    let result =
++      try Ok (Eval.run ~read env term) with Reader_failure key -> Error key
++    in
++    result, List.rev !trace
++  in
++  List.iter (fun fail_at ->
++      assert (evaluate fail_at term = evaluate fail_at normalized)) [0; 1; 2; 3]
++
++let () =
++  let retained term =
++    assert (Measure.fingerprint (Optimizer.normalize term) = Measure.fingerprint term);
++    check_effects () term
++  in
++  retained (Let (Read "price", Var Z));
++  retained (Let (Read "unused", Int 4));
++  retained (Fst (Pair (Int 4, Read "audit")));
++  retained (Snd (Pair (Read "audit", Int 4)));
++  retained (Mul (Int 0, Read "audit"));
++  retained (Mul (Read "audit", Int 0));
++  let nested = Let (Int 4, Let (Read "fee", Add (Var (S Z), Var Z))) in
++  assert (Measure.fingerprint (Optimizer.normalize nested) =
++          Measure.fingerprint (Let (Read "fee", Add (Int 4, Var Z))));
++  check_effects () nested
++
++(* Generate well-typed open terms, extending the variable set under binders. *)
++let random = Random.State.make [| 1729 |]
++let choose n = Random.State.int random n
++
++let rec gen_int : type env. int -> (env, int) var list -> (env, int) t =
++  fun depth vars ->
++    if depth = 0 then
++      match choose 3, vars with
++      | 0, _ :: _ -> Var (List.nth vars (choose (List.length vars)))
++      | 1, _ -> Read (if choose 2 = 0 then "a" else "bb")
++      | _ -> Int (choose 5 - 2)
++    else
++      let sub () = gen_int (depth - 1) vars in
++      match choose 9 with
++      | 0 -> Add (sub (), sub ())
++      | 1 -> Mul (sub (), sub ())
++      | 2 -> If (gen_bool (depth - 1) vars, sub (), sub ())
++      | 3 -> Fst (Pair (sub (), sub ()))
++      | 4 -> Snd (Pair (gen_bool (depth - 1) vars, sub ()))
++      | 5 | 6 ->
++          Let (sub (), gen_int (depth - 1) (Z :: List.map (fun v -> S v) vars))
++      | _ -> gen_int 0 vars
++and gen_bool : type env. int -> (env, int) var list -> (env, bool) t =
++  fun depth vars ->
++    if depth = 0 then Bool (choose 2 = 0)
++    else
++      match choose 4 with
++      | 0 -> Equal (gen_int (depth - 1) vars, gen_int (depth - 1) vars)
++      | 1 -> Let (gen_int (depth - 1) vars,
++                  gen_bool (depth - 1) (Z :: List.map (fun v -> S v) vars))
++      | 2 -> If (gen_bool (depth - 1) vars, gen_bool (depth - 1) vars,
++                 gen_bool (depth - 1) vars)
++      | _ -> Bool (choose 2 = 0)
++
++let () =
++  for _ = 1 to 500 do
++    check_effects (7, (-3, ())) (gen_int 5 [Z; S Z]);
++    check_effects (7, (-3, ())) (gen_bool 5 [Z; S Z])
++  done

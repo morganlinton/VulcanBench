@@ -1,0 +1,192 @@
+diff --git a/lib/batch.ml b/lib/batch.ml
+index 6615f76..04b0720 100644
+--- a/lib/batch.ml
++++ b/lib/batch.ml
+@@ -2,4 +2,4 @@ type ('k,'v) edit = { lower:'k; upper:'k; value:'v option }
+ let apply t edits =
+   List.fold_left (fun acc e -> match acc with Error _ -> acc | Ok t ->
+     match Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value with
+-    | Error _ -> Ok t | Ok updated -> Ok updated) (Ok t) edits
++    | Error error -> Error error | Ok updated -> Ok updated) (Ok t) edits
+diff --git a/lib/interval_map.ml b/lib/interval_map.ml
+index 2ce05b8..ded08e9 100644
+--- a/lib/interval_map.ml
++++ b/lib/interval_map.ml
+@@ -1,10 +1,49 @@
+-type ('k, 'v, 'cmp) t = { comparator : ('k, 'cmp) Base.Comparator.t; equal : 'v -> 'v -> bool; points : ('k * 'v option) list }
+-let empty ~comparator ~equal = { comparator; equal; points = [] }
+-let boundaries t = t.points
++module Tree = Base.Map.Using_comparator.Tree
++
++type ('k, 'v, 'cmp) t = {
++  comparator : ('k, 'cmp) Base.Comparator.t;
++  equal : 'v -> 'v -> bool;
++  points : ('k, 'v option, 'cmp) Tree.t;
++}
++
++let empty ~comparator ~equal =
++  { comparator; equal; points = Tree.empty ~comparator }
++
++let boundaries t = Tree.to_alist t.points
++
++let boundary_value = function None -> None | Some (_, value) -> value
++
+ let find t key =
+-  List.fold_left (fun current (k,v) -> if t.comparator.compare k key <= 0 then v else current) None t.points
++  boundary_value
++    (Tree.closest_key t.points ~comparator:t.comparator `Less_or_equal_to key)
++
++let equal_value t a b =
++  match a, b with
++  | None, None -> true
++  | Some a, Some b -> t.equal a b
++  | _ -> false
++
+ let assign t ~lower ~upper ~value =
+-  let _equal = t.equal in
+-  if t.comparator.compare lower upper > 0 then Error "reversed interval"
+-  else if t.comparator.compare lower upper = 0 then Ok t
+-  else Ok { t with points = [lower, value; upper, None] }
++  let order = t.comparator.compare lower upper in
++  if order > 0 then Error "reversed interval"
++  else if order = 0 then Ok t
++  else
++    let comparator = t.comparator in
++    (* Save the value to restore at upper before discarding the covered points. *)
++    let after = find t upper in
++    let left, _, rest = Tree.split t.points ~comparator lower in
++    let _, _, right = Tree.split rest ~comparator upper in
++    let before = boundary_value (Tree.max_elt left) in
++    let left =
++      if equal_value t before value then left
++      else Tree.set left ~comparator ~key:lower ~data:value
++    in
++    let right =
++      if equal_value t value after then right
++      else Tree.set right ~comparator ~key:upper ~data:after
++    in
++    (* The splits guarantee disjoint, ordered trees. Only the two new seams
++       need coalescing; all retained boundaries are already canonical. *)
++    match Tree.append ~comparator ~lower_part:left ~upper_part:right with
++    | `Ok points -> Ok { t with points }
++    | `Overlapping_key_ranges -> assert false
+diff --git a/public/smoke.ml b/public/smoke.ml
+index a7d231b..9248e20 100644
+--- a/public/smoke.ml
++++ b/public/smoke.ml
+@@ -2,3 +2,115 @@ let () =
+   let t = Interval_map.empty ~comparator:Base.Int.comparator ~equal:Int.equal in
+   assert (Interval_map.find t 0 = None);
+   (match Batch.apply t [] with Ok untouched -> assert (Interval_map.boundaries untouched = []) | Error e -> failwith e)
++
++let assign t lower upper value =
++  match Interval_map.assign t ~lower ~upper ~value with
++  | Ok t -> t
++  | Error e -> failwith e
++
++let () =
++  let empty = Interval_map.empty ~comparator:Base.Int.comparator ~equal:String.equal in
++  let original = assign empty 0 10 (Some "A") in
++  let overlapping = assign original 3 7 (Some "B") in
++  assert (Interval_map.boundaries overlapping =
++          [0, Some "A"; 3, Some "B"; 7, Some "A"; 10, None]);
++  assert (Interval_map.boundaries (assign original 2 8 None) =
++          [0, Some "A"; 2, None; 8, Some "A"; 10, None]);
++  assert (Interval_map.boundaries original = [0, Some "A"; 10, None]);
++  assert (Interval_map.boundaries empty = []);
++  assert (Interval_map.boundaries (assign original 10 20 (Some "A")) =
++          [0, Some "A"; 20, None]);
++  assert (Interval_map.boundaries (assign original (-1) 11 None) = []);
++  assert (assign original 5 5 None == original);
++  assert (Interval_map.assign original ~lower:7 ~upper:3 ~value:None =
++          Error "reversed interval");
++  let edits = [
++    Batch.{ lower = 3; upper = 7; value = Some "B" };
++    Batch.{ lower = 2; upper = 8; value = None };
++  ] in
++  (match Batch.apply original edits with
++   | Ok t -> assert (Interval_map.boundaries t =
++                     [0, Some "A"; 2, None; 8, Some "A"; 10, None])
++   | Error e -> failwith e);
++  assert (Batch.apply original
++            (edits @ [Batch.{ lower = 9; upper = 1; value = None }]) =
++          Error "reversed interval");
++  assert (Interval_map.boundaries original = [0, Some "A"; 10, None]);
++  let t = Interval_map.empty ~comparator:Base.Int.comparator
++      ~equal:(fun a b -> String.equal (String.lowercase_ascii a) (String.lowercase_ascii b)) in
++  let t = assign (assign t 0 10 (Some "A")) 3 7 (Some "a") in
++  assert (Interval_map.boundaries t = [0, Some "A"; 10, None])
++
++module Reverse = struct
++  include Base.Comparator.Make (struct
++    type t = int
++    let compare a b = Int.compare b a
++    let sexp_of_t = Base.Int.sexp_of_t
++  end)
++end
++
++let () =
++  let empty = Interval_map.empty ~comparator:Reverse.comparator ~equal:Int.equal in
++  let t = assign (assign empty 10 0 (Some 1)) 7 3 (Some 2) in
++  assert (Interval_map.boundaries t =
++          [10, Some 1; 7, Some 2; 3, Some 1; 0, None]);
++  assert (Interval_map.find t 8 = Some 1);
++  assert (Interval_map.find t 7 = Some 2);
++  assert (Interval_map.find t 0 = None);
++  assert (Interval_map.assign t ~lower:0 ~upper:10 ~value:None =
++          Error "reversed interval")
++
++let () =
++  let random = Random.State.make [| 42 |] in
++  let reference = Array.make 40 None in
++  let t = ref (Interval_map.empty ~comparator:Base.Int.comparator ~equal:Int.equal) in
++  for _ = 1 to 1000 do
++    let a = Random.State.int random 41 in
++    let b = Random.State.int random 41 in
++    let lower = min a b and upper = max a b in
++    let value = match Random.State.int random 4 with 0 -> None | n -> Some n in
++    let previous = !t in
++    let previous_points = Interval_map.boundaries previous in
++    t := assign previous lower upper value;
++    for k = lower to upper - 1 do reference.(k) <- value done;
++    for k = 0 to 39 do assert (Interval_map.find !t k = reference.(k)) done;
++    let points = ref [] and last = ref None in
++    for k = 0 to 40 do
++      let value = if k = 40 then None else reference.(k) in
++      if value <> !last then points := (k, value) :: !points;
++      last := value
++    done;
++    assert (Interval_map.boundaries !t = List.rev !points);
++    assert (Interval_map.boundaries previous = previous_points)
++  done
++
++module Counted = struct
++  let calls = ref 0
++  include Base.Comparator.Make (struct
++    type t = int
++    let compare a b = incr calls; Int.compare a b
++    let sexp_of_t = Base.Int.sexp_of_t
++  end)
++end
++
++let () =
++  let t = ref (Interval_map.empty ~comparator:Counted.comparator ~equal:Int.equal) in
++  for i = 0 to 2047 do t := assign !t (3 * i) (3 * i + 1) (Some 1) done;
++  let original = !t in
++  assert (List.length (Interval_map.boundaries original) = 4096);
++  Gc.full_major ();
++  for i = 0 to 2047 do
++    Counted.calls := 0;
++    assert (Interval_map.find original (3 * i) = Some 1);
++    assert (!(Counted.calls) <= 64);
++    List.iter (fun value ->
++      Counted.calls := 0;
++      let before = Gc.allocated_bytes () in
++      let updated = assign original (3 * i) (3 * i + 1) value in
++      let allocated = Gc.allocated_bytes () -. before in
++      assert (!(Counted.calls) <= 512);
++      assert (allocated < 32768.);
++      assert (Interval_map.find updated (3 * i) = value);
++      assert (Interval_map.find original (3 * i) = Some 1)
++    ) [Some 2; None]
++  done

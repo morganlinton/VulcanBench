@@ -1,0 +1,123 @@
+{
+  "audited_at": "2026-10-03T17:15:17.311390+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-atomic-candidate-v2",
+    "version": "1ce29fa16e4f",
+    "n_tasks": 1,
+    "task_ids": [
+      "incremental-atomic-rewiring"
+    ],
+    "task_hashes": {
+      "incremental-atomic-rewiring": "71b815e9ecf14468465cd38c59fd4f12f60b8b669891b62a2b162bde0c808100"
+    }
+  },
+  "all_four_earlier_pool_identities_preserved": true,
+  "code_conditions_and_source_unchanged": true,
+  "run_count": 3,
+  "complete_task_passes": 2,
+  "rows": [
+    {
+      "run_id": "incremental-atomic-rewiring-f6a3978d",
+      "attempt": 1,
+      "functional": 0.8571,
+      "complete_task_pass": false,
+      "failed_checks": {
+        "fail_to_pass": [
+          "mixed_graph"
+        ],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/expert1.ml",
+        "test/dependency_edits/dependency_edits.ml",
+        "test/dependency_edits/dune"
+      ],
+      "patch_sha256": "6728c847e76f99be0466d9a0a68e1bad7a974141300ffe704f702a7e000134a2",
+      "summary_sha256": "2df3ae83d5dc68eafc58450032e5d38c40ce081c5c2ae82b0dd514a3b977b0f4",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 504.799,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/tmp"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-4d2889b2",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/expert1.ml",
+        "src/state.ml",
+        "test-atomic/atomic_rewiring.ml",
+        "test-atomic/dune"
+      ],
+      "patch_sha256": "0f7eb8d888cb504dca3d4e22a2ddc595ab0c1c0014a1566e2b58c0a577ccb468",
+      "summary_sha256": "7f5368ad2aa4fb503d2e8911b5f1dd1aa4446edc4656e58fee98d9f57eebba6c",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 501.165,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/Users/vulcanbench/.local/share/vulcanbench/ocaml-v1-native",
+        "/bin/zsh",
+        "/private/tmp"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-25594877",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "atomic-tests/atomic.ml",
+        "atomic-tests/dune",
+        "src/expert1.ml"
+      ],
+      "patch_sha256": "b83af1c05e5806031cb0d7c2fbc4731eec3598b8208baf357ebe72c3b910bc33",
+      "summary_sha256": "115e5fe3756b1697b8b110d992995cbea5029771daf730c16d0da4e153f8cafc",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 423.856,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/tmp"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "limitations": [
+    "Native filesystem telemetry is observational, not isolation.",
+    "Functional grading does not establish OCaml quality or security analyzer coverage.",
+    "Model identity is requested-only."
+  ]
+}

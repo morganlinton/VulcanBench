@@ -1,0 +1,1555 @@
+{
+  "suite": "ocaml-v1",
+  "version": "cce72ac5f0fb",
+  "n_tasks": 5,
+  "task_ids": [
+    "async-bounded-dispatch",
+    "incremental-atomic-graph",
+    "interval-map-transaction",
+    "typed-frame-stream",
+    "window-watermark-allocation"
+  ],
+  "task_hashes": {
+    "async-bounded-dispatch": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+    "incremental-atomic-graph": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+    "interval-map-transaction": "d89cb136cef3b591e588737d4293c436c452b91caa42c70f521707745f1b3794",
+    "typed-frame-stream": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+    "window-watermark-allocation": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1"
+  },
+  "status": "development calibration complete",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "minimum_attempts_per_task": 3,
+  "metric": "mean per-task pass@1; all required checks and regression guards must pass",
+  "pass_at_1": 0.8,
+  "observed_below_80_percent": false,
+  "independent_confirmation": false,
+  "limitations": [
+    "Five tasks are a pilot, not a stable leaderboard or a confidence claim.",
+    "Configured model identity may be requested-only; inspect each CLI receipt.",
+    "Development selection and retrospective audits are not independent confirmation.",
+    "Solve time includes Linux amd64 emulation on an arm64 Mac.",
+    "Quality and security analyzers do not currently score OCaml."
+  ],
+  "excluded_runs": [
+    {
+      "run_id": "incremental-atomic-graph-4191caee",
+      "reason": "old task revision"
+    },
+    {
+      "run_id": "incremental-atomic-graph-6610925d",
+      "reason": "old task revision"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "async-bounded-dispatch",
+      "primary_view": "engineering",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "async-bounded-dispatch-357e35a8",
+          "task_hash": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "bounded_fifo": true,
+              "close_drain": true,
+              "abort_pending": true,
+              "errors_release": true,
+              "close_then_abort": true
+            },
+            "pass_to_pass": {
+              "empty_limits": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 175.999,
+          "tokens": {
+            "prompt": 251979,
+            "completion": 4160,
+            "total": 256139,
+            "cached_input": 224896,
+            "reasoning_output": 448
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f52f-eadd-7152-960a-763c8d33f19d",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 224896,
+            "reasoning_output_tokens": 448,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 57,
+              "loc": 516
+            }
+          }
+        },
+        {
+          "run_id": "async-bounded-dispatch-90519017",
+          "task_hash": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "bounded_fifo": true,
+              "close_drain": true,
+              "abort_pending": true,
+              "errors_release": true,
+              "close_then_abort": true
+            },
+            "pass_to_pass": {
+              "empty_limits": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 238.244,
+          "tokens": {
+            "prompt": 267837,
+            "completion": 5996,
+            "total": 273833,
+            "cached_input": 239744,
+            "reasoning_output": 609
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f532-a6f4-7133-910e-7f4d71e0d4f9",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 239744,
+            "reasoning_output_tokens": 609,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 57,
+              "loc": 596
+            }
+          }
+        },
+        {
+          "run_id": "async-bounded-dispatch-9758e979",
+          "task_hash": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "bounded_fifo": true,
+              "close_drain": true,
+              "abort_pending": true,
+              "errors_release": true,
+              "close_then_abort": true
+            },
+            "pass_to_pass": {
+              "empty_limits": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 184.513,
+          "tokens": {
+            "prompt": 209558,
+            "completion": 4500,
+            "total": 214058,
+            "cached_input": 193408,
+            "reasoning_output": 658
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f52d-142e-7992-b3ee-63bfb9ed0b2e",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 193408,
+            "reasoning_output_tokens": 658,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 57,
+              "loc": 562
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "incremental-atomic-graph",
+      "primary_view": "both",
+      "passes": 0,
+      "attempts": 3,
+      "pass_at_1": 0.0,
+      "runs": [
+        {
+          "run_id": "incremental-atomic-graph-19fa2932",
+          "task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+          "passed": false,
+          "functional": 0.8571,
+          "verifier": {
+            "scores": {
+              "functional": 0.8571
+            },
+            "fail_to_pass": {
+              "forward_atomic": true,
+              "dynamic_switch": true,
+              "stable_subscription": true,
+              "cutoff_laziness": true,
+              "invalid_rollback": true,
+              "atomic_dependency_reversal": false,
+              "repeated_dynamic_switch": true
+            },
+            "pass_to_pass": {
+              "source_observer": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/7 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 254.807,
+          "tokens": {
+            "prompt": 289480,
+            "completion": 5939,
+            "total": 295419,
+            "cached_input": 248704,
+            "reasoning_output": 1482
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f544-7d6f-7cc3-90c5-3becf713b681",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 248704,
+            "reasoning_output_tokens": 1482,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 80,
+              "loc": 569
+            }
+          }
+        },
+        {
+          "run_id": "incremental-atomic-graph-a395ade8",
+          "task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+          "passed": false,
+          "functional": 0.8571,
+          "verifier": {
+            "scores": {
+              "functional": 0.8571
+            },
+            "fail_to_pass": {
+              "forward_atomic": true,
+              "dynamic_switch": true,
+              "stable_subscription": true,
+              "cutoff_laziness": true,
+              "invalid_rollback": true,
+              "atomic_dependency_reversal": false,
+              "repeated_dynamic_switch": true
+            },
+            "pass_to_pass": {
+              "source_observer": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/7 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 306.54,
+          "tokens": {
+            "prompt": 330510,
+            "completion": 7372,
+            "total": 337882,
+            "cached_input": 303872,
+            "reasoning_output": 1409
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f54d-5f07-7010-953c-01bb9d90837f",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 303872,
+            "reasoning_output_tokens": 1409,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 61,
+              "loc": 566
+            }
+          }
+        },
+        {
+          "run_id": "incremental-atomic-graph-b0a12d84",
+          "task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+          "passed": false,
+          "functional": 0.8571,
+          "verifier": {
+            "scores": {
+              "functional": 0.8571
+            },
+            "fail_to_pass": {
+              "forward_atomic": true,
+              "dynamic_switch": true,
+              "stable_subscription": true,
+              "cutoff_laziness": true,
+              "invalid_rollback": true,
+              "atomic_dependency_reversal": false,
+              "repeated_dynamic_switch": true
+            },
+            "pass_to_pass": {
+              "source_observer": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/7 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 322.827,
+          "tokens": {
+            "prompt": 459402,
+            "completion": 7680,
+            "total": 467082,
+            "cached_input": 407424,
+            "reasoning_output": 1790
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f548-696a-7813-99c5-6f9ff69e5253",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 407424,
+            "reasoning_output_tokens": 1790,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 84,
+              "loc": 603
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "interval-map-transaction",
+      "primary_view": "language-mastery",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "interval-map-transaction-31bf05b5",
+          "task_hash": "d89cb136cef3b591e588737d4293c436c452b91caa42c70f521707745f1b3794",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "overlap_restore": true,
+              "erase_normalize": true,
+              "batch_error": true,
+              "custom_order": true,
+              "reference_sequences": true
+            },
+            "pass_to_pass": {
+              "empty_noop": true,
+              "single_range": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 117.836,
+          "tokens": {
+            "prompt": 161056,
+            "completion": 2491,
+            "total": 163547,
+            "cached_input": 147456,
+            "reasoning_output": 319
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f555-8ba5-7192-b6a7-fc2c9b42605d",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 147456,
+            "reasoning_output_tokens": 319,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 60,
+              "loc": 198
+            }
+          }
+        },
+        {
+          "run_id": "interval-map-transaction-8c3cea0b",
+          "task_hash": "d89cb136cef3b591e588737d4293c436c452b91caa42c70f521707745f1b3794",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "overlap_restore": true,
+              "erase_normalize": true,
+              "batch_error": true,
+              "custom_order": true,
+              "reference_sequences": true
+            },
+            "pass_to_pass": {
+              "empty_noop": true,
+              "single_range": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 113.782,
+          "tokens": {
+            "prompt": 174965,
+            "completion": 2409,
+            "total": 177374,
+            "cached_input": 155136,
+            "reasoning_output": 256
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f553-c717-7a53-a8cb-bdbefa5e8173",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 155136,
+            "reasoning_output_tokens": 256,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 60,
+              "loc": 206
+            }
+          }
+        },
+        {
+          "run_id": "interval-map-transaction-fee69258",
+          "task_hash": "d89cb136cef3b591e588737d4293c436c452b91caa42c70f521707745f1b3794",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "overlap_restore": true,
+              "erase_normalize": true,
+              "batch_error": true,
+              "custom_order": true,
+              "reference_sequences": true
+            },
+            "pass_to_pass": {
+              "empty_noop": true,
+              "single_range": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 109.318,
+          "tokens": {
+            "prompt": 131430,
+            "completion": 2389,
+            "total": 133819,
+            "cached_input": 119936,
+            "reasoning_output": 251
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f552-13fe-74a2-b290-861608980e2d",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 119936,
+            "reasoning_output_tokens": 251,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 60,
+              "loc": 238
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "typed-frame-stream",
+      "primary_view": "language-mastery",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "typed-frame-stream-0b64e84a",
+          "task_hash": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_roundtrip": true,
+              "fragmentation": true,
+              "recover_body_error": true,
+              "poison_reset": true,
+              "bounds": true
+            },
+            "pass_to_pass": {
+              "empty_reset": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 135.357,
+          "tokens": {
+            "prompt": 142670,
+            "completion": 3302,
+            "total": 145972,
+            "cached_input": 121472,
+            "reasoning_output": 111
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f55b-c358-7260-a462-716a00fe4076",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 121472,
+            "reasoning_output_tokens": 111,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 60,
+              "loc": 210
+            }
+          }
+        },
+        {
+          "run_id": "typed-frame-stream-a57a6008",
+          "task_hash": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_roundtrip": true,
+              "fragmentation": true,
+              "recover_body_error": true,
+              "poison_reset": true,
+              "bounds": true
+            },
+            "pass_to_pass": {
+              "empty_reset": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 139.189,
+          "tokens": {
+            "prompt": 151072,
+            "completion": 3109,
+            "total": 154181,
+            "cached_input": 133504,
+            "reasoning_output": 163
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f557-5f5b-7ac0-9b06-2acecd807528",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 133504,
+            "reasoning_output_tokens": 163,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 60,
+              "loc": 212
+            }
+          }
+        },
+        {
+          "run_id": "typed-frame-stream-e0b287c5",
+          "task_hash": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_roundtrip": true,
+              "fragmentation": true,
+              "recover_body_error": true,
+              "poison_reset": true,
+              "bounds": true
+            },
+            "pass_to_pass": {
+              "empty_reset": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 145.148,
+          "tokens": {
+            "prompt": 161163,
+            "completion": 3575,
+            "total": 164738,
+            "cached_input": 149248,
+            "reasoning_output": 323
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f559-8574-74d3-bfe4-504dc7b4e04d",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 149248,
+            "reasoning_output_tokens": 323,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 66,
+              "loc": 214
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task_id": "window-watermark-allocation",
+      "primary_view": "engineering",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "window-watermark-allocation-13b7b5e3",
+          "task_hash": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "expire_late": true,
+              "out_of_order": true,
+              "huge_jump": true,
+              "reference_workload": true,
+              "allocation_work": true
+            },
+            "pass_to_pass": {
+              "empty_limits": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 180.809,
+          "tokens": {
+            "prompt": 192973,
+            "completion": 4335,
+            "total": 197308,
+            "cached_input": 163968,
+            "reasoning_output": 537
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f560-135c-70e3-a540-d2b981b13770",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 163968,
+            "reasoning_output_tokens": 537,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 80,
+              "loc": 345
+            }
+          }
+        },
+        {
+          "run_id": "window-watermark-allocation-aa219f94",
+          "task_hash": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "expire_late": true,
+              "out_of_order": true,
+              "huge_jump": true,
+              "reference_workload": true,
+              "allocation_work": true
+            },
+            "pass_to_pass": {
+              "empty_limits": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 201.9,
+          "tokens": {
+            "prompt": 244362,
+            "completion": 4675,
+            "total": 249037,
+            "cached_input": 225792,
+            "reasoning_output": 627
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f562-dc09-7772-b3e9-da2dcab1f690",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 225792,
+            "reasoning_output_tokens": 627,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 57,
+              "loc": 344
+            }
+          }
+        },
+        {
+          "run_id": "window-watermark-allocation-c87e976c",
+          "task_hash": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "expire_late": true,
+              "out_of_order": true,
+              "huge_jump": true,
+              "reference_workload": true,
+              "allocation_work": true
+            },
+            "pass_to_pass": {
+              "empty_limits": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/5 passing"
+            ]
+          },
+          "agent_error": null,
+          "duration_s": 143.955,
+          "tokens": {
+            "prompt": 180501,
+            "completion": 3480,
+            "total": 183981,
+            "cached_input": 155776,
+            "reasoning_output": 563
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "container-workspace; sandbox=container (CLI sandbox off); image=vulcanbench/agent-codex:ocaml-v1",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a0f55d-da98-7e23-8a1d-a87a59661ed8",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 155776,
+            "reasoning_output_tokens": 563,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "Python 3.12.13",
+              "platform": "Linux 7.0.12-linuxkit x86_64",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "docker",
+              "image": "vulcanbench/sandbox:ocaml-v1",
+              "network": false,
+              "resources": {
+                "mem_floor": null,
+                "mem_ceiling": "2g",
+                "cpu_floor": null,
+                "cpu_ceiling": 2.0,
+                "pids_limit": 512
+              },
+              "oom_kills": 0
+            },
+            "tools": {
+              "git": "git version 2.39.5",
+              "ruff": "ruff 0.16.4",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.23.4 linux/amd64",
+              "node": "v22.11.0"
+            },
+            "task": {
+              "repo_scale": "micro",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 57,
+              "loc": 334
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

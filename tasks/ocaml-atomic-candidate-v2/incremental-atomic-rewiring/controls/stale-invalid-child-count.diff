@@ -1,0 +1,123 @@
+diff --git a/src/expert1.ml b/src/expert1.ml
+index c66e68f..ea4e31c 100644
+--- a/src/expert1.ml
++++ b/src/expert1.ml
+@@ -35,5 +35,8 @@ module Node = struct
+ 
+   type edit = Replace : 'a t * 'b Dependency.t list -> edit
+ 
+-  let apply_dependency_edits _state _edits = Error "not implemented"
++  let apply_dependency_edits state edits =
++    State.Expert.apply_dependency_edits state
++      (List.map edits ~f:(fun (Replace (node, deps)) ->
++         State.Expert.Replace (node, List.map deps ~f:(fun dep -> Expert.E dep))))
+ end
+diff --git a/src/state.ml b/src/state.ml
+index 4f73c6f..1452f60 100644
+--- a/src/state.ml
++++ b/src/state.ml
+@@ -2102,4 +2102,104 @@ module Expert = struct
+         then Recompute_heap.add state.recompute_heap node;
+         if not (Node.is_valid edge.child) then Expert.decr_invalid_children e))
+   ;;
++  type edit = Replace : 'a Node.t * Expert.packed_edge list -> edit
++
++  let apply_dependency_edits state edits =
++    match state.status with
++    | Stabilizing | Running_on_update_handlers | Stabilize_previously_raised _ -> Error "busy"
++    | Not_stabilizing ->
++      let exception Reject of string in
++      let reject message = raise (Reject message) in
++      let current_dependencies node =
++        match node.Node.kind with
++        | Expert e ->
++          List.init e.num_children ~f:(fun i ->
++            Uopt.value_exn (Uniform_array.get e.children i))
++        | _ -> []
++      in
++      let same_edge (a : Expert.packed_edge) b = phys_equal a b in
++      let find_edit node =
++        List.find_map edits ~f:(fun (Replace (target, deps)) ->
++          if Node.same node target then Some deps else None)
++      in
++      let children node =
++        match find_edit node with
++        | Some deps -> List.map deps ~f:(fun (Expert.E e) -> Node.Packed.T e.child)
++        | None ->
++          let result = ref [] in
++          Node.iteri_children node ~f:(fun _ child -> result := child :: !result);
++          List.rev !result
++      in
++      try
++        let targets = ref [] in
++        List.iter edits ~f:(fun (Replace (node, _)) ->
++          if List.exists !targets ~f:(fun (Node.Packed.T other) -> Node.same node other)
++          then reject "duplicate node";
++          targets := Node.Packed.T node :: !targets);
++        let dependencies = ref [] in
++        List.iter edits ~f:(fun (Replace (_, deps)) ->
++          List.iter deps ~f:(fun edge ->
++            if List.exists !dependencies ~f:(same_edge edge)
++            then reject "duplicate dependency";
++            dependencies := edge :: !dependencies));
++        List.iter edits ~f:(fun (Replace (node, _)) ->
++          match node.kind with Expert _ -> () | _ -> reject "invalid node");
++        let visited = Hashtbl.Poly.create () in
++        let rec validate (Node.Packed.T node) =
++          if not (Hashtbl.mem visited node.id)
++          then (
++            Hashtbl.set visited ~key:node.id ~data:();
++            if not (phys_equal state node.state && Node.is_valid node && Scope.is_top node.created_in)
++            then reject "invalid node";
++            List.iter (children node) ~f:validate)
++        in
++        List.iter !targets ~f:validate;
++        List.iter !dependencies ~f:(fun (Expert.E edge as packed) ->
++          if Uopt.is_some edge.index
++             && not (List.exists edits ~f:(fun (Replace (node, _)) ->
++               List.exists (current_dependencies node) ~f:(same_edge packed)))
++          then reject "dependency in use");
++        let colors = Hashtbl.Poly.create () in
++        let rec check_cycle (Node.Packed.T node) =
++          match Hashtbl.find colors node.id with
++          | Some `Visiting -> reject "cycle"
++          | Some `Done -> ()
++          | None ->
++            Hashtbl.set colors ~key:node.id ~data:`Visiting;
++            List.iter (children node) ~f:check_cycle;
++            Hashtbl.set colors ~key:node.id ~data:`Done
++        in
++        List.iter !targets ~f:check_cycle;
++        let changed = List.filter edits ~f:(fun (Replace (node, deps)) ->
++          not (List.equal same_edge (current_dependencies node) deps)) in
++        (* Callback execution during rewiring cannot begin a nested transaction. *)
++        state.status <- Stabilizing;
++        (try
++           List.iter changed ~f:(fun (Replace (node, _)) ->
++             let e = Uopt.value_exn (expert_kind_of_node node) in
++             e.will_fire_all_callbacks <- true);
++           (* Remove old backlinks while the old kind still describes them. *)
++           List.iter changed ~f:(fun (Replace (node, _)) ->
++             if Node.is_necessary node then remove_children node);
++           let still_necessary = List.filter changed ~f:(fun (Replace (node, _)) -> Node.is_necessary node) in
++           List.iter changed ~f:(fun (Replace (node, _)) ->
++             let e = Uopt.value_exn (expert_kind_of_node node) in
++             while e.num_children > 0 do Expert.remove_last_child_edge_exn e done;
++             e.force_stale <- true);
++           (* Install the entire prospective child graph before making anything necessary. *)
++           List.iter changed ~f:(fun (Replace (node, deps)) ->
++             let e = Uopt.value_exn (expert_kind_of_node node) in
++             List.iter deps ~f:(fun dep -> ignore (Expert.add_child_edge e dep : int)));
++           List.iter still_necessary ~f:(fun (Replace (node, _)) ->
++             if Node.is_necessary node
++             then (
++               Node.iteri_children node ~f:(fun child_index (Node.Packed.T child) ->
++                 add_parent ~child ~parent:node ~child_index);
++               if not (Node.is_in_recompute_heap node)
++               then Recompute_heap.add state.recompute_heap node));
++           state.status <- Not_stabilizing
++         with exn -> state.status <- Not_stabilizing; raise exn);
++        Ok ()
++      with Reject message -> Error message
++
+ end

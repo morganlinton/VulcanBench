@@ -1,0 +1,12 @@
+{
+  "previous_pool": "ocaml-atomic-candidate",
+  "previous_identity": "b9b088b09fa9",
+  "reason": "Reference retained invalid-child bookkeeping after omitting an invalid old child; a supplied model public test exposed the gap.",
+  "public_contract_changed": false,
+  "new_requirement_added": false,
+  "reference_fix": "Reset invalid-child count after clearing all obsolete edges; every accepted prospective child is valid.",
+  "added_check": "mixed_graph now checks removal of an invalid obsolete child while the parent is valid.",
+  "existing_results_reinterpreted": false,
+  "fresh_validation_and_calibration_required": true,
+  "supplemental_probe": "../ocaml-atomic-candidate/SUPPLEMENTAL_REFERENCE.json"
+}

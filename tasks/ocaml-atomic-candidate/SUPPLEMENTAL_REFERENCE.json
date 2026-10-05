@@ -1,0 +1,8 @@
+{
+  "status": "supplemental reference check",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "Uncaught exception:\n  \n  (\"attempt to get value of an invalid node\"\n   ((state In_use)\n    (observing\n     ((id 1) (state <opaque>) (recomputed_at 1) (value_opt ()) (kind Invalid)\n      (cutoff Phys_equal) (changed_at 1) (num_on_update_handlers 0)\n      (num_parents 0) (parent1_and_beyond ()) (parent0 ()) (created_in Top)\n      (next_node_in_same_scope ()) (height 0) (height_in_recompute_heap -1)\n      (prev_in_recompute_heap ()) (next_in_recompute_heap ())\n      (height_in_adjust_heights_heap -1) (next_in_adjust_heights_heap ())\n      (old_value_opt ()) (observers (<opaque>))\n      (is_in_handle_after_stabilization false) (on_update_handlers ())\n      (my_parent_index_in_child_at_index ())\n      (my_child_index_in_parent_at_index (-1)) (force_necessary false)\n      (user_info ()) (creation_backtrace ())))\n    (on_update_handlers ()) (prev_in_all ()) (next_in_all ())\n    (prev_in_observing ()) (next_in_observing ()))\n   src/internal_observer.ml:135:22)\n\nRaised at Base__Error.raise in file \"src/error.ml\" (inlined), line 9, characters 21-37\nCalled from Core__Error.failwiths in file \"core/src/error.ml\", line 5, characters 2-50\nCalled from Incremental__Internal_observer.value_exn in file \"src/internal_observer.ml\", line 135, characters 6-89\nCalled from Dune__exe__Invalid_old_child in file \"supplemental/invalid_old_child.ml\", line 14, characters 10-39\n",
+  "scored_attempt": false,
+  "contract": "Validation is against the prospective child graph, allowing removal of an invalid old child while the target is still valid."
+}

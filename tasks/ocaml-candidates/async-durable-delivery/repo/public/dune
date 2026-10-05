@@ -1,0 +1,2 @@
+(executables (names smoke example) (libraries delivery_engine))
+(rule (alias runtest) (action (run %{exe:smoke.exe})))

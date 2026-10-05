@@ -1,0 +1,285 @@
+diff --git a/lib/graph.ml b/lib/graph.ml
+index 9125ecf..d463906 100644
+--- a/lib/graph.ml
++++ b/lib/graph.ml
+@@ -1,8 +1,151 @@
+-type t = { sources : (string,int ref) Hashtbl.t }
+-type subscription = int ref
+-let create values = let sources=Hashtbl.create 8 in List.iter(fun (n,v)->if Hashtbl.mem sources n then invalid_arg "duplicate source"; Hashtbl.add sources n (ref v)) values; {sources}
+-let transaction _ ~sources:_ ~formulas:_ = Error "unknown reference"
+-let subscribe t n = Hashtbl.find_opt t.sources n
+-let stabilize _ = ()
+-let value s = !s
+-let additions _ = 0
++module Incr = Incremental
++
++type 'w compiled = {
++  expression : Expression.t;
++  result : (int, 'w) Incr.t;
++  children : 'w compiled list;
++}
++
++type 'w node = {
++  input : ((int, 'w) Incr.t, 'w) Incr.Var.t;
++  output : (int, 'w) Incr.t;
++  mutable compiled : 'w compiled option;
++}
++
++type 'w graph = {
++  state : 'w Incr.State.t;
++  sources : (string, (int, 'w) Incr.Var.t) Hashtbl.t;
++  formulas : (string, Expression.t) Hashtbl.t;
++  nodes : (string, 'w node) Hashtbl.t;
++  additions : int ref;
++}
++
++type t = Graph : 'w graph -> t
++type subscription = Subscription : (int, 'w) Incr.Observer.t -> subscription
++
++let node state input =
++  let input = Incr.Var.create state input in
++  let output = Incr.bind (Incr.Var.watch input) ~f:(fun value -> value) in
++  Incr.set_cutoff output Incr.Cutoff.poly_equal;
++  { input; output; compiled = None }
++
++let create values =
++  let module State = (val Incr.State.create ()) in
++  let state = State.t in
++  let sources = Hashtbl.create 8 in
++  let nodes = Hashtbl.create 8 in
++  List.iter
++    (fun (name, value) ->
++      if Hashtbl.mem sources name then invalid_arg "duplicate source";
++      let source = Incr.Var.create state value in
++      Hashtbl.add sources name source;
++      Hashtbl.add nodes name (node state (Incr.Var.watch source)))
++    values;
++  Graph { state; sources; nodes; formulas = Hashtbl.create 8; additions = ref 0 }
++
++let duplicate edits =
++  let seen = Hashtbl.create 8 in
++  List.exists
++    (fun (name, _) ->
++      if Hashtbl.mem seen name then true
++      else (Hashtbl.add seen name (); false))
++    edits
++
++let rec compile t previous expression =
++  match previous with
++  | Some compiled when compiled.expression = expression -> compiled
++  | _ ->
++    let left, right =
++      match previous with
++      | Some { children = [a; b]; _ } -> Some a, Some b
++      | _ -> None, None
++    in
++    let result, children =
++      match expression with
++      | Expression.Const value -> Incr.const t.state value, []
++      | Expression.Ref name -> (Hashtbl.find t.nodes name).output, []
++      | Expression.Add (a, b) ->
++        let a = compile t left a in
++        let b = compile t right b in
++        let result = Incr.map2 a.result b.result ~f:(fun a b -> incr t.additions; a + b) in
++        result, [a; b]
++      | Expression.Select (name, a, b) ->
++        let a = compile t left a in
++        let b = compile t right b in
++        let flag = (Hashtbl.find t.nodes name).output in
++        (* Only changes between zero and nonzero change the dependency. *)
++        let zero = Incr.map flag ~f:(fun value -> value = 0) in
++        Incr.set_cutoff zero Incr.Cutoff.poly_equal;
++        let result = Incr.bind zero ~f:(fun zero -> if zero then a.result else b.result) in
++        result, [a; b]
++    in
++    Incr.set_cutoff result Incr.Cutoff.poly_equal;
++    { expression; result; children }
++
++let transaction (Graph t) ~sources ~formulas =
++  if duplicate sources || duplicate formulas then Error "duplicate edit"
++  else
++    let prospective = Hashtbl.copy t.formulas in
++    List.iter (fun (name, expression) -> Hashtbl.replace prospective name expression) formulas;
++    let known name = Hashtbl.mem t.sources name || Hashtbl.mem prospective name in
++    let unknown =
++      List.exists (fun (name, _) -> not (Hashtbl.mem t.sources name)) sources
++      || List.exists (fun (name, _) -> Hashtbl.mem t.sources name) formulas
++      || Hashtbl.fold
++           (fun _ expression unknown ->
++             unknown || List.exists (fun name -> not (known name)) (Expression.references expression))
++           prospective false
++    in
++    if unknown then Error "unknown reference"
++    else
++      let visiting = Hashtbl.create 8 in
++      let visited = Hashtbl.create 8 in
++      let rec cyclic name =
++        if Hashtbl.mem visiting name then true
++        else if Hashtbl.mem visited name then false
++        else
++          match Hashtbl.find_opt prospective name with
++          | None -> false
++          | Some expression ->
++            Hashtbl.add visiting name ();
++            let cycle = List.exists cyclic (Expression.references expression) in
++            Hashtbl.remove visiting name;
++            Hashtbl.add visited name ();
++            cycle
++      in
++      if Hashtbl.fold (fun name _ cycle -> cycle || cyclic name) prospective false then
++        Error "cycle"
++      else (
++        (* Allocate every name before compiling, permitting forward references. *)
++        List.iter
++          (fun (name, _) ->
++            if not (Hashtbl.mem t.nodes name) then
++              Hashtbl.add t.nodes name (node t.state (Incr.const t.state 0)))
++          formulas;
++        List.iter
++          (fun (name, expression) ->
++            if Hashtbl.find_opt t.formulas name <> Some expression then (
++              let node = Hashtbl.find t.nodes name in
++              let compiled = compile t node.compiled expression in
++              Incr.Var.set node.input compiled.result;
++              node.compiled <- Some compiled;
++              Hashtbl.replace t.formulas name expression))
++          formulas;
++        List.iter
++          (fun (name, value) ->
++            let source = Hashtbl.find t.sources name in
++            if Incr.Var.latest_value source <> value then Incr.Var.set source value)
++          sources;
++        Ok ())
++
++let subscribe (Graph t) name =
++  Option.map (fun node -> Subscription (Incr.observe node.output)) (Hashtbl.find_opt t.nodes name)
++
++let stabilize (Graph t) =
++  (* A valid graph can exceed Incremental's default height limit of 128. *)
++  let limit = Incr.State.num_nodes_created t.state + 128 in
++  if limit > Incr.State.max_height_allowed t.state then
++    Incr.State.set_max_height_allowed t.state limit;
++  Incr.stabilize t.state
++let value (Subscription observer) = Incr.Observer.value_exn observer
++let additions (Graph t) = !(t.additions)
+diff --git a/public/dune b/public/dune
+index 9445e60..e9bddab 100644
+--- a/public/dune
++++ b/public/dune
+@@ -1 +1 @@
+-(test (name smoke) (libraries engine))
++(tests (names smoke graph_tests) (libraries engine))
+diff --git a/public/graph_tests.ml b/public/graph_tests.ml
+new file mode 100644
+index 0000000..13de8a7
+--- /dev/null
++++ b/public/graph_tests.ml
+@@ -0,0 +1,108 @@
++let ok = function Ok () -> () | Error error -> failwith error
++let observe t name = Option.get (Graph.subscribe t name)
++let check t s expected = Graph.stabilize t; assert (Graph.value s = expected)
++let () =
++  let open Expression in
++  (try ignore (Graph.create ["x", 1; "x", 2]); assert false with Invalid_argument _ -> ());
++  let t = Graph.create ["flag", 0; "a", 2; "b", 9] in
++  ok (Graph.transaction t ~sources:[] ~formulas:[
++    "result", Add (Ref "selected", Const 1);
++    "selected", Select ("flag", Ref "a", Ref "b");
++    "unused", Add (Ref "a", Ref "b")]);
++  let s = observe t "result" in
++  check t s 3;
++  assert (Graph.additions t = 1);
++  ok (Graph.transaction t ~sources:["b", 12] ~formulas:[]);
++  assert (Graph.value s = 3);
++  check t s 3;
++  assert (Graph.additions t = 1);
++  ok (Graph.transaction t ~sources:["flag", 1] ~formulas:[]);
++  check t s 13;
++  assert (Graph.additions t = 2);
++  ok (Graph.transaction t ~sources:["flag", 2] ~formulas:[]);
++  check t s 13;
++  assert (Graph.additions t = 2);
++  ok (Graph.transaction t ~sources:["b", 12] ~formulas:["result", Add (Ref "selected", Const 1)]);
++  check t s 13;
++  assert (Graph.additions t = 2);
++  ok (Graph.transaction t ~sources:[] ~formulas:["selected", Const 12]);
++  assert (Graph.value s = 13);
++  check t s 13;
++  assert (Graph.additions t = 2);
++  ok (Graph.transaction t ~sources:[] ~formulas:["selected", Const 20]);
++  check t s 21;
++  assert (Graph.additions t = 3);
++  Graph.stabilize t;
++  assert (Graph.additions t = 3);
++  let expect_error error sources formulas =
++    assert (Graph.transaction t ~sources ~formulas = Error error);
++    check t s 21;
++    assert (Graph.additions t = 3)
++  in
++  expect_error "duplicate edit" ["missing", 1; "missing", 2] ["loop", Ref "loop"];
++  expect_error "duplicate edit" [] ["loop", Ref "loop"; "loop", Const 1];
++  expect_error "unknown reference" ["missing", 1] ["loop", Ref "loop"];
++  expect_error "unknown reference" [] ["a", Const 1];
++  expect_error "unknown reference" ["a", 99] ["selected", Select ("flag", Const 1, Ref "missing")];
++  expect_error "cycle" ["a", 99] ["selected", Select ("flag", Const 1, Ref "result")];
++  let t = Graph.create [] in
++  ok (Graph.transaction t ~sources:[] ~formulas:["a", Ref "b"; "b", Const 1]);
++  let a = observe t "a" in
++  let b = observe t "b" in
++  check t a 1;
++  ok (Graph.transaction t ~sources:[] ~formulas:["b", Ref "a"; "a", Const 2]);
++  check t a 2;
++  assert (Graph.value b = 2);
++  ok (Graph.transaction t ~sources:[] ~formulas:["a", Ref "b"; "b", Const 3]);
++  check t b 3;
++  assert (Graph.value a = 3)
++
++let () =
++  let open Expression in
++  let t = Graph.create ["flag", 0; "a", 2; "b", 9] in
++  ok (Graph.transaction t ~sources:[] ~formulas:[
++    "chosen", Select ("flag", Add (Ref "a", Const 1), Add (Ref "b", Const 1));
++    "out", Add (Ref "chosen", Const 1)]);
++  let s = observe t "out" in
++  check t s 4;
++  assert (Graph.additions t = 2);
++  ok (Graph.transaction t ~sources:["b", 20] ~formulas:[]);
++  check t s 4;
++  assert (Graph.additions t = 2);
++  ok (Graph.transaction t ~sources:["flag", 1] ~formulas:[]);
++  check t s 22;
++  assert (Graph.additions t = 4);
++  ok (Graph.transaction t ~sources:[] ~formulas:["chosen", Add (Const 10, Const 11)]);
++  check t s 22;
++  assert (Graph.additions t = 5);
++  let other = Graph.create ["x", 1] in
++  ok (Graph.transaction other ~sources:[] ~formulas:["y", Add (Ref "x", Const 1)]);
++  let y = observe other "y" in
++  Graph.stabilize t;
++  assert (Graph.additions other = 0);
++  check other y 2;
++  ok (Graph.transaction other ~sources:["x", 7] ~formulas:[]);
++  Graph.stabilize t;
++  assert (Graph.value y = 2);
++  check other y 8
++
++let () =
++  let open Expression in
++  let t = Graph.create ["x", 0] in
++  let formulas = List.init 150 (fun i ->
++    string_of_int i, Add (Ref (if i = 0 then "x" else string_of_int (i - 1)), Const 1)) in
++  ok (Graph.transaction t ~sources:[] ~formulas);
++  check t (observe t "149") 150
++
++let () =
++  let open Expression in
++  let t = Graph.create ["flag", 0; "a", 2] in
++  ok (Graph.transaction t ~sources:[] ~formulas:[
++    "out", Select ("flag", Add (Ref "a", Const 1), Const 9)]);
++  let s = observe t "out" in
++  check t s 3;
++  assert (Graph.additions t = 1);
++  ok (Graph.transaction t ~sources:[] ~formulas:[
++    "out", Select ("flag", Add (Ref "a", Const 1), Const 10)]);
++  check t s 3;
++  assert (Graph.additions t = 1)

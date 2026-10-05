@@ -1,0 +1,283 @@
+{
+  "audited_at": "2026-10-02T02:01:56.634617+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-candidates",
+    "version": "e0a390e323df",
+    "n_tasks": 3,
+    "task_ids": [
+      "async-durable-delivery",
+      "typed-schema-evolution",
+      "base-nested-transactions"
+    ],
+    "task_hashes": {
+      "async-durable-delivery": "e22ae6f5eb7770c3dbe14dd491dfb5ce26cbeab7229c01eb959d622b47003e50",
+      "base-nested-transactions": "8858a71488d0a4eedd3d89d88228cb772b9db2e4198a67b5df8168d57d0a7df0",
+      "typed-schema-evolution": "e9bea8c75172066a91985ebc21c26b83a31b9c96a75d7b34c5cbf3cace51ee14"
+    }
+  },
+  "original_suite_identity_preserved": "c0a1cc221d60",
+  "code_and_conditions_unchanged": true,
+  "run_count": 9,
+  "complete_task_passes": 7,
+  "rows": [
+    {
+      "run_id": "async-durable-delivery-29b7f573",
+      "task_id": "async-durable-delivery",
+      "attempt": 1,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/committer.ml",
+        "lib/dispatcher.ml",
+        "public/dune",
+        "public/durable.ml"
+      ],
+      "patch_sha256": "31c9b0036b048cd8115f8d17331df6b2548ac17453f7e53de3a4c7b208116902",
+      "summary_sha256": "9aa3c75560c5a633d014772c8447ff4ea69d0e427a3ec31e818fb875fcac1626",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 232.577,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "async-durable-delivery-b48e20bb",
+      "task_id": "async-durable-delivery",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/committer.ml",
+        "lib/dispatcher.ml",
+        "test/delivery.ml",
+        "test/dune"
+      ],
+      "patch_sha256": "c90f92842314e788b60ac875de2f6493a9330b187a9a1ca37454be7f11802c75",
+      "summary_sha256": "8db5fcd4ecebbe4ff976137772495bb2130b3bd4ec14b23def5f8a271789c290",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 237.676,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "async-durable-delivery-5c2f4102",
+      "task_id": "async-durable-delivery",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/committer.ml",
+        "lib/dispatcher.ml",
+        "lib/runtime.ml",
+        "public/dune",
+        "public/durable.ml"
+      ],
+      "patch_sha256": "ad5495c8e61bec0b55270e6452313d653b1d5b85de900ced208edb791576b5d6",
+      "summary_sha256": "2b26ba30c43e23a60a3f2364f0e840697a6f959bc7b1f5ddfb5a82d4d6323caf",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 236.042,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "typed-schema-evolution-cb43a603",
+      "task_id": "typed-schema-evolution",
+      "attempt": 1,
+      "functional": 0.8333,
+      "complete_task_pass": false,
+      "failed_checks": {
+        "fail_to_pass": [
+          "transactional_cursor"
+        ],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/decoder.ml",
+        "public/decoder_tests.ml",
+        "public/dune"
+      ],
+      "patch_sha256": "482d62cb4f53358a931d70736adfdc88b158756d36acd2cd754afb4aa304ef09",
+      "summary_sha256": "da19ff38d7910631989de25549cded2f07c06e9c510d38aef0e0c6def8c429eb",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 221.116,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "typed-schema-evolution-0aed92a9",
+      "task_id": "typed-schema-evolution",
+      "attempt": 2,
+      "functional": 0.8333,
+      "complete_task_pass": false,
+      "failed_checks": {
+        "fail_to_pass": [
+          "transactional_cursor"
+        ],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/decoder.ml",
+        "public/decoder_tests.ml",
+        "public/dune"
+      ],
+      "patch_sha256": "caec15c0d3c7c6d93e749e4bfb28a19a21706dd1cfc0a3b380dccdde1699d454",
+      "summary_sha256": "36a7423fd8b6d7897dbb33c2efb8357b7b5685b7264f01645b38526441fa4bf9",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 176.197,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "typed-schema-evolution-54b33781",
+      "task_id": "typed-schema-evolution",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/decoder.ml",
+        "public/decoder_tests.ml",
+        "public/dune"
+      ],
+      "patch_sha256": "aad5c8cf3b9e196cdac2f03b3d761413a4d01a3b0543b54331cb7b48b1666158",
+      "summary_sha256": "922ac4e581fb8cbe1b919214c630021256985a70879719ad73566ba31c0ac6e6",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 187.566,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "base-nested-transactions-5295e1ed",
+      "task_id": "base-nested-transactions",
+      "attempt": 1,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "public/dune",
+        "public/transaction_tests.ml",
+        "src/hashtbl.ml"
+      ],
+      "patch_sha256": "015e44c2119c4df0b41974f4e5c23df25094299ac7353378565676c741f5c465",
+      "summary_sha256": "f6312eb93277d52a7208cae2668e1cbabc3d00b79fa7e1ae1da44dc55e727cf2",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 192.956,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "base-nested-transactions-a8d8c572",
+      "task_id": "base-nested-transactions",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "public/dune",
+        "public/transactions.ml",
+        "src/hashtbl.ml"
+      ],
+      "patch_sha256": "d62f5431173d8d0dc5c32d565a97859074d80904ff467308ffec55b52a05de7b",
+      "summary_sha256": "00273323c4d6c274499ee311668f649348323701e28aa5862da6df327b5129ff",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 251.71,
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "base-nested-transactions-3cfd740a",
+      "task_id": "base-nested-transactions",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "public/dune",
+        "public/transaction_tests.ml",
+        "src/hashtbl.ml"
+      ],
+      "patch_sha256": "1cef54e3ef541e3e5d72da8d90d58fb2392277d228e6a2dfe641be9a7ea3ef99",
+      "summary_sha256": "19082bc31b3b39a40cdbb94dfe21765a5ee097dad9a8be362b224f09c90751dd",
+      "guarded_interfaces_unchanged": true,
+      "generated_build_paths": false,
+      "benchmark_data_reads_observed": false,
+      "contaminated": false,
+      "duration_s": 238.505,
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "failure_replay": "FAILURE_REPLAY.json",
+  "context": {
+    "original_native_library_cohort": {
+      "complete_passes": 19,
+      "attempts": 21,
+      "distinct_tasks": 7,
+      "pass_at_1": 0.9047619047619048
+    },
+    "new_candidates": {
+      "complete_passes": 7,
+      "attempts": 9,
+      "distinct_tasks": 3,
+      "pass_at_1": 0.7777777777777778
+    },
+    "ten_library_context": {
+      "complete_passes": 26,
+      "attempts": 30,
+      "distinct_tasks": 10,
+      "pass_at_1": 0.8666666666666667,
+      "below_80_percent": false,
+      "status": "Contextual arithmetic, not a frozen expanded-suite model card"
+    },
+    "expanded_eleven_task_pass_at_1": null,
+    "pending_task": "compiler-gadt-field-safety",
+    "pending_reason": "Earlier provider refusal unresolved; no new call authorized or attempted"
+  },
+  "limitations": [
+    "Native filesystem audit is observational; local model execution is not container or network isolated.",
+    "Configured model identity is requested-only; reported model is unavailable.",
+    "Both failures reproduce at cursor restoration after an effectful raising constructor.",
+    "A constructor raising the exposed Error.Decode exception is not part of the current reference checks; exception propagation policy beyond cursor rollback needs a future specification review.",
+    "Two engineering-view tasks pass all six attempts. Larger source size alone did not make Base difficult for this model.",
+    "Three candidates are a development pool. No independent confirmation or stable leaderboard claim."
+  ]
+}

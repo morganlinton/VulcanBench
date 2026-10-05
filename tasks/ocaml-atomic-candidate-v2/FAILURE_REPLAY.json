@@ -1,0 +1,115 @@
+{
+  "network_isolation_enforced": true,
+  "sandbox": "local",
+  "adds_model_attempts": false,
+  "rows": [
+    {
+      "run_id": "incremental-atomic-rewiring-f6a3978d",
+      "patch_sha256": "6728c847e76f99be0466d9a0a68e1bad7a974141300ffe704f702a7e000134a2",
+      "comparison": {
+        "fail_to_pass": true,
+        "pass_to_pass": true,
+        "pass_to_pass_ok": true
+      },
+      "reproduced": true,
+      "setup": [
+        {
+          "name": "public build preflight",
+          "cmd": "dune build --profile release src/incremental.cmxa test/incremental_test.cmxa @runtest",
+          "exit_code": 0,
+          "duration_s": 6.223
+        }
+      ],
+      "setup_commands": [
+        {
+          "cmd": "dune build --profile release src/incremental.cmxa test/incremental_test.cmxa @runtest",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "verdict": {
+        "scores": {
+          "functional": 0.8571
+        },
+        "fail_to_pass": {
+          "prospective_topology": true,
+          "rejection_atomicity": true,
+          "ownership_transfer": true,
+          "publication_callbacks": true,
+          "necessity_and_noops": true,
+          "mixed_graph": false,
+          "busy_and_generic": true
+        },
+        "pass_to_pass": {
+          "ordinary_workflow": true,
+          "supplied_interfaces": true
+        },
+        "pass_to_pass_ok": true,
+        "details": [
+          "fail_to_pass 6/7 passing"
+        ]
+      },
+      "commands": [
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "python hidden/contracts.py",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- prospective_topology",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- rejection_atomicity",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- ownership_transfer",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- publication_callbacks",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- necessity_and_noops",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- mixed_graph",
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "Uncaught exception:\n  \n  (\"attempt to get value of an invalid node\"\n   ((state In_use)\n    (observing\n     ((id 4) (state <opaque>) (recomputed_at 3) (value_opt ()) (kind Invalid)\n      (cutoff Phys_equal) (changed_at 3) (num_on_update_handlers 0)\n      (num_parents 0) (parent1_and_beyond ()) (parent0 ()) (created_in Top)\n      (next_node_in_same_scope ()) (height 0) (height_in_recompute_heap -1)\n      (prev_in_recompute_heap ()) (next_in_recompute_heap ())\n      (height_in_adjust_heights_heap -1) (next_in_adjust_heights_heap ())\n      (old_value_opt ()) (observers (<opaque>))\n      (is_in_handle_after_stabilization false) (on_update_handlers ())\n      (my_parent_index_in_child_at_index ())\n      (my_child_index_in_parent_at_index (-1)) (force_necessary false)\n      (user_info ()) (creation_backtrace ())))\n    (on_update_handlers ()) (prev_in_all ()) (next_in_all ())\n    (prev_in_observing ()) (next_in_observing ()))\n   src/internal_observer.ml:135:22)\n\nRaised at Base__Error.raise in file \"src/error.ml\" (inlined), line 9, characters 21-37\nCalled from Core__Error.failwiths in file \"core/src/error.ml\", line 5, characters 2-50\nCalled from Incremental__Internal_observer.value_exn in file \"src/internal_observer.ml\", line 135, characters 6-89\nCalled from Dune__exe__Checks.mixed_graph in file \"hidden/checks.ml\", line 161, characters 59-66\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 219, characters 19-33\n"
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- busy_and_generic",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "supplemental_commands": [],
+      "task_hash": "71b815e9ecf14468465cd38c59fd4f12f60b8b669891b62a2b162bde0c808100",
+      "sandbox": "local"
+    }
+  ],
+  "all_reproduced": true
+}

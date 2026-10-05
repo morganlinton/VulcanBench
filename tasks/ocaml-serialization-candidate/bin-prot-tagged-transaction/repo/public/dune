@@ -1,0 +1,2 @@
+(executables (names smoke migration) (libraries bin_prot))
+(rule (alias runtest) (action (progn (run %{exe:smoke.exe}) (run %{exe:migration.exe}))))

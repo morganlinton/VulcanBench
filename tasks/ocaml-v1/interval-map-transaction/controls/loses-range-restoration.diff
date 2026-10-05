@@ -1,0 +1,33 @@
+diff --git a/lib/batch.ml b/lib/batch.ml
+--- a/lib/batch.ml
++++ b/lib/batch.ml
+@@ -1,5 +1,4 @@
+ type ('k,'v) edit = { lower:'k; upper:'k; value:'v option }
+ let apply t edits =
+   List.fold_left (fun acc e -> match acc with Error _ -> acc | Ok t ->
+-    match Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value with
+-    | Error _ -> Ok t | Ok updated -> Ok updated) (Ok t) edits
++    Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value) (Ok t) edits
+diff --git a/lib/interval_map.ml b/lib/interval_map.ml
+--- a/lib/interval_map.ml
++++ b/lib/interval_map.ml
+@@ -4,7 +4,15 @@
+ let find t key =
+   List.fold_left (fun current (k,v) -> if t.comparator.compare k key <= 0 then v else current) None t.points
+ let assign t ~lower ~upper ~value =
+-  let _equal = t.equal in
+-  if t.comparator.compare lower upper > 0 then Error "reversed interval"
+-  else if t.comparator.compare lower upper = 0 then Ok t
+-  else Ok { t with points = [lower, value; upper, None] }
++  let compare = t.comparator.compare in
++  if compare lower upper > 0 then Error "reversed interval"
++  else if compare lower upper = 0 then Ok t
++  else
++    let after = None in
++    let before = List.filter (fun (k,_) -> compare k lower < 0) t.points in
++    let beyond = List.filter (fun (k,_) -> compare k upper > 0) t.points in
++    let same a b = match a,b with None,None -> true | Some x,Some y -> t.equal x y | _ -> false in
++    let _, rev = List.fold_left (fun (previous,acc) (k,v) ->
++      if same previous v then previous,acc else v,(k,v)::acc)
++      (None,[]) (before @ [lower,value; upper,after] @ beyond) in
++    Ok { t with points = List.rev rev }

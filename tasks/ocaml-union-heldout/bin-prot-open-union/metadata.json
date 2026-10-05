@@ -1,0 +1,80 @@
+{
+  "id": "bin-prot-open-union",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "unmeasured candidate; not admitted",
+  "task_complexity": "multi_file",
+  "repo_scale": "xlarge",
+  "primary_view": "language-mastery",
+  "source": "oss-derived-original-extension",
+  "created": "2026-10-04",
+  "decontaminated": false,
+  "decontamination_notes": "Original open-union extension to bin_prot v0.17.0. Completed Tagged/Tagged_stream dependency supplied from prior development reference. Held out from target attempts, but authoring is informed by prior calibration and not independent external confirmation.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "typed_dispatch",
+        "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch"
+      },
+      {
+        "name": "projection_order",
+        "cmd": "dune exec --profile release hidden/checks.exe -- projection_order"
+      },
+      {
+        "name": "unknown_forwarding",
+        "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding"
+      },
+      {
+        "name": "framing_errors",
+        "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors"
+      },
+      {
+        "name": "callback_transactions",
+        "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions"
+      },
+      {
+        "name": "native_readers",
+        "cmd": "dune exec --profile release hidden/checks.exe -- native_readers"
+      },
+      {
+        "name": "bounded_payloads",
+        "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads"
+      },
+      {
+        "name": "schema_precedence",
+        "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ordinary_workflow",
+        "cmd": "dune exec --profile release hidden/checks.exe -- ordinary"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public native preflight",
+      "cmd": "dune build --profile release src/bin_prot.cmxa @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  },
+  "base_commit": "2cd58a8cd74b5fa1f28d63cbc4deaf6665b82525",
+  "upstream": {
+    "url": "https://github.com/janestreet/bin_prot",
+    "fix_commit": null
+  }
+}

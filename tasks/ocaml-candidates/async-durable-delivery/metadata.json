@@ -1,0 +1,79 @@
+{
+  "id": "async-durable-delivery",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "unmeasured candidate; not admitted",
+  "task_complexity": "multi_file",
+  "repo_scale": "small",
+  "primary_view": "engineering",
+  "source": "hand-authored",
+  "created": "2026-10-01",
+  "decontaminated": true,
+  "decontamination_notes": "Original integration fixture; no claim about model training cutoffs.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "keyed_dispatch",
+        "cmd": "dune exec --profile release hidden/checks.exe -- keyed_dispatch"
+      },
+      {
+        "name": "ordered_durability",
+        "cmd": "dune exec --profile release hidden/checks.exe -- ordered_durability"
+      },
+      {
+        "name": "retry_ownership",
+        "cmd": "dune exec --profile release hidden/checks.exe -- retry_ownership"
+      },
+      {
+        "name": "timeout_fences",
+        "cmd": "dune exec --profile release hidden/checks.exe -- timeout_fences"
+      },
+      {
+        "name": "cancel_commitpoint",
+        "cmd": "dune exec --profile release hidden/checks.exe -- cancel_commitpoint"
+      },
+      {
+        "name": "close_abort",
+        "cmd": "dune exec --profile release hidden/checks.exe -- close_abort"
+      },
+      {
+        "name": "reentrant_callbacks",
+        "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_callbacks"
+      },
+      {
+        "name": "monitor_failures",
+        "cmd": "dune exec --profile release hidden/checks.exe -- monitor_failures"
+      },
+      {
+        "name": "seeded_delivery",
+        "cmd": "dune exec --profile release hidden/checks.exe -- seeded_delivery"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ordinary_workflow",
+        "cmd": "dune exec --profile release hidden/checks.exe -- ordinary"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build --profile release @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  }
+}

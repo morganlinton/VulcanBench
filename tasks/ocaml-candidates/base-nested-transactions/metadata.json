@@ -1,0 +1,67 @@
+{
+  "id": "base-nested-transactions",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "unmeasured candidate; not admitted",
+  "task_complexity": "multi_file",
+  "repo_scale": "xlarge",
+  "primary_view": "both",
+  "source": "oss-derived-original-extension",
+  "created": "2026-10-01",
+  "decontaminated": false,
+  "decontamination_notes": "Original extension to public Base; upstream source is public, no training-cutoff claim.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "rollback_mutators",
+        "cmd": "dune exec --profile release hidden/checks.exe -- rollback_mutators"
+      },
+      {
+        "name": "nested_savepoints",
+        "cmd": "dune exec --profile release hidden/checks.exe -- nested_savepoints"
+      },
+      {
+        "name": "callback_errors",
+        "cmd": "dune exec --profile release hidden/checks.exe -- callback_errors"
+      },
+      {
+        "name": "canonical_keys",
+        "cmd": "dune exec --profile release hidden/checks.exe -- canonical_keys"
+      },
+      {
+        "name": "resize_clear_copy",
+        "cmd": "dune exec --profile release hidden/checks.exe -- resize_clear_copy"
+      },
+      {
+        "name": "sparse_journal",
+        "cmd": "dune exec --profile release hidden/checks.exe -- sparse_journal"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ordinary_workflow",
+        "cmd": "dune exec --profile release hidden/checks.exe -- ordinary"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build --profile release @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  }
+}

@@ -16,6 +16,22 @@ from harness.agent.providers import LLMProvider, LLMResponse, TokenUsage, ToolIn
 from harness.redaction import MAX_FIELD_CHARS
 
 
+@pytest.mark.parametrize("build_dir", ["_build", "_ocamltest", "_ocamltestd"])
+def test_ocaml_patch_capture_excludes_generated_sources(tmp_path: Path, build_dir: str) -> None:
+    source = tmp_path / "lib" / "example.ml"
+    source.parent.mkdir()
+    source.write_text("let value = 1\n")
+    loop_mod._git_init(tmp_path)
+    source.write_text("let value = 2\n")
+    generated = tmp_path / build_dir / "default" / "lib" / "example.ml"
+    generated.parent.mkdir(parents=True)
+    generated.write_text(source.read_text())
+    patch = loop_mod._git_diff(tmp_path)
+    assert "lib/example.ml" in patch
+    assert build_dir not in patch
+    assert loop_mod._git_changed_files(tmp_path) == ["lib/example.ml"]
+
+
 def test_run_agent_solves_hello_world(tmp_path: Path) -> None:
     res = run_agent(
         task_id="hello-world",
@@ -51,6 +67,8 @@ def test_run_agent_solves_hello_world(tmp_path: Path) -> None:
     assert manifest["runtime"]["python"]
     assert manifest["sandbox"]["mode"] == "local"
     assert "git" in manifest["tools"]
+    assert summary["run_limits"]["agent_timeout_s"] > 0
+    assert summary["run_limits"]["configured_max_steps"] > 0
 
     # Run records the task's scoring-definition hash (for drift detection).
     assert len(summary["task_hash"]) == 64

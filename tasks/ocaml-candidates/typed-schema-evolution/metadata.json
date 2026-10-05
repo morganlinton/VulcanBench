@@ -1,0 +1,67 @@
+{
+  "id": "typed-schema-evolution",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "unmeasured candidate; not admitted",
+  "task_complexity": "multi_file",
+  "repo_scale": "small",
+  "primary_view": "language-mastery",
+  "source": "hand-authored",
+  "created": "2026-10-01",
+  "decontaminated": true,
+  "decontamination_notes": "Original integration fixture; no claim about model training cutoffs.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "nested_migration",
+        "cmd": "dune exec --profile release hidden/checks.exe -- nested_migration"
+      },
+      {
+        "name": "canonical_compatibility",
+        "cmd": "dune exec --profile release hidden/checks.exe -- canonical_compatibility"
+      },
+      {
+        "name": "structured_errors",
+        "cmd": "dune exec --profile release hidden/checks.exe -- structured_errors"
+      },
+      {
+        "name": "transactional_cursor",
+        "cmd": "dune exec --profile release hidden/checks.exe -- transactional_cursor"
+      },
+      {
+        "name": "unknown_field_budget",
+        "cmd": "dune exec --profile release hidden/checks.exe -- unknown_field_budget"
+      },
+      {
+        "name": "schema_validation",
+        "cmd": "dune exec --profile release hidden/checks.exe -- schema_validation"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ordinary_workflow",
+        "cmd": "dune exec --profile release hidden/checks.exe -- ordinary"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build --profile release @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  }
+}

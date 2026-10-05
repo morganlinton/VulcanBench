@@ -1,0 +1,16 @@
+{
+  "provider_model_invocations": 0,
+  "reason": "login status tried to load configuration from the denied benchmark cwd; the subscription itself remained valid",
+  "fix": "Run wrapper control commands --version and login status from /tmp; preserve solve cwd and every solve argument.",
+  "corrected_preflight": {
+    "harness": "codex",
+    "available": true,
+    "version": "codex-cli 0.159.0",
+    "authenticated": true,
+    "auth_mode": "subscription",
+    "plan_name": null,
+    "detail": null
+  },
+  "profile_changes": false,
+  "model_or_prompt_changes": false
+}

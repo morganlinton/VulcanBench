@@ -1,0 +1,27 @@
+# Pinned upstream compiler task with a public baseline build, never a solution.
+# Build the verifier and agent targets with the same compiler-build cache.
+FROM vulcanbench/sandbox:ocaml-v1 AS compiler-build
+ARG COMPILER_BASE_REV=364874344779d2e410e99eb634bea8e7e2b70159
+COPY scripts/ocaml_compiler_seed.py /usr/local/bin/ocaml_compiler_seed.py
+RUN mkdir /opt/ocaml-compiler-base /opt/ocaml-compiler-seed \
+    && curl -fsSL "https://github.com/ocaml/ocaml/archive/${COMPILER_BASE_REV}.tar.gz" \
+       | tar -xz --strip-components=1 -C /opt/ocaml-compiler-base \
+    && python /usr/local/bin/ocaml_compiler_seed.py inventory \
+       /opt/ocaml-compiler-base /opt/ocaml-compiler-seed/source-inventory.json
+WORKDIR /opt/ocaml-compiler-base
+RUN ./configure --prefix=/opt/ocaml-compiler-install \
+    && make -j2 world.opt \
+    && python /usr/local/bin/ocaml_compiler_seed.py package \
+       /opt/ocaml-compiler-base /opt/ocaml-compiler-seed
+
+FROM vulcanbench/sandbox:ocaml-v1 AS verifier
+COPY --from=compiler-build /opt/ocaml-compiler-seed /opt/ocaml-compiler-seed
+COPY scripts/ocaml_compiler_seed.py /usr/local/bin/ocaml_compiler_seed.py
+ENV VULCANBENCH_COMPILER_SEED=/opt/ocaml-compiler-seed
+WORKDIR /workspace
+
+FROM vulcanbench/agent-codex:ocaml-v1 AS agent
+COPY --from=compiler-build /opt/ocaml-compiler-seed /opt/ocaml-compiler-seed
+COPY scripts/ocaml_compiler_seed.py /usr/local/bin/ocaml_compiler_seed.py
+ENV VULCANBENCH_COMPILER_SEED=/opt/ocaml-compiler-seed
+WORKDIR /workspace

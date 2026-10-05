@@ -1,0 +1,12 @@
+{
+  "status": "reference and public contract reviewed before calibration",
+  "hidden_requirement_review": "All assertions map to the supplied issue; user callback Decode propagation is explicitly specified.",
+  "record_validation": "Scan entry headers, detect duplicates before second length, validate lengths and exhaustion, then decode typed tuple in declaration order.",
+  "exception_isolation": "Private Fault transports parser errors; exported Decode raised by user code is not caught as a parse error. Every propagated exception restores caller cursor.",
+  "slice_arithmetic": "Headers use checked take; child length compared to stop minus current position before addition. Atom view has exact payload extent and independent local cursor.",
+  "stream_arithmetic": "8-byte signed length is checked against zero, OCaml max_int and max_size before subtraction-based available-length comparison.",
+  "callbacks": "Record and Map callbacks occur only after their own payload exhaustion. Independent reentrant decode and successful cursor overwrite are checked.",
+  "native_atom_alias": "Reader probe mutates a bounded subview and observes the same mutation in the original buffer, proving aliasing for that probe.",
+  "unknown_field_heap_probe": {"payload_bytes": 2097152, "observed_ocaml_heap_bytes": 968, "maximum_allowed": 65535},
+  "limitations": ["Heap allocation telemetry does not measure external C allocations; the shared Atom subview probe separately checks aliasing.", "Upstream generated fixtures account for a substantial part of the full checkout code count.", "No OCaml quality/security analyzer or independent difficulty confirmation is claimed."]
+}

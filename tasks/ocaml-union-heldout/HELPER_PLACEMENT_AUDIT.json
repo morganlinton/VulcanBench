@@ -1,0 +1,108 @@
+{
+  "setup": [
+    {
+      "name": "public native preflight",
+      "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+      "exit_code": 0,
+      "duration_s": 3.854
+    }
+  ],
+  "setup_commands": [
+    {
+      "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "verdict": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "typed_dispatch": true,
+      "projection_order": true,
+      "unknown_forwarding": true,
+      "framing_errors": true,
+      "callback_transactions": true,
+      "native_readers": true,
+      "bounded_payloads": true,
+      "schema_precedence": true
+    },
+    "pass_to_pass": {
+      "ordinary_workflow": true,
+      "supplied_interfaces": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 8/8 passing"
+    ]
+  },
+  "commands": [
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "python hidden/contracts.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "supplemental_commands": [],
+  "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+  "sandbox": "local",
+  "network_isolation_enforced": true,
+  "adds_model_attempts": false
+}

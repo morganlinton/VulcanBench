@@ -1,0 +1,121 @@
+{
+  "audited_at": "2026-10-05T17:58:37.750158+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-registry-candidate",
+    "version": "d3ebdb801b30",
+    "n_tasks": 1,
+    "task_ids": [
+      "generative-module-registry"
+    ],
+    "task_hashes": {
+      "generative-module-registry": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d"
+    }
+  },
+  "all_nine_earlier_pool_identities_preserved": true,
+  "code_conditions_and_source_unchanged": true,
+  "run_count": 3,
+  "complete_task_passes": 3,
+  "rows": [
+    {
+      "run_id": "generative-module-registry-6a6c69d9",
+      "attempt": 1,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/key.ml",
+        "lib/registry.ml"
+      ],
+      "patch_sha256": "49ee3a7874bd316dadeccc787b29aaf5e85a6c48b933c689513221c23ee61b17",
+      "summary_sha256": "cdb2d4d0ef0d4effedd0e692dddb9488cc86d2b3395f3d8eb765d5d912953b25",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 223.983,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/tmp/registry-integration-test.exe",
+        "/tmp/registry-integration-test.ml",
+        "/tmp/registry_integration_test.exe",
+        "/tmp/registry_integration_test.ml"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "generative-module-registry-09aa1852",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/key.ml",
+        "lib/registry.ml"
+      ],
+      "patch_sha256": "935cee590132c702982365b218e29f14cbdd3cbfbb738aa3469878ca0085d987",
+      "summary_sha256": "4141b19a4d7159e7884ca72d7ba300adb27d940c0c9adccc819c3500cc59fce9",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 206.619,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/tmp/registry_extra",
+        "/tmp/registry_extra.ml"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "generative-module-registry-504af1df",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "lib/key.ml",
+        "lib/registry.ml"
+      ],
+      "patch_sha256": "872c6e92e36af78b175eb228051060363edc61df3ed7dc4a494d6bb459137761",
+      "summary_sha256": "11d10bb72e02741b42b009e45f6fb19b404522fdeadb904df936de1daad75a82",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 171.097,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/tmp/registry_checks",
+        "/private/tmp/registry_checks.ml"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "limitations": [
+    "Native filesystem telemetry is observational, not isolation.",
+    "Functional grading does not establish OCaml quality or security analyzer coverage.",
+    "Model identity is requested-only."
+  ]
+}

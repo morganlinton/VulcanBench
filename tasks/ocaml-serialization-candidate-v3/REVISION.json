@@ -1,0 +1,13 @@
+{
+  "prior_identity": "040052f00a9c",
+  "original_identity": "055b3d9fbec1",
+  "reason": "Reference Utils.bin_read_stream reused an 8-byte header buffer for shorter payloads; Tagged.reader saw leftovers. Model source review revealed gap; offline probe reproduced it.",
+  "public_issue_unchanged": true,
+  "public_source_unchanged": true,
+  "reference_fix": "Pass exact zero-copy payload subview to reader in Utils.bin_read_stream.",
+  "assertion": "Tiny/empty Atom and short string payloads use standard Utils framed read across buffer reuse boundary.",
+  "old_reference_compiling_control": true,
+  "earlier_passes_preserved": true,
+  "same_task_family": true,
+  "fresh_attempts_required": 3
+}

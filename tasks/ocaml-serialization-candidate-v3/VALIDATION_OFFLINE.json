@@ -1,0 +1,1410 @@
+{
+  "tasks": [
+    {
+      "id": "bin-prot-tagged-transaction",
+      "base": [
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.356
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": false,
+              "wire_compatibility": false,
+              "structured_bounds": false,
+              "callback_transactions": false,
+              "stream_transactions": false,
+              "bounded_atoms": false,
+              "unknown_allocation": false,
+              "schema_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.heterogeneous_migration in file \"hidden/checks.ml\", line 28, characters 64-90\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 189, characters 30-55\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.wire_compatibility in file \"hidden/checks.ml\", line 37, characters 1-10\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 190, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.structured_bounds in file \"hidden/checks.ml\", line 65, characters 1-13\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 191, characters 24-43\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 89, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 192, characters 28-51\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"first frame\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.stream_transactions in file \"hidden/checks.ml\", line 120, characters 1-109\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 193, characters 26-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 142, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.unknown_allocation in file \"hidden/checks.ml\", line 164, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 195, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.schema_precedence in file \"hidden/checks.ml\", line 172, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 196, characters 24-43\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.208
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": false,
+              "wire_compatibility": false,
+              "structured_bounds": false,
+              "callback_transactions": false,
+              "stream_transactions": false,
+              "bounded_atoms": false,
+              "unknown_allocation": false,
+              "schema_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.heterogeneous_migration in file \"hidden/checks.ml\", line 28, characters 64-90\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 189, characters 30-55\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.wire_compatibility in file \"hidden/checks.ml\", line 37, characters 1-10\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 190, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.structured_bounds in file \"hidden/checks.ml\", line 65, characters 1-13\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 191, characters 24-43\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 89, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 192, characters 28-51\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"first frame\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.stream_transactions in file \"hidden/checks.ml\", line 120, characters 1-109\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 193, characters 26-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 142, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.unknown_allocation in file \"hidden/checks.ml\", line 164, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 195, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.schema_precedence in file \"hidden/checks.ml\", line 172, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 196, characters 24-43\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.378
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": false,
+              "wire_compatibility": false,
+              "structured_bounds": false,
+              "callback_transactions": false,
+              "stream_transactions": false,
+              "bounded_atoms": false,
+              "unknown_allocation": false,
+              "schema_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.heterogeneous_migration in file \"hidden/checks.ml\", line 28, characters 64-90\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 189, characters 30-55\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.wire_compatibility in file \"hidden/checks.ml\", line 37, characters 1-10\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 190, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.structured_bounds in file \"hidden/checks.ml\", line 65, characters 1-13\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 191, characters 24-43\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 89, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 192, characters 28-51\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"first frame\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.stream_transactions in file \"hidden/checks.ml\", line 120, characters 1-109\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 193, characters 26-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 142, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.unknown_allocation in file \"hidden/checks.ml\", line 164, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 195, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"decode failed\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.rt in file \"hidden/checks.ml\", line 15, characters 53-60\nCalled from Dune__exe__Checks.schema_precedence in file \"hidden/checks.ml\", line 172, characters 1-9\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 196, characters 24-43\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        }
+      ],
+      "gold": [
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.548
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.261
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.601
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        }
+      ],
+      "controls": [
+        {
+          "patch": "commits-incomplete-header.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.462
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": false,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"incomplete cursor\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.stream_transactions in file \"hidden/checks.ml\", line 127, characters 2-34\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 193, characters 26-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "patch": "constructs-before-record-exhaustion.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.25
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": false,
+              "stream_transactions": true,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"no constructor on trailing\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 105, characters 44-90\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 192, characters 28-51\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "patch": "copies-whole-buffer.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.238
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.75
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": false,
+              "unknown_allocation": false,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"leaf zero copy alias\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 150, characters 1-58\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"unknown heap allocation\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.unknown_allocation in file \"hidden/checks.ml\", line 168, characters 31-81\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 195, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "patch": "old-reference-small-stream.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.241
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": false,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Bin_prot__Tagged.Decode(_)\nRaised at Bin_prot__Tagged.reader.(fun) in file \"src/tagged.ml\", line 128, characters 28-44\nCalled from Bin_prot__Utils.bin_read_stream in file \"src/utils.ml\", line 49, characters 14-38\nCalled from Dune__exe__Checks.wire_compatibility.standard_stream in file \"hidden/checks.ml\", line 49, characters 31-74\nCalled from Dune__exe__Checks.wire_compatibility in file \"hidden/checks.ml\", line 52, characters 1-23\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 190, characters 25-45\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "patch": "omits-exception-rollback.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.226
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.625
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": false,
+              "stream_transactions": false,
+              "bounded_atoms": false,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"exception rollback\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.callback_transactions.(fun) in file \"hidden/checks.ml\", line 94, characters 2-70\nCalled from Stdlib__List.iter in file \"list.ml\", line 112, characters 12-15\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", lines 90-97, characters 1-97\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 192, characters 28-51\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"exception rollback\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.stream_transactions in file \"hidden/checks.ml\", line 138, characters 1-120\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 193, characters 26-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"exception rollback\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 156, characters 1-88\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "patch": "swallows-user-decode.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.411
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.625
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": false,
+              "stream_transactions": false,
+              "bounded_atoms": false,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 5/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"exception identity\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.expect_same in file \"hidden/checks.ml\", line 86, characters 1-75\nCalled from Dune__exe__Checks.callback_transactions.(fun) in file \"hidden/checks.ml\", line 94, characters 2-70\nCalled from Stdlib__List.iter in file \"list.ml\", line 112, characters 12-15\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", lines 90-97, characters 1-97\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 192, characters 28-51\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"exception identity\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.expect_same in file \"hidden/checks.ml\", line 86, characters 1-75\nCalled from Dune__exe__Checks.stream_transactions in file \"hidden/checks.ml\", line 138, characters 1-120\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 193, characters 26-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"exception identity\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.expect_same in file \"hidden/checks.ml\", line 86, characters 1-75\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 161, characters 1-61\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        },
+        {
+          "patch": "unbounded-atom-view.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.288
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": false,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"leaf view length\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 3, characters 32-44\nCalled from Dune__exe__Checks.bounded_atoms.(fun) in file \"hidden/checks.ml\", line 145, characters 3-37\nCalled from Bin_prot__Tagged.value in file \"src/tagged.ml\", line 79, characters 9-100\nCalled from Bin_prot__Tagged.decode in file \"src/tagged.ml\", line 122, characters 11-58\nRe-raised at Bin_prot__Tagged.decode in file \"src/tagged.ml\", line 125, characters 31-40\nCalled from Dune__exe__Checks.bounded_atoms in file \"hidden/checks.ml\", line 149, characters 22-60\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 194, characters 20-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+              "exit_code": 0,
+              "stdout": "unknown_heap_bytes=968\n",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+          "sandbox": "local"
+        }
+      ],
+      "standard_validation": {
+        "task_id": "bin-prot-tagged-transaction",
+        "status": "PASS",
+        "reasons": [
+          "gold=1.0, pre-patch=0.0, deterministic over 3 runs (local)"
+        ]
+      },
+      "valid": true
+    }
+  ],
+  "valid": true,
+  "difficulty": "unmeasured",
+  "sandbox": "local",
+  "network_isolation_enforced": true
+}

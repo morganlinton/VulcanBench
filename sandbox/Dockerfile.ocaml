@@ -1,0 +1,29 @@
+# OCaml pilot image. Dependencies are installed before network-isolated runs.
+# Build: docker build -t vulcanbench/sandbox:ocaml-v1 -f sandbox/Dockerfile.ocaml .
+FROM vulcanbench/sandbox:base
+
+ARG OPAM_REPOSITORY_REV=f294d7f729ac7f68f786bfa2cf2bb0811d9e6e95
+ENV OPAMROOT=/opt/opam \
+    OPAMYES=1 \
+    OPAMJOBS=4 \
+    PATH=/opt/opam/5.2.1/bin:$PATH \
+    OCAMLPATH=/opt/opam/5.2.1/lib \
+    DUNE_CACHE=disabled
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends opam m4 pkg-config libgmp-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir /opt/opam-repository \
+    && curl -fsSL "https://github.com/ocaml/opam-repository/archive/${OPAM_REPOSITORY_REV}.tar.gz" \
+       | tar -xz --strip-components=1 -C /opt/opam-repository \
+    && opam init --bare --disable-sandboxing --no-setup default /opt/opam-repository \
+    && opam switch create 5.2.1 ocaml-base-compiler.5.2.1
+RUN opam install --switch=5.2.1 dune.3.17.2 base.v0.17.3 core.v0.17.1 \
+       async.v0.17.0 incremental.v0.17.0 ppx_jane.v0.17.0 \
+    && opam list --switch=5.2.1 --installed --columns=name,version --short \
+       > /opt/ocaml-packages.lock \
+    && chmod -R a+rX /opt/opam \
+    && ocamlc -version && dune --version
+
+WORKDIR /workspace
+CMD ["sleep", "infinity"]

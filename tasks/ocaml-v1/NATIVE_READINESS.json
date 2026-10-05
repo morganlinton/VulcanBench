@@ -1,0 +1,48 @@
+{
+  "status": "native execution validated for development use",
+  "toolchain_ready": true,
+  "native_compiler_seed_ready": true,
+  "offline_gate_complete": true,
+  "ci_tests_passed": 1092,
+  "suite_identity": {
+    "suite": "ocaml-v1",
+    "version": "c0a1cc221d60",
+    "n_tasks": 8,
+    "task_ids": [
+      "async-bounded-dispatch",
+      "incremental-atomic-graph",
+      "interval-map-transaction",
+      "typed-frame-stream",
+      "window-watermark-allocation",
+      "typed-query-optimizer",
+      "async-generation-cache",
+      "compiler-gadt-field-safety"
+    ],
+    "task_hashes": {
+      "async-bounded-dispatch": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+      "async-generation-cache": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+      "compiler-gadt-field-safety": "0e66b01f1e6719bd88831eee1dfa7cdfc65ff60c2f05094777ecf4f4ae4d79cf",
+      "incremental-atomic-graph": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+      "interval-map-transaction": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+      "typed-frame-stream": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+      "typed-query-optimizer": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+      "window-watermark-allocation": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1"
+    }
+  },
+  "fresh_native_model_attempts": 0,
+  "target_below_80_proven": false,
+  "complete_eight_task_calibration": false,
+  "model_card_html_visual_qa": "unverified; in-app browser blocks local-file previews",
+  "receipt_files": [
+    "NATIVE_ENVIRONMENT.json",
+    "NATIVE_VALIDATION.json",
+    "NATIVE_VALIDATION_OFFLINE.json",
+    "CI_NATIVE_FINAL.json",
+    "NATIVE_RUN_PLAN.txt"
+  ],
+  "notes": [
+    "The provisioning.compiler_seed_ready field in NATIVE_ENVIRONMENT is historical at the end of library provisioning. The separate native compiler seed build and both validation gates subsequently completed.",
+    "Earlier compiler provider refusal remains unresolved and unscored.",
+    "Keep native model cohorts separate from historical Docker cohorts."
+  ]
+}

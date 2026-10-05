@@ -1,0 +1,184 @@
+diff --git a/src/state.ml b/src/state.ml
+index 1dcd37c..2ae5e90 100644
+--- a/src/state.ml
++++ b/src/state.ml
+@@ -53,6 +53,8 @@ end
+ 
+ type t = Types.State.t =
+   { mutable status : status
++  ; mutable driver_active : bool
++  ; mutable recomputation_budget : int option
+   ; bind_lhs_change_should_invalidate_rhs : bool
+   ; (* [stabilization_num] starts at zero, and is incremented at the end of each
+        stabilization. *)
+@@ -251,6 +253,8 @@ let invariant t =
+         = Recompute_heap.max_height_allowed t.recompute_heap);
+       Fields.iter
+         ~status:ignore
++        ~driver_active:ignore
++        ~recomputation_budget:ignore
+         ~bind_lhs_change_should_invalidate_rhs:ignore
+         ~stabilization_num:(check Stabilization_num.invariant)
+         ~current_scope:
+@@ -678,6 +682,11 @@ let rec recompute : type a. a Node.t -> unit =
+   then (
+     t.only_in_debug.currently_running_node <- Some (T node);
+     t.only_in_debug.expert_nodes_created_by_current_node <- []);
++  (match t.recomputation_budget with
++   | None -> ()
++   | Some remaining ->
++     assert (remaining > 0);
++     t.recomputation_budget <- Some (remaining - 1));
+   t.num_nodes_recomputed <- t.num_nodes_recomputed + 1;
+   node.recomputed_at <- t.stabilization_num;
+   match node.kind with
+@@ -1102,12 +1111,17 @@ and maybe_change_value : type a. a Node.t -> a -> unit =
+           | If_then_else i -> node.height > i.test_change.height
+           | Join_main j -> node.height > j.lhs_change.height
+         in
+-        if can_recompute_now
++        let budget_available =
++          match t.recomputation_budget with
++          | None -> true
++          | Some n -> n > 0
++        in
++        if budget_available && can_recompute_now
+         then (
+           t.num_nodes_recomputed_directly_because_one_child
+             <- t.num_nodes_recomputed_directly_because_one_child + 1;
+           recompute parent)
+-        else if parent.height <= Recompute_heap.min_height t.recompute_heap
++        else if budget_available && parent.height <= Recompute_heap.min_height t.recompute_heap
+         then (
+           (* If [parent.height] is [<=] the height of all nodes in the recompute heap
+              (possibly because the recompute heap is empty), then we can recompute
+@@ -1366,57 +1380,73 @@ let raise_during_stabilization t exn =
+   Raised_exn.reraise raised
+ ;;
+ 
++let with_driver t ~budget f =
++  if t.driver_active then invalid_arg "reentrant stabilization driver";
++  t.driver_active <- true;
++  t.recomputation_budget <- budget;
++  Exn.protect
++    ~f:(fun () ->
++      try f () with
++      | exn ->
++        (match t.status with
++         | Stabilize_previously_raised _ -> raise exn
++         | _ -> raise_during_stabilization t exn))
++    ~finally:(fun () ->
++      t.driver_active <- false;
++      t.recomputation_budget <- None)
++;;
++
++let start_or_resume t =
++  match t.status with
++  | Not_stabilizing -> stabilize_start t
++  | Stabilizing -> ()
++  | Running_on_update_handlers | Stabilize_previously_raised _ ->
++    ensure_not_stabilizing t ~name:"stabilize" ~allow_in_update_handler:false
++;;
++
+ let stabilize t =
+-  ensure_not_stabilizing t ~name:"stabilize" ~allow_in_update_handler:false;
+-  try
+-    stabilize_start t;
++  with_driver t ~budget:None (fun () ->
++    start_or_resume t;
+     let r = t.recompute_heap in
+     while Recompute_heap.length r > 0 do
+       recompute_first_node_that_is_necessary r
+     done;
+-    stabilize_end t
+-  with
+-  | exn -> raise_during_stabilization t exn
++    stabilize_end t)
+ ;;
+ 
+ module Step_result = struct
+-  type t =
+-    | Keep_going
+-    | Done
+-  [@@deriving sexp_of]
++  type t = Keep_going | Done [@@deriving sexp_of]
+ end
+ 
+ let do_one_step_of_stabilize t : Step_result.t =
+-  try
++  let open Step_result in
++  with_driver t ~budget:None (fun () ->
+     match t.status with
+-    | Not_stabilizing ->
+-      stabilize_start t;
+-      Keep_going
++    | Not_stabilizing -> stabilize_start t; Keep_going
+     | Stabilizing ->
+-      let r = t.recompute_heap in
+-      if Recompute_heap.length r > 0
+-      then (
+-        recompute_first_node_that_is_necessary r;
+-        Keep_going)
+-      else (
+-        stabilize_end t;
+-        Done)
++      if Recompute_heap.length t.recompute_heap > 0
++      then (recompute_first_node_that_is_necessary t.recompute_heap; Keep_going)
++      else (stabilize_end t; Done)
+     | Running_on_update_handlers | Stabilize_previously_raised _ ->
+       ensure_not_stabilizing t ~name:"step" ~allow_in_update_handler:false;
+-      assert false
+-  with
+-  | exn ->
+-    (match t.status with
+-     | Stabilize_previously_raised _ ->
+-       (* If stabilization has already raised, then [exn] is merely a notification of this
+-          fact, rather than the original exception itself.  We should just propagate [exn]
+-          forward; calling [raise_during_stabilization] would store [exn] as the exception
+-          that initially raised during stabilization. *)
+-       raise exn
+-     | _ -> raise_during_stabilization t exn)
++      assert false)
+ ;;
+ 
+-let stabilize_with_budget _t ~max_recomputations:_ = `More
++let stabilize_with_budget t ~max_recomputations =
++  if max_recomputations <= 0 then invalid_arg "max_recomputations must be positive";
++  with_driver t ~budget:(Some max_recomputations) (fun () ->
++    start_or_resume t;
++    let r = t.recompute_heap in
++    while Recompute_heap.length r > 0
++          && (match t.recomputation_budget with Some n -> n > 0 | None -> assert false)
++    do
++      recompute_first_node_that_is_necessary r
++    done;
++    if Recompute_heap.length r = 0
++       && (match t.recomputation_budget with Some 0 -> false | _ -> true)
++    then (stabilize_end t; `Done)
++    else `More)
++;;
+ 
+ let create_node_in t created_in kind =
+   t.num_nodes_created <- t.num_nodes_created + 1;
+@@ -1916,6 +1946,8 @@ let create (module Config : Config.Incremental_config) ~max_height_allowed =
+   let recompute_heap = Recompute_heap.create ~max_height_allowed in
+   let t =
+     { status = Not_stabilizing
++    ; driver_active = false
++    ; recomputation_budget = None
+     ; bind_lhs_change_should_invalidate_rhs = Config.bind_lhs_change_should_invalidate_rhs
+     ; stabilization_num = Stabilization_num.zero
+     ; current_scope = Scope.top
+diff --git a/src/types.ml b/src/types.ml
+index a14c16d..a9665e7 100644
+--- a/src/types.ml
++++ b/src/types.ml
+@@ -574,6 +574,8 @@ end =
+ and State : sig
+   type t =
+     { mutable status : Status.t
++    ; mutable driver_active : bool
++    ; mutable recomputation_budget : int option
+     ; bind_lhs_change_should_invalidate_rhs : bool
+     ; mutable stabilization_num : Stabilization_num.t
+     ; mutable current_scope : Scope.t

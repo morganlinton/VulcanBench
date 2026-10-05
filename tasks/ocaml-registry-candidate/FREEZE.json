@@ -1,0 +1,166 @@
+{
+  "frozen_at": "2026-10-05T13:38:02.612608+00:00",
+  "user_facing_date": "2026-10-05 America/Los_Angeles",
+  "identity": {
+    "suite": "ocaml-registry-candidate",
+    "version": "d3ebdb801b30",
+    "n_tasks": 1,
+    "task_ids": [
+      "generative-module-registry"
+    ],
+    "task_hashes": {
+      "generative-module-registry": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d"
+    }
+  },
+  "target_attempts_before_freeze": 0,
+  "source_metadata_tests_reference_controls_sha256": {
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/clone-aliases-owner.diff": "626bd52102c5ccd1648d2893506229efec8c316fc7e215d1569634bface72666",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/iter-captures-values.diff": "cd394d0de6ba299311ffd8a4d80c830d931083523a43e1df2fe6b7c9613e5bf5",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/iter-visits-stale.diff": "2e09cb4488c943dce0061fb9d2b6cc791a36b9f14ce7d89a56ebef9e92c84ad7",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/no-equality-proof.diff": "80691daca00e499dbdeb42424effb699f7762ff96f498dd8e505a19509653601",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/replacement-keeps-old.diff": "bb42fceaec052393cc1645d8af606f14d1321a0e7293ac2e848e3cebaf584d91",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/transfer-moves-handle.diff": "77ba94dedabf996cd62027a37d1746ad2953aca9a358261a5047515f7e1365f8",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/transfer-no-closed-check.diff": "bb215b5f4e74b023f7dd591205f7e97869a51115227706096af7630b5c76b009",
+    "tasks/ocaml-registry-candidate/generative-module-registry/controls/update-resurrects.diff": "ec58f42e813d994adc5e8a476b8bbaedd02870b00c67956bdef96d407bf9b4cb",
+    "tasks/ocaml-registry-candidate/generative-module-registry/gold_patch.diff": "5a48c279d27ae15bb6ece8857faab277cb2502a37340b1e8d2632565a9e63f20",
+    "tasks/ocaml-registry-candidate/generative-module-registry/issue.md": "e6d546e9cdd7935169b0eb9f03dcbc9603dd36bcd7a07cbd1453b50e4e65fb1b",
+    "tasks/ocaml-registry-candidate/generative-module-registry/metadata.json": "1432281395fabfd785fe8b65e7df726cf976148acebdf4e6472fd8f77b22aef0",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/LICENSE": "4082b4299b2036dbae3eafc9b942486afd0a697077a238f0e3938e1ab89e0fae",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/README.md": "12859b0b1e5c5c59ff82cf937f4c7b2ac7221394777a409059883c87076c42be",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/dune-project": "99c52792bd3d523825f0a674b52adf6b341fa019fdbb7f1ff8cc560a0beeeab5",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/lib/dune": "79b14b997484841626344b3b947ce2d5314e761264c8b4a24149f3dc05e0aafb",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/lib/key.ml": "2694252505454ff473e97869c10a15f3ef3ab9b462e01a945cc55460dbc97e59",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/lib/key.mli": "b08644504c3de09da9a156e9056aaa4d10e348cd3f32500da6131b9fce030389",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/lib/plugin.ml": "05e2837eaf67dfbff94818be3f578e954ae1c657afc392618dc2b6e1931fd35c",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/lib/registry.ml": "a483e0e0d2022d4526fca331b775e14915286b162f744c5df5c0f2f5d42540c2",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/lib/registry.mli": "0a876eefc8489ae266402d255a267b1cff2de77c1d063196013cc4f753386530",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/public/dune": "a9693e8caf57210b5fb1fadaddca2690b0b1242913f87139fbd237d8cd7faeb8",
+    "tasks/ocaml-registry-candidate/generative-module-registry/repo/public/smoke.ml": "60ceded178bfe4ddaf5336a9df578303110a37005677b6723ed99d8354493c32",
+    "tasks/ocaml-registry-candidate/generative-module-registry/tests/hidden/checks.ml": "3e5f1305587d8d6c9fc3e9a6d18b7fa0abc6322803f0e9be4fd58323c03248ee",
+    "tasks/ocaml-registry-candidate/generative-module-registry/tests/hidden/contracts.py": "b1fa309881f4ed3659cb65443407d9e8d64854cc8c1bc0a3bcab10ebce745f76",
+    "tasks/ocaml-registry-candidate/generative-module-registry/tests/hidden/dune": "42d4bf7e7f04f56beb1c8b9f0f434b22ead298d2f038db4c25abe213385601e1"
+  },
+  "conditions_sha256": "b94388e7378f51d931eb165f922fa58ee0160269cd33d0efd93f2ecb0bbf20d7",
+  "expansion_plan_sha256": "2500c7a4b7d436500b98bedbf1d92d3aee22e2c81274681cba1830488c835c71",
+  "prior_suite_identities": {
+    "ocaml-v1": {
+      "suite": "ocaml-v1",
+      "version": "c0a1cc221d60",
+      "n_tasks": 8,
+      "task_ids": [
+        "async-bounded-dispatch",
+        "incremental-atomic-graph",
+        "interval-map-transaction",
+        "typed-frame-stream",
+        "window-watermark-allocation",
+        "typed-query-optimizer",
+        "async-generation-cache",
+        "compiler-gadt-field-safety"
+      ],
+      "task_hashes": {
+        "async-bounded-dispatch": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+        "async-generation-cache": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+        "compiler-gadt-field-safety": "0e66b01f1e6719bd88831eee1dfa7cdfc65ff60c2f05094777ecf4f4ae4d79cf",
+        "incremental-atomic-graph": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+        "interval-map-transaction": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+        "typed-frame-stream": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+        "typed-query-optimizer": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+        "window-watermark-allocation": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1"
+      }
+    },
+    "ocaml-candidates": {
+      "suite": "ocaml-candidates",
+      "version": "e0a390e323df",
+      "n_tasks": 3,
+      "task_ids": [
+        "async-durable-delivery",
+        "typed-schema-evolution",
+        "base-nested-transactions"
+      ],
+      "task_hashes": {
+        "async-durable-delivery": "e22ae6f5eb7770c3dbe14dd491dfb5ce26cbeab7229c01eb959d622b47003e50",
+        "base-nested-transactions": "8858a71488d0a4eedd3d89d88228cb772b9db2e4198a67b5df8168d57d0a7df0",
+        "typed-schema-evolution": "e9bea8c75172066a91985ebc21c26b83a31b9c96a75d7b34c5cbf3cace51ee14"
+      }
+    },
+    "ocaml-incremental-candidate": {
+      "suite": "ocaml-incremental-candidate",
+      "version": "6b37b41277dd",
+      "n_tasks": 1,
+      "task_ids": [
+        "incremental-budgeted-propagation"
+      ],
+      "task_hashes": {
+        "incremental-budgeted-propagation": "d01b0a5fc2ca6352700e023384a2115e551c914ad5120e315fe81011891909b6"
+      }
+    },
+    "ocaml-atomic-candidate-v2": {
+      "suite": "ocaml-atomic-candidate-v2",
+      "version": "1ce29fa16e4f",
+      "n_tasks": 1,
+      "task_ids": [
+        "incremental-atomic-rewiring"
+      ],
+      "task_hashes": {
+        "incremental-atomic-rewiring": "71b815e9ecf14468465cd38c59fd4f12f60b8b669891b62a2b162bde0c808100"
+      }
+    },
+    "ocaml-serialization-candidate-v3": {
+      "suite": "ocaml-serialization-candidate-v3",
+      "version": "fa86068dce81",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "task_hashes": {
+        "bin-prot-tagged-transaction": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b"
+      }
+    },
+    "ocaml-union-heldout": {
+      "suite": "ocaml-union-heldout",
+      "version": "f9e65a3ac13a",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-open-union"
+      ],
+      "task_hashes": {
+        "bin-prot-open-union": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a"
+      }
+    },
+    "ocaml-atomic-candidate": {
+      "suite": "ocaml-atomic-candidate",
+      "version": "b9b088b09fa9",
+      "n_tasks": 1,
+      "task_ids": [
+        "incremental-atomic-rewiring"
+      ],
+      "task_hashes": {
+        "incremental-atomic-rewiring": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286"
+      }
+    },
+    "ocaml-serialization-candidate": {
+      "suite": "ocaml-serialization-candidate",
+      "version": "055b3d9fbec1",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "task_hashes": {
+        "bin-prot-tagged-transaction": "07aed475cf77c6b0e50b8d49990fe6ad09d963133cfde7060f6f189c8c165f6b"
+      }
+    },
+    "ocaml-serialization-candidate-v2": {
+      "suite": "ocaml-serialization-candidate-v2",
+      "version": "040052f00a9c",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "task_hashes": {
+        "bin-prot-tagged-transaction": "fdf1fa85216660946cef63302de921a8364d8e6a60eaaac2e6f76bdfcc7cdb41"
+      }
+    }
+  },
+  "calibration_started": false,
+  "publication_ready": false
+}

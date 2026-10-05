@@ -1,0 +1,175 @@
+diff --git a/lib/alarm.ml b/lib/alarm.ml
+index c0f537e..45a9b07 100644
+--- a/lib/alarm.ml
++++ b/lib/alarm.ml
+@@ -1,6 +1,25 @@
+-type t = unit
+-type handle = unit
+-let create _source = ()
+-let at _ _ _ = ()
+-let cancel _ = ()
+-let pending _ = 0
++open Async_kernel
++type t = { source:Time_source.t; mutable pending:int }
++type handle = {
++  owner:t;
++  mutable active:bool;
++  mutable event:(unit,unit) Time_source.Event.t option;
++}
++let create source = {source;pending=0}
++let at owner time f =
++  let handle={owner;active=true;event=None} in
++  owner.pending<-owner.pending+1;
++  let event=Time_source.Event.run_at owner.source time (fun () ->
++    if handle.active then begin
++      handle.active<-false;owner.pending<-owner.pending-1;f()
++    end) () in
++  handle.event<-Some event;
++  handle
++let cancel handle =
++  if handle.active then begin
++    handle.active<-false;
++    handle.owner.pending<-handle.owner.pending-1;
++    match handle.event with None -> ()
++    | Some event -> Time_source.Event.abort_if_possible event ()
++  end
++let pending t = t.pending
+diff --git a/lib/cache.ml b/lib/cache.ml
+index 5e79b5a..5258552 100644
+--- a/lib/cache.ml
++++ b/lib/cache.ml
+@@ -1,10 +1,125 @@
+-type 'a t = { mutable closed:bool }
+-let create ~source:_ ~policy:_ ~worker:_ = {closed=false}
+-let get t _ = let request=Request.create () in
+-  Request.resolve request (if t.closed then Request.Closed else Request.Failed "not implemented");
++open Core
++open Async_kernel
++
++type 'a generation = {
++  id:int;
++  key:string;
++  deadline:Time_ns.t;
++  mutable alive:bool;
++  mutable attempt:int;
++  mutable requests:'a Request.t list;
++  mutable deadline_alarm:Alarm.handle option;
++  mutable retry_alarm:Alarm.handle option;
++}
++type 'a t = {
++  source:Time_source.t;
++  policy:Policy.t;
++  worker:string -> attempt:int -> ('a,string) result Deferred.t;
++  alarm:Alarm.t;
++  current:(string,'a generation) Stdlib.Hashtbl.t;
++  values:(string,'a * Time_ns.t) Stdlib.Hashtbl.t;
++  mutable generations:'a generation list;
++  mutable next_id:int;
++  mutable closed:bool;
++}
++let create ~source ~policy ~worker = {
++  source;policy;worker;alarm=Alarm.create source;
++  current=Stdlib.Hashtbl.create 16;values=Stdlib.Hashtbl.create 16;
++  generations=[];next_id=0;closed=false;
++}
++let clock_now t = Time_source.now t.source
++let expired t g = Time_ns.(clock_now t >= g.deadline)
++let is_current t g = match Stdlib.Hashtbl.find_opt t.current g.key with
++  | Some current -> current.id=g.id | None -> false
++let cancel_alarm = function None -> () | Some handle -> Alarm.cancel handle
++let finish t g outcome =
++  if g.alive then begin
++    let current=is_current t g in
++    g.alive<-false;
++    cancel_alarm g.deadline_alarm;cancel_alarm g.retry_alarm;
++    g.deadline_alarm<-None;g.retry_alarm<-None;
++    t.generations<-Stdlib.List.filter (fun item -> item.id<>g.id) t.generations;
++    if current then Stdlib.Hashtbl.remove t.current g.key;
++    (match outcome with
++     | Request.Value value when not t.closed && Time_ns.Span.(t.policy.ttl > zero) ->
++       Stdlib.Hashtbl.replace t.values g.key (value,Time_ns.add (clock_now t) t.policy.ttl)
++     | _ -> ());
++    let requests=g.requests in
++    g.requests<-[];
++    Stdlib.List.iter (fun request ->
++      Request.on_cancel request (fun () -> ());Request.resolve request outcome) requests
++  end
++let attach t g request =
++  g.requests<-request::g.requests;
++  Request.on_cancel request (fun () ->
++    if g.alive && not(Stdlib.List.exists Request.is_pending g.requests)
++    then finish t g Request.Cancelled)
++
++let rec start t g =
++  if g.alive then
++    if expired t g then finish t g Request.Timed_out
++    else begin
++      g.retry_alarm<-None;
++      g.attempt<-g.attempt+1;
++      let attempt=g.attempt in
++      let result=Monitor.try_with ~run:`Now ~rest:(`Call (fun _ -> ()))
++        (fun () -> t.worker g.key ~attempt) in
++      upon result (fun result ->
++        if g.alive then
++          if expired t g then finish t g Request.Timed_out
++          else match result with
++            | Ok(Ok value) -> finish t g (Request.Value value)
++            | Ok(Error text) -> failed t g text
++            | Error _ -> failed t g "worker exception")
++    end
++and failed t g text =
++  if g.attempt>=t.policy.max_attempts then finish t g (Request.Failed text)
++  else
++    let retry_at=Time_ns.add (clock_now t) t.policy.retry_delay in
++    if Time_ns.(retry_at < g.deadline) then
++      g.retry_alarm<-Some(Alarm.at t.alarm retry_at (fun () -> start t g))
++
++let get t key =
++  let request=Request.create () in
++  if t.closed then Request.resolve request Request.Closed
++  else begin
++    (match Stdlib.Hashtbl.find_opt t.current key with
++     | Some g when expired t g -> finish t g Request.Timed_out
++     | _ -> ());
++    match Stdlib.Hashtbl.find_opt t.values key with
++    | Some(value,expiration) when Time_ns.(clock_now t < expiration) ->
++      Request.resolve request (Request.Value value)
++    | _ ->
++      Stdlib.Hashtbl.remove t.values key;
++      (match Stdlib.Hashtbl.find_opt t.current key with
++       | Some g -> attach t g request
++       | None ->
++         let g={id=t.next_id;key;deadline=Time_ns.add (clock_now t) t.policy.timeout;
++           alive=true;attempt=0;requests=[];deadline_alarm=None;retry_alarm=None} in
++         t.next_id<-t.next_id+1;
++         Stdlib.Hashtbl.replace t.current key g;
++         t.generations<-g::t.generations;
++         attach t g request;
++         g.deadline_alarm<-Some(Alarm.at t.alarm g.deadline
++           (fun () -> finish t g Request.Timed_out));
++         start t g)
++  end;
+   request
+-let invalidate _ _ = ()
+-let close t = t.closed<-true
+-let in_flight _ = 0
+-let cached _ = 0
+-let pending_alarms _ = 0
++let invalidate t key =
++  if not t.closed then begin
++    Stdlib.Hashtbl.remove t.values key;
++    Stdlib.Hashtbl.remove t.current key
++  end
++let close t =
++  if not t.closed then begin
++    t.closed<-true;
++    Stdlib.Hashtbl.clear t.current;Stdlib.Hashtbl.clear t.values;
++    Stdlib.List.iter (fun g -> finish t g Request.Closed) t.generations
++  end
++let in_flight t = Stdlib.List.length t.generations
++let cached t =
++  let current_time=clock_now t in
++  Stdlib.Hashtbl.filter_map_inplace (fun _ ((_,expiration) as value) ->
++    if Time_ns.(current_time < expiration) then Some value else None) t.values;
++  Stdlib.Hashtbl.length t.values
++let pending_alarms t = Alarm.pending t.alarm

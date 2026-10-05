@@ -12,6 +12,8 @@ def default_test_command(workspace: Path) -> str:
     the tool loop on failure.
     """
     ws = workspace.resolve()
+    if (ws / "dune-project").exists():
+        return "dune runtest 2>&1 || true"
     if (ws / "Cargo.toml").exists():
         return "cargo test --quiet 2>&1 || true"
     if (ws / "go.mod").exists():

@@ -1,0 +1,40 @@
+{
+  "status": "invalid calibration: no working solver shell tools",
+  "reason": "The external macOS read guard prevented Codex workspace-write sandbox_apply from launching commands. Simple external public-build probes did not establish compatibility with Codex tool launching.",
+  "rows": [
+    {
+      "run_id": "incremental-atomic-rewiring-3db92ead",
+      "recorded_functional": 0.0,
+      "patch_bytes": 0,
+      "model_reported_tool_failure": [
+        "I couldn\u2019t access the repository: both shell attempts failed before execution with `sandbox-exec: sandbox_apply: Operation not permitted`.\n\nNo files were changed, and no tests ran. The execution sandbox needs to be repaired or the task rerun in a working environment so I can implement and verify the fix."
+      ],
+      "eligible_as_capability_measurement": false,
+      "summary_sha256": "3ce54ad5fd28c09bfdfc3d425f91a6ebb1757f3a53b51094c6d850aca7507565"
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-a76d2cae",
+      "recorded_functional": 0.0,
+      "patch_bytes": 0,
+      "model_reported_tool_failure": [
+        "I couldn\u2019t access the repository: both command attempts failed before execution with `sandbox-exec: sandbox_apply: Operation not permitted`.\n\nNo files were changed, and tests could not run. Please restart this task in a working execution environment so I can implement and verify the fix."
+      ],
+      "eligible_as_capability_measurement": false,
+      "summary_sha256": "9ba8f6c78874eaa586b0278882b86eecff911436b0d600e6322de4733d38dc66"
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-c9b4935c",
+      "recorded_functional": 0.0,
+      "patch_bytes": 0,
+      "model_reported_tool_failure": [
+        "Blocked by the execution environment: every shell command fails with `sandbox-exec: sandbox_apply: Operation not permitted`, including a basic `pwd`.\n\nI couldn\u2019t inspect or modify the repository or run tests. No changes or commits were made. Please restore workspace command execution so I can implement and verify the fix."
+      ],
+      "eligible_as_capability_measurement": false,
+      "summary_sha256": "0d683a99e377cf57e804dc11b97ce3173eb87824ebe737b1379fdaf3b21a4d19"
+    }
+  ],
+  "raw_receipts_preserved": true,
+  "counts_as_model_failures": false,
+  "clean_attempts": 0,
+  "model_and_task_changes": false
+}

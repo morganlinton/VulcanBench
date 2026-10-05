@@ -1,0 +1,42 @@
+{
+  "first-match-only.diff": {
+    "must_fail": "projection_order",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "known-tag-collision.diff": {
+    "must_fail": "projection_order",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "copy-unknown.diff": {
+    "must_fail": "unknown_forwarding",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "omit-exception-rollback.diff": {
+    "must_fail": "callback_transactions",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "swallow-public-decode.diff": {
+    "must_fail": "callback_transactions",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "reader-consumes-remainder.diff": {
+    "must_fail": "native_readers",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "omit-trailing-check.diff": {
+    "must_fail": "framing_errors",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "payload-offset-lost.diff": {
+    "must_fail": "bounded_payloads",
+    "must_compile": true,
+    "must_preserve_guards": true
+  }
+}

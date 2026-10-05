@@ -1,0 +1,41 @@
+{
+  "status": "Original frozen gate retained; supplemental reference defect found, prospective v2 admission required",
+  "suite_identity": {
+    "suite": "ocaml-atomic-candidate",
+    "version": "b9b088b09fa9",
+    "n_tasks": 1,
+    "task_ids": [
+      "incremental-atomic-rewiring"
+    ],
+    "task_hashes": {
+      "incremental-atomic-rewiring": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286"
+    }
+  },
+  "offline_validation": "VALIDATION_OFFLINE.json",
+  "control_audit": "CONTROL_AUDIT.json",
+  "behavior_groups": 7,
+  "regression_guards": 2,
+  "clean_pairs": 3,
+  "compiling_controls": 4,
+  "metadata_sha256": "f62d81c71e77c2b56620ad8cf7dd6c407db1353e68be3509a07984b15d62a79c",
+  "toolchain_sha256": "03c8c767fdaf4eba1d6dc653ba8b081c6016f4edb671946838076ed34c5de45c",
+  "source_inventory": "SOURCE_INVENTORY.json",
+  "public_build_targets": [
+    "src/incremental.cmxa",
+    "test/incremental_test.cmxa",
+    "@runtest"
+  ],
+  "all_upstream_inline_debug_tests_executed": false,
+  "independent_confirmation": false,
+  "earlier_pools": {
+    "ocaml-v1": "c0a1cc221d60",
+    "ocaml-candidates": "e0a390e323df",
+    "ocaml-incremental-candidate": "6b37b41277dd"
+  },
+  "ci_receipt": "CI.json",
+  "native_read_guard_receipt": "NATIVE_READ_GUARD.json",
+  "read_guard_preflight_receipt": "READ_GUARD_PREFLIGHT.json",
+  "exposed_initial_cohort": "EXPOSURE_INITIAL_COHORT.json",
+  "supplemental_reference_receipt": "SUPPLEMENTAL_REFERENCE.json",
+  "revised_pool": "ocaml-atomic-candidate-v2"
+}

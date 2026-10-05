@@ -1,0 +1,113 @@
+diff --git a/src/hashtbl.ml b/src/hashtbl.ml
+index a1c16d7..6149d48 100644
+--- a/src/hashtbl.ml
++++ b/src/hashtbl.ml
+@@ -14,6 +14,8 @@ type ('k, 'v) t =
+   ; growth_allowed : bool
+   ; hashable : 'k Hashable.t
+   ; mutable mutation_allowed : bool (* Set during all iteration operations *)
++  ; mutable undo_frames : (unit -> unit) list list
++  ; mutable replaying : bool
+   }
+ 
+ type 'a key = 'a
+@@ -60,6 +62,8 @@ let create ?(growth_allowed = true) ?(size = 0) ~hashable () =
+   ; growth_allowed
+   ; hashable
+   ; mutation_allowed = true
++  ; undo_frames = []
++  ; replaying = false
+   }
+ ;;
+ 
+@@ -97,6 +101,28 @@ let add_worker t ~replace ~key ~data =
+   !added
+ ;;
+ 
++let remove_raw t key =
++  let i = slot t key in
++  let root = t.table.(i) in
++  let removed = ref false in
++  let next = Avltree.remove root ~removed ~compare:(compare_key t) key in
++  t.table.(i) <- next;
++  if !removed then t.length <- t.length - 1
++;;
++
++let remember t key =
++  match t.undo_frames with
++  | [] -> ()
++  | _ when t.replaying -> ()
++  | frame :: rest ->
++    let old = Avltree.findi_and_call t.table.(slot t key) ~compare:(compare_key t) key
++      ~if_found:(fun ~key ~data -> Some (key,data)) ~if_not_found:(fun _ -> None) in
++    let undo () =
++      remove_raw t key;
++      Option.iter old ~f:(fun (key,data) -> ignore (add_worker ~replace:true t ~key ~data : bool)) in
++    t.undo_frames <- (undo :: frame) :: rest
++;;
++
+ let maybe_resize_table t =
+   let len = Array.length t.table in
+   let should_grow = t.length > len in
+@@ -119,12 +145,14 @@ let capacity t = Array.length t.table
+ 
+ let set t ~key ~data =
+   ensure_mutation_allowed t;
++  remember t key;
+   ignore (add_worker ~replace:true t ~key ~data : bool);
+   maybe_resize_table t
+ ;;
+ 
+ let add t ~key ~data =
+   ensure_mutation_allowed t;
++  remember t key;
+   let added = add_worker ~replace:false t ~key ~data in
+   if added
+   then (
+@@ -144,6 +172,7 @@ let add_exn t ~key ~data =
+ 
+ let clear t =
+   ensure_mutation_allowed t;
++  Array.iter t.table ~f:(fun root -> Avltree.iter root ~f:(fun ~key ~data:_ -> remember t key));
+   for i = 0 to Array.length t.table - 1 do
+     t.table.(i) <- Avltree.empty
+   done;
+@@ -232,12 +261,8 @@ let mem t key =
+ 
+ let remove t key =
+   ensure_mutation_allowed t;
+-  let i = slot t key in
+-  let root = t.table.(i) in
+-  let removed = ref false in
+-  let new_root = Avltree.remove root ~removed ~compare:(compare_key t) key in
+-  if not (phys_equal root new_root) then t.table.(i) <- new_root;
+-  if !removed then t.length <- t.length - 1
++  remember t key;
++  remove_raw t key
+ ;;
+ 
+ let length t = t.length
+@@ -699,7 +724,7 @@ let filter_map_inplace t ~f =
+ let mapi_inplace t ~f =
+   ensure_mutation_allowed t;
+   without_mutating t (fun () ->
+-    Array.iter t.table ~f:(Avltree.mapi_inplace ~f) [@nontail]) [@nontail]
++    Array.iter t.table ~f:(Avltree.mapi_inplace ~f:(fun ~key ~data -> remember t key; f ~key ~data)) [@nontail]) [@nontail]
+ ;;
+ 
+ let map_inplace t ~f = mapi_inplace t ~f:(fun ~key:_ ~data -> f data) [@nontail]
+@@ -717,7 +742,13 @@ let equal equal t t' =
+ 
+ let similar = equal
+ 
+-let with_transaction _t ~f = f ()
++let with_transaction t ~f =
++  ensure_mutation_allowed t;
++  let saved = copy t in
++  match f () with
++  | result -> result
++  | exception exn -> t.table <- saved.table; t.length <- saved.length; raise exn
++;;
+ 
+ module Accessors = struct
+   let with_transaction = with_transaction

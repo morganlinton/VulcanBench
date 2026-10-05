@@ -1,0 +1,1 @@
+Original typed plugin registry integration fixture. Implement Key and Registry while preserving supplied interfaces and clients. Native build: dune build --profile release @runtest. No extra packages required.

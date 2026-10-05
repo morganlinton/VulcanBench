@@ -1,0 +1,79 @@
+{
+  "id": "compiler-gadt-field-safety",
+  "category": "bugfix",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "revised public workflow validated; zero fresh revised-task model outcomes",
+  "task_complexity": "system",
+  "repo_scale": "xlarge",
+  "domain": "compiler-gadt-gc-safety",
+  "primary_view": "both",
+  "source": "oss",
+  "created": "2026-09-30",
+  "base_commit": "364874344779d2e410e99eb634bea8e7e2b70159",
+  "upstream": {
+    "url": "https://github.com/ocaml/ocaml",
+    "pr": "https://github.com/ocaml/ocaml/pull/15114",
+    "fix_commit": "a47e535288e8e713a4c2ebf9b93d5a069057a3c4"
+  },
+  "license": "LGPL-2.1 with OCaml linking exception; preserved upstream LICENSE",
+  "decontaminated": false,
+  "decontamination_notes": "Actual OCaml compiler source pinned before PR 15114, merged September 30, 2026: https://github.com/ocaml/ocaml/pull/15114 . The full public upstream fix is the reference. Recent publication does not establish model training cutoffs or exclude public-patch retrieval. Independently authored tests exercise the stated bug and field-classification contract.",
+  "image": "vulcanbench/sandbox:ocaml-compiler-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "native_gc_shared_records",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py native_gc_shared_records"
+      },
+      {
+        "name": "tuple_classification",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py tuple_classification"
+      },
+      {
+        "name": "constructor_classification",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py constructor_classification"
+      },
+      {
+        "name": "extension_classification",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py extension_classification"
+      },
+      {
+        "name": "alias_classification",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py alias_classification"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "native_pattern_regressions",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py native_pattern_regressions"
+      },
+      {
+        "name": "compiler_type_contracts",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py compiler_type_contracts"
+      },
+      {
+        "name": "public_interfaces",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py public_interfaces"
+      },
+      {
+        "name": "public_expect_workflow",
+        "cmd": "make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect && python hidden/checks.py public_expect_workflow"
+      }
+    ]
+  },
+  "test_timeout_s": 1200,
+  "setup_timeout_s": 1200,
+  "setup": [
+    {
+      "name": "public pre-fix compiler build seed",
+      "cmd": "python \"${VULCANBENCH_COMPILER_SEED_HELPER:-/usr/local/bin/ocaml_compiler_seed.py}\" install \"$VULCANBENCH_COMPILER_SEED\" \"$PWD\" && make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  }
+}

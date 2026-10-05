@@ -1,0 +1,96 @@
+diff --git a/lib/stream.ml b/lib/stream.ml
+index 704f9b4..da563da 100644
+--- a/lib/stream.ml
++++ b/lib/stream.ml
+@@ -1,5 +1,36 @@
+-type t = { mutable pending : string }
+-let create () = { pending="" }
+-let feed t chunk = t.pending <- t.pending ^ chunk; []
+-let finish t = if t.pending="" then Ok () else Error "truncated frame"
+-let reset t = t.pending <- ""
++type t = { mutable pending : string; mutable poisoned : bool }
++let create () = { pending = ""; poisoned = false }
++
++let feed t chunk =
++  if t.poisoned then []
++  else
++    let input = t.pending ^ chunk in
++    let size = String.length input in
++    let rec consume offset results =
++      if size - offset < 2 then begin
++        t.pending <- String.sub input offset (size - offset);
++        List.rev results
++      end else
++        let length = (Char.code input.[offset] lsl 8)
++          lor Char.code input.[offset + 1] in
++        if length < 5 || length > 69 then begin
++          t.pending <- "";
++          t.poisoned <- true;
++          List.rev (Error "bad length" :: results)
++        end else if size - offset < 2 + length then begin
++          t.pending <- String.sub input offset (size - offset);
++          List.rev results
++        end else
++          let result = Wire.decode_body (String.sub input (offset + 2) length) in
++          consume (offset + 2 + length) (result :: results)
++    in
++    consume 0 []
++
++let finish t =
++  if t.poisoned then Error "bad length"
++  else if t.pending = "" then Ok ()
++  else Error "truncated frame"
++
++let reset t =
++  t.pending <- "";
++  t.poisoned <- false
+diff --git a/lib/wire.ml b/lib/wire.ml
+index 6036848..b5b4bec 100644
+--- a/lib/wire.ml
++++ b/lib/wire.ml
+@@ -1,5 +1,43 @@
+ type _ kind = Ping : unit kind | Data : string kind
+ type packet = Packet : 'a kind * int64 * 'a -> packet
+ let encode : type a. a kind -> sequence:int64 -> a -> (string,string) result =
+-  fun _ ~sequence:_ _ -> Error "not implemented"
+-let decode_body _ = Error "bad payload"
++  fun kind ~sequence value ->
++    if sequence < 0L || sequence > 4294967295L then Error "bad sequence"
++    else
++      let tag, payload = match kind with
++        | Ping -> 0, ""
++        | Data -> 1, value
++      in
++      if String.length payload > 64 then Error "bad payload"
++      else
++        let length = 5 + String.length payload in
++        let frame = Bytes.create (2 + length) in
++        Bytes.set frame 0 (Char.chr (length lsr 8));
++        Bytes.set frame 1 (Char.chr (length land 255));
++        Bytes.set frame 2 (Char.chr tag);
++        for i = 0 to 3 do
++          let byte = Int64.logand
++            (Int64.shift_right_logical sequence (8 * (3 - i))) 255L in
++          Bytes.set frame (3 + i) (Char.chr (Int64.to_int byte))
++        done;
++        Bytes.blit_string payload 0 frame 7 (String.length payload);
++        Ok (Bytes.to_string frame)
++
++let decode_body body =
++  let length = String.length body in
++  if length < 5 then Error "bad payload"
++  else
++    let sequence = ref 0L in
++    for i = 1 to 4 do
++      sequence := Int64.logor (Int64.shift_left !sequence 8)
++        (Int64.of_int (Char.code body.[i]))
++    done;
++    match Char.code body.[0] with
++    | 0 ->
++        if length = 5 then Ok (Packet (Ping, !sequence, ()))
++        else Error "bad payload"
++    | 1 ->
++        if length <= 69 then
++          Ok (Packet (Data, !sequence, String.sub body 5 (length - 5)))
++        else Error "bad payload"
++    | _ -> Error "unknown tag"

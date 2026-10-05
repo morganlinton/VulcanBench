@@ -1,0 +1,100 @@
+{
+  "suite": "ocaml-candidates",
+  "version": "e0a390e323df",
+  "n_tasks": 3,
+  "task_ids": [
+    "async-durable-delivery",
+    "typed-schema-evolution",
+    "base-nested-transactions"
+  ],
+  "task_hashes": {
+    "async-durable-delivery": "e22ae6f5eb7770c3dbe14dd491dfb5ce26cbeab7229c01eb959d622b47003e50",
+    "base-nested-transactions": "8858a71488d0a4eedd3d89d88228cb772b9db2e4198a67b5df8168d57d0a7df0",
+    "typed-schema-evolution": "e9bea8c75172066a91985ebc21c26b83a31b9c96a75d7b34c5cbf3cace51ee14"
+  },
+  "status": "incomplete calibration",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "minimum_attempts_per_task": 3,
+  "sandbox_selection": "local",
+  "execution_environments": [],
+  "metric": "mean per-task pass@1; all required checks and regression guards must pass",
+  "pass_at_1": null,
+  "observed_below_80_percent": null,
+  "independent_confirmation": false,
+  "views": {
+    "engineering": {
+      "task_ids": [
+        "async-durable-delivery",
+        "base-nested-transactions"
+      ],
+      "distinct_tasks": 2,
+      "passes": 0,
+      "attempts": 0,
+      "coverage_complete": false,
+      "pass_at_1": null
+    },
+    "language-mastery": {
+      "task_ids": [
+        "typed-schema-evolution",
+        "base-nested-transactions"
+      ],
+      "distinct_tasks": 2,
+      "passes": 0,
+      "attempts": 0,
+      "coverage_complete": false,
+      "pass_at_1": null
+    }
+  },
+  "view_overlap": "Tasks tagged both enter each view but are counted once in the suite.",
+  "limitations": [
+    "3 tasks are a development pool, not a stable leaderboard or a confidence claim.",
+    "Configured model identity may be requested-only; inspect each CLI receipt.",
+    "Development selection and retrospective audits are not independent confirmation.",
+    "Public upstream patches may be retrievable; task provenance is not a training-cutoff claim.",
+    "Execution environment is missing or mixed; inspect individual receipts.",
+    "Quality and security analyzers do not currently score OCaml.",
+    "Historical summaries may lack effective run limits; audit their launch receipts before publishing."
+  ],
+  "excluded_runs": [],
+  "unscored_runs": [],
+  "trace_only_invocations": [],
+  "tasks": [
+    {
+      "task_id": "async-durable-delivery",
+      "primary_view": "engineering",
+      "source": "hand-authored",
+      "decontaminated": true,
+      "decontamination_notes": "Original integration fixture; no claim about model training cutoffs.",
+      "upstream": null,
+      "passes": 0,
+      "attempts": 0,
+      "pass_at_1": null,
+      "runs": []
+    },
+    {
+      "task_id": "typed-schema-evolution",
+      "primary_view": "language-mastery",
+      "source": "hand-authored",
+      "decontaminated": true,
+      "decontamination_notes": "Original integration fixture; no claim about model training cutoffs.",
+      "upstream": null,
+      "passes": 0,
+      "attempts": 0,
+      "pass_at_1": null,
+      "runs": []
+    },
+    {
+      "task_id": "base-nested-transactions",
+      "primary_view": "both",
+      "source": "oss-derived-original-extension",
+      "decontaminated": false,
+      "decontamination_notes": "Original extension to public Base; upstream source is public, no training-cutoff claim.",
+      "upstream": null,
+      "passes": 0,
+      "attempts": 0,
+      "pass_at_1": null,
+      "runs": []
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+diff --git a/lib/optimizer.ml b/lib/optimizer.ml
+index 37698bc..0fcc000 100644
+--- a/lib/optimizer.ml
++++ b/lib/optimizer.ml
+@@ -1,5 +1,151 @@
+ type ('src, 'dst) renaming = { apply : 'a. ('src, 'a) Expr.var -> ('dst, 'a) Expr.var }
+ type ('src, 'dst) substitution = { replace : 'a. ('src, 'a) Expr.var -> ('dst, 'a) Expr.t }
+-let rename _ _ = failwith "capture-avoiding rename is not implemented"
+-let substitute _ _ = failwith "capture-avoiding substitution is not implemented"
+-let normalize term = term
++
++open Expr
++
++let lift_renaming : type src dst bound.
++    (src, dst) renaming -> (bound * src, bound * dst) renaming =
++  fun mapping ->
++    let apply : type a. (bound * src, a) var -> (bound * dst, a) var = function
++      | Z -> Z
++      | S v -> S (mapping.apply v)
++    in
++    { apply }
++
++let rec rename : type src dst a.
++    (src, dst) renaming -> (src, a) t -> (dst, a) t =
++  fun mapping term ->
++    match term with
++    | Int n -> Int n
++    | Bool b -> Bool b
++    | Var v -> Var (mapping.apply v)
++    | Read key -> Read key
++    | Add (a, b) -> Add (rename mapping a, rename mapping b)
++    | Mul (a, b) -> Mul (rename mapping a, rename mapping b)
++    | Equal (a, b) -> Equal (rename mapping a, rename mapping b)
++    | If (p, a, b) -> If (rename mapping p, rename mapping a, rename mapping b)
++    | Pair (a, b) -> Pair (rename mapping a, rename mapping b)
++    | Fst x -> Fst (rename mapping x)
++    | Snd x -> Snd (rename mapping x)
++    | Let (value, body) ->
++        Let (rename mapping value, rename (lift_renaming mapping) body)
++
++let lift_substitution : type src dst bound.
++    (src, dst) substitution -> (bound * src, bound * dst) substitution =
++  fun mapping ->
++    let replace : type a. (bound * src, a) var -> (bound * dst, a) t = function
++      | Z -> Var Z
++      | S v -> rename { apply = fun v -> S v } (mapping.replace v)
++    in
++    { replace }
++
++let rec substitute : type src dst a.
++    (src, dst) substitution -> (src, a) t -> (dst, a) t =
++  fun mapping term ->
++    match term with
++    | Int n -> Int n
++    | Bool b -> Bool b
++    | Var v -> mapping.replace v
++    | Read key -> Read key
++    | Add (a, b) -> Add (substitute mapping a, substitute mapping b)
++    | Mul (a, b) -> Mul (substitute mapping a, substitute mapping b)
++    | Equal (a, b) -> Equal (substitute mapping a, substitute mapping b)
++    | If (p, a, b) ->
++        If (substitute mapping p, substitute mapping a, substitute mapping b)
++    | Pair (a, b) -> Pair (substitute mapping a, substitute mapping b)
++    | Fst x -> Fst (substitute mapping x)
++    | Snd x -> Snd (substitute mapping x)
++    | Let (value, body) ->
++        Let (substitute mapping value, substitute (lift_substitution mapping) body)
++
++let rec pure : type env a. (env, a) t -> bool = function
++  | Read _ -> false
++  | Int _ | Bool _ | Var _ -> true
++  | Add (a, b) | Mul (a, b) -> pure a && pure b
++  | Equal (a, b) -> pure a && pure b
++  | Pair (a, b) -> pure a && pure b
++  | If (p, a, b) -> pure p && pure a && pure b
++  | Fst x -> pure x
++  | Snd x -> pure x
++  | Let (value, body) -> pure value && pure body
++
++let rec literal : type env a. (env, a) t -> bool = function
++  | Int _ | Bool _ -> true
++  | Pair (a, b) -> literal a && literal b
++  | _ -> false
++
++let rec at_depth : type env a. int -> (env, a) var -> bool =
++  fun depth v ->
++    match v with Z -> depth = 0 | S v -> depth > 0 && at_depth (depth - 1) v
++
++(* A nested Let adds a slot only in its body, not in its value. *)
++let rec uses : type env a. int -> (env, a) t -> bool =
++  fun depth term ->
++    match term with
++    | Var v -> at_depth depth v
++    | Int _ | Bool _ | Read _ -> false
++    | Add (a, b) | Mul (a, b) -> uses depth a || uses depth b
++    | Equal (a, b) -> uses depth a || uses depth b
++    | Pair (a, b) -> uses depth a || uses depth b
++    | If (p, a, b) -> uses depth p || uses depth a || uses depth b
++    | Fst x -> uses depth x
++    | Snd x -> uses depth x
++    | Let (value, body) -> uses depth value || uses (depth + 1) body
++
++let bind : type env a. (env, a) t -> (a * env, env) substitution =
++  fun value ->
++    let replace : type b. (a * env, b) var -> (env, b) t = function
++      | Z -> value
++      | S v -> Var v
++    in
++    { replace }
++
++let rec normalize : type env a. (env, a) t -> (env, a) t = function
++  | Int n -> Int n
++  | Bool b -> Bool b
++  | Var v -> Var v
++  | Read key -> Read key
++  | Add (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      (match a, b with
++       | Int x, Int y -> Int (x + y)
++       | Int 0, x | x, Int 0 -> x
++       | _ -> Add (a, b))
++  | Mul (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      (match a, b with
++       | Int x, Int y -> Int (x * y)
++       | Int 1, x | x, Int 1 -> x
++       | Int 0, x | x, Int 0 when pure x -> Int 0
++       | _ -> Mul (a, b))
++  | Equal (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      (match a, b with
++       | Int x, Int y -> Bool (x = y)
++       | _ -> Equal (a, b))
++  | If (p, a, b) ->
++      let p = normalize p in
++      let a = normalize a in
++      let b = normalize b in
++      (match p with Bool true -> a | Bool false -> b | _ -> If (p, a, b))
++  | Pair (a, b) ->
++      let a = normalize a in
++      let b = normalize b in
++      Pair (a, b)
++  | Fst x ->
++      let x = normalize x in
++      (match x with Pair (a, b) when pure b -> a | _ -> Fst x)
++  | Snd x ->
++      let x = normalize x in
++      (match x with Pair (a, b) when pure a -> b | _ -> Snd x)
++  | Let (value, body) ->
++      let value = normalize value in
++      let body = normalize body in
++      if literal value then normalize (substitute (bind value) body)
++      else if pure value && not (uses 0 body) then
++        (* Z is absent, so this only removes the slot from outer variables. *)
++        substitute (bind value) body
++      else Let (value, body)
+diff --git a/public/dune b/public/dune
+index f047a10..ef43a63 100644
+--- a/public/dune
++++ b/public/dune
+@@ -1 +1 @@
+-(test (name smoke) (libraries query_engine))
++(tests (names smoke normalization) (libraries query_engine))
+diff --git a/public/normalization.ml b/public/normalization.ml
+new file mode 100644
+index 0000000..4617ed7
+--- /dev/null
++++ b/public/normalization.ml
+@@ -0,0 +1,129 @@
++open Expr
++
++let normal term expected =
++  let normalized = Optimizer.normalize term in
++  assert (Measure.fingerprint normalized = Measure.fingerprint expected);
++  assert (Measure.fingerprint (Optimizer.normalize normalized) =
++          Measure.fingerprint normalized)
++
++exception Read_failure of string
++
++let observe env term fail_at =
++  let trace = ref [] in
++  let read key =
++    trace := key :: !trace;
++    if Some key = fail_at then raise (Read_failure key);
++    String.length key
++  in
++  let result =
++    try Ok (Eval.run ~read env term) with Read_failure key -> Error key
++  in
++  result, List.rev !trace
++
++let equivalent env term =
++  let normalized = Optimizer.normalize term in
++  assert (Measure.fingerprint (Optimizer.normalize normalized) =
++          Measure.fingerprint normalized);
++  List.iter (fun fail_at ->
++    assert (observe env term fail_at = observe env normalized fail_at))
++    [None; Some "a"; Some "b"; Some "c"]
++
++let swap : (int * (bool * unit), bool * (int * unit)) Optimizer.renaming =
++  let apply : type a.
++      (int * (bool * unit), a) var -> (bool * (int * unit), a) var = function
++    | Z -> S Z
++    | S Z -> Z
++    | S (S _) -> .
++  in
++  { apply }
++
++let replacement : (int * unit, int * unit) Optimizer.substitution =
++  let replace : type a. (int * unit, a) var -> (int * unit, a) t = function
++    | Z -> Add (Var Z, Int 1)
++    | S _ -> .
++  in
++  { replace }
++
++let () =
++  let term = Let (Read "a", Pair (Var (S Z), Var (S (S Z)))) in
++  let renamed = Optimizer.rename swap term in
++  assert (Measure.fingerprint renamed =
++          Measure.fingerprint
++            (Let (Read "a", Pair (Var (S (S Z)), Var (S Z)))));
++  assert (observe (7, (true, ())) term None =
++          observe (true, (7, ())) renamed None);
++  let body = Let (Var Z, Let (Int 3, Add (Var (S (S Z)), Var (S Z)))) in
++  let substituted = Optimizer.substitute replacement body in
++  assert (Measure.fingerprint substituted =
++          Measure.fingerprint
++            (Let (Add (Var Z, Int 1),
++              Let (Int 3, Add (Add (Var (S (S Z)), Int 1), Var (S Z))))));
++  normal (Add (Int 0, Mul (Int 1, Int 4))) (Int 4);
++  normal (Mul (Var Z, Int 0)) (Int 0);
++  normal (Mul (Int 0, Read "a")) (Mul (Int 0, Read "a"));
++  normal (If (Equal (Int 2, Int 2), Int 5, Read "b")) (Int 5);
++  normal (Fst (Pair (Int 4, Read "a"))) (Fst (Pair (Int 4, Read "a")));
++  normal (Snd (Pair (Read "a", Bool true)))
++    (Snd (Pair (Read "a", Bool true)));
++  normal (Fst (Pair (Read "a", Bool true))) (Read "a");
++  normal (Snd (Pair (Int 4, Read "a"))) (Read "a");
++  normal (Let (Pair (Int 4, Pair (Bool true, Int 2)),
++               If (Fst (Snd (Var Z)), Add (Fst (Var Z), Snd (Snd (Var Z))), Int 0)))
++    (Int 6);
++  normal (Let (Int 4, Let (Read "a", Add (Var (S Z), Var Z))))
++    (Let (Read "a", Add (Int 4, Var Z)));
++  normal (Let (Read "a", Add (Var Z, Int 0))) (Let (Read "a", Var Z));
++  normal (Let (Read "a", Int 4)) (Let (Read "a", Int 4));
++  normal (Let (Add (Var Z, Int 1), Var Z))
++    (Let (Add (Var Z, Int 1), Var Z));
++  normal (Let (Add (Var Z, Int 1),
++               Let (Read "a", Add (Var Z, Var (S (S Z))))))
++    (Let (Read "a", Add (Var Z, Var (S Z))));
++  normal (Let (Add (Var Z, Int 1),
++               Let (Read "a", Add (Var (S Z), Var Z))))
++    (Let (Add (Var Z, Int 1), Let (Read "a", Add (Var (S Z), Var Z))));
++  normal (Let (Add (Var Z, Int 1), Let (Var Z, Int 9))) (Int 9);
++  equivalent () (Pair (Fst (Pair (Read "a", Read "b")), Read "c"));
++  equivalent () (Let (Read "a", If (Bool true, Mul (Int 0, Read "b"), Read "c")))
++
++(* Deterministic trees include open variables, nested binders, predicates,
++   mixed-type pairs, and effectful branches. *)
++let random = Random.State.make [| 2026; 10; 1 |]
++let choose n = Random.State.int random n
++
++let rec integer : type env. (env, int) var list -> int -> (env, int) t =
++  fun vars depth ->
++    if depth = 0 then
++      match choose 3, vars with
++      | 0, v :: _ -> Var v
++      | 1, _ -> Read (List.nth ["a"; "b"; "c"] (choose 3))
++      | _ -> Int (choose 5 - 2)
++    else
++      let child () = integer vars (depth - 1) in
++      match choose 9 with
++      | 0 -> Add (child (), child ())
++      | 1 -> Mul (child (), child ())
++      | 2 -> If (boolean vars (depth - 1), child (), child ())
++      | 3 -> Let (child (), integer (Z :: List.map (fun v -> S v) vars) (depth - 1))
++      | 4 -> Fst (Pair (child (), boolean vars (depth - 1)))
++      | 5 -> Snd (Pair (boolean vars (depth - 1), child ()))
++      | 6 -> Let (boolean vars (depth - 1),
++                  If (Var Z, integer (List.map (fun v -> S v) vars) (depth - 1),
++                      Int 0))
++      | _ -> integer vars 0
++and boolean : type env. (env, int) var list -> int -> (env, bool) t =
++  fun vars depth ->
++    if depth = 0 then Bool (choose 2 = 0)
++    else match choose 4 with
++      | 0 -> Equal (integer vars (depth - 1), integer vars (depth - 1))
++      | 1 -> If (boolean vars (depth - 1), boolean vars (depth - 1),
++                 boolean vars (depth - 1))
++      | 2 -> Let (integer vars (depth - 1),
++                  boolean (Z :: List.map (fun v -> S v) vars) (depth - 1))
++      | _ -> Bool (choose 2 = 0)
++
++let () =
++  for _ = 1 to 1000 do
++    equivalent (7, (-3, ())) (integer [Z; S Z] 5);
++    equivalent (7, (-3, ())) (boolean [Z; S Z] 5)
++  done

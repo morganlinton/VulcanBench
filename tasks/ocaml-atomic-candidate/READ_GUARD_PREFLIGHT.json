@@ -1,0 +1,17 @@
+{
+  "public_build_command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/Users/vulcanbench/.local/share/vulcanbench/ocaml-atomic-native/read-guard.sb",
+    "/bin/sh",
+    "-c",
+    "dune build --profile release src/incremental.cmxa test/incremental_test.cmxa @runtest && python --version"
+  ],
+  "exit_code": 0,
+  "stdout": "Python 3.12.14\n",
+  "stderr": "",
+  "profile_sha256": "ed43506bee9ed4d6a145c90f67f6ae92b83f5ac26c8a592716bab299181e062b",
+  "child_process_read_denied": true,
+  "symlink_read_denied": true,
+  "symlink_probe_stderr": "cat: protected-checks: Operation not permitted\n"
+}

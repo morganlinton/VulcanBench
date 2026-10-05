@@ -1,0 +1,390 @@
+diff --git a/.depend b/.depend
+index 2debc6f08e63..49b98f203830 100644
+--- a/.depend
++++ b/.depend
+@@ -4635,6 +4635,7 @@ lambda/matching.cmo : \
+     typing/env.cmi \
+     lambda/debuginfo.cmi \
+     typing/data_types.cmi \
++    typing/ctype.cmi \
+     utils/clflags.cmi \
+     parsing/asttypes.cmi \
+     lambda/matching.cmi
+@@ -4659,6 +4660,7 @@ lambda/matching.cmx : \
+     typing/env.cmx \
+     lambda/debuginfo.cmx \
+     typing/data_types.cmx \
++    typing/ctype.cmx \
+     utils/clflags.cmx \
+     parsing/asttypes.cmx \
+     lambda/matching.cmi
+diff --git a/Changes b/Changes
+index c4cfb1c6fe4f..04b767eb0d97 100644
+--- a/Changes
++++ b/Changes
+@@ -764,6 +764,12 @@ Working version
+   are valid.
+   (Xavier Leroy, review by Nicolás Ojeda Bär and Edwin Török)
+ 
++- #15114: Fix the compilation of pattern matching on records whose field types
++  mention a locally abstract type: a field could be read as an immediate in
++  all the rows of the match because of a GADT equation that only holds in one
++  of them. In native code, the value was then not registered as a GC root.
++  (Jérôme Vouillon, review by Florian Angeletti)
++
+ - #15115, OSEC-2026-23: Fix multiple issues in demarshaling
+   (`Marshal.from_{channel,string,bytes}`)
+   (Xavier Leroy, review by Nicolás Ojeda Bär)
+diff --git a/lambda/matching.ml b/lambda/matching.ml
+index 6079b71254c4..11d19c4f69d9 100644
+--- a/lambda/matching.ml
++++ b/lambda/matching.ml
+@@ -2000,6 +2000,16 @@ let drop_expr_arg _head _arg rem = rem
+    new  ``pattern_matching'' records.
+ *)
+ 
++(* The typing environment of a pattern can contain GADT equations
++   introduced by the pattern itself or by other patterns of the same
++   row. These equations do not necessarily hold for the other rows of the
++   matrix, which share the same field accesses (or even for the current
++   row, when the fields are read before the corresponding constructor has
++   been tested). Hence, we remove all the local equations from the
++   environment before using it to determine whether a field is an
++   immediate. *)
++let field_env head = Env.remove_local_equations head.pat_env
++
+ (* Matching against a constant *)
+ 
+ let get_key_constant caller = function
+@@ -2037,18 +2047,20 @@ let get_expr_args_constr ~scopes head { arg; mut; _ } rem =
+     | _ -> fatal_error "Matching.get_expr_args_constr"
+   in
+   let loc = head_loc ~scopes head in
+-  let make_field_accesses binding_kind first_pos last_pos argl =
+-    let rec make_args pos =
+-      if pos > last_pos then
+-        argl
+-      else
+-        {
+-          arg = Lprim (Pfield (pos, Pointer, Immutable), [ arg ], loc);
+-          mut = compose_mut mut Immutable;
+-          binding_kind;
+-        } :: make_args (pos + 1)
++  let make_field_accesses binding_kind first_pos argl =
++    let env = field_env head in
++    let rec make_args pos arg_types =
++      match arg_types with
++      | [] -> argl
++      | ty :: arg_types ->
++          let ptr = Typeopt.maybe_pointer_type env ty in
++          {
++            arg = Lprim (Pfield (pos, ptr, Immutable), [ arg ], loc);
++            mut = compose_mut mut Immutable;
++            binding_kind;
++          } :: make_args (pos + 1) arg_types
+     in
+-    make_args first_pos
++    make_args first_pos cstr.cstr_args
+   in
+   if cstr.cstr_inlined <> None then
+     { arg; binding_kind = Alias; mut } :: rem
+@@ -2056,9 +2068,9 @@ let get_expr_args_constr ~scopes head { arg; mut; _ } rem =
+     match cstr.cstr_tag with
+     | Cstr_constant _
+     | Cstr_block _ ->
+-        make_field_accesses Alias 0 (cstr.cstr_arity - 1) rem
++        make_field_accesses Alias 0 rem
+     | Cstr_unboxed -> { arg; binding_kind = Alias; mut } :: rem
+-    | Cstr_extension _ -> make_field_accesses Alias 1 cstr.cstr_arity rem
++    | Cstr_extension _ -> make_field_accesses Alias 1 rem
+ 
+ let divide_constructor ~scopes ctx pm =
+   divide
+@@ -2283,17 +2295,29 @@ let get_pat_args_tuple arity p rem =
+ let get_expr_args_tuple ~scopes head { arg; mut; _ } rem =
+   let loc = head_loc ~scopes head in
+   let arity = Patterns.Head.arity head in
+-  let rec make_args pos =
+-    if pos >= arity then
+-      rem
+-    else
+-      {
+-        arg = Lprim (Pfield (pos, Pointer, Immutable), [ arg ], loc);
+-        binding_kind = Alias;
+-        mut = compose_mut mut Immutable;
+-      } :: make_args (pos + 1)
++  let field_kinds =
++    let env = field_env head in
++    match Types.get_desc (Ctype.expand_head env head.pat_type) with
++    | Ttuple l ->
++        assert (List.length l = arity);
++        List.map (fun (_, ty) -> Typeopt.maybe_pointer_type env ty) l
++    | _ ->
++        (* The type of the pattern can be a tuple type only thanks to a
++           GADT equation that we have removed from the environment, as in
++           [((x, y) : a)] when [a = int * string]. *)
++        List.init arity (fun _ -> Pointer)
+   in
+-  make_args 0
++  let rec make_args pos field_kinds =
++    match field_kinds with
++    | [] -> rem
++    | ptr :: field_kinds ->
++        {
++          arg = Lprim (Pfield (pos, ptr, Immutable), [ arg ], loc);
++          binding_kind = Alias;
++          mut = compose_mut mut Immutable;
++        } :: make_args (pos + 1) field_kinds
++  in
++  make_args 0 field_kinds
+ 
+ let divide_tuple ~scopes head ctx pm =
+   let arity = Patterns.Head.arity head in
+@@ -2326,12 +2350,13 @@ let get_expr_args_record ~scopes head { arg; mut; _ } rem =
+     | _ ->
+         assert false
+   in
++  let env = field_env head in
+   let rec make_args pos =
+     if pos >= Array.length all_labels then
+       rem
+     else
+       let lbl = all_labels.(pos) in
+-      let ptr = Typeopt.maybe_pointer_type head.pat_env lbl.lbl_arg in
++      let ptr = Typeopt.maybe_pointer_type env lbl.lbl_arg in
+       let access =
+         match lbl.lbl_repres with
+         | Record_regular
+diff --git a/testsuite/tests/basic/gadt_immediate_fields.ml b/testsuite/tests/basic/gadt_immediate_fields.ml
+new file mode 100644
+index 000000000000..5d80f8861ee2
+--- /dev/null
++++ b/testsuite/tests/basic/gadt_immediate_fields.ml
+@@ -0,0 +1,64 @@
++(* TEST *)
++
++(* The pattern-matching compiler must not rely on the GADT equations
++   introduced by one row to decide that a field read shared by all the
++   rows is an immediate. Otherwise, in native code, the field is not
++   registered as a GC root, and is not updated when the minor collection
++   below moves the string to the major heap. *)
++
++type _ t = Int : int t | Str : string t
++
++(* Another reference to the string, which is updated by the minor
++   collection *)
++let keep = ref ""
++
++let fresh () =
++  let s = String.init 5 (fun i -> "hello".[i]) in
++  keep := s;
++  s
++
++(* Components of a tuple *)
++let[@inline never] tuple (type a) (p : a * a t) =
++  match p with
++  | (n, Int) -> n = 42
++  | (s, Str) -> Gc.minor (); s == !keep
++
++(* Same, with the rows in the reverse order (depending on the kind of
++   pattern, the environment of either the first or the last row is used) *)
++let[@inline never] tuple_rev (type a) (p : a * a t) =
++  match p with
++  | (s, Str) -> Gc.minor (); s == !keep
++  | (n, Int) -> n = 42
++
++(* Arguments of a constructor whose type mentions a locally abstract type *)
++let[@inline never] constructor (type a) (x : a) (w : a t) =
++  let module M = struct type u = C of a * a t end in
++  match Sys.opaque_identity (M.C (x, w)) with
++  | C (n, Int) -> n = 42
++  | C (s, Str) -> Gc.minor (); s == !keep
++
++let[@inline never] constructor_rev (type a) (x : a) (w : a t) =
++  let module M = struct type u = C of a * a t end in
++  match Sys.opaque_identity (M.C (x, w)) with
++  | C (s, Str) -> Gc.minor (); s == !keep
++  | C (n, Int) -> n = 42
++
++(* Fields of a record whose type mentions a locally abstract type *)
++let[@inline never] record (type a) (x : a) (w : a t) =
++  let module M = struct type u = { v : a; w : a t } end in
++  match Sys.opaque_identity { M.v = x; w } with
++  | { w = Int; v = n } -> n = 42
++  | { w = Str; v = s } -> Gc.minor (); s == !keep
++
++let () =
++  assert (tuple (Sys.opaque_identity (42, Int)));
++  assert (tuple (Sys.opaque_identity (fresh (), Str)));
++  assert (tuple_rev (Sys.opaque_identity (42, Int)));
++  assert (tuple_rev (Sys.opaque_identity (fresh (), Str)));
++  assert (constructor 42 Int);
++  assert (constructor (fresh ()) Str);
++  assert (constructor_rev 42 Int);
++  assert (constructor_rev (fresh ()) Str);
++  assert (record 42 Int);
++  assert (record (fresh ()) Str);
++  print_endline "OK"
+diff --git a/testsuite/tests/basic/gadt_immediate_fields.reference b/testsuite/tests/basic/gadt_immediate_fields.reference
+new file mode 100644
+index 000000000000..d86bac9de59a
+--- /dev/null
++++ b/testsuite/tests/basic/gadt_immediate_fields.reference
+@@ -0,0 +1 @@
++OK
+diff --git a/testsuite/tests/basic/patmatch_split_no_or.ml b/testsuite/tests/basic/patmatch_split_no_or.ml
+index 66f824d30e61..87d0cc70b273 100644
+--- a/testsuite/tests/basic/patmatch_split_no_or.ml
++++ b/testsuite/tests/basic/patmatch_split_no_or.ml
+@@ -18,8 +18,8 @@ let last_is_anys = function
+   (last_is_anys/0 =
+      (function param/0 : int
+        (catch
+-         (if (field_imm 0 param/0) (if (field_imm 1 param/0) (exit 2) 1)
+-           (if (field_imm 1 param/0) (exit 2) 2))
++         (if (field_int 0 param/0) (if (field_int 1 param/0) (exit 2) 1)
++           (if (field_int 1 param/0) (exit 2) 2))
+         with (2) 3)))
+   (apply (field_mut 1 (global Toploop!)) "last_is_anys" last_is_anys/0))
+ val last_is_anys : bool * bool -> int = <fun>
+@@ -35,8 +35,8 @@ let last_is_vars = function
+   (last_is_vars/0 =
+      (function param/1 : int
+        (catch
+-         (if (field_imm 0 param/1) (if (field_imm 1 param/1) (exit 5) 1)
+-           (if (field_imm 1 param/1) (exit 5) 2))
++         (if (field_int 0 param/1) (if (field_int 1 param/1) (exit 5) 1)
++           (if (field_int 1 param/1) (exit 5) 2))
+         with (5) 3)))
+   (apply (field_mut 1 (global Toploop!)) "last_is_vars" last_is_vars/0))
+ val last_is_vars : bool * bool -> int = <fun>
+@@ -78,13 +78,13 @@ let f = function
+      (function param/2 : int
+        (let (*match*/0 =a (field_imm 0 param/2))
+          (catch
+-           (if (== *match*/0 A/0) (if (field_imm 1 param/2) 1 (exit 11))
++           (if (== *match*/0 A/0) (if (field_int 1 param/2) 1 (exit 11))
+              (exit 11))
+           with (11)
+-           (if (field_imm 1 param/2)
++           (if (field_int 1 param/2)
+              (if (== (field_imm 0 *match*/0) B/0) 2
+                (if (== (field_imm 0 *match*/0) C/0) 3 4))
+-             (if (field_imm 2 param/2) 12 11))))))
++             (if (field_int 2 param/2) 12 11))))))
+   (apply (field_mut 1 (global Toploop!)) "f" f/0))
+ val f : t * bool * bool -> int = <fun>
+ |}]
+diff --git a/testsuite/tests/letrec-compilation/renamings.ml b/testsuite/tests/letrec-compilation/renamings.ml
+index 3d009ec4584e..346a4532339f 100644
+--- a/testsuite/tests/letrec-compilation/renamings.ml
++++ b/testsuite/tests/letrec-compilation/renamings.ml
+@@ -24,7 +24,7 @@ type expr = Lit of int | Many of expr list
+     (depth/0
+        (function param/0 : int
+          (switch* param/0
+-          case tag 0: (let (*match*/0 =a (field_imm 0 param/0)) 0)
++          case tag 0: (let (*match*/0 =a (field_int 0 param/0)) 0)
+           case tag 1:
+            (let (l/0 =a (field_imm 0 param/0))
+              (apply (field_imm 29 (global Stdlib__List!))
+diff --git a/testsuite/tests/match-side-effects/partiality.ml b/testsuite/tests/match-side-effects/partiality.ml
+index abf25cb26d1b..87b46a470579 100644
+--- a/testsuite/tests/match-side-effects/partiality.ml
++++ b/testsuite/tests/match-side-effects/partiality.ml
+@@ -185,7 +185,7 @@ type _ t = Int : int -> int t | Bool : bool -> bool t
+ (let
+   (test/0 =
+      (function param/0 : int
+-       (if param/0 (field_imm 0 (field_imm 0 param/0)) 0)))
++       (if param/0 (field_int 0 (field_imm 0 param/0)) 0)))
+   (apply (field_mut 1 (global Toploop!)) "test" test/0))
+ val test : int t option -> int = <fun>
+ |}]
+@@ -207,7 +207,7 @@ type _ t = Int : int -> int t | Bool : bool -> bool t
+   (test/1 =
+      (function param/1 : int
+        (let (*match*/8 =o (field_mut 0 param/1))
+-         (if *match*/8 (field_imm 0 (field_imm 0 *match*/8)) 0))))
++         (if *match*/8 (field_int 0 (field_imm 0 *match*/8)) 0))))
+   (apply (field_mut 1 (global Toploop!)) "test" test/1))
+ val test : int t option ref -> int = <fun>
+ |}]
+@@ -238,8 +238,8 @@ type _ t = Int : int -> int t | Bool : bool -> bool t
+            (let
+              (*match*/10 =a (field_imm 0 *match*/9)
+               *match*/11 =o (field_mut 0 (field_imm 0 *match*/10)))
+-             (if *match*/11 (field_imm 0 (field_imm 1 *match*/10))
+-               (~ (field_imm 0 (field_imm 1 *match*/10)))))
++             (if *match*/11 (field_int 0 (field_imm 1 *match*/10))
++               (~ (field_int 0 (field_imm 1 *match*/10)))))
+            3))))
+   (apply (field_mut 1 (global Toploop!)) "test" test/2))
+ val test : 'a -> int = <fun>
+@@ -325,8 +325,8 @@ type _ t = Bool : bool t | Int : int t | Char : char t
+   (test/3 =
+      (function param/2 : int
+        (catch
+-         (if (>= (field_imm 0 param/2) 2) (exit 24)
+-           (if (>= (field_imm 1 param/2) 2) (exit 24) 0))
++         (if (>= (field_int 0 param/2) 2) (exit 24)
++           (if (>= (field_int 1 param/2) 2) (exit 24) 0))
+         with (24) 0)))
+   (apply (field_mut 1 (global Toploop!)) "test" test/3))
+ val test : 'a t * 'a t -> unit = <fun>
+@@ -353,7 +353,7 @@ type t = A | B | C of nothing
+   (f/3 =
+      (function param/3 : int
+        (catch
+-         (if (field_imm 0 param/3)
++         (if (field_int 0 param/3)
+            (switch* (field_imm 1 param/3)
+             case int 0: 3
+             case int 1: (exit 27))
+@@ -409,7 +409,7 @@ external compare_string : string -> string -> int = "%compare"
+          (switch* t1/0
+           case tag 0:
+            (switch t2/0
+-            case tag 0: (compare_ints (field_imm 0 t1/0) (field_imm 0 t2/0))
++            case tag 0: (compare_ints (field_int 0 t1/0) (field_int 0 t2/0))
+             default: -1)
+           case tag 1:
+            (catch
+diff --git a/testsuite/tests/match-side-effects/test_contexts_code.ml b/testsuite/tests/match-side-effects/test_contexts_code.ml
+index efd7f265b507..544cb1cf00d2 100644
+--- a/testsuite/tests/match-side-effects/test_contexts_code.ml
++++ b/testsuite/tests/match-side-effects/test_contexts_code.ml
+@@ -125,7 +125,7 @@ let example_3 () =
+   (example_3/0 =
+      (function param/2[int]
+        (let (input/2 =mut [0: 1 [0: 1]] *match*/4 =o *input/2)
+-         (if (field_imm 0 *match*/4)
++         (if (field_int 0 *match*/4)
+            (switch* (field_imm 1 *match*/4)
+             case tag 0:
+              (if (seq (assign input/2 [0: 1 [1: 3]]) 0) [1: 3]
+diff --git a/typing/env.ml b/typing/env.ml
+index 7de052079679..5b48850bab09 100644
+--- a/typing/env.ml
++++ b/typing/env.ml
+@@ -2384,6 +2384,8 @@ type local_equations = Types.type_declaration Path.Map.t
+ let freeze_local_equations env = env.local_constraints
+ let restrict_local_equations local_constraints env =
+   { env with local_constraints }
++let remove_local_equations env =
++  { env with local_constraints = Path.Map.empty }
+ 
+ (* Non-lazy version of scrape_alias *)
+ let scrape_alias t mty =
+diff --git a/typing/env.mli b/typing/env.mli
+index d5ae2ea97fbd..b6e4f439a154 100644
+--- a/typing/env.mli
++++ b/typing/env.mli
+@@ -342,6 +342,7 @@ val add_local_constraint: Path.t -> type_declaration -> t -> t
+ type local_equations
+ val freeze_local_equations: t -> local_equations
+ val restrict_local_equations: local_equations -> t -> t
++val remove_local_equations: t -> t
+ 
+ (* Insertion of persistent signatures *)
+ 

@@ -1,0 +1,137 @@
+{
+  "id": "ocaml-expansion-plan-v1",
+  "date": "2026-10-05",
+  "timezone": "America/Los_Angeles",
+  "scope": "Prospective blueprint and existing identities, not future unbuilt task code or a runnable scoring manifest",
+  "known_outcomes_available": "All development results through clean union 3/3 and tagged v3 2/3; selection is development-informed",
+  "files_sha256": {
+    "docs/ocaml-expansion-v1/PLAN.md": "04ef0ed51c1870fa71d06c9fb27349c9de677a62ba8108eae6c286443b356a8d",
+    "docs/ocaml-expansion-v1/plan.json": "691ddebf96f2d986605b96caa45df1dc99dbdeb5783c47b811a23f153556b961",
+    "docs/ocaml-expansion-v1/INVENTORY.json": "e0af58574eb0773f837a6e3a82e3ab545d27fdd2db1a545360c6e0e0807c83a0",
+    "docs/ocaml-expansion-v1/VALIDATION.json": "c160fd5ebb996bd4b5b184dd6bc81e683fab8103bb92c0dfc6c7b86b5cb33313"
+  },
+  "existing_suite_identities": {
+    "ocaml-v1": {
+      "suite": "ocaml-v1",
+      "version": "c0a1cc221d60",
+      "n_tasks": 8,
+      "task_ids": [
+        "async-bounded-dispatch",
+        "incremental-atomic-graph",
+        "interval-map-transaction",
+        "typed-frame-stream",
+        "window-watermark-allocation",
+        "typed-query-optimizer",
+        "async-generation-cache",
+        "compiler-gadt-field-safety"
+      ],
+      "task_hashes": {
+        "async-bounded-dispatch": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+        "async-generation-cache": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+        "compiler-gadt-field-safety": "0e66b01f1e6719bd88831eee1dfa7cdfc65ff60c2f05094777ecf4f4ae4d79cf",
+        "incremental-atomic-graph": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+        "interval-map-transaction": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+        "typed-frame-stream": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+        "typed-query-optimizer": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+        "window-watermark-allocation": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1"
+      }
+    },
+    "ocaml-candidates": {
+      "suite": "ocaml-candidates",
+      "version": "e0a390e323df",
+      "n_tasks": 3,
+      "task_ids": [
+        "async-durable-delivery",
+        "typed-schema-evolution",
+        "base-nested-transactions"
+      ],
+      "task_hashes": {
+        "async-durable-delivery": "e22ae6f5eb7770c3dbe14dd491dfb5ce26cbeab7229c01eb959d622b47003e50",
+        "base-nested-transactions": "8858a71488d0a4eedd3d89d88228cb772b9db2e4198a67b5df8168d57d0a7df0",
+        "typed-schema-evolution": "e9bea8c75172066a91985ebc21c26b83a31b9c96a75d7b34c5cbf3cace51ee14"
+      }
+    },
+    "ocaml-incremental-candidate": {
+      "suite": "ocaml-incremental-candidate",
+      "version": "6b37b41277dd",
+      "n_tasks": 1,
+      "task_ids": [
+        "incremental-budgeted-propagation"
+      ],
+      "task_hashes": {
+        "incremental-budgeted-propagation": "d01b0a5fc2ca6352700e023384a2115e551c914ad5120e315fe81011891909b6"
+      }
+    },
+    "ocaml-atomic-candidate-v2": {
+      "suite": "ocaml-atomic-candidate-v2",
+      "version": "1ce29fa16e4f",
+      "n_tasks": 1,
+      "task_ids": [
+        "incremental-atomic-rewiring"
+      ],
+      "task_hashes": {
+        "incremental-atomic-rewiring": "71b815e9ecf14468465cd38c59fd4f12f60b8b669891b62a2b162bde0c808100"
+      }
+    },
+    "ocaml-serialization-candidate-v3": {
+      "suite": "ocaml-serialization-candidate-v3",
+      "version": "fa86068dce81",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "task_hashes": {
+        "bin-prot-tagged-transaction": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b"
+      }
+    },
+    "ocaml-union-heldout": {
+      "suite": "ocaml-union-heldout",
+      "version": "f9e65a3ac13a",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-open-union"
+      ],
+      "task_hashes": {
+        "bin-prot-open-union": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a"
+      }
+    },
+    "ocaml-atomic-candidate": {
+      "suite": "ocaml-atomic-candidate",
+      "version": "b9b088b09fa9",
+      "n_tasks": 1,
+      "task_ids": [
+        "incremental-atomic-rewiring"
+      ],
+      "task_hashes": {
+        "incremental-atomic-rewiring": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286"
+      }
+    },
+    "ocaml-serialization-candidate": {
+      "suite": "ocaml-serialization-candidate",
+      "version": "055b3d9fbec1",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "task_hashes": {
+        "bin-prot-tagged-transaction": "07aed475cf77c6b0e50b8d49990fe6ad09d963133cfde7060f6f189c8c165f6b"
+      }
+    },
+    "ocaml-serialization-candidate-v2": {
+      "suite": "ocaml-serialization-candidate-v2",
+      "version": "040052f00a9c",
+      "n_tasks": 1,
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "task_hashes": {
+        "bin-prot-tagged-transaction": "fdf1fa85216660946cef63302de921a8364d8e6a60eaaac2e6f76bdfcc7cdb41"
+      }
+    }
+  },
+  "toolchain_lock_sha256": "03c8c767fdaf4eba1d6dc653ba8b081c6016f4edb671946838076ed34c5de45c",
+  "future_definition_hashes": null,
+  "model_calls_started": 0,
+  "publication_ready": false,
+  "revision_policy": "Separate v2 directory/receipt; preserve v1 bytes and all prior evidence"
+}

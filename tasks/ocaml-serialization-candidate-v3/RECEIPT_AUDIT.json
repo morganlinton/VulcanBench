@@ -1,0 +1,132 @@
+{
+  "audited_at": "2026-10-04T18:12:15.986678+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-serialization-candidate-v3",
+    "version": "fa86068dce81",
+    "n_tasks": 1,
+    "task_ids": [
+      "bin-prot-tagged-transaction"
+    ],
+    "task_hashes": {
+      "bin-prot-tagged-transaction": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b"
+    }
+  },
+  "all_five_earlier_pool_identities_preserved": true,
+  "code_conditions_and_source_unchanged": true,
+  "run_count": 3,
+  "complete_task_passes": 2,
+  "rows": [
+    {
+      "run_id": "bin-prot-tagged-transaction-4a1d8239",
+      "attempt": 1,
+      "functional": 0.875,
+      "complete_task_pass": false,
+      "failed_checks": {
+        "fail_to_pass": [
+          "wire_compatibility"
+        ],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/tagged.ml",
+        "src/tagged_stream.ml"
+      ],
+      "patch_sha256": "b32539f35ebe31f6c27b61f6a9677338270602e1ed07c22964b0c835eb83b997",
+      "summary_sha256": "4b498844380f790ffebc9b11d70694fa03ef4acbf32072ff226bedac4c18e03b",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 192.275,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/tagged_verification/verify.exe"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "bin-prot-tagged-transaction-943e24ad",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/tagged.ml",
+        "src/tagged_stream.ml",
+        "src/utils.ml"
+      ],
+      "patch_sha256": "b0eee23d4e842d6d53a3d45c47dbe6d0d8f91429fdee8bd8478af5b80950caf5",
+      "summary_sha256": "58717d7326cada100b6a975e5389a19633200c33580387e5c129cd0d5b5ce732",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 232.233,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/tagged_checks/checks.exe"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "bin-prot-tagged-transaction-5a414f6e",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/tagged.ml",
+        "src/tagged_stream.ml",
+        "src/utils.ml",
+        "tagged_tests/decoding.ml",
+        "tagged_tests/dune"
+      ],
+      "patch_sha256": "01762bfe732f10f091c79c406d83b84f2358e34f8d02aeba871d8336dfd3d8e3",
+      "summary_sha256": "38cc96cb51a79342aec14ecd7b2ffb5374c661e1940f62a612c29e73f14ce6d2",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 290.994,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/var/folders/8c/l0jw07rj1l90scrh6fbl1m_w0000gn/T"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "limitations": [
+    "Native filesystem telemetry is observational, not isolation.",
+    "Functional grading does not establish OCaml quality or security analyzer coverage.",
+    "Model identity is requested-only."
+  ],
+  "preserved_definitions": {
+    "ocaml-v1": "c0a1cc221d60",
+    "ocaml-candidates": "e0a390e323df",
+    "ocaml-incremental-candidate": "6b37b41277dd",
+    "ocaml-atomic-candidate": "b9b088b09fa9",
+    "ocaml-atomic-candidate-v2": "1ce29fa16e4f",
+    "ocaml-serialization-candidate": "055b3d9fbec1",
+    "ocaml-serialization-candidate-v2": "040052f00a9c",
+    "ocaml-serialization-candidate-v3": "fa86068dce81"
+  }
+}

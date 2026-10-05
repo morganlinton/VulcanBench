@@ -1,0 +1,124 @@
+diff --git a/lib/decoder.ml b/lib/decoder.ml
+index 825189b..12face7 100644
+--- a/lib/decoder.ml
++++ b/lib/decoder.ml
+@@ -1,15 +1,104 @@
+-let decode : type a.
+-  a Schema.t -> string -> pos_ref:int ref -> limit:int -> (a, Error.t) result
+-  =
+-  fun schema data ~pos_ref ~limit ->
+-    Schema.validate schema;
+-    (let start = !pos_ref in
+-     if (start < 0) || ((limit < start) || (limit > (String.length data)))
+-     then Error { Error.at = start; path = []; reason = Invalid_bounds }
+-     else
+-       (match schema with
+-        | Schema.Bool when
+-            (limit = (start + 1)) &&
+-              (((data.[start]) = '\000') || ((data.[start]) = '\001'))
+-            -> (pos_ref := limit; Ok ((data.[start]) = '\001'))
+-        | _ -> Error { Error.at = start; path = []; reason = Truncated }))
++type cursor =
++  {
++  data: string ;
++  mutable pos: int ;
++  limit: int ;
++  path: Error.step list }
++let fault c at reason =
++  raise (Error.Decode { Error.at = at; path = (c.path); reason })
++let take c n =
++  let at = c.pos in
++  if (n < 0) || (n > (c.limit - c.pos)) then fault c at Error.Truncated;
++  c.pos <- (c.pos + n);
++  at
++let unsigned c width =
++  let at = take c width in
++  let n = ref 0 in
++  for i = 0 to width - 1 do
++    n := ((!n) lor ((Char.code ((c.data).[at + i])) lsl (8 * i)))
++  done;
++  !n
++let child c step = { c with path = (c.path @ [step]) }
++let framed c step =
++  let sub = child c step in
++  let at = c.pos in
++  let n = unsigned sub 4 in
++  if n > (c.limit - sub.pos) then fault sub at Error.Truncated;
++  c.pos <- (sub.pos + n);
++  { sub with limit = (c.pos) }
++let exact c = if c.pos <> c.limit then fault c c.pos Error.Trailing
++let rec value : type a. a Schema.t -> cursor -> a =
++  fun schema c ->
++    let result : a =
++      match schema with
++      | Schema.Bool ->
++          let at = take c 1 in
++          (match (c.data).[at] with
++           | '\000' -> false
++           | '\001' -> true
++           | _ -> fault c at Error.Invalid_scalar)
++      | Int64 -> let at = take c 8 in Wire.read_int64 c.data at
++      | Text ->
++          let at = take c (c.limit - c.pos) in
++          String.sub c.data at (c.pos - at)
++      | Pair (a, b) ->
++          let left = value a (framed c Error.Left) in
++          let right = value b (framed c Error.Right) in (left, right)
++      | Option s ->
++          let at = take c 1 in
++          (match (c.data).[at] with
++           | '\000' -> None
++           | '\001' -> Some (value s (framed c Error.Some_value))
++           | _ -> fault c at Error.Invalid_scalar)
++      | List s ->
++          let count = unsigned c 2 in
++          let rec loop i acc =
++            if i = count
++            then List.rev acc
++            else
++              (let v = value s (framed c (Error.Index i)) in
++               loop (i + 1) (v :: acc)) in
++          loop 0 []
++      | Record (fs, make) ->
++          let count = unsigned c 2 in
++          let index = Hashtbl.create 8 in
++          (for _i = 1 to count do
++             (let at = c.pos in
++              let id = unsigned c 2 in
++              let sub = framed c (Error.Field id) in
++              if Hashtbl.mem index id
++              then
++                fault { c with path = (c.path @ [Error.Field id]) } at
++                  (Error.Duplicate_field id);
++              Hashtbl.add index id sub)
++           done;
++           make (fields fs index c)) in
++    exact c; result
++and fields : type a r.
++  (a, r) Schema.fields -> (int, cursor) Hashtbl.t -> cursor -> a =
++  fun fs index parent ->
++    match fs with
++    | Nil -> ()
++    | Field (id, s, presence, _, rest) ->
++        let head =
++          match Hashtbl.find_opt index id with
++          | Some c -> value s c
++          | None ->
++              (match presence with
++               | Default v -> v
++               | Required ->
++                   fault
++                     { parent with path = (parent.path @ [Error.Field id]) }
++                     parent.pos (Error.Missing_field id)) in
++        (head, (fields rest index parent))
++let decode schema data ~pos_ref ~limit =
++  Schema.validate schema;
++  (let start = !pos_ref in
++   if (start < 0) || ((limit < start) || (limit > (String.length data)))
++   then Error { Error.at = start; path = []; reason = Invalid_bounds }
++   else
++     (try
++        pos_ref := limit;
++        (let result = value schema { data; pos = start; limit; path = [] } in
++         pos_ref := limit; Ok result)
++      with | Error.Decode e -> Error e | exn -> raise exn))

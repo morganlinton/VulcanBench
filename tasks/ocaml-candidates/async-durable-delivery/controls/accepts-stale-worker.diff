@@ -1,0 +1,115 @@
+diff --git a/lib/committer.ml b/lib/committer.ml
+index 5cdbc45..a2e540e 100644
+--- a/lib/committer.ml
++++ b/lib/committer.ml
+@@ -1 +1,32 @@
+-let step (_ : Runtime.t) = ()
++open Async_kernel
++let step (r : Runtime.t) =
++  if (not r.busy) && (r.stopped = None)
++  then
++    match List.find_opt (fun j -> j.Job.seq = r.commit_seq) r.jobs with
++    | Some j ->
++        (match j.Job.phase with
++         | Ready outcome ->
++             (r.busy <- true;
++              j.phase <- Committing;
++              (let entry = { Journal.seq = (j.seq); key = (j.key); outcome } in
++               let result =
++                 Monitor.try_with ~run:`Now ~rest:`Log
++                   (fun () -> r.journal entry) in
++               Deferred.upon result
++                 (fun result ->
++                    r.busy <- false;
++                    if r.stopped = None
++                    then
++                      (match result with
++                       | Ok (Ok ()) ->
++                           (Runtime.settle r j (Outcome.Committed outcome);
++                            r.commit_seq <- (r.commit_seq + 1))
++                       | Ok (Error error) ->
++                           Runtime.stop r (Outcome.Journal_failed error)
++                       | Error exn ->
++                           Runtime.stop r
++                             (Outcome.Journal_failed
++                                (Printexc.to_string (Monitor.extract_exn exn))));
++                    r.wakeup ())))
++         | _ -> ())
++    | None -> ()
+diff --git a/lib/dispatcher.ml b/lib/dispatcher.ml
+index 5cdbc45..ee77f20 100644
+--- a/lib/dispatcher.ml
++++ b/lib/dispatcher.ml
+@@ -1 +1,71 @@
+-let step (_ : Runtime.t) = ()
++open Async_kernel
++let rec complete (r : Runtime.t) (j : Job.t) token result =
++  if j.phase <> Job.Done
++  then
++    (Runtime.retire_alarm j;
++     r.active <- (r.active - 1);
++     j.generation <- (j.generation + 1);
++     (match result with
++      | Ok value ->
++          (j.phase <- (Ready (Outcome.Succeeded value)); r.wakeup ())
++      | Error error when j.attempt >= (r.policy).attempts ->
++          (j.phase <- (Ready (Outcome.Failed error)); r.wakeup ())
++      | Error _ ->
++          if (r.policy).retry_delay = 0
++          then (j.phase <- Queued; r.wakeup ())
++          else
++            (j.phase <- Backoff;
++             (let generation = j.generation in
++              j.alarm <-
++                (Some
++                   (Clock.at r.clock
++                      ((Clock.now r.clock) + (r.policy).retry_delay)
++                      (fun () ->
++                         if
++                           (j.phase = Backoff) && (j.generation = generation)
++                         then
++                           (j.alarm <- None; j.phase <- Queued; r.wakeup ()))));
++              r.wakeup ()))))
++let start (r : Runtime.t) (j : Job.t) =
++  j.attempt <- (j.attempt + 1);
++  j.generation <- (j.generation + 1);
++  (let token = j.generation in
++   j.phase <- (Running token);
++   r.active <- (r.active + 1);
++   j.deadline <- ((Clock.now r.clock) + (r.policy).timeout);
++   j.alarm <-
++     (Some
++        (Clock.at r.clock j.deadline
++           (fun () -> complete r j token (Error "timeout"))));
++   (let result =
++      Monitor.try_with ~run:`Now ~rest:`Log
++        (fun () ->
++           r.worker ~key:(j.key) ~payload:(j.payload) ~attempt:(j.attempt)) in
++    Deferred.upon result
++      (fun result ->
++         let result =
++           match result with
++           | Ok x -> x
++           | Error exn ->
++               Error (Printexc.to_string (Monitor.extract_exn exn)) in
++         let result =
++           if (Clock.now r.clock) >= j.deadline
++           then Error "timeout"
++           else result in
++         complete r j token result)))
++let candidate r =
++  let seen = Hashtbl.create 8 in
++  let rec loop =
++    function
++    | [] -> None
++    | j::rest ->
++        (match j.Job.phase with
++         | Done | Ready _ | Committing -> loop rest
++         | Running _ | Backoff -> (Hashtbl.replace seen j.key (); loop rest)
++         | Queued -> if Hashtbl.mem seen j.key then loop rest else Some j) in
++  loop r.Runtime.jobs
++let step r =
++  let rec loop () =
++    if (r.Runtime.stopped = None) && (r.active < (r.policy).slots)
++    then match candidate r with | None -> () | Some j -> (start r j; loop ()) in
++  loop ()

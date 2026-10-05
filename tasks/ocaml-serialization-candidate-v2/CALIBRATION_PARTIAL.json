@@ -1,0 +1,189 @@
+{
+  "suite": "ocaml-serialization-candidate-v2",
+  "version": "040052f00a9c",
+  "n_tasks": 1,
+  "task_ids": [
+    "bin-prot-tagged-transaction"
+  ],
+  "task_hashes": {
+    "bin-prot-tagged-transaction": "fdf1fa85216660946cef63302de921a8364d8e6a60eaaac2e6f76bdfcc7cdb41"
+  },
+  "status": "incomplete calibration",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "minimum_attempts_per_task": 3,
+  "sandbox_selection": "local",
+  "execution_environments": [
+    "local"
+  ],
+  "metric": "mean per-task pass@1; all required checks and regression guards must pass",
+  "pass_at_1": null,
+  "observed_below_80_percent": null,
+  "independent_confirmation": false,
+  "views": {
+    "engineering": {
+      "task_ids": [],
+      "distinct_tasks": 0,
+      "passes": 0,
+      "attempts": 0,
+      "coverage_complete": false,
+      "pass_at_1": null
+    },
+    "language-mastery": {
+      "task_ids": [
+        "bin-prot-tagged-transaction"
+      ],
+      "distinct_tasks": 1,
+      "passes": 1,
+      "attempts": 1,
+      "coverage_complete": false,
+      "pass_at_1": null
+    }
+  },
+  "view_overlap": "Tasks tagged both enter each view but are counted once in the suite.",
+  "limitations": [
+    "1 tasks are a development pool, not a stable leaderboard or a confidence claim.",
+    "Configured model identity may be requested-only; inspect each CLI receipt.",
+    "Development selection and retrospective audits are not independent confirmation.",
+    "Public upstream patches may be retrievable; task provenance is not a training-cutoff claim.",
+    "Native runs execute on the host without Docker resource caps or network isolation.",
+    "Quality and security analyzers do not currently score OCaml.",
+    "Historical summaries may lack effective run limits; audit their launch receipts before publishing."
+  ],
+  "excluded_runs": [],
+  "unscored_runs": [],
+  "trace_only_invocations": [
+    {
+      "run_id": "bin-prot-tagged-transaction-66e16b64",
+      "task_id": "bin-prot-tagged-transaction",
+      "model": "codex:gpt-6.1-sol",
+      "started_at": "2026-10-04T17:44:26.827007+00:00",
+      "reason": "No summary or functional verdict; effort, revision, and environment require separate audit.",
+      "counts_toward_coverage": false
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "bin-prot-tagged-transaction",
+      "primary_view": "language-mastery",
+      "source": "oss-derived-original-extension",
+      "decontaminated": false,
+      "decontamination_notes": "Original tagged extension to https://github.com/janestreet/bin_prot commit 2cd58a8cd74b5fa1f28d63cbc4deaf6665b82525. Public-source exposure; no training-cutoff claim.",
+      "upstream": {
+        "url": "https://github.com/janestreet/bin_prot",
+        "fix_commit": null
+      },
+      "passes": 1,
+      "attempts": 1,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "bin-prot-tagged-transaction-dde83d1c",
+          "task_hash": "fdf1fa85216660946cef63302de921a8364d8e6a60eaaac2e6f76bdfcc7cdb41",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "heterogeneous_migration": true,
+              "wire_compatibility": true,
+              "structured_bounds": true,
+              "callback_transactions": true,
+              "stream_transactions": true,
+              "bounded_atoms": true,
+              "unknown_allocation": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 249.42,
+          "tokens": {
+            "prompt": 230644,
+            "completion": 6653,
+            "total": 237297,
+            "cached_input": 184704,
+            "reasoning_output": 936
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a10800-9216-70a2-83b8-e6ceacda2af0",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 184704,
+            "reasoning_output_tokens": 936,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "xlarge",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 396,
+              "loc": 158667
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        }
+      ]
+    }
+  ]
+}

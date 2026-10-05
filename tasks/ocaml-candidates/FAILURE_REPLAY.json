@@ -1,0 +1,216 @@
+{
+  "network_isolation_enforced": true,
+  "started_at": "2026-10-02T01:59:17.828285+00:00",
+  "fresh_model_calls": 0,
+  "rows": [
+    {
+      "run_id": "typed-schema-evolution-cb43a603",
+      "primary_summary": "runs-ocaml-candidates-20261002T011915Z/typed-schema-evolution-cb43a603/summary.json",
+      "fresh_replay": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build --profile release @runtest",
+            "exit_code": 0,
+            "duration_s": 1.166
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build --profile release @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 0.8333
+          },
+          "fail_to_pass": {
+            "nested_migration": true,
+            "canonical_compatibility": true,
+            "structured_errors": true,
+            "transactional_cursor": false,
+            "unknown_field_budget": true,
+            "schema_validation": true
+          },
+          "pass_to_pass": {
+            "ordinary_workflow": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/6 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "File \"hidden/checks.ml\", line 111, characters 22-35:\n111 |        with | Failure \"constructor\" -> true | _ -> false);\n                            ^^^^^^^^^^^^^\nWarning 52 [fragile-literal-pattern]: Code should not depend on the actual values of\nthis constructor's arguments. They are only for information\nand may change in future versions. (see manual section 13.5.3)\n"
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- nested_migration",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- canonical_compatibility",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- structured_errors",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- transactional_cursor",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Fatal error: exception Failure(\"contract mismatch\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 2, characters 28-56\nCalled from Dune__exe__Checks.transactional_cursor in file \"hidden/checks.ml\", line 112, characters 4-20\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 161, characters 30-53\n"
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- unknown_field_budget",
+            "exit_code": 0,
+            "stdout": "allocation=928\n",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- schema_validation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": [
+          {
+            "cmd": "OCAMLRUNPARAM=b dune exec --profile release hidden/checks.exe -- transactional_cursor",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Fatal error: exception Failure(\"contract mismatch\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 2, characters 28-56\nCalled from Dune__exe__Checks.transactional_cursor in file \"hidden/checks.ml\", line 112, characters 4-20\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 161, characters 30-53\n"
+          }
+        ],
+        "task_hash": "e9bea8c75172066a91985ebc21c26b83a31b9c96a75d7b34c5cbf3cace51ee14",
+        "sandbox": "local"
+      },
+      "same_verdict": true
+    },
+    {
+      "run_id": "typed-schema-evolution-0aed92a9",
+      "primary_summary": "runs-ocaml-candidates-20261002T011915Z/typed-schema-evolution-0aed92a9/summary.json",
+      "fresh_replay": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build --profile release @runtest",
+            "exit_code": 0,
+            "duration_s": 1.331
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build --profile release @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 0.8333
+          },
+          "fail_to_pass": {
+            "nested_migration": true,
+            "canonical_compatibility": true,
+            "structured_errors": true,
+            "transactional_cursor": false,
+            "unknown_field_budget": true,
+            "schema_validation": true
+          },
+          "pass_to_pass": {
+            "ordinary_workflow": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/6 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "File \"hidden/checks.ml\", line 111, characters 22-35:\n111 |        with | Failure \"constructor\" -> true | _ -> false);\n                            ^^^^^^^^^^^^^\nWarning 52 [fragile-literal-pattern]: Code should not depend on the actual values of\nthis constructor's arguments. They are only for information\nand may change in future versions. (see manual section 13.5.3)\n"
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- nested_migration",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- canonical_compatibility",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- structured_errors",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- transactional_cursor",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Fatal error: exception Failure(\"contract mismatch\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 2, characters 28-56\nCalled from Dune__exe__Checks.transactional_cursor in file \"hidden/checks.ml\", line 112, characters 4-20\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 161, characters 30-53\n"
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- unknown_field_budget",
+            "exit_code": 0,
+            "stdout": "allocation=1168\n",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec --profile release hidden/checks.exe -- schema_validation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": [
+          {
+            "cmd": "OCAMLRUNPARAM=b dune exec --profile release hidden/checks.exe -- transactional_cursor",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Fatal error: exception Failure(\"contract mismatch\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 2, characters 28-56\nCalled from Dune__exe__Checks.transactional_cursor in file \"hidden/checks.ml\", line 112, characters 4-20\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 161, characters 30-53\n"
+          }
+        ],
+        "task_hash": "e9bea8c75172066a91985ebc21c26b83a31b9c96a75d7b34c5cbf3cace51ee14",
+        "sandbox": "local"
+      },
+      "same_verdict": true
+    }
+  ],
+  "finished_at": "2026-10-02T01:59:22.771567+00:00"
+}

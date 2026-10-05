@@ -1,0 +1,2 @@
+(executables (names smoke cache_client import_client) (libraries base))
+(rule (alias runtest) (action (progn (run %{exe:smoke.exe}) (run %{exe:cache_client.exe}) (run %{exe:import_client.exe}))))

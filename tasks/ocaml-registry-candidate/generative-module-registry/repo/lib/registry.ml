@@ -1,0 +1,14 @@
+type t = unit
+type 'a handle = unit
+type visitor = { visit : 'a. 'a Key.t -> 'a -> unit }
+let create () = ()
+let register _ _ _ = failwith "register pending"
+let find _ _ = failwith "find pending"
+let handle _ _ = failwith "handle pending"
+let read _ = failwith "read pending"
+let update _ _ = failwith "update pending"
+let remove _ _ = failwith "remove pending"
+let close _ = failwith "close pending"
+let clone _ = failwith "clone pending"
+let transfer ~src:_ ~dst:_ _ = failwith "transfer pending"
+let iter _ _ = failwith "iter pending"

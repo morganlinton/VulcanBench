@@ -1,0 +1,53 @@
+{
+  "all_intended_failures": true,
+  "rows": [
+    {
+      "patch": "clone-aliases-owner.diff",
+      "intended_failed_group": "clone_isolation",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "iter-captures-values.diff",
+      "intended_failed_group": "snapshot_visitors",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "iter-visits-stale.diff",
+      "intended_failed_group": "snapshot_visitors",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "no-equality-proof.diff",
+      "intended_failed_group": "generative_identity",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "replacement-keeps-old.diff",
+      "intended_failed_group": "revocable_handles",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "transfer-moves-handle.diff",
+      "intended_failed_group": "typed_transfer",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "transfer-no-closed-check.diff",
+      "intended_failed_group": "closed_precedence",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "update-resurrects.diff",
+      "intended_failed_group": "reentrant_updates",
+      "compiled": true,
+      "guards_preserved": true
+    }
+  ]
+}

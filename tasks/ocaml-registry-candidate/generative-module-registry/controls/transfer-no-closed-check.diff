@@ -1,0 +1,76 @@
+diff --git a/lib/key.ml b/lib/key.ml
+index f98b78b..bf92208 100644
+--- a/lib/key.ml
++++ b/lib/key.ml
+@@ -6,7 +6,7 @@ module type S = sig type value val key : value t end
+ module Make (P : Payload) () = struct
+  type value = P.t
+  type _ witness += Token : value witness
+- let key = {token=Token;label=P.name;prove=(fun _ -> None)}
++ let key = {token=Token;label=P.name;prove=(fun (type b) (other : b witness) : (value,b) equal option -> match other with Token -> Some Refl | _ -> None)}
+ end
+ let name k = k.label
+-let same _ _ = None
++let same a b = a.prove b.token
+diff --git a/lib/registry.ml b/lib/registry.ml
+index f2094f8..3a82fc7 100644
+--- a/lib/registry.ml
++++ b/lib/registry.ml
+@@ -1,14 +1,44 @@
+-type t = unit
+-type 'a handle = unit
++type t = { mutable closed : bool; mutable entries : entry list }
++and 'a handle = { owner : t; key : 'a Key.t; mutable value : 'a; mutable alive : bool }
++and entry = Entry : 'a handle -> entry
+ type visitor = { visit : 'a. 'a Key.t -> 'a -> unit }
+-let create () = ()
+-let register _ _ _ = failwith "register pending"
+-let find _ _ = failwith "find pending"
+-let handle _ _ = failwith "handle pending"
+-let read _ = failwith "read pending"
+-let update _ _ = failwith "update pending"
+-let remove _ _ = failwith "remove pending"
+-let close _ = failwith "close pending"
+-let clone _ = failwith "clone pending"
+-let transfer ~src:_ ~dst:_ _ = failwith "transfer pending"
+-let iter _ _ = failwith "iter pending"
++let create () = {closed=false;entries=[]}
++let live h = h.alive && not h.owner.closed
++let handle : type a. t -> a Key.t -> a handle option = fun t key ->
++ if t.closed then None else
++ let rec search : entry list -> a handle option = function
++ | [] -> None
++ | Entry h::rest -> (match Key.same key h.key with
++   | Some Key.Refl -> if live h then Some h else search rest
++   | None -> search rest) in search t.entries
++let read h = if live h then Some h.value else None
++let find t key = match handle t key with None -> None | Some h -> read h
++let remove t key = match handle t key with
++ | None -> false
++ | Some h -> h.alive <- false;
++   t.entries <- List.filter (fun (Entry other) -> other.alive) t.entries; true
++let register t key value =
++ if t.closed then invalid_arg "closed registry";
++ ignore(remove t key);
++ let h={owner=t;key;value;alive=true} in
++ t.entries <- t.entries @ [Entry h]; h
++let update h f =
++ if not (live h) then false else
++ let value=f h.value in
++ if not (live h) then false else (h.value <- value;true)
++let close t =
++ if not t.closed then (t.closed <- true;
++ List.iter (fun (Entry h) -> h.alive <- false) t.entries;t.entries <- [])
++let clone t =
++ if t.closed then invalid_arg "closed registry";
++ let copy=create () in
++ List.iter (fun (Entry h) -> if live h then ignore(register copy h.key h.value)) t.entries; copy
++let transfer ~src ~dst key =
++ ();
++ match handle src key with
++ | None -> false
++ | Some h -> if src==dst then true else
++   (let value=h.value in ignore(remove src key);ignore(register dst key value);true)
++let iter t visitor =
++ let snapshot=t.entries in
++ List.iter (fun (Entry h) -> if live h then visitor.visit h.key h.value) snapshot

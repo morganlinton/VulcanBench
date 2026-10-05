@@ -1,0 +1,9 @@
+{
+  "phase": "pre-dispatch CLI version check",
+  "model_invocations": 0,
+  "exit_code": 1,
+  "reason": "Guarded Node launcher aborted when stderr inherited a log descriptor inside the denied checkout. A direct reproduction confirmed the descriptor condition.",
+  "fix": "Capture version stderr through a pipe, matching the existing harness CLI subprocess behavior.",
+  "task_scoring_changes": false,
+  "guard_profile_changes": false
+}

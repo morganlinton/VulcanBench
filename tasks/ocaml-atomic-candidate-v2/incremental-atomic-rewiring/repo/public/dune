@@ -1,0 +1,2 @@
+(executables (names smoke generic_client) (libraries incremental core))
+(rule (alias runtest) (action (progn (run %{exe:smoke.exe}) (run %{exe:generic_client.exe}))))

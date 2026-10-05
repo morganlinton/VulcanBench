@@ -1,0 +1,23 @@
+{
+  "upstream_url": "https://github.com/janestreet/bin_prot",
+  "tag": "v0.17.0",
+  "commit": "2cd58a8cd74b5fa1f28d63cbc4deaf6665b82525",
+  "complete_checkout": true,
+  "public_scaffold_additions_or_changes": [
+    "public/README.md",
+    "public/dune",
+    "public/migration.ml",
+    "public/smoke.ml",
+    "src/bin_prot.ml",
+    "src/tagged.ml",
+    "src/tagged.mli",
+    "src/tagged_stream.ml",
+    "src/tagged_stream.mli"
+  ],
+  "original_extension": true,
+  "earlier_schema_pool_unchanged": true,
+  "semantic_family": "typed-serialization",
+  "distinct_from_prior_schema_task": "Native arbitrary bin_prot atoms, bounded zero-copy bigarray views, typed Map and size-framed transactional stream integration. Shares record migration/rollback skills; not independent confirmation.",
+  "license": "Upstream MIT and preserved additional upstream notices",
+  "upstream_test_limit": "float_array is absent from the pinned 96-package native environment. Upstream test library not built; checksum alias and public clients run."
+}

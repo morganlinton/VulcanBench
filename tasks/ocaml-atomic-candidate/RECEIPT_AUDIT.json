@@ -1,0 +1,120 @@
+{
+  "audited_at": "2026-10-03T16:39:10.504540+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-atomic-candidate",
+    "version": "b9b088b09fa9",
+    "n_tasks": 1,
+    "task_ids": [
+      "incremental-atomic-rewiring"
+    ],
+    "task_hashes": {
+      "incremental-atomic-rewiring": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286"
+    }
+  },
+  "all_three_earlier_pool_identities_preserved": true,
+  "code_conditions_and_source_unchanged": true,
+  "run_count": 3,
+  "complete_task_passes": 3,
+  "rows": [
+    {
+      "run_id": "incremental-atomic-rewiring-1060a799",
+      "attempt": 1,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "atomic-tests/atomic_rewiring.ml",
+        "atomic-tests/dune",
+        "src/expert1.ml"
+      ],
+      "patch_sha256": "a8286660c5fbbb0dcb31b48816fde8104bd0af7aa4693974fff44f5a8ac55e8d",
+      "summary_sha256": "f4baa3bd675af474519bec1fe2d31b9a2900df25dae7d85a5485671d3e1fe8a9",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 504.755,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/tmp"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-a9d3e2a6",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "atomic-tests/atomic_rewiring.ml",
+        "atomic-tests/dune",
+        "src/expert1.ml",
+        "src/state.ml"
+      ],
+      "patch_sha256": "94a1598ac58a8c14db2fd5c7da0dd3e8c7b57757bb79c00987b8c016dc353c09",
+      "summary_sha256": "8f05d8e86948783781e56e00c12a84c58e050477662f95bb3f2a9cc401f4f98e",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 377.083,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/tmp"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-9520d365",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/expert1.ml",
+        "src/state.ml",
+        "test-atomic/dependency_edits.ml",
+        "test-atomic/dune"
+      ],
+      "patch_sha256": "a9416cc7c15f990faa06f4d9b750eea421d0a3abce56ad09a3d78cb7aa7718a8",
+      "summary_sha256": "86c3dd319f595d6ecb6c0825fd1ea558a0e7c0c2af63bc97185b789e3c56fd72",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 420.867,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "limitations": [
+    "Native filesystem telemetry is observational, not isolation.",
+    "Functional grading does not establish OCaml quality or security analyzer coverage.",
+    "Model identity is requested-only."
+  ]
+}

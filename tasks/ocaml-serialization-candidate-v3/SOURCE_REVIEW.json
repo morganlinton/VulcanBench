@@ -1,0 +1,52 @@
+{
+  "status": "all three completed source patches reviewed",
+  "rows": [
+    {
+      "run_id": "bin-prot-tagged-transaction-4a1d8239",
+      "patch_sha256": "b32539f35ebe31f6c27b61f6a9677338270602e1ed07c22964b0c835eb83b997",
+      "complete_task_pass": false,
+      "review": "Generic GADT field tuple recursion, bounded shared Atom views, private Structural_error and backtrace-preserving cursor restoration satisfy the seven passing behavior groups. No Utils change: Tagged.reader still receives reused 8-byte buffers for shorter stream payloads and reports Trailing. This violates the public standard-stream integration contract.",
+      "unsafe_casts_or_erased_values_observed": false,
+      "protected_fixture_edits_observed": false,
+      "semantic_failure": "wire_compatibility, short standard-stream payload extent",
+      "replay_pending": false,
+      "offline_replay_reproduced": true
+    },
+    {
+      "run_id": "bin-prot-tagged-transaction-943e24ad",
+      "patch_sha256": "b0eee23d4e842d6d53a3d45c47dbe6d0d8f91429fdee8bd8478af5b80950caf5",
+      "complete_task_pass": true,
+      "review": "Generic result-valued parsing, heterogeneous GADT tuple construction in declaration order, exact shared Atom subviews, offset-only unknown-field indexing and entry-cursor exception restoration. Utils uses an exact subview when its reusable header buffer exceeds payload length; larger freshly allocated payload buffers already have the exact extent. No concrete-domain special cases or erased values observed.",
+      "unsafe_casts_or_erased_values_observed": false,
+      "protected_fixture_edits_observed": false,
+      "source_paths": [
+        "src/tagged.ml",
+        "src/tagged_stream.ml",
+        "src/utils.ml"
+      ],
+      "replay_required": false
+    },
+    {
+      "run_id": "bin-prot-tagged-transaction-5a414f6e",
+      "patch_sha256": "01762bfe732f10f091c79c406d83b84f2358e34f8d02aeba871d8336dfd3d8e3",
+      "complete_task_pass": true,
+      "review": "Generic GADT tuple construction with private Parse_error, shared bounded Atom subviews, record pre-scan before constructors, declaration-order field decoding and explicit entry-cursor restoration. Utils uses an exact payload subview only when its reused header buffer is larger than payload. New native self-tests cover callbacks, framing, tiny/empty standard streams and unknown allocation; supplied fixtures are intact.",
+      "unsafe_casts_or_erased_values_observed": false,
+      "protected_fixture_edits_observed": false,
+      "source_paths": [
+        "src/tagged.ml",
+        "src/tagged_stream.ml",
+        "src/utils.ml",
+        "tagged_tests/decoding.ml",
+        "tagged_tests/dune"
+      ],
+      "replay_required": false
+    }
+  ],
+  "limitations": [
+    "Source review is observational; functional grading is not OCaml quality/security analysis."
+  ],
+  "complete": true,
+  "complete_task_passes": 2,
+  "attempts": 3
+}

@@ -1,0 +1,20 @@
+{
+  "command": "make ci",
+  "exit_code": 0,
+  "tests_passed": 1092,
+  "tests_skipped": 5,
+  "tests_deselected": 4,
+  "coverage_percent": 86.39,
+  "duration_s": 606.16,
+  "code_sha256": {
+    "harness/agent/loop.py": "1a839540bf0777436f1f0ca75fca759dfef27d876bed2e5a3c07ad588500f5f4",
+    "scripts/setup_ocaml_native.py": "f1b70dd90f11ff7c9b91b2ea11159d3c265a8b43c009c3651819fe3b257d01c2",
+    "scripts/report_ocaml_calibration.py": "861674b2bcabc002cd72da8815fb95a380a617bf4e244821469b627b87e7329a",
+    "scripts/validate_ocaml_pilot.py": "c48fe7560dd6e008fb6e5a4c5baf76d1cb9b41104739fdee5792762086be95b7",
+    "scripts/ocaml_compiler_seed.py": "75f93b65c260e78bda14a683e7579f3b7086e6162d29ebba6e515580372926fe"
+  },
+  "notes": [
+    "Frozen final code, with native offline CLI, model-card reporting, aborted receipt visibility, and effective budget tracking.",
+    "No model calls or Docker workloads in this validation phase."
+  ]
+}

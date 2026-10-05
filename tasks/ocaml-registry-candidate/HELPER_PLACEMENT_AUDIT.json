@@ -1,0 +1,108 @@
+{
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build --profile release @runtest",
+      "exit_code": 0,
+      "duration_s": 0.704
+    }
+  ],
+  "setup_commands": [
+    {
+      "cmd": "dune build --profile release @runtest",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "verdict": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "generative_identity": true,
+      "heterogeneous_packages": true,
+      "revocable_handles": true,
+      "reentrant_updates": true,
+      "clone_isolation": true,
+      "typed_transfer": true,
+      "snapshot_visitors": true,
+      "closed_precedence": true
+    },
+    "pass_to_pass": {
+      "ordinary_workflow": true,
+      "supplied_interfaces": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 8/8 passing"
+    ]
+  },
+  "commands": [
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "python hidden/contracts.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "supplemental_commands": [],
+  "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+  "sandbox": "local",
+  "network_isolation_enforced": true,
+  "adds_model_attempts": false
+}

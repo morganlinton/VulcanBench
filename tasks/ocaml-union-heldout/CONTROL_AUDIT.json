@@ -1,0 +1,53 @@
+{
+  "all_intended_failures": true,
+  "rows": [
+    {
+      "patch": "copy-unknown.diff",
+      "intended_failed_group": "unknown_forwarding",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "first-match-only.diff",
+      "intended_failed_group": "projection_order",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "known-tag-collision.diff",
+      "intended_failed_group": "projection_order",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "omit-exception-rollback.diff",
+      "intended_failed_group": "callback_transactions",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "omit-trailing-check.diff",
+      "intended_failed_group": "framing_errors",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "payload-offset-lost.diff",
+      "intended_failed_group": "bounded_payloads",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "reader-consumes-remainder.diff",
+      "intended_failed_group": "native_readers",
+      "compiled": true,
+      "guards_preserved": true
+    },
+    {
+      "patch": "swallow-public-decode.diff",
+      "intended_failed_group": "callback_transactions",
+      "compiled": true,
+      "guards_preserved": true
+    }
+  ]
+}

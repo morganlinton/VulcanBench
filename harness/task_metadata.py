@@ -136,6 +136,8 @@ CODE_SUFFIXES = frozenset(
         ".hh",
         ".hpp",
         ".hxx",
+        ".ml",
+        ".mli",
     }
 )
 _PLACEHOLDER_COMMIT = re.compile(r"^0+$|^0+1$|^0+2$")

@@ -1,0 +1,1518 @@
+{
+  "tasks": [
+    {
+      "id": "generative-module-registry",
+      "base": [
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.708
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "generative_identity": false,
+              "heterogeneous_packages": false,
+              "revocable_handles": false,
+              "reentrant_updates": false,
+              "clone_isolation": false,
+              "typed_transfer": false,
+              "snapshot_visitors": false,
+              "closed_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.503
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "generative_identity": false,
+              "heterogeneous_packages": false,
+              "revocable_handles": false,
+              "reentrant_updates": false,
+              "clone_isolation": false,
+              "typed_transfer": false,
+              "snapshot_visitors": false,
+              "closed_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.494
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "generative_identity": false,
+              "heterogeneous_packages": false,
+              "revocable_handles": false,
+              "reentrant_updates": false,
+              "clone_isolation": false,
+              "typed_transfer": false,
+              "snapshot_visitors": false,
+              "closed_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"register pending\")\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        }
+      ],
+      "gold": [
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.499
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": true,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.512
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": true,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.506
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": true,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        }
+      ],
+      "controls": [
+        {
+          "patch": "clone-aliases-owner.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.594
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": false,
+              "typed_transfer": true,
+              "snapshot_visitors": true,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "iter-captures-values.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.598
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": false,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "iter-visits-stale.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.569
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": false,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"stale visited\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "no-equality-proof.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.586
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.125
+            },
+            "fail_to_pass": {
+              "generative_identity": false,
+              "heterogeneous_packages": false,
+              "revocable_handles": false,
+              "reentrant_updates": false,
+              "clone_isolation": false,
+              "typed_transfer": false,
+              "snapshot_visitors": false,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 1/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"missing\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"missing\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"missing\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"stale visited\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "replacement-keeps-old.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.601
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.5
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": false,
+              "reentrant_updates": false,
+              "clone_isolation": true,
+              "typed_transfer": false,
+              "snapshot_visitors": false,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 4/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"present\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"present\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"stale visited\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "transfer-moves-handle.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.578
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": false,
+              "snapshot_visitors": true,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"present\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "transfer-no-closed-check.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.575
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": true,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": true,
+              "closed_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"invalid expected\")\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        },
+        {
+          "patch": "update-resurrects.diff",
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 0.589
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "generative_identity": true,
+              "heterogeneous_packages": true,
+              "revocable_handles": true,
+              "reentrant_updates": false,
+              "clone_isolation": true,
+              "typed_transfer": true,
+              "snapshot_visitors": true,
+              "closed_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "5a0007e74115415f481ced5b649f745f688c6676117b375c0e8ee3e6084b3f6d",
+          "sandbox": "local"
+        }
+      ],
+      "standard_validation": {
+        "task_id": "generative-module-registry",
+        "status": "FAIL",
+        "reasons": [
+          "hand-authored tasks are written now; metadata.decontaminated must be true"
+        ]
+      },
+      "valid": false,
+      "error": "['hand-authored tasks are written now; metadata.decontaminated must be true']"
+    }
+  ],
+  "valid": false,
+  "difficulty": "unmeasured",
+  "sandbox": "local",
+  "network_isolation_enforced": true
+}

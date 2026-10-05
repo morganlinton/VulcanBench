@@ -1,0 +1,22 @@
+{
+  "valid": true,
+  "benchmark_reads": [
+    {
+      "path": "/Users/vulcanbench/dev/VulcanBench/tasks/ocaml-atomic-candidate/incremental-atomic-rewiring/tests/hidden/checks.ml",
+      "read_denied": true,
+      "stderr": "cat: /Users/vulcanbench/dev/VulcanBench/tasks/ocaml-atomic-candidate/incremental-atomic-rewiring/tests/hidden/checks.ml: Operation not permitted\n"
+    },
+    {
+      "path": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-atomic-authoring-20261003/atomic_reference.ml",
+      "read_denied": true,
+      "stderr": "cat: /Users/vulcanbench/dev/VulcanBench/runs-ocaml-atomic-authoring-20261003/atomic_reference.ml: Operation not permitted\n"
+    },
+    {
+      "path": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-atomic-20261003T153934Z/incremental-atomic-rewiring-50d80c3b/final.patch",
+      "read_denied": true,
+      "stderr": "cat: /Users/vulcanbench/dev/VulcanBench/runs-ocaml-atomic-20261003T153934Z/incremental-atomic-rewiring-50d80c3b/final.patch: Operation not permitted\n"
+    }
+  ],
+  "python_version": "Python 3.12.14",
+  "profile": "(version 1)\n(allow default)\n(deny file-read* (subpath \"/Users/vulcanbench/dev/VulcanBench\"))\n(allow file-read* (subpath \"/Users/vulcanbench/dev/VulcanBench/.venv\"))\n"
+}

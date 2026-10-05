@@ -1,0 +1,71 @@
+{
+  "id": "ocaml-expansion-plan-v1",
+  "date": "2026-10-05",
+  "timezone": "America/Los_Angeles",
+  "status": "frozen prospective blueprint, not an admitted runnable suite",
+  "target_tasks": 20,
+  "family_weight": 0.1,
+  "task_weight": 0.05,
+  "slots_per_family": 2,
+  "primary_view_slots": {"engineering": 10, "language-mastery": 10},
+  "source_targets": {"complete_pinned_upstream_repository_tasks_min": 8, "verified_oss_bugfix_tasks_min": 4},
+  "families": [
+    {"id": "async-lifecycle", "primary_view": "engineering", "slots": [
+      {"id": "async-delivery", "existing": "ocaml-candidates/async-durable-delivery"},
+      {"id": "async-cache", "existing": "ocaml-v1/async-generation-cache"}]},
+    {"id": "incremental-graphs", "primary_view": "engineering", "slots": [
+      {"id": "atomic-rewiring", "existing": "ocaml-atomic-candidate-v2/incremental-atomic-rewiring"},
+      {"id": "bounded-propagation", "existing": "ocaml-incremental-candidate/incremental-budgeted-propagation"}]},
+    {"id": "mutable-transactions", "primary_view": "engineering", "slots": [
+      {"id": "nested-table-savepoints", "existing": "ocaml-candidates/base-nested-transactions"},
+      {"id": "bulk-index-coordination", "new": true}]},
+    {"id": "event-time-aggregation", "primary_view": "engineering", "slots": [
+      {"id": "rolling-watermark", "existing": "ocaml-v1/window-watermark-allocation"},
+      {"id": "bounded-event-time-join", "new": true}]},
+    {"id": "persistent-recovery", "primary_view": "engineering", "slots": [
+      {"id": "interrupted-write-recovery", "new": true},
+      {"id": "checkpoint-compaction", "new": true}]},
+    {"id": "typed-serialization", "primary_view": "language-mastery", "slots": [
+      {"id": "tagged-native-codecs", "existing": "ocaml-serialization-candidate-v3/bin-prot-tagged-transaction"},
+      {"id": "incremental-typed-framing", "existing": "ocaml-v1/typed-frame-stream"}]},
+    {"id": "typed-binders", "primary_view": "language-mastery", "slots": [
+      {"id": "typed-query-normalization", "existing": "ocaml-v1/typed-query-optimizer"},
+      {"id": "recursive-binder-transformation", "new": true}]},
+    {"id": "persistent-ordered-structures", "primary_view": "language-mastery", "slots": [
+      {"id": "comparator-interval-map", "existing": "ocaml-v1/interval-map-transaction"},
+      {"id": "augmented-persistent-order", "new": true}]},
+    {"id": "modules-abstract-types", "primary_view": "language-mastery", "slots": [
+      {"id": "generative-module-registry", "new": true},
+      {"id": "first-class-functor-integration", "new": true}]},
+    {"id": "compiler-runtime", "primary_view": "language-mastery", "slots": [
+      {"id": "gadt-field-safety", "existing": "ocaml-v1/compiler-gadt-field-safety", "blocked": "preserved provider refusal; no automatic retry"},
+      {"id": "verified-compiler-runtime-task", "new": true}]}],
+  "nonselected_latest_tasks": [
+    {"existing": "ocaml-v1/async-bounded-dispatch", "family": "async-lifecycle", "role": "reserve easy anchor"},
+    {"existing": "ocaml-v1/incremental-atomic-graph", "family": "incremental-graphs", "role": "superseded small workload; diagnostic evidence"},
+    {"existing": "ocaml-candidates/typed-schema-evolution", "family": "typed-serialization", "role": "development evidence; unresolved public Decode exception policy"},
+    {"existing": "ocaml-union-heldout/bin-prot-open-union", "family": "typed-serialization", "role": "supporting related workload with prior reference supplied"}],
+  "development_attempts_per_task": 3,
+  "fresh_final_confirmation_attempts_per_task": 3,
+  "planned_confirmation_outcomes": 60,
+  "complete_passes_max_for_point_estimate_strictly_below_80": 47,
+  "headline": null,
+  "headline_requires_all_slots_and_coverage": true,
+  "renormalize_missing_families": false,
+  "independent_external_confirmation_established": false,
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "billing": "subscription",
+  "codex_version": "0.159.0",
+  "sandbox": "local workspace-write",
+  "max_concurrency": 1,
+  "agent_container": false,
+  "judges": false,
+  "agent_timeout_s": 10800,
+  "configured_max_steps": 540,
+  "configured_step_cap_independently_enforced": false,
+  "artifact_cleanup": "positively attributed shared solver files quarantined between attempts; stop on unexplained OCaml artifacts or observed prior-attempt reads",
+  "native_os_read_isolation": false,
+  "automatic_provider_retries": 0,
+  "next_authoring_slot": "generative-module-registry"
+}

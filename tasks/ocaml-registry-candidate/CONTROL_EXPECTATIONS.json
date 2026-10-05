@@ -1,0 +1,42 @@
+{
+  "no-equality-proof.diff": {
+    "must_fail": "generative_identity",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "replacement-keeps-old.diff": {
+    "must_fail": "revocable_handles",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "update-resurrects.diff": {
+    "must_fail": "reentrant_updates",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "clone-aliases-owner.diff": {
+    "must_fail": "clone_isolation",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "transfer-moves-handle.diff": {
+    "must_fail": "typed_transfer",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "iter-captures-values.diff": {
+    "must_fail": "snapshot_visitors",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "iter-visits-stale.diff": {
+    "must_fail": "snapshot_visitors",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "transfer-no-closed-check.diff": {
+    "must_fail": "closed_precedence",
+    "must_compile": true,
+    "must_preserve_guards": true
+  }
+}

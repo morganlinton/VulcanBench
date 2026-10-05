@@ -1,0 +1,73 @@
+{
+  "valid": true,
+  "controls": [
+    {
+      "patch": "commits-incomplete-header.diff",
+      "intended_failure": "stream_transactions",
+      "observed_failed_groups": [
+        "stream_transactions"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    },
+    {
+      "patch": "constructs-before-record-exhaustion.diff",
+      "intended_failure": "callback_transactions",
+      "observed_failed_groups": [
+        "callback_transactions"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    },
+    {
+      "patch": "copies-whole-buffer.diff",
+      "intended_failure": "unknown_allocation",
+      "observed_failed_groups": [
+        "bounded_atoms",
+        "unknown_allocation"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    },
+    {
+      "patch": "old-reference-small-stream.diff",
+      "intended_failure": "wire_compatibility",
+      "observed_failed_groups": [
+        "wire_compatibility"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    },
+    {
+      "patch": "omits-exception-rollback.diff",
+      "intended_failure": "callback_transactions",
+      "observed_failed_groups": [
+        "callback_transactions",
+        "stream_transactions",
+        "bounded_atoms"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    },
+    {
+      "patch": "swallows-user-decode.diff",
+      "intended_failure": "callback_transactions",
+      "observed_failed_groups": [
+        "callback_transactions",
+        "stream_transactions",
+        "bounded_atoms"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    },
+    {
+      "patch": "unbounded-atom-view.diff",
+      "intended_failure": "bounded_atoms",
+      "observed_failed_groups": [
+        "bounded_atoms"
+      ],
+      "compiled": true,
+      "regression_guards_pass": true
+    }
+  ]
+}

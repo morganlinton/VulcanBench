@@ -1,0 +1,41 @@
+# An Introduction to Incremental
+
+Incremental is a tool for optimizing the /incremental performance/ of
+your code. In other words, incremental makes it easier to build
+computations that update efficiently when their input data changes in
+small ways.
+
+It's a useful tool, but one that a lot of people don't feel entirely
+comfortable with.  It's also a tool that's easy to misuse, which can
+leave you with confusing code and hard-to-predict behavior.
+
+But all in, if you know how to approach it, Incremental is powerful,
+and can simplify certain tasks immensely.
+
+This guide will give you an overview of the library, explaining what
+kinds of problems Incremental can help with, and some tips for making
+the most out of it.
+
+The tutorial is broken up into parts:
+
+- [Preliminaries](./part1-preliminaries.mdx) covers what Incremental
+  is for, and walks through the basics.
+- [Dynamic computations with bind](./part2-dynamic.mdx) shows you
+  how to use `bind` to build computations whose structure changes
+  dynamically over time.
+- [Incr_map](./part3-map.mdx) shows you how to use the `Incr_map`
+  libraries to build efficient computations on `Map.t`'s.
+- [Pitfalls](./part4-pitfalls.mdx) highlights some of the mistakes
+  people typically make when first using Incremental.
+- [Time](./part5-time.mdx) demonstrates Incremental's support for
+  building computations over time.
+- [Patterns](./part6-patterns.mdx) covers `ppx_pattern_bind`,
+  which provides specialized support for doing incremental
+  computations involving pattern matches.
+- [Performance and optimization](./part7-optimization.mdx) has some
+  notes on how to think about performance of your incremental
+  programs.
+- [Sharing](./part8-sharing.mdx) shows you how to optimize your
+  incremental programs further by sharing sub-computations among
+  different parts of your computation.
+

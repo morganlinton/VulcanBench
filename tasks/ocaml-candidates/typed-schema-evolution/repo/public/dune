@@ -1,0 +1,2 @@
+(executables (names smoke migration) (libraries schema_engine))
+(rule (alias runtest) (action (run %{exe:smoke.exe})))

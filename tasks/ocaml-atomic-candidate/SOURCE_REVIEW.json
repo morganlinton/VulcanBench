@@ -1,0 +1,23 @@
+{
+  "status": "Exposed initial source review preserved; clean guarded calibration pending",
+  "rows": [
+    {
+      "run_id": "incremental-atomic-rewiring-50d80c3b",
+      "reviewed": true,
+      "implementation_files": [
+        "src/expert1.ml"
+      ],
+      "added_public_tests": [
+        "atomic-test/atomic_edits.ml",
+        "atomic-test/dune"
+      ],
+      "approach": "Validates prospective topology and ownership, removes obsolete dependencies before additions, suppresses edge callbacks until recomputation, and uses the existing backlink and height helpers.",
+      "unsafe_cast_or_registry_observed": false,
+      "counter_forgery_observed": false,
+      "guarded_fixture_edits_observed": false,
+      "new_security_or_quality_score_claimed": false,
+      "eligible_for_clean_calibration": false,
+      "exposure_receipt": "EXPOSURE_INITIAL_COHORT.json"
+    }
+  ]
+}

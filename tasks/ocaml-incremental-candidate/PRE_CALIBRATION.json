@@ -1,0 +1,70 @@
+{
+  "suite": "ocaml-incremental-candidate",
+  "version": "6b37b41277dd",
+  "n_tasks": 1,
+  "task_ids": [
+    "incremental-budgeted-propagation"
+  ],
+  "task_hashes": {
+    "incremental-budgeted-propagation": "d01b0a5fc2ca6352700e023384a2115e551c914ad5120e315fe81011891909b6"
+  },
+  "status": "incomplete calibration",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "minimum_attempts_per_task": 3,
+  "sandbox_selection": "local",
+  "execution_environments": [],
+  "metric": "mean per-task pass@1; all required checks and regression guards must pass",
+  "pass_at_1": null,
+  "observed_below_80_percent": null,
+  "independent_confirmation": false,
+  "views": {
+    "engineering": {
+      "task_ids": [
+        "incremental-budgeted-propagation"
+      ],
+      "distinct_tasks": 1,
+      "passes": 0,
+      "attempts": 0,
+      "coverage_complete": false,
+      "pass_at_1": null
+    },
+    "language-mastery": {
+      "task_ids": [
+        "incremental-budgeted-propagation"
+      ],
+      "distinct_tasks": 1,
+      "passes": 0,
+      "attempts": 0,
+      "coverage_complete": false,
+      "pass_at_1": null
+    }
+  },
+  "view_overlap": "Tasks tagged both enter each view but are counted once in the suite.",
+  "limitations": [
+    "1 tasks are a development pool, not a stable leaderboard or a confidence claim.",
+    "Configured model identity may be requested-only; inspect each CLI receipt.",
+    "Development selection and retrospective audits are not independent confirmation.",
+    "Public upstream patches may be retrievable; task provenance is not a training-cutoff claim.",
+    "Execution environment is missing or mixed; inspect individual receipts.",
+    "Quality and security analyzers do not currently score OCaml.",
+    "Historical summaries may lack effective run limits; audit their launch receipts before publishing."
+  ],
+  "excluded_runs": [],
+  "unscored_runs": [],
+  "trace_only_invocations": [],
+  "tasks": [
+    {
+      "task_id": "incremental-budgeted-propagation",
+      "primary_view": "both",
+      "source": "oss-derived-original-extension",
+      "decontaminated": false,
+      "decontamination_notes": "Original extension to public Incremental. No claim about model training cutoffs.",
+      "upstream": null,
+      "passes": 0,
+      "attempts": 0,
+      "pass_at_1": null,
+      "runs": []
+    }
+  ]
+}

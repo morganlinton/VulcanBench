@@ -1,0 +1,197 @@
+diff --git a/lib/batch.ml b/lib/batch.ml
+index 6615f76..9025d5f 100644
+--- a/lib/batch.ml
++++ b/lib/batch.ml
+@@ -1,5 +1,10 @@
+ type ('k,'v) edit = { lower:'k; upper:'k; value:'v option }
+ let apply t edits =
+-  List.fold_left (fun acc e -> match acc with Error _ -> acc | Ok t ->
+-    match Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value with
+-    | Error _ -> Ok t | Ok updated -> Ok updated) (Ok t) edits
++  let rec loop t = function
++    | [] -> Ok t
++    | e :: rest ->
++      match Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value with
++      | Error _ as error -> error
++      | Ok updated -> loop updated rest
++  in
++  loop t edits
+diff --git a/lib/interval_map.ml b/lib/interval_map.ml
+index 2ce05b8..03fee17 100644
+--- a/lib/interval_map.ml
++++ b/lib/interval_map.ml
+@@ -1,10 +1,50 @@
+-type ('k, 'v, 'cmp) t = { comparator : ('k, 'cmp) Base.Comparator.t; equal : 'v -> 'v -> bool; points : ('k * 'v option) list }
+-let empty ~comparator ~equal = { comparator; equal; points = [] }
+-let boundaries t = t.points
++module Tree = Base.Map.Using_comparator.Tree
++
++type ('k, 'v, 'cmp) t = {
++  comparator : ('k, 'cmp) Base.Comparator.t;
++  equal : 'v -> 'v -> bool;
++  points : ('k, 'v option, 'cmp) Tree.t;
++}
++
++let empty ~comparator ~equal =
++  { comparator; equal; points = Tree.empty ~comparator }
++
++let boundaries t = Tree.to_alist t.points
++
+ let find t key =
+-  List.fold_left (fun current (k,v) -> if t.comparator.compare k key <= 0 then v else current) None t.points
++  match Tree.closest_key ~comparator:t.comparator t.points `Less_or_equal_to key with
++  | None -> None
++  | Some (_, value) -> value
++
++let equal_value t a b =
++  match a, b with
++  | None, None -> true
++  | Some a, Some b -> t.equal a b
++  | None, Some _ | Some _, None -> false
++
+ let assign t ~lower ~upper ~value =
+-  let _equal = t.equal in
+-  if t.comparator.compare lower upper > 0 then Error "reversed interval"
+-  else if t.comparator.compare lower upper = 0 then Ok t
+-  else Ok { t with points = [lower, value; upper, None] }
++  let comparator = t.comparator in
++  let order = comparator.compare lower upper in
++  if order > 0 then Error "reversed interval"
++  else if order = 0 then Ok t
++  else
++    (* Discard the overwritten boundaries while sharing untouched subtrees. *)
++    let upper_value = find t upper in
++    let left, _, rest = Tree.split ~comparator t.points lower in
++    let _, _, right = Tree.split ~comparator rest upper in
++    let lower_value =
++      match Tree.max_elt left with
++      | None -> None
++      | Some (_, value) -> value
++    in
++    let left =
++      if equal_value t lower_value value then left
++      else Tree.set ~comparator left ~key:lower ~data:value
++    in
++    let right =
++      if equal_value t value upper_value then right
++      else Tree.set ~comparator right ~key:upper ~data:upper_value
++    in
++    match Tree.append ~comparator ~lower_part:left ~upper_part:right with
++    | `Ok points -> Ok { t with points }
++    | `Overlapping_key_ranges -> assert false
+diff --git a/public/dune b/public/dune
+index 9445e60..fece142 100644
+--- a/public/dune
++++ b/public/dune
+@@ -1 +1 @@
+-(test (name smoke) (libraries engine))
++(tests (names smoke regression) (libraries engine base))
+diff --git a/public/regression.ml b/public/regression.ml
+new file mode 100644
+index 0000000..cff1f1e
+--- /dev/null
++++ b/public/regression.ml
+@@ -0,0 +1,103 @@
++let unwrap = function Ok t -> t | Error e -> failwith e
++let assign t lower upper value =
++  unwrap (Interval_map.assign t ~lower ~upper ~value)
++
++let () =
++  let empty = Interval_map.empty ~comparator:Base.Int.comparator ~equal:String.equal in
++  let original = assign empty 0 10 (Some "A") in
++  let overwritten = assign original 3 7 (Some "B") in
++  assert (Interval_map.boundaries overwritten =
++          [0, Some "A"; 3, Some "B"; 7, Some "A"; 10, None]);
++  assert (Interval_map.boundaries (assign original 2 8 None) =
++          [0, Some "A"; 2, None; 8, Some "A"; 10, None]);
++  assert (Interval_map.boundaries original = [0, Some "A"; 10, None]);
++  assert (Interval_map.boundaries empty = []);
++  assert (assign original 4 4 None == original);
++  assert (Interval_map.assign original ~lower:5 ~upper:4 ~value:None =
++          Error "reversed interval");
++  assert (Interval_map.boundaries (assign original 10 12 (Some "A")) =
++          [0, Some "A"; 12, None]);
++  assert (Interval_map.boundaries (assign original (-1) 11 None) = []);
++  let equal a b = String.equal (String.lowercase_ascii a) (String.lowercase_ascii b) in
++  let t = Interval_map.empty ~comparator:Base.Int.comparator ~equal in
++  let t = assign (assign t 0 3 (Some "a")) 3 6 (Some "A") in
++  assert (Interval_map.boundaries t = [0, Some "a"; 6, None]);
++  let edits = [Batch.{ lower = 3; upper = 7; value = Some "B" };
++               Batch.{ lower = 5; upper = 9; value = None }] in
++  assert (Interval_map.boundaries (unwrap (Batch.apply original edits)) =
++          [0, Some "A"; 3, Some "B"; 5, None; 9, Some "A"; 10, None]);
++  assert (Batch.apply original
++            (edits @ [Batch.{ lower = 10; upper = 2; value = None }]) =
++          Error "reversed interval");
++  assert (Interval_map.boundaries original = [0, Some "A"; 10, None])
++
++(* Compare many overlapping edits against a small pointwise model, in both orders. *)
++let check_order compare =
++  let module C = (val Base.Comparator.make ~compare ~sexp_of_t:Base.Int.sexp_of_t) in
++  let comparator = C.comparator in
++  let keys = List.sort compare (List.init 29 (fun i -> i - 14)) in
++  let check t model =
++    List.iter (fun k -> assert (Interval_map.find t k = model.(k + 14))) keys;
++    let _, reversed = List.fold_left (fun (previous, points) k ->
++      let value = model.(k + 14) in
++      if value = previous then previous, points
++      else value, (k, value) :: points) (None, []) keys in
++    assert (Interval_map.boundaries t = List.rev reversed)
++  in
++  let rng = Random.State.make [|42|] in
++  let t = ref (Interval_map.empty ~comparator ~equal:Int.equal) in
++  let model = ref (Array.make 29 None) in
++  for _ = 1 to 500 do
++    let a = Random.State.int rng 25 - 12 in
++    let b = Random.State.int rng 25 - 12 in
++    let lower, upper = if compare a b <= 0 then a, b else b, a in
++    let value = match Random.State.int rng 4 with 0 -> None | n -> Some n in
++    let old = !t and old_model = !model in
++    t := assign old lower upper value;
++    model := Array.copy old_model;
++    List.iter (fun k ->
++      if compare lower k <= 0 && compare k upper < 0 then
++        (!model).(k + 14) <- value) keys;
++    check !t !model;
++    check old old_model
++  done
++
++let () =
++  check_order Int.compare;
++  check_order (fun a b -> Int.compare b a)
++
++let () =
++  let calls = ref 0 in
++  let module C = (val Base.Comparator.make
++    ~compare:(fun a b -> incr calls; Int.compare a b)
++    ~sexp_of_t:Base.Int.sexp_of_t) in
++  let comparator = C.comparator in
++  let original = ref (Interval_map.empty ~comparator ~equal:Int.equal) in
++  for i = 0 to 2047 do
++    original := assign !original (3 * i) (3 * i + 1) (Some 1)
++  done;
++  let original = !original in
++  assert (List.length (Interval_map.boundaries original) = 4096);
++  Gc.full_major ();
++  let max_lookup = ref 0 and max_edit = ref 0 and max_bytes = ref 0. in
++  for i = 0 to 2047 do
++    calls := 0;
++    assert (Interval_map.find original (3 * i) = Some 1);
++    max_lookup := max !max_lookup !calls;
++    assert (!calls <= 64);
++    List.iter (fun value ->
++      calls := 0;
++      let before = Gc.allocated_bytes () in
++      let result = Interval_map.assign original
++          ~lower:(3 * i) ~upper:(3 * i + 1) ~value in
++      let bytes = Gc.allocated_bytes () -. before in
++      max_edit := max !max_edit !calls;
++      max_bytes := max !max_bytes bytes;
++      assert (!calls <= 512);
++      assert (bytes < 32768.);
++      let updated = unwrap result in
++      assert (Interval_map.find updated (3 * i) = value);
++      assert (Interval_map.find original (3 * i) = Some 1)) [Some 2; None]
++  done;
++  Printf.printf "Maximum comparator calls: lookup=%d edit=%d; edit allocation=%.0f bytes\n"
++    !max_lookup !max_edit !max_bytes

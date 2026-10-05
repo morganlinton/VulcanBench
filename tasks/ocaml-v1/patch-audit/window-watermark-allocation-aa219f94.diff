@@ -1,0 +1,175 @@
+diff --git a/lib/window.ml b/lib/window.ml
+index 221a6e1..e260143 100644
+--- a/lib/window.ml
++++ b/lib/window.ml
+@@ -1,9 +1,54 @@
+-type t = { width:int; mutable latest:int; mutable events:(int*int) list; mutable visits:int }
+-let create ~width = if width<1 || width>4096 then invalid_arg "width"; {width;latest=(-1);events=[];visits=0}
++type t = {
++  width : int;
++  mutable latest : int;
++  counts : int array;
++  sums : int array;
++  mutable count : int;
++  mutable total : int;
++  mutable visits : int;
++}
++
++let create ~width =
++  if width < 1 || width > 4096 then invalid_arg "width";
++  { width; latest = -1; counts = Array.make width 0;
++    sums = Array.make width 0; count = 0; total = 0; visits = width }
++
++let clear t index =
++  t.count <- t.count - t.counts.(index);
++  t.total <- t.total - t.sums.(index);
++  t.counts.(index) <- 0;
++  t.sums.(index) <- 0;
++  t.visits <- t.visits + 1
++
+ let add t ~time ~value =
+-  if time<0 then Error "negative time" else if t.latest>=0 && time<Window_bounds.oldest ~width:t.width ~watermark:t.latest then Error "late event"
+-  else begin t.latest<-max time t.latest; t.events<-(time,value)::t.events; t.visits<-t.visits+List.length t.events; Ok() end
+-let total t = List.fold_left(fun acc (_,v)->acc+v) 0 t.events
+-let count t = List.length t.events
+-let watermark t = if t.latest<0 then None else Some t.latest
++  if time < 0 then Error "negative time"
++  else if t.latest >= 0 &&
++          time < Window_bounds.oldest ~width:t.width ~watermark:t.latest then
++    Error "late event"
++  else begin
++    if time > t.latest then begin
++      if t.latest >= 0 then begin
++        let advance = time - t.latest in
++        if advance >= t.width then
++          for index = 0 to t.width - 1 do clear t index done
++        else
++          (* Each new timestamp reuses the slot of the timestamp expiring. *)
++          for offset = 1 to advance do
++            clear t ((t.latest + offset) mod t.width)
++          done
++      end;
++      t.latest <- time
++    end;
++    let index = time mod t.width in
++    t.counts.(index) <- t.counts.(index) + 1;
++    t.sums.(index) <- t.sums.(index) + value;
++    t.count <- t.count + 1;
++    t.total <- t.total + value;
++    t.visits <- t.visits + 1;
++    Ok ()
++  end
++
++let total t = t.total
++let count t = t.count
++let watermark t = if t.latest < 0 then None else Some t.latest
+ let bucket_visits t = t.visits
+diff --git a/lib/window_bounds.ml b/lib/window_bounds.ml
+index 40d1ac2..de1e349 100644
+--- a/lib/window_bounds.ml
++++ b/lib/window_bounds.ml
+@@ -1 +1 @@
+-let oldest ~width ~watermark = watermark - width
++let oldest ~width ~watermark = max 0 (watermark - (width - 1))
+diff --git a/public/smoke.ml b/public/smoke.ml
+index 26185ed..b153714 100644
+--- a/public/smoke.ml
++++ b/public/smoke.ml
+@@ -1 +1,96 @@
+-let () = let t=Window.create ~width:4 in assert(Window.count t=0); assert(Window.total t=0); assert(Window.watermark t=None); assert(Window.add t ~time:(-1) ~value:5=Error "negative time")
++let snapshot t =
++  Window.count t, Window.total t, Window.watermark t, Window.bucket_visits t
++
++let accept t time value = assert (Window.add t ~time ~value = Ok ())
++
++let reject t time error =
++  let before = snapshot t in
++  assert (Window.add t ~time ~value:99 = Error error);
++  assert (snapshot t = before)
++
++let () =
++  List.iter (fun width ->
++    assert (try ignore (Window.create ~width); false
++            with Invalid_argument _ -> true)) [min_int; 0; 4097; max_int];
++  let t = Window.create ~width:3 in
++  assert (Window.count t = 0 && Window.total t = 0);
++  assert (Window.watermark t = None);
++  reject t (-1) "negative time";
++  accept t 10 5;
++  accept t 8 2;
++  accept t 9 (-1);
++  assert (Window.count t = 3 && Window.total t = 6);
++  accept t 11 4;
++  assert (Window.count t = 3 && Window.total t = 8);
++  reject t 8 "late event";
++  reject t (-1) "negative time";
++  accept t 9 (-3);
++  assert (Window.count t = 4 && Window.total t = 5);
++  let visits = Window.bucket_visits t in
++  accept t max_int (-7);
++  assert (Window.bucket_visits t - visits = 4);
++  assert (Window.count t = 1 && Window.total t = -7);
++  accept t (max_int - 2) 8;
++  reject t (max_int - 3) "late event";
++  assert (Window.count t = 2 && Window.total t = 1)
++
++(* Compare mixed arrivals against an event-list reference model. *)
++let () =
++  let random = Random.State.make [|42|] in
++  List.iter (fun width ->
++    let t = Window.create ~width in
++    let latest = ref (-1) and events = ref [] in
++    for _ = 1 to 3000 do
++      let time = !latest + Random.State.int random (2 * width + 3) - width in
++      let value = Random.State.int random 101 - 50 in
++      if time < 0 then reject t time "negative time"
++      else if time < max 0 (!latest - (width - 1)) then
++        reject t time "late event"
++      else begin
++        let previous = !latest and visits = Window.bucket_visits t in
++        accept t time value;
++        latest := max !latest time;
++        events := List.filter (fun (timestamp, _) ->
++          timestamp >= max 0 (!latest - (width - 1))) ((time, value) :: !events);
++        let cleared = if previous < 0 then 0
++          else min width (max 0 (time - previous)) in
++        assert (Window.bucket_visits t - visits = cleared + 1)
++      end;
++      assert (Window.watermark t = if !latest < 0 then None else Some !latest);
++      assert (Window.count t = List.length !events);
++      assert (Window.total t = List.fold_left (fun sum (_, v) -> sum + v) 0 !events)
++    done) [1; 2; 3; 17; 4096]
++
++let () =
++  List.iter (fun width ->
++    let t = Window.create ~width in
++    let n = 10_000 in
++    for time = 0 to n - 1 do accept t time 1 done;
++    assert (Window.bucket_visits t <= 3 * n + 2 * width);
++    assert (Window.count t = width && Window.total t = width);
++    let visits = Window.bucket_visits t in
++    accept t max_int 2;
++    assert (Window.bucket_visits t - visits = width + 1);
++    assert (Window.count t = 1 && Window.total t = 2)) [1; 3; 4096]
++
++(* Measure the native insertion path after construction and warm-up. *)
++let () =
++  List.iter (fun width ->
++    let t = Window.create ~width in
++    for time = 0 to width do accept t time 1 done;
++    Gc.full_major ();
++    let n = 100_000 in
++    let visits = Window.bucket_visits t in
++    let before = Gc.allocated_bytes () in
++    for time = width + 1 to width + n do
++      accept t time 1;
++      accept t (time - width + 1) (-1);
++      accept t time 2
++    done;
++    let bytes = Gc.allocated_bytes () -. before in
++    assert (bytes /. float_of_int (3 * n) < 32.);
++    assert (Window.bucket_visits t - visits <= 3 * (3 * n) + 2 * width);
++    assert (Window.count t = 2 * width + 1);
++    assert (Window.total t = 3 * width - 1);
++    Printf.printf "width=%d: %.4f allocated bytes/event\n" width
++      (bytes /. float_of_int (3 * n))) [1; 3; 4096]

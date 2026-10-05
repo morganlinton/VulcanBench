@@ -1,0 +1,261 @@
+diff --git a/lib/graph.ml b/lib/graph.ml
+index 9125ecf..7a7ee62 100644
+--- a/lib/graph.ml
++++ b/lib/graph.ml
+@@ -1,8 +1,109 @@
+-type t = { sources : (string,int ref) Hashtbl.t }
+-type subscription = int ref
+-let create values = let sources=Hashtbl.create 8 in List.iter(fun (n,v)->if Hashtbl.mem sources n then invalid_arg "duplicate source"; Hashtbl.add sources n (ref v)) values; {sources}
+-let transaction _ ~sources:_ ~formulas:_ = Error "unknown reference"
+-let subscribe t n = Hashtbl.find_opt t.sources n
+-let stabilize _ = ()
+-let value s = !s
+-let additions _ = 0
++module Incr = Incremental
++
++type 'w graph = {
++  state : 'w Incr.State.t;
++  sources : (string, (int, 'w) Incr.Var.t) Hashtbl.t;
++  formulas : (string, (Expression.t, 'w) Incr.Var.t) Hashtbl.t;
++  nodes : (string, (int, 'w) Incr.t) Hashtbl.t;
++  mutable additions : int;
++}
++
++(* The witness keeps each graph's Incremental state separate, without casts. *)
++type t = Graph : 'w graph -> t
++type subscription = Subscription : (int, 'w) Incr.Observer.t -> subscription
++
++let create values =
++  let module State = (val Incr.State.create ()) in
++  let graph = {
++    state = State.t;
++    sources = Hashtbl.create 8;
++    formulas = Hashtbl.create 8;
++    nodes = Hashtbl.create 8;
++    additions = 0;
++  } in
++  List.iter (fun (name, value) ->
++    if Hashtbl.mem graph.sources name then invalid_arg "duplicate source";
++    let var = Incr.Var.create graph.state value in
++    Hashtbl.add graph.sources name var;
++    Hashtbl.add graph.nodes name (Incr.Var.watch var)) values;
++  Graph graph
++
++let rec compile graph = function
++  | Expression.Const value -> Incr.const graph.state value
++  | Expression.Ref name -> Hashtbl.find graph.nodes name
++  | Expression.Add (a, b) ->
++    Incr.map2 (compile graph a) (compile graph b) ~f:(fun a b ->
++      graph.additions <- graph.additions + 1;
++      a + b)
++  | Expression.Select (name, a, b) ->
++    let condition = Incr.map (Hashtbl.find graph.nodes name) ~f:(( = ) 0) in
++    Incr.bind condition ~f:(fun zero -> compile graph (if zero then a else b))
++
++let duplicates edits =
++  let seen = Hashtbl.create 8 in
++  List.exists (fun (name, _) ->
++    if Hashtbl.mem seen name then true
++    else (Hashtbl.add seen name (); false)) edits
++
++let transaction (Graph graph) ~sources ~formulas =
++  if duplicates sources || duplicates formulas then Error "duplicate edit"
++  else begin
++    let prospective = Hashtbl.create (Hashtbl.length graph.formulas) in
++    Hashtbl.iter (fun name var ->
++      Hashtbl.add prospective name (Incr.Var.latest_value var)) graph.formulas;
++    List.iter (fun (name, expr) -> Hashtbl.replace prospective name expr) formulas;
++    let known name =
++      Hashtbl.mem graph.sources name || Hashtbl.mem prospective name
++    in
++    let unknown =
++      List.exists (fun (name, _) -> not (Hashtbl.mem graph.sources name)) sources
++      || List.exists (fun (name, _) -> Hashtbl.mem graph.sources name) formulas
++      || Hashtbl.fold (fun _ expr unknown ->
++        unknown || List.exists (fun name -> not (known name))
++          (Expression.references expr)) prospective false
++    in
++    if unknown then Error "unknown reference"
++    else begin
++      let visiting = Hashtbl.create 8 in
++      let visited = Hashtbl.create 8 in
++      let rec cycle name =
++        if Hashtbl.mem visiting name then true
++        else if Hashtbl.mem visited name then false
++        else match Hashtbl.find_opt prospective name with
++          | None -> false
++          | Some expr ->
++            Hashtbl.add visiting name ();
++            let result = List.exists cycle (Expression.references expr) in
++            Hashtbl.remove visiting name;
++            Hashtbl.replace visited name ();
++            result
++      in
++      if Hashtbl.fold (fun name _ found -> found || cycle name) prospective false
++      then Error "cycle"
++      else begin
++        (* Bind callbacks run only at stabilization, after all names exist.
++           The binding itself stays attached to the name across replacements. *)
++        List.iter (fun (name, expr) ->
++          match Hashtbl.find_opt graph.formulas name with
++          | Some var ->
++            if Incr.Var.latest_value var <> expr then Incr.Var.set var expr
++          | None ->
++            let var = Incr.Var.create graph.state expr in
++            let node = Incr.bind (Incr.Var.watch var) ~f:(compile graph) in
++            Hashtbl.add graph.formulas name var;
++            Hashtbl.add graph.nodes name node) formulas;
++        List.iter (fun (name, value) ->
++          let var = Hashtbl.find graph.sources name in
++          if Incr.Var.latest_value var <> value then Incr.Var.set var value) sources;
++        Ok ()
++      end
++    end
++  end
++
++let subscribe (Graph graph) name =
++  Option.map (fun node -> Subscription (Incr.observe node))
++    (Hashtbl.find_opt graph.nodes name)
++
++let stabilize (Graph graph) = Incr.stabilize graph.state
++let value (Subscription observer) = Incr.Observer.value_exn observer
++let additions (Graph graph) = graph.additions
+diff --git a/public/smoke.ml b/public/smoke.ml
+index 1b9705b..24df800 100644
+--- a/public/smoke.ml
++++ b/public/smoke.ml
+@@ -1 +1,133 @@
+-let () = let t=Graph.create ["x",3] in let s=Option.get(Graph.subscribe t "x") in Graph.stabilize t; assert(Graph.value s=3); assert(Graph.subscribe t "absent"=None)
++open Expression
++
++let edit t ?(sources = []) formulas = Graph.transaction t ~sources ~formulas
++let observe t name = Option.get (Graph.subscribe t name)
++
++let () =
++  let t = Graph.create ["x", 3] in
++  let s = observe t "x" in
++  Graph.stabilize t;
++  assert (Graph.value s = 3);
++  assert (Graph.subscribe t "absent" = None);
++  assert (edit t ~sources:["x", 4] [] = Ok ());
++  assert (Graph.value s = 3);
++  Graph.stabilize t;
++  assert (Graph.value s = 4);
++  assert (try ignore (Graph.create ["x", 1; "x", 2]); false
++          with Invalid_argument _ -> true)
++
++let () =
++  let t = Graph.create ["flag", 0; "a", 2; "b", 9] in
++  let selected = Select ("flag", Ref "a", Ref "b") in
++  let result = Add (Ref "selected", Const 1) in
++  (* Forward references are valid within a batch. *)
++  assert (edit t ["result", result; "selected", selected] = Ok ());
++  let s = observe t "result" in
++  Graph.stabilize t;
++  assert (Graph.value s = 3 && Graph.additions t = 1);
++  Graph.stabilize t;
++  assert (Graph.additions t = 1);
++  assert (edit t ~sources:["b", 20] [] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.value s = 3 && Graph.additions t = 1);
++  assert (edit t ~sources:["flag", 1] [] = Ok ());
++  assert (Graph.value s = 3);
++  Graph.stabilize t;
++  assert (Graph.value s = 21 && Graph.additions t = 2);
++  assert (edit t ~sources:["flag", 2] [] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.value s = 21 && Graph.additions t = 2);
++  assert (edit t ~sources:["b", 20] ["selected", selected; "result", result] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.additions t = 2);
++  (* Replacing a formula preserves subscriptions and equal-value cutoffs. *)
++  assert (edit t ["selected", Const 20] = Ok ());
++  assert (Graph.value s = 21);
++  Graph.stabilize t;
++  assert (Graph.value s = 21 && Graph.additions t = 2);
++  assert (edit t ["result", Add (Ref "a", Const 5)] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.value s = 7 && Graph.additions t = 3)
++
++let () =
++  let t = Graph.create ["flag", 0; "a", 2; "b", 9] in
++  assert (edit t [
++    "selected", Select ("flag", Add (Ref "a", Const 1),
++                        Add (Ref "b", Const 2));
++    "unused", Add (Ref "a", Ref "b")
++  ] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.additions t = 0);
++  let s = observe t "selected" in
++  Graph.stabilize t;
++  assert (Graph.value s = 3 && Graph.additions t = 1);
++  assert (edit t ~sources:["b", 30] ["unused", Add (Ref "a", Const 99)] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.value s = 3 && Graph.additions t = 1);
++  assert (edit t ~sources:["flag", 1] [] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.value s = 32 && Graph.additions t = 2)
++
++let () =
++  let t = Graph.create ["a", 2; "b", 3] in
++  assert (edit t ["sum", Add (Ref "a", Ref "b");
++                 "out", Add (Ref "sum", Const 1)] = Ok ());
++  let s = observe t "out" in
++  Graph.stabilize t;
++  assert (Graph.value s = 6 && Graph.additions t = 2);
++  assert (edit t ~sources:["a", 1; "b", 4] [] = Ok ());
++  Graph.stabilize t;
++  assert (Graph.value s = 6 && Graph.additions t = 3)
++
++let () =
++  let t = Graph.create ["x", 1; "flag", 0] in
++  assert (edit t ["out", Add (Ref "x", Const 1)] = Ok ());
++  let s = observe t "out" in
++  Graph.stabilize t;
++  let fails sources formulas error =
++    assert (edit t ~sources formulas = Error error);
++    assert (Graph.subscribe t "new" = None);
++    Graph.stabilize t;
++    assert (Graph.value s = 2 && Graph.additions t = 1)
++  in
++  fails ["x", 5; "x", 6] ["new", Ref "missing"] "duplicate edit";
++  fails ["x", 5] ["new", Const 1; "new", Ref "new"] "duplicate edit";
++  fails ["missing", 1] ["new", Const 2] "unknown reference";
++  fails ["x", 5] ["x", Const 2; "new", Const 1] "unknown reference";
++  fails ["x", 5] ["new", Ref "new"; "out", Ref "missing"] "unknown reference";
++  fails ["x", 5] ["new", Select ("flag", Const 1, Ref "missing")]
++    "unknown reference";
++  fails ["x", 5] ["new", Select ("flag", Const 1, Ref "new")] "cycle";
++  fails ["x", 5] ["new", Ref "out"; "out", Ref "new"] "cycle";
++  fails ["x", 5] ["new", Select ("new", Const 1, Const 2)] "cycle"
++
++let () =
++  (* A batch may reverse old dependencies while its final graph remains acyclic. *)
++  let t = Graph.create [] in
++  assert (edit t ["a", Ref "b"; "b", Const 4] = Ok ());
++  let a = observe t "a" and b = observe t "b" in
++  Graph.stabilize t;
++  assert (edit t ["b", Ref "a"; "a", Const 7] = Ok ());
++  assert (Graph.value a = 4 && Graph.value b = 4);
++  Graph.stabilize t;
++  assert (Graph.value a = 7 && Graph.value b = 7);
++  (* Validation also sees successful edits that have not yet stabilized. *)
++  assert (edit t ["a", Ref "c"; "c", Const 8] = Ok ());
++  assert (edit t ["c", Ref "b"] = Error "cycle");
++  Graph.stabilize t;
++  assert (Graph.value a = 8 && Graph.value b = 8)
++
++let () =
++  let first = Graph.create ["x", 1] and second = Graph.create ["x", 5] in
++  assert (edit first ["out", Add (Ref "x", Const 1)] = Ok ());
++  assert (edit second ["out", Add (Ref "x", Const 1)] = Ok ());
++  let a = observe first "out" and b = observe second "out" in
++  Graph.stabilize first;
++  assert (Graph.value a = 2 && Graph.additions second = 0);
++  Graph.stabilize second;
++  assert (Graph.value b = 6);
++  assert (edit second ~sources:["x", 10] [] = Ok ());
++  Graph.stabilize first;
++  assert (Graph.value b = 6 && Graph.additions second = 1);
++  Graph.stabilize second;
++  assert (Graph.value b = 11 && Graph.additions second = 2)

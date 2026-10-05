@@ -1,0 +1,37 @@
+diff --git a/lib/pipeline.ml b/lib/pipeline.ml
+--- a/lib/pipeline.ml
++++ b/lib/pipeline.ml
+@@ -1,10 +1,27 @@
+ open Async_kernel
+-type t = { worker : int -> (int,string) result Deferred.t; mutable count:int }
++type t = { worker : int -> (int,string) result Deferred.t; concurrency:int; capacity:int;
++  pending:(int * (int,string) result Ivar.t) Pending.t; mutable count:int; mutable closing:bool; done_:unit Ivar.t }
+ let create ~concurrency ~capacity ~worker =
+   if concurrency<=0 || capacity<0 then invalid_arg "limits";
+-  {worker;count=0}
+-let submit t value = t.count<-t.count+1; let d=t.worker value in Deferred.upon d (fun _->t.count<-t.count-1); d
+-let close _ = Deferred.return ()
+-let abort _ = Deferred.return ()
++  {worker;concurrency;capacity;pending=Pending.create();count=0;closing=false;done_=Ivar.create()}
++let maybe_done t = if t.closing && t.count=0 && Pending.length t.pending=0 then Ivar.fill_if_empty t.done_ ()
++let rec start t (value,reply) =
++  t.count<-t.count+1;
++  let d=try t.worker value with _->Deferred.return(Error "worker exception") in
++  Deferred.upon d (fun result ->
++    Ivar.fill_if_empty reply result; t.count<-t.count-1;
++    (match Pending.take t.pending with None->() | Some job->start t job);
++    maybe_done t)
++let submit t value =
++  if t.closing then Deferred.return(Error "closed")
++  else if t.count>=t.concurrency && Pending.length t.pending>=t.capacity then Deferred.return(Error "full")
++  else let reply=Ivar.create() in
++    if t.count<t.concurrency then start t (value,reply) else Pending.push t.pending (value,reply);
++    Ivar.read reply
++let close t = t.closing<-true; maybe_done t; Ivar.read t.done_
++let abort t =
++  t.closing<-true;
++  let rec discard ()= match Pending.take t.pending with None->() | Some(_,reply)->Ivar.fill_if_empty reply (Error "aborted"); discard() in
++  discard(); maybe_done t; Ivar.read t.done_
+ let active t = t.count
+-let queued _ = 0
++let queued t = Pending.length t.pending

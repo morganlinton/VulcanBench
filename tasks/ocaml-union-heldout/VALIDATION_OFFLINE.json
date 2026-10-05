@@ -1,0 +1,1517 @@
+{
+  "tasks": [
+    {
+      "id": "bin-prot-open-union",
+      "base": [
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.511
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": false,
+              "projection_order": false,
+              "unknown_forwarding": false,
+              "framing_errors": false,
+              "callback_transactions": false,
+              "native_readers": false,
+              "bounded_payloads": false,
+              "schema_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.round in file \"hidden/checks.ml\", line 26, characters 22-34\nCalled from Dune__exe__Checks.typed_dispatch in file \"hidden/checks.ml\", line 28, characters 8-32\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 20-36\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.projection_order in file \"hidden/checks.ml\", line 39, characters 7-63\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 57-75\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.unknown_forwarding in file \"hidden/checks.ml\", line 46, characters 39-74\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 98-118\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.framing_errors in file \"hidden/checks.ml\", line 55, characters 11-37\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 137-153\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.decode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.decode in file \"src/union.ml\" (inlined), line 15, characters 59-90\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 72, characters 66-103\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.native_readers in file \"hidden/checks.ml\", line 85, characters 7-33\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 221-237\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.decode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.decode in file \"src/union.ml\" (inlined), line 15, characters 59-90\nCalled from Dune__exe__Checks.bounded_payloads in file \"hidden/checks.ml\", line 97, characters 88-127\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 258-276\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.schema_precedence in file \"hidden/checks.ml\", line 104, characters 7-35\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 298-317\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.391
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": false,
+              "projection_order": false,
+              "unknown_forwarding": false,
+              "framing_errors": false,
+              "callback_transactions": false,
+              "native_readers": false,
+              "bounded_payloads": false,
+              "schema_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.round in file \"hidden/checks.ml\", line 26, characters 22-34\nCalled from Dune__exe__Checks.typed_dispatch in file \"hidden/checks.ml\", line 28, characters 8-32\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 20-36\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.projection_order in file \"hidden/checks.ml\", line 39, characters 7-63\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 57-75\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.unknown_forwarding in file \"hidden/checks.ml\", line 46, characters 39-74\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 98-118\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.framing_errors in file \"hidden/checks.ml\", line 55, characters 11-37\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 137-153\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.decode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.decode in file \"src/union.ml\" (inlined), line 15, characters 59-90\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 72, characters 66-103\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.native_readers in file \"hidden/checks.ml\", line 85, characters 7-33\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 221-237\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.decode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.decode in file \"src/union.ml\" (inlined), line 15, characters 59-90\nCalled from Dune__exe__Checks.bounded_payloads in file \"hidden/checks.ml\", line 97, characters 88-127\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 258-276\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.schema_precedence in file \"hidden/checks.ml\", line 104, characters 7-35\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 298-317\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.402
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": false,
+              "projection_order": false,
+              "unknown_forwarding": false,
+              "framing_errors": false,
+              "callback_transactions": false,
+              "native_readers": false,
+              "bounded_payloads": false,
+              "schema_precedence": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 0/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.round in file \"hidden/checks.ml\", line 26, characters 22-34\nCalled from Dune__exe__Checks.typed_dispatch in file \"hidden/checks.ml\", line 28, characters 8-32\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 20-36\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.projection_order in file \"hidden/checks.ml\", line 39, characters 7-63\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 57-75\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.unknown_forwarding in file \"hidden/checks.ml\", line 46, characters 39-74\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 98-118\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.framing_errors in file \"hidden/checks.ml\", line 55, characters 11-37\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 137-153\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.decode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.decode in file \"src/union.ml\" (inlined), line 15, characters 59-90\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 72, characters 66-103\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.native_readers in file \"hidden/checks.ml\", line 85, characters 7-33\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 221-237\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.decode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.decode in file \"src/union.ml\" (inlined), line 15, characters 59-90\nCalled from Dune__exe__Checks.bounded_payloads in file \"hidden/checks.ml\", line 97, characters 88-127\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 258-276\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"Union.encode pending\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Bin_prot__Union.encode in file \"src/union.ml\" (inlined), line 14, characters 39-70\nCalled from Dune__exe__Checks.schema_precedence in file \"hidden/checks.ml\", line 104, characters 7-35\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 298-317\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        }
+      ],
+      "gold": [
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.396
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.486
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.386
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        }
+      ],
+      "controls": [
+        {
+          "patch": "copy-unknown.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.481
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": false,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 4, characters 28-44\nCalled from Dune__exe__Checks.unknown_forwarding in file \"hidden/checks.ml\", line 48, characters 44-66\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 98-118\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "first-match-only.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.445
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": false,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 4, characters 28-44\nCalled from Dune__exe__Checks.projection_order in file \"hidden/checks.ml\", line 39, characters 64-112\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 57-75\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "known-tag-collision.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.41
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": false,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"expected invalid\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Stdlib__List.iter in file \"list.ml\", line 112, characters 12-15\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 57-75\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "omit-exception-rollback.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.423
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": false,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 4, characters 28-44\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 73, characters 125-136\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "omit-trailing-check.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.469
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.75
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": false,
+              "callback_transactions": false,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.framing_errors.run in file \"hidden/checks.ml\", line 56, characters 54-105\nCalled from Dune__exe__Checks.framing_errors in file \"hidden/checks.ml\", line 62, characters 39-65\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 137-153\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"expected error\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 77, characters 1-67\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "payload-offset-lost.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.418
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.75
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": false,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": false,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 4, characters 28-44\nCalled from Dune__exe__Checks.framing_errors in file \"hidden/checks.ml\", line 67, characters 33-58\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 137-153\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"bounds\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.bounded_payloads in file \"hidden/checks.ml\", line 100, characters 168-185\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 258-276\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "reader-consumes-remainder.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.419
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.75
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": false,
+              "native_readers": false,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 6/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"check\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 74, characters 109-165\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Bin_prot__Union.Decode(_)\nRaised at Bin_prot__Union.reader.(fun) in file \"src/union.ml\", line 73, characters 31-47\nRe-raised at Bin_prot__Union.reader.(fun) in file \"src/union.ml\", line 74, characters 34-43\nCalled from Dune__exe__Checks.native_readers in file \"hidden/checks.ml\", line 86, characters 7-31\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 221-237\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        },
+        {
+          "patch": "swallow-public-decode.diff",
+          "setup": [
+            {
+              "name": "public native preflight",
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "duration_s": 3.831
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.875
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": false,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/8 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- typed_dispatch",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- projection_order",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- unknown_forwarding",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- framing_errors",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Fatal error: exception Failure(\"expected exception\")\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.callback_transactions in file \"hidden/checks.ml\", line 73, characters 62-124\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 111, characters 179-202\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- native_readers",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- bounded_payloads",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "sandbox": "local"
+        }
+      ],
+      "standard_validation": {
+        "task_id": "bin-prot-open-union",
+        "status": "PASS",
+        "reasons": [
+          "gold=1.0, pre-patch=0.0, deterministic over 3 runs (local)"
+        ]
+      },
+      "valid": true
+    }
+  ],
+  "valid": true,
+  "difficulty": "unmeasured",
+  "sandbox": "local",
+  "network_isolation_enforced": true
+}

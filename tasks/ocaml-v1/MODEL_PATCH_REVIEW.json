@@ -1,0 +1,33 @@
+{
+  "kind": "qualitative source review and supplemental replay inventory, not a new scored benchmark",
+  "source_replay_receipt_sha256": "63fb2a39cad2fb1a7964a0fe2249f870f5f95d1275d85ec4fb70cb2fa5dcb115",
+  "replayed_runs": 21,
+  "original_passes": 17,
+  "exact_functional_and_failed_check_agreements": 21,
+  "patches_requiring_generated_artifact_exclusion": 3,
+  "excluded_generated_file_entries": 99,
+  "unchanged_source_patch_hashes": 18,
+  "patches_editing_public_tests": 18,
+  "modified_supplied_mli_paths": [],
+  "reviewed_library_implementation_runs": [
+    "async-bounded-dispatch-357e35a8",
+    "incremental-atomic-graph-19fa2932",
+    "interval-map-transaction-4ad37e00",
+    "typed-frame-stream-0b64e84a",
+    "window-watermark-allocation-13b7b5e3",
+    "typed-query-optimizer-15dd0191",
+    "async-generation-cache-6bd6f12c",
+    "async-generation-cache-e06a92cd"
+  ],
+  "review_selection": "Lexically first current run per original task family, plus the failed cache run; library code inspected, public-test edits inventoried. No maintainability score assigned.",
+  "verifier_image_inspected_after_replay": {
+    "tag": "vulcanbench/sandbox:ocaml-v1",
+    "id": "sha256:77987aefd1582051227ad123b7c4b9d5eb848c235ea15c413698ec9357952e4d"
+  },
+  "limitations": [
+    "No fresh model calls or independent confirmation.",
+    "Generated artifacts were excluded only from derived source patches; original raw patches and scores remain intact.",
+    "Qualitative inspection of eight library implementations is not a full review of all changed test code.",
+    "Original compiler replay belongs to its old core-only definition and is separate from these 21 matching outcomes."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "command": "dune build --profile release @all @runtest",
+  "workspace": "temporary reference checkout, outside scoring snapshots",
+  "status": "failed upstream public-checkout target",
+  "diagnostic": "test-debug/dune references absent bin/gen-explicit-dependencies.sh; upstream debug generators also fail on BSD cp and sed. The API addition required forwarding through test/test_incremental.ml, now supplied in the baseline scaffold.",
+  "admission_evidence": false,
+  "resolution": "The final setup explicitly compiles src/incremental.cmxa and test/incremental_test.cmxa, and runs both original public client executables through @runtest. This target passed on the temporary reference. Do not claim that all upstream inline/debug tests execute."
+}

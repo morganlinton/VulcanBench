@@ -1,0 +1,75 @@
+{
+  "id": "generative-module-registry",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "unmeasured candidate; not publication admitted",
+  "task_complexity": "multi_file",
+  "repo_scale": "small",
+  "primary_view": "language-mastery",
+  "source": "hand-authored",
+  "created": "2026-10-05",
+  "decontaminated": true,
+  "decontamination_notes": "Original fixture authored October 5, 2026. Harness classification denotes newly written hand-authored material, not independently verified training-cutoff decontamination.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "generative_identity",
+        "cmd": "dune exec --profile release hidden/checks.exe -- generative_identity"
+      },
+      {
+        "name": "heterogeneous_packages",
+        "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_packages"
+      },
+      {
+        "name": "revocable_handles",
+        "cmd": "dune exec --profile release hidden/checks.exe -- revocable_handles"
+      },
+      {
+        "name": "reentrant_updates",
+        "cmd": "dune exec --profile release hidden/checks.exe -- reentrant_updates"
+      },
+      {
+        "name": "clone_isolation",
+        "cmd": "dune exec --profile release hidden/checks.exe -- clone_isolation"
+      },
+      {
+        "name": "typed_transfer",
+        "cmd": "dune exec --profile release hidden/checks.exe -- typed_transfer"
+      },
+      {
+        "name": "snapshot_visitors",
+        "cmd": "dune exec --profile release hidden/checks.exe -- snapshot_visitors"
+      },
+      {
+        "name": "closed_precedence",
+        "cmd": "dune exec --profile release hidden/checks.exe -- closed_precedence"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "ordinary_workflow",
+        "cmd": "dune exec --profile release hidden/checks.exe -- ordinary"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build --profile release @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  }
+}

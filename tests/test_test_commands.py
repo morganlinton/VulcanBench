@@ -12,6 +12,12 @@ def test_python_default(tmp_path: Path) -> None:
     assert "pytest" in cmd
 
 
+def test_dune_project_takes_precedence_over_node_tooling(tmp_path: Path) -> None:
+    (tmp_path / "dune-project").write_text("(lang dune 3.11)\n")
+    (tmp_path / "package.json").write_text('{"name":"web-tooling"}')
+    assert default_test_command(tmp_path) == "dune runtest 2>&1 || true"
+
+
 def test_go_default(tmp_path: Path) -> None:
     (tmp_path / "go.mod").write_text("module example.com/x\n\ngo 1.23\n")
     assert "go test" in default_test_command(tmp_path)

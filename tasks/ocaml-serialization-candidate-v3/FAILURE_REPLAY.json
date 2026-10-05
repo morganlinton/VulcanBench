@@ -1,0 +1,122 @@
+{
+  "network_isolation_enforced": true,
+  "sandbox": "local",
+  "adds_model_attempts": false,
+  "rows": [
+    {
+      "run_id": "bin-prot-tagged-transaction-4a1d8239",
+      "patch_sha256": "b32539f35ebe31f6c27b61f6a9677338270602e1ed07c22964b0c835eb83b997",
+      "comparison": {
+        "fail_to_pass": true,
+        "pass_to_pass": true,
+        "pass_to_pass_ok": true
+      },
+      "reproduced": true,
+      "setup": [
+        {
+          "name": "public native preflight",
+          "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+          "exit_code": 0,
+          "duration_s": 3.536
+        }
+      ],
+      "setup_commands": [
+        {
+          "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "verdict": {
+        "scores": {
+          "functional": 0.875
+        },
+        "fail_to_pass": {
+          "heterogeneous_migration": true,
+          "wire_compatibility": false,
+          "structured_bounds": true,
+          "callback_transactions": true,
+          "stream_transactions": true,
+          "bounded_atoms": true,
+          "unknown_allocation": true,
+          "schema_precedence": true
+        },
+        "pass_to_pass": {
+          "ordinary_workflow": true,
+          "supplied_interfaces": true
+        },
+        "pass_to_pass_ok": true,
+        "details": [
+          "fail_to_pass 7/8 passing"
+        ]
+      },
+      "commands": [
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "python hidden/contracts.py",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+          "exit_code": 2,
+          "stdout": "",
+          "stderr": "Fatal error: exception Bin_prot__Tagged.Decode(_)\nRaised at Bin_prot__Tagged.reader.(fun) in file \"src/tagged.ml\", line 167, characters 28-44\nCalled from Bin_prot__Utils.bin_read_stream in file \"src/utils.ml\", line 49, characters 14-38\nCalled from Dune__exe__Checks.wire_compatibility.standard_stream in file \"hidden/checks.ml\", line 49, characters 31-74\nCalled from Dune__exe__Checks.wire_compatibility in file \"hidden/checks.ml\", line 52, characters 1-23\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 190, characters 25-45\n"
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+          "exit_code": 0,
+          "stdout": "unknown_heap_bytes=1288\n",
+          "stderr": ""
+        },
+        {
+          "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "supplemental_commands": [],
+      "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+      "sandbox": "local"
+    }
+  ],
+  "all_reproduced": true
+}

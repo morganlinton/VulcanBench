@@ -1,0 +1,218 @@
+{
+  "tasks": [
+    {
+      "id": "incremental-budgeted-propagation",
+      "base": [
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 11.274
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "exact_quota": false,
+              "dynamic_dependencies": false,
+              "publication_fence": false,
+              "deferred_writes": false,
+              "driver_interop": false,
+              "reentrancy": false,
+              "poison_and_validation": false
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": false,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": false,
+            "details": [
+              "regression: pass_to_pass failing: ['ordinary_workflow']",
+              "fail_to_pass 0/7 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.ordinary in file \"hidden/checks.ml\", line 211, characters 2-79\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 228, characters 18-29\n"
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- exact_quota",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.Run.slice in file \"hidden/checks.ml\", line 13, characters 32-75\nCalled from Dune__exe__Checks.exact_quota.loop in file \"hidden/checks.ml\", line 36, characters 10-34\nCalled from Dune__exe__Checks.exact_quota in file \"hidden/checks.ml\", line 38, characters 5-11\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 221, characters 21-35\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- dynamic_dependencies",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.Run.slice in file \"hidden/checks.ml\", line 13, characters 32-75\nCalled from Dune__exe__Checks.Run.drain.loop in file \"hidden/checks.ml\", line 19, characters 12-23\nCalled from Dune__exe__Checks.dynamic_dependencies in file \"hidden/checks.ml\", line 70, characters 4-25\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 222, characters 30-53\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- publication_fence",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.Run.slice in file \"hidden/checks.ml\", line 13, characters 32-75\nCalled from Dune__exe__Checks.publication_fence in file \"hidden/checks.ml\", line 102, characters 9-18\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 223, characters 27-47\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- deferred_writes",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.Run.slice in file \"hidden/checks.ml\", line 13, characters 32-75\nCalled from Dune__exe__Checks.deferred_writes in file \"hidden/checks.ml\", line 119, characters 9-18\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 224, characters 25-43\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- driver_interop",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.Run.slice in file \"hidden/checks.ml\", line 13, characters 32-75\nCalled from Dune__exe__Checks.driver_interop in file \"hidden/checks.ml\", line 134, characters 9-18\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 225, characters 24-41\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrancy",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.Run.slice in file \"hidden/checks.ml\", line 13, characters 32-75\nCalled from Dune__exe__Checks.Run.drain.loop in file \"hidden/checks.ml\", line 19, characters 12-23\nCalled from Dune__exe__Checks.reentrancy in file \"hidden/checks.ml\", line 173, characters 2-11\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 226, characters 20-33\n"
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- poison_and_validation",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.poison_and_validation in file \"hidden/checks.ml\", line 192, characters 5-14\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 227, characters 31-55\n"
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c0aa3894b602fbbdc51639f98ca561891669b0067bd80b8db5b9c05a85b999b9",
+          "sandbox": "local"
+        }
+      ],
+      "gold": [
+        {
+          "setup": [
+            {
+              "name": "public build preflight",
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "duration_s": 8.735
+            }
+          ],
+          "setup_commands": [
+            {
+              "cmd": "dune build --profile release @runtest",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "verdict": {
+            "scores": {
+              "functional": 0.0
+            },
+            "fail_to_pass": {
+              "exact_quota": true,
+              "dynamic_dependencies": true,
+              "publication_fence": true,
+              "deferred_writes": true,
+              "driver_interop": true,
+              "reentrancy": true,
+              "poison_and_validation": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": false,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": false,
+            "details": [
+              "regression: pass_to_pass failing: ['ordinary_workflow']",
+              "fail_to_pass 7/7 passing"
+            ]
+          },
+          "commands": [
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+              "exit_code": 2,
+              "stdout": "",
+              "stderr": "Uncaught exception:\n  \n  (Failure \"contract mismatch\")\n\nRaised at Stdlib.failwith in file \"stdlib.ml\", line 29, characters 17-33\nCalled from Dune__exe__Checks.check in file \"hidden/checks.ml\" (inlined), line 1, characters 28-56\nCalled from Dune__exe__Checks.ordinary in file \"hidden/checks.ml\", line 211, characters 2-79\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 228, characters 18-29\n"
+            },
+            {
+              "cmd": "python hidden/contracts.py",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- exact_quota",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- dynamic_dependencies",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- publication_fence",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- deferred_writes",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- driver_interop",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- reentrancy",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            },
+            {
+              "cmd": "dune exec --profile release hidden/checks.exe -- poison_and_validation",
+              "exit_code": 0,
+              "stdout": "",
+              "stderr": ""
+            }
+          ],
+          "supplemental_commands": [],
+          "task_hash": "c0aa3894b602fbbdc51639f98ca561891669b0067bd80b8db5b9c05a85b999b9",
+          "sandbox": "local"
+        }
+      ],
+      "controls": [],
+      "valid": false,
+      "error": "base regression guard failed"
+    }
+  ],
+  "valid": false,
+  "difficulty": "unmeasured",
+  "sandbox": "local",
+  "network_isolation_enforced": true
+}

@@ -1,0 +1,56 @@
+diff --git a/lib/batch.ml b/lib/batch.ml
+--- a/lib/batch.ml
++++ b/lib/batch.ml
+@@ -1,5 +1,4 @@
+ type ('k,'v) edit = { lower:'k; upper:'k; value:'v option }
+ let apply t edits =
+   List.fold_left (fun acc e -> match acc with Error _ -> acc | Ok t ->
+-    match Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value with
+-    | Error _ -> Ok t | Ok updated -> Ok updated) (Ok t) edits
++    Interval_map.assign t ~lower:e.lower ~upper:e.upper ~value:e.value) (Ok t) edits
+diff --git a/lib/interval_map.ml b/lib/interval_map.ml
+--- a/lib/interval_map.ml
++++ b/lib/interval_map.ml
+@@ -1,10 +1,34 @@
+-type ('k, 'v, 'cmp) t = { comparator : ('k, 'cmp) Base.Comparator.t; equal : 'v -> 'v -> bool; points : ('k * 'v option) list }
+-let empty ~comparator ~equal = { comparator; equal; points = [] }
+-let boundaries t = t.points
++module Tree = Base.Map.Using_comparator.Tree
++
++type ('key, 'value, 'cmp) t = {
++  points : ('key, 'value option, 'cmp) Tree.t;
++  comparator : ('key, 'cmp) Base.Comparator.t;
++  equal : 'value -> 'value -> bool;
++}
++
++let empty ~comparator ~equal =
++  { points = Tree.empty ~comparator; comparator; equal }
++let boundaries t = Tree.to_alist t.points
+ let find t key =
+-  List.fold_left (fun current (k,v) -> if t.comparator.compare k key <= 0 then v else current) None t.points
++  match Tree.closest_key t.points ~comparator:t.comparator `Less_or_equal_to key with
++  | None -> None | Some (_, value) -> value
++let same t a b = match a, b with
++  | None, None -> true | Some x, Some y -> t.equal x y | _ -> false
++
+ let assign t ~lower ~upper ~value =
+-  let _equal = t.equal in
+-  if t.comparator.compare lower upper > 0 then Error "reversed interval"
+-  else if t.comparator.compare lower upper = 0 then Ok t
+-  else Ok { t with points = [lower, value; upper, None] }
++  let compare = t.comparator.compare in
++  let order = compare lower upper in
++  if order > 0 then Error "reversed interval"
++  else if order = 0 then Ok t
++  else begin
++    let before = match Tree.closest_key t.points ~comparator:t.comparator `Less_than lower with
++      | None -> None | Some (_, value) -> value in
++    let after = find t upper in
++    let left, _, remainder = Tree.split t.points ~comparator:t.comparator lower in
++    let _, _, right = Tree.split remainder ~comparator:t.comparator upper in
++    let left = if same t before value then left else Tree.set left ~comparator:t.comparator ~key:lower ~data:value in
++    let left = if same t value after then left else Tree.set left ~comparator:t.comparator ~key:upper ~data:after in
++    match Tree.append ~comparator:t.comparator ~lower_part:left ~upper_part:right with
++    | `Ok points -> Ok { t with points }
++    | `Overlapping_key_ranges -> failwith "disjoint split invariant"
++  end

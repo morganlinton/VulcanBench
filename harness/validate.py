@@ -53,6 +53,7 @@ LANG_TOOL = {
     "typescript": "node",
     "javascript": "node",
     "rust": "cargo",
+    "ocaml": "dune",
 }
 DETERMINISM_RUNS = 3
 # Files that count as preserving an upstream license in a vendored OSS task.

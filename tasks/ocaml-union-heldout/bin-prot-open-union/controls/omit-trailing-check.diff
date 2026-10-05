@@ -1,0 +1,77 @@
+diff --git a/src/union.ml b/src/union.ml
+index 4bcb3fd..4d0580b 100644
+--- a/src/union.ml
++++ b/src/union.ml
+@@ -11,12 +11,66 @@ let validate schema =
+    if c.tag < 1 || c.tag > 65535 || Hashtbl.mem seen c.tag then invalid_arg "Union tag";
+    Hashtbl.add seen c.tag ()) (cases schema);
+  List.iter (fun (Case c) -> Tagged.validate c.codec) (cases schema)
+-let encode schema _ = validate schema; failwith "Union.encode pending"
+-let decode schema _ ~pos_ref:_ ~limit:_ = validate schema; failwith "Union.decode pending"
++let uget b at n =
++ let v=ref 0 in for i=0 to n-1 do v := !v lor (Char.code b.{at+i} lsl (8*i)) done; !v
++let put b at n v = for i=0 to n-1 do b.{at+i} <- Char.chr ((v lsr (8*i)) land 255) done
++let valid_tag tag = tag >= 1 && tag <= 65535
++let encode schema v =
++ validate schema;
++ let selected=List.filter_map (fun (Case c) ->
++   match c.project v with None -> None | Some x -> Some (c.tag, fun () -> Tagged.encode c.codec x)) (cases schema) in
++ let tag,payload = match selected with
++ | [tag,make] -> tag,make ()
++ | _::_::_ -> invalid_arg "Union ambiguous"
++ | [] -> (match schema with
++   | Closed _ -> invalid_arg "Union unmatched"
++   | Open (xs,u) -> (match u.project_unknown v with
++     | Some (tag,b) when valid_tag tag && not (List.exists (fun (Case c) -> c.tag=tag) xs) -> tag,b
++     | _ -> invalid_arg "Union unknown")) in
++ let n=Bigarray.Array1.dim payload in
++ if Int64.of_int n > 0xffffffffL then invalid_arg "Union length";
++ let b=Common.create_buf (n+6) in put b 0 2 tag; put b 2 4 n;
++ Bigarray.Array1.blit payload (Bigarray.Array1.sub b 6 n); b
++let error at reason = Error {at;reason}
++let structural b start limit =
++ if start<0 || limit<start || limit>Bigarray.Array1.dim b then error start Invalid_bounds
++ else if limit-start<6 then error start Truncated
++ else let tag=uget b start 2 in let n=uget b (start+2) 4 in
++ if tag=0 then error start Invalid_tag
++ else if n>limit-start-6 then error (start+6) Truncated
++ else Ok (tag,start+6,n)
++let decode schema b ~pos_ref ~limit =
++ validate schema;
++ let start= !pos_ref in
++ let run () = match structural b start limit with
++ | Error e -> Error e
++ | Ok (tag,at,n) ->
++   if false then error (at+n) Trailing
++   else let rec select = function
++    | Case c::xs -> if c.tag<>tag then select xs else
++      let local=ref at in
++      (match Tagged.decode c.codec b ~pos_ref:local ~limit:(at+n) with
++       | Error e -> error e.at (Payload e)
++       | Ok x -> Ok (c.inject x))
++    | [] -> (match schema with Closed _ -> error start (Unknown_tag tag)
++      | Open (_,u) -> Ok (u.inject_unknown tag (Bigarray.Array1.sub b at n))) in
++   select (cases schema) in
++ try match run () with
++ | Ok v -> pos_ref := limit; Ok v
++ | Error e -> pos_ref := start; Error e
++ with exn -> pos_ref := start; raise exn
+ let writer schema : _ Type_class.writer =
+  { size=(fun v -> Bigarray.Array1.dim (encode schema v));
+-   write=(fun _ ~pos:_ _ -> failwith "Union.write pending") }
++   write=(fun b ~pos v -> let payload=encode schema v in let n=Bigarray.Array1.dim payload in
++     if pos<0 || pos>Bigarray.Array1.dim b || n>Bigarray.Array1.dim b-pos then invalid_arg "Union writer bounds";
++     Bigarray.Array1.blit payload (Bigarray.Array1.sub b pos n); pos+n) }
+ let reader schema : _ Type_class.reader =
+- { read=(fun b ~pos_ref -> match decode schema b ~pos_ref ~limit:(Bigarray.Array1.dim b) with Ok v -> v | Error e -> raise (Decode e));
+-   vtag_read=(fun _ ~pos_ref:_ _ -> invalid_arg "Union vtag") }
+-let type_class ~shape schema : _ Type_class.t = {shape; writer=writer schema; reader=reader schema}
++ { read=(fun b ~pos_ref ->
++    validate schema; let start= !pos_ref in
++    try match structural b start (Bigarray.Array1.dim b) with
++    | Error e -> pos_ref := start; raise (Decode e)
++    | Ok (_,at,n) -> (match decode schema b ~pos_ref ~limit:(at+n) with
++      | Ok v -> v | Error e -> raise (Decode e))
++    with exn -> pos_ref := start; raise exn);
++   vtag_read=(fun _ ~pos_ref:_ _ -> validate schema; invalid_arg "Union vtag") }
++let type_class ~shape schema : _ Type_class.t = {shape;writer=writer schema;reader=reader schema}

@@ -80,9 +80,23 @@ def _infrastructure_reason(cmd: str, outcome: RunnerOutcome) -> str | None:
         return "verifier command timed out"
     if "no module named pytest" in output or "no module named 'pytest'" in output:
         return "pytest is unavailable in the verifier environment"
-    missing_commands = ("python", "python3", "pytest", "go", "cargo", "npm", "node")
+    missing_commands = (
+        "python",
+        "python3",
+        "pytest",
+        "go",
+        "cargo",
+        "npm",
+        "node",
+        "ocamlc",
+        "ocamlopt",
+        "dune",
+        "opam",
+    )
     if outcome.exit_code in {126, 127} and re.search(
-        r"(?:python3?|pytest|go|cargo|npm|node): (?:command )?not found", output
+        r"(?:python3?|pytest|go|cargo|npm|node|ocamlc|ocamlopt|dune|opam): "
+        r"(?:command )?not found",
+        output,
     ):
         # Commands often begin with environment assignments, e.g. PYTHONPATH=.
         return "verifier toolchain command is unavailable"

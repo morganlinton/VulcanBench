@@ -358,6 +358,10 @@ def run_agent(  # noqa: PLR0915
             "task_hash": task_hash(task),
             "suite": suite,
             "suite_id": suite_id,
+            "run_limits": {
+                "agent_timeout_s": effective_timeout,
+                "configured_max_steps": effective_max_steps,
+            },
             **({"effort": effort_meta.as_summary()} if effort_meta else {}),
             **(
                 {
@@ -771,7 +775,7 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
     return prompt_tokens, completion_tokens, finished, cost_capped, actual_steps
 
 
-_MANIFEST_TOOLS = ("git", "ruff", "bandit", "radon", "go", "node")
+_MANIFEST_TOOLS = ("git", "ruff", "bandit", "radon", "go", "node", "ocamlc", "dune", "opam")
 
 
 def _first_output_line(output: str) -> str | None:
@@ -1215,7 +1219,8 @@ def _verify(
 _WORKSPACE_GITIGNORE = (
     ".coverage\n__pycache__/\n.pytest_cache/\n.ruff_cache/\n*.pyc\n.cursor/\n.grok/\n.zcode/\n"
     ".devin/\n"
-    "target/\nnode_modules/\ndist/\nbuild/\n.gocache/\n.nyc_output/\n*.egg-info/\n"
+    "target/\nnode_modules/\ndist/\nbuild/\n_build/\n_ocamltest/\n_ocamltestd/\n"
+    ".gocache/\n.nyc_output/\n*.egg-info/\n"
     "*.o\n*.a\n*.dSYM/\nCMakeFiles/\nCMakeCache.txt\ncmake-build-*/\nzz_hidden_build/\n"
 )
 

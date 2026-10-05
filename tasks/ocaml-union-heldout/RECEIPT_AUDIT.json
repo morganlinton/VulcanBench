@@ -1,0 +1,119 @@
+{
+  "audited_at": "2026-10-04T23:13:04.685859+00:00",
+  "complete": true,
+  "suite_identity": {
+    "suite": "ocaml-union-heldout",
+    "version": "f9e65a3ac13a",
+    "n_tasks": 1,
+    "task_ids": [
+      "bin-prot-open-union"
+    ],
+    "task_hashes": {
+      "bin-prot-open-union": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a"
+    }
+  },
+  "all_eight_earlier_pool_identities_preserved": true,
+  "code_conditions_and_source_unchanged": true,
+  "run_count": 3,
+  "complete_task_passes": 3,
+  "rows": [
+    {
+      "run_id": "bin-prot-open-union-0fa6fc43",
+      "attempt": 1,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/union.ml"
+      ],
+      "patch_sha256": "5b42fb320747f68d79fb5e4d494c20da2b85b1b3fe85ae4f5ea5410b852c2399",
+      "summary_sha256": "2c2c63596b89b6fb9e950374006c67dd1640ddb3229430e0ce08241b713b4a53",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 237.901,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/tmp/union_checks.exe",
+        "/tmp/union_checks.ml"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "bin-prot-open-union-895ec73e",
+      "attempt": 2,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/union.ml"
+      ],
+      "patch_sha256": "09dc731968db93cb91129d5e4bd90d2e59dedbe42f520eaca44e5a3e4a8d0c69",
+      "summary_sha256": "53e8d05ba9b4092c7bdcb3fa3f5c7fa5d447f663ddf57ade615401da5033d3ce",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 215.739,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/private/tmp",
+        "/private/tmp/union_checks.exe",
+        "/private/tmp/union_checks.ml"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    },
+    {
+      "run_id": "bin-prot-open-union-ea3d6b29",
+      "attempt": 3,
+      "functional": 1.0,
+      "complete_task_pass": true,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "patch_paths": [
+        "src/union.ml"
+      ],
+      "patch_sha256": "36671db61c3193b57bf799d22834c83b7a80817153eb679019f3a0cf9f9b9c01",
+      "summary_sha256": "5b26a3539a44f6f4b074ae0ba7cbc835868a1adb72496ef9afcc34191e71f279",
+      "guarded_files_edited": [],
+      "generated_build_paths": [],
+      "new_unsafe_casts_observed": false,
+      "benchmark_data_paths_observed": [],
+      "answer_key_paths_observed": [],
+      "contaminated": false,
+      "duration_s": 233.082,
+      "filesystem_verdict": "out_of_workspace",
+      "out_of_workspace_paths": [
+        "/bin/zsh",
+        "/tmp/union_checks.exe",
+        "/tmp/union_checks.ml",
+        "/tmp/union_nested_checks.exe",
+        "/tmp/union_nested_checks.ml"
+      ],
+      "web_verdict": "no_web",
+      "model_identity_confidence": "requested-only"
+    }
+  ],
+  "limitations": [
+    "Native filesystem telemetry is observational, not isolation.",
+    "Functional grading does not establish OCaml quality or security analyzer coverage.",
+    "Model identity is requested-only."
+  ]
+}

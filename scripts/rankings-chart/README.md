@@ -48,7 +48,8 @@ instead); `make_efforts.py` keeps every effort level.
 - **Fonts**: Geist (Vercel) and Chakra Petch, both from Google Fonts under the
   SIL Open Font License 1.1, https://openfontlicense.org. Chakra Petch static
   weights register in matplotlib as separate families ("Chakra Petch",
-  "… Medium", "… SemiBold").
+  "… Medium", "… SemiBold"). The upstream Chakra Petch license is retained in
+  `OFL-Chakra-Petch.txt` and embedded in standalone OCaml HTML model cards.
 - **Numeric face**: IBM Plex Mono Regular and Medium, from
   `google/fonts/ofl/ibmplexmono`; the upstream SIL Open Font License is retained
   in `OFL-IBM-Plex-Mono.txt`. Used for the Astra/Fable comparison card's numbers.

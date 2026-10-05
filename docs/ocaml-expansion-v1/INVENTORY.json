@@ -1,0 +1,140 @@
+{
+  "logical_tasks": 15,
+  "rows": [
+    {
+      "definition": "ocaml-candidates/async-durable-delivery",
+      "family": "async-lifecycle",
+      "role": "prospective slot occupant",
+      "slot": "async-delivery",
+      "metadata_sha256": "6fc609e7a34c90bae2e1ac3c4566088c242a86c53f4d59c15eb86332f6a6b085",
+      "original_primary_view": "engineering",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-v1/async-generation-cache",
+      "family": "async-lifecycle",
+      "role": "prospective slot occupant",
+      "slot": "async-cache",
+      "metadata_sha256": "68b0fa8eaa12c3cbf80306fc9683b79b8b6daa6cdc9dbf1132328c51319277f6",
+      "original_primary_view": "engineering",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-atomic-candidate-v2/incremental-atomic-rewiring",
+      "family": "incremental-graphs",
+      "role": "prospective slot occupant",
+      "slot": "atomic-rewiring",
+      "metadata_sha256": "f62d81c71e77c2b56620ad8cf7dd6c407db1353e68be3509a07984b15d62a79c",
+      "original_primary_view": "both",
+      "source": "oss-derived-original-extension"
+    },
+    {
+      "definition": "ocaml-incremental-candidate/incremental-budgeted-propagation",
+      "family": "incremental-graphs",
+      "role": "prospective slot occupant",
+      "slot": "bounded-propagation",
+      "metadata_sha256": "8d628bbd33f5869143f664cdb50e08b9161bfd097ea032629afccaa4ed918f8e",
+      "original_primary_view": "both",
+      "source": "oss-derived-original-extension"
+    },
+    {
+      "definition": "ocaml-candidates/base-nested-transactions",
+      "family": "mutable-transactions",
+      "role": "prospective slot occupant",
+      "slot": "nested-table-savepoints",
+      "metadata_sha256": "ffc07fd799987f9eb4115d76f8c514474e450dbc7c128976b91086e0e2ce54f2",
+      "original_primary_view": "both",
+      "source": "oss-derived-original-extension"
+    },
+    {
+      "definition": "ocaml-v1/window-watermark-allocation",
+      "family": "event-time-aggregation",
+      "role": "prospective slot occupant",
+      "slot": "rolling-watermark",
+      "metadata_sha256": "bbae02e273a8ee196e81e25e88337ff948f58d5bd8ad0efe200396c2b8217feb",
+      "original_primary_view": "engineering",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-serialization-candidate-v3/bin-prot-tagged-transaction",
+      "family": "typed-serialization",
+      "role": "prospective slot occupant",
+      "slot": "tagged-native-codecs",
+      "metadata_sha256": "47b88b2bc63abd43b64bf06960763dd3b4f71ae5718928aae15b67fd234a695b",
+      "original_primary_view": "language-mastery",
+      "source": "oss-derived-original-extension"
+    },
+    {
+      "definition": "ocaml-v1/typed-frame-stream",
+      "family": "typed-serialization",
+      "role": "prospective slot occupant",
+      "slot": "incremental-typed-framing",
+      "metadata_sha256": "8a8efbf169f04c8d1a611c81f398c1d735a9bfb889c4a9bece479a853fb98d5d",
+      "original_primary_view": "language-mastery",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-v1/typed-query-optimizer",
+      "family": "typed-binders",
+      "role": "prospective slot occupant",
+      "slot": "typed-query-normalization",
+      "metadata_sha256": "7a5223294d2be3672800ba092837ddd5f29b8a1624c3342589895e95fc03e80f",
+      "original_primary_view": "language-mastery",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-v1/interval-map-transaction",
+      "family": "persistent-ordered-structures",
+      "role": "prospective slot occupant",
+      "slot": "comparator-interval-map",
+      "metadata_sha256": "accf83601eda80db29126085bfe90b86e62ad07998289d9f2dfb952e4b546223",
+      "original_primary_view": "language-mastery",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-v1/compiler-gadt-field-safety",
+      "family": "compiler-runtime",
+      "role": "prospective slot occupant",
+      "slot": "gadt-field-safety",
+      "metadata_sha256": "2e3de4cf2858c9dd00e5b9596a1f161fee403eaba215e0f588d9205acea619d1",
+      "original_primary_view": "both",
+      "source": "oss"
+    },
+    {
+      "definition": "ocaml-v1/async-bounded-dispatch",
+      "family": "async-lifecycle",
+      "role": "reserve easy anchor",
+      "slot": null,
+      "metadata_sha256": "c48f261434ff24ba078a0d79361007e81583929b9238ee26eb6b5e79b92c2eab",
+      "original_primary_view": "engineering",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-v1/incremental-atomic-graph",
+      "family": "incremental-graphs",
+      "role": "superseded small workload; diagnostic evidence",
+      "slot": null,
+      "metadata_sha256": "62ae24d24875f97d6366d0dea66460e476b6c333faf2e927f05f1c9c93e096fe",
+      "original_primary_view": "both",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-candidates/typed-schema-evolution",
+      "family": "typed-serialization",
+      "role": "development evidence; unresolved public Decode exception policy",
+      "slot": null,
+      "metadata_sha256": "315f0ab843974ca1cac5a6ea9050f264f88713da38f39f048ff6a500b1a2a17d",
+      "original_primary_view": "language-mastery",
+      "source": "hand-authored"
+    },
+    {
+      "definition": "ocaml-union-heldout/bin-prot-open-union",
+      "family": "typed-serialization",
+      "role": "supporting related workload with prior reference supplied",
+      "slot": null,
+      "metadata_sha256": "a01ed839882b17dd3e5920f5a7ac52a7734538f42fa3bb53abd1dd302feb5f53",
+      "original_primary_view": "language-mastery",
+      "source": "oss-derived-original-extension"
+    }
+  ]
+}

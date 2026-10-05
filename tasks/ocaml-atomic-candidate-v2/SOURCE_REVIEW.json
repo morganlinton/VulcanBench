@@ -1,0 +1,38 @@
+{
+  "status": "complete; failing patch reproduced offline",
+  "rows": [
+    {
+      "run_id": "incremental-atomic-rewiring-f6a3978d",
+      "reviewed": true,
+      "recorded_functional": 0.8571,
+      "complete_task_pass": false,
+      "failed_group": "mixed_graph",
+      "cause": "Obsolete child edges are removed without decrementing or resetting Expert.num_invalid_children. A necessary parent retaining this count becomes invalid at its next computation despite valid prospective children.",
+      "infrastructure_failure_observed": false,
+      "unsafe_cast_or_registry_observed": false,
+      "guarded_fixture_edits_observed": false,
+      "offline_replay_pending": false,
+      "offline_reproduced": true
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-4d2889b2",
+      "reviewed": true,
+      "recorded_functional": 1.0,
+      "complete_task_pass": true,
+      "approach": "Prospective child traversal and object ownership checks precede remove-all/add-all application. Removal decrements invalid-child counts using the existing state machinery; callback publication and no-op identity checks remain intact.",
+      "unsafe_cast_or_registry_observed": false,
+      "guarded_fixture_edits_observed": false,
+      "counter_forgery_observed": false
+    },
+    {
+      "run_id": "incremental-atomic-rewiring-25594877",
+      "reviewed": true,
+      "recorded_functional": 1.0,
+      "complete_task_pass": true,
+      "approach": "Prospective DFS and ownership validation precede complete replacement. Invalid old children decrement the existing count; all new child arrays are installed before necessity reconnects. Existing node identities and heap helpers remain in use.",
+      "unsafe_cast_or_registry_observed": false,
+      "guarded_fixture_edits_observed": false,
+      "counter_forgery_observed": false
+    }
+  ]
+}

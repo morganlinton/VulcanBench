@@ -1,0 +1,17 @@
+Incremental is a library that gives you a way of building complex
+computations that can update efficiently in response to their inputs
+changing, inspired by the work of [[http://www.umut-acar.org/self-adjusting-computation][Umut Acar et. al.]] on self-adjusting
+computations. Incremental can be useful in a number of applications,
+including:
+
+- Building large calculations (of the kind you might build into a
+  spreadsheet) that can react efficiently to changing data.
+- Constructing views in GUI applications that can incorporate new data
+  efficiently.
+- Computing derived data while guaranteeing that the derived data
+  stays in sync with the source data, for instance filtering or
+  inversing a mapping.
+
+You can find detailed documentation of the library and how to use
+it in [[https://github.com/janestreet/incremental/blob/master/src/incremental_intf.ml][incremental/src/incremental_intf.ml]].  You can also find an
+informal introduction to the library in this [[https://blog.janestreet.com/introducing-incremental][blog post]].

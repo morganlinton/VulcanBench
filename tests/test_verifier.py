@@ -113,3 +113,27 @@ def test_hidden_tests_not_in_prepared_workspace(tmp_path: Path) -> None:
     ws = prepare_workspace(task, tmp_path / "ws")
     assert (ws / "m.py").exists()  # repo copied
     assert not (ws / "t_f2p.py").exists()  # hidden test NOT present yet
+
+
+@pytest.mark.parametrize("executable", ["dune", "ocamlc", "ocamlopt", "opam"])
+def test_missing_ocaml_tool_is_infrastructure(tmp_path: Path, executable: str) -> None:
+    _make_task(tmp_path / "tasks", f_returns=2)
+    task = load_task("fix-f", tmp_path / "tasks")
+    ws = prepare_workspace(task, tmp_path / "ws")
+
+    def missing(cmd: str, workspace: Path, timeout: int) -> RunnerOutcome:
+        return RunnerOutcome(127, stderr=f"/bin/sh: 1: {executable}: not found")
+
+    with pytest.raises(VerifierInfrastructureError, match="toolchain command"):
+        run_declarative_verifier(task, ws, runner=missing)
+
+
+def test_ocaml_type_error_is_a_graded_failure(tmp_path: Path) -> None:
+    _make_task(tmp_path / "tasks", f_returns=2)
+    task = load_task("fix-f", tmp_path / "tasks")
+    ws = prepare_workspace(task, tmp_path / "ws")
+
+    def type_error(cmd: str, workspace: Path, timeout: int) -> RunnerOutcome:
+        return RunnerOutcome(1, stderr="Error: This expression has type string but expected int")
+
+    assert run_declarative_verifier(task, ws, runner=type_error)["scores"]["functional"] == 0

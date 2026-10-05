@@ -1,0 +1,126 @@
+diff --git a/src/tagged.ml b/src/tagged.ml
+index 46e14c3..ea5af16 100644
+--- a/src/tagged.ml
++++ b/src/tagged.ml
+@@ -56,12 +56,73 @@ let writer schema : _ Type_class.writer =
+    write=(fun buf ~pos v -> let value=encode schema v in let n=Bigarray.Array1.dim value in
+      if pos<0 || n > Bigarray.Array1.dim buf-pos then invalid_arg "Tagged writer bounds";
+      Bigarray.Array1.blit value (Bigarray.Array1.sub buf pos n); pos+n) }
++(* Private parser exceptions cannot capture a user-raised Decode. *)
++exception Fault of error
++type cursor = { buf:Common.buf; mutable pos:int; stop:int; path:step list }
++let fault c at reason = raise (Fault {at;path=c.path;reason})
++let take c n =
++ let at=c.pos in if n<0 || n>c.stop-c.pos then fault c at Truncated;
++ c.pos <- c.pos+n; at
++let unsigned_read c width =
++ let at=take c width in let n=ref 0 in
++ for i=0 to width-1 do n := !n lor (Char.code c.buf.{at+i} lsl (8*i)) done; !n
++let descend c step = {c with path=c.path @ [step]}
++let framed c step =
++ let sub=descend c step in let at=c.pos in let n=unsigned_read sub 4 in
++ if n>c.stop-sub.pos then fault sub at Truncated;
++ c.pos <- sub.pos+n; {sub with stop=c.pos}
++let exact c = if c.pos<>c.stop then fault c c.pos Trailing
++let rec value : type a. a t -> cursor -> a = fun schema c ->
++ let v : a = match schema with
++ | Atom tc ->
++   let at=c.pos in let n=c.stop-at in let local=ref 0 in
++   let v=tc.reader.read (Bigarray.Array1.sub c.buf at n) ~pos_ref:local in
++   if !local<0 || !local>n then fault c at Invalid_bounds;
++   c.pos <- at + !local; v
++ | Pair (a,b) ->
++   let left=value a (framed c Left) in let right=value b (framed c Right) in left,right
++ | Option s ->
++   let at=take c 1 in (match c.buf.{at} with
++    | '\000' -> None | '\001' -> Some (value s (framed c Some_value))
++    | _ -> fault c at Invalid_tag)
++ | List s ->
++   let n=unsigned_read c 2 in let rec loop i acc =
++    if i=n then List.rev acc else let v=value s (framed c (Index i)) in loop (i+1) (v::acc) in
++   loop 0 []
++ | Record (fs,make) ->
++   let count=unsigned_read c 2 in let index=Hashtbl.create 8 in
++   for _i=1 to count do
++    let at=c.pos in let id=unsigned_read c 2 in
++    if Hashtbl.mem index id then fault (descend c (Field_id id)) at (Duplicate_field id);
++    let sub=framed c (Field_id id) in Hashtbl.add index id sub
++   done;
++   exact c;
++   let tuple=fields fs index c in make tuple
++ | Map (s,make,_) ->
++   let sub=descend c Mapped in let v=value s sub in c.pos <- sub.pos;
++   exact c; make v
++ in exact c; v
++and fields : type a r. (a,r) fields -> (int,cursor) Hashtbl.t -> cursor -> a = fun fs index parent ->
++ match fs with
++ | Nil -> ()
++ | Field (id,s,presence,_,rest) ->
++   let head=match Hashtbl.find_opt index id with
++    | Some c -> value s c
++    | None -> (match presence with Default v -> v | Required ->
++        fault (descend parent (Field_id id)) parent.stop (Missing_field id)) in
++   let tail=fields rest index parent in head,tail
+ let decode schema buf ~pos_ref ~limit =
+- validate schema;
+  let start = !pos_ref in
+- if start<0 || limit<start || limit>Bigarray.Array1.dim buf then
+-   Error {at=start; path=[]; reason=Invalid_bounds}
+- else Error {at=start; path=[]; reason=Truncated}
++ try
++  validate schema;
++  if start<0 || limit<start || limit>Bigarray.Array1.dim buf then
++   Error {at=start;path=[];reason=Invalid_bounds}
++  else
++   (try
++     let v=value schema {buf;pos=start;stop=limit;path=[]} in
++     pos_ref := limit; Ok v
++    with Fault e -> pos_ref := start; Error e)
++ with exn -> pos_ref := start; raise exn
+ let reader schema : _ Type_class.reader =
+  { read=(fun buf ~pos_ref -> match decode schema buf ~pos_ref ~limit:(Bigarray.Array1.dim buf) with
+    | Ok v -> v | Error e -> raise (Decode e));
+diff --git a/src/tagged_stream.ml b/src/tagged_stream.ml
+index 2c0eb0e..ec520d1 100644
+--- a/src/tagged_stream.ml
++++ b/src/tagged_stream.ml
+@@ -1,8 +1,21 @@
+ let dump schema v = Utils.bin_dump ~header:true (Tagged.writer schema) v
+ let decode_next schema buf ~pos_ref ~limit ~max_size =
+- Tagged.validate schema;
+- if max_size < 0 then invalid_arg "Tagged_stream.max_size";
+  let start = !pos_ref in
+- if start < 0 || limit < start || limit > Bigarray.Array1.dim buf then
+-   Error {Tagged.at=start; path=[]; reason=Tagged.Invalid_bounds}
+- else Ok None
++ let error reason = Error {Tagged.at=start;path=[];reason} in
++ try
++  Tagged.validate schema;
++  if max_size<0 then invalid_arg "Tagged_stream.max_size";
++  if start<0 || limit<start || limit>Bigarray.Array1.dim buf then error Tagged.Invalid_bounds
++  else if limit-start < Utils.size_header_length then Ok None
++  else
++   let local=ref start in let size=Read.bin_read_int64_bits buf ~pos_ref:local in
++   if size<0L || size>Int64.of_int max_int then error Tagged.Invalid_frame_size
++   else let n=Int64.to_int size in
++    if n>max_size then error Tagged.Frame_too_large
++    else if n>limit - !local then Ok None
++    else
++     let stop = !local+n in
++     match Tagged.decode schema buf ~pos_ref:local ~limit:stop with
++      | Error e -> pos_ref := start; Error e
++      | Ok v -> pos_ref := stop; Ok (Some v)
++ with exn -> pos_ref := start; raise exn
+diff --git a/src/utils.ml b/src/utils.ml
+index 939e669..2aa796b 100644
+--- a/src/utils.ml
++++ b/src/utils.ml
+@@ -46,7 +46,7 @@ let bin_read_stream ?max_size ~read reader =
+     let buf = if len > size_header_length then create_buf len else buf in
+     read buf ~pos:0 ~len;
+     pos_ref := 0;
+-    let res = reader.read buf ~pos_ref in
++    let res = reader.read (Bigarray.Array1.sub buf 0 len) ~pos_ref in
+     if !pos_ref = len
+     then res
+     else (

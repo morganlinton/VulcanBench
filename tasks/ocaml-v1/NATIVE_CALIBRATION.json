@@ -1,0 +1,837 @@
+{
+  "status": "complete seven-library-task development calibration; eight-task coverage incomplete",
+  "audited_at": "2026-10-01T21:31:48.909407+00:00",
+  "started_at": "2026-10-01T17:56:09.266557+00:00",
+  "finished_at": "2026-10-01T19:09:14.399715+00:00",
+  "scope": "Seven library tasks only; not the complete eight-task suite",
+  "suite_identity": {
+    "suite": "ocaml-v1",
+    "version": "c0a1cc221d60",
+    "n_tasks": 8,
+    "task_ids": [
+      "async-bounded-dispatch",
+      "incremental-atomic-graph",
+      "interval-map-transaction",
+      "typed-frame-stream",
+      "window-watermark-allocation",
+      "typed-query-optimizer",
+      "async-generation-cache",
+      "compiler-gadt-field-safety"
+    ],
+    "task_hashes": {
+      "async-bounded-dispatch": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+      "async-generation-cache": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+      "compiler-gadt-field-safety": "0e66b01f1e6719bd88831eee1dfa7cdfc65ff60c2f05094777ecf4f4ae4d79cf",
+      "incremental-atomic-graph": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+      "interval-map-transaction": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+      "typed-frame-stream": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+      "typed-query-optimizer": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+      "window-watermark-allocation": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1"
+    }
+  },
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "conditions": {
+    "suite_identity": {
+      "suite": "ocaml-v1",
+      "version": "c0a1cc221d60",
+      "n_tasks": 8,
+      "task_ids": [
+        "async-bounded-dispatch",
+        "incremental-atomic-graph",
+        "interval-map-transaction",
+        "typed-frame-stream",
+        "window-watermark-allocation",
+        "typed-query-optimizer",
+        "async-generation-cache",
+        "compiler-gadt-field-safety"
+      ],
+      "task_hashes": {
+        "async-bounded-dispatch": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+        "async-generation-cache": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+        "compiler-gadt-field-safety": "0e66b01f1e6719bd88831eee1dfa7cdfc65ff60c2f05094777ecf4f4ae4d79cf",
+        "incremental-atomic-graph": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+        "interval-map-transaction": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+        "typed-frame-stream": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+        "typed-query-optimizer": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+        "window-watermark-allocation": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1"
+      }
+    },
+    "planned_tasks": [
+      "async-bounded-dispatch",
+      "incremental-atomic-graph",
+      "interval-map-transaction",
+      "typed-frame-stream",
+      "window-watermark-allocation",
+      "typed-query-optimizer",
+      "async-generation-cache"
+    ],
+    "pending_tasks": {
+      "compiler-gadt-field-safety": "Earlier provider content-filter refusal unresolved; no call queued"
+    },
+    "model": "codex:gpt-6.1-sol",
+    "effort": "medium",
+    "billing": "subscription",
+    "attempts_per_selected_task": 3,
+    "max_concurrency": 1,
+    "sandbox": "local",
+    "agent_container": false,
+    "judges": false,
+    "timeout_override": null,
+    "max_steps_override": null,
+    "task_default_timeout_s": 10800,
+    "task_default_configured_steps": 540,
+    "started_at": "2026-10-01T17:56:09.042291+00:00",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "codex_version": "codex-cli 0.159.0",
+    "code_sha256": {
+      "harness/agent/loop.py": "1a839540bf0777436f1f0ca75fca759dfef27d876bed2e5a3c07ad588500f5f4",
+      "scripts/setup_ocaml_native.py": "f1b70dd90f11ff7c9b91b2ea11159d3c265a8b43c009c3651819fe3b257d01c2",
+      "scripts/report_ocaml_calibration.py": "861674b2bcabc002cd72da8815fb95a380a617bf4e244821469b627b87e7329a",
+      "scripts/validate_ocaml_pilot.py": "c48fe7560dd6e008fb6e5a4c5baf76d1cb9b41104739fdee5792762086be95b7",
+      "scripts/ocaml_compiler_seed.py": "75f93b65c260e78bda14a683e7579f3b7086e6162d29ebba6e515580372926fe"
+    },
+    "native_environment_receipt": "tasks/ocaml-v1/NATIVE_ENVIRONMENT.json",
+    "authorization": "Owner requested proceeding after the overnight deadline; separate daytime calibration, not continuation of the expired automation",
+    "automatic_retries": 0
+  },
+  "native_output_directory": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-native-20261001T175608Z",
+  "complete_task_passes": 19,
+  "scored_attempts": 21,
+  "library_subset_pass_at_1": 0.9047619047619048,
+  "full_eight_task_pass_at_1": null,
+  "pending_task": "compiler-gadt-field-safety",
+  "pending_reason": "Earlier provider refusal unresolved; no native compiler calls were made",
+  "tasks": [
+    {
+      "task_id": "async-bounded-dispatch",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0
+    },
+    {
+      "task_id": "incremental-atomic-graph",
+      "passes": 1,
+      "attempts": 3,
+      "pass_at_1": 0.3333333333333333
+    },
+    {
+      "task_id": "interval-map-transaction",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0
+    },
+    {
+      "task_id": "typed-frame-stream",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0
+    },
+    {
+      "task_id": "window-watermark-allocation",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0
+    },
+    {
+      "task_id": "typed-query-optimizer",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0
+    },
+    {
+      "task_id": "async-generation-cache",
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0
+    }
+  ],
+  "audit": {
+    "code_and_scoring_digests_unchanged": true,
+    "effective_budget_and_versions_verified": true,
+    "all_regression_guards_passed": true,
+    "contaminated_runs": 0,
+    "generated_paths_in_patches": 0,
+    "interface_edits": 0,
+    "agent_errors": 0,
+    "invocation_errors": []
+  },
+  "graph_review": {
+    "failed_runs": [
+      "incremental-atomic-graph-312331b9",
+      "incremental-atomic-graph-c88130a2"
+    ],
+    "failed_check": "atomic_dependency_reversal",
+    "failure_source_observation": "Both failed patches validate prospective topology but replace formula bindings independently, leaving intermediate dependency ordering during stabilization.",
+    "passing_run": "incremental-atomic-graph-e50eba0f",
+    "passing_source_observation": "Uses an Incremental Expert barrier that detaches all replaced dependencies before attaching their replacements.",
+    "interpretation": "Atomic dependency application remains a substantive challenge; one fresh attempt solved it. Functional checks are not a general maintainability certification."
+  },
+  "limitations": [
+    "Development calibration, not independent confirmation.",
+    "Native and historical Docker cohorts remain separate.",
+    "Configured model identity is requested-only in CLI receipts.",
+    "Six of seven library tasks passed all three attempts; the intended hard pool is still saturated.",
+    "The full suite under-80 percent target remains unproven.",
+    "OCaml quality/security scores and HTML visual QA remain unavailable."
+  ],
+  "run_inventory": [
+    {
+      "run_id": "async-bounded-dispatch-50a25a22",
+      "task_id": "async-bounded-dispatch",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "8f46d9a001e4e7fc89e1a410d904e4b39144966985948c61e377d76c207897e4",
+      "changed_paths": [
+        "lib/pending.ml",
+        "lib/pipeline.ml",
+        "public/dispatcher.ml",
+        "public/dune"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "async-bounded-dispatch-5b1f5216",
+      "task_id": "async-bounded-dispatch",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "3fb4cda3a6d2f4a0f08a5540eb5ee928aa8f91cff6ab6bb7b76046d72fead9de",
+      "changed_paths": [
+        "lib/pending.ml",
+        "lib/pipeline.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "async-bounded-dispatch-c9391f29",
+      "task_id": "async-bounded-dispatch",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "d4cd317faeadb649ba00166e512734ce2b01ecf67b613935fbcc41f4c3d93702",
+      "changed_paths": [
+        "lib/pending.ml",
+        "lib/pipeline.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "async-generation-cache-2592c8b2",
+      "task_id": "async-generation-cache",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "8ceb2a982a2543208744f20005a83cffc9f0269a3e567c13b2b8b928f37edac6",
+      "changed_paths": [
+        "lib/alarm.ml",
+        "lib/cache.ml",
+        "public/dune",
+        "public/regression.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "async-generation-cache-94779380",
+      "task_id": "async-generation-cache",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "0d7d252423dd5c9ee7e2586346767f2ec80411fe4a092a3f7cea393c96cb682e",
+      "changed_paths": [
+        "lib/alarm.ml",
+        "lib/cache.ml",
+        "public/dune",
+        "public/generations.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "async-generation-cache-94841db7",
+      "task_id": "async-generation-cache",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "380a764d21cd309dff3503705504b7edeeea873ecab88cd74c5688e00404114b",
+      "changed_paths": [
+        "lib/alarm.ml",
+        "lib/cache.ml",
+        "public/dune",
+        "public/lifecycle.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "incremental-atomic-graph-312331b9",
+      "task_id": "incremental-atomic-graph",
+      "functional": 0.8571,
+      "failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "39c99cd9e92767c955e8d737fa2a3e9ece7df5589b0dea365442c4986e431631",
+      "changed_paths": [
+        "lib/graph.ml",
+        "public/dune",
+        "public/graph_test.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "incremental-atomic-graph-c88130a2",
+      "task_id": "incremental-atomic-graph",
+      "functional": 0.8571,
+      "failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "7460f45bf3b6d96d4b1f78e73e64662e2d45be0076216e3761387509a652dcd9",
+      "changed_paths": [
+        "lib/graph.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "incremental-atomic-graph-e50eba0f",
+      "task_id": "incremental-atomic-graph",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "16e0da93f5d9f5915a0e4feb40c8e5a0d9dc26373c797db3f529eb5ea234179e",
+      "changed_paths": [
+        "lib/graph.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "interval-map-transaction-2a6978a5",
+      "task_id": "interval-map-transaction",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "98e76e19dacd2994548879da0861ce5ec9b8a9c83ed645f52d9af1ff5fffbdd6",
+      "changed_paths": [
+        "lib/batch.ml",
+        "lib/interval_map.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "interval-map-transaction-600f7e40",
+      "task_id": "interval-map-transaction",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "0cfd76dbea986c32d6c3dd357e3984d93b3fd395e1c29a826b937406d49392b9",
+      "changed_paths": [
+        "lib/batch.ml",
+        "lib/interval_map.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "interval-map-transaction-d74f88d8",
+      "task_id": "interval-map-transaction",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "4dde9acf06ffd16734c72809d8262dd0b30dead42c3492b007504e748fda3072",
+      "changed_paths": [
+        "lib/batch.ml",
+        "lib/interval_map.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "typed-frame-stream-765f1b7c",
+      "task_id": "typed-frame-stream",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "d69c5cd074d25328cf25ac2106a797c5e7e90b77de2460fc066562f266978a0e",
+      "changed_paths": [
+        "lib/stream.ml",
+        "lib/wire.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "typed-frame-stream-7797dadb",
+      "task_id": "typed-frame-stream",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "2668b400c8289378a2dc09a800a20445f0e2de77db360d9374966ec57714fa61",
+      "changed_paths": [
+        "lib/stream.ml",
+        "lib/wire.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "typed-frame-stream-c3f66cd4",
+      "task_id": "typed-frame-stream",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "4fbc4dd337bc7cabcaed608af043c8ff82551e6dbef5710405c5e412b19b2392",
+      "changed_paths": [
+        "lib/stream.ml",
+        "lib/wire.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "typed-query-optimizer-46a1e4ce",
+      "task_id": "typed-query-optimizer",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "85507d127e3b87d52bd6d32e5df7feb977c0f03406c2790b1a66f8bc7a5fbaab",
+      "changed_paths": [
+        "lib/optimizer.ml",
+        "public/dune",
+        "public/optimizer_tests.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "typed-query-optimizer-b43d21e1",
+      "task_id": "typed-query-optimizer",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "0f49c64f46b7467e5d771f833455a0b11235ed7a430e34b412713218c000458d",
+      "changed_paths": [
+        "lib/optimizer.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "typed-query-optimizer-bb6b8685",
+      "task_id": "typed-query-optimizer",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "b58caeafcc2438602f22038a291f9f71ceed7d051da4631804b570a06835d0f8",
+      "changed_paths": [
+        "lib/optimizer.ml",
+        "public/dune",
+        "public/optimizer_tests.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "window-watermark-allocation-48f52287",
+      "task_id": "window-watermark-allocation",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "b9f35f0eafb6b47188c4cd4cf132f818cc06b8363b9b9d6f8378ab36ff0568ac",
+      "changed_paths": [
+        "lib/window.ml",
+        "lib/window_bounds.ml",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "window-watermark-allocation-6d89913d",
+      "task_id": "window-watermark-allocation",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "63331061d9a01563efaa716d86a218c4619e5bf6131f91a90026396f2ecc3691",
+      "changed_paths": [
+        "lib/window.ml",
+        "lib/window_bounds.ml",
+        "public/dune",
+        "public/window_test.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    },
+    {
+      "run_id": "window-watermark-allocation-7448cb33",
+      "task_id": "window-watermark-allocation",
+      "functional": 1.0,
+      "failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "regression_guards_ok": true,
+      "run_limits": {
+        "agent_timeout_s": 10800.0,
+        "configured_max_steps": 540
+      },
+      "model": "codex:gpt-6.1-sol",
+      "effort": "medium",
+      "cli_version": "codex-cli 0.159.0",
+      "identity_confidence": "requested-only",
+      "sandbox": "local",
+      "ocaml": "5.2.1",
+      "dune": "3.17.2",
+      "integrity_contaminated": false,
+      "patch_sha256": "1883e119a3050e094f186f6ae3f7a98ed63a0b9f4e8684b2a67a57d0f48798ff",
+      "changed_paths": [
+        "lib/window.ml",
+        "lib/window_bounds.ml",
+        "public/dune",
+        "public/smoke.ml"
+      ],
+      "generated_paths": [],
+      "interface_paths": [],
+      "agent_error": null
+    }
+  ],
+  "model_card_json_sha256": "7aaa8c7e96ed2e9c39fd867d094dd5e33b3f845c70858b942a7fa3016cff80a4"
+}

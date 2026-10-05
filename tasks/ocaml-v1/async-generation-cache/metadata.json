@@ -1,0 +1,87 @@
+{
+  "id": "async-generation-cache",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "provisional after single-configuration development calibration",
+  "task_complexity": "multi_file",
+  "repo_scale": "small",
+  "domain": "async-lifecycle",
+  "primary_view": "engineering",
+  "source": "hand-authored",
+  "created": "2026-09-30",
+  "decontaminated": true,
+  "decontamination_notes": "Original generation-cache fixture authored 2026-09-30 using public Core and Async_kernel. No upstream defect or training-cutoff claim.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "coalescing_ttl",
+        "cmd": "dune exec hidden/checks.exe -- coalescing_ttl"
+      },
+      {
+        "name": "generation_invalidation",
+        "cmd": "dune exec hidden/checks.exe -- generation_invalidation"
+      },
+      {
+        "name": "subscriber_cancellation",
+        "cmd": "dune exec hidden/checks.exe -- subscriber_cancellation"
+      },
+      {
+        "name": "retry_budget",
+        "cmd": "dune exec hidden/checks.exe -- retry_budget"
+      },
+      {
+        "name": "deadline_dominance",
+        "cmd": "dune exec hidden/checks.exe -- deadline_dominance"
+      },
+      {
+        "name": "close_detached",
+        "cmd": "dune exec hidden/checks.exe -- close_detached"
+      },
+      {
+        "name": "reentrant_worker",
+        "cmd": "dune exec hidden/checks.exe -- reentrant_worker"
+      },
+      {
+        "name": "monitor_errors",
+        "cmd": "dune exec hidden/checks.exe -- monitor_errors"
+      },
+      {
+        "name": "alarm_ownership",
+        "cmd": "dune exec hidden/checks.exe -- alarm_ownership"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "empty_policy_request",
+        "cmd": "dune exec hidden/checks.exe -- empty_policy_request"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  },
+  "calibration": {
+    "model": "codex:gpt-6.1-sol",
+    "effort": "medium",
+    "attempts": 3,
+    "passes": 2,
+    "independent_confirmation": false
+  }
+}

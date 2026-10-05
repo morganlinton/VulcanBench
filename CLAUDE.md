@@ -1,5 +1,15 @@
 # VulcanBench project notes
 
+## Response handoffs
+
+Whenever you finish a task, recommend the next step in the final reply, even
+when the task is small or no work remains. End every final reply with a concise,
+concrete suggested next step tied to the current work. Prefer one recommended
+action and briefly explain why it helps. Clearly distinguish the suggestion
+from work already completed or running. Continue already-authorized work
+without unnecessary confirmation; a suggested next step is not a substitute
+for completing the current request.
+
 ## Writing conventions (applies to ALL output)
 
 Never use em-dashes ("—", U+2014) anywhere: not in code, comments, commit
@@ -30,6 +40,11 @@ logged with their evidence in [docs/DECISIONS.md](docs/DECISIONS.md). Read
 the relevant entry before changing budgets, concurrency, or sweep launchers,
 and add an entry when a decision like that is made. Current: v4 tasks carry
 a flat 3-hour timeout; sweeps run one task at a time.
+
+For OCaml expansion, read the frozen
+[family-balanced blueprint](docs/ocaml-expansion-v1/PLAN.md) before choosing or
+authoring candidates. It fixes prospective family capacity and weights; it is
+not an admitted runnable suite. Revisions must preserve the v1 plan and receipts.
 
 Operator settings live in [vulcanbench.toml](vulcanbench.toml). Effort levels
 listed under `[effort].blocked` (currently "ultra") never run on any model,

@@ -1,0 +1,71 @@
+{
+  "id": "async-bounded-dispatch",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "provisional after single-configuration development calibration",
+  "task_complexity": "multi_file",
+  "repo_scale": "micro",
+  "domain": "async-lifecycle",
+  "primary_view": "engineering",
+  "source": "hand-authored",
+  "created": "2026-09-30",
+  "decontaminated": true,
+  "decontamination_notes": "Original fixture authored 2026-09-30 using public OCaml libraries. No upstream defect or training-cutoff claim.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "bounded_fifo",
+        "cmd": "dune exec ./hidden/checks.exe -- bounded_fifo"
+      },
+      {
+        "name": "close_drain",
+        "cmd": "dune exec ./hidden/checks.exe -- close_drain"
+      },
+      {
+        "name": "abort_pending",
+        "cmd": "dune exec ./hidden/checks.exe -- abort_pending"
+      },
+      {
+        "name": "errors_release",
+        "cmd": "dune exec ./hidden/checks.exe -- errors_release"
+      },
+      {
+        "name": "close_then_abort",
+        "cmd": "dune exec ./hidden/checks.exe -- close_then_abort"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "empty_limits",
+        "cmd": "dune exec ./hidden/checks.exe -- empty_limits"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  },
+  "calibration": {
+    "model": "codex:gpt-6.1-sol",
+    "effort": "medium",
+    "attempts": 3,
+    "passes": 3,
+    "independent_confirmation": false
+  }
+}

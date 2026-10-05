@@ -1,0 +1,2669 @@
+{
+  "kind": "supplemental fresh source-patch replay, not fresh model calibration",
+  "started_at": "2026-10-01T12:49:35.512457+00:00",
+  "complete": true,
+  "valid": true,
+  "rows": [
+    {
+      "run_id": "async-bounded-dispatch-357e35a8",
+      "task_id": "async-bounded-dispatch",
+      "task_hash": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "d84c090d5306e4a6332cf94c53829dd263b2539bf43d785662d1d8885918da29",
+      "source_patch_sha256": "7049e93ec5cd607fc34aab67d1f0c1bd17c1ef36bcd0d5f729d70076e6f294a2",
+      "excluded_generated_paths": [
+        "_build/.actions/default/public/runtest-d023935d77ae3f1901131710f5170d54",
+        "_build/.db",
+        "_build/.digest-db",
+        "_build/.filesystem-clock",
+        "_build/.lock",
+        "_build/default/.dune/configurator",
+        "_build/default/.dune/configurator.v2",
+        "_build/default/lib/.engine.objs/byte/pending.cmi",
+        "_build/default/lib/.engine.objs/byte/pending.cmo",
+        "_build/default/lib/.engine.objs/byte/pending.cmt",
+        "_build/default/lib/.engine.objs/byte/pipeline.cmi",
+        "_build/default/lib/.engine.objs/byte/pipeline.cmti",
+        "_build/default/lib/.engine.objs/native/pending.cmx",
+        "_build/default/lib/.engine.objs/native/pipeline.cmx",
+        "_build/default/lib/.engine.objs/pending.impl.all-deps",
+        "_build/default/lib/.engine.objs/pending.impl.d",
+        "_build/default/lib/.engine.objs/pipeline.impl.all-deps",
+        "_build/default/lib/.engine.objs/pipeline.impl.d",
+        "_build/default/lib/.engine.objs/pipeline.intf.all-deps",
+        "_build/default/lib/.engine.objs/pipeline.intf.d",
+        "_build/default/lib/.merlin-conf/lib-engine",
+        "_build/default/lib/engine.cmxa",
+        "_build/default/lib/pending.ml",
+        "_build/default/lib/pipeline.ml",
+        "_build/default/lib/pipeline.mli",
+        "_build/default/public/.merlin-conf/exe-smoke",
+        "_build/default/public/.smoke.eobjs/byte/dune__exe__Smoke.cmi",
+        "_build/default/public/.smoke.eobjs/byte/dune__exe__Smoke.cmti",
+        "_build/default/public/.smoke.eobjs/native/dune__exe__Smoke.cmx",
+        "_build/default/public/smoke.exe",
+        "_build/default/public/smoke.ml",
+        "_build/default/public/smoke.mli",
+        "_build/log"
+      ],
+      "source_files": [
+        "lib/pending.ml",
+        "lib/pipeline.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:49:35.519081+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 10.365
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "bounded_fifo": true,
+            "close_drain": true,
+            "abort_pending": true,
+            "errors_release": true,
+            "close_then_abort": true
+          },
+          "pass_to_pass": {
+            "empty_limits": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_limits",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_fifo",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- close_drain",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- abort_pending",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- errors_release",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- close_then_abort",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:49:59.309160+00:00"
+    },
+    {
+      "run_id": "async-bounded-dispatch-90519017",
+      "task_id": "async-bounded-dispatch",
+      "task_hash": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "84f6f681a923c53e6672ccbb924971f43457672dd0d97e1ea661f8dcdb6fbd90",
+      "source_patch_sha256": "f6ded8c117881bd33db56f4841e11c7769c02f5117b7aa598fa37a96eb996d11",
+      "excluded_generated_paths": [
+        "_build/.actions/default/public/runtest-d023935d77ae3f1901131710f5170d54",
+        "_build/.db",
+        "_build/.digest-db",
+        "_build/.filesystem-clock",
+        "_build/.lock",
+        "_build/default/.dune/configurator",
+        "_build/default/.dune/configurator.v2",
+        "_build/default/lib/.engine.objs/byte/pending.cmi",
+        "_build/default/lib/.engine.objs/byte/pending.cmo",
+        "_build/default/lib/.engine.objs/byte/pending.cmt",
+        "_build/default/lib/.engine.objs/byte/pipeline.cmi",
+        "_build/default/lib/.engine.objs/byte/pipeline.cmti",
+        "_build/default/lib/.engine.objs/native/pending.cmx",
+        "_build/default/lib/.engine.objs/native/pipeline.cmx",
+        "_build/default/lib/.engine.objs/pending.impl.all-deps",
+        "_build/default/lib/.engine.objs/pending.impl.d",
+        "_build/default/lib/.engine.objs/pipeline.impl.all-deps",
+        "_build/default/lib/.engine.objs/pipeline.impl.d",
+        "_build/default/lib/.engine.objs/pipeline.intf.all-deps",
+        "_build/default/lib/.engine.objs/pipeline.intf.d",
+        "_build/default/lib/.merlin-conf/lib-engine",
+        "_build/default/lib/engine.cmxa",
+        "_build/default/lib/pending.ml",
+        "_build/default/lib/pipeline.ml",
+        "_build/default/lib/pipeline.mli",
+        "_build/default/public/.merlin-conf/exe-smoke",
+        "_build/default/public/.smoke.eobjs/byte/dune__exe__Smoke.cmi",
+        "_build/default/public/.smoke.eobjs/byte/dune__exe__Smoke.cmti",
+        "_build/default/public/.smoke.eobjs/native/dune__exe__Smoke.cmx",
+        "_build/default/public/smoke.exe",
+        "_build/default/public/smoke.ml",
+        "_build/default/public/smoke.mli",
+        "_build/log"
+      ],
+      "source_files": [
+        "lib/pending.ml",
+        "lib/pipeline.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:49:59.320474+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 3.077
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "bounded_fifo": true,
+            "close_drain": true,
+            "abort_pending": true,
+            "errors_release": true,
+            "close_then_abort": true
+          },
+          "pass_to_pass": {
+            "empty_limits": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_limits",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_fifo",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- close_drain",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- abort_pending",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- errors_release",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- close_then_abort",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:50:16.190075+00:00"
+    },
+    {
+      "run_id": "async-bounded-dispatch-9758e979",
+      "task_id": "async-bounded-dispatch",
+      "task_hash": "d9749de8cdd98a2a2d8b8802333051370388f321532e6df04e6bef45e5c13a71",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "7d275eaeb22f3d1467724ae532c7c7b22b213902b828b1e2b13d0cab15252164",
+      "source_patch_sha256": "34ac0a75589639a8057a97c49a5229cfe03fb174fcf15598ff8ba04887704907",
+      "excluded_generated_paths": [
+        "_build/.actions/default/public/runtest-d023935d77ae3f1901131710f5170d54",
+        "_build/.db",
+        "_build/.digest-db",
+        "_build/.filesystem-clock",
+        "_build/.lock",
+        "_build/default/.dune/configurator",
+        "_build/default/.dune/configurator.v2",
+        "_build/default/lib/.engine.objs/byte/pending.cmi",
+        "_build/default/lib/.engine.objs/byte/pending.cmo",
+        "_build/default/lib/.engine.objs/byte/pending.cmt",
+        "_build/default/lib/.engine.objs/byte/pipeline.cmi",
+        "_build/default/lib/.engine.objs/byte/pipeline.cmti",
+        "_build/default/lib/.engine.objs/native/pending.cmx",
+        "_build/default/lib/.engine.objs/native/pipeline.cmx",
+        "_build/default/lib/.engine.objs/pending.impl.all-deps",
+        "_build/default/lib/.engine.objs/pending.impl.d",
+        "_build/default/lib/.engine.objs/pipeline.impl.all-deps",
+        "_build/default/lib/.engine.objs/pipeline.impl.d",
+        "_build/default/lib/.engine.objs/pipeline.intf.all-deps",
+        "_build/default/lib/.engine.objs/pipeline.intf.d",
+        "_build/default/lib/.merlin-conf/lib-engine",
+        "_build/default/lib/engine.cmxa",
+        "_build/default/lib/pending.ml",
+        "_build/default/lib/pipeline.ml",
+        "_build/default/lib/pipeline.mli",
+        "_build/default/public/.merlin-conf/exe-smoke",
+        "_build/default/public/.smoke.eobjs/byte/dune__exe__Smoke.cmi",
+        "_build/default/public/.smoke.eobjs/byte/dune__exe__Smoke.cmti",
+        "_build/default/public/.smoke.eobjs/native/dune__exe__Smoke.cmx",
+        "_build/default/public/smoke.exe",
+        "_build/default/public/smoke.ml",
+        "_build/default/public/smoke.mli",
+        "_build/log"
+      ],
+      "source_files": [
+        "lib/pending.ml",
+        "lib/pipeline.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:50:16.199547+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 3.394
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "bounded_fifo": true,
+            "close_drain": true,
+            "abort_pending": true,
+            "errors_release": true,
+            "close_then_abort": true
+          },
+          "pass_to_pass": {
+            "empty_limits": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_limits",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_fifo",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- close_drain",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- abort_pending",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- errors_release",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- close_then_abort",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:50:30.028954+00:00"
+    },
+    {
+      "run_id": "incremental-atomic-graph-19fa2932",
+      "task_id": "incremental-atomic-graph",
+      "task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+      "original_functional": 0.8571,
+      "original_failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "d0eb0dc6e0550b558263c22ffccaff8243660c5cb717ab480af46a83d66f1a10",
+      "source_patch_sha256": "d0eb0dc6e0550b558263c22ffccaff8243660c5cb717ab480af46a83d66f1a10",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/graph.ml",
+        "public/dune",
+        "public/graph_tests.ml"
+      ],
+      "started_at": "2026-10-01T12:50:30.036883+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 8.048
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 0.8571
+          },
+          "fail_to_pass": {
+            "forward_atomic": true,
+            "dynamic_switch": true,
+            "stable_subscription": true,
+            "cutoff_laziness": true,
+            "invalid_rollback": true,
+            "atomic_dependency_reversal": false,
+            "repeated_dynamic_switch": true
+          },
+          "pass_to_pass": {
+            "source_observer": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 6/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- source_observer",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- forward_atomic",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- dynamic_switch",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- stable_subscription",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- cutoff_laziness",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- invalid_rollback",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- atomic_dependency_reversal",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Uncaught exception:\n  \n  (\"adding edge made graph cyclic\"\n   ((child\n     ((id 17) (state <opaque>) (recomputed_at -1) (value_opt ())\n      (kind (Map2 <fun> n4 n16)) (cutoff Phys_equal) (changed_at -1)\n      (num_on_update_handlers 0) (num_parents 1) (parent1_and_beyond ())\n      (parent0 (n7)) (created_in n7) (next_node_in_same_scope (n16))\n      (height 9) (height_in_recompute_heap 9) (prev_in_recompute_heap ())\n      (next_in_recompute_heap ()) (height_in_adjust_heights_heap -1)\n      (next_in_adjust_heights_heap ()) (old_value_opt ()) (observers ())\n      (is_in_handle_after_stabilization false) (on_update_handlers ())\n      (my_parent_index_in_child_at_index (0 0))\n      (my_child_index_in_parent_at_index (1)) (force_necessary false)\n      (user_info ()) (creation_backtrace ())))\n    (parent\n     ((id 7) (state <opaque>) (recomputed_at 1) (value_opt (_))\n      (kind\n       (Bind_main\n        ((main n7) (f <fun>) (lhs n5) (lhs_change n6) (rhs (n17))\n         (rhs_scope n7) (all_nodes_created_on_rhs (n17)))))\n      (cutoff Phys_equal) (changed_at 1) (num_on_update_handlers 0)\n      (num_parents 1) (parent1_and_beyond ()) (parent0 (n15))\n      (created_in Top) (next_node_in_same_scope ()) (height 10)\n      (height_in_recompute_heap -1) (prev_in_recompute_heap ())\n      (next_in_recompute_heap ()) (height_in_adjust_heights_heap -1)\n      (next_in_adjust_heights_heap ()) (old_value_opt ())\n      (observers (<opaque>)) (is_in_handle_after_stabilization false)\n      (on_update_handlers ()) (my_parent_index_in_child_at_index (0 0))\n      (my_child_index_in_parent_at_index (0)) (force_necessary false)\n      (user_info ()) (creation_backtrace ()))))\n   src/adjust_heights_heap.ml:144:12)\n\nRaised at Base__Error.raise in file \"src/error.ml\" (inlined), line 9, characters 21-37\nCalled from Core__Error.failwiths in file \"core/src/error.ml\", line 5, characters 2-50\nCalled from Incremental__Adjust_heights_heap.ensure_height_requirement in file \"src/adjust_heights_heap.ml\", lines 143-147, characters 4-66\nCalled from Incremental__Adjust_heights_heap.adjust_heights in file \"src/adjust_heights_heap.ml\", line 179, characters 6-81\nCalled from Incremental__State.add_parent in file \"src/state.ml\", lines 607-611, characters 4-13\nCalled from Incremental__State.change_child in file \"src/state.ml\", line 662, characters 6-54\nCalled from Incremental__State.recompute in file \"src/state.ml\", lines 709-713, characters 4-44\nCalled from Incremental__State.maybe_change_value in file \"src/state.ml\", line 1109, characters 10-26\nCalled from Incremental__State.stabilize in file \"src/state.ml\", line 1375, characters 6-46\nRe-raised at Base__Exn.raise_with_original_backtrace in file \"src/exn.ml\" (inlined), line 59, characters 2-50\nCalled from Incremental__Raised_exn.reraise in file \"src/raised_exn.ml\", line 16, characters 33-80\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 17, characters 2-19\n"
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- repeated_dynamic_switch",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 0.8571,
+      "replay_failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:50:49.932448+00:00"
+    },
+    {
+      "run_id": "incremental-atomic-graph-a395ade8",
+      "task_id": "incremental-atomic-graph",
+      "task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+      "original_functional": 0.8571,
+      "original_failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "2528709063e796cf744d96e3d4dab90b99c399e82b93b995c0b3fe6f36984b1a",
+      "source_patch_sha256": "2528709063e796cf744d96e3d4dab90b99c399e82b93b995c0b3fe6f36984b1a",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/graph.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:50:49.938299+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 3.429
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 0.8571
+          },
+          "fail_to_pass": {
+            "forward_atomic": true,
+            "dynamic_switch": true,
+            "stable_subscription": true,
+            "cutoff_laziness": true,
+            "invalid_rollback": true,
+            "atomic_dependency_reversal": false,
+            "repeated_dynamic_switch": true
+          },
+          "pass_to_pass": {
+            "source_observer": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 6/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- source_observer",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- forward_atomic",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- dynamic_switch",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- stable_subscription",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- cutoff_laziness",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- invalid_rollback",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- atomic_dependency_reversal",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Uncaught exception:\n  \n  (\"adding edge made graph cyclic\"\n   ((child\n     ((id 17) (state <opaque>) (recomputed_at -1) (value_opt ())\n      (kind (Map2 <fun> n4 n16)) (cutoff Phys_equal) (changed_at -1)\n      (num_on_update_handlers 0) (num_parents 1) (parent1_and_beyond ())\n      (parent0 (n7)) (created_in n7) (next_node_in_same_scope (n16))\n      (height 9) (height_in_recompute_heap 9) (prev_in_recompute_heap ())\n      (next_in_recompute_heap ()) (height_in_adjust_heights_heap -1)\n      (next_in_adjust_heights_heap ()) (old_value_opt ()) (observers ())\n      (is_in_handle_after_stabilization false) (on_update_handlers ())\n      (my_parent_index_in_child_at_index (0 0))\n      (my_child_index_in_parent_at_index (1)) (force_necessary false)\n      (user_info ()) (creation_backtrace ())))\n    (parent\n     ((id 7) (state <opaque>) (recomputed_at 1) (value_opt (_))\n      (kind\n       (Bind_main\n        ((main n7) (f <fun>) (lhs n5) (lhs_change n6) (rhs (n17))\n         (rhs_scope n7) (all_nodes_created_on_rhs (n17)))))\n      (cutoff Phys_equal) (changed_at 1) (num_on_update_handlers 0)\n      (num_parents 1) (parent1_and_beyond ()) (parent0 (n15))\n      (created_in Top) (next_node_in_same_scope ()) (height 10)\n      (height_in_recompute_heap -1) (prev_in_recompute_heap ())\n      (next_in_recompute_heap ()) (height_in_adjust_heights_heap -1)\n      (next_in_adjust_heights_heap ()) (old_value_opt ())\n      (observers (<opaque>)) (is_in_handle_after_stabilization false)\n      (on_update_handlers ()) (my_parent_index_in_child_at_index (0 0))\n      (my_child_index_in_parent_at_index (0)) (force_necessary false)\n      (user_info ()) (creation_backtrace ()))))\n   src/adjust_heights_heap.ml:144:12)\n\nRaised at Base__Error.raise in file \"src/error.ml\" (inlined), line 9, characters 21-37\nCalled from Core__Error.failwiths in file \"core/src/error.ml\", line 5, characters 2-50\nCalled from Incremental__Adjust_heights_heap.ensure_height_requirement in file \"src/adjust_heights_heap.ml\", lines 143-147, characters 4-66\nCalled from Incremental__Adjust_heights_heap.adjust_heights in file \"src/adjust_heights_heap.ml\", line 179, characters 6-81\nCalled from Incremental__State.add_parent in file \"src/state.ml\", lines 607-611, characters 4-13\nCalled from Incremental__State.change_child in file \"src/state.ml\", line 662, characters 6-54\nCalled from Incremental__State.recompute in file \"src/state.ml\", lines 709-713, characters 4-44\nCalled from Incremental__State.maybe_change_value in file \"src/state.ml\", line 1109, characters 10-26\nCalled from Incremental__State.stabilize in file \"src/state.ml\", line 1375, characters 6-46\nRe-raised at Base__Exn.raise_with_original_backtrace in file \"src/exn.ml\" (inlined), line 59, characters 2-50\nCalled from Incremental__Raised_exn.reraise in file \"src/raised_exn.ml\", line 16, characters 33-80\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 17, characters 2-19\n"
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- repeated_dynamic_switch",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 0.8571,
+      "replay_failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:51:04.989573+00:00"
+    },
+    {
+      "run_id": "incremental-atomic-graph-b0a12d84",
+      "task_id": "incremental-atomic-graph",
+      "task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+      "original_functional": 0.8571,
+      "original_failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "d4e1fedcca1352390f768d487bb04d077d2b27659c0d27dab36296eab338f18a",
+      "source_patch_sha256": "d4e1fedcca1352390f768d487bb04d077d2b27659c0d27dab36296eab338f18a",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/graph.ml",
+        "public/dune",
+        "public/graph_tests.ml"
+      ],
+      "started_at": "2026-10-01T12:51:04.997099+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 5.61
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 0.8571
+          },
+          "fail_to_pass": {
+            "forward_atomic": true,
+            "dynamic_switch": true,
+            "stable_subscription": true,
+            "cutoff_laziness": true,
+            "invalid_rollback": true,
+            "atomic_dependency_reversal": false,
+            "repeated_dynamic_switch": true
+          },
+          "pass_to_pass": {
+            "source_observer": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 6/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- source_observer",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- forward_atomic",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- dynamic_switch",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- stable_subscription",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- cutoff_laziness",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- invalid_rollback",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- atomic_dependency_reversal",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Uncaught exception:\n  \n  (\"adding edge made graph cyclic\"\n   ((child\n     ((id 20) (state <opaque>) (recomputed_at -1) (value_opt ())\n      (kind (Map2 <fun> n8 n15)) (cutoff (Equal <fun>)) (changed_at -1)\n      (num_on_update_handlers 0) (num_parents 1) (parent1_and_beyond ())\n      (parent0 (n12)) (created_in Top) (next_node_in_same_scope ())\n      (height 9) (height_in_recompute_heap 9) (prev_in_recompute_heap ())\n      (next_in_recompute_heap ()) (height_in_adjust_heights_heap -1)\n      (next_in_adjust_heights_heap ()) (old_value_opt ()) (observers ())\n      (is_in_handle_after_stabilization false) (on_update_handlers ())\n      (my_parent_index_in_child_at_index (0 1))\n      (my_child_index_in_parent_at_index (1)) (force_necessary false)\n      (user_info ()) (creation_backtrace ())))\n    (parent\n     ((id 12) (state <opaque>) (recomputed_at 1) (value_opt (_))\n      (kind\n       (Bind_main\n        ((main n12) (f <fun>) (lhs n10) (lhs_change n11) (rhs (n20))\n         (rhs_scope n12) (all_nodes_created_on_rhs ()))))\n      (cutoff (Equal <fun>)) (changed_at 1) (num_on_update_handlers 0)\n      (num_parents 1) (parent1_and_beyond ()) (parent0 (n17))\n      (created_in Top) (next_node_in_same_scope ()) (height 10)\n      (height_in_recompute_heap -1) (prev_in_recompute_heap ())\n      (next_in_recompute_heap ()) (height_in_adjust_heights_heap -1)\n      (next_in_adjust_heights_heap ()) (old_value_opt ())\n      (observers (<opaque>)) (is_in_handle_after_stabilization false)\n      (on_update_handlers ()) (my_parent_index_in_child_at_index (0 0))\n      (my_child_index_in_parent_at_index (0)) (force_necessary false)\n      (user_info ()) (creation_backtrace ()))))\n   src/adjust_heights_heap.ml:144:12)\n\nRaised at Base__Error.raise in file \"src/error.ml\" (inlined), line 9, characters 21-37\nCalled from Core__Error.failwiths in file \"core/src/error.ml\", line 5, characters 2-50\nCalled from Incremental__Adjust_heights_heap.ensure_height_requirement in file \"src/adjust_heights_heap.ml\", lines 143-147, characters 4-66\nCalled from Incremental__Adjust_heights_heap.adjust_heights in file \"src/adjust_heights_heap.ml\", line 179, characters 6-81\nCalled from Incremental__State.add_parent in file \"src/state.ml\", lines 607-611, characters 4-13\nCalled from Incremental__State.change_child in file \"src/state.ml\", line 662, characters 6-54\nCalled from Incremental__State.recompute in file \"src/state.ml\", lines 709-713, characters 4-44\nCalled from Incremental__State.maybe_change_value in file \"src/state.ml\", line 1109, characters 10-26\nCalled from Incremental__State.stabilize in file \"src/state.ml\", line 1375, characters 6-46\nRe-raised at Base__Exn.raise_with_original_backtrace in file \"src/exn.ml\" (inlined), line 59, characters 2-50\nCalled from Incremental__Raised_exn.reraise in file \"src/raised_exn.ml\", line 16, characters 33-80\nCalled from Dune__exe__Checks in file \"hidden/checks.ml\", line 17, characters 2-19\n"
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- repeated_dynamic_switch",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 0.8571,
+      "replay_failed_checks": {
+        "fail_to_pass": [
+          "atomic_dependency_reversal"
+        ],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:51:24.899203+00:00"
+    },
+    {
+      "run_id": "interval-map-transaction-4ad37e00",
+      "task_id": "interval-map-transaction",
+      "task_hash": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "0755dae1ff4c9f5a0e5f73801b5f91a5f18311d1b8c1c2bfd16bdc1a70fc44e2",
+      "source_patch_sha256": "0755dae1ff4c9f5a0e5f73801b5f91a5f18311d1b8c1c2bfd16bdc1a70fc44e2",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/batch.ml",
+        "lib/interval_map.ml",
+        "public/dune",
+        "public/regression.ml"
+      ],
+      "started_at": "2026-10-01T12:51:24.910686+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.961
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "Maximum comparator calls: lookup=13 edit=62; edit allocation=5488 bytes\n"
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "overlap_restore": true,
+            "erase_normalize": true,
+            "batch_error": true,
+            "custom_order": true,
+            "reference_sequences": true,
+            "bounded_lookup": true,
+            "bounded_local_edit": true
+          },
+          "pass_to_pass": {
+            "empty_noop": true,
+            "single_range": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 7/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_noop",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- single_range",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- overlap_restore",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- erase_normalize",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- batch_error",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- custom_order",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- reference_sequences",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_lookup",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_local_edit",
+            "exit_code": 0,
+            "stdout": "comparisons=48 allocated_bytes=3872\ncomparisons=21 allocated_bytes=2912\ncomparisons=41 allocated_bytes=3680\n",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:51:38.082091+00:00"
+    },
+    {
+      "run_id": "interval-map-transaction-b01f085b",
+      "task_id": "interval-map-transaction",
+      "task_hash": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "18b0091bbbe37a23e4954f3926ac7d29259802b154f1dcdbb655806b0d5706a8",
+      "source_patch_sha256": "18b0091bbbe37a23e4954f3926ac7d29259802b154f1dcdbb655806b0d5706a8",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/batch.ml",
+        "lib/interval_map.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:51:38.090315+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.383
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "overlap_restore": true,
+            "erase_normalize": true,
+            "batch_error": true,
+            "custom_order": true,
+            "reference_sequences": true,
+            "bounded_lookup": true,
+            "bounded_local_edit": true
+          },
+          "pass_to_pass": {
+            "empty_noop": true,
+            "single_range": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 7/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_noop",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- single_range",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- overlap_restore",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- erase_normalize",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- batch_error",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- custom_order",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- reference_sequences",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_lookup",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_local_edit",
+            "exit_code": 0,
+            "stdout": "comparisons=48 allocated_bytes=3872\ncomparisons=21 allocated_bytes=2912\ncomparisons=41 allocated_bytes=3680\n",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:51:50.539937+00:00"
+    },
+    {
+      "run_id": "interval-map-transaction-b4b7b3a5",
+      "task_id": "interval-map-transaction",
+      "task_hash": "494586ec6f871b3642ad7db233da8deb0821f88529e3af1c4f60f4654850e23e",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "ea14ae61f208c180d674b7309dd4e2a211ea7fc78344143cf3d6475babe1956a",
+      "source_patch_sha256": "ea14ae61f208c180d674b7309dd4e2a211ea7fc78344143cf3d6475babe1956a",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/batch.ml",
+        "lib/interval_map.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:51:50.545533+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.335
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "overlap_restore": true,
+            "erase_normalize": true,
+            "batch_error": true,
+            "custom_order": true,
+            "reference_sequences": true,
+            "bounded_lookup": true,
+            "bounded_local_edit": true
+          },
+          "pass_to_pass": {
+            "empty_noop": true,
+            "single_range": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 7/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_noop",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- single_range",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- overlap_restore",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- erase_normalize",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- batch_error",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- custom_order",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- reference_sequences",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_lookup",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounded_local_edit",
+            "exit_code": 0,
+            "stdout": "comparisons=48 allocated_bytes=3872\ncomparisons=21 allocated_bytes=2912\ncomparisons=41 allocated_bytes=3680\n",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:52:04.262943+00:00"
+    },
+    {
+      "run_id": "typed-frame-stream-0b64e84a",
+      "task_id": "typed-frame-stream",
+      "task_hash": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "2c7b7338ea6a0c4cd4bbe7802216aee1cfd29e88d4dfe52cc6bcfe930f0052a2",
+      "source_patch_sha256": "2c7b7338ea6a0c4cd4bbe7802216aee1cfd29e88d4dfe52cc6bcfe930f0052a2",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/stream.ml",
+        "lib/wire.ml"
+      ],
+      "started_at": "2026-10-01T12:52:04.287442+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 1.815
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "typed_roundtrip": true,
+            "fragmentation": true,
+            "recover_body_error": true,
+            "poison_reset": true,
+            "bounds": true
+          },
+          "pass_to_pass": {
+            "empty_reset": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_reset",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- typed_roundtrip",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- fragmentation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- recover_body_error",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- poison_reset",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounds",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:52:17.692911+00:00"
+    },
+    {
+      "run_id": "typed-frame-stream-a57a6008",
+      "task_id": "typed-frame-stream",
+      "task_hash": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "ad8214524103dff519fab15b0bcab70b0a252d6080844dfba1ec7a13cc6c67d2",
+      "source_patch_sha256": "ad8214524103dff519fab15b0bcab70b0a252d6080844dfba1ec7a13cc6c67d2",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/stream.ml",
+        "lib/wire.ml"
+      ],
+      "started_at": "2026-10-01T12:52:17.713546+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 3.389
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "typed_roundtrip": true,
+            "fragmentation": true,
+            "recover_body_error": true,
+            "poison_reset": true,
+            "bounds": true
+          },
+          "pass_to_pass": {
+            "empty_reset": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_reset",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- typed_roundtrip",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- fragmentation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- recover_body_error",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- poison_reset",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounds",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:52:31.518168+00:00"
+    },
+    {
+      "run_id": "typed-frame-stream-e0b287c5",
+      "task_id": "typed-frame-stream",
+      "task_hash": "3c44b621d128043b22189c64c33dd30398b9f6cb90d59afb802acd6ceac2395f",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "eb0d8a26b7d02d6ae64472370ea515a286dbee97ca0aa0de3349af59e2720f6e",
+      "source_patch_sha256": "eb0d8a26b7d02d6ae64472370ea515a286dbee97ca0aa0de3349af59e2720f6e",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/stream.ml",
+        "lib/wire.ml"
+      ],
+      "started_at": "2026-10-01T12:52:31.531558+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.762
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "typed_roundtrip": true,
+            "fragmentation": true,
+            "recover_body_error": true,
+            "poison_reset": true,
+            "bounds": true
+          },
+          "pass_to_pass": {
+            "empty_reset": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_reset",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- typed_roundtrip",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- fragmentation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- recover_body_error",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- poison_reset",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- bounds",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:52:43.764677+00:00"
+    },
+    {
+      "run_id": "window-watermark-allocation-13b7b5e3",
+      "task_id": "window-watermark-allocation",
+      "task_hash": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "85abfb15e1c44f5f0bae18993dfb840b479f0767a0afa1df2f4fdeefbaf757af",
+      "source_patch_sha256": "85abfb15e1c44f5f0bae18993dfb840b479f0767a0afa1df2f4fdeefbaf757af",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/window.ml",
+        "lib/window_bounds.ml",
+        "public/dune",
+        "public/window_test.ml"
+      ],
+      "started_at": "2026-10-01T12:52:43.780640+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.693
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "width=1: 0.000 allocated bytes/event\nwidth=4096: 0.000 allocated bytes/event\n"
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "expire_late": true,
+            "out_of_order": true,
+            "huge_jump": true,
+            "reference_workload": true,
+            "allocation_work": true
+          },
+          "pass_to_pass": {
+            "empty_limits": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_limits",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- expire_late",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- out_of_order",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- huge_jump",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- reference_workload",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- allocation_work",
+            "exit_code": 0,
+            "stdout": "bytes/event=0.002 visits=105119\n",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:52:56.254069+00:00"
+    },
+    {
+      "run_id": "window-watermark-allocation-aa219f94",
+      "task_id": "window-watermark-allocation",
+      "task_hash": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "7f56ab4368e6372334ea2f125e26fe20c0a82edfcda8e97b893227632f2b0bb7",
+      "source_patch_sha256": "7f56ab4368e6372334ea2f125e26fe20c0a82edfcda8e97b893227632f2b0bb7",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/window.ml",
+        "lib/window_bounds.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:52:56.266070+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.512
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "width=1: 0.0003 allocated bytes/event\nwidth=3: 0.0003 allocated bytes/event\nwidth=4096: 0.0003 allocated bytes/event\n"
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "expire_late": true,
+            "out_of_order": true,
+            "huge_jump": true,
+            "reference_workload": true,
+            "allocation_work": true
+          },
+          "pass_to_pass": {
+            "empty_limits": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_limits",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- expire_late",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- out_of_order",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- huge_jump",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- reference_workload",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- allocation_work",
+            "exit_code": 0,
+            "stdout": "bytes/event=0.002 visits=105119\n",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:53:08.203011+00:00"
+    },
+    {
+      "run_id": "window-watermark-allocation-c87e976c",
+      "task_id": "window-watermark-allocation",
+      "task_hash": "465028798caec8d23d05cf12275eb76163d635ed5ee6ce862c1f8ac6d26417d1",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "ccdf91dc4751c3daac885c36f16d29ad27a8d9f7f7205273e6e211f11ae8de40",
+      "source_patch_sha256": "ccdf91dc4751c3daac885c36f16d29ad27a8d9f7f7205273e6e211f11ae8de40",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/window.ml",
+        "lib/window_bounds.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:53:08.215898+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 1.984
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": "width=1: 0.001 allocated bytes/event\nwidth=3: 0.001 allocated bytes/event\nwidth=4096: 0.001 allocated bytes/event\n"
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "expire_late": true,
+            "out_of_order": true,
+            "huge_jump": true,
+            "reference_workload": true,
+            "allocation_work": true
+          },
+          "pass_to_pass": {
+            "empty_limits": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 5/5 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- empty_limits",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- expire_late",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- out_of_order",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- huge_jump",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- reference_workload",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- allocation_work",
+            "exit_code": 0,
+            "stdout": "bytes/event=0.002 visits=105119\n",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:53:18.570805+00:00"
+    },
+    {
+      "run_id": "typed-query-optimizer-15dd0191",
+      "task_id": "typed-query-optimizer",
+      "task_hash": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "fa0211ece6d63194ae02403c542a28f4a1a289761e3f61e3201435348fe061e7",
+      "source_patch_sha256": "fa0211ece6d63194ae02403c542a28f4a1a289761e3f61e3201435348fe061e7",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/optimizer.ml",
+        "public/dune",
+        "public/normalization.ml"
+      ],
+      "started_at": "2026-10-01T12:53:18.577924+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.39
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "renaming_scope": true,
+            "simultaneous_substitution": true,
+            "literal_beta": true,
+            "dead_binding": true,
+            "projection_effects": true,
+            "sharing": true,
+            "generated_equivalence": true
+          },
+          "pass_to_pass": {
+            "interpreter_contract": true,
+            "supplied_interfaces": true,
+            "typed_clients": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 7/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- interpreter_contract",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/type_clients.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- renaming_scope",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- simultaneous_substitution",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- literal_beta",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- dead_binding",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- projection_effects",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- sharing",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- generated_equivalence",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:53:30.756418+00:00"
+    },
+    {
+      "run_id": "typed-query-optimizer-3a90abdc",
+      "task_id": "typed-query-optimizer",
+      "task_hash": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "41cd81927278ba17a834482b380a5aea553e16144fea9f7b177492fb837d5d69",
+      "source_patch_sha256": "41cd81927278ba17a834482b380a5aea553e16144fea9f7b177492fb837d5d69",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/optimizer.ml",
+        "public/dune",
+        "public/optimizer_test.ml"
+      ],
+      "started_at": "2026-10-01T12:53:30.762494+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.521
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "renaming_scope": true,
+            "simultaneous_substitution": true,
+            "literal_beta": true,
+            "dead_binding": true,
+            "projection_effects": true,
+            "sharing": true,
+            "generated_equivalence": true
+          },
+          "pass_to_pass": {
+            "interpreter_contract": true,
+            "supplied_interfaces": true,
+            "typed_clients": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 7/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- interpreter_contract",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/type_clients.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- renaming_scope",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- simultaneous_substitution",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- literal_beta",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- dead_binding",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- projection_effects",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- sharing",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- generated_equivalence",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:53:42.982721+00:00"
+    },
+    {
+      "run_id": "typed-query-optimizer-9a3432a8",
+      "task_id": "typed-query-optimizer",
+      "task_hash": "103bfe95d93eee1ff5c0a9b2adea14c74f0b9691ad9c9d9bf9297899fe08e63c",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "5588cdedf2b9e3dbfcaef177938bd453922f80c036bc606f96e7dd3e390e42ab",
+      "source_patch_sha256": "5588cdedf2b9e3dbfcaef177938bd453922f80c036bc606f96e7dd3e390e42ab",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/optimizer.ml",
+        "public/smoke.ml"
+      ],
+      "started_at": "2026-10-01T12:53:42.989589+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 2.117
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "renaming_scope": true,
+            "simultaneous_substitution": true,
+            "literal_beta": true,
+            "dead_binding": true,
+            "projection_effects": true,
+            "sharing": true,
+            "generated_equivalence": true
+          },
+          "pass_to_pass": {
+            "interpreter_contract": true,
+            "supplied_interfaces": true,
+            "typed_clients": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 7/7 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- interpreter_contract",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/type_clients.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- renaming_scope",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- simultaneous_substitution",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- literal_beta",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- dead_binding",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- projection_effects",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- sharing",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec ./hidden/checks.exe -- generated_equivalence",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:53:54.936374+00:00"
+    },
+    {
+      "run_id": "async-generation-cache-6bd6f12c",
+      "task_id": "async-generation-cache",
+      "task_hash": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "4c28000b2d3607a18141911717f8945f97b54fcec7d9dcda2f966a7c47798239",
+      "source_patch_sha256": "4c28000b2d3607a18141911717f8945f97b54fcec7d9dcda2f966a7c47798239",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/alarm.ml",
+        "lib/cache.ml",
+        "public/dune",
+        "public/regression.ml"
+      ],
+      "started_at": "2026-10-01T12:53:54.948188+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 6.677
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "coalescing_ttl": true,
+            "generation_invalidation": true,
+            "subscriber_cancellation": true,
+            "retry_budget": true,
+            "deadline_dominance": true,
+            "close_detached": true,
+            "reentrant_worker": true,
+            "monitor_errors": true,
+            "alarm_ownership": true
+          },
+          "pass_to_pass": {
+            "empty_policy_request": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 9/9 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec hidden/checks.exe -- empty_policy_request",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- coalescing_ttl",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- generation_invalidation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- subscriber_cancellation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- retry_budget",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- deadline_dominance",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- close_detached",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- reentrant_worker",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- monitor_errors",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- alarm_ownership",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:54:15.566557+00:00"
+    },
+    {
+      "run_id": "async-generation-cache-6c2d7553",
+      "task_id": "async-generation-cache",
+      "task_hash": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+      "original_functional": 1.0,
+      "original_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "64ed5a98d56155afc01d6941f6c5bb8d79126b9aa073b1e313b0767217e04786",
+      "source_patch_sha256": "64ed5a98d56155afc01d6941f6c5bb8d79126b9aa073b1e313b0767217e04786",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/alarm.ml",
+        "lib/cache.ml",
+        "public/dune",
+        "public/generations.ml"
+      ],
+      "started_at": "2026-10-01T12:54:15.574965+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 5.226
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 1.0
+          },
+          "fail_to_pass": {
+            "coalescing_ttl": true,
+            "generation_invalidation": true,
+            "subscriber_cancellation": true,
+            "retry_budget": true,
+            "deadline_dominance": true,
+            "close_detached": true,
+            "reentrant_worker": true,
+            "monitor_errors": true,
+            "alarm_ownership": true
+          },
+          "pass_to_pass": {
+            "empty_policy_request": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 9/9 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec hidden/checks.exe -- empty_policy_request",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- coalescing_ttl",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- generation_invalidation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- subscriber_cancellation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- retry_budget",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- deadline_dominance",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- close_detached",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- reentrant_worker",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- monitor_errors",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- alarm_ownership",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 1.0,
+      "replay_failed_checks": {
+        "fail_to_pass": [],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:54:34.761117+00:00"
+    },
+    {
+      "run_id": "async-generation-cache-e06a92cd",
+      "task_id": "async-generation-cache",
+      "task_hash": "44725461f72f084b393088788cbc3e8c53096f2160617a32ceaee63c7bcf9cb4",
+      "original_functional": 0.8889,
+      "original_failed_checks": {
+        "fail_to_pass": [
+          "deadline_dominance"
+        ],
+        "pass_to_pass": []
+      },
+      "original_patch_sha256": "a6a073b9a5e692aadc43e447da2bb533f38c237b4e84d4948d1fdf27a425852a",
+      "source_patch_sha256": "a6a073b9a5e692aadc43e447da2bb533f38c237b4e84d4948d1fdf27a425852a",
+      "excluded_generated_paths": [],
+      "source_files": [
+        "lib/alarm.ml",
+        "lib/cache.ml",
+        "public/dune",
+        "public/regression.ml"
+      ],
+      "started_at": "2026-10-01T12:54:34.769972+00:00",
+      "exercise": {
+        "setup": [
+          {
+            "name": "public build preflight",
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "duration_s": 4.57
+          }
+        ],
+        "setup_commands": [
+          {
+            "cmd": "dune build @runtest",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "verdict": {
+          "scores": {
+            "functional": 0.8889
+          },
+          "fail_to_pass": {
+            "coalescing_ttl": true,
+            "generation_invalidation": true,
+            "subscriber_cancellation": true,
+            "retry_budget": true,
+            "deadline_dominance": false,
+            "close_detached": true,
+            "reentrant_worker": true,
+            "monitor_errors": true,
+            "alarm_ownership": true
+          },
+          "pass_to_pass": {
+            "empty_policy_request": true,
+            "supplied_interfaces": true
+          },
+          "pass_to_pass_ok": true,
+          "details": [
+            "fail_to_pass 8/9 passing"
+          ]
+        },
+        "commands": [
+          {
+            "cmd": "dune exec hidden/checks.exe -- empty_policy_request",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "python hidden/contracts.py",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- coalescing_ttl",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- generation_invalidation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- subscriber_cancellation",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- retry_budget",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- deadline_dominance",
+            "exit_code": 2,
+            "stdout": "",
+            "stderr": "Uncaught exception:\n  \n  \"Assert_failure hidden/checks.ml:123:2\"\n\nRaised at Dune__exe__Checks in file \"hidden/checks.ml\", line 123, characters 2-30\n"
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- close_detached",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- reentrant_worker",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- monitor_errors",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "cmd": "dune exec hidden/checks.exe -- alarm_ownership",
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "supplemental_commands": []
+      },
+      "replay_functional": 0.8889,
+      "replay_failed_checks": {
+        "fail_to_pass": [
+          "deadline_dominance"
+        ],
+        "pass_to_pass": []
+      },
+      "consistent": true,
+      "finished_at": "2026-10-01T12:54:51.989284+00:00"
+    }
+  ],
+  "compiler_note": "Old core-only compiler replay remains in compiler-gadt-field-safety/MODEL_PATCH_REPLAY.json and is not a current-task outcome.",
+  "finished_at": "2026-10-01T12:54:52.007620+00:00"
+}

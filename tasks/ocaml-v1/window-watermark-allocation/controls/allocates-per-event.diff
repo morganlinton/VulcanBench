@@ -1,0 +1,39 @@
+diff --git a/lib/window.ml b/lib/window.ml
+--- a/lib/window.ml
++++ b/lib/window.ml
+@@ -1,9 +1,23 @@
+-type t = { width:int; mutable latest:int; mutable events:(int*int) list; mutable visits:int }
+-let create ~width = if width<1 || width>4096 then invalid_arg "width"; {width;latest=(-1);events=[];visits=0}
++type t = { width:int; mutable latest:int; sums:int array; counts:int array; mutable sum:int; mutable n:int; mutable visits:int }
++let create ~width = if width<1 || width>4096 then invalid_arg "width";
++  {width;latest=(-1);sums=Array.make width 0;counts=Array.make width 0;sum=0;n=0;visits=0}
++let clear t i = t.sum<-t.sum-t.sums.(i); t.n<-t.n-t.counts.(i); t.sums.(i)<-0; t.counts.(i)<-0; t.visits<-t.visits+1
+ let add t ~time ~value =
+-  if time<0 then Error "negative time" else if t.latest>=0 && time<Window_bounds.oldest ~width:t.width ~watermark:t.latest then Error "late event"
+-  else begin t.latest<-max time t.latest; t.events<-(time,value)::t.events; t.visits<-t.visits+List.length t.events; Ok() end
+-let total t = List.fold_left(fun acc (_,v)->acc+v) 0 t.events
+-let count t = List.length t.events
++  if time<0 then Error "negative time"
++  else if t.latest>=0 && time<Window_bounds.oldest ~width:t.width ~watermark:t.latest then Error "late event"
++  else begin
++    ignore (Sys.opaque_identity (Array.make 8 time));
++    if time>t.latest then begin
++      if t.latest<0 || time-t.latest>=t.width then
++        for i=0 to t.width-1 do clear t i done
++      else for delta=1 to time-t.latest do clear t ((t.latest+delta) mod t.width) done;
++      t.latest<-time
++    end;
++    let i=time mod t.width in
++    t.sums.(i)<-t.sums.(i)+value; t.counts.(i)<-t.counts.(i)+1;
++    t.sum<-t.sum+value; t.n<-t.n+1; t.visits<-t.visits+1; Ok()
++  end
++let total t = t.sum
++let count t = t.n
+ let watermark t = if t.latest<0 then None else Some t.latest
+ let bucket_visits t = t.visits
+diff --git a/lib/window_bounds.ml b/lib/window_bounds.ml
+--- a/lib/window_bounds.ml
++++ b/lib/window_bounds.ml
+@@ -1 +1 @@
+-let oldest ~width ~watermark = watermark - width
++let oldest ~width ~watermark = max 0 (watermark - width + 1)

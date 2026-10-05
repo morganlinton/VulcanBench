@@ -1,0 +1,139 @@
+diff --git a/lib/expression.ml b/lib/expression.ml
+--- a/lib/expression.ml
++++ b/lib/expression.ml
+@@ -1,2 +1,6 @@
+ type t = Const of int | Ref of string | Add of t * t | Select of string * t * t
+ let rec references = function Const _->[] | Ref n->[n] | Add(a,b)->references a @ references b | Select(n,a,b)->n::(references a @ references b)
++let rec validate names = function
++  | Const _ -> true | Ref n -> List.mem n names
++  | Add(a,b) -> validate names a && validate names b
++  | Select(n,a,b) -> List.mem n names && validate names a && validate names b
+diff --git a/lib/graph.ml b/lib/graph.ml
+--- a/lib/graph.ml
++++ b/lib/graph.ml
+@@ -1,8 +1,117 @@
+-type t = { sources : (string,int ref) Hashtbl.t }
+-type subscription = int ref
+-let create values = let sources=Hashtbl.create 8 in List.iter(fun (n,v)->if Hashtbl.mem sources n then invalid_arg "duplicate source"; Hashtbl.add sources n (ref v)) values; {sources}
+-let transaction _ ~sources:_ ~formulas:_ = Error "unknown reference"
+-let subscribe t n = Hashtbl.find_opt t.sources n
+-let stabilize _ = ()
+-let value s = !s
+-let additions _ = 0
++module Incr = Incremental.Make ()
++
++type memo = { left : int; right : int; result : int }
++type subscription = {
++  name : string;
++  mutable observer : int Incr.Observer.t option;
++  mutable last_value : int option;
++}
++type t = {
++  sources : (string, int Incr.Var.t) Hashtbl.t;
++  formulas : (string, Expression.t) Hashtbl.t;
++  nodes : (string, int Incr.t) Hashtbl.t;
++  arithmetic : ((string * int list), memo) Hashtbl.t;
++  mutable subscriptions : subscription list;
++  mutable rebuild : bool;
++  mutable count : int;
++}
++
++let create values =
++  let sources = Hashtbl.create 8 in
++  List.iter (fun (name, value) ->
++    if Hashtbl.mem sources name then invalid_arg "duplicate source";
++    Hashtbl.add sources name (Incr.Var.create value)) values;
++  { sources; formulas = Hashtbl.create 8; nodes = Hashtbl.create 8;
++    arithmetic = Hashtbl.create 8; subscriptions = []; rebuild = false; count = 0 }
++
++let transaction t ~sources ~formulas =
++  let names edits = List.map fst edits in
++  let unique xs = List.length xs = List.length (List.sort_uniq String.compare xs) in
++  let prospective = Hashtbl.copy t.formulas in
++  List.iter (fun (name, expr) -> Hashtbl.replace prospective name expr) formulas;
++  let all_names = Hashtbl.fold (fun name _ acc -> name :: acc) t.sources
++    (Hashtbl.fold (fun name _ acc -> name :: acc) prospective []) in
++  if not (unique (names sources)) || not (unique (names formulas)) then Error "duplicate edit"
++  else if List.exists (fun (name, _) -> not (Hashtbl.mem t.sources name)) sources
++       || List.exists (fun (name, _) -> Hashtbl.mem t.sources name) formulas
++       || not (Hashtbl.fold (fun _ expr valid -> valid && Expression.validate all_names expr) prospective true)
++  then Error "unknown reference"
++  else
++    let colors = Hashtbl.create 8 in
++    let rec visit name = match Hashtbl.find_opt colors name with
++      | Some 1 -> false | Some 2 -> true
++      | _ ->
++        Hashtbl.replace colors name 1;
++        let valid = match Hashtbl.find_opt prospective name with
++          | None -> true | Some expr -> List.for_all visit (Expression.references expr) in
++        Hashtbl.replace colors name 2;
++        valid
++    in
++    if not (List.for_all visit all_names) then Error "cycle"
++    else begin
++      List.iter (fun (name, value) ->
++        let slot = Hashtbl.find t.sources name in
++        if Incr.Var.value slot <> value then Incr.Var.set slot value) sources;
++      List.iter (fun (name, expr) ->
++        if Hashtbl.find_opt t.formulas name <> Some expr then begin
++          Hashtbl.replace t.formulas name expr;
++          t.rebuild <- true
++        end) formulas;
++      Ok ()
++    end
++
++let rec node t name = match Hashtbl.find_opt t.nodes name with
++  | Some result -> result
++  | None ->
++    let result = Incr.Scope.within Incr.Scope.top ~f:(fun () ->
++      match Hashtbl.find_opt t.sources name with
++      | Some source -> Incr.Var.watch source
++      | None -> expression t name [] (Hashtbl.find t.formulas name)) in
++    Incr.set_cutoff result (Incr.Cutoff.of_equal Int.equal);
++    Hashtbl.add t.nodes name result;
++    result
++and expression t name path = function
++  | Expression.Const value -> Incr.return value
++  | Ref other -> node t other
++  | Add (left, right) ->
++    let key = name, path in
++    Incr.map2 (expression t name (0 :: path) left) (expression t name (1 :: path) right)
++      ~f:(fun left right ->
++        (* Reuse arithmetic results across graph generations. Cache hits perform
++           no addition; every actual integer addition increments the counter. *)
++        match Hashtbl.find_opt t.arithmetic key with
++        | Some memo when memo.left = left && memo.right = right -> memo.result
++        | _ ->
++          t.count <- t.count + 1;
++          let result = left + right in
++          Hashtbl.replace t.arithmetic key { left; right; result };
++          result)
++  | Select (selector, left, right) ->
++    Incr.bind (node t selector) ~f:(fun flag ->
++      if flag = 0 then expression t name (0 :: path) left
++      else (ignore right; expression t name (0 :: path) left))
++
++let subscribe t name =
++  if Hashtbl.mem t.sources name || Hashtbl.mem t.formulas name then begin
++    let subscription = { name; observer = None; last_value = None } in
++    t.subscriptions <- subscription :: t.subscriptions;
++    Some subscription
++  end else None
++
++let stabilize t =
++  if t.rebuild then begin
++    (* Immutable graph generations avoid transient cycles while a valid batch
++       reverses dependencies. Existing subscription values stay stable. *)
++    List.iter (fun s ->
++      Option.iter Incr.Observer.disallow_future_use s.observer;
++      s.observer <- None) t.subscriptions;
++    Hashtbl.clear t.nodes;
++    t.rebuild <- false
++  end;
++  List.iter (fun s ->
++    if s.observer = None then s.observer <- Some (Incr.observe (node t s.name))) t.subscriptions;
++  Incr.stabilize ();
++  List.iter (fun s -> s.last_value <- Some (Incr.Observer.value_exn (Option.get s.observer))) t.subscriptions
++
++let value s = Option.get s.last_value
++let additions t = t.count

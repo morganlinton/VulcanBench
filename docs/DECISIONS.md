@@ -7,6 +7,490 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-05: Generative registry calibration completed
+
+Frozen d3ebdb801b30 measured 3/3 fresh native medium complete passes, with every
+behavior and guard passing. Full CI passed 1105 tests (86.38% coverage); reporter
+and validation coverage passed 38 focused tests. Source/trace and receipt audits
+passed, all 15 attributed solver artifacts were quarantined and hash-verified,
+and no earlier-artifact read was observed. No semantic failure needed replay.
+All scoped jobs exited. Task/conditions/code, nine earlier pools and the expansion
+blueprint stayed unchanged. Preserve all raw receipts in the ignored run root
+runs-ocaml-registry-20261005T173757Z and the preparation history.
+
+This adds a measured module/type-identity candidate, not difficulty below 80%,
+independent confirmation or expanded-suite admission. Original fixture status
+provides no upstream/OSS-bug-fix quota credit. Compiler refusal remains unresolved
+without retry. Recommend sourcing a complementary first-class module/functor
+workload from a complete pinned upstream repository before further authoring.
+
+## 2026-10-05: Generative registry native calibration authorized
+
+The owner authorized reporter/launcher support, full CI and three fresh serial
+native medium attempts for frozen d3ebdb801b30. Keep the original task, all nine
+earlier pools and the family-balanced blueprint unchanged. Reporter suite/title
+and regression coverage are added; the full CI code digest gates first dispatch.
+Every attempt retains the original CLI/toolchain, subscription, workspace-write,
+10800-second / 540-configured-step budgets, concurrency one and no container/judges.
+No compiler refusal retry, provider retry or expired automation.
+
+The launcher verifies scoring/source/metadata/control, code and blueprint hashes
+before each call. Solver-artifact hygiene covers positively attributed changed
+regular files and new temporary directories in both /private/tmp and native
+TMPDIR root. Existing host directories are not recursively swept. Unexplained
+new OCaml artifacts or leftover task workspaces stop dispatch for review. Archive
+positive matches with file hashes before another call. A synthetic probe tests
+files, new directories, unexplained sources and workspace leftovers entirely
+inside ignored authoring material. No outer OS read guard or new resource cap is
+added. This extends the known artifact cleanup, without claiming isolation.
+
+Preserve all outcomes; manually audit source/traces and replay semantic failures
+offline. This remains development calibration for a prospective module/type
+identity slot, not expanded-suite admission or independent external confirmation.
+
+## 2026-10-05: Generative module registry candidate authored
+
+The owner accepted authoring the next modules/type-identity slot. Create the
+separate ocaml-registry-candidate pool, frozen d3ebdb801b30, without modifying the
+immutable expansion blueprint or earlier scoring pools. Key generativity,
+proof-producing heterogeneous lookup and first-class abstract payload packages
+are primary obligations. Revocable handles, independent clone owners, typed
+transfer and reentrant visitors/updates are explicit secondary lifetime/state
+coverage. No serialized payloads, unsafe casts or global registry cache.
+
+The complete fresh offline gate passed three base/reference pairs, eight
+compiling controls with intended semantic sensitivity, guards and standard
+validation. A harmless helper-placement probe passed. Fifty-nine focused
+metadata/verifier/validation tests passed; harness/validator hashes match the
+prior 1104-test full CI receipt. No fresh full CI or model invocation occurred
+in this authoring step. Reporter registration, full CI and a fresh artifact-cleaned
+three-attempt native launcher are required before calibration. Budgets, native
+CLI and toolchain remain unchanged. No refusal/automation retry was performed.
+
+Preserve the initial gate's metadata rejection: the validator requires newly
+written hand-authored tasks to classify decontaminated=true. The corrected notes
+explicitly deny an independently verified training-cutoff claim. Original small
+Apache-2.0 fixture status is disclosed, with no upstream/OSS-bug-fix quota credit.
+Candidate reference validation does not establish difficulty, confirmation or
+publication admission. Current operating evidence is in
+[tasks/ocaml-registry-candidate/CHECKPOINT.md](../tasks/ocaml-registry-candidate/CHECKPOINT.md).
+
+## 2026-10-05: Frozen family-balanced OCaml expansion blueprint
+
+The owner accepted the recommended expansion-plan step. Freeze
+[OCaml expansion plan v1](ocaml-expansion-v1/PLAN.md) and its JSON/inventory/hash
+receipts before further candidate authoring. Target 20 tasks, ten semantic
+families, two slots per family, equal 10% family and 5% task weights, and a 10/10
+engineering/language split. Eleven existing definitions and nine new slots are
+prospective occupants, not admitted publication tasks. Each of the 15 latest
+logical workloads is assigned exactly one primary family; historical revisions
+retain their original identities and results. Older contextual "twelve families"
+meant task workloads, not the new semantic grouping.
+
+Full tagged serialization v3 and typed-frame-stream occupy the two serialization
+slots for native migration and incremental framing coverage. The ambiguous
+older schema and dependent open-union workload remain supporting evidence, not
+extra family weight. Existing easy anchors are not discarded solely to lower a
+score. Selection uses known development results and does not establish an
+independent experiment. Compiler coverage remains blocked by the provider refusal;
+no retry, prompt change or compiler-free renormalized headline is authorized.
+
+Require at least eight complete upstream-repository tasks and four verified OSS
+bug fixes in the eventual suite, with real baseline reproduction and correct
+reference evidence. Original feature extensions do not count as bug fixes.
+Admit each future task through the existing offline/control/CI gate, then freeze
+all 20 exact definitions and conditions before a separate 60-outcome confirmation.
+Keep all outcomes and withhold the overall score for incomplete coverage. At
+three attempts per task, strictly below 80% requires at most 47/60 passes, without
+asserting statistical certainty from that point estimate.
+
+No task source, metadata, scorer, model budget or CLI setting changed, and no
+model invocation was launched. The v1 plan hashes the blueprint and existing
+identities, not nonexistent future definitions. Policy/slot changes require a
+separate prospective v2 preserving v1. Next authoring priority is the unfilled
+generative-module-registry slot, with transaction overlap explicitly secondary.
+
+## 2026-10-04: Cross-attempt native solver-artifact exposure
+
+The first open-union attempt wrote its smoke tests to /private/tmp. The second
+attempt listed that directory, read the first attempt's union_regression.ml and
+compiled/ran it after writing its initial implementation. Both raw outcomes
+passed; preserve them and the third interrupted trace without rescoring. Retire
+that interrupted cohort from independent confirmation. Harness telemetry showed
+out-of-workspace paths but did not flag these solver artifacts as benchmark data.
+Manual trace review caught the exposure. No hidden reference/check read occurred.
+
+Stop the scoped dispatcher/process tree, quarantine positively identified solver
+artifacts and interrupted workspace into ignored receipts, and start a separate
+full three-attempt cohort with unchanged f9e65a3ac13a scoring definition. Snapshot
+global temporary files around each attempt, quarantine new/modified files only
+when positively attributable to that solver command or native compilation, and
+stop for review on unattributed new OCaml artifacts or leftover task workspaces.
+Preserve a cleanup receipt before the next call. The cleanup helper has a
+synthetic offline probe entirely inside the ignored authoring directory.
+
+This changes between-attempt artifact hygiene, disclosed in the new run's
+ARTIFACT_POLICY.json. It adds no OS read guard and changes no CLI/toolchain,
+model, budget, concurrency, provider or prompt. Existing offline validation and
+CI cover unchanged scoring/harness inputs. Native isolation remains observational.
+This is an exposure correction, not a provider retry or outcome-driven task
+revision. Do not omit legitimate semantic failures from the fresh cohort.
+
+## 2026-10-04: Held-out open-union serialization workload
+
+The owner accepted the recommended held-out serialization calibration. Create
+ocaml-union-heldout separately from every measured definition. Supply the
+completed Tagged/Tagged_stream/Utils reference as an explicitly disclosed public
+dependency, then implement a new heterogeneous open-union API. This tests typed
+dispatch, ordered projection, opaque zero-copy forwarding, transactional
+callbacks and ordinary native reader composition. Authoring is informed by prior
+results, so held out means not previously attempted by the target on this
+contract. It is not independent external confirmation or a separate family for
+automatic weighting.
+
+Freeze the entire issue/source/reference/checks/controls and operating conditions
+before any target invocation. Require three offline base/reference pairs, eight
+compiling semantic controls with intended sensitivity, protected interfaces and
+fixtures, standard validation and full applicable CI. Do not modify a frozen
+contract in response to outcome. Record all three fresh serial medium attempts,
+then audit traces and replay failures. Keep pinned native CLI/toolchain,
+workspace-write, subscription, no container/judges and 10800-second /
+540-configured-step budgets. No compiler retry, expired automation or provider
+retry. Existing measured pool identities remain unchanged.
+
+## 2026-10-04: Prospective short-payload stream reference correction
+
+Source review of the first passing v2 patch revealed a gold integration gap:
+Utils.bin_read_stream reuses its 8-byte header buffer for smaller payloads,
+while Tagged.reader consumes to buffer end. A fresh offline reference probe
+reproduced Tagged.Decode on a one-byte Atom payload. Preserve 040052f00a9c,
+its 1.0 pass and interrupted second trace. Do not change existing scores.
+
+Create v3 with unchanged public issue/source and the narrowed declaration guard.
+Gold now passes an exact zero-copy payload subview to Utils' reader. Add explicit
+compatibility probes for tiny/empty Atom, empty containers and short strings
+across the buffer-reuse boundary, and the old reference as a seventh compiling
+control. The corrected short-stream probe passes. Require the complete offline
+gate, CI and three entirely fresh unchanged native attempts. The model budget,
+effort, CLI, toolchain and provider conditions are unchanged. This remains one
+serialization family, not three distinct tasks for weighting.
+
+## 2026-10-04: Prospective serialization declaration-guard correction
+
+A pre-final review found that the supplied prefix hash froze validator source
+and harmless decoder-helper placement beyond the public issue. The first
+attempt completed a legitimate 1.0 pass before the dispatcher was interrupted
+on its second attempt. Preserve the original 055b3d9fbec1 definition, pass, raw
+cards and interrupted trace. Do not reinterpret its result or silently edit it.
+
+Create ocaml-serialization-candidate-v2 with the same public issue, source,
+reference and faulty controls. Narrow the verifier guard to supplied encoder/
+writer declarations and actual protected interfaces and fixtures. Demonstrate
+that the reference plus a harmless helper placed before validate still passes
+all checks. Require a complete new offline gate, CI and three fresh unchanged
+native attempts. This is the same task family; identities are not pooled.
+
+## 2026-10-04: Full bin_prot typed serialization candidate
+
+The owner accepted the recommended full-repository typed serialization next step.
+Create tasks/ocaml-serialization-candidate independently of every measured pool,
+using the complete public bin_prot v0.17.0 source at
+2cd58a8cd74b5fa1f28d63cbc4deaf6665b82525. Native arbitrary Atom readers, bounded
+zero-copy Bigarrays, typed Map/Record construction and transactional size-framed
+streams add integration work beyond the older small schema fixture. Explicitly
+specify propagation by identity of every user callback exception, including
+Tagged.Decode, and cursor rollback. Do not retrospectively change the older task.
+
+Require the same offline gate, intended sensitivity of compiling controls,
+protected interfaces/encoder/fixtures, standard validation and full applicable
+CI before fresh calibration. The initial gate found an overly broad unbounded
+Atom control that broke public migration at setup; preserve it and correct the
+control before a new gate. The original upstream test library requires missing
+float_array. Preserve it without changing the pinned 96-package toolchain;
+preflight compiles the library, runs the upstream fixture checksum rule and
+public clients. Do not claim all upstream inline tests were executed.
+
+Keep Codex 0.159.0, GPT-6.1 Sol medium, subscription, local workspace-write,
+serial concurrency one, no container/judges, and 10800-second / 540-configured-step
+budgets. No provider retries, compiler retry or expired automation. Authoring
+artifacts remain in the ignored benchmark directory, not global /tmp. Integrity
+is observational, not OS read isolation. Report the candidate separately until
+an explicit frozen composition decides the weighting of overlapping schema
+skills. This is development calibration, not independent confirmation.
+
+## 2026-10-03: Prospective atomic-rewiring reference revision
+
+Review of a model's public test revealed a reference defect: clearing an invalid
+obsolete child left num_invalid_children nonzero and invalidated a still-valid
+parent at the next stabilization. A supplemental offline reproduction failed
+on the original reference. Preserve b9b088b09fa9 and its three fresh native
+passes; do not reinterpret their frozen grading outcomes.
+
+Create tasks/ocaml-atomic-candidate-v2 as a revision of the same task family.
+The public issue and baseline stay unchanged. Reset invalid-child bookkeeping
+after clearing obsolete edges, add an assertion of the existing prospective
+validation contract to mixed_graph, and use the old reference as a fifth
+compiling semantic control. Three complete offline pairs, all five controls,
+interfaces/fixtures and standard validation pass. Full CI passes 1100 tests.
+Freeze revised identity 1ce29fa16e4f for three entirely fresh serial medium
+attempts at the same pinned native model, CLI and budgets. This is development
+calibration, not independent confirmation or an extra distinct task for weighting.
+
+Reporting honors per-run CALIBRATION_ELIGIBILITY.json review decisions without
+rewriting raw summaries. Exposed or tool-invalid zeroes cannot complete coverage
+or manufacture a below-80% score. Preserve their excluded receipts and raw cards.
+Native execution uses the original workspace-write CLI; the incompatible outer
+read guard is absent, authoring artifacts stay out of global /tmp, and trace
+integrity remains observational. The compiler's provider refusal is unchanged.
+
+## 2026-10-03: External read guard is incompatible with Codex tool sandboxing
+
+All three externally guarded attempts reported sandbox-exec sandbox_apply
+failures even for pwd and produced empty patches. Preserve their raw zeroes as
+infrastructure-invalid evidence, not capability results. The simple guarded
+public-build probes were insufficient to verify nested Codex tool integration.
+No difficulty or below-80% claim may use these outcomes.
+
+Restore the original pinned Codex workspace-write execution for fresh native
+calibration, keeping all benchmark-authoring artifacts relocated out of global
+/tmp. This matches earlier native execution conditions and restores working
+solver tools. Native read integrity is observational, not OS isolation. Review
+all tool traces and reject exposed attempts from clean calibration, preserving
+their original receipts. No model, effort, prompt, test, timeout or provider
+content-filter condition changes to make this infrastructure correction.
+
+## 2026-10-03: Native calibration denies benchmark-checkout reads
+
+The first atomic-rewiring attempt read a benchmark-authoring script from global
+/tmp and listed discoverable reference/hidden-check paths. Preserve its recorded
+functional pass separately as exposed evidence, stop the cohort, and preserve
+the interrupted second trace as unscored. Do not treat either as clean calibration.
+Move every authoring artifact from global /tmp into an ignored benchmark path.
+
+Use a tested macOS sandbox-exec wrapper around the pinned target Codex process
+and its descendants. Deny reads of the benchmark checkout except its .venv;
+the solver works on its separately copied public workspace and uses the same
+installed toolchain. Child-process and symlink denial probes pass, as does the
+portable public library/test/client build. Record and freeze profile/wrapper
+hashes before dispatching three entirely fresh serial medium attempts. The
+model, CLI version, source/grading identity, budgets and resource/network
+conditions remain unchanged. Earlier native cohorts did not use this benchmark
+read guard, so disclose the changed execution condition and withhold any claim
+of homogeneous aggregation. This fixes an authoring exposure without turning
+it into a capability failure or silently deleting an outcome. The compiler's
+separate provider refusal is not retried.
+
+## 2026-10-03: Separate full Incremental atomic rewiring candidate
+
+The owner requested continued OCaml eval-suite work. Follow the completed
+handoff's recommended atomic dependency rewiring direction in a separate
+one-task pool, tasks/ocaml-atomic-candidate. Preserve the three measured pool
+identities and every existing result. The original small atomic-graph task's
+1/3 native result motivates this direction; repository size alone did not
+produce failures on the later budgeted-propagation candidate.
+
+Use the same full Incremental v0.17.0 source, restoring the three files containing
+previous bounded-driver scaffolding from the pinned installed upstream package.
+The new public signatures specify prospective replacement lists, ownership
+transfer, explicit error precedence, dormant and ordinary-node cycle detection,
+callback publication, no-ops and top-scope validity. Resource exhaustion and
+violations of the existing callback preconditions are explicitly outside the
+rollback contract. Do not introduce unstated requirements to manufacture failure.
+
+Before calibration require three clean offline base/reference pairs, preserved
+interfaces and fixtures, compiling faulty controls rejected for their intended
+semantics, standard validation PASS, and full harness CI. Keep three fresh
+serial GPT-6.1 Sol medium attempts, Codex 0.159.0, subscription billing, local
+execution, no agent container or judges, and 10800-second / 540-configured-step
+solve defaults. Stop on invocation errors without automatic retries. This
+continues authorized suite development and does not revive the expired overnight
+automation or retry the compiler's unresolved provider refusal. Any resulting
+score is a development cohort, with no independent-confirmation claim.
+
+## 2026-10-02: Full Incremental repository candidate
+
+The owner accepted the recommended full-repository Incremental extension after
+Async and Base each passed 3/3. Keep it in tasks/ocaml-incremental-candidate;
+the original suite and three-candidate scoring identities stay frozen. Use the
+entire Incremental v0.17.0 checkout and an original budgeted propagation API.
+The existing expert step can trigger recursive recomputation, so quotas must
+count actual nodes and preserve publication and dynamic dependency semantics.
+The 15,832-line snapshot is large. Native release builds work with the existing
+96-package toolchain; no additional package or resource budget is required.
+
+Require three clean offline base/reference pairs, preserved interfaces, all
+compiling faulty controls rejected semantically, and standard validation.
+Record and fix fixture/control infrastructure failures before calibration.
+Keep the same three serial GPT-6.1 Sol medium attempts, pinned Codex 0.159.0,
+subscription billing, local execution, no agent container or judges, and
+10800-second / 540-step solve defaults. Stop on invocation errors without
+automatic retries. This is authorized daytime work, not a restart of the
+expired overnight automation. A one-task development result cannot establish
+independent difficulty or a full-suite under-80% headline. Preserve all earlier
+outcomes and the unresolved compiler provider refusal.
+
+## 2026-10-01: Separate OCaml candidate expansion at unchanged native settings
+
+After the seven frozen library tasks measured 19/21 complete passes (90.5%)
+on the native Mac, the owner accepted a three-candidate expansion: Async
+lifecycle integration, typed serialization compatibility, and a full-repository
+Base collection feature. Keep them in tasks/ocaml-candidates; do not mutate the
+eight measured ocaml-v1 definitions or selectively exclude old failures.
+The full Base v0.17.3 checkout has 66,082 code lines, so its navigation-scale
+metadata is xlarge. All three still explicitly retain the same 10800-second
+solve ceiling and 540 configured steps. Release-profile builds follow the
+compatible public Base package convention and avoid unrelated dev warnings.
+
+Require three clean offline base/reference pairs, every guarded interface,
+all compiling faulty controls rejected for semantics, and standard validation.
+Preserve the initial metadata failure and every subsequent receipt. Calibrate
+all three with three fresh attempts each, serial concurrency, GPT-6.1 Sol medium,
+Codex 0.159.0, subscription billing, native local execution, no agent container
+and no judges. Stop on invocation errors for review without automatic retries.
+No shorter budgets, weaker reasoning, hidden requirements, broken references,
+or selective omission may establish the under-80% goal.
+
+Candidate cards have a separate suite identity and withhold the headline until
+complete current-hash coverage. Development selection is not independent
+confirmation. This authorization is separate from the expired overnight effort
+and does not restart its automation. Revisit task difficulty after complete
+fresh receipts and failure review, before deciding on a frozen expanded suite.
+
+## 2026-10-01: OCaml compiler candidate uses a public baseline build seed
+
+After the overnight deadline, the owner explicitly requested proceeding with
+fresh native calibration. Launch a separate daytime cohort for the seven
+library tasks, three fresh attempts each, sequential single-attempt dispatch,
+GPT-6.1 Sol medium, subscription billing, local execution, no agent container,
+and no judges. Inherit the full 10800-second solve and 540 configured-step
+defaults without overrides. Preserve a new timestamped output directory,
+launch conditions, toolchain pins, and a progress receipt. Check the frozen
+scoring identity and validated code digests before each dispatch. Stop on a
+provider or infrastructure invocation error for review, without automatic
+retries. The compiler task stays pending while its earlier provider refusal
+is unresolved; partial coverage must not produce an eight-task headline.
+This new authorization does not extend the expired overnight automation.
+
+Owner steering later that morning requests native Mac execution because Docker
+uses too much memory. Provision a dedicated local opam root, pinned to the same
+repository revision and every package version in TOOLCHAIN.lock, and build a
+separate Darwin arm64 public pre-fix compiler seed. Linux artifacts are not
+portable to this host. Compiler setup accepts an explicit helper path and uses
+its actual working directory; the Docker defaults and all scoring inputs remain
+unchanged. The existing task hash excludes setup metadata, so record this setup
+change and native platform separately rather than claiming the hash pins it.
+
+Use the existing local executor and keep model concurrency at one, three fresh
+attempts per task, medium reasoning, and the full 10800-second solve allowance.
+Native host execution does not inherit Docker CPU or memory ceilings. Record it
+as a different execution environment and do not pool native and Docker outcomes
+into one headline score. Calibration reporting now exposes model, effort, and
+environment selection, and withholds an aggregate when both environments occur.
+
+Native reference validation can deny network for the complete process and its
+children with the macOS sandbox-exec profile `(version 1) (allow default)
+(deny network*)`. `validate_ocaml_pilot.py --sandbox local --offline` uses that
+profile; it does not silently claim network isolation on an ordinary local run.
+No model attempts are dispatched during this late overnight setup: the full
+solve and grading allowances no longer fit before the owner's 9 AM stop.
+
+The first actual compiler-source candidate is pinned before upstream OCaml
+PR 15114. A clean offline `configure` and `make -j2 world.opt` probe completed
+under the existing 2-CPU, 2-GiB Docker limits, taking about seven minutes under
+Linux amd64 emulation. A complete Git checkout supplies 4984 tracked files,
+including public tests omitted from upstream release archives.
+
+Provide generated artifacts from that public pre-fix build in matching verifier
+and agent images. Seed installation never overwrites original source paths or
+later rebuilds. Generated paths are excluded from captured model patches.
+Hidden tests and the upstream reference patch are absent from the seed.
+Setup installs the baseline once, then rebuilds the core compiler, standard
+library, both native frontends, and the public expect-test helper before the solve
+clock. Every graded check rebuilds those targets before executing assertions.
+
+Initial reference rebuilds with `make -j2 opt.opt` failed twice during native
+compilation with `Unbound module Types` in typing_recovery.ml. A single-job retry
+completed. The precise cause is not established; do not score these as model
+failures or claim the retry proves a reference is deterministic. Use single-job
+compiler rebuilds provisionally and require three fresh validations before
+admission. The final source image build took 642 seconds while other validation
+work was active, reinforcing the need to avoid marginal build budgets.
+
+Compiler setup and check commands now use a 1200-second budget instead of the
+small-fixture 120-second verification budget and the 600-second default setup
+budget. This permits legitimate rebuilds without relying on partial retries.
+This is build headroom, not a solve-time difficulty gate. Solver settings remain
+GPT-6.1 Sol medium, three fresh attempts,
+serial concurrency, and the same 10800-second solve ceiling. Record any setup or
+verification infrastructure failure separately from model capability.
+
+The compiler under test is upstream 5.6.0+dev0 at the pinned revision. The seven
+original fixtures retain their OCaml 5.2.1 environment. Publish both toolchains
+when reporting a mixed pool. This is an upstream OCaml task, not an OxCaml task.
+Recent publication is not evidence of decontamination or unknown model cutoffs;
+the OSS candidate explicitly declares `decontaminated: false`.
+
+Three fresh base/reference repetitions passed with single-job `opt.opt`, but the
+blanket-pointer control failed linking ocamldoc because cached Unix and rebuilt
+Stdlib__Printf had different implementation digests. That is an unrelated
+documentation-tool cache-coherence failure, not evidence that the controlled
+field classification failed to compile. Preserve the failure receipt. Use
+`make -j1 coreall opt-core ocamlc.opt ocamlopt.opt testsuite/tools/expect` to rebuild
+the compiler under test and public helper without linking unused native tools.
+Require another complete validation of the final commands, including every
+compiling control. Both solver and grader use this same documented build recipe;
+no native compiler feature, behavioral requirement, or interface guard changed.
+
+Dispatch compiler calibration one fresh attempt at a time, for a total of three,
+instead of handing the CLI an unattended three-attempt queue near the owner's
+9 AM PDT stop. Keep the same model, medium effort, serial resources, and full
+10800-second solve ceiling. Before each dispatch reserve six hours and fifteen
+minutes: three hours solving, one 20-minute setup command, eight 20-minute
+verification commands, and fifteen minutes of orchestration margin. Thus no
+compiler attempt starts after 09:45 UTC on October 1. This is an overnight
+dispatch rule, not a shortened model timeout or a scored failure. If coverage
+cannot complete, preserve partial receipts and withhold the expanded score.
+Single-task CLI dispatch does not automatically retry infrastructure failures;
+record them separately and retry only when the same full allowance remains.
+
+Inspection of `_verify_with_budget` establishes a tighter existing bound: it
+chooses `min(1200, remaining_deadline)` once for each of eight grading commands.
+For elapsed solve time s, configured solve-plus-verify time is bounded by
+`s + 8 * min(1200, 10800 - s)`, whose maximum is 19200 seconds (5 hours
+20 minutes, plus integer rounding). Setup permits 20 minutes. A six-hour
+dispatch reserve therefore leaves about 20 minutes for orchestration. No solve
+or grading timeout changes. The original launcher retains its more conservative
+09:45 UTC cutoff. If it stops with incomplete coverage, one serial resume may
+dispatch missing attempts by 10:00 UTC using this six-hour allowance, after the
+original process exits and infrastructure errors are reviewed. Preserve its
+original launch receipt; the resumed launcher writes a separate receipt.
+
+## 2026-09-30: OCaml pilot validation and provisional measurement budgets
+
+The owner requested building and testing the OCaml suite, with a model scoring
+below 80% as a difficulty goal. Build five original pilot candidates first and
+validate them before making a model-difficulty claim. Their repository scale is
+micro, with several interacting contracts per task; larger OSS tasks remain an
+expansion requirement.
+
+Pilot metadata adopts a provisional 10800-second agent ceiling and 540 steps,
+with measurements running serially. This carries forward the generous existing
+Frontier policy rather than using the micro-repository default of five minutes
+to create artificial failures. The evidence for that policy is recorded in the
+2026-09-13 entry below; it has not yet been measured on OCaml. Revisit it after
+actual OCaml run times are available. Report timeouts separately and do not
+count missing tools or dependency failures as evidence for the sub-80% target.
+
+Pin OCaml 5.2.1, Dune 3.17.2, and the selected Jane Street v0.17 release packages.
+Resolve transitive dependencies from a pinned opam-repository revision and save
+the resolved package list in the image. Use the same toolchain for agent and
+verifier. Keep hidden tests and reference patches out of the agent container.
+Compiler extensions from OxCaml remain outside this upstream pilot.
+
+Difficulty calibration, independent confirmation, and the distinction between
+five-task pilot evidence and a full-suite claim are specified in
+[the measurement plan](../tasks/ocaml-v1/MEASUREMENT_PLAN.md).
+
 ## 2026-09-29: GPT-6.1 Sol runs on Frontier v4 now, on a pinned Codex 0.159.0, ahead of Grok 4.7
 
 ### Decision
@@ -975,3 +1459,38 @@ below 3 hours, so results before and after differ only in how long a
 failure could take. The GPT-5.6 Luna extra-high sweep was 17 of 23 tasks
 in when the restamp landed on 2026-09-13; its last six runs, and the
 queued Astra rerun, run under the 3-hour bound.
+
+## 2026-10-01: Compiler public-workflow grading revision
+
+A fresh source-patch replay reproduced the original core-only compiler pass but
+failed one affected public expect snapshot. The issue already required public
+expectation maintenance. Add that existing workflow as a fourth regression guard
+and require a complete new reference/control gate. Preserve the original score,
+old definition, and replay separately; the replay is not a fresh revised-task
+failure. Controls may update expected output to their intentionally faulty
+semantics, preserving test programs, while independent behavior checks reject
+their defects. Do not admit until all three clean pairs and controls pass.
+
+The revised definition has nine grading commands. The configured bound is now
+`s + 9 * min(1200, 10800 - s)`, at most 20400 seconds (5 hours 40 minutes).
+Including 20-minute setup and 20-minute orchestration margin requires a 6-hour
+20-minute dispatch reserve, hence a 09:40 UTC cutoff for the 16:00 UTC stop.
+The grading revision occurred after that cutoff. No revised compiler model call
+will run overnight. A separate provider content-filter refusal is unscored;
+do not rephrase the prompt or change model/provider to route around it.
+
+## 2026-10-01: Supplemental cold full compiler reference build
+
+The admitted compiler gate uses a public pre-fix build seed. Earlier full native
+tool builds exposed cache-coherence failures, so a separate cold reference audit
+will configure and build world.opt without installing that seed, then execute
+all nine unchanged assertions and the new upstream GC regression. This checks
+that reference source also survives a full build beyond the core grading recipe.
+It is one supplemental audit, not three repeated cold validations or a model run.
+
+Dispatch only after the queued full CI passes, and before 13:00 UTC. Allow one
+hour for cold configure/world.opt, then 20 minutes for the combined unchanged
+assertions and 20 minutes for the upstream regression. This fits before the
+16:00 UTC stop without overlapping another workload. The task's setup, per-check
+budgets, solve ceiling, model settings, seed, and grading definition are unchanged.
+Record build failures as supplemental reference/build findings, not model scores.

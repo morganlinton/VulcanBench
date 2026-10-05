@@ -1,0 +1,261 @@
+diff --git a/lib/pending.ml b/lib/pending.ml
+index c3edc24..2f0371f 100644
+--- a/lib/pending.ml
++++ b/lib/pending.ml
+@@ -1,5 +1,23 @@
+-type 'a t = { mutable jobs : 'a list }
+-let create () = {jobs=[]}
+-let length t = List.length t.jobs
+-let push t x = t.jobs <- x::t.jobs
+-let take t = match t.jobs with []->None | x::xs->t.jobs<-xs; Some x
++type 'a t = {
++  mutable front : 'a list;
++  mutable back : 'a list;
++  mutable count : int;
++}
++
++let create () = { front = []; back = []; count = 0 }
++let length t = t.count
++let push t x =
++  t.back <- x :: t.back;
++  t.count <- t.count + 1
++
++let take t =
++  if t.front = [] then begin
++    t.front <- List.rev t.back;
++    t.back <- []
++  end;
++  match t.front with
++  | [] -> None
++  | x :: xs ->
++    t.front <- xs;
++    t.count <- t.count - 1;
++    Some x
+diff --git a/lib/pipeline.ml b/lib/pipeline.ml
+index 190bbda..4157d8e 100644
+--- a/lib/pipeline.ml
++++ b/lib/pipeline.ml
+@@ -1,10 +1,77 @@
+ open Async_kernel
+-type t = { worker : int -> (int,string) result Deferred.t; mutable count:int }
++
++type state = Open | Closing | Aborted
++type job = int * (int, string) result Ivar.t
++type t = {
++  worker : int -> (int, string) result Deferred.t;
++  concurrency : int;
++  capacity : int;
++  pending : job Pending.t;
++  finished : unit Ivar.t;
++  mutable state : state;
++  mutable count : int;
++}
++
+ let create ~concurrency ~capacity ~worker =
+-  if concurrency<=0 || capacity<0 then invalid_arg "limits";
+-  {worker;count=0}
+-let submit t value = t.count<-t.count+1; let d=t.worker value in Deferred.upon d (fun _->t.count<-t.count-1); d
+-let close _ = Deferred.return ()
+-let abort _ = Deferred.return ()
++  if concurrency <= 0 || capacity < 0 then invalid_arg "limits";
++  { worker; concurrency; capacity; pending = Pending.create ();
++    finished = Ivar.create (); state = Open; count = 0 }
++
++let complete_if_idle t =
++  if t.state <> Open && t.count = 0 && Pending.length t.pending = 0
++     && not (Ivar.is_full t.finished)
++  then Ivar.fill_exn t.finished ()
++
++let rec start t (value, result) =
++  t.count <- t.count + 1;
++  match (try Some (t.worker value) with _ -> None) with
++  | None ->
++    t.count <- t.count - 1;
++    Ivar.fill_exn result (Error "worker exception")
++  | Some deferred ->
++    Deferred.upon deferred (fun outcome ->
++      t.count <- t.count - 1;
++      Ivar.fill_exn result outcome;
++      pump t)
++
++and pump t =
++  while t.state <> Aborted && t.count < t.concurrency
++        && Pending.length t.pending > 0 do
++    match Pending.take t.pending with
++    | None -> ()
++    | Some job -> start t job
++  done;
++  complete_if_idle t
++
++let submit t value =
++  if t.state <> Open then Deferred.return (Error "closed")
++  else if t.count < t.concurrency && Pending.length t.pending = 0 then begin
++    let result = Ivar.create () in
++    start t (value, result);
++    pump t;
++    Ivar.read result
++  end else if Pending.length t.pending >= t.capacity then
++    Deferred.return (Error "full")
++  else begin
++    let result = Ivar.create () in
++    Pending.push t.pending (value, result);
++    Ivar.read result
++  end
++
++let close t =
++  if t.state = Open then t.state <- Closing;
++  pump t;
++  Ivar.read t.finished
++
++let abort t =
++  t.state <- Aborted;
++  while Pending.length t.pending > 0 do
++    match Pending.take t.pending with
++    | None -> ()
++    | Some (_, result) -> Ivar.fill_exn result (Error "aborted")
++  done;
++  complete_if_idle t;
++  Ivar.read t.finished
++
+ let active t = t.count
+-let queued _ = 0
++let queued t = Pending.length t.pending
+diff --git a/public/smoke.ml b/public/smoke.ml
+index f0e9ddd..1ad702d 100644
+--- a/public/smoke.ml
++++ b/public/smoke.ml
+@@ -1,2 +1,132 @@
+-let () = let t=Pipeline.create ~concurrency:1 ~capacity:1 ~worker:(fun x->Async_kernel.Deferred.return(Ok x)) in
+-  assert(Pipeline.active t=0); assert(Pipeline.queued t=0)
++open Async_kernel
++
++let flush () =
++  Async_kernel_scheduler.Expert.run_cycles_until_no_jobs_remain ()
++let expect d result = assert (Deferred.peek d = Some result)
++let unresolved d = assert (not (Deferred.is_determined d))
++let counts t active queued =
++  assert (Pipeline.active t = active);
++  assert (Pipeline.queued t = queued)
++
++let controlled ~concurrency ~capacity =
++  let started = ref [] in
++  let jobs = Hashtbl.create 8 in
++  let worker value =
++    started := !started @ [value];
++    let result = Ivar.create () in
++    Hashtbl.add jobs value result;
++    Ivar.read result
++  in
++  let finish value result =
++    Ivar.fill_exn (Hashtbl.find jobs value) result;
++    flush ()
++  in
++  Pipeline.create ~concurrency ~capacity ~worker, started, finish
++
++let () =
++  List.iter (fun (concurrency, capacity) ->
++    match Pipeline.create ~concurrency ~capacity
++            ~worker:(fun x -> Deferred.return (Ok x)) with
++    | _ -> assert false
++    | exception Invalid_argument _ -> ())
++    [0, 1; -1, 1; 1, -1];
++
++  let t, started, finish = controlled ~concurrency:1 ~capacity:2 in
++  counts t 0 0;
++  let a = Pipeline.submit t 1 in
++  let b = Pipeline.submit t 2 in
++  let c = Pipeline.submit t 3 in
++  expect (Pipeline.submit t 4) (Error "full");
++  counts t 1 2;
++  assert (!started = [1]);
++  let closed = Pipeline.close t in
++  let closed_again = Pipeline.close t in
++  unresolved closed;
++  expect (Pipeline.submit t 5) (Error "closed");
++  finish 1 (Ok 10);
++  expect a (Ok 10);
++  unresolved b;
++  unresolved c;
++  unresolved closed;
++  counts t 1 1;
++  assert (!started = [1; 2]);
++  finish 2 (Error "failed");
++  expect b (Error "failed");
++  unresolved c;
++  unresolved closed;
++  counts t 1 0;
++  assert (!started = [1; 2; 3]);
++  finish 3 (Ok 30);
++  expect c (Ok 30);
++  expect closed ();
++  expect closed_again ();
++  expect (Pipeline.close t) ();
++  counts t 0 0;
++
++  let t, started, finish = controlled ~concurrency:2 ~capacity:2 in
++  let a = Pipeline.submit t 1 in
++  let b = Pipeline.submit t 2 in
++  let c = Pipeline.submit t 3 in
++  let d = Pipeline.submit t 4 in
++  let closed = Pipeline.close t in
++  let aborted = Pipeline.abort t in
++  expect c (Error "aborted");
++  expect d (Error "aborted");
++  counts t 2 0;
++  unresolved a;
++  unresolved b;
++  unresolved closed;
++  unresolved aborted;
++  unresolved (Pipeline.abort t);
++  unresolved (Pipeline.close t);
++  expect (Pipeline.submit t 5) (Error "closed");
++  finish 2 (Error "failed");
++  expect b (Error "failed");
++  unresolved a;
++  unresolved aborted;
++  counts t 1 0;
++  finish 1 (Ok 10);
++  expect a (Ok 10);
++  expect aborted ();
++  expect closed ();
++  counts t 0 0;
++  assert (!started = [1; 2]);
++
++  let t, _, finish = controlled ~concurrency:1 ~capacity:0 in
++  let a = Pipeline.submit t 1 in
++  expect (Pipeline.submit t 2) (Error "full");
++  finish 1 (Ok 1);
++  expect a (Ok 1);
++  let b = Pipeline.submit t 2 in
++  finish 2 (Ok 2);
++  expect b (Ok 2);
++  expect (Pipeline.abort t) ();
++  expect (Pipeline.close t) ();
++
++  let first = Ivar.create () in
++  let started = ref [] in
++  let t = Pipeline.create ~concurrency:1 ~capacity:2 ~worker:(fun x ->
++    started := !started @ [x];
++    match x with
++    | 1 -> Ivar.read first
++    | 2 -> failwith "synchronous failure"
++    | _ -> Deferred.return (Ok x))
++  in
++  let a = Pipeline.submit t 1 in
++  let b = Pipeline.submit t 2 in
++  let c = Pipeline.submit t 3 in
++  let closed = Pipeline.close t in
++  Ivar.fill_exn first (Ok 1);
++  flush ();
++  expect a (Ok 1);
++  expect b (Error "worker exception");
++  expect c (Ok 3);
++  expect closed ();
++  counts t 0 0;
++  assert (!started = [1; 2; 3]);
++
++  let t = Pipeline.create ~concurrency:1 ~capacity:0
++      ~worker:(fun _ -> failwith "synchronous failure") in
++  expect (Pipeline.submit t 1) (Error "worker exception");
++  counts t 0 0;
++  expect (Pipeline.close t) ()

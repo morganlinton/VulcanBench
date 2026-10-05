@@ -1,0 +1,32 @@
+{
+  "swallows-user-decode.diff": {
+    "must_fail": "callback_transactions",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "omits-exception-rollback.diff": {
+    "must_fail": "callback_transactions",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "copies-whole-buffer.diff": {
+    "must_fail": "unknown_allocation",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "constructs-before-record-exhaustion.diff": {
+    "must_fail": "callback_transactions",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "commits-incomplete-header.diff": {
+    "must_fail": "stream_transactions",
+    "must_compile": true,
+    "must_preserve_guards": true
+  },
+  "unbounded-atom-view.diff": {
+    "must_fail": "bounded_atoms",
+    "must_compile": true,
+    "must_preserve_guards": true
+  }
+}

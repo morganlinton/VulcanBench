@@ -1,0 +1,83 @@
+{
+  "id": "typed-query-optimizer",
+  "category": "feature",
+  "languages": [
+    "ocaml"
+  ],
+  "difficulty": "hard",
+  "difficulty_status": "provisional after single-configuration development calibration",
+  "task_complexity": "multi_file",
+  "repo_scale": "small",
+  "domain": "typed-DSL",
+  "primary_view": "language-mastery",
+  "source": "hand-authored",
+  "created": "2026-09-30",
+  "decontaminated": true,
+  "decontamination_notes": "Original typed DSL fixture authored 2026-09-30. Inspired by publicly described typed API engineering; no upstream bug or training-cutoff claim.",
+  "grader": "tests",
+  "image": "vulcanbench/sandbox:ocaml-v1",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "renaming_scope",
+        "cmd": "dune exec ./hidden/checks.exe -- renaming_scope"
+      },
+      {
+        "name": "simultaneous_substitution",
+        "cmd": "dune exec ./hidden/checks.exe -- simultaneous_substitution"
+      },
+      {
+        "name": "literal_beta",
+        "cmd": "dune exec ./hidden/checks.exe -- literal_beta"
+      },
+      {
+        "name": "dead_binding",
+        "cmd": "dune exec ./hidden/checks.exe -- dead_binding"
+      },
+      {
+        "name": "projection_effects",
+        "cmd": "dune exec ./hidden/checks.exe -- projection_effects"
+      },
+      {
+        "name": "sharing",
+        "cmd": "dune exec ./hidden/checks.exe -- sharing"
+      },
+      {
+        "name": "generated_equivalence",
+        "cmd": "dune exec ./hidden/checks.exe -- generated_equivalence"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "interpreter_contract",
+        "cmd": "dune exec ./hidden/checks.exe -- interpreter_contract"
+      },
+      {
+        "name": "supplied_interfaces",
+        "cmd": "python hidden/contracts.py"
+      },
+      {
+        "name": "typed_clients",
+        "cmd": "python hidden/type_clients.py"
+      }
+    ]
+  },
+  "test_timeout_s": 120,
+  "setup": [
+    {
+      "name": "public build preflight",
+      "cmd": "dune build @runtest"
+    }
+  ],
+  "agent_hints": {
+    "suggested_max_steps": 540,
+    "suggested_timeout_s": 10800
+  },
+  "calibration": {
+    "model": "codex:gpt-6.1-sol",
+    "effort": "medium",
+    "attempts": 3,
+    "passes": 3,
+    "independent_confirmation": false
+  }
+}

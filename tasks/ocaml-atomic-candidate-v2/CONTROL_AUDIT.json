@@ -1,0 +1,65 @@
+{
+  "valid": true,
+  "controls": [
+    {
+      "patch": "eager-edge-callbacks.diff",
+      "expected_failures": [
+        "publication_callbacks"
+      ],
+      "actual_behavior_failures": [
+        "publication_callbacks"
+      ],
+      "guards_passed": true,
+      "setup_passed": true
+    },
+    {
+      "patch": "recompute-noops.diff",
+      "expected_failures": [
+        "necessity_and_noops"
+      ],
+      "actual_behavior_failures": [
+        "necessity_and_noops"
+      ],
+      "guards_passed": true,
+      "setup_passed": true
+    },
+    {
+      "patch": "sequential-batch.diff",
+      "expected_failures": [
+        "prospective_topology",
+        "ownership_transfer"
+      ],
+      "actual_behavior_failures": [
+        "prospective_topology",
+        "rejection_atomicity",
+        "ownership_transfer",
+        "necessity_and_noops",
+        "busy_and_generic"
+      ],
+      "guards_passed": true,
+      "setup_passed": true
+    },
+    {
+      "patch": "skip-ordinary-cycle-edges.diff",
+      "expected_failures": [
+        "mixed_graph"
+      ],
+      "actual_behavior_failures": [
+        "mixed_graph"
+      ],
+      "guards_passed": true,
+      "setup_passed": true
+    },
+    {
+      "patch": "stale-invalid-child-count.diff",
+      "expected_failures": [
+        "mixed_graph"
+      ],
+      "actual_behavior_failures": [
+        "mixed_graph"
+      ],
+      "guards_passed": true,
+      "setup_passed": true
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+diff --git a/lib/optimizer.ml b/lib/optimizer.ml
+index 37698bc..1c7e766 100644
+--- a/lib/optimizer.ml
++++ b/lib/optimizer.ml
+@@ -1,5 +1,107 @@
+-type ('src, 'dst) renaming = { apply : 'a. ('src, 'a) Expr.var -> ('dst, 'a) Expr.var }
+-type ('src, 'dst) substitution = { replace : 'a. ('src, 'a) Expr.var -> ('dst, 'a) Expr.t }
+-let rename _ _ = failwith "capture-avoiding rename is not implemented"
+-let substitute _ _ = failwith "capture-avoiding substitution is not implemented"
+-let normalize term = term
++open Expr
++
++type ('src, 'dst) renaming = { apply : 'a. ('src, 'a) var -> ('dst, 'a) var }
++type ('src, 'dst) substitution = { replace : 'a. ('src, 'a) var -> ('dst, 'a) t }
++
++let lift_renaming : type src dst x.
++  (src,dst) renaming -> (x * src,x * dst) renaming = fun r ->
++  { apply = (fun (type a) (v : (x * src,a) var) : (x * dst,a) var ->
++      match v with Z -> Z | S v -> S (r.apply v)) }
++
++let rec rename : type src dst a.
++  (src,dst) renaming -> (src,a) t -> (dst,a) t = fun r term ->
++  match term with
++  | Int n -> Int n | Bool b -> Bool b | Read key -> Read key
++  | Var v -> Var (r.apply v)
++  | Add(a,b) -> Add(rename r a,rename r b)
++  | Mul(a,b) -> Mul(rename r a,rename r b)
++  | Equal(a,b) -> Equal(rename r a,rename r b)
++  | If(p,a,b) -> If(rename r p,rename r a,rename r b)
++  | Pair(a,b) -> Pair(rename r a,rename r b)
++  | Fst x -> Fst(rename r x) | Snd x -> Snd(rename r x)
++  | Let(a,b) -> Let(rename r a,rename (lift_renaming r) b)
++
++let lift_substitution : type src dst x.
++  (src,dst) substitution -> (x * src,x * dst) substitution = fun s ->
++  let shift : (dst,x * dst) renaming = { apply = (fun v -> S v) } in
++  { replace = (fun (type a) (v : (x * src,a) var) : (x * dst,a) t ->
++      match v with Z -> Var Z | S v -> rename shift (s.replace v)) }
++
++let rec substitute : type src dst a.
++  (src,dst) substitution -> (src,a) t -> (dst,a) t = fun s term ->
++  match term with
++  | Int n -> Int n | Bool b -> Bool b | Read key -> Read key
++  | Var v -> s.replace v
++  | Add(a,b) -> Add(substitute s a,substitute s b)
++  | Mul(a,b) -> Mul(substitute s a,substitute s b)
++  | Equal(a,b) -> Equal(substitute s a,substitute s b)
++  | If(p,a,b) -> If(substitute s p,substitute s a,substitute s b)
++  | Pair(a,b) -> Pair(substitute s a,substitute s b)
++  | Fst x -> Fst(substitute s x) | Snd x -> Snd(substitute s x)
++  | Let(a,b) -> Let(substitute s a,substitute (lift_substitution s) b)
++
++let rec pure : type env a. (env,a) t -> bool = function
++  | Read _ -> false | Int _ | Bool _ | Var _ -> true
++  | Add(a,b) | Mul(a,b) -> pure a && pure b
++  | Equal(a,b) -> pure a && pure b
++  | Pair(a,b) -> pure a && pure b
++  | If(p,a,b) -> pure p && pure a && pure b
++  | Fst x -> pure x | Snd x -> pure x
++  | Let(a,b) -> pure a && pure b
++
++let rec literal : type env a. (env,a) t -> bool = function
++  | Int _ | Bool _ -> true | Pair(a,b) -> literal a && literal b | _ -> false
++
++let rec index : type env a. (env,a) var -> int = function
++  | Z -> 0 | S v -> 1+index v
++
++let rec used : type env a. int -> (env,a) t -> bool = fun depth -> function
++  | Int _ | Bool _ | Read _ -> false | Var v -> index v=depth
++  | Add(a,b) | Mul(a,b) -> used depth a || used depth b
++  | Equal(a,b) -> used depth a || used depth b
++  | Pair(a,b) -> used depth a || used depth b
++  | If(p,a,b) -> used depth p || used depth a || used depth b
++  | Fst x -> used depth x | Snd x -> used depth x
++  | Let(a,b) -> used depth a || used (depth+1) b
++
++let beta : type env a b. (env,a) t -> (a * env,b) t -> (env,b) t = fun value body ->
++  let s : (a * env,env) substitution =
++    { replace = (fun (type x) (v : (a * env,x) var) : (env,x) t ->
++        match v with Z -> value | S v -> Var v) } in
++  substitute s body
++
++let drop : type env a b. (a * env,b) t -> (env,b) t = fun body ->
++  let s : (a * env,env) substitution =
++    { replace = (fun (type x) (v : (a * env,x) var) : (env,x) t ->
++        match v with Z -> failwith "unused binding occurred" | S v -> Var v) } in
++  substitute s body
++
++let rec normalize : type env a. (env,a) t -> (env,a) t = fun term ->
++  let n = normalize in
++  match term with
++  | Int _ | Bool _ | Var _ | Read _ -> term
++  | Add(a,b) ->
++    (match n a,n b with
++     | Int x,Int y -> Int(x+y) | Int 0,x | x,Int 0 -> x
++     | a,b -> Add(a,b))
++  | Mul(a,b) ->
++    (match n a,n b with
++     | Int x,Int y -> Int(x*y) | Int 1,x | x,Int 1 -> x
++     | Int 0,x | x,Int 0 when pure x -> Int 0
++     | a,b -> Mul(a,b))
++  | Equal(a,b) ->
++    (match n a,n b with Int x,Int y -> Bool(x=y) | a,b -> Equal(a,b))
++  | If(p,a,b) ->
++    (match n p with Bool true -> n a | Bool false -> n b
++     | p -> If(p,n a,n b))
++  | Pair(a,b) -> Pair(n a,n b)
++  | Fst x ->
++    (match n x with Pair(a,b) when pure b -> a | x -> Fst x)
++  | Snd x ->
++    (match n x with Pair(a,b) when pure a -> b | x -> Snd x)
++  | Let(value,body) ->
++    let value=n value in
++    let body=n body in
++    if literal value then n (beta value body)
++    else if pure value && not(used 0 body) then n (drop body)
++    else Let(value,body)

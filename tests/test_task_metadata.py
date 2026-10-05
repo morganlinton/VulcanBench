@@ -46,6 +46,15 @@ def test_infer_task_complexity_from_gold_patch() -> None:
     )
 
 
+def test_ocaml_interface_and_implementation_count_as_source() -> None:
+    assert (
+        infer_task_complexity_from_gold_patch(
+            "diff --git a/api.mli b/api.mli\ndiff --git a/api.ml b/api.ml\n"
+        )
+        == "multi_file"
+    )
+
+
 def test_resolve_max_steps_from_hints() -> None:
     meta = {"repo_scale": "large", "agent_hints": {"suggested_max_steps": 120}}
     assert resolve_max_steps(meta) == 120

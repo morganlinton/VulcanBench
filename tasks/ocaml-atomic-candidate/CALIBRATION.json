@@ -1,0 +1,404 @@
+{
+  "suite": "ocaml-atomic-candidate",
+  "version": "b9b088b09fa9",
+  "n_tasks": 1,
+  "task_ids": [
+    "incremental-atomic-rewiring"
+  ],
+  "task_hashes": {
+    "incremental-atomic-rewiring": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286"
+  },
+  "status": "development calibration complete",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "minimum_attempts_per_task": 3,
+  "sandbox_selection": "local",
+  "execution_environments": [
+    "local"
+  ],
+  "metric": "mean per-task pass@1; all required checks and regression guards must pass",
+  "pass_at_1": 1.0,
+  "observed_below_80_percent": false,
+  "independent_confirmation": false,
+  "views": {
+    "engineering": {
+      "task_ids": [
+        "incremental-atomic-rewiring"
+      ],
+      "distinct_tasks": 1,
+      "passes": 3,
+      "attempts": 3,
+      "coverage_complete": true,
+      "pass_at_1": 1.0
+    },
+    "language-mastery": {
+      "task_ids": [
+        "incremental-atomic-rewiring"
+      ],
+      "distinct_tasks": 1,
+      "passes": 3,
+      "attempts": 3,
+      "coverage_complete": true,
+      "pass_at_1": 1.0
+    }
+  },
+  "view_overlap": "Tasks tagged both enter each view but are counted once in the suite.",
+  "limitations": [
+    "1 tasks are a development pool, not a stable leaderboard or a confidence claim.",
+    "Configured model identity may be requested-only; inspect each CLI receipt.",
+    "Development selection and retrospective audits are not independent confirmation.",
+    "Public upstream patches may be retrievable; task provenance is not a training-cutoff claim.",
+    "Native runs execute on the host without Docker resource caps or network isolation.",
+    "Quality and security analyzers do not currently score OCaml.",
+    "Historical summaries may lack effective run limits; audit their launch receipts before publishing."
+  ],
+  "excluded_runs": [],
+  "unscored_runs": [],
+  "trace_only_invocations": [],
+  "tasks": [
+    {
+      "task_id": "incremental-atomic-rewiring",
+      "primary_view": "both",
+      "source": "oss-derived-original-extension",
+      "decontaminated": false,
+      "decontamination_notes": "Original extension to public Incremental. No claim about model training cutoffs.",
+      "upstream": null,
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "incremental-atomic-rewiring-1060a799",
+          "task_hash": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "prospective_topology": true,
+              "rejection_atomicity": true,
+              "ownership_transfer": true,
+              "publication_callbacks": true,
+              "necessity_and_noops": true,
+              "mixed_graph": true,
+              "busy_and_generic": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/7 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 504.755,
+          "tokens": {
+            "prompt": 788596,
+            "completion": 9800,
+            "total": 798396,
+            "cached_input": 714496,
+            "reasoning_output": 3060
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a1028c-d331-7623-9224-dc310de2dff0",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 714496,
+            "reasoning_output_tokens": 3060,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "large",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 805,
+              "loc": 147673
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        },
+        {
+          "run_id": "incremental-atomic-rewiring-9520d365",
+          "task_hash": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "prospective_topology": true,
+              "rejection_atomicity": true,
+              "ownership_transfer": true,
+              "publication_callbacks": true,
+              "necessity_and_noops": true,
+              "mixed_graph": true,
+              "busy_and_generic": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/7 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 420.867,
+          "tokens": {
+            "prompt": 620447,
+            "completion": 8710,
+            "total": 629157,
+            "cached_input": 575232,
+            "reasoning_output": 2342
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a1029a-7afe-7b21-bcdd-6169fc656852",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 575232,
+            "reasoning_output_tokens": 2342,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "large",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 796,
+              "loc": 147019
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        },
+        {
+          "run_id": "incremental-atomic-rewiring-a9d3e2a6",
+          "task_hash": "e0c1bf27cb1dbc9825a2db77db0b51b7040b7094b1f1ae112aa9a11e774a2286",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "prospective_topology": true,
+              "rejection_atomicity": true,
+              "ownership_transfer": true,
+              "publication_callbacks": true,
+              "necessity_and_noops": true,
+              "mixed_graph": true,
+              "busy_and_generic": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 7/7 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 377.083,
+          "tokens": {
+            "prompt": 450348,
+            "completion": 7542,
+            "total": 457890,
+            "cached_input": 406784,
+            "reasoning_output": 2244
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a10294-a003-7231-a359-d192a37dd3d9",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 406784,
+            "reasoning_output_tokens": 2244,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "large",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 796,
+              "loc": 145713
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        }
+      ]
+    }
+  ],
+  "native_execution_conditions": {
+    "external_read_guard": false,
+    "codex_sandbox": "workspace-write",
+    "native_benchmark_reads": "observational audit, no OS read isolation",
+    "authoring_artifacts_relocated_out_of_global_tmp": true,
+    "native_resource_caps": false,
+    "network_isolation": false,
+    "matches_original_native_cli_settings": true,
+    "excluded_exposed_cohort": "runs-ocaml-atomic-20261003T153934Z",
+    "invalid_tool_cohort": "runs-ocaml-atomic-guarded-20261003T160759Z",
+    "infrastructure_fix": "Restore original Codex sandbox so shell tools can execute; preserve relocated authoring artifacts."
+  },
+  "complete_task_passes": 3,
+  "attempts": 3,
+  "receipts_root": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-atomic-native-20261003T161538Z",
+  "receipt_audit": "RECEIPT_AUDIT.json"
+}

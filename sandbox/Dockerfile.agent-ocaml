@@ -1,0 +1,4 @@
+# Same OCaml environment for the subscription agent and offline verifier.
+FROM vulcanbench/sandbox:ocaml-v1
+ARG CODEX_VERSION=0.159.0
+RUN npm install -g @openai/codex@${CODEX_VERSION} && codex --version

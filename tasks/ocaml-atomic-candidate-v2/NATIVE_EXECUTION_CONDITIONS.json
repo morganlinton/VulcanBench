@@ -1,0 +1,13 @@
+{
+  "external_read_guard": false,
+  "codex_sandbox": "workspace-write",
+  "native_benchmark_reads": "observational audit, no OS read isolation",
+  "authoring_artifacts_relocated_out_of_global_tmp": true,
+  "native_resource_caps": false,
+  "network_isolation": false,
+  "matches_original_native_cli_settings": true,
+  "excluded_exposed_cohort": "runs-ocaml-atomic-20261003T153934Z",
+  "invalid_tool_cohort": "runs-ocaml-atomic-guarded-20261003T160759Z",
+  "infrastructure_fix": "Restore original Codex sandbox so shell tools can execute; preserve relocated authoring artifacts.",
+  "prospective_revision": "Same public contract; fixed reference and added invalid-child assertion; fresh calibration."
+}

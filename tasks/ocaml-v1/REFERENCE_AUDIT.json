@@ -1,0 +1,105 @@
+{
+  "kind": "retrospective diagnostic, not fresh model calibration",
+  "finding": "A valid atomic dependency reversal crashed the initial reference and two initially passing model patches.",
+  "requirement_origin": "The original issue required atomic validation against the complete prospective graph; no new solver requirement was added.",
+  "revised_task_hash": "22dff8cab227e6e1a250a8d4faafc8948c79ed7dcb268cfc60e51f9b6b99829e",
+  "repairs": [
+    "Immutable dependency-graph generations preserve stable subscriptions while avoiding transient cycles.",
+    "Top-scope named nodes support repeated dynamic branch switching.",
+    "New behavioral checks cover both cases; all reference checks pass over three repetitions."
+  ],
+  "old_model_patches": [
+    {
+      "run_id": "incremental-atomic-graph-4191caee",
+      "original_task_hash": "c356df786faa4d9962b2df1b5c87d4ad7ab628ff84ef675df3241ead144cf037",
+      "original_verifier": {
+        "scores": {
+          "functional": 1.0
+        },
+        "fail_to_pass": {
+          "forward_atomic": true,
+          "dynamic_switch": true,
+          "stable_subscription": true,
+          "cutoff_laziness": true,
+          "invalid_rollback": true
+        },
+        "pass_to_pass": {
+          "source_observer": true,
+          "supplied_interfaces": true
+        },
+        "pass_to_pass_ok": true,
+        "details": [
+          "fail_to_pass 5/5 passing"
+        ]
+      },
+      "retrospective_verifier": {
+        "scores": {
+          "functional": 0.8571
+        },
+        "fail_to_pass": {
+          "forward_atomic": true,
+          "dynamic_switch": true,
+          "stable_subscription": true,
+          "cutoff_laziness": true,
+          "invalid_rollback": true,
+          "atomic_dependency_reversal": false,
+          "repeated_dynamic_switch": true
+        },
+        "pass_to_pass": {
+          "source_observer": true,
+          "supplied_interfaces": true
+        },
+        "pass_to_pass_ok": true,
+        "details": [
+          "fail_to_pass 6/7 passing"
+        ]
+      }
+    },
+    {
+      "run_id": "incremental-atomic-graph-6610925d",
+      "original_task_hash": "c356df786faa4d9962b2df1b5c87d4ad7ab628ff84ef675df3241ead144cf037",
+      "original_verifier": {
+        "scores": {
+          "functional": 1.0
+        },
+        "fail_to_pass": {
+          "forward_atomic": true,
+          "dynamic_switch": true,
+          "stable_subscription": true,
+          "cutoff_laziness": true,
+          "invalid_rollback": true
+        },
+        "pass_to_pass": {
+          "source_observer": true,
+          "supplied_interfaces": true
+        },
+        "pass_to_pass_ok": true,
+        "details": [
+          "fail_to_pass 5/5 passing"
+        ]
+      },
+      "retrospective_verifier": {
+        "scores": {
+          "functional": 0.8571
+        },
+        "fail_to_pass": {
+          "forward_atomic": true,
+          "dynamic_switch": true,
+          "stable_subscription": true,
+          "cutoff_laziness": true,
+          "invalid_rollback": true,
+          "atomic_dependency_reversal": false,
+          "repeated_dynamic_switch": true
+        },
+        "pass_to_pass": {
+          "source_observer": true,
+          "supplied_interfaces": true
+        },
+        "pass_to_pass_ok": true,
+        "details": [
+          "fail_to_pass 6/7 passing"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "status": "PASS",
+  "network_isolation_enforced": true,
+  "adds_model_attempts": false,
+  "purpose": "Reference plus harmless decoder helper before validate retains every semantic and protected declaration check.",
+  "setup": [
+    {
+      "name": "public native preflight",
+      "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+      "exit_code": 0,
+      "duration_s": 3.248
+    }
+  ],
+  "setup_commands": [
+    {
+      "cmd": "dune build --profile release src/bin_prot.cmxa @runtest",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "verdict": {
+    "scores": {
+      "functional": 1.0
+    },
+    "fail_to_pass": {
+      "heterogeneous_migration": true,
+      "wire_compatibility": true,
+      "structured_bounds": true,
+      "callback_transactions": true,
+      "stream_transactions": true,
+      "bounded_atoms": true,
+      "unknown_allocation": true,
+      "schema_precedence": true
+    },
+    "pass_to_pass": {
+      "ordinary_workflow": true,
+      "supplied_interfaces": true
+    },
+    "pass_to_pass_ok": true,
+    "details": [
+      "fail_to_pass 8/8 passing"
+    ]
+  },
+  "commands": [
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- ordinary",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "python hidden/contracts.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- heterogeneous_migration",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- wire_compatibility",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- structured_bounds",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- callback_transactions",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- stream_transactions",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- bounded_atoms",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- unknown_allocation",
+      "exit_code": 0,
+      "stdout": "unknown_heap_bytes=968\n",
+      "stderr": ""
+    },
+    {
+      "cmd": "dune exec --profile release hidden/checks.exe -- schema_precedence",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "supplemental_commands": [],
+  "task_hash": "c7d6b02d18a8873db05975ae1c681fb1464ab5ded3589cf9810232b120a3457b",
+  "sandbox": "local"
+}

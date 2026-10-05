@@ -1,0 +1,413 @@
+{
+  "suite": "ocaml-union-heldout",
+  "version": "f9e65a3ac13a",
+  "n_tasks": 1,
+  "task_ids": [
+    "bin-prot-open-union"
+  ],
+  "task_hashes": {
+    "bin-prot-open-union": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a"
+  },
+  "status": "development calibration complete",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "minimum_attempts_per_task": 3,
+  "sandbox_selection": "local",
+  "execution_environments": [
+    "local"
+  ],
+  "metric": "mean per-task pass@1; all required checks and regression guards must pass",
+  "pass_at_1": 1.0,
+  "observed_below_80_percent": false,
+  "independent_confirmation": false,
+  "views": {
+    "engineering": {
+      "task_ids": [],
+      "distinct_tasks": 0,
+      "passes": 0,
+      "attempts": 0,
+      "coverage_complete": false,
+      "pass_at_1": null
+    },
+    "language-mastery": {
+      "task_ids": [
+        "bin-prot-open-union"
+      ],
+      "distinct_tasks": 1,
+      "passes": 3,
+      "attempts": 3,
+      "coverage_complete": true,
+      "pass_at_1": 1.0
+    }
+  },
+  "view_overlap": "Tasks tagged both enter each view but are counted once in the suite.",
+  "limitations": [
+    "1 tasks are a development pool, not a stable leaderboard or a confidence claim.",
+    "Configured model identity may be requested-only; inspect each CLI receipt.",
+    "Development selection and retrospective audits are not independent confirmation.",
+    "Public upstream patches may be retrievable; task provenance is not a training-cutoff claim.",
+    "Native runs execute on the host without Docker resource caps or network isolation.",
+    "Quality and security analyzers do not currently score OCaml.",
+    "Historical summaries may lack effective run limits; audit their launch receipts before publishing."
+  ],
+  "excluded_runs": [],
+  "unscored_runs": [],
+  "trace_only_invocations": [],
+  "tasks": [
+    {
+      "task_id": "bin-prot-open-union",
+      "primary_view": "language-mastery",
+      "source": "oss-derived-original-extension",
+      "decontaminated": false,
+      "decontamination_notes": "Original open-union extension to bin_prot v0.17.0. Completed Tagged/Tagged_stream dependency supplied from prior development reference. Held out from target attempts, but authoring is informed by prior calibration and not independent external confirmation.",
+      "upstream": {
+        "url": "https://github.com/janestreet/bin_prot",
+        "fix_commit": null
+      },
+      "passes": 3,
+      "attempts": 3,
+      "pass_at_1": 1.0,
+      "runs": [
+        {
+          "run_id": "bin-prot-open-union-0fa6fc43",
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 237.901,
+          "tokens": {
+            "prompt": 351816,
+            "completion": 6923,
+            "total": 358739,
+            "cached_input": 321792,
+            "reasoning_output": 860
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a10926-0263-71e2-b885-64f9cab0fe29",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 321792,
+            "reasoning_output_tokens": 860,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "xlarge",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 447,
+              "loc": 160524
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        },
+        {
+          "run_id": "bin-prot-open-union-895ec73e",
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 215.739,
+          "tokens": {
+            "prompt": 302390,
+            "completion": 6275,
+            "total": 308665,
+            "cached_input": 253824,
+            "reasoning_output": 653
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a10929-b2cb-75d1-8dd2-1dc7ed5924c0",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 253824,
+            "reasoning_output_tokens": 653,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "xlarge",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 420,
+              "loc": 160509
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        },
+        {
+          "run_id": "bin-prot-open-union-ea3d6b29",
+          "task_hash": "c9f90e8c45702456d96ea7a51c5b8d62a9e0f4e78e7ec6895277d6257581a40a",
+          "passed": true,
+          "functional": 1.0,
+          "verifier": {
+            "scores": {
+              "functional": 1.0
+            },
+            "fail_to_pass": {
+              "typed_dispatch": true,
+              "projection_order": true,
+              "unknown_forwarding": true,
+              "framing_errors": true,
+              "callback_transactions": true,
+              "native_readers": true,
+              "bounded_payloads": true,
+              "schema_precedence": true
+            },
+            "pass_to_pass": {
+              "ordinary_workflow": true,
+              "supplied_interfaces": true
+            },
+            "pass_to_pass_ok": true,
+            "details": [
+              "fail_to_pass 8/8 passing"
+            ]
+          },
+          "failed_checks": {
+            "fail_to_pass": [],
+            "pass_to_pass": []
+          },
+          "agent_error": null,
+          "duration_s": 233.082,
+          "tokens": {
+            "prompt": 225448,
+            "completion": 6886,
+            "total": 232334,
+            "cached_input": 190080,
+            "reasoning_output": 605
+          },
+          "cli_agent": {
+            "harness": "codex",
+            "harness_version": "codex-cli 0.159.0",
+            "billing": "subscription",
+            "cost_basis": "api-equivalent",
+            "execution_boundary": "host-workspace; sandbox=workspace-write",
+            "auth_method": "subscription",
+            "plan_name": null,
+            "requested_model": "gpt-6.1-sol",
+            "reported_model": null,
+            "model_identity_confidence": "requested-only",
+            "session_id": "01a1092d-0d7e-7490-bafe-130fe2181853",
+            "subtype": "success",
+            "num_turns": null,
+            "cached_input_tokens": 190080,
+            "reasoning_output_tokens": 605,
+            "cli_reported_cost_usd": null,
+            "cli_total_tokens": null,
+            "reported_effort": null,
+            "sandbox_profile": null
+          },
+          "manifest": {
+            "model": "codex:gpt-6.1-sol",
+            "judge_model": "codex:gpt-6.1-sol",
+            "runtime": {
+              "python": "3.12.14",
+              "platform": "darwin",
+              "host_python": "3.12.14",
+              "host_platform": "darwin"
+            },
+            "sandbox": {
+              "mode": "local",
+              "image": null,
+              "network": false,
+              "resources": null,
+              "oom_kills": null
+            },
+            "tools": {
+              "git": "git version 2.50.1 (Apple Git-155)",
+              "ruff": "ruff 0.16.5",
+              "bandit": "bandit 1.9.4",
+              "radon": "6.0.1",
+              "go": "go version go1.27.0 darwin/arm64",
+              "node": "v24.19.0",
+              "ocamlc": "5.2.1",
+              "dune": "3.17.2",
+              "opam": "2.6.0"
+            },
+            "task": {
+              "repo_scale": "xlarge",
+              "task_complexity": "multi_file",
+              "languages": [
+                "ocaml"
+              ],
+              "difficulty": "hard",
+              "file_count": 447,
+              "loc": 160640
+            }
+          },
+          "sandbox": "local",
+          "run_limits": {
+            "agent_timeout_s": 10800.0,
+            "configured_max_steps": 540
+          }
+        }
+      ]
+    }
+  ],
+  "native_execution_conditions": {
+    "external_read_guard": false,
+    "codex_sandbox": "workspace-write",
+    "native_benchmark_reads": "observational audit, no OS read isolation",
+    "authoring_artifacts_relocated_out_of_global_tmp": true,
+    "native_resource_caps": false,
+    "network_isolation": false,
+    "matches_original_native_cli_settings": true,
+    "task_family_overlap": "Open union built on supplied prior Tagged reference. Related serialization family; new frozen workload, not independent external confirmation.",
+    "between_attempt_solver_artifact_cleanup": true,
+    "prior_exposed_cohort": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-union-20261004T224324Z"
+  },
+  "complete_task_passes": 3,
+  "attempts": 3,
+  "receipts_root": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-union-clean-20261004T225941Z",
+  "receipt_audit": "RECEIPT_AUDIT.json",
+  "retired_exposed_cohort": "/Users/vulcanbench/dev/VulcanBench/runs-ocaml-union-20261004T224324Z",
+  "artifact_hygiene": "ARTIFACT_HYGIENE_AUDIT.json",
+  "held_out_scope": "New scoring workload frozen before initial target calls; authoring informed by prior development. Fresh confirmation follows preservation of an interrupted exposed cohort.",
+  "family_admitted": false,
+  "pooled_headline": null
+}

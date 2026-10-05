@@ -84,6 +84,26 @@ sandbox-image-go-1.26: sandbox-image ## Build Go 1.26 sandbox image (for repos w
 
 sandbox-image-all: sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 ## Build base + Rust + Node/TS + Go-1.26 sandbox images
 
+.PHONY: sandbox-image-ocaml
+ocaml-native: ## Provision the pinned local OCaml toolchain (requires opam and pkg-config)
+	$(VENV_BIN)/python scripts/setup_ocaml_native.py
+	$(VENV_BIN)/python scripts/setup_ocaml_native.py --compiler-seed-only
+
+.PHONY: ocaml-native
+sandbox-image-ocaml: sandbox-image ## Build the pinned OCaml pilot sandbox
+	docker build -t vulcanbench/sandbox:ocaml-v1 -f sandbox/Dockerfile.ocaml .
+
+.PHONY: agent-image-ocaml
+agent-image-ocaml: sandbox-image-ocaml ## Build the matching OCaml Codex agent image
+	docker build -t vulcanbench/agent-codex:ocaml-v1 -f sandbox/Dockerfile.agent-ocaml .
+
+.PHONY: sandbox-image-ocaml-compiler agent-image-ocaml-compiler
+sandbox-image-ocaml-compiler: sandbox-image-ocaml ## Build the pinned compiler-source verifier image
+	docker build --target verifier -t vulcanbench/sandbox:ocaml-compiler-v1 -f sandbox/Dockerfile.ocaml-compiler .
+
+agent-image-ocaml-compiler: sandbox-image-ocaml-compiler agent-image-ocaml ## Build the matching compiler-source Codex image
+	docker build --target agent -t vulcanbench/agent-codex:ocaml-compiler-v1 -f sandbox/Dockerfile.ocaml-compiler .
+
 agent-image-codex: sandbox-image ## Build the containerized-agent image (Codex CLI in the sandbox base)
 	docker build -t vulcanbench/agent-codex:latest -f sandbox/Dockerfile.agent-codex .
 	@echo "✅ Built vulcanbench/agent-codex:latest for --agent-container runs"

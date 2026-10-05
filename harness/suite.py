@@ -19,6 +19,7 @@ from harness.agent.cli_agents import is_cli_agent_spec
 from harness.agent.loop import run_agent
 from harness.agent.providers import NonRetryableProviderError, ProviderError
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
+from harness.provenance import source_provenance
 from harness.sandbox.docker_executor import SandboxError
 from harness.task_metadata import repo_scale
 from harness.tasks import list_task_ids, load_task
@@ -347,6 +348,7 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
         "errors": errors,
         "skipped": skipped,
         "aggregate": aggregate,
+        "source": source_provenance().as_summary(),
     }
     suite_dir = output_dir / suite_id
     suite_dir.mkdir(parents=True, exist_ok=True)

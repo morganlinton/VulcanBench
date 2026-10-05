@@ -50,6 +50,8 @@ jobs:
         run: ruff check . && ruff format --check .
       - name: No em-dashes (U+2014) in authored source/docs
         run: python scripts/check_no_emdash.py
+      - name: Frozen suites match their locks (tasks/*/suite.lock.json)
+        run: python -m harness.suite_lock check
       - name: Mypy typecheck
         run: mypy harness backend alembic/env.py scripts/ingest_runs.py
       - name: Pytest (fast, no Docker)

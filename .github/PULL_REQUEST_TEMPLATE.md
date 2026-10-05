@@ -15,6 +15,8 @@
 - [ ] New code has tests (or existing coverage not regressed)
 - [ ] Docs updated if user-facing
 - [ ] No secrets or large binaries committed
+- [ ] Engine changes and published results are not mixed in this PR (docs/HOW_WE_WORK.md)
+- [ ] Results PRs: bench tag the runs came from: `bench/...`
 - [ ] For tasks: gold-patch run 3× on ARM64 + x86, validation script output attached
 
 ## Related issues

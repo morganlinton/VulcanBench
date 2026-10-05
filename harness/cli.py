@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -32,6 +33,12 @@ from harness.cost_estimate import estimate_plan
 from harness.effort import DEFAULT_SWEEP_EFFORTS, parse_efforts
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
 from harness.pricing import is_priced
+from harness.provenance import (
+    ALLOW_DIRTY_ENV,
+    DirtyTreeError,
+    check_clean_for_suite,
+    source_provenance,
+)
 from harness.regrade import find_run_dirs, regrade_run
 from harness.report import build_report, to_markdown
 from harness.sandbox.docker_executor import ResourceSpec, SandboxError
@@ -295,6 +302,12 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         "(levels under [effort].blocked in vulcanbench.toml are refused)",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only, do not launch sandbox"),
+    allow_dirty: bool = typer.Option(
+        False,
+        "--allow-dirty",
+        help="Let a suite run start with uncommitted changes to harness/, tasks/ or "
+        "sandbox/ (experiments only; the run records that it was dirty)",
+    ),
     use_priors: bool = typer.Option(
         True,
         "--priors/--no-priors",
@@ -388,6 +401,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
             except ValueError as e:
                 console.print(f"[yellow]cost estimate skipped[/yellow]: {e}")
         raise typer.Exit()
+    _guard_source_tree(suite_run=suite is not None, allow_dirty=allow_dirty)
 
     run_kwargs = {
         "max_steps": max_steps,
@@ -458,6 +472,24 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
             console.print(f"[red]FAIL[/red] pass@1={pass_at_1} < --fail-under {fail_under}")
             raise typer.Exit(code=4)
         console.print(f"[green]PASS[/green] pass@1={pass_at_1} >= --fail-under {fail_under}")
+
+
+def _guard_source_tree(*, suite_run: bool, allow_dirty: bool) -> None:
+    """Refuse a suite run from uncommitted scoring-relevant changes; warn on a task run."""
+    if allow_dirty:
+        # Exported so every run summary in this process records the override.
+        os.environ[ALLOW_DIRTY_ENV] = "1"
+    if suite_run:
+        try:
+            check_clean_for_suite(allow_dirty=allow_dirty)
+        except DirtyTreeError as exc:
+            console.print(f"[red]error[/red] {exc}")
+            raise typer.Exit(code=1) from exc
+    elif source_provenance().dirty:
+        console.print(
+            "[yellow]warning[/yellow] uncommitted changes to scoring-relevant paths; "
+            "this run records dirty: true and is not publishable"
+        )
 
 
 def _print_cost_estimate(plan: Any, *, json_output: bool = False) -> None:
@@ -757,6 +789,12 @@ def effort_sweep(  # noqa: PLR0912, PLR0915, CLI entry: validation + per-effort 
         None, "--timeout", help="Per-run wall-clock budget in seconds (abort if exceeded)"
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only, do not launch sandbox"),
+    allow_dirty: bool = typer.Option(
+        False,
+        "--allow-dirty",
+        help="Start with uncommitted changes to harness/, tasks/ or sandbox/ "
+        "(experiments only; every run records that it was dirty)",
+    ),
 ) -> None:
     """Run a suite across normalized reasoning-effort levels."""
     try:
@@ -799,6 +837,7 @@ def effort_sweep(  # noqa: PLR0912, PLR0915, CLI entry: validation + per-effort 
     if dry_run:
         console.print("[yellow]dry-run[/yellow] would run one suite invocation per effort")
         raise typer.Exit()
+    _guard_source_tree(suite_run=True, allow_dirty=allow_dirty)
 
     suites: list[dict[str, Any]] = []
     started_at = datetime.now(UTC)

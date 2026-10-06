@@ -7,6 +7,138 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-06: Frontier v5 composition frozen (20 tasks, four families, six languages)
+
+### Decision
+
+Owner, in chat, confirming decision (a) of the v5 plan as proposed. The
+composition of VulcanBench Frontier v5 (suite id `frontier-v5`, tasks under
+`tasks/frontier-v5/`) is fixed before any task is authored:
+
+- 20 tasks at 5% weight each. With three confirmation attempts per task the
+  overall score is complete passes divided by 60, the OCaml blueprint's
+  arithmetic.
+- Four engineering families with fixed weights: F1 tool-provided oracles
+  (sanitizers or property-based oracles on a stored corpus, 30%, six slots),
+  F2 differential parity against a source-available reference (30%, six
+  slots), F3 long-horizon upstream volume (30%, six slots), F4
+  opaque-component parity, the v4 lineage (10%, two slots).
+- Six languages: Python, JavaScript/TypeScript, Rust, C, C++, Java. Each has
+  one slot in each of F1 to F3; the two F4 slots are Python and Java. The
+  per-language subscore is reported over F1 to F3 only (15% each) and F4 is
+  reported as its own line.
+- Tasks are authored natively in Harbor format: `task.toml` is the source of
+  truth, there is no `metadata.json`, and `harbor run` is the intended
+  runner (decision (c), still open).
+
+Frozen in [docs/frontier-v5/FREEZE.json](frontier-v5/FREEZE.json) over
+[PLAN.md](frontier-v5/PLAN.md) and [plan.json](frontier-v5/plan.json). The
+frozen files are immutable; capacity, weights or slot changes require a v2
+plan with its own freeze. Decisions (b) gate references and effort, (c)
+runner, (d) publishing channel, (e) concurrency on gate runs and (f) gold
+location are open and will each get a dated entry here that cites the
+freeze. Nothing is gated before (b) and (c) are recorded.
+
+### Evidence
+
+- The saturation measurement in the entry below: the suite's own lifecycle
+  rule says the frontier suite must be re-made, and the v4 candidate log
+  shows the binary-parity thesis cannot carry another one (one solver
+  strategy, disassembly, collapses it; 23 correlated tasks carry the
+  information of a few; wall-clock effort decayed from a 32.9-minute to a
+  3.8-minute median in one model generation).
+- Fixing capacity before authoring follows the frozen
+  [OCaml family-balanced blueprint](ocaml-expansion-v1/PLAN.md): without
+  it the headline becomes a weighted average of whatever got authored, and
+  per-language subscores are not comparable.
+- Family and language were crossed deliberately: F1 is the substantive
+  reason for C and C++ (sanitizer oracles do not exist in Python), and F4
+  went to the two languages with the weakest sanitizer story so compiled
+  languages carry tool-oracle depth and managed runtimes carry black-box
+  depth.
+- The alternative, a 4x6 grid of 24 tasks, was rejected because it would
+  give the binary-parity lineage six slots.
+
+### Revisit triggers
+
+- A family's first three pre-registered candidates all reject for the same
+  structural reason: halt the wave by rule and open a v2 plan rather than
+  bending the floors.
+- A language's toolchain image cannot pass the determinism gate with a
+  flaky control caught: that language's slots stay empty and the headline
+  is withheld, never renormalized.
+- Decisions (b) through (f) landing: each is a separate entry, not an edit
+  to this one or to the frozen files.
+
+### What this touched
+
+- `docs/frontier-v5/PLAN.md`, `plan.json`, `FREEZE.json` (new, on branch
+  `frontier-v5-plan` from `origin/main`; the OCaml work on
+  `codex/ocaml-v1` is a separate suite and carries none of this).
+- No task, image, harness code or v4 file changed. Frontier v4 stays frozen
+  at 2.0.0 under `suite.lock.json` (entry of 2026-10-05).
+
+## 2026-10-06: Frontier v4 is saturated; the charter's pruning rule is triggered
+
+### Decision
+
+Frontier v4 (`coding-intelligence-index-v4`, 23 tasks) is recorded as
+saturated at the current frontier. Consequences:
+
+1. No new task is admitted to v4; its candidate log closes with the wave-11
+   verdicts.
+2. v4 is not pruned task by task. Applied literally against GPT-6 Astra the
+   rule would remove nearly the whole suite, so v4 stays frozen at 2.0.0
+   (lock of 2026-10-05) as the historical column and keeps running for
+   board comparability until Frontier v5 confirms, after which it is
+   retired like cii-v1 and v1 to v4.
+3. The frontier suite is re-made as Frontier v5 (entry above). Run
+   conditions do not change: 3-hour flat bound (2026-10-03, every suite),
+   one task at a time, tagged run worktrees (2026-10-05).
+
+### Evidence
+
+From `docs/results/swe-v4-frontier-quartet-2026-09/frontier-quartet-efforts.csv`
+and `docs/results/swe-v4-gpt6-sol-2026-09/gpt6-sol-v317-efforts.csv`, one run
+per task per effort level:
+
+| Model | Best functional | Tasks passed | Median minutes at that effort |
+| --- | --- | --- | --- |
+| GPT-6 Astra (Codex) | 100.0 at medium, high, extra-high and max | 23 of 23 | 3.8 (medium) |
+| Claude Fable 5.1 (Claude Code) | 100.0 at max | 23 of 23 | 27.1 |
+| Devin SWE-2 | 93.7 at max | 21 of 23 | 56.6 |
+| GPT-6 Sol | combined v3.17 86.8 at max (not a functional column) | 19 of 23 | 24.5 |
+| Muse Spark 1.3 | 76.9 at extra-high | 14 of 23 | 36.0 |
+
+The charter's saturation rule (CHARTER.md, lifecycle item 1) prunes any
+task the weaker reference solves 3/3 or the stronger reference's median
+solves under 10 minutes. Astra clears every task at four effort levels with
+a 3.8-minute median; the admission bar required the August 2026 best model
+to miss outright or to spend 10 or more minutes per run, and
+legacy-paddockcore-binary-parity was admitted on Opus 5 missing all three
+gated runs, one after 230 minutes.
+
+Caveat recorded with the measurement: the rule as written calls for an n=3
+re-gate per model per task at one effort. The quartet evidence is one run
+per task at each of four efforts, 92 Astra runs in all, every one a pass.
+That is treated as stronger than the n=3 re-gate, and the re-gate is not
+run (it would cost about 69 Codex hours to confirm a result already
+observed four times over), but the two are not the same measurement and
+this entry does not claim they are.
+
+### Revisit triggers
+
+- Frontier v5 confirms (60 scored outcomes): retire v4 from the live board
+  and move it to the retired-suite list.
+- A model generation scores below 90% functional on v4: the saturation
+  claim is about the models measured here, not about v4 being trivial; keep
+  v4 as a reference column rather than retiring it.
+
+### What this touched
+
+- This entry only. `CHARTER.md`, `CANDIDATES.md`, `suite.json` and
+  `suite.lock.json` for v4 are unchanged.
+
 ## 2026-10-06: task_hash and the agent workspace skip local byproducts
 
 ### Decision

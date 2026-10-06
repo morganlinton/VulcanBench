@@ -1,0 +1,27 @@
+{
+  "id": "frontier-v5-freeze-v1",
+  "date": "2026-10-06",
+  "timezone": "America/Los_Angeles",
+  "scope": "Composition only: family table, slot capacity, weights, family definitions and the language view (PLAN.md section 2, plan.json). Prospective blueprint, not a runnable suite manifest; no task code, images or checklists exist yet and are frozen individually when they do.",
+  "confirmed_decisions": {
+    "a": "Composition as proposed: 20 tasks at 5% each, families F1/F2/F3 at 30% with six slots, F4 at 10% with two slots in Python and Java, per-language subscore over F1 to F3 only. Confirmed by the owner 2026-10-06."
+  },
+  "open_decisions": [
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+  ],
+  "open_decisions_policy": "Resolved through dated docs/DECISIONS.md entries citing this freeze; never by editing the frozen files. Capacity, weights or slot changes require a v2 plan with its own freeze.",
+  "known_outcomes_available": "All Frontier v4 results through the GPT-6 Sol v3.17 run and the frontier quartet sweeps of 2026-09; the v4 candidate log (37 gated candidates, 23 admits); no v5 candidate has been authored or run.",
+  "files_sha256": {
+    "docs/frontier-v5/PLAN.md": "6953c9d91b8998173c528857e4e9b8dfe6b0f1d798d5caa0a73009fa60b5fde1",
+    "docs/frontier-v5/plan.json": "a1330b71cc2b60a4ea4b3485c4546e706ba9cae4a74de0116b13717c06addd77"
+  },
+  "related": {
+    "v4_suite": "tasks/coding-intelligence-index-v4/suite.json version 2.0.0",
+    "template": "docs/ocaml-expansion-v1/FREEZE.json",
+    "decisions_log": "docs/DECISIONS.md entries dated 2026-10-06"
+  }
+}

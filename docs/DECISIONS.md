@@ -51,11 +51,15 @@ asks the first concurrent pilot to produce (below), gathered at 2 first.
 - Capacity on the gate machine measured 2026-10-06: host 12 CPUs and
   16 GiB; Docker Desktop VM 12 CPUs and 7.7 GiB. Two Python or
   JavaScript tasks at the plan's initial band (2 CPUs, 4096 MB each) fit
-  today. Two compiled-language or JVM tasks (4 CPUs, 8192 MB each, plus a
-  separate verifier) do not: the Docker VM memory must be raised to at least
-  20 GiB in Docker Desktop before the first concurrent C, C++, Rust or Java
-  gate run, and the runner's capacity check (rule 3) makes that a hard
-  failure rather than an OOM kill mid-run.
+  once the Docker VM is raised to about 12 GiB, the practical ceiling on a
+  16 GiB host. Two compiled-language or JVM tasks at the initial band
+  (4 CPUs, 8192 MB each, plus their verifiers) cannot run concurrently on
+  this machine at all. So on this host concurrency 2 applies to Python and
+  JavaScript pairs, compiled and JVM gate runs stay at `-n 1` unless the
+  pilots calibrate their band below 8192 MB, and rule 3's capacity check
+  turns an over-committed pair into a refused launch instead of an OOM kill
+  mid-run. A gate machine with 32 GiB or more lifts the restriction without
+  a new decision; the rules above do not depend on the host.
 
 ### Pilot checks before concurrency 2 is used for a verdict
 

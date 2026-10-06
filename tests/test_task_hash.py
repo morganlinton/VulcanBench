@@ -6,6 +6,8 @@ Claims ledger (promise -> proving test):
 - "changing a scoring file (repo/tests/tests-spec/gold)
    changes the hash"                                         -> test_* _changes_hash
 - "cosmetic metadata edits do NOT change the hash"           -> test_cosmetic_metadata_stable
+- "local byproducts (__pycache__, .DS_Store, ...) do NOT
+   change the hash and never reach the agent workspace"      -> test_local_junk_*
 - "the leaderboard flags runs scored against a task version
    that no longer matches the current definition"           -> test_mark_stale_*
 """
@@ -16,7 +18,7 @@ import json
 from pathlib import Path
 
 from harness.leaderboard import mark_stale
-from harness.tasks import load_task, task_hash
+from harness.tasks import is_local_junk, load_task, prepare_workspace, task_hash
 
 
 def _make_task(root: Path, task_id: str = "t") -> Path:
@@ -140,3 +142,41 @@ def test_mark_stale_matching_and_mismatched(tmp_path: Path) -> None:
     assert flags["r_old"] is True
     assert flags["r_pre"] is None
     assert flags["r_gone"] is None  # task no longer exists -> unknown, not flagged
+
+
+def _litter(task_dir: Path) -> None:
+    """What running a task's Python in place, or opening it in Finder, leaves behind."""
+    for sub in ("repo", "tests"):
+        (task_dir / sub / "__pycache__").mkdir()
+        (task_dir / sub / "__pycache__" / "m.cpython-312.pyc").write_bytes(b"\x00junk")
+        (task_dir / sub / ".DS_Store").write_bytes(b"\x00\x01finder")
+    (task_dir / "tests" / ".pytest_cache" / "v").mkdir(parents=True)
+    (task_dir / "tests" / ".pytest_cache" / "v" / "lastfailed").write_text("{}")
+    (task_dir / "repo" / "stray.pyc").write_bytes(b"\x00")
+
+
+def test_local_junk_does_not_change_hash(tmp_path: Path) -> None:
+    d = _make_task(tmp_path)
+    clean = _h(tmp_path)
+    _litter(d)
+    assert _h(tmp_path) == clean
+    (d / "repo" / "notes.txt").write_text("a real untracked file still counts")
+    assert _h(tmp_path) != clean
+
+
+def test_local_junk_is_not_copied_to_workspace(tmp_path: Path) -> None:
+    d = _make_task(tmp_path / "tasks")
+    _litter(d)
+    ws = prepare_workspace(load_task("t", tmp_path / "tasks"), tmp_path / "ws")
+    copied = sorted(p.relative_to(ws).as_posix() for p in ws.rglob("*") if p.is_file())
+    assert copied == ["issue.md", "m.py"]
+
+
+def test_local_junk_classifier() -> None:
+    assert is_local_junk(Path("__pycache__/m.cpython-312.pyc"))
+    assert is_local_junk(Path("pkg/.pytest_cache/v/lastfailed"))
+    assert is_local_junk(Path("docs/.DS_Store"))
+    assert is_local_junk(Path("legacy/old.pyo"))
+    assert not is_local_junk(Path("pkg/cache.py"))
+    assert not is_local_junk(Path("pycache_notes.md"))
+    assert not is_local_junk(Path("legacy/blendcore-darwin-arm64"))

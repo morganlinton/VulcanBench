@@ -129,7 +129,8 @@ def main(argv: list[str] | None = None) -> int:
             "and run: python -m harness.suite_lock freeze <suite>\n"
             "If you changed nothing, look for ignored or untracked files inside the task "
             "dirs (git status --ignored tasks/<suite>); task_hash counts every file "
-            "under repo/ and tests/. A fresh checkout or run worktree is the reference.",
+            "under repo/ and tests/ except local byproducts such as __pycache__ and "
+            ".DS_Store. A fresh checkout or run worktree is the reference.",
             file=sys.stderr,
         )
     return 1 if failed else 0

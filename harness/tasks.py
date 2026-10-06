@@ -31,6 +31,25 @@ from typing import Any
 
 DEFAULT_TASKS_ROOT = Path("tasks/v1")
 
+#: Local byproducts that can appear inside a task directory on a working machine
+#: (running a task's Python in place, browsing it in Finder) and are never part
+#: of a task. They are gitignored, so a fresh checkout has none; on an edited
+#: checkout they made ``task_hash`` drift from the committed definition and were
+#: copied into agent workspaces. Both now skip them. No committed task file
+#: matches these (docs/DECISIONS.md, 2026-10-06).
+_LOCAL_JUNK_DIRS = frozenset({"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"})
+_LOCAL_JUNK_FILES = frozenset({".DS_Store"})
+_LOCAL_JUNK_SUFFIXES = frozenset({".pyc", ".pyo"})
+
+
+def is_local_junk(rel: Path) -> bool:
+    """Whether ``rel`` (relative to a task's repo/ or tests/) is a local byproduct."""
+    return (
+        any(part in _LOCAL_JUNK_DIRS for part in rel.parts)
+        or rel.name in _LOCAL_JUNK_FILES
+        or rel.suffix in _LOCAL_JUNK_SUFFIXES
+    )
+
 
 @dataclass
 class Task:
@@ -119,7 +138,8 @@ def list_task_ids(tasks_root: Path = DEFAULT_TASKS_ROOT) -> list[str]:
 
 
 def _hash_dir(h: hashlib._Hash, label: str, root: Path) -> None:
-    for f in sorted(p for p in root.rglob("*") if p.is_file()):
+    files = (p for p in root.rglob("*") if p.is_file() and not is_local_junk(p.relative_to(root)))
+    for f in sorted(files):
         rel = f.relative_to(root).as_posix()
         h.update(label.encode())
         h.update(b"\0")
@@ -138,7 +158,8 @@ def task_hash(task: Task) -> str:
     (if any), and the gold patch. Cosmetic metadata (id, created, source,
     decontamination_notes, difficulty, task_complexity) is intentionally
     excluded, so editing a note does not register as task drift, while changing the prompt, any
-    test/source file, or the scoring logic does.
+    test/source file, or the scoring logic does. Local byproducts (``is_local_junk``) are
+    skipped, so the hash of a used checkout equals the hash of a fresh one.
     """
     h = hashlib.sha256()
     if task.repo_dir is not None:
@@ -281,6 +302,8 @@ def _copytree(src: Path, dst: Path) -> None:
     dst.mkdir(parents=True, exist_ok=True)
     for item in src.rglob("*"):
         rel = item.relative_to(src)
+        if is_local_junk(rel):
+            continue
         target = dst / rel
         if item.is_dir():
             target.mkdir(parents=True, exist_ok=True)

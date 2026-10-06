@@ -7,6 +7,62 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-06: task_hash and the agent workspace skip local byproducts
+
+### Decision
+
+Owner, in chat, after the investigation below: `task_hash` and the copy of
+a task's repo/ into the agent workspace (and of tests/ at verification)
+skip local byproducts: `__pycache__/`, `.pytest_cache/`, `.mypy_cache/`,
+`.ruff_cache/`, `*.pyc`, `*.pyo` and `.DS_Store`
+(`harness.tasks.is_local_junk`). Every other file still counts, untracked
+or not. Nothing under tasks/ that git tracks matches these patterns, so
+the hash of every committed task is unchanged: all 289 tasks across every
+suite hash identically before and after, and the Frontier v4 lock holds.
+
+The 197 August and early September runs below stay flagged stale. Their
+recorded hashes cannot be recomputed from anything that survives, so this
+change does not make them match.
+
+### Evidence
+
+- Replaying `task_hash` at every commit that touched the Frontier v4 task
+  directories (2026-08-27 to now): each task's committed hash settles at
+  the commit that admitted it or, at the latest, at b510137d (2026-08-29,
+  the contamination canary) and never changes after. All 115 Muse Spark
+  1.3 runs (2026-09-06 to 2026-09-24) match the committed hash.
+- The 197 runs in docs/results/cii-v4-fable51-2026-09 and
+  docs/results/cii-v4-opus5-effort-2026-09 record 52 distinct hashes, none
+  equal to the committed state of its task at any commit. Each task has two
+  or three recorded hashes over time; the 2026-09-02 to 09-04 runs agree
+  with each other. Tasks run on the day they were admitted (2026-08-31)
+  already differ from that day's commit. So the task directories on the
+  machine that ran them held content git never had, and it changed between
+  run days.
+- Both sets ran `--sandbox local` on darwin; the mismatching runs used
+  Python 3.12.14, the matching Muse runs Python 3.14.3 (a different venv,
+  possibly a fresh checkout).
+- `task_hash` and the workspace copy read every file under repo/ and
+  tests/, ignored or not. The likeliest source is gitignored byproducts
+  of building the suite in place (Python bytecode caches change whenever
+  their sources change, which fits the drift between run days) or Finder
+  metadata. Not proven: the run traces for these sweeps are only on the
+  run machine, and manifest file counts are taken after the agent works,
+  so they cannot show the starting tree. `scripts/validate_tasks.py` was
+  ruled out: it works on a copy and leaves the task directory untouched.
+- Consequence while stale: `vulcanbench compare` and calibration exclude
+  these runs, and `--only-missing` treats them as missing, so resuming
+  into those output directories would re-run them. The published Fable 5.1
+  and Opus 5 cards were made when the hashes still matched their machine
+  and are not affected.
+
+### Open
+
+- On the run machine, `git status --ignored tasks/coding-intelligence-index-v4`
+  and a search of those sweeps' trace.jsonl files for `__pycache__`,
+  `.pyc` or `.DS_Store` would confirm the cause, and show whether any
+  agent saw byproducts in its workspace.
+
 ## 2026-10-05: sweeps run from tagged worktrees; published suites are frozen
 
 ### Decision
@@ -44,9 +100,8 @@ time.
   docs/results/cii-v4-opus5-effort-2026-09 (runs from 2026-08-28 to
   2026-09-04) differ for every one of the 23 tasks. No commit since
   2026-08-25 touches those tasks' scoring files (only metadata budgets and
-  the directory rename), so the cause is not yet known; one candidate is
-  untracked files inside task repo/ trees on the machine that ran them,
-  which `task_hash` includes. Not investigated further in this change.
+  the directory rename). Investigated in the 2026-10-06 entry: local,
+  uncommitted files in the task directories, now excluded from the hash.
 - traces/ is about 550 MB across 2,465 tracked files, the largest single
   file 37 MB, all added in one week.
 

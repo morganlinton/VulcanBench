@@ -113,11 +113,12 @@ typo in a note.
 - a task was added or removed, or
 - the version in `suite.json` no longer matches the lock.
 
-`task_hash` counts every file under a task's `repo/` and `tests/`, including
-ignored ones, so a stray `__pycache__` from running a task's code in place
-makes a local check fail. If you changed nothing, run
-`git status --ignored tasks/<suite>` and delete the leftovers. CI and fresh
-run worktrees are always clean.
+`task_hash` skips local byproducts (`__pycache__`, `.pyc`, `.pytest_cache`,
+`.mypy_cache`, `.ruff_cache`, `.DS_Store`), and the agent workspace copy skips
+them too. Any other untracked file under a task's `repo/` or `tests/` still
+counts, so if the check fails and you changed nothing, run
+`git status --ignored tasks/<suite>` and look for leftovers. CI and fresh run
+worktrees are always clean.
 
 Frozen today: **VulcanBench Frontier v4** (`coding-intelligence-index-v4`,
 version 2.0.0). Retired suites in this repo (cii-v1, v1 to v4, hard-1,

@@ -7,6 +7,93 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-06: Frontier v5 gate runs use concurrency 2; speed reporting stays serial
+
+### Decision
+
+Owner, in chat, accepting the recommendation in
+[docs/frontier-v5/PLAN.md](frontier-v5/PLAN.md) section 8, decision (e).
+Frontier v5 pilot and gate runs pass `--n-concurrent 2` to `harbor run`. Three
+rules make that compatible with the 2026-09-13 decision that kept v4 sweeps
+serial, which is not edited and still governs v4:
+
+1. Every run summary records the concurrency it ran under (Harbor's job
+   config carries `n_concurrent`; the ingest copies it into
+   `max_concurrency` as v4 summaries already do).
+2. The v5 speed panel, and any per-run wall-clock figure published as a
+   model comparison, is sourced only from the serial confirmation runs
+   (PLAN.md section 7, Phase 4, `-n 1`) or from runs whose recorded
+   concurrency is 1. Gate-run durations are logged as covariates and used for
+   candidate anatomy, never for a published speed ranking.
+3. Two pinned tasks must fit the machine. Each v5 task declares `cpus` and
+   `memory_mb` in `task.toml` and Harbor runs with `--cpus limit --memory
+   limit`, so two concurrent trials cannot steal from each other the way
+   unpinned v4 runs on one host could. The runner refuses a concurrent
+   launch whose pins exceed the Docker VM's allocation.
+
+Concurrency above 2 is not adopted. It needs the same evidence this entry
+asks the first concurrent pilot to produce (below), gathered at 2 first.
+
+### Evidence
+
+- The 2026-09-13 entry deferred concurrency for one main reason, the
+  wall-clock speed panel, and two smaller ones: no run had ever exercised
+  the Codex or Claude Code subscription with two sessions at once, and the
+  harness's infra-retry path had no backoff. Rule 2 answers the main reason
+  by construction. The two smaller ones are the pilot checks below.
+- Per-task resource pins are the thing Harbor buys most directly
+  (PLAN.md section 4), and they remove the "runs sharing one 10-core
+  machine" objection: a pinned trial gets its declared CPUs and memory
+  whether or not another trial is running.
+- Cost: PLAN.md section 3 estimates 200 to 300 serial machine hours for
+  the admit gates alone, before rejects. At concurrency 2 the calendar time
+  roughly halves while every per-run measurement stays a covariate.
+- Capacity on the gate machine measured 2026-10-06: host 12 CPUs and
+  16 GiB; Docker Desktop VM 12 CPUs and 7.7 GiB. Two Python or
+  JavaScript tasks at the plan's initial band (2 CPUs, 4096 MB each) fit
+  once the Docker VM is raised to about 12 GiB, the practical ceiling on a
+  16 GiB host. Two compiled-language or JVM tasks at the initial band
+  (4 CPUs, 8192 MB each, plus their verifiers) cannot run concurrently on
+  this machine at all. So on this host concurrency 2 applies to Python and
+  JavaScript pairs, compiled and JVM gate runs stay at `-n 1` unless the
+  pilots calibrate their band below 8192 MB, and rule 3's capacity check
+  turns an over-committed pair into a refused launch instead of an OOM kill
+  mid-run. A gate machine with 32 GiB or more lifts the restriction without
+  a new decision; the rules above do not depend on the host.
+
+### Pilot checks before concurrency 2 is used for a verdict
+
+- Run the first concurrent pilot pair and confirm from each `result.json`
+  that neither trial saw a usage-limit or rate-limit rejection from the
+  Codex or Claude Code subscription. One rejection drops gate runs back to
+  `-n 1` until a backoff exists in the launcher (Harbor's `--max-retries`
+  plus `--retry-include` for the provider's exception type, verified to
+  retry rather than score the failure).
+- Confirm from `docker stats` during that pair that each trial stayed
+  inside its pins and the verifier containers started with theirs.
+- Confirm the ingest writes `max_concurrency = 2` for those runs and that
+  the speed-panel source filter excludes them.
+
+### Revisit triggers
+
+- Any usage-limit rejection on a concurrent run: back to 1, add backoff,
+  log it here before returning to 2.
+- A gate verdict that would differ depending on whether a run was
+  concurrent (for example a timeout at 2 that passes at 1): treat the
+  concurrent run as infrastructure, not as a scored attempt, and rerun
+  serially.
+- The speed panel decoupled from wall clock entirely (tokens or steps):
+  rule 2 becomes moot and concurrency 3 or 4 can be evaluated on the
+  evidence above.
+
+### What this touched
+
+- This entry. The 2026-09-13 entry and v4 run conditions are unchanged.
+  `docs/frontier-v5/FREEZE.json` lists (e) as open at freeze time by design
+  and is not edited. The (c) entry's "`-n 1` until decision (e)" clause is
+  superseded for gate runs by this one; confirmation runs stay at `-n 1`.
+  Decisions (d) publishing channel and (f) gold location remain open.
+
 ## 2026-10-06: Frontier v5 runs on Harbor; the harness ingests, it does not emulate
 
 ### Decision

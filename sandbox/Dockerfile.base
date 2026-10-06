@@ -8,8 +8,15 @@
 # git/ripgrep/a compiler. Rust tasks use ``vulcanbench/sandbox:rust`` (see
 # ``sandbox/Dockerfile.rust``), auto-selected by language.
 #
-# Pinned by digest for reproducible sandbox builds (amd64; see multi-arch manifest).
-FROM python:3.12-slim-bookworm@sha256:4181eb0137487812d8b84ee677de85e5c9f7e08b7c3e16fc564b077cff4907a8
+# Pinned by digest for reproducible sandbox builds. The default digest is the
+# amd64 image manifest (not a multi-arch index), so a `--platform linux/arm64`
+# build against it silently produces amd64 content labeled arm64. For a native
+# arm64 chain pass the arm64 digest of the same tag instead, resolved
+# 2026-10-06 with `docker manifest inspect python:3.12-slim-bookworm`:
+#   --build-arg PYTHON_IMAGE=python:3.12-slim-bookworm@sha256:739ba32ae445e8d58f3d90feb85f83bebc8346f8dd280fa1eb5848f4ff1ed163
+# and tag the result vulcanbench/sandbox:base-arm64 so the amd64 tag is untouched.
+ARG PYTHON_IMAGE=python:3.12-slim-bookworm@sha256:4181eb0137487812d8b84ee677de85e5c9f7e08b7c3e16fc564b077cff4907a8
+FROM ${PYTHON_IMAGE}
 
 ARG GO_VERSION=1.23.4
 ARG NODE_MAJOR=22

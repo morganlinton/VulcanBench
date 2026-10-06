@@ -1,5 +1,14 @@
 # VulcanBench project notes
 
+## Authoring and execution separation
+
+Read [docs/BENCHMARK_OPERATING_MODEL.md](docs/BENCHMARK_OPERATING_MODEL.md)
+before launching benchmarks or assigning a checkout to another chat. Use one
+writer per authoring checkout/worktree. Benchmarks run from a dedicated clone
+at an exact committed revision via scripts/benchmark_runner.py, with external
+results. Preserve active legacy runs; never pull, edit or push from a running
+execution checkout. Promote reviewed results through an authoring commit/PR.
+
 ## Response handoffs
 
 Whenever you finish a task, recommend the next step in the final reply, even

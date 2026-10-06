@@ -58,7 +58,7 @@ fmt: setup ## Auto-format with ruff
 	$(RUFF) check --fix .
 
 typecheck: setup ## Strict mypy
-	$(MYPY) harness backend alembic/env.py scripts/ingest_runs.py
+	$(MYPY) harness backend alembic/env.py scripts/ingest_runs.py scripts/benchmark_runner.py
 
 ci: lint typecheck test ## Full local CI (lint + types + fast tests)
 

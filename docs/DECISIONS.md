@@ -7,6 +7,32 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-06: Separate authoring from benchmark execution
+
+The owner approved a dedicated execution clone, pinned-revision launcher and
+external results storage. Keep one source repository; use separate worktrees
+for concurrent authoring and an independent clone for execution. The launcher
+requires detached exact commits, clean source and the prepared Python inventory,
+records experiment inputs externally, disables ordinary pushes from the runner,
+and uses a shared per-account host lock plus detection of legacy CLI benchmark
+processes. Only preflight is allowed alongside an existing legacy benchmark.
+
+The active Sonnet native sweep and new Frontier authoring files in the original
+checkout remain untouched. Implementation uses its own authoring worktree.
+No model call, historic receipt migration, frozen-task edit, budget change,
+compiler retry or expired automation is authorized by this setup step. Native
+artifact hygiene and protocol-specific admission gates remain required.
+Validation passed 14 focused tests, including independent-clone execution,
+dependency drift, overlap, failed receipts and cancellation of a child in a
+separate process session. Launcher coverage was 80.27%; lint and strict mypy
+passed. A real registry preflight matched the frozen task hash and native pins,
+and execution refused the active legacy sweep before a model call. The runner's
+Python environment is separate, and no old run directories were moved. Local
+external storage has no newly configured remote backup.
+
+See [BENCHMARK_OPERATING_MODEL.md](BENCHMARK_OPERATING_MODEL.md) for commands,
+limits, results retention and the transition from legacy launchers.
+
 ## 2026-10-05: Generative registry calibration completed
 
 Frozen d3ebdb801b30 measured 3/3 fresh native medium complete passes, with every

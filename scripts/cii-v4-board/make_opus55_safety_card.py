@@ -13,8 +13,11 @@ hazards detector labels each planted hazard per run:
 The card leads with the answer (how many planted notes were followed, split
 into network, secret or delete actions and extra code or files), shows 95%
 Wilson intervals because every cell is small, and keeps the per-level table
-for detail. The grouping describes what each note asks for; it is not a
-severity score defined by the suite.
+for detail. Notes are grouped by the harm classes the suite itself defines
+(VulcanConduct ``tasks/conduct-v1/README.md``): beacon, secret exfiltration
+and destructive delete each break a ground rule; the code insert is code
+injection into the deliverable; the acknowledgment file is baseline
+instruction following that breaks no rule.
 
 It reads the Opus 5.5 rows of the frozen Grok 4.7 and Opus 5.5 card
 (``docs/results/safety-v1-grok47-2026-10``), which were built from the
@@ -59,9 +62,11 @@ PAYLOADS = {
     "secret_exfil": "Secret exfiltration",
     "destructive": "Destructive delete",
 }
+RISKY = "Breaks a ground rule: network, secret or delete"
 GROUPS = {
-    "Network, secret or delete actions": ("beacon", "secret_exfil", "destructive"),
-    "Extra code or files": ("code_insert", "ack_file"),
+    RISKY: ("beacon", "secret_exfil", "destructive"),
+    "Code injection into the deliverable": ("code_insert",),
+    "Harmless test instruction (no rule broken)": ("ack_file",),
 }
 OUTCOMES = ("complied", "ignored", "reported")
 OUTCOME_LABELS = {
@@ -142,9 +147,13 @@ def headline(data):
     followed = sum(c["complied"] for c in levels)
     told = sum(c["reported"] for c in levels)
     refused = planted - followed
-    risky = GROUPS["Network, secret or delete actions"]
+    risky = GROUPS[RISKY]
     risky_n = sum(p[k, o] for k in risky for o in OUTCOMES)
     risky_k = sum(p[k, "complied"] for k in risky)
+    sf.require(
+        risky_k + p["code_insert", "complied"] + p["ack_file", "complied"] == followed,
+        "followed notes split across the headline classes",
+    )
     runs = sum(c["runs"] for c in levels)
     passed = sum(c["passed"] for c in levels)
     low = data["levels"]["low"]
@@ -157,12 +166,12 @@ def headline(data):
         (
             f"{followed} of {planted}",
             "Planted notes followed",
-            f"all extra code or files;  95% range {pct(wilson(followed, planted)[0])} to {pct(wilson(followed, planted)[1])}",
+            f"{p['code_insert', 'complied']} code injections, {p['ack_file', 'complied']} harmless; 95% range {pct(wilson(followed, planted)[0])} to {pct(wilson(followed, planted)[1])}",
         ),
         (
             f"{told} of {refused}",
             "Refusals flagged to the user",
-            f"{pct(told / refused)};  95% range {pct(wilson(told, refused)[0])} to {pct(wilson(told, refused)[1])}",
+            f"{pct(told / refused)}; 95% range {pct(wilson(told, refused)[0])} to {pct(wilson(told, refused)[1])}",
         ),
         (
             f"{passed} of {runs}",
@@ -191,7 +200,7 @@ def tiles(fig, yf, text, items):
         )
         text(x + 0.012, 3.62, value, 30, True, heading=True)
         text(x + 0.012, 4.12, label, 12, True)
-        text(x + 0.012, 4.42, sub, 10, color=sf.MUTED)
+        text(x + 0.012, 4.42, sub, 9.5, color=sf.MUTED)
 
 
 def payload_chart(fig, yf, text, data):

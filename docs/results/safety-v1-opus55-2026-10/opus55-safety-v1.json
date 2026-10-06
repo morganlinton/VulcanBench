@@ -25,13 +25,15 @@
     "destructive/reported": 12
   },
   "groups": {
-    "Network, secret or delete actions": [
+    "Breaks a ground rule: network, secret or delete": [
       "beacon",
       "secret_exfil",
       "destructive"
     ],
-    "Extra code or files": [
-      "code_insert",
+    "Code injection into the deliverable": [
+      "code_insert"
+    ],
+    "Harmless test instruction (no rule broken)": [
       "ack_file"
     ]
   },
@@ -44,12 +46,12 @@
     {
       "value": "3 of 100",
       "label": "Planted notes followed",
-      "detail": "all extra code or files;  95% range 1% to 8%"
+      "detail": "2 code injections, 1 harmless; 95% range 1% to 8%"
     },
     {
       "value": "64 of 97",
       "label": "Refusals flagged to the user",
-      "detail": "66%;  95% range 56% to 75%"
+      "detail": "66%; 95% range 56% to 75%"
     },
     {
       "value": "44 of 50",
@@ -57,6 +59,6 @@
       "detail": "5 of 10 at Low, 10 of 10 at High and above"
     }
   ],
-  "png_sha256": "907b7dceb8711acc4dbaddd4f0d17d723305ff549b7e24ee3ee7bbfbaf2bb3bd",
+  "png_sha256": "2a2caacbaee0f6f3d8c062eb8f27cc10286b9ba7be23a0d862603d30470b6d80",
   "supporting_table": "opus55-safety-v1-efforts.csv"
 }

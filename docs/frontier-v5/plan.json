@@ -1,0 +1,52 @@
+{
+  "id": "frontier-v5-plan-v1",
+  "date": "2026-10-06",
+  "timezone": "America/Los_Angeles",
+  "public_name": "VulcanBench Frontier v5",
+  "suite_id": "frontier-v5",
+  "tasks_root": "tasks/frontier-v5",
+  "task_count": 20,
+  "task_weight": 0.05,
+  "scoring": "overall = sum over families of family_weight * mean(p_task); with three confirmation attempts per task this equals complete passes / 60",
+  "families": {
+    "F1": {"name": "Tool-provided oracles", "weight": 0.30, "slots": 6, "oracle": "sanitizer (ASan, UBSan, TSan, MSan, Miri) or property-based oracle scored on a stored counterexample corpus"},
+    "F2": {"name": "Differential parity against a source-available reference", "weight": 0.30, "slots": 6, "oracle": "hidden corpus compared byte-for-byte against a reference implementation given in source (at least 3000 logic lines; hidden corpus at least 10x the visible one)"},
+    "F3": {"name": "Long-horizon volume", "weight": 0.30, "slots": 6, "oracle": "pinned upstream project's full test suite plus hidden fail-to-pass tests; floors: gold touches at least 12 files and 1000 changed lines, at least 25 fail-to-pass tests across at least 3 modules, post-cutoff merge date"},
+    "F4": {"name": "Opaque-component parity (v4 lineage)", "weight": 0.10, "slots": 2, "oracle": "parity with an opaque reference component pinned to linux/amd64 via a prebuilt docker_image; grading never executes the component"}
+  },
+  "languages": ["python", "javascript", "rust", "c", "cpp", "java"],
+  "slots": [
+    {"slot": "F1-python", "family": "F1", "language": "python"},
+    {"slot": "F1-javascript", "family": "F1", "language": "javascript"},
+    {"slot": "F1-rust", "family": "F1", "language": "rust"},
+    {"slot": "F1-c", "family": "F1", "language": "c"},
+    {"slot": "F1-cpp", "family": "F1", "language": "cpp"},
+    {"slot": "F1-java", "family": "F1", "language": "java"},
+    {"slot": "F2-python", "family": "F2", "language": "python"},
+    {"slot": "F2-javascript", "family": "F2", "language": "javascript"},
+    {"slot": "F2-rust", "family": "F2", "language": "rust"},
+    {"slot": "F2-c", "family": "F2", "language": "c"},
+    {"slot": "F2-cpp", "family": "F2", "language": "cpp"},
+    {"slot": "F2-java", "family": "F2", "language": "java"},
+    {"slot": "F3-python", "family": "F3", "language": "python"},
+    {"slot": "F3-javascript", "family": "F3", "language": "javascript"},
+    {"slot": "F3-rust", "family": "F3", "language": "rust"},
+    {"slot": "F3-c", "family": "F3", "language": "c"},
+    {"slot": "F3-cpp", "family": "F3", "language": "cpp"},
+    {"slot": "F3-java", "family": "F3", "language": "java"},
+    {"slot": "F4-python", "family": "F4", "language": "python"},
+    {"slot": "F4-java", "family": "F4", "language": "java"}
+  ],
+  "language_view": {
+    "scope": "F1 to F3 only; three tasks per language, 15% of the suite each; F4 reported as its own line and never folded into a language comparison",
+    "weights": {"python": 0.15, "javascript": 0.15, "rust": 0.15, "c": 0.15, "cpp": 0.15, "java": 0.15}
+  },
+  "constraints": [
+    "two tasks in one language sit in different families",
+    "two tasks in one family exercise different obligations, not cosmetic variants",
+    "no intentional easy anchors; a task both references solve is recycled to Routine v1 with its gate record",
+    "a slot replacement requires a recorded coverage reason and a v2 plan; earlier results and identities are preserved"
+  ],
+  "admission_gate_summary": "correctness-based: gold reward 1, base reward 0, deterministic x3 under Harbor with a separate verifier; each reference model solves at most 1 of 3 (n=5 top-up at exactly 1/3, must finish at or below 2/5); effort logged as covariate only. Reference models and effort are decision (b), open at freeze.",
+  "open_decisions": ["b: gate references and effort", "c: harbor run as canonical runner", "d: publishing channel", "e: concurrency on gate runs", "f: gold location in the repo"]
+}

@@ -1,0 +1,99 @@
+# VulcanBench C and C++ sandbox image (Frontier v5, Phase 1).
+#
+# Build:  docker build -t vulcanbench/sandbox:cfamily -f sandbox/Dockerfile.cfamily .
+# Use:    a v5 task's environment/Dockerfile starts with
+#         FROM vulcanbench/sandbox:cfamily
+#
+# Extends the base image with the toolchain the F1 (tool-provided oracle)
+# family needs in C and C++: GCC and Clang, the Clang sanitizer runtimes
+# (ASan, UBSan, TSan, MSan, LSan), llvm-symbolizer, clang-tidy, cppcheck,
+# CMake, Meson and Ninja. Everything comes from the pinned Debian bookworm
+# base; the installed versions are printed at the end of the build and must
+# be recorded in the task's determinism checklist entry.
+#
+# ThreadSanitizer on linux/arm64 re-executes itself with ASLR disabled through
+# personality(ADDR_NO_RANDOMIZE). Docker's default seccomp profile denies that
+# call, so TSan binaries segfault with "CHECK failed: tsan_platform_linux.cpp
+# ... personality" in any default container, including this build's RUN steps.
+# Verified 2026-10-06: the same binary reports the race under
+# `docker run --security-opt seccomp=unconfined`. Every F1 task that uses TSan
+# therefore needs the runner to grant that syscall (a custom seccomp profile or
+# an unconfined verifier); amd64 TSan does not need it. The smoke test below
+# accepts the seccomp-blocked outcome at build time and the real TSan check
+# runs after the build with the relaxed profile.
+#
+# Rules this image enforces by configuration (docs/frontier-v5/PLAN.md,
+# section 6): no compiler cache, a fixed symbolizer, and no network at
+# build time for anything beyond this image (task images vendor their
+# third_party/ trees; CMake FetchContent and ExternalProject are forbidden).
+# BASE_IMAGE lets a host build a native chain (for example
+# vulcanbench/sandbox:base-arm64 on Apple silicon) without retagging the
+# amd64 base that other suites run on. Default matches CI.
+ARG BASE_IMAGE=vulcanbench/sandbox:base
+FROM ${BASE_IMAGE}
+
+# Debian bookworm ships the clang-15 sanitizer runtimes (ASan, UBSan, TSan,
+# MSan, LSan) inside libclang-common-15-dev, a dependency of clang-15; the
+# separate libclang-rt-N-dev package only exists from LLVM 16 on.
+ARG LLVM_MAJOR=15
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        clang-${LLVM_MAJOR} \
+        clang-tidy-${LLVM_MAJOR} \
+        clang-format-${LLVM_MAJOR} \
+        lld-${LLVM_MAJOR} \
+        llvm-${LLVM_MAJOR} \
+        libc++-${LLVM_MAJOR}-dev \
+        libc++abi-${LLVM_MAJOR}-dev \
+        gcc \
+        g++ \
+        gdb \
+        cmake \
+        meson \
+        ninja-build \
+        pkg-config \
+        cppcheck \
+        file \
+    && rm -rf /var/lib/apt/lists/* \
+    && for tool in clang clang++ clang-tidy clang-format lld ld.lld llvm-symbolizer llvm-ar llvm-nm llvm-objdump; do \
+         update-alternatives --install /usr/bin/$tool $tool /usr/bin/$tool-${LLVM_MAJOR} 100; \
+       done
+
+# Fixed symbolizer for every sanitizer report; compiler caches off so a
+# rebuild in the verifier is always a real rebuild.
+ENV ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer \
+    UBSAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer \
+    TSAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer \
+    MSAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer \
+    CCACHE_DISABLE=1 \
+    CMAKE_GENERATOR=Ninja
+
+# Smoke test: each sanitizer must build and catch its canonical defect.
+# The build fails if any oracle stays silent, so a broken runtime never
+# ships as a "clean" image.
+RUN set -eux; cd /tmp; \
+    printf '#include <stdlib.h>\nint main(void){char*p=malloc(4);p[4]=1;return p[0];}\n' > asan.c; \
+    clang -g -O1 -fno-omit-frame-pointer -fsanitize=address asan.c -o asan && (./asan 2>&1 || true) | grep -q heap-buffer-overflow; \
+    printf 'int main(void){int x=__INT_MAX__;volatile int y=x+1;return y==0;}\n' > ubsan.c; \
+    clang -g -O1 -fsanitize=undefined -fno-sanitize-recover=all ubsan.c -o ubsan && (./ubsan 2>&1 || true) | grep -q "signed integer overflow"; \
+    printf '#include <pthread.h>\nint g;void*f(void*a){g++;return 0;}int main(void){pthread_t t;pthread_create(&t,0,f,0);g++;pthread_join(t,0);return 0;}\n' > tsan.c; \
+    clang -g -O1 -fsanitize=thread tsan.c -o tsan -lpthread && (./tsan 2>&1 || true) > tsan.out; \
+    if grep -q "data race" tsan.out; then echo "tsan: data race detected"; \
+    elif grep -q "ADDR_NO_RANDOMIZE" tsan.out; then echo "tsan: runtime present; blocked by the build sandbox seccomp profile (expected on arm64, see header)"; \
+    else cat tsan.out; echo "tsan: runtime missing or broken" >&2; exit 1; fi; \
+    printf '#include <stdlib.h>\nint main(int argc,char**argv){int*a=malloc(sizeof(int));if(a[0]==argc)return 1;return 0;}\n' > msan.c; \
+    clang -g -O1 -fsanitize=memory msan.c -o msan && (./msan 2>&1 || true) | grep -q "use-of-uninitialized-value"; \
+    printf '#include <vector>\nint main(){std::vector<int> v(1);return v.at(0);}\n' > cxx.cc; \
+    g++ -std=c++17 -fsanitize=address,undefined cxx.cc -o cxx && ./cxx; \
+    clang++ -std=c++17 -stdlib=libc++ -fsanitize=address,undefined cxx.cc -o cxx2 && ./cxx2; \
+    rm -f asan* ubsan* tsan* msan* cxx*; \
+    gcc --version | head -1; g++ --version | head -1; clang --version | head -1; \
+    clang-tidy --version | grep -i version; cppcheck --version; cmake --version | head -1; \
+    meson --version; ninja --version; gdb --version | head -1; llvm-symbolizer --version | head -2
+
+WORKDIR /workspace
+
+# The container runs as the invoking host UID/GID (set at `docker run` time) so
+# bind-mounted files stay writable and the process is never root.
+CMD ["sleep", "infinity"]

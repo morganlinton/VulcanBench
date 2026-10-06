@@ -1,0 +1,73 @@
+# VulcanBench JVM sandbox image (Frontier v5, Phase 1).
+#
+# Build:  docker build -t vulcanbench/sandbox:jvm -f sandbox/Dockerfile.jvm .
+# Use:    a v5 task's environment/Dockerfile starts with
+#         FROM vulcanbench/sandbox:jvm
+#
+# Extends the base image with a pinned Eclipse Temurin JDK 21, Apache Maven
+# and Gradle, each downloaded once at image build and verified against the
+# checksum recorded below. The image carries build tools only; every task
+# vendors its own dependencies at task-image build time (mvn
+# dependency:go-offline into a task-local repository, or a populated Gradle
+# cache) and runs offline afterwards (`mvn -o`, `gradle --offline`). The
+# Gradle daemon is disabled image-wide so no warm JVM survives between
+# commands (docs/frontier-v5/PLAN.md, sections 5 and 6).
+# BASE_IMAGE lets a host build a native chain (for example
+# vulcanbench/sandbox:base-arm64 on Apple silicon) without retagging the
+# amd64 base that other suites run on. Default matches CI.
+ARG BASE_IMAGE=vulcanbench/sandbox:base
+FROM ${BASE_IMAGE}
+
+# Temurin release names use "+"; the download path encodes it as %2B.
+ARG JDK_RELEASE_TAG=jdk-21.0.12.1%2B1
+ARG JDK_FILE_VERSION=21.0.12.1_1
+ARG JDK_SHA256_X64=ce79869e1307ed8ee1e2baa86a412b1eb5b75d10a01006d788a6f968bcfaee94
+ARG JDK_SHA256_AARCH64=23e37e026f12f3e706f18938ff611db3032d075b09d0879a25d06718c773e223
+ARG MAVEN_VERSION=3.9.16
+ARG MAVEN_SHA512=831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+ARG GRADLE_VERSION=9.8.0
+ARG GRADLE_SHA256=bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c
+
+ENV JAVA_HOME=/opt/java/openjdk \
+    MAVEN_HOME=/opt/maven \
+    GRADLE_HOME=/opt/gradle \
+    PATH=/opt/java/openjdk/bin:/opt/maven/bin:/opt/gradle/bin:$PATH \
+    GRADLE_USER_HOME=/tmp/gradle \
+    GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false" \
+    MAVEN_CONFIG=/tmp/.m2
+
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*; \
+    ARCH="$(dpkg --print-architecture)"; \
+    case "$ARCH" in \
+      amd64) JDK_ARCH=x64; JDK_SHA256="$JDK_SHA256_X64" ;; \
+      arm64) JDK_ARCH=aarch64; JDK_SHA256="$JDK_SHA256_AARCH64" ;; \
+      *) echo "unsupported architecture: $ARCH" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://github.com/adoptium/temurin21-binaries/releases/download/${JDK_RELEASE_TAG}/OpenJDK21U-jdk_${JDK_ARCH}_linux_hotspot_${JDK_FILE_VERSION}.tar.gz" -o /tmp/jdk.tgz; \
+    echo "${JDK_SHA256}  /tmp/jdk.tgz" | sha256sum -c -; \
+    mkdir -p "$JAVA_HOME"; tar -C "$JAVA_HOME" --strip-components=1 -xzf /tmp/jdk.tgz; rm /tmp/jdk.tgz; \
+    curl -fsSL "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" -o /tmp/maven.tgz; \
+    echo "${MAVEN_SHA512}  /tmp/maven.tgz" | sha512sum -c -; \
+    mkdir -p "$MAVEN_HOME"; tar -C "$MAVEN_HOME" --strip-components=1 -xzf /tmp/maven.tgz; rm /tmp/maven.tgz; \
+    curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip; \
+    echo "${GRADLE_SHA256}  /tmp/gradle.zip" | sha256sum -c -; \
+    unzip -q /tmp/gradle.zip -d /opt; mv "/opt/gradle-${GRADLE_VERSION}" "$GRADLE_HOME"; rm /tmp/gradle.zip; \
+    java -version; javac -version; mvn -v; gradle --version --offline
+
+# Smoke test: compile and run a class, and confirm Maven refuses the
+# network in offline mode instead of silently fetching (the failure mode
+# the vendoring rule exists to catch).
+RUN set -eux; cd /tmp; \
+    printf 'public class Hello{public static void main(String[] a){System.out.println(java.util.TimeZone.getDefault().getID());}}\n' > Hello.java; \
+    javac Hello.java && java -Duser.timezone=UTC Hello | grep -q UTC; \
+    mkdir -p mvnprobe && cd mvnprobe; \
+    printf '<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>probe</groupId><artifactId>probe</artifactId><version>1</version><dependencies><dependency><groupId>junit</groupId><artifactId>junit</artifactId><version>4.13.2</version></dependency></dependencies></project>\n' > pom.xml; \
+    if mvn -q -o -Dmaven.repo.local=/tmp/empty-repo dependency:resolve >/tmp/mvn.log 2>&1; then echo "offline Maven resolved a dependency it should not have" >&2; exit 1; fi; \
+    cd /tmp && rm -rf Hello.* mvnprobe mvn.log empty-repo
+
+WORKDIR /workspace
+
+# The container runs as the invoking host UID/GID (set at `docker run` time) so
+# bind-mounted files stay writable and the process is never root.
+CMD ["sleep", "infinity"]

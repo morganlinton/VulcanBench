@@ -7,6 +7,147 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-06: Frontier v5 runs on Harbor; the harness ingests, it does not emulate
+
+### Decision
+
+Owner, in chat, accepting the recommendation in
+[docs/frontier-v5/PLAN.md](frontier-v5/PLAN.md) section 8, decision (c).
+Every Frontier v5 pilot, gate run and sweep is executed by the Harbor CLI
+(`harbor run`, Docker environment), never by `vulcanbench run` or the
+effort-sweep launchers. Adopted at Harbor 0.24.0; every run records the
+Harbor version it ran under, and a Harbor upgrade is logged here before the
+first gated run that uses it.
+
+What the harness keeps:
+
+1. Loading `task.toml` (the source of truth; v5 tasks have no
+   `metadata.json`) so `validate_tasks.py`, `task_hash`, the suite manifest
+   and `suite.lock.json` cover v5 tasks.
+2. A new `harness/harbor_ingest.py` that turns a Harbor job directory
+   (`result.json`, per-trial `reward.json`, trajectories, durations, token
+   counts) into the existing `runs/<run>/summary.json` shape, so the boards,
+   pricing, `time_sliced.py` and the rankings chart keep working unchanged.
+3. The `[effort].blocked` check from `vulcanbench.toml`, which wraps every
+   Harbor launch the harness makes before any model call.
+4. The export tree inverts into a strip step: a task directory minus
+   `solution/` and `DESIGN.md`, asserted free of gold material, is the only
+   thing handed to anyone outside the repo.
+
+Run conventions fixed with this decision: `tests/Dockerfile` is required in
+every task (Harbor skips the tests upload whenever the verifier image is
+prebuilt or that file exists, so a verifier image without `COPY . /tests`
+grades an empty container); `harbor run -o` takes an absolute path; job
+directories live under ignored `runs-frontier-v5-*` roots; `--cpus limit`
+and `--memory limit` are passed so `task.toml` resource pins are enforced
+rather than advisory; `-n 1` until decision (e) says otherwise.
+
+### Evidence
+
+- The 2026-09-01 export was downstream of `metadata.json` and drifted: the
+  checked-in `task.toml` still carried the 10-hour timeout after the
+  2026-09-13 revision. One source of truth removes the class of error.
+- [docs/frontier-v5/PHASE1.md](frontier-v5/PHASE1.md): a real `harbor run`
+  on Docker passed both reward directions with the oracle and no-op agents,
+  through the separate verifier, the top-level `artifacts` handoff,
+  `reward.json` metric parsing and `no-network` enforcement in the verifier
+  phase (`scripts/harbor-smoke/run.sh`). Harbor's `--effort` flag and the
+  `claude-code` and `codex` agents' `reasoning_effort` levels match
+  VulcanBench's low to max with no ultra level.
+- Emulating the same contract in the harness would mean re-verifying every
+  one of those behaviors against Harbor's source on each release, which is
+  the drift problem again in a different place.
+
+### Revisit triggers
+
+- A Harbor release changes the `task.toml` schema, the reward contract or
+  the artifacts semantics: pin the previous version for in-flight gates and
+  log the migration here before upgrading.
+- A task needs something Harbor's Docker environment cannot grant. The first
+  known case is the ThreadSanitizer seccomp allowance on linux/arm64
+  (PHASE1.md finding 2); if `--extra-docker-compose` cannot carry
+  `security_opt`, that is a pilot blocker to log, not a reason to bypass the
+  runner.
+- The ingest cannot recover a metric the boards need (per-run tokens, cost,
+  wall clock): extend the ingest or the trajectory parser, never run the
+  task outside Harbor to get the number.
+
+### What this touched
+
+- This entry. `docs/frontier-v5/FREEZE.json` lists (c) as open at freeze
+  time by design and is not edited; this entry is the resolution it points
+  to. No code changes yet: the harness work above is Phase 1 and Phase 2
+  scope and lands in its own PRs.
+
+## 2026-10-06: Frontier v5 gate references are GPT-6 Astra and Fable 5.1 at medium
+
+### Decision
+
+Owner, in chat, accepting the recommendation in
+[docs/frontier-v5/PLAN.md](frontier-v5/PLAN.md) section 8, decision (b).
+The Frontier v5 admission gate (PLAN.md section 3, part 2) measures every
+candidate against two reference models, both at reasoning effort `medium`:
+
+| Reference | Agent | VulcanBench model id | Effort |
+| --- | --- | --- | --- |
+| GPT-6 Astra | Codex CLI via `harbor run -a codex` | `codex:gpt-6-astra` | medium |
+| Claude Fable 5.1 | Claude Code CLI via `harbor run -a claude-code` | `claude-code:claude-fable-5-1` | medium |
+
+Admit iff each reference solves at most 1 of 3 runs. A prong at exactly 1/3
+gets the n=5 top-up and must finish at or below 2/5. Two solves by either
+reference end the gate early as a reject. Effort is a covariate only: wall
+clock, tokens and list-price cost are logged per run and never decide
+admission. Each gate run records the Harbor model identifier string, the
+agent CLI version (pinned per wave through the agent's `version` setting),
+the Harbor version and the date; the exact identifier strings are fixed in
+the candidate log with the first gate run and do not change within a wave.
+
+The gate is relative to the frontier at admission time. When a new model
+generation lands, candidates and admitted tasks are re-gated and the
+pruning rule applies prospectively; the reference pair changes only through
+a new entry here.
+
+### Evidence
+
+- These are the two models that saturated v4
+  (`docs/results/swe-v4-frontier-quartet-2026-09/frontier-quartet-efforts.csv`):
+  Astra 23/23 at medium, high, extra-high and max; Fable 5.1 23/23 at max,
+  22/23 at extra-high, 20/23 at medium. A v5 task that either of them solves
+  routinely is not a frontier task.
+- Medium is the lowest effort at which Astra swept v4 (100.0, median 3.8
+  minutes), so gating at medium measures the task shape rather than the
+  reasoning budget, and it is the effort the harness has the most v4 runs at
+  for both references. Fable 5.1 at medium scored 97.6 on v4, so the
+  weaker-prong reading is conservative, not lenient: a task it misses 2 of 3
+  at medium is harder than anything in v4.
+- Harbor passes the effort through natively (`--effort medium`, mapped to
+  each agent's `reasoning_effort`), verified in
+  [docs/frontier-v5/PHASE1.md](frontier-v5/PHASE1.md) finding 6; the
+  `[effort].blocked` rule holds because no ultra level exists on either
+  agent.
+- The v4 charter's reference-model policy and the n=5 top-up protocol
+  (loyaltycore and tariffcore prunes in `CANDIDATES.md`) carry over
+  unchanged; only the admission prong moves from effort back to correctness.
+
+### Revisit triggers
+
+- A new frontier model generation ships for either lab: re-gate and log the
+  new pair here before the next wave.
+- Either reference becomes unavailable at medium (model retired, effort
+  level removed): substitute with a logged entry, never silently.
+- Three consecutive pre-registered candidates in one family go 0/3 on both
+  references: that is a design question for a v2 plan, not a reason to raise
+  the admission prong.
+- The first gated pilot run: confirm from its `result.json` that the effort
+  requested is the effort the agent reports, before any verdict is logged.
+
+### What this touched
+
+- This entry. `docs/frontier-v5/FREEZE.json` lists (b) as open at freeze
+  time by design and is not edited. Decisions (d) publishing channel, (e)
+  concurrency on gate runs and (f) gold location remain open; (e) is next,
+  since the gate cost estimate in PLAN.md section 3 assumes serial runs.
+
 ## 2026-10-06: Frontier v5 composition frozen (20 tasks, four families, six languages)
 
 ### Decision

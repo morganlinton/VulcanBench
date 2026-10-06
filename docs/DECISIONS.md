@@ -7,6 +7,46 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-06: CII v1 and its results are withdrawn
+
+### Decision
+
+Owner, in chat: CII v1 is old and should be deleted to avoid confusion.
+Removed `tasks/cii-v1` (41 tasks plus recycled candidates, 36,331 files),
+the `cii-v1`, `cii` and `coding-intelligence-index` suite names,
+`scripts/cii-report/`, and the August 2026 results chart. The results page
+`docs/results/cii-v1-2026-08/README.md` stays as a short withdrawal notice
+so existing links explain what happened. Git history keeps everything.
+
+### Evidence
+
+From the run machine's audit of local byproducts (previous entry):
+
+- Six CII v1 tasks had pytest's compiled copies of their hidden tests
+  (`oss_tests` and `reg_tests`, `cpython-312-pytest-9.1.1.pyc`) in
+  `repo/__pycache__/`, copied into every agent workspace before
+  2026-10-06: oss-anyio-create-task-names,
+  oss-networkx-kcomponents-exact-epic, oss-pydantic-none-discriminator,
+  oss-sqlglot-json-operator-precedence, oss-sqlglot-pushdown-semantics and
+  oss-starlette-max-body-size. Four of them are in the published 37-task
+  set. oss-starlette-max-body-size also carried
+  `starlette/middleware/__pycache__/body_limit.cpython-312.pyc`, compiled
+  from a file only the gold patch creates.
+- On oss-starlette-max-body-size, all three Opus 5 runs (2026-08-23) and
+  one Sonnet 5 run (2026-08-24) decoded the hidden-test bytecode and
+  passed; one Opus run reconstructed the tests and ran them against its
+  fix. No scanned run decoded `body_limit.cpython-312.pyc`. The scan read
+  Claude Code streams only; GPT 5.6 Sol (Codex) runs were not checked.
+- The published table (Opus 5 96.4%, Sonnet 5 89.2%, GPT 5.6 Sol 86.5%)
+  therefore counts at least one contaminated task. Rather than re-run an
+  old suite, it is withdrawn.
+
+### What prevents a repeat
+
+`harness.tasks.is_local_junk` (previous entry) keeps `__pycache__` and
+`.pyc` out of agent workspaces, so leftover bytecode can no longer reach an
+agent, whatever is on the run machine's disk.
+
 ## 2026-10-06: task_hash and the agent workspace skip local byproducts
 
 ### Decision
@@ -56,12 +96,19 @@ change does not make them match.
   and Opus 5 cards were made when the hashes still matched their machine
   and are not affected.
 
-### Open
+### Resolved on the run machine, same day
 
-- On the run machine, `git status --ignored tasks/coding-intelligence-index-v4`
-  and a search of those sweeps' trace.jsonl files for `__pycache__`,
-  `.pyc` or `.DS_Store` would confirm the cause, and show whether any
-  agent saw byproducts in its workspace.
+- `git status --ignored` showed `__pycache__/` under repo/, tests/ and
+  builder/ of every Frontier v4 task: the cause is confirmed.
+- All 130 cached `.pyc` files under Frontier v4 repo/ and tests/ were
+  compiled from the committed starting source (recorded source size equals
+  the committed file), and none is orphaned, so no gold or hidden-test
+  bytecode was in a Frontier v4 workspace.
+- Six Frontier v4 runs tried to decode a cached `.pyc`; four failed with
+  "bad marshal data" (the cache came from another Python version) and the
+  others printed only listings. Nothing was gained. Frontier v4 results
+  stand.
+- The same audit found a real leak in CII v1; see the next entry.
 
 ## 2026-10-05: sweeps run from tagged worktrees; published suites are frozen
 

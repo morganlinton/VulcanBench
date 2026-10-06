@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Coding Intelligence Index v1** (`tasks/cii-v1/`, `--suite cii-v1` and the
+  `cii` and `coding-intelligence-index` aliases, `scripts/cii-report/`, and the
+  August 2026 results chart). Six of its tasks shipped compiled copies of their
+  hidden tests in the starting workspace, and agents decoded them on one
+  published task, so the suite and its results are withdrawn. The results page
+  `docs/results/cii-v1-2026-08/README.md` now says so. Details in
+  docs/DECISIONS.md (2026-10-06).
+
 ### Added
 
 - **Devin CLI harness** (`--harness devin`, `devin:<model>` specs,

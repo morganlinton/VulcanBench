@@ -36,10 +36,10 @@ SUITE_ALIASES = {
 }
 
 #: Plain directory aliases: alternate CLI names for a whole suite, with none of
-#: the v1 tier/filter semantics. ``--suite cii`` loads ``tasks/cii-v1`` as-is.
+#: the v1 tier/filter semantics. ``--suite cii-v4`` loads Frontier v4 as-is.
+#: (``cii`` and ``coding-intelligence-index`` pointed at CII v1 and went with
+#: it on 2026-10-06; docs/DECISIONS.md.)
 SUITE_NAME_ALIASES = {
-    "cii": "cii-v1",
-    "coding-intelligence-index": "cii-v1",
     # The frontier suite's directory was renamed from its internal build id
     # (cii-v2) to its public name on 2026-09-01. The old id stays as an alias
     # so historical command lines, scripts, and notes keep resolving.

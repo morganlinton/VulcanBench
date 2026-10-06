@@ -2,7 +2,7 @@
 """Stamp explicit per-task agent budgets from the complexity-scaled formula.
 
 Suites that set ``"require_explicit_budgets": true`` in their ``suite.json``
-(the Coding Intelligence Index, ``tasks/cii-v1``) fail validation unless every
+(Frontier v4, ``tasks/coding-intelligence-index-v4``) fail validation unless every
 task carries positive ``agent_hints.suggested_max_steps`` and
 ``suggested_timeout_s``. This script computes those values from
 ``harness.task_metadata.complexity_scaled_budgets`` (repo_scale baseline x
@@ -19,9 +19,9 @@ A task may deliberately deviate from the formula (a measured hand-tune): set
 
 Usage::
 
-    python scripts/stamp_task_budgets.py tasks/cii-v1            # stamp all tasks
-    python scripts/stamp_task_budgets.py tasks/cii-v1 --check    # verify only (CI)
-    python scripts/stamp_task_budgets.py tasks/cii-v1/<task-id>  # one task
+    python scripts/stamp_task_budgets.py tasks/<suite>            # stamp all tasks
+    python scripts/stamp_task_budgets.py tasks/<suite> --check    # verify only (CI)
+    python scripts/stamp_task_budgets.py tasks/<suite>/<task-id>  # one task
 
 ``--check`` exits 1 if any stamped value is missing or differs from the formula.
 Writing normalizes metadata.json to 2-space-indented JSON with a trailing newline.

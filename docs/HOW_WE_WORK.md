@@ -121,7 +121,7 @@ counts, so if the check fails and you changed nothing, run
 worktrees are always clean.
 
 Frozen today: **VulcanBench Frontier v4** (`coding-intelligence-index-v4`,
-version 2.0.0). Retired suites in this repo (cii-v1, v1 to v4, hard-1,
+version 2.0.0). Retired suites in this repo (v1 to v4, hard-1,
 python-1, voice-v1, vulcancyber-v1) are not swept and are not locked. Lock one
 if it ever comes back into use.
 

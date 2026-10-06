@@ -3,8 +3,9 @@
 #
 # Refuses unless you are on main, the tree is clean and main matches
 # origin/main. Suite locks are checked by CI on main and again in the fresh run
-# worktree (an edited checkout can hold ignored files, such as __pycache__,
-# inside task repos, which task_hash counts). The tag is what a run worktree
+# worktree (an edited checkout can hold untracked files inside task dirs, which
+# task_hash counts unless they are local byproducts like __pycache__). The tag
+# is what a run worktree
 # checks out (scripts/run_worktree.sh) and what every run summary's
 # source.harness.describe points back to. See docs/HOW_WE_WORK.md.
 #

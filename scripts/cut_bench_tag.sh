@@ -5,9 +5,8 @@
 # origin/main. Suite locks are checked by CI on main and again in the fresh run
 # worktree (an edited checkout can hold untracked files inside task dirs, which
 # task_hash counts unless they are local byproducts like __pycache__). The tag
-# is what a run worktree
-# checks out (scripts/run_worktree.sh) and what every run summary's
-# source.harness.describe points back to. See docs/HOW_WE_WORK.md.
+# is what a run worktree checks out (scripts/run_worktree.sh) and what every run
+# summary's source.harness.describe points back to. See docs/HOW_WE_WORK.md.
 #
 #   bash scripts/cut_bench_tag.sh grok47-safety          # bench/2026-10-05-grok47-safety
 #   bash scripts/cut_bench_tag.sh grok47-safety --push   # also push the tag

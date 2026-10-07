@@ -7,8 +7,11 @@
 # and cargo-audit. Rust tasks reference this image via per-task metadata
 # ("image": "vulcanbench/sandbox:rust") or `--image vulcanbench/sandbox:rust`.
 #
-# Pinned versions keep the sandbox reproducible.
-FROM vulcanbench/sandbox:base
+# Pinned versions keep the sandbox reproducible. BASE_IMAGE lets a host build
+# a native chain (for example vulcanbench/sandbox:v5-base on Apple silicon or
+# an amd64 cloud VM) without retagging the base other suites run on.
+ARG BASE_IMAGE=vulcanbench/sandbox:base
+FROM ${BASE_IMAGE}
 
 ARG RUST_VERSION=1.87.0
 ARG CARGO_AUDIT_VERSION=0.21.2

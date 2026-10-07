@@ -367,3 +367,62 @@ reach "frontier-v5 setup: done". What broke, in the order it surfaced:
    cloud environment's allowed domains (Network access, with the package
    managers box ticked), then re-run setup-host.sh. Until then no v5 image
    builds on the cloud VM.
+4. **The allowlist change reached the session proxy but not the container
+   path.** The owner switched the Default environment to Custom network
+   access with those four hosts plus the default list. The host (through
+   the session's HTTPS proxy) reached all four within a minute, but
+   containers on the default bridge network kept getting 403 from the
+   egress gateway for the newly allowed hosts (pypi still worked) across
+   ten checks 30 s apart. Fixed in the script: on a cloud host with
+   `HTTPS_PROXY` set, image builds run with `--network host` and the proxy
+   passed as build arguments, which Docker does not store in the image.
+   apt, curl, git and pip all honour it. The task images were built the
+   same way. Open item for a cloud gate run: Harbor's own image builds will
+   need the same proxy route (or the container path must start honouring
+   the environment's allowed domains).
+5. **Two of the host's CA files have no trailing newline**
+   (`swp-ca-production.crt`, `swp-ca-staging.crt`), so concatenating them
+   glued two certificates onto one line and `keytool` rejected the bundle
+   ("Input not an X.509 certificate"). The script now writes a newline
+   after each file, and `Dockerfile.jvm` copies only BEGIN..END blocks.
+6. **Docker does not survive a VM restore.** dockerd had to be restarted by
+   hand twice in one session after the VM paused. Start it in the
+   environment's setup script (or a SessionStart hook) before anything
+   that uses images.
+
+With 4 and 5 fixed, setup-host.sh ends with "frontier-v5 setup: done" on
+the x86-64 VM and lists v5-base, v5-cfamily, v5-jvm and v5-rust (plus the
+local trust layer v5-python-ca); Harbor 0.24.0 installed. Tool versions in
+the amd64 tags match the table at the top (GCC 12.2.0-14+deb12u1, CMake
+3.25.1, Temurin 21.0.12.1; the JVM image carries the seven interception
+CAs in its cacerts).
+
+## C++ pipeline proven 2026-10-07
+
+tasks/frontier-v5/fmt-format-spec-conformance validates end to end (base
+reward 0 x3, gold reward 1 x3, nine single-fix controls) on
+`vulcanbench/sandbox:v5-cfamily` built on the x86-64 cloud VM, the first
+Track A task in C or C++. Lessons for the cpp-v1 checklist:
+
+- Pick the language standard in the grading image, not on the host. The
+  first choice, C++20, built and passed with the host's GCC 13 but GCC 12.2
+  cannot compile {fmt}'s existing `base-test.cc` in C++20 mode at the base;
+  the task builds as C++17 (GCC 12's default, one of upstream's CI
+  configurations). A hidden test that is a compile error at base also takes
+  its whole test binary down with it, so prefer standards where the held-out
+  tests compile at base and fail at run time.
+- Run one googletest case per process. Debug builds keep `FMT_ASSERT`
+  live, and one base failure (a calendar formatter fed a zeroed `tm`)
+  aborts the process, which would hide every later case in that binary.
+  `tests/run_tests.py` lists each ctest entry's cases and runs each with
+  `--gtest_filter`; 584 cases take seconds.
+- googletest is vendored in the {fmt} tree, so the agent and verifier
+  images build and test with no network at all; the verifier builds from
+  scratch with pristine CMake files and test sources and grades
+  `include/` and `src/` only.
+- A test overlay copied with `cp -a` keeps old mtimes, and Ninja then
+  skips the rebuild; irrelevant to the verifier (fresh build tree) but it
+  silently fakes a base pass in an incremental host build.
+- `long double` is 80-bit x87 on x86-64 and IEEE quad on arm64 Linux; one
+  held-out case depends on it, so arm64 validation is a separate check
+  before the task is called portable.

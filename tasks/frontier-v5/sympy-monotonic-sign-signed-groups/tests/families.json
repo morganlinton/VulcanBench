@@ -1,0 +1,27 @@
+{
+  "suite": "frontier-v5",
+  "task": "sympy-monotonic-sign-signed-groups",
+  "test_files": [
+    "sympy/core/tests/test_exprtools.py",
+    "sympy/core/tests/test_assumptions.py"
+  ],
+  "fail_to_pass": [
+    "sympy/core/tests/test_exprtools.py::test_monotonic_sign",
+    "sympy/core/tests/test_assumptions.py::test_add_signed_group_assumptions"
+  ],
+  "pass_to_pass": [
+    "sympy/core/tests/test_exprtools.py::test_Factors",
+    "sympy/core/tests/test_exprtools.py::test_Term",
+    "sympy/core/tests/test_exprtools.py::test__decompose_exprs",
+    "sympy/core/tests/test_exprtools.py::test_decompose_power",
+    "sympy/core/tests/test_exprtools.py::test_factor_nc",
+    "sympy/core/tests/test_exprtools.py::test_factor_terms",
+    "sympy/core/tests/test_exprtools.py::test_gcd_terms",
+    "sympy/core/tests/test_exprtools.py::test_issue_17256",
+    "sympy/core/tests/test_exprtools.py::test_issue_21623",
+    "sympy/core/tests/test_exprtools.py::test_issue_6360",
+    "sympy/core/tests/test_exprtools.py::test_issue_7903",
+    "sympy/core/tests/test_exprtools.py::test_issue_8263",
+    "sympy/core/tests/test_exprtools.py::test_xreplace"
+  ]
+}

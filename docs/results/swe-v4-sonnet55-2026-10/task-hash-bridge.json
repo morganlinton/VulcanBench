@@ -1,0 +1,104 @@
+{
+ "id": "task-hash-bridge-sonnet55",
+ "made": "2026-10-07",
+ "why": "The Sonnet 5.5 sweep ran from the codex/ocaml-v1 checkout, whose task_hash still counted gitignored __pycache__ files. Its summaries therefore record a hash that differs from suite.lock.json although the task content is identical (docs/DECISIONS.md, 2026-10-07).",
+ "method": [
+  "recorded: harness.tasks.task_hash at 5da730e0 (the sweep's own code), computed on the task directories the sweep read in the main checkout; it reproduces the task_hash of every Sonnet 5.5 summary (93 of 93 at the time of writing, one distinct hash per task across the whole sweep).",
+  "lock: harness.tasks.task_hash at d8ddcedc (skips local byproducts) on the same directories; equals tasks/coding-intelligence-index-v4/suite.lock.json for all 23 tasks.",
+  "The only difference is the byproducts. Every repo/ .pyc an agent workspace could contain (107 files) is byte-identical to compiling the current starting source with Python 3.12, so the extra files exposed nothing beyond the starting code."
+ ],
+ "tasks": {
+  "legacy-blendcore-binary-parity": {
+   "recorded": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63",
+   "lock": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+  },
+  "legacy-cellarcore-binary-parity": {
+   "recorded": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782",
+   "lock": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+  },
+  "legacy-codeccore-binary-parity": {
+   "recorded": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d",
+   "lock": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+  },
+  "legacy-depotcore-binary-parity": {
+   "recorded": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78",
+   "lock": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+  },
+  "legacy-freightcore-binary-parity": {
+   "recorded": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b",
+   "lock": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+  },
+  "legacy-granarycore-binary-parity": {
+   "recorded": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7",
+   "lock": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+  },
+  "legacy-hedgecore-binary-parity": {
+   "recorded": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133",
+   "lock": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+  },
+  "legacy-lodgecore-binary-parity": {
+   "recorded": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847",
+   "lock": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+  },
+  "legacy-matchcore-order-book-parity": {
+   "recorded": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19",
+   "lock": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+  },
+  "legacy-metercore-binary-parity": {
+   "recorded": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218",
+   "lock": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+  },
+  "legacy-pacecore-binary-parity": {
+   "recorded": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd",
+   "lock": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+  },
+  "legacy-paddockcore-binary-parity": {
+   "recorded": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e",
+   "lock": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+  },
+  "legacy-payrollcore-binary-parity": {
+   "recorded": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc",
+   "lock": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+  },
+  "legacy-qlite-store-parity": {
+   "recorded": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4",
+   "lock": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+  },
+  "legacy-queuecore-binary-parity": {
+   "recorded": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e",
+   "lock": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+  },
+  "legacy-quotacore-binary-parity": {
+   "recorded": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2",
+   "lock": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+  },
+  "legacy-reflowcore-binary-parity": {
+   "recorded": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9",
+   "lock": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+  },
+  "legacy-schedcore-binary-parity": {
+   "recorded": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c",
+   "lock": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+  },
+  "legacy-settlecore-binary-parity": {
+   "recorded": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1",
+   "lock": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+  },
+  "legacy-snapcore-binary-parity": {
+   "recorded": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134",
+   "lock": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+  },
+  "legacy-stampcore-binary-parity": {
+   "recorded": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143",
+   "lock": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+  },
+  "legacy-tallycore-binary-parity": {
+   "recorded": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c",
+   "lock": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+  },
+  "legacy-vaultcore-binary-parity": {
+   "recorded": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14",
+   "lock": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+  }
+ }
+}

@@ -31,11 +31,27 @@ Owner requests in chat, 2026-10-07.
   `bench/2026-10-07-haiku55-frontier-v4` (`d8ddcedc`), all five levels,
   output `runs-effort-haiku55/`, queued behind the Sonnet sweep. The
   refusal fallback stays at Claude Code's default (on), as for Opus 5.5.
-- **Code quality judging runs on this host.** Earlier rounds ran on a host
-  whose home was `/Users/morganlinton`; the frozen v3.3 and v3.4 protocols
-  record judge binaries by absolute path under it. The next runner matches
-  the pinned judges by sha256 and records the path change in its protocol,
-  instead of comparing path strings.
+- **Code quality judging runs on this host, with the judge pins rebuilt.**
+  Earlier rounds ran on a host whose home was `/Users/morganlinton`. That
+  host has been erased, and with it the only copies of
+  `runs-code-quality-maintenance-v3.3/` and `v3.4/`, whose `protocol.json`
+  files held the Grok and Muse reviewer settings and binary pins that every
+  later runner reads. They were never committed; only their sha256 is
+  published. The owner chose to rebuild and disclose rather than judge
+  with Muse alone or publish without Code quality:
+  `docs/judging/judge-pins-v3.json` (committed, so this cannot recur)
+  holds the recovered settings, and the v3.23 runner matches binaries by
+  sha256 on this host instead of comparing path strings. Muse matches the
+  original pin exactly; the Cursor CLI that carries Grok 4.6 is re-pinned
+  and every card discloses that its equality with the v3.3 pin cannot be
+  shown. Both judges retake calibration in v3.23, as in every round.
+- **The Sonnet 5.5 population goes through a committed hash bridge.** The
+  judging pipeline rejects any run whose recorded `task_hash` differs from
+  the task today, so every Sonnet 5.5 run would be excluded.
+  `docs/results/swe-v4-sonnet55-2026-10/task-hash-bridge.json` pairs each
+  task's recorded hash with its lock hash, and the population builder
+  accepts a run only when the task still hashes to the lock and the run
+  recorded exactly the bridged hash.
 - **Costs.** Sonnet 5.5 cards use the cost Claude Code reports per run
   (`cli_reported_cost_usd`), as the Opus 5.5 card did, because the vendor
   page disagrees with itself on the cache-read price. Haiku 5.5 cards show a
@@ -52,10 +68,12 @@ Owner requests in chat, 2026-10-07.
   difference between `codex/ocaml-v1` and `main` under that suite is the
   lock file itself. The recorded hashes differ because the older hash
   counted gitignored `__pycache__/` folders.
-- Claude Code versions, from each summary's `harness_version`: low ran 21
-  tasks on 2.1.291 and 2 on 2.1.292; medium, high and extra-high ran on
-  2.1.292. The CLI updated itself to 2.1.293 at 12:52 on 2026-10-07, after
-  the last extra-high task had started, so max runs on 2.1.293. Each card
+- Claude Code versions, from each run's stream `init` event (each summary's
+  `harness_version` agrees): low ran 21 tasks on 2.1.291 and 2 on 2.1.292;
+  medium and high ran on 2.1.292; extra-high ran 22 on 2.1.292 and its last
+  task (paddockcore, started 12:09 on 2026-10-07) on 2.1.293; max runs on
+  2.1.293. The CLI updated itself during the sweep; the global install's
+  link time (12:52) is not when the new version took effect. Each card
   footnotes the versions per level.
 - Sonnet 5.5 results before max (pass@1, n=23 each, no timeouts, no fallback
   replies): low 0.652, medium 0.739, high 0.870, extra-high 0.957.
@@ -71,9 +89,27 @@ Owner requests in chat, 2026-10-07.
   - `claude -p --model claude-haiku-5-5` resolves to `claude-haiku-5-5`;
     so does the `haiku` alias.
 - Judge binaries on this host: `muse-bin-1.0.3-R2198.1` hashes to the
-  frozen `MUSE_SHA256` (`4c0f9600...`). `cursor-agent` 2026.09.10-fd3934a
-  is installed and logged in. Its hash is checked against the v3.3 pin once
-  that protocol file is copied here.
+  frozen `MUSE_SHA256` (`4c0f9600...`), the value published in the v3.4,
+  v3.15 and v3.17 bundles. `cursor-agent` 2026.09.10-fd3934a hashes to
+  `2ccc9a8e...`, now the committed pin. Live probes on 2026-10-07: Cursor
+  served `cursor-grok-4.6-medium` on the subscription login (display name
+  "Grok 4.6 Medium", the rename v3_resume already accepts), and Muse
+  Spark 1.3 answered through the pinned binary.
+- Recovered settings: the published `scored_panel` blocks (the frozen
+  reviewer settings minus binary paths, per the site exporter) are
+  identical across the v3.4, v3.15 and v3.17 bundles and equal
+  `GROK_MODEL`, `GROK_DISPLAY` and `MUSE_MODEL` in
+  `harness/maintenance_review_v3.py`. A search of every branch of both
+  repos found no copy of either lost protocol file or the Cursor hash.
+- Hash bridge: `task_hash` from `5da730e0` (the sweep's own code) on the
+  task directories it read reproduces the recorded hash of all 93 Sonnet
+  5.5 runs finished so far, one distinct hash per task for the whole
+  sweep; `main`'s `task_hash` on the same directories equals the lock for
+  all 23 tasks. The difference is byproduct files only. All 107 `.pyc`
+  files under the tasks' `repo/` directories (the part copied into agent
+  workspaces) are byte-identical to compiling the current starting source
+  with Python 3.12: they were compiled during task authoring (August 27
+  to 30) and differ from the sources only in modification time.
 
 ### Revisit
 

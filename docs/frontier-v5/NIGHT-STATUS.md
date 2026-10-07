@@ -5,7 +5,7 @@ validated, what is blocked on you, and the one design question that matters.
 
 ## TL;DR
 
-Five tasks are built and locally validated (base scores 0, gold scores 1,
+Six tasks are built and locally validated (base scores 0, gold scores 1,
 deterministic x3, through the real separate-verifier flow). Three are
 genuinely hard correctness tasks (two NetworkX graph-algorithm, one SymPy
 symbolic-math), one of them the direct successor to the only v4 task that ever
@@ -31,6 +31,7 @@ frozen family table has no home for. Decision needed (see bottom).
 | petgraph-maxflow-sparse-index | Rust: max-flow scratch vectors sized by count not index bound; panics on graphs with removed nodes/edges (Dinic's + Ford-Fulkerson) | base=0 gold=1 x3 offline | UNSLOTTED; easy Rust pipeline-prover |
 | sympy-monotonic-sign-signed-groups | SymPy: sign inference fails to combine bounds of several same-signed terms, must prove more signs without ever claiming an unguaranteed one | base=0 gold=1 x3 | UNSLOTTED; symbolic-math domain |
 | luxon-duration-format-fixedzone | JavaScript: three independent Luxon defects at a common base (Duration#toISO exponential notation, Duration#toFormat losing the sign when the largest unit is zero, FixedOffsetZone valid for non-numeric offsets) | base=0 gold=1 x3 + single-fix controls | UNSLOTTED; easy JS pipeline-prover (added 2026-10-07, Track A session) |
+| commons-lang-fraction-lowest-terms | Java: five interacting Fraction defects at a common base (unreduced-operand overflow in multiplyBy and add/subtract, unreduced zero-operand results, Integer.MIN_VALUE reduction, string factory leaking ArithmeticException); full 89k-execution suite as the guard wall | base=0 gold=1 x3 + single-fix controls | UNSLOTTED; Java pipeline-prover, moderate difficulty (added 2026-10-07, Track A session) |
 
 Each ships: a symptoms-only instruction with no file or function-location
 hints, a pinned single-commit base workspace (fix history stripped), a

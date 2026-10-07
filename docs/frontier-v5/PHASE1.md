@@ -274,3 +274,33 @@ and npm 10.9.0; no new image was needed. Lessons for the js-v1 checklist:
 - Grading reads jest's `--json` report and matches tests by
   `<file>::<fullName>`; single-fix controls (each PR applied alone) confirm
   each cause is independently exercised.
+
+## Java pipeline proven 2026-10-07
+
+tasks/frontier-v5/commons-lang-fraction-lowest-terms validates end to end
+(base reward 0, gold reward 1, x3, five single-fix controls) on
+`vulcanbench/sandbox:jvm` built on the arm64 base. Lessons for the java-v1
+checklist:
+
+- Offline Maven is a two-step image build: one ONLINE `mvn clean test`
+  (with `-Dtest=<one class>`) populates a task-local repository
+  (`/opt/m2`, about 90 MB for Commons Lang), and only then is
+  `.mvn/maven.config` written with `-o -Dmaven.repo.local=/opt/m2` plus the
+  analysis-plugin skips (rat, checkstyle, spotbugs, jacoco, pmd, animal
+  sniffer, spotless, japicmp, cyclonedx, javadoc). Writing the config before
+  the warm-up run makes the warm-up itself offline and the parent POM
+  unresolvable. Every goal the agent or verifier will call must be in the
+  warm-up: `mvn clean` failed offline until `clean` joined it.
+- The workspace is committed as a single commit after the warm-up so the
+  offline config is part of the snapshot; `target/` is cleaned first.
+- The graded artifact is `src/main`; the verifier compiles it together with
+  the pristine test sources (`test-compile` failure is reward 0) and runs
+  `mvn test` with the pristine config, parsing surefire XML by
+  `classname::name` (`tests/check.py`).
+- Commons Lang's full suite (630 classes, 89,192 executions) is clean and
+  deterministic in the image at `TZ=UTC`, 2.5 minutes single, 3 to 4
+  minutes with three verifiers sharing the host, so the whole suite is the
+  guard wall with the unique-id count pinned; no environment exclusions
+  were needed (contrast luxon's two ICU-dependent tests).
+- A control that does not apply alone on the base (a later fix's context
+  depends on an earlier one) is tested as gold minus that fix instead.

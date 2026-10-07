@@ -38,16 +38,19 @@ The luxon task, tasks/frontier-v5/luxon-duration-format-fixedzone, composes
 on 2026-10-07 (base=0, gold=1, x3, single-fix controls). It is an easy
 pipeline-prover, labeled UNSLOTTED.
 
-Java is the remaining empty language: mine a test-bearing correctness fix in
-a pure-Java library (no JNI, no concurrency races, to stay in Track A). The
-JVM image (vulcanbench/sandbox:jvm, Temurin 21, Maven 3.9.16, Gradle 9.8.0,
-offline) is built and smoke-tested; the pipeline shape is the luxon one with
-Maven in place of jest.
+Java is done too: tasks/frontier-v5/commons-lang-fraction-lowest-terms
+composes five Fraction fixes from Apache Commons Lang at their common base
+and proved the JVM/Maven offline pipeline on 2026-10-07 (base=0, gold=1, x3,
+single-fix controls, full 89k-execution suite as the guard wall). Every
+Track A language now has at least one validated task: Python (2), Rust,
+JavaScript and Java. The next Track A gaps are C and C++ correctness tasks
+(not F1) and a second, harder JavaScript or Java arc; the pipeline shape is
+settled, so the remaining work is sourcing difficulty.
 
 ## One-line startup for a fresh Fable session
 
 "Continue VulcanBench Frontier v5 Track A authoring on branch
 frontier-v5-authoring. Read docs/frontier-v5/AUTHORING-TRACKS.md and
-NIGHT-STATUS.md. Build the Java task next, same pipeline as
-tasks/frontier-v5/luxon-duration-format-fixedzone. Do not do F1 sanitizer work in
+NIGHT-STATUS.md. Source the next correctness arc (C or C++, or a harder Java or JavaScript
+arc) and build it like tasks/frontier-v5/commons-lang-fraction-lowest-terms. Do not do F1 sanitizer work in
 this session."

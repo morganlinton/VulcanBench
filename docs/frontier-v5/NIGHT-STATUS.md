@@ -9,7 +9,9 @@ Two genuinely hard tasks are built and locally validated (base scores 0, gold
 scores 1, deterministic x3, through the real separate-verifier flow). Both are
 NetworkX multi-bug algorithmic correctness tasks, one of them the direct
 successor to the only v4 task that ever beat the stronger reference. The
-Harbor-native Python pipeline is proven end to end. Nothing is gate-measured,
+Harbor-native Python pipeline is proven end to end, and the Rust pipeline too
+(native arm64 image, pinned Cargo.lock, offline build and test, via an easy
+third task). Nothing is gate-measured,
 because reference-model credentials are deferred by your call, so "challenges
 the frontier" is designed-for and argued, not yet measured.
 
@@ -25,6 +27,7 @@ frozen family table has no home for. Decision needed (see bottom).
 | --- | --- | --- | --- |
 | nx-group-betweenness-epic | 6 interacting bugs in group_betweenness_centrality (directed, disconnected, zero path counts, endpoints normalization, order independence) | base=0 gold=1 x3 | UNSLOTTED (below F3 floor) |
 | nx-digraph-node-connectivity | 5 interacting bugs in node_connectivity / minimum_node_cut / minimum_st_node_cut for digraphs, self-loops, parallel edges | base=0 gold=1 x3 | UNSLOTTED; v4 near-miss successor |
+| petgraph-maxflow-sparse-index | Rust: max-flow scratch vectors sized by count not index bound; panics on graphs with removed nodes/edges (Dinic's + Ford-Fulkerson) | base=0 gold=1 x3 offline | UNSLOTTED; easy Rust pipeline-prover |
 
 Each ships: a symptoms-only instruction with no file or function-location
 hints, a pinned single-commit base workspace (fix history stripped), a

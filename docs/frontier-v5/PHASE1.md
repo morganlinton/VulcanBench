@@ -233,3 +233,16 @@ decision (b)'s credentials configured for Harbor's agents.
   family for concentrated multi-bug correctness, a revived mid-band, or only
   admit F3 arcs large enough to meet the floor. The task is kept as a validated
   pipeline artifact and labeled UNSLOTTED, not forced into F3.
+
+## Rust pipeline proven 2026-10-07
+
+tasks/frontier-v5/petgraph-maxflow-sparse-index validates end to end OFFLINE
+(base reward 0, gold reward 1, build_ok in both). It proves the Rust half of
+the toolchain that the plan flagged as mandatory and unproven: a native arm64
+Rust image (sandbox/Dockerfile.rust-arm64-min, a minimal stopgap; the admitted
+image should be the full pinned Dockerfile.rust built for arm64), a generated
+and committed Cargo.lock, dependencies fetched at environment-build time, and
+both the agent and the verifier building and testing with `cargo --offline`
+(net.offline baked into CARGO_HOME). The task itself is easy by design (one
+root cause, panic points near the line) and is kept as a pipeline artifact and
+easy Rust anchor, not a frontier-difficulty candidate.

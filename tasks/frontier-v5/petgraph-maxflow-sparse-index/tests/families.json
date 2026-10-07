@@ -1,0 +1,17 @@
+{
+  "suite": "frontier-v5",
+  "task": "petgraph-maxflow-sparse-index",
+  "test_files": ["tests/dinics.rs", "tests/ford_fulkerson.rs"],
+  "fail_to_pass": [
+    "dinics::test_dinics_stable_graph_edge_hole",
+    "ford_fulkerson::test_ford_fulkerson_stable_graph_node_hole"
+  ],
+  "pass_to_pass": [
+    "dinics::test_dinics_a", "dinics::test_dinics_b", "dinics::test_dinics_c",
+    "dinics::test_dinics_d", "dinics::test_dinics_e", "dinics::test_dinics_f",
+    "dinics::test_dinics_g", "dinics::test_dinics_source_equals_destination",
+    "dinics::test_dinics_stable_graph",
+    "ford_fulkerson::test_ford_fulkerson", "ford_fulkerson::test_ford_fulkerson_stable_graphs"
+  ],
+  "grade": "all fail_to_pass and all pass_to_pass must pass (cargo test exits 0)"
+}

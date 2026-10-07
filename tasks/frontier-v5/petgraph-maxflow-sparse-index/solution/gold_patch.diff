@@ -1,0 +1,32 @@
+diff --git a/src/algo/maximum_flow/dinics.rs b/src/algo/maximum_flow/dinics.rs
+index 6185ebd..2f7c8c5 100644
+--- a/src/algo/maximum_flow/dinics.rs
++++ b/src/algo/maximum_flow/dinics.rs
+@@ -82,12 +82,12 @@ where
+     if source == destination {
+         return (
+             G::EdgeWeight::zero(),
+-            vec![G::EdgeWeight::zero(); network.edge_count()],
++            vec![G::EdgeWeight::zero(); network.edge_bound()],
+         );
+     }
+ 
+     let mut max_flow = G::EdgeWeight::zero();
+-    let mut flows = vec![G::EdgeWeight::zero(); network.edge_count()];
++    let mut flows = vec![G::EdgeWeight::zero(); network.edge_bound()];
+     let mut visited = network.visit_map();
+     let mut level_edges = vec![Default::default(); network.node_bound()];
+ 
+diff --git a/src/algo/maximum_flow/ford_fulkerson.rs b/src/algo/maximum_flow/ford_fulkerson.rs
+index 32ac3f1..bb2bf30 100644
+--- a/src/algo/maximum_flow/ford_fulkerson.rs
++++ b/src/algo/maximum_flow/ford_fulkerson.rs
+@@ -176,7 +176,7 @@ where
+         + Visitable,
+     G::EdgeWeight: Sub<Output = G::EdgeWeight> + PositiveMeasure,
+ {
+-    let mut edge_to = vec![None; network.node_count()];
++    let mut edge_to = vec![None; network.node_bound()];
+     let mut flows = vec![G::EdgeWeight::zero(); network.edge_bound()];
+     let mut max_flow = G::EdgeWeight::zero();
+     while has_augmented_path(&network, source, destination, &mut edge_to, &flows) {

@@ -1,0 +1,18 @@
+# Minimal native arm64 Rust image for Frontier v5 petgraph validation.
+# Toolchain only (no cargo-audit) for speed; the admitted task image should use
+# the full pinned sandbox/Dockerfile.rust built for arm64.
+FROM vulcanbench/sandbox:base-arm64
+
+ARG RUST_VERSION=1.87.0
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+
+RUN set -eux; \
+    curl -fsSL "https://static.rust-lang.org/rustup/archive/1.28.2/aarch64-unknown-linux-gnu/rustup-init" -o /tmp/rustup-init; \
+    chmod +x /tmp/rustup-init; \
+    /tmp/rustup-init -y --no-modify-path --profile minimal --default-toolchain "$RUST_VERSION" --default-host aarch64-unknown-linux-gnu; \
+    rm /tmp/rustup-init; \
+    rustc --version; cargo --version
+
+WORKDIR /workspace

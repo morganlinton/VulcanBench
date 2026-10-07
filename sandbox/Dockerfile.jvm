@@ -62,7 +62,7 @@ RUN set -eux; \
 # that layer (laptop, CI).
 RUN set -eu; pem=/usr/local/share/vulcanbench-egress-proxy.pem; \
     if [ -f "$pem" ]; then \
-      d=$(mktemp -d); awk -v d="$d" '/BEGIN CERT/{n++} n{print > (d "/" n ".pem")}' "$pem"; \
+      d=$(mktemp -d); awk -v d="$d" '/BEGIN CERT/{n++; f=1} f{print > (d "/" n ".pem")} /END CERT/{f=0}' "$pem"; \
       for c in "$d"/*.pem; do \
         keytool -importcert -noprompt -cacerts -storepass changeit -alias "vulcanbench-egress-$(basename "$c" .pem)" -file "$c"; \
       done; rm -rf "$d"; \

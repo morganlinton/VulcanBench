@@ -25,8 +25,12 @@
 # the same pinned python digest with those CAs added to the system store, the
 # Debian sources switched to HTTPS (same signed packages), and the CA env vars
 # pip and Node read. Without CAs nothing changes (laptop builds). The egress
-# policy must also allow the hosts the chain downloads from; see
-# docs/frontier-v5/PHASE1.md, "Cloud VM setup 2026-10-07".
+# policy must also allow the hosts the chain downloads from. On such a host
+# with HTTPS_PROXY set, builds also run on the host network through that
+# session proxy (build-time args only, not stored in the images): it is the
+# path that applies the cloud environment's own allowed domains, which the
+# default container path did not pick up. See docs/frontier-v5/PHASE1.md,
+# "Cloud VM setup 2026-10-07".
 #
 # Usage: scripts/frontier-v5/setup-host.sh [--no-rust] [--no-harbor] [--ca DIR_OR_FILE | --no-ca]
 set -euo pipefail
@@ -64,10 +68,18 @@ echo "frontier-v5 setup: $arch ($platform)"
 command -v docker >/dev/null || { echo "docker not found" >&2; exit 1; }
 docker info >/dev/null 2>&1 || { echo "docker daemon not reachable" >&2; exit 1; }
 
+proxy_args=()
+if [ -n "$ca_file" ] && [ -n "${HTTPS_PROXY:-}" ]; then
+  proxy_args=(--network host
+    --build-arg "HTTPS_PROXY=$HTTPS_PROXY" --build-arg "https_proxy=$HTTPS_PROXY"
+    --build-arg "NO_PROXY=${NO_PROXY:-}" --build-arg "no_proxy=${NO_PROXY:-}")
+  echo "== builds go through the session proxy $HTTPS_PROXY"
+fi
+
 build() { # tag dockerfile [extra build args...]
   local tag=$1 df=$2; shift 2
   echo "== building vulcanbench/sandbox:$tag from $df"
-  docker build --platform "$platform" "$@" -t "vulcanbench/sandbox:$tag" -f "$df" .
+  docker build --platform "$platform" ${proxy_args[@]+"${proxy_args[@]}"} "$@" -t "vulcanbench/sandbox:$tag" -f "$df" .
 }
 if [ -n "$ca_file" ]; then
   # Trust layer for an egress-proxy host (see header). The digest is the one
@@ -79,7 +91,9 @@ if [ -n "$ca_file" ]; then
   mkdir "$ctx/ca"
   if [ -d "$ca_file" ]; then cp "$ca_file"/*.crt "$ctx/ca/"; else cp "$ca_file" "$ctx/ca/"; fi
   # Also one PEM bundle, which Dockerfile.jvm imports into Temurin's cacerts.
-  cat "$ctx"/ca/*.crt > "$ctx/vulcanbench-egress-proxy.pem"
+  # (a newline after each file: a CA file without a trailing newline would
+  # otherwise glue two certificates onto one line).
+  for f in "$ctx"/ca/*.crt; do cat "$f"; echo; done > "$ctx/vulcanbench-egress-proxy.pem"
   cat > "$ctx/Dockerfile" <<'DOCKERFILE'
 ARG PYTHON_IMAGE
 FROM ${PYTHON_IMAGE}

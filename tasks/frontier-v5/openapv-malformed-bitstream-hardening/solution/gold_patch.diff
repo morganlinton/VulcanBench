@@ -1,0 +1,709 @@
+diff --git a/src/avx/oapv_tq_avx.c b/src/avx/oapv_tq_avx.c
+index 3987dbc..86278fa 100644
+--- a/src/avx/oapv_tq_avx.c
++++ b/src/avx/oapv_tq_avx.c
+@@ -393,7 +393,7 @@ const oapv_fn_itx_t oapv_tbl_fn_itx_avx[2] =
+         NULL
+ };
+ 
+-static int oapv_quant_avx(s16* coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset)
++static int oapv_quant_avx(s16* coef, u8 qp, int q_mat[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset)
+ {
+     s64 offset;
+     int shift;
+@@ -417,7 +417,7 @@ static int oapv_quant_avx(s16* coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_w
+             __m256i c32 = _mm256_cvtepi16_epi32(c16);
+             __m256i sign = _mm256_srai_epi32(c32, 31);
+             __m256i a = _mm256_abs_epi32(c32);
+-            __m256i q = _mm256_loadu_si256((__m256i*)(q_matrix + i + g * 8));
++            __m256i q = _mm256_loadu_si256((__m256i*)(q_mat + i + g * 8));
+ 
+             // 32x32 -> 64-bit products for even and odd lanes; the quantized
+             // level after the shift fits in 21 bits, so the upper dword is 0
+@@ -443,7 +443,7 @@ const oapv_fn_quant_t oapv_tbl_fn_quant_avx[2] =
+         NULL
+ };
+ 
+-static void oapv_dquant_avx(s16 *coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int log2_h, s8 shift)
++static void oapv_dquant_avx(s16 *coef, s16 dq_mat[OAPV_BLK_D], int log2_w, int log2_h, s8 shift)
+ {
+     int i;
+     int pixels = (1 << (log2_w + log2_h));
+@@ -456,7 +456,7 @@ static void oapv_dquant_avx(s16 *coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int
+         for (i = 0; i < pixels; i += 16)
+         {
+             __m256i c = _mm256_loadu_si256((__m256i*)(coef + i));
+-            __m256i q = _mm256_loadu_si256((__m256i*)(q_matrix + i));
++            __m256i q = _mm256_loadu_si256((__m256i*)(dq_mat + i));
+             __m256i lo = _mm256_mullo_epi16(c, q);
+             __m256i hi = _mm256_mulhi_epi16(c, q);
+             __m256i p0 = _mm256_unpacklo_epi16(lo, hi);
+@@ -468,15 +468,19 @@ static void oapv_dquant_avx(s16 *coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int
+     }
+     else
+     {
+-        int left_shift = -shift;
++        // clip before the shift so that it cannot wrap; see oapv_dquant()
++        __m256i min_16 = _mm256_set1_epi32(-32768);
++        __m256i max_16 = _mm256_set1_epi32(32767);
+         for (i = 0; i < pixels; i += 16)
+         {
+             __m256i c = _mm256_loadu_si256((__m256i*)(coef + i));
+-            __m256i q = _mm256_loadu_si256((__m256i*)(q_matrix + i));
++            __m256i q = _mm256_loadu_si256((__m256i*)(dq_mat + i));
+             __m256i lo = _mm256_mullo_epi16(c, q);
+             __m256i hi = _mm256_mulhi_epi16(c, q);
+-            __m256i p0 = _mm256_slli_epi32(_mm256_unpacklo_epi16(lo, hi), left_shift);
+-            __m256i p1 = _mm256_slli_epi32(_mm256_unpackhi_epi16(lo, hi), left_shift);
++            __m256i p0 = _mm256_unpacklo_epi16(lo, hi);
++            __m256i p1 = _mm256_unpackhi_epi16(lo, hi);
++            p0 = _mm256_slli_epi32(_mm256_min_epi32(_mm256_max_epi32(p0, min_16), max_16), -shift);
++            p1 = _mm256_slli_epi32(_mm256_min_epi32(_mm256_max_epi32(p1, min_16), max_16), -shift);
+             _mm256_storeu_si256((__m256i*)(coef + i), _mm256_packs_epi32(p0, p1));
+         }
+     }
+diff --git a/src/neon/oapv_tq_neon.c b/src/neon/oapv_tq_neon.c
+index 442adf3..2680f93 100644
+--- a/src/neon/oapv_tq_neon.c
++++ b/src/neon/oapv_tq_neon.c
+@@ -492,7 +492,7 @@ const oapv_fn_itx_t oapv_tbl_fn_itx_neon[2] =
+             NULL
+ };
+ 
+-static int oapv_quant_neon(s16* coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset)
++static int oapv_quant_neon(s16* coef, u8 qp, int q_mat[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset)
+ {
+     s64 offset;
+     int shift;
+@@ -529,11 +529,11 @@ static int oapv_quant_neon(s16* coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_
+         int32x4_t coef_low_32b  = vmovl_s16(vget_low_s16(coef_row_abs));
+         int32x4_t coef_high_32b = vmovl_high_s16(coef_row_abs);
+ 
+-        // Load q_matrix elements
+-        int32x4_t quant_matrix_low  = vld1q_s32(q_matrix + i);
+-        int32x4_t quant_matrix_high = vld1q_s32(q_matrix + i + 4);
++        // Load q_mat elements
++        int32x4_t quant_matrix_low  = vld1q_s32(q_mat + i);
++        int32x4_t quant_matrix_high = vld1q_s32(q_mat + i + 4);
+ 
+-        // Multiply 2X: 32-bit coef with 32-bit q_matrix and add 64-bit offset_vector to store result as 64-bit
++        // Multiply 2X: 32-bit coef with 32-bit q_mat and add 64-bit offset_vector to store result as 64-bit
+         int64x2_t coef_low_32b_first_half   = vmlal_s32(offset_vector, vget_low_s32 (coef_low_32b), vget_low_s32 (quant_matrix_low));
+         int64x2_t coef_low_32b_second_half  = vmlal_s32(offset_vector, vget_high_s32(coef_low_32b), vget_high_s32(quant_matrix_low));
+ 
+@@ -738,7 +738,7 @@ const oapv_fn_itx_part_t oapv_tbl_fn_itx_part_neon[2] =
+     NULL
+ };
+ 
+-static void oapv_dquant_neon(s16* coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int log2_h, s8 shift)
++static void oapv_dquant_neon(s16* coef, s16 dq_mat[OAPV_BLK_D], int log2_w, int log2_h, s8 shift)
+ {
+     int i;
+     int pixels = (1 << (log2_w + log2_h));
+@@ -747,7 +747,7 @@ static void oapv_dquant_neon(s16* coef, s16 q_matrix[OAPV_BLK_D], int log2_w, in
+         int32x4_t sh = vdupq_n_s32(-shift); // rounding right shift via vrshlq
+         for(i = 0; i < pixels; i += 8) {
+             int16x8_t c = vld1q_s16(coef + i);
+-            int16x8_t q = vld1q_s16(q_matrix + i);
++            int16x8_t q = vld1q_s16(dq_mat + i);
+             int32x4_t p0 = vmull_s16(vget_low_s16(c), vget_low_s16(q));
+             int32x4_t p1 = vmull_high_s16(c, q);
+             p0 = vrshlq_s32(p0, sh);
+@@ -756,12 +756,13 @@ static void oapv_dquant_neon(s16* coef, s16 q_matrix[OAPV_BLK_D], int log2_w, in
+         }
+     }
+     else {
++        // saturating shift so that a large product cannot wrap
+         int32x4_t sh = vdupq_n_s32(-shift);
+         for(i = 0; i < pixels; i += 8) {
+             int16x8_t c = vld1q_s16(coef + i);
+-            int16x8_t q = vld1q_s16(q_matrix + i);
+-            int32x4_t p0 = vshlq_s32(vmull_s16(vget_low_s16(c), vget_low_s16(q)), sh);
+-            int32x4_t p1 = vshlq_s32(vmull_high_s16(c, q), sh);
++            int16x8_t q = vld1q_s16(dq_mat + i);
++            int32x4_t p0 = vqshlq_s32(vmull_s16(vget_low_s16(c), vget_low_s16(q)), sh);
++            int32x4_t p1 = vqshlq_s32(vmull_high_s16(c, q), sh);
+             vst1q_s16(coef + i, vcombine_s16(vqmovn_s32(p0), vqmovn_s32(p1)));
+         }
+     }
+diff --git a/src/oapv.c b/src/oapv.c
+index 3e7aa0d..0f8042d 100644
+--- a/src/oapv.c
++++ b/src/oapv.c
+@@ -310,14 +310,14 @@ static double enc_block(oapve_ctx_t *ctx, oapve_core_t *core, int log2_w, int lo
+     int bit_depth = ctx->bit_depth;
+ 
+     oapv_trans(ctx, core->coef, log2_w, log2_h, bit_depth);
+-    ctx->fn_quant[0](core->coef, core->qp[c], core->q_mat_enc[c], log2_w, log2_h, bit_depth, ctx->dz[c]);
++    ctx->fn_quant[0](core->coef, core->qp[c], core->q_mat[c], log2_w, log2_h, bit_depth, ctx->dz[c]);
+ 
+     core->dc_diff = core->coef[0] - core->prev_dc[c];
+     core->prev_dc[c] = core->coef[0];
+ 
+     if(ctx->imgb_r) {
+         oapv_mcpy(core->coef_rec, core->coef, sizeof(s16) * OAPV_BLK_D);
+-        ctx->fn_dquant[0](core->coef_rec, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++        ctx->fn_dquant[0](core->coef_rec, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+         ctx->fn_itx[0](core->coef_rec, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+     }
+ 
+@@ -338,7 +338,7 @@ static double enc_block_rdo_medium(oapve_ctx_t *ctx, oapve_core_t *core, int log
+ 
+     if(ctx->imgb_r) {
+         oapv_mcpy(core->coef_rec, core->coef, sizeof(s16) * OAPV_BLK_D);
+-        ctx->fn_dquant[0](core->coef_rec, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++        ctx->fn_dquant[0](core->coef_rec, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+         ctx->fn_itx[0](core->coef_rec, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+     }
+ 
+@@ -376,7 +376,7 @@ static double enc_block_rdo_slow(oapve_ctx_t *ctx, oapve_core_t *core, int log2_
+ 
+     {
+         oapv_mcpy(recon, coeff, sizeof(s16) * OAPV_BLK_D);
+-        ctx->fn_dquant[0](recon, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++        ctx->fn_dquant[0](recon, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+         ctx->fn_itx_part[0](recon, tmp_buf, ITX_SHIFT1, 1 << log2_w);
+         oapv_itx_get_wo_sft(tmp_buf, recon, rec_ups, ITX_SHIFT2(bit_depth), 1 << log2_h);
+ 
+@@ -406,10 +406,10 @@ static double enc_block_rdo_slow(oapve_ctx_t *ctx, oapve_core_t *core, int log2_
+             }
+             int q_step = 0;
+             if(core->dq_shift[c] > 0) {
+-                q_step = (core->q_mat_dec[c][scanp[j]] + (1 << (core->dq_shift[c] - 1))) >> core->dq_shift[c];
++                q_step = (core->dq_mat[c][scanp[j]] + (1 << (core->dq_shift[c] - 1))) >> core->dq_shift[c];
+             }
+             else {
+-                q_step = (core->q_mat_dec[c][scanp[j]]) << (-core->dq_shift[c]);
++                q_step = (core->dq_mat[c][scanp[j]]) << (-core->dq_shift[c]);
+             }
+ 
+             for(int i = 1; i < adj_rng && !zero_dist; i++) {
+@@ -452,7 +452,7 @@ static double enc_block_rdo_slow(oapve_ctx_t *ctx, oapve_core_t *core, int log2_
+ 
+     if(ctx->imgb_r) {
+         oapv_mcpy(best_recon, best_coeff, sizeof(s16) * OAPV_BLK_D);
+-        ctx->fn_dquant[0](best_recon, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++        ctx->fn_dquant[0](best_recon, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+         ctx->fn_itx[0](best_recon, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+     }
+ 
+@@ -519,10 +519,10 @@ static double enc_block_rdo_placebo(oapve_ctx_t* ctx, oapve_core_t* core, int lo
+ 
+     oapv_mcpy(org, core->coef, sizeof(s16) * OAPV_BLK_D);
+     oapv_trans(ctx, core->coef, log2_w, log2_h, bit_depth);
+-    ctx->fn_quant[0](core->coef, qp, core->q_mat_enc[c], log2_w, log2_h, bit_depth, c ? 128 : 128);
++    ctx->fn_quant[0](core->coef, qp, core->q_mat[c], log2_w, log2_h, bit_depth, c ? 128 : 128);
+ 
+     oapv_mcpy(recon, core->coef, sizeof(s16) * OAPV_BLK_D);
+-    ctx->fn_dquant[0](recon, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++    ctx->fn_dquant[0](recon, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+     ctx->fn_itx[0](recon, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+     best_cost = (int)ctx->fn_ssd[0](blk_w, blk_h, org, recon, blk_w, blk_w);
+ 
+@@ -548,7 +548,7 @@ static double enc_block_rdo_placebo(oapve_ctx_t* ctx, oapve_core_t* core, int lo
+                 coeff[scanp[j]] = test_coef;
+ 
+                 int test_rate = oapve_vlc_get_coef_rate(core, coeff, c);
+-                ctx->fn_dquant[0](coeff, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++                ctx->fn_dquant[0](coeff, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+                 ctx->fn_itx[0](coeff, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+                 double cost = (int)ctx->fn_ssd[0](blk_w, blk_h, org, coeff, blk_w, blk_w);
+                 cost += (lambda) * (test_rate);
+@@ -572,7 +572,7 @@ static double enc_block_rdo_placebo(oapve_ctx_t* ctx, oapve_core_t* core, int lo
+                 coeff[coef_list[i].coef_pos] = ((j >> i) & 1) ? coef_list[i].coef_test : coef_list[i].coef_org;
+             }
+             oapv_mcpy(recon, coeff, sizeof(s16) * OAPV_BLK_D);
+-            ctx->fn_dquant[0](recon, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++            ctx->fn_dquant[0](recon, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+             ctx->fn_itx[0](recon, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+             double cost = (int)ctx->fn_ssd[0](blk_w, blk_h, org, recon, blk_w, blk_w);
+             int test_rate = oapve_vlc_get_coef_rate(core, coeff, c);
+@@ -586,7 +586,7 @@ static double enc_block_rdo_placebo(oapve_ctx_t* ctx, oapve_core_t* core, int lo
+ 
+     if(ctx->imgb_r) {
+         oapv_mcpy(best_recon, best_coeff, sizeof(s16) * OAPV_BLK_D);
+-        ctx->fn_dquant[0](best_recon, core->q_mat_dec[c], log2_w, log2_h, core->dq_shift[c]);
++        ctx->fn_dquant[0](best_recon, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+         ctx->fn_itx[0](best_recon, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+     }
+ 
+@@ -762,7 +762,7 @@ static int enc_tile(oapve_ctx_t *ctx, oapve_core_t *core, oapve_tile_t *tile)
+         s32 scale_multiply_16 = (s32)(qscale << 4); // 15bit + 4bit
+         for(int y = 0; y < OAPV_BLK_H; y++) {
+             for(int x = 0; x < OAPV_BLK_W; x++) {
+-                core->q_mat_enc[c][cnt++] = scale_multiply_16 / ctx->fh.q_matrix[c][y][x];
++                core->q_mat[c][cnt++] = scale_multiply_16 / ctx->fh.q_matrix[c][y][x];
+             }
+         }
+ 
+@@ -773,7 +773,7 @@ static int enc_tile(oapve_ctx_t *ctx, oapve_core_t *core, oapve_tile_t *tile)
+             u8 dq_scale = oapv_tbl_dq_scale[core->qp[c] % 6];
+             for(int y = 0; y < OAPV_BLK_H; y++) {
+                 for(int x = 0; x < OAPV_BLK_W; x++) {
+-                    core->q_mat_dec[c][cnt++] = dq_scale * ctx->fh.q_matrix[c][y][x];
++                    core->dq_mat[c][cnt++] = dq_scale * ctx->fh.q_matrix[c][y][x];
+                 }
+             }
+         }
+@@ -1617,7 +1617,7 @@ static int dec_block(oapvd_ctx_t *ctx, oapvd_core_t *core, int log2_w, int log2_
+     core->coef[0] = (s16)dc;
+     core->prev_dc[c] = core->coef[0];
+     // Inverse quantization
+-    ctx->fn_dquant[0](core->coef, core->q_mat[c], log2_w, log2_h, core->dq_shift[c]);
++    ctx->fn_dquant[0](core->coef, core->dq_mat[c], log2_w, log2_h, core->dq_shift[c]);
+     // Inverse transform
+     ctx->fn_itx[0](core->coef, ITX_SHIFT1, ITX_SHIFT2(bit_depth), 1 << log2_w);
+     return OAPV_OK;
+@@ -1753,19 +1753,23 @@ static int dec_frm_prepare(oapvd_ctx_t *ctx, oapv_imgb_t *imgb)
+     ret = dec_frm_setup(ctx, imgb->cs);
+     oapv_assert_rv(OAPV_SUCCEEDED(ret), ret);
+ 
+-    // validate buffer capacity for each component
++    // validate buffer capacity for each plane the write path touches
+     int byte_depth = (ctx->fh.fi.bit_depth + 7) / 8; // bytes per pixel
++    int planar2 = (OAPV_CS_GET_FORMAT(ctx->cs) == OAPV_CF_PLANAR2);
++    int num_pln = planar2 ? 2 : ctx->num_c;
++
++    oapv_assert_rv(imgb->np >= num_pln, OAPV_ERR_INVALID_ARGUMENT);
+ 
+-    for(int c = 0; c < imgb->np; c++) {
+-        int comp_w = ctx->w >> (c > 0 ? get_chroma_sft_w(ctx->cfi) : 0);
+-        int comp_h = ctx->h >> (c > 0 ? get_chroma_sft_h(ctx->cfi) : 0);
+-        // frame_width/height are signaled in 24 bits, so the required buffer
+-        // size can exceed INT_MAX; compute in s64 so the product does not wrap
+-        // and let a too-small (int) bsize incorrectly pass the check
+-        int required_stride = comp_w * byte_depth;
+-        s64 required_bsize = (s64)required_stride * comp_h;
++    for(int p = 0; p < num_pln; p++) {
++        int c = (planar2 && p > 0) ? U_C : p; // the component stored in this plane
++        int w = ctx->w >> ctx->c_sft[c][0];
++        int h = ctx->h >> ctx->c_sft[c][1];
++        // the UV plane of PLANAR2 interleaves two components per sample
++        s64 row = (s64)w * byte_depth * ((planar2 && p > 0) ? 2 : 1);
+ 
+-        if((s64)imgb->bsize[c] < required_bsize) {
++        // the capacity must cover the last row reached through the stride
++        if((s64)imgb->s[p] < row ||
++           (s64)imgb->bsize[p] < (s64)imgb->s[p] * (h - 1) + row) {
+             return OAPV_ERR_INVALID_ARGUMENT;
+         }
+     }
+@@ -1865,7 +1869,7 @@ static int dec_tile(oapvd_core_t *core, oapvd_tile_t *tile)
+         midx = 0;
+         for(y = 0; y < OAPV_BLK_H; y++) {
+             for(x = 0; x < OAPV_BLK_W; x++) {
+-                core->q_mat[c][midx++] = dq_scale * ctx->fh.q_matrix[c][y][x]; // 7bit + 8bit
++                core->dq_mat[c][midx++] = dq_scale * ctx->fh.q_matrix[c][y][x]; // 7bit + 8bit
+             }
+         }
+     }
+@@ -2514,6 +2518,7 @@ int oapvd_info(void *au, int au_size, oapv_au_info_t *aui)
+ int oapvd_info_pbu(void *pbu, int pbu_size, oapv_pbu_info_t *pbu_info)
+ {
+     oapv_bs_t bs;
++    oapv_assert_rv(pbu != NULL && pbu_info != NULL, OAPV_ERR_INVALID_ARGUMENT);
+     oapv_assert_rv(pbu_size >= 4, OAPV_ERR_INVALID_ARGUMENT);
+ 
+     oapv_bsr_init(&bs, pbu, pbu_size, NULL);
+@@ -2811,9 +2816,14 @@ int oapvd_decode_tiles(oapvd_t did, oapv_bitb_t *bitb, int num_tiles, oapv_tile_
+ 
+ int oapvd_decode_auinfo(oapvd_t did, oapv_bitb_t *bitb, oapv_au_info_t *aui)
+ {
+-    int        ret;
+-    oapv_bs_t  bs;
+-    oapv_aui_t ai;
++    oapvd_ctx_t *ctx;
++    int          ret;
++    oapv_bs_t    bs;
++    oapv_aui_t   ai;
++
++    ctx = dec_id_to_ctx(did);
++    oapv_assert_rv(ctx, OAPV_ERR_INVALID_ARGUMENT);
++    oapv_assert_rv(bitb != NULL && bitb->addr != NULL && aui != NULL, OAPV_ERR_INVALID_ARGUMENT);
+ 
+     if(bitb->bsize > 0) {
+         oapv_assert_rv(bitb->ssize <= bitb->bsize, OAPV_ERR_INVALID_ARGUMENT);
+diff --git a/src/oapv_def.h b/src/oapv_def.h
+index 7127794..4c06b0a 100644
+--- a/src/oapv_def.h
++++ b/src/oapv_def.h
+@@ -190,8 +190,8 @@ typedef void (*oapv_fn_itx_part_t)(s16 *coef, s16 *t, int shift, int line);
+ typedef void (*oapv_fn_itx_t)(s16 *coef, int shift1, int shift2, int line);
+ typedef void (*oapv_fn_tx_t)(s16 *coef, int shift1, int shift2, int line);
+ typedef void (*oapv_fn_itx_adj_t)(int *src, int *dst, int itrans_diff_idx, int diff_step, int shift);
+-typedef int (*oapv_fn_quant_t)(s16 *coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset);
+-typedef void (*oapv_fn_dquant_t)(s16 *coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int log2_h, s8 shift);
++typedef int (*oapv_fn_quant_t)(s16 *coef, u8 qp, int q_mat[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset);
++typedef void (*oapv_fn_dquant_t)(s16 *coef, s16 dq_mat[OAPV_BLK_D], int log2_w, int log2_h, s8 shift);
+ typedef s64 (*oapv_fn_ssd_t)(int w, int h, void *src1, void *src2, int s_src1, int s_src2);
+ 
+ typedef double (*oapv_fn_enc_blk_cost_t)(oapve_ctx_t *ctx, oapve_core_t *core, int log2_w, int log2_h, int c);
+@@ -245,8 +245,8 @@ struct oapve_core {
+     int          qp[N_C]; // QPs for Y, Cb(U), Cr(V)
+     int          dq_shift[N_C];
+ 
+-    int          q_mat_enc[N_C][OAPV_BLK_D];
+-    s16          q_mat_dec[N_C][OAPV_BLK_D];
++    int          q_mat[N_C][OAPV_BLK_D];
++    s16          dq_mat[N_C][OAPV_BLK_D];
+     double       err_scale_tbl[N_C][OAPV_BLK_D];
+     int          thread_idx;
+ 
+@@ -381,7 +381,7 @@ typedef struct oapvd_ctx  oapvd_ctx_t;
+ 
+ struct oapvd_core {
+     ALIGNED_16(s16 coef[OAPV_MB_D]);
+-    s16          q_mat[N_C][OAPV_BLK_D];
++    s16          dq_mat[N_C][OAPV_BLK_D];
+ 
+     int          kparam_dc[N_C];
+     int          kparam_ac[N_C];
+diff --git a/src/oapv_metadata.c b/src/oapv_metadata.c
+index 2352b2d..a11d1e3 100644
+--- a/src/oapv_metadata.c
++++ b/src/oapv_metadata.c
+@@ -119,6 +119,15 @@ static int meta_rm_mdp(oapvm_ctx_t *ctx, oapv_md_t *md, int mdt, unsigned char *
+     return OAPV_OK;
+ }
+ 
++static int meta_get_num_mdp(oapvm_ctx_t *ctx)
++{
++    int num = 0;
++    for(int i = 0; i < ctx->num; i++) {
++        num += ctx->md_arr[i].mdp_num;
++    }
++    return num;
++}
++
+ static oapv_md_t *meta_find_md(oapvm_ctx_t *ctx, int group_id)
+ {
+     for(int n = 0; n < ctx->num; n++) {
+@@ -314,6 +323,7 @@ int oapvm_set(oapvm_t mid, int group_id, int type, void *data, int size)
+ 
+     oapv_mdp_t *mdp_t = meta_find_mdp(md, type, uuid);
+     if(mdp_t == NULL) { // add new one
++        oapv_assert_gv(meta_get_num_mdp(ctx) < OAPV_MAX_NUM_META_PAYLOADS, ret, OAPV_ERR_REACHED_MAX, ERR);
+         mdp_new = oapv_ops_malloc(ctx, sizeof(oapv_mdp_t));
+         oapv_assert_gv(mdp_new != NULL, ret, OAPV_ERR_OUT_OF_MEMORY, ERR);
+         mdp_new->pld_size = size;
+@@ -395,12 +405,9 @@ int oapvm_get_all(oapvm_t mid, oapvm_payload_t *pld, int *num_plds)
+     oapv_assert_rv(ctx, OAPV_ERR_INVALID_ARGUMENT);
+     oapv_assert_rv(num_plds != NULL, OAPV_ERR_INVALID_ARGUMENT);
+     if(pld == NULL) {
+-        int num_payload = 0;
+-        for(int i = 0; i < ctx->num; i++) {
+-            num_payload += ctx->md_arr[i].mdp_num;
+-            if(num_payload > OAPV_MAX_NUM_META_PAYLOADS || num_payload < 0)
+-                return OAPV_ERR_REACHED_MAX;
+-        }
++        int num_payload = meta_get_num_mdp(ctx);
++        if(num_payload > OAPV_MAX_NUM_META_PAYLOADS || num_payload < 0)
++            return OAPV_ERR_REACHED_MAX;
+         *num_plds = num_payload;
+         return OAPV_OK;
+     }
+diff --git a/src/oapv_param.c b/src/oapv_param.c
+index 3a6d98c..2983d53 100644
+--- a/src/oapv_param.c
++++ b/src/oapv_param.c
+@@ -565,6 +565,12 @@ static int enc_update_param_tile(oapve_ctx_t* ctx, oapve_param_t* param)
+     if(param->tile_h > ctx->h) {
+         param->tile_h = ctx->h;
+     }
++
++    if(!unconst) {
++        param->tile_w = oapv_max(param->tile_w, OAPV_MIN_TILE_W);
++        param->tile_h = oapv_max(param->tile_h, OAPV_MIN_TILE_H);
++    }
++
+     oapv_assert_rv((param->tile_w & (OAPV_MB_W - 1)) == 0 && (param->tile_h & (OAPV_MB_H - 1)) == 0, OAPV_ERR_INVALID_ARGUMENT);
+ 
+     if (!unconst && oapv_div_round_up(ctx->w, param->tile_w) > OAPV_MAX_TILE_COLS) {
+diff --git a/src/oapv_tq.c b/src/oapv_tq.c
+index b2a8539..2efb9f8 100644
+--- a/src/oapv_tq.c
++++ b/src/oapv_tq.c
+@@ -105,7 +105,7 @@ void oapve_init_rdoq(oapve_core_t * core, int bit_depth, int ch_type)
+     double err_scale;
+ 
+     for(int cnt = 0; cnt < OAPV_BLK_D; cnt++) {
+-        int q_value = core->q_mat_enc[ch_type][cnt];
++        int q_value = core->q_mat[ch_type][cnt];
+         int tr_shift = MAX_TX_DYNAMIC_RANGE - bit_depth - 3;
+         err_scale = (double)pow(2.0, -tr_shift);
+         err_scale = err_scale / q_value ;
+@@ -147,7 +147,7 @@ int oapve_rdoq(oapve_core_t* core, s16 *src_coef, s16 *dst_coef, int log2_cuw, i
+         s64 temp_level;
+         double err;
+ 
+-        temp_level = ((s64)oapv_abs(src_coef[blk_pos]) * core->q_mat_enc[ch_type][blk_pos]);
++        temp_level = ((s64)oapv_abs(src_coef[blk_pos]) * core->q_mat[ch_type][blk_pos]);
+         level_double = (s32)oapv_min(temp_level, ((s32)0x7FFFFFFF) - ((1 << q_bits) - 1));
+         tmp_level_double[blk_pos] = level_double;
+         max_abs_level = (u32)oapv_min((level_double + ((1 << q_bits) - 1)) >> q_bits, (1 << MAX_TX_DYNAMIC_RANGE) - 1);
+@@ -271,12 +271,12 @@ int oapve_rdoq(oapve_core_t* core, s16 *src_coef, s16 *dst_coef, int log2_cuw, i
+     return nnz;
+ }
+ 
+-static int oapv_quant(s16 *coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset)
++static int oapv_quant(s16 *coef, u8 qp, int q_mat[OAPV_BLK_D], int log2_w, int log2_h, int bit_depth, int deadzone_offset)
+ {
+     // coef is the output of the transform, the bit range is 16
+-    // q_matrix has the value of q_scale * 16 / q_matrix, the bit range is 19
++    // q_mat has the value of q_scale * 16 / q_matrix, the bit range is 19
+     // (precision of q_scale is 15, and the range of q_mtrix is 1~255)
+-    // lev is the product of abs(coef) and q_matrix, the bit range is 35
++    // lev is the product of abs(coef) and q_mat, the bit range is 35
+ 
+     s64 lev;
+     s32 offset;
+@@ -293,7 +293,7 @@ static int oapv_quant(s16 *coef, u8 qp, int q_matrix[OAPV_BLK_D], int log2_w, in
+ 
+     for(i = 0; i < pixels; i++) {
+         sign = oapv_get_sign(coef[i]);
+-        lev = (s64)oapv_abs(coef[i]) * (q_matrix[i]);
++        lev = (s64)oapv_abs(coef[i]) * (q_mat[i]);
+         lev = (lev + offset) >> shift;
+         lev = oapv_set_sign(lev, sign);
+         coef[i] = (s16)(oapv_clip3(-32768, 32767, lev));
+@@ -393,7 +393,7 @@ const oapv_fn_itx_t oapv_tbl_fn_itx[2] = {
+     NULL
+ };
+ 
+-static void oapv_dquant(s16 *coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int log2_h, s8 shift)
++static void oapv_dquant(s16 *coef, s16 dq_mat[OAPV_BLK_D], int log2_w, int log2_h, s8 shift)
+ {
+     int i;
+     int lev;
+@@ -402,15 +402,20 @@ static void oapv_dquant(s16 *coef, s16 q_matrix[OAPV_BLK_D], int log2_w, int log
+     if(shift > 0) {
+         s32 offset = (1 << (shift - 1));
+         for(i = 0; i < pixels; i++) {
+-            lev = (coef[i] * q_matrix[i] + offset) >> shift;
++            lev = (coef[i] * dq_mat[i] + offset) >> shift;
+             coef[i] = (s16)oapv_clip3(-32768, 32767, lev);
+         }
+     }
+     else {
+-        int left_shift = -shift;
++        // -shift is at most 2, since qp <= MAX_QUANT(bit_depth) keeps
++        // dq_shift >= -2. The shift is written as a multiplication, because
++        // left-shifting a negative value is undefined behavior in C. The
++        // product is clipped first, because it can reach about 2^29.1 and
++        // multiplying it by 4 would overflow int; since the result is
++        // clipped to 16 bits anyway, clipping first does not change it.
+         for(i = 0; i < pixels; i++) {
+-            lev = (coef[i] * q_matrix[i]) << left_shift;
+-            coef[i] = (s16)oapv_clip3(-32768, 32767, lev);
++            lev = oapv_clip3(-32768, 32767, coef[i] * dq_mat[i]);
++            coef[i] = (s16)oapv_clip3(-32768, 32767, lev * (1 << (-shift)));
+         }
+     }
+ }
+diff --git a/src/oapv_vlc.c b/src/oapv_vlc.c
+index d14ecbb..52e9d20 100644
+--- a/src/oapv_vlc.c
++++ b/src/oapv_vlc.c
+@@ -662,7 +662,7 @@ int oapve_vlc_get_coef_rate(oapve_core_t* core, s16* coef, int c)
+ 
+ static int dec_vlc_read_kparam0(oapv_bs_t *bs)
+ {
+-    int symbol;
++    u32 symbol;
+     int flag, k;
+ 
+     symbol = 2;
+@@ -676,10 +676,14 @@ static int dec_vlc_read_kparam0(oapv_bs_t *bs)
+             break;
+         }
+         else {
++            // No k range check here on purpose; a per-bit branch slows
++            // down decoding. At buffer end, BSR_FLUSH_1BYTE feeds 1-bits
++            // and sets is_eob, so the loop exits; the k check below and
++            // the callers' BSR_IS_UNEXPECTED_EOB check reject the stream.
+             k++;
+         }
+     }
+-    oapv_assert_rv(k < 32, -1); /* prevent too large (impossible) k value */
++    oapv_assert_rv(k < 30, -1); /* prevent too large (impossible) k value */
+ 
+     if(k > 0) {
+         symbol += ((u32)0xFFFFFFFF) >> (32 - k);
+@@ -693,18 +697,18 @@ static int dec_vlc_read_kparam0(oapv_bs_t *bs)
+         bs->code <<= k;
+         bs->leftbits -= k;
+     }
+-    return symbol;
++    return (int)symbol;
+ }
+ 
+ static int dec_vlc_read_1bit_read(oapv_bs_t *bs)
+ {
+-    int symbol;
++    u32 symbol;
+     int flag, k;
+ 
+     if(bs->leftbits == 0) BSR_FLUSH_1BYTE(bs);
+     BSR_READ_1BIT(bs, flag);
+ 
+-    symbol = (1 + flag);
++    symbol = (u32)(1 + flag);
+     k = 0;
+     if(flag) { // parse_exp_golomb
+         while(1) {
+@@ -715,12 +719,16 @@ static int dec_vlc_read_1bit_read(oapv_bs_t *bs)
+                 break;
+             }
+             else {
++                // No k range check here on purpose; a per-bit branch slows
++                // down decoding. At buffer end, BSR_FLUSH_1BYTE feeds 1-bits
++                // and sets is_eob, so the loop exits; the k check below and
++                // the callers' BSR_IS_UNEXPECTED_EOB check reject the stream.
+                 k++;
+             }
+         }
+     }
+ 
+-    oapv_assert_rv(k < 32, -1); /* prevent too large (impossible) k value */
++    oapv_assert_rv(k < 30, -1); /* prevent too large (impossible) k value */
+ 
+     if(k > 0) {
+         symbol += ((u32)0xFFFFFFFF) >> (32 - k);
+@@ -734,12 +742,11 @@ static int dec_vlc_read_1bit_read(oapv_bs_t *bs)
+         bs->code <<= k;
+         bs->leftbits -= k;
+     }
+-    return symbol;
++    return (int)symbol;
+ }
+ 
+ static int dec_vlc_read(oapv_bs_t *bs, int k)
+ {
+-    // u32 so accumulation wraps (defined) instead of signed-overflow UB
+     u32 symbol;
+     int flag;
+     int parse_exp_golomb = 0;
+@@ -751,7 +758,8 @@ static int dec_vlc_read(oapv_bs_t *bs, int k)
+         if(bs->leftbits == 0) BSR_FLUSH_1BYTE(bs);
+         BSR_READ_1BIT(bs, flag);
+ 
+-        symbol = (u32)(1 + flag) << k;
++        // for '01', this is the (1 << k0) part of the prefix sum below
++        symbol = 1u << k;
+         parse_exp_golomb = flag;
+     }
+     else {
+@@ -766,25 +774,22 @@ static int dec_vlc_read(oapv_bs_t *bs, int k)
+                 break;
+             }
+             else {
+-                // The APV spec has no (k & 31) here: for a valid bitstream k
+-                // stays below 32 so the mask is a no-op. It exists only to
+-                // keep the shift count in [0,31] for a malformed stream that
+-                // drives k past 31, which would otherwise be shift-count UB.
+-                // Such a stream is rejected by the (k < 32) check after the
+-                // loop, so the masked value is never used.
+-                //
+-                // The mask is used instead of an in-loop (k < 32) branch on
+-                // purpose: this is the hot coefficient-decoding loop, and an
+-                // extra conditional here would add a mispredictable branch and
+-                // slow down decoding of every symbol. Masking is branch-free.
+-                symbol += 1u << (k & 31);
++                // No k range check here on purpose; a per-bit branch slows
++                // down decoding. At buffer end, BSR_FLUSH_1BYTE feeds 1-bits
++                // and sets is_eob, so the loop exits; the k check below and
++                // the callers' BSR_IS_UNEXPECTED_EOB check reject the stream.
+                 k++;
+             }
+         }
++        // The APV spec starts the '01' prefix at (2 << k0) and adds (1 << k)
++        // for each prefix 0-bit. Here the loop only counts k, and the whole
++        // sum, (1 << k0) + (1 << k), is added in one step after the k check,
++        // so symbol cannot wrap on a malformed bitstream. This also drops the
++        // per-bit shift and add from the loop, which helps at low QP.
++        oapv_assert_rv(k < 30, -1); /* prevent too large (impossible) k value */
++        symbol += 1u << k;
+     }
+ 
+-    oapv_assert_rv(k < 32, -1); /* prevent too large (impossible) k value */
+-
+     if(k > 0) {
+         while(bs->leftbits < k) {
+             symbol += bs->code >> (64 - k);
+@@ -795,7 +800,7 @@ static int dec_vlc_read(oapv_bs_t *bs, int k)
+         bs->code <<= k;
+         bs->leftbits -= k;
+     }
+-    return symbol;
++    return (int)symbol;
+ }
+ 
+ static int dec_vlc_q_matrix(oapv_bs_t *bs, oapv_fh_t *fh)
+@@ -959,20 +964,22 @@ int oapvd_vlc_ac_coef(oapv_bs_t *bs, s16 *coef, int *kparam_ac)
+                 return OAPV_ERR_MALFORMED_BITSTREAM;
+             level += 1;
+         }
+-        if(level > 32767)
++        // sign parsing
++        if(bs->leftbits == 0) BSR_FLUSH_1BYTE(bs);
++        BSR_READ_1BIT(bs, flag);
++
++        // the reconstructed AC coefficient must be in [-32768, 32767]
++        int val = oapv_set_sign16(level, flag);
++        if(val < MIN_TX_VAL || val > MAX_TX_VAL)
+             return OAPV_ERR_MALFORMED_BITSTREAM;
+-        k_ac = KPARAM_AC(level);
+ 
++        k_ac = KPARAM_AC(level);
+         if(first_ac) {
+             first_ac = 0;
+             *kparam_ac = k_ac; // backup
+         }
+ 
+-        // sign parsing
+-        if(bs->leftbits == 0) BSR_FLUSH_1BYTE(bs);
+-        BSR_READ_1BIT(bs, flag);
+-
+-        coef[scanp[scan_pos_offset++]] = oapv_set_sign16(level, flag);
++        coef[scanp[scan_pos_offset++]] = (s16)val;
+ 
+         if(scan_pos_offset >= OAPV_BLK_D) {
+             break;
+@@ -1256,9 +1263,11 @@ int oapvd_vlc_metadata(oapv_bs_t *bs, u32 pbu_size, oapvm_t mid, int group_id)
+             oapv_assert_gv(metadata_size > 0, ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+             metadata_size -= 1;
+             if(t0 == 0xFF) {
++                oapv_assert_gv(payload_type <= (0xFFFFFFFFU - 255), ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+                 payload_type += 255;
+             }
+         } while(t0 == 0xFF);
++        oapv_assert_gv(payload_type <= (0xFFFFFFFFU - t0), ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+         payload_type += t0;
+ 
+         t0 = 0;
+@@ -1269,9 +1278,11 @@ int oapvd_vlc_metadata(oapv_bs_t *bs, u32 pbu_size, oapvm_t mid, int group_id)
+             oapv_assert_gv(metadata_size > 0, ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+             metadata_size -= 1;
+             if(t0 == 0xFF) {
++                oapv_assert_gv(payload_size <= (0xFFFFFFFFU - 255), ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+                 payload_size += 255;
+             }
+         } while(t0 == 0xFF);
++        oapv_assert_gv(payload_size <= (0xFFFFFFFFU - t0), ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+         payload_size += t0;
+         oapv_assert_gv(payload_size <= metadata_size, ret, OAPV_ERR_MALFORMED_BITSTREAM, ERR);
+ 
+diff --git a/src/oapv_vlc.h b/src/oapv_vlc.h
+index 9860ae9..7956764 100644
+--- a/src/oapv_vlc.h
++++ b/src/oapv_vlc.h
+@@ -35,6 +35,9 @@
+ #include "oapv_def.h"
+ #include "oapv_metadata.h"
+ 
++// level and run are never negative and OAPV_KPARAM_*_MIN is 0, so the lower
++// clamp of oapv_clip3() is not needed; these run for every coefficient, where
++// even one extra compare slows down VLC coding
+ #define KPARAM_DC(level)      oapv_min((level)>>1, OAPV_KPARAM_DC_MAX)
+ #define KPARAM_AC(level)      oapv_min((level)>>2, OAPV_KPARAM_AC_MAX)
+ #define KPARAM_RUN(run)       oapv_min((run)>>2, OAPV_KPARAM_RUN_MAX)

@@ -7,6 +7,81 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-07: Sonnet 5.5 and Haiku 5.5 on Frontier v4; judging moves hosts
+
+### Decision
+
+Owner requests in chat, 2026-10-07.
+
+- **Sonnet 5.5 publishes with disclosure, no rerun.** The sweep
+  (`runs-effort-sonnet55/`, all five levels, `--billing subscription`,
+  serial, flat 3-hour timeout) was launched on 2026-10-06 from the
+  `codex/ocaml-v1` checkout, which branched before the 2026-10-05
+  tagged-worktree rule. Its summaries carry no `source` block and their
+  `task_hash` values differ from `suite.lock.json`. Cards and the site
+  footnote both facts and the evidence below.
+- **Haiku 5.5 runs locally, from a run worktree.** The owner asked whether it
+  could run in the cloud so the laptop could be closed. It stays on this Mac:
+  every published Frontier v4 column ran here on `--sandbox local`, CHARTER
+  lifecycle item 4 requires a decision and a disclosure before any
+  cross-host comparison, speed cards rank by wall clock, and the
+  `claude-code` harness needs a claude.ai subscription login that a cloud
+  session is not known to provide. Launcher:
+  `logs/haiku55-frontier-v4.launch.sh` (untracked), run worktree at the local tag
+  `bench/2026-10-07-haiku55-frontier-v4` (`d8ddcedc`), all five levels,
+  output `runs-effort-haiku55/`, queued behind the Sonnet sweep. The
+  refusal fallback stays at Claude Code's default (on), as for Opus 5.5.
+- **Code quality judging runs on this host.** Earlier rounds ran on a host
+  whose home was `/Users/morganlinton`; the frozen v3.3 and v3.4 protocols
+  record judge binaries by absolute path under it. The next runner matches
+  the pinned judges by sha256 and records the path change in its protocol,
+  instead of comparing path strings.
+- **Costs.** Sonnet 5.5 cards use the cost Claude Code reports per run
+  (`cli_reported_cost_usd`), as the Opus 5.5 card did, because the vendor
+  page disagrees with itself on the cache-read price. Haiku 5.5 cards show a
+  standard-tier estimate plus an upper bound priced entirely at the
+  over-100k tier, following the GPT-6 Astra precedent, because run receipts
+  hold cumulative session usage, not per-request prompt sizes.
+
+### Evidence
+
+- Task content is identical. Hashing the 23 task directories the Sonnet sweep
+  read, with `main`'s `harness.tasks.task_hash` (which skips local
+  byproducts, 2026-10-06 entry), matches all 23 entries of
+  `tasks/coding-intelligence-index-v4/suite.lock.json`. The only tracked
+  difference between `codex/ocaml-v1` and `main` under that suite is the
+  lock file itself. The recorded hashes differ because the older hash
+  counted gitignored `__pycache__/` folders.
+- Claude Code versions, from each summary's `harness_version`: low ran 21
+  tasks on 2.1.291 and 2 on 2.1.292; medium, high and extra-high ran on
+  2.1.292. The CLI updated itself to 2.1.293 at 12:52 on 2026-10-07, after
+  the last extra-high task had started, so max runs on 2.1.293. Each card
+  footnotes the versions per level.
+- Sonnet 5.5 results before max (pass@1, n=23 each, no timeouts, no fallback
+  replies): low 0.652, medium 0.739, high 0.870, extra-high 0.957.
+- Vendor facts checked 2026-10-07 on platform.claude.com, not recalled:
+  - Sonnet 5.5: $2 input, $2.50 5m write, $4 1h write, $10 output per
+    MTok. The pricing table lists cache hits at $0.20; the prompt caching
+    section on the same page says 0.05x ($0.10). API default effort is
+    high; the effort page does not state a Claude Code default.
+  - Haiku 5.5: up to 100k prompt tokens $0.10 input, $0.125 5m write,
+    $0.20 1h write, $0.01 cache hit, $0.50 output; over 100k $0.50,
+    $0.625, $1, $0.05, $2.50. Default effort is medium on the API and in
+    Claude Code; all five levels are supported.
+  - `claude -p --model claude-haiku-5-5` resolves to `claude-haiku-5-5`;
+    so does the `haiku` alias.
+- Judge binaries on this host: `muse-bin-1.0.3-R2198.1` hashes to the
+  frozen `MUSE_SHA256` (`4c0f9600...`). `cursor-agent` 2026.09.10-fd3934a
+  is installed and logged in. Its hash is checked against the v3.3 pin once
+  that protocol file is copied here.
+
+### Revisit
+
+If Haiku 5.5 is ever run off this Mac, that needs its own entry and a
+cross-host footnote. If Anthropic corrects the Sonnet 5.5 cache-read price,
+re-derive the API-equivalent cost and keep the CLI-reported figure as the
+published one unless the owner decides otherwise.
+
 ## 2026-10-06: Frontier v5 gate runs use concurrency 2; speed reporting stays serial
 
 ### Decision

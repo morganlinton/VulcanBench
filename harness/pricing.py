@@ -67,8 +67,15 @@ PRICES: dict[str, dict[str, float]] = {
     "anthropic:claude-opus-4-6": {"input": 5.00, "output": 25.00},
     # Sonnet 5 standard pricing; intro promo ($2/$10) runs through 2026-08-31.
     "anthropic:claude-sonnet-5": {"input": 3.00, "output": 15.00},
+    # Sonnet 5.5 cache hits: the vendor table says $0.20/M (used here), its
+    # caching section says 0.05x ($0.10/M). Cards publish Claude Code's
+    # reported cost instead (docs/DECISIONS.md 2026-10-07).
+    "anthropic:claude-sonnet-5-5": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
     "anthropic:claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
     "anthropic:claude-haiku-4-5": {"input": 1.00, "output": 5.00},
+    # Haiku 5.5 up-to-100K-prompt tier. Prompts over 100K cost 5x on every
+    # line, which per-run receipts do not expose, so this is a lower bound.
+    "anthropic:claude-haiku-5-5": {"input": 0.10, "cached_input": 0.01, "output": 0.50},
     # Grok list prices are the <200K-input tier; xAI doubles input/cached/output
     # for requests with >=200K input tokens, which per-run receipts do not
     # expose, so long-context turns are underestimated here.

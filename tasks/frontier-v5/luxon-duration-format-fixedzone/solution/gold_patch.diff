@@ -1,0 +1,101 @@
+diff --git a/src/duration.js b/src/duration.js
+index d6757746..ed27f9c9 100644
+--- a/src/duration.js
++++ b/src/duration.js
+@@ -209,6 +209,15 @@ function removeZeroes(vals) {
+   return newVals;
+ }
+ 
++// Render a number for toISO(). JS prints very small magnitudes in exponential
++// notation (e.g. `1e-7`), which is not valid ISO 8601 and which fromISO() cannot
++// parse, so expand those to a plain decimal. (toFixed keeps exponential notation
++// for magnitudes >= 1e21, so very large durations are left untouched here.)
++function toISONumber(value) {
++  const str = `${value}`;
++  return str.includes("e") ? value.toFixed(20).replace(/\.?0+$/, "") : str;
++}
++
+ /**
+  * A Duration object represents a period of time, like "2 months" or "1 day, 1 hour". Conceptually, it's just a map of units to their quantities, accompanied by some additional configuration and methods for creating, parsing, interrogating, transforming, and formatting them. They can be used on their own or in conjunction with other Luxon types; for example, you can use {@link DateTime#plus} to add a Duration object to a DateTime, producing another DateTime.
+  *
+@@ -566,18 +575,19 @@ export default class Duration {
+     if (!this.isValid) return null;
+ 
+     let s = "P";
+-    if (this.years !== 0) s += this.years + "Y";
+-    if (this.months !== 0 || this.quarters !== 0) s += this.months + this.quarters * 3 + "M";
+-    if (this.weeks !== 0) s += this.weeks + "W";
+-    if (this.days !== 0) s += this.days + "D";
++    if (this.years !== 0) s += toISONumber(this.years) + "Y";
++    if (this.months !== 0 || this.quarters !== 0)
++      s += toISONumber(this.months + this.quarters * 3) + "M";
++    if (this.weeks !== 0) s += toISONumber(this.weeks) + "W";
++    if (this.days !== 0) s += toISONumber(this.days) + "D";
+     if (this.hours !== 0 || this.minutes !== 0 || this.seconds !== 0 || this.milliseconds !== 0)
+       s += "T";
+-    if (this.hours !== 0) s += this.hours + "H";
+-    if (this.minutes !== 0) s += this.minutes + "M";
++    if (this.hours !== 0) s += toISONumber(this.hours) + "H";
++    if (this.minutes !== 0) s += toISONumber(this.minutes) + "M";
+     if (this.seconds !== 0 || this.milliseconds !== 0)
+       // this will handle "floating point madness" by removing extra decimal places
+       // https://stackoverflow.com/questions/588004/is-floating-point-math-broken
+-      s += roundTo(this.seconds + this.milliseconds / 1000, 3) + "S";
++      s += toISONumber(roundTo(this.seconds + this.milliseconds / 1000, 3)) + "S";
+     if (s === "P") s += "T0S";
+     return s;
+   }
+diff --git a/src/impl/formatter.js b/src/impl/formatter.js
+index f7e2d04a..ae6218ee 100644
+--- a/src/impl/formatter.js
++++ b/src/impl/formatter.js
+@@ -412,7 +412,21 @@ export default class Formatter {
+             // "auto" and "negative" are the same, but "auto" has better support
+             signDisplay = "auto";
+           }
+-          return this.num(lildur.get(mapped) * inversionFactor, token.length, signDisplay);
++          let value = lildur.get(mapped) * inversionFactor;
++          // When the negative sign is only shown on the largest unit (signMode
++          // "negativeLargestOnly") and that unit rounds to zero, "auto" sign display
++          // would drop the sign entirely (positive zero formats without a sign),
++          // making a negative duration indistinguishable from a positive one. Use
++          // negative zero so the sign is preserved on the largest unit.
++          if (
++            this.opts.signMode === "negativeLargestOnly" &&
++            mapped === info.largestUnit &&
++            info.isNegativeDuration &&
++            value === 0
++          ) {
++            value = -0;
++          }
++          return this.num(value, token.length, signDisplay);
+         } else {
+           return token;
+         }
+diff --git a/src/zones/fixedOffsetZone.js b/src/zones/fixedOffsetZone.js
+index b1ab4ab1..bc46e24a 100644
+--- a/src/zones/fixedOffsetZone.js
++++ b/src/zones/fixedOffsetZone.js
+@@ -50,6 +50,8 @@ export default class FixedOffsetZone extends Zone {
+     super();
+     /** @private **/
+     this.fixed = offset;
++    /** @private **/
++    this.valid = Number.isInteger(offset);
+   }
+ 
+   /**
+@@ -140,11 +142,11 @@ export default class FixedOffsetZone extends Zone {
+ 
+   /**
+    * Return whether this Zone is valid:
+-   * All fixed offset zones are valid.
++   * All fixed offset zones are valid, provided they were constructed with a numeric offset.
+    * @override
+    * @type {boolean}
+    */
+   get isValid() {
+-    return true;
++    return this.valid;
+   }
+ }

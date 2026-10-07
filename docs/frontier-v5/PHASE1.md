@@ -246,3 +246,31 @@ both the agent and the verifier building and testing with `cargo --offline`
 (net.offline baked into CARGO_HOME). The task itself is easy by design (one
 root cause, panic points near the line) and is kept as a pipeline artifact and
 easy Rust anchor, not a frontier-difficulty candidate.
+
+## JavaScript pipeline proven 2026-10-07
+
+tasks/frontier-v5/luxon-duration-format-fixedzone validates end to end (base
+reward 0, gold reward 1, x3, plus single-fix controls) on the existing
+`vulcanbench/sandbox:base-arm64` image, which already carries Node 22.11.0
+and npm 10.9.0; no new image was needed. Lessons for the js-v1 checklist:
+
+- Luxon's tests import `src/` directly through babel-jest, so the graded
+  artifact is the agent's `src/` tree and the verifier runs the pristine
+  suite in-tree against it; no build output of the agent is used. Test
+  files, jest and babel configs and `node_modules` come from the verifier
+  image.
+- Dependencies come from the committed `package-lock.json` with
+  `npm ci --ignore-scripts` at image build time (the public baseline);
+  `--ignore-scripts` skips the husky `prepare` hook, which needs a git tree
+  the stripped workspace no longer has.
+- Upstream CI's environment matters: `TZ=America/New_York` and a UTF-8
+  locale are set in both images, as in luxon's workflow.
+- ICU is part of the toolchain pin. Node 22.11's ICU 75 names the Islamic era
+  `ERA1` where upstream CI's newer ICU prints `AM`, so two locale tests fail
+  at base and gold alike. The verifier runs the whole suite as the guard wall
+  and excludes those two by name (`known_env_failures` in families.json),
+  pins the total test count, and treats any other failure or any test file
+  that fails to load as a broken wall. Record the ICU version with Node's.
+- Grading reads jest's `--json` report and matches tests by
+  `<file>::<fullName>`; single-fix controls (each PR applied alone) confirm
+  each cause is independently exercised.

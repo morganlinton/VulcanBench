@@ -321,3 +321,49 @@ the minimal stopgap `Dockerfile.rust-arm64-min` the petgraph task was first
 validated on; petgraph was re-validated on `:v5-rust`. Tool versions inside
 the tags are unchanged; only the names are. The earlier validation records
 that name `base-arm64` describe the same content.
+
+## Cloud VM setup 2026-10-07 (first run on x86-64)
+
+First run of `scripts/frontier-v5/setup-host.sh` on a Claude Code cloud VM
+(x86-64, 4 vCPU, 16 GB RAM, Ubuntu 24.04 host, Docker 29.8.2). It did not
+reach "frontier-v5 setup: done". What broke, in the order it surfaced:
+
+1. **The Docker daemon is not running at session start.** `dockerd` and
+   `containerd` are installed but nothing launches them; the script stopped
+   at "docker daemon not reachable". Started by hand with `dockerd` in the
+   background (overlayfs, cgroup v1). The environment's setup script should
+   start it before calling setup-host.sh.
+2. **Build containers sit behind a TLS-intercepting egress gateway.** A
+   container on the default bridge network gets every HTTPS connection
+   re-signed by "Egress Gateway SDS Issuing CA", and plain-HTTP requests
+   (apt's default `http://deb.debian.org`) are refused with 403. The pinned
+   python image does not trust that CA, so every fetch in the chain fails
+   certificate verification. Note the host's agent-proxy CA
+   (`/root/.ccr/agent-proxy-ca.crt`) is not the one that signs container
+   traffic; the gateway CAs are in the host's
+   `/usr/local/share/ca-certificates/`. Fixed in the script: on a host
+   marked by `/root/.ccr` (or with `--ca DIR_OR_FILE`) it first builds a
+   local trust layer, `vulcanbench/sandbox:v5-python-ca`, from the same
+   pinned digest with those CAs in the system store, Debian sources switched
+   to HTTPS (the same signed packages), and `SSL_CERT_FILE`,
+   `REQUESTS_CA_BUNDLE`, `PIP_CERT` and `NODE_EXTRA_CA_CERTS` set, then
+   builds v5-base on it. `Dockerfile.jvm` imports the same CAs into
+   Temurin's own cacerts when the layer is present (a no-op otherwise).
+   Verified: inside the layer pypi.org, nodejs.org and github.com verify and
+   return 200. Without CAs (laptop, CI) the script and images are unchanged.
+   The CAs and env vars ride along into every cloud-built task image; they
+   change nothing at grading (the verifier runs with no network) but they
+   are a recorded cloud-only difference from laptop-built images.
+3. **The environment's network policy denies the Debian archive.** With TLS
+   fixed, apt gets `403 Forbidden` from the gateway on
+   `https://deb.debian.org` (the main, updates and security suites are all
+   served from that host). This is an organization egress-policy denial,
+   not a script bug, and it is not routed around. The same policy denies
+   `go.dev` and `dl.google.com` (the Go download in `Dockerfile.base`) and
+   `dlcdn.apache.org` (Maven in `Dockerfile.jvm`). Reachable: Docker Hub,
+   github.com, nodejs.org, pypi.org, index.crates.io, static.rust-lang.org,
+   services.gradle.org, repo.maven.apache.org. Action for the owner: add
+   `deb.debian.org`, `go.dev`, `dl.google.com` and `dlcdn.apache.org` to the
+   cloud environment's allowed domains (Network access, with the package
+   managers box ticked), then re-run setup-host.sh. Until then no v5 image
+   builds on the cloud VM.

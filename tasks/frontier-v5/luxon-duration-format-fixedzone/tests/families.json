@@ -1,0 +1,42 @@
+{
+  "suite": "frontier-v5",
+  "task": "luxon-duration-format-fixedzone",
+  "test_files": [
+    "test/duration/format.test.js",
+    "test/zones/fixedOffset.test.js"
+  ],
+  "fail_to_pass": [
+    "test/duration/format.test.js::Duration#toISO does not use exponential notation for very small values",
+    "test/duration/format.test.js::Duration#toISO output round-trips small fractional values through fromISO",
+    "test/duration/format.test.js::Duration#toFormat keeps the negative sign on the largest unit when it is zero with signMode negativeLargestOnly",
+    "test/zones/fixedOffset.test.js::FixedOffsetZone is invalid when constructed with a non-numeric offset",
+    "test/zones/fixedOffset.test.js::A DateTime in an invalid FixedOffsetZone is itself invalid"
+  ],
+  "pass_to_pass_note": "every other test in the two overlaid files (57 at base and gold) plus the whole pristine suite, enforced by guard_suite; listed explicitly below are the tests in the two files that bracket the fixed behaviour",
+  "pass_to_pass": [
+    "test/duration/format.test.js::Duration#toISO fills out every field",
+    "test/duration/format.test.js::Duration#toISO fills out every field with fractional",
+    "test/duration/format.test.js::Duration#toISO creates a minimal string",
+    "test/duration/format.test.js::Duration#toISO handles negative durations",
+    "test/duration/format.test.js::Duration#toISO handles mixed negative/positive durations",
+    "test/duration/format.test.js::Duration#toISO handles zero durations",
+    "test/duration/format.test.js::Duration#toISO returns null for invalid durations",
+    "test/duration/format.test.js::Duration#toISO handles milliseconds duration",
+    "test/duration/format.test.js::Duration#toISO handles seconds/milliseconds duration",
+    "test/duration/format.test.js::Duration#toISO handles negative seconds/milliseconds duration",
+    "test/duration/format.test.js::Duration#toISO handles mixed negative/positive numbers in seconds/milliseconds durations",
+    "test/duration/format.test.js::Duration#toFormat with signMode all shows positive sign on positive durations",
+    "test/zones/fixedOffset.test.js::FixedOffsetZone is valid when constructed with a numeric offset",
+    "test/zones/fixedOffset.test.js::FixedOffsetZone.equals requires both zones to be fixed",
+    "test/duration/format.test.js::Duration#toFormat shows negative sign on the largest unit when using signMode negativeLargestOnly",
+    "test/duration/format.test.js::Duration#toFormat shows no negative sign on the largest unit when using signMode negativeLargestOnly with positive Duration",
+    "test/duration/format.test.js::Duration#toFormat with signMode all shows positive sign on negative durations",
+    "test/zones/fixedOffset.test.js::FixedOffsetZone.utcInstance returns a singleton"
+  ],
+  "known_env_failures_note": "ICU 75 (Node 22.11 in vulcanbench/sandbox:base-arm64) names the Islamic era ERA1 where upstream CI's newer ICU prints AM; both fail at base and at gold and are not part of the task",
+  "known_env_failures": [
+    "test/datetime/format.test.js::DateTime#toLocaleString can override the dateTime's output calendar",
+    "test/interval/format.test.js::Interval#toLocaleString can override the start DateTime's output calendar"
+  ],
+  "min_total_tests": 1214
+}

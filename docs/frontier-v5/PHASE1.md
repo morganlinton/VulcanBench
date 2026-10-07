@@ -115,6 +115,86 @@ Each of these changes something in how v5 tasks are authored or run.
    `test.sh` fails). Harbor also started an egress-control sidecar image on
    its own for the network policy.
 
+## Pilot 1: F1-c, openapv-malformed-bitstream-hardening (started 2026-10-06)
+
+Task directory: `tasks/frontier-v5/openapv-malformed-bitstream-hardening/`
+(pre-registration in its DESIGN.md). Source: AcademySoftwareFoundation/openapv
+at cdb30f234da30a82ff8ccaf4f81658bdefd7e994, the last commit before a
+late-September hardening wave; gold is nine upstream hardening commits that
+cherry-pick cleanly onto it. Base and gold both pass the project's 24 ctest
+tests under ASan and UBSan in release mode.
+
+Lessons from building the hidden corpus, each one a line for the C
+determinism checklist or the authoring guide:
+
+1. **Oracle builds must be release builds.** The project's `oapv_assert`
+   macros become libc `assert()` in Debug, so every malformed-input check
+   aborts before any sanitizer can report. The oracle uses RelWithDebInfo
+   (NDEBUG) plus sanitizers, which is also how the library ships.
+2. **The fuzzed library needs its own coverage instrumentation.** Linking a
+   `-fsanitize=fuzzer` harness against a library built with only
+   `-fsanitize=address,undefined` gives libFuzzer about 50 edges, all in the
+   harness; the first ten-minute run found nothing. The library is built
+   with `-fsanitize=fuzzer-no-link` for corpus discovery (never for grading).
+3. **Seeds must fit under the input cap.** The conformance access units are
+   about 3 MB each (4K frames); with a 64 KB cap libFuzzer truncated every
+   seed to a header. Small seeds are encoded from the project's own 320x240
+   sequence with its encoder (7 KB to 17 KB per access unit, with tile,
+   profile, quantization-matrix and frame-hash variants).
+4. **The verifier probe shares the discovery harness.** Crashes found through
+   the library API do not necessarily reproduce through the CLI app, which
+   validates some fields itself, so `tests/probe_dec.c` is the harness with a
+   file-driven `main`, compiled against the agent's library at grading time.
+5. **Pinned upstream snapshots instead of vendored trees.** The repository
+   at the base commit is 180 MB, mostly conformance bitstreams. Both the
+   agent environment and the verifier image clone upstream at build time
+   (public baseline) and verify the commit hash; the agent workspace is
+   re-initialised as a single-commit repository so no later history leaks,
+   and the agent-phase allowlist blocks GitHub.
+
+6. **Verify sanitizer detectability on the base before authoring, on the
+   grading architecture.** Forty minutes of instrumented fuzzing found no
+   sanitizer report on the OpenAPV base, and reading each fixed site showed
+   why: the pre-wave base already guards the shallow paths (exp-Golomb
+   accumulates in u32 with a shift mask and a bound; the metadata parser
+   checks end-of-buffer at every step), the payload-count limit bounds an
+   unbounded list rather than a fixed array, and the dequant shift overflow
+   lives in the generic and AVX paths while arm64 dispatches to NEON, whose
+   wrap is a defined intrinsic UBSan cannot see. A PR title that says
+   "fix heap buffer overflow" is not evidence that ASan fires on the base.
+   Rule for F1 sourcing: before any task files are written, build the base
+   with the oracle flags on the architecture that will grade and show at
+   least three distinct sanitizer reports from inputs you can regenerate.
+   OpenAPV is withdrawn from F1-c and kept as an F2 differential-parity
+   candidate, where its size and clean sanitizer builds are assets.
+
+7. **Fuzzing the base to discover the corpus does not work; source F1 from
+   reproducer-bearing regressions instead.** The same wall hit twice more on
+   libmbus (rscada/libmbus, PR #240): five minutes of combined ASan+UBSan
+   fuzzing found 178 crashes, but every one was a single co-resident shift
+   overflow in storage-number decoding that the gold does NOT fix (still live
+   upstream), so it cannot be the oracle and the verifier excludes the shift
+   check. The heap overflows the PR actually fixes (mishandled snprintf
+   return values in XML output) did not reproduce under ASan-only fuzzing at
+   5 or 15 minutes with inputs up to 64KB, because a single length-bounded
+   M-Bus frame cannot make the XML exceed the output buffer by blind mutation.
+   Across OpenAPV and libmbus, coverage-guided fuzzing from valid seeds did
+   not once produce a base-crashing, gold-clean input for the specific fixed
+   defect. Conclusion for F1 sourcing: do not pick a security-fix PR and then
+   try to reach its defect by fuzzing. Pick a defect that already ships a
+   reproducer input (an OSS-Fuzz regression, a CVE proof-of-concept, or a
+   fuzz corpus entry committed with the fix). The reproducer is the corpus
+   seed: confirm base-crashes and gold-clean on it, minimize, cluster, done.
+   This also removes the fuzzer-luck variance from the x3 determinism gate.
+   libmbus is withdrawn from F1-c for the same reason as OpenAPV; its scaffold
+   at tasks/frontier-v5/libmbus-frame-xml-hardening is left in place but
+   marked blocked-no-corpus.
+
+Open at the time of writing: the fuzzing attribution that fills the family
+table, the correctness gate (base 0, gold 1, x3 under Harbor), the
+reverted-commit controls, and the first reference-model runs, which need
+decision (b)'s credentials configured for Harbor's agents.
+
 ## Still unverified (pilot exit criteria)
 
 - A real agent run (`-a claude-code` and `-a codex`) through Harbor:
@@ -127,3 +207,100 @@ Each of these changes something in how v5 tasks are authored or run.
 - The harness side: `task.toml` loading, `harbor_ingest.py`, the strip step.
 - Decisions (b) and (c) must be recorded in `docs/DECISIONS.md` before the
   first gated pilot run (PLAN.md section 8).
+
+
+## Authoring run 2026-10-06 night: Python pipeline proven, F3-floor tension
+
+- The Harbor-native Python task pipeline is validated end to end by
+  tasks/frontier-v5/nx-group-betweenness-epic: env image (networkx cloned at a
+  pinned base, history stripped, deps installed), the declared artifact
+  /app/networkx extracted, a separate verifier that imports the agent sources
+  in-tree on a private copy, overlays a hidden gold test file, and protects the
+  guard wall by taking test files from the pristine image. Direct-Docker check:
+  base workspace scores reward 0 (11 held-out tests fail, 29-test guard wall
+  passes), gold workspace scores reward 1. Deterministic x3.
+- Two Python-specific traps, both now designed around and worth the py-v1
+  checklist: an editable `pip install -e .` silently shadows worktree edits, so
+  the verifier imports strictly in-tree via PYTHONPATH; and read-write mounts
+  let a swap contaminate the base worktree across runs, so validation mounts
+  read-only and mutates only a container-local copy.
+- Family-fit finding: that task is a concentrated multi-bug correctness task
+  (2 files, 11 tests, 1 module), well below the frozen F3 volume floor (12
+  files, 1000 lines, 25 tests, 3 modules). It is v4-shaped, not a v5 family.
+  The hardest real-defect tasks (group betweenness, node cuts) are concentrated
+  by nature, while F3 rewards breadth, so composing genuine difficulty into F3
+  from real bug fixes is in tension. Open question for the owner: a fifth
+  family for concentrated multi-bug correctness, a revived mid-band, or only
+  admit F3 arcs large enough to meet the floor. The task is kept as a validated
+  pipeline artifact and labeled UNSLOTTED, not forced into F3.
+
+## Rust pipeline proven 2026-10-07
+
+tasks/frontier-v5/petgraph-maxflow-sparse-index validates end to end OFFLINE
+(base reward 0, gold reward 1, build_ok in both). It proves the Rust half of
+the toolchain that the plan flagged as mandatory and unproven: a native arm64
+Rust image (sandbox/Dockerfile.rust-arm64-min, a minimal stopgap; the admitted
+image should be the full pinned Dockerfile.rust built for arm64), a generated
+and committed Cargo.lock, dependencies fetched at environment-build time, and
+both the agent and the verifier building and testing with `cargo --offline`
+(net.offline baked into CARGO_HOME). The task itself is easy by design (one
+root cause, panic points near the line) and is kept as a pipeline artifact and
+easy Rust anchor, not a frontier-difficulty candidate.
+
+## JavaScript pipeline proven 2026-10-07
+
+tasks/frontier-v5/luxon-duration-format-fixedzone validates end to end (base
+reward 0, gold reward 1, x3, plus single-fix controls) on the existing
+`vulcanbench/sandbox:base-arm64` image, which already carries Node 22.11.0
+and npm 10.9.0; no new image was needed. Lessons for the js-v1 checklist:
+
+- Luxon's tests import `src/` directly through babel-jest, so the graded
+  artifact is the agent's `src/` tree and the verifier runs the pristine
+  suite in-tree against it; no build output of the agent is used. Test
+  files, jest and babel configs and `node_modules` come from the verifier
+  image.
+- Dependencies come from the committed `package-lock.json` with
+  `npm ci --ignore-scripts` at image build time (the public baseline);
+  `--ignore-scripts` skips the husky `prepare` hook, which needs a git tree
+  the stripped workspace no longer has.
+- Upstream CI's environment matters: `TZ=America/New_York` and a UTF-8
+  locale are set in both images, as in luxon's workflow.
+- ICU is part of the toolchain pin. Node 22.11's ICU 75 names the Islamic era
+  `ERA1` where upstream CI's newer ICU prints `AM`, so two locale tests fail
+  at base and gold alike. The verifier runs the whole suite as the guard wall
+  and excludes those two by name (`known_env_failures` in families.json),
+  pins the total test count, and treats any other failure or any test file
+  that fails to load as a broken wall. Record the ICU version with Node's.
+- Grading reads jest's `--json` report and matches tests by
+  `<file>::<fullName>`; single-fix controls (each PR applied alone) confirm
+  each cause is independently exercised.
+
+## Java pipeline proven 2026-10-07
+
+tasks/frontier-v5/commons-lang-fraction-lowest-terms validates end to end
+(base reward 0, gold reward 1, x3, five single-fix controls) on
+`vulcanbench/sandbox:jvm` built on the arm64 base. Lessons for the java-v1
+checklist:
+
+- Offline Maven is a two-step image build: one ONLINE `mvn clean test`
+  (with `-Dtest=<one class>`) populates a task-local repository
+  (`/opt/m2`, about 90 MB for Commons Lang), and only then is
+  `.mvn/maven.config` written with `-o -Dmaven.repo.local=/opt/m2` plus the
+  analysis-plugin skips (rat, checkstyle, spotbugs, jacoco, pmd, animal
+  sniffer, spotless, japicmp, cyclonedx, javadoc). Writing the config before
+  the warm-up run makes the warm-up itself offline and the parent POM
+  unresolvable. Every goal the agent or verifier will call must be in the
+  warm-up: `mvn clean` failed offline until `clean` joined it.
+- The workspace is committed as a single commit after the warm-up so the
+  offline config is part of the snapshot; `target/` is cleaned first.
+- The graded artifact is `src/main`; the verifier compiles it together with
+  the pristine test sources (`test-compile` failure is reward 0) and runs
+  `mvn test` with the pristine config, parsing surefire XML by
+  `classname::name` (`tests/check.py`).
+- Commons Lang's full suite (630 classes, 89,192 executions) is clean and
+  deterministic in the image at `TZ=UTC`, 2.5 minutes single, 3 to 4
+  minutes with three verifiers sharing the host, so the whole suite is the
+  guard wall with the unique-id count pinned; no environment exclusions
+  were needed (contrast luxon's two ICU-dependent tests).
+- A control that does not apply alone on the base (a later fix's context
+  depends on an earlier one) is tested as gold minus that fix instead.

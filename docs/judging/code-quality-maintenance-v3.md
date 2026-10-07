@@ -1079,7 +1079,7 @@ built by `scripts/cii-v4-board/build_sonnet55_population.py`.
   whose `task_hash` still counted `__pycache__` files, so its summaries
   record hashes that differ from `suite.lock.json`. The population builder
   accepts a run only through the committed bridge
-  `docs/results/swe-v4-sonnet55-2026-10/task-hash-bridge.json`, which
+  `docs/judging/task-hash-bridge-sonnet55.json`, which
   pairs each task's recorded hash with its lock hash, both computed on the
   same unchanged directories. Every repo `.pyc` an agent could have seen
   is byte-identical to compiling the starting source, so the extra files

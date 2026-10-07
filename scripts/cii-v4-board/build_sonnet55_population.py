@@ -39,7 +39,7 @@ MODELS = {"sonnet55": ("runs-effort-sonnet55", tuple(base.LEVELS))}
 SWEEP_MODELS = {"sonnet55": "claude-code:claude-sonnet-5-5"}
 TASK_IDS = sorted(p.name for p in TASKS.iterdir() if p.is_dir() and p.name.startswith("legacy-"))
 MISSING_REASON = "No finished run for this task and level"
-BRIDGE = OUTPUT.parent / "task-hash-bridge.json"
+BRIDGE = ROOT / "docs/judging/task-hash-bridge-sonnet55.json"
 
 
 def _bridged_inputs(run: Path) -> tuple[dict, dict]:

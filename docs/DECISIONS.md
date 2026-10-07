@@ -48,7 +48,7 @@ Owner requests in chat, 2026-10-07.
 - **The Sonnet 5.5 population goes through a committed hash bridge.** The
   judging pipeline rejects any run whose recorded `task_hash` differs from
   the task today, so every Sonnet 5.5 run would be excluded.
-  `docs/results/swe-v4-sonnet55-2026-10/task-hash-bridge.json` pairs each
+  `docs/judging/task-hash-bridge-sonnet55.json` pairs each
   task's recorded hash with its lock hash, and the population builder
   accepts a run only when the task still hashes to the lock and the run
   recorded exactly the bridged hash.

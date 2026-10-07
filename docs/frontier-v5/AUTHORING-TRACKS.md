@@ -50,7 +50,31 @@ settled, so the remaining work is sourcing difficulty.
 ## One-line startup for a fresh Fable session
 
 "Continue VulcanBench Frontier v5 Track A authoring on branch
-frontier-v5-authoring. Read docs/frontier-v5/AUTHORING-TRACKS.md and
+frontier-v5-authoring-2. Read docs/frontier-v5/AUTHORING-TRACKS.md and
 NIGHT-STATUS.md. Source the next correctness arc (C or C++, or a harder Java or JavaScript
 arc) and build it like tasks/frontier-v5/commons-lang-fraction-lowest-terms. Do not do F1 sanitizer work in
 this session."
+
+## Running a session in the cloud (no laptop needed)
+
+Start a Claude Code cloud session from the GitHub repo on the current
+authoring branch and paste the startup line above; cloud sessions keep
+running after the laptop is closed and can push and open PRs. Before the
+first task work, the session must run
+
+```bash
+scripts/frontier-v5/setup-host.sh
+```
+
+which builds the four architecture-neutral sandbox tags every v5 task
+starts from (`vulcanbench/sandbox:v5-base`, `:v5-cfamily`, `:v5-jvm`,
+`:v5-rust`) for the host's CPU and installs Harbor 0.24.0. Cloud VMs are
+x86-64; the laptop is arm64; the tags are the same, the content is native to
+each. Put the script in the cloud environment's setup script so the images
+are cached across sessions. Constraints: the cloud VM has 4 vCPU, 16 GB RAM
+and 30 GB disk, so build one task's images at a time and prune old ones;
+only committed and pushed files exist there (the withdrawn libmbus scaffold
+is untracked and will be absent); and gate runs still need the reference-
+model credentials, which must be configured as environment secrets, a
+separate step from authoring. Track B (F1) sessions in the cloud follow the
+same rule: pick Opus 4.8 explicitly.

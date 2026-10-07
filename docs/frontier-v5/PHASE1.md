@@ -304,3 +304,20 @@ checklist:
   were needed (contrast luxon's two ICU-dependent tests).
 - A control that does not apply alone on the base (a later fix's context
   depends on an earlier one) is tested as gold minus that fix instead.
+
+## Portable image tags 2026-10-07
+
+The validated tasks were built against host-local tags that named the
+laptop's architecture (`vulcanbench/sandbox:base-arm64`, `:rust-arm64-min`)
+or the amd64 default (`:jvm`, `:cfamily` built on `base-arm64`). To run the
+same task Dockerfiles on an x86-64 cloud VM, every v5 task now starts from
+an architecture-neutral tag, `vulcanbench/sandbox:v5-base`, `:v5-cfamily`,
+`:v5-jvm` or `:v5-rust`, and `scripts/frontier-v5/setup-host.sh` builds
+those four for whatever CPU it runs on (arm64 digest on Apple silicon, the
+Dockerfile default on amd64). `Dockerfile.rust` gained the same `BASE_IMAGE`
+argument `Dockerfile.jvm` and `Dockerfile.cfamily` already had, and
+`:v5-rust` is the full pinned Rust image (clippy, rustfmt, cargo-audit), not
+the minimal stopgap `Dockerfile.rust-arm64-min` the petgraph task was first
+validated on; petgraph was re-validated on `:v5-rust`. Tool versions inside
+the tags are unchanged; only the names are. The earlier validation records
+that name `base-arm64` describe the same content.

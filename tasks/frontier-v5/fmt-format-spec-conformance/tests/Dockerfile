@@ -28,4 +28,7 @@ COPY check.py /check.py
 COPY tamper_scan.py /tamper_scan.py
 COPY sentinel.cc.snippet /sentinel.cc.snippet
 COPY test.sh /test.sh
+# Harbor runs the verifier image's own /tests/test.sh (it uploads no tests).
+COPY test.sh /tests/test.sh
 RUN chmod +x /test.sh
+RUN chmod +x /tests/test.sh

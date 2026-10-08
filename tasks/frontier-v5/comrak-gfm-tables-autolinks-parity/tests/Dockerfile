@@ -49,4 +49,7 @@ COPY families.json /families.json
 COPY grade.py /grade.py
 COPY tamper_scan.py /tamper_scan.py
 COPY test.sh /test.sh
+# Harbor runs the verifier image's own /tests/test.sh (it uploads no tests).
+COPY test.sh /tests/test.sh
 RUN chmod 600 /expected.json.gz /families.json && chmod +x /test.sh
+RUN chmod +x /tests/test.sh

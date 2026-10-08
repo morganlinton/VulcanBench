@@ -73,5 +73,10 @@
     "networkx/algorithms/connectivity/tests/test_cuts.py::tests_min_cut_complete",
     "networkx/algorithms/connectivity/tests/test_cuts.py::tests_min_cut_complete_directed",
     "networkx/algorithms/connectivity/tests/test_cuts.py::tests_minimum_st_node_cut"
+  ],
+  "must_fail_note": "sentinels appended by test.sh to each overlaid file; each must be reported failed, else the test run was tampered with (reward 0)",
+  "must_fail": [
+    "networkx/algorithms/connectivity/tests/test_connectivity.py::test_consistency_check_impossible_equality",
+    "networkx/algorithms/connectivity/tests/test_cuts.py::test_consistency_check_impossible_equality"
   ]
 }

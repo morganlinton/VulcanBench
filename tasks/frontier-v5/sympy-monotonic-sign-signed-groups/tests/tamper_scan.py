@@ -31,7 +31,7 @@ CODE = {
               r"|\bsys\s*\.\s*(modules|argv)\b",
     "java": r"org\.junit|\bjunit\b|opentest4j|surefire|\bSystem\s*\.\s*exit\b"
             r"|\bRuntime\s*\.\s*getRuntime\s*\(\s*\)\s*\.\s*(halt|exit)\b|\b(halt|exit)\s*\(",
-    "javascript": r"\bjest\b|__mocks__|\bprocess\s*\.\s*(exit|kill|abort|reallyExit)\b"
+    "javascript": r"\bjest\b|__mocks__|\bprocess\s*\.\s*(exit|kill|abort|reallyExit)\b|\bglobalThis\b|\bexpect\b"
                   r"|(?<![\w.$])(expect|describe|it|test|beforeAll|beforeEach|afterAll|afterEach)\s*\(",
     "rust": r"\bprocess\s*::\s*(exit|abort)\b|\b(exit|abort)\s*\(|\blibtest\b|\benv\s*::\s*args\b"
             r"|test result:",

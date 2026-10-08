@@ -23,5 +23,10 @@
     "sympy/core/tests/test_exprtools.py::test_issue_7903",
     "sympy/core/tests/test_exprtools.py::test_issue_8263",
     "sympy/core/tests/test_exprtools.py::test_xreplace"
+  ],
+  "must_fail_note": "sentinels appended by test.sh to each overlaid file; each must be reported failed, else the test run was tampered with (reward 0)",
+  "must_fail": [
+    "sympy/core/tests/test_exprtools.py::test_consistency_check_impossible_equality",
+    "sympy/core/tests/test_assumptions.py::test_consistency_check_impossible_equality"
   ]
 }

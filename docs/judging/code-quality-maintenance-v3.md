@@ -1060,6 +1060,46 @@ Sol seat transport. Population record:
   with Muse Code or Codex. Windows are logged in
   `logs/routine-v1-maint-v322-chain.log`.
 
+## Amendment v3.23, October 7, 2026: Claude Sonnet 5.5 on Frontier v4, judge pins rebuilt
+
+The v3.15 protocol on a new population, with the judge pins read from a
+committed file because their frozen sources were lost. Nothing in the
+rubric, controls, quirk keys, gates, repeats, seed, weights or judge
+settings changes. Protocol id `code-quality-maintenance-v3.23`; run
+directory `runs-code-quality-maintenance-v3.23`; runner
+`harness/maintenance_review_v323.py`, derived from the v3.15 runner.
+Population record: `docs/results/swe-v4-sonnet55-2026-10/comparison.json`,
+built by `scripts/cii-v4-board/build_sonnet55_population.py`.
+
+- Population: the October 2026 Claude Sonnet 5.5 sweep of Frontier v4,
+  low through max, one attempt per task and level, through Claude Code
+  2.1.291 to 2.1.293 (the version is recorded per row), refusal fallback
+  on. Exclusions, if any, are listed in the population record.
+- Task hashes: the sweep ran before tagged run worktrees, from a checkout
+  whose `task_hash` still counted `__pycache__` files, so its summaries
+  record hashes that differ from `suite.lock.json`. The population builder
+  accepts a run only through the committed bridge
+  `docs/judging/task-hash-bridge-sonnet55.json`, which
+  pairs each task's recorded hash with its lock hash, both computed on the
+  same unchanged directories. Every repo `.pyc` an agent could have seen
+  is byte-identical to compiling the starting source, so the extra files
+  revealed nothing (DECISIONS.md, 2026-10-07).
+- Judge pins: the v3.3 and v3.4 run directories held the Grok and Muse
+  reviewer settings and binary pins, and existed only on the original
+  host, which was erased. `docs/judging/judge-pins-v3.json` now holds the
+  settings, recovered from the published judge-protocols data (identical in
+  the v3.4, v3.15 and v3.17 bundles and equal to the v3 constants). Muse
+  Spark 1.3 runs the same binary as every earlier round, matched by sha256.
+  The Cursor CLI that carries Grok 4.6 is re-pinned by sha256 on this host;
+  equality with the v3.3 Cursor pin cannot be shown, and every card says so.
+  Binary paths are resolved on the host and only hashes are compared.
+- Judges: Muse Spark 1.3 and Grok 4.6, neutral for an Anthropic submission.
+  Both retake the exam under v3.23 before any counted call; one failing
+  panel is disclosed and the passing one publishes, two failures stop the
+  amendment.
+- Comparability: Frontier Code quality is L1 plus L2, as for v3.15, and is
+  never placed beside Routine Code quality.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

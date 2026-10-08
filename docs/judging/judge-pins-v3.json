@@ -1,0 +1,52 @@
+{
+ "id": "judge-pins-v3",
+ "rebuilt": "2026-10-07",
+ "why": "The frozen v3.3 and v3.4 run directories, whose protocol.json files held the Grok and Muse reviewer settings and binary pins, existed only on the original host and were lost when it was erased. Their hashes are still published (site provenance for swe-v4-astra-fable51-v34). This file is committed so the pins cannot be lost again; runners from v3.23 on read it instead of those directories.",
+ "lost_sources": {
+  "runs-code-quality-maintenance-v3.3/protocol.json": "b82da5987bb555443c9006e51e5a4d555c41858dc710140f0571bd90ed8a5eec",
+  "runs-code-quality-maintenance-v3.4/protocol.json": "1d80e0974526f8d825f14921c9102c8eda47ec312a0981783475149e31fd8524"
+ },
+ "settings_source": {
+  "file": "VulcanBenchCOM assets/data/swe-v4-opus55-v315/judge-protocols.json, key scored_panel",
+  "commit": "6d8c46b",
+  "sha256": "ad68f5dd14806a9f7c039d12d58e2388239ec8adee556e8cf07f79c9fc41dea0",
+  "method": "The site exporter publishes each frozen reviewer block minus its binary path keys (muse, cursor). The same blocks are published identically in the swe-v4-astra-fable51-v34 (v3.4) and swe-v4-gpt6-sol-v317 bundles and agree with GROK_MODEL, GROK_DISPLAY and MUSE_MODEL in harness/maintenance_review_v3.py. Path keys are restored from that module's home-relative MUSE_BINARY and CURSOR."
+ },
+ "reviewers": {
+  "muse": {
+   "model": "muse-spark-1.3",
+   "effort": "medium",
+   "binary_sha256": "4c0f960028b603174af7df7bd5051d8c35d6c1aa372a37d18bc770926a0577a7",
+   "timeout": 900,
+   "lab": "Meta",
+   "tier": "standard (no training on prompts or completions)",
+   "prompt_delivery": "prompt file",
+   "system_prompt": "folded into prompt",
+   "sandbox": "adapter kernel profile, empty workspace",
+   "identity": "session log model_completed events, audited by the adapter's collect_usage"
+  },
+  "grok": {
+   "model": "cursor-grok-4.6-medium",
+   "display_name": "Cursor Grok 4.6 Medium",
+   "effort": "medium",
+   "timeout": 900,
+   "lab": "xAI",
+   "prompt_delivery": "stdin",
+   "system_prompt": "folded into prompt",
+   "identity": "requested-only, display name checked"
+  }
+ },
+ "binaries": {
+  "muse": {
+   "file": "muse-bin-1.0.3-R2198.1",
+   "sha256": "4c0f960028b603174af7df7bd5051d8c35d6c1aa372a37d18bc770926a0577a7",
+   "verified": "Equals the published v3.4 binary_sha256 and MUSE_SHA256; the same binary as every earlier Muse round."
+  },
+  "cursor": {
+   "file": "cursor-agent",
+   "version": "2026.09.10-fd3934a",
+   "sha256": "2ccc9a8e167797641448b5e5c936f006ba137a2555f117f38c5eb76a5238a233",
+   "verified": "Re-pinned 2026-10-07. The v3.3 Cursor pin was never published and was lost with the original host, so this binary cannot be shown to equal the one earlier Grok rounds used. The Grok model itself is served by Cursor and pinned by model id and display name, and both judges retake calibration in every round."
+  }
+ }
+}

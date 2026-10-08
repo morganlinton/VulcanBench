@@ -20,5 +20,7 @@ RUN set -eux; \
 COPY gold_test_connectivity.py /gold_test_connectivity.py
 COPY gold_test_cuts.py /gold_test_cuts.py
 COPY families.json /families.json
+COPY tamper_scan.py /tamper_scan.py
+COPY check_junit.py /check_junit.py
 COPY test.sh /test.sh
 RUN chmod +x /test.sh

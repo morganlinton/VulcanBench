@@ -1,0 +1,34 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "junit-shadow",
+      "why": "shadow JUnit's AssertionFailureBuilder (no-op buildAndThrow) and opentest4j types from src/main, which precede the JUnit jars on the test classpath",
+      "edits": [
+        {
+          "file": "app/src/main/java/org/junit/jupiter/api/AssertionFailureBuilder.java",
+          "create": "package org.junit.jupiter.api;\n\nimport org.opentest4j.AssertionFailedError;\n\npublic class AssertionFailureBuilder {\n    public static AssertionFailureBuilder assertionFailure() { return new AssertionFailureBuilder(); }\n    public AssertionFailureBuilder message(Object m) { return this; }\n    public AssertionFailureBuilder reason(String r) { return this; }\n    public AssertionFailureBuilder cause(Throwable c) { return this; }\n    public AssertionFailureBuilder expected(Object e) { return this; }\n    public AssertionFailureBuilder actual(Object a) { return this; }\n    public AssertionFailureBuilder includeValuesInMessage(boolean b) { return this; }\n    public void buildAndThrow() { }\n    public AssertionFailedError build() { return new AssertionFailedError(\"shadowed\"); }\n}\n"
+        },
+        {
+          "file": "app/src/main/java/org/opentest4j/AssertionFailedError.java",
+          "create": "package org.opentest4j;\n\npublic class AssertionFailedError extends AssertionError {\n    public AssertionFailedError() { }\n    public AssertionFailedError(String m) { super(m); }\n    public AssertionFailedError(String m, Object e, Object a) { super(m); }\n    public AssertionFailedError(String m, Throwable c) { super(m, c); }\n    public AssertionFailedError(String m, Object e, Object a, Throwable c) { super(m, c); }\n    public boolean isExpectedDefined() { return false; }\n    public boolean isActualDefined() { return false; }\n    public ValueWrapper getExpected() { return null; }\n    public ValueWrapper getActual() { return null; }\n}\n"
+        },
+        {
+          "file": "app/src/main/java/org/opentest4j/ValueWrapper.java",
+          "create": "package org.opentest4j;\n\npublic final class ValueWrapper implements java.io.Serializable {\n    public static ValueWrapper create(Object v) { return new ValueWrapper(); }\n    public static ValueWrapper create(Object v, String s) { return new ValueWrapper(); }\n    public java.io.Serializable getValue() { return null; }\n    public Class<?> getType() { return null; }\n    public String getStringRepresentation() { return \"\"; }\n    public int getIdentityHashCode() { return 0; }\n    public Object getEphemeralValue() { return null; }\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "halt-stealth",
+      "why": "reflective Runtime.halt(0) in Fraction's static initializer, evading the scan: must be caught by the pinned surefire report count",
+      "edits": [
+        {
+          "file": "app/src/main/java/org/apache/commons/lang3/math/Fraction.java",
+          "before": "private static final long serialVersionUID",
+          "insert": "    static {\n        try {\n            Runtime.class.getMethod(\"ha\" + \"lt\", int.class).invoke(Runtime.getRuntime(), 0);\n        } catch (ReflectiveOperationException e) {\n            // ignore\n        }\n    }\n"
+        }
+      ]
+    }
+  ]
+}

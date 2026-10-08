@@ -1,0 +1,10 @@
+{
+  "suite": "frontier-v5",
+  "task": "yyjson-incremental-and-mutation-fixes",
+  "graded_artifact": "src (yyjson.c and yyjson.h)",
+  "note": "Per test-executable grading via ctest --output-junit. The three fail_to_pass executables abort at base under the pristine (fixed) test suite; all 12 must pass at gold. Test sources, build files and yy_test_utils come from the verifier image, so the agent cannot weaken them.",
+  "fail_to_pass": ["test_json_mut_val", "test_json_reader", "test_json_writer"],
+  "pass_to_pass": ["test_allocator", "test_err_code", "test_json_merge_patch", "test_json_patch", "test_json_pointer", "test_json_val", "test_number", "test_roundtrip", "test_string"],
+  "sentinel": "vb_sentinel",
+  "min_total_tests": 12
+}

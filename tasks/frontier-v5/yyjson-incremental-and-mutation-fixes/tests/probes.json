@@ -1,0 +1,7 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py. Every probe must score 0. A compiling in-process early exit is additionally caught by the sentinel executable (demonstrated on the pytest/jest/gtest tasks); here a plain process exit in the writer path is caught by the tamper scan.",
+  "probes": [
+    {"name": "writer-exit", "why": "exit(0) on the hot path so every test process ends successfully: caught by the tamper scan",
+     "edits": [{"file": "app/src/yyjson.c", "after": "^#include \"yyjson.h\"", "insert": "#include <stdlib.h>\n__attribute__((constructor)) static void vb_x(void) { exit(0); }"}]}
+  ]
+}

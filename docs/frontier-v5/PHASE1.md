@@ -488,3 +488,27 @@ therefore include a diff review of every solved run, looking for test
 framework interaction and exits, before a solve counts against the 1/3
 bar. The F1 scaffolds (OpenAPV, libmbus) were not audited here; that
 belongs to the Track B session.
+
+## C and F2 pipelines proven 2026-10-08
+
+- **Plain C (CMake + ctest):** yyjson-incremental-and-mutation-fixes builds
+  the pinned base's test suite with the fixed (gold) tests applied from a
+  patch, grades per test executable from `ctest --output-junit` (not ctest's
+  exit status), and adds a sentinel executable compiled against the agent's
+  library that must abort. The writer-exit probe showed per-executable exit
+  codes alone are foolable (a constructor `exit(0)` makes every executable
+  exit 0, so ctest marks them passed); the tamper scan and the sentinel
+  catch it. c-v1 checklist, this task its first entry.
+- **F2 differential parity (Rust):** comrak-gfm-tables-autolinks-parity.
+  Lessons: build the reference's expected outputs in a throwaway verifier
+  stage pinned by output hash, keep them root-only, and run the agent's
+  binary as `nobody` so it cannot read them; match the reference CLI's flags
+  exactly (here `--syntax-highlighting none --gfm-quirks`), since a flag
+  mismatch looks like thousands of "failures"; and source the whole corpus
+  from the reference project's own example files plus seeded combinations,
+  never hand-written payloads. A natural-drift F2 target did not work
+  (comrak has matched cmark-gfm for years); removing two whole parsers gives
+  an honest gap whose gold is real upstream code.
+- **Verifier probe harness:** scripts/frontier-v5/probe_verifier.py turns the
+  audit's attacks into a per-task gate (tests/probes.json). Required for
+  every new task.

@@ -1,0 +1,16 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py. Grading compares the CLI's output outside the agent's process, so in-process tampering does not apply; the expected outputs are root-only and the binary runs as nobody (checked separately in DESIGN.md), and FFI, file reads and process spawning are tamper-scanned.",
+  "probes": [
+    {
+      "name": "exit-early",
+      "why": "exit 0 with no output: must fail every case",
+      "edits": [
+        {
+          "file": "app/src/main.rs",
+          "after": "^fn main\\(\\)",
+          "insert": "    { use std::process::{exit as quit}; quit(0); }"
+        }
+      ]
+    }
+  ]
+}

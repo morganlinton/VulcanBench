@@ -23,7 +23,7 @@ M[artifact_present]=1
 
 # pristine tree, then overlay the agent's non-test files (tests stay pristine).
 cp -a /pristine /work
-( cd /app/networkx && tar cf - --exclude='*/tests' --exclude='*/tests/*' --exclude='conftest.py' . ) | ( cd /work/networkx && tar xf - )
+( cd /app/networkx && tar cf - --exclude='*/tests' --exclude='*/tests/*' --exclude='conftest.py' --exclude='__pycache__' --exclude='*.py[co]' . ) | ( cd /work/networkx && tar xf - )
 # The agent's conftest.py files are never used (pytest loads every conftest.py
 # on the path to a test, so one could rewrite results); its tests/ trees are
 # ignored too. Added lines that reference the test runner or force an exit

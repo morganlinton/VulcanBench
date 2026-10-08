@@ -26,4 +26,7 @@ COPY families.json /families.json
 COPY tamper_scan.py /tamper_scan.py
 COPY check_libtest.py /check_libtest.py
 COPY test.sh /test.sh
+# Harbor runs the verifier image's own /tests/test.sh (it uploads no tests).
+COPY test.sh /tests/test.sh
 RUN chmod +x /test.sh
+RUN chmod +x /tests/test.sh

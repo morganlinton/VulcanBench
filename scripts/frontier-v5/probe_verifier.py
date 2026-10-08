@@ -121,7 +121,7 @@ def run_verifier(image: str, art: Path, paths: list[str], out: Path, timeout: in
     cmd = ["docker", "run", "--rm", "--network", "none", "--cpus", "2", "--memory", "4g"]
     for p in paths:
         cmd += ["-v", f"{art}{p}:{p}:ro"]
-    cmd += ["-v", f"{out}:/logs/verifier", image, "bash", "/test.sh"]
+    cmd += ["-v", f"{out}:/logs/verifier", image, "bash", "/tests/test.sh"]
     cname = f"vbprobe-run-{os.getpid()}-{out.name}"
     cmd[3:3] = ["--name", cname]
     with (out / "stdout").open("w") as so, (out / "stderr").open("w") as se:

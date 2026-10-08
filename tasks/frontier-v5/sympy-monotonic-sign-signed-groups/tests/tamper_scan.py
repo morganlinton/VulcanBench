@@ -48,6 +48,17 @@ NAMES = {
 }
 
 
+# Python byproducts (harness.tasks.is_local_junk, DECISIONS 2026-10-06): an
+# agent that runs the tests leaves bytecode caches in the artifact. They are
+# not scanned for Python only, because the Python verifiers never copy
+# __pycache__ or *.py[co] into the graded tree (so a planted .pyc cannot stand
+# in for its source) and the dot-directories are not importable. Other
+# languages scan everything: their builds would compile a file hidden there.
+JUNK = {
+    "python": re.compile(r"(^|/)(__pycache__|\.pytest_cache|\.mypy_cache|\.ruff_cache)(/|$)|\.py[co]$"),
+}
+
+
 def read(path):
     try:
         with open(path, encoding="utf-8", errors="strict") as f:
@@ -60,12 +71,13 @@ def main():
     lang, pristine, agent = sys.argv[1], sys.argv[2], sys.argv[3]
     ignore = re.compile(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None
     code, names = re.compile(CODE[lang]), re.compile(NAMES[lang])
+    junk = JUNK.get(lang)
     findings = []
     for root, _dirs, files in os.walk(agent):
         for fn in files:
             path = os.path.join(root, fn)
             rel = os.path.relpath(path, agent)
-            if ignore and ignore.search(rel):
+            if (ignore and ignore.search(rel)) or (junk and junk.search(rel)):
                 continue
             ref = os.path.join(pristine, rel)
             new = not os.path.exists(ref)

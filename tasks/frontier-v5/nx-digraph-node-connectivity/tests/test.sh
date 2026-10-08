@@ -16,7 +16,7 @@ emit() { local r=$1; { printf '{"reward": %s' "$r"; for k in "${!M[@]}"; do prin
 [ -d /app/networkx ] || { echo "verifier: missing /app/networkx" >&2; emit 0; }
 M[artifact_present]=1
 cp -a /pristine /work
-( cd /app/networkx && tar cf - --exclude='*/tests' --exclude='*/tests/*' --exclude='conftest.py' . ) | ( cd /work/networkx && tar xf - )
+( cd /app/networkx && tar cf - --exclude='*/tests' --exclude='*/tests/*' --exclude='conftest.py' --exclude='__pycache__' --exclude='*.py[co]' . ) | ( cd /work/networkx && tar xf - )
 # The agent's conftest.py files are never used (pytest loads every conftest.py
 # on the path to a test, so one could rewrite results); its tests/ trees are
 # ignored too. Added lines that reference the test runner or force an exit

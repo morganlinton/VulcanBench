@@ -512,3 +512,31 @@ belongs to the Track B session.
 - **Verifier probe harness:** scripts/frontier-v5/probe_verifier.py turns the
   audit's attacks into a per-task gate (tests/probes.json). Required for
   every new task.
+
+## First subscription gate attempt 2026-10-08: two grading bugs
+
+The first real `harbor run` (codex:gpt-6-astra at medium, ChatGPT
+subscription via `CODEX_FORCE_AUTH_JSON=1`, Codex CLI 0.159.0; 0.149.0
+refuses the model) on nx-digraph-node-connectivity could not be scored:
+
+1. **Wrong verifier entry point.** Harbor 0.24.0 runs the verifier image's
+   own `/tests/test.sh` (finding 4), but every Track A tests/Dockerfile
+   installed the script only at `/test.sh`, and probe_verifier.py called
+   `/test.sh` directly, so no validation exercised Harbor's path. Harbor's
+   `oracle` agent reproduced it on main: RewardFileNotFoundError, "bash:
+   /tests/test.sh: No such file or directory". Each Dockerfile now also
+   installs `/tests/test.sh`, and probe_verifier.py calls `/tests/test.sh`,
+   so the two cannot drift again.
+2. **Bytecode false positive.** An agent that runs pytest leaves
+   `__pycache__/*.pyc` in the artifact, and the tamper scan flagged every one
+   as a new binary file (287 findings on the Astra run), so any such agent
+   scored 0. For Python only, the scan now skips the byproducts
+   `harness.tasks.is_local_junk` skips (DECISIONS 2026-10-06), and the three
+   Python verifiers no longer copy `__pycache__` or `*.py[co]` into the
+   graded tree, so a planted bytecode file cannot stand in for its source.
+   Checked on nx-digraph: gold plus 583 compiled caches scores 1 (it scored
+   0 before); base plus forged gold bytecode stamped with the base sources'
+   mtime and size scores 0; every existing probe still scores 0.
+
+Rule for new tasks: validate through `harbor run -a oracle` (gold must score
+1 under Harbor itself), not only probe_verifier.py.

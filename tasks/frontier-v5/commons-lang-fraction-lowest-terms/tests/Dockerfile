@@ -31,5 +31,6 @@ RUN set -eux; \
 COPY gold_test_FractionTest.java /gold_test_FractionTest.java
 COPY families.json /families.json
 COPY check.py /check.py
+COPY tamper_scan.py /tamper_scan.py
 COPY test.sh /test.sh
 RUN chmod +x /test.sh

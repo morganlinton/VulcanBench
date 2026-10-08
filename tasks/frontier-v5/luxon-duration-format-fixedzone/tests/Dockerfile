@@ -31,5 +31,7 @@ COPY gold_test_duration_format.test.js /gold_test_duration_format.test.js
 COPY gold_test_zones_fixedOffset.test.js /gold_test_zones_fixedOffset.test.js
 COPY families.json /families.json
 COPY check.js /check.js
+COPY tamper_scan.py /tamper_scan.py
+COPY sentinel.test.snippet /sentinel.test.snippet
 COPY test.sh /test.sh
 RUN chmod +x /test.sh

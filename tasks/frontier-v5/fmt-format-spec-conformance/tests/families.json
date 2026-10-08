@@ -599,5 +599,10 @@
   ],
   "guard_note": "every ctest entry (GCC 12.2, C++17, Debug, in vulcanbench/sandbox:v5-cfamily) of the pristine suite plus the gold overlay, one googletest case per process (run_tests.py); pass_to_pass is every case other than fail_to_pass; any failure outside known_env_failures, or fewer cases than min_total_tests, breaks the wall",
   "known_env_failures": [],
-  "min_total_tests": 584
+  "min_total_tests": 586,
+  "must_fail_note": "sentinels appended by test.sh to format-test.cc and args-test.cc; each must be reported failed, else the test run was tampered with (reward 0)",
+  "must_fail": [
+    "format-test::consistency_check.impossible_equality",
+    "args-test::consistency_check.impossible_equality"
+  ]
 }

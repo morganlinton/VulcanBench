@@ -21,6 +21,18 @@ JavaScript/TypeScript, Rust, C, C++ and Java. These do not flag. Start a
 clean session per batch so context stays unsaturated. The four committed
 tasks prove the pipeline (Python and Rust) end to end; reuse their structure.
 
+Every Track A task must ship the three verifier layers from PHASE1.md
+("Verifier audit 2026-10-08"): structural (only upstream graded paths),
+report-based grading (never the runner's exit status) and tamper detection
+(`tests/tamper_scan.py`, copied unchanged, plus a must-fail sentinel for
+in-process runners), and must be probed with at least an exit attack and
+a test-framework shadowing attack before it counts as validated.
+
+The probe is mechanized: add a tests/probes.json (edits that try to score
+without fixing anything) and run python3 scripts/frontier-v5/probe_verifier.py
+tasks/frontier-v5/<task>. It builds the images, checks base=0 and gold=1, and
+fails if any probe scores 1. All nine current tasks pass it.
+
 ### Track B: the F1 sanitizer family, on Opus 4.8 (its designated model)
 
 Reproducing heap overflows, data races and undefined behavior, and writing
@@ -53,8 +65,18 @@ and proved the C++/CMake pipeline on v5-cfamily on 2026-10-07 (base=0,
 gold=1, x3, nine single-fix controls), the first task validated on the
 x86-64 cloud VM. It is wide (six headers) but its causes are independent,
 so it is labeled UNSLOTTED as a breadth task, not an interaction task.
-Remaining Track A gaps: a plain C task (no C++), and harder arcs whose
-causes interact (the commons-lang shape) in JavaScript, Java or C++.
+C is done too (2026-10-08): yyjson-incremental-and-mutation-fixes composes
+four upstream yyjson fixes and proved the plain-C (CMake + ctest) pipeline
+on v5-cfamily. And the first F2 (differential parity) task exists:
+comrak-gfm-tables-autolinks-parity, a Rust port of GFM tables and autolinks
+graded byte-for-byte against the C reference cmark-gfm; it is built to fill
+the F2-rust slot, not UNSLOTTED. Every language now has a validated task.
+
+Remaining Track A gaps, in priority order: gate-measure what exists (needs
+the reference credentials, the real blocker); more F2 and F3 tasks toward
+their six slots each; and harder interacting arcs (the commons-lang shape)
+rather than more breadth tasks. Every new task must pass
+scripts/frontier-v5/probe_verifier.py (see below).
 
 ## One-line startup for a fresh Fable session
 

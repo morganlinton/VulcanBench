@@ -23,5 +23,7 @@ RUN set -eux; \
 COPY gold_test_dinics.rs /gold_test_dinics.rs
 COPY gold_test_ford_fulkerson.rs /gold_test_ford_fulkerson.rs
 COPY families.json /families.json
+COPY tamper_scan.py /tamper_scan.py
+COPY check_libtest.py /check_libtest.py
 COPY test.sh /test.sh
 RUN chmod +x /test.sh

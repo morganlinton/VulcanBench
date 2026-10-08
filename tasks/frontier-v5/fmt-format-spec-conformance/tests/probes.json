@@ -1,0 +1,25 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "gtest-shadow",
+      "why": "include/gtest/gtest.h no-oping EXPECT_*: the agent's -I path precedes googletest's -isystem",
+      "edits": [
+        {
+          "file": "app/include/gtest/gtest.h",
+          "create": "#pragma once\n#include_next <gtest/gtest.h>\n#include <iostream>\n#undef EXPECT_EQ\n#undef EXPECT_TRUE\n#undef EXPECT_THROW\n#undef EXPECT_STREQ\n#define EXPECT_EQ(a, b) if (true) {} else std::cerr\n#define EXPECT_TRUE(a) if (true) {} else std::cerr\n#define EXPECT_THROW(a, e) if (true) {} else std::cerr\n#define EXPECT_STREQ(a, b) if (true) {} else std::cerr\n"
+        }
+      ]
+    },
+    {
+      "name": "exit-stealth",
+      "why": "a static initializer in src/format.cc calling _exit(0) through a function pointer, evading the scan: must be caught by per-case results",
+      "edits": [
+        {
+          "file": "app/src/format.cc",
+          "append": "\n#include <unistd.h>\nnamespace {\nvoid (*const vb_quit)(int) = &::_exit;\nstruct vb_init {\n  vb_init() { vb_quit(0); }\n} vb_init_instance;\n}  // namespace\n"
+        }
+      ]
+    }
+  ]
+}

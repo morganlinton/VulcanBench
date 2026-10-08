@@ -25,5 +25,7 @@ COPY gold_tests/ /gold_tests/
 COPY families.json /families.json
 COPY run_tests.py /run_tests.py
 COPY check.py /check.py
+COPY tamper_scan.py /tamper_scan.py
+COPY sentinel.cc.snippet /sentinel.cc.snippet
 COPY test.sh /test.sh
 RUN chmod +x /test.sh

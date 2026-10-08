@@ -1,0 +1,209 @@
+diff --git a/test/test_json_mut_val.c b/test/test_json_mut_val.c
+index 1dee66b..a0fcd80 100644
+--- a/test/test_json_mut_val.c
++++ b/test/test_json_mut_val.c
+@@ -835,6 +835,25 @@ static void test_json_mut_arr_api(void) {
+     yyjson_mut_arr_clear(arr);
+     
+     
++    //---------------------------------------------
++    // iterator with remove() called twice in a row
++
++    yyjson_mut_arr_append(arr, num1);
++    yyjson_mut_arr_append(arr, num2);
++    yyjson_mut_arr_append(arr, num3);
++
++    cmp[0] = 1;
++    cmp[1] = 3;
++    yyjson_mut_arr_iter_init(arr, &iter);
++    yyjson_mut_arr_iter_next(&iter);
++    val = yyjson_mut_arr_iter_next(&iter);
++    yy_assert(yyjson_mut_arr_iter_remove(&iter) == val);
++    yy_assert(yyjson_mut_arr_iter_remove(&iter) == NULL);
++    validate_mut_arr(arr, cmp, 2);
++    
++    yyjson_mut_arr_clear(arr);
++    
++    
+     //---------------------------------------------
+     // array add()
+     val = yyjson_mut_str(doc, "abc");
+@@ -2126,6 +2145,25 @@ static void test_json_mut_obj_api(void) {
+     yy_assert(!yyjson_mut_obj_iter_remove(NULL));
+     
+     
++    //---------------------------------------------
++    // iterator with remove() called twice in a row
++
++    yyjson_mut_obj_add_int(doc, obj, "a", 10);
++    yyjson_mut_obj_add_int(doc, obj, "b", 11);
++    yyjson_mut_obj_add_int(doc, obj, "c", 12);
++
++    yyjson_mut_obj_iter_init(obj, &iter);
++    yyjson_mut_obj_iter_next(&iter);
++    key = yyjson_mut_obj_iter_next(&iter);
++    val = yyjson_mut_obj_iter_get_val(key);
++    yy_assert(yyjson_mut_obj_iter_remove(&iter) == val);
++    yy_assert(yyjson_mut_obj_iter_remove(&iter) == NULL);
++    set_validate(0, "a", 1, 10);
++    set_validate(1, "c", 1, 12);
++    validate_mut_obj(obj, keys, key_lens, vals, 2);
++    yyjson_mut_obj_clear(obj);
++    
++    
+     yyjson_mut_obj_clear(NULL);
+     yyjson_mut_obj_clear(obj);
+     //---------------------------------------------
+diff --git a/test/test_json_reader.c b/test/test_json_reader.c
+index f40b302..479268b 100644
+--- a/test/test_json_reader.c
++++ b/test/test_json_reader.c
+@@ -725,9 +725,106 @@ static void test_incr_raw_number_terminator(void) {
+     }
+ }
+ 
++/* A root-level number must not be finalized while more data is still pending;
++   it may continue with more digits in a later chunk (same as numbers inside a
++   container). Feeding "743" one byte at a time must yield 743, not 7. */
++static void test_incr_root_number_truncation(void) {
++    const char *json = "743";
++    usize len = strlen(json);
++    char *buf = malloc(len);
++    yyjson_incr_state *state;
++    yyjson_doc *doc = NULL;
++    usize read_len;
++    memcpy(buf, json, len);
++    state = yyjson_incr_new(buf, len, 0, NULL);
++    for (read_len = 1; read_len <= len; read_len++) {
++        yyjson_read_err err;
++        doc = yyjson_incr_read(state, read_len, &err);
++        if (doc) {
++            yy_assert(read_len == len);
++            break;
++        }
++        yy_assert(err.code == YYJSON_READ_ERROR_MORE);
++    }
++    yy_assert(doc != NULL);
++    yy_assert(yyjson_get_sint(yyjson_doc_get_root(doc)) == 743);
++    yyjson_doc_free(doc);
++    yyjson_incr_free(state);
++    free(buf);
++}
++
++/* Without STOP_WHEN_DONE the reader rejects content after a complete document.
++   The incremental reader must apply the same rule to bytes that are still
++   pending in the buffer: it must not finalize a document early and accept
++   trailing content that yyjson_read() would reject. */
++static void test_incr_trailing_content(void) {
++    const char *bad[] = {"1 2", "[1] x", "{} x", "true false", "\"a\" b"};
++    usize n = sizeof(bad) / sizeof(bad[0]);
++    usize i;
++    for (i = 0; i < n; i++) {
++        usize len = strlen(bad[i]);
++        char *buf = malloc(len);
++        yyjson_incr_state *state;
++        yyjson_doc *doc = NULL;
++        yyjson_read_err err;
++        usize read_len;
++        memcpy(buf, bad[i], len);
++
++        /* default: must report the trailing content as an error */
++        state = yyjson_incr_new(buf, len, 0, NULL);
++        for (read_len = 1; read_len <= len; read_len++) {
++            doc = yyjson_incr_read(state, read_len, &err);
++            if (doc) break;
++            if (err.code != YYJSON_READ_ERROR_MORE) break;
++        }
++        yy_assertf(doc == NULL,
++                   "trailing content should fail but passed: %s\n", bad[i]);
++        yy_assert(err.code == YYJSON_READ_ERROR_UNEXPECTED_CONTENT);
++        yyjson_incr_free(state);
++
++        /* STOP_WHEN_DONE: the first complete value is returned as usual */
++        state = yyjson_incr_new(buf, len, YYJSON_READ_STOP_WHEN_DONE, NULL);
++        for (read_len = 1; read_len <= len; read_len++) {
++            doc = yyjson_incr_read(state, read_len, &err);
++            if (doc) break;
++            if (err.code != YYJSON_READ_ERROR_MORE) break;
++        }
++        yy_assertf(doc != NULL,
++                   "STOP_WHEN_DONE should return the first value: %s\n", bad[i]);
++        yyjson_doc_free(doc);
++        yyjson_incr_free(state);
++        free(buf);
++    }
++
++    /* a complete document followed only by whitespace is still valid */
++    {
++        const char *json = "[1,2,3]  \n";
++        usize len = strlen(json);
++        char *buf = malloc(len);
++        yyjson_incr_state *state;
++        yyjson_doc *doc = NULL;
++        yyjson_read_err err;
++        usize read_len;
++        memcpy(buf, json, len);
++        state = yyjson_incr_new(buf, len, 0, NULL);
++        for (read_len = 1; read_len <= len; read_len++) {
++            doc = yyjson_incr_read(state, read_len, &err);
++            if (doc) break;
++            yy_assert(err.code == YYJSON_READ_ERROR_MORE);
++        }
++        yy_assert(doc != NULL);
++        yy_assert(yyjson_arr_size(yyjson_doc_get_root(doc)) == 3);
++        yyjson_doc_free(doc);
++        yyjson_incr_free(state);
++        free(buf);
++    }
++}
++
+ // yyjson incremental with insitu
+ static void test_json_incremental(void) {
+     test_incr_raw_number_terminator();
++    test_incr_root_number_truncation();
++    test_incr_trailing_content();
+     char *dat = create_json(3, 10);
+     usize len = strlen(dat);
+     char *dat_dup = yy_str_copy(dat);
+diff --git a/test/test_json_writer.c b/test/test_json_writer.c
+index 05335ce..fd69c12 100644
+--- a/test/test_json_writer.c
++++ b/test/test_json_writer.c
+@@ -854,7 +854,36 @@ yy_test_case(test_json_writer) {
+         yyjson_mut_write_file("", NULL, 0, NULL, NULL);
+         yyjson_mut_write_file("tmp.json", NULL, 0, NULL, NULL);
+     }
+-    
++
++    // test zero-length output (empty raw root) to file
++    {
++        const char *tmp_file_path = "__yyjson_test_empty__.json";
++        u8 *dat;
++        usize dat_len;
++        FILE *tmp_fp;
++        yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
++        yyjson_mut_doc_set_root(doc, yyjson_mut_rawn(doc, "", 0));
++
++        usize len;
++        char *ret = yyjson_mut_write(doc, 0, &len);
++        yy_assert(ret && len == 0);
++        free(ret);
++
++        yy_file_delete(tmp_file_path);
++        yy_assert(yyjson_mut_write_file(tmp_file_path, doc, 0, NULL, NULL));
++        yy_assert(yy_file_read(tmp_file_path, &dat, &dat_len));
++        yy_assert(dat_len == 0);
++        free(dat);
++        yy_file_delete(tmp_file_path);
++
++        tmp_fp = yy_file_open(tmp_file_path, "wb");
++        yy_assert(yyjson_mut_write_fp(tmp_fp, doc, 0, NULL, NULL));
++        fclose(tmp_fp);
++        yy_file_delete(tmp_file_path);
++
++        yyjson_mut_doc_free(doc);
++    }
++
+ #if !YYJSON_DISABLE_READER
+     // test invalid immutable doc
+     {

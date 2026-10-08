@@ -24,6 +24,45 @@ opaque). That is a real finding, not a slip: the difficulty that actually beat
 frontier models in v4 lives in concentrated algorithmic interaction, which the
 frozen family table has no home for. Decision needed (see bottom).
 
+## Overnight 2026-10-07 into 2026-10-08 (second session): what changed
+
+Three things happened after the first night, all on branch
+frontier-v5-authoring-2 (PRs #177 merged, #178 open):
+
+1. **A verifier audit (below) found five of seven tasks could be scored
+   without fixing anything.** All are fixed and re-validated; the cheating
+   attempts are now a committed, reusable check,
+   `scripts/frontier-v5/probe_verifier.py`, with a `tests/probes.json` per
+   task. Every task now passes base=0, gold=1 and every probe=0 on it.
+2. **First F2 (differential parity) task:**
+   `comrak-gfm-tables-autolinks-parity` (Rust). Port GFM tables and extended
+   autolinks into comrak so its HTML matches the C reference cmark-gfm byte
+   for byte on 5,410 cases (150 visible, 5,260 hidden). A real F2 slot
+   candidate, not UNSLOTTED. Validated base 0 / gold 1 x3.
+3. **First plain-C task:** `yyjson-incremental-and-mutation-fixes`, four
+   upstream yyjson fixes (incremental reader, mutable iterator, file
+   writer). Validated base 0 / gold 1 x3 + single-fix controls. UNSLOTTED.
+
+Count now: nine built-and-validated tasks. Languages with at least one task:
+Python (2), Rust (2: petgraph UNSLOTTED, comrak F2), JavaScript, Java, C++,
+C. Slot-wise still almost all UNSLOTTED; comrak is the first task built to
+fill a frozen slot (F2-rust). Nothing is gate-measured; reference-model
+credentials are still the blocker.
+
+## Verifier audit (2026-10-08): read before trusting any reward
+
+Every Track A verifier was attacked on purpose after a review finding. Five
+of the seven could be beaten by a few lines of graded code that fix
+nothing; the worst, nx-digraph-node-connectivity (the headline task),
+scored reward 1 from a three-line `os._exit(0)`. All seven now grade from
+the runner's own report rather than its exit status, take only the
+upstream graded paths, run a shared tamper scan and (for pytest, jest and
+googletest) require a sentinel test that asserts something false to fail.
+Every task re-probed at base 0, gold 1, every attack 0. Details, the attack
+table and the rule for new tasks are in PHASE1.md, "Verifier audit
+2026-10-08". Any reward recorded before this audit should not be relied on;
+none had been gate-measured.
+
 ## What is on the PR (#174, branch frontier-v5-authoring)
 
 | Task | What it is | Validated | Family |

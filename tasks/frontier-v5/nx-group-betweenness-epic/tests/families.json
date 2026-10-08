@@ -45,5 +45,9 @@
     "networkx/algorithms/centrality/tests/test_group.py::TestProminentGroup::test_prominent_group_normalized_endpoints",
     "networkx/algorithms/centrality/tests/test_group.py::TestProminentGroup::test_prominent_group_single_node",
     "networkx/algorithms/centrality/tests/test_group.py::TestProminentGroup::test_prominent_group_with_c"
+  ],
+  "must_fail_note": "sentinels appended by test.sh to each overlaid file; each must be reported failed, else the test run was tampered with (reward 0)",
+  "must_fail": [
+    "networkx/algorithms/centrality/tests/test_group.py::test_consistency_check_impossible_equality"
   ]
 }

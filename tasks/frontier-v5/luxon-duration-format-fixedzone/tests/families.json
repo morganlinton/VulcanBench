@@ -38,5 +38,10 @@
     "test/datetime/format.test.js::DateTime#toLocaleString can override the dateTime's output calendar",
     "test/interval/format.test.js::Interval#toLocaleString can override the start DateTime's output calendar"
   ],
-  "min_total_tests": 1214
+  "min_total_tests": 1216,
+  "must_fail_note": "sentinels appended by test.sh to both overlaid files; each must be reported failed, else assertions were tampered with (reward 0)",
+  "must_fail": [
+    "test/duration/format.test.js::consistency check: an impossible equality is rejected",
+    "test/zones/fixedOffset.test.js::consistency check: an impossible equality is rejected"
+  ]
 }

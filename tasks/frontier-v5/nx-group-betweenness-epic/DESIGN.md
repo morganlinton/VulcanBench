@@ -99,3 +99,14 @@ a covariate only.
 
 Filled from the validation run; fail_to_pass ids are listed in
 `tests/families.json`.
+
+## Verifier hardening (2026-10-08 audit)
+
+Same exit-status hole and fix as nx-digraph-node-connectivity: no agent
+`conftest.py`, `--junitxml` graded by id (`tests/check_junit.py`), the
+tamper scan, and a sentinel test appended to the overlaid file that must be
+reported failed. Re-probed on the x86-64 cloud VM: base 0, gold 1, and the
+planted `conftest.py`, a scan-evading `os._exit` and an in-process patch of
+pytest's reports all 0.
+
+See docs/frontier-v5/PHASE1.md, "Verifier audit 2026-10-08".

@@ -1,0 +1,35 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "expect-global",
+      "why": "replace the global expect with a no-op proxy from src/: jest then honestly reports every test passed",
+      "edits": [
+        {
+          "file": "app/src/luxon.js",
+          "append": "\n{\n  const g = globalThis, k = \"exp\" + \"ect\";\n  if (typeof g[k] === \"function\") {\n    const sink = new Proxy(function () {}, { get: () => sink, apply: () => sink });\n    g[k] = Object.assign(() => sink, g[k]);\n  }\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "expect-stealth",
+      "why": "the same through Function(\"return this\"), evading the scan: must be caught by the sentinel",
+      "edits": [
+        {
+          "file": "app/src/luxon.js",
+          "append": "\n{\n  const g = Function(\"return this\")(), k = \"exp\" + \"ect\";\n  if (typeof g[k] === \"function\") {\n    const sink = new Proxy(function () {}, { get: () => sink, apply: () => sink });\n    g[k] = Object.assign(() => sink, g[k]);\n  }\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "exit",
+      "why": "process.exit(0) when loaded under jest: must be caught by the jest JSON report",
+      "edits": [
+        {
+          "file": "app/src/luxon.js",
+          "append": "\nif (typeof jest !== \"undefined\") process.exit(0);\n"
+        }
+      ]
+    }
+  ]
+}

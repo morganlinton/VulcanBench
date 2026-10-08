@@ -1,0 +1,92 @@
+diff --git a/src/yyjson.c b/src/yyjson.c
+index 9cb829b..8e20e04 100644
+--- a/src/yyjson.c
++++ b/src/yyjson.c
+@@ -6769,7 +6769,11 @@ doc_begin:
+         goto arr_val_begin;
+     }
+     if (char_is_num(*cur)) {
+-        if (likely(read_num(&cur, pre, flg, val, &msg))) goto doc_end;
++        if (likely(read_num(&cur, pre, flg, val, &msg))) {
++            /* a root number may continue with more digits in a later chunk */
++            if (unlikely(len < state->buf_len)) check_maybe_truncated_number();
++            goto doc_end;
++        }
+         goto fail_number;
+     }
+     if (*cur == '"') {
+@@ -7057,10 +7061,15 @@ obj_end:
+ 
+ doc_end:
+     /* check invalid contents after json document */
+-    if (unlikely(cur < end) && !has_flg(STOP_WHEN_DONE)) {
++    if (unlikely(cur < end || len < state->buf_len) &&
++        !has_flg(STOP_WHEN_DONE)) {
+         save_incr_state(doc_end);
+         while (char_is_space(*cur)) cur++;
+         if (unlikely(cur < end)) goto fail_garbage;
++        /* the document is complete for the bytes seen so far, but more input
++           is still pending; it may hold trailing content that has to be
++           rejected, so request the remaining data before finalizing */
++        if (unlikely(len < state->buf_len)) goto unexpected_end;
+     }
+ 
+     **pre = '\0';
+@@ -9064,7 +9073,7 @@ static_inline u8 *write_indent(u8 *cur, usize level, usize spaces) {
+ /** Write data to file pointer. */
+ static bool write_dat_to_fp(FILE *fp, u8 *dat, usize len,
+                             yyjson_write_err *err) {
+-    if (fwrite(dat, len, 1, fp) != 1) {
++    if (fwrite(dat, 1, len, fp) != len) {
+         err->msg = "file writing failed";
+         err->code = YYJSON_WRITE_ERROR_FILE_WRITE;
+         return false;
+@@ -9086,7 +9095,7 @@ static bool write_dat_to_file(const char *path, u8 *dat, usize len,
+     if (file == NULL) {
+         return_err(FILE_OPEN, MSG_FOPEN);
+     }
+-    if (fwrite(dat, len, 1, file) != 1) {
++    if (fwrite(dat, 1, len, file) != len) {
+         return_err(FILE_WRITE, MSG_FWRITE);
+     }
+     if (fclose(file) != 0) {
+diff --git a/src/yyjson.h b/src/yyjson.h
+index 9901509..88c320f 100644
+--- a/src/yyjson.h
++++ b/src/yyjson.h
+@@ -6308,7 +6308,8 @@ yyjson_api_inline yyjson_mut_val *yyjson_mut_arr_iter_next(
+ 
+ yyjson_api_inline yyjson_mut_val *yyjson_mut_arr_iter_remove(
+     yyjson_mut_arr_iter *iter) {
+-    if (yyjson_likely(iter && 0 < iter->idx && iter->idx <= iter->max)) {
++    if (yyjson_likely(iter && iter->pre &&
++                      0 < iter->idx && iter->idx <= iter->max)) {
+         yyjson_mut_val *prev = iter->pre;
+         yyjson_mut_val *cur = iter->cur;
+         yyjson_mut_val *next = cur->next;
+@@ -6318,6 +6319,7 @@ yyjson_api_inline yyjson_mut_val *yyjson_mut_arr_iter_remove(
+         unsafe_yyjson_set_len(iter->arr, iter->max);
+         prev->next = next;
+         iter->cur = prev;
++        iter->pre = NULL;
+         return cur;
+     }
+     return NULL;
+@@ -6958,7 +6960,8 @@ yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_iter_get_val(
+ 
+ yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_iter_remove(
+     yyjson_mut_obj_iter *iter) {
+-    if (yyjson_likely(iter && 0 < iter->idx && iter->idx <= iter->max)) {
++    if (yyjson_likely(iter && iter->pre &&
++                      0 < iter->idx && iter->idx <= iter->max)) {
+         yyjson_mut_val *prev = iter->pre;
+         yyjson_mut_val *cur = iter->cur;
+         yyjson_mut_val *next = cur->next->next;
+@@ -6968,6 +6971,7 @@ yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_iter_remove(
+         unsafe_yyjson_set_len(iter->obj, iter->max);
+         prev->next->next = next;
+         iter->cur = prev;
++        iter->pre = NULL;
+         return cur->next;
+     }
+     return NULL;

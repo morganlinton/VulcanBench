@@ -40,7 +40,10 @@ cat /sentinel.test.snippet >> /work/test/zones/fixedOffset.test.js
 cd /work
 export TZ=America/New_York LANG=C.UTF-8 LC_ALL=C.UTF-8 CI=true
 # --ci: no snapshot writes; -w 2: fixed worker count; cache lives in the container only.
-npx jest --ci -w 2 --json --outputFile="$OUT/jest.json" > "$OUT/jest.log" 2>&1 || true
+# A hard limit: graded code that kills jest's workers (process.exit) makes jest
+# crash a worker per test file and drag on; the whole suite takes about two
+# minutes, so a run past 15 leaves no report and scores 0.
+timeout -k 30 900 npx jest --ci -w 2 --json --outputFile="$OUT/jest.json" > "$OUT/jest.log" 2>&1 || true
 
 while read -r k v; do M[$k]=$v; done < <(node /check.js "$OUT/jest.json" /families.json /work 2>"$OUT/check.err")
 cat "$OUT/check.err" >&2

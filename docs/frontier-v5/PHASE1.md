@@ -436,3 +436,55 @@ Track A task in C or C++. Lessons for the cpp-v1 checklist:
 - `long double` is 80-bit x87 on x86-64 and IEEE quad on arm64 Linux; one
   held-out case depends on it, so arm64 validation is a separate check
   before the task is called portable.
+
+## Verifier audit 2026-10-08
+
+Reviewing the fmt task before merge turned up a header-shadowing hole, so
+every Track A verifier was attacked on purpose. Each attack below is a few
+lines of graded source that fix nothing; "old" is the verifier as first
+validated.
+
+| Task | Attack | Old reward | Hole |
+| --- | --- | --- | --- |
+| fmt | `include/gtest/gtest.h` turning `EXPECT_*` into no-ops | f2p all green | agent `include/` is an `-I` path searched before googletest's `-isystem` |
+| nx-digraph (also nx-group, sympy) | `os._exit(0)` in `__init__.py` when pytest is loaded | 1 | graded on pytest's exit status |
+| nx-digraph | `conftest.py` beside the tests rewriting failed reports | 1 | agent `conftest.py` files were copied and loaded |
+| nx-digraph | `importlib` patch of pytest's `TestReport`, no test-runner words | 1 (even with report grading) | code under test shares the pytest process |
+| petgraph | `std::process::exit(0)` in the max-flow entry points | 1 | graded on `cargo test`'s exit status |
+| luxon | `src/luxon.js` replacing the global `expect` with a no-op | f2p all green | code under test shares the jest worker |
+| commons-lang | shadow `AssertionFailureBuilder` and opentest4j types in `src/main` | results changed | main classes precede the JUnit jars on the test classpath |
+
+Every task now has three layers, and a new task must ship all three plus
+these probes before it counts as validated:
+
+1. **Structural.** Take only what upstream ships at the graded path:
+   `include/fmt`, `src/main/java/org/apache/commons/lang3`, the package
+   tree minus `tests/` and every `conftest.py`.
+2. **Report-based grading.** Never trust the runner's exit status. Every
+   expected id must appear as passed in a report the runner writes
+   (JUnit XML, libtest `--logfile` at an unpredictable path, jest JSON,
+   per-case gtest output, surefire XML), with the total pinned, so an early
+   exit leaves tests missing and fails.
+3. **Tamper detection.** `tests/tamper_scan.py` (one file, identical in
+   every task) rejects added lines that reference the test framework or its
+   report format, force an exit, or (C++) use `dlsym`/`dlopen`, and new
+   files with a runner meaning. For in-process runners (pytest, jest,
+   googletest) a sentinel test asserting something false is appended to the
+   overlaid gold files and must be reported failed (`must_fail`), which
+   catches obfuscated neutering the scan cannot see.
+
+Each layer was shown to be needed: scan-evading exits (`getattr(os,
+"_ex" + "it")`, `use std::process::{exit as quit}`, a reflected
+`Runtime.halt`, a function pointer to `_exit`) pass the scan and are caught
+by report grading; the pytest report patch and a `Function("return
+this")` expect patch pass both the scan and report grading and are caught
+only by the sentinels. After the change every task re-probed on the x86-64
+cloud VM at base 0, gold 1, every attack 0 (records in each DESIGN.md).
+
+Residual risk, stated plainly: a determined agent can still tamper in ways
+none of this sees (for example neutering assertions only for test names it
+guesses are hidden while leaving the sentinel alone). The gate should
+therefore include a diff review of every solved run, looking for test
+framework interaction and exits, before a solve counts against the 1/3
+bar. The F1 scaffolds (OpenAPV, libmbus) were not audited here; that
+belongs to the Track B session.

@@ -110,3 +110,18 @@ cases), and (c) treating numeric strings such as `"5"` as valid offsets
 expected outcome and says nothing about the frontier; the task's job is the
 pipeline and the easy JavaScript anchor. Effort (wall clock, tokens, cost) is
 logged as a covariate only.
+
+## Verifier hardening (2026-10-08 audit)
+
+Graded `src/` code runs inside the jest worker, where `expect` is a global.
+Four lines in `src/luxon.js` that replace `expect` with a no-op proxy made
+every held-out test pass with no fix on the old verifier (fail_to_pass 1;
+11 collateral failures kept the guard red, which a careful attacker would
+avoid). Now a sentinel test that asserts something false is appended to
+both overlaid files and must be reported failed (`must_fail` in
+`check.js`), plus the tamper scan over `src/`. Re-probed on the x86-64
+cloud VM: base 0, gold 1 (the two ICU-dependent tests still fail at both,
+as recorded), the attack 0, and a variant reaching the global object via
+`Function("return this")`, which evades the scan, 0 (sentinels passed).
+
+See docs/frontier-v5/PHASE1.md, "Verifier audit 2026-10-08".

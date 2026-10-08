@@ -21,6 +21,13 @@ JavaScript/TypeScript, Rust, C, C++ and Java. These do not flag. Start a
 clean session per batch so context stays unsaturated. The four committed
 tasks prove the pipeline (Python and Rust) end to end; reuse their structure.
 
+Every Track A task must ship the three verifier layers from PHASE1.md
+("Verifier audit 2026-10-08"): structural (only upstream graded paths),
+report-based grading (never the runner's exit status) and tamper detection
+(`tests/tamper_scan.py`, copied unchanged, plus a must-fail sentinel for
+in-process runners), and must be probed with at least an exit attack and
+a test-framework shadowing attack before it counts as validated.
+
 ### Track B: the F1 sanitizer family, on Opus 4.8 (its designated model)
 
 Reproducing heap overflows, data races and undefined behavior, and writing

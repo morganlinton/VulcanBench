@@ -24,6 +24,20 @@ opaque). That is a real finding, not a slip: the difficulty that actually beat
 frontier models in v4 lives in concentrated algorithmic interaction, which the
 frozen family table has no home for. Decision needed (see bottom).
 
+## Verifier audit (2026-10-08): read before trusting any reward
+
+Every Track A verifier was attacked on purpose after a review finding. Five
+of the seven could be beaten by a few lines of graded code that fix
+nothing; the worst, nx-digraph-node-connectivity (the headline task),
+scored reward 1 from a three-line `os._exit(0)`. All seven now grade from
+the runner's own report rather than its exit status, take only the
+upstream graded paths, run a shared tamper scan and (for pytest, jest and
+googletest) require a sentinel test that asserts something false to fail.
+Every task re-probed at base 0, gold 1, every attack 0. Details, the attack
+table and the rule for new tasks are in PHASE1.md, "Verifier audit
+2026-10-08". Any reward recorded before this audit should not be relied on;
+none had been gate-measured.
+
 ## What is on the PR (#174, branch frontier-v5-authoring)
 
 | Task | What it is | Validated | Family |

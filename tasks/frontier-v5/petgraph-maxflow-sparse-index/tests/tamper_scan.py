@@ -31,12 +31,12 @@ CODE = {
               r"|\bsys\s*\.\s*(modules|argv)\b",
     "java": r"org\.junit|\bjunit\b|opentest4j|surefire|\bSystem\s*\.\s*exit\b"
             r"|\bRuntime\s*\.\s*getRuntime\s*\(\s*\)\s*\.\s*(halt|exit)\b|\b(halt|exit)\s*\(",
-    "javascript": r"\bjest\b|__mocks__|\bprocess\s*\.\s*(exit|kill|abort|reallyExit)\b"
+    "javascript": r"\bjest\b|__mocks__|\bprocess\s*\.\s*(exit|kill|abort|reallyExit)\b|\bglobalThis\b|\bexpect\b"
                   r"|(?<![\w.$])(expect|describe|it|test|beforeAll|beforeEach|afterAll|afterEach)\s*\(",
     "rust": r"\bprocess\s*::\s*(exit|abort)\b|\b(exit|abort)\s*\(|\blibtest\b|\benv\s*::\s*args\b"
             r"|test result:",
     "cpp": r"\bgtest\b|\bgmock\b|\btesting\s*::|\b(EXPECT|ASSERT)_[A-Z_]+\b|\bTEST(_F|_P)?\s*\("
-           r"|\b(_exit|_Exit|quick_exit|exit|abort)\s*\(|/proc/self|\[\s+OK\s+\]",
+           r"|\b(_exit|_Exit|quick_exit|exit|abort)\s*\(|/proc/self|\[\s+OK\s+\]|\bdl(sym|open)\b",
 }
 NAMES = {
     "python": r"(^|/)(conftest\.py|pytest\.ini|sitecustomize\.py|usercustomize\.py)$|\.pth$",

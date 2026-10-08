@@ -26,8 +26,11 @@ emit() { local r=$1; { printf '{"reward": %s' "$r"; for k in "${!M[@]}"; do prin
 M[artifact_present]=1
 
 rm -rf "$WORK"; cp -a "$PRISTINE" "$WORK"
-rm -rf "$WORK/include" "$WORK/src"
-cp -a "$APP/include" "$WORK/include"
+# Only include/fmt is taken from the agent: googletest is an -isystem include
+# while include/ is an -I include, so any other directory under the agent's
+# include/ (say include/gtest/gtest.h) would shadow the test framework.
+rm -rf "$WORK/include/fmt" "$WORK/src"
+cp -a "$APP/include/fmt" "$WORK/include/fmt"
 cp -a "$APP/src" "$WORK/src"
 cp "$HIDDEN"/*.cc "$WORK/test/"
 

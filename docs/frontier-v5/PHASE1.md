@@ -416,6 +416,16 @@ Track A task in C or C++. Lessons for the cpp-v1 checklist:
   aborts the process, which would hide every later case in that binary.
   `tests/run_tests.py` lists each ctest entry's cases and runs each with
   `--gtest_filter`; 584 cases take seconds.
+- Take only the directories upstream ships from the agent's artifact, and
+  check include order. The first verifier copied the agent's whole
+  `include/`, which is an `-I` path searched before googletest's
+  `-isystem` path, so an `include/gtest/gtest.h` that no-ops `EXPECT_*`
+  passed every held-out case with no fix. Now only `include/fmt` is taken,
+  and a shadowing probe is part of validation. The same class of hole is
+  worth auditing in the other tasks: a test-framework class or module placed
+  inside the graded tree (Java `src/main` precedes the JUnit jar on
+  Maven's test classpath; a `conftest.py` inside a graded Python package is
+  collected by pytest).
 - googletest is vendored in the {fmt} tree, so the agent and verifier
   images build and test with no network at all; the verifier builds from
   scratch with pristine CMake files and test sources and grades

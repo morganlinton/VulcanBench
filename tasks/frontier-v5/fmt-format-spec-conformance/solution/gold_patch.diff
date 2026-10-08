@@ -1,0 +1,419 @@
+diff --git a/include/fmt/args.h b/include/fmt/args.h
+index 3283e6fa..cef566fa 100644
+--- a/include/fmt/args.h
++++ b/include/fmt/args.h
+@@ -131,7 +131,7 @@ FMT_EXPORT template <typename Context> class dynamic_format_arg_store {
+   constexpr dynamic_format_arg_store() = default;
+ 
+   operator basic_format_args<Context>() const {
+-    return basic_format_args<Context>(data(), static_cast<int>(data_.size()),
++    return basic_format_args<Context>(data(), static_cast<int>(size()),
+                                       !named_info_.empty());
+   }
+ 
+@@ -210,7 +210,9 @@ FMT_EXPORT template <typename Context> class dynamic_format_arg_store {
+   }
+ 
+   /// Returns the number of elements in the store.
+-  auto size() const noexcept -> size_t { return data_.size(); }
++  auto size() const noexcept -> size_t {
++    return data_.size() - (named_info_.empty() ? 0 : 1);
++  }
+ };
+ 
+ FMT_END_NAMESPACE
+diff --git a/include/fmt/chrono.h b/include/fmt/chrono.h
+index 46590074..cc04243b 100644
+--- a/include/fmt/chrono.h
++++ b/include/fmt/chrono.h
+@@ -1908,11 +1908,8 @@ struct formatter<weekday, Char> : private formatter<std::tm, Char> {
+ 
+  public:
+   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) -> const Char* {
++    this->set_format(detail::string_literal<Char, '%', 'a'>());
+     auto it = ctx.begin(), end = ctx.end();
+-    if (it != end && *it == 'L') {
+-      ++it;
+-      this->set_localized();
+-    }
+     use_tm_formatter_ = it != end && *it != '}';
+     return use_tm_formatter_ ? formatter<std::tm, Char>::parse(ctx) : it;
+   }
+@@ -1922,7 +1919,7 @@ struct formatter<weekday, Char> : private formatter<std::tm, Char> {
+     auto time = std::tm();
+     time.tm_wday = static_cast<int>(wd.c_encoding());
+     if (use_tm_formatter_) return formatter<std::tm, Char>::format(time, ctx);
+-    detail::get_locale loc(this->localized(), ctx.locale());
++    detail::get_locale loc(false, ctx.locale());
+     auto w = detail::tm_writer<decltype(ctx.out()), Char>(loc, ctx.out(), time);
+     w.on_abbr_weekday();
+     return w.out();
+@@ -1936,6 +1933,7 @@ struct formatter<day, Char> : private formatter<std::tm, Char> {
+ 
+  public:
+   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) -> const Char* {
++    this->set_format(detail::string_literal<Char, '%', 'd'>());
+     auto it = ctx.begin(), end = ctx.end();
+     use_tm_formatter_ = it != end && *it != '}';
+     return use_tm_formatter_ ? formatter<std::tm, Char>::parse(ctx) : it;
+@@ -1960,11 +1958,8 @@ struct formatter<month, Char> : private formatter<std::tm, Char> {
+ 
+  public:
+   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) -> const Char* {
++    this->set_format(detail::string_literal<Char, '%', 'b'>());
+     auto it = ctx.begin(), end = ctx.end();
+-    if (it != end && *it == 'L') {
+-      ++it;
+-      this->set_localized();
+-    }
+     use_tm_formatter_ = it != end && *it != '}';
+     return use_tm_formatter_ ? formatter<std::tm, Char>::parse(ctx) : it;
+   }
+@@ -1974,7 +1969,7 @@ struct formatter<month, Char> : private formatter<std::tm, Char> {
+     auto time = std::tm();
+     time.tm_mon = static_cast<int>(static_cast<unsigned>(m)) - 1;
+     if (use_tm_formatter_) return formatter<std::tm, Char>::format(time, ctx);
+-    detail::get_locale loc(this->localized(), ctx.locale());
++    detail::get_locale loc(false, ctx.locale());
+     auto w = detail::tm_writer<decltype(ctx.out()), Char>(loc, ctx.out(), time);
+     w.on_abbr_month();
+     return w.out();
+@@ -1988,6 +1983,7 @@ struct formatter<year, Char> : private formatter<std::tm, Char> {
+ 
+  public:
+   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) -> const Char* {
++    this->set_format(detail::string_literal<Char, '%', 'Y'>());
+     auto it = ctx.begin(), end = ctx.end();
+     use_tm_formatter_ = it != end && *it != '}';
+     return use_tm_formatter_ ? formatter<std::tm, Char>::parse(ctx) : it;
+@@ -2012,6 +2008,7 @@ struct formatter<year_month_day, Char> : private formatter<std::tm, Char> {
+ 
+  public:
+   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) -> const Char* {
++    this->set_format(detail::string_literal<Char, '%', 'F'>());
+     auto it = ctx.begin(), end = ctx.end();
+     use_tm_formatter_ = it != end && *it != '}';
+     return use_tm_formatter_ ? formatter<std::tm, Char>::parse(ctx) : it;
+@@ -2106,8 +2103,7 @@ template <typename Char> struct formatter<std::tm, Char> {
+       detail::string_literal<Char, '%', 'F', ' ', '%', 'T'>();
+ 
+  protected:
+-  auto localized() const -> bool { return specs_.localized(); }
+-  FMT_CONSTEXPR void set_localized() { specs_.set_localized(); }
++  FMT_CONSTEXPR void set_format(basic_string_view<Char> fmt) { fmt_ = fmt; }
+ 
+   FMT_CONSTEXPR auto do_parse(parse_context<Char>& ctx, bool has_timezone)
+       -> const Char* {
+diff --git a/include/fmt/format.h b/include/fmt/format.h
+index 210a851c..c8106ff7 100644
+--- a/include/fmt/format.h
++++ b/include/fmt/format.h
+@@ -726,12 +726,24 @@ FMT_API auto allocate(size_t size) -> void*;
+ template <typename T> struct allocator : private std::decay<void> {
+   using value_type = T;
+ 
+-  auto allocate(size_t n) -> T* {
++  FMT_CONSTEXPR20 auto allocate(size_t n) -> T* {
+     FMT_ASSERT(n <= max_value<size_t>() / sizeof(T), "");
++#if FMT_USE_CONSTEVAL
++    // Use the builtin directly to avoid C++ runtime dependencies at -O0.
++    if (__builtin_is_constant_evaluated()) return new T[n];
++#endif
+     return static_cast<T*>(detail::allocate(n * sizeof(T)));
+   }
+ 
+-  void deallocate(T* p, size_t) { free(p); }
++  FMT_CONSTEXPR20 void deallocate(T* p, size_t) {
++#if FMT_USE_CONSTEVAL
++    if (__builtin_is_constant_evaluated()) {
++      delete[] p;
++      return;
++    }
++#endif
++    free(p);
++  }
+ 
+   constexpr friend auto operator==(allocator, allocator) noexcept -> bool {
+     return true;  // All instances of this allocator are equivalent.
+@@ -798,10 +810,18 @@ class basic_memory_buffer : public detail::buffer<T> {
+       new_capacity = max_of(size, max_size);
+     T* old_data = buf.data();
+     T* new_data = self.alloc_.allocate(new_capacity);
+-    // Suppress a bogus -Wstringop-overflow in gcc 13.1 (#3481).
+-    detail::assume(buf.size() <= new_capacity);
+     // The following code doesn't throw, so the raw pointer above doesn't leak.
+-    memcpy(new_data, old_data, buf.size() * sizeof(T));
++    if (detail::is_constant_evaluated()) {
++      auto alloc = detail::allocator<T>();
++      for (size_t i = 0; i < new_capacity; ++i)
++        std::allocator_traits<detail::allocator<T>>::construct(alloc,
++                                                               new_data + i);
++      for (size_t i = 0; i < buf.size(); ++i) new_data[i] = old_data[i];
++    } else {
++      // Suppress a bogus -Wstringop-overflow in gcc 13.1 (#3481).
++      detail::assume(buf.size() <= new_capacity);
++      memcpy(new_data, old_data, buf.size() * sizeof(T));
++    }
+     self.set(new_data, new_capacity);
+     // deallocate must not throw according to the standard, but even if it does,
+     // the buffer already uses the new storage and will deallocate it in
+@@ -1907,11 +1927,22 @@ template <typename Char, typename OutputIt>
+ FMT_CONSTEXPR auto write_char(OutputIt out, Char value,
+                               const format_specs& specs) -> OutputIt {
+   bool is_debug = specs.type() == presentation_type::debug;
+-  return write_padded<Char>(out, specs, 1, [=](reserve_iterator<OutputIt> it) {
+-    if (is_debug) return write_escaped_char(it, value);
+-    *it++ = value;
+-    return it;
+-  });
++  Char buf[12];
++  auto* begin = buf;
++  auto* end = begin;
++  size_t size = 1;
++
++  if (is_debug) {
++    end = write_escaped_char(begin, value);
++    size = to_unsigned(end - begin);
++  }
++
++  return write_padded<Char>(out, specs, size,
++                            [=](reserve_iterator<OutputIt> it) {
++                              if (is_debug) return copy<Char>(begin, end, it);
++                              *it++ = value;
++                              return it;
++                            });
+ }
+ 
+ template <typename Char> class digit_grouping {
+@@ -2269,6 +2300,12 @@ FMT_CONSTEXPR auto write(OutputIt out, basic_string_view<Char> s,
+     return false;
+   });
+ 
++  if (is_debug && s.size() == 0 && specs.precision != 0 &&
++      display_width < display_width_limit) {
++    ++display_width;
++    ++size;
++  }
++
+   struct bounded_output_iterator {
+     reserve_iterator<OutputIt> underlying_iterator;
+     size_t bound;
+@@ -2402,12 +2439,11 @@ FMT_CONSTEXPR20 auto write_nonfinite(OutputIt out, bool isnan,
+   const bool is_zero_fill =
+       specs.fill_size() == 1 && specs.fill_unit<Char>() == '0';
+   if (is_zero_fill) specs.set_fill(' ');
+-  return write_padded<Char>(out, specs, size,
+-                            [=](reserve_iterator<OutputIt> it) {
+-                              if (s != sign::none)
+-                                *it++ = detail::getsign<Char>(s);
+-                              return copy<Char>(str, str + str_size, it);
+-                            });
++  return write_padded<Char, align::right>(
++      out, specs, size, [=](reserve_iterator<OutputIt> it) {
++        if (s != sign::none) *it++ = detail::getsign<Char>(s);
++        return copy<Char>(str, str + str_size, it);
++      });
+ }
+ 
+ // A decimal floating-point number significand * pow(10, exp).
+@@ -2554,7 +2590,9 @@ FMT_CONSTEXPR20 auto write_fixed(OutputIt out, const DecimalFP& f,
+   if (f.exponent >= 0) {
+     // 1234e5 -> 123400000[.0+]
+     size += f.exponent;
+-    int num_zeros = specs.precision - exp;
++    int num_zeros = specs.type() == presentation_type::fixed
++                        ? specs.precision
++                        : specs.precision - exp;
+     abort_fuzzing_if(num_zeros > 5000);
+     if (specs.alt()) {
+       ++size;
+@@ -2576,8 +2614,12 @@ FMT_CONSTEXPR20 auto write_fixed(OutputIt out, const DecimalFP& f,
+   }
+   if (exp > 0) {
+     // 1234e-2 -> 12.34[0+]
+-    int num_zeros = specs.alt() ? specs.precision - significand_size : 0;
+-    size += 1 + max_of(num_zeros, 0);
++    int num_zeros = specs.type() == presentation_type::fixed
++                        ? specs.precision + f.exponent
++                    : specs.alt() ? specs.precision - significand_size
++                                  : 0;
++    size += 1;
++    size += max_of(num_zeros, 0);
+     auto grouping = Grouping(loc, specs.localized());
+     size += grouping.count_separators(exp);
+     return write_padded<Char, align::right>(
+@@ -2594,8 +2636,13 @@ FMT_CONSTEXPR20 auto write_fixed(OutputIt out, const DecimalFP& f,
+       specs.precision < num_zeros) {
+     num_zeros = specs.precision;
+   }
++  int trailing_zeros = specs.type() == presentation_type::fixed
++                           ? specs.precision + f.exponent
++                       : specs.alt() ? specs.precision - significand_size
++                                     : 0;
+   bool pointy = num_zeros != 0 || significand_size != 0 || specs.alt();
+   size += 1 + (pointy ? 1 : 0) + num_zeros;
++  size += max_of(trailing_zeros, 0);
+   return write_padded<Char, align::right>(
+       out, specs, static_cast<size_t>(size), [&](iterator it) {
+         if (s != sign::none) *it++ = detail::getsign<Char>(s);
+@@ -2603,7 +2650,10 @@ FMT_CONSTEXPR20 auto write_fixed(OutputIt out, const DecimalFP& f,
+         if (!pointy) return it;
+         *it++ = decimal_point;
+         it = detail::fill_n(it, num_zeros, Char('0'));
+-        return write_significand<Char>(it, f.significand, significand_size);
++        it = write_significand<Char>(it, f.significand, significand_size);
++        return trailing_zeros > 0
++                   ? detail::fill_n(it, trailing_zeros, Char('0'))
++                   : it;
+       });
+ }
+ 
+@@ -3110,6 +3160,11 @@ FMT_CONSTEXPR20 void format_hexfloat(Float value, format_specs specs,
+   f.e += num_float_significand_bits;
+   if (!has_implicit_bit<Float>()) --f.e;
+ 
++  // basic_fp maps a zero biased exponent to the minimum subnormal exponent,
++  // which is correct for subnormals but not for zero: printf prints zero as
++  // 0x0p+0. A zero significand can only come from +-0, so reset the exponent.
++  if (f.f == 0) f.e = 0;
++
+   const auto num_fraction_bits =
+       num_float_significand_bits + (has_implicit_bit<Float>() ? 1 : 0);
+   const auto num_xdigits = (num_fraction_bits + 3) / 4;
+@@ -3471,10 +3526,17 @@ FMT_CONSTEXPR20 auto format_float(Float value, int precision,
+                                           : f.assign(converted_value);
+     if (is_predecessor_closer) dragon_flags |= dragon::predecessor_closer;
+     if (fixed) dragon_flags |= dragon::fixed;
+-    // Limit precision to the maximum possible number of significant digits in
+-    // an IEEE754 double because we don't need to generate zeros.
+-    const int max_double_digits = 767;
+-    if (precision > max_double_digits) precision = max_double_digits;
++    // Keep the fast double path's significant-digit limit.
++    int max_precision = 767;
++    if ((dragon_flags & dragon::fixup) != 0) {
++      // Fixed precision still counts fractional places before fixup. A value
++      // f * 2^e has at most max(-e, 0) fractional decimal places, and its
++      // number of significant decimal digits is bounded by the bit length of f
++      // + |e|.
++      max_precision = fixed ? (f.e < 0 ? -f.e : 0)
++                            : count_digits<1>(f.f) + (f.e < 0 ? -f.e : f.e);
++    }
++    if (precision > max_precision) precision = max_precision;
+     format_dragon(f, dragon_flags, precision, buf, exp);
+   }
+   if (!fixed && !specs.alt()) {
+diff --git a/include/fmt/printf.h b/include/fmt/printf.h
+index 8d792fbd..0caeae0c 100644
+--- a/include/fmt/printf.h
++++ b/include/fmt/printf.h
+@@ -88,7 +88,7 @@ struct printf_precision_handler {
+   auto operator()(T value) -> int {
+     if (!int_checker<std::numeric_limits<T>::is_signed>::fits_in_int(value))
+       report_error("number is too big");
+-    return max_of(static_cast<int>(value), 0);
++    return detail::is_negative(value) ? -1 : static_cast<int>(value);
+   }
+ 
+   template <typename T, FMT_ENABLE_IF(!std::is_integral<T>::value)>
+@@ -246,6 +246,19 @@ class printf_arg_formatter : public arg_formatter<Char> {
+     detail::write<Char>(this->out, value, this->specs, this->locale);
+   }
+ 
++  // C requires no characters when converting a zero value with a precision of
++  // zero, so only the sign and the padding remain.
++  void write_zero_with_zero_precision() {
++    auto s = this->specs;
++    const char* sign_str = s.sign() == sign::plus    ? "+"
++                           : s.sign() == sign::space ? " "
++                                                     : "";
++    s.set_type(presentation_type::none);
++    if (s.align() == align::none || s.align() == align::numeric)
++      s.set_align(align::right);
++    write_bytes<Char>(this->out, sign_str, s);
++  }
++
+  public:
+   printf_arg_formatter(basic_appender<Char> iter, format_specs& s,
+                        context_type& ctx)
+@@ -258,6 +271,13 @@ class printf_arg_formatter : public arg_formatter<Char> {
+     // MSVC2013 fails to compile separate overloads for bool and Char so use
+     // std::is_same instead.
+     if (!std::is_same<T, Char>::value) {
++      auto t = this->specs.type();
++      if (value == 0 && this->specs.precision == 0 &&
++          (t == presentation_type::dec || t == presentation_type::oct ||
++           t == presentation_type::hex)) {
++        write_zero_with_zero_precision();
++        return;
++      }
+       write(value);
+       return;
+     }
+@@ -490,7 +510,6 @@ void vprintf(buffer<Char>& buf, basic_string_view<Char> format,
+           str, to_unsigned(nul != str_end ? nul - str : specs.precision));
+       arg = sv;
+     }
+-    if (specs.alt() && arg.visit(is_zero_int())) specs.clear_alt();
+     if (specs.fill_unit<Char>() == '0') {
+       if (is_arithmetic_type(arg.type()) && specs.align() != align::left) {
+         specs.set_align(align::numeric);
+@@ -550,6 +569,13 @@ void vprintf(buffer<Char>& buf, basic_string_view<Char> format,
+     if (specs.type() == presentation_type::none)
+       report_error("invalid format specifier");
+     if (upper) specs.set_upper();
++    // For '#o', C requires a single '0' when the value and the precision are
++    // both zero.
++    bool alt_zero = specs.alt() && arg.visit(is_zero_int());
++    if (alt_zero) specs.clear_alt();
++    if (alt_zero && specs.type() == presentation_type::oct &&
++        specs.precision == 0)
++      specs.precision = 1;
+ 
+     start = it;
+ 
+diff --git a/include/fmt/ranges.h b/include/fmt/ranges.h
+index 99bef841..1e54fdab 100644
+--- a/include/fmt/ranges.h
++++ b/include/fmt/ranges.h
+@@ -609,23 +609,18 @@ struct formatter<
+ 
+  public:
+   FMT_CONSTEXPR auto parse(parse_context<Char>& ctx) -> const Char* {
+-    return underlying_.parse(ctx);
++    auto it = underlying_.parse(ctx);
++    if FMT_CONSTEXPR20 (range_format_kind<R, Char>::value ==
++                        range_format::debug_string)
++      underlying_.set_debug_format();
++    return it;
+   }
+ 
+   template <typename FormatContext>
+   auto format(range_type& range, FormatContext& ctx) const
+       -> decltype(ctx.out()) {
+-    auto out = ctx.out();
+-    if FMT_CONSTEXPR20 (range_format_kind<R, Char>::value ==
+-                        range_format::debug_string) {
+-      *out++ = '"';
+-    }
+-    out = underlying_.format(
++    return underlying_.format(
+         string_type{detail::range_begin(range), detail::range_end(range)}, ctx);
+-    if FMT_CONSTEXPR20 (range_format_kind<R, Char>::value ==
+-                        range_format::debug_string)
+-      *out++ = '"';
+-    return out;
+   }
+ };
+ 
+diff --git a/include/fmt/std.h b/include/fmt/std.h
+index 379b186e..4c0f14b8 100644
+--- a/include/fmt/std.h
++++ b/include/fmt/std.h
+@@ -141,6 +141,7 @@ FMT_CONSTEXPR auto write_escaped_alternative(OutputIt out, const T& v,
+ 
+   formatter<std::remove_cv_t<T>, Char> underlying;
+   maybe_set_debug_format(underlying, true);
++  ctx.advance_to(out);
+   return underlying.format(v, ctx);
+ }
+ #endif

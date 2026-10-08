@@ -321,3 +321,118 @@ the minimal stopgap `Dockerfile.rust-arm64-min` the petgraph task was first
 validated on; petgraph was re-validated on `:v5-rust`. Tool versions inside
 the tags are unchanged; only the names are. The earlier validation records
 that name `base-arm64` describe the same content.
+
+## Cloud VM setup 2026-10-07 (first run on x86-64)
+
+First run of `scripts/frontier-v5/setup-host.sh` on a Claude Code cloud VM
+(x86-64, 4 vCPU, 16 GB RAM, Ubuntu 24.04 host, Docker 29.8.2). It did not
+reach "frontier-v5 setup: done". What broke, in the order it surfaced:
+
+1. **The Docker daemon is not running at session start.** `dockerd` and
+   `containerd` are installed but nothing launches them; the script stopped
+   at "docker daemon not reachable". Started by hand with `dockerd` in the
+   background (overlayfs, cgroup v1). The environment's setup script should
+   start it before calling setup-host.sh.
+2. **Build containers sit behind a TLS-intercepting egress gateway.** A
+   container on the default bridge network gets every HTTPS connection
+   re-signed by "Egress Gateway SDS Issuing CA", and plain-HTTP requests
+   (apt's default `http://deb.debian.org`) are refused with 403. The pinned
+   python image does not trust that CA, so every fetch in the chain fails
+   certificate verification. Note the host's agent-proxy CA
+   (`/root/.ccr/agent-proxy-ca.crt`) is not the one that signs container
+   traffic; the gateway CAs are in the host's
+   `/usr/local/share/ca-certificates/`. Fixed in the script: on a host
+   marked by `/root/.ccr` (or with `--ca DIR_OR_FILE`) it first builds a
+   local trust layer, `vulcanbench/sandbox:v5-python-ca`, from the same
+   pinned digest with those CAs in the system store, Debian sources switched
+   to HTTPS (the same signed packages), and `SSL_CERT_FILE`,
+   `REQUESTS_CA_BUNDLE`, `PIP_CERT` and `NODE_EXTRA_CA_CERTS` set, then
+   builds v5-base on it. `Dockerfile.jvm` imports the same CAs into
+   Temurin's own cacerts when the layer is present (a no-op otherwise).
+   Verified: inside the layer pypi.org, nodejs.org and github.com verify and
+   return 200. Without CAs (laptop, CI) the script and images are unchanged.
+   The CAs and env vars ride along into every cloud-built task image; they
+   change nothing at grading (the verifier runs with no network) but they
+   are a recorded cloud-only difference from laptop-built images.
+3. **The environment's network policy denies the Debian archive.** With TLS
+   fixed, apt gets `403 Forbidden` from the gateway on
+   `https://deb.debian.org` (the main, updates and security suites are all
+   served from that host). This is an organization egress-policy denial,
+   not a script bug, and it is not routed around. The same policy denies
+   `go.dev` and `dl.google.com` (the Go download in `Dockerfile.base`) and
+   `dlcdn.apache.org` (Maven in `Dockerfile.jvm`). Reachable: Docker Hub,
+   github.com, nodejs.org, pypi.org, index.crates.io, static.rust-lang.org,
+   services.gradle.org, repo.maven.apache.org. Action for the owner: add
+   `deb.debian.org`, `go.dev`, `dl.google.com` and `dlcdn.apache.org` to the
+   cloud environment's allowed domains (Network access, with the package
+   managers box ticked), then re-run setup-host.sh. Until then no v5 image
+   builds on the cloud VM.
+4. **The allowlist change reached the session proxy but not the container
+   path.** The owner switched the Default environment to Custom network
+   access with those four hosts plus the default list. The host (through
+   the session's HTTPS proxy) reached all four within a minute, but
+   containers on the default bridge network kept getting 403 from the
+   egress gateway for the newly allowed hosts (pypi still worked) across
+   ten checks 30 s apart. Fixed in the script: on a cloud host with
+   `HTTPS_PROXY` set, image builds run with `--network host` and the proxy
+   passed as build arguments, which Docker does not store in the image.
+   apt, curl, git and pip all honour it. The task images were built the
+   same way. Open item for a cloud gate run: Harbor's own image builds will
+   need the same proxy route (or the container path must start honouring
+   the environment's allowed domains).
+5. **Two of the host's CA files have no trailing newline**
+   (`swp-ca-production.crt`, `swp-ca-staging.crt`), so concatenating them
+   glued two certificates onto one line and `keytool` rejected the bundle
+   ("Input not an X.509 certificate"). The script now writes a newline
+   after each file, and `Dockerfile.jvm` copies only BEGIN..END blocks.
+6. **Docker does not survive a VM restore.** dockerd had to be restarted by
+   hand twice in one session after the VM paused. Start it in the
+   environment's setup script (or a SessionStart hook) before anything
+   that uses images.
+
+With 4 and 5 fixed, setup-host.sh ends with "frontier-v5 setup: done" on
+the x86-64 VM and lists v5-base, v5-cfamily, v5-jvm and v5-rust (plus the
+local trust layer v5-python-ca); Harbor 0.24.0 installed. Tool versions in
+the amd64 tags match the table at the top (GCC 12.2.0-14+deb12u1, CMake
+3.25.1, Temurin 21.0.12.1; the JVM image carries the seven interception
+CAs in its cacerts).
+
+## C++ pipeline proven 2026-10-07
+
+tasks/frontier-v5/fmt-format-spec-conformance validates end to end (base
+reward 0 x3, gold reward 1 x3, nine single-fix controls) on
+`vulcanbench/sandbox:v5-cfamily` built on the x86-64 cloud VM, the first
+Track A task in C or C++. Lessons for the cpp-v1 checklist:
+
+- Pick the language standard in the grading image, not on the host. The
+  first choice, C++20, built and passed with the host's GCC 13 but GCC 12.2
+  cannot compile {fmt}'s existing `base-test.cc` in C++20 mode at the base;
+  the task builds as C++17 (GCC 12's default, one of upstream's CI
+  configurations). A hidden test that is a compile error at base also takes
+  its whole test binary down with it, so prefer standards where the held-out
+  tests compile at base and fail at run time.
+- Run one googletest case per process. Debug builds keep `FMT_ASSERT`
+  live, and one base failure (a calendar formatter fed a zeroed `tm`)
+  aborts the process, which would hide every later case in that binary.
+  `tests/run_tests.py` lists each ctest entry's cases and runs each with
+  `--gtest_filter`; 584 cases take seconds.
+- Take only the directories upstream ships from the agent's artifact, and
+  check include order. The first verifier copied the agent's whole
+  `include/`, which is an `-I` path searched before googletest's
+  `-isystem` path, so an `include/gtest/gtest.h` that no-ops `EXPECT_*`
+  passed every held-out case with no fix. Now only `include/fmt` is taken,
+  and a shadowing probe is part of validation. The same class of hole is
+  worth auditing in the other tasks: a test-framework class or module placed
+  inside the graded tree (Java `src/main` precedes the JUnit jar on
+  Maven's test classpath; a `conftest.py` inside a graded Python package is
+  collected by pytest).
+- googletest is vendored in the {fmt} tree, so the agent and verifier
+  images build and test with no network at all; the verifier builds from
+  scratch with pristine CMake files and test sources and grades
+  `include/` and `src/` only.
+- A test overlay copied with `cp -a` keeps old mtimes, and Ninja then
+  skips the rebuild; irrelevant to the verifier (fresh build tree) but it
+  silently fakes a base pass in an incremental host build.
+- `long double` is 80-bit x87 on x86-64 and IEEE quad on arm64 Linux; one
+  held-out case depends on it, so arm64 validation is a separate check
+  before the task is called portable.

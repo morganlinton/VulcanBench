@@ -47,12 +47,22 @@ JavaScript and Java. The next Track A gaps are C and C++ correctness tasks
 (not F1) and a second, harder JavaScript or Java arc; the pipeline shape is
 settled, so the remaining work is sourcing difficulty.
 
+C++ is done too: tasks/frontier-v5/fmt-format-spec-conformance composes nine
+{fmt} fixes (#4878 to #4968, 2026-08-10 to 2026-10-07) at their common base
+and proved the C++/CMake pipeline on v5-cfamily on 2026-10-07 (base=0,
+gold=1, x3, nine single-fix controls), the first task validated on the
+x86-64 cloud VM. It is wide (six headers) but its causes are independent,
+so it is labeled UNSLOTTED as a breadth task, not an interaction task.
+Remaining Track A gaps: a plain C task (no C++), and harder arcs whose
+causes interact (the commons-lang shape) in JavaScript, Java or C++.
+
 ## One-line startup for a fresh Fable session
 
 "Continue VulcanBench Frontier v5 Track A authoring on branch
 frontier-v5-authoring-2. Read docs/frontier-v5/AUTHORING-TRACKS.md and
-NIGHT-STATUS.md. Source the next correctness arc (C or C++, or a harder Java or JavaScript
-arc) and build it like tasks/frontier-v5/commons-lang-fraction-lowest-terms. Do not do F1 sanitizer work in
+NIGHT-STATUS.md. Source the next correctness arc (plain C, or a harder
+interacting Java, JavaScript or C++ arc) and build it like
+tasks/frontier-v5/fmt-format-spec-conformance. Do not do F1 sanitizer work in
 this session."
 
 ## Running a session in the cloud (no laptop needed)
@@ -71,7 +81,17 @@ starts from (`vulcanbench/sandbox:v5-base`, `:v5-cfamily`, `:v5-jvm`,
 `:v5-rust`) for the host's CPU and installs Harbor 0.24.0. Cloud VMs are
 x86-64; the laptop is arm64; the tags are the same, the content is native to
 each. Put the script in the cloud environment's setup script so the images
-are cached across sessions. Constraints: the cloud VM has 4 vCPU, 16 GB RAM
+are cached across sessions.
+
+Cloud prerequisites learned on 2026-10-07 (PHASE1.md, "Cloud VM setup"):
+the environment needs Custom network access with `deb.debian.org`,
+`go.dev`, `dl.google.com` and `dlcdn.apache.org` added to the default list
+(set on the Default environment now); dockerd is installed but not running
+at session start and does not survive a VM restore, so start it first
+(`dockerd > /tmp/dockerd.log 2>&1 &`); and the script itself adds the
+egress CAs and routes builds through the session proxy, so no manual step
+is needed for that. Build task images with the same proxy arguments
+(`--network host --build-arg HTTPS_PROXY=$HTTPS_PROXY`). Constraints: the cloud VM has 4 vCPU, 16 GB RAM
 and 30 GB disk, so build one task's images at a time and prune old ones;
 only committed and pushed files exist there (the withdrawn libmbus scaffold
 is untracked and will be absent); and gate runs still need the reference-

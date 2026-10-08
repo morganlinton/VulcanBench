@@ -1077,8 +1077,9 @@ built by `scripts/cii-v4-board/build_sonnet55_population.py`.
   on. Exclusions, if any, are listed in the population record.
 - Task hashes: the sweep ran before tagged run worktrees, from a checkout
   whose `task_hash` still counted `__pycache__` files, so its summaries
-  record hashes that differ from `suite.lock.json`. The population builder
-  accepts a run only through the committed bridge
+  record hashes that differ from `suite.lock.json`. The population builder,
+  and the runner in every stage (`prepare` and `verify_frozen`), accept a
+  run only through the committed bridge
   `docs/judging/task-hash-bridge-sonnet55.json`, which
   pairs each task's recorded hash with its lock hash, both computed on the
   same unchanged directories. Every repo `.pyc` an agent could have seen

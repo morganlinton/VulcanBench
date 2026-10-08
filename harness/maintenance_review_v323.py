@@ -15,6 +15,10 @@ the v3.3 Cursor hash cannot be recovered. Binary paths are resolved on this
 host; only the hashes are compared. The protocol records all of this under
 ``judge_pins`` so every card can disclose it.
 
+The sweep's runs carry pre-2026-10-06 task hashes. Importing this module
+installs the committed hash bridge for the whole process, so ``prepare`` and
+``verify_frozen`` (run by every later stage) admit exactly those runs.
+
 Both neutral judges, Muse Spark 1.3 and Grok 4.6, are neutral for an Anthropic
 submission and retake the exam under this protocol before any counted call.
 There are no sensitivity panels. The protocol document is frozen as a copy
@@ -47,6 +51,7 @@ PROTOCOL_ID = "code-quality-maintenance-v3.23"
 OUT = ROOT / "runs-code-quality-maintenance-v3.23"
 COMPARISON = ROOT / "docs/results/swe-v4-sonnet55-2026-10/comparison.json"
 PINS = ROOT / "docs/judging/judge-pins-v3.json"
+HASH_BRIDGE = ROOT / "docs/judging/task-hash-bridge-sonnet55.json"
 MODELS = {"sonnet55": tuple(base.LEVELS)}
 SOURCE_DOC = ROOT / "docs/judging/code-quality-maintenance-v3.md"
 PANELS = ("muse", "grok")
@@ -64,6 +69,29 @@ def _bind() -> None:
     v3.SENSITIVITY_OUT = OUT
     v3.DOC = OUT / "protocol-document.md"
     v3.prepare = prepare
+    _install_hash_bridge()
+
+
+def _install_hash_bridge() -> None:
+    """Admit this sweep's pre-2026-10-06 task hashes in every stage, through the committed bridge.
+
+    ``retrospective_judging.inputs`` compares each run's recorded task hash with
+    the task today, in ``prepare`` (via ``v2.evidence_for``) and in
+    ``verify_frozen``, which every later stage runs. The Sonnet 5.5 sweep
+    recorded the older hash that counted ``__pycache__`` files. While a task
+    still hashes to its lock entry, the bridged hash reports the exact hash
+    that sweep recorded for it, so those runs pass and any other hash still
+    fails (docs/DECISIONS.md, 2026-10-07).
+    """
+    bridge = v3.read(HASH_BRIDGE)["tasks"]
+    real = base.task_hash
+
+    def bridged(task) -> str:  # noqa: ANN001, harness.tasks.Task
+        current = real(task)
+        entry = bridge.get(task.task_id)
+        return entry["recorded"] if entry and current == entry["lock"] else current
+
+    base.task_hash = bridged
 
 
 def pinned_reviewers() -> tuple[dict, dict, dict]:

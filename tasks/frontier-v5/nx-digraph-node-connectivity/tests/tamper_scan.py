@@ -38,6 +38,10 @@ CODE = {
             r"|\binclude_(str|bytes)\s*!|\bextern\s+\"C\"|#\s*\[\s*link\b",
     "cpp": r"\bgtest\b|\bgmock\b|\btesting\s*::|\b(EXPECT|ASSERT)_[A-Z_]+\b|\bTEST(_F|_P)?\s*\("
            r"|\b(_exit|_Exit|quick_exit|exit|abort)\s*\(|/proc/self|\[\s+OK\s+\]|\bdl(sym|open)\b",
+    # C++ graded by tut and an XML tester (GEOS): the cpp rules plus the tut
+    # framework, its summary line and the XML tester's per-case result text.
+    "cpp-tut": r"\btut\b|tests summary|\btest_result\b|\bXMLTester\b|case\s*\d*\s*,\s*test\b|\b(ok|failed)\.\s*\""
+               r"|\b(_exit|_Exit|quick_exit|exit|abort)\s*\(|/proc/self|\bdl(sym|open)\b",
 }
 NAMES = {
     "python": r"(^|/)(conftest\.py|pytest\.ini|sitecustomize\.py|usercustomize\.py)$|\.pth$",
@@ -45,6 +49,7 @@ NAMES = {
     "javascript": r"(^|/)__mocks__(/|$)|\.(test|spec)\.[cm]?[jt]sx?$|(^|/)jest\.",
     "rust": r"(^|/)build\.rs$",
     "cpp": r"(^|/)(gtest|gmock)(/|$)",
+    "cpp-tut": r"(^|/)(tut|xmltester)(/|$)",
 }
 
 

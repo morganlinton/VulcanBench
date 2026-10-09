@@ -1,18 +1,23 @@
-"""Claude Sonnet 5.5, Claude Opus 5.5 and Claude Fable 5.1 on VulcanBench Frontier v4.
+"""Claude Sonnet 5.5, Claude Opus 5.5 and GPT-6.1 Sol on VulcanBench Frontier v4.
 
 One card: combined score and cost per task at every effort level, and a table
 with tasks passed, cost and the refusal-fallback share for each column.
 
 Sources, nothing re-judged:
 
-- Claude Opus 5.5 and Claude Fable 5.1: the published per-level rows in
+- Claude Opus 5.5: the published per-level rows in
   docs/results/swe-v4-opus55-2026-09/opus55-astra-fable-efforts.csv (Code
-  quality v3.15 and v3.4). The raw judging directories behind them were lost
-  with the original host, so the committed table is the source of record.
+  quality v3.15).
+- GPT-6.1 Sol: the published per-level rows in
+  docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-efforts.csv (Code
+  quality v3.18) and its API-equivalent cost in
+  gpt61-sol-v318-economics-efforts.csv.
+- The raw judging directories behind both were lost with the original host,
+  so the committed tables are the source of record.
 - Claude Sonnet 5.5: the Code quality v3.23 summary and manifest, aggregated by
   make_sonnet55_v323_card.py (cost is Claude Code's own list-price total).
 
-    python scripts/cii-v4-board/make_sonnet55_vs_claude_card.py
+    python scripts/cii-v4-board/make_sonnet55_vs_frontier_card.py
 """
 
 from __future__ import annotations
@@ -37,24 +42,25 @@ sys.path.insert(0, str(ROOT))
 from harness.retrospective_judging import LEVELS, digest, save  # noqa: E402
 
 PUBLISHED = ROOT / "docs/results/swe-v4-opus55-2026-09/opus55-astra-fable-efforts.csv"
+SOL = ROOT / "docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-efforts.csv"
+SOL_COST = ROOT / "docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-economics-efforts.csv"
 OUTPUT = ROOT / "docs/results/swe-v4-sonnet55-2026-10"
-MODELS = ("sonnet55", "opus55", "fable")
-NAMES = {"sonnet55": "Claude Sonnet 5.5", "opus55": "Claude Opus 5.5", "fable": "Claude Fable 5.1"}
+MODELS = ("sonnet55", "opus55", "gpt61sol")
+NAMES = {"sonnet55": "Claude Sonnet 5.5", "opus55": "Claude Opus 5.5", "gpt61sol": "GPT-6.1 Sol"}
 HARNESS = {
     "sonnet55": "Claude Code 2.1.291 to 2.1.293",
     "opus55": "Claude Code 2.1.280",
-    "fable": "Claude Code 2.1.259 to 2.1.261",
+    "gpt61sol": "Codex 0.159.0",
 }
 # Sonnet 5.5 keeps Anthropic clay, as on its own card; Opus 5.5 keeps its
-# comparison-card hue; Fable 5.1 moves to a neutral so three Claude columns stay
-# apart. Markers, direct labels and the table carry identity as well as color.
-COLORS = {"sonnet55": "#D97757", "opus55": "#8C3A1F", "fable": "#6F6A60"}
-MARKERS = {"sonnet55": "o", "opus55": "D", "fable": "s"}
+# comparison-card hue; GPT-6.1 Sol takes the OpenAI lab color (CLAUDE.md).
+# Markers, direct labels and the table carry identity as well as color.
+COLORS = {"sonnet55": "#D97757", "opus55": "#8C3A1F", "gpt61sol": "#10A37F"}
+MARKERS = {"sonnet55": "o", "opus55": "D", "gpt61sol": "^"}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 CLAUDE_MAIN = {
     "sonnet55": "claude-sonnet-5-5",
     "opus55": "claude-opus-5-5",
-    "fable": "claude-fable-5-1",
 }
 
 
@@ -81,11 +87,11 @@ def mean_se(values):
 
 
 def load_groups():
-    """Per-level aggregates: Opus 5.5 and Fable 5.1 from the published table, Sonnet 5.5 from v3.23."""
+    """Per-level aggregates: Opus 5.5 and GPT-6.1 Sol from published tables, Sonnet 5.5 from v3.23."""
     groups = {}
     with PUBLISHED.open() as handle:
         for r in csv.DictReader(handle):
-            if r["model"] not in ("opus55", "fable"):
+            if r["model"] != "opus55":
                 continue
             groups[r["model"], r["effort"]] = {
                 "n": int(r["n"]),
@@ -100,6 +106,26 @@ def load_groups():
                 "minutes": {"mean": float(r["minutes"])},
                 "fb_runs": int(r["fallback_runs"]),
                 "fb_share": float(r["opus48_reply_share_pct"]),
+            }
+    with SOL_COST.open() as handle:
+        sol_cost = {r["effort"]: r for r in csv.DictReader(handle)}
+    with SOL.open() as handle:
+        for r in csv.DictReader(handle):
+            require(r["model"] == "gpt61sol", f"unexpected row {r['model']}")
+            c = sol_cost[r["effort"]]
+            groups["gpt61sol", r["effort"]] = {
+                "n": int(r["n"]),
+                "combined": {
+                    "n": int(r["n"]),
+                    "mean": float(r["combined_v3"]),
+                    "se": float(r["combined_v3_se"]),
+                },
+                "code_quality": {"mean": float(r["code_quality"])},
+                "passed": int(r["passed"]),
+                "usd": {"mean": float(c["mean_usd"])},
+                "minutes": {"mean": float(r["minutes"])},
+                "fb_runs": 0,
+                "fb_share": None,
             }
     card = SONNET
     _summary, _protocol, rows, final, _coverage = card.load()
@@ -128,8 +154,7 @@ def load_groups():
         for e in LEVELS:
             require((m, e) in groups, f"{m} {e} missing")
     sources = {
-        "published_table": PUBLISHED.name,
-        "published_table_sha256": digest(PUBLISHED.read_bytes()),
+        "published_tables": {p.name: digest(p.read_bytes()) for p in (PUBLISHED, SOL, SOL_COST)},
         "v3.23_summary_sha256": digest((card.RUN / "summary.json").read_bytes()),
     }
     return groups, final, sources
@@ -187,7 +212,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         left,
         1.72,
-        "VulcanBench Frontier v4: Claude Sonnet 5.5, Opus 5.5 and Fable 5.1",
+        "VulcanBench Frontier v4: Sonnet 5.5, Opus 5.5 and GPT-6.1 Sol",
         30,
         True,
         heading=True,
@@ -223,7 +248,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
         label = f"{NAMES[m]}{' (with fallback)' if m in CLAUDE_MAIN else ''}"
         text(x + 0.016, 3.05, label, 13, True)
-        x += {"sonnet55": 0.30, "opus55": 0.29, "fable": 0}[m]
+        x += {"sonnet55": 0.30, "opus55": 0.29, "gpt61sol": 0}[m]
 
     def axis(x0, w, top, h):
         ax = fig.add_axes([x0, yf(top + h), w, h / H], facecolor=PAPER)
@@ -296,7 +321,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         color=MUTED,
     )
     ax = axis(0.585, 0.355, 4.25, 3.2)
-    shifts = {"sonnet55": -0.26, "opus55": 0.0, "fable": 0.26}
+    shifts = {"sonnet55": -0.26, "opus55": 0.0, "gpt61sol": 0.26}
     top = max(groups[m, e]["usd"]["mean"] for m in MODELS for e in LEVELS)
     ax.set_ylim(0, top * 1.22)
     for m in MODELS:
@@ -386,15 +411,15 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
 
     notes = [
         "* Combined score over the judged runs when fewer than 23. Bold marks each model's best level.",
-        "Protocols: Sonnet 5.5 is Code quality v3.23, Opus 5.5 is v3.15 and Fable 5.1 is v3.4. Same rubric, controls, weights and "
-        "judges, judged in separate sessions. For v3.23 the judge pins were rebuilt after the original judging host was erased: Muse "
-        "runs the same binary (sha256 match) and the Cursor CLI that carries Grok was re-pinned, so it cannot be shown identical to "
-        "the earlier rounds' binary.",
-        "All three ran with Claude Code's refusal fallback on and count every run; the share row counts replies written by another "
-        "model. Sonnet 5.5 never fell back. Cost is Claude Code's own list-price total for Sonnet 5.5 and Opus 5.5, and the published "
-        "cost ledger for Fable 5.1.",
-        "Harness versions differ (Sonnet 5.5 on 2.1.291 to 2.1.293, Opus 5.5 on 2.1.280, Fable 5.1 on 2.1.259 to 2.1.261), so small "
-        "gaps between columns are harness confounded. Opus 5.5 and Fable 5.1 numbers are the published per-level rows.",
+        "Protocols: Sonnet 5.5 is Code quality v3.23, Opus 5.5 is v3.15 and GPT-6.1 Sol is v3.18. Same rubric, controls, weights and "
+        "judges (Muse Spark 1.3 and Grok 4.6, neutral for both labs), judged in separate sessions. For v3.23 the judge pins were "
+        "rebuilt after the original judging host was erased: Muse runs the same binary (sha256 match) and the Cursor CLI that "
+        "carries Grok was re-pinned, so it cannot be shown identical to the earlier rounds' binary.",
+        "Cost bases differ: the Claude columns use Claude Code's own list-price total per task; GPT-6.1 Sol is API-equivalent at "
+        "list prices from its token ledger (its runs used the ChatGPT Pro subscription). Both Claude columns ran with Claude Code's "
+        "refusal fallback on and count every run; Sonnet 5.5 never fell back. Codex has no refusal fallback.",
+        "Harnesses differ (Claude Code 2.1.291 to 2.1.293, Claude Code 2.1.280, Codex 0.159.0), so small gaps are harness "
+        "confounded. Opus 5.5 and GPT-6.1 Sol numbers are their published per-level rows; nothing was re-run or re-judged.",
     ]
     yy = y + 0.12
     for n in notes:
@@ -405,11 +430,11 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
     suffix = "" if final else "-preliminary"
-    out = OUTPUT / f"sonnet55-vs-claude{suffix}.png"
+    out = OUTPUT / f"sonnet55-vs-frontier{suffix}.png"
     fig.savefig(out, facecolor=PAPER)
     fig.savefig(out.with_suffix(".svg"), facecolor=PAPER)
     plt.close(fig)
-    table = OUTPUT / f"sonnet55-vs-claude{suffix}-efforts.csv"
+    table = OUTPUT / f"sonnet55-vs-frontier{suffix}-efforts.csv"
     with table.open("w", newline="") as fh:
         w = csv.writer(fh, lineterminator="\n")
         w.writerow(

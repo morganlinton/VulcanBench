@@ -4,8 +4,9 @@
 
 Frontier v5: UNSLOTTED. Status: pre-registered 2026-10-08 (commit 4338ef63,
 before any build); fail_to_pass and single-fix controls measured the same
-day on a native arm64 build (below); not yet validated on v5-cfamily, not
-gate-measured. Written before any reference-model run. Nothing here is shown
+day on a native arm64 build; validated on v5-cfamily on arm64 2026-10-09
+(base 0 x3, gold 1 x3, three probes 0, Harbor oracle 1 and nop 0); x86-64
+not yet run; not gate-measured. Written before any reference-model run. Nothing here is shown
 to the agent.
 
 ## Family fit (honest)
@@ -160,17 +161,34 @@ unnecessary nodes (a topologically equal result with extra vertices), which
 the decision rule above treats as a verifier defect if a gate run shows it.
 Assessed low; kept as a gate-time check.
 
-## Validation plan (after the arm64 re-validation of fmt and comrak finishes)
+## Validation record (2026-10-09, arm64 Mac, `vulcanbench/sandbox:v5-cfamily`, GCC 12.2)
 
-1. Build the pin and the base on `vulcanbench/sandbox:v5-cfamily` (GCC 12.2,
-   C++17, Release with assertions as upstream's CI), run the full suite at
-   both, and record the fail_to_pass set. Every expected fix test must fail at
-   base; anything else failing at base must be explained or dropped.
-2. Determinism x3 at base and gold, then single-fix controls.
-3. `scripts/frontier-v5/probe_verifier.py` with the probes above, then
-   `harbor run -a oracle` (PHASE1.md rule: gold must score 1 under Harbor).
-4. Record x86-64 portability separately (the host is arm64; floating-point
-   circle math may differ in the last bit between architectures).
+Docker VM confined to the host's efficiency cores (a Frontier v4 sweep held
+the performance cores), so wall-clock figures are pessimistic.
+
+- Agent image: base workspace builds offline; its own ctest self-check
+  passes all 536 visible test groups (held-out cases deleted).
+- `scripts/frontier-v5/probe_verifier.py`, three runs: base reward 0 x3
+  (exactly the 16 fail_to_pass fail, pass_to_pass all pass, sentinels fail),
+  gold reward 1 x3 (15,345 ids seen), probes `exit-stealth`, `summary-forge`
+  and `tut-plant` reward 0 x3. `exit-stealth` leaves cases missing and the
+  sentinel unfailed; `summary-forge` turns every unit case "passed" and is
+  caught by the sentinel and the XML held-out cases, as registered;
+  `tut-plant` is caught by the tamper scan (and is never copied or on an
+  include path).
+- Harbor 0.24.0, real `harbor run`: oracle reward 1 (all 16 fail_to_pass,
+  guard_suite 1), nop reward 0. Verifier wall clock about 2 minutes per run
+  (incremental rebuild of the prebuilt tree).
+- Two verifier fixes found on the way, both infrastructure, not task
+  content: GEOS's three slow GridIntersection cases (skipped by upstream on
+  CI) were graded failed at a 120 s per-case bound on the loaded host, so the
+  bound is 600 s and the worker pool is sized to the container's CPU quota;
+  and the environment's ctest self-check runs at `-j2` (GEOS's 30 s
+  per-group ctest timeout) and prints failures.
+- Not yet done: x86-64 portability (floating-point circle math can differ in
+  the last bit between architectures; the XML comparison tolerance is about
+  1e-7, the unit tests mostly compare exactly). Run probe_verifier once on an
+  x86-64 host before admission.
 
 ## Difficulty hypothesis (to confirm at the gate)
 

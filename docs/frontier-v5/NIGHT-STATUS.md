@@ -49,6 +49,25 @@ C. Slot-wise still almost all UNSLOTTED; comrak is the first task built to
 fill a frozen slot (F2-rust). Nothing is gate-measured; reference-model
 credentials are still the blocker.
 
+## Local session 2026-10-08 to 10-09 (back on the arm64 Mac)
+
+Authoring moved back from cloud sessions to the Mac. Three outcomes:
+
+1. **The cloud-authored tasks are confirmed on arm64.** yyjson and comrak
+   passed as built; fmt needed one metadata fix (an x86-only test,
+   `write_float128`, was required to pass) and now passes too.
+2. **Tenth task: `geos-curved-overlay-arc-noding`** (C++), five interacting
+   GEOS fixes to curved-geometry overlay, the "harder interacting arc" the
+   C++ gap called for. No single fix clears more than 5 of its 16 held-out
+   cases and leaving any one out fails at least one. Validated base 0 x3,
+   gold 1 x3, three cheating probes 0, and through the real Harbor path
+   (oracle 1, nop 0). UNSLOTTED.
+3. **Verifier robustness lessons** (PHASE1.md, "Back on the arm64 Mac"):
+   generous per-case bounds, pools sized to the CPU quota, conditional tests
+   out of pass_to_pass, never discard a failing self-check's output.
+
+Count now: ten built-and-validated tasks. Still nothing gate-measured.
+
 ## Verifier audit (2026-10-08): read before trusting any reward
 
 Every Track A verifier was attacked on purpose after a review finding. Five

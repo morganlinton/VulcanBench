@@ -1,0 +1,1794 @@
+{
+ "guard_light_franking": [
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 500",
+    "F ma 1400",
+    "Z ma",
+    "F ma 1900",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49500",
+    "P ma 48100",
+    "Z ma MATCH",
+    "P ma 46200",
+    "Z ma MATCH",
+    "X 1 3 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M m1 50000",
+    "F m1 1999",
+    "Z m1"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 48001",
+    "Z m1 MATCH",
+    "X 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 15",
+    "F ma 24"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49985",
+    "P ma 49961",
+    "X 1 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m9 12000",
+    "F m9 1500",
+    "Z m9"
+   ],
+   "expected": [
+    "OK 1",
+    "P m9 10500",
+    "Z m9 MATCH",
+    "X 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "Z ma",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Z ma MATCH",
+    "Z ma MATCH",
+    "X 1 0 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 1000",
+    "F ma 1500"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma LOW",
+    "X 1 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_stable_returns": [
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 300",
+    "F ma 300",
+    "R ma 2",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49700",
+    "P ma 49400",
+    "K ma 600",
+    "Z ma MATCH",
+    "X 1 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 450",
+    "R ma 1",
+    "F ma 450",
+    "R ma 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49550",
+    "K ma 450",
+    "P ma 49550",
+    "K ma 450",
+    "X 1 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 20000",
+    "F ma 800",
+    "F ma 800",
+    "R ma 1",
+    "R ma 1",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 19200",
+    "P ma 18400",
+    "K ma 800",
+    "K ma 800",
+    "Z ma MATCH",
+    "X 1 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M mb 999999999",
+    "F mb 1000",
+    "R mb 1",
+    "Z mb"
+   ],
+   "expected": [
+    "OK 1",
+    "P mb 999998999",
+    "K mb 1000",
+    "Z mb MATCH",
+    "X 1 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 999",
+    "R ma 1",
+    "Z ma",
+    "F ma 999",
+    "R ma 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49001",
+    "K ma 999",
+    "Z ma MATCH",
+    "P ma 49001",
+    "K ma 999",
+    "X 1 2 2 1 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "M toolong99 50000"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M m-1 50000"
+   ],
+   "expected": [
+    "N m-1 FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 999"
+   ],
+   "expected": [
+    "N ma BAL",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 0999"
+   ],
+   "expected": [
+    "N ma BAL",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 1234567890"
+   ],
+   "expected": [
+    "N ma BAL",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 12x45"
+   ],
+   "expected": [
+    "N ma BAL",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma"
+   ],
+   "expected": [
+    "N ma FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "M ma 60000"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma DUP",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 9"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 09"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 1234567"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 1x0"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma FMT",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "F"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "F ghost 100"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 1000",
+    "F ma 5000"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma LOW",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "R ma 0"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma RET",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "R ma 12345"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma RET",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "R ma 2x"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma RET",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "R ma"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma FMT",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "R ghost 1"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Z ghost"
+   ],
+   "expected": [
+    "N ghost UNKNOWN",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Z m-1"
+   ],
+   "expected": [
+    "N m-1 FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Z"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "m ma 50000"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "f ma 100"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "M ma 50000",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "Z ma MATCH",
+    "X 1 0 0 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "M ma 50000",
+    "M mb 20000",
+    "F ma 300",
+    "F ghost 100",
+    "F ma 9",
+    "R ma 1",
+    "Z ma",
+    "Z ghost",
+    "M ma 999",
+    "Q junk",
+    "F mb 450"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "P ma 49700",
+    "N ghost UNKNOWN",
+    "N ma POST",
+    "K ma 300",
+    "Z ma MATCH",
+    "N ghost UNKNOWN",
+    "N ma BAL",
+    "N ???????? FMT",
+    "P mb 19550",
+    "X 2 2 1 1 5"
+   ]
+  }
+ ],
+ "f2p_drift_fee": [
+  {
+   "input": [
+    "M ma 100000",
+    "F ma 1999",
+    "Z ma",
+    "F ma 2000",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 98001",
+    "Z ma MATCH",
+    "P ma 96000",
+    "Z ma DRIFT 1",
+    "X 1 2 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 100000",
+    "F ma 1000",
+    "F ma 999",
+    "F ma 10",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 99000",
+    "P ma 98001",
+    "P ma 97990",
+    "Z ma DRIFT 1",
+    "X 1 3 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 100000",
+    "F ma 4000",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 95998",
+    "Z ma DRIFT 2",
+    "X 1 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 100000",
+    "F ma 3000",
+    "F ma 3000",
+    "Z ma",
+    "F ma 3000",
+    "Z ma",
+    "F ma 100"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 96999",
+    "P ma 93997",
+    "Z ma DRIFT 3",
+    "P ma 90996",
+    "Z ma DRIFT 1",
+    "P ma 90896",
+    "X 1 4 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 2000",
+    "F ma 2000"
+   ],
+   "expected": [
+    "OK 1",
+    "N ma LOW",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M ma 100000",
+    "F ma 1999",
+    "Z ma",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 98001",
+    "Z ma MATCH",
+    "Z ma MATCH",
+    "X 1 1 0 2 0"
+   ]
+  }
+ ],
+ "f2p_stale_credit": [
+  {
+   "input": [
+    "M mb 900000",
+    "F mb 50000",
+    "F mb 12000",
+    "R mb 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P mb 849975",
+    "P mb 837969",
+    "K mb 50000",
+    "X 1 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M mb 900000",
+    "F mb 48000",
+    "F mb 12000",
+    "R mb 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P mb 851976",
+    "P mb 839970",
+    "K mb 12000",
+    "X 1 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M mb 900000",
+    "F mb 50000",
+    "F mb 12000",
+    "Z mb",
+    "R mb 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P mb 849975",
+    "P mb 837969",
+    "Z mb DRIFT 31",
+    "K mb 12000",
+    "X 1 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M mb 900000",
+    "F mb 62000",
+    "R mb 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P mb 837969",
+    "K mb 0",
+    "X 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m7 9999",
+    "F m7 26",
+    "F m7 30",
+    "R m7 2"
+   ],
+   "expected": [
+    "OK 1",
+    "P m7 9949",
+    "P m7 9899",
+    "K m7 52",
+    "X 1 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M mb 900000",
+    "F mb 1000",
+    "F mb 500",
+    "R mb 2"
+   ],
+   "expected": [
+    "OK 1",
+    "P mb 899000",
+    "P mb 898500",
+    "K mb 1000",
+    "X 1 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_coarse_regime": [
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 30"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9949",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 26",
+    "F m1 51"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9949",
+    "P m1 9874",
+    "X 1 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m1 15000",
+    "F m1 6000",
+    "F m1 30"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 8997",
+    "P m1 8947",
+    "X 1 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 30",
+    "R m1 1",
+    "F m1 30"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9949",
+    "K m1 30",
+    "P m1 9929",
+    "X 1 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m1 10000",
+    "F m1 30"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9970",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 9999",
+    "F ma 30"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 9969",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 50"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9949",
+    "X 1 1 0 0 0"
+   ]
+  }
+ ],
+ "f2p_regime_post": [
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 20"
+   ],
+   "expected": [
+    "OK 1",
+    "N m1 POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 24"
+   ],
+   "expected": [
+    "OK 1",
+    "N m1 POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M m1 10000",
+    "F m1 20",
+    "F m1 20"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9980",
+    "N m1 POST",
+    "X 1 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M m1 5000",
+    "F m1 20"
+   ],
+   "expected": [
+    "OK 1",
+    "N m1 POST",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M m1 9999",
+    "F m1 25"
+   ],
+   "expected": [
+    "OK 1",
+    "P m1 9974",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 9999",
+    "F ma 20"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 9979",
+    "X 1 1 0 0 0"
+   ]
+  }
+ ],
+ "f2p_over_return": [
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 100",
+    "R ma 3"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49900",
+    "K ma 100",
+    "X 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "R ma 1"
+   ],
+   "expected": [
+    "OK 1",
+    "K ma 0",
+    "X 1 0 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 100",
+    "F ma 200",
+    "R ma 1",
+    "R ma 2"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49900",
+    "P ma 49700",
+    "K ma 200",
+    "K ma 200",
+    "X 1 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 100",
+    "R ma 9999"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49900",
+    "K ma 100",
+    "X 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 100",
+    "F ma 100",
+    "R ma 2"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49900",
+    "P ma 49800",
+    "K ma 200",
+    "X 1 2 1 0 0"
+   ]
+  }
+ ],
+ "f2p_case_fold": [
+  {
+   "input": [
+    "M Abc 50000",
+    "M ABC 60000"
+   ],
+   "expected": [
+    "OK 1",
+    "N ABC DUP",
+    "X 1 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "M Abc 50000",
+    "F abc 300",
+    "Z aBC",
+    "R ABC 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P abc 49700",
+    "Z aBC MATCH",
+    "K ABC 300",
+    "X 1 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F MA 300"
+   ],
+   "expected": [
+    "OK 1",
+    "P MA 49700",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M Q7 9999",
+    "F q7 30"
+   ],
+   "expected": [
+    "OK 1",
+    "P q7 9949",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 300"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49700",
+    "X 1 1 0 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "M ma 50000 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 300 tail junk"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49700",
+    "X 1 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 300",
+    "R ma 1 pieces"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49700",
+    "K ma 300",
+    "X 1 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "Z ma now please"
+   ],
+   "expected": [
+    "OK 1",
+    "Z ma MATCH",
+    "X 1 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 300"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49700",
+    "X 1 1 0 0 0"
+   ]
+  }
+ ],
+ "f2p_drift_chain": [
+  {
+   "input": [
+    "M m5 12000",
+    "F m5 2500",
+    "F m5 810",
+    "Z m5",
+    "F m5 30",
+    "R m5 2",
+    "Z m5"
+   ],
+   "expected": [
+    "OK 1",
+    "P m5 9499",
+    "P m5 8674",
+    "Z m5 DRIFT 16",
+    "P m5 8624",
+    "K m5 60",
+    "Z m5 DRIFT 20",
+    "X 1 3 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 200000",
+    "F ma 40000",
+    "R ma 1",
+    "Z ma",
+    "F ma 40000",
+    "Z ma",
+    "R ma 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 159980",
+    "K ma 40000",
+    "Z ma DRIFT 20",
+    "P ma 159960",
+    "Z ma DRIFT 20",
+    "K ma 40000",
+    "X 1 2 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "M mc 500000",
+    "F mc 30000",
+    "F mc 30000",
+    "F mc 15000",
+    "R mc 1",
+    "Z mc",
+    "R mc 1"
+   ],
+   "expected": [
+    "OK 1",
+    "P mc 469985",
+    "P mc 439970",
+    "P mc 424963",
+    "K mc 30000",
+    "Z mc DRIFT 37",
+    "K mc 15000",
+    "X 1 3 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "M ma 50000",
+    "F ma 500",
+    "Z ma",
+    "F ma 500",
+    "R ma 1",
+    "Z ma"
+   ],
+   "expected": [
+    "OK 1",
+    "P ma 49500",
+    "Z ma MATCH",
+    "P ma 49000",
+    "K ma 500",
+    "Z ma MATCH",
+    "X 1 2 1 2 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "R mtr9 12345",
+    "M ma 10000",
+    "M MA 1234567890",
+    "R Ma 0",
+    "F ma 1234567 tail junk",
+    "F MA 10",
+    "F q07 2000",
+    "F q07 4000",
+    "F bad-id 09",
+    "R ZZ 12345",
+    "F ZZ 24",
+    "F ZZ 24 tail junk",
+    "M MA 0999",
+    "F ghost 50 tail junk",
+    "M q07 9999",
+    "F mtr9 1999 tail junk",
+    "F q07 9",
+    "R q07 9999",
+    "R bad-id 2",
+    "F M1 1234567",
+    "F m1 26",
+    "F toolong99 20",
+    "F M1 10",
+    "Z q07",
+    "M m1 999999999",
+    "F mtr9 999999",
+    "F ma 30",
+    "R Ma 0",
+    "F M1 999999",
+    "F toolong99 4000",
+    "F q07 30000",
+    "F ma 10",
+    "M bad-id 0999",
+    "R bad-id 3",
+    "R m1 3 pieces",
+    "F mtr9 25",
+    "M Ma 12000",
+    "F mtr9 1234567",
+    "F bad-id 1x0",
+    "F q07 62000 tail junk",
+    "M m1 12x4",
+    "R m1 2",
+    "F ZZ 09",
+    "R bad-id 9999",
+    "M mtr9 12x4 extra",
+    "R ZZ 2",
+    "M toolong99 12000",
+    "Z MA",
+    "R",
+    "Z ghost",
+    "Z bad-id",
+    "F MA 2000",
+    "R ghost 9999",
+    "Z m1 now",
+    "F Ma 1234567",
+    "F ZZ 10 tail junk",
+    "F MA 2000",
+    "M toolong99 50000 extra",
+    "Z ZZ",
+    "M ma",
+    "F ghost 999 tail junk",
+    "F ma 999999",
+    "F q07 2000",
+    "F toolong99 26",
+    "Z ghost",
+    "Z m1",
+    "M ma 999 extra",
+    "Z ZZ now",
+    "F bad-id 1x0",
+    "R M1 0",
+    "F ZZ 999999 tail junk",
+    "Z ma",
+    "F MA 300",
+    "M ma 9999",
+    "F bad-id 10",
+    "M ghost 999999999",
+    "F MA 30",
+    "F ZZ 1x0",
+    "F ZZ 9",
+    "R M1 0",
+    "R M1 0",
+    "F ZZ 4000",
+    "F",
+    "R q07 2",
+    "M MA 1000",
+    "F toolong99 300",
+    "R M1 9999",
+    "F M1 2000 tail junk",
+    "F m1 62000",
+    "Z q07",
+    "Z q07",
+    "M bad-id 999",
+    "F q07 50",
+    "M m1 9999",
+    "Z ghost",
+    "F mtr9 1234567",
+    "R",
+    "F MA 300",
+    "R Ma 2",
+    "F m1 26",
+    "m ma 1000",
+    "R MA 1",
+    "F M1 1999",
+    "F m1 1999 tail junk",
+    "Z m1",
+    "Z mtr9 now",
+    "F Ma 62000",
+    "Z M1",
+    "Q hey",
+    "F m1 26",
+    "Z MA",
+    "Z mtr9 now",
+    "F toolong99 1234567",
+    "R mtr9 2 pieces",
+    "F q07 50",
+    "F m1 26",
+    "Z ghost",
+    "R q07 1 pieces",
+    "R M1 12345",
+    "R bad-id 2x",
+    "M toolong99 9999 extra",
+    "M MA 1234567890",
+    "F ghost 1234567",
+    "F toolong99 30 tail junk",
+    "R bad-id 9999",
+    "Z mtr9",
+    "F MA 30",
+    "F toolong99 999",
+    "R M1 9999",
+    "F bad-id 300",
+    "F q07 1234567",
+    "F MA 50000",
+    "M ma 900000",
+    "R ma 2x",
+    "F Ma 999",
+    "F q07 30",
+    "M m1 900000 extra",
+    "m ma 1000",
+    "F MA 20",
+    "F ZZ 1999 tail junk",
+    "R ZZ 2",
+    "F Ma 24",
+    "F MA 50",
+    "Z MA",
+    "F mtr9 30 tail junk",
+    "R ma 1",
+    "R ghost 0",
+    "M mtr9 1234567890",
+    "F toolong99 4000 tail junk",
+    "F MA 1999 tail junk",
+    "R toolong99 12345",
+    "R M1 3",
+    "R",
+    "R bad-id 2x",
+    "F toolong99 1234567",
+    "M bad-id 12000",
+    "F MA 09",
+    "F ma 25",
+    "R MA 3",
+    "F ghost 999"
+   ],
+   "expected": [
+    "N mtr9 RET",
+    "OK 1",
+    "N MA BAL",
+    "N Ma RET",
+    "N ma POST",
+    "P MA 9990",
+    "N q07 UNKNOWN",
+    "N q07 UNKNOWN",
+    "N bad-id FMT",
+    "N ZZ RET",
+    "N ZZ UNKNOWN",
+    "N ZZ UNKNOWN",
+    "N MA BAL",
+    "N ghost UNKNOWN",
+    "OK 2",
+    "N mtr9 UNKNOWN",
+    "N q07 POST",
+    "K q07 0",
+    "N bad-id FMT",
+    "N M1 POST",
+    "N m1 UNKNOWN",
+    "N toolong99 FMT",
+    "N M1 UNKNOWN",
+    "Z q07 MATCH",
+    "OK 3",
+    "N mtr9 UNKNOWN",
+    "P ma 9960",
+    "N Ma RET",
+    "P M1 998999501",
+    "N toolong99 FMT",
+    "N q07 LOW",
+    "P ma 9950",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "K m1 0",
+    "N mtr9 UNKNOWN",
+    "N Ma DUP",
+    "N mtr9 POST",
+    "N bad-id FMT",
+    "N q07 LOW",
+    "N m1 BAL",
+    "K m1 0",
+    "N ZZ POST",
+    "N bad-id FMT",
+    "N mtr9 BAL",
+    "N ZZ UNKNOWN",
+    "N toolong99 FMT",
+    "Z MA MATCH",
+    "N ???????? FMT",
+    "N ghost UNKNOWN",
+    "N bad-id FMT",
+    "P MA 7949",
+    "N ghost UNKNOWN",
+    "Z m1 DRIFT 499",
+    "N Ma POST",
+    "N ZZ UNKNOWN",
+    "P MA 5948",
+    "N toolong99 FMT",
+    "N ZZ UNKNOWN",
+    "N ma FMT",
+    "N ghost UNKNOWN",
+    "N ma LOW",
+    "P q07 7998",
+    "N toolong99 FMT",
+    "N ghost UNKNOWN",
+    "Z m1 MATCH",
+    "N ma BAL",
+    "N ZZ UNKNOWN",
+    "N bad-id FMT",
+    "N M1 RET",
+    "N ZZ UNKNOWN",
+    "Z ma DRIFT 2",
+    "P MA 5648",
+    "N ma DUP",
+    "N bad-id FMT",
+    "OK 4",
+    "P MA 5618",
+    "N ZZ POST",
+    "N ZZ POST",
+    "N M1 RET",
+    "N M1 RET",
+    "N ZZ UNKNOWN",
+    "N ???????? FMT",
+    "K q07 2000",
+    "N MA DUP",
+    "N toolong99 FMT",
+    "K M1 0",
+    "P M1 998997500",
+    "P m1 998935469",
+    "Z q07 DRIFT 1",
+    "Z q07 MATCH",
+    "N bad-id FMT",
+    "P q07 9948",
+    "N m1 DUP",
+    "Z ghost MATCH",
+    "N mtr9 POST",
+    "N ???????? FMT",
+    "P MA 5318",
+    "K Ma 600",
+    "P m1 998935443",
+    "N ???????? FMT",
+    "K MA 300",
+    "P M1 998933443",
+    "P m1 998931443",
+    "Z m1 DRIFT 34",
+    "N mtr9 UNKNOWN",
+    "N Ma LOW",
+    "Z M1 MATCH",
+    "N ???????? FMT",
+    "P m1 998931417",
+    "Z MA MATCH",
+    "N mtr9 UNKNOWN",
+    "N toolong99 FMT",
+    "N mtr9 UNKNOWN",
+    "P q07 9898",
+    "P m1 998931391",
+    "Z ghost MATCH",
+    "K q07 50",
+    "N M1 RET",
+    "N bad-id FMT",
+    "N toolong99 FMT",
+    "N MA BAL",
+    "N ghost POST",
+    "N toolong99 FMT",
+    "N bad-id FMT",
+    "N mtr9 UNKNOWN",
+    "P MA 6188",
+    "N toolong99 FMT",
+    "K M1 182",
+    "N bad-id FMT",
+    "N q07 POST",
+    "N MA LOW",
+    "N ma DUP",
+    "N ma RET",
+    "P Ma 5189",
+    "P q07 9898",
+    "N m1 DUP",
+    "N ???????? FMT",
+    "P MA 5169",
+    "N ZZ UNKNOWN",
+    "N ZZ UNKNOWN",
+    "P Ma 5145",
+    "P MA 5095",
+    "Z MA MATCH",
+    "N mtr9 UNKNOWN",
+    "K ma 50",
+    "N ghost RET",
+    "N mtr9 BAL",
+    "N toolong99 FMT",
+    "P MA 3146",
+    "N toolong99 FMT",
+    "K M1 0",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "N toolong99 FMT",
+    "N bad-id FMT",
+    "N MA POST",
+    "P ma 3120",
+    "K MA 75",
+    "P ghost 999999000",
+    "X 4 28 12 13 103"
+   ]
+  },
+  {
+   "input": [
+    "Z Ma",
+    "M M1 1234567890",
+    "F MA 50000",
+    "M Ma 999999999",
+    "R MA 2",
+    "R toolong99 12345",
+    "R ma 9999",
+    "Z MA",
+    "F toolong99 4000",
+    "X",
+    "F toolong99 30",
+    "F m1 10",
+    "Z MA",
+    "F Ma 2000",
+    "R Ma 9999",
+    "Z MA",
+    "F bad-id 09 tail junk",
+    "R MA 2",
+    "F Ma 999",
+    "F q07 30",
+    "F ZZ 09",
+    "Z ma",
+    "F Ma 30000",
+    "R Ma 0",
+    "F mtr9 26 tail junk",
+    "X",
+    "M M1 900000",
+    "Z ghost",
+    "R MA 1",
+    "F ghost 26",
+    "R mtr9 1",
+    "M ma",
+    "F MA 62000",
+    "Z q07",
+    "F bad-id 300",
+    "M q07 0999",
+    "F ghost 25",
+    "R MA 3",
+    "F m1 300",
+    "F ZZ 1234567",
+    "M ghost 1234567890 extra",
+    "F bad-id 50",
+    "F bad-id 09",
+    "M ghost 12x4",
+    "F ghost 30000",
+    "Z ghost",
+    "M toolong99 10000 extra",
+    "F ma 2000",
+    "R ZZ 12345",
+    "M bad-id 12000",
+    "M mtr9 12x4 extra",
+    "M ghost 50000",
+    "Z MA",
+    "Z ghost",
+    "M mtr9 10000 extra",
+    "M ghost 12x4",
+    "Z q07",
+    "M m1 999999999 extra",
+    "F ZZ 2000 tail junk",
+    "Z bad-id",
+    "R m1 2",
+    "M ZZ 12x4 extra",
+    "Z M1",
+    "F ma 62000",
+    "R M1 0",
+    "Z MA",
+    "Z ZZ",
+    "R MA 3",
+    "F ZZ 30",
+    "F MA 25",
+    "F q07 50000",
+    "F Ma 9",
+    "F ma 50 tail junk",
+    "F toolong99 1x0",
+    "F ZZ 25",
+    "F bad-id 30000 tail junk",
+    "R MA 9999",
+    "F ma 999999 tail junk",
+    "F ma 20",
+    "F toolong99 1999",
+    "F m1 20",
+    "Z q07 now",
+    "R M1 3",
+    "F ZZ 26",
+    "Z ZZ",
+    "F mtr9 30000",
+    "F Ma 30000",
+    "R toolong99 2",
+    "F ghost 25",
+    "M mtr9 900000",
+    "Z",
+    "F M1 62000",
+    "F Ma 30000",
+    "R mtr9 12345",
+    "F toolong99 30000",
+    "F Ma 50000",
+    "R toolong99 2x",
+    "F MA 4000",
+    "R ZZ 1",
+    "F bad-id 24 tail junk",
+    "F MA 10",
+    "F toolong99 2000",
+    "F q07 09",
+    "Z Ma",
+    "F Ma 9",
+    "F M1 1999",
+    "F ZZ 09",
+    "Z ZZ now",
+    "F ghost 62000",
+    "F toolong99 999 tail junk",
+    "F toolong99 50",
+    "F ma 10",
+    "M m1 12x4",
+    "F ma 30",
+    "Z Ma",
+    "R ghost 12345 pieces",
+    "F ghost 26",
+    "M ghost 999",
+    "R toolong99 0",
+    "Z mtr9",
+    "F q07 999999",
+    "F ma 1999",
+    "Z q07 now",
+    "M Ma 12000",
+    "Z bad-id",
+    "F Ma 26",
+    "Z ghost",
+    "F Ma 24",
+    "M ZZ 1234567890",
+    "M ma 0999",
+    "F MA 20 tail junk",
+    "F q07 25",
+    "M MA 0999",
+    "Z mtr9",
+    "M toolong99 999999999",
+    "F m1 62000",
+    "F ZZ 1234567",
+    "F ma 1x0",
+    "Z",
+    "M m1 900000 extra",
+    "R toolong99 12345 pieces",
+    "M ghost 1234567890",
+    "Q hey",
+    "F bad-id 26",
+    "Z ma",
+    "F Ma 4000",
+    "F m1 50000",
+    "M mtr9 0999",
+    "F mtr9 999",
+    "R ma 9999",
+    "F ZZ 4000",
+    "F ZZ 09",
+    "F toolong99 25",
+    "M q07 50000",
+    "M mtr9 900000 extra"
+   ],
+   "expected": [
+    "N Ma UNKNOWN",
+    "N M1 BAL",
+    "N MA UNKNOWN",
+    "OK 1",
+    "K MA 0",
+    "N toolong99 FMT",
+    "K ma 0",
+    "Z MA MATCH",
+    "N toolong99 FMT",
+    "N ???????? FMT",
+    "N toolong99 FMT",
+    "N m1 UNKNOWN",
+    "Z MA MATCH",
+    "P Ma 999997998",
+    "K Ma 2000",
+    "Z MA DRIFT 1",
+    "N bad-id FMT",
+    "K MA 0",
+    "P Ma 999998999",
+    "N q07 UNKNOWN",
+    "N ZZ POST",
+    "Z ma MATCH",
+    "P Ma 999968984",
+    "N Ma RET",
+    "N mtr9 UNKNOWN",
+    "N ???????? FMT",
+    "OK 2",
+    "N ghost UNKNOWN",
+    "K MA 30000",
+    "N ghost UNKNOWN",
+    "N mtr9 UNKNOWN",
+    "N ma FMT",
+    "P MA 999936953",
+    "N q07 UNKNOWN",
+    "N bad-id FMT",
+    "N q07 BAL",
+    "N ghost UNKNOWN",
+    "K MA 60000",
+    "P m1 899700",
+    "N ZZ POST",
+    "N ghost BAL",
+    "N bad-id FMT",
+    "N bad-id FMT",
+    "N ghost BAL",
+    "N ghost UNKNOWN",
+    "N ghost UNKNOWN",
+    "N toolong99 FMT",
+    "P ma 999994952",
+    "N ZZ RET",
+    "N bad-id FMT",
+    "N mtr9 BAL",
+    "OK 3",
+    "Z MA DRIFT 47",
+    "Z ghost MATCH",
+    "OK 4",
+    "N ghost BAL",
+    "N q07 UNKNOWN",
+    "N m1 DUP",
+    "N ZZ UNKNOWN",
+    "N bad-id FMT",
+    "K m1 300",
+    "N ZZ BAL",
+    "Z M1 MATCH",
+    "P ma 999932921",
+    "N M1 RET",
+    "Z MA DRIFT 31",
+    "N ZZ UNKNOWN",
+    "K MA 124000",
+    "N ZZ UNKNOWN",
+    "P MA 1000056896",
+    "N q07 UNKNOWN",
+    "N Ma POST",
+    "P ma 1000056846",
+    "N toolong99 FMT",
+    "N ZZ UNKNOWN",
+    "N bad-id FMT",
+    "K MA 100",
+    "P ma 999056447",
+    "P ma 999056427",
+    "N toolong99 FMT",
+    "P m1 899980",
+    "N q07 UNKNOWN",
+    "K M1 20",
+    "N ZZ UNKNOWN",
+    "N ZZ UNKNOWN",
+    "N mtr9 LOW",
+    "P Ma 999026412",
+    "N toolong99 FMT",
+    "P ghost 49975",
+    "N mtr9 DUP",
+    "N ???????? FMT",
+    "P M1 837969",
+    "P Ma 998996397",
+    "N mtr9 RET",
+    "N toolong99 FMT",
+    "P Ma 998946372",
+    "N toolong99 FMT",
+    "P MA 998942370",
+    "N ZZ UNKNOWN",
+    "N bad-id FMT",
+    "P MA 998942360",
+    "N toolong99 FMT",
+    "N q07 POST",
+    "Z Ma DRIFT 557",
+    "N Ma POST",
+    "P M1 835969",
+    "N ZZ POST",
+    "N ZZ UNKNOWN",
+    "N ghost LOW",
+    "N toolong99 FMT",
+    "N toolong99 FMT",
+    "P ma 998942350",
+    "N m1 BAL",
+    "P ma 998942320",
+    "Z Ma MATCH",
+    "N ghost RET",
+    "P ghost 49949",
+    "N ghost BAL",
+    "N toolong99 FMT",
+    "Z mtr9 MATCH",
+    "N q07 UNKNOWN",
+    "P ma 998940321",
+    "N q07 UNKNOWN",
+    "N Ma DUP",
+    "N bad-id FMT",
+    "P Ma 998940294",
+    "Z ghost MATCH",
+    "P Ma 998940270",
+    "N ZZ BAL",
+    "N ma BAL",
+    "P MA 998940250",
+    "N q07 UNKNOWN",
+    "N MA BAL",
+    "Z mtr9 MATCH",
+    "N toolong99 FMT",
+    "P m1 773938",
+    "N ZZ POST",
+    "N ma POST",
+    "N ???????? FMT",
+    "N m1 DUP",
+    "N toolong99 FMT",
+    "N ghost BAL",
+    "N ???????? FMT",
+    "N bad-id FMT",
+    "Z ma DRIFT 1",
+    "P Ma 998936248",
+    "P m1 723913",
+    "N mtr9 BAL",
+    "P mtr9 9001",
+    "K ma 56000",
+    "N ZZ UNKNOWN",
+    "N ZZ POST",
+    "N toolong99 FMT",
+    "OK 5",
+    "N mtr9 DUP",
+    "X 5 31 11 14 94"
+   ]
+  }
+ ]
+}

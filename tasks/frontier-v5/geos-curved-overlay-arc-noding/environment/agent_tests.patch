@@ -1,0 +1,270 @@
+diff --git a/tests/unit/algorithm/CircularArcIntersectorTest.cpp b/tests/unit/algorithm/CircularArcIntersectorTest.cpp
+index 63695fb..1225bb9 100644
+--- a/tests/unit/algorithm/CircularArcIntersectorTest.cpp
++++ b/tests/unit/algorithm/CircularArcIntersectorTest.cpp
+@@ -1761,27 +1761,6 @@ void object::test<87>()
+     ensure_equals(arc.p2(), arcOut.p2());
+ }
+ 
+-template<>
+-template<>
+-void object::test<88>()
+-{
+-    // From https://github.com/libgeos/geos/issues/1539
+-    set_test_name("arc endpoint intersects interior of horizontal line");
+-    setTolerance(0);
+-    setToleranceIsDistance(false);
+-
+-    // clockwise arc
+-    checkIntersectionArcSeg(XY{1, 10}, XY{3, 7}, XY{1, 5},
+-                            XY{0, 10}, XY{10, 10},
+-                            CircularArcIntersector::ONE_POINT_INTERSECTION,
+-                            XY{1, 10});
+-
+-    // counter-clockwise arc
+-    checkIntersectionArcSeg(XY{1, 5}, XY{3, 7}, XY{1, 10},
+-                            XY{0, 10}, XY{10, 10},
+-                            CircularArcIntersector::ONE_POINT_INTERSECTION,
+-                            XY{1, 10});
+-}
+ 
+ template<>
+ template<>
+@@ -1797,31 +1776,7 @@ void object::test<89>()
+                             XY{-7, 3});
+ }
+ 
+-template<>
+-template<>
+-void object::test<90>()
+-{
+-    set_test_name("arc control point intersects interior of diagonal line");
+-    setTolerance(0);
+-    setToleranceIsDistance(false);
+-
+-    checkIntersectionArcSeg(XY{0 , 0}, XY{208, 22}, XY{140355444245, 3882200024},
+-                            XY{104, 11}, XY{2080, 220},
+-                            CircularArcIntersector::ONE_POINT_INTERSECTION,
+-                            XY{208, 22});
+-}
+-
+-template<>
+-template<>
+-void object::test<91>()
+-{
+-    set_test_name("two arcs with interior intersection at control point");
+ 
+-    checkIntersection(XY{-5, 0}, XY{0, 5}, XY{5, 0},
+-                      XY{-7, 0}, XY{-3, 4}, XY{1, 0},
+-                      CircularArcIntersector::ONE_POINT_INTERSECTION,
+-                      XY{-3, 4});
+-}
+ 
+ // TODO: check Z values of arc result centerpoints
+ // TODO: add tests for seg/seg
+diff --git a/tests/unit/noding/NodableArcStringTest.cpp b/tests/unit/noding/NodableArcStringTest.cpp
+index c1f1c02..1642e8a 100644
+--- a/tests/unit/noding/NodableArcStringTest.cpp
++++ b/tests/unit/noding/NodableArcStringTest.cpp
+@@ -192,35 +192,5 @@ void object::test<4>()
+     ensure_equals(arc1.p1<CoordinateXYZM>().m, (intPt.m + p2.m) / 2);
+ }
+ 
+-template<>
+-template<>
+-void object::test<5>()
+-{
+-    set_test_name("splits at arc endpoints");
+-
+-    checkSplit("CIRCULARSTRING (100 0, 50 50, 0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)",
+-                {0, 0}, 0, {
+-                 "CIRCULARSTRING (100 0, 50 50, 0 0)",
+-                 "CIRCULARSTRING (0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)"
+-                });
+-
+-    checkSplit("CIRCULARSTRING (100 0, 50 50, 0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)",
+-                {0, 0}, 1, {
+-                 "CIRCULARSTRING (100 0, 50 50, 0 0)",
+-                 "CIRCULARSTRING (0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)"
+-                });
+-
+-    checkSplit("CIRCULARSTRING (100 0, 50 50, 0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)",
+-                {100, 100}, 2, {
+-                 "CIRCULARSTRING (100 0, 50 50, 0 0)",
+-                 "CIRCULARSTRING (0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)"
+-                });
+-
+-    checkSplit("CIRCULARSTRING (100 0, 50 50, 0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)",
+-                {100, 100}, 3, {
+-                 "CIRCULARSTRING (100 0, 50 50, 0 0)",
+-                 "CIRCULARSTRING (0 0, -50 50, 0 100, 50 80, 100 100, 150 50, 100 0)"
+-                });
+-}
+ 
+ }
+\ No newline at end of file
+diff --git a/tests/unit/operation/overlayng/OverlayNGTest.cpp b/tests/unit/operation/overlayng/OverlayNGTest.cpp
+index 3ee1821..ebf9ff7 100644
+--- a/tests/unit/operation/overlayng/OverlayNGTest.cpp
++++ b/tests/unit/operation/overlayng/OverlayNGTest.cpp
+@@ -845,15 +845,5 @@ void object::test<64>()
+     testOverlay(a, b, exp, OverlayNG::UNION, 0);
+ }
+ 
+-template<>
+-template<>
+-void object::test<65>()
+-{
+-    set_test_name("Intersection of circular CurvePolygon with itself");
+-
+-    std::string a = "CURVEPOLYGON (CIRCULARSTRING (-1 0,0 1,1 0,0 -1,-1 0))";
+-
+-    testOverlay(a, a, a, OverlayNG::INTERSECTION, 0);
+-}
+ 
+ } // namespace tut
+diff --git a/tests/unit/operation/split/GeometrySplitterTest.cpp b/tests/unit/operation/split/GeometrySplitterTest.cpp
+index 9719283..2784aa4 100644
+--- a/tests/unit/operation/split/GeometrySplitterTest.cpp
++++ b/tests/unit/operation/split/GeometrySplitterTest.cpp
+@@ -936,15 +936,5 @@ void object::test<77>()
+         "GEOMETRYCOLLECTION (CURVEPOLYGON (COMPOUNDCURVE ((5 0, 3 0, 3 5, 5 5), CIRCULARSTRING (5 5, 7 1, 5 0))), POLYGON ((3 0, 0 0, 0 5, 3 5, 3 0)))");
+ }
+ 
+-template<>
+-template<>
+-void object::test<78>()
+-{
+-    set_test_name("split Polygon with CircularString (#1539)");
+-
+-    testSplit("POLYGON ((0 5, 0 10, 10 10, 10 5, 0 5))",
+-        "CIRCULARSTRING (1 10, 3 7, 1 5)",
+-        "GEOMETRYCOLLECTION (CURVEPOLYGON (COMPOUNDCURVE ((0 5, 0 10, 1 10), CIRCULARSTRING (1 10, 3 7, 1 5), (1 5, 0 5))), CURVEPOLYGON (COMPOUNDCURVE ((1 10, 10 10, 10 5, 1 5), CIRCULARSTRING (1 5, 3 7, 1 10))))");
+-}
+ 
+ }
+diff --git a/tests/xmltester/tests/general/TestOverlayCurvesAA.xml b/tests/xmltester/tests/general/TestOverlayCurvesAA.xml
+index c9a1d43..0ddaa1c 100644
+--- a/tests/xmltester/tests/general/TestOverlayCurvesAA.xml
++++ b/tests/xmltester/tests/general/TestOverlayCurvesAA.xml
+@@ -89,36 +89,6 @@
+       </op>
+     </test>
+ 
+-  </case>
+-  <case>
+-    <desc>AA - simple polygons intersecting in P, L and A</desc>
+-    <a>
+-      CURVEPOLYGON(COMPOUNDCURVE((0 0, 110 0), CIRCULARSTRING (110 0, 90 20, 110 60), (110 60, 40 60, 100 100), CIRCULARSTRING (100 100, 150 150, 100 200), (100 200, 40 220, 110 260), CIRCULARSTRING (110 260, 50 280, 0 260, -50 130, 0 0)))
+-    </a>
+-    <b>
+-      CURVEPOLYGON(COMPOUNDCURVE(CIRCULARSTRING(220 0, 120 20, 110 0, 90 20, 110 60), (110 60, 180 60, 100 150, 180 220, 110 260, 220 260, 220 0)))
+-    </b>
+-    <test>
+-      <op name="intersection" arg1="A" arg2="B">
+-        GEOMETRYCOLLECTION (CURVEPOLYGON (COMPOUNDCURVE ((100 150, 137.6288347353439 182.92523039342592), CIRCULARSTRING (137.6288347353439 182.92523039342592, 149.90186898086148 146.8689503011078, 133.218191941496 112.62953406581698), (133.218191941496 112.62953406581698, 100 150))), CIRCULARSTRING (110 0, 90 20, 110 60), POINT (110 260))
+-      </op>
+-    </test>
+-    <test>
+-      <op name="union" arg1="A" arg2="B">
+-        CURVEPOLYGON (COMPOUNDCURVE (CIRCULARSTRING (0 0, -50 130, 0 260, 50 280, 110 260), (110 260, 220 260, 220 0), CIRCULARSTRING (220 0, 120 20, 110 0), (110 0, 0 0)), COMPOUNDCURVE ((40 60, 110 60, 180 60, 133.218191941496 112.62953406581698), CIRCULARSTRING (133.218191941496 112.62953406581698, 117.76902787564433 103.26391492267913, 100 100), (100 100, 40 60)), COMPOUNDCURVE ((40 220, 100 200), CIRCULARSTRING (100 200, 120.66081412152852 195.5316456965444, 137.6288347353439 182.92523039342592), (137.6288347353439 182.92523039342592, 180 220, 110 260), (110 260, 40 220)))
+-      </op>
+-    </test>
+-    <test>
+-      <op name="difference" arg1="A" arg2="B">
+-        CURVEPOLYGON (COMPOUNDCURVE (CIRCULARSTRING (0 0, -50 130, 0 260, 50 280, 110 260), (110 260, 40 220, 100 200), CIRCULARSTRING (100 200, 120.66081412152852 195.5316456965444, 137.6288347353439 182.92523039342592), (137.6288347353439 182.92523039342592, 100 150, 133.218191941496 112.62953406581698), CIRCULARSTRING (133.218191941496 112.62953406581698, 117.76902787564433 103.26391492267913, 100 100), (100 100, 40 60, 110 60), CIRCULARSTRING (110 60, 90 20, 110 0), (110 0, 0 0)))
+-      </op>
+-    </test>
+-    <test>
+-      <op name="symdifference" arg1="A" arg2="B">
+-        CURVEPOLYGON (COMPOUNDCURVE (CIRCULARSTRING (0 0, -50 130, 0 260, 50 280, 110 260), (110 260, 220 260, 220 0), CIRCULARSTRING (220 0, 120 20, 110 0), (110 0, 0 0)), COMPOUNDCURVE ((40 60, 110 60, 180 60, 133.218191941496 112.62953406581698), CIRCULARSTRING (133.218191941496 112.62953406581698, 117.76902787564433 103.26391492267913, 100 100), (100 100, 40 60)), COMPOUNDCURVE ((100 150, 133.218191941496 112.62953406581698), CIRCULARSTRING (133.218191941496 112.62953406581698, 149.90186898086148 146.8689503011078, 137.6288347353439 182.92523039342592), (137.6288347353439 182.92523039342592, 100 150)), COMPOUNDCURVE ((40 220, 100 200), CIRCULARSTRING (100 200, 120.66081412152852 195.5316456965444, 137.6288347353439 182.92523039342592), (137.6288347353439 182.92523039342592, 180 220, 110 260), (110 260, 40 220)))
+-      </op>
+-    </test>
+-
+   </case>
+ 
+   <case>
+@@ -150,40 +120,6 @@
+       </op>
+     </test>
+   </case>
+-  <case>
+-    <desc>AmA - A simple, symDiff contains inversion</desc>
+-    <a>
+-      POLYGON((0 0, 210 0, 210 230, 0 230, 0 0))
+-    </a>
+-    <b>
+-      MULTISURFACE( CURVEPOLYGON ( CIRCULARSTRING (0 0, 20 40, 60 60, 40 20, 0 0)), CURVEPOLYGON( CIRCULARSTRING (60 90, 60 60, 90 60, 90 90, 60 90)), CURVEPOLYGON( COMPOUNDCURVE(CIRCULARSTRING(90 90, 100 120, 70 120), (70 120, 90 90))), ( (120 70, 90 90, 120 80, 120 70)))
+-    </b>
+-    <test>
+-      <op name="symdifference" arg1="A" arg2="B">
+-        CURVEPOLYGON ((0 0, 0 230, 210 230, 210 0, 0 0), COMPOUNDCURVE ((70 120, 90 90), CIRCULARSTRING (90 90, 100 120, 70 120)), CIRCULARSTRING (60 60, 75 53.78679656440357, 90 60, 96.21320343559643 75, 90 90, 75 96.21320343559643, 60 90, 53.78679656440357 75, 60 60), CIRCULARSTRING (0 0, 40 20, 60 60, 20 40, 0 0), (90 90, 120 70, 120 80, 90 90))
+-      </op>
+-    </test>
+-  </case>
+-  <case>
+-    <desc>AmA - A simple, B connected multiPolygon touching A at vertex</desc>
+-    <a>
+-      POLYGON((0 0, 340 0, 340 300, 0 300, 0 0))
+-    </a>
+-    <b>
+-      MULTISURFACE (CURVEPOLYGON (CIRCULARSTRING (0 0, 20 40, 60 60, 40 20, 0 0)), CURVEPOLYGON (CIRCULARSTRING (60 90, 60 60, 90 60, 90 90, 60 90)))
+-    </b>
+-    <test>
+-      <op name="intersection" arg1="A" arg2="B">
+-        MULTISURFACE (CURVEPOLYGON (CIRCULARSTRING (60 60, 53.78679656440357 75, 60 90, 90 90, 90 60, 75 53.78679656440357, 60 60)), CURVEPOLYGON (CIRCULARSTRING (0 0, 20 40, 60 60, 40 20, 0 0)))
+-      </op>
+-    </test>
+-
+-    <test>
+-      <op name="symdifference" arg1="A" arg2="B">
+-        CURVEPOLYGON ((0 0, 0 300, 340 300, 340 0, 0 0), CIRCULARSTRING (60 60, 75 53.78679656440357, 90 60, 90 90, 60 90, 53.78679656440357 75, 60 60), CIRCULARSTRING (0 0, 40 20, 60 60, 20 40, 0 0))
+-      </op>
+-    </test>
+-  </case>
+   <case>
+     <desc>AmA - A simple, B connected multiSurface touching A at interior of edge</desc>
+     <a>
+diff --git a/tests/xmltester/tests/general/TestOverlayCurvesLA.xml b/tests/xmltester/tests/general/TestOverlayCurvesLA.xml
+index 1c6c603..4206627 100644
+--- a/tests/xmltester/tests/general/TestOverlayCurvesLA.xml
++++ b/tests/xmltester/tests/general/TestOverlayCurvesLA.xml
+@@ -101,38 +101,5 @@
+         </test>
+ 
+     </case>
+-<case>
+-  <desc>mLmA - A and B complex, overlapping and touching #3</desc>
+-  <a>
+-      MULTISURFACE (CURVEPOLYGON(COMPOUNDCURVE(CIRCULARSTRING(120 180, 100 120, 60 80, 120 90, 180 80, 140 120, 120 180))), ((100 240, 140 240, 120 220, 100 240)))
+-  </a>
+-  <b>
+-      MULTICURVE (CIRCULARSTRING(180 220, 120 180, 60 220, 120 270, 180 220), (60 300, 60 40), (100 100, 140 100))
+-  </b>
+-  <test>
+-      <op name="intersection" arg1="A" arg2="B">
+-          GEOMETRYCOLLECTION (LINESTRING (100 100, 140 100), POINT (120 180), POINT (60 80))
+-      </op>
+-  </test>
+-
+-  <test>
+-      <op name="union" arg1="A" arg2="B">
+-          GEOMETRYCOLLECTION (CURVEPOLYGON (CIRCULARSTRING (60 80, 100 120, 120 180, 140 120, 180 80, 120 90, 60 80)), CIRCULARSTRING (60 220, 120 270, 180 220, 156.0555127546399 190.91673086804016, 120 180, 83.94448724536011 190.91673086804016, 60 220), POLYGON ((100 240, 140 240, 120 220, 100 240)), LINESTRING (60 40, 60 80, 60 220), LINESTRING (60 220, 60 300))
+-      </op>
+-  </test>
+-
+-  <test>
+-      <op name="difference" arg1="A" arg2="B">
+-          MULTISURFACE (CURVEPOLYGON (CIRCULARSTRING (60 80, 100 120, 120 180, 140 120, 180 80, 120 90, 60 80)), ((100 240, 140 240, 120 220, 100 240)))
+-      </op>
+-  </test>
+-
+-  <test>
+-      <op name="symdifference" arg1="A" arg2="B">
+-          GEOMETRYCOLLECTION (CURVEPOLYGON (CIRCULARSTRING (60 80, 100 120, 120 180, 140 120, 180 80, 120 90, 60 80)), CIRCULARSTRING (60 220, 120 270, 180 220, 156.0555127546399 190.91673086804016, 120 180, 83.94448724536011 190.91673086804016, 60 220), POLYGON ((100 240, 140 240, 120 220, 100 240)), LINESTRING (60 40, 60 80, 60 220), LINESTRING (60 220, 60 300))
+-      </op>
+-  </test>
+-
+-</case>
+ 
+ </run>

@@ -1100,6 +1100,14 @@ built by `scripts/cii-v4-board/build_sonnet55_population.py`.
   amendment.
 - Comparability: Frontier Code quality is L1 plus L2, as for v3.15, and is
   never placed beside Routine Code quality.
+- Correction, October 8, 2026 (after the round; the frozen copy of this
+  document is unchanged): the v3.3 and v3.4 protocol files were recovered
+  from the owner's private pre-reset backup and are committed under
+  `docs/judging/recovered/`; the settings above are identical to them. The
+  Cursor pin hashes only Cursor's launcher script, which is the same in every
+  release, so it does not fix the version: every v3.23 Grok call ran on Cursor
+  CLI `2026.10.01-e373342`, while v3.3 recorded `2026.09.02-c22c1a3`
+  (DECISIONS.md, 2026-10-08).
 
 ## Not yet done
 

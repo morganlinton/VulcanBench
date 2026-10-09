@@ -42,9 +42,11 @@ where it is known, instead of claiming or denying binary identity.
   `judge-pins-v3.json` is the version installed when it was written, not the
   one that ran; that file is left unchanged because the v3.23 protocol
   records its hash.
-- The Grok model id (`cursor-grok-4.6-medium`) and display name are the
-  same, and Grok passed the v3.23 calibration exam (one allowed gate miss,
-  g04), so its judging is validated within the round.
+- The Grok model id (`cursor-grok-4.6-medium`) is the same. Cursor has
+  reported its display name as "Grok 4.6 Medium" (frozen: "Cursor Grok 4.6
+  Medium") since 2026-09-21; `v3_resume` accepts that rename and records it
+  per call, as in earlier rounds. Grok passed the v3.23 calibration exam (one
+  allowed gate miss, g04), so its judging is validated within the round.
 
 ### Revisit
 

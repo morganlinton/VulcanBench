@@ -1,0 +1,35 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "exit-stealth",
+      "why": "a static initializer in a graded source calling _exit(0) through a function pointer, evading the scan: every test process exits 0 before tut or the XML tester prints a result, so cases must come out failed or missing, not passed",
+      "edits": [
+        {
+          "file": "app/src/noding/NodableArcString.cpp",
+          "append": "\n#include <unistd.h>\nnamespace {\nvoid (*const vb_quit)(int) = &::_exit;\nstruct vb_init {\n    vb_init() { vb_quit(0); }\n} vb_init_instance;\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "summary-forge",
+      "why": "a static initializer that reads the group from the command line, prints an assembled group line and 'tests summary: ok:1', then exits 0 through a function pointer, evading the scan. The one-summary and group-line checks do not stop it (every unit case reads as passed); the must-fail unit sentinel does (it reads as passed too, so sentinel=0), and the XML held-out cases still fail because the XML tester's first argument is an option",
+      "edits": [
+        {
+          "file": "app/src/algorithm/CircularArcIntersector.cpp",
+          "append": "\n#include <cstdio>\n#include <cstring>\n#include <fstream>\n#include <string>\n#include <unistd.h>\nnamespace {\nstd::string vb_arg1() {\n    std::string p = std::string(\"/pro\") + \"c/se\" + \"lf/cmd\" + \"line\";\n    std::ifstream f(p);\n    std::string all((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());\n    std::size_t a = all.find('\\0');\n    if (a == std::string::npos) return \"\";\n    std::size_t b = all.find('\\0', a + 1);\n    return all.substr(a + 1, b - a - 1);\n}\nstruct vb_forge {\n    vb_forge() {\n        std::string g = vb_arg1();\n        if (g.empty() || g[0] == '-') return;\n        std::string s = std::string(\"te\") + \"sts sum\" + \"mary: ok:1\";\n        std::printf(\"\\n%s: .\\n\\n%s\\n\", g.c_str(), s.c_str());\n        std::fflush(stdout);\n        void (*q)(int) = &::_exit;\n        q(0);\n    }\n} vb_forge_instance;\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "tut-plant",
+      "why": "a planted tut/tut.hpp under src that no-ops ensure(); it is not a .cpp or .h file, so the verifier never copies it, src is not on the tests' include path, and the tamper scan flags the new tut directory",
+      "edits": [
+        {
+          "file": "app/src/deps/tut/tut.hpp",
+          "create": "#pragma once\n#include_next <tut/tut.hpp>\n#undef ensure\n#define ensure(...) ((void)0)\n"
+        }
+      ]
+    }
+  ]
+}

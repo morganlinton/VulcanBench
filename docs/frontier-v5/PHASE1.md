@@ -540,3 +540,43 @@ refuses the model) on nx-digraph-node-connectivity could not be scored:
 
 Rule for new tasks: validate through `harbor run -a oracle` (gold must score
 1 under Harbor itself), not only probe_verifier.py.
+
+## Back on the arm64 Mac 2026-10-08 to 10-09: re-validation and the GEOS task
+
+Authoring moved back from cloud sessions to the owner's arm64 Mac (M2 Pro,
+8 performance and 4 efficiency cores, 16 GB) while a Frontier v4 sweep ran on
+the same host. Docker work ran with the Docker VM confined to the efficiency
+cores (`taskpolicy -b` on `com.apple.Virtualization.VirtualMachine`), which
+keeps the sweep's performance cores free at roughly a fifth of the build
+speed. Docker Desktop restarted once on its own and silently dropped the
+confinement, so a loop re-applies it every five minutes while v5 jobs run.
+
+- **The three cloud-authored tasks re-validated on arm64.** yyjson and comrak
+  passed unchanged. fmt's gold first scored 0: every fail_to_pass case passed
+  (the `long double` case included), but `format_impl_test.write_float128` is
+  compiled only where `__float128` exists (x86-64) and was in pass_to_pass, so
+  it was "missing" on arm64. Fixed in its families.json; then base 0, gold 1,
+  both probes 0. Rule for the cpp-v1 checklist: cases compiled conditionally
+  on the architecture stay out of pass_to_pass.
+- **Infrastructure timeouts are not grades.** On the confined, shared cores
+  fmt's base hit probe_verifier's default 1800 s verifier bound; reruns pass
+  `--timeout 7200`. Within a verifier, a per-case bound that is fine on an
+  idle host can fail slow upstream cases under load: GEOS's three slow
+  GridIntersection cases (upstream skips them on CI) were graded failed at a
+  120 s per-case bound and passed at 600 s. Per-case bounds stay generous;
+  the verifier's own timeout limits the run.
+- **Size worker pools to the container's CPU quota.** `docker --cpus` sets a
+  CFS quota but `nproc` still reports the host's CPUs; the GEOS runner reads
+  `/sys/fs/cgroup/cpu.max`.
+- **Keep diagnostics of non-passing cases.** A suppressed `ctest > /dev/null`
+  in the environment image's self-check hid which tests failed (a 30 s
+  per-group ctest timeout at `-j12` under load); the check now runs at `-j2`
+  and prints failures, and the GEOS runner writes a details file with the
+  reason (skip, timeout, signal, output tail) for every non-passing case.
+- **New task: geos-curved-overlay-arc-noding** (C++, five interacting
+  upstream fixes, UNSLOTTED). Its base is the last fix's commit with the two
+  touched files restored to their pre-fix state, so every upstream test is
+  usable unchanged; the agent's visible tests have the held-out cases deleted
+  (not reverted to old expectations, which would make a correct fix look like
+  a regression). Validated on arm64: base 0, gold 1, three probes 0, Harbor
+  oracle 1 and nop 0. Details in its DESIGN.md.

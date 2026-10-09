@@ -185,7 +185,6 @@
     "format-impl-test::format_impl_test.utf8_decode_surrogate_halves",
     "format-impl-test::format_impl_test.write_double_double",
     "format-impl-test::format_impl_test.write_dragon_even",
-    "format-impl-test::format_impl_test.write_float128",
     "format-impl-test::fp_test.double_tests",
     "format-impl-test::fp_test.dragonbox_max_k",
     "format-impl-test::fp_test.multiply",
@@ -599,10 +598,11 @@
   ],
   "guard_note": "every ctest entry (GCC 12.2, C++17, Debug, in vulcanbench/sandbox:v5-cfamily) of the pristine suite plus the gold overlay, one googletest case per process (run_tests.py); pass_to_pass is every case other than fail_to_pass; any failure outside known_env_failures, or fewer cases than min_total_tests, breaks the wall",
   "known_env_failures": [],
-  "min_total_tests": 586,
+  "min_total_tests": 585,
   "must_fail_note": "sentinels appended by test.sh to format-test.cc and args-test.cc; each must be reported failed, else the test run was tampered with (reward 0)",
   "must_fail": [
     "format-test::consistency_check.impossible_equality",
     "args-test::consistency_check.impossible_equality"
-  ]
+  ],
+  "arch_conditional_note": "format-impl-test::format_impl_test.write_float128 is compiled only where __float128 exists (x86-64), so it is absent on arm64. It is not in pass_to_pass and min_total_tests counts the arm64 total (585; 586 on x86-64); where it exists, any failure of it still fails guard_suite. Found by the arm64 re-validation, 2026-10-08."
 }

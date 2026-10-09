@@ -72,6 +72,13 @@ comrak-gfm-tables-autolinks-parity, a Rust port of GFM tables and autolinks
 graded byte-for-byte against the C reference cmark-gfm; it is built to fill
 the F2-rust slot, not UNSLOTTED. Every language now has a validated task.
 
+C++ now also has an interacting arc (2026-10-09):
+tasks/frontier-v5/geos-curved-overlay-arc-noding composes five GEOS fixes to
+curved-geometry overlay (#1478, #1480, #1513, #1546, #1549) in two files;
+no single fix clears more than 5 of its 16 held-out cases and leaving any
+one out fails at least one. Validated on the arm64 Mac including the real
+Harbor oracle path. UNSLOTTED pending the fifth-family decision.
+
 Remaining Track A gaps, in priority order: gate-measure what exists (needs
 the reference credentials, the real blocker); more F2 and F3 tasks toward
 their six slots each; and harder interacting arcs (the commons-lang shape)

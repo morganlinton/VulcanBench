@@ -125,8 +125,16 @@ right-aligning all strings, or treating every zero as an empty conversion.
   calendar case then compares against the classic locale, at base and gold
   alike), no network at build or test time. Architecture note:
   `high_precision_long_double` depends on the `long double` format (80-bit
-  x87 on x86-64, IEEE quad on arm64 Linux); validated on x86-64 only so far.
-  Checklist cpp-v1 (new; this task is its first entry).
+  x87 on x86-64, IEEE quad on arm64 Linux). arm64 re-validation (2026-10-08,
+  v5-cfamily built natively on the arm64 Mac): base reward 0, and the gold
+  passes all 15 fail_to_pass cases including `high_precision_long_double`,
+  but it first scored 0 because `format_impl_test.write_float128` is compiled
+  only where `__float128` exists (x86-64) and was listed in pass_to_pass. It
+  is now out of pass_to_pass and `min_total_tests` is the arm64 total (585;
+  586 on x86-64); every remaining pass_to_pass id is still required by name,
+  and where the case exists any failure of it still fails guard_suite.
+  Checklist cpp-v1 (new; this task is its first entry): list cases that are
+  compiled conditionally on the architecture outside pass_to_pass.
 
 ## Validation record
 

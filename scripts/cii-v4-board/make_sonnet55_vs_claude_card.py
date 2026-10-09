@@ -387,9 +387,9 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     notes = [
         "* Combined score over the judged runs when fewer than 23. Bold marks each model's best level.",
         "Protocols: Sonnet 5.5 is Code quality v3.23, Opus 5.5 is v3.15 and Fable 5.1 is v3.4. Same rubric, controls, weights and "
-        "judges, judged in separate sessions. For v3.23 the judge pins were rebuilt after the original judging host was erased: Muse "
-        "runs the same binary (sha256 match) and the Cursor CLI that carries Grok was re-pinned, so it cannot be shown identical to "
-        "the earlier rounds' binary.",
+        "judges, judged in separate sessions. For v3.23 the judge settings were checked against the original protocols, recovered from a private "
+        "backup: identical. Muse ran the same binary (sha256 match); Grok ran through Cursor CLI 2026.10.01, "
+        "which updates itself (the v3.3 round recorded 2026.09.02).",
         "All three ran with Claude Code's refusal fallback on and count every run; the share row counts replies written by another "
         "model. Sonnet 5.5 never fell back. Cost is Claude Code's own list-price total for Sonnet 5.5 and Opus 5.5, and the published "
         "cost ledger for Fable 5.1.",

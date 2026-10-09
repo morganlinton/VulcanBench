@@ -7,6 +7,51 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-08: the v3.3 and v3.4 judge protocols were recovered; Cursor's pin never fixed its version
+
+### Decision
+
+Correction to the 2026-10-07 entry. The v3.3 and v3.4 `protocol.json` files
+were not lost: the owner's private repo `vulcanbench-data-backup` holds a
+pre-reset (2026-10-05) archive of every judging run directory. Both files
+are now committed byte for byte under `docs/judging/recovered/`, so the
+judge settings live in git. Nothing is re-judged: the v3.23 round ran with
+settings identical to them.
+
+The Cursor disclosure changes. Every Grok round's "Cursor binary pin" hashes
+`~/.local/bin/cursor-agent`, which is a launcher script that is the same file
+in every Cursor release, so no round ever fixed the Cursor CLI version.
+Cursor updates itself. Cards and the site state the version each round ran
+where it is known, instead of claiming or denying binary identity.
+
+### Evidence
+
+- Recovered `protocol.json` sha256: v3.3 `b82da598...`, v3.4 `1d80e097...`,
+  equal to the values published in the site's
+  `swe-v4-astra-fable51-v34/provenance.json`.
+- Their `reviewers.grok` and `reviewers.muse` blocks, minus the binary path
+  keys, equal `docs/judging/judge-pins-v3.json`. The Muse binary hash equals
+  the v3.4 pin. The v3.3 Cursor pin, `2ccc9a8e...`, equals the hash this host
+  computes, but that file is a 1096-byte bash launcher that starts the Node
+  bundle beside it.
+- Versions: v3.3 recorded Cursor `2026.09.02-c22c1a3`. On this host the
+  `cursor-agent` link moved from `2026.09.10-fd3934a` to `2026.10.01-e373342`
+  at 14:43 PDT on 2026-10-07, around the one-line Grok probe made that
+  afternoon, so every v3.23 calibration and judging call (from 05:02 on
+  2026-10-08) ran on `2026.10.01-e373342`. The `version` field in
+  `judge-pins-v3.json` is the version installed when it was written, not the
+  one that ran; that file is left unchanged because the v3.23 protocol
+  records its hash.
+- The Grok model id (`cursor-grok-4.6-medium`) and display name are the
+  same, and Grok passed the v3.23 calibration exam (one allowed gate miss,
+  g04), so its judging is validated within the round.
+
+### Revisit
+
+Pin the Cursor version, not the launcher, before the next Grok round: hash
+the version directory the link resolves to, record the version string, and
+turn off or detect self-updates during a round.
+
 ## 2026-10-07: Sonnet 5.5 and Haiku 5.5 on Frontier v4; judging moves hosts
 
 ### Decision

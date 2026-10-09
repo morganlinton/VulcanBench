@@ -11,9 +11,9 @@ Sonnet 5.5 ran with the refusal fallback on and no run used it, so the card
 shows a fallback-run count instead of a fallback share. The footnotes are
 computed from the data where they can be: Claude Code versions per level from
 the population rows, and each judge's calibration gate misses from the frozen
-calibration records. The sweep predates tagged run worktrees and the judge pins
-were rebuilt after the original judging host was erased; both are disclosed
-(docs/DECISIONS.md, 2026-10-07; Amendment v3.23).
+calibration records. The sweep predates tagged run worktrees, and Grok judged
+through a newer, self-updated Cursor CLI than v3.3 recorded; both are disclosed
+(docs/DECISIONS.md, 2026-10-07 and 2026-10-08; Amendment v3.23).
 """
 
 from __future__ import annotations
@@ -251,8 +251,9 @@ def footnotes(rows):
         "The sweep predates tagged run worktrees, so runs record no source commit and an older task hash; "
         "task content was verified identical to the suite lock and runs were admitted through a committed "
         "hash bridge.",
-        "Judge pins were rebuilt after the original judging host was erased: Muse runs the same binary "
-        "(sha256 match); the Cursor CLI that carries Grok was re-pinned. Calibration passed with one "
+        "Judge settings match the original v3.3 and v3.4 protocols, recovered from a private backup after the "
+        "judging host was erased. Muse ran the same binary (sha256 match); Grok ran through Cursor CLI "
+        "2026.10.01, which updates itself (v3.3 recorded 2026.09.02). Calibration passed with one "
         f"allowed miss each: {miss}. Frontier Code quality is L1 plus L2 and is not comparable with "
         "Routine v1 Code quality.",
     )

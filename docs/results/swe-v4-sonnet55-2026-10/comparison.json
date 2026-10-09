@@ -1,0 +1,3822 @@
+{
+ "cells": {
+  "sonnet55/extra-high": 23,
+  "sonnet55/high": 23,
+  "sonnet55/low": 23,
+  "sonnet55/max": 23,
+  "sonnet55/medium": 23
+ },
+ "excluded": [],
+ "levels": {
+  "sonnet55": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "sonnet55": "Claude Sonnet 5.5 in Claude Code (refusal fallback on)"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 309.494,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 64
+   },
+   "finished_at": "2026-10-06T15:46:45.534146+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8325,
+   "reported_tokens": 227427,
+   "run_id": "legacy-blendcore-binary-parity-ec9fa5b9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-blendcore-binary-parity-ec9fa5b9",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "e57be1a795d1937399e299dc6107ca5fb03b8763eaa5557892b45c65cebf1cd8",
+    "summary": "57a544fcdfbce46f7f256add77aa167705d5ab31b2a0d67f60ba13a00f7b0397",
+    "task": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   },
+   "started_at": "2026-10-06T15:41:36.031302+00:00",
+   "task": "legacy-blendcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366",
+    "recorded": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1609.717,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 158
+   },
+   "finished_at": "2026-10-06T20:49:54.822772+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7434,
+   "reported_tokens": 1000124,
+   "run_id": "legacy-cellarcore-binary-parity-0d628cd4",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-cellarcore-binary-parity-0d628cd4",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "3508c62aadc92f64d50b9c476aba41818556b46f848cd243a47ad8fc74d85904",
+    "summary": "dbf30ed8c282268876010c31675590f01daf9f33c6cc46e631b32be356437c4f",
+    "task": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   },
+   "started_at": "2026-10-06T20:23:05.059715+00:00",
+   "task": "legacy-cellarcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e",
+    "recorded": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 254.53,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 71
+   },
+   "finished_at": "2026-10-06T14:40:10.234833+00:00",
+   "functional": 0.6,
+   "model": "sonnet55",
+   "quality": 0.8081,
+   "reported_tokens": 208221,
+   "run_id": "legacy-codeccore-binary-parity-dcd9b1bb",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-codeccore-binary-parity-dcd9b1bb",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "0deae2e36c8c60c17e2fb409c8e35ebc001b39fed5cab5f13f1c8307f21bed6a",
+    "summary": "1e4b2f49fd8379d9c91500854c593b2050ffcaef1ea00eb40cfc34fd89665655",
+    "task": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   },
+   "started_at": "2026-10-06T14:35:55.698955+00:00",
+   "task": "legacy-codeccore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d",
+    "recorded": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 5276.029,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 416
+   },
+   "finished_at": "2026-10-06T19:02:18.373250+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7507,
+   "reported_tokens": 43891,
+   "run_id": "legacy-depotcore-binary-parity-d7683b9c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-depotcore-binary-parity-d7683b9c",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "1e68ff0c06aae0478ff221da8ef848ba6654bd5077fcb47754f4dc245dd945cd",
+    "summary": "e93f52394f5a9071b4c0c5957a69890f02ac48e8087c4bf8bb434e22bab0156f",
+    "task": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   },
+   "started_at": "2026-10-06T17:33:48.284929+00:00",
+   "task": "legacy-depotcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+    "recorded": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 210.872,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 63
+   },
+   "finished_at": "2026-10-06T14:35:55.618880+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8117,
+   "reported_tokens": 178940,
+   "run_id": "legacy-freightcore-binary-parity-35ebfd9e",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-freightcore-binary-parity-35ebfd9e",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "c98414ad6e8bfccc54f319b25179c369ccfd25ab9d8655dc2a145f874e97290d",
+    "summary": "2b77d5171eb347877576dc2ec08ec695c7707789a724113fe2fdac8227c1ac4f",
+    "task": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   },
+   "started_at": "2026-10-06T14:32:24.738880+00:00",
+   "task": "legacy-freightcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb",
+    "recorded": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 6075.972,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 570
+   },
+   "finished_at": "2026-10-06T17:33:48.177094+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.6102,
+   "reported_tokens": 40266,
+   "run_id": "legacy-granarycore-binary-parity-5370c924",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-granarycore-binary-parity-5370c924",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "941a2562adf6306c6d59752883926d20303bfbd49c1efa854cae92dedd570b1a",
+    "summary": "15d198679b218fc07b2645e958fb3c060a0ebbd6ac1cc97cc751eaaea7783286",
+    "task": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   },
+   "started_at": "2026-10-06T15:52:32.179592+00:00",
+   "task": "legacy-granarycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92",
+    "recorded": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 570.221,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 74
+   },
+   "finished_at": "2026-10-06T15:05:29.944597+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8304,
+   "reported_tokens": 344484,
+   "run_id": "legacy-hedgecore-binary-parity-17066d75",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-hedgecore-binary-parity-17066d75",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "41a22df40dde38564f79bc9793e5d35a813ac37d32f1df724c83baf3ce21a3d3",
+    "summary": "48f94b67fa987bf23f6f0d72d34cc74be1e5f900331d34d981df66e04e5f8928",
+    "task": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   },
+   "started_at": "2026-10-06T14:55:59.719618+00:00",
+   "task": "legacy-hedgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+    "recorded": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3697.183,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 280
+   },
+   "finished_at": "2026-10-06T20:23:04.969788+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7439,
+   "reported_tokens": 2454501,
+   "run_id": "legacy-lodgecore-binary-parity-89c68e4b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-lodgecore-binary-parity-89c68e4b",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "64d34e599b237d82b7f2460504a20c2ed79f6efa5c9a2b7186bfd8b4572ff7b4",
+    "summary": "e8d4e086f7779e084ee6ac7ee13bbf4e6bd1dd94d71cebb4e253defd1dfb101b",
+    "task": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   },
+   "started_at": "2026-10-06T19:02:18.475189+00:00",
+   "task": "legacy-lodgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d",
+    "recorded": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 567.033,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 62
+   },
+   "finished_at": "2026-10-06T14:09:14.949635+00:00",
+   "functional": 0.7778,
+   "model": "sonnet55",
+   "quality": 0.7749,
+   "reported_tokens": 22878,
+   "run_id": "legacy-matchcore-order-book-parity-aaf9a0c2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-matchcore-order-book-parity-aaf9a0c2",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "69a56fcc3274ca5c25488bf59ec77a8bc0316235d13365b13126cd8783b74298",
+    "summary": "0dd23ec05d90c2e35bd7d7015a88df4d915b3ca62c1381f6ab3afdffb0a11adc",
+    "task": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   },
+   "started_at": "2026-10-06T13:59:47.908653+00:00",
+   "task": "legacy-matchcore-order-book-parity",
+   "task_hash_bridge": {
+    "lock": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb",
+    "recorded": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 154.403,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 41
+   },
+   "finished_at": "2026-10-06T14:32:24.657678+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8146,
+   "reported_tokens": 106656,
+   "run_id": "legacy-metercore-binary-parity-2a2b60f8",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-metercore-binary-parity-2a2b60f8",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "2252be284a6df7c2d9f27feb9061067093e1abcb106ae6abc2ee1b2118da32c8",
+    "summary": "88b2f37a21d5ade1ca7c52871e42d84989d0a1b527d870b7ef3ee24b1e28ae85",
+    "task": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   },
+   "started_at": "2026-10-06T14:29:50.248734+00:00",
+   "task": "legacy-metercore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0",
+    "recorded": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 356.315,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 77
+   },
+   "finished_at": "2026-10-06T15:41:35.952047+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8152,
+   "reported_tokens": 276228,
+   "run_id": "legacy-pacecore-binary-parity-f719fb1c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-pacecore-binary-parity-f719fb1c",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "616910e0f4a59cdfb175db9ea005608ad4e420f4a4565e57e0e83deb9fc5d861",
+    "summary": "936ff6089fd9fb51e18a2b65e31f56ebdba8079285db5982956d10a16efba1ed",
+    "task": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   },
+   "started_at": "2026-10-06T15:35:39.584289+00:00",
+   "task": "legacy-pacecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3",
+    "recorded": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3488.152,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 370
+   },
+   "finished_at": "2026-10-06T21:48:03.113618+00:00",
+   "functional": 0.9333,
+   "model": "sonnet55",
+   "quality": 0.6616,
+   "reported_tokens": 3675877,
+   "run_id": "legacy-paddockcore-binary-parity-3381a754",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-paddockcore-binary-parity-3381a754",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "354848331b50b103619491e29077b0ff5c1d9704a81f5cfc6af924eb23e2b0a6",
+    "summary": "495426243188891403d8e22717dada1c90a1ce15f874d94cf7b25edb756b2faa",
+    "task": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   },
+   "started_at": "2026-10-06T20:49:54.920005+00:00",
+   "task": "legacy-paddockcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644",
+    "recorded": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1076.01,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 134
+   },
+   "finished_at": "2026-10-06T14:29:50.162301+00:00",
+   "functional": 0.8,
+   "model": "sonnet55",
+   "quality": 0.7746,
+   "reported_tokens": 689330,
+   "run_id": "legacy-payrollcore-binary-parity-04a53d94",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-payrollcore-binary-parity-04a53d94",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "d407f10a8df26a127c819641a580670bb8a8d644be0b8df96192544853ab0738",
+    "summary": "f579ee5935cbbe2933df190327010f22858dc4af36a295443eecdc7abaf8b8df",
+    "task": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   },
+   "started_at": "2026-10-06T14:11:54.122570+00:00",
+   "task": "legacy-payrollcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96",
+    "recorded": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 159.002,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 25
+   },
+   "finished_at": "2026-10-06T14:11:54.040185+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8133,
+   "reported_tokens": 86178,
+   "run_id": "legacy-qlite-store-parity-30797456",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-qlite-store-parity-30797456",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "8e629e2ac76d828fd2a2c0dec26b81675f7f2663ba603aec573d7852f71d35ed",
+    "summary": "063c76f57f36c1afcbe7fe2485c0ef234ab8d41f0040cf3539eeed9d15e31bce",
+    "task": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   },
+   "started_at": "2026-10-06T14:09:15.031635+00:00",
+   "task": "legacy-qlite-store-parity",
+   "task_hash_bridge": {
+    "lock": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a",
+    "recorded": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 262.199,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 49
+   },
+   "finished_at": "2026-10-06T14:55:59.635539+00:00",
+   "functional": 0.75,
+   "model": "sonnet55",
+   "quality": 0.8054,
+   "reported_tokens": 142462,
+   "run_id": "legacy-queuecore-binary-parity-4b28ec7b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-queuecore-binary-parity-4b28ec7b",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "99ce87340aef4494829f5754eafa6191a2df42d40a6a07235cadba9c9ac830a6",
+    "summary": "c034ddb359c0410e97305c01636b4a4b8615b9516eafff513b605164e92be9bc",
+    "task": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   },
+   "started_at": "2026-10-06T14:51:37.434507+00:00",
+   "task": "legacy-queuecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b",
+    "recorded": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 253.123,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 41
+   },
+   "finished_at": "2026-10-06T14:44:23.418114+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8338,
+   "reported_tokens": 116503,
+   "run_id": "legacy-quotacore-binary-parity-d8592298",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-quotacore-binary-parity-d8592298",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "eda586a192366084dd960d796e95fccc0132df63ea5d40b5ac1fd8ece88ecf7a",
+    "summary": "953b84d3c9198fe37dc1f9d1aaea38f135e04e80b4e854eecb608ef9f3d55653",
+    "task": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   },
+   "started_at": "2026-10-06T14:40:10.317470+00:00",
+   "task": "legacy-quotacore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc",
+    "recorded": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 274.57,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 47
+   },
+   "finished_at": "2026-10-06T15:16:11.754398+00:00",
+   "functional": 0.75,
+   "model": "sonnet55",
+   "quality": 0.8412,
+   "reported_tokens": 135944,
+   "run_id": "legacy-reflowcore-binary-parity-cd7cf3d1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-reflowcore-binary-parity-cd7cf3d1",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "a121243a33e2b3e4b0a578b95868c5e43953306ba797b27911385c8246ca4462",
+    "summary": "36276d16b3f0eb04a7aa113b98d526865ba9c950188e48f088d595e523ecbf66",
+    "task": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   },
+   "started_at": "2026-10-06T15:11:37.176478+00:00",
+   "task": "legacy-reflowcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe",
+    "recorded": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 367.055,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 65
+   },
+   "finished_at": "2026-10-06T15:11:37.090583+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7974,
+   "reported_tokens": 217614,
+   "run_id": "legacy-schedcore-binary-parity-e8586f76",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-schedcore-binary-parity-e8586f76",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "90a3409e141da99e7834d8412d1aaa4fc8cf626b9b5977cb477ccd0afb1de09c",
+    "summary": "ed9f0b3f7148f812f2486a81fcdb9aa95271305a4a7e6c6f687bd8b720f3b13d",
+    "task": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   },
+   "started_at": "2026-10-06T15:05:30.029503+00:00",
+   "task": "legacy-schedcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448",
+    "recorded": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 627.909,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 112
+   },
+   "finished_at": "2026-10-06T13:59:47.822612+00:00",
+   "functional": 0.8,
+   "model": "sonnet55",
+   "quality": 0.7804,
+   "reported_tokens": 454529,
+   "run_id": "legacy-settlecore-binary-parity-534f2e62",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-settlecore-binary-parity-534f2e62",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "ebfb36cc82774c3a4f0e3285d059f264c291b939feae412bb10bd18800c5e8fa",
+    "summary": "2d260d043e89d5fbd28d29c32c86b564eb174ea34297a600d549d6da537a82eb",
+    "task": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   },
+   "started_at": "2026-10-06T13:49:19.904976+00:00",
+   "task": "legacy-settlecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+    "recorded": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 243.668,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 58
+   },
+   "finished_at": "2026-10-06T14:48:27.181929+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8289,
+   "reported_tokens": 192212,
+   "run_id": "legacy-snapcore-binary-parity-832aa21b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-snapcore-binary-parity-832aa21b",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "6703c6d3e960c3010eb3ba81f06e5153887e991c1d29a7c611f17c74d92dab2d",
+    "summary": "cb3ce626a5204d3ef19e5443ebfd5f39182700c0d1ac3c873077d212635d1d46",
+    "task": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   },
+   "started_at": "2026-10-06T14:44:23.512603+00:00",
+   "task": "legacy-snapcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d",
+    "recorded": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 346.46,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 80
+   },
+   "finished_at": "2026-10-06T15:52:32.085367+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8221,
+   "reported_tokens": 297794,
+   "run_id": "legacy-stampcore-binary-parity-e505583a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-stampcore-binary-parity-e505583a",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "6df2f1e0e03cc285485a7cdf76701d6a3f8876b4f235ec0264b3981dd6544b71",
+    "summary": "8d5838a6cfafec9e99317efdd2919b2d61f52c9c0e905593d01d0c794375b05d",
+    "task": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   },
+   "started_at": "2026-10-06T15:46:45.614580+00:00",
+   "task": "legacy-stampcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da",
+    "recorded": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1167.663,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 137
+   },
+   "finished_at": "2026-10-06T15:35:39.502165+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8269,
+   "reported_tokens": 690471,
+   "run_id": "legacy-tallycore-binary-parity-cbafb90b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-tallycore-binary-parity-cbafb90b",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "e1969a8c5e701bb921683d9e1312b030a729db575b62b788377cd8def68a65c6",
+    "summary": "56df1f2acb7de6baa1260561e901e8ff23e0356506df3d4e404ab59b6a465338",
+    "task": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   },
+   "started_at": "2026-10-06T15:16:11.835805+00:00",
+   "task": "legacy-tallycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc",
+    "recorded": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 190.07,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 57
+   },
+   "finished_at": "2026-10-06T14:51:37.353400+00:00",
+   "functional": 0.7778,
+   "model": "sonnet55",
+   "quality": 0.8416,
+   "reported_tokens": 160967,
+   "run_id": "legacy-vaultcore-binary-parity-4eaf868b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.291 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/low/legacy-vaultcore-binary-parity-4eaf868b",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "8886bdd87ee418c84c8a173df0fe2d4fe91c6ace2f3ccb890bb3c1b6c39225df",
+    "summary": "5bd97127d98c3c3b4920cf188bf768f6c14f9dfa5c9bf2b6ad40db225a5867a2",
+    "task": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   },
+   "started_at": "2026-10-06T14:48:27.280140+00:00",
+   "task": "legacy-vaultcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6",
+    "recorded": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 634.977,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 71
+   },
+   "finished_at": "2026-10-06T23:56:34.878559+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8286,
+   "reported_tokens": 279500,
+   "run_id": "legacy-blendcore-binary-parity-507dd992",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-blendcore-binary-parity-507dd992",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "1b7153336cfa83be4b22ee480e12fcaf8fe0785c857673304fc97440f08eac23",
+    "summary": "3e7cab1c35ee0bac41211cde1941d162845c28918f26b652fbb1196298d0e3b9",
+    "task": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   },
+   "started_at": "2026-10-06T23:45:59.864206+00:00",
+   "task": "legacy-blendcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366",
+    "recorded": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1428.371,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 109
+   },
+   "finished_at": "2026-10-07T05:08:00.403366+00:00",
+   "functional": 0.9286,
+   "model": "sonnet55",
+   "quality": 0.7497,
+   "reported_tokens": 502447,
+   "run_id": "legacy-cellarcore-binary-parity-87792083",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-cellarcore-binary-parity-87792083",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "49018d643dc83293040d5c866bf701596977dad94157e2cec9bfb7eeb5b4866a",
+    "summary": "537799b1859f3349212913b43778514e3dda8459d5fa61c0f2e5c442c23b29e7",
+    "task": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   },
+   "started_at": "2026-10-07T04:44:12.038638+00:00",
+   "task": "legacy-cellarcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e",
+    "recorded": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 323.113,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 75
+   },
+   "finished_at": "2026-10-06T22:51:23.896905+00:00",
+   "functional": 0.7,
+   "model": "sonnet55",
+   "quality": 0.8122,
+   "reported_tokens": 264858,
+   "run_id": "legacy-codeccore-binary-parity-651a276a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-codeccore-binary-parity-651a276a",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "0a662bbee4c52cfa1c7fa8bcc5be3a69354fac4632651112751a6014b8769bf4",
+    "summary": "af13a6a9cdadc78374524350ad46cb7f53d8c944a95891ef5809871a367aadf0",
+    "task": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   },
+   "started_at": "2026-10-06T22:46:00.824209+00:00",
+   "task": "legacy-codeccore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d",
+    "recorded": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 4920.087,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 450
+   },
+   "finished_at": "2026-10-07T02:27:12.669204+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7393,
+   "reported_tokens": 5881512,
+   "run_id": "legacy-depotcore-binary-parity-0ddf418b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-depotcore-binary-parity-0ddf418b",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "6202b47e1afe905aac54aa306a12982b00bce6bf9d3ce5604c287c35da2ae166",
+    "summary": "81c6374e1fa5d6215d7c302271eb90fd29d6fd37081ad7ccfd41c8278f82b184",
+    "task": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   },
+   "started_at": "2026-10-07T01:05:12.559642+00:00",
+   "task": "legacy-depotcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+    "recorded": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 488.027,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 78
+   },
+   "finished_at": "2026-10-06T22:46:00.743102+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8047,
+   "reported_tokens": 323743,
+   "run_id": "legacy-freightcore-binary-parity-558810e4",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-freightcore-binary-parity-558810e4",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "668f84fd8d6b3d3c061d4a44e721aedeaf3367c1978b48ac94ac3ea53fa7dffb",
+    "summary": "92524451281050f89948d730e2678b7513b84c6663cc322f282fe3ccd67e3442",
+    "task": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   },
+   "started_at": "2026-10-06T22:37:52.707284+00:00",
+   "task": "legacy-freightcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb",
+    "recorded": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3748.364,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 493
+   },
+   "finished_at": "2026-10-07T01:05:12.465094+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.5961,
+   "reported_tokens": 6025408,
+   "run_id": "legacy-granarycore-binary-parity-d6fe2ee1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-granarycore-binary-parity-d6fe2ee1",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "748a641503020b6c02514ff6370e5272b759b36957281009a35cad76c8b4519e",
+    "summary": "c3a24b381eaa90618e0c1cabeb01a2211991979001372e72c592103fc3be7b17",
+    "task": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   },
+   "started_at": "2026-10-07T00:02:44.050730+00:00",
+   "task": "legacy-granarycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92",
+    "recorded": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 696.653,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 72
+   },
+   "finished_at": "2026-10-06T23:21:34.719481+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.828,
+   "reported_tokens": 309934,
+   "run_id": "legacy-hedgecore-binary-parity-b180a8de",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-hedgecore-binary-parity-b180a8de",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "f7ef3fb7f626137ac10e0563f8309fcd00844040c6453e87aa3c416f5f2639ad",
+    "summary": "22267e0415c0427407204c89fe57d3a23e7f0b5bada5c1c57ff1b7022233a46d",
+    "task": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   },
+   "started_at": "2026-10-06T23:09:58.065474+00:00",
+   "task": "legacy-hedgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+    "recorded": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 8219.085,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 474
+   },
+   "finished_at": "2026-10-07T04:44:11.937857+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.76,
+   "reported_tokens": 42252,
+   "run_id": "legacy-lodgecore-binary-parity-8d72d7a6",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-lodgecore-binary-parity-8d72d7a6",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "1fcf7bdeedc1cbd2f66c7a9c5f4343b0bb8d8d119345b6407e8634148ba045f2",
+    "summary": "9bafaddee5b89eb5eb754c20f479d6d9eb34749d628234a523cf1d5906ea64a9",
+    "task": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   },
+   "started_at": "2026-10-07T02:27:12.783465+00:00",
+   "task": "legacy-lodgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d",
+    "recorded": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 476.629,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 84
+   },
+   "finished_at": "2026-10-06T22:24:46.391432+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7712,
+   "reported_tokens": 297315,
+   "run_id": "legacy-matchcore-order-book-parity-ab39cc6b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-matchcore-order-book-parity-ab39cc6b",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "3d5e6bf5b40ada3fee0375d0a18ce05c33d3a36679a9cf8d69f585d03cc19b87",
+    "summary": "bebe7d76e6159619180f27458f51927c32d9ef3fbc338f9e284afdefbffc26c0",
+    "task": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   },
+   "started_at": "2026-10-06T21:56:39.274877+00:00",
+   "task": "legacy-matchcore-order-book-parity",
+   "task_hash_bridge": {
+    "lock": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb",
+    "recorded": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 180.221,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 45
+   },
+   "finished_at": "2026-10-06T22:37:52.625069+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8279,
+   "reported_tokens": 127152,
+   "run_id": "legacy-metercore-binary-parity-5ee8ada1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-metercore-binary-parity-5ee8ada1",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "95cb38375a6f9ac73b7f31018f55c2fb575263f1856666fb7c37fa25bce79b6b",
+    "summary": "3857d6274dd70f1d89b04095d3356074b2507843e22d32ef0524ee65d670fb22",
+    "task": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   },
+   "started_at": "2026-10-06T22:34:52.398601+00:00",
+   "task": "legacy-metercore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0",
+    "recorded": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 345.18,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 63
+   },
+   "finished_at": "2026-10-06T23:45:59.778430+00:00",
+   "functional": 0.6667,
+   "model": "sonnet55",
+   "quality": 0.8171,
+   "reported_tokens": 262326,
+   "run_id": "legacy-pacecore-binary-parity-64314684",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-pacecore-binary-parity-64314684",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "beac675051e7d8ce9d803522d3ce6f2588655a46d2a1c709489aef0cf3655ce5",
+    "summary": "8e56f9b89add682d00c9af1ee551f382a2742bdd101ff4b84cede6115a558aaa",
+    "task": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   },
+   "started_at": "2026-10-06T23:40:14.594688+00:00",
+   "task": "legacy-pacecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3",
+    "recorded": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3554.802,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 344
+   },
+   "finished_at": "2026-10-07T06:07:15.298190+00:00",
+   "functional": 0.9333,
+   "model": "sonnet55",
+   "quality": 0.7032,
+   "reported_tokens": 61302,
+   "run_id": "legacy-paddockcore-binary-parity-fb5d0d75",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-paddockcore-binary-parity-fb5d0d75",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "86dc58832bd89aaed61c1f1962d700d65f3acac9136633a875160d906f432d55",
+    "summary": "aaabede2ad3c3b7da753c664d937c8bb628c3a6a8d79583595505eb878f0d952",
+    "task": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   },
+   "started_at": "2026-10-07T05:08:00.496847+00:00",
+   "task": "legacy-paddockcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644",
+    "recorded": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 439.689,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 98
+   },
+   "finished_at": "2026-10-06T22:34:52.316258+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8063,
+   "reported_tokens": 383765,
+   "run_id": "legacy-payrollcore-binary-parity-42b5d3f7",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-payrollcore-binary-parity-42b5d3f7",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "e64f41311f4eb0b8ddaca4afcf7afc141bb267e24a726e5fb799c59c88f583fa",
+    "summary": "ec49aad938808164933ac223c11b9564a24a2520146070fcc7b42121a6a90e27",
+    "task": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   },
+   "started_at": "2026-10-06T22:27:32.615795+00:00",
+   "task": "legacy-payrollcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96",
+    "recorded": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 166.058,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 29
+   },
+   "finished_at": "2026-10-06T22:27:32.534585+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8082,
+   "reported_tokens": 86375,
+   "run_id": "legacy-qlite-store-parity-05a53f93",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-qlite-store-parity-05a53f93",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "d96cc9fe32f953ecc863f9aa8d87f79bc406fa436648b1e96102d58c1225618a",
+    "summary": "7f5ea7b2d5c169101b2a589d2e65f81c04d4f70d0a7399ef04f180ab2386dac6",
+    "task": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   },
+   "started_at": "2026-10-06T22:24:46.471891+00:00",
+   "task": "legacy-qlite-store-parity",
+   "task_hash_bridge": {
+    "lock": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a",
+    "recorded": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 418.14,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 37
+   },
+   "finished_at": "2026-10-06T23:09:57.981637+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.813,
+   "reported_tokens": 132986,
+   "run_id": "legacy-queuecore-binary-parity-4330bd93",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-queuecore-binary-parity-4330bd93",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "d8231b8be9613a19164333186bc8cb2605e1baa3aade78b54139b4ebd7d24f52",
+    "summary": "1a1c8ec4a9bb3dd49dfba9970d160a70a575e89410a9ac80eef1031cc14fc73a",
+    "task": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   },
+   "started_at": "2026-10-06T23:02:59.840471+00:00",
+   "task": "legacy-queuecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b",
+    "recorded": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 284.365,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 44
+   },
+   "finished_at": "2026-10-06T22:56:08.350796+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.835,
+   "reported_tokens": 146799,
+   "run_id": "legacy-quotacore-binary-parity-cfcf514d",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-quotacore-binary-parity-cfcf514d",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "3e8f6ca2b4683553581719ea263f191d0fa9a626dabc70fc2608db0501ec840c",
+    "summary": "84e669c7e61608f0bd07bde211b61eb23fa851055d6788fa881e836599981b1f",
+    "task": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   },
+   "started_at": "2026-10-06T22:51:23.982522+00:00",
+   "task": "legacy-quotacore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc",
+    "recorded": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 239.539,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 34
+   },
+   "finished_at": "2026-10-06T23:31:35.870851+00:00",
+   "functional": 0.75,
+   "model": "sonnet55",
+   "quality": 0.8274,
+   "reported_tokens": 129133,
+   "run_id": "legacy-reflowcore-binary-parity-a23fdbca",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-reflowcore-binary-parity-a23fdbca",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "71068d7e700147c73e4dfe22cdeec32e0ee7128df3f08275d58d0165ce30aca5",
+    "summary": "c99ea7ff8ecae632cd7358a20297aea921bbe7d35873fe867db0bd16899375cf",
+    "task": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   },
+   "started_at": "2026-10-06T23:27:36.325484+00:00",
+   "task": "legacy-reflowcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe",
+    "recorded": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 361.407,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 44
+   },
+   "finished_at": "2026-10-06T23:27:36.235593+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7808,
+   "reported_tokens": 149762,
+   "run_id": "legacy-schedcore-binary-parity-2cd54282",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-schedcore-binary-parity-2cd54282",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "acc5f66dcbfe3e75f4e586480eba025413bc08827b7c977c75306666d12df0a6",
+    "summary": "a31b86706d188f5e752e04e5ca818fb95f5c8748a2d9913e1bf578884b2a37a5",
+    "task": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   },
+   "started_at": "2026-10-06T23:21:34.812359+00:00",
+   "task": "legacy-schedcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448",
+    "recorded": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 510.894,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 119
+   },
+   "finished_at": "2026-10-06T21:56:39.191031+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7855,
+   "reported_tokens": 508087,
+   "run_id": "legacy-settlecore-binary-parity-92aafab7",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-settlecore-binary-parity-92aafab7",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "ccc3792d646851df261695457873312067171e13e2761f7add3a383ffb965304",
+    "summary": "7c310896ecec7eb8cde9366098b7b3242b454fa2eba71e0e41fdc6d538c1dcb7",
+    "task": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   },
+   "started_at": "2026-10-06T21:48:08.287225+00:00",
+   "task": "legacy-settlecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+    "recorded": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 243.763,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 43
+   },
+   "finished_at": "2026-10-06T23:00:12.196404+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8289,
+   "reported_tokens": 168302,
+   "run_id": "legacy-snapcore-binary-parity-7ebb3b76",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-snapcore-binary-parity-7ebb3b76",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "4cf44bfd6370b2c21d5457f3ef76ce979121fd176f274829234b8eb2270d8ab1",
+    "summary": "4963d45e3666d6f639c80a33e1d1b5d517ae14e15073008723d5e8986ac8655c",
+    "task": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   },
+   "started_at": "2026-10-06T22:56:08.430729+00:00",
+   "task": "legacy-snapcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d",
+    "recorded": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 368.975,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 66
+   },
+   "finished_at": "2026-10-07T00:02:43.956194+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8283,
+   "reported_tokens": 267949,
+   "run_id": "legacy-stampcore-binary-parity-aacc72b0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-stampcore-binary-parity-aacc72b0",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "a839cdb8a7add8a4883d24bdc771695d8f3dbe008b51753e15f57c9505f601a9",
+    "summary": "4deef88906f1802d638ccf02b892fc58937e4116550dfccff29c4fbc215fe4fb",
+    "task": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   },
+   "started_at": "2026-10-06T23:56:34.961459+00:00",
+   "task": "legacy-stampcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da",
+    "recorded": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 518.535,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 100
+   },
+   "finished_at": "2026-10-06T23:40:14.513180+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8277,
+   "reported_tokens": 452288,
+   "run_id": "legacy-tallycore-binary-parity-9975f9d9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-tallycore-binary-parity-9975f9d9",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "32bd4d1be9df10ccb8d992fbafb9f9795156f692fdc39bcf8404c2b2787e3c13",
+    "summary": "1927fe4406407611793541edd11c6c964c6bedefabcdab142ecf8294b99801ab",
+    "task": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   },
+   "started_at": "2026-10-06T23:31:35.972387+00:00",
+   "task": "legacy-tallycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc",
+    "recorded": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 167.474,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 44
+   },
+   "finished_at": "2026-10-06T23:02:59.759827+00:00",
+   "functional": 0.7778,
+   "model": "sonnet55",
+   "quality": 0.8411,
+   "reported_tokens": 132105,
+   "run_id": "legacy-vaultcore-binary-parity-10d0c146",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/medium/legacy-vaultcore-binary-parity-10d0c146",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "cf1f16e17af03e1d4131c6b6661c396aa59d1d4036350113c10982b833436fe0",
+    "summary": "a53963b343f20a0729ce957b14edb422d1148ec94b060a95992db104fd4a3903",
+    "task": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   },
+   "started_at": "2026-10-06T23:00:12.282949+00:00",
+   "task": "legacy-vaultcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6",
+    "recorded": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 594.035,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 75
+   },
+   "finished_at": "2026-10-07T08:36:01.711248+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8332,
+   "reported_tokens": 375732,
+   "run_id": "legacy-blendcore-binary-parity-ad9d39e0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-blendcore-binary-parity-ad9d39e0",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "cb7f6a39b5a8e3627c282564f210d573f24163c0ae97bde6599a60cc32afa6e8",
+    "summary": "3a72dfd78ecef24920371c10ccddb1325e71c6b873056efa09fe8e0f56d0011d",
+    "task": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   },
+   "started_at": "2026-10-07T08:26:07.641554+00:00",
+   "task": "legacy-blendcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366",
+    "recorded": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1529.607,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 211
+   },
+   "finished_at": "2026-10-07T10:57:39.875344+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7575,
+   "reported_tokens": 1292221,
+   "run_id": "legacy-cellarcore-binary-parity-4ab4f9ea",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-cellarcore-binary-parity-4ab4f9ea",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "9b46bd55c7cbcc4dc3b87a7ce0e925298e11f9dd44ec560f68ae45fd63687b6b",
+    "summary": "672e427ae49500f65c1a1f94311ffa5534c51393eaa94c97a21740b79f2f7cf1",
+    "task": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   },
+   "started_at": "2026-10-07T10:32:10.261322+00:00",
+   "task": "legacy-cellarcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e",
+    "recorded": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 361.787,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 60
+   },
+   "finished_at": "2026-10-07T06:53:59.128500+00:00",
+   "functional": 0.6,
+   "model": "sonnet55",
+   "quality": 0.8044,
+   "reported_tokens": 230350,
+   "run_id": "legacy-codeccore-binary-parity-0a51ea26",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-codeccore-binary-parity-0a51ea26",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "f3c2a84bece40a6f54a692ba85b4e05d434b8636a2b0d75af31bff42831dac5e",
+    "summary": "9c00efad0e4754b1f8baf601cbc5de6b2c66b3c91a02f6fb79f61390dfe5a59c",
+    "task": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   },
+   "started_at": "2026-10-07T06:47:57.335162+00:00",
+   "task": "legacy-codeccore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d",
+    "recorded": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 880.703,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 113
+   },
+   "finished_at": "2026-10-07T09:33:01.791879+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7298,
+   "reported_tokens": 743856,
+   "run_id": "legacy-depotcore-binary-parity-60d3b4b8",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-depotcore-binary-parity-60d3b4b8",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "948db41183131d160d401616ebb5405e11ca0431a48c1bbe4377c4237310496e",
+    "summary": "ec2247001cf79f8036489b3474658a8c24fa6cc6dc38838abf14f29cea6a7c09",
+    "task": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   },
+   "started_at": "2026-10-07T09:18:21.101791+00:00",
+   "task": "legacy-depotcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+    "recorded": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 356.548,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 87
+   },
+   "finished_at": "2026-10-07T06:47:57.233330+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8169,
+   "reported_tokens": 325399,
+   "run_id": "legacy-freightcore-binary-parity-15177e2a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-freightcore-binary-parity-15177e2a",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "81dcabffb00496ec612bae075abf8048dfc5ce1177796b8556d00f9e41646d2c",
+    "summary": "b1a87027ba9ab91619222fde3f30c883bf5d068e5f20502288bfd7b0070c2d7e",
+    "task": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   },
+   "started_at": "2026-10-07T06:42:00.678976+00:00",
+   "task": "legacy-freightcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb",
+    "recorded": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2313.393,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 371
+   },
+   "finished_at": "2026-10-07T09:18:21.009520+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.679,
+   "reported_tokens": 3219206,
+   "run_id": "legacy-granarycore-binary-parity-de60775f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-granarycore-binary-parity-de60775f",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "1ce1925cea4b7da952d19b0a009bfc4625e7a6e110cab134439388f3ae67fa5d",
+    "summary": "f348df02c409fff50aa6681fb3ce22b1338123fbbc6b98b6e0cd9deee374413f",
+    "task": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   },
+   "started_at": "2026-10-07T08:39:47.577541+00:00",
+   "task": "legacy-granarycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92",
+    "recorded": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1024.85,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 97
+   },
+   "finished_at": "2026-10-07T07:43:49.254665+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.828,
+   "reported_tokens": 544640,
+   "run_id": "legacy-hedgecore-binary-parity-aa9ca4da",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-hedgecore-binary-parity-aa9ca4da",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "cec6cb1ef85bd3607ee1f788ee132844df2d7adc72f7257393956b990d0892b6",
+    "summary": "c85fc15e6baba5954a8d4f3eb15fd4f166107d9d706329293130d8979216090c",
+    "task": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   },
+   "started_at": "2026-10-07T07:26:44.381196+00:00",
+   "task": "legacy-hedgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+    "recorded": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3548.249,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 369
+   },
+   "finished_at": "2026-10-07T10:32:10.161541+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.762,
+   "reported_tokens": 3574335,
+   "run_id": "legacy-lodgecore-binary-parity-9e8aa075",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-lodgecore-binary-parity-9e8aa075",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "0a578f3e4d0a5b381231e741ebccc43cdc5aa4875d220e2777cd4cda34202322",
+    "summary": "a8bd3135f7e3b7758de7e4cc50724f25ff7757bc4411c6867711285eb5347731",
+    "task": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   },
+   "started_at": "2026-10-07T09:33:01.874560+00:00",
+   "task": "legacy-lodgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d",
+    "recorded": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 333.312,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 47
+   },
+   "finished_at": "2026-10-07T06:18:47.022789+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.789,
+   "reported_tokens": 200262,
+   "run_id": "legacy-matchcore-order-book-parity-ebb20099",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-matchcore-order-book-parity-ebb20099",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "7c4c55de6403cfb97e5ebb521dba4c2fe3b7df6706b3b2a0bd8932e3eaadf9b3",
+    "summary": "6284241ae28bf0b676bfd8665021e40b46a87c0c372ca5a4d81f714a1e552751",
+    "task": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   },
+   "started_at": "2026-10-07T06:13:13.710106+00:00",
+   "task": "legacy-matchcore-order-book-parity",
+   "task_hash_bridge": {
+    "lock": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb",
+    "recorded": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 439.28,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 63
+   },
+   "finished_at": "2026-10-07T06:42:00.595373+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.823,
+   "reported_tokens": 208852,
+   "run_id": "legacy-metercore-binary-parity-b46653f0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-metercore-binary-parity-b46653f0",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "a82c747078aa5c5c2b421fed39fb79ff176c38c25faf0657571994ab5d9cbf24",
+    "summary": "1066e69801bf817a699e706b86341865ccf2cd9cb3c9ebe5a52e3c301fa7f9fc",
+    "task": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   },
+   "started_at": "2026-10-07T06:34:41.308689+00:00",
+   "task": "legacy-metercore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0",
+    "recorded": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 460.014,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 77
+   },
+   "finished_at": "2026-10-07T08:26:07.558233+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8242,
+   "reported_tokens": 360333,
+   "run_id": "legacy-pacecore-binary-parity-cb0a5393",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-pacecore-binary-parity-cb0a5393",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "c42a821e18451f4a5cd58b7e555e918787edb75e292e2b73310772eefd0e369d",
+    "summary": "fd71d4843d8879b358fe0e7e8fbe27c08ae118d98cc7c1ed80281573308cd509",
+    "task": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   },
+   "started_at": "2026-10-07T08:18:27.537033+00:00",
+   "task": "legacy-pacecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3",
+    "recorded": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3034.322,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 432
+   },
+   "finished_at": "2026-10-07T11:48:14.286841+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7742,
+   "reported_tokens": 5593851,
+   "run_id": "legacy-paddockcore-binary-parity-8386f1e9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-paddockcore-binary-parity-8386f1e9",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "5996ef3288a122d1ea6cfc8e10f607e4e11ace741b2d62341f7915f7e769e089",
+    "summary": "0429d3f7d9254d4e0a9281ac7ebec4ec554fe8e4b997499f93a0f276aa34c4be",
+    "task": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   },
+   "started_at": "2026-10-07T10:57:39.967433+00:00",
+   "task": "legacy-paddockcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644",
+    "recorded": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 673.523,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 102
+   },
+   "finished_at": "2026-10-07T06:34:41.231041+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8036,
+   "reported_tokens": 478611,
+   "run_id": "legacy-payrollcore-binary-parity-cb99e3f9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-payrollcore-binary-parity-cb99e3f9",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "be33e87398d3ffbed5427726e5183ed32863c92d7ddc8d0ade4b84b912a0425f",
+    "summary": "44b29b555d13a04bf301c18a5e32d0a4f6e7d35a46aa42572bb7d52756f31d17",
+    "task": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   },
+   "started_at": "2026-10-07T06:23:27.661041+00:00",
+   "task": "legacy-payrollcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96",
+    "recorded": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 280.479,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 64
+   },
+   "finished_at": "2026-10-07T06:23:27.582581+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8025,
+   "reported_tokens": 235536,
+   "run_id": "legacy-qlite-store-parity-f7b939de",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-qlite-store-parity-f7b939de",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "68520f4599a3802a42151f76e31ae3826695138b89361b184d161f74f4fc7c46",
+    "summary": "d303d4d75ce8dbbb5d1ce66a23171f5655b5e8c2fc3d8322ab7bdbfffe7ad3e7",
+    "task": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   },
+   "started_at": "2026-10-07T06:18:47.101215+00:00",
+   "task": "legacy-qlite-store-parity",
+   "task_hash_bridge": {
+    "lock": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a",
+    "recorded": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 614.969,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 50
+   },
+   "finished_at": "2026-10-07T07:26:44.297769+00:00",
+   "functional": 0.75,
+   "model": "sonnet55",
+   "quality": 0.8028,
+   "reported_tokens": 160613,
+   "run_id": "legacy-queuecore-binary-parity-b871383e",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-queuecore-binary-parity-b871383e",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "7ebc8fc96687da967d09fdea21343d3963335dc14557dc35dc07077e74105478",
+    "summary": "b68ec64a0b4bded70a7846ac18a9350bcc76666057d0ff128ceffebf20199342",
+    "task": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   },
+   "started_at": "2026-10-07T07:16:29.314195+00:00",
+   "task": "legacy-queuecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b",
+    "recorded": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 652.704,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 59
+   },
+   "finished_at": "2026-10-07T07:04:51.962534+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8407,
+   "reported_tokens": 229014,
+   "run_id": "legacy-quotacore-binary-parity-8d10b8b1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-quotacore-binary-parity-8d10b8b1",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "ed71da760a77aca72e6e822499ed830f260d8ae0291a5ba95a288bade2a12820",
+    "summary": "41caa010615da550831ee9db1dfee23668b13238f21e7972c1ca28f371804b93",
+    "task": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   },
+   "started_at": "2026-10-07T06:53:59.211487+00:00",
+   "task": "legacy-quotacore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc",
+    "recorded": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 524.787,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 80
+   },
+   "finished_at": "2026-10-07T08:07:17.678026+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8458,
+   "reported_tokens": 314391,
+   "run_id": "legacy-reflowcore-binary-parity-f4006c1f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-reflowcore-binary-parity-f4006c1f",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "87ffe19e29026de237a3bec9b03092856e5a745f5b4fd4d55eb5017a80968263",
+    "summary": "27d3677ac338edefaaf1beb3549802ebdc43ae8a76c8dcde797b8e5106cf2304",
+    "task": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   },
+   "started_at": "2026-10-07T07:58:32.938932+00:00",
+   "task": "legacy-reflowcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe",
+    "recorded": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 883.491,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 88
+   },
+   "finished_at": "2026-10-07T07:58:32.858699+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7999,
+   "reported_tokens": 336525,
+   "run_id": "legacy-schedcore-binary-parity-ecb74fd0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-schedcore-binary-parity-ecb74fd0",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "fa346c98b115768baf37b6fa89513945d03418ac60df8be5f48633a3bbca0588",
+    "summary": "94c1b61b2127e13036054aa019a0a844333ab3394e692dda257baa51895f5513",
+    "task": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   },
+   "started_at": "2026-10-07T07:43:49.348932+00:00",
+   "task": "legacy-schedcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448",
+    "recorded": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 352.977,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 50
+   },
+   "finished_at": "2026-10-07T06:13:13.624296+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7924,
+   "reported_tokens": 221290,
+   "run_id": "legacy-settlecore-binary-parity-49d5ff37",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-settlecore-binary-parity-49d5ff37",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "3d51d5475b3ad6bd098ba0cdbaf7deb2340096e021069799c683db0b33f555a9",
+    "summary": "a51201c165b88a0fa93aed909640a6d5dc9e3304ee5db5bafd49227a17971395",
+    "task": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   },
+   "started_at": "2026-10-07T06:07:20.646235+00:00",
+   "task": "legacy-settlecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+    "recorded": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 438.94,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 77
+   },
+   "finished_at": "2026-10-07T07:12:10.990094+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8223,
+   "reported_tokens": 278896,
+   "run_id": "legacy-snapcore-binary-parity-4af2a263",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-snapcore-binary-parity-4af2a263",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "59a293bc099dd6b35c223cee5f3b7e6f6652b7b8f00fb1cb9a9bac0073aea7bf",
+    "summary": "3e4a589d6206fa1e914ed34b3b963378b688c6bedcafa859c8aca66963a070c1",
+    "task": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   },
+   "started_at": "2026-10-07T07:04:52.037940+00:00",
+   "task": "legacy-snapcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d",
+    "recorded": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 225.698,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 33
+   },
+   "finished_at": "2026-10-07T08:39:47.492642+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8192,
+   "reported_tokens": 144405,
+   "run_id": "legacy-stampcore-binary-parity-97bf9f54",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-stampcore-binary-parity-97bf9f54",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "b8c16572974836622c2f0cc2bdb6ff433a2d78c452c539a9078e2c8730e8dfc7",
+    "summary": "198ab88baa1525fd00ade58a8efdb10d5440fefd9198a0f3d62e53cd69bb289b",
+    "task": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   },
+   "started_at": "2026-10-07T08:36:01.789627+00:00",
+   "task": "legacy-stampcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da",
+    "recorded": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 669.684,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 102
+   },
+   "finished_at": "2026-10-07T08:18:27.455849+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8402,
+   "reported_tokens": 483976,
+   "run_id": "legacy-tallycore-binary-parity-763c9370",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-tallycore-binary-parity-763c9370",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "7ac27d45b51a55089889024ec3e2a374ca7c29b0b3f2872c77933101115fc28d",
+    "summary": "f65f799734b5338e3b8c7736539fbf6f572f679d38618336e04763923d29f55d",
+    "task": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   },
+   "started_at": "2026-10-07T08:07:17.766140+00:00",
+   "task": "legacy-tallycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc",
+    "recorded": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 258.159,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 57
+   },
+   "finished_at": "2026-10-07T07:16:29.233282+00:00",
+   "functional": 0.7778,
+   "model": "sonnet55",
+   "quality": 0.8412,
+   "reported_tokens": 207026,
+   "run_id": "legacy-vaultcore-binary-parity-2658ef32",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/high/legacy-vaultcore-binary-parity-2658ef32",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "6d9db89d5174756b84021eb7008c94e204f15b8d18e969b72bd7c0194a736d22",
+    "summary": "478b71a61edd9c50f3d0b4060a0e3652cc0b410c16bfdd560d7a0c034512ae22",
+    "task": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   },
+   "started_at": "2026-10-07T07:12:11.066354+00:00",
+   "task": "legacy-vaultcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6",
+    "recorded": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1048.492,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 158
+   },
+   "finished_at": "2026-10-07T15:19:26.062802+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8521,
+   "reported_tokens": 656109,
+   "run_id": "legacy-blendcore-binary-parity-83818fdf",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-blendcore-binary-parity-83818fdf",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "295e722a40817ba5a5b90edde44e9c5217e0712d4a13ce159aa58d9924f18527",
+    "summary": "bd501192e348b435a087bba326d358679b9521480552710387dd2fb13b26753f",
+    "task": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   },
+   "started_at": "2026-10-07T15:01:57.558439+00:00",
+   "task": "legacy-blendcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366",
+    "recorded": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3451.682,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 369
+   },
+   "finished_at": "2026-10-07T19:09:02.471916+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7599,
+   "reported_tokens": 2271276,
+   "run_id": "legacy-cellarcore-binary-parity-84d0dd12",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-cellarcore-binary-parity-84d0dd12",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "321b64a4c67fa64fb17d4b599a05643743f9406b3ca096922e8ad41fff238b68",
+    "summary": "afd412f901ddc829b28dc6f87441666100a16def123412ea024fa00deca30f7e",
+    "task": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   },
+   "started_at": "2026-10-07T18:11:30.765564+00:00",
+   "task": "legacy-cellarcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e",
+    "recorded": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 467.355,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 69
+   },
+   "finished_at": "2026-10-07T13:11:13.331796+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8119,
+   "reported_tokens": 297441,
+   "run_id": "legacy-codeccore-binary-parity-0b1eb79a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-codeccore-binary-parity-0b1eb79a",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "a033986b18cd46e248ec989e8d7e2723f604e832573f4b66b13d3181d71a9f0a",
+    "summary": "6ad9bafd7186b547b3a72dde60f07cb22fbd8440f14a8842934cc2b7d6fbeed6",
+    "task": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   },
+   "started_at": "2026-10-07T13:03:25.966862+00:00",
+   "task": "legacy-codeccore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d",
+    "recorded": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 4517.098,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 514
+   },
+   "finished_at": "2026-10-07T17:12:47.177037+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8151,
+   "reported_tokens": 5007066,
+   "run_id": "legacy-depotcore-binary-parity-8bbd4686",
+   "security": 0.85,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-depotcore-binary-parity-8bbd4686",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "e54942afea36ab48d5176277e9e1b5c1aae6acf5ea826f618867d7be299c771a",
+    "summary": "4b7208f6d77024f43d04b8802a87a9116ae745f4e75a01a20420dd0b53c04e45",
+    "task": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   },
+   "started_at": "2026-10-07T15:57:30.014160+00:00",
+   "task": "legacy-depotcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+    "recorded": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 821.395,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 155
+   },
+   "finished_at": "2026-10-07T13:03:25.881241+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8365,
+   "reported_tokens": 582099,
+   "run_id": "legacy-freightcore-binary-parity-1a0bf64c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-freightcore-binary-parity-1a0bf64c",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "5e1a8ff2a2d3a31e3adade0829ea16272058b43a765644cbc9b5deb341fddfcf",
+    "summary": "cd29ab3af3d2831ef92c711f368d5e2f59c89d20e160146c8e696d21a99a4ca2",
+    "task": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   },
+   "started_at": "2026-10-07T12:49:44.469716+00:00",
+   "task": "legacy-freightcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb",
+    "recorded": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1898.426,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 333
+   },
+   "finished_at": "2026-10-07T15:57:29.917752+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7983,
+   "reported_tokens": 2632647,
+   "run_id": "legacy-granarycore-binary-parity-43e2683c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-granarycore-binary-parity-43e2683c",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "9f5706ad1149977e657bd111e0bb6a4227ec7b20f44464b7082e8f3003c2d507",
+    "summary": "8a2add2e6e81df5c7132dcb1160c738add9fb50e301c29581c4fe26d55cfd2d4",
+    "task": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   },
+   "started_at": "2026-10-07T15:25:51.463364+00:00",
+   "task": "legacy-granarycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92",
+    "recorded": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 735.554,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 119
+   },
+   "finished_at": "2026-10-07T14:13:20.009013+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8444,
+   "reported_tokens": 15096,
+   "run_id": "legacy-hedgecore-binary-parity-40f8e221",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-hedgecore-binary-parity-40f8e221",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "7e1ce72abab9bfa61353c8955d78a1c64848300c63c60abeab4a05382059c0c9",
+    "summary": "85dd011b5b01b0b53a7fb69b70ebf12ffacb7339fec00d867df9df650a39cc61",
+    "task": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   },
+   "started_at": "2026-10-07T14:01:04.442216+00:00",
+   "task": "legacy-hedgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+    "recorded": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3523.292,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 473
+   },
+   "finished_at": "2026-10-07T18:11:30.660201+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8193,
+   "reported_tokens": 35802,
+   "run_id": "legacy-lodgecore-binary-parity-c8d2e943",
+   "security": 0.9,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-lodgecore-binary-parity-c8d2e943",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "e5b57c967af15d30513ceb138977a330d38cb64e2613224eac7b2355d174db51",
+    "summary": "39334610691cad62d43d0086039faf6d70d2c03d59ae208232e5c8617387e96e",
+    "task": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   },
+   "started_at": "2026-10-07T17:12:47.320633+00:00",
+   "task": "legacy-lodgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d",
+    "recorded": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 521.81,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 79
+   },
+   "finished_at": "2026-10-07T12:13:32.836424+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8141,
+   "reported_tokens": 357737,
+   "run_id": "legacy-matchcore-order-book-parity-c63bad43",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-matchcore-order-book-parity-c63bad43",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "521d06f059142ef74438aeb84baf5449e8c6f1ecc34f2ff573acbd7d21258c90",
+    "summary": "b789a7f2c67b5a1464aa69b9e9e412168000c865402afbd0166b9da7153c0f79",
+    "task": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   },
+   "started_at": "2026-10-07T12:04:51.020583+00:00",
+   "task": "legacy-matchcore-order-book-parity",
+   "task_hash_bridge": {
+    "lock": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb",
+    "recorded": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 500.801,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 99
+   },
+   "finished_at": "2026-10-07T12:49:44.386456+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8415,
+   "reported_tokens": 329749,
+   "run_id": "legacy-metercore-binary-parity-deff9361",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-metercore-binary-parity-deff9361",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "1e2c3a80bf379e9793b5063ab1f4b3e385ab7fccc863b6212688cffaacfea25b",
+    "summary": "ec6504af5968e68ecfc7b0a2a313b9b5b2b9a5c1813951118f7ff7d36b88d96e",
+    "task": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   },
+   "started_at": "2026-10-07T12:41:23.572842+00:00",
+   "task": "legacy-metercore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0",
+    "recorded": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 320.924,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 48
+   },
+   "finished_at": "2026-10-07T15:01:57.466619+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8144,
+   "reported_tokens": 213830,
+   "run_id": "legacy-pacecore-binary-parity-b39b9370",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-pacecore-binary-parity-b39b9370",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "dd29437356ba71b0c905f371b946eca410aef7dfb5ff6071b8970719be9fc1e5",
+    "summary": "81b10240fab6c72383bc8e43cfaa6dd68846a1f0d36f2c9856024a598d1de6d0",
+    "task": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   },
+   "started_at": "2026-10-07T14:56:36.538003+00:00",
+   "task": "legacy-pacecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3",
+    "recorded": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3360.244,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 361
+   },
+   "finished_at": "2026-10-07T20:05:02.866599+00:00",
+   "functional": 0.9333,
+   "model": "sonnet55",
+   "quality": 0.8236,
+   "reported_tokens": 4796803,
+   "run_id": "legacy-paddockcore-binary-parity-823b2f7e",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-paddockcore-binary-parity-823b2f7e",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "02e200eb6eb8690585bc6de145ac5f9023c971494d19e578ec7d95dac01c824a",
+    "summary": "12d26dd213537bb885769f22637892b6899b7b8d43dcb18e06f6baecba7489de",
+    "task": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   },
+   "started_at": "2026-10-07T19:09:02.575267+00:00",
+   "task": "legacy-paddockcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644",
+    "recorded": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1091.318,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 189
+   },
+   "finished_at": "2026-10-07T12:41:23.468131+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7964,
+   "reported_tokens": 927874,
+   "run_id": "legacy-payrollcore-binary-parity-dc5f24af",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-payrollcore-binary-parity-dc5f24af",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "7935f653896ccd52ce88dc9869f7744256901a1c046d8f6fb7a96e68f20508a6",
+    "summary": "1a0afe7216b19857c2d47460e9a987e89ce88d8e214be78021e9c61802633933",
+    "task": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   },
+   "started_at": "2026-10-07T12:23:12.130303+00:00",
+   "task": "legacy-payrollcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96",
+    "recorded": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 579.09,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 89
+   },
+   "finished_at": "2026-10-07T12:23:12.042603+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.822,
+   "reported_tokens": 329113,
+   "run_id": "legacy-qlite-store-parity-b3524ef6",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-qlite-store-parity-b3524ef6",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "9e377ec02eda883828e78dd61e287b4bb57f1ec7a3190b521606df025af23f9c",
+    "summary": "b34508465a2e3de5f53a01df3ae140f372a7d87982aed884ec8600875d495785",
+    "task": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   },
+   "started_at": "2026-10-07T12:13:32.917771+00:00",
+   "task": "legacy-qlite-store-parity",
+   "task_hash_bridge": {
+    "lock": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a",
+    "recorded": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 987.515,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 90
+   },
+   "finished_at": "2026-10-07T14:01:04.348329+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8025,
+   "reported_tokens": 461157,
+   "run_id": "legacy-queuecore-binary-parity-10e24a3f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-queuecore-binary-parity-10e24a3f",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "4f229479913e70a5bf183002875eb80a1b515bb0c5200181a3a42b797f017225",
+    "summary": "0afa27ccd2b3feef6f4f371df67c869e9c522d5eea4ef12d933d05d97d02cf63",
+    "task": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   },
+   "started_at": "2026-10-07T13:44:36.821483+00:00",
+   "task": "legacy-queuecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b",
+    "recorded": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 669.694,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 107
+   },
+   "finished_at": "2026-10-07T13:22:23.141992+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8472,
+   "reported_tokens": 496223,
+   "run_id": "legacy-quotacore-binary-parity-a62b8249",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-quotacore-binary-parity-a62b8249",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "ca06f8eec6b071aeab2b4ee2ad31a956d1b6a096a9542327431ac33901825510",
+    "summary": "fa8d9608640885d260ba68c1bfd8379cdf41d70ce28b419332dfdf6d2bcff27c",
+    "task": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   },
+   "started_at": "2026-10-07T13:11:13.432737+00:00",
+   "task": "legacy-quotacore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc",
+    "recorded": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1083.175,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 102
+   },
+   "finished_at": "2026-10-07T14:50:27.199385+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8605,
+   "reported_tokens": 559369,
+   "run_id": "legacy-reflowcore-binary-parity-85cd0de6",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-reflowcore-binary-parity-85cd0de6",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "0b21902ea5971ee9adf8317f87daf2a2271a45ce0a3794b412cdf96e7c2fde02",
+    "summary": "942b17757dedf48b0bcb3e510a64b9ed183cd9890ba899790b32c9bfcb5c6fde",
+    "task": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   },
+   "started_at": "2026-10-07T14:32:24.009746+00:00",
+   "task": "legacy-reflowcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe",
+    "recorded": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1143.793,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 84
+   },
+   "finished_at": "2026-10-07T14:32:23.908263+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7832,
+   "reported_tokens": 427384,
+   "run_id": "legacy-schedcore-binary-parity-9b6188ff",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-schedcore-binary-parity-9b6188ff",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "1a38f39dab34dab646e889690d0f827314772be5d6753dd3f39c4d089e887c51",
+    "summary": "ded62b4d7547ee4e4ee8a051dd901026193942dbf17a22f3bc695614ae600b2d",
+    "task": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   },
+   "started_at": "2026-10-07T14:13:20.099930+00:00",
+   "task": "legacy-schedcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448",
+    "recorded": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 991.039,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 129
+   },
+   "finished_at": "2026-10-07T12:04:50.919296+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7796,
+   "reported_tokens": 676625,
+   "run_id": "legacy-settlecore-binary-parity-d78fa3f3",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-settlecore-binary-parity-d78fa3f3",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "f26571293b4e191e67f2df9325bc1a5b6fc2d6ba679ed38e2815a89075c34829",
+    "summary": "ecb790109f4eac0d8a17a13551e26078a142fa05edc6881a963729873b7a1e56",
+    "task": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   },
+   "started_at": "2026-10-07T11:48:19.851926+00:00",
+   "task": "legacy-settlecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+    "recorded": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 801.733,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 143
+   },
+   "finished_at": "2026-10-07T13:35:44.972469+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.831,
+   "reported_tokens": 720840,
+   "run_id": "legacy-snapcore-binary-parity-96de0700",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-snapcore-binary-parity-96de0700",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "528adc4475ad8f50097517e4ba74a6c9a7062a87231e744a3d9e6ca5020b0527",
+    "summary": "eec3170184be8c57210756c36d53a764461d20eae4bd4d95c1de13a6df4505bd",
+    "task": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   },
+   "started_at": "2026-10-07T13:22:23.231488+00:00",
+   "task": "legacy-snapcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d",
+    "recorded": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 385.221,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 57
+   },
+   "finished_at": "2026-10-07T15:25:51.380734+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8251,
+   "reported_tokens": 252831,
+   "run_id": "legacy-stampcore-binary-parity-72f25bb0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-stampcore-binary-parity-72f25bb0",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "b2a493bc84ebe41a2170059587d02f3d8d63accf324bd410fb245afc490fd5c4",
+    "summary": "adafae059563a4b8578e992778ec61bb5d465f8ba698c07cc057741bad879e41",
+    "task": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   },
+   "started_at": "2026-10-07T15:19:26.150639+00:00",
+   "task": "legacy-stampcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da",
+    "recorded": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 369.173,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 49
+   },
+   "finished_at": "2026-10-07T14:56:36.449197+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8315,
+   "reported_tokens": 234092,
+   "run_id": "legacy-tallycore-binary-parity-ddd4dd29",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-tallycore-binary-parity-ddd4dd29",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "1ed15412ee718ebc7eb92cf199ec74fe935929c419b54ea4af10bfb482b80240",
+    "summary": "00a94e22bbcaf62647461281ac485dece38349315f91c8c61d34052f8fab5f93",
+    "task": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   },
+   "started_at": "2026-10-07T14:50:27.287275+00:00",
+   "task": "legacy-tallycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc",
+    "recorded": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 531.67,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 82
+   },
+   "finished_at": "2026-10-07T13:44:36.734873+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8474,
+   "reported_tokens": 318699,
+   "run_id": "legacy-vaultcore-binary-parity-e2fa3b9d",
+   "security": 1.0,
+   "solver_cli_version": "2.1.292 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/extra-high/legacy-vaultcore-binary-parity-e2fa3b9d",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "08d76e1dd8632aeea650d76be39bb5104265a9cc249c9e0fbf279780cd2d426f",
+    "summary": "5fb58edb3080d6cc25696a921cd453fd22a67cfd273838a224120b14550b8c29",
+    "task": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   },
+   "started_at": "2026-10-07T13:35:45.053116+00:00",
+   "task": "legacy-vaultcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6",
+    "recorded": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1667.278,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 194
+   },
+   "finished_at": "2026-10-08T05:52:58.608301+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8581,
+   "reported_tokens": 1518365,
+   "run_id": "legacy-blendcore-binary-parity-90e0492c",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-blendcore-binary-parity-90e0492c",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "9a05b158d4a03edd1e0eb66b3b4128d3fde846c203dd359bd6081a5fd4311409",
+    "summary": "08d710f7f7c5c7cf0db8492104ce330c6414555af3c4c33388a48c0da0adb89c",
+    "task": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   },
+   "started_at": "2026-10-08T05:25:11.274362+00:00",
+   "task": "legacy-blendcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366",
+    "recorded": "749e20f69cec6e08c9474b6852230035948176aa7186ccdafb0761293333ef63"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2305.238,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 281
+   },
+   "finished_at": "2026-10-08T09:29:57.297581+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7818,
+   "reported_tokens": 2888732,
+   "run_id": "legacy-cellarcore-binary-parity-d4a2a24b",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-cellarcore-binary-parity-d4a2a24b",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "43541dc8c0b76154d4e6cab91cf2b2fedde8f4ba2f08659dfee531b1f1664282",
+    "summary": "d29fa07c42ad410d3c0d66500d6f16c440d5934d2d5454492fb83c41227c3461",
+    "task": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   },
+   "started_at": "2026-10-08T08:51:32.018250+00:00",
+   "task": "legacy-cellarcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e",
+    "recorded": "3c3b5ed5f0a98a8bcaff0673f7c3b0321b3ad5f4d32e0471bf2699b48bb7d782"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1465.185,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 147
+   },
+   "finished_at": "2026-10-08T00:39:43.422056+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8353,
+   "reported_tokens": 1013504,
+   "run_id": "legacy-codeccore-binary-parity-bab44c12",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-codeccore-binary-parity-bab44c12",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "18cda7e5442eff4dea713887151a61c1e254e3b1a8d665fecb7c66247b555407",
+    "summary": "e24750bbae164b37490678ac277cb42916476a257e8e98abf14eafbc9ed6e290",
+    "task": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   },
+   "started_at": "2026-10-08T00:15:18.207749+00:00",
+   "task": "legacy-codeccore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d",
+    "recorded": "d849c67367d063425eb35b9141f1c8f58cfd6715212cffeecf736fa3bea1a59d"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1600.862,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 153
+   },
+   "finished_at": "2026-10-08T07:26:50.514498+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7532,
+   "reported_tokens": 1528293,
+   "run_id": "legacy-depotcore-binary-parity-fd43ed7f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-depotcore-binary-parity-fd43ed7f",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "fed6608e18917696d4cd30f9f534a1d3fda2b8628b678fcc0ae9aa8afb5933a4",
+    "summary": "675e6f9ff31eda64db26520eaa840c71635568e19b46d556ac88999550549ae5",
+    "task": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   },
+   "started_at": "2026-10-08T07:00:09.610035+00:00",
+   "task": "legacy-depotcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77",
+    "recorded": "62417852858939e06fde028843b46d6a475f6e0ee79171df4f63bb4c351a1f78"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1844.536,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 227
+   },
+   "finished_at": "2026-10-08T00:15:18.119284+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8361,
+   "reported_tokens": 826253,
+   "run_id": "legacy-freightcore-binary-parity-ecc2892f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-freightcore-binary-parity-ecc2892f",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "ce7f82a90ad68877a0513a2da834d13d098c2541e86b8454a998d4b24318b952",
+    "summary": "fcf2f99b07e832565948540b8cc860392d588c1a4da89e0818664dd486ed271b",
+    "task": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   },
+   "started_at": "2026-10-07T23:44:33.536029+00:00",
+   "task": "legacy-freightcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb",
+    "recorded": "634ca7a9af33250a6fa6f71252a8d54d9dd60fc006c85ede59a330cd5f57316b"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2906.384,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 292
+   },
+   "finished_at": "2026-10-08T07:00:09.491813+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.7566,
+   "reported_tokens": 3618338,
+   "run_id": "legacy-granarycore-binary-parity-12915738",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-granarycore-binary-parity-12915738",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "ceca7c8300750f465e41ba0583c3a524196cde2af6fa2fa7d719bedbc69957c4",
+    "summary": "6774b66cf7acb6d9d01dfbe2db4ef449ed3241954e2591bc51d599dbc68b9e2d",
+    "task": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   },
+   "started_at": "2026-10-08T06:11:43.047729+00:00",
+   "task": "legacy-granarycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92",
+    "recorded": "9126d1bde29c5b3b34286925c6848b0f4b38001945c13f64a39413faa6064ad7"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2380.402,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 229
+   },
+   "finished_at": "2026-10-08T03:40:40.904781+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8336,
+   "reported_tokens": 1825738,
+   "run_id": "legacy-hedgecore-binary-parity-fa0b410c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-hedgecore-binary-parity-fa0b410c",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "7f63f128ecb27eb2236e0299a485ae97941965157819a5c0cda72dfc8d9369e0",
+    "summary": "266a75af2e2c9278f41489d0a29c71df53082aff9abf2244383b93be35ffdc68",
+    "task": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   },
+   "started_at": "2026-10-08T03:01:00.517633+00:00",
+   "task": "legacy-hedgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4",
+    "recorded": "43eb251f5f44aa2cc3d93e1b665657a92d130e2f6105c05883cc79c928573133"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 5081.123,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 630
+   },
+   "finished_at": "2026-10-08T08:51:31.888126+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.764,
+   "reported_tokens": 8591493,
+   "run_id": "legacy-lodgecore-binary-parity-812a0f91",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-lodgecore-binary-parity-812a0f91",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "1b80271338bc2525ca6f57ebdb1a9eb3226314d0b80753321c1dd034afbf6421",
+    "summary": "d579e55e7305cf55808bab35ab1fb3fa31b21a1ffb17de7353817feceb67f4da",
+    "task": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   },
+   "started_at": "2026-10-08T07:26:50.676228+00:00",
+   "task": "legacy-lodgecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d",
+    "recorded": "dc53423692763293669361836b5d971b9c1fc514b0ddd0e92cadb795efc88847"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2911.373,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 163
+   },
+   "finished_at": "2026-10-07T21:41:48.620709+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8142,
+   "reported_tokens": 975111,
+   "run_id": "legacy-matchcore-order-book-parity-1820e6f2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-matchcore-order-book-parity-1820e6f2",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "95d2e98780c3c2c0fe73503ea5efdea1b3921c6ef40ed0a0263dc0f1c132d7d2",
+    "summary": "6f6f75e78b5b4f98c30f53d3d589ad7a0e3df2c3f83a86f6d1048eebc4f09561",
+    "task": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   },
+   "started_at": "2026-10-07T20:53:17.213218+00:00",
+   "task": "legacy-matchcore-order-book-parity",
+   "task_hash_bridge": {
+    "lock": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb",
+    "recorded": "8534248d873adf750977ed32867d413ad2e392132f6d05f2930e827e19fc6e19"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1505.935,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 142
+   },
+   "finished_at": "2026-10-07T23:44:33.449414+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8821,
+   "reported_tokens": 935470,
+   "run_id": "legacy-metercore-binary-parity-66e615dc",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-metercore-binary-parity-66e615dc",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "16e5e301b7c2904b4ec917095a5b1e77458a764be8a45752df61dbe3cd40841a",
+    "summary": "6b4cd17b5bf9eb29278a0f6942822176f2e02ec8c744cd23e102ebf85febaac5",
+    "task": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   },
+   "started_at": "2026-10-07T23:19:27.521638+00:00",
+   "task": "legacy-metercore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0",
+    "recorded": "e3c094e26e450d360e6f8e6716a271f12b9901e5a70cdb00208fb368acaac218"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1159.675,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 159
+   },
+   "finished_at": "2026-10-08T05:25:11.180831+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8527,
+   "reported_tokens": 964974,
+   "run_id": "legacy-pacecore-binary-parity-16d2ff74",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-pacecore-binary-parity-16d2ff74",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "68b442c3977df4f05ed2ca0827d5226068b3392159c5c5c954938dc57d71205f",
+    "summary": "deebb642d7ea03a222692aa9ee40850fbf7c92700cb250cf3fcbc10ade8d4184",
+    "task": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   },
+   "started_at": "2026-10-08T05:05:51.480796+00:00",
+   "task": "legacy-pacecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3",
+    "recorded": "3efecaef5c40ad15791a833410d4e66e08f0d2f5d6aeb466bafebe2a9635e8fd"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 4122.206,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 307
+   },
+   "finished_at": "2026-10-08T10:38:39.624482+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8126,
+   "reported_tokens": 3777121,
+   "run_id": "legacy-paddockcore-binary-parity-4ce18221",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-paddockcore-binary-parity-4ce18221",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "597f56f9231f8c0fdb60485ab1de7ff77f455b5361b386e5662b8a9609db384b",
+    "summary": "e475c7b26a91536fb978734156a1d3c7a1a14c38622c3b3c40677bc429c0eeb7",
+    "task": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   },
+   "started_at": "2026-10-08T09:29:57.423736+00:00",
+   "task": "legacy-paddockcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644",
+    "recorded": "b86e05da8df1684b0e0bb61a65eb09aaded47c4e4a46cfbc4a50b612856f519e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3821.82,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 193
+   },
+   "finished_at": "2026-10-07T23:19:27.430042+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8185,
+   "reported_tokens": 1492774,
+   "run_id": "legacy-payrollcore-binary-parity-30610ceb",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-payrollcore-binary-parity-30610ceb",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "187a126ba55fb42379e4be3f77a3345fed443e8ff0b92f337047b2d4c3c82144",
+    "summary": "4851a37dcffa7c230e1da41f6019ce85068a9ac1dbd12b3872bb8ecf73b5eea8",
+    "task": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   },
+   "started_at": "2026-10-07T22:15:45.541177+00:00",
+   "task": "legacy-payrollcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96",
+    "recorded": "f0e2061255aab1ef174bd6dd5ce971c54a9142abcca7694b47fb9a370ecadbbc"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2036.659,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 174
+   },
+   "finished_at": "2026-10-07T22:15:45.436018+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8329,
+   "reported_tokens": 1226764,
+   "run_id": "legacy-qlite-store-parity-c1fc4b65",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-qlite-store-parity-c1fc4b65",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "0ec6163b3b94e47dee1ab23faa0da438dc2d6368a2535383011ebe2a4b8045a2",
+    "summary": "e11135c96d47f26fbedece22ccb3b88d33c1c03952a5f48b66a784c2acf1b8bb",
+    "task": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   },
+   "started_at": "2026-10-07T21:41:48.724537+00:00",
+   "task": "legacy-qlite-store-parity",
+   "task_hash_bridge": {
+    "lock": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a",
+    "recorded": "4c29140deb78abf0d4ae60960fbc850b11b5be39db0cd47c5225aa692e5728d4"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3343.923,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 161
+   },
+   "finished_at": "2026-10-08T03:01:00.430065+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8514,
+   "reported_tokens": 1034493,
+   "run_id": "legacy-queuecore-binary-parity-17767535",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-queuecore-binary-parity-17767535",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "717b309bea8b08ce3abe541ffab1c220baab831182cb22613404bd28280ef589",
+    "summary": "4bccc958cc429e69b9b600806059248637a92f9045a721e4444eb0bed923f7c1",
+    "task": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   },
+   "started_at": "2026-10-08T02:05:16.448731+00:00",
+   "task": "legacy-queuecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b",
+    "recorded": "514b84986af955969a594b6bea800be2eb3a8f4607b7406a56bdd4845e4dd81e"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1337.689,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 121
+   },
+   "finished_at": "2026-10-08T01:02:01.218999+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8634,
+   "reported_tokens": 708219,
+   "run_id": "legacy-quotacore-binary-parity-f813d977",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-quotacore-binary-parity-f813d977",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "68d62449a19c2ad6f7ea357d0a28093eceaf1f05412461ced7250dd4e07c357a",
+    "summary": "1fa657e91c587dcd6e7eb6c41b7f39d9b51d0f2ba4c7f58ad0b0963a57ee4518",
+    "task": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   },
+   "started_at": "2026-10-08T00:39:43.511201+00:00",
+   "task": "legacy-quotacore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc",
+    "recorded": "85eb878a987440b63f4d1a69a8b47124a89904ae7f14051c38d30b31c7d193c2"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1755.578,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 199
+   },
+   "finished_at": "2026-10-08T04:45:16.506842+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8683,
+   "reported_tokens": 1558163,
+   "run_id": "legacy-reflowcore-binary-parity-5a05b15f",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-reflowcore-binary-parity-5a05b15f",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "3f8565a156d0ea13918603c574b6cb30bf4217ee19aa822257d893e3b7455d72",
+    "summary": "aff00c4a00dea93a8822270e352f93cc668034bed1c2d11889c9011fbf938185",
+    "task": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   },
+   "started_at": "2026-10-08T04:16:00.882256+00:00",
+   "task": "legacy-reflowcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe",
+    "recorded": "8f5bf559add102318185baa03e2f2093f3939df02ffbc0d9cd7e871dcb21bad9"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2119.732,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 219
+   },
+   "finished_at": "2026-10-08T04:16:00.780281+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8326,
+   "reported_tokens": 1851023,
+   "run_id": "legacy-schedcore-binary-parity-100487b2",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-schedcore-binary-parity-100487b2",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "e99439d9d611cc90a9004932f8c0f8488cbe29a3a69897aff65d9fa867c62d5e",
+    "summary": "8b68fcd5b8c50427add8dc1e8942a0f3fd3f6ddebda8ef778ec4b5b9fecf0c89",
+    "task": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   },
+   "started_at": "2026-10-08T03:40:41.020093+00:00",
+   "task": "legacy-schedcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448",
+    "recorded": "4ffaf69f5e1115f915ee229102f4064162be299cd6a76001c440063354c1e56c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2886.79,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 177
+   },
+   "finished_at": "2026-10-07T20:53:17.115000+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8345,
+   "reported_tokens": 1471211,
+   "run_id": "legacy-settlecore-binary-parity-c02509fc",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-settlecore-binary-parity-c02509fc",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "5fe061e2fa1dac334195a63214717238fd81549e57362a2cff45b5217d1a6102",
+    "summary": "030a79948c837ecc76c6983ffb13a747390df6ff9020a85f80a5253d5e249970",
+    "task": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   },
+   "started_at": "2026-10-07T20:05:10.303245+00:00",
+   "task": "legacy-settlecore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6",
+    "recorded": "b6460acb2f827dd07cc1e9fd0aa38f05c900cb6e04202731a5680574b5bf47c1"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1696.797,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 208
+   },
+   "finished_at": "2026-10-08T01:30:18.142327+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.865,
+   "reported_tokens": 1572367,
+   "run_id": "legacy-snapcore-binary-parity-a920f0a6",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-snapcore-binary-parity-a920f0a6",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "929154d8b8a4c896304d3acaf99624e113034f766857c0272eb11d05a85e9bb4",
+    "summary": "6ee081676e1affce9869435b2bb248911f39a4bec62b6a389ddc2b93186177b1",
+    "task": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   },
+   "started_at": "2026-10-08T01:02:01.319298+00:00",
+   "task": "legacy-snapcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d",
+    "recorded": "112fe9f2002298fe0898ecf41d343a902a2fc95a5c0e6e5727900079f548f134"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1124.281,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 159
+   },
+   "finished_at": "2026-10-08T06:11:42.960145+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8665,
+   "reported_tokens": 1062462,
+   "run_id": "legacy-stampcore-binary-parity-43c181fd",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-stampcore-binary-parity-43c181fd",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "ccb0d46fe878b3c4e59771c816455049309081e83e4faa96e824ff21759c8765",
+    "summary": "6705e1c48dc18681560f55851e006b210a1566ee649523f802593a0491851823",
+    "task": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   },
+   "started_at": "2026-10-08T05:52:58.705249+00:00",
+   "task": "legacy-stampcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da",
+    "recorded": "bb5e288abbc5faee4c139312dfec63c8db066962c131b70213b300ad053be143"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1234.755,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 145
+   },
+   "finished_at": "2026-10-08T05:05:51.387803+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8401,
+   "reported_tokens": 934178,
+   "run_id": "legacy-tallycore-binary-parity-3c47efc2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-tallycore-binary-parity-3c47efc2",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "f97c9062c91f2f10047dd41ecd542bd318d5d672ef79f2b8b0d4d24370c462f7",
+    "summary": "b353dc9c8b9d7f53dc8f649ae200d33e247f674e7c3bc9414ce4b3900a932bcf",
+    "task": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   },
+   "started_at": "2026-10-08T04:45:16.601364+00:00",
+   "task": "legacy-tallycore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc",
+    "recorded": "b9c0c0af0a2911ca3386f1cb3fdb1a146a4912035f2787f6cb9eedeb93b8b88c"
+   }
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2098.108,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-sonnet-5-5": 153
+   },
+   "finished_at": "2026-10-08T02:05:16.328782+00:00",
+   "functional": 1.0,
+   "model": "sonnet55",
+   "quality": 0.8759,
+   "reported_tokens": 1016101,
+   "run_id": "legacy-vaultcore-binary-parity-747b7e21",
+   "security": 0.9,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-08-sonnet55-judging-v323b/runs-effort-sonnet55/max/legacy-vaultcore-binary-parity-747b7e21",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "0e34cea413430577c2a16cecdbc17df6d2f05880d891aa4016986711f422dbb4",
+    "summary": "9bdf330b332c543cfe71a272824513cd4b6411599ea26fe105b8617530ccd253",
+    "task": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   },
+   "started_at": "2026-10-08T01:30:18.239098+00:00",
+   "task": "legacy-vaultcore-binary-parity",
+   "task_hash_bridge": {
+    "lock": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6",
+    "recorded": "eeac6ac407651028f9d2f7ce85e67f75904e7367fbec9f398202202e05f59a14"
+   }
+  }
+ ],
+ "suite": "coding-intelligence-index-v4",
+ "task_hash_bridge": "docs/judging/task-hash-bridge-sonnet55.json"
+}

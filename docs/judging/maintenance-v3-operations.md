@@ -723,3 +723,34 @@ operational notes live here.
   admission is a single draw too. Whether admission should require a
   repeated or aggregated exam is a protocol question for a future revision,
   to be decided before a panel is under consideration rather than after.
+
+## v3.23, October 8, 2026: Claude Sonnet 5.5 on Frontier v4
+
+- First attempt, from `bench/2026-10-07-sonnet55-judging-v323` (a36ea7a2):
+  the population built (115 rows, none excluded or missing), then `prepare`
+  stopped at 03:43 PDT on the first row with "Task definition changed". The
+  hash bridge covered the population builder but not `v2.evidence_for` or
+  `verify_frozen`. No judge call was made; the partial output (the frozen
+  document copy and 23 quirk keys) was removed. Fix in PR #179 (0287a14e):
+  importing the v3.23 runner installs the bridge for the process.
+- Second attempt, from `bench/2026-10-08-sonnet55-judging-v323b`: population
+  frozen 05:01 PDT, 115 rows. Judging window 05:02 to 18:02 PDT, one
+  window, no stops.
+- Calibration: both judges passed with the one-gate allowance. Muse missed
+  g11 (repeatability); Grok missed g04 (formatting is presentation).
+- The wrapper accepted 439 display renames (Cursor reports "Grok 4.6 Medium"
+  for the pinned `cursor-grok-4.6-medium`). Invalid-response retries under
+  the frozen rule: Muse 10, Grok 2.
+- Every Grok call ran on Cursor CLI 2026.10.01-e373342: the CLI updated
+  itself on October 7 at 14:43 PDT, and its pin hashes only the launcher
+  script (DECISIONS.md, 2026-10-08).
+- Concurrency: the Haiku 5.5 Frontier v4 sweep ran for the whole window on
+  the Claude subscription; the judges use Muse and Cursor, so no quota is
+  shared. The overlap is disclosed on the Haiku 5.5 column. The Sonnet 5.5
+  sweep finished at 03:38 PDT, before either attempt, so its runtimes are
+  unaffected.
+- Summary: 115 of 115 published, both panels passing, no reviewer
+  fallbacks. Combined score by level: low 81.63, medium 84.10, high 86.79,
+  extra-high 90.20, max 92.02. Code quality 61.67 at low to 81.72 at max.
+- Cost for cards is `cli_reported_cost_usd`, because the vendor price page
+  gives two Sonnet 5.5 cache-read prices.

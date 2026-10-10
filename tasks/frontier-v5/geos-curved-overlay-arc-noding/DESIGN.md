@@ -9,6 +9,8 @@ day on a native arm64 build; validated on v5-cfamily on arm64 2026-10-09
 not yet run; not gate-measured. Written before any reference-model run. Nothing here is shown
 to the agent.
 
+**Slotting update 2026-10-10.** F5 candidate for slot F5-cpp under composition v2 (docs/frontier-v5/PLAN-v2.md, owner decision in docs/DECISIONS.md 2026-10-10). Every F5 floor is met and measured (records below). The family-fit text below was written while the task was unslotted and is kept as pre-registered.
+
 ## Family fit (honest)
 
 Concentrated multi-bug correctness in C++, Track A: the "harder interacting

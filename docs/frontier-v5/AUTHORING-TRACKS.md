@@ -79,6 +79,15 @@ no single fix clears more than 5 of its 16 held-out cases and leaving any
 one out fails at least one. Validated on the arm64 Mac including the real
 Harbor oracle path. UNSLOTTED pending the fifth-family decision.
 
+Composition v2 (2026-10-10, PLAN-v2.md) adds family F5, concentrated
+multi-bug correctness, one slot per language, with pre-registered floors
+(three or more causes in one subsystem, interaction shown by controls,
+leave-one-out necessity, no fix clearing more than half the held-out checks,
+at least five of them). F5 work is Track A. Candidates: F5-cpp geos (floors
+measured), F5-java commons-lang (four leave-one-out controls to run),
+F5-python nx-digraph and nx-group (controls to author). Open F5 slots:
+JavaScript, Rust and C; luxon, petgraph and yyjson do not qualify.
+
 Remaining Track A gaps, in priority order: gate-measure what exists (needs
 the reference credentials, the real blocker); more F2 and F3 tasks toward
 their six slots each; and harder interacting arcs (the commons-lang shape)

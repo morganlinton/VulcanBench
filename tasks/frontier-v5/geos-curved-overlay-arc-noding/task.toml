@@ -17,9 +17,9 @@ keywords = ["cpp", "geometry", "overlay", "floating-point", "bugfix", "multi-bug
 
 [metadata]
 vulcanbench_suite = "frontier-v5"
-vulcanbench_family = "unslotted"
-vulcanbench_slot = "none"
-vulcanbench_family_note = "Concentrated multi-bug correctness in C++ (the interacting arc the C++ gap called for after the fmt breadth task). Five upstream fixes in two source files (about 60 changed source lines, 16 fail_to_pass across the unit and XML suites), below the frozen F3 volume floor. The fixes interact: #1546 rewrites the snapping #1480 introduced and does not apply without it, #1478 and #1513 change the same split-point filter, no single fix clears more than 5 of the 16 held-out cases (the coupled #1480+#1546 pair clears 9), and leaving any one fix out of the gold leaves at least one held-out case failing. Not admitted to a frozen family. See DESIGN.md."
+vulcanbench_family = "F5"
+vulcanbench_slot = "F5-cpp"
+vulcanbench_family_note = "F5 candidate (composition v2, PLAN-v2.md, 2026-10-10): every F5 floor met and measured. Earlier note: Concentrated multi-bug correctness in C++ (the interacting arc the C++ gap called for after the fmt breadth task). Five upstream fixes in two source files (about 60 changed source lines, 16 fail_to_pass across the unit and XML suites), below the frozen F3 volume floor. The fixes interact: #1546 rewrites the snapping #1480 introduced and does not apply without it, #1478 and #1513 change the same split-point filter, no single fix clears more than 5 of the 16 held-out cases (the coupled #1480+#1546 pair clears 9), and leaving any one fix out of the gold leaves at least one held-out case failing. Not admitted to a frozen family. See DESIGN.md."
 vulcanbench_language = "cpp"
 vulcanbench_oracle = "fail_to_pass+guard_wall"
 vulcanbench_source = "upstream"

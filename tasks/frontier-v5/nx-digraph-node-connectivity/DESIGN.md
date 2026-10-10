@@ -6,6 +6,8 @@ Frontier v5: UNSLOTTED (see Family fit). Status: locally validated (base=0,
 gold=1, x3), not admitted, not gate-measured. Written before any
 reference-model run. Not shown to the agent.
 
+**Slotting update 2026-10-10.** F5 candidate for slot F5-python under composition v2 (docs/frontier-v5/PLAN-v2.md, owner decision in docs/DECISIONS.md 2026-10-10). Shared with nx-group-betweenness-epic; the gate decides which takes the slot. One upstream PR (#8837) fixes all five causes, so the gold is split per cause for the single-fix and leave-one-out controls, which run before the gate. The family-fit text below was written while the task was unslotted and is kept as pre-registered.
+
 ## Thesis
 
 The direct successor to v4's hardest near-miss. In v4,

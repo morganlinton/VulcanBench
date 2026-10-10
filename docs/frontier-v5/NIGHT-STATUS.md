@@ -125,9 +125,16 @@ needs a gate run to confirm.
 1. Reference-model credentials for Harbor (deferred). Until these exist, no
    task can run the admission gate, so difficulty is unconfirmed. Both tasks
    are built to go straight to the gate when credentials land.
-2. The design question below.
+2. ~~The design question below.~~ Resolved 2026-10-10 (F5 added).
 
 ## The design question
+
+**Resolved 2026-10-10: the first option.** The owner added F5,
+concentrated multi-bug correctness, at six slots (one per language) in a
+26-task composition v2 at equal task weight (PLAN-v2.md, FREEZE-v2.json,
+DECISIONS.md 2026-10-10). Candidates: F5-cpp geos, F5-java commons-lang,
+F5-python nx-digraph and nx-group. The text below is the question as it was
+put.
 
 The frozen v5 family table (F1/F2/F3/F4) has no home for concentrated
 multi-bug algorithmic correctness, yet that is where v4's real

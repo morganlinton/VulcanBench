@@ -15,9 +15,9 @@ keywords = ["F3", "python", "epic", "algorithms", "bugfix"]
 
 [metadata]
 vulcanbench_suite = "frontier-v5"
-vulcanbench_family = "unslotted"
-vulcanbench_slot = "none"
-vulcanbench_family_note = "Concentrated multi-bug algorithmic correctness (v4-shaped). Below the frozen F3 volume floor (2 files, 11 fail_to_pass, 1 module vs 12 files / 25 tests / 3 modules). Built to prove the Harbor-native Python task pipeline end to end; not admitted to any frozen v5 family. See PHASE1.md."
+vulcanbench_family = "F5"
+vulcanbench_slot = "F5-python"
+vulcanbench_family_note = "F5 candidate for F5-python, shared with nx-digraph-node-connectivity (composition v2, PLAN-v2.md, 2026-10-10): single-fix and leave-one-out controls over its six upstream PRs still to author before the gate. Earlier note: Concentrated multi-bug algorithmic correctness (v4-shaped). Below the frozen F3 volume floor (2 files, 11 fail_to_pass, 1 module vs 12 files / 25 tests / 3 modules). Built to prove the Harbor-native Python task pipeline end to end; not admitted to any frozen v5 family. See PHASE1.md."
 vulcanbench_language = "python"
 vulcanbench_oracle = "fail_to_pass+guard_wall"
 vulcanbench_source = "upstream"

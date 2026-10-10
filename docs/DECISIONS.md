@@ -7,6 +7,53 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-10: Frontier v5 gains a fifth family, F5 concentrated multi-bug correctness (composition v2)
+
+### Decision
+
+The owner added a fifth Frontier v5 family and slotted the concentrated
+multi-bug tasks there. Composition v2 (`docs/frontier-v5/PLAN-v2.md`,
+`plan-v2.json`, frozen by `FREEZE-v2.json`): 26 tasks at equal weight 1/26;
+F1, F2, F3 and the new F5 at six slots each (one per language, 6/26 each);
+F4 unchanged at two slots (2/26); the per-language subscore covers F1, F2, F3
+and F5. With three confirmation attempts the headline is complete passes
+divided by 78. The v1 plan files are not edited and still match
+`FREEZE.json`; v2 replaces only v1's composition section, and the gate,
+task contract, languages, checklists, sequencing and decisions (b), (c) and
+(e) apply to F5 unchanged. Decisions (d) and (f) stay open.
+
+F5 floors are pre-registered in PLAN-v2.md section 2: at least three root
+causes in one subsystem, interaction shown by controls, leave-one-out
+necessity, no single fix clearing more than half of the held-out checks, at
+least five held-out checks, and the full verifier contract. Slot candidates
+(not admissions): F5-cpp geos-curved-overlay-arc-noding, F5-java
+commons-lang-fraction-lowest-terms, F5-python nx-digraph-node-connectivity
+and nx-group-betweenness-epic (one slot, the gate decides). F5-javascript,
+F5-rust and F5-c are open. sympy, luxon, fmt, yyjson and petgraph stay
+unslotted.
+
+### Evidence
+
+- v4's only task that beat the stronger reference
+  (`oss-networkx-digraph-node-cuts`, Opus 5 0/3, codex 1/3) was a few
+  interacting defects in one surface; the v1 table had no family for that
+  shape, and the four v5 tasks built in it sat unslotted below the F3 volume
+  floor (NIGHT-STATUS.md, "The design question").
+- geos-curved-overlay-arc-noding measured the property: no single fix
+  clears more than 5 of 16 held-out cases, and leaving any one of the five
+  fixes out of the gold leaves at least one failing (its DESIGN.md).
+- Options considered: six slots and 26 tasks (chosen); four slots only where
+  candidates existed (uneven language view); keeping 20 tasks by shrinking
+  F1 to F3 to four slots (loses one-per-language coverage).
+
+### Cost and revisit
+
+Six more admits than v1, roughly twelve more candidates and 36 to 60 more
+gate runs at v1's yield assumption; three F5 slots already have built
+candidates. Revisit if F5 candidates are solved 3/3 by both references at
+the gate: that would mean interaction depth alone does not hold the
+frontier either, and F5's floors (not the family) need raising in a v3 plan.
+
 ## 2026-10-08: the v3.3 and v3.4 judge protocols were recovered; Cursor's pin never fixed its version
 
 ### Decision

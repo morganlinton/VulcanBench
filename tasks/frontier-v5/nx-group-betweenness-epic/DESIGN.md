@@ -6,6 +6,8 @@ Frontier v5: UNSLOTTED. Status: locally validated (base=0, gold=1, x3), not
 admitted, not gate-measured. Written before any reference-model run. Nothing
 here is shown to the agent.
 
+**Slotting update 2026-10-10.** F5 candidate for slot F5-python under composition v2 (docs/frontier-v5/PLAN-v2.md, owner decision in docs/DECISIONS.md 2026-10-10). Shared with nx-digraph-node-connectivity; the gate decides which takes the slot. Single-fix and leave-one-out controls over the six upstream PRs run before the gate. The family-fit text below was written while the task was unslotted and is kept as pre-registered.
+
 ## Family fit (honest)
 
 This was built to exercise and prove the Harbor-native Python task pipeline,

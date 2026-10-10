@@ -1,0 +1,240 @@
+{
+  "id": "frontier-v5-plan-v2",
+  "date": "2026-10-10",
+  "timezone": "America/Los_Angeles",
+  "supersedes": {
+    "plan": "frontier-v5-plan-v1",
+    "scope": "composition only (v1 PLAN.md section 2 and plan.json); every other v1 section applies unchanged; v1 files are not edited"
+  },
+  "public_name": "VulcanBench Frontier v5",
+  "suite_id": "frontier-v5",
+  "tasks_root": "tasks/frontier-v5",
+  "task_count": 26,
+  "task_weight": 0.038462,
+  "scoring": "overall = sum over families of family_weight * mean(p_task); every task weighs 1/26, so with three confirmation attempts per task this equals complete passes / 78",
+  "families": {
+    "F1": {
+      "name": "Tool-provided oracles",
+      "weight": 0.230769,
+      "slots": 6,
+      "oracle": "sanitizer (ASan, UBSan, TSan, MSan, Miri) or property-based oracle scored on a stored counterexample corpus"
+    },
+    "F2": {
+      "name": "Differential parity against a source-available reference",
+      "weight": 0.230769,
+      "slots": 6,
+      "oracle": "hidden corpus compared byte-for-byte against a reference implementation given in source (at least 3000 logic lines; hidden corpus at least 10x the visible one)"
+    },
+    "F3": {
+      "name": "Long-horizon volume",
+      "weight": 0.230769,
+      "slots": 6,
+      "oracle": "pinned upstream project's full test suite plus hidden fail-to-pass tests; floors: gold touches at least 12 files and 1000 changed lines, at least 25 fail-to-pass tests across at least 3 modules, post-cutoff merge date"
+    },
+    "F4": {
+      "name": "Opaque-component parity (v4 lineage)",
+      "weight": 0.076923,
+      "slots": 2,
+      "oracle": "parity with an opaque reference component pinned to linux/amd64 via a prebuilt docker_image; grading never executes the component"
+    },
+    "F5": {
+      "name": "Concentrated multi-bug correctness",
+      "weight": 0.230769,
+      "slots": 6,
+      "oracle": "the pinned upstream project's own regression tests as held-out fail-to-pass checks plus its full suite as the guard wall",
+      "floors": [
+        "at least three distinct root causes fixed upstream (one or several merged changes) with regression tests exercising them, post-cutoff as far as can be established; a multi-cause upstream change is split per cause for controls",
+        "concentration: one class or module, one algorithm family, or at most three tightly coupled source files",
+        "interaction shown by controls: two fixes coupled at the source level, or a held-out check that passes only with two or more fixes together",
+        "necessity: leave-one-out of any fix (coupled fixes together) leaves at least one fail-to-pass check failing",
+        "no dominant fix: no single fix clears more than half of the fail-to-pass checks",
+        "at least five fail-to-pass checks",
+        "symptoms-only instruction, full upstream suite as guard wall, the three verifier layers and cheating probes of PHASE1.md 'Verifier audit 2026-10-08'"
+      ]
+    }
+  },
+  "languages": [
+    "python",
+    "javascript",
+    "rust",
+    "c",
+    "cpp",
+    "java"
+  ],
+  "slots": [
+    {
+      "slot": "F1-python",
+      "family": "F1",
+      "language": "python"
+    },
+    {
+      "slot": "F1-javascript",
+      "family": "F1",
+      "language": "javascript"
+    },
+    {
+      "slot": "F1-rust",
+      "family": "F1",
+      "language": "rust"
+    },
+    {
+      "slot": "F1-c",
+      "family": "F1",
+      "language": "c"
+    },
+    {
+      "slot": "F1-cpp",
+      "family": "F1",
+      "language": "cpp"
+    },
+    {
+      "slot": "F1-java",
+      "family": "F1",
+      "language": "java"
+    },
+    {
+      "slot": "F2-python",
+      "family": "F2",
+      "language": "python"
+    },
+    {
+      "slot": "F2-javascript",
+      "family": "F2",
+      "language": "javascript"
+    },
+    {
+      "slot": "F2-rust",
+      "family": "F2",
+      "language": "rust"
+    },
+    {
+      "slot": "F2-c",
+      "family": "F2",
+      "language": "c"
+    },
+    {
+      "slot": "F2-cpp",
+      "family": "F2",
+      "language": "cpp"
+    },
+    {
+      "slot": "F2-java",
+      "family": "F2",
+      "language": "java"
+    },
+    {
+      "slot": "F3-python",
+      "family": "F3",
+      "language": "python"
+    },
+    {
+      "slot": "F3-javascript",
+      "family": "F3",
+      "language": "javascript"
+    },
+    {
+      "slot": "F3-rust",
+      "family": "F3",
+      "language": "rust"
+    },
+    {
+      "slot": "F3-c",
+      "family": "F3",
+      "language": "c"
+    },
+    {
+      "slot": "F3-cpp",
+      "family": "F3",
+      "language": "cpp"
+    },
+    {
+      "slot": "F3-java",
+      "family": "F3",
+      "language": "java"
+    },
+    {
+      "slot": "F5-python",
+      "family": "F5",
+      "language": "python"
+    },
+    {
+      "slot": "F5-javascript",
+      "family": "F5",
+      "language": "javascript"
+    },
+    {
+      "slot": "F5-rust",
+      "family": "F5",
+      "language": "rust"
+    },
+    {
+      "slot": "F5-c",
+      "family": "F5",
+      "language": "c"
+    },
+    {
+      "slot": "F5-cpp",
+      "family": "F5",
+      "language": "cpp"
+    },
+    {
+      "slot": "F5-java",
+      "family": "F5",
+      "language": "java"
+    },
+    {
+      "slot": "F4-python",
+      "family": "F4",
+      "language": "python"
+    },
+    {
+      "slot": "F4-java",
+      "family": "F4",
+      "language": "java"
+    }
+  ],
+  "language_view": {
+    "scope": "F1, F2, F3 and F5; four tasks per language, 4/26 of the suite each; F4 reported as its own line and never folded into a language comparison",
+    "weights": {
+      "python": 0.153846,
+      "javascript": 0.153846,
+      "rust": 0.153846,
+      "c": 0.153846,
+      "cpp": 0.153846,
+      "java": 0.153846
+    }
+  },
+  "constraints": [
+    "two tasks in one language sit in different families",
+    "two tasks in one family exercise different obligations, not cosmetic variants",
+    "no intentional easy anchors; a task both references solve is recycled to Routine v1 with its gate record",
+    "a slot replacement requires a recorded coverage reason and a v2 plan; earlier results and identities are preserved"
+  ],
+  "slot_candidates_at_freeze": {
+    "F5-cpp": [
+      "geos-curved-overlay-arc-noding"
+    ],
+    "F5-java": [
+      "commons-lang-fraction-lowest-terms"
+    ],
+    "F5-python": [
+      "nx-digraph-node-connectivity",
+      "nx-group-betweenness-epic"
+    ],
+    "F5-javascript": [],
+    "F5-rust": [],
+    "F5-c": []
+  },
+  "unslotted_at_freeze": [
+    "sympy-monotonic-sign-signed-groups",
+    "luxon-duration-format-fixedzone",
+    "fmt-format-spec-conformance",
+    "yyjson-incremental-and-mutation-fixes",
+    "petgraph-maxflow-sparse-index"
+  ],
+  "admission_gate_summary": "correctness-based: gold reward 1, base reward 0, deterministic x3 under Harbor with a separate verifier; each reference model solves at most 1 of 3 (n=5 top-up at exactly 1/3, must finish at or below 2/5); effort logged as covariate only. Reference models and effort per decision (b), DECISIONS.md 2026-10-06.",
+  "open_decisions": [
+    "d: publishing channel",
+    "f: gold location in the repo"
+  ]
+}

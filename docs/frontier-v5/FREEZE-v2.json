@@ -1,0 +1,31 @@
+{
+  "id": "frontier-v5-freeze-v2",
+  "date": "2026-10-10",
+  "timezone": "America/Los_Angeles",
+  "scope": "Composition v2 only: adds family F5 (concentrated multi-bug correctness, six slots, one per language) and moves to 26 tasks at equal weight 1/26 (PLAN-v2.md, plan-v2.json). Replaces v1's composition; every other part of the v1 plan applies unchanged. Prospective blueprint, not a runnable suite manifest; no task is admitted by it.",
+  "confirmed_decisions": {
+    "a-v2": "Add a fifth family F5 and slot the concentrated multi-bug tasks there, at six slots (one per language), 26 tasks, every task at equal weight; families F1, F2, F3 and F5 at 6/26 each, F4 at 2/26; per-language subscore over F1, F2, F3 and F5. Confirmed by the owner 2026-10-10."
+  },
+  "previous_freeze": {
+    "id": "frontier-v5-freeze-v1",
+    "file": "docs/frontier-v5/FREEZE.json",
+    "files_sha256_verified_unchanged": {
+      "docs/frontier-v5/PLAN.md": "6953c9d91b8998173c528857e4e9b8dfe6b0f1d798d5caa0a73009fa60b5fde1",
+      "docs/frontier-v5/plan.json": "a1330b71cc2b60a4ea4b3485c4546e706ba9cae4a74de0116b13717c06addd77"
+    }
+  },
+  "open_decisions": [
+    "d",
+    "f"
+  ],
+  "open_decisions_policy": "As v1: resolved through dated docs/DECISIONS.md entries citing this freeze, never by editing frozen files. Capacity, weights or slot changes require a v3 plan with its own freeze; v1 and v2 files and their records are preserved.",
+  "known_outcomes_available": "Ten v5 tasks built and validated locally (base 0, gold 1, cheating probes 0); GEOS also through the real Harbor oracle path. No v5 task has been gate-measured against the reference models. Frontier v4 results as in the v1 freeze.",
+  "files_sha256": {
+    "docs/frontier-v5/PLAN-v2.md": "3b604c653e72f355cd0fcb36a7246f04578cd792b401638a3654f36dd1ea0686",
+    "docs/frontier-v5/plan-v2.json": "6b3aea8106473404525df67ba1a45f87b3f969bb854dca75f3a1d1fe51a94c12"
+  },
+  "related": {
+    "v1_plan": "docs/frontier-v5/PLAN.md",
+    "decisions_log": "docs/DECISIONS.md entry dated 2026-10-10"
+  }
+}

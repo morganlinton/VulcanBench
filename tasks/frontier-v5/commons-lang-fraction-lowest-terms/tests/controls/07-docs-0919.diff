@@ -1,0 +1,14 @@
+diff --git a/src/main/java/org/apache/commons/lang3/math/Fraction.java b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+index a57845dd2..5e5d1d95c 100644
+--- a/src/main/java/org/apache/commons/lang3/math/Fraction.java
++++ b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+@@ -321,7 +321,8 @@ public static Fraction getFraction(final String str) {
+      * @param numerator   The numerator, for example the three in 'three sevenths'
+      * @param denominator The denominator, for example the seven in 'three sevenths'
+      * @return A new fraction instance, with the numerator and denominator reduced
+-     * @throws ArithmeticException Thrown if the denominator is {@code zero}.
++     * @throws ArithmeticException Thrown if the denominator is {@code zero}, or the reduced numerator or positive denominator cannot be represented as an
++     *                             {@code int}.
+      */
+     public static Fraction getReducedFraction(int numerator, int denominator) {
+         checkDenominator(denominator);

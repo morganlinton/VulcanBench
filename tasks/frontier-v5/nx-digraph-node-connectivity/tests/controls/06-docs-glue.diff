@@ -1,0 +1,77 @@
+diff --git a/networkx/algorithms/connectivity/connectivity.py b/networkx/algorithms/connectivity/connectivity.py
+index da4badc..86d4c54 100644
+--- a/networkx/algorithms/connectivity/connectivity.py
++++ b/networkx/algorithms/connectivity/connectivity.py
+@@ -280,6 +280,9 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+     :meth:`local_node_connectivity`. This implementation is based
+     on algorithm 11 in [1]_.
+ 
++    The local node connectivity of an ordered pair of nodes of a digraph
++    is not symmetric, so both orders of each pair are considered [2]_.
++
+     See also
+     --------
+     :meth:`local_node_connectivity`
+@@ -294,6 +297,11 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+     .. [1] Abdol-Hossein Esfahanian. Connectivity Algorithms.
+         http://www.cse.msu.edu/~cse835/Papers/Graph_connectivity_revised.pdf
+ 
++    .. [2] Shimon Even and R. Endre Tarjan. Network Flow and Testing Graph
++        Connectivity. SIAM Journal on Computing, Volume 4, Issue 4,
++        pp. 507-518, 1975.
++        https://doi.org/10.1137/0204043
++
+     """
+     if (s is not None and t is None) or (s is None and t is not None):
+         raise nx.NetworkXError("Both source and target must be specified.")
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index 38b818f..9675cb2 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -208,8 +208,10 @@ def minimum_st_node_cut(G, s, t, flow_func=None, auxiliary=None, residual=None):
+         source and target in G.
+ 
+         Returns an empty set if source and target are either in different
+-        components or are directly connected by an edge, as no node removal
+-        can destroy the path.
++        components or are joined by an edge from source to target, as no node
++        removal can destroy that path. In a digraph an edge from target to
++        source is not a source-target path, and does not stop source from
++        being separated from target [2]_.
+ 
+     Examples
+     --------
+@@ -285,6 +287,11 @@ def minimum_st_node_cut(G, s, t, flow_func=None, auxiliary=None, residual=None):
+     .. [1] Abdol-Hossein Esfahanian. Connectivity Algorithms.
+         http://www.cse.msu.edu/~cse835/Papers/Graph_connectivity_revised.pdf
+ 
++    .. [2] Shimon Even and R. Endre Tarjan. Network Flow and Testing Graph
++        Connectivity. SIAM Journal on Computing, Volume 4, Issue 4,
++        pp. 507-518, 1975.
++        https://doi.org/10.1137/0204043
++
+     """
+     if auxiliary is None:
+         H = build_auxiliary_node_connectivity(G)
+@@ -386,6 +393,9 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+     and undirected graphs. This implementation is based on algorithm 11
+     in [1]_.
+ 
++    A minimum node cut of a digraph separates an ordered pair of nodes,
++    and the two orders need not agree, so both are considered [2]_.
++
+     See also
+     --------
+     :meth:`minimum_st_node_cut`
+@@ -404,6 +414,11 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+     .. [1] Abdol-Hossein Esfahanian. Connectivity Algorithms.
+         http://www.cse.msu.edu/~cse835/Papers/Graph_connectivity_revised.pdf
+ 
++    .. [2] Shimon Even and R. Endre Tarjan. Network Flow and Testing Graph
++        Connectivity. SIAM Journal on Computing, Volume 4, Issue 4,
++        pp. 507-518, 1975.
++        https://doi.org/10.1137/0204043
++
+     """
+     if (s is not None and t is None) or (s is None and t is not None):
+         raise nx.NetworkXError("Both source and target must be specified.")

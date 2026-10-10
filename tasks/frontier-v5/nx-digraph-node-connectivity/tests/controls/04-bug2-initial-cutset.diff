@@ -1,0 +1,44 @@
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index 9c36ef8..cb90680 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -426,10 +426,10 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+         def neighbors(v):
+             return itertools.chain.from_iterable([G.predecessors(v), G.successors(v)])
+ 
+-        # Interim (bug 1 only): the degree bound is the smaller of the
+-        # distinct predecessors and successors.
+-        def start_degree(v):
+-            return min(len(G.pred[v].keys() - {v}), len(G.succ[v].keys() - {v}))
++        # Isolating a node only requires removing all its predecessors or all
++        # its successors, so the smaller of the two is the better cutset.
++        def isolating_cut(v):
++            return min(G.pred[v].keys() - {v}, G.succ[v].keys() - {v}, key=len)
+ 
+     else:
+         if not nx.is_connected(G):
+@@ -437,18 +437,18 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+         iter_func = itertools.combinations
+         neighbors = G.neighbors
+ 
+-        def start_degree(v):
+-            return len(G[v].keys() - {v})
++        def isolating_cut(v):
++            return G[v].keys() - {v}
+ 
+     # Reuse the auxiliary digraph and the residual network.
+     H = build_auxiliary_node_connectivity(G)
+     R = build_residual_network(H, "capacity")
+     kwargs = {"flow_func": flow_func, "auxiliary": H, "residual": R}
+ 
+-    # Choose a node with minimum degree.
+-    v = min(G, key=start_degree)
+-    # Initial node cutset is all neighbors of the node with minimum degree.
+-    min_cut = set(G[v])
++    # Choose a node with minimum degree, and take the nodes that isolate it as
++    # the initial cutset. `G.degree` cannot be used here because parallel edges
++    # do not add connectivity and self-loops are irrelevant for it.
++    v, min_cut = min(((n, isolating_cut(n)) for n in G), key=lambda nc: len(nc[1]))
+     # Neighbors of v, excluding v itself if it has a self-loop. For digraphs
+     # this deduplicates the nodes that are both predecessors and successors.
+     v_nbrs = set(neighbors(v)) - {v}

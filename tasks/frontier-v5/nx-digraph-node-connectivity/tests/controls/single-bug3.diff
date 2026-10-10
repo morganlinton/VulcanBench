@@ -1,0 +1,39 @@
+diff --git a/networkx/algorithms/connectivity/connectivity.py b/networkx/algorithms/connectivity/connectivity.py
+index aa069d2..e2b7b53 100644
+--- a/networkx/algorithms/connectivity/connectivity.py
++++ b/networkx/algorithms/connectivity/connectivity.py
+@@ -332,11 +332,12 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+     # Node connectivity is bounded by degree.
+     v, K = min(G.degree(), key=itemgetter(1))
+     # compute local node connectivity with all its non-neighbors nodes
+-    for w in set(G) - set(neighbors(v)) - {v}:
++    v_nbrs = set(neighbors(v)) - {v}
++    for w in set(G) - v_nbrs - {v}:
+         kwargs["cutoff"] = K
+         K = min(K, local_node_connectivity(G, v, w, **kwargs))
+     # Also for non adjacent pairs of neighbors of v
+-    for x, y in iter_func(neighbors(v), 2):
++    for x, y in iter_func(v_nbrs, 2):
+         if y in G[x]:
+             continue
+         kwargs["cutoff"] = K
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index e7806e1..43535d2 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -437,12 +437,13 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+     # Initial node cutset is all neighbors of the node with minimum degree.
+     min_cut = set(G[v])
+     # Compute st node cuts between v and all its non-neighbors nodes in G.
+-    for w in set(G) - set(neighbors(v)) - {v}:
++    v_nbrs = set(neighbors(v)) - {v}
++    for w in set(G) - v_nbrs - {v}:
+         this_cut = minimum_st_node_cut(G, v, w, **kwargs)
+         if len(min_cut) >= len(this_cut):
+             min_cut = this_cut
+     # Also for non adjacent pairs of neighbors of v.
+-    for x, y in iter_func(neighbors(v), 2):
++    for x, y in iter_func(v_nbrs, 2):
+         if y in G[x]:
+             continue
+         this_cut = minimum_st_node_cut(G, x, y, **kwargs)

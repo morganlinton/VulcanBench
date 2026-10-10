@@ -1,0 +1,71 @@
+diff --git a/networkx/algorithms/connectivity/connectivity.py b/networkx/algorithms/connectivity/connectivity.py
+index 5be9bff..0f59b97 100644
+--- a/networkx/algorithms/connectivity/connectivity.py
++++ b/networkx/algorithms/connectivity/connectivity.py
+@@ -317,20 +317,30 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+         def neighbors(v):
+             return itertools.chain.from_iterable([G.predecessors(v), G.successors(v)])
+ 
++        # Isolating a node only requires removing all its predecessors or all
++        # its successors, so the bound is the smaller of the two.
++        def degree(v):
++            return min(len(G.pred[v].keys() - {v}), len(G.succ[v].keys() - {v}))
++
+     else:
+         if not nx.is_connected(G):
+             return 0
+         iter_func = itertools.combinations
+         neighbors = G.neighbors
+ 
++        def degree(v):
++            return len(G[v].keys() - {v})
++
+     # Reuse the auxiliary digraph and the residual network
+     H = build_auxiliary_node_connectivity(G)
+     R = build_residual_network(H, "capacity")
+     kwargs = {"flow_func": flow_func, "auxiliary": H, "residual": R}
+ 
+-    # Pick a node with minimum degree
+-    # Node connectivity is bounded by degree.
+-    v, K = min(G.degree(), key=itemgetter(1))
++    # Pick a node with minimum degree. Node connectivity is bounded by the
++    # number of distinct neighbors. `G.degree` cannot be used here because
++    # parallel edges do not add connectivity and self-loops are irrelevant
++    # for it.
++    v, K = min(((n, degree(n)) for n in G), key=itemgetter(1))
+     # Neighbors of v, excluding v itself if it has a self-loop. For digraphs
+     # this deduplicates the nodes that are both predecessors and successors.
+     v_nbrs = set(neighbors(v)) - {v}
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index f20fe10..9c36ef8 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -426,19 +426,27 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+         def neighbors(v):
+             return itertools.chain.from_iterable([G.predecessors(v), G.successors(v)])
+ 
++        # Interim (bug 1 only): the degree bound is the smaller of the
++        # distinct predecessors and successors.
++        def start_degree(v):
++            return min(len(G.pred[v].keys() - {v}), len(G.succ[v].keys() - {v}))
++
+     else:
+         if not nx.is_connected(G):
+             raise nx.NetworkXError("Input graph is not connected")
+         iter_func = itertools.combinations
+         neighbors = G.neighbors
+ 
++        def start_degree(v):
++            return len(G[v].keys() - {v})
++
+     # Reuse the auxiliary digraph and the residual network.
+     H = build_auxiliary_node_connectivity(G)
+     R = build_residual_network(H, "capacity")
+     kwargs = {"flow_func": flow_func, "auxiliary": H, "residual": R}
+ 
+     # Choose a node with minimum degree.
+-    v = min(G, key=G.degree)
++    v = min(G, key=start_degree)
+     # Initial node cutset is all neighbors of the node with minimum degree.
+     min_cut = set(G[v])
+     # Neighbors of v, excluding v itself if it has a self-loop. For digraphs

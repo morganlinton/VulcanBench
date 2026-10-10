@@ -49,6 +49,24 @@ C. Slot-wise still almost all UNSLOTTED; comrak is the first task built to
 fill a frozen slot (F2-rust). Nothing is gate-measured; reference-model
 credentials are still the blocker.
 
+## F5 controls 2026-10-10
+
+`scripts/frontier-v5/run_controls.py` measured the F5 floors (PLAN-v2.md)
+on the candidates with each task's real verifier:
+
+- **geos (F5-cpp):** all floors met (measured 2026-10-08).
+- **commons-lang (F5-java):** all floors met; no single fix clears more
+  than 2 of 6 held-out checks, every leave-one-out fails one.
+- **nx-digraph (F5-python):** all floors met with four graded causes. Of
+  the five bugs #8837 fixed, bug 3 (neighbor deduplication) is not
+  detectable by the held-out tests once the other four are fixed.
+- **nx-group:** necessity and no-dominant-fix cannot be established without
+  writing new code (#8881 rewrites the loop the later fixes edit), so it
+  cannot be gated as F5; nx-digraph takes F5-python.
+
+Three F5 slots now have a candidate that meets every floor: cpp, java and
+python. JavaScript, Rust and C are open.
+
 ## Local session 2026-10-08 to 10-09 (back on the arm64 Mac)
 
 Authoring moved back from cloud sessions to the Mac. Three outcomes:

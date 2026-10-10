@@ -1,0 +1,15 @@
+diff --git a/src/main/java/org/apache/commons/lang3/math/Fraction.java b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+index 3ba548fac..a57845dd2 100644
+--- a/src/main/java/org/apache/commons/lang3/math/Fraction.java
++++ b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+@@ -328,8 +328,8 @@ public static Fraction getReducedFraction(int numerator, int denominator) {
+         if (numerator == 0) {
+             return ZERO; // normalize zero.
+         }
+-        // allow 2^k/-2^31 as a valid fraction (where k>0)
+-        if (denominator == Integer.MIN_VALUE && (numerator & 1) == 0) {
++        // Reduce common powers of two before sign normalization to avoid negating Integer.MIN_VALUE.
++        while ((numerator & 1) == 0 && (denominator & 1) == 0) {
+             numerator /= 2;
+             denominator /= 2;
+         }

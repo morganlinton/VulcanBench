@@ -7,6 +7,42 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-10: Haiku 5.5 judging (v3.24) pins Cursor by version; sweep pause and CLI updates
+
+### Decision
+
+- The Haiku 5.5 Code quality round is v3.24: the v3.23 protocol on the Haiku
+  population. Judge settings come from the recovered v3.3 and v3.4 protocols
+  (2026-10-08 entry). Cursor is pinned by its version directory, not its
+  launcher, and the pin is re-checked before every stage, so the CLI that
+  carries Grok cannot change during the round.
+- Runs whose patch is empty because a safety classifier stopped the session
+  are excluded from judging and counted as failed, as for Opus 5.5's high
+  depotcore (2026-09-24). Cards state the judged n per level and the reason.
+- The owner left with the laptop on 2026-10-09, so the Haiku sweep was
+  stopped between tasks at 08:43 PDT and resumed at 2026-10-10 02:20 PDT with
+  `--only-missing`. The one run in progress (extra-high qlite) was moved to
+  `runs-effort-haiku55-operator-killed/` and re-run. Pausing between tasks
+  leaves every finished run's wall-clock untouched.
+
+### Evidence
+
+- Claude Code versions, from each run's stream `init` event (each summary
+  agrees): low 22 on 2.1.293 and 1 on 2.1.294; medium 3 on 2.1.294 and 20 on
+  2.1.295; high 2.1.295; extra-high 2 on 2.1.295 and 21 on 2.1.296; max so far
+  2.1.296. The CLI updates itself; each card footnotes the versions per level.
+- paddockcore at medium (4.7 minutes) and extra-high (9.3 minutes): both
+  finished with an empty patch and functional 0. Each stream carries a safety
+  classifier stop notice while the model probed the legacy binary, and the
+  model's closing message says the repository's module is unchanged. No reply
+  came from a fallback model.
+- Cursor on this host is still `2026.10.01-e373342`, the version that judged
+  v3.23, so Sonnet 5.5 and Haiku 5.5 are judged on the same Grok CLI. Its
+  version directory holds 447 shipped files; Cursor writes only to a transient
+  `.running/` folder inside it, which the digest skips.
+- Haiku 5.5 so far (pass@1, n=23): low 0.565, medium 0.565, high 0.739,
+  extra-high 0.957.
+
 ## 2026-10-10: Frontier v5 gains a fifth family, F5 concentrated multi-bug correctness (composition v2)
 
 ### Decision

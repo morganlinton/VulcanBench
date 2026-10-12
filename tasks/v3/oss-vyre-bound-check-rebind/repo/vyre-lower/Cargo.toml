@@ -1,0 +1,28 @@
+[package]
+name = "vyre-lower"
+version = "0.6.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Substrate-neutral lowering: vyre Program → KernelDescriptor consumed by vyre-emit-* crates."
+readme = "README.md"
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+documentation = "https://docs.rs/vyre-lower"
+categories = ["compilers", "hardware-support"]
+keywords = ["vyre", "lowering", "gpu", "compiler"]
+
+[lib]
+name = "vyre_lower"
+path = "src/lib.rs"
+
+[dependencies]
+vyre-foundation = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+rustc-hash = { workspace = true }
+smallvec.workspace = true
+im = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+toml = { workspace = true }

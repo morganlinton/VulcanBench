@@ -1,0 +1,40 @@
+[package]
+name = "vyre-emit-spirv"
+version = "0.6.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "SPIR-V binary emitter for vyre KernelDescriptor. Routes through naga::Module → naga::back::spv to share substrate-neutral lowering with vyre-emit-naga."
+readme = "README.md"
+repository = "https://github.com/santhsecurity/vyre"
+homepage = "https://github.com/santhsecurity/vyre"
+documentation = "https://docs.rs/vyre-emit-spirv"
+categories = ["compilers", "hardware-support"]
+keywords = ["vyre", "spirv", "shader", "gpu"]
+
+[lib]
+name = "vyre_emit_spirv"
+path = "src/lib.rs"
+
+[dependencies]
+vyre-emit-naga = { workspace = true }
+vyre-lower = { workspace = true }
+# `matching` enables `vyre_primitives::matching` (AnchorDfaPlan, build_anchor_dfa_plan,
+# …) used UNCONDITIONALLY by `src/anchor_dfa_offload.rs`. The workspace dep is
+# default-features = false, so this must be requested explicitly: it built locally
+# only because another workspace crate unifies it on; the isolated `cargo publish`
+# verify build compiled it out (E0432).
+# `hash` is required transitively: `vyre_primitives::matching::nfa_to_dfa` imports
+# `crate::hash::fnv1a` UNCONDITIONALLY, but the PUBLISHED vyre-primitives 0.6.3
+# `matching` feature does not self-enable `hash` (a feature-completeness bug fixed
+# locally for 0.6.4). Until that ships, consumers enabling `matching` against the
+# published 0.6.3 must also enable `hash` or the isolated build fails (E0433).
+vyre-primitives = { workspace = true, features = ["matching", "hash"] }
+naga = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+vyre-foundation.workspace = true
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs
+vyre-emit-ptx = { workspace = true }
+proptest.workspace = true

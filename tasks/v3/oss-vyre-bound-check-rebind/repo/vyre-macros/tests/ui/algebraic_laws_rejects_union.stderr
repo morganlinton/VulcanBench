@@ -1,0 +1,5 @@
+error: #[derive(AlgebraicLaws)] does not support unions. Fix: derive it on the op struct or enum that declares algebraic laws.
+ --> tests/ui/algebraic_laws_rejects_union.rs:4:7
+  |
+4 | union BadLawCarrier {
+  |       ^^^^^^^^^^^^^

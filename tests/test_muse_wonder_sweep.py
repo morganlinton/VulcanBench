@@ -64,7 +64,7 @@ def test_protocol_records_contributor_mode_and_pins(name, cli_model):
     assert protocol["cli_model"] == cli_model and protocol["contributor_mode"] == "on"
     assert protocol["concurrency"] == 1 and protocol["binary_sha256"] == sweep.BINARY_SHA256
     assert set(protocol["source_hashes"]) == set(sweep.SOURCES)
-    assert "—" not in json.dumps(protocol)
+    assert chr(0x2014) not in json.dumps(protocol)  # no em-dash in the protocol
 
 
 def test_changed_protocol_fails_closed(tmp_path):

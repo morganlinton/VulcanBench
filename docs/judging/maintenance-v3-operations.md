@@ -777,6 +777,6 @@ Times are UTC: the judging host moved from PDT to CEST during the sweep.
 - The wrapper accepted 426 display renames. Invalid-response retries under
   the frozen rule: Muse 9, Grok 5.
 - Summary: 111 of 112 published, both panels passing, no reviewer fallbacks.
-  Combined score by level: low 84.42, medium 84.03 (n=22), high 88.02,
+  Combined score by level: low 84.42, medium 84.03 (n=22), high 88.01,
   extra-high 91.83 (n=22), max 92.16 (n=21). Code quality 74.83 at low to
   81.30 at max.

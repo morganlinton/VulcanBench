@@ -754,3 +754,29 @@ operational notes live here.
   extra-high 90.20, max 92.02. Code quality 61.67 at low to 81.72 at max.
 - Cost for cards is `cli_reported_cost_usd`, because the vendor price page
   gives two Sonnet 5.5 cache-read prices.
+
+## v3.24, October 12, 2026: Claude Haiku 5.5 on Frontier v4
+
+Times are UTC: the judging host moved from PDT to CEST during the sweep.
+
+- Run from `bench/2026-10-11-haiku55-judging-v324` (36e27641), queued behind
+  the sweep. Population frozen October 11, 22:52: 112 rows, 3 excluded
+  (paddockcore at medium, extra-high and max: each session was stopped by a
+  safety classifier while the model probed the legacy binary, and ended with
+  an empty patch), none missing. Judging window October 11, 22:52 to
+  October 12, 10:11, one window, no stops. No sweep ran during it.
+- Calibration: both judges passed every gate, with no allowance used.
+- Cursor pinned by version for the whole round: `2026.10.01-e373342`, digest
+  re-checked before every stage, unchanged throughout. It is the same CLI
+  that carried Grok in v3.23.
+- Grok's intent probe for submission-030 (max codeccore) had no valid
+  response: attempt 1 quoted a line absent from the evidence and attempt 2
+  was not valid JSON. `invalidate_unrecoverable_probe` marked it invalid, so
+  the submission is unpublished, as the same codeccore line was under v3.7
+  and v3.17. The run still counts for pass rates, time and cost.
+- The wrapper accepted 426 display renames. Invalid-response retries under
+  the frozen rule: Muse 9, Grok 5.
+- Summary: 111 of 112 published, both panels passing, no reviewer fallbacks.
+  Combined score by level: low 84.42, medium 84.03 (n=22), high 88.01,
+  extra-high 91.83 (n=22), max 92.16 (n=21). Code quality 74.83 at low to
+  81.30 at max.

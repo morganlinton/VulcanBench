@@ -1,0 +1,49 @@
+{
+  "final": true,
+  "coverage": {
+    "submissions_with_both_reviews": 111,
+    "submissions_total": 111,
+    "submissions_with_probes": 111,
+    "per_panel_reviews": {
+      "muse": 111,
+      "grok": 111
+    },
+    "per_panel_probes": {
+      "muse": 111,
+      "grok": 111
+    },
+    "unpublished_invalid_probe": [
+      {
+        "id": "submission-030",
+        "model": "haiku55",
+        "effort": "max",
+        "task": "legacy-codeccore-binary-parity"
+      }
+    ]
+  },
+  "headline": "Combined score 84.42 to 92.16 from low to max.",
+  "subtitle": "Best at max",
+  "best_effort": "max",
+  "expected_rows": {
+    "haiku55/low": 23,
+    "haiku55/medium": 22,
+    "haiku55/high": 23,
+    "haiku55/extra-high": 22,
+    "haiku55/max": 21
+  },
+  "weights": {
+    "functional": 0.5,
+    "quality": 0.085,
+    "security": 0.085,
+    "code_quality": 0.33,
+    "code_quality_split": {
+      "l1": 0.24,
+      "l2": 0.09
+    }
+  },
+  "summary_sha256": "3c57f31901d4a55b87e131727c3011327b38e59385cfb9a1f9d26f6153824de8",
+  "protocol_sha256": "15c04683b3056999bec21cd99b148fc40c2289953360fb1106da05a5d1b800ed",
+  "png_sha256": "da91e92a062ef7a723b731fec7ada551241228e5af2fa7dde10d209f5be980bd",
+  "supporting_table": "haiku55-v324-efforts.csv",
+  "visual_qa": "Requires visual inspection after rendering"
+}

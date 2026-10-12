@@ -7,6 +7,39 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-12: Haiku 5.5 published; second pause, clock change and resume stubs
+
+### Decision
+
+Owner request in chat, 2026-10-12: publish Haiku 5.5 like Sonnet 5.5 (results
+PR, public redacted traces, a results page and a comparison page). The
+comparisons are GPT-6 Luna (the closest small OpenAI model already
+published), Claude Sonnet 5.5 (same family) and GPT-6.1 Sol (the board's
+lowest cost per task among strong columns); each comparison card reads the
+other model from its committed per-level table and nothing is re-judged.
+
+### Evidence
+
+- Second pause: the owner closed the laptop, so the sweep was stopped
+  between tasks on 2026-10-10 at 19:48 UTC (max 10 of 23 done) and resumed
+  2026-10-11 at 15:50 UTC. The run in progress (max queuecore) was moved to
+  `runs-effort-haiku55-operator-killed/max/` and re-run.
+- The host's clock moved from PDT to CEST between the two pauses, so local
+  times in the sweep and judging logs mix the two zones. Run summaries and
+  traces record UTC; entries from here on use UTC.
+- Resume stubs: `runs-effort-haiku55/extra-high/` holds 25 folders with only
+  the first two trace events (task start, sandbox) and no summary, all
+  written 2026-10-10 09:20:13 to 09:20:15 UTC as the first pause ended. The
+  launcher's `claude --version` printed nothing at 09:20:09, and the first
+  real extra-high run after the pause started at 09:20:15 on 2.1.296, which
+  is consistent with Claude Code replacing itself (2.1.295 to 2.1.296) at
+  that moment: the harness's first attempts failed at CLI start and its
+  retries ran normally. Every one of those tasks finished in its own run
+  folder; the stubs are never read by the sweep, the population builder or
+  the cards, and are kept as found.
+- Haiku 5.5 final, n=23 runs per level: pass@1 0.565, 0.565, 0.739, 0.957,
+  0.957 from low to max; no timeouts; no reply from a fallback model.
+
 ## 2026-10-10: Haiku 5.5 judging (v3.24) pins Cursor by version; sweep pause and CLI updates
 
 ### Decision

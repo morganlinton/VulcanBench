@@ -276,7 +276,15 @@ def _pin_fake_binary(tmp_path, monkeypatch):
 
 
 def _run(
-    tmp_path, monkeypatch, *, stdout_lines, stderr_text="", returncode=0, session_rows=(), **kwargs
+    tmp_path,
+    monkeypatch,
+    *,
+    stdout_lines,
+    stderr_text="",
+    returncode=0,
+    session_rows=(),
+    model="muse-spark-1.3",
+    **kwargs,
 ):
     workspace = _pin_fake_binary(tmp_path, monkeypatch)
     launched = {}
@@ -294,7 +302,7 @@ def _run(
     outcome = MuseCodeAdapter().run_task(
         workspace=workspace,
         prompt="Replace the retired engine.",
-        model="muse-spark-1.3",
+        model=model,
         priced_spec="unused",
         max_turns=40,
         collector=collector,
@@ -375,4 +383,59 @@ def test_run_task_rejects_completion_without_receipts_and_bad_options(tmp_path, 
             collector=None,
             effort="high",
             timeout_s=0,
+        )
+
+
+@pytest.mark.parametrize(
+    ("spec", "cli_model", "mode"),
+    [
+        ("muse-wonder-1.0-contributor", "muse-wonder-1.0", "on"),
+        ("muse-wonder-1.0", "muse-wonder-1.0", "off"),
+        ("muse-wonder-full-1.0-contributor", "muse-wonder-full-1.0", "on"),
+    ],
+)
+def test_wonder_passes_explicit_contributor_mode(tmp_path, monkeypatch, spec, cli_model, mode):
+    rows = [receipt(record="1")]
+    rows[0]["payload"]["event"]["model"] = cli_model
+    stdout = [
+        json.dumps({"payload_type": "run.terminal.completed", "payload": {"terminal": "completed"}})
+    ]
+    outcome, collector, launched, _ = _run(
+        tmp_path, monkeypatch, stdout_lines=stdout, session_rows=rows, model=spec
+    )
+    cmd = launched["cmd"]
+    assert cmd[cmd.index("--model") + 1] == cli_model
+    assert cmd[cmd.index("--contributor-mode") + 1] == mode
+    assert outcome.finished and outcome.reported_model == spec
+    start = collector.events[0][1]
+    assert start["contributor_mode"] == mode and start["cli_model"] == cli_model
+    assert start["pricing_tier"] == ("contributor" if mode == "on" else "standard")
+
+
+def test_spark_keeps_model_id_contributor_without_flag(tmp_path, monkeypatch):
+    rows = [receipt(record="1")]
+    stdout = [
+        json.dumps({"payload_type": "run.terminal.completed", "payload": {"terminal": "completed"}})
+    ]
+    _, _, launched, _ = _run(
+        tmp_path,
+        monkeypatch,
+        stdout_lines=stdout,
+        session_rows=rows,
+        model="muse-spark-1.3-contributor",
+    )
+    assert "--contributor-mode" not in launched["cmd"]
+
+
+def test_wonder_contributor_max_rejected_before_any_process():
+    with pytest.raises(ProviderError, match="Standard-only"):
+        MuseCodeAdapter().run_task(
+            workspace="unused",
+            prompt="unused",
+            model="muse-wonder-1.0-contributor",
+            priced_spec="unused",
+            max_turns=1,
+            collector=None,
+            effort="max",
+            timeout_s=1,
         )

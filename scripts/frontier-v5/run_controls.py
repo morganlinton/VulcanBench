@@ -63,7 +63,7 @@ import tomllib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from probe_verifier import extract, proxy_args, run_verifier, sh  # noqa: E402
+from probe_verifier import extract, proxy_args, run_verifier, sh
 
 F2P_LINE = re.compile(r"^fail_to_pass: (\S+?): (\S+)", re.M)
 
@@ -92,6 +92,76 @@ def build_variant(base: Path, dest: Path, root: str, parts: list[dict], task: Pa
     return None
 
 
+def plan_variants(spec: dict) -> dict[str, list[list[dict]]]:
+    """Map each variant name to the part lists to try, in order."""
+    parts = spec["parts"]
+    causes = [p for p in parts if not p.get("glue")]
+    coupled = [set(g) for g in spec.get("coupled", [])]
+    # Leave-one-out first leaves out only that part, and falls back to leaving
+    # out its coupled group when a later part does not apply without it.
+    variants: dict[str, list[list[dict]]] = {"gold-from-parts": [parts]}
+    if len(causes) < len(parts):
+        variants["causes-only"] = [causes]
+    explicit = spec.get("variants")
+    if explicit:
+        for v in explicit:
+            variants[v["name"]] = [[{"name": v["name"], "patch": v["patch"]}]]
+        return variants
+    for c in causes:
+        group = next((g for g in coupled if c["name"] in g), {c["name"]})
+        variants[f"single:{c['name']}"] = [
+            [p for p in parts if p.get("glue") or p["name"] == c["name"]]
+        ]
+        tries = [[p for p in parts if p["name"] != c["name"]]]
+        if group != {c["name"]}:
+            tries.append([p for p in parts if p["name"] not in group])
+        variants[f"loo:{c['name']}"] = tries
+    return variants
+
+
+def run_variant(ctx: dict, vname: str, tries: list[list[dict]]) -> dict:
+    """Build the first part list that applies, grade it, and report."""
+    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", vname)
+    arts, task = ctx["work"] / "art", ctx["task"]
+    errs, used = [], None
+    for vparts in tries:
+        err = build_variant(arts / "base", arts / safe, ctx["root"], vparts, task)
+        if not err:
+            used = vparts
+            break
+        errs.append(err)
+    if used is None:
+        print(f"n/a  {vname:28s} {'; '.join(errs)}", flush=True)
+        return {"status": "n/a", "reason": "; ".join(errs)}
+    causes = [] if ctx["explicit"] else ctx["causes"]
+    left_out = sorted(p["name"] for p in causes if p not in used)
+    out = ctx["work"] / "out" / safe
+    r = run_verifier(ctx["ver_img"], arts / safe, ctx["paths"], out, ctx["timeout"])
+    text = "".join(
+        (out / f).read_text(errors="replace")
+        for f in ("stderr", "check.err")
+        if (out / f).is_file()
+    )
+    failing = sorted({m.group(1) for m in F2P_LINE.finditer(text) if m.group(2) != "passed"})
+    total = len(ctx["f2p"])
+    note = f" (absent: {','.join(left_out)})" if errs else ""
+    print(
+        f"ran  {vname:28s} reward={r.get('reward')} f2p {total - len(failing)}/{total}{note} "
+        f"failing={failing}",
+        flush=True,
+    )
+    return {
+        "status": "ran",
+        "causes_absent": left_out,
+        "fallback": errs[0] if errs else None,
+        "reward": r.get("reward"),
+        "f2p_passing": total - len(failing),
+        "f2p_total": total,
+        "f2p_failing": failing,
+        "metrics": r,
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("task")
@@ -105,83 +175,49 @@ def main() -> int:
     task = Path(a.task).resolve()
     name = task.name
     spec = json.loads((task / "tests" / "controls.json").read_text())
-    root, parts = spec["artifact_root"], spec["parts"]
-    causes = [p for p in parts if not p.get("glue")]
-    coupled = [set(g) for g in spec.get("coupled", [])]
-    fam = json.loads((task / "tests" / "families.json").read_text())
-    f2p_all = list(fam["fail_to_pass"])
-    paths = [x["source"] for x in tomllib.loads((task / "task.toml").read_text())["artifacts"]]
     work = Path(a.work or tempfile.mkdtemp(prefix=f"controls-{name}-")).resolve()
     env_img, ver_img = f"vbprobe-{name}-env", f"vbprobe-{name}-verifier"
-    print(f"run_controls: {name}, {len(causes)} causes, work dir {work}", flush=True)
+    ctx = {
+        "task": task,
+        "work": work,
+        "root": spec["artifact_root"],
+        "causes": [p for p in spec["parts"] if not p.get("glue")],
+        "explicit": bool(spec.get("variants")),
+        "f2p": json.loads((task / "tests" / "families.json").read_text())["fail_to_pass"],
+        "paths": [
+            x["source"] for x in tomllib.loads((task / "task.toml").read_text())["artifacts"]
+        ],
+        "ver_img": ver_img,
+        "timeout": a.timeout,
+    }
+    print(f"run_controls: {name}, {len(ctx['causes'])} causes, work dir {work}", flush=True)
 
     if not a.skip_build:
-        for img, ctx in ((env_img, "environment"), (ver_img, "tests")):
+        for img, sub in ((env_img, "environment"), (ver_img, "tests")):
             print(f"== building {img}", flush=True)
-            sh(["docker", "build", "-q", *proxy_args(), "-t", img, str(task / ctx)],
-               stdout=subprocess.DEVNULL)
-    arts = work / "art"
-    if (arts / "base").exists():
-        shutil.rmtree(arts / "base")
-    extract(env_img, paths, arts / "base")
+            sh(
+                ["docker", "build", "-q", *proxy_args(), "-t", img, str(task / sub)],
+                stdout=subprocess.DEVNULL,
+            )
+    if (work / "art" / "base").exists():
+        shutil.rmtree(work / "art" / "base")
+    extract(env_img, ctx["paths"], work / "art" / "base")
 
-    # Each variant is a list of part lists to try in order: leave-one-out
-    # first leaves out only that part, and falls back to leaving out its
-    # coupled group when a later part does not apply without it.
-    variants: dict[str, list[list[dict]]] = {"gold-from-parts": [parts]}
-    if len(causes) < len(parts):
-        variants["causes-only"] = [causes]
-    explicit = spec.get("variants")
-    for v in explicit or []:
-        variants[v["name"]] = [[{"name": v["name"], "patch": v["patch"]}]]
-    for c in [] if explicit else causes:
-        group = next((g for g in coupled if c["name"] in g), {c["name"]})
-        variants[f"single:{c['name']}"] = [[p for p in parts if p.get("glue") or p["name"] == c["name"]]]
-        tries = [[p for p in parts if p["name"] != c["name"]]]
-        if group != {c["name"]}:
-            tries.append([p for p in parts if p["name"] not in group])
-        variants[f"loo:{c['name']}"] = tries
     only = {x for x in a.only.split(",") if x}
-
-    report = {}
-    for vname, tries in variants.items():
-        if only and vname not in only:
-            continue
-        safe = re.sub(r"[^A-Za-z0-9_.-]", "_", vname)
-        errs, used = [], None
-        for vparts in tries:
-            err = build_variant(arts / "base", arts / safe, root, vparts, task)
-            if not err:
-                used = vparts
-                break
-            errs.append(err)
-        if used is None:
-            report[vname] = {"status": "n/a", "reason": "; ".join(errs)}
-            print(f"n/a  {vname:28s} {'; '.join(errs)}", flush=True)
-            continue
-        left_out = sorted(p["name"] for p in causes if p not in used) if not explicit else []
-        out = work / "out" / safe
-        r = run_verifier(ver_img, arts / safe, paths, out, a.timeout)
-        text = ""
-        for f in ("stderr", "check.err"):
-            if (out / f).is_file():
-                text += (out / f).read_text(errors="replace")
-        failing = sorted({m.group(1) for m in F2P_LINE.finditer(text) if m.group(2) != "passed"})
-        passing = len(f2p_all) - len(failing)
-        report[vname] = {"status": "ran", "causes_absent": left_out,
-                         "fallback": errs[0] if errs else None,
-                         "reward": r.get("reward"), "f2p_passing": passing,
-                         "f2p_total": len(f2p_all), "f2p_failing": failing, "metrics": r}
-        note = f" (absent: {','.join(left_out)})" if errs else ""
-        print(f"ran  {vname:28s} reward={r.get('reward')} f2p {passing}/{len(f2p_all)}{note} "
-              f"failing={failing}", flush=True)
-
+    report = {
+        vname: run_variant(ctx, vname, tries)
+        for vname, tries in plan_variants(spec).items()
+        if not only or vname in only
+    }
     (work / "controls-report.json").write_text(json.dumps(report, indent=1, sort_keys=True))
     if not a.keep_images:
-        subprocess.run(["docker", "rmi", env_img, ver_img], check=False,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    g = report.get("gold-from-parts", {})
-    if not only and g.get("reward") != 1:
+        subprocess.run(
+            ["docker", "rmi", env_img, ver_img],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    if not only and report.get("gold-from-parts", {}).get("reward") != 1:
         print("run_controls: the parts do not compose to a passing gold", flush=True)
         return 1
     return 0

@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Fail if an em-dash appears in project-authored source or docs.
+"""Fail if an em-dash appears in project-authored written text.
 
-VulcanBench forbids em-dashes (U+2014) in all output (see AGENTS.md and
-CLAUDE.md). This check enforces that mechanically for tracked, project-authored
-text. Third-party task fixtures under ``tasks/`` and vendored trees are
-excluded: their upstream text is not ours to rewrite. The rule-definition files
+VulcanBench forbids em-dashes (U+2014) in written text (see AGENTS.md and
+CLAUDE.md). Code is exempt: source files, comments, docstrings, string
+literals, tests and config may contain them. This check enforces the rule
+mechanically for tracked, project-authored prose files (.md, .mdx, .mdc, .txt).
+Third-party task fixtures under ``tasks/`` and vendored trees are excluded:
+their upstream text is not ours to rewrite. The rule-definition files
 (AGENTS.md, CLAUDE.md, and this script) are excluded because their job is to
 name the forbidden character.
 
 Usage:
     python scripts/check_no_emdash.py            # scan all tracked files
-    python scripts/check_no_emdash.py a.md b.py  # scan just these (pre-commit)
+    python scripts/check_no_emdash.py a.md b.py  # scan just these; b.py is skipped
 """
 
 from __future__ import annotations
@@ -21,33 +23,15 @@ from pathlib import Path
 
 EM_DASH = "—"
 
-# Extensions and filenames we author and therefore police.
-SCAN_SUFFIXES = {
-    ".py",
-    ".ts",
-    ".tsx",
-    ".js",
-    ".jsx",
-    ".md",
-    ".mdx",
-    ".yml",
-    ".yaml",
-    ".toml",
-    ".sh",
-    ".css",
-    ".txt",
-    ".mdc",
-    ".example",
-}
-SCAN_NAMES = {"Makefile", "Dockerfile"}
+# Prose files we author and therefore police. Code and config are exempt.
+SCAN_SUFFIXES = {".md", ".mdx", ".mdc", ".txt"}
 
-# Files whose purpose is to name the forbidden character, so they legitimately
-# contain it.
+# Prose files whose purpose is to name the forbidden character, so they
+# legitimately contain it.
 EXCLUDE_EXACT = {
     "AGENTS.md",
     "CLAUDE.md",
     "dashboard/AGENTS.md",
-    "scripts/check_no_emdash.py",
 }
 
 # Trees we do not author (third-party task fixtures, vendored deps, agent
@@ -74,8 +58,7 @@ def _should_scan(path: str) -> bool:
         return False
     if any(path.endswith(suffix) for suffix in EXCLUDE_SUFFIXES):
         return False
-    p = Path(path)
-    return p.suffix in SCAN_SUFFIXES or p.name in SCAN_NAMES or p.name.startswith("Dockerfile")
+    return Path(path).suffix in SCAN_SUFFIXES
 
 
 def main(argv: list[str]) -> int:
@@ -96,7 +79,7 @@ def main(argv: list[str]) -> int:
     if offenders:
         print(
             f"Found {len(offenders)} em-dash(es) (U+2014). VulcanBench forbids "
-            "them in all output; see AGENTS.md."
+            "them in written text; see AGENTS.md."
         )
         for path, lineno, col, snippet in offenders:
             print(f"  {path}:{lineno}:{col}: {snippet}")

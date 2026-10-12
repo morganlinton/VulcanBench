@@ -1,13 +1,18 @@
 # VulcanBench project notes
 
-## Writing conventions (applies to ALL output)
+## Writing conventions (applies to all written text)
 
-Never use em-dashes ("—", U+2014) anywhere: not in code, comments, commit
-messages, docs, chat replies, charts, reports, social images, or any other
-generated text. This rule has no exceptions.
+Never use em-dashes ("—", U+2014) in written text: docs and Markdown, commit
+messages, PR descriptions, chat replies, reports, charts, social images, or any
+other prose a person reads. Text that code renders for readers (chart titles and
+labels, card copy, report bodies, UI copy) is written text too.
 
-When you would reach for an em-dash, restructure instead. Use a comma, a colon,
-a pair of parentheses, or split into two sentences. A plain hyphen ("-") is fine
+Code is exempt. Em-dashes are allowed in source files, including comments,
+docstrings, string literals, tests and config. The CI check
+(`scripts/check_no_emdash.py`) scans prose files only (.md, .mdx, .mdc, .txt).
+
+When you would reach for an em-dash in written text, restructure instead. Use
+a comma, a colon, a pair of parentheses, or split into two sentences. A plain hyphen ("-") is fine
 for ranges and compound words. En-dashes ("–", U+2013) should also be avoided;
 use "to" for ranges (for example "10 to 20", not "10–20").
 

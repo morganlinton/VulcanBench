@@ -1,0 +1,48 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Each part is the upstream PR's diff of networkx/algorithms/centrality/group.py. #8925 (prominent_group rounding) is inside the range and in the shipped gold although DESIGN.md said it was excluded; no fail_to_pass check covers it, so it is glue here, and the causes-only variant tests that it is not needed. base + all parts is byte-identical to solution/gold_patch.diff (checked 2026-10-10).",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "#8879",
+      "patch": "tests/controls/01-8879.diff",
+      "upstream": "73cb92bb"
+    },
+    {
+      "name": "#8880",
+      "patch": "tests/controls/02-8880.diff",
+      "upstream": "0e3f58ed"
+    },
+    {
+      "name": "#8881",
+      "patch": "tests/controls/03-8881.diff",
+      "upstream": "c279073c"
+    },
+    {
+      "name": "#8882",
+      "patch": "tests/controls/04-8882.diff",
+      "upstream": "8e0b38e1"
+    },
+    {
+      "name": "#8883",
+      "patch": "tests/controls/05-8883.diff",
+      "upstream": "0db82270"
+    },
+    {
+      "name": "#8925",
+      "patch": "tests/controls/055-8925-glue.diff",
+      "upstream": "f1baf031",
+      "glue": true
+    },
+    {
+      "name": "#8931",
+      "patch": "tests/controls/06-8931.diff",
+      "upstream": "c1ebe046"
+    }
+  ],
+  "coupled": [
+    [
+      "#8880",
+      "#8882"
+    ]
+  ]
+}

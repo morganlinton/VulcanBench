@@ -1,0 +1,13 @@
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index e7806e1..0cee78d 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -294,7 +294,7 @@ def minimum_st_node_cut(G, s, t, flow_func=None, auxiliary=None, residual=None):
+     mapping = H.graph.get("mapping", None)
+     if mapping is None:
+         raise nx.NetworkXError("Invalid auxiliary digraph.")
+-    if G.has_edge(s, t) or G.has_edge(t, s):
++    if G.has_edge(s, t):
+         return set()
+     kwargs = {"flow_func": flow_func, "residual": residual, "auxiliary": H}
+ 

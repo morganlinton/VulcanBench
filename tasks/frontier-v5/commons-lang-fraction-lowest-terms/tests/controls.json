@@ -1,0 +1,49 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Each part is the upstream commit's diff of Fraction.java; the two Javadoc commits inside the range are comment-only glue. base + all parts is byte-identical to solution/gold_patch.diff (checked 2026-10-10).",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "#1769",
+      "patch": "tests/controls/01-1769.diff",
+      "upstream": "10f442145"
+    },
+    {
+      "name": "f021",
+      "patch": "tests/controls/02-f021.diff",
+      "upstream": "7f5bbbf0a"
+    },
+    {
+      "name": "#1784",
+      "patch": "tests/controls/03-1784.diff",
+      "upstream": "e213b85ce"
+    },
+    {
+      "name": "#1787",
+      "patch": "tests/controls/04-1787.diff",
+      "upstream": "284be5d6a"
+    },
+    {
+      "name": "docs-0915",
+      "patch": "tests/controls/05-docs-0915.diff",
+      "upstream": "0c96ced7d",
+      "glue": true
+    },
+    {
+      "name": "#1794",
+      "patch": "tests/controls/06-1794.diff",
+      "upstream": "e992a498d"
+    },
+    {
+      "name": "docs-0919",
+      "patch": "tests/controls/07-docs-0919.diff",
+      "upstream": "a1a3bd056",
+      "glue": true
+    }
+  ],
+  "coupled": [
+    [
+      "#1784",
+      "#1787"
+    ]
+  ]
+}

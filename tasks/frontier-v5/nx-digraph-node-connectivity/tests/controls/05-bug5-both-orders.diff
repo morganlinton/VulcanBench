@@ -1,0 +1,84 @@
+diff --git a/networkx/algorithms/connectivity/connectivity.py b/networkx/algorithms/connectivity/connectivity.py
+index 0f59b97..da4badc 100644
+--- a/networkx/algorithms/connectivity/connectivity.py
++++ b/networkx/algorithms/connectivity/connectivity.py
+@@ -322,6 +322,14 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+         def degree(v):
+             return min(len(G.pred[v].keys() - {v}), len(G.succ[v].keys() - {v}))
+ 
++        # In a digraph the local node connectivity of an ordered pair is not
++        # symmetric, and v has to lie on the source side of a minimum node cut
++        # for its value to be the right one, so both orders are needed. Page
++        # 513 of [2] states that for a digraph both N(v, w) and N(w, v) have to
++        # be computed.
++        def ordered_pairs(v, w):
++            return ((v, w), (w, v))
++
+     else:
+         if not nx.is_connected(G):
+             return 0
+@@ -331,6 +339,9 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+         def degree(v):
+             return len(G[v].keys() - {v})
+ 
++        def ordered_pairs(v, w):
++            return ((v, w),)
++
+     # Reuse the auxiliary digraph and the residual network
+     H = build_auxiliary_node_connectivity(G)
+     R = build_residual_network(H, "capacity")
+@@ -346,8 +357,9 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+     v_nbrs = set(neighbors(v)) - {v}
+     # compute local node connectivity with all its non-neighbors nodes
+     for w in set(G) - v_nbrs - {v}:
+-        kwargs["cutoff"] = K
+-        K = min(K, local_node_connectivity(G, v, w, **kwargs))
++        for s, t in ordered_pairs(v, w):
++            kwargs["cutoff"] = K
++            K = min(K, local_node_connectivity(G, s, t, **kwargs))
+     # Also for non adjacent pairs of neighbors of v
+     for x, y in iter_func(v_nbrs, 2):
+         if y in G[x]:
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index cb90680..38b818f 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -431,6 +431,14 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+         def isolating_cut(v):
+             return min(G.pred[v].keys() - {v}, G.succ[v].keys() - {v}, key=len)
+ 
++        # A minimum node cut of a digraph separates an ordered pair, and the
++        # two orders of a pair need not agree, so v has to lie on the source
++        # side of a minimum node cut for the cut between the pair to be the
++        # right one. Both orders are needed. Page 513 of [2] states that for a
++        # digraph both N(v, w) and N(w, v) have to be computed.
++        def ordered_pairs(v, w):
++            return ((v, w), (w, v))
++
+     else:
+         if not nx.is_connected(G):
+             raise nx.NetworkXError("Input graph is not connected")
+@@ -440,6 +448,9 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+         def isolating_cut(v):
+             return G[v].keys() - {v}
+ 
++        def ordered_pairs(v, w):
++            return ((v, w),)
++
+     # Reuse the auxiliary digraph and the residual network.
+     H = build_auxiliary_node_connectivity(G)
+     R = build_residual_network(H, "capacity")
+@@ -454,9 +465,10 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+     v_nbrs = set(neighbors(v)) - {v}
+     # Compute st node cuts between v and all its non-neighbors nodes in G.
+     for w in set(G) - v_nbrs - {v}:
+-        this_cut = minimum_st_node_cut(G, v, w, **kwargs)
+-        if len(min_cut) >= len(this_cut):
+-            min_cut = this_cut
++        for s, t in ordered_pairs(v, w):
++            this_cut = minimum_st_node_cut(G, s, t, **kwargs)
++            if len(min_cut) >= len(this_cut):
++                min_cut = this_cut
+     # Also for non adjacent pairs of neighbors of v.
+     for x, y in iter_func(v_nbrs, 2):
+         # `minimum_st_node_cut` returns an empty set when x and y cannot be

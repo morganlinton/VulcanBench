@@ -1,0 +1,32 @@
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index e7806e1..6834188 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -421,12 +421,18 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+         def neighbors(v):
+             return itertools.chain.from_iterable([G.predecessors(v), G.successors(v)])
+ 
++        def isolating_cut(v):
++            return min(G.pred[v].keys() - {v}, G.succ[v].keys() - {v}, key=len)
++
+     else:
+         if not nx.is_connected(G):
+             raise nx.NetworkXError("Input graph is not connected")
+         iter_func = itertools.combinations
+         neighbors = G.neighbors
+ 
++        def isolating_cut(v):
++            return G[v].keys() - {v}
++
+     # Reuse the auxiliary digraph and the residual network.
+     H = build_auxiliary_node_connectivity(G)
+     R = build_residual_network(H, "capacity")
+@@ -435,7 +441,7 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+     # Choose a node with minimum degree.
+     v = min(G, key=G.degree)
+     # Initial node cutset is all neighbors of the node with minimum degree.
+-    min_cut = set(G[v])
++    min_cut = set(isolating_cut(v))
+     # Compute st node cuts between v and all its non-neighbors nodes in G.
+     for w in set(G) - set(neighbors(v)) - {v}:
+         this_cut = minimum_st_node_cut(G, v, w, **kwargs)

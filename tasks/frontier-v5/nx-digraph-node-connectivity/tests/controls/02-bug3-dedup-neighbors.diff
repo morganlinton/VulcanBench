@@ -1,0 +1,47 @@
+diff --git a/networkx/algorithms/connectivity/connectivity.py b/networkx/algorithms/connectivity/connectivity.py
+index aa069d2..5be9bff 100644
+--- a/networkx/algorithms/connectivity/connectivity.py
++++ b/networkx/algorithms/connectivity/connectivity.py
+@@ -331,12 +331,15 @@ def node_connectivity(G, s=None, t=None, flow_func=None):
+     # Pick a node with minimum degree
+     # Node connectivity is bounded by degree.
+     v, K = min(G.degree(), key=itemgetter(1))
++    # Neighbors of v, excluding v itself if it has a self-loop. For digraphs
++    # this deduplicates the nodes that are both predecessors and successors.
++    v_nbrs = set(neighbors(v)) - {v}
+     # compute local node connectivity with all its non-neighbors nodes
+-    for w in set(G) - set(neighbors(v)) - {v}:
++    for w in set(G) - v_nbrs - {v}:
+         kwargs["cutoff"] = K
+         K = min(K, local_node_connectivity(G, v, w, **kwargs))
+     # Also for non adjacent pairs of neighbors of v
+-    for x, y in iter_func(neighbors(v), 2):
++    for x, y in iter_func(v_nbrs, 2):
+         if y in G[x]:
+             continue
+         kwargs["cutoff"] = K
+diff --git a/networkx/algorithms/connectivity/cuts.py b/networkx/algorithms/connectivity/cuts.py
+index bf2dda9..f20fe10 100644
+--- a/networkx/algorithms/connectivity/cuts.py
++++ b/networkx/algorithms/connectivity/cuts.py
+@@ -441,13 +441,18 @@ def minimum_node_cut(G, s=None, t=None, flow_func=None):
+     v = min(G, key=G.degree)
+     # Initial node cutset is all neighbors of the node with minimum degree.
+     min_cut = set(G[v])
++    # Neighbors of v, excluding v itself if it has a self-loop. For digraphs
++    # this deduplicates the nodes that are both predecessors and successors.
++    v_nbrs = set(neighbors(v)) - {v}
+     # Compute st node cuts between v and all its non-neighbors nodes in G.
+-    for w in set(G) - set(neighbors(v)) - {v}:
++    for w in set(G) - v_nbrs - {v}:
+         this_cut = minimum_st_node_cut(G, v, w, **kwargs)
+         if len(min_cut) >= len(this_cut):
+             min_cut = this_cut
+     # Also for non adjacent pairs of neighbors of v.
+-    for x, y in iter_func(neighbors(v), 2):
++    for x, y in iter_func(v_nbrs, 2):
++        # `minimum_st_node_cut` returns an empty set when x and y cannot be
++        # separated, which must not be taken for a smaller cut.
+         if y in G[x]:
+             continue
+         this_cut = minimum_st_node_cut(G, x, y, **kwargs)

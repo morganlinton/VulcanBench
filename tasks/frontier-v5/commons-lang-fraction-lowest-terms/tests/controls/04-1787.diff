@@ -1,0 +1,17 @@
+diff --git a/src/main/java/org/apache/commons/lang3/math/Fraction.java b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+index cb18b130d..95f40dc34 100644
+--- a/src/main/java/org/apache/commons/lang3/math/Fraction.java
++++ b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+@@ -551,10 +551,10 @@ private Fraction addSub(final Fraction fraction, final boolean isAdd) {
+         Objects.requireNonNull(fraction, "fraction");
+         // zero is identity for addition.
+         if (numerator == 0) {
+-            return isAdd ? fraction : fraction.negate();
++            return isAdd ? fraction.reduce() : fraction.reduce().negate();
+         }
+         if (fraction.numerator == 0) {
+-            return this;
++            return reduce();
+         }
+         // Knuth 4.5.1 assumes operands in lowest terms and this class does not reduce on
+         // construction, so reduce both first, as multiplyBy does.

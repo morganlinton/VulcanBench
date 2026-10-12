@@ -1,0 +1,73 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Upstream fixed all five bugs in one change (#8837, 416c3e26), so the split is by hand, following the five numbered bugs in the PR description: 1 start node chosen by total degree, 2 initial cutset from successors only, 3 duplicated neighbors (and v paired with itself on self-loops), 4 minimum_st_node_cut short-circuits on an edge in either direction, 5 the start node only ever used as the source. The parts chain (each in the context of the previous ones) and compose, with the docstring glue, to exactly the gold's content (checked 2026-10-10); they are used for gold-from-parts and causes-only. Because chained hand-split parts cannot be applied alone or left out one at a time, the single and leave-one-out variants are written explicitly: single:bugN is base plus only bug N's change, loo:bugN is the gold with only bug N's change reverted. In minimum_node_cut bugs 1 and 2 share one gold line; single:bug1 uses an interim start_degree helper, loo:bug1 picks v by total degree but keeps the isolating cutset, and loo:bug2 picks v by the bug-1 bound but takes the cutset from successors.",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "bug4",
+      "patch": "tests/controls/01-bug4-st-cut-edge-direction.diff"
+    },
+    {
+      "name": "bug3",
+      "patch": "tests/controls/02-bug3-dedup-neighbors.diff"
+    },
+    {
+      "name": "bug1",
+      "patch": "tests/controls/03-bug1-start-degree-bound.diff"
+    },
+    {
+      "name": "bug2",
+      "patch": "tests/controls/04-bug2-initial-cutset.diff"
+    },
+    {
+      "name": "bug5",
+      "patch": "tests/controls/05-bug5-both-orders.diff"
+    },
+    {
+      "name": "docs",
+      "patch": "tests/controls/06-docs-glue.diff",
+      "glue": true
+    }
+  ],
+  "variants": [
+    {
+      "name": "single:bug1",
+      "patch": "tests/controls/single-bug1.diff"
+    },
+    {
+      "name": "single:bug2",
+      "patch": "tests/controls/single-bug2.diff"
+    },
+    {
+      "name": "single:bug3",
+      "patch": "tests/controls/single-bug3.diff"
+    },
+    {
+      "name": "single:bug4",
+      "patch": "tests/controls/single-bug4.diff"
+    },
+    {
+      "name": "single:bug5",
+      "patch": "tests/controls/single-bug5.diff"
+    },
+    {
+      "name": "loo:bug1",
+      "patch": "tests/controls/loo-bug1.diff"
+    },
+    {
+      "name": "loo:bug2",
+      "patch": "tests/controls/loo-bug2.diff"
+    },
+    {
+      "name": "loo:bug3",
+      "patch": "tests/controls/loo-bug3.diff"
+    },
+    {
+      "name": "loo:bug4",
+      "patch": "tests/controls/loo-bug4.diff"
+    },
+    {
+      "name": "loo:bug5",
+      "patch": "tests/controls/loo-bug5.diff"
+    }
+  ]
+}

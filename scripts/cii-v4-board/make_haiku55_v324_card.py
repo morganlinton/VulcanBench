@@ -51,7 +51,12 @@ HARNESS = {"haiku55": "Claude Code 2.1.293 to 2.1.296"}
 # Every Sonnet 5.5 run finished and none was excluded. A cell can still come up
 # short if a submission is left unpublished by the frozen summary; add it here
 # with the reason, and the card states the short cell.
-EXPECTED = {"haiku55/medium": 22, "haiku55/extra-high": 22, "haiku55/max": 22}
+# Judged rows per cell, checked against the summary. paddockcore at medium,
+# extra-high and max is excluded (safety classifier stop, empty patch), and max
+# codeccore is unpublished because Grok's probe was invalid on both attempts.
+EXPECTED = {"haiku55/medium": 22, "haiku55/extra-high": 22, "haiku55/max": 21}
+POPULATION = ROOT / "docs/results/swe-v4-haiku55-2026-10/comparison.json"
+ALL_RUNS: dict = {}
 INVALID_MARKER = "operator-invalid.json"
 PANELS = ("muse", "grok")
 PANEL_NAMES = {"muse": "Muse Spark 1.3 (Meta)", "grok": "Grok 4.6 (xAI)"}
@@ -132,6 +137,27 @@ def composite(run, quality, weight):
         + other * run["security"]
         + weight * quality / 100
     )
+
+
+def all_runs() -> dict:
+    """Every run per level (judged or not) from the population record: tasks passed and CLI versions."""
+    record = json.loads(POPULATION.read_text())
+    out = {e: {"passed": 0, "runs": 0, "versions": {}} for e in LEVELS}
+    entries = [(r["effort"], r["run_id"]) for r in record["rows"]] + [
+        (e["effort"], e["run_id"]) for e in record["excluded"]
+    ]
+    for effort, run_id in entries:
+        summary = json.loads(
+            (ROOT / "runs-effort-haiku55" / effort / run_id / "summary.json").read_text()
+        )
+        version = summary["cli_agent"]["harness_version"].split()[0]
+        cell = out[effort]
+        cell["runs"] += 1
+        cell["passed"] += summary["scores"]["functional"] == 1
+        cell["versions"][version] = cell["versions"].get(version, 0) + 1
+    for effort, cell in out.items():
+        require(cell["runs"] == 23, f"{effort} has {cell['runs']} runs in the population record")
+    return out
 
 
 def load():
@@ -250,7 +276,7 @@ def aggregate(rows):
                 "cli_usd": mean_se(r["cli_usd"] for r in rs),
                 "usd_floor": mean_se(r["usd_floor"] for r in rs),
                 "usd_ceiling": mean_se(r["usd_ceiling"] for r in rs),
-                "passed_stat": {"mean": sum(r["functional"] == 1 for r in rs)},
+                "passed_stat": {"mean": ALL_RUNS[effort]["passed"]},
                 "fallbacks_stat": {"mean": sum(r["fallback"] for r in rs)},
             }
     return groups
@@ -265,12 +291,12 @@ def n_label(groups):
     return f"n=23 at every effort, {cells}"
 
 
-def footnotes(rows):
+def footnotes(rows, coverage):
     """Card footnotes; the version mix and calibration misses are read from the data."""
     by_version = {}
-    for r in rows:
-        by_version.setdefault(r["cli_version"], {}).setdefault(r["effort"], 0)
-        by_version[r["cli_version"]][r["effort"]] += 1
+    for effort, info in ALL_RUNS.items():
+        for version, n in info["versions"].items():
+            by_version.setdefault(version, {})[effort] = n
     mix = "; ".join(
         f"{version} for "
         + ", ".join(
@@ -292,15 +318,35 @@ def footnotes(rows):
         if not any(misses.values())
         else f"passed within the one-gate allowance ({miss})"
     )
+
+    def levels(efforts):
+        names = [e.replace("-", " ") for e in sorted(set(efforts), key=LEVELS.index)]
+        return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+
+    excluded = json.loads(POPULATION.read_text())["excluded"]
+    parts = []
+    for task in sorted({e["task"] for e in excluded}):
+        cells = [e["effort"] for e in excluded if e["task"] == task]
+        name = task.removeprefix("legacy-").split("-")[0]
+        parts.append(
+            f"{name} at {levels(cells)} is not judged: a safety classifier stopped the session while the "
+            "model probed the legacy binary and it ended without editing the module, so the run counts as failed."
+        )
+    for inv in coverage["unpublished_invalid_probe"]:
+        name = inv["task"].removeprefix("legacy-").split("-")[0]
+        parts.append(
+            f"{inv['effort'].replace('-', ' ').capitalize()} {name} has no published Code quality score: a "
+            "judge's intent probe had no valid response on either attempt, so the frozen protocol leaves it "
+            "unpublished."
+        )
+    unjudged = " ".join(p[0].upper() + p[1:] for p in parts)
     paragraphs = (
         f"Claude Code {mix}. Earlier Claude columns used older CLIs. Refusal fallback on; "
-        f"{'no run used it' if not fallbacks else f'{fallbacks} runs used it'}. Medium, extra high and max are "
-        "judged on 22 of 23 runs: on paddockcore a safety classifier stopped the session while the model "
-        "probed the legacy binary, it ended without editing the module, and the run counts as failed.",
+        f"{'no run used it' if not fallbacks else f'{fallbacks} runs used it'}. {unjudged}",
         "Haiku 5.5 costs five times as much for prompts over 100,000 tokens. Run receipts hold session totals, "
         "so the floor prices every request at the standard tier and the ceiling at the higher one; Claude "
-        "Code's own total sits between them. The sweep paused between tasks on October 9 and 10, which "
-        "leaves every run's timing intact.",
+        "Code's own total sits between them. The sweep paused twice between tasks (October 9 to 10 and "
+        "October 10 to 11), which leaves every run's timing intact.",
         "Judge settings are the original v3.3 and v3.4 protocols. Muse ran the same binary (sha256 match); "
         "Grok ran through Cursor CLI 2026.10.01, pinned by version for the whole round, the same CLI that "
         f"judged Sonnet 5.5. Calibration: {calibration}. Frontier Code quality is L1 plus L2 and is not comparable "
@@ -314,6 +360,8 @@ def fmt(stat, digits=2):
 
 
 def main():  # noqa: PLR0912, PLR0915, one linear figure
+    global ALL_RUNS  # noqa: PLW0603, computed once per render
+    ALL_RUNS = all_runs()
     _summary, _protocol, rows, final, coverage = load()
     groups = aggregate(rows)
     for (model, effort), g in groups.items():
@@ -329,7 +377,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    width_in, height_in = 16, 14.2
+    width_in, height_in = 16, 14.9
     fig = plt.figure(figsize=(width_in, height_in), dpi=150, facecolor=PAPER)
 
     def yf(inches):
@@ -577,7 +625,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ("    Rated by Muse Spark 1.3", ("by_panel", "muse"), 1, False, False),
         ("    Rated by Grok 4.6", ("by_panel", "grok"), 1, False, False),
         ("Standard error of Code quality", "se", 2, False, True),
-        ("Tasks passed (judged runs)", "passed_stat", 0, False, False),
+        ("Tasks passed of 23 (every run)", "passed_stat", 0, False, False),
         ("Runs with fallback-model turns", "fallbacks_stat", 0, False, False),
         ("Cost per task, USD (Claude Code total)", "cli_usd", 2, False, False),
         ("    Floor, every prompt under 100k", "usd_floor", 2, False, False),
@@ -613,7 +661,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         if group_end:
             line(left, right, y - step / 2, RULE, 0.6)
     line(left, right, y - step / 2, INK, 1.2)
-    notes = footnotes(rows)
+    notes = footnotes(rows, coverage)
     for i, note in enumerate(notes):
         text(left, y - step / 2 + 0.18 + 0.24 * i, note, 11, color=MUTED)
 

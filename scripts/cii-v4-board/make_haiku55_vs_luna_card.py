@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import json
 import math
 import statistics
 import sys
@@ -103,13 +104,32 @@ def load_groups():
                 "fb_share": None,
             }
     card = HAIKU
-    _summary, _protocol, rows, final, _coverage = card.load()
+    global HAIKU_UNJUDGED  # noqa: PLW0603, filled from the data before the figure
+    _summary, _protocol, rows, final, coverage = card.load()
+    excluded = json.loads(card.POPULATION.read_text())["excluded"]
+    cells = ", ".join(
+        f"{e['effort'].replace('-', ' ')} {e['task'].removeprefix('legacy-').split('-')[0]}"
+        for e in excluded
+    )
+    invalid = ", ".join(
+        f"{i['effort'].replace('-', ' ')} {i['task'].removeprefix('legacy-').split('-')[0]}"
+        for i in coverage["unpublished_invalid_probe"]
+    )
+    HAIKU_UNJUDGED = (
+        f"Unjudged Haiku runs: {cells} (a safety classifier stopped the session before any edit; counted as failed)"
+        + (
+            f", and {invalid} (no valid judge probe, so unpublished under the frozen protocol)."
+            if invalid
+            else "."
+        )
+    )
+    card.ALL_RUNS = card.all_runs()
     for (_m, e), g in card.aggregate(rows).items():
         groups["haiku55", e] = {
             "n": 23,
             "combined": g["combined"],
             "code_quality": g["code_quality"],
-            "passed": g["passed"],
+            "passed": card.ALL_RUNS[e]["passed"],
             "usd": g["cli_usd"],
             "minutes": g["minutes"],
             "fb_runs": g["fallbacks"],
@@ -136,6 +156,7 @@ def load_groups():
 
 
 HAIKU = _haiku_card()
+HAIKU_UNJUDGED = ""
 
 
 def main():  # noqa: PLR0912, PLR0915, one linear figure
@@ -144,7 +165,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    W, H = 16, 16.3
+    W, H = 16, 15.6
     fig = plt.figure(figsize=(W, H), dpi=150, facecolor=PAPER)
     yf = lambda i: 1 - i / H  # noqa: E731
 
@@ -312,7 +333,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
         for i, y in enumerate(ys):
             ax.annotate(
-                f"{y:.1f}",
+                f"{y:.2f}",
                 (i + shifts[m], y),
                 xytext=(0, 3),
                 textcoords="offset points",
@@ -396,8 +417,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "(Muse Spark 1.3 and Grok 4.6, neutral for both labs), judged in separate sessions; for v3.24 Grok ran through "
         "Cursor CLI 2026.10.01, pinned by version for the round.",
         "Luna timed out on 2 extra-high and 4 max runs; those are unjudged and unpriced, so its row also shows the "
-        "combined score with each timeout counted as 0. Haiku 5.5 had no timeouts; at medium, extra-high and max one "
-        "paddockcore run each is unjudged because a safety classifier stopped the session before any edit.",
+        "combined score with each timeout counted as 0. Haiku 5.5 had no timeouts. "
+        + HAIKU_UNJUDGED,
         "Cost bases differ: Haiku 5.5 is Claude Code's own list-price total, between a floor (every prompt at the "
         "under-100k tier) and a ceiling (every prompt at the 5x tier) shown on its own card; GPT-6 Luna is "
         "API-equivalent at list prices from its token ledger, and its runs used the ChatGPT Pro subscription. "

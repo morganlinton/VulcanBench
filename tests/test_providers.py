@@ -376,13 +376,30 @@ def test_meta_complete_uses_responses_api(monkeypatch: pytest.MonkeyPatch) -> No
 
 def test_meta_complete_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("META_MUSE_SPARK_API", raising=False)
+    monkeypatch.delenv("MUSE_API_KEY", raising=False)
     monkeypatch.delenv("MODEL_API_KEY", raising=False)
-    with pytest.raises(P.ProviderError, match="META_MUSE_SPARK_API or MODEL_API_KEY"):
+    with pytest.raises(
+        P.ProviderError, match="META_MUSE_SPARK_API or MUSE_API_KEY or MODEL_API_KEY"
+    ):
         MetaProvider("muse-spark-1.2").complete([], [])
+
+
+def test_meta_complete_accepts_muse_api_key_name(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("META_MUSE_SPARK_API", raising=False)
+    monkeypatch.setenv("MUSE_API_KEY", "muse-meta-test")
+    monkeypatch.setenv("MODEL_API_KEY", "lower-precedence")
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        assert headers["Authorization"] == "Bearer muse-meta-test"
+        return {"output": [], "usage": {}}
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    MetaProvider("muse-wonder-1.0").complete([], [])
 
 
 def test_meta_complete_accepts_official_key_name(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("META_MUSE_SPARK_API", raising=False)
+    monkeypatch.delenv("MUSE_API_KEY", raising=False)
     monkeypatch.setenv("MODEL_API_KEY", "official-meta-test")
 
     def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
@@ -397,6 +414,7 @@ def _openrouter_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("META_BASE_URL", "https://openrouter.ai/api/v1")
     monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
     monkeypatch.delenv("META_MUSE_SPARK_API", raising=False)
+    monkeypatch.delenv("MUSE_API_KEY", raising=False)
     monkeypatch.delenv("MODEL_API_KEY", raising=False)
 
 

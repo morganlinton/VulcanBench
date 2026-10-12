@@ -146,3 +146,17 @@ def test_anthropic_frontier_models_priced() -> None:
     # Fable 5: input 10.00/1M, output 50.00/1M -> 60.00.
     assert pricing.is_priced("anthropic:claude-fable-5")
     assert pricing.cost_usd("anthropic:claude-fable-5", 1_000_000, 1_000_000) == 60.0
+
+
+def test_muse_wonder_prices_and_unpriced_full() -> None:
+    # 1M uncached input + 1M cached input + 1M output at Wonder Standard list rates.
+    assert (
+        pricing.cost_usd(
+            "meta:muse-wonder-1.0", 2_000_000, 1_000_000, cached_input_tokens=1_000_000
+        )
+        == 24.2
+    )
+    # Contributor has no published Wonder rate; the estimate uses the Standard one.
+    assert pricing.cost_usd("muse-code:muse-wonder-1.0-contributor", 1_000_000, 0) == 4.0
+    # Wonder Full has no API price, so no API-equivalent number is invented.
+    assert pricing.cost_usd("muse-code:muse-wonder-full-1.0-contributor", 1_000_000, 0) is None

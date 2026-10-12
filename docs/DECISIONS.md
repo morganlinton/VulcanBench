@@ -7,6 +7,37 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-12: Muse Wonder runs in Contributor mode through Muse Code 1.4.6
+
+The owner asked for Muse Wonder to be benchmarked in Contributor mode,
+accepting that Meta may train on submitted prompts and completions, so
+VulcanBench Frontier v4 task content can enter future Meta training data.
+Meta serves Wonder Contributor only through Muse Code; the Model API lists
+only `muse-wonder-1.0`, and `muse-wonder-1.0-contributor` returns 404.
+
+The adapter maps `muse-wonder-1.0-contributor` and
+`muse-wonder-full-1.0-contributor` to the bare model id plus an explicit
+`--contributor-mode on`, so the CLI default never decides the data mode.
+Spark 1.3 keeps its model-id Contributor selection and gets no flag. Max stays
+excluded under Contributor: Meta documents it as Standard-only for Spark and
+does not document it for Wonder Contributor. Wonder Full has no API price and
+stays unpriced; Wonder 1.0 Contributor uses the Standard list rate ($4 input,
+$0.20 cached, $20 output per million) as its API-equivalent estimate.
+
+Pinned binary: `~/.local/bin/muse-bin-1.4.6-R6000.1`, SHA256
+`c713165a287d64afb8816f8351a240b457a23524f4ade06bca0e41dfde410460`. The
+launcher deletes older binaries on install; 1.0.3 and 1.1.1 were restored with
+matching hashes, and all three are kept with SHA256SUMS in
+`~/.local/share/vulcanbench/muse-binaries/`.
+
+Synthetic validation (no benchmark task read): both models passed at low,
+medium, high and extra-high, 5 to 6 completed calls and 85k to 112k tokens per
+run, every receipt reporting the requested model. Receipts are in
+`logs/muse-wonder-validation-20261012/`; an earlier attempt that failed only on
+the validator's hard-coded Homebrew python path is kept in `-attempt1`.
+Limits: Muse receipts record neither the effective reasoning effort nor the
+data mode, so both rest on the explicit CLI flags, as with Spark in September.
+
 ## 2026-10-10: Haiku 5.5 judging (v3.24) pins Cursor by version; sweep pause and CLI updates
 
 ### Decision

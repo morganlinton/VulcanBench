@@ -2,7 +2,9 @@
 
 import argparse
 import json
+import os
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -25,9 +27,20 @@ class Collector:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--efforts", nargs="+", choices=LEVELS, default=LEVELS)
+    parser.add_argument("--efforts", nargs="+", choices=[*LEVELS, "max"], default=LEVELS)
+    parser.add_argument("--model", default=MODEL, help="muse-code:<spec>, default Spark 1.3")
+    parser.add_argument("--binary", type=Path, help="Pinned Muse binary (needs --sha256)")
+    parser.add_argument("--sha256", help="Expected SHA256 of --binary")
     args = parser.parse_args()
-    configure_binary()
+    if bool(args.binary) != bool(args.sha256):
+        parser.error("--binary and --sha256 go together")
+    if args.binary:
+        os.environ["VULCANBENCH_MUSE_BINARY"] = str(args.binary)
+        os.environ["VULCANBENCH_MUSE_SHA256"] = args.sha256
+        binary_sha256 = args.sha256
+    else:
+        configure_binary()
+        binary_sha256 = BINARY_SHA256
     args.output.mkdir(parents=True, exist_ok=True)
     for effort in args.efforts:
         output = args.output / effort
@@ -49,8 +62,8 @@ def main():
                     "$TMPDIR template described above, write OK to it and verify "
                     "its contents. Stop once these checks pass. Do not commit."
                 ),
-                model=MODEL.split(":", 1)[1],
-                priced_spec=MODEL,
+                model=args.model.split(":", 1)[1],
+                priced_spec=args.model,
                 max_turns=12,
                 collector=collector,
                 stream_log_path=output / "stream.jsonl",
@@ -60,7 +73,7 @@ def main():
             assert outcome.finished and outcome.prompt_tokens > 0
             subprocess.run(
                 [
-                    "/opt/homebrew/bin/python3",
+                    sys.executable,
                     "-c",
                     "from add import add; assert add(2,3)==5; assert add(-2,2)==0",
                 ],
@@ -72,10 +85,11 @@ def main():
                 "effort": effort,
                 "state": "passed",
                 "duration_s": time.monotonic() - started,
-                "binary_sha256": BINARY_SHA256,
+                "model": args.model,
+                "binary_sha256": binary_sha256,
                 "outcome": outcome.summary(),
                 "api_equivalent_usd": cost_usd(
-                    MODEL,
+                    args.model,
                     outcome.prompt_tokens,
                     outcome.completion_tokens,
                     cached_input_tokens=outcome.cached_input_tokens,

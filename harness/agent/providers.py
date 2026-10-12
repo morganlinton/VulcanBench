@@ -375,7 +375,7 @@ def _resolve_meta_route(model: str) -> MetaRoute:
             model=model,
             wire_model=model,
             via="meta" if base == META_DEFAULT_BASE_URL else "custom",
-            key_envs=("META_MUSE_SPARK_API", "MODEL_API_KEY"),
+            key_envs=("META_MUSE_SPARK_API", "MUSE_API_KEY", "MODEL_API_KEY"),
         )
     if model.endswith("-contributor"):
         # The data-sharing tier is a Meta-direct product. Routed, the namespaced
@@ -391,7 +391,7 @@ def _resolve_meta_route(model: str) -> MetaRoute:
         # OpenRouter namespaces the id; the harness spec stays "meta:muse-spark-1.2".
         wire_model=model if "/" in model else f"meta/{model}",
         via="openrouter",
-        key_envs=("OPENROUTER_API_KEY", "META_MUSE_SPARK_API", "MODEL_API_KEY"),
+        key_envs=("OPENROUTER_API_KEY", "META_MUSE_SPARK_API", "MUSE_API_KEY", "MODEL_API_KEY"),
         extra_payload={"provider": {"order": [_OPENROUTER_UPSTREAM], "allow_fallbacks": False}},
     )
 

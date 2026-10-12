@@ -1,0 +1,73 @@
+{
+  "id": "oss-vyre-loop-peel-first-iter",
+  "category": "bug_fix",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "localized",
+  "created": "2026-07-19",
+  "repo_scale": "xlarge",
+  "source": "oss",
+  "decontaminated": false,
+  "image": "vulcanbench/sandbox:rust",
+  "base_commit": "a9fc3ba07092a833fd96d11e52c9e3c0a75dd26b",
+  "upstream": {
+    "url": "https://github.com/santhreal/vyre",
+    "issue": "https://github.com/santhreal/vyre/commit/a94026fb04f78600677f696415ae276cf3067b29",
+    "commit": "a94026fb04f78600677f696415ae276cf3067b29"
+  },
+  "decontamination_notes": "Real bug fix from santhreal/vyre commit a94026f (2026-06-22), after model training cutoffs. loop_peel lifted only the first-iteration guard then-arm and left rest exclusively in the i=1 remainder loop, dropping rest[i:=0] and leaving Var(i) unsubstituted in the prologue. Full workspace slice at the parent commit. LICENSE-MIT/LICENSE-APACHE preserved. Hidden tests: 5 fail_to_pass (multi-rest, nested rest, arith index, swapped Eq, reference_eval oracle) plus 5 pass_to_pass skip/remainder guards.",
+  "grader": "tests",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "multi_trailing",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_materializes_multiple_trailing_rest_stores_at_i_zero"
+      },
+      {
+        "name": "nested_if_rest",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_inside_nested_if_in_rest"
+      },
+      {
+        "name": "arith_index",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_substitutes_induction_in_then_arm_arithmetic_index"
+      },
+      {
+        "name": "swapped_eq",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_accepts_swapped_eq_operands"
+      },
+      {
+        "name": "ref_eval_oracle",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_preserves_reference_eval_on_buffer_stores"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "remainder_multi",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_remainder_keeps_from_one_after_multi_rest"
+      },
+      {
+        "name": "skip_else",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_when_otherwise_arm_is_nonempty"
+      },
+      {
+        "name": "skip_rest_rebind",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_when_rest_rebinds_induction"
+      },
+      {
+        "name": "skip_n1",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_trip_count_one"
+      },
+      {
+        "name": "skip_nonzero_guard",
+        "cmd": "cargo test -p vyre-foundation --offline --test vb_loop_peel peel_skips_guard_on_nonzero_literal"
+      }
+    ]
+  },
+  "test_timeout_s": 900,
+  "agent_hints": {
+    "suggested_max_steps": 200,
+    "suggested_timeout_s": 1800
+  }
+}

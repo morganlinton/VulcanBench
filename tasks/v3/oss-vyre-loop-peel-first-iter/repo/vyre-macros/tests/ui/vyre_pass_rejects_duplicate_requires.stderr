@@ -1,0 +1,5 @@
+error: duplicate vyre_pass requires entry `domtree`. Fix: list each dependency, invalidation, or capability once.
+ --> tests/ui/vyre_pass_rejects_duplicate_requires.rs:3:69
+  |
+3 | #[vyre_pass(name = "bad_duplicate_requires", requires = ["domtree", "domtree"], invalidates = [])]
+  |                                                                     ^^^^^^^^^

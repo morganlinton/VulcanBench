@@ -1,0 +1,217 @@
+# vyrec release parity target: Linux lib/math at v6.8.
+#
+# This file freezes the first real Linux subsystem target for clang-parity
+# through semantic analysis. It is intentionally data, not prose, so tools can
+# consume it as the release proof harness is implemented.
+
+schema = "vyrec.parity.target.v1"
+id = "linux-lib-math-v6.8"
+name = "Linux kernel lib/math subsystem"
+upstream = "https://github.com/torvalds/linux.git"
+tag = "v6.8"
+commit = "90d1f30371ae3337beb01666b226320728d35c70"
+subsystem_root = "lib/math"
+target_triple = "x86_64-unknown-linux-gnu"
+language = "gnu11"
+
+[scope]
+description = "Every C translation unit in Linux lib/math at v6.8, plus the direct kernel headers and asm headers required by those units."
+lowering = false
+pre_lowering_required = true
+clang_parity_through = "semantic-analysis"
+cpu_execution_allowed = "oracle-only"
+gpu_execution_required = true
+
+[baseline.clang]
+purpose = "Oracle fact extraction only."
+required_outputs = [
+  "preprocessed_tokens",
+  "diagnostics",
+  "ast_declarations",
+  "ast_statements",
+  "expression_types",
+  "scope_facts",
+  "type_facts",
+  "abi_layout_facts",
+]
+
+[baseline.vyrec]
+required_outputs = [
+  "preprocessed_tokens",
+  "diagnostics",
+  "vast",
+  "program_graph",
+  "semantic_graph",
+  "semantic_scope",
+  "type_facts",
+  "abi_layout_facts",
+  "object_evidence",
+  "gpu_residency_report",
+  "performance_report",
+]
+
+[release_gates]
+zero_unexplained_parity_mismatches = true
+zero_silent_cpu_fallbacks = true
+zero_silent_cpu_demotions = true
+zero_false_no_gpu_skips = true
+resident_gpu_frontend_required = true
+megakernel_or_resident_graph_measurement_required = true
+clang_baseline_required = true
+reproducible_performance_claim_required = true
+
+[files]
+sources = [
+  "lib/math/cordic.c",
+  "lib/math/div64.c",
+  "lib/math/gcd.c",
+  "lib/math/int_log.c",
+  "lib/math/int_pow.c",
+  "lib/math/int_sqrt.c",
+  "lib/math/lcm.c",
+  "lib/math/prime_numbers.c",
+  "lib/math/rational-test.c",
+  "lib/math/rational.c",
+  "lib/math/reciprocal_div.c",
+  "lib/math/test_div64.c",
+]
+
+metadata_files = [
+  "lib/math/Kconfig",
+  "lib/math/Makefile",
+]
+
+direct_headers = [
+  "asm/bug.h",
+  "asm/div64.h",
+  "linux/bitops.h",
+  "linux/bug.h",
+  "linux/compiler.h",
+  "linux/cordic.h",
+  "linux/export.h",
+  "linux/gcd.h",
+  "linux/init.h",
+  "linux/int_log.h",
+  "linux/kernel.h",
+  "linux/ktime.h",
+  "linux/lcm.h",
+  "linux/limits.h",
+  "linux/log2.h",
+  "linux/math.h",
+  "linux/math64.h",
+  "linux/minmax.h",
+  "linux/module.h",
+  "linux/mutex.h",
+  "linux/prime_numbers.h",
+  "linux/printk.h",
+  "linux/rational.h",
+  "linux/reciprocal_div.h",
+  "linux/slab.h",
+  "linux/time64.h",
+  "linux/types.h",
+  "kunit/test.h",
+]
+
+[[translation_units]]
+path = "lib/math/cordic.c"
+direct_headers = ["linux/module.h", "linux/cordic.h"]
+
+[[translation_units]]
+path = "lib/math/div64.c"
+direct_headers = ["linux/bitops.h", "linux/export.h", "linux/math.h", "linux/math64.h", "linux/log2.h"]
+
+[[translation_units]]
+path = "lib/math/gcd.c"
+direct_headers = ["linux/kernel.h", "linux/gcd.h", "linux/export.h"]
+
+[[translation_units]]
+path = "lib/math/int_log.c"
+direct_headers = ["linux/bitops.h", "linux/export.h", "linux/int_log.h", "linux/kernel.h", "linux/types.h", "asm/bug.h"]
+
+[[translation_units]]
+path = "lib/math/int_pow.c"
+direct_headers = ["linux/export.h", "linux/math.h", "linux/types.h"]
+
+[[translation_units]]
+path = "lib/math/int_sqrt.c"
+direct_headers = ["linux/export.h", "linux/bitops.h", "linux/limits.h", "linux/math.h"]
+
+[[translation_units]]
+path = "lib/math/lcm.c"
+direct_headers = ["linux/compiler.h", "linux/gcd.h", "linux/export.h", "linux/lcm.h"]
+
+[[translation_units]]
+path = "lib/math/prime_numbers.c"
+direct_headers = ["linux/module.h", "linux/mutex.h", "linux/prime_numbers.h", "linux/slab.h"]
+
+[[translation_units]]
+path = "lib/math/rational-test.c"
+direct_headers = ["kunit/test.h", "linux/rational.h"]
+
+[[translation_units]]
+path = "lib/math/rational.c"
+direct_headers = ["linux/rational.h", "linux/compiler.h", "linux/export.h", "linux/minmax.h", "linux/limits.h", "linux/module.h"]
+
+[[translation_units]]
+path = "lib/math/reciprocal_div.c"
+direct_headers = ["linux/bitops.h", "linux/bug.h", "linux/export.h", "linux/limits.h", "linux/math.h", "linux/minmax.h", "linux/types.h", "linux/reciprocal_div.h"]
+
+[[translation_units]]
+path = "lib/math/test_div64.c"
+direct_headers = ["linux/init.h", "linux/ktime.h", "linux/module.h", "linux/printk.h", "linux/time64.h", "linux/types.h", "asm/div64.h"]
+
+[proof_required]
+preprocessor = [
+  "include_graph",
+  "conditional_state",
+  "macro_definitions",
+  "macro_expansions",
+  "macro_origin_spans",
+  "diagnostics",
+]
+lexer = [
+  "token_kind",
+  "token_spelling",
+  "token_span",
+  "literal_facts",
+  "line_table",
+  "macro_expansion_frame",
+]
+parser = [
+  "declarations",
+  "declarators",
+  "statements",
+  "expressions",
+  "initializers",
+  "attributes",
+  "gnu_extensions",
+]
+semantic_analysis = [
+  "scopes",
+  "symbols",
+  "references",
+  "redeclarations",
+  "type_inference",
+  "conversions",
+  "lvalue_rules",
+  "constant_expressions",
+  "diagnostics",
+]
+abi_layout = [
+  "size",
+  "alignment",
+  "field_offsets",
+  "bitfields",
+  "enum_representation",
+  "function_abi_facts",
+]
+performance = [
+  "clang_wall_time",
+  "vyrec_wall_time",
+  "kernel_launch_count",
+  "host_readback_bytes",
+  "host_write_bytes",
+  "device_allocation_bytes",
+  "resident_graph_reuse",
+  "megakernel_queue_metrics",
+]

@@ -1,0 +1,50 @@
+[package]
+name = "vyre-driver-metal"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/vyre-driver-metal"
+description = "Native Metal backend for vyre IR through Metal.framework."
+readme = "README.md"
+keywords = ["gpu", "compute", "metal", "msl", "vyre"]
+categories = ["hardware-support"]
+
+[lib]
+name = "vyre_driver_metal"
+path = "src/lib.rs"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints.rust]
+unsafe_code = "allow"
+missing_docs = "deny"
+unreachable_pub = "warn"
+nonstandard_style = { level = "warn", priority = -1 }
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "warn"
+
+[dependencies]
+vyre-driver = { workspace = true }
+vyre-foundation = { workspace = true }
+vyre-lower = { workspace = true }
+vyre-emit-metal = { workspace = true }
+inventory.workspace = true
+tracing.workspace = true
+
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+metal.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dev-dependencies]
+vyre-driver-wgpu = { workspace = true }

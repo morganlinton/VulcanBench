@@ -1,0 +1,176 @@
+# vyre  -  Machine-readable performance targets per crate.
+#
+# Each entry locks a measurable target on a named bench/test. Values are
+# the publish-blocker ceilings. The release signoff gate
+# (`scripts/check_perf_targets.sh`) verifies that every entry below has
+# a matching benchmark file under `benches/` or `tests/`, that the
+# named ID is a real Criterion benchmark id or test name, and (when
+# `benches/RESULTS.md` exists) that the latest measurement does not
+# exceed the budget.
+#
+# Why machine-readable: humans drift. CI does not.
+#
+# Schema:
+#   [crates.<name>.targets.<id>]
+#     bench        -  file path under benches/ or tests/ that produces the metric
+#     metric       -  one of {time_ns, time_us, time_ms, throughput_gibps,
+#                            throughput_kops, allocs, bytes, hit_rate_pct}
+#     budget       -  numeric ceiling (or floor for hit_rate_pct / throughput_*)
+#     direction    -  "max" (smaller is better) or "min" (larger is better)
+#     description  -  one-line human pointer
+#
+# The same bench can produce multiple metrics; one entry per metric.
+
+[crates.vyre-driver-wgpu.targets.dispatch_latency_cached]
+bench = "vyre-driver-wgpu/tests/dispatch_hot_path.rs"
+metric = "time_us"
+budget = 50
+direction = "max"
+description = "Cached small-program dispatch latency (audit item #15)."
+
+[crates.vyre-driver-wgpu.targets.batched_submit_latency]
+bench = "vyre-driver-wgpu/tests/dispatch_hot_path.rs"
+metric = "time_us"
+budget = 200
+direction = "max"
+description = "Batched submit + readback latency for 16-way dispatches."
+
+[crates.vyre-driver-wgpu.targets.long_buffer_throughput]
+bench = "vyre-driver-wgpu/tests/dispatch_hot_path.rs"
+metric = "throughput_gibps"
+budget = 8
+direction = "min"
+description = "Hot 4 MiB long-buffer dispatch + readback throughput."
+
+[crates.vyre-driver-wgpu.targets.compile_cache_hit_rate]
+bench = "vyre-driver-wgpu/tests/pipeline_cache_contract.rs"
+metric = "hit_rate_pct"
+budget = 95
+direction = "min"
+description = "Steady-state compile-cache hit rate; falls when canonicalization drifts."
+
+[crates.vyre-driver-wgpu.targets.dispatch_steady_state_allocs]
+bench = "vyre-driver-wgpu/tests/dispatch_allocation_contract.rs"
+metric = "allocs"
+budget = 4
+direction = "max"
+description = "Steady-state heap allocations per dispatch (audit item #10)."
+
+[crates.vyre-runtime.targets.fingerprint_per_program]
+bench = "vyre-runtime/benches/pipeline_cache_bench.rs"
+metric = "time_us"
+budget = 250
+direction = "max"
+description = "Pipeline fingerprinting cost per Program (audit items #19/#20)."
+
+[crates.vyre-runtime.targets.megakernel_dispatch]
+bench = "vyre-runtime/benches/megakernel_bench.rs"
+metric = "time_us"
+budget = 500
+direction = "max"
+description = "Megakernel single-program dispatch cost."
+
+[crates.vyre-runtime.targets.megakernel_batch_throughput]
+bench = "vyre-runtime/benches/megakernel_batch.rs"
+metric = "throughput_kops"
+budget = 200
+direction = "min"
+description = "Megakernel batched program throughput; floor for the 0.7 release."
+
+[crates.vyre-runtime.targets.ring_protocol_overhead]
+bench = "vyre-runtime/benches/ring_protocol_bench.rs"
+metric = "time_ns"
+budget = 200
+direction = "max"
+description = "Ring-protocol enqueue/dequeue overhead per slot."
+
+[crates.vyre-runtime.targets.nvme_ingest_throughput]
+bench = "vyre-runtime/benches/nvme_ingest.rs"
+metric = "throughput_gibps"
+budget = 6
+direction = "min"
+description = "NVMe → GPU streaming throughput via io_uring (audit item #47)."
+
+[crates.vyre-foundation.targets.cse_per_program]
+bench = "vyre-foundation/benches/cse.rs"
+metric = "time_us"
+budget = 150
+direction = "max"
+description = "CSE pass cost per medium Program."
+
+[crates.vyre-foundation.targets.fuse_programs_per_call]
+bench = "vyre-foundation/benches/fuse_programs.rs"
+metric = "time_us"
+budget = 200
+direction = "max"
+description = "Whole-Program fusion cost per call."
+
+[crates.vyre-foundation.targets.optimizer_scheduler]
+bench = "vyre-foundation/benches/optimizer_scheduler.rs"
+metric = "time_us"
+budget = 300
+direction = "max"
+description = "Optimizer scheduler cost per program."
+
+[crates.vyre-libs.targets.cat_a_dispatch]
+bench = "vyre-libs/benches/cat_a_bench.rs"
+metric = "time_us"
+budget = 500
+direction = "max"
+description = "Category-A op dispatch cost (matmul / softmax / dfa_scan / etc.)."
+
+[crates.vyre-libs.targets.dfa_scan_throughput]
+bench = "vyre-libs/benches/cooperative_dfa_vs_classic.rs"
+metric = "throughput_gibps"
+budget = 4
+direction = "min"
+description = "DFA scan throughput; the matching moat."
+
+[crates.vyre-libs.targets.decode_scan_throughput]
+bench = "vyre-libs/benches/decode_scan.rs"
+metric = "throughput_gibps"
+budget = 5
+direction = "min"
+description = "Base64 decode + scan throughput; the streaming moat."
+
+[crates.vyre-libs.targets.production_corpus_throughput]
+bench = "vyre-libs/benches/production_corpus.rs"
+metric = "throughput_kops"
+budget = 100
+direction = "min"
+description = "End-to-end Cat-A throughput on the production corpus."
+
+[crates.vyre-reference.targets.eval_throughput]
+bench = "vyre-reference/benches/eval_throughput.rs"
+metric = "throughput_kops"
+budget = 50
+direction = "min"
+description = "CPU reference interpreter throughput floor."
+
+[crates.vyre-intrinsics.targets.intrinsic_perf]
+bench = "vyre-intrinsics/benches/intrinsic_perf.rs"
+metric = "time_ns"
+budget = 1000
+direction = "max"
+description = "Per-intrinsic dispatch cost on hot ops."
+
+[crates.benches-smoke.targets.smoke_runtime]
+bench = "benches/smoke/benches/smoke.rs"
+metric = "time_ms"
+budget = 4000
+direction = "max"
+description = "Smoke-bench wall-clock; CI gate ceiling."
+
+[crates.benches-deep.targets.deep_runtime]
+bench = "benches/deep/benches/deep.rs"
+metric = "time_ms"
+budget = 60000
+direction = "max"
+description = "Deep-bench wall-clock; nightly gate ceiling."
+
+[crates.benches-competition.targets.competition_throughput]
+bench = "benches/competition/src/lib.rs"
+metric = "throughput_kops"
+budget = 500
+direction = "min"
+description = "Competition harness throughput floor (surgec/vyre integration). The harness ships as a library with TOML rulesets under benches/competition/rulesets/."

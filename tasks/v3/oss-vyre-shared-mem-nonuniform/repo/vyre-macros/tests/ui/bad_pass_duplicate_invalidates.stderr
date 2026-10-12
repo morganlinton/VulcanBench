@@ -1,0 +1,5 @@
+error: duplicate vyre_pass invalidates entry `alias`. Fix: list each dependency, invalidation, or capability once.
+ --> tests/ui/bad_pass_duplicate_invalidates.rs:6:29
+  |
+6 |     invalidates = ["alias", "alias"]
+  |                             ^^^^^^^

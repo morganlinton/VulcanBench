@@ -1,0 +1,9 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  santh:
+    uses: santh-project/santh-ci/.github/workflows/main.yml@v1

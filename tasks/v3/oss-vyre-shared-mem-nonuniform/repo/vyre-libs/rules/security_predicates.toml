@@ -1,0 +1,151 @@
+schema_version = 1
+
+[[predicate]]
+id = "auth_check_dominates"
+module = "auth_check_dominates"
+function = "auth_check_dominates"
+op_id = "vyre-libs::security::auth_check_dominates"
+operation = "bitset_and"
+inputs = ["auth_doms", "sensitive_op_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/auth_check_dominates/basic_overlap"
+weir_mapping = "dominance(auth_check, sensitive_operation)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]
+
+[[predicate]]
+id = "buffer_size_check"
+module = "buffer_size_check"
+function = "buffer_size_check"
+op_id = "vyre-libs::security::buffer_size_check"
+operation = "bitset_and"
+inputs = ["size_compared", "user_input_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/buffer_size_check/basic_overlap"
+weir_mapping = "range_comparison(size_compared, user_input)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]
+
+[[predicate]]
+id = "format_string_check"
+module = "format_string_check"
+function = "format_string_check"
+op_id = "vyre-libs::security::format_string_check"
+operation = "bitset_and_not"
+inputs = ["format_arg_pts", "non_literal_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/format_string_check/basic_subtraction"
+weir_mapping = "points_to(format_argument) minus non_literal"
+witness_lhs = [15]
+witness_rhs = [12]
+witness_expected = [3]
+
+[[predicate]]
+id = "lock_dominates"
+module = "lock_dominates"
+function = "lock_dominates"
+op_id = "vyre-libs::security::lock_dominates"
+operation = "bitset_and"
+inputs = ["lock_doms", "shared_access_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/lock_dominates/basic_overlap"
+weir_mapping = "dominance(lock_acquire, shared_access)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]
+
+[[predicate]]
+id = "path_canonical"
+module = "path_canonical"
+function = "path_canonical"
+op_id = "vyre-libs::security::path_canonical"
+operation = "bitset_and"
+inputs = ["canonicalizer_dominates", "fs_op_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/path_canonical/basic_overlap"
+weir_mapping = "dominance(path_canonicalizer, filesystem_operation)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]
+
+[[predicate]]
+id = "sanitizer_dominates"
+module = "sanitizer_dominates"
+function = "sanitizer_dominates"
+op_id = "vyre-libs::security::sanitizer_dominates"
+operation = "bitset_and"
+inputs = ["sanitizer_doms", "sink_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/sanitizer_dominates/basic_overlap"
+weir_mapping = "dominance(sanitizer, sink)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]
+
+[[predicate]]
+id = "sql_param_bound"
+module = "sql_param_bound"
+function = "sql_param_bound"
+op_id = "vyre-libs::security::sql_param_bound"
+operation = "bitset_and"
+inputs = ["param_binding_set", "sql_query_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/sql_param_bound/basic_overlap"
+weir_mapping = "dominance(sql_parameter_binding, query_execution)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]
+
+[[predicate]]
+id = "taint_kill"
+module = "taint_kill"
+function = "taint_kill"
+op_id = "vyre-libs::security::taint_kill"
+operation = "bitset_and_not"
+inputs = ["frontier_in", "kill_set"]
+output = "frontier_out"
+soundness = "Exact"
+witness_fixture = "security/taint_kill/basic_subtraction"
+weir_mapping = "frontier minus sanitizer_or_guard_kill_set"
+witness_lhs = [15]
+witness_rhs = [12]
+witness_expected = [3]
+
+[[predicate]]
+id = "unchecked_return"
+module = "unchecked_return"
+function = "unchecked_return"
+op_id = "vyre-libs::security::unchecked_return"
+operation = "bitset_and_not"
+inputs = ["use_set", "check_dominates"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/unchecked_return/basic_subtraction"
+weir_mapping = "return_value_use minus dominance(check, use)"
+witness_lhs = [15]
+witness_rhs = [12]
+witness_expected = [3]
+
+[[predicate]]
+id = "xss_escape"
+module = "xss_escape"
+function = "xss_escape"
+op_id = "vyre-libs::security::xss_escape"
+operation = "bitset_and"
+inputs = ["escape_dominates", "render_set"]
+output = "out"
+soundness = "Exact"
+witness_fixture = "security/xss_escape/basic_overlap"
+weir_mapping = "dominance(html_escape, render_sink)"
+witness_lhs = [12]
+witness_rhs = [10]
+witness_expected = [8]

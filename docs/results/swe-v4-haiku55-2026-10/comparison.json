@@ -1,0 +1,3305 @@
+{
+ "cells": {
+  "haiku55/extra-high": 22,
+  "haiku55/high": 23,
+  "haiku55/low": 23,
+  "haiku55/max": 22,
+  "haiku55/medium": 22
+ },
+ "excluded": [
+  {
+   "duration_s": 281.896,
+   "effort": "medium",
+   "finished": true,
+   "functional": 0.0,
+   "model": "haiku55",
+   "reason": "Incomplete source run: /Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-paddockcore-binary-parity-e3a92210",
+   "run_id": "legacy-paddockcore-binary-parity-e3a92210",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "duration_s": 555.338,
+   "effort": "extra-high",
+   "finished": true,
+   "functional": 0.0,
+   "model": "haiku55",
+   "reason": "Incomplete source run: /Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-paddockcore-binary-parity-727aa3e4",
+   "run_id": "legacy-paddockcore-binary-parity-727aa3e4",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "duration_s": 1782.418,
+   "effort": "max",
+   "finished": true,
+   "functional": 0.0,
+   "model": "haiku55",
+   "reason": "Incomplete source run: /Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-paddockcore-binary-parity-bc105a70",
+   "run_id": "legacy-paddockcore-binary-parity-bc105a70",
+   "task": "legacy-paddockcore-binary-parity"
+  }
+ ],
+ "levels": {
+  "haiku55": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "haiku55": "Claude Haiku 5.5 in Claude Code (refusal fallback on)"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 428.093,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 72
+   },
+   "finished_at": "2026-10-08T13:56:09.667802+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8379,
+   "reported_tokens": 471984,
+   "run_id": "legacy-blendcore-binary-parity-bc364d0a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-blendcore-binary-parity-bc364d0a",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "1883d97a985f75a99ac0904925422a85ba2d8e3c32d7bc0fcfb3c21caca26460",
+    "summary": "53ebd97624b87fde6f4d0493d4ebb44f1254ca25546ea61a93b4d6223308242b",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-08T13:49:01.562765+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 6373.622,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 691
+   },
+   "finished_at": "2026-10-08T18:51:26.280905+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7716,
+   "reported_tokens": 9642073,
+   "run_id": "legacy-cellarcore-binary-parity-f8de7b40",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-cellarcore-binary-parity-f8de7b40",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "b797876bf4174e92df57758c3ecc81a7d4f9d8316ae7912e13c0349ebfafa4dd",
+    "summary": "567d73707641bf3018d5487e8f58e7d5f3b98776ab2779bc701e757ffc13a44d",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-08T17:05:12.569722+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 393.145,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 108
+   },
+   "finished_at": "2026-10-08T11:46:44.787927+00:00",
+   "functional": 0.5,
+   "model": "haiku55",
+   "quality": 0.8233,
+   "reported_tokens": 477303,
+   "run_id": "legacy-codeccore-binary-parity-e2c35d10",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-codeccore-binary-parity-e2c35d10",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "c887f85b10767c45039204b223c1d78968d50eb244722795b599a78ba65e07b1",
+    "summary": "26cf6ad4cd16f540c81bbc49489c12bf7bce905f1acac4669c87de8f13321477",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-08T11:40:11.612173+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 4409.888,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 617
+   },
+   "finished_at": "2026-10-08T15:58:47.959612+00:00",
+   "functional": 0.8571,
+   "model": "haiku55",
+   "quality": 0.756,
+   "reported_tokens": 8354670,
+   "run_id": "legacy-depotcore-binary-parity-1d698f94",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-depotcore-binary-parity-1d698f94",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "c1ad522c926e8bc9ef20b0495762279ae35c7adf3ee20713187aa89d78dbeb5d",
+    "summary": "e4b8a61c59fbf74e46a5e70f4df072db6028ce5d67e00aca28e44148bb913539",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-08T14:45:18.034898+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1320.04,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 239
+   },
+   "finished_at": "2026-10-08T11:40:11.519793+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8305,
+   "reported_tokens": 1545081,
+   "run_id": "legacy-freightcore-binary-parity-4aba54f3",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-freightcore-binary-parity-4aba54f3",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "34a9bfce877373523670efbf21b75bf91e103949c7c06d7c1529e659fcd2e46b",
+    "summary": "91f4572cf7a6286023513d6a5ccc75b1cb52cb7af5feb953d5d1aabac7013127",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-08T11:18:11.466653+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2585.861,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 424
+   },
+   "finished_at": "2026-10-08T14:45:17.922778+00:00",
+   "functional": 0.9286,
+   "model": "haiku55",
+   "quality": 0.6915,
+   "reported_tokens": 3938164,
+   "run_id": "legacy-granarycore-binary-parity-c01503f3",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-granarycore-binary-parity-c01503f3",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "4eff17af1f6802c192ca8cc0342e02d06498af245acf4b8b1752481c1a86af1c",
+    "summary": "d8878b1dff9a2e92e66e84699d916196df4adde1ed8ec8a4aadc9a56e97fb923",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-08T14:02:11.975794+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 926.155,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 125
+   },
+   "finished_at": "2026-10-08T12:52:39.541258+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.838,
+   "reported_tokens": 916872,
+   "run_id": "legacy-hedgecore-binary-parity-fff96e9f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-hedgecore-binary-parity-fff96e9f",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "b26f0c6602e06ec18b1de9944c1ac4a9a64326448279b0297ddd7e5797b3e528",
+    "summary": "3a303f36db0cc5835b7bf64365d7205a0769fe6e16889aa4a9d6b2d865ffd9be",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-08T12:37:13.361768+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3984.339,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 595
+   },
+   "finished_at": "2026-10-08T17:05:12.463546+00:00",
+   "functional": 0.5833,
+   "model": "haiku55",
+   "quality": 0.7583,
+   "reported_tokens": 5840810,
+   "run_id": "legacy-lodgecore-binary-parity-bc303836",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-lodgecore-binary-parity-bc303836",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "f770eabcff33b97d45d7b10f3288c41e7e6e78ec78e1d4589effdaeb7c2b1890",
+    "summary": "4918530bf244d0a04e12e7010db2dbc0c6382323e24ff219f000d5966ee7a8af",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-08T15:58:48.098475+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 526.406,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 134
+   },
+   "finished_at": "2026-10-08T10:59:30.829430+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8023,
+   "reported_tokens": 574781,
+   "run_id": "legacy-matchcore-order-book-parity-610a7b33",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-matchcore-order-book-parity-610a7b33",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "f29dfd5365d1e3353dff56b930af9a0157db0030cb799b51af5643805325a926",
+    "summary": "594e4a7d99390c8f682f6d212de16771aadf56b63e6969222eba4d5dfd39c0a7",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-08T10:50:44.416254+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 185.423,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 62
+   },
+   "finished_at": "2026-10-08T11:18:11.374073+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8364,
+   "reported_tokens": 188480,
+   "run_id": "legacy-metercore-binary-parity-ab4fda15",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-metercore-binary-parity-ab4fda15",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "44e9745d24dee42d3f574c76b77b8ed11ddcbf17cbc318a0364a13bb7c520eb7",
+    "summary": "b33ea43b304eec15bc41cf4e91244a5ea0f4f07e3c0e752b4114e6d161a02ccb",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-08T11:15:05.939951+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 412.42,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 66
+   },
+   "finished_at": "2026-10-08T13:49:01.393605+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8243,
+   "reported_tokens": 457277,
+   "run_id": "legacy-pacecore-binary-parity-2790008f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-pacecore-binary-parity-2790008f",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "d719d9df236541f46926c51473ee0d8ba608e0e2a6afc3542e9247ec13e2cf35",
+    "summary": "7fe35c01bcc985df3ce7d9ab45331ba8481fb023273e37799ed73a3323bb2d7f",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-08T13:42:08.963019+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2148.097,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 258
+   },
+   "finished_at": "2026-10-08T19:27:14.548506+00:00",
+   "functional": 0.5333,
+   "model": "haiku55",
+   "quality": 0.713,
+   "reported_tokens": 51283,
+   "run_id": "legacy-paddockcore-binary-parity-a8024770",
+   "security": 1.0,
+   "solver_cli_version": "2.1.294 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-paddockcore-binary-parity-a8024770",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "b84326f3155acc6ced45070d4af5838fc0c2fad96a0528eac9113f110c54ac6b",
+    "summary": "5117b512cf69e4a4acca45ed8bdd3327e76104009cbf7bca1a744bccaf861809",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-08T18:51:26.406416+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 456.12,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 149
+   },
+   "finished_at": "2026-10-08T11:15:05.857802+00:00",
+   "functional": 0.9,
+   "model": "haiku55",
+   "quality": 0.8007,
+   "reported_tokens": 652093,
+   "run_id": "legacy-payrollcore-binary-parity-c5ff2763",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-payrollcore-binary-parity-c5ff2763",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "ba14b63853de5d41b4511dc77b59c402587af436199e4df557d112226f598e77",
+    "summary": "c6bb2d3424df07831834c565e7e3c1ed2f7a2304d859ecfb55d6192d70992be2",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-08T11:07:29.731798+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 478.726,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 57
+   },
+   "finished_at": "2026-10-08T11:07:29.644483+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8171,
+   "reported_tokens": 26363,
+   "run_id": "legacy-qlite-store-parity-200b8fd1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-qlite-store-parity-200b8fd1",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "1f26929c0556ba64b0f37a4e3b082dfc27a6796fa720d6d3a83021dcd641d2e6",
+    "summary": "2916582af05fa5c44809d88a4f50faefae84b855428af32801f3ec893397213b",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-08T10:59:30.916139+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1175.863,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 130
+   },
+   "finished_at": "2026-10-08T12:37:13.259698+00:00",
+   "functional": 0.75,
+   "model": "haiku55",
+   "quality": 0.8311,
+   "reported_tokens": 18075,
+   "run_id": "legacy-queuecore-binary-parity-fc789193",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-queuecore-binary-parity-fc789193",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "b82fa6dba31af391a108125c3bf12b0bedfa933c0175809268dd9b2b4e9378a6",
+    "summary": "f34442941ae36171cf6c68698bcc801c0efae7c6b9ef7bffafcee52760f25121",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-08T12:17:37.372699+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 550.984,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 73
+   },
+   "finished_at": "2026-10-08T11:55:55.887884+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8495,
+   "reported_tokens": 25326,
+   "run_id": "legacy-quotacore-binary-parity-5fde1928",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-quotacore-binary-parity-5fde1928",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "9220e7ed1e30f52db39dbaa413db32c1fd9a04cf107b9ff4fb83a697f6584f0b",
+    "summary": "6cf5f299f3a2a2ac4999a561c1896d0afefbece9ba61500e960c0c3165778cb1",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-08T11:46:44.895394+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1094.203,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 134
+   },
+   "finished_at": "2026-10-08T13:23:07.883592+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8485,
+   "reported_tokens": 853034,
+   "run_id": "legacy-reflowcore-binary-parity-b151adeb",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-reflowcore-binary-parity-b151adeb",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "f00b28d98d64ef9daa33c05be363317ded0f400c2dccac2b1c07db6e9174246b",
+    "summary": "bb3eade156eaa27be649f5ec104c014a1b7fbb16eae199ba84b5eb00921a983b",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-08T13:04:53.651089+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 733.867,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 99
+   },
+   "finished_at": "2026-10-08T13:04:53.532036+00:00",
+   "functional": 0.875,
+   "model": "haiku55",
+   "quality": 0.8119,
+   "reported_tokens": 565554,
+   "run_id": "legacy-schedcore-binary-parity-534d4552",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-schedcore-binary-parity-534d4552",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "f017b250dffedf59661df65b1092e8714a394886d92116e0dc6ce91527008fae",
+    "summary": "c604a963a35dc6b74c1936dc9d08cf70096915c7e52f937db702b45739662ffd",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-08T12:52:39.645690+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 632.559,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 140
+   },
+   "finished_at": "2026-10-08T10:50:44.331893+00:00",
+   "functional": 0.7,
+   "model": "haiku55",
+   "quality": 0.798,
+   "reported_tokens": 558533,
+   "run_id": "legacy-settlecore-binary-parity-0b529209",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-settlecore-binary-parity-0b529209",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "d131c16cf4f57666bdfa08e106fa71a56f5c0e8d7efd70cc8c04cd5bab82d0ad",
+    "summary": "6bb7f1e5c6a01f6c41070f28f3b3d8247f1facb7e2a0669230af5050434b0b11",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-08T10:40:11.762595+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 823.559,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 196
+   },
+   "finished_at": "2026-10-08T12:09:39.560159+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8423,
+   "reported_tokens": 1072079,
+   "run_id": "legacy-snapcore-binary-parity-c81b5a59",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-snapcore-binary-parity-c81b5a59",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "b651b263789fa16bfd9d89721e4cb1ad51775bdde6516cefc3ce4bdcf604bc97",
+    "summary": "ecf1d004757a286eff707516f34947212a9880af9207e91550255ca7ac1d179f",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-08T11:55:55.979822+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 362.045,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 60
+   },
+   "finished_at": "2026-10-08T14:02:11.840546+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8258,
+   "reported_tokens": 415619,
+   "run_id": "legacy-stampcore-binary-parity-cea193f2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-stampcore-binary-parity-cea193f2",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "d6c3aa46a9392fbfbaf323d98062f36fbf139180a238e52e07400c99895243c8",
+    "summary": "c1415d60ea76a0933b03dabfefb37e49e072ace7a3b9f671fd1c346e5c0ae63d",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-08T13:56:09.796733+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1140.866,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 141
+   },
+   "finished_at": "2026-10-08T13:42:08.841122+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8396,
+   "reported_tokens": 1355591,
+   "run_id": "legacy-tallycore-binary-parity-c76e617f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-tallycore-binary-parity-c76e617f",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "a4cb76793ea18413deb0db9d7a1f13d98578a1a84d41edf8f51f6eb66044c95f",
+    "summary": "2471ef55b528dcd12d671b34e8a7ef490d8a8aaac5def9d61d5bd299ee4278bf",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-08T13:23:08.000037+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 477.507,
+   "effort": "low",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 99
+   },
+   "finished_at": "2026-10-08T12:17:37.239129+00:00",
+   "functional": 0.7778,
+   "model": "haiku55",
+   "quality": 0.8482,
+   "reported_tokens": 449178,
+   "run_id": "legacy-vaultcore-binary-parity-2cc05cd1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.293 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/low/legacy-vaultcore-binary-parity-2cc05cd1",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "e9567a6e8467dfd46f868193ea4e82aabbdaaf90c8153be01c2e970ce947c755",
+    "summary": "98cceb61e62381929dbbe5fac31a32833c5f54249ebd3f56a4cff7a76ed71b74",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-08T12:09:39.693566+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 502.699,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 110
+   },
+   "finished_at": "2026-10-08T23:20:49.710738+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8332,
+   "reported_tokens": 664858,
+   "run_id": "legacy-blendcore-binary-parity-40f6e7ae",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-blendcore-binary-parity-40f6e7ae",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "d0c79d12343c856dc3a8a5f88c8478cc7e84df0e5157237d07b16ea19629f921",
+    "summary": "d5a87dfe6362bcebcde44170e24f0a3a8d1793e6a648e4787d762fddd1f0e1d6",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-08T23:12:27.001881+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2431.756,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 526
+   },
+   "finished_at": "2026-10-09T04:35:07.334936+00:00",
+   "functional": 0.7857,
+   "model": "haiku55",
+   "quality": 0.7635,
+   "reported_tokens": 5568467,
+   "run_id": "legacy-cellarcore-binary-parity-efaff928",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-cellarcore-binary-parity-efaff928",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "ef8a52b96f0f1794c904b64a956cc0ee353318411cdb547b12c16868ff3a3a1a",
+    "summary": "99636293756144c461356360bf7427e76f267f3d8c80dca150899975bafd2c8d",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-09T03:54:35.504911+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 642.807,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 157
+   },
+   "finished_at": "2026-10-08T20:52:47.696368+00:00",
+   "functional": 0.6,
+   "model": "haiku55",
+   "quality": 0.8668,
+   "reported_tokens": 854835,
+   "run_id": "legacy-codeccore-binary-parity-1d06e261",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-codeccore-binary-parity-1d06e261",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "8ce35df45f726cb2544b852d5fa08e194f5b054adabfb6a9eb2b70782950c02d",
+    "summary": "8d21620414223e99d0293f3952855cdc5a2f62ce65487bf81215540c2ae13de6",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-08T20:42:04.876748+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 7537.863,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 828
+   },
+   "finished_at": "2026-10-09T02:13:46.887056+00:00",
+   "functional": 0.9286,
+   "model": "haiku55",
+   "quality": 0.7577,
+   "reported_tokens": 71281,
+   "run_id": "legacy-depotcore-binary-parity-bbb5b28a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-depotcore-binary-parity-bbb5b28a",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "49c709179a18e026e91f3250bb259d93cee19fcd4c659da43d9f6b640959793a",
+    "summary": "b95365f3563290adce26c13a2336e84a34946f07be858035828027ff6f1137fa",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-09T00:08:08.881972+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 878.8,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 216
+   },
+   "finished_at": "2026-10-08T20:42:04.773635+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8301,
+   "reported_tokens": 1384306,
+   "run_id": "legacy-freightcore-binary-parity-a02eb40f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-freightcore-binary-parity-a02eb40f",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "6b582a35a7a4fe842f1af666fda04f337153678c0a9fe1d8a132d18845e6f893",
+    "summary": "1b1c617a2803afa7faa8eb71c4f21fc4d3376953b07cd7988e9a43a6ab7f8d92",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-08T20:27:25.958052+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2273.681,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 433
+   },
+   "finished_at": "2026-10-09T00:08:08.775664+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.6904,
+   "reported_tokens": 80971,
+   "run_id": "legacy-granarycore-binary-parity-e609b442",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-granarycore-binary-parity-e609b442",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "876d592302feda4d8616afb6a049ab6d9dbc8d6b9fe4703fc0dfa919063dd8bd",
+    "summary": "21d96d193fdb632dec0b321ae4e38fb810af478d5354e083eb3da13ffa493a44",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-08T23:30:15.055883+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 629.454,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 72
+   },
+   "finished_at": "2026-10-08T22:25:05.011859+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8235,
+   "reported_tokens": 495404,
+   "run_id": "legacy-hedgecore-binary-parity-0f3e9a09",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-hedgecore-binary-parity-0f3e9a09",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "903758cd92e798edf0a681f5d93d040e9ea4619709d2e51afeba2cdf9d518451",
+    "summary": "1f629c9c8bcb6d29dc242960b13712223c702bec567e26ade2a6fc14bf81a682",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-08T22:14:35.512852+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 6048.277,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 872
+   },
+   "finished_at": "2026-10-09T03:54:35.347218+00:00",
+   "functional": 0.9167,
+   "model": "haiku55",
+   "quality": 0.768,
+   "reported_tokens": 82795,
+   "run_id": "legacy-lodgecore-binary-parity-fe199fcf",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-lodgecore-binary-parity-fe199fcf",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "d1479ec68e9830899beb318ed06b1e63e9b187d78d0f841cda05421b7a1e55c0",
+    "summary": "33fa4dd95b3dbc79a7437ce059b800b5931b4286018b3611c3c5ac38903d301c",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-09T02:13:47.023995+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 535.046,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 140
+   },
+   "finished_at": "2026-10-08T19:46:46.114159+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8126,
+   "reported_tokens": 731851,
+   "run_id": "legacy-matchcore-order-book-parity-6947b600",
+   "security": 1.0,
+   "solver_cli_version": "2.1.294 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-matchcore-order-book-parity-6947b600",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "ae6c100bef8f94be3384a16bcd631c06bccbb2f7a7f7ce04e9101fda79c585cf",
+    "summary": "1bbbc2d679513388e518f6ad507217b749b03034c1fe8929ec0a67fedaa3f2fe",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-08T19:37:51.051847+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 518.682,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 95
+   },
+   "finished_at": "2026-10-08T20:27:25.869547+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8598,
+   "reported_tokens": 357896,
+   "run_id": "legacy-metercore-binary-parity-69505a9e",
+   "security": 0.9,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-metercore-binary-parity-69505a9e",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "cfcf2210efdeb982988b98fc779c30cb6ea9efd1061198c5a6efc60c90c16206",
+    "summary": "b01808ddf4d91c318771130b80cb776e2220368dd343a8b4ed30e339567e2813",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-08T20:18:47.217704+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 594.606,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 135
+   },
+   "finished_at": "2026-10-08T23:12:26.907336+00:00",
+   "functional": 0.0,
+   "model": "haiku55",
+   "quality": 0.8324,
+   "reported_tokens": 722297,
+   "run_id": "legacy-pacecore-binary-parity-d6467031",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-pacecore-binary-parity-d6467031",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "a77e88570c218e145103af4e01d6f89c0ca9b3bb86e90a3afdfe19400a477ba8",
+    "summary": "3249c7c9d76c1fb5614c73922bcf25c7586de7463893499d42d657d604e91b83",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-08T23:02:32.322541+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1465.928,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 272
+   },
+   "finished_at": "2026-10-08T20:18:47.125773+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8083,
+   "reported_tokens": 30154,
+   "run_id": "legacy-payrollcore-binary-parity-e8d4d35a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-payrollcore-binary-parity-e8d4d35a",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "53838d14c0ce739511c263b5278e7b58ba073b58faedcdf0454d2e34c1e7f6fc",
+    "summary": "04ae98b002b49ede85b1e69ee8135fb376c489c12ae553017ece6f6c878004c8",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-08T19:54:21.141088+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 454.818,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 59
+   },
+   "finished_at": "2026-10-08T19:54:21.036339+00:00",
+   "functional": 0.8889,
+   "model": "haiku55",
+   "quality": 0.8235,
+   "reported_tokens": 335619,
+   "run_id": "legacy-qlite-store-parity-7eceada6",
+   "security": 1.0,
+   "solver_cli_version": "2.1.294 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-qlite-store-parity-7eceada6",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "f808584847bfeb8023ea22cb3ee408da49159434468f7324240d30269cac9d2e",
+    "summary": "aaa644c6abb1efb8ba511a3f1d292a5c25deca43963cd55c7b029887b354a64c",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-08T19:46:46.205359+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3096.78,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 243
+   },
+   "finished_at": "2026-10-08T22:14:35.400780+00:00",
+   "functional": 0.75,
+   "model": "haiku55",
+   "quality": 0.8273,
+   "reported_tokens": 1826469,
+   "run_id": "legacy-queuecore-binary-parity-6c40ca2a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-queuecore-binary-parity-6c40ca2a",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "a8b5ca5af915f965a50bdb660a1d6f6ec95246660da39fb9205c418f4cd80381",
+    "summary": "2d4b088a92d95e759e9ffb536b833a860e0545cf43a127069c14164098ab98ac",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-08T21:22:58.580646+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 648.417,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 107
+   },
+   "finished_at": "2026-10-08T21:03:36.261721+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8633,
+   "reported_tokens": 470883,
+   "run_id": "legacy-quotacore-binary-parity-751412ed",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-quotacore-binary-parity-751412ed",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "f3cea4d82961eaf69828426c45b969b179bd106709f5f0653075ed5b43a7e2f2",
+    "summary": "54d116f84a14761d2d732fb77664bddabfa166128e5098e4e599197291cbe768",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-08T20:52:47.802355+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 710.372,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 139
+   },
+   "finished_at": "2026-10-08T22:52:53.493486+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8487,
+   "reported_tokens": 940775,
+   "run_id": "legacy-reflowcore-binary-parity-b8a9c780",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-reflowcore-binary-parity-b8a9c780",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "ba0de31de47b3f8b400d8a111d7101070f947372dcf85352489bef6e2296a747",
+    "summary": "663c1199e50cc8942a618586239f1e28754daaf62496a512f48ab49d5f34b077",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-08T22:41:03.096211+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 957.874,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 115
+   },
+   "finished_at": "2026-10-08T22:41:02.998890+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7917,
+   "reported_tokens": 37536,
+   "run_id": "legacy-schedcore-binary-parity-8eeb005c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-schedcore-binary-parity-8eeb005c",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "362eb977acdd03fa682af54e78bafeb77bd736982a9212b612b7a3e9626a6023",
+    "summary": "6fd607cb64a62124b9a5377d44554ccf6cb15d794657b8504533ffe7690fe60c",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-08T22:25:05.103714+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 629.392,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 67
+   },
+   "finished_at": "2026-10-08T19:37:50.965614+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8242,
+   "reported_tokens": 493650,
+   "run_id": "legacy-settlecore-binary-parity-90dad81f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.294 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-settlecore-binary-parity-90dad81f",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "1af6dee3e8145acfd4f636c2ceeab72b177b4544c260ea1ce9ba46e1e23bbfbd",
+    "summary": "840b2bd7766150bdd21df9cb899df6b765e366207b198601a74e7cb842abdd85",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-08T19:27:21.552379+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 655.932,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 114
+   },
+   "finished_at": "2026-10-08T21:14:32.306105+00:00",
+   "functional": 0.5,
+   "model": "haiku55",
+   "quality": 0.8462,
+   "reported_tokens": 492893,
+   "run_id": "legacy-snapcore-binary-parity-82633242",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-snapcore-binary-parity-82633242",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "5b7ef3bfada77ca9a9922f3895c4cb8cb884a0665dce03e8cb7fc8c90fced871",
+    "summary": "3844348d9003105a034312d97f37cd8b0f20760eb235469b94ac4e4211005f4b",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-08T21:03:36.358492+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 565.152,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 146
+   },
+   "finished_at": "2026-10-08T23:30:14.963734+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8275,
+   "reported_tokens": 739559,
+   "run_id": "legacy-stampcore-binary-parity-b1cc4118",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-stampcore-binary-parity-b1cc4118",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "f2ceba710587a4bf8ad4a0028b736c37c4e63630766d8ebe66011185dd994765",
+    "summary": "ca01a60f74bea446bba753d151d08d04df199dbd466b2b0230bc77db4eefac78",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-08T23:20:49.798899+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 578.612,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 91
+   },
+   "finished_at": "2026-10-08T23:02:32.228441+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8335,
+   "reported_tokens": 615433,
+   "run_id": "legacy-tallycore-binary-parity-fbb4873d",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-tallycore-binary-parity-fbb4873d",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "e9f84d5144f3b5a079baaffe30032abf78126881a6b4d8dac6d712cf0bdad216",
+    "summary": "80e7a3416fd35c1f456e40afacba2ef84b4a187d18f40bccfcfdc61a67148f20",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-08T22:52:53.599362+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 506.101,
+   "effort": "medium",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 127
+   },
+   "finished_at": "2026-10-08T21:22:58.480079+00:00",
+   "functional": 0.7778,
+   "model": "haiku55",
+   "quality": 0.849,
+   "reported_tokens": 513565,
+   "run_id": "legacy-vaultcore-binary-parity-ef9373f9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/medium/legacy-vaultcore-binary-parity-ef9373f9",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "fe01c074e9b67c10dc819084071f6dd0be830046d1f4dee7a3a814bc4eba31cb",
+    "summary": "96e0b35e6f63f239345ea4443dac3dcb16ac11c893789c0019323d0633aa66fa",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-08T21:14:32.396481+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 996.016,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 102
+   },
+   "finished_at": "2026-10-09T10:36:17.557908+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8365,
+   "reported_tokens": 643896,
+   "run_id": "legacy-blendcore-binary-parity-ac118d19",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-blendcore-binary-parity-ac118d19",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "9e2a1ac3262f9ea72c9af76d23ff5a01e73ab9b58f754cb5cbda43e69c9b96e8",
+    "summary": "0008433189260c32fdcb1a67e646659fe03f57dba70f6effecaae6bdcf298524",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-09T10:19:41.432723+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2384.603,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 358
+   },
+   "finished_at": "2026-10-09T13:58:48.333784+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7703,
+   "reported_tokens": 3511047,
+   "run_id": "legacy-cellarcore-binary-parity-be13ef3b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-cellarcore-binary-parity-be13ef3b",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "db6fc4039ad0520f8e73983c480347643275e7f37c446b12f491f30a05b11019",
+    "summary": "7b3f2999165aa6b486730ba5f4476fa944cd6b4f19853d3fecad4d5f05f70663",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-09T13:19:03.639479+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 876.476,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 177
+   },
+   "finished_at": "2026-10-09T06:22:58.863472+00:00",
+   "functional": 0.7,
+   "model": "haiku55",
+   "quality": 0.839,
+   "reported_tokens": 1037893,
+   "run_id": "legacy-codeccore-binary-parity-0ad8840d",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-codeccore-binary-parity-0ad8840d",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "3a9839d8c0de4889ef311a610c583c0a0bc01472f23024aad3a21f96aab4ccd2",
+    "summary": "7df91460fa2a9ec3b9a127259c00612be5feb8beaa064a07b0ccc42b6bacb8df",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-09T06:08:22.162684+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2822.795,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 403
+   },
+   "finished_at": "2026-10-09T12:41:17.240546+00:00",
+   "functional": 0.7857,
+   "model": "haiku55",
+   "quality": 0.7508,
+   "reported_tokens": 3833593,
+   "run_id": "legacy-depotcore-binary-parity-076ae6a1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-depotcore-binary-parity-076ae6a1",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "eddf6250a570a512e23e16d9ba883d47a94b809393e9f7b66005bc34108b851d",
+    "summary": "2d8a30fe818320c98e76d56fd1971dd653e486ec4454ba920e0af4c12bf02e14",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-09T11:54:14.461425+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 925.53,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 112
+   },
+   "finished_at": "2026-10-09T06:08:21.992375+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8475,
+   "reported_tokens": 61257,
+   "run_id": "legacy-freightcore-binary-parity-a271d92c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-freightcore-binary-parity-a271d92c",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "3b128a9528ddf9d405fa3a5426a70c98e6c723d173d3f6b6d481e9bf79336e2a",
+    "summary": "7306d96ae3938d78d40f3fddd1414e7d6bbae6ef71fa213bdc816d46642e732b",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-09T05:52:56.445306+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 4026.066,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 831
+   },
+   "finished_at": "2026-10-09T11:54:14.274086+00:00",
+   "functional": 0.8571,
+   "model": "haiku55",
+   "quality": 0.7268,
+   "reported_tokens": 12394300,
+   "run_id": "legacy-granarycore-binary-parity-0b6ca0c2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-granarycore-binary-parity-0b6ca0c2",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "c8a4d19784da6b92a83a911fb622a610be7e7727930f85347ec0855fe55b05b8",
+    "summary": "a2e63c1f1031782bc1ce4414a27af2abd0ae987d07cc67dce12e83f9aaa01696",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-09T10:47:08.093199+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1536.071,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 214
+   },
+   "finished_at": "2026-10-09T08:27:28.674914+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8385,
+   "reported_tokens": 51607,
+   "run_id": "legacy-hedgecore-binary-parity-b0cf4365",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-hedgecore-binary-parity-b0cf4365",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "0fa40532d3127a5109b0307e691156f70bfe73811d0a4d06f01f60918dc7846a",
+    "summary": "163cad276ffd223c3c35609e742bed934e8593f06bd401de4bb5d7f9cff7b98c",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-09T08:01:52.581483+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2266.163,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 359
+   },
+   "finished_at": "2026-10-09T13:19:03.525334+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7545,
+   "reported_tokens": 111097,
+   "run_id": "legacy-lodgecore-binary-parity-4aa2aaa5",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-lodgecore-binary-parity-4aa2aaa5",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "a669cd04b2ea60e7801416df0c5c7424f97d7fde7e1db378f268e098fef93842",
+    "summary": "07797f11258bfd2cff9c1800a8d04ed99b54c85e2bed28c1af072a43a6c57961",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-09T12:41:17.350350+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 908.205,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 91
+   },
+   "finished_at": "2026-10-09T05:14:20.920009+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7973,
+   "reported_tokens": 653964,
+   "run_id": "legacy-matchcore-order-book-parity-37104592",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-matchcore-order-book-parity-37104592",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "81ff567027ec8b331b507a65b529c45afe5a951b71365fc285361c67b871bf43",
+    "summary": "a585a6acdab19fbe0242ed8bfebbf4c1f3980813a37e4687bae48b9b5ecc78ba",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-09T04:59:12.704397+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 371.997,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 69
+   },
+   "finished_at": "2026-10-09T05:52:56.251212+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8371,
+   "reported_tokens": 259989,
+   "run_id": "legacy-metercore-binary-parity-8e040459",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-metercore-binary-parity-8e040459",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "c5f9b7111371c6433d502c483daf128763c22cb0aab3c2b7f7bfebd320cd1dfb",
+    "summary": "8563e2da2250759664340dd9e5615e5ed6150b8cd189a2984197f7c83b5987f0",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-09T05:46:44.250675+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1351.54,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 173
+   },
+   "finished_at": "2026-10-09T10:19:41.299216+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8355,
+   "reported_tokens": 1315355,
+   "run_id": "legacy-pacecore-binary-parity-4d7c80bf",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-pacecore-binary-parity-4d7c80bf",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "67e748d7ddc8ec95bac0e82dc53a792e7fb647074c5d105a713f6e7e82c65669",
+    "summary": "b159db1bde2d4d7b412771f812a9d5c0bd188a332b7cb98001324a5802a95572",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-09T09:57:09.751090+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3487.922,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 598
+   },
+   "finished_at": "2026-10-09T14:56:56.413161+00:00",
+   "functional": 0.6667,
+   "model": "haiku55",
+   "quality": 0.8338,
+   "reported_tokens": 7065093,
+   "run_id": "legacy-paddockcore-binary-parity-6e4e2be9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-paddockcore-binary-parity-6e4e2be9",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "0a55f9dc4d07a236ccab1223350a858be0401a8d648e5864d4310ee39d40642a",
+    "summary": "9dcd660938c0b07234ed5848216994c1e819917bde057465058de880570874f9",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-09T13:58:48.460353+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1282.575,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 264
+   },
+   "finished_at": "2026-10-09T05:46:44.080211+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8303,
+   "reported_tokens": 1466635,
+   "run_id": "legacy-payrollcore-binary-parity-a18e97ba",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-payrollcore-binary-parity-a18e97ba",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "6948f1c58e742c727ef6164d78038b3e43720b950dfc8888abe4cb18d86138de",
+    "summary": "7a63835a685f5f508d2bdccac05c98531d7f1161efb39414b50ae508a4de9f53",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-09T05:25:21.464354+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 660.296,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 105
+   },
+   "finished_at": "2026-10-09T05:25:21.367517+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8199,
+   "reported_tokens": 440860,
+   "run_id": "legacy-qlite-store-parity-d3d4d697",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-qlite-store-parity-d3d4d697",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "91e3f841295121d1d4caecd63d1dae77dcac4fe6ccad27e362dfac77d74e1ad3",
+    "summary": "e9ec20cb54ef0d6cf55e5e32689d4f8e23642b894fbee0512c452f1dbf48e888",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-09T05:14:21.024143+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2650.013,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 162
+   },
+   "finished_at": "2026-10-09T08:01:51.318527+00:00",
+   "functional": 0.75,
+   "model": "haiku55",
+   "quality": 0.853,
+   "reported_tokens": 46438,
+   "run_id": "legacy-queuecore-binary-parity-926ad0cf",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-queuecore-binary-parity-926ad0cf",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "c82ee295f0aff51af5bfb27a3e01b490e547590ec416b39ae20ec815a59bed49",
+    "summary": "643f57e79e93f68c2cae5b5ea2e54b0bc64b0847660e0d428a6cbedbdfbbc2a4",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-09T07:17:41.234975+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 640.464,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 40
+   },
+   "finished_at": "2026-10-09T06:33:40.076359+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8464,
+   "reported_tokens": 262511,
+   "run_id": "legacy-quotacore-binary-parity-efefcfde",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-quotacore-binary-parity-efefcfde",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "21105cc5b832f4eacc8b34c8bc6784136bc6943f9be4382ea63569d9df7d46f4",
+    "summary": "7663389e91c6ad235e459b1383669da7e6a16bbbc94114ff454b4124f1087ef5",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-09T06:22:59.599900+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2331.619,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 227
+   },
+   "finished_at": "2026-10-09T09:32:33.275395+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8624,
+   "reported_tokens": 46794,
+   "run_id": "legacy-reflowcore-binary-parity-fd881bd2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-reflowcore-binary-parity-fd881bd2",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "640950ca39fb42c90dba6ddd7b77e6ae85a8a90bf044722af7ffe5cd639bbadc",
+    "summary": "63cca848e6d91dc314e6be91396288443ea6c2a39e090d34c5edce4cde0df30d",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-09T08:53:41.593250+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1571.972,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 165
+   },
+   "finished_at": "2026-10-09T08:53:40.959836+00:00",
+   "functional": 0.875,
+   "model": "haiku55",
+   "quality": 0.7955,
+   "reported_tokens": 39052,
+   "run_id": "legacy-schedcore-binary-parity-1014f0e8",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-schedcore-binary-parity-1014f0e8",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "161f520d5e7fca6983692808edfc914be3f42cd8cd3ece945c785717878bbd91",
+    "summary": "c3cce1787f315a4b260a567641d554fe7074305678c1b959272b4b51dc7bbd57",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-09T08:27:28.811010+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1156.499,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 167
+   },
+   "finished_at": "2026-10-09T04:59:12.589581+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8265,
+   "reported_tokens": 1259267,
+   "run_id": "legacy-settlecore-binary-parity-ffcca1c7",
+   "security": 0.75,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-settlecore-binary-parity-ffcca1c7",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "2b151019660a424fd5f55fcf2144c8d83917eb2eb9483fd21a5c9baa0e0aa784",
+    "summary": "929c16dff074d966c8de0bdcd43006cfec658e0321c4a19fba29548f8dd31813",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-09T04:39:56.098176+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1626.388,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 187
+   },
+   "finished_at": "2026-10-09T07:00:46.601238+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8479,
+   "reported_tokens": 38561,
+   "run_id": "legacy-snapcore-binary-parity-0aebd803",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-snapcore-binary-parity-0aebd803",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "80d974d6db51afc2f968d2cdbb7c99e486fd863febaef05b33b79869f0938e45",
+    "summary": "a4b0b2cd6057417d2f19f7daa4d8f7c1b86ca391d7a547390bc2c5541e7065a3",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-09T06:33:40.206804+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 648.531,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 71
+   },
+   "finished_at": "2026-10-09T10:47:07.485964+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8238,
+   "reported_tokens": 473337,
+   "run_id": "legacy-stampcore-binary-parity-564004ec",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-stampcore-binary-parity-564004ec",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "1794e85768d08ff1b2c32f839f245ac0dce0f0d1b41c4d1747bb419ab4749a12",
+    "summary": "07168caa2e4c957d226da13d177583efaae51d270da681fb93eccfdc7e0308b6",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-09T10:36:18.932186+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1474.221,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 274
+   },
+   "finished_at": "2026-10-09T09:57:09.552412+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.835,
+   "reported_tokens": 23409,
+   "run_id": "legacy-tallycore-binary-parity-434057cc",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-tallycore-binary-parity-434057cc",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "29c89b5e16134cb6cdda80bd582a480cd33c54df9596f2060903b148201e857a",
+    "summary": "9fcea0a72244a5d1b95443fab4c4f4f07bf118a7b373e7f6ea7c5e19d5ed6a24",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-09T09:32:35.288160+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1014.285,
+   "effort": "high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 187
+   },
+   "finished_at": "2026-10-09T07:17:41.079334+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8496,
+   "reported_tokens": 986795,
+   "run_id": "legacy-vaultcore-binary-parity-e46bc807",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/high/legacy-vaultcore-binary-parity-e46bc807",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "406e1971096b1d54cb09dffea07bc3c6685a495b89b3b64de3b43db7a72bfa32",
+    "summary": "bdf84c0f503d6240b62dea24999c3b891150e3d953f756f1409667ba6f57bc0d",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-09T07:00:46.755343+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 799.881,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 119
+   },
+   "finished_at": "2026-10-10T12:24:23.677620+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8409,
+   "reported_tokens": 919128,
+   "run_id": "legacy-blendcore-binary-parity-7d675111",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-blendcore-binary-parity-7d675111",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "961a02c3ac50f31e0b10bd1ca5bfd0540e9b318a5e54648f131be4433cc68212",
+    "summary": "46ec458717183e88c0e299d4d5447d5b60ce3499a154fb63016c924e272ec7b9",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-10T12:11:03.798443+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1664.342,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 282
+   },
+   "finished_at": "2026-10-10T14:38:01.009666+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7629,
+   "reported_tokens": 2510294,
+   "run_id": "legacy-cellarcore-binary-parity-d21fb815",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-cellarcore-binary-parity-d21fb815",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "ad9eefd986f5246e1e29b7133929f03fe341b52e3ef2f20afa381c30f55f325e",
+    "summary": "638af5e202a7e2b1f54a1a7f94cafea361c223b7ba7da0345bcb3d726aa3ff82",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-10T14:10:16.698033+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 711.695,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 121
+   },
+   "finished_at": "2026-10-10T09:32:07.190695+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8275,
+   "reported_tokens": 901321,
+   "run_id": "legacy-codeccore-binary-parity-37f7a7c2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-codeccore-binary-parity-37f7a7c2",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "772130c93de18cf9f513e6a1df58689858547a2dfedce3b2aa1334576532b9f5",
+    "summary": "511eed2bbfe4d8d68b31f0d6ee29c2fcb87a9e3120468f11dc73930582d602b1",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-10T09:20:15.480879+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1106.634,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 195
+   },
+   "finished_at": "2026-10-10T13:37:36.963921+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7488,
+   "reported_tokens": 61870,
+   "run_id": "legacy-depotcore-binary-parity-0d996076",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-depotcore-binary-parity-0d996076",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "6a4a315608ffa8c50c0a4511d147d8cdd3b9a523ea0baa368882e0cfa84ff7d6",
+    "summary": "51ae25f16a0c92a083771193f6df9909ffedbf108cae5341039d401db3438a59",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-10T13:19:10.307214+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1348.621,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 98
+   },
+   "finished_at": "2026-10-10T16:03:34.476845+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.829,
+   "reported_tokens": 17814,
+   "run_id": "legacy-freightcore-binary-parity-dc093ef8",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-freightcore-binary-parity-dc093ef8",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "e159feddb1b6b7a34fbdb497e2bce21f81e729feb56d7e50cd48304888195d89",
+    "summary": "18f21339c514f4cc84ede371812a154d6161d7dead5eb53335a8b5bcf9649eac",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-10T15:41:05.861757+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2329.229,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 382
+   },
+   "finished_at": "2026-10-10T13:19:10.203446+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.6925,
+   "reported_tokens": 49049,
+   "run_id": "legacy-granarycore-binary-parity-079e0ae4",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-granarycore-binary-parity-079e0ae4",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "5229178e4ae3db2e25e550c45c2f263a0c3ca3fae18f38ee5b216e5f0ad8b4fe",
+    "summary": "b7dab8e4ad86da0860e403078065dbf0f1c3d46c7c347da4944fa9ef4ab5f5e6",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-10T12:40:20.909742+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1402.677,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 95
+   },
+   "finished_at": "2026-10-10T10:45:19.529044+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8202,
+   "reported_tokens": 41678,
+   "run_id": "legacy-hedgecore-binary-parity-6f3f80cc",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-hedgecore-binary-parity-6f3f80cc",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "45391174ab1d1ca4b622d3f5c9b859f4d2468852a7fbc49059aec7057f10f350",
+    "summary": "a15124cb5c72a7e067b0a3bdbfc7a65a9bb46d2a29b15cc482462d064751e0b0",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-10T10:21:56.858648+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1959.524,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 371
+   },
+   "finished_at": "2026-10-10T14:10:16.606011+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7442,
+   "reported_tokens": 129164,
+   "run_id": "legacy-lodgecore-binary-parity-dfd39a5f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-lodgecore-binary-parity-dfd39a5f",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "eb3bff4ed2cf4dcc0e14e998a83ce4afbe741bb50938c89e30c55a99522245fd",
+    "summary": "338ee662b6ff0f5abc0d1b109d8c91cd92049be113114fc79f7570b0a0a56abd",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-10T13:37:37.056004+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 905.486,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 129
+   },
+   "finished_at": "2026-10-09T15:30:01.828169+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7939,
+   "reported_tokens": 933790,
+   "run_id": "legacy-matchcore-order-book-parity-f07be193",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-matchcore-order-book-parity-f07be193",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "5f48d6cabea0aa0fd0a59ff60c6490568d3ea486f441ce07c9fe069d359358a2",
+    "summary": "d776d3eab5ca106005cb5f5153da4c2f4426f6da119b9552327a2d543345a4e5",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-09T15:14:56.324591+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 655.238,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 86
+   },
+   "finished_at": "2026-10-10T15:41:05.776528+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8469,
+   "reported_tokens": 559069,
+   "run_id": "legacy-metercore-binary-parity-34303eaf",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-metercore-binary-parity-34303eaf",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "c5de7be283708d4c515c3c595ab33efef04bfaca16ff62f12449ecb98742a563",
+    "summary": "d8b804f2ba2d8673b3048eb72b842396e5fdd8b1b7b713c06ec95b465d7d63c5",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-10T15:30:10.525714+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 614.433,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 79
+   },
+   "finished_at": "2026-10-10T12:11:03.713440+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8303,
+   "reported_tokens": 643480,
+   "run_id": "legacy-pacecore-binary-parity-2a96eae1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-pacecore-binary-parity-2a96eae1",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "dcf573c260bc59327c33237d103b8b1128caa64e1f70631a1d57329453a10923",
+    "summary": "2a20ce559cd87ba04630e58f4fb4351868c4bdd45c100be5465ac4be5bf7a931",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-10T12:00:49.271118+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1928.274,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 150
+   },
+   "finished_at": "2026-10-10T15:30:10.435552+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8303,
+   "reported_tokens": 1192465,
+   "run_id": "legacy-payrollcore-binary-parity-efaca311",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-payrollcore-binary-parity-efaca311",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "191736b45aacd005e06cbb60aeac5360d03ce76c6661a27a5dc08bdbd4772fb2",
+    "summary": "b37ab1c1feb6174827bc12d87ef17318d3f8412cef3db6b71b3fd856ee9e5f7e",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-10T14:58:02.135949+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 645.465,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 67
+   },
+   "finished_at": "2026-10-10T14:58:02.045395+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8233,
+   "reported_tokens": 472936,
+   "run_id": "legacy-qlite-store-parity-de0f21a5",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-qlite-store-parity-de0f21a5",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "7de9b4f92f1304ad4a484cabbbbef6e0688dfa822e8d57600cd871442552b277",
+    "summary": "74b18cff13d2f3321cca1f71e37403beac8cc45ed227443af1862f7bdee8579e",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-10T14:47:16.572241+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1021.602,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 80
+   },
+   "finished_at": "2026-10-10T10:21:56.765973+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7988,
+   "reported_tokens": 630202,
+   "run_id": "legacy-queuecore-binary-parity-b4df6445",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-queuecore-binary-parity-b4df6445",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "d1e9b66390b63a74c9431d6086722d6848c618708a088740481416966c452c6f",
+    "summary": "20bdc7c02895e463f3441d83caccde090913e7cdb3f595beaabda0e50a4643d1",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-10T10:04:55.142482+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 581.944,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 101
+   },
+   "finished_at": "2026-10-10T09:41:49.265006+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8605,
+   "reported_tokens": 646678,
+   "run_id": "legacy-quotacore-binary-parity-1dbb0ce6",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-quotacore-binary-parity-1dbb0ce6",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "59c1b32ccfad27c6e78b9dcba6b3e80ba5085d83dc9d990aaf8834107d245f31",
+    "summary": "e6bfa967e792948303b401805d211a87eedfcb9d5e2d8d299dad1479512f612e",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-10T09:32:07.311340+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1008.419,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 139
+   },
+   "finished_at": "2026-10-10T11:26:16.980116+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8577,
+   "reported_tokens": 1024375,
+   "run_id": "legacy-reflowcore-binary-parity-5ba071ea",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-reflowcore-binary-parity-5ba071ea",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "a72ba1458abd6cc108fc006eb84277b9098fdf93989f1e809a0fd363267df710",
+    "summary": "921c5025b97af6a8851e9815dd733fd920f8245cf936c2f8055e6095bd1a08f6",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-10T11:09:28.544631+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1448.793,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 114
+   },
+   "finished_at": "2026-10-10T11:09:28.434549+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7928,
+   "reported_tokens": 1123035,
+   "run_id": "legacy-schedcore-binary-parity-087c606e",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-schedcore-binary-parity-087c606e",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "c8b97053c6062e83cce4bfe8fa6d28b7673709bfa267c0fb7d1087a951db77d5",
+    "summary": "a1b8ba0fe4dec31239e2f4f4a156bfcd5e189a26534fd574b693d0251bd25127",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-10T10:45:19.619334+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1072.275,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 123
+   },
+   "finished_at": "2026-10-09T15:14:56.196015+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8239,
+   "reported_tokens": 1058746,
+   "run_id": "legacy-settlecore-binary-parity-2136b9a7",
+   "security": 1.0,
+   "solver_cli_version": "2.1.295 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-settlecore-binary-parity-2136b9a7",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "81fd9f31873ce4dc5736eb512a3cab982e4545afe7500ea481b0654ff7b1bc0e",
+    "summary": "e266f602eba7720582c4df19fe92ca44a733e75cafc435c591927b3c0244ca07",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-09T14:57:03.890420+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 652.611,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 94
+   },
+   "finished_at": "2026-10-10T09:52:42.046686+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8289,
+   "reported_tokens": 636630,
+   "run_id": "legacy-snapcore-binary-parity-17fe17fb",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-snapcore-binary-parity-17fe17fb",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "174ae40048ca8de53bbaa6ef17bcdaacfb1a1147bc9249bdadc3b5808dc6950d",
+    "summary": "1a0e0de94319608fea433bd25bece2fd1d76826ab4015440d1bfcb4f3163b2da",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-10T09:41:49.391076+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 957.038,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 151
+   },
+   "finished_at": "2026-10-10T12:40:20.819255+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8386,
+   "reported_tokens": 886433,
+   "run_id": "legacy-stampcore-binary-parity-ac52cc7c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-stampcore-binary-parity-ac52cc7c",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "2518953e4c583840e9d55f8edf8baf9b68b23093ff6bcfc8f57323188235bd0e",
+    "summary": "236c5da53b67b2fcfaefb9dda20b968b652b60b43c7d9d6b127ef1e71ce3fb6c",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-10T12:24:23.769404+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2072.062,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 356
+   },
+   "finished_at": "2026-10-10T12:00:49.167533+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8827,
+   "reported_tokens": 4120307,
+   "run_id": "legacy-tallycore-binary-parity-fd9feca3",
+   "security": 0.9,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-tallycore-binary-parity-fd9feca3",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "f8c2b7e952899861f8abca6dffd6890e10341fa3b44c5f0ef661e9902dc69df0",
+    "summary": "ce8c3d4795788926a498d0df4fb259151e1c485fd77e7fb9bdac3ce0b811b2d9",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-10T11:26:17.070414+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 732.888,
+   "effort": "extra-high",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 83
+   },
+   "finished_at": "2026-10-10T10:04:55.041935+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8479,
+   "reported_tokens": 581604,
+   "run_id": "legacy-vaultcore-binary-parity-082500a6",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/extra-high/legacy-vaultcore-binary-parity-082500a6",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "1ba869040f2667d2a3812e3365d12572c4fc8f75a9cb4d52eda713099e662d1e",
+    "summary": "b144c3abc878443be119884a12e799c023b826ee6ac837af261a9a6b800d363e",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-10T09:52:42.138375+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1322.224,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 194
+   },
+   "finished_at": "2026-10-11T18:46:08.607854+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8489,
+   "reported_tokens": 1718222,
+   "run_id": "legacy-blendcore-binary-parity-7ab6c287",
+   "security": 0.9,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-blendcore-binary-parity-7ab6c287",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "d5e2450831e56064418545d645de19afc6fd358b3d9fd2591410cdc00d751e3d",
+    "summary": "f05ed7d26293d84810c9ca52ae9787209ef1c258d790ef3376ffa942da992f6c",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-11T18:24:06.355178+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3697.384,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 687
+   },
+   "finished_at": "2026-10-11T22:20:09.250758+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7693,
+   "reported_tokens": 2022803,
+   "run_id": "legacy-cellarcore-binary-parity-81e1fd87",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-cellarcore-binary-parity-81e1fd87",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "718c8f8756a5a97543e967820370040865de624b6e48f054d226e3690cd9a159",
+    "summary": "5abe82097bb352e0651b5f15ee3a32f1c09c6c224ad6adbef13c354529472a31",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-11T21:18:31.762502+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1252.751,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 161
+   },
+   "finished_at": "2026-10-10T18:32:07.748520+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8304,
+   "reported_tokens": 1518771,
+   "run_id": "legacy-codeccore-binary-parity-55ae1da1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-codeccore-binary-parity-55ae1da1",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "08765467da8d976e6b150392c7234e474d5ecabb905577bda6da16bcbc3fe037",
+    "summary": "6bb920709f31a4aa478421675c6b890b158382303bd21a57b2866585239e7cb5",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-10T18:11:15.006178+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2245.13,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 378
+   },
+   "finished_at": "2026-10-11T20:22:40.292683+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.745,
+   "reported_tokens": 6351100,
+   "run_id": "legacy-depotcore-binary-parity-dcf9b2d8",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-depotcore-binary-parity-dcf9b2d8",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "a324066fc56f047b7e8ed03ddda9c8d472bd222a472cda3f41052c032bcf542b",
+    "summary": "19217418df701b56a218030b4c7d1fbb1cf769ff0df329d487c9564d2badf6c7",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-11T19:45:15.140946+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 962.553,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 116
+   },
+   "finished_at": "2026-10-10T18:11:14.909160+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8363,
+   "reported_tokens": 966724,
+   "run_id": "legacy-freightcore-binary-parity-9529b4b9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-freightcore-binary-parity-9529b4b9",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "22715db4102d9a056da3f92203a7ffb7840789a1eb47bcd1c67b33a23594d651",
+    "summary": "95e59baeeaba129e2c568daad5337d27ac97e5b5576f11cb04a3a14a96eeb79f",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-10T17:55:12.340736+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2356.668,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 325
+   },
+   "finished_at": "2026-10-11T19:45:15.041077+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.6998,
+   "reported_tokens": 3910469,
+   "run_id": "legacy-granarycore-binary-parity-bc2396c9",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-granarycore-binary-parity-bc2396c9",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "90b2e9b23180b7c1aed51edab47254387916c01d084d2c62eaf4d625a6609312",
+    "summary": "1921bb8471f903ea7184fc5bf70a056f0bb7e6a4b6aa2dcc5af7492e933add5b",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-11T19:05:58.283653+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1320.226,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 139
+   },
+   "finished_at": "2026-10-11T16:31:28.867796+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8258,
+   "reported_tokens": 1330973,
+   "run_id": "legacy-hedgecore-binary-parity-881350d0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-hedgecore-binary-parity-881350d0",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "59437837e347512520d28caea34c304010b46fcc7823825eb676a44b616206d7",
+    "summary": "109bd58344e1bfc29b48d0d98c5857f197a4fe93b3d5af78020d79dce954953c",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-11T16:09:28.596971+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3351.332,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 460
+   },
+   "finished_at": "2026-10-11T21:18:31.656105+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7557,
+   "reported_tokens": 6352153,
+   "run_id": "legacy-lodgecore-binary-parity-2cf68e0b",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-lodgecore-binary-parity-2cf68e0b",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "b7fcd7df67afcf5146e91580bc09178ffa031feff292a2aa0274c50213af6448",
+    "summary": "75e5c93ad293a9c372505b784bcd4fb8a685a237ade4d61d4014c4cd9bd61a71",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-11T20:22:40.386509+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1383.62,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 179
+   },
+   "finished_at": "2026-10-10T16:52:13.215853+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8103,
+   "reported_tokens": 1704902,
+   "run_id": "legacy-matchcore-order-book-parity-8739a0a1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-matchcore-order-book-parity-8739a0a1",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "d236b8fd11fe9a037c6b263f47d08d6a5cd8866aeaf7b754d4dbbc591ced2304",
+    "summary": "63413838284bb2ea320135da481761ffa6c1d6fd5105f74236cd847b32cc4f6e",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-10T16:29:09.613623+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1449.709,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 134
+   },
+   "finished_at": "2026-10-10T17:55:12.248949+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.836,
+   "reported_tokens": 71581,
+   "run_id": "legacy-metercore-binary-parity-14ad20fd",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-metercore-binary-parity-14ad20fd",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "bbbf9e78aca9191d1ece3f7e8aeae0a390fa25b85edb2d92f1b8974703da9e84",
+    "summary": "e911431ec79e3c055ce758bbb16b4a1077bc9c15a8432862ef80a2c0634725a1",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-10T17:31:02.523699+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1308.286,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 129
+   },
+   "finished_at": "2026-10-11T18:24:06.272180+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.825,
+   "reported_tokens": 1092478,
+   "run_id": "legacy-pacecore-binary-parity-5c1326b1",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-pacecore-binary-parity-5c1326b1",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "0ffaf0c6be96dc2fb1994be6c42e73390217cb99c72070cecbb6168a9aa7d318",
+    "summary": "17a8dac8278c6a9aab1510fcfcc0c2207abc9ef80db53dd86a3b99e0509dc137",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-11T18:02:18.027389+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1325.779,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 167
+   },
+   "finished_at": "2026-10-10T17:31:02.428645+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.7933,
+   "reported_tokens": 1303277,
+   "run_id": "legacy-payrollcore-binary-parity-57ba6103",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-payrollcore-binary-parity-57ba6103",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "c00c4a59c311aaf080829e77df20c61c2a7821a13d5a17f6943ff40890f738bb",
+    "summary": "64d115b515ddd9ba3e351734e09293eb7427301bc3b99db1528a5866c0b69e76",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-10T17:08:56.596807+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1003.196,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 117
+   },
+   "finished_at": "2026-10-10T17:08:56.508511+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8265,
+   "reported_tokens": 1188338,
+   "run_id": "legacy-qlite-store-parity-d33e342a",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-qlite-store-parity-d33e342a",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "2955a52bdf87755a05e76d890a5cf38dab3f277c72b8ef4103cedfd6a39de60b",
+    "summary": "d0637a2af113107e9feec6cd013e34b88ab4fb4381670f6fc4840e3ac01349b8",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-10T16:52:13.306512+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1161.532,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 128
+   },
+   "finished_at": "2026-10-11T16:09:28.486210+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8304,
+   "reported_tokens": 1087156,
+   "run_id": "legacy-queuecore-binary-parity-6d7c92a2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-queuecore-binary-parity-6d7c92a2",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "b68b3eccd829189d043f811f81de9a0ec099f5b8635446484f603f97cb6920ed",
+    "summary": "554daca8ed81fc084c6bc2e3cf6eebc9b990754890e8e75b93d4879f72e087a9",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-11T15:50:06.647794+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1808.493,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 144
+   },
+   "finished_at": "2026-10-10T19:02:16.400949+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8418,
+   "reported_tokens": 88919,
+   "run_id": "legacy-quotacore-binary-parity-9e98f19e",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-quotacore-binary-parity-9e98f19e",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "96208ce8958eea787e920457a033e513b8e73b72cf4b80f96dd605923e0ab305",
+    "summary": "6aa8562a912203125c3cd1fee7a1a117e439964b99a0575c6d4d2be222fe3d2e",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-10T18:32:07.860155+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1059.586,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 100
+   },
+   "finished_at": "2026-10-11T17:36:07.203648+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8477,
+   "reported_tokens": 1008510,
+   "run_id": "legacy-reflowcore-binary-parity-4f381a60",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-reflowcore-binary-parity-4f381a60",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "d8be7c93d6142b54fea4d5c77cf24768e887d3dc6fbdf3131043862989f551c9",
+    "summary": "24349637b4ae54f4e9d4df915649e2ab9785dfc2759163b265c2f4313f8f9bb2",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-11T17:18:27.632036+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2818.561,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 180
+   },
+   "finished_at": "2026-10-11T17:18:27.547417+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8042,
+   "reported_tokens": 252124,
+   "run_id": "legacy-schedcore-binary-parity-40fcfd1f",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-schedcore-binary-parity-40fcfd1f",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "a32d00a96c87ecb50093a480a6c6d54849391dbb0d8a27c2a49f9383381245e0",
+    "summary": "d58e508a5e45d80883189829974a04e0813a113084650c48490ce0751ececa84",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-11T16:31:28.958946+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1528.104,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 177
+   },
+   "finished_at": "2026-10-10T16:29:09.519145+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8211,
+   "reported_tokens": 2020849,
+   "run_id": "legacy-settlecore-binary-parity-e9312aa0",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-settlecore-binary-parity-e9312aa0",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "f614f414a87a014ee290cac9af0d36c9fbbcd43bd4aa02f305bc1f04dbd14181",
+    "summary": "bf1b464ecd11440e682862110d0172bbcf54bc890adf558ca85ad26f02d584b3",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-10T16:03:41.400933+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 961.383,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 167
+   },
+   "finished_at": "2026-10-10T19:18:17.921520+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8332,
+   "reported_tokens": 1214101,
+   "run_id": "legacy-snapcore-binary-parity-4db98ac2",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-snapcore-binary-parity-4db98ac2",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "2018612fc4561f8d8d3b14e073f4497d690bc48cc7e60da9e3615d27eaaa28ac",
+    "summary": "0a3cffa045b8de8c3339f6a7616932d2456bf5c4b883f718992528dfc18f7935",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-10T19:02:16.509519+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1189.438,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 145
+   },
+   "finished_at": "2026-10-11T19:05:58.195038+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.832,
+   "reported_tokens": 1110680,
+   "run_id": "legacy-stampcore-binary-parity-73189c29",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-stampcore-binary-parity-73189c29",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "833852699a873a11b14eadb260761563ba659d016b52c8dd97225c92941e4301",
+    "summary": "ee9bdcade79858c0eee552579ea3570d05b4c960571cf5deba3ac8e52d336048",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-11T18:46:08.731521+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1570.65,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 174
+   },
+   "finished_at": "2026-10-11T18:02:17.940352+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8379,
+   "reported_tokens": 1785565,
+   "run_id": "legacy-tallycore-binary-parity-d75fb46c",
+   "security": 1.0,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-tallycore-binary-parity-d75fb46c",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "9dd4bea40093dfa9a3283c8c609e33f93093a498a74541346f1653c3fb689381",
+    "summary": "a03cf586609a6484a1a4d8e801759a94e260058866810cbb0f8e40434c3a9174",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-11T17:36:07.287726+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1332.632,
+   "effort": "max",
+   "fallback": false,
+   "fallback_replies": {
+    "claude-haiku-5-5": 221
+   },
+   "finished_at": "2026-10-10T19:40:30.671911+00:00",
+   "functional": 1.0,
+   "model": "haiku55",
+   "quality": 0.8558,
+   "reported_tokens": 207076,
+   "run_id": "legacy-vaultcore-binary-parity-f0d36054",
+   "security": 0.9,
+   "solver_cli_version": "2.1.296 (Claude Code)",
+   "solver_receipt": {
+    "error": "ValueError: Unknown solver"
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-11-haiku55-judging-v324/runs-effort-haiku55/max/legacy-vaultcore-binary-parity-f0d36054",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "26a4f289b21cdcbb9667088343d1c3ccf8e332a19a167a818ca3dde7e3921619",
+    "summary": "3debe55981b247ee950a29166d6714a7b78085d0f011731a16a228da0ebafbaf",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-10T19:18:18.042920+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4"
+}

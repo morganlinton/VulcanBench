@@ -1109,6 +1109,42 @@ built by `scripts/cii-v4-board/build_sonnet55_population.py`.
   CLI `2026.10.01-e373342`, while v3.3 recorded `2026.09.02-c22c1a3`
   (DECISIONS.md, 2026-10-08).
 
+## Amendment v3.24, October 10, 2026: Claude Haiku 5.5 on Frontier v4, Cursor pinned by version
+
+The v3.23 protocol on a new population, with two pins fixed. Nothing in the
+rubric, controls, quirk keys, gates, repeats, seed, weights or judge settings
+changes. Protocol id `code-quality-maintenance-v3.24`; run directory
+`runs-code-quality-maintenance-v3.24`; runner
+`harness/maintenance_review_v324.py`, derived from the v3.23 runner. Population
+record: `docs/results/swe-v4-haiku55-2026-10/comparison.json`, built by
+`scripts/cii-v4-board/build_haiku55_population.py`.
+
+- Population: the October 2026 Claude Haiku 5.5 sweep of Frontier v4, low
+  through max, one attempt per task and level, through Claude Code 2.1.293 to
+  2.1.296 (the version is recorded per row), refusal fallback on, run from
+  `bench/2026-10-07-haiku55-frontier-v4`, so task hashes match the suite lock
+  and no bridge is used. The sweep paused between tasks from October 9, 08:43
+  to October 10, 02:20 PDT; the run interrupted by the pause is kept outside
+  the sweep folder and not judged.
+- Exclusions: runs whose patch is empty are not judged, as in v3.15. So far
+  two paddockcore runs (medium and extra-high) qualify: in each a safety
+  classifier stopped Claude Code mid-session while it probed the legacy
+  binary, and the model ended without editing the module. They count as
+  failed in tasks passed and are priced. The population record lists every
+  exclusion with its reason.
+- Judge settings are read from the recovered original protocols in
+  `docs/judging/recovered/` (Grok from v3.3, Muse from v3.4), each checked
+  against its published sha256. Muse runs the v3.4 binary, matched by sha256.
+- Cursor is pinned by version. The runner resolves `~/.local/bin/cursor-agent`
+  once at prepare, judges through that versioned launcher for the whole round
+  (Cursor keeps old version directories when it updates itself), records a
+  digest of the version directory, and re-checks it before every stage.
+- Judges: Muse Spark 1.3 and Grok 4.6, neutral for an Anthropic submission;
+  both retake the exam under v3.24 before any counted call. One failing panel
+  is disclosed and the passing one publishes; two failures stop the amendment.
+- Comparability: Frontier Code quality is L1 plus L2, as for v3.15 and v3.23,
+  and is never placed beside Routine Code quality.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

@@ -121,6 +121,12 @@ PRICES: dict[str, dict[str, float]] = {
     # API-equivalent estimate only; Muse Code uses the account subscription.
     "meta:muse-spark-1.3-contributor": {"input": 0.10, "output": 0.20, "cached_input": 0.002},
     "meta:muse-spark-1.2-contributor": {"input": 0.10, "output": 0.20},
+    # Wonder 1.0 Standard list rates, Meta pricing page verified 2026-10-12.
+    "meta:muse-wonder-1.0": {"input": 4.00, "output": 20.00, "cached_input": 0.20},
+    # Meta publishes no Contributor rate for Wonder (it is Muse Code only), so
+    # the API-equivalent estimate uses the only published Wonder rate. Wonder
+    # Full has no API price at all and stays unpriced on purpose.
+    "meta:muse-wonder-1.0-contributor": {"input": 4.00, "output": 20.00, "cached_input": 0.20},
     # Free / offline.
     "mock:": {"input": 0.0, "output": 0.0},
     # Local inference: no marginal per-token cost. $0 is the marginal cash truth;

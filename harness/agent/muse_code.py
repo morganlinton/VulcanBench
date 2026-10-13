@@ -29,7 +29,21 @@ from harness.agent.cli_agents import (
 from harness.agent.providers import ProviderError
 from harness.redaction import sanitize
 
-MODELS = {"muse-spark-1.3", "muse-spark-1.3-contributor"}
+# VulcanBench model spec -> (Muse Code --model value, --contributor-mode value).
+# Spark 1.3 selects Contributor through its model id and predates the flag, so
+# it passes no flag. Wonder has one id per model; Muse Code 1.4.6 selects the
+# data mode per run with --contributor-mode, which the harness always passes
+# explicitly so the CLI default never decides it. Meta serves Wonder Contributor
+# only through Muse Code, not the Model API (dev.meta.ai pricing, 2026-10-12).
+CLI_MODELS: dict[str, tuple[str, str | None]] = {
+    "muse-spark-1.3": ("muse-spark-1.3", None),
+    "muse-spark-1.3-contributor": ("muse-spark-1.3-contributor", None),
+    "muse-wonder-1.0": ("muse-wonder-1.0", "off"),
+    "muse-wonder-1.0-contributor": ("muse-wonder-1.0", "on"),
+    "muse-wonder-full-1.0": ("muse-wonder-full-1.0", "off"),
+    "muse-wonder-full-1.0-contributor": ("muse-wonder-full-1.0", "on"),
+}
+MODELS = set(CLI_MODELS)
 EFFORTS = {"minimal", "low", "medium", "high", "xhigh", "max", "ultra"}
 # Muse Code aborts a run when the provider stream is silent this long. The
 # 180 s default killed five lodgecore attempts on 2026-09-08 during Meta
@@ -237,7 +251,10 @@ class MuseCodeAdapter:
         if model not in MODELS or effort not in EFFORTS:
             raise ProviderError("Muse requires a verified explicit model and effort")
         if model.endswith("-contributor") and effort == "max":
+            # Documented for Spark 1.3 Contributor; Meta does not document max
+            # under Contributor for Wonder either, so it stays excluded.
             raise ProviderError("Meta documents max reasoning as Standard-only, not Contributor")
+        cli_model, contributor_mode = CLI_MODELS[model]
         if timeout_s is None or timeout_s <= 0:
             raise ProviderError("Muse requires a positive wall-clock timeout")
         checked = self.preflight()
@@ -270,7 +287,8 @@ class MuseCodeAdapter:
             "exec",
             "--json",
             "--model",
-            model,
+            cli_model,
+            *(("--contributor-mode", contributor_mode) if contributor_mode else ()),
             "--reasoning-effort",
             effort,
             "--workspace",
@@ -294,6 +312,8 @@ class MuseCodeAdapter:
                 "harness_version": checked.version,
                 "binary_sha256": binary_sha256,
                 "requested_model": model,
+                "cli_model": cli_model,
+                "contributor_mode": contributor_mode,
                 "pricing_tier": "contributor" if model.endswith("-contributor") else "standard",
                 "session_data_root": str(scratch / "data"),
                 "requested_effort": effort,
@@ -372,7 +392,7 @@ class MuseCodeAdapter:
                         destination.write(json.dumps(sanitize(json.loads(line))) + "\n")
             (archive / "stderr.txt").write_text(str(sanitize("".join(errors))))
             (archive / "boundary.sb").write_text(profile)
-        usage = collect_usage(logs, model)
+        usage = collect_usage(logs, cli_model)
         outcome.prompt_tokens = usage["input_tokens"]
         outcome.completion_tokens = usage["output_tokens"]
         outcome.cached_input_tokens = usage["cached_tokens"]

@@ -89,6 +89,8 @@ F5-python nx-digraph and nx-group (controls to author). Open F5 slots:
 JavaScript, Rust and C; luxon, petgraph and yyjson do not qualify.
 Update 2026-10-13: F5-rust is filled by ioverlay-hole-binding-extraction
 (every floor measured in the image); F5-javascript and F5-c remain open.
+Update 2026-10-13: F5-javascript is filled by tseslint-type-params-mapped-types;
+F5-c is the last open F5 slot.
 
 Remaining Track A gaps, in priority order: gate-measure what exists (needs
 the reference credentials, the real blocker); more F2 and F3 tasks toward

@@ -65,7 +65,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from probe_verifier import extract, proxy_args, run_verifier, sh
 
-F2P_LINE = re.compile(r"^fail_to_pass: (\S+?): (\S+)", re.M)
+# "fail_to_pass: <id>: <status>[ (want ...)]", one per line. Ids may contain
+# spaces and ": " (vitest ids are test code), so the status is taken from the
+# end of the line, not from the first separator.
+F2P_LINE = re.compile(r"^fail_to_pass: (.+): (\w+)(?: \(want \w+\))?$", re.M)
 
 
 def apply(root: Path, patch: Path, reverse: bool = False) -> str | None:

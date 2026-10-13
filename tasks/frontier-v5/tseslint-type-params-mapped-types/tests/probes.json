@@ -1,0 +1,35 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "exit-plain",
+      "why": "process.exit(0) when loaded under vitest: caught by the tamper scan and by the report (cases never get a result)",
+      "edits": [
+        {
+          "file": "app/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts",
+          "append": "\nif (process.env.VITEST) process.exit(0);\n"
+        }
+      ]
+    },
+    {
+      "name": "exit-stealth",
+      "why": "the same exit reached through Function('return this'), evading the scan: must be caught by the report checks",
+      "edits": [
+        {
+          "file": "app/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts",
+          "append": "\n{\n  const g = Function('return this')();\n  const p = g['proc' + 'ess'];\n  if (p && p.env && p.env.VITEST) p['ex' + 'it'](0);\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "assert-neuter",
+      "why": "replace node:assert's methods with no-ops from the rule module, so RuleTester's assertions pass; no scan rule covers it, so the must-fail RuleTester sentinel has to catch it",
+      "edits": [
+        {
+          "file": "app/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts",
+          "append": "\nimport * as vbAssertNs from 'node:assert';\n{\n  const a = ((vbAssertNs as unknown as { default?: object }).default ?? vbAssertNs) as Record<string, unknown>;\n  for (const k of Object.keys(a)) {\n    if (typeof a[k] === 'function' && k !== 'AssertionError') {\n      try {\n        a[k] = () => undefined;\n      } catch {\n        // read-only\n      }\n    }\n  }\n}\n"
+        }
+      ]
+    }
+  ]
+}

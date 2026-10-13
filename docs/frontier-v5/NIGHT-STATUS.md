@@ -75,6 +75,15 @@ clears more than 6 of 15 held-out tests, every leave-one-out fails at least
 Harbor oracle 1 and nop 0. F5 now has cpp, java, python and rust;
 JavaScript and C are open.
 
+**Update 2026-10-13: F5-javascript filled.** `tseslint-type-params-mapped-types`
+(four fixes to typescript-eslint's no-unnecessary-type-parameters rule)
+meets every floor in the task image: #12941 is source-coupled to #12588,
+#12974's tests need #12588, no single fix clears more than 7 of 14, and
+every leave-one-out fails some; base 0 x3, gold 1 x3, three probes 0
+(the assert-neuter probe caught only by the sentinel, as designed), Harbor
+oracle 1 and nop 0. Three JavaScript sweeps (about 45 projects) found no
+other cluster with real interaction. F5 now has five of six slots; C is open.
+
 ## Local session 2026-10-08 to 10-09 (back on the arm64 Mac)
 
 Authoring moved back from cloud sessions to the Mac. Three outcomes:

@@ -1,0 +1,289 @@
+diff --git a/packages/eslint-plugin/tests/rules/no-unnecessary-type-parameters.test.ts b/packages/eslint-plugin/tests/rules/no-unnecessary-type-parameters.test.ts
+index 229083b..0aa2735 100644
+--- a/packages/eslint-plugin/tests/rules/no-unnecessary-type-parameters.test.ts
++++ b/packages/eslint-plugin/tests/rules/no-unnecessary-type-parameters.test.ts
+@@ -387,52 +387,6 @@ function inferredMappedReturnType<T extends string>(x: T) {
+ }
+     `,
+     `
+-declare function fill<T, Value>(
+-  shape: T,
+-  value: Value,
+-): { [K in keyof T]: Value };
+-declare function unfill<U>(mapped: { [K in keyof U]: number }): U;
+-
+-function filled<T>(shape: T, warmed = !unfill(fill(shape, 1))) {
+-  return fill(shape, 1);
+-}
+-    `,
+-    `
+-declare function fill<T, Value>(
+-  shape: T,
+-  value: Value,
+-): { [K in keyof T]: Value };
+-declare function unfill<U>(mapped: { [K in keyof U]: number }): U;
+-
+-function filled<T>(shape: T) {
+-  return [!unfill(fill(shape, 1)), fill(shape, 1)] as const;
+-}
+-    `,
+-    `
+-declare function remap<T extends string>(t: T): { [K in 'a' as T]: 0 };
+-
+-function f<P extends string>(p: P) {
+-  return remap(p);
+-}
+-    `,
+-    `
+-declare function remap<T extends string, V>(t: T, v: V): { [K in 'a' as T]: V };
+-
+-function f<P extends string, N>(p: P, n: N) {
+-  return remap(p, n);
+-}
+-    `,
+-    `
+-declare function prefixKeys<O, T extends string>(
+-  obj: O,
+-  prefix: T,
+-): { [K in keyof O & string as \`\${T}\${K}\`]: O[K] };
+-
+-function f<P extends string, N>(p: P, n: N) {
+-  return prefixKeys({ a: n }, p);
+-}
+-    `,
+-    `
+ type Identity<T> = T;
+ 
+ type Mapped<T, Value> = Identity<{ [P in keyof T]: Value }>;
+@@ -468,8 +422,6 @@ const f = <T,>(
+   getValue: (v: NoInfer<T>) => NoInfer<T>,
+ ) => {};
+     `,
+-
+-    "<T extends string>(t: T) => t as { [K in 'a' as T]: 0 };",
+   ],
+ 
+   invalid: [
+@@ -1819,37 +1771,6 @@ type Fn = () => Other;
+         },
+       ],
+     },
+-    {
+-      code: `
+-declare function remap<T extends string, V>(t: T, v: V): { [K in 'a' as T]: V };
+-
+-function f<P extends string, N>(p: P) {
+-  return remap<P, N>(p, null!);
+-}
+-      `,
+-      errors: [
+-        {
+-          column: 30,
+-          data: { descriptor: 'function', name: 'N', uses: 'used only once' },
+-          endColumn: 31,
+-          endLine: 4,
+-          line: 4,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: `
+-declare function remap<T extends string, V>(t: T, v: V): { [K in 'a' as T]: V };
+-
+-function f<P extends string>(p: P) {
+-  return remap<P, unknown>(p, null!);
+-}
+-      `,
+-            },
+-          ],
+-        },
+-      ],
+-    },
+     {
+       code: 'type Fn = <T>(value: unknown) => value is T;',
+       errors: [
+@@ -2282,184 +2203,5 @@ declare function f(): (A extends B ? C : D) | null;
+         },
+       ],
+     },
+-    {
+-      code: 'declare function foo<T extends () => number>(arg: T[]): void;',
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 44,
+-          endLine: 1,
+-          line: 1,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: 'declare function foo(arg: (() => number)[]): void;',
+-            },
+-          ],
+-        },
+-      ],
+-    },
+-    {
+-      code: `
+-interface Foo {
+-  a: string;
+-  b: number;
+-}
+-declare function foo<T extends keyof Foo>(arg: T[]): void;
+-      `,
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 41,
+-          endLine: 6,
+-          line: 6,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: `
+-interface Foo {
+-  a: string;
+-  b: number;
+-}
+-declare function foo(arg: (keyof Foo)[]): void;
+-      `,
+-            },
+-          ],
+-        },
+-      ],
+-    },
+-    {
+-      code: 'declare function foo<T extends () => void>(arg: T | string): void;',
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 42,
+-          endLine: 1,
+-          line: 1,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: 'declare function foo(arg: (() => void) | string): void;',
+-            },
+-          ],
+-        },
+-      ],
+-    },
+-    {
+-      code: `
+-interface A {
+-  x: string;
+-  shared: string;
+-}
+-interface B {
+-  y: string;
+-  shared: string;
+-}
+-declare function foo<T extends A | B>(k: keyof T): void;
+-      `,
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 37,
+-          endLine: 10,
+-          line: 10,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: `
+-interface A {
+-  x: string;
+-  shared: string;
+-}
+-interface B {
+-  y: string;
+-  shared: string;
+-}
+-declare function foo(k: keyof (A | B)): void;
+-      `,
+-            },
+-          ],
+-        },
+-      ],
+-    },
+-    {
+-      code: `
+-class Foo {}
+-declare function bar<T extends new () => Foo>(arg: T[]): void;
+-      `,
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 45,
+-          endLine: 3,
+-          line: 3,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: `
+-class Foo {}
+-declare function bar(arg: (new () => Foo)[]): void;
+-      `,
+-            },
+-          ],
+-        },
+-      ],
+-    },
+-    {
+-      code: `
+-declare function foo<T extends () => Promise<string>>(
+-  arg: T extends () => Promise<infer R> ? R : never,
+-): void;
+-      `,
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 53,
+-          endLine: 2,
+-          line: 2,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: `
+-declare function foo(
+-  arg: (() => Promise<string>) extends () => Promise<infer R> ? R : never,
+-): void;
+-      `,
+-            },
+-          ],
+-        },
+-      ],
+-    },
+-    {
+-      code: 'declare function foo<T extends readonly string[]>(x: T[]): void;',
+-      errors: [
+-        {
+-          column: 22,
+-          data: { descriptor: 'function', name: 'T', uses: 'used only once' },
+-          endColumn: 49,
+-          endLine: 1,
+-          line: 1,
+-          messageId: 'sole',
+-          suggestions: [
+-            {
+-              messageId: 'replaceUsagesWithConstraint',
+-              output: 'declare function foo(x: (readonly string[])[]): void;',
+-            },
+-          ],
+-        },
+-      ],
+-    },
+   ],
+ });

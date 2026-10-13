@@ -65,6 +65,7 @@ def test_harness_list_json() -> None:
         "devin",
         "grok-build",
         "muse-code",
+        "pi",
         "zcode",
     }
     assert all(row["structured_events"] for row in data)

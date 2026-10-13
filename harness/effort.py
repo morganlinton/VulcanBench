@@ -161,6 +161,17 @@ _DEVIN_EFFORT_VALUES = {
     "max": "max",
 }
 
+# Pi's --thinking levels; Pi maps them onto the provider's reasoning.effort via
+# the model's thinkingLevelMap in models.json (Meta: minimal to max).
+_PI_EFFORT_VALUES = {
+    "minimal": "minimal",
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "extra-high": "xhigh",
+    "max": "max",
+}
+
 
 def zai_supports_effort(model: str | None) -> bool:
     """Whether a Z.ai GLM model exposes the ``reasoning_effort`` knob."""
@@ -181,6 +192,7 @@ _PROVIDER_EFFORT_MAPS = {
     "grok-build": _GROK_BUILD_EFFORT_VALUES,
     "zcode": _ZCODE_EFFORT_VALUES,
     "devin": _DEVIN_EFFORT_VALUES,
+    "pi": _PI_EFFORT_VALUES,
 }
 
 

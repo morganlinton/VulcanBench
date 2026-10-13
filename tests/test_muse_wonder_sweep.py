@@ -94,3 +94,23 @@ def test_record_result_is_idempotent(tmp_path):
     sweep.record_result(tmp_path, summary, "low")
     sweep.record_result(tmp_path, summary, "low")
     assert len((tmp_path / "results.jsonl").read_text().splitlines()) == 1
+
+
+def test_protocol_pins_muse_settings(tmp_path, monkeypatch):
+    settings = tmp_path / "settings.json"
+    settings.write_text('{"plugins": {"skill-reminder": {"enabled": false}}}')
+    monkeypatch.setattr(sweep, "MUSE_SETTINGS", settings)
+    protocol = sweep.build_protocol(
+        sweep.MODELS["wonder-full"],
+        sweep.BINARY,
+        sweep.BINARY_SHA256,
+        sweep.VERSION,
+        {"t": "h"},
+        {"t": 1},
+    )
+    assert protocol["muse_settings_plugins"] == {"skill-reminder": {"enabled": False}}
+    before = protocol["muse_settings_sha256"]
+    settings.write_text('{"plugins": {"skill-reminder": {"enabled": true}}}')
+    assert sweep.muse_settings()[1] != before
+    monkeypatch.setattr(sweep, "MUSE_SETTINGS", tmp_path / "missing.json")
+    assert sweep.muse_settings()[0] == {}

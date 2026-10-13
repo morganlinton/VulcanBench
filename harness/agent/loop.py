@@ -326,7 +326,7 @@ def run_agent(  # noqa: PLR0915
                 else "estimated-from-reported-tokens"
             ),
         )
-        if cli_outcome
+        if cli_outcome and cli_outcome.billing != "api"
         else api_receipt(cost["total"], cost["judges"])
     )
     duration_s = round(time.monotonic() - started_mono, 3)

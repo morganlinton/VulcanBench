@@ -7,6 +7,92 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-13: Wonder Full Low is re-run with Muse Code's skill reminder off
+
+Meta advised the owner that Muse Code's built-in skill-reminder plugin is
+currently expensive on Muse Wonder (a fix is due in the next release) and that
+disabling it stretches the subscription quota about 25%. The owner chose to
+re-run Wonder Full at Low in Muse Code only, Contributor on, with
+`{"plugins": {"skill-reminder": {"enabled": false}}}` in
+`~/.config/muse/settings.json` (original kept as `settings.json.bak-20261013`).
+
+The setting changes the solver's context, so it is a new run condition: a fresh
+23-task Low run in `runs-effort-musewonder-full-v2`, never mixed with the first
+run. `run_muse_wonder_sweep.py` now pins the Muse settings file (content of
+`plugins` and SHA256) in the protocol and fails closed if it changes mid-sweep.
+The first run's resume loop is retired; its 19 completed Low tasks stay as the
+plugin-on baseline (`runs-effort-musewonder-full`). The re-run starts after the
+subscription's weekly reset (2026-10-19 00:00 UTC; a probe at 20:28 UTC on
+2026-10-13 still returned 429) and stops after Low.
+
+The Wonder 1.0 API High level stopped on its own at 20:24 UTC on 2026-10-13
+when Meta returned `402 billing_not_configured` ("Billing verification
+failed"), after 10 scored runs and $28.02 of metered spend; it stays paused
+until the owner fixes billing and approves.
+
+## 2026-10-13: Muse Wonder 1.0 runs through the Model API in Pi and Muse Code, one approved level at a time
+
+The Muse Code weekly quota stalls the Wonder Full sweep until 2026-10-19, and
+Wonder Full is not served on the Model API. The owner chose to benchmark Muse
+Wonder 1.0 on VulcanBench Frontier v4 through the Model API key instead, in two
+harnesses: Pi 1.2.0 (`pi:meta/muse-wonder-1.0`, new adapter) and Muse Code
+1.4.6 (`muse-code:muse-wonder-1.0-api`, Standard mode, key passed as
+`META_API_KEY`). Same model, tasks and efforts, so cost and score gaps are the
+harness. API billing is Standard mode: Meta does not train on the content.
+
+Run conditions: Low to Max (ultra blocked, minimal not published), one task at
+a time, each task in Pi then Muse Code before the next. The owner approves each
+effort level: `scripts/cii-v4-board/run_wonder_api_sweep.py` runs one level per
+launch, then stops with `level_complete_awaiting_approval` and the spend. Each
+launch also carries a USD ceiling for that level, checked before every run, and
+Pi runs carry a per-run kill cap. Spend is the harness's metered receipt
+(`economics.marginal_cash_usd`) at Wonder 1.0 list prices; Meta's billing
+dashboard is the authority. Run roots: `runs-effort-musewonder10-api/{pi,muse-code}`.
+
+Pilot evidence (2026-10-13, not board data): on `legacy-qlite-store-parity` at
+Low, Pi cost $0.69 and Muse Code $1.51 per task, both functional 1.0. On the
+synthetic validation task Pi cost $0.023 and Muse Code $0.166; Pi's own cost
+report matched the harness's pricing exactly. The pilot stopped after that pair
+when the owner redirected; raw output is in `runs-pilot-wonder-harness/`.
+
+Limits: the API key is in each agent's environment (both CLIs need it) and shell
+network is not isolated, so rotate the key after the sweep. The Wonder Full
+resume loop now waits while an API level runs, so sweeps stay serial when the
+weekly quota resets.
+
+## 2026-10-13: Muse Wonder sweeps resume automatically after subscription quota pauses
+
+The Wonder Full sweep on VulcanBench Frontier v4 (bench tag
+`bench/2026-10-13-musewonder-full-frontier-v4`) runs on the owner's Muse Code
+subscription, whose usage window runs out mid-sweep. Muse then fails the
+current task with `429 Subscription quota exhausted. Your usage window resets
+at <UTC time>`; the adapter raises `SubscriptionQuotaError` and the sweep stops
+with `paused_error` before writing a summary, so the interrupted attempt is
+never scored.
+
+Decision: a local wrapper (`logs/musewonder-full-frontier-v4.resume.sh`, not
+tracked) relaunches the sweep after each quota pause. On a stop whose error is
+Muse's own quota message, it moves every run folder without a `summary.json`
+to `runs-effort-musewonder-full/quota-aborted/`, sleeps until the reported
+reset time plus 3 minutes, and relaunches from the same run worktree. Any
+other stop, including completion, ends the loop for review. The interrupted
+task reruns from a fresh workspace with no memory of the aborted attempt.
+Solver conditions, the frozen protocol and the source hashes are unchanged,
+so the sweep's own resume checks still apply.
+
+Evidence (times UTC): window 1 ran 22:11 to 01:31 and completed 10 Low tasks;
+reset 02:42, relaunch 02:45. Window 2 ran 02:45 to 04:33 and completed 6;
+reset 07:45, relaunch 07:48. Window length and task count vary, so the
+wrapper follows the reset time Muse reports rather than a fixed schedule. The
+two interrupted attempts (`legacy-queuecore-binary-parity`,
+`legacy-blendcore-binary-parity`, both Low) are kept in `quota-aborted/` and
+both tasks reran in full.
+
+Revisit if Muse changes the quota message (the wrapper then stops instead of
+waiting), if an interrupted attempt ever writes a summary, or if a higher
+subscription tier makes the pauses unnecessary. Wonder 1.0 should use the same
+wrapper pattern when it launches.
+
 ## 2026-10-12: Muse Wonder runs in Contributor mode through Muse Code 1.4.6
 
 The owner asked for Muse Wonder to be benchmarked in Contributor mode,

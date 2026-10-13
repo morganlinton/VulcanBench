@@ -127,6 +127,8 @@ PRICES: dict[str, dict[str, float]] = {
     # the API-equivalent estimate uses the only published Wonder rate. Wonder
     # Full has no API price at all and stays unpriced on purpose.
     "meta:muse-wonder-1.0-contributor": {"input": 4.00, "output": 20.00, "cached_input": 0.20},
+    # Muse Code billed to a Model API key: Standard Wonder 1.0 at list rates.
+    "meta:muse-wonder-1.0-api": {"input": 4.00, "output": 20.00, "cached_input": 0.20},
     # Free / offline.
     "mock:": {"input": 0.0, "output": 0.0},
     # Local inference: no marginal per-token cost. $0 is the marginal cash truth;
@@ -149,6 +151,8 @@ _SPEC_ALIASES = {
     "grok-build:": "xai:",
     "zcode:": "zai:",
     "muse-code:": "meta:",
+    # Pi specs name the provider: "pi:meta/<model>" prices as "meta:<model>".
+    "pi:meta/": "meta:",
 }
 
 

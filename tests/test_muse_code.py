@@ -439,3 +439,39 @@ def test_wonder_contributor_max_rejected_before_any_process():
             effort="max",
             timeout_s=1,
         )
+
+
+def test_api_billed_wonder_passes_key_and_records_metered_billing(tmp_path, monkeypatch):
+    monkeypatch.setenv("MUSE_API_KEY", "meta-api-test")
+    rows = [receipt(record="1")]
+    rows[0]["payload"]["event"]["model"] = "muse-wonder-1.0"
+    stdout = [
+        json.dumps({"payload_type": "run.terminal.completed", "payload": {"terminal": "completed"}})
+    ]
+    outcome, collector, launched, _ = _run(
+        tmp_path, monkeypatch, stdout_lines=stdout, session_rows=rows, model="muse-wonder-1.0-api"
+    )
+    cmd = launched["cmd"]
+    assert cmd[cmd.index("--model") + 1] == "muse-wonder-1.0"
+    assert cmd[cmd.index("--contributor-mode") + 1] == "off"
+    assert launched["env"]["META_API_KEY"] == "meta-api-test"
+    assert outcome.billing == "api" and outcome.auth_method == "api-key"
+    assert collector.events[0][1]["billing"] == "api"
+
+
+def test_subscription_runs_never_receive_an_api_key(tmp_path, monkeypatch):
+    monkeypatch.setenv("MUSE_API_KEY", "meta-api-test")
+    rows = [receipt(record="1")]
+    rows[0]["payload"]["event"]["model"] = "muse-wonder-1.0"
+    stdout = [
+        json.dumps({"payload_type": "run.terminal.completed", "payload": {"terminal": "completed"}})
+    ]
+    outcome, _, launched, _ = _run(
+        tmp_path,
+        monkeypatch,
+        stdout_lines=stdout,
+        session_rows=rows,
+        model="muse-wonder-1.0-contributor",
+    )
+    assert "META_API_KEY" not in launched["env"] and "MUSE_API_KEY" not in launched["env"]
+    assert outcome.billing == "subscription"

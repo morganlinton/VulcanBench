@@ -580,3 +580,18 @@ confinement, so a loop re-applies it every five minutes while v5 jobs run.
   (not reverted to old expectations, which would make a correct fix look like
   a regression). Validated on arm64: base 0, gold 1, three probes 0, Harbor
   oracle 1 and nop 0. Details in its DESIGN.md.
+
+## F5-rust: iOverlay (2026-10-12 to 10-13)
+
+- **Probes must compile.** iOverlay is `#![no_std]`; the first exit probes
+  used `std::process` directly, failed to compile, and scored 0 for the
+  wrong reason (build failure), so they tested nothing. A probe that does
+  not build is not evidence: check `build_ok=1` on every probe. For no_std
+  crates the probe brings std in with `extern crate std`, as a real attempt
+  would.
+- **Surface compiler errors.** With `cargo test --message-format=json`,
+  rustc's diagnostics are JSON on stdout; the runner now prints the rendered
+  errors on a failed build.
+- **A newer toolchain without touching the shared image.** The crate's MSRV
+  (1.88) is above v5-rust's 1.87, so the task images install 1.98.0 with
+  rustup on top of v5-rust; petgraph and comrak keep their validated image.

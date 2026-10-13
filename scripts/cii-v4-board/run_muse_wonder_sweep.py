@@ -36,6 +36,9 @@ MODELS = {
 BINARY = Path.home() / ".local/bin/muse-bin-1.4.6-R6000.1"
 BINARY_SHA256 = "c713165a287d64afb8816f8351a240b457a23524f4ade06bca0e41dfde410460"
 VERSION = "Muse Code 1.4.6 (1.4.6-R6000.1)"
+# Muse Code reads user settings (plugins included) from here; they shape the
+# solver's context, so the protocol pins their exact content.
+MUSE_SETTINGS = Path.home() / ".config/muse/settings.json"
 SOURCES = [
     "harness/agent/muse_code.py",
     "harness/effort.py",
@@ -51,6 +54,13 @@ def configure_binary():
     return pinned_executable()
 
 
+def muse_settings():
+    """User settings Muse Code loads for every run, and their SHA256."""
+    raw = MUSE_SETTINGS.read_bytes() if MUSE_SETTINGS.is_file() else b""
+    settings = json.loads(raw) if raw else {}
+    return settings, hashlib.sha256(raw).hexdigest()
+
+
 def source_hashes():
     return {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in SOURCES}
 
@@ -58,7 +68,12 @@ def source_hashes():
 def other_sweep_active():
     """Sweeps run one task at a time across the whole host (docs/DECISIONS.md)."""
     found = subprocess.run(
-        ["pgrep", "-f", "vulcanbench run|vulcanconduct run|run_muse_sweep.py|run_effort_sweep"],
+        [
+            "pgrep",
+            "-f",
+            "vulcanbench run|vulcanconduct run|run_muse_sweep.py|run_effort_sweep|"
+            "run_wonder_api_sweep.py|run_wonder_harness_pilot.py",
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -98,6 +113,8 @@ def build_protocol(model, binary, digest, version, hashes, timeouts):
         },
         "price_source": "https://dev.meta.ai/docs/pricing-rate-limits/",
         "stream_idle_timeout_secs": STREAM_IDLE_TIMEOUT_SECS,
+        "muse_settings_plugins": muse_settings()[0].get("plugins", {}),
+        "muse_settings_sha256": muse_settings()[1],
         "boundary": "Kernel-denied checkout/prior agent sessions/shared temp artifacts; "
         "isolated writes and explicit TMPDIR guidance; web tools disabled; shell network "
         "not isolated",
@@ -174,6 +191,9 @@ def run(model, out, levels):
             try:
                 configure_binary()
                 assert get_cli_agent_adapter("muse-code").preflight().version == VERSION
+                assert muse_settings()[1] == protocol["muse_settings_sha256"], (
+                    "Muse settings changed during sweep"
+                )
                 assert source_hashes() == protocol["source_hashes"], (
                     "Solver source changed during sweep"
                 )

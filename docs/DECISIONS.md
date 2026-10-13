@@ -7,6 +7,29 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-13: Wonder Full Low is re-run with Muse Code's skill reminder off
+
+Meta advised the owner that Muse Code's built-in skill-reminder plugin is
+currently expensive on Muse Wonder (a fix is due in the next release) and that
+disabling it stretches the subscription quota about 25%. The owner chose to
+re-run Wonder Full at Low in Muse Code only, Contributor on, with
+`{"plugins": {"skill-reminder": {"enabled": false}}}` in
+`~/.config/muse/settings.json` (original kept as `settings.json.bak-20261013`).
+
+The setting changes the solver's context, so it is a new run condition: a fresh
+23-task Low run in `runs-effort-musewonder-full-v2`, never mixed with the first
+run. `run_muse_wonder_sweep.py` now pins the Muse settings file (content of
+`plugins` and SHA256) in the protocol and fails closed if it changes mid-sweep.
+The first run's resume loop is retired; its 19 completed Low tasks stay as the
+plugin-on baseline (`runs-effort-musewonder-full`). The re-run starts after the
+subscription's weekly reset (2026-10-19 00:00 UTC; a probe at 20:28 UTC on
+2026-10-13 still returned 429) and stops after Low.
+
+The Wonder 1.0 API High level stopped on its own at 20:24 UTC on 2026-10-13
+when Meta returned `402 billing_not_configured` ("Billing verification
+failed"), after 10 scored runs and $28.02 of metered spend; it stays paused
+until the owner fixes billing and approves.
+
 ## 2026-10-13: Muse Wonder 1.0 runs through the Model API in Pi and Muse Code, one approved level at a time
 
 The Muse Code weekly quota stalls the Wonder Full sweep until 2026-10-19, and

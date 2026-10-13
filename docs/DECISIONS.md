@@ -7,6 +7,39 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-13: Muse Wonder sweeps resume automatically after subscription quota pauses
+
+The Wonder Full sweep on VulcanBench Frontier v4 (bench tag
+`bench/2026-10-13-musewonder-full-frontier-v4`) runs on the owner's Muse Code
+subscription, whose usage window runs out mid-sweep. Muse then fails the
+current task with `429 Subscription quota exhausted. Your usage window resets
+at <UTC time>`; the adapter raises `SubscriptionQuotaError` and the sweep stops
+with `paused_error` before writing a summary, so the interrupted attempt is
+never scored.
+
+Decision: a local wrapper (`logs/musewonder-full-frontier-v4.resume.sh`, not
+tracked) relaunches the sweep after each quota pause. On a stop whose error is
+Muse's own quota message, it moves every run folder without a `summary.json`
+to `runs-effort-musewonder-full/quota-aborted/`, sleeps until the reported
+reset time plus 3 minutes, and relaunches from the same run worktree. Any
+other stop, including completion, ends the loop for review. The interrupted
+task reruns from a fresh workspace with no memory of the aborted attempt.
+Solver conditions, the frozen protocol and the source hashes are unchanged,
+so the sweep's own resume checks still apply.
+
+Evidence (times UTC): window 1 ran 22:11 to 01:31 and completed 10 Low tasks;
+reset 02:42, relaunch 02:45. Window 2 ran 02:45 to 04:33 and completed 6;
+reset 07:45, relaunch 07:48. Window length and task count vary, so the
+wrapper follows the reset time Muse reports rather than a fixed schedule. The
+two interrupted attempts (`legacy-queuecore-binary-parity`,
+`legacy-blendcore-binary-parity`, both Low) are kept in `quota-aborted/` and
+both tasks reran in full.
+
+Revisit if Muse changes the quota message (the wrapper then stops instead of
+waiting), if an interrupted attempt ever writes a summary, or if a higher
+subscription tier makes the pauses unnecessary. Wonder 1.0 should use the same
+wrapper pattern when it launches.
+
 ## 2026-10-12: Muse Wonder runs in Contributor mode through Muse Code 1.4.6
 
 The owner asked for Muse Wonder to be benchmarked in Contributor mode,

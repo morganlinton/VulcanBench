@@ -1,0 +1,148 @@
+diff --git a/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts b/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts
+index 9666e6f..873f791 100644
+--- a/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts
++++ b/packages/eslint-plugin/src/rules/no-unnecessary-type-parameters.ts
+@@ -10,7 +10,6 @@ import type { MakeRequired } from '../util';
+ import {
+   createRule,
+   getParserServices,
+-  getWrappingFixer,
+   nullThrows,
+   NullThrowsReasons,
+ } from '../util';
+@@ -109,27 +108,40 @@ export default createRule({
+                 for (const reference of smTypeParameterVariable.references) {
+                   if (reference.isTypeReference) {
+                     const referenceNode = reference.identifier;
+-                    const isComplexType =
++                    const isWeakPrecedenceConstraint =
+                       constraint?.type === AST_NODE_TYPES.TSUnionType ||
+                       constraint?.type === AST_NODE_TYPES.TSIntersectionType ||
+-                      constraint?.type === AST_NODE_TYPES.TSConditionalType;
+-                    const hasMatchingAncestorType = [
+-                      AST_NODE_TYPES.TSArrayType,
+-                      AST_NODE_TYPES.TSIndexedAccessType,
+-                      AST_NODE_TYPES.TSIntersectionType,
+-                      AST_NODE_TYPES.TSUnionType,
+-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+-                    ].some(type => referenceNode.parent.parent!.type === type);
+-                    if (isComplexType && hasMatchingAncestorType) {
+-                      const fixResult = getWrappingFixer({
+-                        node: referenceNode,
+-                        innerNode: constraint,
+-                        sourceCode: context.sourceCode,
+-                        wrap: constraintNode => constraintNode,
+-                      })(fixer);
+-                      yield fixResult;
++                      constraint?.type === AST_NODE_TYPES.TSConditionalType ||
++                      constraint?.type === AST_NODE_TYPES.TSTypeOperator ||
++                      constraint?.type === AST_NODE_TYPES.TSFunctionType ||
++                      constraint?.type === AST_NODE_TYPES.TSConstructorType;
++
++                    const grandparent = nullThrows(
++                      referenceNode.parent.parent,
++                      NullThrowsReasons.MissingParent,
++                    );
++
++                    const isWeakPrecedenceTypeParent =
++                      grandparent.type === AST_NODE_TYPES.TSArrayType ||
++                      grandparent.type === AST_NODE_TYPES.TSIndexedAccessType ||
++                      grandparent.type === AST_NODE_TYPES.TSIntersectionType ||
++                      grandparent.type === AST_NODE_TYPES.TSUnionType ||
++                      grandparent.type === AST_NODE_TYPES.TSConditionalType ||
++                      grandparent.type === AST_NODE_TYPES.TSTypeOperator;
++
++                    if (
++                      isWeakPrecedenceConstraint &&
++                      isWeakPrecedenceTypeParent
++                    ) {
++                      yield fixer.replaceText(
++                        referenceNode.parent,
++                        `(${constraintText})`,
++                      );
+                     } else {
+-                      yield fixer.replaceText(referenceNode, constraintText);
++                      yield fixer.replaceText(
++                        referenceNode.parent,
++                        constraintText,
++                      );
+                     }
+                   }
+                 }
+@@ -454,9 +466,39 @@ function collectTypeParameterUsageCounts(
+       if (isMappedType(type)) {
+         visitType(type.typeParameter, false);
+         if (properties.length === 0) {
++          // Instantiated mapped types populate `templateType` lazily, which
++          // building a type node forces.
++          if (!type.templateType) {
++            checker.typeToTypeNode(type, undefined, undefined);
++          }
++
+           // TS treats mapped types like `{[k in "a"]: T}` like `{a: T}`.
+           // They have properties, so we need to avoid double-counting.
+           visitType(type.templateType ?? type.constraintType, false);
++
++          // `templateType` is a lazily populated checker cache. Once it is
++          // populated on an instantiated mapped type, its constraint is
++          // reachable only here: the type parameter's declaration holds the
++          // original constraint from before instantiation.
++          if (
++            type.templateType &&
++            type.constraintType &&
++            type.constraintType !==
++              getDeclaredConstraintType(type.typeParameter)
++          ) {
++            visitType(type.constraintType, false);
++          }
++        }
++
++        // TS doesn't count mapped types key remapping (`{[K in 'a' as T]: K}`)
++        // but handles this under `MappedType.nameType`, so we need to visit that too.
++        // Instantiated mapped types populate it lazily, which getting the
++        // awaited type forces.
++        if (!type.nameType) {
++          checker.getAwaitedType(type);
++        }
++        if (type.nameType) {
++          visitType(type.nameType, false);
+         }
+       }
+ 
+@@ -495,6 +537,16 @@ function collectTypeParameterUsageCounts(
+     return count;
+   }
+ 
++  function getDeclaredConstraintType(
++    typeParameter: ts.Type | undefined,
++  ): ts.Type | undefined {
++    const constraint = typeParameter
++      ?.getSymbol()
++      ?.getDeclarations()
++      ?.find(ts.isTypeParameterDeclaration)?.constraint;
++    return constraint && checker.getTypeAtLocation(constraint);
++  }
++
+   function visitSignature(signature: ts.Signature | undefined): void {
+     if (!signature) {
+       return;
+@@ -549,6 +601,7 @@ interface MappedType extends ts.ObjectType {
+   constraintType?: ts.Type;
+   templateType?: ts.Type;
+   typeParameter: ts.Type;
++  nameType?: ts.Type;
+ }
+ 
+ function isMappedType(type: ts.Type): type is MappedType {
+diff --git a/packages/eslint-plugin/src/util/getWrappingFixer.ts b/packages/eslint-plugin/src/util/getWrappingFixer.ts
+index 23aa830..9c1c4f2 100644
+--- a/packages/eslint-plugin/src/util/getWrappingFixer.ts
++++ b/packages/eslint-plugin/src/util/getWrappingFixer.ts
+@@ -116,7 +116,6 @@ export function isStrongPrecedenceNode(innerNode: TSESTree.Node): boolean {
+     innerNode.type === AST_NODE_TYPES.Literal ||
+     innerNode.type === AST_NODE_TYPES.Identifier ||
+     innerNode.type === AST_NODE_TYPES.TSTypeReference ||
+-    innerNode.type === AST_NODE_TYPES.TSTypeOperator ||
+     innerNode.type === AST_NODE_TYPES.ArrayExpression ||
+     innerNode.type === AST_NODE_TYPES.ObjectExpression ||
+     innerNode.type === AST_NODE_TYPES.MemberExpression ||

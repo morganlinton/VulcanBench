@@ -595,3 +595,25 @@ confinement, so a loop re-applies it every five minutes while v5 jobs run.
 - **A newer toolchain without touching the shared image.** The crate's MSRV
   (1.88) is above v5-rust's 1.87, so the task images install 1.98.0 with
   rustup on top of v5-rust; petgraph and comrak keep their validated image.
+
+## F5-javascript: typescript-eslint (2026-10-13)
+
+- **Sourcing JavaScript for F5 is hard.** Three sweeps over about 45
+  projects found clusters that pass every floor except interaction (each
+  upstream test cleared by exactly one fix, no source coupling): marked,
+  csv-stringify, cron-parser. Only typescript-eslint's
+  no-unnecessary-type-parameters cluster had measured interaction.
+- **corepack in Node 22.11 is broken for pnpm.** Its bundled keys do not
+  match the npm registry's rotated signing keys; install the pinned pnpm
+  with npm instead.
+- **A large suite needs every workspace package its tests import built.**
+  `schemas.test.ts` failed to load until rule-schema-to-typescript-types was
+  built; a load failure is a file-level failure, not a test result.
+- **"Pending" is not a verdict.** One of six full vitest runs left 12 cases
+  with no result in a file that passed; the verifier re-runs only files with
+  pending cases and never retries a failure.
+- **Ids can contain anything.** RuleTester names cases after their code, so
+  ids contain spaces, colons and newlines: checkers print them with newlines
+  escaped and untruncated, and run_controls.py reads the status from the end
+  of the line. The first control run mis-parsed every id and reported 14/14
+  for every variant; the rewards (all 0) gave it away.

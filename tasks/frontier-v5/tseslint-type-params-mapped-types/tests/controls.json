@@ -1,0 +1,32 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Each part is the packages/eslint-plugin/src diff of the upstream squash merge: #12588 6be25d3b45, #12637 54a183fed3, #12941 e8593b2be2, #12974 29d25fa43c. #12941 does not apply without #12588 (source-coupled), so they form a coupled group. base + parts equals the pinned source (checked 2026-10-13).",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "#12588",
+      "patch": "tests/controls/01-12588-key-remapping.diff",
+      "upstream": "6be25d3b45"
+    },
+    {
+      "name": "#12637",
+      "patch": "tests/controls/02-12637-fixer-precedence.diff",
+      "upstream": "54a183fed3"
+    },
+    {
+      "name": "#12941",
+      "patch": "tests/controls/03-12941-instantiated-constraint.diff",
+      "upstream": "e8593b2be2"
+    },
+    {
+      "name": "#12974",
+      "patch": "tests/controls/04-12974-instantiated-template.diff",
+      "upstream": "29d25fa43c"
+    }
+  ],
+  "coupled": [
+    [
+      "#12588",
+      "#12941"
+    ]
+  ]
+}

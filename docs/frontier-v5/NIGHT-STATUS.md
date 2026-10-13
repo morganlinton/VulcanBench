@@ -67,6 +67,14 @@ on the candidates with each task's real verifier:
 Three F5 slots now have a candidate that meets every floor: cpp, java and
 python. JavaScript, Rust and C are open.
 
+**Update 2026-10-13: F5-rust filled.** `ioverlay-hole-binding-extraction`
+(three hole-binding fixes from iOverlay PR #92, the polygon boolean engine
+under geo's BooleanOps) meets every floor in the task image: no single fix
+clears more than 6 of 15 held-out tests, every leave-one-out fails at least
+4, two tests need two fixes together; base 0 x3, gold 1 x3, probes 0,
+Harbor oracle 1 and nop 0. F5 now has cpp, java, python and rust;
+JavaScript and C are open.
+
 ## Local session 2026-10-08 to 10-09 (back on the arm64 Mac)
 
 Authoring moved back from cloud sessions to the Mac. Three outcomes:

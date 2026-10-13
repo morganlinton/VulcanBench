@@ -87,6 +87,8 @@ at least five of them). F5 work is Track A. Candidates: F5-cpp geos (floors
 measured), F5-java commons-lang (four leave-one-out controls to run),
 F5-python nx-digraph and nx-group (controls to author). Open F5 slots:
 JavaScript, Rust and C; luxon, petgraph and yyjson do not qualify.
+Update 2026-10-13: F5-rust is filled by ioverlay-hole-binding-extraction
+(every floor measured in the image); F5-javascript and F5-c remain open.
 
 Remaining Track A gaps, in priority order: gate-measure what exists (needs
 the reference credentials, the real blocker); more F2 and F3 tasks toward

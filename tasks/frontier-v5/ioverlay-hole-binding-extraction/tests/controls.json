@@ -1,0 +1,21 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Upstream PR #92 kept one commit per bug: F1 9bf01be, F2 6f172fe, F3 1e69d28 plus 17659e6 (its follow-up, which also changes hierarchy.rs). Each part is the iOverlay/src diff of its commits; base + parts equals the pinned source (checked 2026-10-12).",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "F1",
+      "patch": "tests/controls/01-F1-ogc-hole-winding.diff",
+      "upstream": "9bf01be"
+    },
+    {
+      "name": "F2",
+      "patch": "tests/controls/02-F2-vector-bind-direction.diff",
+      "upstream": "6f172fe"
+    },
+    {
+      "name": "F3",
+      "patch": "tests/controls/03-F3-simplify-after-binding.diff",
+      "upstream": "1e69d28, 17659e6"
+    }
+  ]
+}

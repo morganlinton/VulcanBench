@@ -35,7 +35,11 @@ def test_levels_are_low_to_max_and_ultra_is_refused(tmp_path):
             )
 
 
-def test_both_arms_bill_the_api_on_wonder_10():
+def test_both_arms_bill_the_api_on_wonder_10(tmp_path, monkeypatch):
+    config = tmp_path / "pi-config"
+    config.mkdir()
+    (config / "models.json").write_text('{"providers": {}}')
+    monkeypatch.setitem(sweep.PINS, "VULCANBENCH_PI_CONFIG", str(config))
     assert sweep.ARMS == {
         "pi": "pi:meta/muse-wonder-1.0",
         "muse-code": "muse-code:muse-wonder-1.0-api",

@@ -45,12 +45,12 @@ test: setup ## Run fast unit tests (target >=80% coverage on harness)
 test-all: setup ## Run all tests including slow/Docker (CI)
 	$(PYTEST)
 
-lint: setup ## Ruff lint + format check (zero warnings enforced) + no em-dashes
+lint: setup ## Ruff lint + format check (zero warnings enforced) + no em-dashes in prose
 	$(RUFF) check .
 	$(RUFF) format --check .
 	$(VENV_BIN)/python scripts/check_no_emdash.py
 
-no-emdash: setup ## Fail if any project-authored file contains an em-dash (U+2014)
+no-emdash: setup ## Fail if any project-authored prose file contains an em-dash (U+2014)
 	$(VENV_BIN)/python scripts/check_no_emdash.py
 
 fmt: setup ## Auto-format with ruff

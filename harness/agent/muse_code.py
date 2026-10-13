@@ -42,8 +42,16 @@ CLI_MODELS: dict[str, tuple[str, str | None]] = {
     "muse-wonder-1.0-contributor": ("muse-wonder-1.0", "on"),
     "muse-wonder-full-1.0": ("muse-wonder-full-1.0", "off"),
     "muse-wonder-full-1.0-contributor": ("muse-wonder-full-1.0", "on"),
+    # Billed to a Meta Model API key instead of the subscription. The API serves
+    # Wonder Full not at all and Wonder Contributor not at all, so only Standard
+    # Wonder 1.0 has an API-billed spec.
+    "muse-wonder-1.0-api": ("muse-wonder-1.0", "off"),
 }
 MODELS = set(CLI_MODELS)
+API_BILLED = {"muse-wonder-1.0-api"}
+# Environment variables that may hold the Model API key, in lookup order. Muse
+# Code reads META_API_KEY, which takes priority over the account login.
+API_KEY_ENVS = ("MUSE_API_KEY", "META_MUSE_SPARK_API", "MODEL_API_KEY")
 EFFORTS = {"minimal", "low", "medium", "high", "xhigh", "max", "ultra"}
 # Muse Code aborts a run when the provider stream is silent this long. The
 # 180 s default killed five lodgecore attempts on 2026-09-08 during Meta
@@ -255,6 +263,11 @@ class MuseCodeAdapter:
             # under Contributor for Wonder either, so it stays excluded.
             raise ProviderError("Meta documents max reasoning as Standard-only, not Contributor")
         cli_model, contributor_mode = CLI_MODELS[model]
+        api_key = None
+        if model in API_BILLED:
+            api_key = next((os.environ[k] for k in API_KEY_ENVS if os.environ.get(k)), None)
+            if not api_key:
+                raise ProviderError(f"API-billed Muse needs one of {', '.join(API_KEY_ENVS)}")
         if timeout_s is None or timeout_s <= 0:
             raise ProviderError("Muse requires a positive wall-clock timeout")
         checked = self.preflight()
@@ -273,6 +286,8 @@ class MuseCodeAdapter:
             TEMP=str(scratch / "tmp"),
             TBH_STREAM_IDLE_TIMEOUT_SECS=str(STREAM_IDLE_TIMEOUT_SECS),
         )
+        if api_key:
+            env["META_API_KEY"] = api_key
         session_id = str(uuid.uuid4())
         # Kernel denial covers all Muse tools, not just shell tools. The task
         # workspace is staged outside the checkout by VulcanBench.
@@ -315,6 +330,7 @@ class MuseCodeAdapter:
                 "cli_model": cli_model,
                 "contributor_mode": contributor_mode,
                 "pricing_tier": "contributor" if model.endswith("-contributor") else "standard",
+                "billing": "api" if api_key else "subscription",
                 "session_data_root": str(scratch / "data"),
                 "requested_effort": effort,
                 "stream_idle_timeout_secs": STREAM_IDLE_TIMEOUT_SECS,
@@ -325,7 +341,9 @@ class MuseCodeAdapter:
             requested_model=model,
             session_id=session_id,
             harness_version=checked.version,
-            auth_method="subscription",
+            auth_method="api-key" if api_key else "subscription",
+            billing="api" if api_key else "subscription",
+            cost_basis="metered-api-pricing" if api_key else "api-equivalent",
             execution_boundary="macOS outer sandbox; workspace/session writes; shared-temp/checkout/prior-session read deny; explicit TMPDIR context; web tools off unless network requested; shell network not isolated",
         )
         proc = subprocess.Popen(

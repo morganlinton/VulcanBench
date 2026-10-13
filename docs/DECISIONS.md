@@ -7,6 +7,36 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-13: Muse Wonder 1.0 runs through the Model API in Pi and Muse Code, one approved level at a time
+
+The Muse Code weekly quota stalls the Wonder Full sweep until 2026-10-19, and
+Wonder Full is not served on the Model API. The owner chose to benchmark Muse
+Wonder 1.0 on VulcanBench Frontier v4 through the Model API key instead, in two
+harnesses: Pi 1.2.0 (`pi:meta/muse-wonder-1.0`, new adapter) and Muse Code
+1.4.6 (`muse-code:muse-wonder-1.0-api`, Standard mode, key passed as
+`META_API_KEY`). Same model, tasks and efforts, so cost and score gaps are the
+harness. API billing is Standard mode: Meta does not train on the content.
+
+Run conditions: Low to Max (ultra blocked, minimal not published), one task at
+a time, each task in Pi then Muse Code before the next. The owner approves each
+effort level: `scripts/cii-v4-board/run_wonder_api_sweep.py` runs one level per
+launch, then stops with `level_complete_awaiting_approval` and the spend. Each
+launch also carries a USD ceiling for that level, checked before every run, and
+Pi runs carry a per-run kill cap. Spend is the harness's metered receipt
+(`economics.marginal_cash_usd`) at Wonder 1.0 list prices; Meta's billing
+dashboard is the authority. Run roots: `runs-effort-musewonder10-api/{pi,muse-code}`.
+
+Pilot evidence (2026-10-13, not board data): on `legacy-qlite-store-parity` at
+Low, Pi cost $0.69 and Muse Code $1.51 per task, both functional 1.0. On the
+synthetic validation task Pi cost $0.023 and Muse Code $0.166; Pi's own cost
+report matched the harness's pricing exactly. The pilot stopped after that pair
+when the owner redirected; raw output is in `runs-pilot-wonder-harness/`.
+
+Limits: the API key is in each agent's environment (both CLIs need it) and shell
+network is not isolated, so rotate the key after the sweep. The Wonder Full
+resume loop now waits while an API level runs, so sweeps stay serial when the
+weekly quota resets.
+
 ## 2026-10-13: Muse Wonder sweeps resume automatically after subscription quota pauses
 
 The Wonder Full sweep on VulcanBench Frontier v4 (bench tag

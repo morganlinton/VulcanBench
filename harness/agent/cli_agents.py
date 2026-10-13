@@ -56,7 +56,7 @@ from harness.redaction import sanitize
 from harness.sandbox.docker_executor import ResourceSpec
 
 CLI_AGENT_PROVIDERS = frozenset(
-    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code", "devin"}
+    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code", "devin", "pi"}
 )
 
 # Claude Code's headless result text when a subscription window is exhausted
@@ -2786,6 +2786,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
         from harness.agent.muse_code import MuseCodeAdapter  # noqa: PLC0415
 
         return MuseCodeAdapter()
+    if name == "pi":
+        # Same lazy import: pi_agent builds on this module's helpers.
+        from harness.agent.pi_agent import PiAdapter  # noqa: PLC0415
+
+        return PiAdapter()
     if name == "devin":
         # Same lazy import: devin_cli builds on this module's helpers.
         from harness.agent.devin_cli import DevinAdapter  # noqa: PLC0415

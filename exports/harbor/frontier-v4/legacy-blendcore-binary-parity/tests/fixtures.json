@@ -1,0 +1,1972 @@
+{
+ "guard_fill_flows": [
+  {
+   "input": [
+    "T t1 blk 5000",
+    "T t2 red 3000",
+    "D j1 t1 400",
+    "D j1 t2 300",
+    "D j2 t1 499"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "J j1 400",
+    "J j1 700",
+    "J j2 499",
+    "X 2 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "T t1 blk 2500",
+    "D j1 t1 450"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "J j1 450",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 900",
+    "D j1 t1 300",
+    "D j2 t1 300",
+    "D j1 t1 300"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 300",
+    "J j2 300",
+    "J j1 600",
+    "X 1 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T aa blk 5000",
+    "T bb blk 5000",
+    "D j1 aa 100",
+    "D j1 bb 100",
+    "D j2 aa 100"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "J j1 100",
+    "J j1 200",
+    "J j2 100",
+    "X 2 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 99",
+    "D j1 t1 99"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 99",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_reconcile_identity": [
+  {
+   "input": [
+    "T t1 blk 5000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "B t1 5000",
+    "REND 1",
+    "X 1 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "T t2 red 3000",
+    "R",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "B t1 5000",
+    "B t2 3000",
+    "REND 2",
+    "B t1 5000",
+    "B t2 3000",
+    "REND 2",
+    "X 2 0 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 400",
+    "R",
+    "D j2 t1 400",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 400",
+    "B t1 4600",
+    "REND 1",
+    "J j2 400",
+    "B t1 4200",
+    "REND 1",
+    "X 1 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "R"
+   ],
+   "expected": [
+    "REND 0",
+    "X 0 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 250",
+    "D j2 t1 250",
+    "R",
+    "T t1 blk 1000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 250",
+    "J j2 250",
+    "B t1 4500",
+    "REND 1",
+    "OK 1",
+    "B t1 5500",
+    "REND 1",
+    "X 2 2 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "T toolong99 blk 5000"
+   ],
+   "expected": [
+    "N toolong99 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t-1 blk 5000"
+   ],
+   "expected": [
+    "N t-1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk-x 5000"
+   ],
+   "expected": [
+    "N t1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 toolong99 5000"
+   ],
+   "expected": [
+    "N t1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 9"
+   ],
+   "expected": [
+    "N t1 VOL",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 12345678"
+   ],
+   "expected": [
+    "N t1 VOL",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 12x4"
+   ],
+   "expected": [
+    "N t1 VOL",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk"
+   ],
+   "expected": [
+    "N t1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1"
+   ],
+   "expected": [
+    "N t1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "T t1 red 1000"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 PIGMENT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 0"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 AMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 1234567"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 AMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 12a"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 AMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D toolong99 t1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t-1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "N t-1 FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "D j1 ghost 100"
+   ],
+   "expected": [
+    "N ghost FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 5000"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 DRY",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 400",
+    "D j1 t1 90"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 DRY",
+    "J j1 90",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "R now"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "t t1 blk 5000"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "d j1 t1 100"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "r"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "T t1 blk 5000",
+    ""
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "B t1 5000",
+    "REND 1",
+    "X 1 0 1 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "T t1 blk 5000",
+    "T t2 red 3000",
+    "D j1 t1 400",
+    "D j1 ghost 100",
+    "D j1 t1 12a",
+    "R",
+    "T t1 red 100",
+    "T t3 blk 9",
+    "Q junk",
+    "D j2 t2 250",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "J j1 400",
+    "N ghost FMT",
+    "N t1 AMT",
+    "B t1 4600",
+    "B t2 3000",
+    "REND 2",
+    "N t1 PIGMENT",
+    "N t3 VOL",
+    "N ???????? FMT",
+    "J j2 250",
+    "B t1 4600",
+    "B t2 2750",
+    "REND 2",
+    "X 2 2 2 5"
+   ]
+  }
+ ],
+ "f2p_book_vs_physical": [
+  {
+   "input": [
+    "T t1 blk 1000",
+    "D j1 t1 600",
+    "D j2 t1 400"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 600",
+    "J j2 399",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 20000",
+    "D j1 t1 15000",
+    "D j2 t1 5000"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 15000",
+    "N t1 DRY",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 20000",
+    "D j1 t1 15000",
+    "D j2 t1 4985"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 15000",
+    "J j2 4970",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 1000",
+    "D j1 t1 600",
+    "R",
+    "D j2 t1 400"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 600",
+    "B t1 400",
+    "REND 1",
+    "J j2 400",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 1000",
+    "D j1 t1 499",
+    "D j2 t1 501"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 499",
+    "J j2 501",
+    "X 1 2 0 0"
+   ]
+  }
+ ],
+ "f2p_writeoff": [
+  {
+   "input": [
+    "T t1 blk 100000",
+    "D j1 t1 25500",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 25500",
+    "B t1 74475",
+    "REND 1",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100000",
+    "D j1 t1 25000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 25000",
+    "B t1 75000",
+    "REND 1",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100000",
+    "D j1 t1 13000",
+    "D j1 t1 13000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 13000",
+    "J j1 26000",
+    "B t1 73974",
+    "REND 1",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100000",
+    "D j1 t1 25500",
+    "R",
+    "D j2 t1 25500",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 25500",
+    "B t1 74475",
+    "REND 1",
+    "J j2 25500",
+    "B t1 48950",
+    "REND 1",
+    "X 1 2 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100000",
+    "T t2 red 100000",
+    "D j1 t1 25500",
+    "D j2 t2 20000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "J j1 25500",
+    "J j2 20000",
+    "B t1 74475",
+    "B t2 80000",
+    "REND 2",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 30000",
+    "D j1 t1 25500",
+    "R",
+    "D j2 t1 4470"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 25500",
+    "B t1 4475",
+    "REND 1",
+    "J j2 4470",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_white_bulk": [
+  {
+   "input": [
+    "T t1 inkW 100000",
+    "D j1 t1 13000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 13000",
+    "B t1 86974",
+    "REND 1",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 inkw 100000",
+    "D j1 t1 13000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 13000",
+    "B t1 87000",
+    "REND 1",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 inkX 100000",
+    "D j1 t1 13000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 13000",
+    "B t1 87000",
+    "REND 1",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 W1 10000",
+    "D j1 t1 999",
+    "D j2 t1 9001"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 999",
+    "J j2 9000",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 W1 10000",
+    "D j1 t1 1000",
+    "D j2 t1 9000"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 1000",
+    "J j2 8996",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 baseW 30000",
+    "D j1 t1 14000",
+    "D j2 t1 15950"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 14000",
+    "J j2 15944",
+    "X 1 2 0 0"
+   ]
+  }
+ ],
+ "f2p_near_dry_partial": [
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 119"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 120"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 121"
+   ],
+   "expected": [
+    "OK 1",
+    "N t1 DRY",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 10",
+    "D j1 t1 15",
+    "D j1 t1 10"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 10",
+    "J j1 10",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 115",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "B t1 0",
+    "REND 1",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 100",
+    "D j1 t1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "f2p_overfill_cap": [
+  {
+   "input": [
+    "T t1 blk 9999999",
+    "T t1 blk 9999999",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "B t1 9999999",
+    "REND 1",
+    "X 2 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 9999999",
+    "T t1 blk 50000",
+    "D j1 t1 400",
+    "R",
+    "D j2 t1 400"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "J j1 400",
+    "B t1 9999599",
+    "REND 1",
+    "J j2 400",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 9999998",
+    "T t1 blk 10",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "B t1 9999999",
+    "REND 1",
+    "X 2 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 9000000",
+    "T t1 blk 999999",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "B t1 9999999",
+    "REND 1",
+    "X 2 0 1 0"
+   ]
+  }
+ ],
+ "f2p_case_fold": [
+  {
+   "input": [
+    "T Tk1 blk 1000",
+    "T TK1 blk 1000",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "B Tk1 2000",
+    "REND 1",
+    "X 2 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T Tk1 blk 5000",
+    "T tk1 red 1000"
+   ],
+   "expected": [
+    "OK 1",
+    "N tk1 PIGMENT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "T tk1 blk 5000",
+    "D Job tk1 100",
+    "D JOB tk1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "J Job 100",
+    "J Job 200",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T tk1 blk 5000",
+    "D j1 TK1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T tk1 blk 5000",
+    "D j1 tk1 100",
+    "D j1 tk1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "J j1 200",
+    "X 1 2 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "T t1 blk 5000 extra"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 100 tail junk"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 100"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 100",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "R now"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  }
+ ],
+ "f2p_reconcile_feedback": [
+  {
+   "input": [
+    "T t1 blk 30000",
+    "D j1 t1 25500",
+    "D j2 t1 4460"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 25500",
+    "J j2 4449",
+    "X 1 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 30000",
+    "D j1 t1 25500",
+    "R",
+    "D j2 t1 4460"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 25500",
+    "B t1 4475",
+    "REND 1",
+    "J j2 4460",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 50000",
+    "D j1 t1 20000",
+    "R",
+    "T t1 blk 20000",
+    "D j2 t1 25500",
+    "R",
+    "D j3 t1 18980"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 20000",
+    "B t1 30000",
+    "REND 1",
+    "OK 1",
+    "J j2 25500",
+    "B t1 24475",
+    "REND 1",
+    "J j3 18980",
+    "X 2 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "T t1 blk 5000",
+    "D j1 t1 400",
+    "R",
+    "D j2 t1 400",
+    "R"
+   ],
+   "expected": [
+    "OK 1",
+    "J j1 400",
+    "B t1 4600",
+    "REND 1",
+    "J j2 400",
+    "B t1 4200",
+    "REND 1",
+    "X 1 2 2 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "D job T1 20",
+    "T t1 blk 100",
+    "T ghost red 9",
+    "D j1 t1 499",
+    "D toolong99 t1 5000",
+    "D JOB tk1 999999",
+    "D j2 t-1 5000",
+    "D J1 TK1 1",
+    "D job T1 25000",
+    "T T1 blk 100",
+    "D j2 t-1 501 tail junk",
+    "T ghost blk 1000",
+    "D job t1 999999",
+    "D j2 t1 999999",
+    "T",
+    "D J1 t-1 1000",
+    "R",
+    "D job t-1 1000",
+    "D",
+    "Q hey",
+    "D job ghost 501",
+    "T zz99 blk 9999999",
+    "D toolong99 tk1 1",
+    "X",
+    "D j2 big8big8 4985",
+    "d j1 t1 5",
+    "D JOB TK1 0",
+    "T aa blk 40 extra",
+    "D j2 t-1 25000 tail junk",
+    "R",
+    "D j2 TK1 13000 tail junk",
+    "D job T1 13000",
+    "R",
+    "T big8big8 W1 12345678",
+    "D j2 tk1 12a",
+    "D job t1 501",
+    "R",
+    "D JOB tk1 999999",
+    "R",
+    "D toolong99 aa 0",
+    "T big8big8 baseW 100 extra",
+    "R",
+    "R now",
+    "T T1 blk 100",
+    "T",
+    "R",
+    "D j2 zz99 25500",
+    "D toolong99 t-1 25500",
+    "R",
+    "R",
+    "R now",
+    "D JOB t1 400",
+    "T big8big8 red 9 extra",
+    "D job tk1 25000",
+    "T",
+    "D toolong99 aa 1",
+    "R now",
+    "T T1 inkW 100",
+    "D j1 TK1 13000",
+    "T TK1 blk 9999998",
+    "R",
+    "D job TK1 13000",
+    "T t1 inkw 100",
+    "D",
+    "T TK1 inkW 12345678",
+    "D j2 T1 1000",
+    "T ghost inkw 9999998 extra",
+    "Q hey",
+    "R",
+    "T T1 baseW 40",
+    "T big8big8 baseW 12345678 extra",
+    "D J1 t-1 25000",
+    "D j1 tk1 0",
+    "R",
+    "D j1 zz99 12a",
+    "D job zz99 1000",
+    "D",
+    "t t1 blk 5000",
+    "D toolong99 zz99 0",
+    "D j2 t1 1234567 tail junk",
+    "R",
+    "D toolong99 TK1 1",
+    "R",
+    "D j2 aa 5000 tail junk",
+    "D J1 ghost 4985",
+    "D job zz99 0",
+    "T ghost W1 5000",
+    "D J1 aa 1234567 tail junk",
+    "X",
+    "T t-1 baseW 40",
+    "D j2 zz99 12a",
+    "T tk1 red 5000",
+    "R",
+    "t t1 blk 5000",
+    "R",
+    "D j2 ghost 1000",
+    "D J1 T1 999",
+    "D j1 TK1 0",
+    "D j1 big8big8 5000",
+    "R",
+    "D job aa 20",
+    "T tk1 inkw 12345678",
+    "T zz99 blk 100000 extra",
+    "D toolong99 TK1 13000",
+    "T ghost red 1000",
+    "D J1 TK1 4985",
+    "D job ghost 121 tail junk",
+    "D toolong99 aa 1000",
+    "D j2 tk1 119",
+    "T t1 blk 100",
+    "D j2 big8big8 12a",
+    "T tk1 baseW 1000 extra",
+    "D j2 zz99 5000",
+    "D j1 tk1 499",
+    "t t1 blk 5000",
+    "T aa inkw 100000",
+    "D J1 TK1 999999",
+    "D J1 aa 121",
+    "T TK1 blk 100000",
+    "R",
+    "R",
+    "T aa baseW 100000",
+    "D j2 T1 400",
+    "R",
+    "D toolong99 aa 4985",
+    "T TK1 red 9999998",
+    "Q hey",
+    "T t-1 inkw 1000",
+    "D J1 T1 119",
+    "T TK1 blk 9 extra",
+    "D job tk1 400 tail junk",
+    "D j1 t-1 499 tail junk",
+    "D toolong99 big8big8 0",
+    "R",
+    "D JOB T1 4985 tail junk",
+    "D toolong99 aa 1234567",
+    "D j2 T1 12a",
+    "D toolong99 zz99 20",
+    "D J1 aa 119",
+    "R",
+    "T T1 inkW 100000",
+    "D JOB tk1 1000",
+    "D job tk1 121",
+    "T t-1 red 9999999",
+    "D j1 TK1 400",
+    "T t1 inkw 100000 extra",
+    "T t1 inkW 20000",
+    "D toolong99 TK1 20",
+    "D JOB TK1 1",
+    "R",
+    "X",
+    "R",
+    "D toolong99 tk1 0",
+    "R",
+    "T",
+    "R",
+    "D j1 tk1 1234567",
+    "D job zz99 13000",
+    "T ghost inkW 1000",
+    "D job t-1 20"
+   ],
+   "expected": [
+    "N T1 FMT",
+    "OK 1",
+    "N ghost VOL",
+    "N t1 DRY",
+    "N t1 FMT",
+    "N tk1 FMT",
+    "N t-1 FMT",
+    "N TK1 FMT",
+    "N T1 DRY",
+    "OK 1",
+    "N t-1 FMT",
+    "OK 2",
+    "N t1 DRY",
+    "N t1 DRY",
+    "N ???????? FMT",
+    "N t-1 FMT",
+    "B t1 200",
+    "B ghost 1000",
+    "REND 2",
+    "N t-1 FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "J job 501",
+    "OK 3",
+    "N tk1 FMT",
+    "N ???????? FMT",
+    "N big8big8 FMT",
+    "N ???????? FMT",
+    "N TK1 AMT",
+    "OK 4",
+    "N t-1 FMT",
+    "B t1 200",
+    "B ghost 499",
+    "B zz99 9999999",
+    "B aa 40",
+    "REND 4",
+    "N TK1 FMT",
+    "N T1 DRY",
+    "B t1 200",
+    "B ghost 499",
+    "B zz99 9999999",
+    "B aa 40",
+    "REND 4",
+    "N big8big8 VOL",
+    "N tk1 AMT",
+    "N t1 DRY",
+    "B t1 200",
+    "B ghost 499",
+    "B zz99 9999999",
+    "B aa 40",
+    "REND 4",
+    "N tk1 FMT",
+    "B t1 200",
+    "B ghost 499",
+    "B zz99 9999999",
+    "B aa 40",
+    "REND 4",
+    "N aa FMT",
+    "OK 5",
+    "B t1 200",
+    "B ghost 499",
+    "B zz99 9999999",
+    "B aa 40",
+    "B big8big8 100",
+    "REND 5",
+    "N ???????? FMT",
+    "OK 5",
+    "N ???????? FMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9999999",
+    "B aa 40",
+    "B big8big8 100",
+    "REND 5",
+    "J j2 25500",
+    "N t-1 FMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9974474",
+    "B aa 40",
+    "B big8big8 100",
+    "REND 5",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9974474",
+    "B aa 40",
+    "B big8big8 100",
+    "REND 5",
+    "N ???????? FMT",
+    "N t1 DRY",
+    "N big8big8 VOL",
+    "N tk1 FMT",
+    "N ???????? FMT",
+    "N aa FMT",
+    "N ???????? FMT",
+    "N T1 PIGMENT",
+    "N TK1 FMT",
+    "OK 6",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9974474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9999998",
+    "REND 6",
+    "J job 13501",
+    "N t1 PIGMENT",
+    "N ???????? FMT",
+    "N TK1 VOL",
+    "N T1 DRY",
+    "N ghost PIGMENT",
+    "N ???????? FMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9974474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "N T1 PIGMENT",
+    "N big8big8 VOL",
+    "N t-1 FMT",
+    "N tk1 AMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9974474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "N zz99 AMT",
+    "J job 14501",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N zz99 FMT",
+    "N t1 AMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9973474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "N TK1 FMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9973474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "N aa DRY",
+    "N ghost DRY",
+    "N zz99 AMT",
+    "N ghost PIGMENT",
+    "N aa AMT",
+    "N ???????? FMT",
+    "N t-1 FMT",
+    "N zz99 AMT",
+    "N tk1 PIGMENT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9973474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "N ???????? FMT",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9973474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "N ghost DRY",
+    "N T1 DRY",
+    "N TK1 AMT",
+    "N big8big8 DRY",
+    "B t1 300",
+    "B ghost 499",
+    "B zz99 9973474",
+    "B aa 40",
+    "B big8big8 100",
+    "B TK1 9986998",
+    "REND 6",
+    "J job 14521",
+    "N tk1 VOL",
+    "OK 6",
+    "N TK1 FMT",
+    "N ghost PIGMENT",
+    "J J1 4985",
+    "J job 14642",
+    "N aa FMT",
+    "J j2 25619",
+    "OK 6",
+    "N big8big8 AMT",
+    "N tk1 PIGMENT",
+    "J j2 30619",
+    "J J1 5484",
+    "N ???????? FMT",
+    "N aa PIGMENT",
+    "J J1 1005483",
+    "N aa DRY",
+    "OK 6",
+    "B t1 400",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8993393",
+    "REND 6",
+    "B t1 400",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8993393",
+    "REND 6",
+    "N aa PIGMENT",
+    "J j2 31019",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8993393",
+    "REND 6",
+    "N aa FMT",
+    "N TK1 PIGMENT",
+    "N ???????? FMT",
+    "N t-1 FMT",
+    "N T1 DRY",
+    "N TK1 VOL",
+    "J job 15042",
+    "N t-1 FMT",
+    "N big8big8 FMT",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8992993",
+    "REND 6",
+    "N T1 DRY",
+    "N aa FMT",
+    "N T1 AMT",
+    "N zz99 FMT",
+    "N aa DRY",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8992993",
+    "REND 6",
+    "N T1 PIGMENT",
+    "J job 16042",
+    "J job 16163",
+    "N t-1 FMT",
+    "J J1 1005883",
+    "N t1 PIGMENT",
+    "N t1 PIGMENT",
+    "N TK1 FMT",
+    "J job 16164",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8991471",
+    "REND 6",
+    "N ???????? FMT",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8991471",
+    "REND 6",
+    "N tk1 FMT",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8991471",
+    "REND 6",
+    "N ???????? FMT",
+    "B t1 0",
+    "B ghost 378",
+    "B zz99 9994999",
+    "B aa 20",
+    "B big8big8 100",
+    "B TK1 8991471",
+    "REND 6",
+    "N tk1 AMT",
+    "J job 29164",
+    "N ghost PIGMENT",
+    "N t-1 FMT",
+    "X 11 18 26 105"
+   ]
+  },
+  {
+   "input": [
+    "T tk1 baseW 9999999",
+    "D J1 t-1 501",
+    "X",
+    "T TK1 blk 9999998",
+    "D j1 t-1 4985",
+    "D j1 tk1 499",
+    "X",
+    "D toolong99 big8big8 20",
+    "t t1 blk 5000",
+    "D JOB t-1 0",
+    "T TK1 W1 100 extra",
+    "T",
+    "R",
+    "D j1 tk1 121",
+    "T TK1 red 5000",
+    "D JOB aa 20",
+    "D j2 big8big8 1234567",
+    "T TK1 red 12345678",
+    "X",
+    "R",
+    "D JOB aa 12a",
+    "R",
+    "D j1 t1 499 tail junk",
+    "D j1 big8big8 999",
+    "D toolong99 T1 999",
+    "T big8big8 baseW 40",
+    "D job ghost 501 tail junk",
+    "T",
+    "D j1 big8big8 400 tail junk",
+    "T t-1 blk 12x4",
+    "R",
+    "D J1 TK1 25000 tail junk",
+    "T zz99 baseW 100000 extra",
+    "R",
+    "R",
+    "T T1 baseW 9999999",
+    "D J1 aa 5000",
+    "R",
+    "D J1 aa 999",
+    "R",
+    "R",
+    "Q hey",
+    "T ghost inkw 1000",
+    "T t-1 inkw 100 extra",
+    "T ghost inkw 9999999",
+    "D J1 t-1 501",
+    "D toolong99 TK1 121",
+    "D j2 TK1 25500",
+    "T zz99 inkw 12345678",
+    "T t-1 blk 9999999",
+    "T t1 inkw 40",
+    "T t1 baseW 100",
+    "D job zz99 1",
+    "T big8big8 blk 9999998 extra",
+    "R",
+    "D j2 tk1 25000 tail junk",
+    "D",
+    "D JOB big8big8 25000",
+    "D J1 zz99 999",
+    "X",
+    "D j2 ghost 12a",
+    "D J1 zz99 5000",
+    "R",
+    "D job ghost 501",
+    "T tk1 inkw 100000",
+    "T tk1 W1 12x4",
+    "D JOB tk1 25500",
+    "D toolong99 aa 999",
+    "D toolong99 zz99 20",
+    "D j2 T1 121 tail junk",
+    "T t1 inkW 1000",
+    "D job ghost 0",
+    "D j2 tk1 0",
+    "D j2 tk1 12a",
+    "D toolong99 t-1 20",
+    "D JOB tk1 25500 tail junk",
+    "D j2 ghost 13000",
+    "D J1 TK1 25000",
+    "D job t1 1",
+    "T TK1 baseW 20000",
+    "T tk1 baseW 5000",
+    "D j1 big8big8 999999",
+    "T T1 blk 12345678",
+    "D toolong99 t-1 13000",
+    "D JOB ghost 12a",
+    "t t1 blk 5000",
+    "D j1 ghost 400",
+    "D J1 big8big8 25500",
+    "T tk1 baseW 9999998",
+    "D JOB tk1 400",
+    "T T1 inkw 9999999",
+    "D job t1 12a",
+    "D j1 t1 1",
+    "T T1 inkW 100",
+    "T t1 blk 9999998",
+    "R",
+    "T zz99 W1 9",
+    "T ghost red 12345678",
+    "R",
+    "D job t1 12a",
+    "R",
+    "t t1 blk 5000",
+    "T ghost baseW 1000 extra",
+    "D j2 big8big8 1",
+    "T",
+    "T aa blk 12x4 extra",
+    "T t1 baseW 1000",
+    "D j1 zz99 999",
+    "D toolong99 big8big8 1234567",
+    "T big8big8 inkW 9999999",
+    "D j1 zz99 0",
+    "D job ghost 13000",
+    "D job tk1 121",
+    "T ghost inkW 12x4",
+    "T big8big8 blk 100000 extra",
+    "D toolong99 TK1 25500",
+    "D j1 t1 119",
+    "R",
+    "Q hey",
+    "T t1 red 100000",
+    "D toolong99 ghost 121 tail junk",
+    "D",
+    "D JOB aa 4985 tail junk",
+    "T aa W1 100",
+    "D job big8big8 25500",
+    "R",
+    "R",
+    "D J1 T1 1234567",
+    "R",
+    "d j1 t1 5",
+    "R",
+    "R now",
+    "T t1 W1 9 extra",
+    "T aa W1 1000",
+    "T TK1 inkw 9999998 extra",
+    "D j2 ghost 4985",
+    "R",
+    "R",
+    "R",
+    "R",
+    "T big8big8 blk 5000",
+    "X",
+    "D J1 t1 13000",
+    "D job t-1 499",
+    "T t-1 blk 1000",
+    "d j1 t1 5",
+    "R now",
+    "T big8big8 blk 9999998 extra",
+    "d j1 t1 5",
+    "R",
+    "D j2 ghost 5000",
+    "D JOB zz99 121",
+    "D j1 TK1 1",
+    "D j2 aa 999999",
+    "D J1 t-1 4985"
+   ],
+   "expected": [
+    "OK 1",
+    "N t-1 FMT",
+    "N ???????? FMT",
+    "N TK1 PIGMENT",
+    "N t-1 FMT",
+    "J j1 499",
+    "N ???????? FMT",
+    "N big8big8 FMT",
+    "N ???????? FMT",
+    "N t-1 FMT",
+    "N TK1 PIGMENT",
+    "N ???????? FMT",
+    "B tk1 9999500",
+    "REND 1",
+    "J j1 620",
+    "N TK1 PIGMENT",
+    "N aa FMT",
+    "N big8big8 AMT",
+    "N TK1 VOL",
+    "N ???????? FMT",
+    "B tk1 9999379",
+    "REND 1",
+    "N aa AMT",
+    "B tk1 9999379",
+    "REND 1",
+    "N t1 FMT",
+    "N big8big8 FMT",
+    "N T1 FMT",
+    "OK 2",
+    "N ghost FMT",
+    "N ???????? FMT",
+    "N big8big8 DRY",
+    "N t-1 FMT",
+    "B tk1 9999379",
+    "B big8big8 40",
+    "REND 2",
+    "J j1 25620",
+    "OK 3",
+    "B tk1 9974329",
+    "B big8big8 40",
+    "B zz99 100000",
+    "REND 3",
+    "B tk1 9974329",
+    "B big8big8 40",
+    "B zz99 100000",
+    "REND 3",
+    "OK 4",
+    "N aa FMT",
+    "B tk1 9974329",
+    "B big8big8 40",
+    "B zz99 100000",
+    "B T1 9999999",
+    "REND 4",
+    "N aa FMT",
+    "B tk1 9974329",
+    "B big8big8 40",
+    "B zz99 100000",
+    "B T1 9999999",
+    "REND 4",
+    "B tk1 9974329",
+    "B big8big8 40",
+    "B zz99 100000",
+    "B T1 9999999",
+    "REND 4",
+    "N ???????? FMT",
+    "OK 5",
+    "N t-1 FMT",
+    "OK 5",
+    "N t-1 FMT",
+    "N TK1 FMT",
+    "J j2 25500",
+    "N zz99 VOL",
+    "N t-1 FMT",
+    "N t1 PIGMENT",
+    "OK 5",
+    "J job 1",
+    "N big8big8 PIGMENT",
+    "B tk1 9948778",
+    "B big8big8 40",
+    "B zz99 99999",
+    "B T1 9999999",
+    "B ghost 9999999",
+    "REND 5",
+    "J j2 50500",
+    "N ???????? FMT",
+    "N big8big8 DRY",
+    "J j1 26619",
+    "N ???????? FMT",
+    "N ghost AMT",
+    "J j1 31619",
+    "B tk1 9923728",
+    "B big8big8 40",
+    "B zz99 94000",
+    "B T1 9999999",
+    "B ghost 9999999",
+    "REND 5",
+    "J job 502",
+    "N tk1 PIGMENT",
+    "N tk1 VOL",
+    "J job 26002",
+    "N aa FMT",
+    "N zz99 FMT",
+    "J j2 50621",
+    "N t1 PIGMENT",
+    "N ghost AMT",
+    "N tk1 AMT",
+    "N tk1 AMT",
+    "N t-1 FMT",
+    "J job 51502",
+    "J j2 63621",
+    "J j1 56619",
+    "J job 51503",
+    "OK 5",
+    "OK 5",
+    "N big8big8 DRY",
+    "N T1 VOL",
+    "N t-1 FMT",
+    "N ghost AMT",
+    "N ???????? FMT",
+    "J j1 57019",
+    "N big8big8 DRY",
+    "OK 5",
+    "J job 51903",
+    "N T1 PIGMENT",
+    "N t1 AMT",
+    "J j1 57020",
+    "N T1 PIGMENT",
+    "N t1 PIGMENT",
+    "B tk1 9923447",
+    "B big8big8 40",
+    "B zz99 94000",
+    "B T1 9999876",
+    "B ghost 9986098",
+    "REND 5",
+    "N zz99 VOL",
+    "N ghost VOL",
+    "B tk1 9923447",
+    "B big8big8 40",
+    "B zz99 94000",
+    "B T1 9999876",
+    "B ghost 9986098",
+    "REND 5",
+    "N t1 AMT",
+    "B tk1 9923447",
+    "B big8big8 40",
+    "B zz99 94000",
+    "B T1 9999876",
+    "B ghost 9986098",
+    "REND 5",
+    "N ???????? FMT",
+    "N ghost PIGMENT",
+    "J j2 63622",
+    "N ???????? FMT",
+    "N aa VOL",
+    "OK 5",
+    "J j1 58019",
+    "N big8big8 FMT",
+    "N big8big8 PIGMENT",
+    "N zz99 AMT",
+    "J job 64903",
+    "J job 65024",
+    "N ghost VOL",
+    "N big8big8 PIGMENT",
+    "N TK1 FMT",
+    "J j1 58138",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9973098",
+    "REND 5",
+    "N ???????? FMT",
+    "N t1 PIGMENT",
+    "N ghost FMT",
+    "N ???????? FMT",
+    "N aa FMT",
+    "OK 6",
+    "N big8big8 DRY",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9973098",
+    "B aa 100",
+    "REND 6",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9973098",
+    "B aa 100",
+    "REND 6",
+    "N T1 AMT",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9973098",
+    "B aa 100",
+    "REND 6",
+    "N ???????? FMT",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9973098",
+    "B aa 100",
+    "REND 6",
+    "N ???????? FMT",
+    "N t1 VOL",
+    "OK 6",
+    "N TK1 PIGMENT",
+    "J j2 68607",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9968113",
+    "B aa 1100",
+    "REND 6",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9968113",
+    "B aa 1100",
+    "REND 6",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9968113",
+    "B aa 1100",
+    "REND 6",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9999880",
+    "B ghost 9968113",
+    "B aa 1100",
+    "REND 6",
+    "N big8big8 PIGMENT",
+    "N ???????? FMT",
+    "J j1 71138",
+    "N t-1 FMT",
+    "N t-1 FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N big8big8 PIGMENT",
+    "N ???????? FMT",
+    "B tk1 9923326",
+    "B big8big8 39",
+    "B zz99 93001",
+    "B T1 9986854",
+    "B ghost 9968113",
+    "B aa 1100",
+    "REND 6",
+    "J j2 73607",
+    "J job 65145",
+    "J j1 71139",
+    "N aa DRY",
+    "N t-1 FMT",
+    "X 13 28 24 90"
+   ]
+  }
+ ]
+}

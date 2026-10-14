@@ -617,3 +617,23 @@ confinement, so a loop re-applies it every five minutes while v5 jobs run.
   escaped and untruncated, and run_controls.py reads the status from the end
   of the line. The first control run mis-parsed every id and reported 14/14
   for every variant; the rewards (all 0) gave it away.
+
+## F5-c: tree-sitter (2026-10-14)
+
+- **Explicit variants when upstream interleaves a unit.** Unit D's four
+  commits are interleaved with E to H in history, so chained parts cannot
+  separate the units. Each control variant is built from base by applying
+  the chosen units' commits in upstream order (git apply, then -3 against
+  the real history) and stored as an explicit patch; a variant that cannot
+  be built (gold minus A, because C needs A) is recorded as such.
+- **Tests in another language are fine.** The graded code is C; the oracle
+  is the Rust crate's libtest suite, which compiles the library through its
+  build script (which watches every lib/src entry, so fresh mtimes force a
+  rebuild). Fixtures are fetched and generated at image build.
+- **Remove test functions structurally.** Reversing the test diffs hit
+  conflicts and a 3-way merge left conflict markers; deleting the held-out
+  functions by name and the one added assertion by exact text gave a
+  pure-deletion patch.
+- **Check the oracle exists.** The first validation run stopped at once
+  because solution/solve.sh was missing; probe_verifier extracts gold
+  through it.

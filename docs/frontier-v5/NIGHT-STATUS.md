@@ -84,6 +84,16 @@ every leave-one-out fails some; base 0 x3, gold 1 x3, three probes 0
 oracle 1 and nop 0. Three JavaScript sweeps (about 45 projects) found no
 other cluster with real interaction. F5 now has five of six slots; C is open.
 
+**Update 2026-10-14: F5 complete, every slot has a validated candidate.**
+F5-c is `treesitter-query-anchor-matching`: eleven fixes to tree-sitter's
+query engine and tree cursor (C) in eight units; an upstream test needs
+three fixes together, one fix does not compile without another, no unit
+clears more than 3 of 11 held-out tests, every leave-one-out fails some;
+base 0 x3, gold 1 x3, probes 0, Harbor oracle 1 and nop 0. mruby's case/in
+code generator (PR #7539) is the recorded backup. F5 by language: C++ geos,
+Java commons-lang, Python nx-digraph, Rust ioverlay, JavaScript tseslint,
+C tree-sitter. Next: the admission gate against the reference models.
+
 ## Local session 2026-10-08 to 10-09 (back on the arm64 Mac)
 
 Authoring moved back from cloud sessions to the Mac. Three outcomes:

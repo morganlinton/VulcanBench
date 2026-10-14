@@ -91,6 +91,8 @@ Update 2026-10-13: F5-rust is filled by ioverlay-hole-binding-extraction
 (every floor measured in the image); F5-javascript and F5-c remain open.
 Update 2026-10-13: F5-javascript is filled by tseslint-type-params-mapped-types;
 F5-c is the last open F5 slot.
+Update 2026-10-14: F5-c is filled by treesitter-query-anchor-matching; every
+F5 slot now has a candidate that meets every floor in its task image.
 
 Remaining Track A gaps, in priority order: gate-measure what exists (needs
 the reference credentials, the real blocker); more F2 and F3 tasks toward

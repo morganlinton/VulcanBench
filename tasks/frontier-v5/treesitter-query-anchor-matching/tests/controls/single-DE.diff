@@ -1,0 +1,125 @@
+diff --git a/lib/src/query.c b/lib/src/query.c
+index 4adf9f07..0d5f478b 100644
+--- a/lib/src/query.c
++++ b/lib/src/query.c
+@@ -80,6 +80,10 @@ typedef struct {
+  * - `is_pass_through` - Indicates that state has no matching logic of its own,
+  *    and exists only to split a state. One copy of the state advances immediately
+  *    to the next step, and one moves to the alternative step.
++ * - `alternative_is_skip` - Indicates that this step's `alternative_index` is the
++ *    forward skip introduced by a `?` or `*` quantifier (the branch taken when the
++ *    quantifier matches zero occurrences). For a state that follows it, an
++ *    immediately-following anchor is vacuous.
+  * - `is_inside_alternation` - Indicates that state is inside an alternation.
+  *    Currently only written to quantifier steps, read by logic that maintains
+  *    correctness for quantifiers inside alternations.
+@@ -115,6 +119,7 @@ typedef struct {
+   bool root_pattern_guaranteed: 1;
+   bool parent_pattern_guaranteed: 1;
+   bool is_missing: 1;
++  bool alternative_is_skip: 1;
+ } QueryStep;
+ 
+ /*
+@@ -210,6 +215,7 @@ typedef struct {
+   bool has_in_progress_alternatives: 1;
+   bool dead: 1;
+   bool needs_parent: 1;
++  bool skipped_quantifier: 1;
+ } QueryState;
+ 
+ typedef Array(QueryState) QueryStateList;
+@@ -2987,6 +2993,7 @@ static TSQueryError ts_query__parse_pattern(
+         step = array_get(&self->steps, step->alternative_index);
+       }
+       step->alternative_index = self->steps.size;
++      step->alternative_is_skip = true;
+       break;
+     case TSQuantifierZeroOrOne:
+       step = array_get(&self->steps, starting_step_index);
+@@ -2994,6 +3001,7 @@ static TSQueryError ts_query__parse_pattern(
+         step = array_get(&self->steps, step->alternative_index);
+       }
+       step->alternative_index = self->steps.size;
++      step->alternative_is_skip = true;
+       break;
+     default:
+       break;
+@@ -3816,6 +3824,7 @@ static void ts_query_cursor__add_state(
+     .has_in_progress_alternatives = false,
+     .needs_parent = step->depth == 1,
+     .dead = false,
++    .skipped_quantifier = false,
+   }));
+ }
+ 
+@@ -4254,7 +4263,7 @@ static inline bool ts_query_cursor__advance(
+             node_does_match = symbol == step->symbol && (!step->is_missing || is_missing);
+           }
+           bool later_sibling_can_match = has_later_siblings;
+-          if ((step->is_immediate && is_named) || state->seeking_immediate_match) {
++          if ((step->is_immediate && is_named && !state->skipped_quantifier) || state->seeking_immediate_match) {
+             later_sibling_can_match = false;
+           }
+           if (step->is_last_child && has_later_named_siblings) {
+@@ -4397,6 +4406,9 @@ static inline bool ts_query_cursor__advance(
+           } else {
+               state->seeking_immediate_match = false;
+           }
++          // The zero-skip's vacuous-anchor exemption only covers the immediate
++          // step it lands on. Once the state advances, a later anchor is normal.
++          state->skipped_quantifier = false;
+ 
+           if (stop_on_definite_step && next_step->root_pattern_guaranteed) did_match = true;
+ 
+@@ -4425,6 +4437,17 @@ static inline bool ts_query_cursor__advance(
+                 k--;
+               }
+ 
++              // A `?`/`*` zero-skip past a step that carries a trailing last-child
++              // anchor transfers that requirement to the last matched node. The
++              // skip is only valid if that node really is the last named child.
++              if (
++                child_step->alternative_is_skip &&
++                child_step->is_last_child &&
++                has_later_named_siblings
++              ) {
++                continue;
++              }
++
+               QueryState *copy = ts_query_cursor__copy_state(self, &child_state);
+               if (copy) {
+                 LOG(
+@@ -4441,6 +4464,32 @@ static inline bool ts_query_cursor__advance(
+                 if (child_step->is_pass_through) {
+                   copy->seeking_immediate_match = true;
+                 }
++                // Taking a `?`/`*` zero-skip means the quantified subpattern matched
++                // nothing. How an adjacent anchor behaves then depends on where it sat:
++                if (child_step->alternative_is_skip) {
++                  if (!child_step->is_immediate) {
++                    QueryStep *skip_target = array_get(
++                      &self->query->steps,
++                      child_step->alternative_index
++                    );
++                    // No leading anchor on the skipped step, so an immediately-following
++                    // anchor on the skip target is vacuous (`Q* . B` with zero `Q` lets
++                    // `B` match anywhere).
++                    copy->skipped_quantifier = skip_target->depth == child_step->depth;
++                  } else if (
++                    array_get(&self->query->steps, child_state->step_index - 1)->depth <
++                    child_step->depth
++                  ) {
++                    // The skipped step was the parent's first child pattern and carried a
++                    // leading *boundary* anchor (`(P . Q* Y)`). Transfer the first-child
++                    // requirement to the skip target so it survives the empty run: `Y`
++                    // must still be the parent's first named child.
++                    copy->seeking_immediate_match = true;
++                  }
++                  // Otherwise the skipped step carried a leading *between* anchor
++                  // (`A . Q* ...`): with zero `Q` that adjacency vanishes, while the skip
++                  // target's own anchor, if any, still applies (`A . Q* . B` stays adjacent).
++                }
+               }
+             }
+           }

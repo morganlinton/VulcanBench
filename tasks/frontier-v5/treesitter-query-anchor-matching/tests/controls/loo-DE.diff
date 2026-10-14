@@ -1,0 +1,109 @@
+diff --git a/lib/src/query.c b/lib/src/query.c
+index 4adf9f07..c369662c 100644
+--- a/lib/src/query.c
++++ b/lib/src/query.c
+@@ -2488,9 +2488,17 @@ static TSQueryError ts_query__parse_pattern(
+       CaptureQuantifiers child_capture_quantifiers = capture_quantifiers_new();
+       for (;;) {
+         if (stream->next == '.') {
++          const char *anchor_start = stream->input;
+           child_is_immediate = true;
+           stream_advance(stream);
+           stream_skip_whitespace(stream);
++          // A `.` at a group's end has no sibling to anchor, and a group is not a
++          // node, so there is no last child to anchor against.
++          if (stream->next == ')') {
++            stream_reset(stream, anchor_start);
++            capture_quantifiers_delete(&child_capture_quantifiers);
++            return TSQueryErrorSyntax;
++          }
+         }
+         TSQueryError e = ts_query__parse_pattern(
+           self,
+@@ -2540,7 +2548,7 @@ static TSQueryError ts_query__parse_pattern(
+         // Parse the wildcard symbol
+         if (length == 1 && node_name[0] == '_') {
+           symbol = WILDCARD_SYMBOL;
+-        } else if (!strncmp(node_name, "MISSING", length)) {
++        } else if (length == 7 && !strncmp(node_name, "MISSING", length)) {
+           is_missing = true;
+           stream_skip_whitespace(stream);
+ 
+@@ -3356,12 +3364,18 @@ bool ts_query__step_is_fallible(
+   const TSQuery *self,
+   uint16_t step_index
+ ) {
+-  ts_assert((uint32_t)step_index + 1 < self->steps.size);
++  unsigned i = 1;
+   QueryStep *step = array_get(&self->steps, step_index);
+-  QueryStep *next_step = array_get(&self->steps, step_index + 1);
++  QueryStep *next_step;
++  do {
++    ts_assert((uint32_t)step_index + i < self->steps.size);
++    next_step = array_get(&self->steps, step_index + i);
++    i++;
++  } while (next_step->is_pass_through);
+   return (
+     next_step->depth != PATTERN_DONE_MARKER &&
+-    next_step->depth > step->depth &&
++    (next_step->depth > step->depth ||
++        (next_step->depth == step->depth && next_step->is_immediate)) &&
+     (!next_step->parent_pattern_guaranteed || step->symbol == WILDCARD_SYMBOL)
+   );
+ }
+@@ -4505,7 +4519,10 @@ static inline bool ts_query_cursor__advance(
+               &right_contains_left
+             );
+             if (left_contains_right) {
+-              if (state->step_index == other_state->step_index) {
++              if (
++                state->step_index == other_state->step_index &&
++                (other_state->seeking_immediate_match || !state->seeking_immediate_match)
++              ) {
+                 LOG(
+                   "  drop shorter state. pattern: %u, step_index: %u\n",
+                   state->pattern_index,
+@@ -4519,7 +4536,10 @@ static inline bool ts_query_cursor__advance(
+               other_state->has_in_progress_alternatives = true;
+             }
+             if (right_contains_left) {
+-              if (state->step_index == other_state->step_index) {
++              if (
++                state->step_index == other_state->step_index &&
++                (state->seeking_immediate_match || !other_state->seeking_immediate_match)
++              ) {
+                 LOG(
+                   "  drop shorter state. pattern: %u, step_index: %u\n",
+                   state->pattern_index,
+diff --git a/lib/src/tree_cursor.c b/lib/src/tree_cursor.c
+index ed79ef72..63c49ae5 100644
+--- a/lib/src/tree_cursor.c
++++ b/lib/src/tree_cursor.c
+@@ -557,8 +557,10 @@ void ts_tree_cursor_current_status(
+       (*supertype_count)++;
+     }
+ 
+-    // Determine if the current node has later siblings.
+-    if (!*has_later_siblings) {
++    // Determine if the current node has later siblings. A later *anonymous*
++    // sibling settles `has_later_siblings` but says nothing about later *named*
++    // siblings.
++    if (!*has_later_named_siblings) {
+       unsigned sibling_count = parent_entry->subtree->ptr->child_count;
+       unsigned structural_child_index = entry->structural_child_index;
+       if (!ts_subtree_extra(*entry->subtree)) structural_child_index++;
+@@ -570,14 +572,12 @@ void ts_tree_cursor_current_status(
+         );
+         if (sibling_metadata.visible) {
+           *has_later_siblings = true;
+-          if (*has_later_named_siblings) break;
+           if (sibling_metadata.named) {
+             *has_later_named_siblings = true;
+             break;
+           }
+         } else if (ts_subtree_visible_child_count(sibling) > 0) {
+           *has_later_siblings = true;
+-          if (*has_later_named_siblings) break;
+           if (sibling.ptr->named_child_count > 0) {
+             *has_later_named_siblings = true;
+             break;

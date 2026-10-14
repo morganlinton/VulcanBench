@@ -1,0 +1,76 @@
+{
+  "note": "Controls for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Units: A 1b110f62, B 8b43f42d, C 99bceec6, D a6bc7247+dfcf7392+1ffd612b+42f33fe2 (one root cause), E 139b801c, F b69d00b0, G 5fae914f, H 308aee0c. Upstream interleaves D's commits with E to H, so each variant is written explicitly as a patch from base: base plus the chosen units' commits applied in upstream order (git apply, then -3 against the real history). C does not apply without A, and E does not compile without D, so {A,C} and {D,E} are units for the alone control; gold minus A alone cannot be built (C does not apply). Built 2026-10-14; base plus all eleven commits is byte-identical to upstream lib/src at fbfb07e9.",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "all-fixes",
+      "patch": "solution/gold_patch.diff"
+    }
+  ],
+  "variants": [
+    {
+      "name": "single:AC",
+      "patch": "tests/controls/single-AC.diff"
+    },
+    {
+      "name": "single:A",
+      "patch": "tests/controls/single-A.diff"
+    },
+    {
+      "name": "single:B",
+      "patch": "tests/controls/single-B.diff"
+    },
+    {
+      "name": "single:DE",
+      "patch": "tests/controls/single-DE.diff"
+    },
+    {
+      "name": "single:D",
+      "patch": "tests/controls/single-D.diff"
+    },
+    {
+      "name": "single:F",
+      "patch": "tests/controls/single-F.diff"
+    },
+    {
+      "name": "single:G",
+      "patch": "tests/controls/single-G.diff"
+    },
+    {
+      "name": "single:H",
+      "patch": "tests/controls/single-H.diff"
+    },
+    {
+      "name": "loo:AC",
+      "patch": "tests/controls/loo-AC.diff"
+    },
+    {
+      "name": "loo:B",
+      "patch": "tests/controls/loo-B.diff"
+    },
+    {
+      "name": "loo:C",
+      "patch": "tests/controls/loo-C.diff"
+    },
+    {
+      "name": "loo:DE",
+      "patch": "tests/controls/loo-DE.diff"
+    },
+    {
+      "name": "loo:E",
+      "patch": "tests/controls/loo-E.diff"
+    },
+    {
+      "name": "loo:F",
+      "patch": "tests/controls/loo-F.diff"
+    },
+    {
+      "name": "loo:G",
+      "patch": "tests/controls/loo-G.diff"
+    },
+    {
+      "name": "loo:H",
+      "patch": "tests/controls/loo-H.diff"
+    }
+  ]
+}

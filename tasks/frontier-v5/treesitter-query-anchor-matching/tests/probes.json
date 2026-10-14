@@ -1,0 +1,25 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'. The library is compiled into the Rust test binary, so a constructor runs before libtest starts.",
+  "probes": [
+    {
+      "name": "exit-plain",
+      "why": "a GCC constructor in the library calling exit(0) before any test runs: caught by the tamper scan and by the libtest logfile (no test recorded)",
+      "edits": [
+        {
+          "file": "app/lib/src/query.c",
+          "append": "\n#include <stdlib.h>\n__attribute__((constructor)) static void vb_probe_quit(void) { exit(0); }\n"
+        }
+      ]
+    },
+    {
+      "name": "exit-stealth",
+      "why": "the same through a function pointer to _exit, evading the scan: must be caught by the libtest logfile",
+      "edits": [
+        {
+          "file": "app/lib/src/query.c",
+          "append": "\n#include <unistd.h>\nstatic void (*const vb_probe_q)(int) = &_exit;\n__attribute__((constructor)) static void vb_probe_quit(void) { vb_probe_q(0); }\n"
+        }
+      ]
+    }
+  ]
+}

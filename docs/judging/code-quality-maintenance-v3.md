@@ -1212,6 +1212,52 @@ v3.20's Sol seat transport. Population record:
   panels, none of which is this pair, so any card that places them side by
   side names the panel behind each column.
 
+## Amendment v3.26, October 15, 2026: Opus 5.5 replaces the Grok 4.7 seat for Muse Wonder Full
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+population changes from v3.25. What changes is one seat. Protocol id
+`code-quality-maintenance-v3.26`; run directory
+`runs-code-quality-maintenance-v3.26`; runner
+`harness/maintenance_review_v326.py`.
+
+- Why: under v3.25, GPT-6.1 Sol passed the exam and finished every review,
+  probe and match. Grok 4.7 stopped on its first exam call: the Cursor
+  account ran out of usage (October 15, 2026, 17:57, "You're out of usage"),
+  a stop and not a judgment. The owner replaced the Grok seat with Claude
+  Opus 5.5 (chat, October 15, 2026).
+- Round shape: v3.25's votes are bound to its protocol hash, so the new seat
+  runs as its own round with Sol attached as a scored sibling, the pattern
+  v3.4 and v3.13 used. Sol's v3.25 directory is read as it stands; this
+  protocol records its protocol hash and exam verdict and re-checks the hash
+  before every stage. Prepare refuses unless the manifest, evidence, signals,
+  controls, quirk keys, diagnostic selection and calibration order are
+  byte-identical to v3.25's, and the rubric, prompts, schemas, seed, repeats,
+  gate allowance, weights and population in the protocol record equal
+  v3.25's. v3.25 is not rewritten; its Grok seat stays recorded as stopped.
+- Seat "claude": Claude Opus 5.5 at medium (`claude-opus-5-5`) through Claude
+  Code 2.1.300 on the subscription, on v3's frozen Claude transport: tools
+  disabled, structured output, every assistant message must report
+  `claude-opus-5-5`, any model fallback fails the call, and the quota guard
+  stops before any call once overage is in use or a window passes 80%. Claude
+  Code updates itself in place, so the judge runs from a copy of the 2.1.300
+  binary at `~/.local/share/vulcanbench/claude-2.1.300/claude` (sha256
+  `475517caa611e3318a2f298fa071287ec98955538df78c58f709ecc01e5ae2d3`), which
+  v3's frozen-input check re-hashes before every stage. Opus 5.5 takes the
+  exam under v3.26 before any counted call.
+- Neutrality: Opus 5.5 is neutral for a Meta submission. It is also one of
+  the models the Muse Wonder Full comparison card places beside Muse Wonder
+  Full; its own combined score there comes from its own round's panel, not
+  from this one, and the card says so.
+- Single-panel rule: if Opus fails the exam it is disclosed and Sol publishes
+  alone; Sol has already passed.
+- Top-up: the two missing Medium runs, recorded in the population under a
+  v3.25.1 top-up, are judged as v3.26.1
+  (`runs-code-quality-maintenance-v3.26.1`), gated by this round's Opus
+  verdict and v3.25's Sol verdict with no new exam; each top-up submission
+  gets a primary and a repeat review from both seats and no pairwise check.
+- Comparability: a Muse Wonder Full score is a mean of Opus 5.5 and GPT-6.1
+  Sol.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

@@ -1,15 +1,18 @@
 """Muse Wonder Full beside Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra.
 
-One card on VulcanBench Frontier v4 across the five effort levels: accuracy
-as a line chart (functional score, the share of hidden behaviour tests
-passed, each point labelled with its score) and cost per task as grouped bars.
-At the owner's request the bars carry no whiskers; the standard errors stay
-in the table and the CSV.
-Muse Wonder Full appears at the levels it has run so far.
+One card on VulcanBench Frontier v4 at Low and Medium: the combined score and
+cost per task, each as grouped bars labelled with their values. At the
+owner's request the bars carry no whiskers; the standard errors stay in the
+table and the CSV.
 
-Accuracy is the functional score, not the combined score, because Muse Wonder
-Full's code quality has not been judged; every model is compared on the same
-measure, computed from its per-run rows, counting every run.
+The combined score is 50% functional, 8.5% quality, 8.5% security and 33%
+judged Code quality. Muse Wonder Full's comes from the v3.26 summary
+(runs-code-quality-maintenance-v3.26, judged by Claude Opus 5.5 and, through
+its v3.25 sibling, GPT-6.1 Sol); the other models' come from their published
+tables, judged by Muse Spark 1.3 and Grok 4.6. Muse Spark is a Meta model and
+is not neutral for a Meta submission, so the panels differ, and the card says so.
+The functional score in the table is computed from each model's per-run rows,
+counting every run.
 
 Prices were checked against each vendor's official page on 2026-10-15
 (docs/results/swe-v4-musewonder-full-2026-10/pricing-check.json):
@@ -67,6 +70,14 @@ OPUS_MANIFEST = OUTPUT / "opus55-traces-manifest.csv"
 SOL_ROWS = RESULTS / "swe-v4-gpt61-sol-2026-09/comparison.json"
 AF_ROWS = RESULTS / "swe-v4-astra-fable51-2026-09/comparison.json"
 PRICING = OUTPUT / "pricing-check.json"
+JUDGING = ROOT / "runs-code-quality-maintenance-v3.26"
+JUDGING_PROTOCOL = "code-quality-maintenance-v3.26"
+PANELS = {
+    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26)",
+    "opus55": "Muse Spark 1.3 and Grok 4.6 (v3.15)",
+    "gpt61sol": "Muse Spark 1.3 and Grok 4.6 (v3.18)",
+    "astra": "Muse Spark 1.3 and Grok 4.6 (v3.4)",
+}
 LEVELS = ("low", "medium", "high", "extra-high", "max")
 TABLE_LEVELS = ("low", "medium")
 SUITE_TASKS = 23
@@ -166,8 +177,29 @@ def load_wonder():
     return groups
 
 
+def load_wonder_judged(groups):
+    """Combined score per level from the frozen v3.26 summary; both seats must have passed."""
+    summary = json.loads((JUDGING / "summary.json").read_text())
+    require(summary["protocol"] == JUDGING_PROTOCOL, "wrong judging protocol")
+    require(summary["ready_for_publication"], "v3.26 is not ready for publication")
+    require(set(summary["passing_panels"]) == {"claude", "sol"}, "v3.26 panels")
+    for lvl, g in groups.items():
+        cell = summary["groups"][f"musewonderfull/{lvl}"]
+        rows = [r for r in summary["rows"] if r["effort"] == lvl and r.get("published")]
+        require(
+            cell["n"] == g["n"] == len(rows), f"v3.26 {lvl}: {cell['n']} judged vs {g['n']} runs"
+        )
+        g["combined"] = cell["composite_v3"]["mean"]
+        g["combined_se"] = cell["composite_v3"]["se"]
+        g["by_judge_l1"] = {p: cell["by_panel"][p]["mean"] for p in ("claude", "sol")}
+    return {
+        p.name: digest(p.read_bytes())
+        for p in (JUDGING / "summary.json", JUDGING / "protocol.json")
+    }
+
+
 def load_others():
-    pub = {}
+    pub, combined = {}, {}
     with OPUS_SOL.open() as fh:
         for r in csv.DictReader(fh):
             if r["model"] in ("opus55", "gpt61sol"):
@@ -177,6 +209,8 @@ def load_others():
                     int(r["passed"]),
                     None,
                 )
+            if r["model"] in ("opus55", "gpt61sol", "astra"):
+                combined[r["model"], r["effort"]] = (float(r["combined"]), float(r["combined_se"]))
     with ASTRA_FABLE.open() as fh:
         for r in csv.DictReader(fh):
             upper = float(r["long_context_upper_mean_usd"]) if r["model"] == "astra" else None
@@ -202,11 +236,14 @@ def load_others():
             usd, minutes, passed, upper = pub[m, lvl]
             groups[m][lvl] = level_group(func[m][lvl], usd, minutes, passed, m, lvl)
             groups[m][lvl]["usd_upper"] = upper
+            if (m, lvl) in combined:
+                groups[m][lvl]["combined"], groups[m][lvl]["combined_se"] = combined[m, lvl]
     return groups
 
 
 def main():  # noqa: PLR0915, one linear figure
     groups = {"wonder": load_wonder(), **load_others()}
+    judging_hashes = load_wonder_judged(groups["wonder"])
     wonder_levels = [lvl for lvl in LEVELS if lvl in groups["wonder"]]
     require(
         wonder_levels and wonder_levels == list(LEVELS[: len(wonder_levels)]),
@@ -283,16 +320,16 @@ def main():  # noqa: PLR0915, one linear figure
         heading=True,
     )
     head = " and ".join(
-        f"{groups['wonder'][lvl]['functional']:.1f}% of hidden tests at {lvl.capitalize()}{'*' if lvl in prelim else ''} "
+        f"{groups['wonder'][lvl]['combined']:.1f} at {lvl.capitalize()}{'*' if lvl in prelim else ''} "
         f"for about ${groups['wonder'][lvl]['usd']:.2f} per task"
         for lvl in wonder_levels
     )
-    text(left, 2.22, f"Muse Wonder Full passes {head}.", 15)
+    text(left, 2.22, f"Muse Wonder Full scores {head}.", 15)
     text(
         left,
         2.60,
-        "Accuracy is the functional score, the share of hidden behaviour tests passed, for every model. "
-        "Muse Wonder Full has run Low and Medium so far.",
+        "Combined score: 50% functional, 8.5% quality, 8.5% security, 33% judged Code quality. "
+        "Muse Wonder Full's code was judged by a different panel from the others (see notes).",
         13.5,
         color=MUTED,
     )
@@ -357,19 +394,20 @@ def main():  # noqa: PLR0915, one linear figure
                         color="#ffffff",
                     )
 
-    # Accuracy: grouped bars at Low and Medium.
-    text(left, 3.62, "Accuracy", 20, True, heading=True)
+    # Combined score: grouped bars at Low and Medium.
+    text(left, 3.62, "Combined score", 20, True, heading=True)
     text(
         left,
         3.94,
-        "functional score, %  ·  higher is better  ·  focused scale  ·  hatched = preliminary",
+        "0 to 100  ·  higher is better  ·  focused scale  ·  hatched = preliminary",
         12,
         color=MUTED,
     )
     ax = axis(0.085, 0.385, 4.25, 3.3)
-    lo = min(groups[m][lvl]["functional"] for m in MODELS for lvl in chart_levels)
-    ax.set_ylim(math.floor(lo / 2) * 2 - 2, 101.5)
-    bars(ax, "functional", lambda v: f"{v:.1f}", lambda m, lvl: m == "wonder" and lvl in prelim)
+    lo = min(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
+    hi = max(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
+    ax.set_ylim(math.floor(lo / 2) * 2 - 2, math.ceil(hi / 2) * 2 + 1.5)
+    bars(ax, "combined", lambda v: f"{v:.1f}", lambda m, lvl: m == "wonder" and lvl in prelim)
 
     # Cost per task: grouped bars at Low and Medium.
     text(0.53, 3.62, "Cost per task", 20, True, heading=True)
@@ -423,7 +461,12 @@ def main():  # noqa: PLR0915, one linear figure
     line(0.69, right, ty + 0.66, RULE, 0.6)
     text(left, ty + 0.86, "Model  ·  harness", 12, True)
     for lvl in TABLE_LEVELS:
-        for k, lab in (("f", "Functional ±se"), ("p", "Passed"), ("usd", "$/task"), ("min", "Min")):
+        for k, lab in (
+            ("f", "Combined ±se"),
+            ("p", "Functional"),
+            ("usd", "$/task"),
+            ("min", "Min"),
+        ):
             text(cols[lvl, k], ty + 0.86, lab, 11, True, ha="right", color=MUTED)
     line(left, right, ty + 1.04, INK, 0.6)
     y = ty + 1.32
@@ -441,12 +484,12 @@ def main():  # noqa: PLR0915, one linear figure
             text(
                 cols[lvl, "f"],
                 y,
-                f"{g['functional']:.1f} ±{g['functional_se']:.1f}",
+                f"{g['combined']:.1f} ±{g['combined_se']:.1f}",
                 12.5,
                 numeric=True,
                 ha="right",
             )
-            text(cols[lvl, "p"], y, f"{g['passed']}/{g['n']}", 12.5, numeric=True, ha="right")
+            text(cols[lvl, "p"], y, f"{g['functional']:.1f}", 12.5, numeric=True, ha="right")
             text(cols[lvl, "usd"], y, usd, 12.5, numeric=True, ha="right")
             text(cols[lvl, "min"], y, f"{g['minutes']:.1f}", 12.5, numeric=True, ha="right")
         y += 0.40
@@ -456,14 +499,23 @@ def main():  # noqa: PLR0915, one linear figure
     wm = groups["wonder"].get("medium")
     notes = [
         (
-            f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hatched accuracy bar; every other bar is n=23); "
+            f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hatched combined bar; every other bar is n=23); "
             "the last two run after its Muse Code weekly limit resets."
             if wm and "medium" in prelim
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
-        "Accuracy is the functional score (share of hidden behaviour tests passed), mean over every run; the table gives its standard error (±se). "
-        "Passed counts runs that passed every test (Opus 5.5 High includes the depotcore run a safety classifier stopped). "
-        "Combined scores with Code quality are on each model's own report; Muse Wonder Full has not been judged yet.",
+        "Combined score = 50% functional (share of hidden behaviour tests passed) + 8.5% quality + 8.5% security + 33% Code quality judged by "
+        "two calibrated model judges; the table gives its standard error (±se) and the functional score. Code quality judges (model: panel): "
+        + "; ".join(f"{NAMES[m]}: {PANELS[m]}" for m in MODELS)
+        + ". Muse Spark 1.3 is a Meta model and is not neutral for a Meta submission, so Muse Wonder Full has a different panel; "
+        "scores from different panels are not calibrated against each other. Claude Opus 5.5 judged Muse Wonder Full and is also "
+        "compared here; its own column is from its own round's panel. The two Muse Wonder Full judges differed: reviewed Code quality "
+        + " and ".join(
+            f"{groups['wonder'][lvl]['by_judge_l1']['claude']:.0f} from Opus 5.5 and {groups['wonder'][lvl]['by_judge_l1']['sol']:.0f} "
+            f"from Sol at {lvl.capitalize()}"
+            for lvl in wonder_levels
+        )
+        + ", out of 100.",
         f"Prices verified on {pricing['checked_at']} against each vendor's official pricing page. Muse Wonder Full ran on a Muse Code "
         "subscription and Meta lists no API price for it, so its cost (~, hatched) is an estimate from its token use at the Muse Wonder 1.0 "
         "list price ($4.00 input, $0.20 cached, $20.00 output per million, no long-context premium). Claude Opus 5.5 is Claude Code's own "
@@ -504,6 +556,9 @@ def main():  # noqa: PLR0915, one linear figure
                 "model",
                 "effort",
                 "n",
+                "combined",
+                "combined_se",
+                "code_quality_panel",
                 "functional_pct",
                 "functional_se_pct",
                 "passed",
@@ -523,6 +578,9 @@ def main():  # noqa: PLR0915, one linear figure
                         m,
                         lvl,
                         g["n"],
+                        f"{g['combined']:.4f}" if "combined" in g else "",
+                        f"{g['combined_se']:.4f}" if "combined" in g else "",
+                        PANELS[m],
                         f"{g['functional']:.2f}",
                         f"{g['functional_se']:.2f}",
                         g["passed"],
@@ -536,6 +594,7 @@ def main():  # noqa: PLR0915, one linear figure
         p.name: digest(p.read_bytes())
         for p in (OPUS_SOL, ASTRA_FABLE, OPUS_MANIFEST, SOL_ROWS, AF_ROWS, PRICING)
     }
+    sources["wonder_judging"] = judging_hashes
     sources["opus55_traces_repo"] = "https://github.com/morganlinton/vulcanbench-opus55-traces"
     sources["wonder_summaries"] = {
         f"{lvl}/{p.parent.name}": digest(p.read_bytes())
@@ -557,7 +616,8 @@ def main():  # noqa: PLR0915, one linear figure
         print(
             f"  {NAMES[m]:<18}"
             + "  ".join(
-                f"{lvl[:3]} {g['functional']:.1f}% ${g['usd']:.2f}" for lvl, g in groups[m].items()
+                f"{lvl[:3]} {g.get('combined', float('nan')):.1f} ({g['functional']:.1f}%) ${g['usd']:.2f}"
+                for lvl, g in groups[m].items()
             )
         )
 

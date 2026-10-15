@@ -78,6 +78,7 @@ GROK_MODEL = "grok-4.7-medium"
 GROK_DISPLAY = "Grok 4.7 256K Medium"  # the label Cursor reports at run time
 CURSOR_VERSION = "2026.10.01-e373342"
 CURSOR_DIGEST = "dedbb877a8405b20e38a3dc32f38bf614bcd96d6e557f73eb6e99ff8c87b8a73"
+CURSOR_PINNED_LAUNCHER = Path.home() / ".local/share/cursor-agent/versions" / CURSOR_VERSION / "cursor-agent"
 
 SOL_MODEL = "gpt-6.1-sol"
 CODEX_VERSION = "0.159.0"
@@ -127,8 +128,15 @@ def cursor_version_digest(version_dir: Path) -> str:
 
 
 def pinned_cursor(link: Path | None = None) -> dict:
-    """Resolve the Cursor launcher once and require the version and digest v3.24 pinned."""
-    launcher = (link or v3.CURSOR).resolve()
+    """Require the pinned Cursor version's own launcher and the digest v3.24 pinned.
+
+    Cursor updates itself when it runs and repoints its shared launcher link
+    (~/.local/bin/cursor-agent) at the newest version; on 2026-10-15 it moved to
+    2026.10.14-941492e a minute after the first v3.25 launch. Judge calls go
+    through the pinned version's own launcher, so that launcher is what is pinned;
+    where the shared link points is recorded, not required.
+    """
+    launcher = (link or CURSOR_PINNED_LAUNCHER).resolve()
     version_dir = launcher.parent
     if version_dir.name != CURSOR_VERSION:
         raise ValueError(f"Cursor resolves to {version_dir.name}, not the pinned {CURSOR_VERSION}")
@@ -141,6 +149,7 @@ def pinned_cursor(link: Path | None = None) -> dict:
         "launcher": str(launcher),
         "digest": digest,
         "same_as": "code-quality-maintenance-v3.24",
+        "shared_link_points_to": str(v3.CURSOR.resolve()) if v3.CURSOR.exists() else None,
         "rule": "judged through this versioned launcher for the whole round; re-checked before every stage",
     }
 

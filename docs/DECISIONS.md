@@ -56,6 +56,12 @@ entries here record the measurements behind those rules.
   in its run worktree; no vote from it is used. v3.25 was re-prepared from a
   new bench tag with the reported label frozen, and both judges retake the
   exam from the start.
+- Second amendment, same day: Cursor updated itself a minute after the first
+  launch (its shared `cursor-agent` link now points to `2026.10.14-941492e`),
+  so `prepare` refused the re-launch. Judge calls already go through the pinned
+  version's own launcher; `prepare` now pins that launcher directly and records
+  where the shared link points. The pinned version folder still matches the
+  v3.24 digest, which every stage re-checks.
 - Population (built 2026-10-15): 44 runs, Low 23 and Medium 21, none
   excluded, every run from `bench/2026-10-13-musewonder-full-v2-low` with a
   clean checkout and task hashes equal to the suite lock.

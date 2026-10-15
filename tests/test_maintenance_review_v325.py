@@ -422,3 +422,24 @@ def test_protocol_document_carries_the_amendment(m: ModuleType) -> None:
     text = m.SOURCE_DOC.read_text()
     assert "## Amendment v3.25" in text and "code-quality-maintenance-v3.25" in text
     assert chr(0x2014) not in text and chr(0x2013) not in text
+
+
+def test_cursor_pin_ignores_the_self_updating_shared_link(
+    m: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Cursor repoints ~/.local/bin/cursor-agent when it updates; the pin uses the versioned launcher."""
+    assert m.CURSOR_PINNED_LAUNCHER.parent.name == m.CURSOR_VERSION
+    shared = tmp_path / "cursor-agent"
+    newer = tmp_path / "versions/2099.01.01-newer/cursor-agent"
+    newer.parent.mkdir(parents=True)
+    newer.write_text("#!/bin/sh\n")
+    shared.symlink_to(newer)
+    monkeypatch.setattr(m.v3, "CURSOR", shared)
+    pinned = tmp_path / "versions" / m.CURSOR_VERSION / "cursor-agent"
+    pinned.parent.mkdir(parents=True)
+    pinned.write_text("#!/bin/sh\n")
+    monkeypatch.setattr(m, "CURSOR_PINNED_LAUNCHER", pinned)
+    monkeypatch.setattr(m, "cursor_version_digest", lambda _d: m.CURSOR_DIGEST)
+    record = m.pinned_cursor()
+    assert record["version"] == m.CURSOR_VERSION
+    assert record["shared_link_points_to"] == str(newer.resolve())

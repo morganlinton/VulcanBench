@@ -12,7 +12,7 @@ Muse Spark 1.3 is a Meta model and is not neutral for a Meta submission (owner
 decision in chat, 2026-10-15), so both seats change:
 
 - "grok": Grok 4.7 at medium through Cursor (model id ``grok-4.7-medium``,
-  display name ``Grok 4.7  Medium`` with two spaces, as Cursor lists it), on
+  display name ``Grok 4.7 256K Medium``, the label Cursor reports at run time), on
   v3's frozen Cursor transport. Cursor is pinned by version directory as in
   v3.24, to the same version and digest v3.24 pinned. Grok 4.7 has never
   judged before.
@@ -75,7 +75,7 @@ TOP_UP = {
 }
 
 GROK_MODEL = "grok-4.7-medium"
-GROK_DISPLAY = "Grok 4.7  Medium"  # two spaces, exactly as Cursor lists it
+GROK_DISPLAY = "Grok 4.7 256K Medium"  # the label Cursor reports at run time
 CURSOR_VERSION = "2026.10.01-e373342"
 CURSOR_DIGEST = "dedbb877a8405b20e38a3dc32f38bf614bcd96d6e557f73eb6e99ff8c87b8a73"
 
@@ -192,8 +192,8 @@ def grok_settings(cursor: dict) -> dict:
         "prompt_delivery": "stdin",
         "system_prompt": "folded into prompt",
         "identity": "requested-only, display name checked",
-        "display_name_source": "as Cursor lists the model (two spaces between 4.7 and Medium); Cursor "
-        "serves its model list at run time, so the label is checked on every response",
+        "display_name_source": "the label Cursor reports for grok-4.7-medium at run time (its model list "
+        "renders it as 'Grok 4.7  Medium' without the 256K context label); checked on every response",
         "neutrality": "neutral for Meta submissions",
         "seat": "first time as a judge; takes the exam under this protocol before any counted call",
     }

@@ -7,6 +7,58 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-15: Opus 5.5 replaces the Grok 4.7 seat for Muse Wonder Full (v3.26)
+
+### Decision
+
+- Claude Opus 5.5 at medium takes the second judge seat for Muse Wonder Full,
+  in place of Grok 4.7. Owner choice in chat, 2026-10-15.
+- It runs as a new round, v3.26, with GPT-6.1 Sol's finished v3.25 work
+  attached as a scored sibling (the v3.4 and v3.13 pattern) instead of
+  re-running Sol. A Muse Wonder Full score is the mean of Opus 5.5 and Sol.
+- v3.25 is not rewritten. Its Grok seat stays recorded as stopped by a usage
+  limit, which is a stop and not an exam failure.
+- The two missing Medium runs, named as a v3.25.1 top-up in the population
+  record, are judged as v3.26.1 after the 2026-10-19 reset, gated by the
+  v3.26 Opus verdict and the v3.25 Sol verdict with no new exam.
+- Opus 5.5 is neutral for a Meta submission. It is also a compared model on
+  the Muse Wonder Full card; its column there keeps the combined score from
+  its own round's panel, and the card names the panel behind each column.
+
+### Evidence
+
+- v3.25 (`bench/2026-10-15-musewonder-judging-v325c`, launched 17:45): Sol
+  passed the exam at 18:13 (80 calls, no failing gate, allowance unused),
+  finished reviews at 18:38 and probes and matches at 19:31. Grok's first exam
+  call (`control-0-r1`) failed twice at 17:57 with Cursor's "You're out of
+  usage" error, so no Grok vote exists.
+- Votes are bound to their round's protocol hash, so changing a seat inside
+  v3.25 would have voided Sol's 1 hour 46 minutes of finished calls. The
+  sibling round keeps them: v3.26 `prepare` refuses unless the manifest,
+  evidence, signals, controls, quirk keys, diagnostic selection and
+  calibration order are byte-identical to v3.25's, and the rubric, prompts,
+  schemas, seed, repeats, gate allowance, weights and population in the
+  protocol record equal v3.25's. Every stage re-checks Sol's protocol hash.
+- A dry run of `prepare` against a copy of the v3.25 directory first refused:
+  stray `__pycache__` files in the main checkout's task folders entered one
+  submission's binary manifest. A clean bench worktree has none (the v3.25
+  run worktree had 0); after clearing them the dry run matched v3.25 byte for
+  byte and Sol verified as passed.
+- Claude Code updates itself in place (the npm binary was rewritten at 20:07
+  on 2026-10-15). The judge runs from a copy of 2.1.300 at
+  `~/.local/share/vulcanbench/claude-2.1.300/claude` (sha256
+  `475517caa611e3318a2f298fa071287ec98955538df78c58f709ecc01e5ae2d3`), which
+  v3's frozen-input check re-hashes before every stage. A smoke call through
+  v3's frozen Claude transport returned `claude-opus-5-5` on every assistant
+  message, no fallback, no overage, subscription windows at 0%.
+
+### Operation
+
+`python -m harness.maintenance_review_v326 prepare` from a bench-tag run
+worktree that holds a copy of the v3.25 run directory, then
+`logs/cii-v4-maint-v326-chain.sh` (local, untracked) calibrates, runs and
+probes the Opus seat and summarizes both seats.
+
 ## 2026-10-15: Muse Wonder Full is judged by Grok 4.7 and GPT-6.1 Sol (v3.25)
 
 ### Decision

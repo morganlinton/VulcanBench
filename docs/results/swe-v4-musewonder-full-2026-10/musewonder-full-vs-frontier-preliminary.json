@@ -26,7 +26,8 @@
         "functional_se": 2.4052933727449166,
         "passed": 17,
         "usd": 1.695309,
-        "minutes": 13.6903
+        "minutes": 13.6903,
+        "usd_upper": null
       },
       "medium": {
         "n": 23,
@@ -34,7 +35,35 @@
         "functional_se": 0.0,
         "passed": 23,
         "usd": 2.842201,
-        "minutes": 18.6446
+        "minutes": 18.6446,
+        "usd_upper": null
+      },
+      "high": {
+        "n": 23,
+        "functional": 95.65217391304348,
+        "functional_se": 4.347826086956522,
+        "passed": 22,
+        "usd": 3.269444,
+        "minutes": 21.4192,
+        "usd_upper": null
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 97.82608695652173,
+        "functional_se": 2.173913043478261,
+        "passed": 22,
+        "usd": 4.111557,
+        "minutes": 20.747,
+        "usd_upper": null
+      },
+      "max": {
+        "n": 23,
+        "functional": 97.17391304347827,
+        "functional_se": 2.008531382842158,
+        "passed": 21,
+        "usd": 8.748014,
+        "minutes": 37.5113,
+        "usd_upper": null
       }
     },
     "fable": {
@@ -44,7 +73,8 @@
         "functional_se": 1.8769270946904937,
         "passed": 19,
         "usd": 7.963719,
-        "minutes": 26.897
+        "minutes": 26.897,
+        "usd_upper": null
       },
       "medium": {
         "n": 23,
@@ -52,7 +82,35 @@
         "functional_se": 1.3545861520175344,
         "passed": 20,
         "usd": 9.18601,
-        "minutes": 31.7213
+        "minutes": 31.7213,
+        "usd_upper": null
+      },
+      "high": {
+        "n": 23,
+        "functional": 98.45782608695653,
+        "functional_se": 0.9593183425848062,
+        "passed": 20,
+        "usd": 9.701575,
+        "minutes": 28.7614,
+        "usd_upper": null
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 99.1304347826087,
+        "functional_se": 0.8695652173913043,
+        "passed": 22,
+        "usd": 14.485635,
+        "minutes": 38.7732,
+        "usd_upper": null
+      },
+      "max": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 9.058763,
+        "minutes": 27.0964,
+        "usd_upper": null
       }
     },
     "gpt61sol": {
@@ -62,7 +120,8 @@
         "functional_se": 1.5662600830888982,
         "passed": 20,
         "usd": 0.305976,
-        "minutes": 6.89
+        "minutes": 6.89,
+        "usd_upper": null
       },
       "medium": {
         "n": 23,
@@ -70,7 +129,35 @@
         "functional_se": 1.3043478260869568,
         "passed": 22,
         "usd": 0.3986,
-        "minutes": 10.5647
+        "minutes": 10.5647,
+        "usd_upper": null
+      },
+      "high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 0.33007,
+        "minutes": 10.2219,
+        "usd_upper": null
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 0.434591,
+        "minutes": 15.3716,
+        "usd_upper": null
+      },
+      "max": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 0.458339,
+        "minutes": 14.4642,
+        "usd_upper": null
       }
     },
     "astra": {
@@ -80,7 +167,8 @@
         "functional_se": 0.2899999999999999,
         "passed": 22,
         "usd": 1.721698,
-        "minutes": 4.2187
+        "minutes": 4.2187,
+        "usd_upper": 3.283855
       },
       "medium": {
         "n": 23,
@@ -88,14 +176,45 @@
         "functional_se": 0.0,
         "passed": 23,
         "usd": 1.481347,
-        "minutes": 3.8226
+        "minutes": 3.8226,
+        "usd_upper": 2.791
+      },
+      "high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 1.711065,
+        "minutes": 4.8999,
+        "usd_upper": 3.217211
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 2.302022,
+        "minutes": 8.0905,
+        "usd_upper": 4.253697
+      },
+      "max": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 2.568128,
+        "minutes": 10.2805,
+        "usd_upper": 4.689675
       }
     }
   },
   "sources": {
     "gpt61sol-opus55-astra-efforts.csv": "8cd50c4dc1f6b5d9df77f6f3b5e156d6d2e3c0b8cdcf98e4495ea47f4996a585",
     "astra-vs-fable51-v34-economics-efforts.csv": "2a34c5e633fb4abfdb8ffc69633a4400504d406e529188b89d96c7f843a1ef08",
+    "opus55-traces-manifest.csv": "bf574c8cec594f17c4726045b2a33c63e43594265e758c6dae8dd896705af3a0",
     "comparison.json": "fc5405e3da76c2b6904013a367f5c98250207f16f7d9195f54f618474b7cbe1e",
+    "pricing-check.json": "cbb7cac7e549314fadad30d3f9b7ea0ff475773a5553ed70e03fa5257f49296a",
+    "opus55_traces_repo": "https://github.com/morganlinton/vulcanbench-opus55-traces",
     "wonder_summaries": {
       "low/legacy-blendcore-binary-parity-63cfdcc6": "2f056860823a7c15f28ba4d765311f08f67a397443fb33c9869bd3b1b0fe9862",
       "low/legacy-cellarcore-binary-parity-28b7253e": "aefcf11f9b09acdd63ad0dbb19e5d990e13a8a7b0ef9ca42e1919da82cfec97d",
@@ -143,6 +262,6 @@
       "medium/legacy-vaultcore-binary-parity-20ba29d8": "ddb87b75ae7ea62e531b715dd2df31bb225287ba558239099b1957676e373877"
     }
   },
-  "png_sha256": "f4717c870ff942619a96fb6e535166dc3889a90e598c37ced74896be86a834eb",
+  "png_sha256": "e409ed1e33820cadc90be0379ddf02595a3e4590dbd15dfd9c6573a2e20bb613",
   "table": "musewonder-full-vs-frontier-preliminary-efforts.csv"
 }

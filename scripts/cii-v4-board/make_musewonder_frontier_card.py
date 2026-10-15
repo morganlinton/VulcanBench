@@ -3,7 +3,7 @@
 One card on VulcanBench Frontier v4 across the five effort levels: accuracy
 as a line chart (functional score, the share of hidden behaviour tests
 passed, each point labelled with its score) and cost per task as grouped bars.
-At the owner's request the chart shows no whiskers; the standard errors stay
+At the owner's request the bars carry no whiskers; the standard errors stay
 in the table and the CSV.
 Muse Wonder Full appears at the levels it has run so far.
 
@@ -52,7 +52,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 from matplotlib.patches import FancyBboxPatch
-from matplotlib.ticker import FuncFormatter
+from matplotlib.ticker import FixedLocator, FuncFormatter, NullFormatter
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -205,7 +205,7 @@ def load_others():
     return groups
 
 
-def main():  # noqa: PLR0912, PLR0915, one linear figure
+def main():  # noqa: PLR0915, one linear figure
     groups = {"wonder": load_wonder(), **load_others()}
     wonder_levels = [lvl for lvl in LEVELS if lvl in groups["wonder"]]
     require(
@@ -302,148 +302,76 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         text(x + 0.016, 3.05, NAMES[m], 12.5, True)
         x += 0.22
 
-    xs = list(range(len(LEVELS)))
+    chart_levels = TABLE_LEVELS
+    xs = list(range(len(chart_levels)))
+    width = 0.19
+    offsets = {m: (i - (len(MODELS) - 1) / 2) * width for i, m in enumerate(MODELS)}
 
     def axis(x0, w, top, h):
         ax = fig.add_axes([x0, yf(top + h), w, h / H], facecolor=PAPER)
         ax.spines[["top", "right"]].set_visible(False)
         ax.spines[["left", "bottom"]].set_color(RULE)
-        ax.tick_params(axis="x", length=0, labelsize=12, pad=8)
+        ax.tick_params(axis="x", length=0, labelsize=13, pad=8)
         ax.tick_params(axis="y", length=0, labelsize=11, pad=6)
         ax.grid(axis="y", color=RULE, linewidth=0.5)
         ax.set_axisbelow(True)
         ax.set_xticks(
-            xs,
-            [lvl.replace("-", " ").capitalize() + ("*" if lvl in prelim else "") for lvl in LEVELS],
+            xs, [lvl.capitalize() + ("*" if lvl in prelim else "") for lvl in chart_levels]
         )
+        ax.set_xlim(-0.5, len(chart_levels) - 0.5)
         return ax
 
-    # Accuracy: line chart across effort levels.
+    def bars(ax, key, fmt, hatched):
+        """Grouped bars for Low and Medium, each labelled with its value; no whiskers."""
+        for m in MODELS:
+            bx = [i + offsets[m] for i in xs]
+            ys = [groups[m][lvl][key] for lvl in chart_levels]
+            drawn = ax.bar(
+                bx, ys, width=width * 0.9, color=COLORS[m], edgecolor=INK, linewidth=0.5, zorder=2
+            )
+            for patch, xx, y_, lvl in zip(drawn, bx, ys, chart_levels, strict=True):
+                if hatched(m, lvl):
+                    patch.set_hatch("///")
+                ax.annotate(
+                    fmt(y_),
+                    (xx, y_),
+                    xytext=(0, 4),
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                    fontsize=10,
+                    fontfamily="IBM Plex Mono",
+                    color=INK,
+                )
+                if m == "wonder" and lvl in prelim:
+                    ax.annotate(
+                        f"n={groups[m][lvl]['n']}",
+                        (xx, ax.get_ylim()[0]),
+                        xytext=(0, 6),
+                        textcoords="offset points",
+                        ha="center",
+                        va="bottom",
+                        rotation=90,
+                        fontsize=9,
+                        fontfamily="IBM Plex Mono",
+                        color="#ffffff",
+                    )
+
+    # Accuracy: grouped bars at Low and Medium.
     text(left, 3.62, "Accuracy", 20, True, heading=True)
     text(
         left,
         3.94,
-        "functional score, %  ·  higher is better  ·  focused scale  ·  each point labelled",
+        "functional score, %  ·  higher is better  ·  focused scale  ·  hatched = preliminary",
         12,
         color=MUTED,
     )
-    ax = axis(0.085, 0.355, 4.25, 3.3)
-    lo = min(g["functional"] for m in MODELS for g in groups[m].values())
-    ax.set_ylim(math.floor(lo) - 1, 101.2)
-    ax.set_xlim(-0.6, len(LEVELS) - 0.3)
-    ends = []
-    for m in MODELS:
-        lv = [lvl for lvl in LEVELS if lvl in groups[m]]
-        px = [LEVELS.index(lvl) for lvl in lv]
-        ys = [groups[m][lvl]["functional"] for lvl in lv]
-        ax.plot(
-            px,
-            ys,
-            color=COLORS[m],
-            lw=2.4 if m == "wonder" else 1.8,
-            zorder=3 if m == "wonder" else 2,
-        )
-        for p_, y_, lvl in zip(px, ys, lv, strict=True):
-            hollow = m == "wonder" and lvl in prelim
-            ax.plot(
-                p_,
-                y_,
-                MARKERS[m],
-                markersize=8 if m == "wonder" else 7,
-                markerfacecolor=PAPER if hollow else COLORS[m],
-                markeredgecolor=COLORS[m] if hollow else INK,
-                markeredgewidth=1.6 if hollow else 0.6,
-                zorder=4,
-            )
-        if m == "wonder":
-            last = lv[-1]
-            note = f", n={groups[m][last]['n']}" if last in prelim else ""
-            ax.annotate(
-                f"Wonder Full{note}",
-                (px[-1], ys[-1]),
-                xytext=(
-                    px[-1] + 0.1,
-                    ax.get_ylim()[0] + 0.14 * (ax.get_ylim()[1] - ax.get_ylim()[0]),
-                ),
-                textcoords="data",
-                fontsize=10,
-                fontfamily="Geist",
-                weight=700,
-                color=COLORS[m],
-                arrowprops={
-                    "arrowstyle": "-",
-                    "color": COLORS[m],
-                    "lw": 0.9,
-                    "shrinkA": 0,
-                    "shrinkB": 5,
-                },
-            )
-        else:
-            ends.append((ys[-1], px[-1], m))
-    span = ax.get_ylim()[1] - ax.get_ylim()[0]
+    ax = axis(0.085, 0.385, 4.25, 3.3)
+    lo = min(groups[m][lvl]["functional"] for m in MODELS for lvl in chart_levels)
+    ax.set_ylim(math.floor(lo / 2) * 2 - 2, 101.5)
+    bars(ax, "functional", lambda v: f"{v:.1f}", lambda m, lvl: m == "wonder" and lvl in prelim)
 
-    def is_dip(m, i):
-        """True when this point sits below both neighbours on its own line."""
-        lv = [lvl for lvl in LEVELS if lvl in groups[m]]
-        lvl = LEVELS[i]
-        k = lv.index(lvl)
-        here = groups[m][lvl]["functional"]
-        nbrs = [groups[m][lv[j]]["functional"] for j in (k - 1, k + 1) if 0 <= j < len(lv)]
-        return len(nbrs) == 2 and all(v > here for v in nbrs)
-
-    # One label per distinct score at each level (ink when models share it).
-    # Low labels sit to the left, where nothing else is drawn; elsewhere a label
-    # goes above its point, or below when the point is a dip in its line or
-    # sits just under another score at the same level.
-    for i, lvl in enumerate(LEVELS):
-        shared = {}
-        for m in MODELS:
-            if lvl in groups[m]:
-                shared.setdefault(round(groups[m][lvl]["functional"], 1), []).append(m)
-        higher = None
-        for val in sorted(shared, reverse=True):
-            ms = shared[val]
-            color = COLORS[ms[0]] if len(ms) == 1 else INK
-            style = {
-                "fontsize": 8.5,
-                "fontfamily": "IBM Plex Mono",
-                "color": color,
-                "zorder": 5,
-                "textcoords": "offset points",
-            }
-            if i == 0:
-                ax.annotate(
-                    f"{val:.1f}", (i, val), xytext=(-9, 0), ha="right", va="center", **style
-                )
-            elif any(is_dip(m, i) for m in ms) or (
-                higher is not None and higher - val < 0.09 * span
-            ):
-                ax.annotate(f"{val:.1f}", (i, val), xytext=(0, -9), ha="center", va="top", **style)
-            else:
-                ax.annotate(
-                    f"{val:.1f}", (i, val), xytext=(0, 7), ha="center", va="bottom", **style
-                )
-            higher = val
-    gap = 0.075 * span
-    placed = {}
-    for y_end, p_end, m in sorted(ends, reverse=True):
-        same_col = [v for v in placed.values() if v[1] == p_end]
-        ceiling = min((v[0] for v in same_col), default=math.inf) - gap
-        placed[m] = (min(y_end, ceiling), p_end)
-    for m, (ly, p_end) in placed.items():
-        ax.annotate(
-            NAMES[m].replace("Claude ", ""),
-            (p_end, groups[m][LEVELS[p_end]]["functional"]),
-            xytext=(p_end + 0.12, ly),
-            textcoords="data",
-            va="center",
-            fontsize=10,
-            color=INK,
-            fontfamily="Geist",
-            weight=700,
-        )
-
-    # Cost per task: grouped bars.
+    # Cost per task: grouped bars at Low and Medium.
     text(0.53, 3.62, "Cost per task", 20, True, heading=True)
     text(
         0.53,
@@ -454,54 +382,16 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     )
     ax = axis(0.555, 0.385, 4.25, 3.3)
     ax.set_yscale("log")
-    vals = [g["usd"] for m in MODELS for g in groups[m].values()]
-    ax.set_ylim(min(vals) / 1.6, max(vals) * 3.4)
-    ax.set_xlim(-0.55, len(LEVELS) - 0.45)
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v:g}"))
-    width = 0.19
-    offsets = {m: (i - (len(MODELS) - 1) / 2) * width for i, m in enumerate(MODELS)}
-    for m in MODELS:
-        lv = [lvl for lvl in LEVELS if lvl in groups[m]]
-        bx = [LEVELS.index(lvl) + offsets[m] for lvl in lv]
-        ys = [groups[m][lvl]["usd"] for lvl in lv]
-        ax.bar(
-            bx,
-            ys,
-            width=width * 0.9,
-            color=COLORS[m],
-            edgecolor=INK,
-            linewidth=0.5,
-            zorder=2,
-            hatch="///" if m == "wonder" else None,
+    vals = [groups[m][lvl]["usd"] for m in MODELS for lvl in chart_levels]
+    ax.set_ylim(min(vals) / 1.8, max(vals) * 2.2)
+    ax.yaxis.set_major_locator(
+        FixedLocator(
+            [t for t in (0.25, 0.5, 1, 2, 4, 8) if ax.get_ylim()[0] <= t <= ax.get_ylim()[1]]
         )
-        for xx, y_ in zip(bx, ys, strict=True):
-            ax.annotate(
-                f"{y_:.2f}",
-                (xx, y_),
-                xytext=(0, 3),
-                textcoords="offset points",
-                ha="center",
-                va="bottom",
-                rotation=90,
-                fontsize=7.8,
-                fontfamily="IBM Plex Mono",
-                color=INK,
-            )
-        if m == "wonder":
-            for lvl in LEVELS:
-                if lvl not in groups[m]:
-                    ax.annotate(
-                        "not yet run",
-                        (LEVELS.index(lvl) + offsets[m], ax.get_ylim()[0]),
-                        xytext=(0, 4),
-                        textcoords="offset points",
-                        rotation=90,
-                        ha="center",
-                        va="bottom",
-                        fontsize=7,
-                        color=MUTED,
-                        fontfamily="IBM Plex Mono",
-                    )
+    )
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v:g}"))
+    ax.yaxis.set_minor_formatter(NullFormatter())
+    bars(ax, "usd", lambda v: f"{v:.2f}", lambda m, lvl: m == "wonder")
 
     # Table: the levels Muse Wonder Full has run.
     ty = 8.25
@@ -566,7 +456,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     wm = groups["wonder"].get("medium")
     notes = [
         (
-            f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hollow marker; every other point is n=23); "
+            f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hatched accuracy bar; every other bar is n=23); "
             "the last two run after its Muse Code weekly limit resets."
             if wm and "medium" in prelim
             else "Muse Wonder Full levels cover all 23 tasks."

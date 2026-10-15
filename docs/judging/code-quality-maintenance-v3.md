@@ -1182,8 +1182,9 @@ v3.20's Sol seat transport. Population record:
   GPT-6.1 Sol, both neutral for a Meta submission.
   - Seat "grok": Grok 4.7 at medium through Cursor, model id
     `grok-4.7-medium`, on v3's frozen Cursor transport. The identity check
-    requires the display name exactly as Cursor lists it, `Grok 4.7  Medium`
-    (two spaces between 4.7 and Medium). Cursor is pinned by version
+    requires the label Cursor reports at run time, `Grok 4.7 256K Medium`
+    (its model list renders `Grok 4.7  Medium` without the 256K context
+    label). Cursor is pinned by version
     directory as in v3.24, to the same version (`2026.10.01-e373342`) and
     digest v3.24 recorded; the runner refuses any other. Grok 4.7 has never
     judged before.

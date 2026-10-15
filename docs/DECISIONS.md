@@ -18,8 +18,8 @@ entries here record the measurements behind those rules.
   Meta submission. This mirrors the 2026-10-03 precedent, where Grok 4.6 was
   not neutral for Grok 4.7 and GPT-6.1 Sol took its seat (v3.20).
 - Grok 4.7 has never judged. It runs at medium through Cursor (model id
-  `grok-4.7-medium`, display name `Grok 4.7  Medium` with two spaces, as
-  Cursor lists it) and must pass the calibration exam under v3.25 before any
+  `grok-4.7-medium`, display name `Grok 4.7 256K Medium`, the label Cursor
+  reports at run time; see the amendment below) and must pass the calibration exam under v3.25 before any
   counted call. GPT-6.1 Sol retakes the exam too. If one judge fails, the other
   publishes alone and the failure is disclosed; two failures stop the round.
 - Medium covers 21 of 23 tasks now. cellarcore and paddockcore had not run
@@ -44,8 +44,18 @@ entries here record the measurements behind those rules.
   equals the one v3.24 recorded, so v3.25 pins the same Cursor and refuses
   any other. Cursor serves its model list at run time, so the version
   directory holds no Grok 4.7 label to check offline; the transport rejects
-  any reported label other than `Grok 4.7  Medium`, so a wrong label stops
-  the first exam call rather than producing a counted judgment.
+  any reported label other than the frozen one, so a wrong label stops the
+  first exam call rather than producing a counted judgment.
+- Amendment, 2026-10-15 (before any counted judgment): the first launch froze
+  `Grok 4.7  Medium`, Cursor's model-list rendering, but Cursor reports
+  `Grok 4.7 256K Medium` for the same model id, so Grok's first exam call
+  stopped on the label (no vote). The same launch's Sol seat first stopped on
+  an expired Codex ChatGPT login (no model output); the owner signed in again
+  and one fresh attempt ran under the transport-fault rule. That round was
+  stopped by the operator and kept as `runs-code-quality-maintenance-v3.25-aborted-display-name`
+  in its run worktree; no vote from it is used. v3.25 was re-prepared from a
+  new bench tag with the reported label frozen, and both judges retake the
+  exam from the start.
 - Population (built 2026-10-15): 44 runs, Low 23 and Medium 21, none
   excluded, every run from `bench/2026-10-13-musewonder-full-v2-low` with a
   clean checkout and task hashes equal to the suite lock.

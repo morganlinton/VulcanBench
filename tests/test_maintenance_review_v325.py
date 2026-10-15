@@ -105,8 +105,9 @@ def test_cli_rejects_the_muse_panel(m: ModuleType, monkeypatch: pytest.MonkeyPat
 def test_grok_47_settings_and_two_space_display_name(m: ModuleType) -> None:
     settings = m.grok_settings({"launcher": "/x/2026.10.01-e373342/cursor-agent"})
     assert settings["model"] == "grok-4.7-medium"
-    assert settings["display_name"] == "Grok 4.7  Medium"
-    assert "4.7  Medium" in settings["display_name"]  # two spaces, as Cursor lists it
+    assert (
+        settings["display_name"] == "Grok 4.7 256K Medium"
+    )  # the label Cursor reports at run time
     assert settings["effort"] == "medium" and settings["lab"] == "xAI"
     assert settings["cursor"] == "/x/2026.10.01-e373342/cursor-agent"
     assert "first time" in settings["seat"]
@@ -145,9 +146,12 @@ def test_cursor_transport_accepts_only_the_exact_display_name(
 
         return Proc
 
-    monkeypatch.setattr(v3.subprocess, "Popen", fake_popen("Grok 4.7  Medium"))
+    monkeypatch.setattr(v3.subprocess, "Popen", fake_popen("Grok 4.7 256K Medium"))
     vote = v3.cursor_vote("text", tmp_path, "a1", settings, {})
-    assert vote["model_reported"] == "Grok 4.7  Medium"
+    assert vote["model_reported"] == "Grok 4.7 256K Medium"
+    monkeypatch.setattr(v3.subprocess, "Popen", fake_popen("Grok 4.7  Medium"))
+    with pytest.raises(RuntimeError, match="Judge model changed"):
+        v3.cursor_vote("text", tmp_path, "a0", settings, {})
     monkeypatch.setattr(v3.subprocess, "Popen", fake_popen("Grok 4.7 Medium"))
     with pytest.raises(RuntimeError, match="Judge model changed"):
         v3.cursor_vote("text", tmp_path, "a2", settings, {})

@@ -1,0 +1,1590 @@
+{
+ "cells": {
+  "musewonderfull/low": 23,
+  "musewonderfull/medium": 21
+ },
+ "excluded": [],
+ "levels": {
+  "musewonderfull": [
+   "low",
+   "medium"
+  ]
+ },
+ "missing": [
+  {
+   "effort": "medium",
+   "model": "musewonderfull",
+   "reason": "Not yet run: the Muse Code subscription's weekly limit ran out during the Medium level (Muse returned 429 'Subscription quota exhausted' at 2026-10-14 22:20 UTC; the window resets 2026-10-19 00:00 UTC). The task runs at Medium after the reset and is judged in the v3.25.1 top-up round. The interrupted attempt is kept in runs-effort-musewonder-full-v2/quota-aborted/ and is not judged.",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "effort": "medium",
+   "model": "musewonderfull",
+   "reason": "Not yet run: the Muse Code subscription's weekly limit ran out during the Medium level (Muse returned 429 'Subscription quota exhausted' at 2026-10-14 22:20 UTC; the window resets 2026-10-19 00:00 UTC). The task runs at Medium after the reset and is judged in the v3.25.1 top-up round.",
+   "task": "legacy-paddockcore-binary-parity"
+  }
+ ],
+ "models": {
+  "musewonderfull": "Muse Wonder Full through Muse Code 1.4.6 (Contributor mode, skill reminder off)"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 494.741,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T01:11:31.872879+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8362,
+   "reported_tokens": 2240549,
+   "run_id": "legacy-blendcore-binary-parity-63cfdcc6",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2240549,
+    "result_receipts": null,
+    "stream_sha256": "c3249ea27a165b230c889bcd8fca099df6d670d81f1b21d3554f552f225ab537",
+    "usage": {
+     "cached_input_tokens": 2044800,
+     "input_tokens": 2215086,
+     "output_tokens": 25463,
+     "reasoning_output_tokens": 12595
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-blendcore-binary-parity-63cfdcc6",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "24c474e4834822c58976baf56269e89e4b2370bedacd99559260cb10eb3494ce",
+    "summary": "2f056860823a7c15f28ba4d765311f08f67a397443fb33c9869bd3b1b0fe9862",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-14T01:03:17.116557+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1098.448,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T05:04:30.676362+00:00",
+   "functional": 0.9286,
+   "model": "musewonderfull",
+   "quality": 0.7507,
+   "reported_tokens": 5056791,
+   "run_id": "legacy-cellarcore-binary-parity-28b7253e",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5056791,
+    "result_receipts": null,
+    "stream_sha256": "eb155bb8d97eef7ae5df64e51254671d97a8564660e4e6515ec54f508e308b47",
+    "usage": {
+     "cached_input_tokens": 4776080,
+     "input_tokens": 5001734,
+     "output_tokens": 55057,
+     "reasoning_output_tokens": 25971
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-cellarcore-binary-parity-28b7253e",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "8169e072611d095fe7d210d74c1d0cda0556ff9af48c7f4f3c7f477824a30b36",
+    "summary": "aefcf11f9b09acdd63ad0dbb19e5d990e13a8a7b0ef9ca42e1919da82cfec97d",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-14T04:46:12.168143+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 861.46,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T22:36:17.856579+00:00",
+   "functional": 0.6,
+   "model": "musewonderfull",
+   "quality": 0.7957,
+   "reported_tokens": 3117704,
+   "run_id": "legacy-codeccore-binary-parity-7072c3b3",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3117704,
+    "result_receipts": null,
+    "stream_sha256": "56c3772addc12b13419edf24bb283e8155fb6a05a512038d7322457a074dffab",
+    "usage": {
+     "cached_input_tokens": 2901708,
+     "input_tokens": 3080801,
+     "output_tokens": 36903,
+     "reasoning_output_tokens": 17991
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-codeccore-binary-parity-7072c3b3",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "c56022dc8b72d717186c01e79f82302e4eb118f3514e7a46e79d93b9c4f46862",
+    "summary": "52ebf0c9db8ba97d6d404076cea9df07a1707930cf29879d71e86ab7c238e45f",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-13T22:21:56.380584+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2894.619,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T02:49:10.311406+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7372,
+   "reported_tokens": 14632835,
+   "run_id": "legacy-depotcore-binary-parity-72f0d090",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 14632835,
+    "result_receipts": null,
+    "stream_sha256": "1a7c6538859c25d8cb87d12feff68b59dd56dd495a10f50972be1f46aeac1c99",
+    "usage": {
+     "cached_input_tokens": 14244268,
+     "input_tokens": 14506022,
+     "output_tokens": 126813,
+     "reasoning_output_tokens": 78612
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-depotcore-binary-parity-72f0d090",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "14df87527f81a1da98be5c9a6d7b506b0e59f4cbe3ee6aa82e4a4085b9c184c3",
+    "summary": "59578a931eb989587fccc3300016a693e580edbb3aa0fbf4c77d2b837b25cd80",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-14T02:00:55.647118+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1090.896,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T22:21:55.891526+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8263,
+   "reported_tokens": 5413445,
+   "run_id": "legacy-freightcore-binary-parity-ab1acaaf",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5413445,
+    "result_receipts": null,
+    "stream_sha256": "d1a6d4624887a9405c54ac3756159ba137a048d0e2ae6a8296d4cdc70d87858e",
+    "usage": {
+     "cached_input_tokens": 5126368,
+     "input_tokens": 5353937,
+     "output_tokens": 59508,
+     "reasoning_output_tokens": 29550
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-freightcore-binary-parity-ab1acaaf",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "1110496fdada1e42f8684d5a0245561ccfcfa67be78afede6f21b93774740e45",
+    "summary": "90386bdfaed7038564b25ee15ba70aeac0295ad9474eda9a9b9771e71336250d",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-13T22:03:44.952545+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1979.158,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T02:00:55.088618+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.6161,
+   "reported_tokens": 12944269,
+   "run_id": "legacy-granarycore-binary-parity-9309c95f",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 12944269,
+    "result_receipts": null,
+    "stream_sha256": "b203a6fa56f987a4adfe562d75ea711c7444148319f96458e2d7b0dbfeb05806",
+    "usage": {
+     "cached_input_tokens": 12598248,
+     "input_tokens": 12841095,
+     "output_tokens": 103174,
+     "reasoning_output_tokens": 45968
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-granarycore-binary-parity-9309c95f",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "2a1ab2b1820d1185fe245c4ab1a3c615bb99aed1a17e6163cb9a1a80888ade87",
+    "summary": "05ef062de006e6135cbb80a4dcfb51dce2e01b54b65110a4143c4b54a3afa4c3",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-14T01:27:55.905436+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 893.693,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T23:50:12.557093+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8145,
+   "reported_tokens": 3202518,
+   "run_id": "legacy-hedgecore-binary-parity-55bcd818",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3202518,
+    "result_receipts": null,
+    "stream_sha256": "0511943e27915c4babba150be1ee2a8f85962a1d96cc20dbb669ae497a2a8e14",
+    "usage": {
+     "cached_input_tokens": 2978044,
+     "input_tokens": 3157251,
+     "output_tokens": 45267,
+     "reasoning_output_tokens": 21368
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-hedgecore-binary-parity-55bcd818",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "c693c6a8e9109dc5688de3ba9c30401867976c73954f877f83097dd104be0dd7",
+    "summary": "475654420a3c6e53fc82be1d21ada80cc70b6a2fdac247d21e1524ecd4db0ff2",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-13T23:35:18.798539+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 7020.759,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T04:46:11.534421+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.747,
+   "reported_tokens": 31256142,
+   "run_id": "legacy-lodgecore-binary-parity-60a434a4",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 31256142,
+    "result_receipts": null,
+    "stream_sha256": "a2f4a63071720de7b20f9a9b69bfb34c1a7561377ae2e5adcec174be16b45eca",
+    "usage": {
+     "cached_input_tokens": 30250480,
+     "input_tokens": 30992042,
+     "output_tokens": 264100,
+     "reasoning_output_tokens": 185357
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-lodgecore-binary-parity-60a434a4",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "21ef2301862700de27b2e20efb38f667c046609c3caa07b5e527e3d3cd52fd58",
+    "summary": "718ece4bff86f061260896094ffe9018e76b30ba6dfa94217b78fbe8dbea494f",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-14T02:49:10.775023+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1171.949,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T21:11:47.115325+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7755,
+   "reported_tokens": 4295426,
+   "run_id": "legacy-matchcore-order-book-parity-05a346ef",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4295426,
+    "result_receipts": null,
+    "stream_sha256": "ac90ea1bcb7cc2c233870b1f2853974a02f35f31a6cd8fbb24eae6482dfd2b3b",
+    "usage": {
+     "cached_input_tokens": 4009112,
+     "input_tokens": 4258997,
+     "output_tokens": 36429,
+     "reasoning_output_tokens": 13447
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-matchcore-order-book-parity-05a346ef",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "fc1c1c49010ed2823af23484a3bc3154a2b88b73fa6f631a7045a3d2a2ca5d62",
+    "summary": "634b2f7b51ea6fd3f71ff4509dadd2031c347cd31abd0d68e9e5a3143c03bf29",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-13T20:52:15.193178+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 690.516,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T22:03:44.427911+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8304,
+   "reported_tokens": 2374956,
+   "run_id": "legacy-metercore-binary-parity-2af08044",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2374956,
+    "result_receipts": null,
+    "stream_sha256": "e2cb138e42bbbce6fed1570b1cfd1ea5a92db6a963e6fdf07e431927318008be",
+    "usage": {
+     "cached_input_tokens": 2229352,
+     "input_tokens": 2346029,
+     "output_tokens": 28927,
+     "reasoning_output_tokens": 11159
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-metercore-binary-parity-2af08044",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "6936d7012cf238c7e211fb1a7e3fa82d11f90493ce8145cecea7378bbed6de57",
+    "summary": "accb6f464c8ea91bf03859a5356e0103507270bfb9d0b83c501df5677b57e807",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-13T21:52:13.933584+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 646.272,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T01:03:16.715791+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8143,
+   "reported_tokens": 2566952,
+   "run_id": "legacy-pacecore-binary-parity-9fd55bc8",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2566952,
+    "result_receipts": null,
+    "stream_sha256": "57dfb49f708dc835d253dc2d9c8b3c9fdf5a60b996e21bcbbde771352465ee29",
+    "usage": {
+     "cached_input_tokens": 2347740,
+     "input_tokens": 2532672,
+     "output_tokens": 34280,
+     "reasoning_output_tokens": 16415
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-pacecore-binary-parity-9fd55bc8",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "3682d334080c7a22748081073aca28917746fac35ace67a0ab015610e359c622",
+    "summary": "cb9401d67c2608fb069cc4cd8448c27959ed6f4b338d728a9e137f16d74898e7",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-14T00:52:30.425404+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 6892.505,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T06:59:23.773584+00:00",
+   "functional": 0.9333,
+   "model": "musewonderfull",
+   "quality": 0.7314,
+   "reported_tokens": 41870678,
+   "run_id": "legacy-paddockcore-binary-parity-8e9c0f53",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 41870678,
+    "result_receipts": null,
+    "stream_sha256": "9c662d31d65b5bb5ec58be9de8df7c8ad76fed5f10f04c72b62f0821295852b9",
+    "usage": {
+     "cached_input_tokens": 40748804,
+     "input_tokens": 41622608,
+     "output_tokens": 248070,
+     "reasoning_output_tokens": 157450
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-paddockcore-binary-parity-8e9c0f53",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "18e7f0c37fe56851bf5ba3becc065cfe379780c24156ff1618d7cbe3bc6166e1",
+    "summary": "fc81f89aaeb274812bb5f986bf74e94fbf138cd381167cb610bc5c8c4f44e0aa",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-14T05:04:31.223322+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1834.859,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T21:52:13.282973+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7658,
+   "reported_tokens": 9870012,
+   "run_id": "legacy-payrollcore-binary-parity-3314791e",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9870012,
+    "result_receipts": null,
+    "stream_sha256": "167aee0317bccd34e9de8206aca187a423333ddd71cecb5610d22a69495650cb",
+    "usage": {
+     "cached_input_tokens": 9583644,
+     "input_tokens": 9793008,
+     "output_tokens": 77004,
+     "reasoning_output_tokens": 40869
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-payrollcore-binary-parity-3314791e",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "266373596d83465b451945f856c059468d5cc7b6a3df8b630c1d097837607e74",
+    "summary": "f13e2afdc52d0ea68f3072c04423d900ed3b88925e13b32b979f58744592537c",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-13T21:21:38.409680+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 590.102,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T21:21:37.843993+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7814,
+   "reported_tokens": 1606434,
+   "run_id": "legacy-qlite-store-parity-8fdb6247",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1606434,
+    "result_receipts": null,
+    "stream_sha256": "4eb9de9b246e5c7323be09832f2f0eca30dbe32710dbfa3aec21b161572ae490",
+    "usage": {
+     "cached_input_tokens": 1434360,
+     "input_tokens": 1575530,
+     "output_tokens": 30904,
+     "reasoning_output_tokens": 16722
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-qlite-store-parity-8fdb6247",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "722fed72dc1e8b5e676c70f8cd52bb8f2b76a01f124d93083d10d83977383899",
+    "summary": "d411b6908d4fae9be9eb704a1fd2372f17353210b86ae30e5a6cbe19a2f35413",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-13T21:11:47.730116+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1169.883,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T23:35:18.262543+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7646,
+   "reported_tokens": 5677920,
+   "run_id": "legacy-queuecore-binary-parity-041a13f0",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5677920,
+    "result_receipts": null,
+    "stream_sha256": "d39d00ab7d60f4ed719ce33e1582be7db8b71430d7b3a7b84b4445c0c6bc09df",
+    "usage": {
+     "cached_input_tokens": 5374476,
+     "input_tokens": 5624348,
+     "output_tokens": 53572,
+     "reasoning_output_tokens": 28110
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-queuecore-binary-parity-041a13f0",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "3234ef3240dc977c128f21189f9040adbca81a3d29f33439800bce4ce4662e89",
+    "summary": "9b4d4693bde4a11134a03b159f32a4138af1c10cdcb9e24f7eb0049e27647d49",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-13T23:15:48.394296+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1054.159,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T22:53:52.657097+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8109,
+   "reported_tokens": 4320217,
+   "run_id": "legacy-quotacore-binary-parity-84beb849",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4320217,
+    "result_receipts": null,
+    "stream_sha256": "674b4ef16ff2b00f8cb54d4521d170db4f6c179d99da43d36527676dafbdb27c",
+    "usage": {
+     "cached_input_tokens": 4067540,
+     "input_tokens": 4271028,
+     "output_tokens": 49189,
+     "reasoning_output_tokens": 28028
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-quotacore-binary-parity-84beb849",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "f02f00b0794d01c0c751981b291f7f8fb4a4d2a07f0e650cda419e7ea7734756",
+    "summary": "557ee75b1b77f3b598676919ec78619271ac87a369e705b4304bfd310ccac600",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-13T22:36:18.496198+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1033.941,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T00:16:41.409050+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8288,
+   "reported_tokens": 3765406,
+   "run_id": "legacy-reflowcore-binary-parity-59db50df",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3765406,
+    "result_receipts": null,
+    "stream_sha256": "a5aa18f467aad0d7d84b6d048e00c9e1a2fc5e71b9d768665d248457f6f05cac",
+    "usage": {
+     "cached_input_tokens": 3535840,
+     "input_tokens": 3727036,
+     "output_tokens": 38370,
+     "reasoning_output_tokens": 21282
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-reflowcore-binary-parity-59db50df",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "190b3ffa9832e1c5558a1deb72aa637dc6e94ae6d487bd388c72bf7f60dcb2ab",
+    "summary": "386f7c0e915406990de4ac36667a7e580ec3e9b267ca9ebe99dc978b1d22b009",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-13T23:59:27.403239+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 553.968,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T23:59:26.992307+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7902,
+   "reported_tokens": 1501367,
+   "run_id": "legacy-schedcore-binary-parity-88d6c7f4",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1501367,
+    "result_receipts": null,
+    "stream_sha256": "a38dc64c36c7c62fa45435c75e7ed24cb0927aae7aa7e77eec3bc41a3f84e2eb",
+    "usage": {
+     "cached_input_tokens": 1344840,
+     "input_tokens": 1478865,
+     "output_tokens": 22502,
+     "reasoning_output_tokens": 10547
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-schedcore-binary-parity-88d6c7f4",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "62223a939467f7e86b8f11b5b51e78469e7e35b5befac5c61e87ec937b896903",
+    "summary": "69b734826a763ccd6c9138f07bae9e461881a6d04f47fd30371633fa8b8a911a",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-13T23:50:13.011297+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1238.218,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T20:52:14.707959+00:00",
+   "functional": 0.8,
+   "model": "musewonderfull",
+   "quality": 0.7697,
+   "reported_tokens": 4292875,
+   "run_id": "legacy-settlecore-binary-parity-53c42ba6",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4292875,
+    "result_receipts": null,
+    "stream_sha256": "5eaeece99b99c8630b7d51ba6d77ea80503e4829146a99b1a8a4039393816118",
+    "usage": {
+     "cached_input_tokens": 3970148,
+     "input_tokens": 4250593,
+     "output_tokens": 42282,
+     "reasoning_output_tokens": 20212
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-settlecore-binary-parity-53c42ba6",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "c40e7b7b87c998093b2505fe2ce617162a4c475cbd1da0d4310b8fce2f6165a0",
+    "summary": "ad37e6a4e0f70b8dccbc755916502a75d8e289df3a49f7682ad5bc8d560781fc",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-13T20:31:35.011222+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 656.226,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T23:04:49.482831+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8149,
+   "reported_tokens": 2794415,
+   "run_id": "legacy-snapcore-binary-parity-a59a20f4",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2794415,
+    "result_receipts": null,
+    "stream_sha256": "e4dc642a35d0ad397c03cbb194f70c77d7b5b407abaa05a4ba602266c3b2e0bf",
+    "usage": {
+     "cached_input_tokens": 2577324,
+     "input_tokens": 2763795,
+     "output_tokens": 30620,
+     "reasoning_output_tokens": 12244
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-snapcore-binary-parity-a59a20f4",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "099da1c62002357f6662d8251d4c0a861b142f6974c64d892c5d47e6853d66e2",
+    "summary": "8340ea6312ba40ff14900202d4e3069c185a17445f6e22bf5c095da0ae7cf59a",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-13T22:53:53.245257+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 983.143,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T01:27:55.394297+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8231,
+   "reported_tokens": 4778967,
+   "run_id": "legacy-stampcore-binary-parity-02723984",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4778967,
+    "result_receipts": null,
+    "stream_sha256": "611c8ea4f2e6ddf512dc042d05ad8bc926891296ec86def748d100a39ff821c2",
+    "usage": {
+     "cached_input_tokens": 4561908,
+     "input_tokens": 4742386,
+     "output_tokens": 36581,
+     "reasoning_output_tokens": 15652
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-stampcore-binary-parity-02723984",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "036777b019906ccbd9cbe153b126cd5ea4ffa69235134f1f8317c3c824e9c920",
+    "summary": "3734a471b93fbdf5670624c86f8f34feb200baf2ce4666beca3b2dd63b2108c6",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-14T01:11:32.276070+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2147.994,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-14T00:52:29.990558+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8472,
+   "reported_tokens": 13393333,
+   "run_id": "legacy-tallycore-binary-parity-62b2d8eb",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 13393333,
+    "result_receipts": null,
+    "stream_sha256": "6fba6853ac7e1aa46a8e6b8805586043a4fd7525d53a0bf10407a0fe29403cc6",
+    "usage": {
+     "cached_input_tokens": 12995984,
+     "input_tokens": 13290365,
+     "output_tokens": 102968,
+     "reasoning_output_tokens": 66006
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-tallycore-binary-parity-62b2d8eb",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "6d32add3f85a313185d897688895c98472fdb6a43ded9762a254ffe4ee1e08a9",
+    "summary": "4067ebaeb1a5e4e33345d321de20c7bf877d356572a0e39ddae2febf2680c8e7",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-14T00:16:41.939788+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 657.791,
+   "effort": "low",
+   "fallback": false,
+   "finished_at": "2026-10-13T23:15:47.776592+00:00",
+   "functional": 0.7778,
+   "model": "musewonderfull",
+   "quality": 0.8444,
+   "reported_tokens": 2813263,
+   "run_id": "legacy-vaultcore-binary-parity-661690b4",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2813263,
+    "result_receipts": null,
+    "stream_sha256": "38d87ab85a553ec8408f483a586612322318f38301110ecd7c7813a0c4d56727",
+    "usage": {
+     "cached_input_tokens": 2609952,
+     "input_tokens": 2782358,
+     "output_tokens": 30905,
+     "reasoning_output_tokens": 14324
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/low/legacy-vaultcore-binary-parity-661690b4",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "2b29bbeb4ac1a38c05a517be9638c85cce1bc47c5fadb1140163ff7540253e46",
+    "summary": "910145638a60022f585e9e82378374cb199371ba6f3df76779946ade5b15ed79",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-13T23:04:49.974129+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1513.278,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T18:46:37.371823+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7898,
+   "reported_tokens": 9510127,
+   "run_id": "legacy-blendcore-binary-parity-2dd0b7e1",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9510127,
+    "result_receipts": null,
+    "stream_sha256": "9b3252663d603e536978b44c82c38bfa0df9670875b5811f3cd191b9807b26e3",
+    "usage": {
+     "cached_input_tokens": 9167364,
+     "input_tokens": 9434529,
+     "output_tokens": 75598,
+     "reasoning_output_tokens": 38329
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-blendcore-binary-parity-2dd0b7e1",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "aa7899c63fe9ba49d3ed4f594cb996eb5bc6fb2a8e92fcd0a5c44fd8311d12d8",
+    "summary": "ab759ae87361417e502729452a67c1cbacd21d46902d6f24cf4694e9c4d287ac",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-14T18:21:24.072264+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1554.084,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T15:24:50.922862+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7956,
+   "reported_tokens": 3984301,
+   "run_id": "legacy-codeccore-binary-parity-b5f1b8ca",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3984301,
+    "result_receipts": null,
+    "stream_sha256": "4f785677e020cafe2f3d43f6bbf56cd7c884d193302a7375bec2ab6fa2c8d575",
+    "usage": {
+     "cached_input_tokens": 3689116,
+     "input_tokens": 3939167,
+     "output_tokens": 45134,
+     "reasoning_output_tokens": 23756
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-codeccore-binary-parity-b5f1b8ca",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "1c25acf33e147bd035d71164afd9ccc87db4feebcb902a34c7de2de50e353cf6",
+    "summary": "9213135e6eb138333a03cd557365313baab7e94d8e15481079157f0ab8c0c515",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-14T14:58:56.811487+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 5123.518,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T21:00:23.500551+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7261,
+   "reported_tokens": 20936836,
+   "run_id": "legacy-depotcore-binary-parity-3aa0a0f1",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 20936836,
+    "result_receipts": null,
+    "stream_sha256": "d96d1acab7db719fd392d353245af569f2622c66a94230fddcae9b128c057734",
+    "usage": {
+     "cached_input_tokens": 20172308,
+     "input_tokens": 20711147,
+     "output_tokens": 225689,
+     "reasoning_output_tokens": 161755
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-depotcore-binary-parity-3aa0a0f1",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "549e6804a700a22ad8f6e9fac1272bc63eb93d36d905a971cd99cdd6684504c0",
+    "summary": "88fc038b5c7915a0ddd3bd0c9fbf385e04189f8312359bd26e60f2d8ba363b2f",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-14T19:35:00.047863+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1280.144,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T14:58:56.114012+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8134,
+   "reported_tokens": 7261202,
+   "run_id": "legacy-freightcore-binary-parity-04aa49fc",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7261202,
+    "result_receipts": null,
+    "stream_sha256": "615a191d4b06ee6539d3190d9b663e9d639c8b43dc81a32d98178987b2c250bd",
+    "usage": {
+     "cached_input_tokens": 6925320,
+     "input_tokens": 7186513,
+     "output_tokens": 74689,
+     "reasoning_output_tokens": 37285
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-freightcore-binary-parity-04aa49fc",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "1d71ce9d75c275230bf531b1accfd5796baff1eaafcdb209931eec45354c7899",
+    "summary": "a5988beb38bbb684f74255885465d0a1d9711909d30a044571f0872ac49d9237",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-14T14:37:35.938353+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1279.137,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T19:34:59.561129+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.5962,
+   "reported_tokens": 8466457,
+   "run_id": "legacy-granarycore-binary-parity-b4e045a8",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8466457,
+    "result_receipts": null,
+    "stream_sha256": "785e0bd6ae15b0bc82623fcd39f9a673abd86071913c7bba5331a3ef5b5ffb1d",
+    "usage": {
+     "cached_input_tokens": 8137240,
+     "input_tokens": 8408337,
+     "output_tokens": 58120,
+     "reasoning_output_tokens": 35095
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-granarycore-binary-parity-b4e045a8",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "0e26121e3cf91915a7a83d0200a00d642e494a2235303e229f20e483fe80fd8b",
+    "summary": "091d3b0ff1f0680c3be0aed7bb9fdce2fa733667858e44371409048daa2684c5",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-14T19:13:40.394319+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1031.342,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T17:03:42.445787+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8245,
+   "reported_tokens": 4995441,
+   "run_id": "legacy-hedgecore-binary-parity-19a78d40",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4995441,
+    "result_receipts": null,
+    "stream_sha256": "7676f084f87f52f71d646d364853ac5b408fe3ea12367e1aea002bf814ea93de",
+    "usage": {
+     "cached_input_tokens": 4744728,
+     "input_tokens": 4945988,
+     "output_tokens": 49453,
+     "reasoning_output_tokens": 23551
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-hedgecore-binary-parity-19a78d40",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "79b366c7a6f9325033a524bb4e168e9b8b4a2138eddc813db798686b2da7cb8b",
+    "summary": "86e62cf481b1266ac00ad159d3bb9145c2a6a9a27b48d60f4bdd6a74b12d0ab8",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-14T16:46:31.104971+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 4273.01,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T22:11:37.164938+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7414,
+   "reported_tokens": 43231394,
+   "run_id": "legacy-lodgecore-binary-parity-e1d64441",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 43231394,
+    "result_receipts": null,
+    "stream_sha256": "dac2933f6d3bc99c80f86a086c54e42cc5a78e27b739028dabe6a50f37dcba88",
+    "usage": {
+     "cached_input_tokens": 42676588,
+     "input_tokens": 43031024,
+     "output_tokens": 200370,
+     "reasoning_output_tokens": 135798
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-lodgecore-binary-parity-e1d64441",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "2f80b0a48f52f2f99247b47904bfd5ec3ed84af84ad8c863461e7614a0dcc800",
+    "summary": "a55ca0d45557992a1addbffdfb5c427313e8a4586f3b62fafd271c6f61315786",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-14T21:00:24.004591+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1050.287,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T13:58:47.785679+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7759,
+   "reported_tokens": 3961682,
+   "run_id": "legacy-matchcore-order-book-parity-0852e355",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3961682,
+    "result_receipts": null,
+    "stream_sha256": "baa6e9f3899788552bedf9e5fc1fad4753cb0ed94df5c3ea248b761f3e0cd2fa",
+    "usage": {
+     "cached_input_tokens": 3727864,
+     "input_tokens": 3917034,
+     "output_tokens": 44648,
+     "reasoning_output_tokens": 18649
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-matchcore-order-book-parity-0852e355",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "59a4eb7c8dae959e683b903ad81500f626ea9b0e86c1eb09e0a712a6cd184a4f",
+    "summary": "29c74c6255b047f14a96602736ef3b9e337db59a61af4c7d7f1910c43271d0eb",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-14T13:41:17.456582+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 692.154,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T14:37:35.434768+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8481,
+   "reported_tokens": 2751338,
+   "run_id": "legacy-metercore-binary-parity-418f6475",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2751338,
+    "result_receipts": null,
+    "stream_sha256": "4ecb5cc71ba589c9c29562108d1f73e2c80f25ed2b3bda618c64a49a5229f797",
+    "usage": {
+     "cached_input_tokens": 2571144,
+     "input_tokens": 2715693,
+     "output_tokens": 35645,
+     "reasoning_output_tokens": 17710
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-metercore-binary-parity-418f6475",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "6a2577fc8d2d8fdd83a3974de7cabfbb701e7931bed952253352a0fa76c7c7cd",
+    "summary": "b400db74cfdb258f6ff02b05e52db7ed1ba155e7b38ce641cbbead6b918228aa",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-14T14:26:03.280284+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 958.348,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T18:21:23.624207+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8126,
+   "reported_tokens": 3426252,
+   "run_id": "legacy-pacecore-binary-parity-3866833f",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3426252,
+    "result_receipts": null,
+    "stream_sha256": "de918e6e3ed2a8c829d8032d52d4d2731816c0f48b52e156a2383c994bc5a605",
+    "usage": {
+     "cached_input_tokens": 3186020,
+     "input_tokens": 3377804,
+     "output_tokens": 48448,
+     "reasoning_output_tokens": 26853
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-pacecore-binary-parity-3866833f",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "1219d35cc502e9b09877977e62bdee9ec204e34fc8f101883ae9023abf8e24cf",
+    "summary": "2fdd235e42290bc26cba2a92cf3a8c13d87360ad307c44ab25f37dc1ba8d03f4",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-14T18:05:25.260729+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 970.641,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T14:26:02.789532+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7863,
+   "reported_tokens": 4363114,
+   "run_id": "legacy-payrollcore-binary-parity-3b420007",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4363114,
+    "result_receipts": null,
+    "stream_sha256": "e7bab0c8671844fdd0dbd94da0244f536e6022aa11ec88b1d4944c0012edd8dc",
+    "usage": {
+     "cached_input_tokens": 4065880,
+     "input_tokens": 4308709,
+     "output_tokens": 54405,
+     "reasoning_output_tokens": 28052
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-payrollcore-binary-parity-3b420007",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "1274ab02a9d3743ccb7fdd80235f4557fabbdabf056069422b2bb6b865e2e8c5",
+    "summary": "ef65a77833b1e9ed786fb12cccdb37a37c88c4e6e05f902d8d6275555ca0463c",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-14T14:09:52.126409+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 663.285,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T14:09:51.615925+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8001,
+   "reported_tokens": 3230607,
+   "run_id": "legacy-qlite-store-parity-e8598cd0",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3230607,
+    "result_receipts": null,
+    "stream_sha256": "ebe1ac8fe1e778bbe3aaa0dd16dc2acc6a9516259258736527d5b506aaab2c5a",
+    "usage": {
+     "cached_input_tokens": 3019644,
+     "input_tokens": 3197033,
+     "output_tokens": 33574,
+     "reasoning_output_tokens": 15713
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-qlite-store-parity-e8598cd0",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "fa6a684930395f300d070972adf51557ee5b6cb9c6523bc888d00ca4efe47757",
+    "summary": "7af7c44fbb8257bca095a56a85a245eed1bf3cd39b2f29f59080ed992a652660",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-14T13:58:48.291512+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1850.581,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T16:46:30.604992+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.7961,
+   "reported_tokens": 4747325,
+   "run_id": "legacy-queuecore-binary-parity-33dbffef",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4747325,
+    "result_receipts": null,
+    "stream_sha256": "2d172c36d5e13036139979d3a33a5e6c069c7853ad573268dda7c938a9c8a0f6",
+    "usage": {
+     "cached_input_tokens": 4454160,
+     "input_tokens": 4690804,
+     "output_tokens": 56521,
+     "reasoning_output_tokens": 32233
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-queuecore-binary-parity-33dbffef",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "3e87eaaeff6a9d1f3fdec20d18031301a1b4b845a3f6972fff243e32df1ddf4c",
+    "summary": "0fd3e7cb436996d5e50aaa0e43311fb6bf4a242820b64ae52005ada0dc26d64f",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-14T16:15:40.011298+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1244.068,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T15:45:35.485652+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8014,
+   "reported_tokens": 6474190,
+   "run_id": "legacy-quotacore-binary-parity-1abb1764",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6474190,
+    "result_receipts": null,
+    "stream_sha256": "4a5d3087f47bcf6b8ca0581982f1f1c0b7dc62c68f722e92d3fc678521b46791",
+    "usage": {
+     "cached_input_tokens": 6180288,
+     "input_tokens": 6407613,
+     "output_tokens": 66577,
+     "reasoning_output_tokens": 37523
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-quotacore-binary-parity-1abb1764",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "7376b7d014ab7c2d06786ea359d34beafb515ffcbd786867a26c030b977d7872",
+    "summary": "93a37e73bd015ce97edeb883813606a43e4ce4f7bbe543959804ebaf66a7a697",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-14T15:24:51.389777+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 962.128,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T17:40:56.209676+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8272,
+   "reported_tokens": 6640084,
+   "run_id": "legacy-reflowcore-binary-parity-439ee069",
+   "security": 0.95,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6640084,
+    "result_receipts": null,
+    "stream_sha256": "c814e05aa9a074e70159f15d618700bbfbc49cfe87de11706da079251ad982b4",
+    "usage": {
+     "cached_input_tokens": 6363948,
+     "input_tokens": 6589990,
+     "output_tokens": 50094,
+     "reasoning_output_tokens": 24690
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-reflowcore-binary-parity-439ee069",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "cdd2c2c3c0d4067ad599e0d16ac0af2a8bb810edb7e58dc3e42c64f6f958fa97",
+    "summary": "9482a25aea8a80734856327fde0ca8210b99f51c77e1626f9df17131e77b4782",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-14T17:24:54.065223+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1270.561,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T17:24:53.566486+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.74,
+   "reported_tokens": 6425219,
+   "run_id": "legacy-schedcore-binary-parity-fa118e23",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6425219,
+    "result_receipts": null,
+    "stream_sha256": "e88cedad744b5473d231c4f7e666508b9a78727ebd78b83bb3cf79cc7ddc3fdd",
+    "usage": {
+     "cached_input_tokens": 6113652,
+     "input_tokens": 6359156,
+     "output_tokens": 66063,
+     "reasoning_output_tokens": 39530
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-schedcore-binary-parity-fa118e23",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "2275f6e2f85b4eec34bd8ec213789149617d28d5537071a6b844a812b3f26035",
+    "summary": "ce4b39f4b64938ba318d326e9115fef1ad5a23a2a8b71e93dd1fe4ff38059e98",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-14T17:03:42.956462+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1646.998,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T13:41:16.980810+00:00",
+   "functional": 0.8,
+   "model": "musewonderfull",
+   "quality": 0.7614,
+   "reported_tokens": 9262007,
+   "run_id": "legacy-settlecore-binary-parity-a1428148",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9262007,
+    "result_receipts": null,
+    "stream_sha256": "ce9db6f4cb28db2c9a7ddb322e79e56ba9d58588d0398da2db48788ab7ca01bd",
+    "usage": {
+     "cached_input_tokens": 8956052,
+     "input_tokens": 9202508,
+     "output_tokens": 59499,
+     "reasoning_output_tokens": 24066
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-settlecore-binary-parity-a1428148",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "340b7b2624a320b33f4cca90188df36f58a6acde24496d8a58c6447b31b51cd3",
+    "summary": "35fa7979b8587f1bde71ed57cfe17e36c8b93c2502d9e41083afda09ff771949",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-14T13:13:48.557735+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 785.237,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T15:58:41.206306+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8234,
+   "reported_tokens": 3941100,
+   "run_id": "legacy-snapcore-binary-parity-a75d3446",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3941100,
+    "result_receipts": null,
+    "stream_sha256": "1e3876bbbe92fc6d22de0d0fc143ad6694901aa8776baa58c55e023a76aa9ee2",
+    "usage": {
+     "cached_input_tokens": 3717904,
+     "input_tokens": 3899431,
+     "output_tokens": 41669,
+     "reasoning_output_tokens": 20191
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-snapcore-binary-parity-a75d3446",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "ed2f119f947e43790a96410b527128a82f634242cb66b0877a9af5e4d7fef43b",
+    "summary": "7b770203b0f3b1869ca53bc0eeec6f468b77f5954290b1a0505989548e8ea876",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-14T15:45:36.014430+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1621.995,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T19:13:39.887496+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8147,
+   "reported_tokens": 6465286,
+   "run_id": "legacy-stampcore-binary-parity-1a6601dc",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6465286,
+    "result_receipts": null,
+    "stream_sha256": "0207354e5d32def15a51f4a8c5e2ce683383bed34b6c8c90b3f9b252d2d2ae62",
+    "usage": {
+     "cached_input_tokens": 6153004,
+     "input_tokens": 6409309,
+     "output_tokens": 55977,
+     "reasoning_output_tokens": 27691
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-stampcore-binary-parity-1a6601dc",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "47a53bc6905443f444149a9783b6f69052a533360cbf64328664b459169f91fc",
+    "summary": "7c50233826a68de18d18fcd47b13de1dc196b407ea6b019bd63382c0ac91f9c8",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-14T18:46:37.833238+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1468.037,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T18:05:24.754069+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8468,
+   "reported_tokens": 4839200,
+   "run_id": "legacy-tallycore-binary-parity-dd77fbf1",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4839200,
+    "result_receipts": null,
+    "stream_sha256": "c479daf52e9d26eb157f92bd98a72bd87047dd805f3835fe1762e4e84b0f262d",
+    "usage": {
+     "cached_input_tokens": 4534428,
+     "input_tokens": 4763060,
+     "output_tokens": 76140,
+     "reasoning_output_tokens": 53182
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-tallycore-binary-parity-dd77fbf1",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "03197b208629f3f639924f5ddbd9823b90e7c0947d7620709351809830e39f95",
+    "summary": "d86d52d9efdd0c346e6d1544ef960ceb8b8f5495f91421c7b11ebb7a7c1b927c",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-14T17:40:56.702463+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1017.756,
+   "effort": "medium",
+   "fallback": false,
+   "finished_at": "2026-10-14T16:15:39.500259+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.8513,
+   "reported_tokens": 3200868,
+   "run_id": "legacy-vaultcore-binary-parity-20ba29d8",
+   "security": 1.0,
+   "solver_cli_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3200868,
+    "result_receipts": null,
+    "stream_sha256": "1b3f8117e09d45c1f1236200c6bf5c209fed34b62da351992b9672457a643ed1",
+    "usage": {
+     "cached_input_tokens": 2996264,
+     "input_tokens": 3161758,
+     "output_tokens": 39110,
+     "reasoning_output_tokens": 19078
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2/medium/legacy-vaultcore-binary-parity-20ba29d8",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "49bae793a46d3e6d72497869b08e40c99bb31a1a0a71f506bdc9bb7938e4cafc",
+    "summary": "ddb87b75ae7ea62e531b715dd2df31bb225287ba558239099b1957676e373877",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-14T15:58:41.704063+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "solver": {
+  "binary_sha256": "c713165a287d64afb8816f8351a240b457a23524f4ade06bca0e41dfde410460",
+  "cli_model": "muse-wonder-full-1.0",
+  "contributor_mode": "on",
+  "harness_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+  "model": "muse-code:muse-wonder-full-1.0-contributor",
+  "muse_settings_plugins": {
+   "skill-reminder": {
+    "enabled": false
+   }
+  },
+  "muse_settings_sha256": "47288435fd9c5e31c4c0ed92893f7f4ec7eec864b0e72d18999f4281b39736ee",
+  "run_from": [
+   "bench/2026-10-13-musewonder-full-v2-low"
+  ],
+  "sweep_protocol_sha256": "85cbf1c8f4201ae08276b7d052bc1593db5a1c8360cdf1279a26bd4fa0119603"
+ },
+ "suite": "coding-intelligence-index-v4"
+}

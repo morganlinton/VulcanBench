@@ -1,0 +1,220 @@
+{
+  "final": false,
+  "groups": {
+    "wonder": {
+      "low": {
+        "n": 23,
+        "functional": 95.82478260869566,
+        "functional_se": 2.079568770816542,
+        "passed": 18,
+        "usd": 3.9315751304347826,
+        "minutes": 27.28644927536232
+      },
+      "medium": {
+        "n": 21,
+        "functional": 99.04761904761905,
+        "functional_se": 0.9523809523809523,
+        "passed": 20,
+        "usd": 3.898752723809524,
+        "minutes": 25.60046746031746
+      }
+    },
+    "opus55": {
+      "low": {
+        "n": 23,
+        "functional": 94.20652173913044,
+        "functional_se": 2.4052933727449166,
+        "passed": 17,
+        "usd": 1.695309,
+        "minutes": 13.6903,
+        "usd_upper": null
+      },
+      "medium": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 2.842201,
+        "minutes": 18.6446,
+        "usd_upper": null
+      },
+      "high": {
+        "n": 23,
+        "functional": 95.65217391304348,
+        "functional_se": 4.347826086956522,
+        "passed": 22,
+        "usd": 3.269444,
+        "minutes": 21.4192,
+        "usd_upper": null
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 97.82608695652173,
+        "functional_se": 2.173913043478261,
+        "passed": 22,
+        "usd": 4.111557,
+        "minutes": 20.747,
+        "usd_upper": null
+      },
+      "max": {
+        "n": 23,
+        "functional": 97.17391304347827,
+        "functional_se": 2.008531382842158,
+        "passed": 21,
+        "usd": 8.748014,
+        "minutes": 37.5113,
+        "usd_upper": null
+      }
+    },
+    "gpt61sol": {
+      "low": {
+        "n": 23,
+        "functional": 97.17391304347827,
+        "functional_se": 1.5662600830888982,
+        "passed": 20,
+        "usd": 0.305976,
+        "minutes": 6.89,
+        "usd_upper": null
+      },
+      "medium": {
+        "n": 23,
+        "functional": 98.69565217391305,
+        "functional_se": 1.3043478260869568,
+        "passed": 22,
+        "usd": 0.3986,
+        "minutes": 10.5647,
+        "usd_upper": null
+      },
+      "high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 0.33007,
+        "minutes": 10.2219,
+        "usd_upper": null
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 0.434591,
+        "minutes": 15.3716,
+        "usd_upper": null
+      },
+      "max": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 0.458339,
+        "minutes": 14.4642,
+        "usd_upper": null
+      }
+    },
+    "astra": {
+      "low": {
+        "n": 23,
+        "functional": 99.71,
+        "functional_se": 0.2899999999999999,
+        "passed": 22,
+        "usd": 1.721698,
+        "minutes": 4.2187,
+        "usd_upper": 3.283855
+      },
+      "medium": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 1.481347,
+        "minutes": 3.8226,
+        "usd_upper": 2.791
+      },
+      "high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 1.711065,
+        "minutes": 4.8999,
+        "usd_upper": 3.217211
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 2.302022,
+        "minutes": 8.0905,
+        "usd_upper": 4.253697
+      },
+      "max": {
+        "n": 23,
+        "functional": 100.0,
+        "functional_se": 0.0,
+        "passed": 23,
+        "usd": 2.568128,
+        "minutes": 10.2805,
+        "usd_upper": 4.689675
+      }
+    }
+  },
+  "sources": {
+    "gpt61sol-opus55-astra-efforts.csv": "8cd50c4dc1f6b5d9df77f6f3b5e156d6d2e3c0b8cdcf98e4495ea47f4996a585",
+    "astra-vs-fable51-v34-economics-efforts.csv": "2a34c5e633fb4abfdb8ffc69633a4400504d406e529188b89d96c7f843a1ef08",
+    "opus55-traces-manifest.csv": "bf574c8cec594f17c4726045b2a33c63e43594265e758c6dae8dd896705af3a0",
+    "comparison.json": "fc5405e3da76c2b6904013a367f5c98250207f16f7d9195f54f618474b7cbe1e",
+    "pricing-check.json": "cbb7cac7e549314fadad30d3f9b7ea0ff475773a5553ed70e03fa5257f49296a",
+    "opus55_traces_repo": "https://github.com/morganlinton/vulcanbench-opus55-traces",
+    "wonder_summaries": {
+      "low/legacy-blendcore-binary-parity-63cfdcc6": "2f056860823a7c15f28ba4d765311f08f67a397443fb33c9869bd3b1b0fe9862",
+      "low/legacy-cellarcore-binary-parity-28b7253e": "aefcf11f9b09acdd63ad0dbb19e5d990e13a8a7b0ef9ca42e1919da82cfec97d",
+      "low/legacy-codeccore-binary-parity-7072c3b3": "52ebf0c9db8ba97d6d404076cea9df07a1707930cf29879d71e86ab7c238e45f",
+      "low/legacy-depotcore-binary-parity-72f0d090": "59578a931eb989587fccc3300016a693e580edbb3aa0fbf4c77d2b837b25cd80",
+      "low/legacy-freightcore-binary-parity-ab1acaaf": "90386bdfaed7038564b25ee15ba70aeac0295ad9474eda9a9b9771e71336250d",
+      "low/legacy-granarycore-binary-parity-9309c95f": "05ef062de006e6135cbb80a4dcfb51dce2e01b54b65110a4143c4b54a3afa4c3",
+      "low/legacy-hedgecore-binary-parity-55bcd818": "475654420a3c6e53fc82be1d21ada80cc70b6a2fdac247d21e1524ecd4db0ff2",
+      "low/legacy-lodgecore-binary-parity-60a434a4": "718ece4bff86f061260896094ffe9018e76b30ba6dfa94217b78fbe8dbea494f",
+      "low/legacy-matchcore-order-book-parity-05a346ef": "634b2f7b51ea6fd3f71ff4509dadd2031c347cd31abd0d68e9e5a3143c03bf29",
+      "low/legacy-metercore-binary-parity-2af08044": "accb6f464c8ea91bf03859a5356e0103507270bfb9d0b83c501df5677b57e807",
+      "low/legacy-pacecore-binary-parity-9fd55bc8": "cb9401d67c2608fb069cc4cd8448c27959ed6f4b338d728a9e137f16d74898e7",
+      "low/legacy-paddockcore-binary-parity-8e9c0f53": "fc81f89aaeb274812bb5f986bf74e94fbf138cd381167cb610bc5c8c4f44e0aa",
+      "low/legacy-payrollcore-binary-parity-3314791e": "f13e2afdc52d0ea68f3072c04423d900ed3b88925e13b32b979f58744592537c",
+      "low/legacy-qlite-store-parity-8fdb6247": "d411b6908d4fae9be9eb704a1fd2372f17353210b86ae30e5a6cbe19a2f35413",
+      "low/legacy-queuecore-binary-parity-041a13f0": "9b4d4693bde4a11134a03b159f32a4138af1c10cdcb9e24f7eb0049e27647d49",
+      "low/legacy-quotacore-binary-parity-84beb849": "557ee75b1b77f3b598676919ec78619271ac87a369e705b4304bfd310ccac600",
+      "low/legacy-reflowcore-binary-parity-59db50df": "386f7c0e915406990de4ac36667a7e580ec3e9b267ca9ebe99dc978b1d22b009",
+      "low/legacy-schedcore-binary-parity-88d6c7f4": "69b734826a763ccd6c9138f07bae9e461881a6d04f47fd30371633fa8b8a911a",
+      "low/legacy-settlecore-binary-parity-53c42ba6": "ad37e6a4e0f70b8dccbc755916502a75d8e289df3a49f7682ad5bc8d560781fc",
+      "low/legacy-snapcore-binary-parity-a59a20f4": "8340ea6312ba40ff14900202d4e3069c185a17445f6e22bf5c095da0ae7cf59a",
+      "low/legacy-stampcore-binary-parity-02723984": "3734a471b93fbdf5670624c86f8f34feb200baf2ce4666beca3b2dd63b2108c6",
+      "low/legacy-tallycore-binary-parity-62b2d8eb": "4067ebaeb1a5e4e33345d321de20c7bf877d356572a0e39ddae2febf2680c8e7",
+      "low/legacy-vaultcore-binary-parity-661690b4": "910145638a60022f585e9e82378374cb199371ba6f3df76779946ade5b15ed79",
+      "medium/legacy-blendcore-binary-parity-2dd0b7e1": "ab759ae87361417e502729452a67c1cbacd21d46902d6f24cf4694e9c4d287ac",
+      "medium/legacy-codeccore-binary-parity-b5f1b8ca": "9213135e6eb138333a03cd557365313baab7e94d8e15481079157f0ab8c0c515",
+      "medium/legacy-depotcore-binary-parity-3aa0a0f1": "88fc038b5c7915a0ddd3bd0c9fbf385e04189f8312359bd26e60f2d8ba363b2f",
+      "medium/legacy-freightcore-binary-parity-04aa49fc": "a5988beb38bbb684f74255885465d0a1d9711909d30a044571f0872ac49d9237",
+      "medium/legacy-granarycore-binary-parity-b4e045a8": "091d3b0ff1f0680c3be0aed7bb9fdce2fa733667858e44371409048daa2684c5",
+      "medium/legacy-hedgecore-binary-parity-19a78d40": "86e62cf481b1266ac00ad159d3bb9145c2a6a9a27b48d60f4bdd6a74b12d0ab8",
+      "medium/legacy-lodgecore-binary-parity-e1d64441": "a55ca0d45557992a1addbffdfb5c427313e8a4586f3b62fafd271c6f61315786",
+      "medium/legacy-matchcore-order-book-parity-0852e355": "29c74c6255b047f14a96602736ef3b9e337db59a61af4c7d7f1910c43271d0eb",
+      "medium/legacy-metercore-binary-parity-418f6475": "b400db74cfdb258f6ff02b05e52db7ed1ba155e7b38ce641cbbead6b918228aa",
+      "medium/legacy-pacecore-binary-parity-3866833f": "2fdd235e42290bc26cba2a92cf3a8c13d87360ad307c44ab25f37dc1ba8d03f4",
+      "medium/legacy-payrollcore-binary-parity-3b420007": "ef65a77833b1e9ed786fb12cccdb37a37c88c4e6e05f902d8d6275555ca0463c",
+      "medium/legacy-qlite-store-parity-e8598cd0": "7af7c44fbb8257bca095a56a85a245eed1bf3cd39b2f29f59080ed992a652660",
+      "medium/legacy-queuecore-binary-parity-33dbffef": "0fd3e7cb436996d5e50aaa0e43311fb6bf4a242820b64ae52005ada0dc26d64f",
+      "medium/legacy-quotacore-binary-parity-1abb1764": "93a37e73bd015ce97edeb883813606a43e4ce4f7bbe543959804ebaf66a7a697",
+      "medium/legacy-reflowcore-binary-parity-439ee069": "9482a25aea8a80734856327fde0ca8210b99f51c77e1626f9df17131e77b4782",
+      "medium/legacy-schedcore-binary-parity-fa118e23": "ce4b39f4b64938ba318d326e9115fef1ad5a23a2a8b71e93dd1fe4ff38059e98",
+      "medium/legacy-settlecore-binary-parity-a1428148": "35fa7979b8587f1bde71ed57cfe17e36c8b93c2502d9e41083afda09ff771949",
+      "medium/legacy-snapcore-binary-parity-a75d3446": "7b770203b0f3b1869ca53bc0eeec6f468b77f5954290b1a0505989548e8ea876",
+      "medium/legacy-stampcore-binary-parity-1a6601dc": "7c50233826a68de18d18fcd47b13de1dc196b407ea6b019bd63382c0ac91f9c8",
+      "medium/legacy-tallycore-binary-parity-dd77fbf1": "d86d52d9efdd0c346e6d1544ef960ceb8b8f5495f91421c7b11ebb7a7c1b927c",
+      "medium/legacy-vaultcore-binary-parity-20ba29d8": "ddb87b75ae7ea62e531b715dd2df31bb225287ba558239099b1957676e373877"
+    }
+  },
+  "png_sha256": "b3e6d34658f18ef40a5f7249ccf1df591c652dbe91a8156b18f74471f686b706",
+  "table": "musewonder-full-vs-frontier-preliminary-efforts.csv"
+}

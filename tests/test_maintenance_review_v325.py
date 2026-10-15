@@ -394,6 +394,10 @@ def test_diagnostic_pairs_skip_tasks_without_both_levels(m: ModuleType) -> None:
         assert a["task"] == b["task"] and a["task"] not in {"legacy-t03", "legacy-t07"}
 
 
+@pytest.mark.skipif(
+    not (ROOT / "docs/results/swe-v4-musewonder-full-2026-10/comparison.json").exists(),
+    reason="the population record lands with the results PR (#197), not this engine PR",
+)
 def test_committed_population_record(m: ModuleType) -> None:
     record = json.loads(m.COMPARISON.read_text())
     rows, excluded, missing, counts = m.check_population(record)

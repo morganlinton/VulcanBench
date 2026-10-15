@@ -225,6 +225,10 @@ def test_main_writes_and_check_mode_compares(builder: ModuleType, tmp_path: Path
     assert json.loads(builder.OUTPUT.read_text())["cells"]["musewonderfull/medium"] == 1
 
 
+@pytest.mark.skipif(
+    not (ROOT / "docs/results/swe-v4-musewonder-full-2026-10/comparison.json").exists(),
+    reason="the population record lands with the results PR (#197), not this engine PR",
+)
 def test_committed_record_names_the_sweep_and_its_gaps() -> None:
     record = json.loads(
         (ROOT / "docs/results/swe-v4-musewonder-full-2026-10/comparison.json").read_text()

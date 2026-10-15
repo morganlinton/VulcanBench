@@ -7,6 +7,57 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-15: Muse Wonder Full is judged by Grok 4.7 and GPT-6.1 Sol (v3.25)
+
+### Decision
+
+- Muse Wonder Full's Frontier v4 sweep (Low and Medium, Muse Code 1.4.6,
+  Contributor mode, skill reminder off) is judged for Code quality under
+  v3.25 by Grok 4.7 and GPT-6.1 Sol. Owner choice in chat, 2026-10-15.
+- Muse Spark 1.3 is excluded: it is a Meta model, so it is not neutral for a
+  Meta submission. This mirrors the 2026-10-03 precedent, where Grok 4.6 was
+  not neutral for Grok 4.7 and GPT-6.1 Sol took its seat (v3.20).
+- Grok 4.7 has never judged. It runs at medium through Cursor (model id
+  `grok-4.7-medium`, display name `Grok 4.7  Medium` with two spaces, as
+  Cursor lists it) and must pass the calibration exam under v3.25 before any
+  counted call. GPT-6.1 Sol retakes the exam too. If one judge fails, the other
+  publishes alone and the failure is disclosed; two failures stop the round.
+- Medium covers 21 of 23 tasks now. cellarcore and paddockcore had not run
+  when the Muse Code weekly limit ran out; they run after it resets on
+  2026-10-19 and are judged in a v3.25.1 top-up that reuses the v3.25 exam
+  verdicts and leaves the v3.25 record unchanged (the v3.6.1 precedent).
+- Muse Wonder Full's combined scores will be compared with other models'
+  published combined scores, which come from their own rounds and panels. Any
+  card that does so discloses the panel behind each column.
+
+### Evidence
+
+- Codex CLI 0.159.0 was reinstalled on this host under
+  `~/.local/share/vulcanbench/codex-0.159.0/`; the v3.20 path under the old
+  home directory no longer exists. v3.25 pins both the `codex.js` launcher
+  (sha256 `61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70`)
+  and the native binary it runs (sha256
+  `e89718aa1969bfc4a471277bdc4679a3a3529293de0a309909822dfd67ddb77a`) and
+  re-checks both before every stage. v3.20 pinned only the launcher.
+- Cursor on this host still resolves to `2026.10.01-e373342`, whose version
+  directory digest (`dedbb877a8405b20e38a3dc32f38bf614bcd96d6e557f73eb6e99ff8c87b8a73`)
+  equals the one v3.24 recorded, so v3.25 pins the same Cursor and refuses
+  any other. Cursor serves its model list at run time, so the version
+  directory holds no Grok 4.7 label to check offline; the transport rejects
+  any reported label other than `Grok 4.7  Medium`, so a wrong label stops
+  the first exam call rather than producing a counted judgment.
+- Population (built 2026-10-15): 44 runs, Low 23 and Medium 21, none
+  excluded, every run from `bench/2026-10-13-musewonder-full-v2-low` with a
+  clean checkout and task hashes equal to the suite lock.
+
+### Operation
+
+`scripts/cii-v4-board/build_musewonder_population.py` builds the record,
+`python -m harness.maintenance_review_v325 prepare` freezes it, and
+`logs/cii-v4-maint-v325-chain.sh` (local, untracked) calibrates both judges,
+runs and probes the passing ones, then summarizes, from a bench-tag run
+worktree after this runner merges.
+
 ## 2026-10-13: Wonder Full Low is re-run with Muse Code's skill reminder off
 
 Meta advised the owner that Muse Code's built-in skill-reminder plugin is

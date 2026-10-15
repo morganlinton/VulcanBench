@@ -1,8 +1,10 @@
-"""Muse Wonder Full beside Claude Opus 5.5, Claude Fable 5.1, GPT-6.1 Sol and GPT-6 Astra.
+"""Muse Wonder Full beside Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra.
 
 One card on VulcanBench Frontier v4 across the five effort levels: accuracy
 as a line chart (functional score, the share of hidden behaviour tests
-passed, mean with +/-1 se whiskers) and cost per task as grouped bars.
+passed, each point labelled with its score) and cost per task as grouped bars.
+At the owner's request the chart shows no whiskers; the standard errors stay
+in the table and the CSV.
 Muse Wonder Full appears at the levels it has run so far.
 
 Accuracy is the functional score, not the combined score, because Muse Wonder
@@ -24,9 +26,9 @@ Prices were checked against each vendor's official page on 2026-10-15
 - GPT-6.1 Sol: per-run functional scores from its comparison.json; cost and
   minutes from the frontier leaders card table (Codex receipts at today's list
   price; long-context tier not applied, per-request sizes unrecorded).
-- Claude Fable 5.1 and GPT-6 Astra: per-run functional scores from
+- GPT-6 Astra: per-run functional scores from
   docs/results/swe-v4-astra-fable51-2026-09/comparison.json; cost and minutes
-  from that report's economics table, plus Astra's long-context upper bound.
+  from that report's economics table, plus its long-context upper bound.
 
 Passed counts must match the published tables, or the card refuses to draw.
 A Muse Wonder Full level with fewer than 23 tasks is marked preliminary.
@@ -68,18 +70,16 @@ PRICING = OUTPUT / "pricing-check.json"
 LEVELS = ("low", "medium", "high", "extra-high", "max")
 TABLE_LEVELS = ("low", "medium")
 SUITE_TASKS = 23
-MODELS = ("wonder", "opus55", "fable", "gpt61sol", "astra")
+MODELS = ("wonder", "opus55", "gpt61sol", "astra")
 NAMES = {
     "wonder": "Muse Wonder Full",
     "opus55": "Claude Opus 5.5",
-    "fable": "Claude Fable 5.1",
     "gpt61sol": "GPT-6.1 Sol",
     "astra": "GPT-6 Astra",
 }
 HARNESS = {
     "wonder": "Muse Code 1.4.6",
     "opus55": "Claude Code 2.1.280",
-    "fable": "Claude Code",
     "gpt61sol": "Codex 0.159.0",
     "astra": "Codex",
 }
@@ -88,11 +88,10 @@ HARNESS = {
 COLORS = {
     "wonder": "#0866FF",
     "opus55": "#D97757",
-    "fable": "#8C3A1F",
     "gpt61sol": "#0B3D2E",
     "astra": "#10A37F",
 }
-MARKERS = {"wonder": "o", "opus55": "s", "fable": "D", "gpt61sol": "^", "astra": "v"}
+MARKERS = {"wonder": "o", "opus55": "s", "gpt61sol": "^", "astra": "D"}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 WONDER_RATES = (
     4.00,
@@ -194,7 +193,8 @@ def load_others():
     for r in json.loads(SOL_ROWS.read_text())["rows"]:
         func["gpt61sol"][r["effort"]].append(r["functional"])
     for r in json.loads(AF_ROWS.read_text())["rows"]:
-        func[r["model"]][r["effort"]].append(r["functional"])
+        if r["model"] in func:
+            func[r["model"]][r["effort"]].append(r["functional"])
     groups = {}
     for m in MODELS[1:]:
         groups[m] = {}
@@ -300,7 +300,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for m in MODELS:
         swatch(x + 0.004, 3.05, m)
         text(x + 0.016, 3.05, NAMES[m], 12.5, True)
-        x += 0.177
+        x += 0.22
 
     xs = list(range(len(LEVELS)))
 
@@ -323,37 +323,25 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         left,
         3.94,
-        "functional score, %  ·  higher is better  ·  focused scale  ·  whiskers +/-1 se",
+        "functional score, %  ·  higher is better  ·  focused scale  ·  each point labelled",
         12,
         color=MUTED,
     )
     ax = axis(0.085, 0.355, 4.25, 3.3)
-    lo = min(g["functional"] - g["functional_se"] for m in MODELS for g in groups[m].values())
-    ax.set_ylim(math.floor(lo) - 1, 101)
-    ax.set_xlim(-0.35, len(LEVELS) - 0.3)
+    lo = min(g["functional"] for m in MODELS for g in groups[m].values())
+    ax.set_ylim(math.floor(lo) - 1, 101.2)
+    ax.set_xlim(-0.6, len(LEVELS) - 0.3)
     ends = []
     for m in MODELS:
         lv = [lvl for lvl in LEVELS if lvl in groups[m]]
         px = [LEVELS.index(lvl) for lvl in lv]
         ys = [groups[m][lvl]["functional"] for lvl in lv]
-        es = [groups[m][lvl]["functional_se"] for lvl in lv]
         ax.plot(
             px,
             ys,
             color=COLORS[m],
             lw=2.4 if m == "wonder" else 1.8,
             zorder=3 if m == "wonder" else 2,
-        )
-        ax.errorbar(
-            px,
-            ys,
-            yerr=es,
-            fmt="none",
-            ecolor=COLORS[m],
-            elinewidth=0.9,
-            capsize=3,
-            alpha=0.8,
-            zorder=2,
         )
         for p_, y_, lvl in zip(px, ys, lv, strict=True):
             hollow = m == "wonder" and lvl in prelim
@@ -375,7 +363,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 (px[-1], ys[-1]),
                 xytext=(
                     px[-1] + 0.1,
-                    ax.get_ylim()[0] + 0.32 * (ax.get_ylim()[1] - ax.get_ylim()[0]),
+                    ax.get_ylim()[0] + 0.14 * (ax.get_ylim()[1] - ax.get_ylim()[0]),
                 ),
                 textcoords="data",
                 fontsize=10,
@@ -392,7 +380,51 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             )
         else:
             ends.append((ys[-1], px[-1], m))
-    gap = 0.075 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+    span = ax.get_ylim()[1] - ax.get_ylim()[0]
+
+    def is_dip(m, i):
+        """True when this point sits below both neighbours on its own line."""
+        lv = [lvl for lvl in LEVELS if lvl in groups[m]]
+        lvl = LEVELS[i]
+        k = lv.index(lvl)
+        here = groups[m][lvl]["functional"]
+        nbrs = [groups[m][lv[j]]["functional"] for j in (k - 1, k + 1) if 0 <= j < len(lv)]
+        return len(nbrs) == 2 and all(v > here for v in nbrs)
+
+    # One label per distinct score at each level (ink when models share it).
+    # Low labels sit to the left, where nothing else is drawn; elsewhere a label
+    # goes above its point, or below when the point is a dip in its line or
+    # sits just under another score at the same level.
+    for i, lvl in enumerate(LEVELS):
+        shared = {}
+        for m in MODELS:
+            if lvl in groups[m]:
+                shared.setdefault(round(groups[m][lvl]["functional"], 1), []).append(m)
+        higher = None
+        for val in sorted(shared, reverse=True):
+            ms = shared[val]
+            color = COLORS[ms[0]] if len(ms) == 1 else INK
+            style = {
+                "fontsize": 8.5,
+                "fontfamily": "IBM Plex Mono",
+                "color": color,
+                "zorder": 5,
+                "textcoords": "offset points",
+            }
+            if i == 0:
+                ax.annotate(
+                    f"{val:.1f}", (i, val), xytext=(-9, 0), ha="right", va="center", **style
+                )
+            elif any(is_dip(m, i) for m in ms) or (
+                higher is not None and higher - val < 0.09 * span
+            ):
+                ax.annotate(f"{val:.1f}", (i, val), xytext=(0, -9), ha="center", va="top", **style)
+            else:
+                ax.annotate(
+                    f"{val:.1f}", (i, val), xytext=(0, 7), ha="center", va="bottom", **style
+                )
+            higher = val
+    gap = 0.075 * span
     placed = {}
     for y_end, p_end, m in sorted(ends, reverse=True):
         same_col = [v for v in placed.values() if v[1] == p_end]
@@ -423,11 +455,10 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     ax = axis(0.555, 0.385, 4.25, 3.3)
     ax.set_yscale("log")
     vals = [g["usd"] for m in MODELS for g in groups[m].values()]
-    vals += [g["usd_upper"] for m in MODELS for g in groups[m].values() if g.get("usd_upper")]
     ax.set_ylim(min(vals) / 1.6, max(vals) * 3.4)
     ax.set_xlim(-0.55, len(LEVELS) - 0.45)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v:g}"))
-    width = 0.16
+    width = 0.19
     offsets = {m: (i - (len(MODELS) - 1) / 2) * width for i, m in enumerate(MODELS)}
     for m in MODELS:
         lv = [lvl for lvl in LEVELS if lvl in groups[m]]
@@ -443,21 +474,10 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             zorder=2,
             hatch="///" if m == "wonder" else None,
         )
-        for xx, lvl, y_ in zip(bx, lv, ys, strict=True):
-            upper = groups[m][lvl].get("usd_upper")
-            top = upper or y_
-            if upper:
-                ax.plot([xx, xx], [y_, upper], color=INK, lw=0.8, linestyle=(0, (2, 1.5)), zorder=3)
-                ax.plot(
-                    [xx - width * 0.3, xx + width * 0.3],
-                    [upper, upper],
-                    color=INK,
-                    lw=1.0,
-                    zorder=3,
-                )
+        for xx, y_ in zip(bx, ys, strict=True):
             ax.annotate(
                 f"{y_:.2f}",
-                (xx, top),
+                (xx, y_),
                 xytext=(0, 3),
                 textcoords="offset points",
                 ha="center",
@@ -492,7 +512,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         left,
         ty,
-        "Table 1  |  The levels Muse Wonder Full has run, all five models",
+        "Table 1  |  The levels Muse Wonder Full has run",
         14.5,
         heading=True,
     )
@@ -513,7 +533,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     line(0.69, right, ty + 0.66, RULE, 0.6)
     text(left, ty + 0.86, "Model  ·  harness", 12, True)
     for lvl in TABLE_LEVELS:
-        for k, lab in (("f", "Functional"), ("p", "Passed"), ("usd", "$/task"), ("min", "Min")):
+        for k, lab in (("f", "Functional ±se"), ("p", "Passed"), ("usd", "$/task"), ("min", "Min")):
             text(cols[lvl, k], ty + 0.86, lab, 11, True, ha="right", color=MUTED)
     line(left, right, ty + 1.04, INK, 0.6)
     y = ty + 1.32
@@ -528,7 +548,14 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 if m == "wonder"
                 else f"{g['usd']:.2f}" + ("+" if g.get("usd_upper") else "")
             )
-            text(cols[lvl, "f"], y, f"{g['functional']:.1f}", 12.5, numeric=True, ha="right")
+            text(
+                cols[lvl, "f"],
+                y,
+                f"{g['functional']:.1f} ±{g['functional_se']:.1f}",
+                12.5,
+                numeric=True,
+                ha="right",
+            )
             text(cols[lvl, "p"], y, f"{g['passed']}/{g['n']}", 12.5, numeric=True, ha="right")
             text(cols[lvl, "usd"], y, usd, 12.5, numeric=True, ha="right")
             text(cols[lvl, "min"], y, f"{g['minutes']:.1f}", 12.5, numeric=True, ha="right")
@@ -544,7 +571,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             if wm and "medium" in prelim
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
-        "Accuracy is the functional score (share of hidden behaviour tests passed), mean over every run with +/-1 se whiskers; "
+        "Accuracy is the functional score (share of hidden behaviour tests passed), mean over every run; the table gives its standard error (±se). "
         "Passed counts runs that passed every test (Opus 5.5 High includes the depotcore run a safety classifier stopped). "
         "Combined scores with Code quality are on each model's own report; Muse Wonder Full has not been judged yet.",
         f"Prices verified on {pricing['checked_at']} against each vendor's official pricing page. Muse Wonder Full ran on a Muse Code "
@@ -552,9 +579,9 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "list price ($4.00 input, $0.20 cached, $20.00 output per million, no long-context premium). Claude Opus 5.5 is Claude Code's own "
         "total, which reprices exactly from its traces at today's list prices ($4.00 input, $0.20 cache hit, $8.00 one-hour cache write, "
         "$20.00 output; fallback turns at their own model's rate). GPT-6.1 Sol is its Codex token receipts at $2.00 / $0.10 / $10.00. "
-        "Claude Fable 5.1 ($10 / $0.25 / $50) and GPT-6 Astra ($10 / $1 / $50) are their report's central estimates at those prices.",
+        "GPT-6 Astra ($10 / $1 / $50) is its report's central estimate at that price.",
         "GPT-6 Astra and GPT-6.1 Sol charge 2x input and 1.5x output on requests over 272K input tokens, and per-request sizes were not "
-        "recorded: the dotted line and cap (+ in the table) show Astra's report's upper bound; Sol's calls average about 35K input tokens, "
+        "recorded: + in the table marks Astra, whose report gives an upper bound of $3.28 at Low and $2.79 at Medium; Sol's calls average about 35K input tokens, "
         "so its premium is likely small and is not applied.",
         "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 15 October 2026); 7 of its finished Medium "
         "tasks overlapped another local job, which can affect minutes but not scores. Other models are their published Frontier v4 runs, "
@@ -578,7 +605,6 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "wonder": "estimate at Muse Wonder 1.0 list price",
         "opus55": "Claude Code total, reprices exactly at list price",
         "gpt61sol": "Codex receipts at list price, long-context tier not applied",
-        "fable": "report central estimate at list price",
         "astra": "report central estimate at list price; upper bound in usd_upper",
     }
     with table.open("w", newline="") as fh:

@@ -1145,6 +1145,72 @@ record: `docs/results/swe-v4-haiku55-2026-10/comparison.json`, built by
 - Comparability: Frontier Code quality is L1 plus L2, as for v3.15 and v3.23,
   and is never placed beside Routine Code quality.
 
+## Amendment v3.25, October 15, 2026: Muse Wonder Full on Frontier v4, judged by Grok 4.7 and GPT-6.1 Sol
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes from v3.7. What changes is the population and both judges. Protocol id
+`code-quality-maintenance-v3.25`; run directory
+`runs-code-quality-maintenance-v3.25`; runner
+`harness/maintenance_review_v325.py`, derived from the v3.24 runner with
+v3.20's Sol seat transport. Population record:
+`docs/results/swe-v4-musewonder-full-2026-10/comparison.json`, built by
+`scripts/cii-v4-board/build_musewonder_population.py`.
+
+- Population: the October 13 to 14, 2026 Muse Wonder Full sweep of Frontier
+  v4 through Muse Code 1.4.6 (solver `muse-code:muse-wonder-full-1.0-contributor`)
+  in Contributor mode with Muse Code's skill reminder off, Low and Medium, one
+  attempt per task and level, run from
+  `bench/2026-10-13-musewonder-full-v2-low`. Low has 23 runs. Medium has 21:
+  cellarcore and paddockcore had not run when the Muse Code weekly limit ran
+  out (it resets 2026-10-19 00:00 UTC), so both are recorded under `missing`
+  with that reason and the cell freezes at 21. The interrupted cellarcore
+  attempt sits in the sweep's `quota-aborted/` folder and is not judged. The
+  builder stops on any run whose solver id, requested effort, Muse Code
+  version, checkout state or task hash differs from the sweep's record.
+- Top-up: once the two Medium runs exist they are judged as v3.25.1
+  (`runs-code-quality-maintenance-v3.25.1`), on the v3.6.1 precedent. Its
+  population is built with `build_musewonder_population.py --top-up`, which
+  keeps only runs on the v3.25 protocol's frozen `missing` list and writes
+  `comparison-topup.json` beside the v3.25 record. Both judges' v3.25
+  verdicts gate the top-up with no new exam; each top-up submission gets a
+  primary and a repeat review and no pairwise check. Publication merges both
+  directories, recomputes the Medium cell over all 23, and the v3.25 record is
+  not rewritten.
+- Judges: Muse Spark 1.3 is a Meta model and is not neutral for a Meta
+  submission, so it is excluded (owner decision in chat, October 15, 2026),
+  as Grok 4.6 was for Grok 4.7 under v3.20. The owner chose Grok 4.7 and
+  GPT-6.1 Sol, both neutral for a Meta submission.
+  - Seat "grok": Grok 4.7 at medium through Cursor, model id
+    `grok-4.7-medium`, on v3's frozen Cursor transport. The identity check
+    requires the display name exactly as Cursor lists it, `Grok 4.7  Medium`
+    (two spaces between 4.7 and Medium). Cursor is pinned by version
+    directory as in v3.24, to the same version (`2026.10.01-e373342`) and
+    digest v3.24 recorded; the runner refuses any other. Grok 4.7 has never
+    judged before.
+  - Seat "sol": GPT-6.1 Sol at medium through Codex CLI 0.159.0, on the
+    transport v3.20 built (v3's frozen call with `codex_vote`). Codex 0.159.0
+    was reinstalled on this host under
+    `~/.local/share/vulcanbench/codex-0.159.0/`. Both the `codex.js` launcher
+    (sha256 `61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70`)
+    and the native binary it runs
+    (`@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex`, sha256
+    `e89718aa1969bfc4a471277bdc4679a3a3529293de0a309909822dfd67ddb77a`) are
+    pinned; v3.20 pinned only the launcher.
+  - Both judges take the exam under v3.25 before any counted call. One
+    failing panel is disclosed and the passing one publishes alone; two
+    failures stop the amendment. There are no sensitivity panels.
+- Pins are re-checked before every stage: the Cursor version digest and both
+  Codex hashes, from the protocol record, so a changed or missing CLI stops
+  the round before any call.
+- Diagnostics: with only two levels, v3's "two levels two steps apart" pair
+  would set a submission against itself, so each pair sets one task's Low
+  submission against its Medium one, one pair per level, with tasks taken in
+  the seeded order and any task lacking either submission skipped.
+- Comparability: a Muse Wonder Full score is a mean of Grok 4.7 and GPT-6.1
+  Sol. Other models' published combined scores come from their own rounds and
+  panels, none of which is this pair, so any card that places them side by
+  side names the panel behind each column.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

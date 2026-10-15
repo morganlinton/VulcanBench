@@ -1,7 +1,7 @@
 """Muse Wonder Full beside Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra.
 
-One card on VulcanBench Frontier v4 at Low and Medium: the combined score and
-cost per task, each as grouped bars labelled with their values. At the
+One card on VulcanBench Frontier v4 at Low and Medium: the combined score, time
+per task and cost per task, each as grouped bars labelled with their values. At the
 owner's request the bars carry no whiskers; the standard errors stay in the
 table and the CSV.
 
@@ -321,7 +321,7 @@ def main():  # noqa: PLR0915, one linear figure
     )
     head = " and ".join(
         f"{groups['wonder'][lvl]['combined']:.1f} at {lvl.capitalize()}{'*' if lvl in prelim else ''} "
-        f"for about ${groups['wonder'][lvl]['usd']:.2f} per task"
+        f"({groups['wonder'][lvl]['minutes']:.0f} min, ~${groups['wonder'][lvl]['usd']:.2f} per task)"
         for lvl in wonder_levels
     )
     text(left, 2.22, f"Muse Wonder Full scores {head}.", 15)
@@ -329,7 +329,7 @@ def main():  # noqa: PLR0915, one linear figure
         left,
         2.60,
         "Combined score: 50% functional, 8.5% quality, 8.5% security, 33% judged Code quality. "
-        "Muse Wonder Full's code was judged by a different panel from the others (see notes).",
+        "Muse Wonder Full was judged by a different panel (see notes).",
         13.5,
         color=MUTED,
     )
@@ -376,7 +376,7 @@ def main():  # noqa: PLR0915, one linear figure
                     textcoords="offset points",
                     ha="center",
                     va="bottom",
-                    fontsize=10,
+                    fontsize=8.5,
                     fontfamily="IBM Plex Mono",
                     color=INK,
                 )
@@ -394,31 +394,28 @@ def main():  # noqa: PLR0915, one linear figure
                         color="#ffffff",
                     )
 
-    # Combined score: grouped bars at Low and Medium.
-    text(left, 3.62, "Combined score", 20, True, heading=True)
-    text(
-        left,
-        3.94,
-        "0 to 100  ·  higher is better  ·  focused scale  ·  hatched = preliminary",
-        12,
-        color=MUTED,
-    )
-    ax = axis(0.085, 0.385, 4.25, 3.3)
+    # Top row: combined score, time per task and cost per task, grouped bars at Low and Medium.
+    prelim_bar = lambda m, lvl: m == "wonder" and lvl in prelim  # noqa: E731
+    panel_x = (left, 0.37, 0.68)
+    panel_w = 0.24
+
+    def panel(i, title, subtitle):
+        text(panel_x[i], 3.62, title, 20, True, heading=True)
+        text(panel_x[i], 3.94, subtitle, 11, color=MUTED)
+        return axis(panel_x[i] + 0.022, panel_w, 4.25, 3.3)
+
+    ax = panel(0, "Combined score", "higher is better  ·  focused scale  ·  hatched = preliminary")
     lo = min(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
     hi = max(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
     ax.set_ylim(math.floor(lo / 2) * 2 - 2, math.ceil(hi / 2) * 2 + 1.5)
-    bars(ax, "combined", lambda v: f"{v:.1f}", lambda m, lvl: m == "wonder" and lvl in prelim)
+    bars(ax, "combined", lambda v: f"{v:.1f}", prelim_bar)
 
-    # Cost per task: grouped bars at Low and Medium.
-    text(0.53, 3.62, "Cost per task", 20, True, heading=True)
-    text(
-        0.53,
-        3.94,
-        "USD at verified list prices  ·  lower is cheaper  ·  log scale  ·  hatched = estimate",
-        12,
-        color=MUTED,
-    )
-    ax = axis(0.555, 0.385, 4.25, 3.3)
+    ax = panel(1, "Time per task", "minutes  ·  lower is faster  ·  hatched = preliminary")
+    top = max(groups[m][lvl]["minutes"] for m in MODELS for lvl in chart_levels)
+    ax.set_ylim(0, math.ceil(top * 1.15 / 5) * 5)
+    bars(ax, "minutes", lambda v: f"{v:.1f}", prelim_bar)
+
+    ax = panel(2, "Cost per task", "USD at list prices  ·  log scale  ·  hatched = estimate")
     ax.set_yscale("log")
     vals = [groups[m][lvl]["usd"] for m in MODELS for lvl in chart_levels]
     ax.set_ylim(min(vals) / 1.8, max(vals) * 2.2)
@@ -499,7 +496,7 @@ def main():  # noqa: PLR0915, one linear figure
     wm = groups["wonder"].get("medium")
     notes = [
         (
-            f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hatched combined bar; every other bar is n=23); "
+            f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hatched combined and time bars; every other bar is n=23); "
             "the last two run after its Muse Code weekly limit resets."
             if wm and "medium" in prelim
             else "Muse Wonder Full levels cover all 23 tasks."

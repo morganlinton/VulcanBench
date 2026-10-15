@@ -8,7 +8,13 @@
         "functional_se": 2.079568770816542,
         "passed": 18,
         "usd": 3.9315751304347826,
-        "minutes": 27.28644927536232
+        "minutes": 27.28644927536232,
+        "combined": 86.95102934239672,
+        "combined_se": 1.1638903461497077,
+        "by_judge_l1": {
+          "claude": 58.8768115942029,
+          "sol": 75.9963768115942
+        }
       },
       "medium": {
         "n": 21,
@@ -16,7 +22,13 @@
         "functional_se": 0.9523809523809523,
         "passed": 20,
         "usd": 3.898752723809524,
-        "minutes": 25.60046746031746
+        "minutes": 25.60046746031746,
+        "combined": 88.83025466438323,
+        "combined_se": 0.8840816286213421,
+        "by_judge_l1": {
+          "claude": 59.523809523809526,
+          "sol": 75.59523809523809
+        }
       }
     },
     "opus55": {
@@ -27,7 +39,9 @@
         "passed": 17,
         "usd": 1.695309,
         "minutes": 13.6903,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 86.3631,
+        "combined_se": 1.3003
       },
       "medium": {
         "n": 23,
@@ -36,7 +50,9 @@
         "passed": 23,
         "usd": 2.842201,
         "minutes": 18.6446,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 90.8635,
+        "combined_se": 0.6416
       },
       "high": {
         "n": 23,
@@ -45,7 +61,9 @@
         "passed": 22,
         "usd": 3.269444,
         "minutes": 21.4192,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 91.1081,
+        "combined_se": 0.5658
       },
       "extra-high": {
         "n": 23,
@@ -54,7 +72,9 @@
         "passed": 22,
         "usd": 4.111557,
         "minutes": 20.747,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 90.6788,
+        "combined_se": 1.0968
       },
       "max": {
         "n": 23,
@@ -63,7 +83,9 @@
         "passed": 21,
         "usd": 8.748014,
         "minutes": 37.5113,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 90.2197,
+        "combined_se": 1.0241
       }
     },
     "gpt61sol": {
@@ -74,7 +96,9 @@
         "passed": 20,
         "usd": 0.305976,
         "minutes": 6.89,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 86.2213,
+        "combined_se": 0.8218
       },
       "medium": {
         "n": 23,
@@ -83,7 +107,9 @@
         "passed": 22,
         "usd": 0.3986,
         "minutes": 10.5647,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 86.441,
+        "combined_se": 0.7823
       },
       "high": {
         "n": 23,
@@ -92,7 +118,9 @@
         "passed": 23,
         "usd": 0.33007,
         "minutes": 10.2219,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 88.2342,
+        "combined_se": 0.4008
       },
       "extra-high": {
         "n": 23,
@@ -101,7 +129,9 @@
         "passed": 23,
         "usd": 0.434591,
         "minutes": 15.3716,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 88.7805,
+        "combined_se": 0.4038
       },
       "max": {
         "n": 23,
@@ -110,7 +140,9 @@
         "passed": 23,
         "usd": 0.458339,
         "minutes": 14.4642,
-        "usd_upper": null
+        "usd_upper": null,
+        "combined": 88.3478,
+        "combined_se": 0.331
       }
     },
     "astra": {
@@ -121,7 +153,9 @@
         "passed": 22,
         "usd": 1.721698,
         "minutes": 4.2187,
-        "usd_upper": 3.283855
+        "usd_upper": 3.283855,
+        "combined": 87.4325,
+        "combined_se": 0.5104
       },
       "medium": {
         "n": 23,
@@ -130,7 +164,9 @@
         "passed": 23,
         "usd": 1.481347,
         "minutes": 3.8226,
-        "usd_upper": 2.791
+        "usd_upper": 2.791,
+        "combined": 87.7262,
+        "combined_se": 0.3185
       },
       "high": {
         "n": 23,
@@ -139,7 +175,9 @@
         "passed": 23,
         "usd": 1.711065,
         "minutes": 4.8999,
-        "usd_upper": 3.217211
+        "usd_upper": 3.217211,
+        "combined": 88.158,
+        "combined_se": 0.4248
       },
       "extra-high": {
         "n": 23,
@@ -148,7 +186,9 @@
         "passed": 23,
         "usd": 2.302022,
         "minutes": 8.0905,
-        "usd_upper": 4.253697
+        "usd_upper": 4.253697,
+        "combined": 89.1616,
+        "combined_se": 0.2971
       },
       "max": {
         "n": 23,
@@ -157,7 +197,9 @@
         "passed": 23,
         "usd": 2.568128,
         "minutes": 10.2805,
-        "usd_upper": 4.689675
+        "usd_upper": 4.689675,
+        "combined": 89.3033,
+        "combined_se": 0.3663
       }
     }
   },
@@ -167,6 +209,10 @@
     "opus55-traces-manifest.csv": "bf574c8cec594f17c4726045b2a33c63e43594265e758c6dae8dd896705af3a0",
     "comparison.json": "fc5405e3da76c2b6904013a367f5c98250207f16f7d9195f54f618474b7cbe1e",
     "pricing-check.json": "cbb7cac7e549314fadad30d3f9b7ea0ff475773a5553ed70e03fa5257f49296a",
+    "wonder_judging": {
+      "summary.json": "a1e026c829a3ceafc8b2f1f543d0c92fa3a670f70f55f7c17606d075dc7ce0e2",
+      "protocol.json": "a718b2766f9db218fc070ad4e8d740293cd52371b4ab03af463cee60ef44a22d"
+    },
     "opus55_traces_repo": "https://github.com/morganlinton/vulcanbench-opus55-traces",
     "wonder_summaries": {
       "low/legacy-blendcore-binary-parity-63cfdcc6": "2f056860823a7c15f28ba4d765311f08f67a397443fb33c9869bd3b1b0fe9862",
@@ -215,6 +261,6 @@
       "medium/legacy-vaultcore-binary-parity-20ba29d8": "ddb87b75ae7ea62e531b715dd2df31bb225287ba558239099b1957676e373877"
     }
   },
-  "png_sha256": "b3e6d34658f18ef40a5f7249ccf1df591c652dbe91a8156b18f74471f686b706",
+  "png_sha256": "d02b92cdbeafc77ec78b5c53f3a58338b722e3644e8372a29e3d5abbe69e6dc9",
   "table": "musewonder-full-vs-frontier-preliminary-efforts.csv"
 }

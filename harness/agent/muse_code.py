@@ -136,19 +136,71 @@ def session_records(row: dict[str, Any]) -> Iterator[dict[str, Any]]:
             yield from session_records(json.loads(record) if isinstance(record, str) else record)
 
 
-def collect_usage(paths: list[Path], model: str) -> dict[str, int]:
+# Muse Code 1.4.9 runs its goal and verify reminder observers on Spark 1.3 whatever
+# --model and the saved default say (owner decision 2026-10-16, docs/DECISIONS.md).
+REMINDER_AGENTS = frozenset({"goal-reminder", "verify-reminder"})
+
+
+def allowed_reminder_models() -> frozenset[str]:
+    """Models a run may accept on reminder observers only, from VULCANBENCH_MUSE_REMINDER_MODELS."""
+    raw = os.environ.get("VULCANBENCH_MUSE_REMINDER_MODELS", "")
+    return frozenset(m.strip() for m in raw.split(",") if m.strip())
+
+
+def reminder_child_sessions(paths: list[Path]) -> set[str]:
+    """Session ids of goal and verify reminder observers, as the parent session links them."""
+    children = set()
+    for path in paths:
+        with path.open() as source:
+            for line in source:
+                for row in session_records(json.loads(line)):
+                    payload = row.get("payload") or {}
+                    event = payload.get("event", payload)
+                    if (
+                        isinstance(event, dict)
+                        and event.get("kind") == "memory_reminder_child_session_linked"
+                        and event.get("reminder_agent_id") in REMINDER_AGENTS
+                        and event.get("child_session_id")
+                    ):
+                        children.add(str(event["child_session_id"]))
+    return children
+
+
+def _zero() -> dict[str, int]:
+    return dict(input_tokens=0, output_tokens=0, cached_tokens=0, reasoning_tokens=0, calls=0)
+
+
+def collect_usage(
+    paths: list[Path], model: str, reminder_models: frozenset[str] = frozenset()
+) -> dict[str, Any]:
     """Count unique completed model calls, including reminder/subagent calls.
 
     Session logs mirror run records. Never add goal_usage_attribution to the
     model_completed totals, since those are two views of the same request.
+
+    Every call must report ``model``, except that calls inside a goal or verify
+    reminder observer may report one of ``reminder_models``; those are counted
+    under ``auxiliary`` by model and never in the main totals.
     """
-    totals = dict(input_tokens=0, output_tokens=0, cached_tokens=0, reasoning_tokens=0, calls=0)
+    totals = _zero()
+    auxiliary: dict[str, dict[str, int]] = {}
     seen: dict[tuple[str, str], dict[str, int]] = {}
+    children = reminder_child_sessions(paths) if reminder_models else set()
     for path in sorted(paths):
+        observer = path.parent.parent.name == "subagent" and path.parent.name in children
         with path.open() as source:
             rows = (row for line in source for row in session_records(json.loads(line)))
             for row in rows:
-                _add_usage(row, model, seen, totals)
+                _add_usage(
+                    row,
+                    model,
+                    seen,
+                    totals,
+                    auxiliary,
+                    reminder_models if observer else frozenset(),
+                )
+    if auxiliary:
+        return {**totals, "auxiliary": auxiliary}
     return totals
 
 
@@ -157,6 +209,8 @@ def _add_usage(
     model: str,
     seen: dict[tuple[str, str], dict[str, int]],
     totals: dict[str, int],
+    auxiliary: dict[str, dict[str, int]],
+    other_models: frozenset[str] = frozenset(),
 ) -> None:
     payload = row.get("payload") or {}
     event = payload.get("event", {})
@@ -171,8 +225,11 @@ def _add_usage(
             "Muse completed call has no run identity; refusing ambiguous accounting"
         )
     key = (payload["run_id"], str(record_id))
+    ledger = totals
     if event.get("model") != model:
-        raise ProviderError(f"Muse model mismatch: {event.get('model')!r}")
+        if event.get("model") not in other_models:
+            raise ProviderError(f"Muse model mismatch: {event.get('model')!r}")
+        ledger = auxiliary.setdefault(str(event["model"]), _zero())
     usage = event.get("usage")
     if not isinstance(usage, dict) or not {"input_tokens", "output_tokens"} <= usage.keys():
         raise ProviderError("Muse completed call has no token receipt")
@@ -192,9 +249,9 @@ def _add_usage(
             raise ProviderError("Conflicting Muse token receipts for one run record")
         return
     seen[key] = receipt
-    totals["calls"] += 1
+    ledger["calls"] += 1
     for name, value in receipt.items():
-        totals[name] += value
+        ledger[name] += value
 
 
 class MuseCodeAdapter:
@@ -410,7 +467,7 @@ class MuseCodeAdapter:
                         destination.write(json.dumps(sanitize(json.loads(line))) + "\n")
             (archive / "stderr.txt").write_text(str(sanitize("".join(errors))))
             (archive / "boundary.sb").write_text(profile)
-        usage = collect_usage(logs, cli_model)
+        usage = collect_usage(logs, cli_model, allowed_reminder_models())
         outcome.prompt_tokens = usage["input_tokens"]
         outcome.completion_tokens = usage["output_tokens"]
         outcome.cached_input_tokens = usage["cached_tokens"]

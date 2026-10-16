@@ -475,3 +475,85 @@ def test_subscription_runs_never_receive_an_api_key(tmp_path, monkeypatch):
     )
     assert "META_API_KEY" not in launched["env"] and "MUSE_API_KEY" not in launched["env"]
     assert outcome.billing == "subscription"
+
+
+def _call(record_id, model, run_id="parent"):
+    return {
+        "id": record_id,
+        "payload": {
+            "run_id": run_id,
+            "source_run_record_id": record_id,
+            "event": {
+                "kind": "model_completed",
+                "model": model,
+                "usage": {"input_tokens": 10, "output_tokens": 4},
+            },
+        },
+    }
+
+
+def _link(child, agent="goal-reminder"):
+    return {
+        "payload": {
+            "event": {
+                "kind": "memory_reminder_child_session_linked",
+                "reminder_agent_id": agent,
+                "child_session_id": child,
+            }
+        }
+    }
+
+
+def _sessions(tmp_path, observer_model, linked_agent="goal-reminder"):
+    main = tmp_path / "s/session.jsonl"
+    main.parent.mkdir(parents=True)
+    main.write_text(
+        "\n".join(json.dumps(r) for r in [_call("a", "wonder"), _link("c1", linked_agent)])
+    )
+    child = tmp_path / "s/subagent/c1/session.jsonl"
+    child.parent.mkdir(parents=True)
+    child.write_text(json.dumps(_call("b", observer_model, run_id="c1")))
+    return [main, child]
+
+
+def test_reminder_observers_may_use_an_allowed_model_counted_apart(tmp_path):
+    paths = _sessions(tmp_path, "spark")
+    usage = collect_usage(paths, "wonder", frozenset({"spark"}))
+    assert usage["calls"] == 1 and usage["input_tokens"] == 10
+    assert usage["auxiliary"] == {
+        "spark": {
+            "input_tokens": 10,
+            "output_tokens": 4,
+            "cached_tokens": 0,
+            "reasoning_tokens": 0,
+            "calls": 1,
+        }
+    }
+    # Without the allowance the one-model guard still holds.
+    with pytest.raises(ProviderError, match="mismatch"):
+        collect_usage(paths, "wonder")
+
+
+def test_reminder_allowance_covers_only_goal_and_verify_observers(tmp_path):
+    paths = _sessions(tmp_path, "spark", linked_agent="skill-reminder")
+    with pytest.raises(ProviderError, match="mismatch"):
+        collect_usage(paths, "wonder", frozenset({"spark"}))
+
+
+def test_main_agent_must_stay_on_the_requested_model(tmp_path):
+    paths = _sessions(tmp_path, "spark")
+    paths[0].write_text("\n".join(json.dumps(r) for r in [_call("a", "spark"), _link("c1")]))
+    with pytest.raises(ProviderError, match="mismatch"):
+        collect_usage(paths, "wonder", frozenset({"spark"}))
+
+
+def test_observer_on_the_main_model_counts_as_before(tmp_path):
+    usage = collect_usage(_sessions(tmp_path, "wonder"), "wonder", frozenset({"spark"}))
+    assert usage["calls"] == 2 and "auxiliary" not in usage
+
+
+def test_allowed_reminder_models_from_env(monkeypatch):
+    monkeypatch.delenv("VULCANBENCH_MUSE_REMINDER_MODELS", raising=False)
+    assert muse_code.allowed_reminder_models() == frozenset()
+    monkeypatch.setenv("VULCANBENCH_MUSE_REMINDER_MODELS", "muse-spark-1.3, ")
+    assert muse_code.allowed_reminder_models() == frozenset({"muse-spark-1.3"})

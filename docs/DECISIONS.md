@@ -7,6 +7,60 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-16: Muse Wonder Full's remaining runs move to Muse Code 1.4.9
+
+### Decision
+
+- The Muse team released a more token-efficient Muse Code and reset the
+  subscription quota (message relayed by the owner, 2026-10-16). The owner
+  chose to run the rest of the Wonder Full sweep on the new version and keep
+  what already ran: Low (23 tasks) and 21 Medium tasks stay on 1.4.6; Medium's
+  last two tasks (cellarcore, paddockcore), High and Extra-high run on 1.4.9.
+  Max stays excluded under Contributor (2026-10-12); ultra stays blocked.
+- One version per run root. The 1.4.9 runs go to
+  `runs-effort-musewonder-full-v2-149` with their own frozen protocol, which
+  continues `runs-effort-musewonder-full-v2` (`--continue-from`): at each
+  level, tasks that root completed are skipped. Medium is therefore 21 runs on
+  1.4.6 and 2 on 1.4.9, and every card and page that shows Medium says so.
+- Muse Code 1.4.9 runs its goal and verify reminder observers on Muse Spark
+  1.3, whatever `--model` and the saved default model say. Under 1.4.6 they ran
+  on the main model. The owner chose to run 1.4.9 as Meta ships it and
+  disclose it: on 1.4.9 runs only, calls inside goal and verify reminder
+  observers may report `muse-spark-1.3`; their tokens are recorded apart under
+  `auxiliary` in the run's usage, never in the Wonder Full totals, and every
+  other call must still be Wonder Full or the run fails. The protocol records
+  the allowance.
+
+### Evidence
+
+- Meta's `muse-stable` channel served `1.4.9-R6297.1` on 2026-10-16, not the
+  1.4.8 the message named. The aarch64 macOS binary was downloaded directly
+  (not through the launcher, which deleted older binaries in September) to
+  `~/.local/bin/muse-bin-1.4.9-R6297.1`; its SHA256
+  (`2b856618ae3de3a63956e6d510b849ad707b16e5d2ed196299f3fe5ef2e3ff5e`)
+  equals the release manifest's, its code signature verifies, and a copy is
+  backed up under `~/.local/share/vulcanbench/muse-binaries/`. Every long
+  `exec` flag the adapter passes exists in 1.4.9.
+- The first 1.4.9 smoke call (Wonder Full, High) stopped on the adapter's
+  one-model guard: two reminder subagents (`goal-reminder`,
+  `verify-reminder`) reported `muse-spark-1.3`. Their configuration still
+  says `same-as-main`. A 1.4.6 Medium run's logs show the same two observers on
+  `muse-wonder-full-1.0`. Setting the saved default model to Wonder Full did
+  not move them off Spark, so the settings file was restored unchanged;
+  `-c model=` is refused because `--model` owns that setting.
+- With the allowance, the smoke call passed: 3 Wonder Full calls in the main
+  totals and 2 Spark reminder calls (8.8K input, 1.1K output tokens) under
+  `auxiliary`.
+
+### Operation
+
+`run_muse_wonder_sweep.py --model wonder-full --muse-version 1.4.9
+--continue-from <main checkout>/runs-effort-musewonder-full-v2 --out
+<main checkout>/runs-effort-musewonder-full-v2-149 --efforts <level>
+--accept-contributor-training`, one level at a time from a bench-tag run
+worktree, under the quota-resume wrapper. The 1.4.6 root's sleeping resume
+loop is stopped so nothing relaunches it.
+
 ## 2026-10-15: Opus 5.5 replaces the Grok 4.7 seat for Muse Wonder Full (v3.26)
 
 ### Decision

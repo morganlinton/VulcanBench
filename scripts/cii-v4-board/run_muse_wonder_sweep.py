@@ -1,13 +1,19 @@
 """Sequential, resumable Muse Wonder sweep on VulcanBench Frontier v4. Stop on any error.
 
-Runs one model (Wonder 1.0 or Wonder Full) in Contributor mode through the
-pinned Muse Code 1.4.6 binary, one task at a time, low to extra-high. Max is
+Runs one model (Wonder 1.0 or Wonder Full) in Contributor mode through a
+pinned Muse Code binary (1.4.6 by default, or 1.4.9 with --muse-version), one
+task at a time, low to extra-high. Max is
 excluded under Contributor and ultra is blocked board-wide (docs/DECISIONS.md,
 2026-10-12 and 2026-09-16). Each model gets its own run root and frozen
 protocol; a changed protocol fails closed on resume.
 
 Run it from a bench-tag run worktree (docs/HOW_WE_WORK.md) with --out pointing
 at the main checkout's gitignored runs-effort-* folder.
+
+A new Muse Code version gets its own run root. --continue-from names an earlier
+root of the same model: at each level, tasks that root already completed are
+skipped, so a sweep that changes version part-way keeps one version per root
+(owner decision 2026-10-16, docs/DECISIONS.md).
 """
 
 import argparse
@@ -33,9 +39,24 @@ MODELS = {
     "wonder": "muse-code:muse-wonder-1.0-contributor",
     "wonder-full": "muse-code:muse-wonder-full-1.0-contributor",
 }
-BINARY = Path.home() / ".local/bin/muse-bin-1.4.6-R6000.1"
-BINARY_SHA256 = "c713165a287d64afb8816f8351a240b457a23524f4ade06bca0e41dfde410460"
-VERSION = "Muse Code 1.4.6 (1.4.6-R6000.1)"
+# Muse Code release -> (pinned binary, its SHA256, the version string preflight reports).
+PINS = {
+    "1.4.6": (
+        Path.home() / ".local/bin/muse-bin-1.4.6-R6000.1",
+        "c713165a287d64afb8816f8351a240b457a23524f4ade06bca0e41dfde410460",
+        "Muse Code 1.4.6 (1.4.6-R6000.1)",
+    ),
+    # Meta's muse-stable channel on 2026-10-16; SHA256 equals its release manifest's.
+    "1.4.9": (
+        Path.home() / ".local/bin/muse-bin-1.4.9-R6297.1",
+        "2b856618ae3de3a63956e6d510b849ad707b16e5d2ed196299f3fe5ef2e3ff5e",
+        "Muse Code 1.4.9 (1.4.9-R6297.1)",
+    ),
+}
+BINARY, BINARY_SHA256, VERSION = PINS["1.4.6"]
+# Models a release may run on goal and verify reminder observers only. 1.4.9 runs them
+# on Spark 1.3 whatever --model or the saved default say; 1.4.6 ran them on the main model.
+REMINDER_MODELS = {"1.4.6": (), "1.4.9": ("muse-spark-1.3",)}
 # Muse Code reads user settings (plugins included) from here; they shape the
 # solver's context, so the protocol pins their exact content.
 MUSE_SETTINGS = Path.home() / ".config/muse/settings.json"
@@ -48,10 +69,37 @@ SOURCES = [
 ]
 
 
-def configure_binary():
-    os.environ["VULCANBENCH_MUSE_BINARY"] = str(BINARY)
-    os.environ["VULCANBENCH_MUSE_SHA256"] = BINARY_SHA256
+def configure_binary(release="1.4.6"):
+    binary, digest, _ = PINS[release]
+    os.environ["VULCANBENCH_MUSE_BINARY"] = str(binary)
+    os.environ["VULCANBENCH_MUSE_SHA256"] = digest
+    os.environ["VULCANBENCH_MUSE_REMINDER_MODELS"] = ",".join(REMINDER_MODELS[release])
     return pinned_executable()
+
+
+def completed_in(root, level, model, hashes):
+    """Tasks an earlier run root of the same model finished at this level, with matching task hashes."""
+    done = set()
+    for p in (root / level).glob("*/summary.json"):
+        r = json.loads(p.read_text())
+        assert r["model"] == model and r["effort"]["requested"] == level, p
+        assert r["task_hash"] == hashes[r["task_id"]], f"{p}: task changed since that run"
+        done.add(r["task_id"])
+    return done
+
+
+def continuation(root, model, out):
+    """What a continued root records about the root it continues, which must be the same model's."""
+    if root is None:
+        return None
+    previous = json.loads((root / "protocol.json").read_text())
+    assert root != out and previous["model"] == model, "continue from the same model's root"
+    return {
+        "root": str(root),
+        "protocol_sha256": hashlib.sha256((root / "protocol.json").read_bytes()).hexdigest(),
+        "harness_version": previous["harness_version"],
+        "rule": "at each level, tasks completed in that root are skipped here",
+    }
 
 
 def muse_settings():
@@ -81,7 +129,9 @@ def other_sweep_active():
     return [pid for pid in found.stdout.split() if int(pid) != os.getpid()]
 
 
-def build_protocol(model, binary, digest, version, hashes, timeouts):
+def build_protocol(
+    model, binary, digest, version, hashes, timeouts, continues=None, reminder_models=()
+):
     spec = model.split(":", 1)[1]
     cli_model, contributor_mode = CLI_MODELS[spec]
     return {
@@ -119,6 +169,17 @@ def build_protocol(model, binary, digest, version, hashes, timeouts):
         "isolated writes and explicit TMPDIR guidance; web tools disabled; shell network "
         "not isolated",
         "source_hashes": source_hashes(),
+        **({"continues": continues} if continues else {}),
+        **(
+            {
+                "reminder_observer_models": list(reminder_models),
+                "reminder_observer_rule": "goal and verify reminder observers may run on these "
+                "models; their tokens are recorded apart under auxiliary and every other call "
+                "must be the requested model (owner decision 2026-10-16)",
+            }
+            if reminder_models
+            else {}
+        ),
     }
 
 
@@ -144,7 +205,7 @@ def record_result(out, summary, level):
         print("RESULT " + json.dumps(event), flush=True)
 
 
-def run(model, out, levels):
+def run(model, out, levels, release="1.4.6", continue_from=None):  # noqa: PLR0915, one linear sweep loop
     os.chdir(ROOT)
     out.mkdir(parents=True, exist_ok=True)
     lock = (out / "sweep.lock").open("a")
@@ -158,10 +219,20 @@ def run(model, out, levels):
     timeouts = {
         t: load_task(t, SUITE).metadata["agent_hints"]["suggested_timeout_s"] for t in tasks
     }
-    binary, digest = configure_binary()
+    version = PINS[release][2]
+    binary, digest = configure_binary(release)
     checked = get_cli_agent_adapter("muse-code").preflight()
-    assert checked.ready and checked.version == VERSION, checked
-    protocol = build_protocol(model, binary, digest, checked.version, hashes, timeouts)
+    assert checked.ready and checked.version == version, checked
+    protocol = build_protocol(
+        model,
+        binary,
+        digest,
+        checked.version,
+        hashes,
+        timeouts,
+        continuation(continue_from, model, out),
+        REMINDER_MODELS[release],
+    )
     save_protocol(out / "protocol.json", protocol)
     status_path = out / "status.json"
 
@@ -174,6 +245,7 @@ def run(model, out, levels):
         output = out / level
         output.mkdir(exist_ok=True)
         completed = {}
+        earlier = completed_in(continue_from, level, model, hashes) if continue_from else set()
         for p in output.glob("*/summary.json"):
             r = json.loads(p.read_text())
             t = r["task_id"]
@@ -183,14 +255,15 @@ def run(model, out, levels):
             result_summary({"run_id": r["run_id"], "summary": r})
             completed[t] = r
             record_result(out, r, level)
+        assert not earlier & set(completed), "Task completed in both roots"
         for task in tasks:
-            if task in completed:
+            if task in completed or task in earlier:
                 continue
             assert task_hash(load_task(task, SUITE)) == hashes[task]
             status(state="running", effort=level, task=task, completed_in_effort=len(completed))
             try:
-                configure_binary()
-                assert get_cli_agent_adapter("muse-code").preflight().version == VERSION
+                configure_binary(release)
+                assert get_cli_agent_adapter("muse-code").preflight().version == version
                 assert muse_settings()[1] == protocol["muse_settings_sha256"], (
                     "Muse settings changed during sweep"
                 )
@@ -221,7 +294,12 @@ def run(model, out, levels):
                 )
                 raise
             completed[task] = result
-        status(state="effort_complete", effort=level, completed_in_effort=len(completed))
+        status(
+            state="effort_complete",
+            effort=level,
+            completed_in_effort=len(completed),
+            completed_in_earlier_root=len(earlier),
+        )
     status(state="complete", completed=len(tasks) * len(levels))
 
 
@@ -230,6 +308,12 @@ def main(argv=None):
     parser.add_argument("--model", choices=sorted(MODELS), required=True)
     parser.add_argument("--out", type=Path, required=True, help="Run root, one per model")
     parser.add_argument("--efforts", nargs="+", choices=LEVELS, default=LEVELS)
+    parser.add_argument("--muse-version", choices=sorted(PINS), default="1.4.6")
+    parser.add_argument(
+        "--continue-from",
+        type=Path,
+        help="An earlier run root of the same model; tasks it completed are skipped",
+    )
     parser.add_argument(
         "--accept-contributor-training",
         action="store_true",
@@ -244,7 +328,13 @@ def main(argv=None):
         )
     out = args.out.resolve()
     try:
-        run(MODELS[args.model], out, args.efforts)
+        run(
+            MODELS[args.model],
+            out,
+            args.efforts,
+            args.muse_version,
+            args.continue_from.resolve() if args.continue_from else None,
+        )
     except Exception as exc:
         print(f"Sweep stopped: {exc}", flush=True)
         status_path = out / "status.json"

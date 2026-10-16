@@ -65,6 +65,10 @@ TOPUP_SOLVER_CLI = "Muse Code 1.4.9 (1.4.9-R6297.1)"
 TOPUP_REMINDER_MODELS = ["muse-spark-1.3"]
 MODEL = "musewonderfull"
 LEVELS = ("low", "medium")
+EXTENSION_LEVELS = (
+    "high",
+    "extra-high",
+)  # ran only on Muse Code 1.4.9 (docs/DECISIONS.md, 2026-10-16)
 MODELS = {MODEL: (RUNS, LEVELS)}
 SWEEP_MODELS = {MODEL: "muse-code:muse-wonder-full-1.0-contributor"}
 SOLVER_CLI = "Muse Code 1.4.6 (1.4.6-R6000.1)"
@@ -188,15 +192,20 @@ def _evidence_rebuilds(run: Path, summary: dict, data: dict) -> bool:
     return True
 
 
-def build(wanted: set[tuple[str, str, str]] | None = None, top_up: bool = False) -> dict[str, Any]:
+def build(
+    wanted: set[tuple[str, str, str]] | None = None,
+    top_up: bool = False,
+    read_levels: tuple[str, ...] = LEVELS,
+) -> dict[str, Any]:
     """The population record; ``wanted`` limits it to those (model, effort, task) cells.
 
-    ``top_up`` reads the 1.4.9 continuation root instead of the 1.4.6 one.
+    ``top_up`` reads the 1.4.9 continuation root instead of the 1.4.6 one;
+    ``read_levels`` picks the effort levels read there (High and Extra-high ran only on 1.4.9).
     """
     lock = _lock_hashes()
     rows, excluded, missing, tags = [], [], [], set()
     solver_cli = TOPUP_SOLVER_CLI if top_up else SOLVER_CLI
-    models = {MODEL: (TOPUP_RUNS, LEVELS)} if top_up else MODELS
+    models = {MODEL: (TOPUP_RUNS, read_levels)} if top_up else MODELS
     for model, (root, levels) in models.items():
         for level in levels:
             seen = set()
@@ -306,8 +315,19 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="rebuild and compare; write nothing")
     mode.add_argument("--top-up", action="store_true", help="v3.26.1: only the frozen missing runs")
+    parser.add_argument(
+        "--level",
+        choices=EXTENSION_LEVELS,
+        help="a whole level that ran on Muse Code 1.4.9 (v3.26.2 High, then Extra-high); "
+        "writes comparison-<level>.json",
+    )
     args = parser.parse_args(argv)
-    if args.top_up:
+    if args.level and args.top_up:
+        parser.error("--level and --top-up are separate records")
+    if args.level:
+        record = build(top_up=True, read_levels=(args.level,))
+        output = RESULTS / f"comparison-{args.level}.json"
+    elif args.top_up:
         record, output = build(frozen_missing(), top_up=True), TOPUP_OUTPUT
     else:
         record, output = build(), OUTPUT

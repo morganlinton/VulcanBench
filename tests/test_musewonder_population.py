@@ -317,3 +317,11 @@ def test_top_up_refuses_a_sweep_without_the_reminder_allowance(
     frozen.write_text(json.dumps({"population": {"missing": []}}))
     with pytest.raises(ValueError, match="reminder_observer_models"):
         builder.build(builder.frozen_missing(frozen), top_up=True)
+
+
+def test_level_mode_is_separate_from_top_up(builder: ModuleType) -> None:
+    assert builder.EXTENSION_LEVELS == ("high", "extra-high")
+    with pytest.raises(SystemExit):
+        builder.main(["--level", "high", "--top-up"])
+    with pytest.raises(SystemExit):
+        builder.main(["--level", "max"])

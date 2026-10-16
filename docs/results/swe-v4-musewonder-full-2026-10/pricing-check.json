@@ -2,20 +2,66 @@
   "checked_at": "2026-10-15",
   "unit": "USD per million tokens, Standard first-party API, no batch, fast or regional modifier",
   "models": {
-    "muse-wonder-1.0": {"input": 4.00, "cached_input": 0.20, "output": 20.00, "long_context": "none (Meta: same rate at any context length)",
-      "source": "https://dev.meta.ai/docs/pricing-rate-limits/"},
-    "muse-wonder-full-1.0": {"price": null, "note": "Not served on the Model API and not listed on the pricing page; Muse Code subscription only. Card cost is an estimate at the muse-wonder-1.0 list price.",
-      "source": "https://dev.meta.ai/docs/pricing-rate-limits/"},
-    "claude-opus-5-5": {"input": 4.00, "cache_write_5m": 5.00, "cache_write_1h": 8.00, "cache_hit": 0.20, "output": 20.00, "long_context": "none (1M context at standard pricing)",
-      "source": "https://platform.claude.com/docs/en/about-claude/pricing"},
-    "claude-opus-4-8 and claude-opus-5 (Opus 5.5 refusal fallback)": {"input": 5.00, "cache_write_5m": 6.25, "cache_write_1h": 10.00, "cache_hit": 0.50, "output": 25.00,
-      "source": "https://platform.claude.com/docs/en/about-claude/pricing"},
-    "claude-fable-5-1": {"input": 10.00, "cache_write_5m": 12.50, "cache_write_1h": 20.00, "cache_hit": 0.25, "output": 50.00, "long_context": "none",
-      "source": "https://platform.claude.com/docs/en/about-claude/pricing"},
-    "gpt-6.1-sol": {"input": 2.00, "cached_input": 0.10, "output": 10.00, "long_context": "requests over 272K input tokens: 2x input and cache, 1.5x output",
-      "source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol"},
-    "gpt-6-astra": {"input": 10.00, "cached_input": 1.00, "output": 50.00, "long_context": "requests over 272K input tokens: 2x input and cache, 1.5x output",
-      "source": "https://developers.openai.com/api/docs/models/gpt-6-astra"}
+    "muse-wonder-1.0": {
+      "input": 4.0,
+      "cached_input": 0.2,
+      "output": 20.0,
+      "long_context": "none (Meta: same rate at any context length)",
+      "source": "https://dev.meta.ai/docs/pricing-rate-limits/"
+    },
+    "muse-wonder-full-1.0": {
+      "price": null,
+      "note": "Not served on the Model API and not listed on the pricing page; Muse Code subscription only. Card cost is an estimate at the muse-wonder-1.0 list price.",
+      "source": "https://dev.meta.ai/docs/pricing-rate-limits/"
+    },
+    "claude-opus-5-5": {
+      "input": 4.0,
+      "cache_write_5m": 5.0,
+      "cache_write_1h": 8.0,
+      "cache_hit": 0.2,
+      "output": 20.0,
+      "long_context": "none (1M context at standard pricing)",
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    "claude-opus-4-8 and claude-opus-5 (Opus 5.5 refusal fallback)": {
+      "input": 5.0,
+      "cache_write_5m": 6.25,
+      "cache_write_1h": 10.0,
+      "cache_hit": 0.5,
+      "output": 25.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    "claude-fable-5-1": {
+      "input": 10.0,
+      "cache_write_5m": 12.5,
+      "cache_write_1h": 20.0,
+      "cache_hit": 0.25,
+      "output": 50.0,
+      "long_context": "none",
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    "gpt-6.1-sol": {
+      "input": 2.0,
+      "cached_input": 0.1,
+      "output": 10.0,
+      "long_context": "requests over 272K input tokens: 2x input and cache, 1.5x output",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol"
+    },
+    "gpt-6-astra": {
+      "input": 10.0,
+      "cached_input": 1.0,
+      "output": 50.0,
+      "long_context": "requests over 272K input tokens: 2x input and cache, 1.5x output",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-astra"
+    },
+    "muse-spark-1.3": {
+      "input": 1.25,
+      "cached_input": 0.15,
+      "output": 4.25,
+      "checked_at": "2026-10-16",
+      "note": "Standard list price, used for Muse Code 1.4.9's goal and verify reminder observers on Muse Wonder Full runs (Contributor rates $0.10 / $0.002 / $0.20 are lower; Standard is used to match the Muse Wonder Full estimate's Standard basis)",
+      "source": "https://dev.meta.ai/docs/pricing-rate-limits/"
+    }
   },
   "checks": {
     "claude-opus-5-5": "Repriced all 115 runs from usage_by_model in the public opus55 traces (cache writes at the 1-hour rate, fallback turns at their own model's rate): 114 match Claude Code's total_cost_usd exactly; max cellarcore differs by $0.21. Per-level means match the published table to the cent at low to extra-high and within $0.01 at max.",

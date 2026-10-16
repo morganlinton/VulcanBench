@@ -34,7 +34,12 @@ Prices were checked against each vendor's official page on 2026-10-15
   from that report's economics table, plus its long-context upper bound.
 
 Passed counts must match the published tables, or the card refuses to draw.
-A Muse Wonder Full level with fewer than 23 tasks is marked preliminary.
+A Muse Wonder Full level with fewer than 23 tasks is marked preliminary, and a
+level that mixes Muse Code versions is marked with a dagger. Medium's last two
+tasks ran on Muse Code 1.4.9 in runs-effort-musewonder-full-v2-149, judged in
+v3.26.1; 1.4.9 runs its goal and verify reminder observers on Muse Spark 1.3,
+whose tokens are added to cost at Spark's list price (docs/DECISIONS.md,
+2026-10-16).
 
     python scripts/cii-v4-board/make_musewonder_frontier_card.py
 """
@@ -47,6 +52,7 @@ import math
 import statistics
 import sys
 import textwrap
+from collections import Counter
 from pathlib import Path
 
 import matplotlib
@@ -64,6 +70,8 @@ from harness.retrospective_judging import digest, save  # noqa: E402
 RESULTS = ROOT / "docs/results"
 OUTPUT = RESULTS / "swe-v4-musewonder-full-2026-10"
 WONDER = ROOT / "runs-effort-musewonder-full-v2"
+WONDER_149 = ROOT / "runs-effort-musewonder-full-v2-149"  # continues WONDER on Muse Code 1.4.9
+WONDER_ROOTS = (WONDER, WONDER_149)
 OPUS_SOL = RESULTS / "swe-v4-gpt6-vs-gpt56-2026-09/gpt61sol-opus55-astra-efforts.csv"
 ASTRA_FABLE = RESULTS / "swe-v4-astra-fable51-2026-09/astra-vs-fable51-v34-economics-efforts.csv"
 OPUS_MANIFEST = OUTPUT / "opus55-traces-manifest.csv"
@@ -72,8 +80,10 @@ AF_ROWS = RESULTS / "swe-v4-astra-fable51-2026-09/comparison.json"
 PRICING = OUTPUT / "pricing-check.json"
 JUDGING = ROOT / "runs-code-quality-maintenance-v3.26"
 JUDGING_PROTOCOL = "code-quality-maintenance-v3.26"
+TOPUP = ROOT / "runs-code-quality-maintenance-v3.26.1"
+TOPUP_PROTOCOL = "code-quality-maintenance-v3.26.1"
 PANELS = {
-    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26)",
+    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26, v3.26.1)",
     "opus55": "Muse Spark 1.3 and Grok 4.6 (v3.15)",
     "gpt61sol": "Muse Spark 1.3 and Grok 4.6 (v3.18)",
     "astra": "Muse Spark 1.3 and Grok 4.6 (v3.4)",
@@ -104,6 +114,7 @@ COLORS = {
 }
 MARKERS = {"wonder": "o", "opus55": "s", "gpt61sol": "^", "astra": "D"}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
+SPARK_RATES = (1.25, 0.15, 4.25)  # Muse Spark 1.3 Standard list price, Meta page 2026-10-16
 WONDER_RATES = (
     4.00,
     0.20,
@@ -140,10 +151,42 @@ def level_group(func, usd, minutes, passed_published=None, model="", level=""):
     }
 
 
+def reminder_usd(run_dir):
+    """Spark reminder-observer tokens a Muse Code 1.4.9 run recorded apart, at Spark's list price."""
+    trace = run_dir / "trace.jsonl"
+    if not trace.exists():
+        return 0.0
+    for line in trace.read_text().splitlines():
+        event = json.loads(line)
+        if event.get("type") == "muse_usage":
+            usd = 0.0
+            for model, u in ((event.get("data") or {}).get("auxiliary") or {}).items():
+                require(model == "muse-spark-1.3", f"unexpected reminder model {model}")
+                rin, rcached, rout = SPARK_RATES
+                cached = u.get("cached_tokens", 0)
+                usd += (
+                    (u["input_tokens"] - cached) * rin
+                    + cached * rcached
+                    + u["output_tokens"] * rout
+                ) / 1e6
+            return usd
+    return 0.0
+
+
+def wonder_summaries(level):
+    """(run folder, summary) for every finished run at this level across both Muse Code roots."""
+    return [
+        (p.parent, json.loads(p.read_text()))
+        for root in WONDER_ROOTS
+        for p in sorted((root / level).glob("*/summary.json"))
+    ]
+
+
 def load_wonder():
     groups = {}
-    for level in LEVELS:
-        runs = [json.loads(p.read_text()) for p in sorted((WONDER / level).glob("*/summary.json"))]
+    for level in TABLE_LEVELS:  # the judged levels; High and Extra-high join once judged
+        found = wonder_summaries(level)
+        runs = [r for _, r in found]
         if not runs:
             continue
         require(
@@ -151,7 +194,7 @@ def load_wonder():
             f"duplicate Muse Wonder Full tasks at {level}",
         )
         usd = []
-        for r in runs:
+        for run_dir, r in found:
             require(
                 r["model"] == "muse-code:muse-wonder-full-1.0-contributor", f"model {r['model']}"
             )
@@ -166,6 +209,7 @@ def load_wonder():
                     + output * rout
                 )
                 / 1e6
+                + reminder_usd(run_dir)
             )
         groups[level] = level_group(
             [r["scores"]["functional"] for r in runs],
@@ -174,28 +218,42 @@ def load_wonder():
             model="wonder",
             level=level,
         )
+        groups[level]["versions"] = dict(Counter(r["cli_agent"]["harness_version"] for r in runs))
     return groups
 
 
 def load_wonder_judged(groups):
-    """Combined score per level from the frozen v3.26 summary; both seats must have passed."""
-    summary = json.loads((JUDGING / "summary.json").read_text())
-    require(summary["protocol"] == JUDGING_PROTOCOL, "wrong judging protocol")
-    require(summary["ready_for_publication"], "v3.26 is not ready for publication")
-    require(set(summary["passing_panels"]) == {"claude", "sol"}, "v3.26 panels")
+    """Combined score per level from the frozen v3.26 summary and its v3.26.1 top-up.
+
+    Both rounds must be ready for publication with both seats passing; each
+    level's combined score is the mean over every judged run in either.
+    """
+    rows, hashes = [], {}
+    for root, protocol_id in ((JUDGING, JUDGING_PROTOCOL), (TOPUP, TOPUP_PROTOCOL)):
+        if root == TOPUP and not (root / "summary.json").exists():
+            continue
+        summary = json.loads((root / "summary.json").read_text())
+        require(summary["protocol"] == protocol_id, f"wrong judging protocol in {root.name}")
+        require(summary["ready_for_publication"], f"{protocol_id} is not ready for publication")
+        require(set(summary["passing_panels"]) == {"claude", "sol"}, f"{protocol_id} panels")
+        rows += [r for r in summary["rows"] if r.get("published")]
+        hashes[protocol_id] = {
+            p.name: digest(p.read_bytes()) for p in (root / "summary.json", root / "protocol.json")
+        }
     for lvl, g in groups.items():
-        cell = summary["groups"][f"musewonderfull/{lvl}"]
-        rows = [r for r in summary["rows"] if r["effort"] == lvl and r.get("published")]
+        level_rows = [r for r in rows if r["effort"] == lvl]
         require(
-            cell["n"] == g["n"] == len(rows), f"v3.26 {lvl}: {cell['n']} judged vs {g['n']} runs"
+            len({r["task"] for r in level_rows}) == len(level_rows), f"{lvl}: a task judged twice"
         )
-        g["combined"] = cell["composite_v3"]["mean"]
-        g["combined_se"] = cell["composite_v3"]["se"]
-        g["by_judge_l1"] = {p: cell["by_panel"][p]["mean"] for p in ("claude", "sol")}
-    return {
-        p.name: digest(p.read_bytes())
-        for p in (JUDGING / "summary.json", JUDGING / "protocol.json")
-    }
+        require(len(level_rows) == g["n"], f"{lvl}: {len(level_rows)} judged vs {g['n']} runs")
+        g["combined"], g["combined_se"] = mean_se(
+            [r["published"]["composite_v3"] for r in level_rows]
+        )
+        g["by_judge_l1"] = {
+            p: statistics.mean(r["panels"][p]["l1"]["score"] for r in level_rows)
+            for p in ("claude", "sol")
+        }
+    return hashes
 
 
 def load_others():
@@ -251,6 +309,25 @@ def main():  # noqa: PLR0915, one linear figure
     )
     prelim = {lvl for lvl in wonder_levels if groups["wonder"][lvl]["n"] < SUITE_TASKS}
     final = not prelim and len(wonder_levels) == len(LEVELS)
+    mixed = {lvl for lvl in wonder_levels if len(groups["wonder"][lvl]["versions"]) > 1}
+
+    def level_mark(lvl):
+        """* for a preliminary level, a dagger for a level that mixes Muse Code versions."""
+        return ("*" if lvl in prelim else "") + ("\u2020" if lvl in mixed else "")
+
+    wonder_harness = (
+        "Muse Code "
+        + ", ".join(
+            sorted(
+                {
+                    v.split(" (")[0].removeprefix("Muse Code ")
+                    for g in groups["wonder"].values()
+                    for v in g["versions"]
+                }
+            )
+        )
+        + ("\u2020" if mixed else "")
+    )
     pricing = json.loads(PRICING.read_text())
 
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
@@ -320,7 +397,7 @@ def main():  # noqa: PLR0915, one linear figure
         heading=True,
     )
     head = " and ".join(
-        f"{groups['wonder'][lvl]['combined']:.1f} at {lvl.capitalize()}{'*' if lvl in prelim else ''} "
+        f"{groups['wonder'][lvl]['combined']:.1f} at {lvl.capitalize()}{level_mark(lvl)} "
         f"({groups['wonder'][lvl]['minutes']:.0f} min, ~${groups['wonder'][lvl]['usd']:.2f} per task)"
         for lvl in wonder_levels
     )
@@ -352,9 +429,7 @@ def main():  # noqa: PLR0915, one linear figure
         ax.tick_params(axis="y", length=0, labelsize=11, pad=6)
         ax.grid(axis="y", color=RULE, linewidth=0.5)
         ax.set_axisbelow(True)
-        ax.set_xticks(
-            xs, [lvl.capitalize() + ("*" if lvl in prelim else "") for lvl in chart_levels]
-        )
+        ax.set_xticks(xs, [lvl.capitalize() + level_mark(lvl) for lvl in chart_levels])
         ax.set_xlim(-0.5, len(chart_levels) - 0.5)
         return ax
 
@@ -404,13 +479,14 @@ def main():  # noqa: PLR0915, one linear figure
         text(panel_x[i], 3.94, subtitle, 11, color=MUTED)
         return axis(panel_x[i] + 0.022, panel_w, 4.25, 3.3)
 
-    ax = panel(0, "Combined score", "higher is better  ·  focused scale  ·  hatched = preliminary")
+    hatch_note = "  ·  hatched = preliminary" if prelim else ""
+    ax = panel(0, "Combined score", "higher is better  ·  focused scale" + hatch_note)
     lo = min(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
     hi = max(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
     ax.set_ylim(math.floor(lo / 2) * 2 - 2, math.ceil(hi / 2) * 2 + 1.5)
     bars(ax, "combined", lambda v: f"{v:.1f}", prelim_bar)
 
-    ax = panel(1, "Time per task", "minutes  ·  lower is faster  ·  hatched = preliminary")
+    ax = panel(1, "Time per task", "minutes  ·  lower is faster" + hatch_note)
     top = max(groups[m][lvl]["minutes"] for m in MODELS for lvl in chart_levels)
     ax.set_ylim(0, math.ceil(top * 1.15 / 5) * 5)
     bars(ax, "minutes", lambda v: f"{v:.1f}", prelim_bar)
@@ -432,7 +508,7 @@ def main():  # noqa: PLR0915, one linear figure
     ty = 8.25
 
     def star(lvl):
-        return "*" if lvl in prelim else ""
+        return level_mark(lvl)
 
     text(
         left,
@@ -470,7 +546,7 @@ def main():  # noqa: PLR0915, one linear figure
     for m in MODELS:
         swatch(left + 0.004, y, m, 7)
         text(left + 0.016, y, NAMES[m], 12.5, True)
-        text(left + 0.131, y, HARNESS[m], 11, color=MUTED)
+        text(left + 0.131, y, wonder_harness if m == "wonder" else HARNESS[m], 11, color=MUTED)
         for lvl in TABLE_LEVELS:
             g = groups[m][lvl]
             usd = (
@@ -499,6 +575,11 @@ def main():  # noqa: PLR0915, one linear figure
             f"* Muse Wonder Full Medium covers {wm['n']} of {SUITE_TASKS} tasks so far (hatched combined and time bars; every other bar is n=23); "
             "the last two run after its Muse Code weekly limit resets."
             if wm and "medium" in prelim
+            else "\u2020 Muse Wonder Full Medium covers all 23 tasks: 21 ran on Muse Code 1.4.6 and 2 (cellarcore, paddockcore) on Muse Code "
+            "1.4.9 after the quota reset, judged by the same panel in v3.26.1. Muse Code 1.4.9 runs its goal and verify reminder observers "
+            "on Muse Spark 1.3, not Muse Wonder Full; their tokens are added to cost at Spark's list price ($1.25 input, $0.15 cached, "
+            "$4.25 output per million)."
+            if "medium" in mixed
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
         "Combined score = 50% functional (share of hidden behaviour tests passed) + 8.5% quality + 8.5% security + 33% Code quality judged by "
@@ -522,7 +603,7 @@ def main():  # noqa: PLR0915, one linear figure
         "GPT-6 Astra and GPT-6.1 Sol charge 2x input and 1.5x output on requests over 272K input tokens, and per-request sizes were not "
         "recorded: + in the table marks Astra, whose report gives an upper bound of $3.28 at Low and $2.79 at Medium; Sol's calls average about 35K input tokens, "
         "so its premium is likely small and is not applied.",
-        "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 15 October 2026); 7 of its finished Medium "
+        "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 16 October 2026); 9 of its 23 Medium "
         "tasks overlapped another local job, which can affect minutes but not scores. Other models are their published Frontier v4 runs, "
         "not re-run. Harnesses differ.",
     ]
@@ -594,9 +675,10 @@ def main():  # noqa: PLR0915, one linear figure
     sources["wonder_judging"] = judging_hashes
     sources["opus55_traces_repo"] = "https://github.com/morganlinton/vulcanbench-opus55-traces"
     sources["wonder_summaries"] = {
-        f"{lvl}/{p.parent.name}": digest(p.read_bytes())
+        f"{root.name}/{lvl}/{p.parent.name}": digest(p.read_bytes())
+        for root in WONDER_ROOTS
         for lvl in wonder_levels
-        for p in sorted((WONDER / lvl).glob("*/summary.json"))
+        for p in sorted((root / lvl).glob("*/summary.json"))
     }
     save(
         out.with_suffix(".json"),

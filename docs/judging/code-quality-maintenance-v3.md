@@ -1258,6 +1258,34 @@ population changes from v3.25. What changes is one seat. Protocol id
 - Comparability: a Muse Wonder Full score is a mean of Opus 5.5 and GPT-6.1
   Sol.
 
+## Amendment v3.26.1, October 16, 2026: the Muse Wonder Full Medium top-up
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+judges changes from v3.26. Protocol id `code-quality-maintenance-v3.26.1`; run
+directory `runs-code-quality-maintenance-v3.26.1`; runner
+`harness/maintenance_review_v3261.py`. Population record:
+`docs/results/swe-v4-musewonder-full-2026-10/comparison-topup.json`, built by
+`build_musewonder_population.py --top-up`.
+
+- Population: only the Medium runs v3.25 and v3.26 froze as missing
+  (cellarcore, paddockcore). After the quota reset they ran through Muse Code
+  1.4.9 in `runs-effort-musewonder-full-v2-149`, which continues the 1.4.6 root
+  (DECISIONS.md, 2026-10-16). Muse Code 1.4.9 runs its goal and verify reminder
+  observers on Muse Spark 1.3; the builder checks the sweep's recorded allowance
+  and each row records those observers' usage. Prepare refuses any run already
+  judged under v3.26 or not on the frozen missing list, and requires each cell
+  to reach 23 with the v3.26 rows.
+- Judges: no new exam, on the v3.6.1 precedent. Claude Opus 5.5 is gated by
+  its v3.26 verdict and GPT-6.1 Sol by its v3.25 verdict, each re-checked
+  against the protocol it was taken under; their settings and binary pins are
+  copied from those protocols and the binaries are re-hashed. Sol runs on the
+  Codex transport, as in v3.25.
+- Each submission gets a primary and a repeat review from both judges, a probe
+  and a match, and no pairwise check.
+- Publication merges this directory with v3.26 (and v3.25 for Sol); neither
+  record is rewritten. Medium then reaches 23 runs: 21 on Muse Code 1.4.6 and
+  2 on 1.4.9, which every card says.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

@@ -245,3 +245,75 @@ def test_committed_record_names_the_sweep_and_its_gaps() -> None:
         and "/.claude/worktrees/" not in r["source_directory"]
         for r in record["rows"]
     )
+
+
+def _topup_sweep(root: Path, builder: ModuleType, **protocol_changes: object) -> Path:
+    sweep = root / builder.TOPUP_RUNS
+    sweep.mkdir()
+    protocol = {
+        "model": builder.SWEEP_MODELS[builder.MODEL],
+        "cli_model": "muse-wonder-full-1.0",
+        "harness_version": builder.TOPUP_SOLVER_CLI,
+        "contributor_mode": "on",
+        "muse_settings_plugins": {"skill-reminder": {"enabled": False}},
+        "binary_sha256": "bin149",
+        "muse_settings_sha256": "settings",
+        "reminder_observer_models": ["muse-spark-1.3"],
+        "reminder_observer_rule": "goal and verify reminder observers may run on these models",
+        "continues": {"root": str(root / builder.RUNS), "harness_version": builder.SOLVER_CLI},
+        **protocol_changes,
+    }
+    (sweep / "protocol.json").write_text(json.dumps(protocol))
+    run = sweep / "medium" / f"{CELLAR}-med0001"
+    run.mkdir(parents=True)
+    old = add_run(root, "medium", CELLAR)  # a 1.4.6-shaped run, moved under the 1.4.9 root
+    summary = json.loads((old / "summary.json").read_text())
+    summary["cli_agent"]["harness_version"] = builder.TOPUP_SOLVER_CLI
+    summary["source"]["harness"]["describe"] = "bench/2026-10-16-musewonder-full-149"
+    (run / "summary.json").write_text(json.dumps(summary))
+    (run / "cli-agent-stream.jsonl").write_text('{"type": "stdout"}\n')
+    aux = {"muse-spark-1.3": {"input_tokens": 97, "output_tokens": 3, "calls": 2}}
+    (run / "trace.jsonl").write_text(
+        json.dumps({"type": "muse_usage", "data": {"calls": 74, "auxiliary": aux}}) + "\n"
+    )
+    for p in old.iterdir():
+        p.unlink()
+    old.rmdir()
+    return root / "frozen.json"
+
+
+def test_top_up_reads_the_149_root_and_records_reminder_usage(
+    builder: ModuleType, tmp_path: Path
+) -> None:
+    _full_sweep(tmp_path)
+    frozen = _topup_sweep(tmp_path, builder)
+    frozen.write_text(
+        json.dumps(
+            {
+                "population": {
+                    "missing": [
+                        {"model": "musewonderfull", "effort": "medium", "task": CELLAR},
+                        {"model": "musewonderfull", "effort": "medium", "task": PADDOCK},
+                    ]
+                }
+            }
+        )
+    )
+    record = builder.build(builder.frozen_missing(frozen), top_up=True)
+    (row,) = record["rows"]
+    assert row["task"] == CELLAR and row["solver_cli_version"] == builder.TOPUP_SOLVER_CLI
+    assert row["reminder_observer_usage"]["muse-spark-1.3"]["calls"] == 2
+    assert record["solver"]["reminder_observer_models"] == ["muse-spark-1.3"]
+    assert record["solver"]["run_from"] == ["bench/2026-10-16-musewonder-full-149"]
+    assert "1.4.9" in record["models"][builder.MODEL]
+    assert [x["task"] for x in record["missing"]] == [PADDOCK]
+
+
+def test_top_up_refuses_a_sweep_without_the_reminder_allowance(
+    builder: ModuleType, tmp_path: Path
+) -> None:
+    _full_sweep(tmp_path)
+    frozen = _topup_sweep(tmp_path, builder, reminder_observer_models=[])
+    frozen.write_text(json.dumps({"population": {"missing": []}}))
+    with pytest.raises(ValueError, match="reminder_observer_models"):
+        builder.build(builder.frozen_missing(frozen), top_up=True)

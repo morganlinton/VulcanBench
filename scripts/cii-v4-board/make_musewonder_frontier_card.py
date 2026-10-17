@@ -82,14 +82,17 @@ JUDGING = ROOT / "runs-code-quality-maintenance-v3.26"
 JUDGING_PROTOCOL = "code-quality-maintenance-v3.26"
 TOPUP = ROOT / "runs-code-quality-maintenance-v3.26.1"
 TOPUP_PROTOCOL = "code-quality-maintenance-v3.26.1"
+HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.2"
+HIGH_PROTOCOL = "code-quality-maintenance-v3.26.2"
+TIMEOUT_S = 10800  # the flat 3-hour task bound (docs/DECISIONS.md 2026-09-13)
 PANELS = {
-    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26, v3.26.1)",
+    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26, v3.26.1, v3.26.2)",
     "opus55": "Muse Spark 1.3 and Grok 4.6 (v3.15)",
     "gpt61sol": "Muse Spark 1.3 and Grok 4.6 (v3.18)",
     "astra": "Muse Spark 1.3 and Grok 4.6 (v3.4)",
 }
 LEVELS = ("low", "medium", "high", "extra-high", "max")
-TABLE_LEVELS = ("low", "medium")
+TABLE_LEVELS = ("low", "medium", "high")
 SUITE_TASKS = 23
 MODELS = ("wonder", "opus55", "gpt61sol", "astra")
 NAMES = {
@@ -218,6 +221,11 @@ def load_wonder():
             model="wonder",
             level=level,
         )
+        groups[level]["timeouts"] = sum(
+            1
+            for r in runs
+            if r["scores"].get("budget_exceeded") and r["duration_s"] >= TIMEOUT_S - 5
+        )
         groups[level]["versions"] = dict(Counter(r["cli_agent"]["harness_version"] for r in runs))
     return groups
 
@@ -229,8 +237,12 @@ def load_wonder_judged(groups):
     level's combined score is the mean over every judged run in either.
     """
     rows, hashes = [], {}
-    for root, protocol_id in ((JUDGING, JUDGING_PROTOCOL), (TOPUP, TOPUP_PROTOCOL)):
-        if root == TOPUP and not (root / "summary.json").exists():
+    for root, protocol_id in (
+        (JUDGING, JUDGING_PROTOCOL),
+        (TOPUP, TOPUP_PROTOCOL),
+        (HIGH_JUDGING, HIGH_PROTOCOL),
+    ):
+        if root != JUDGING and not (root / "summary.json").exists():
             continue
         summary = json.loads((root / "summary.json").read_text())
         require(summary["protocol"] == protocol_id, f"wrong judging protocol in {root.name}")
@@ -245,9 +257,17 @@ def load_wonder_judged(groups):
         require(
             len({r["task"] for r in level_rows}) == len(level_rows), f"{lvl}: a task judged twice"
         )
-        require(len(level_rows) == g["n"], f"{lvl}: {len(level_rows)} judged vs {g['n']} runs")
-        g["combined"], g["combined_se"] = mean_se(
-            [r["published"]["composite_v3"] for r in level_rows]
+        require(
+            len(level_rows) + g["timeouts"] == g["n"],
+            f"{lvl}: {len(level_rows)} judged and {g['timeouts']} timeouts vs {g['n']} runs",
+        )
+        scored = [r["published"]["composite_v3"] for r in level_rows]
+        g["n_judged"] = len(scored)
+        g["combined"], g["combined_se"] = mean_se(scored)
+        # A timed-out run has no finished submission to judge; the second figure counts it as 0
+        # over every run (owner decision, docs/DECISIONS.md 2026-09-28).
+        g["combined_timeouts_zero"] = (
+            mean_se(scored + [0.0] * g["timeouts"])[0] if g["timeouts"] else None
         )
         g["by_judge_l1"] = {
             p: statistics.mean(r["panels"][p]["l1"]["score"] for r in level_rows)
@@ -268,7 +288,11 @@ def load_others():
                     None,
                 )
             if r["model"] in ("opus55", "gpt61sol", "astra"):
-                combined[r["model"], r["effort"]] = (float(r["combined"]), float(r["combined_se"]))
+                combined[r["model"], r["effort"]] = (
+                    float(r["combined"]),
+                    float(r["combined_se"]),
+                    int(r["judged"]),
+                )
     with ASTRA_FABLE.open() as fh:
         for r in csv.DictReader(fh):
             upper = float(r["long_context_upper_mean_usd"]) if r["model"] == "astra" else None
@@ -295,11 +319,15 @@ def load_others():
             groups[m][lvl] = level_group(func[m][lvl], usd, minutes, passed, m, lvl)
             groups[m][lvl]["usd_upper"] = upper
             if (m, lvl) in combined:
-                groups[m][lvl]["combined"], groups[m][lvl]["combined_se"] = combined[m, lvl]
+                (
+                    groups[m][lvl]["combined"],
+                    groups[m][lvl]["combined_se"],
+                    groups[m][lvl]["n_judged"],
+                ) = combined[m, lvl]
     return groups
 
 
-def main():  # noqa: PLR0915, one linear figure
+def main():  # noqa: PLR0912, PLR0915, one linear figure
     groups = {"wonder": load_wonder(), **load_others()}
     judging_hashes = load_wonder_judged(groups["wonder"])
     wonder_levels = [lvl for lvl in LEVELS if lvl in groups["wonder"]]
@@ -333,7 +361,7 @@ def main():  # noqa: PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    W, H = 16, 15.4
+    W, H = 19, 15.6
     fig = plt.figure(figsize=(W, H), dpi=150, facecolor=PAPER)
     yf = lambda i: 1 - i / H  # noqa: E731
 
@@ -396,12 +424,14 @@ def main():  # noqa: PLR0915, one linear figure
         True,
         heading=True,
     )
-    head = " and ".join(
-        f"{groups['wonder'][lvl]['combined']:.1f} at {lvl.capitalize()}{level_mark(lvl)} "
-        f"({groups['wonder'][lvl]['minutes']:.0f} min, ~${groups['wonder'][lvl]['usd']:.2f} per task)"
+    parts = [
+        f"{groups['wonder'][lvl]['combined']:.1f}{'\u2021' if groups['wonder'][lvl]['timeouts'] else ''} "
+        f"at {lvl.capitalize()}{level_mark(lvl)} "
+        f"({groups['wonder'][lvl]['minutes']:.0f} min, ~${groups['wonder'][lvl]['usd']:.2f})"
         for lvl in wonder_levels
-    )
-    text(left, 2.22, f"Muse Wonder Full scores {head}.", 15)
+    ]
+    head = ", ".join(parts[:-1]) + " and " + parts[-1] if len(parts) > 1 else parts[0]
+    text(left, 2.22, f"Muse Wonder Full scores {head} per task.", 15)
     text(
         left,
         2.60,
@@ -418,7 +448,7 @@ def main():  # noqa: PLR0915, one linear figure
 
     chart_levels = TABLE_LEVELS
     xs = list(range(len(chart_levels)))
-    width = 0.19
+    width = 0.21
     offsets = {m: (i - (len(MODELS) - 1) / 2) * width for i, m in enumerate(MODELS)}
 
     def axis(x0, w, top, h):
@@ -451,7 +481,7 @@ def main():  # noqa: PLR0915, one linear figure
                     textcoords="offset points",
                     ha="center",
                     va="bottom",
-                    fontsize=8.5,
+                    fontsize=7.5,
                     fontfamily="IBM Plex Mono",
                     color=INK,
                 )
@@ -517,21 +547,19 @@ def main():  # noqa: PLR0915, one linear figure
         14.5,
         heading=True,
     )
+    table_left, span = 0.355, (right - 0.355) / len(TABLE_LEVELS)
+    keys = ("f", "p", "usd", "min")
+    at = (0.36, 0.58, 0.78, 0.95)  # right edges within a level; the wide combined column leads
     cols = {
-        ("low", "f"): 0.43,
-        ("low", "p"): 0.50,
-        ("low", "usd"): 0.57,
-        ("low", "min"): 0.64,
-        ("medium", "f"): 0.73,
-        ("medium", "p"): 0.80,
-        ("medium", "usd"): 0.87,
-        ("medium", "min"): 0.94,
+        (lvl, k): table_left + i * span + span * at[j]
+        for i, lvl in enumerate(TABLE_LEVELS)
+        for j, k in enumerate(keys)
     }
     line(left, right, ty + 0.28, INK, 1.2)
-    text(0.535, ty + 0.50, "Low" + star("low"), 12.5, True, ha="center")
-    text(0.835, ty + 0.50, "Medium" + star("medium"), 12.5, True, ha="center")
-    line(0.39, 0.645, ty + 0.66, RULE, 0.6)
-    line(0.69, right, ty + 0.66, RULE, 0.6)
+    for i, lvl in enumerate(TABLE_LEVELS):
+        x0 = table_left + i * span
+        text(x0 + span * 0.52, ty + 0.50, lvl.capitalize() + star(lvl), 12.5, True, ha="center")
+        line(x0 + span * 0.06, x0 + span * 0.96, ty + 0.66, RULE, 0.6)
     text(left, ty + 0.86, "Model  ·  harness", 12, True)
     for lvl in TABLE_LEVELS:
         for k, lab in (
@@ -540,7 +568,7 @@ def main():  # noqa: PLR0915, one linear figure
             ("usd", "$/task"),
             ("min", "Min"),
         ):
-            text(cols[lvl, k], ty + 0.86, lab, 11, True, ha="right", color=MUTED)
+            text(cols[lvl, k], ty + 0.86, lab, 10.5, True, ha="right", color=MUTED)
     line(left, right, ty + 1.04, INK, 0.6)
     y = ty + 1.32
     for m in MODELS:
@@ -557,14 +585,15 @@ def main():  # noqa: PLR0915, one linear figure
             text(
                 cols[lvl, "f"],
                 y,
-                f"{g['combined']:.1f} ±{g['combined_se']:.1f}",
-                12.5,
+                f"{g['combined']:.1f} ±{g['combined_se']:.1f}"
+                + ("\u2021" if g.get("timeouts") else ""),
+                11.5,
                 numeric=True,
                 ha="right",
             )
-            text(cols[lvl, "p"], y, f"{g['functional']:.1f}", 12.5, numeric=True, ha="right")
-            text(cols[lvl, "usd"], y, usd, 12.5, numeric=True, ha="right")
-            text(cols[lvl, "min"], y, f"{g['minutes']:.1f}", 12.5, numeric=True, ha="right")
+            text(cols[lvl, "p"], y, f"{g['functional']:.1f}", 11.5, numeric=True, ha="right")
+            text(cols[lvl, "usd"], y, usd, 11.5, numeric=True, ha="right")
+            text(cols[lvl, "min"], y, f"{g['minutes']:.1f}", 11.5, numeric=True, ha="right")
         y += 0.40
         line(left, right, y - 0.2, RULE, 0.6)
     line(left, right, y - 0.2, INK, 1.2)
@@ -578,10 +607,25 @@ def main():  # noqa: PLR0915, one linear figure
             else "\u2020 Muse Wonder Full Medium covers all 23 tasks: 21 ran on Muse Code 1.4.6 and 2 (cellarcore, paddockcore) on Muse Code "
             "1.4.9 after the quota reset, judged by the same panel in v3.26.1. Muse Code 1.4.9 runs its goal and verify reminder observers "
             "on Muse Spark 1.3, not Muse Wonder Full; their tokens are added to cost at Spark's list price ($1.25 input, $0.15 cached, "
-            "$4.25 output per million)."
+            "$4.25 output per million). High ran entirely on Muse Code 1.4.9 and was judged in v3.26.2."
             if "medium" in mixed
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
+        "\u2021 Combined scores are means over judged runs: "
+        + "; ".join(
+            f"{NAMES[m]} {lvl.capitalize()} {groups[m][lvl]['n_judged']} of {groups[m][lvl]['n']}"
+            for m in MODELS
+            for lvl in TABLE_LEVELS
+            if groups[m][lvl]["n_judged"] < groups[m][lvl]["n"]
+        )
+        + ", 23 everywhere else. Claude Opus 5.5's High depotcore run was stopped by a safety classifier. Muse Wonder Full's High "
+        "paddockcore run hit the 3-hour task limit and left no finished code to judge; counting it as 0 over all 23 runs gives "
+        + ", ".join(
+            f"{groups['wonder'][lvl]['combined_timeouts_zero']:.1f} at {lvl.capitalize()}"
+            for lvl in wonder_levels
+            if groups["wonder"][lvl].get("combined_timeouts_zero") is not None
+        )
+        + " (DECISIONS.md 2026-09-28). Functional score, minutes and cost count every run.",
         "Combined score = 50% functional (share of hidden behaviour tests passed) + 8.5% quality + 8.5% security + 33% Code quality judged by "
         "two calibrated model judges; the table gives its standard error (±se) and the functional score. Code quality judges (model: panel): "
         + "; ".join(f"{NAMES[m]}: {PANELS[m]}" for m in MODELS)
@@ -601,15 +645,20 @@ def main():  # noqa: PLR0915, one linear figure
         "$20.00 output; fallback turns at their own model's rate). GPT-6.1 Sol is its Codex token receipts at $2.00 / $0.10 / $10.00. "
         "GPT-6 Astra ($10 / $1 / $50) is its report's central estimate at that price.",
         "GPT-6 Astra and GPT-6.1 Sol charge 2x input and 1.5x output on requests over 272K input tokens, and per-request sizes were not "
-        "recorded: + in the table marks Astra, whose report gives an upper bound of $3.28 at Low and $2.79 at Medium; Sol's calls average about 35K input tokens, "
+        "recorded: + in the table marks Astra, whose report gives an upper bound of "
+        + ", ".join(
+            f"${groups['astra'][lvl]['usd_upper']:.2f} at {lvl.capitalize()}"
+            for lvl in TABLE_LEVELS
+        )
+        + "; Sol's calls average about 35K input tokens, "
         "so its premium is likely small and is not applied.",
-        "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 16 October 2026); 9 of its 23 Medium "
-        "tasks overlapped another local job, which can affect minutes but not scores. Other models are their published Frontier v4 runs, "
+        "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 17 October 2026); 9 of its 23 Medium "
+        "tasks and 14 of its 23 High tasks overlapped another local job for part of their run, which can affect minutes but not scores. Other models are their published Frontier v4 runs, "
         "not re-run. Harnesses differ.",
     ]
     yy = y + 0.12
     for n_ in notes:
-        for w in textwrap.wrap(n_, 205):
+        for w in textwrap.wrap(n_, 245):
             text(left, yy, w, 10.3, color=MUTED)
             yy += 0.235
         yy += 0.05

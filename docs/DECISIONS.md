@@ -7,6 +7,41 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-17: Muse Wonder Full High judged without a new exam; Meta transport stops are rerun
+
+### Decision
+
+- High (all 23 runs on Muse Code 1.4.9) is judged in v3.26.2 by the same two
+  judges with no new exam: Opus 5.5 gated by its v3.26 verdict and GPT-6.1
+  Sol by its v3.25 verdict, as in the v3.26.1 Medium top-up. High is another
+  level of the same Muse Wonder Full sweep. Owner approval in chat
+  (PR #207, 2026-10-17). Extra-high follows the same way.
+- High's paddockcore run hit the 3-hour bound and left no finished code, so
+  it is excluded from Code quality. The card follows the 2026-09-28 rule:
+  the combined score is over the 22 judged runs, and a second figure counts
+  the timeout as 0 over all 23.
+- A Muse Code run that stops on a Meta API transport error (the API
+  unreachable after Muse's own retries) is an infrastructure stop, not a
+  result: the unscored attempt moves to the sweep's `infra-aborted/` folder
+  and the task reruns once the API answers again. Three in a row stop the
+  sweep for review. Owner instruction to keep the benchmark running,
+  2026-10-16.
+
+### Evidence
+
+- 2026-10-16 17:43: High snapcore stopped 8 minutes in with "transport
+  error: error sending request for url (https://api.meta.ai/v1/responses)
+  (after 4 provider attempts)"; the API answered again within a minute. The
+  rerun passed every hidden test (1.00) in 18.8 minutes.
+- v3.26.2 (bench/2026-10-17-musewonder-judging-v3262): both judges passing,
+  no fallback reviews; High combined 88.2 +/- 1.0 over 22 judged runs, 84.4
+  with the timeout counted as 0.
+- Another session's benchmark jobs ran beside High from 13:03 to 18:23 UTC
+  on 2026-10-16; 14 of the 23 High tasks overlapped them for part of their
+  run (6 to 36 minutes each, from the per-minute overlap log). Minutes for
+  those tasks are timing-flagged; scores are unaffected. Nothing has
+  overlapped Extra-high.
+
 ## 2026-10-16: Muse Wonder Full's remaining runs move to Muse Code 1.4.9
 
 ### Decision

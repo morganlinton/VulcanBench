@@ -84,15 +84,17 @@ TOPUP = ROOT / "runs-code-quality-maintenance-v3.26.1"
 TOPUP_PROTOCOL = "code-quality-maintenance-v3.26.1"
 HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.2"
 HIGH_PROTOCOL = "code-quality-maintenance-v3.26.2"
+EXTRA_HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.3"
+EXTRA_HIGH_PROTOCOL = "code-quality-maintenance-v3.26.3"
 TIMEOUT_S = 10800  # the flat 3-hour task bound (docs/DECISIONS.md 2026-09-13)
 PANELS = {
-    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26, v3.26.1, v3.26.2)",
+    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26 to v3.26.3)",
     "opus55": "Muse Spark 1.3 and Grok 4.6 (v3.15)",
     "gpt61sol": "Muse Spark 1.3 and Grok 4.6 (v3.18)",
     "astra": "Muse Spark 1.3 and Grok 4.6 (v3.4)",
 }
 LEVELS = ("low", "medium", "high", "extra-high", "max")
-TABLE_LEVELS = ("low", "medium", "high")
+TABLE_LEVELS = ("low", "medium", "high", "extra-high")
 SUITE_TASKS = 23
 MODELS = ("wonder", "opus55", "gpt61sol", "astra")
 NAMES = {
@@ -241,6 +243,7 @@ def load_wonder_judged(groups):
         (JUDGING, JUDGING_PROTOCOL),
         (TOPUP, TOPUP_PROTOCOL),
         (HIGH_JUDGING, HIGH_PROTOCOL),
+        (EXTRA_HIGH_JUDGING, EXTRA_HIGH_PROTOCOL),
     ):
         if root != JUDGING and not (root / "summary.json").exists():
             continue
@@ -336,7 +339,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "Muse Wonder Full levels must start at Low",
     )
     prelim = {lvl for lvl in wonder_levels if groups["wonder"][lvl]["n"] < SUITE_TASKS}
-    final = not prelim and len(wonder_levels) == len(LEVELS)
+    # Final once every level Contributor mode allows is run and judged (Max is excluded, DECISIONS 2026-10-12).
+    final = not prelim and tuple(wonder_levels) == TABLE_LEVELS
     mixed = {lvl for lvl in wonder_levels if len(groups["wonder"][lvl]["versions"]) > 1}
 
     def level_mark(lvl):
@@ -361,7 +365,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    W, H = 19, 15.6
+    W, H = 23, 15.8
     fig = plt.figure(figsize=(W, H), dpi=150, facecolor=PAPER)
     yf = lambda i: 1 - i / H  # noqa: E731
 
@@ -412,7 +416,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
     )
     logo.axis("off")
-    text(left + 0.038, 0.65, "VulcanBench", 20, True, heading=True)
+    text(left + 0.038 * 16 / W, 0.65, "VulcanBench", 20, True, heading=True)
     text(right, 0.65, "October 2026", 14, ha="right", color=MUTED)
     line(left, right, 1.05, INK, 1.2)
 
@@ -549,7 +553,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     )
     table_left, span = 0.355, (right - 0.355) / len(TABLE_LEVELS)
     keys = ("f", "p", "usd", "min")
-    at = (0.36, 0.58, 0.78, 0.95)  # right edges within a level; the wide combined column leads
+    at = (0.36, 0.64, 0.82, 0.96)  # right edges within a level; the wide combined column leads
     cols = {
         (lvl, k): table_left + i * span + span * at[j]
         for i, lvl in enumerate(TABLE_LEVELS)
@@ -563,7 +567,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(left, ty + 0.86, "Model  ·  harness", 12, True)
     for lvl in TABLE_LEVELS:
         for k, lab in (
-            ("f", "Combined ±se"),
+            ("f", "Combined"),
             ("p", "Functional"),
             ("usd", "$/task"),
             ("min", "Min"),
@@ -607,7 +611,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             else "\u2020 Muse Wonder Full Medium covers all 23 tasks: 21 ran on Muse Code 1.4.6 and 2 (cellarcore, paddockcore) on Muse Code "
             "1.4.9 after the quota reset, judged by the same panel in v3.26.1. Muse Code 1.4.9 runs its goal and verify reminder observers "
             "on Muse Spark 1.3, not Muse Wonder Full; their tokens are added to cost at Spark's list price ($1.25 input, $0.15 cached, "
-            "$4.25 output per million). High ran entirely on Muse Code 1.4.9 and was judged in v3.26.2."
+            "$4.25 output per million). High and Extra-high ran entirely on Muse Code 1.4.9 (judged in v3.26.2 and v3.26.3)."
             if "medium" in mixed
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
@@ -619,7 +623,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             if groups[m][lvl]["n_judged"] < groups[m][lvl]["n"]
         )
         + ", 23 everywhere else. Claude Opus 5.5's High depotcore run was stopped by a safety classifier. Muse Wonder Full's High "
-        "paddockcore run hit the 3-hour task limit and left no finished code to judge; counting it as 0 over all 23 runs gives "
+        "paddockcore and Extra-high depotcore runs hit the 3-hour task limit and left no finished code to judge; counting each "
+        "as 0 over all 23 runs gives "
         + ", ".join(
             f"{groups['wonder'][lvl]['combined_timeouts_zero']:.1f} at {lvl.capitalize()}"
             for lvl in wonder_levels
@@ -653,12 +658,13 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         + "; Sol's calls average about 35K input tokens, "
         "so its premium is likely small and is not applied.",
         "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 17 October 2026); 9 of its 23 Medium "
-        "tasks and 14 of its 23 High tasks overlapped another local job for part of their run, which can affect minutes but not scores. Other models are their published Frontier v4 runs, "
+        "tasks and 14 of its 23 High tasks overlapped another local job for part of their run, which can affect minutes but not scores; "
+        "Extra-high ran alone. Other models are their published Frontier v4 runs, "
         "not re-run. Harnesses differ.",
     ]
     yy = y + 0.12
     for n_ in notes:
-        for w in textwrap.wrap(n_, 245):
+        for w in textwrap.wrap(n_, 300):
             text(left, yy, w, 10.3, color=MUTED)
             yy += 0.235
         yy += 0.05

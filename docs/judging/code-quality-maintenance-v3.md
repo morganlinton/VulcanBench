@@ -1311,6 +1311,26 @@ directory `runs-code-quality-maintenance-v3.26.2`; runner
 - Publication merges this directory with v3.26 and v3.26.1; no earlier record
   is rewritten. Extra-high follows as its own round in the same way.
 
+## Amendment v3.26.3, October 17, 2026: Muse Wonder Full at Extra-high
+
+Everything is as in v3.26.2, for the Extra-high level. Protocol id
+`code-quality-maintenance-v3.26.3`; run directory
+`runs-code-quality-maintenance-v3.26.3`; runner
+`harness/maintenance_review_v3263.py`. Population record:
+`docs/results/swe-v4-musewonder-full-2026-10/comparison-extra-high.json`,
+built by `build_musewonder_population.py --level extra-high`.
+
+- Population: Muse Wonder Full's Extra-high level, every run through Muse
+  Code 1.4.9. Prepare also refuses any run already judged in v3.26.2.
+- Judges: no new exam, as in v3.26.2 (owner approval for High, 2026-10-17,
+  applied the same way): Opus 5.5 gated by its v3.26 verdict, GPT-6.1 Sol by
+  its v3.25 verdict.
+- A run that hit the 3-hour bound has no finished code and is excluded with
+  its reason; the card applies the 2026-09-28 two-figure rule.
+- Publication merges this directory with v3.26, v3.26.1 and v3.26.2; no
+  earlier record is rewritten. This completes the Muse Wonder Full levels
+  under Contributor mode (Max is excluded).
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

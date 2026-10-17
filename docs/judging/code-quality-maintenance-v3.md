@@ -1286,6 +1286,31 @@ directory `runs-code-quality-maintenance-v3.26.1`; runner
   record is rewritten. Medium then reaches 23 runs: 21 on Muse Code 1.4.6 and
   2 on 1.4.9, which every card says.
 
+## Amendment v3.26.2, October 17, 2026: Muse Wonder Full at High
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed, weights or
+judges changes from v3.26. Protocol id `code-quality-maintenance-v3.26.2`; run
+directory `runs-code-quality-maintenance-v3.26.2`; runner
+`harness/maintenance_review_v3262.py`. Population record:
+`docs/results/swe-v4-musewonder-full-2026-10/comparison-high.json`, built by
+`build_musewonder_population.py --level high`.
+
+- Population: Muse Wonder Full's High level, every run through Muse Code
+  1.4.9 in `runs-effort-musewonder-full-v2-149` (DECISIONS.md, 2026-10-16),
+  with each row's Spark 1.3 reminder-observer usage recorded. Prepare refuses
+  any run already judged in v3.26 or v3.26.1, any run not from Muse Code
+  1.4.9, and a level whose runs and reasoned gaps do not make 23.
+- Judges: no new exam. High is another level of the same Muse Wonder Full
+  sweep, so Claude Opus 5.5 is gated by its v3.26 verdict and GPT-6.1 Sol by
+  its v3.25 verdict, as in v3.26.1, each re-checked against the protocol it
+  was taken under; settings, binary pins and Sol's Codex transport are
+  v3.26.1's.
+- Each submission gets a primary review, a probe and a match from both judges;
+  the cell gets one repeat review, as v3.25 and v3.26 gave each cell; no
+  pairwise check.
+- Publication merges this directory with v3.26 and v3.26.1; no earlier record
+  is rewritten. Extra-high follows as its own round in the same way.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

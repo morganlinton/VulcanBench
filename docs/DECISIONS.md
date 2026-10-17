@@ -36,6 +36,11 @@ entries here record the measurements behind those rules.
 - v3.26.2 (bench/2026-10-17-musewonder-judging-v3262): both judges passing,
   no fallback reviews; High combined 88.2 +/- 1.0 over 22 judged runs, 84.4
   with the timeout counted as 0.
+- v3.26.3 (bench/2026-10-17-musewonder-judging-v3263), Extra-high, started
+  by a waiter when the sweep reported complete: both judges passing, no
+  fallback reviews; combined 87.6 +/- 1.0 over 22 judged runs (depotcore hit
+  the 3-hour bound), 83.8 with the timeout counted as 0. This completes the
+  levels Contributor mode allows; the card is no longer marked preliminary.
 - Another session's benchmark jobs ran beside High from 13:03 to 18:23 UTC
   on 2026-10-16; 14 of the 23 High tasks overlapped them for part of their
   run (6 to 36 minutes each, from the per-minute overlap log). Minutes for

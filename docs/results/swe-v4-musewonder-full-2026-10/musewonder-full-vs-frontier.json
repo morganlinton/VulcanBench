@@ -1,5 +1,5 @@
 {
-  "final": false,
+  "final": true,
   "groups": {
     "wonder": {
       "low": {
@@ -61,6 +61,26 @@
         "by_judge_l1": {
           "claude": 59.56439393939394,
           "sol": 77.08333333333333
+        }
+      },
+      "extra-high": {
+        "n": 23,
+        "functional": 93.16782608695652,
+        "functional_se": 4.506773950983732,
+        "passed": 19,
+        "usd": 5.081019567391304,
+        "minutes": 33.337392028985505,
+        "timeouts": 1,
+        "versions": {
+          "Muse Code 1.4.9 (1.4.9-R6297.1)": 23
+        },
+        "n_judged": 22,
+        "combined": 87.58899923939697,
+        "combined_se": 0.964079486318422,
+        "combined_timeouts_zero": 83.78078188116231,
+        "by_judge_l1": {
+          "claude": 57.765151515151516,
+          "sol": 74.90530303030303
         }
       }
     },
@@ -269,6 +289,10 @@
       "code-quality-maintenance-v3.26.2": {
         "summary.json": "ae51baa9191672c03a71f995b49a7fdb4b28027f3a42d4b811dbbc54e0dd177a",
         "protocol.json": "d08704a8c501766d4ca00a84b8590a1e2f365c0a58feab1498f17c14f89d23cb"
+      },
+      "code-quality-maintenance-v3.26.3": {
+        "summary.json": "06e3dbbbb01663bdc3e6cfdebaecd111f1ff15fdb52eb91e3ea356215a7a011d",
+        "protocol.json": "2271aa3dff46892901859999ad83c4ff12bc00e74710cb0f876da8fc4b96c721"
       }
     },
     "opus55_traces_repo": "https://github.com/morganlinton/vulcanbench-opus55-traces",
@@ -341,9 +365,32 @@
       "runs-effort-musewonder-full-v2-149/high/legacy-snapcore-binary-parity-9c6964ea": "036b1e2bfe35edb5d1b88e92e2631b6767f12835833465f23a2ecd140cd9ee98",
       "runs-effort-musewonder-full-v2-149/high/legacy-stampcore-binary-parity-5356606d": "bb3a2722880375f3d53936e376508eb310947a4cb1e7133b68680138c91d2e5b",
       "runs-effort-musewonder-full-v2-149/high/legacy-tallycore-binary-parity-2f30c6ea": "d884139d006e762b06a4b37d199406411d52ad8713259025e9127e3d6fae1096",
-      "runs-effort-musewonder-full-v2-149/high/legacy-vaultcore-binary-parity-62d1d1f7": "00465c90d9fa0b5450ac614b41805fbc00736d081b54d0aab141578c033717b1"
+      "runs-effort-musewonder-full-v2-149/high/legacy-vaultcore-binary-parity-62d1d1f7": "00465c90d9fa0b5450ac614b41805fbc00736d081b54d0aab141578c033717b1",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-blendcore-binary-parity-c8ba8321": "a96fd830ef778f38d55bd98b31628cddce97106131196d43846f879bc085823a",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-cellarcore-binary-parity-7fac3835": "edc3b8e39e02657afa40b89663c4e55619aff94fa7429a557a3d21965f35ce80",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-codeccore-binary-parity-4c5d1af5": "3403dab969982f96e961304b479a971ec958a1e05ade9dce1ea527135e79d436",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-depotcore-binary-parity-995c75a9": "17a6ee3534bc112fea50193478650b954839ff2639710b82572559f72bd8d476",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-freightcore-binary-parity-191804aa": "35648491f006d5441006d9f812c2a8a20230ee843307c71d1b1093821994a12f",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-granarycore-binary-parity-35f0c96a": "c883a07f1d3ac608a8b594921ef42b00f4200a1b82bd594d1211b78713dd6a2b",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-hedgecore-binary-parity-e2794f6a": "beb16e36eb2019ea2632dbdd43eb6c305cf27afb8a4f14e58873a927fb09c720",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-lodgecore-binary-parity-542151f6": "cb606de0bfe561a89bd1c159f1c6d1fe803b313e25bd44d9511eb78f4e840e8b",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-matchcore-order-book-parity-7a90f0ae": "527b6cea1339a55bd7b5296615576faae53c423c20fed70783d9b9cfb685f079",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-metercore-binary-parity-05b8bea8": "7a2553490b4817209ac1aff56cdabdf24f3eab2ec46f102b30984dd0d6f14442",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-pacecore-binary-parity-8c0efc08": "d2004047631dba19ce959a59a9bc61d1a087b769a0a5d61f4a2d5b47dc5456e3",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-paddockcore-binary-parity-9d48de4d": "62765f05884fe6624060e92fff65e634c93dd2471d7cea84f950a9a8ca9786a3",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-payrollcore-binary-parity-7cc2507a": "cfcc6fc953e340a6b1dc60c815f7d4e1e623292c0f06f95ed8a86c3875140d7d",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-qlite-store-parity-098ce605": "9ced977d6a965a6e32ebe9003cfdc55917ebcd27a180a0532bc580b53834b564",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-queuecore-binary-parity-75b0d2c9": "8470f142d019f1e2dd99879422bf67c929ec6e94ce52b424ee0740333815adf8",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-quotacore-binary-parity-98ba8058": "0a46b0747c0eef99b1023e40248f250031ffb9349d3a30f20c2b26669ef8adf2",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-reflowcore-binary-parity-a3ae9ffa": "a9fc1b1e7bca8ef64a473626707e2e892745d6c33e2735bccc2d17fd2738a76c",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-schedcore-binary-parity-5d0fb2b2": "7ea11e5599200a387d0993a1e3f17aa0a7d3d072a87a80ff1022d5fc74271660",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-settlecore-binary-parity-32dc2a5a": "3c2ca53c4041d6411dde5bfe29f7d39babbbde55b6303e5f168070ae60027ca4",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-snapcore-binary-parity-9b7ee3df": "86dbad662124cb24af54c433c025a36a149f09d4c065b0eefcd61535f3ad9647",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-stampcore-binary-parity-e9c6b6f4": "567926acb7443560a4b6e703fff5bfd3e2de28569efd85470cf9880215f80fcd",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-tallycore-binary-parity-4bc0f3e2": "b26494319a459fc831b1e22aa01e08b06e7dd4d08c44477be5121f4ef9b8c9c4",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-vaultcore-binary-parity-7448aea9": "c34893a40d42788d40e3584b489da30fdcaa5a2c98a3d88c5434a193bf4df297"
     }
   },
-  "png_sha256": "b3ddda22f43f0e48e7a1454427ea7a4ff824645c349244448f261fafa2b94153",
-  "table": "musewonder-full-vs-frontier-preliminary-efforts.csv"
+  "png_sha256": "6e76e3cac8d699f2d5f89ef8972780f4f7eafdc91a4c30d475259f1c6d0857c7",
+  "table": "musewonder-full-vs-frontier-efforts.csv"
 }

@@ -1331,6 +1331,29 @@ built by `build_musewonder_population.py --level extra-high`.
   earlier record is rewritten. This completes the Muse Wonder Full levels
   under Contributor mode (Max is excluded).
 
+## Amendment v3.26.4, October 17, 2026: the Extra-high depotcore rerun
+
+Everything is as in v3.26.1, for Extra-high. Protocol id
+`code-quality-maintenance-v3.26.4`; run directory
+`runs-code-quality-maintenance-v3.26.4`; runner
+`harness/maintenance_review_v3264.py`. Population record:
+`docs/results/swe-v4-musewonder-full-2026-10/comparison-extra-high-topup.json`,
+built by `build_musewonder_population.py --level extra-high --only
+legacy-depotcore-binary-parity`.
+
+- Why: Extra-high depotcore first hit the 3-hour bound while another
+  session's Frontier v5 jobs ran beside it for 145 of its 180 minutes, so
+  v3.26.3 excluded it. Under the owner's overlap rule it was rerun alone on
+  Muse Code 1.4.9; the overlapped attempt is kept in the sweep's
+  `overlap-superseded/` folder and disclosed (DECISIONS.md, 2026-10-17).
+- Population: only runs v3.26.3 recorded as excluded; prepare refuses
+  anything else, and Extra-high must then reach 23 with v3.26.3's 22 rows.
+- Judges: no new exam, as in v3.26.1 to v3.26.3. Each submission gets a
+  primary and a repeat review from both judges, a probe and a match, and no
+  pairwise check.
+- Publication merges this directory with v3.26.3; no earlier record is
+  rewritten.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

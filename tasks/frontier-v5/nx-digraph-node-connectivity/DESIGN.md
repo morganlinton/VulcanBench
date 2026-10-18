@@ -6,6 +6,8 @@ Frontier v5: UNSLOTTED (see Family fit). Status: locally validated (base=0,
 gold=1, x3), not admitted, not gate-measured. Written before any
 reference-model run. Not shown to the agent.
 
+**Gate result 2026-10-18: REJECT.** GPT-6 Astra (Codex CLI 0.159.0, medium) solved it in 2 of 2 attempts, about six minutes each; two solves end the gate early. Both solves re-graded and diff-reviewed as genuine (docs/frontier-v5/GATE-LOG.md). The F5-python slot needs another candidate; nx-group cannot be gated as F5 (its floors 4 and 5 are not established).
+
 **Slotting update 2026-10-10.** F5 candidate for slot F5-python under composition v2 (docs/frontier-v5/PLAN-v2.md, owner decision in docs/DECISIONS.md 2026-10-10). Shared with nx-group-betweenness-epic; the gate decides which takes the slot. One upstream PR (#8837) fixes all five causes, so the gold is split per cause for the single-fix and leave-one-out controls, which run before the gate. The family-fit text below was written while the task was unslotted and is kept as pre-registered.
 
 ## Thesis

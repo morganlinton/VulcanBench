@@ -44,8 +44,27 @@ entries here record the measurements behind those rules.
 - Another session's benchmark jobs ran beside High from 13:03 to 18:23 UTC
   on 2026-10-16; 14 of the 23 High tasks overlapped them for part of their
   run (6 to 36 minutes each, from the per-minute overlap log). Minutes for
-  those tasks are timing-flagged; scores are unaffected. Nothing has
-  overlapped Extra-high.
+  those tasks are timing-flagged; scores are unaffected. Nothing had
+  overlapped Extra-high when this was first written.
+- Correction, 2026-10-17 (found while building the site bundle): the same log
+  shows another session's Frontier v5 jobs (the v5p1 worktree's scheduled
+  runs 18 to 37) beside 5 Extra-high tasks on 2026-10-17, 10:08 to 15:46
+  UTC: depotcore 145 minutes, granarycore 29, lodgecore 27, stampcore 16 and
+  paddockcore 1. Extra-high depotcore hit the 3-hour bound with 145 of its
+  180 minutes overlapped (it finished clean at High in 111 minutes), so that
+  timeout, and the score of 0 it carries, may be partly due to the load.
+  Earlier statements that Extra-high ran alone were wrong.
+- The owner chose to rerun Extra-high depotcore alone (the 2026-10-14 overlap
+  rule: flag overlapped tasks, rerun any that look inflated). The rerun
+  started at 2026-10-17 20:29 UTC with no other job running, and the Muse
+  Code weekly limit stopped it 30 minutes in (429, resets 2026-10-19 00:00
+  UTC); the interrupted attempt is in the sweep's quota-aborted/ folder and
+  is not scored. The owner then chose to publish with the overlapped timeout
+  disclosed and update after the rerun: the overlapped run stays the
+  published Extra-high depotcore result until then. A one-off job moves it to
+  overlap-superseded/ just after the reset and reruns the task; v3.26.4
+  judges the rerun with the same two judges, and the card, site pages and
+  traces are updated with it.
 
 ## 2026-10-16: Muse Wonder Full's remaining runs move to Muse Code 1.4.9
 

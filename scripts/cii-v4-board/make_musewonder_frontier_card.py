@@ -658,8 +658,9 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         + "; Sol's calls average about 35K input tokens, "
         "so its premium is likely small and is not applied.",
         "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 17 October 2026); 9 of its 23 Medium "
-        "tasks and 14 of its 23 High tasks overlapped another local job for part of their run, which can affect minutes but not scores; "
-        "Extra-high ran alone. Other models are their published Frontier v4 runs, "
+        "tasks, 14 of its 23 High tasks and 5 of its 23 Extra-high tasks overlapped another local job for part of their run, which can "
+        "lengthen minutes; Extra-high depotcore, which hit the 3-hour limit, overlapped for 145 of its 180 minutes, and a clean rerun "
+        "is scheduled after the Muse quota reset (19 October). Other models are their published Frontier v4 runs, "
         "not re-run. Harnesses differ.",
     ]
     yy = y + 0.12

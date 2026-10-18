@@ -321,10 +321,21 @@ def main(argv: list[str] | None = None) -> int:
         help="a whole level that ran on Muse Code 1.4.9 (v3.26.2 High, then Extra-high); "
         "writes comparison-<level>.json",
     )
+    parser.add_argument(
+        "--only",
+        metavar="TASK",
+        help="with --level: just this task (a top-up of runs that level's round excluded, "
+        "e.g. v3.26.4's Extra-high depotcore rerun); writes comparison-<level>-topup.json",
+    )
     args = parser.parse_args(argv)
     if args.level and args.top_up:
         parser.error("--level and --top-up are separate records")
-    if args.level:
+    if args.only and not args.level:
+        parser.error("--only needs --level")
+    if args.level and args.only:
+        record = build({(MODEL, args.level, args.only)}, top_up=True, read_levels=(args.level,))
+        output = RESULTS / f"comparison-{args.level}-topup.json"
+    elif args.level:
         record = build(top_up=True, read_levels=(args.level,))
         output = RESULTS / f"comparison-{args.level}.json"
     elif args.top_up:

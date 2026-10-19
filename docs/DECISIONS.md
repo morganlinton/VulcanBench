@@ -7,6 +7,56 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-19: DeepSeek V4.1 Flash and V4 Pro on Frontier v4 through DeepSeek Harness
+
+### Decision
+
+The owner asked for DeepSeek on VulcanBench Frontier v4, in DeepSeek's own
+harness. DeepSeek's API serves two models and no "V4.1 Pro":
+`deepseek-flash` (DeepSeek-V4.1-Flash-1017) and `deepseek-v4-pro`
+(DeepSeek-V4-Pro-0813). Owner choices in chat, 2026-10-19:
+
+- Both models, Flash first, the same 23 tasks at Low, High and Max. Those are
+  the three reasoning levels DeepSeek's API takes (it has no medium). One task
+  at a time, flat 3-hour bound, from a tagged run worktree.
+- Harness: DeepSeek Harness (`@deepseek-ai/dsh`, MIT, DeepSeek's official agent
+  released 2026-08-13), headless profile, adapter `harness/agent/deepseek_harness.py`,
+  specs `dsh:deepseek-flash` and `dsh:deepseek-v4-pro`. Pinned to 0.2.1-rc.2,
+  npm's `latest` tag on 2026-10-19 (every dsh release so far is a prerelease),
+  by exact version and a content hash of the whole install tree.
+- dsh uploads each session's log to DeepSeek by default (`dsh_session_log`).
+  Turned off, with OpenTelemetry feedback upload, and disclosed. The model
+  never sees either upload, so behaviour is unchanged; task content still
+  reaches DeepSeek in the model requests, as with any API model.
+
+Settings that follow the board's existing rules, not new choices: web tools off
+(as for every harness); dsh's own sandbox and approvals off
+(`DSH_PERMISSION_MODE=danger-full-access`) inside the macOS outer sandbox Muse
+Code and Pi use, since sandbox-exec cannot nest; a fresh `DSH_HOME` per run;
+session logs uncompressed so receipts are auditable. No other dsh default
+changes: subagents, compaction, goals, the repeat-tool reminder and session
+titles stay as shipped.
+
+Billing is the API key (`DEEPSEEK_API_KEY`), so runs are metered API spend.
+Usage comes from dsh's own `assistant/message` events, plus retried
+`assistant/attempt` events, which DeepSeek also bills. Prices (checked
+2026-10-19 at api-docs.deepseek.com/quick_start/pricing), per million tokens,
+off-peak: Flash $0.15 input, $0.003 cached input, $0.60 output; V4 Pro $0.66,
+$0.022, $1.98. Peak hours (01:00 to 04:00 and 06:00 to 10:00 UTC, Monday to
+Friday) bill 2x. The price table holds the off-peak list rate, which is what
+the board's list-price cost uses; the adapter also meters each call at its
+actual time (`cli_reported_cost_usd`), and both figures are kept.
+
+### Limits
+
+The key is in the agent's environment and shell network is not isolated, so
+rotate it after the sweeps. dsh is a developer preview; a CLI change during the
+sweep is impossible by the pin, but a DeepSeek-side change to what
+`deepseek-flash` serves is not. dsh records the model it requested, not the id
+in DeepSeek's response, so model identity is `harness-recorded`; the pricing
+page's alias mapping is checked before each level and any change stops the
+sweep for the owner.
+
 ## 2026-10-17: Muse Wonder Full High judged without a new exam; Meta transport stops are rerun
 
 ### Decision

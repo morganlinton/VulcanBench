@@ -193,6 +193,8 @@ _PROVIDER_EFFORT_MAPS = {
     "zcode": _ZCODE_EFFORT_VALUES,
     "devin": _DEVIN_EFFORT_VALUES,
     "pi": _PI_EFFORT_VALUES,
+    # DeepSeek Harness's DeepSeek route takes off, low, high and max.
+    "dsh": {"low": "low", "high": "high", "max": "max"},
 }
 
 

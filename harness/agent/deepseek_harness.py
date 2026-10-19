@@ -14,6 +14,8 @@ Run settings (owner decisions 2026-10-19, docs/DECISIONS.md):
   feedback upload are off. The model never sees either, so behaviour is
   unchanged; task content still reaches DeepSeek in the model requests.
 - Session logs are written uncompressed so the receipts are auditable.
+- OpenTelemetry upload is off through ``DSH_TELEMETRY_MODE=DISABLED``, the
+  variable the shipped config reads, so that entry's config stays as shipped.
 
 Token use is read from dsh's persisted ``assistant/message`` events, each of
 which carries the call's usage and time; cost is metered per call with
@@ -72,13 +74,12 @@ def benchmark_patch(model: str, effort: str) -> str:
 - id: session-log-deepseek
   config:
     enabled: false
-- id: session-telemetry-otel
-  config:
-    mode: DISABLED
 - id: tool-web
   disabled: true
+# A patch row replaces the entry's whole config, so the shipped root is restated.
 - id: session-persistence-jsonl
   config:
+    root: !!js dshHomePath('sessions')
     compression: none
 """
 
@@ -139,6 +140,7 @@ def _zero() -> dict[str, Any]:
         calls=0,
         retried_attempts=0,
         attempts_without_usage=0,
+        unmetered_title_calls=0,
         peak_calls=0,
         metered_usd=0.0,
     )
@@ -164,7 +166,8 @@ def collect_usage(paths: list[Path], model: str, priced_spec: str) -> dict[str, 
     interrupted, its stream's last usage chunk) and must come from
     ``PROVIDER``/``model``. A retried ``assistant/attempt`` keeps its usage only
     in its stream; it is billed, so it counts. An attempt that reports no usage
-    is counted under ``attempts_without_usage``. ``input`` excludes cache reads,
+    is counted under ``attempts_without_usage``, and dsh's session-title call,
+    which records no usage, under ``unmetered_title_calls``. ``input`` excludes cache reads,
     which DeepSeek reports separately (Messages protocol semantics).
     """
     totals = _zero()
@@ -174,6 +177,14 @@ def collect_usage(paths: list[Path], model: str, priced_spec: str) -> dict[str, 
             for line in source:
                 row = json.loads(line)
                 kind = row.get("type")
+                if kind == "session/title-llm-request":
+                    # dsh titles each session with one small call (input capped at
+                    # 4 KiB) and records no usage for it; counted, disclosed, unpriced.
+                    route = (row.get("data") or {}).get("route") or {}
+                    if route.get("provider") != PROVIDER or route.get("model") != model:
+                        raise ProviderError(f"dsh title call on an unexpected route: {route!r}")
+                    totals["unmetered_title_calls"] += 1
+                    continue
                 if kind not in {"assistant/message", "assistant/attempt"}:
                     continue
                 key = (str(path), row.get("seq"))
@@ -455,6 +466,14 @@ class DeepSeekHarnessAdapter:
         )
         outcome.subtype = "completed" if outcome.finished else f"exit-{proc.returncode}"
         collector.record("dsh_usage", usage)
+        inactive = "did not activate" in "".join(errors)
+        if inactive or (outcome.finished and not usage["calls"]):
+            # A plugin that failed to load (e.g. session persistence) silently drops
+            # receipts, so the run cannot be audited and must not be scored.
+            raise ProviderError(
+                "dsh run has no auditable usage: "
+                + ("a plugin did not activate" if inactive else "no session-log receipts")
+            )
         if not (outcome.timed_out or outcome.finished):
             detail = str(failure or "".join(errors)[-2000:])
             infra = any(f"{code}:" in detail or f'"{code}"' in detail for code in INFRA_CODES)

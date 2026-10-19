@@ -161,7 +161,7 @@ def test_patch_turns_off_uploads_and_web_tools():
     patch = benchmark_patch("deepseek-v4-pro", "max")
     assert "model: deepseek-v4-pro" in patch and "reasoningEffort: max" in patch
     assert "id: session-log-deepseek\n  config:\n    enabled: false" in patch
-    assert "mode: DISABLED" in patch
+    assert "root: !!js dshHomePath('sessions')" in patch
     assert "id: tool-web\n  disabled: true" in patch
     assert "compression: none" in patch
 
@@ -175,12 +175,18 @@ def test_usage_counts_messages_retries_and_peak_calls(tmp_path):
             _attempt(3, {"inputTokens": 1000, "outputTokens": 10}),
             _attempt(4, None),
             _message(5, time_ms=PEAK_MS, usage={"inputTokens": 1000, "outputTokens": 100}),
+            {
+                "type": "session/title-llm-request",
+                "seq": 6,
+                "time": OFF_PEAK_MS,
+                "data": {"route": {"provider": "deepseek-official", "model": MODEL}},
+            },
         ],
     )
     usage = collect_usage([log], MODEL, SPEC)
     assert (usage["calls"], usage["retried_attempts"], usage["attempts_without_usage"]) == (2, 1, 1)
     assert (usage["input"], usage["cacheRead"], usage["output"]) == (2200, 800, 160)
-    assert usage["peak_calls"] == 1
+    assert usage["peak_calls"] == 1 and usage["unmetered_title_calls"] == 1
     off_peak = cost_usd(SPEC, 1000, 50, cached_input_tokens=800) + cost_usd(SPEC, 1000, 10)
     assert usage["metered_usd"] == round(off_peak + 2 * cost_usd(SPEC, 1000, 100), 6)
 
@@ -226,6 +232,11 @@ def test_run_sets_settings_records_usage_and_archives(tmp_path, monkeypatch):
     start = collector.events[0][1]
     assert start["harness_version"] == deepseek_harness.VERSION and start["billing"] == "api"
     assert collector.events[-1][0] == "cli_agent_result"
+
+
+def test_finished_run_without_receipts_fails_closed(tmp_path, monkeypatch):
+    with pytest.raises(ProviderError, match="no session-log receipts"):
+        _run(tmp_path, monkeypatch, STDOUT, [])
 
 
 def test_failed_run_raises_and_flags_api_failures(tmp_path, monkeypatch):

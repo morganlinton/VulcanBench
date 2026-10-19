@@ -14,6 +14,9 @@
 # fraction of a level, so each level is retried with --only-missing until it
 # completes, waiting out "limit reached" windows rather than burning retries.
 #
+# For an API-billed harness set PROBE=none; PRELEVEL may name a command that
+# must succeed before each level starts.
+#
 #   bash scripts/cii-v4-board/run_effort_sweep.sh
 set -u
 cd "$(dirname "$0")/../.."
@@ -33,6 +36,8 @@ if pgrep -f "vulcanbench run --suite $SUITE" >/dev/null 2>&1; then
 fi
 
 quota_ready() {
+  # API-billed harnesses have no subscription window to probe.
+  [ "$PROBE" = "none" ] && return 0
   local out
   out=$(echo "reply with the single word ok" \
     | claude -p --model "$PROBE" --max-turns 1 2>&1 | tail -1)
@@ -43,6 +48,12 @@ quota_ready() {
 }
 
 for level in $LEVELS; do
+  # Optional gate before each level (e.g. a provider alias check); a failure
+  # stops the sweep for the operator.
+  if [ -n "${PRELEVEL:-}" ] && ! bash -c "$PRELEVEL"; then
+    echo "=== $MODEL effort=$level STOPPED by PRELEVEL check $(date '+%F %H:%M:%S')"
+    exit 3
+  fi
   outdir="$OUTROOT/$level"
   mkdir -p "$outdir"
   for attempt in $(seq 1 40); do

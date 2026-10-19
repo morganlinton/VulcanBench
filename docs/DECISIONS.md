@@ -39,7 +39,10 @@ titles stay as shipped.
 
 Billing is the API key (`DEEPSEEK_API_KEY`), so runs are metered API spend.
 Usage comes from dsh's own `assistant/message` events, plus retried
-`assistant/attempt` events, which DeepSeek also bills. Prices (checked
+`assistant/attempt` events, which DeepSeek also bills. dsh also titles each
+session with one small `deepseek-flash` call (input capped at 4 KiB) and records
+no usage for it; those calls are counted per run (`unmetered_title_calls`) and
+left unpriced, which understates cost by well under a cent per run. Prices (checked
 2026-10-19 at api-docs.deepseek.com/quick_start/pricing), per million tokens,
 off-peak: Flash $0.15 input, $0.003 cached input, $0.60 output; V4 Pro $0.66,
 $0.022, $1.98. Peak hours (01:00 to 04:00 and 06:00 to 10:00 UTC, Monday to

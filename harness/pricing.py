@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
 
@@ -106,11 +107,15 @@ PRICES: dict[str, dict[str, float]] = {
     "qwen:qwen3-max": {"input": 1.20, "output": 6.00},
     "qwen:qwen3.5-plus": {"input": 0.40, "output": 2.40},
     "qwen:qwen-plus": {"input": 0.40, "output": 1.20},
-    # DeepSeek V4 public-beta list prices. A peak/off-peak policy (2x during
-    # Beijing peak hours) has been announced but is not yet in effect and is
-    # not modeled, override with VULCANBENCH_PRICING if/when it lands.
+    # DeepSeek V4 public-beta list prices (Report 13, August 2026). DeepSeek has
+    # retired V4 Flash; the legacy id now routes to V4.1 Flash at Flash prices.
     "deepseek:deepseek-v4-flash": {"input": 0.14, "output": 0.28},
-    "deepseek:deepseek-v4-pro": {"input": 0.435, "output": 0.87},
+    # Off-peak list prices, api-docs.deepseek.com/quick_start/pricing checked
+    # 2026-10-19: deepseek-flash is V4.1-Flash-1017, deepseek-v4-pro is
+    # V4-Pro-0813 (was $0.435/$0.87 in the V4 beta). Peak hours bill 2x; see
+    # PEAK_WINDOWS and cost_usd_at.
+    "deepseek:deepseek-flash": {"input": 0.15, "cached_input": 0.003, "output": 0.60},
+    "deepseek:deepseek-v4-pro": {"input": 0.66, "cached_input": 0.022, "output": 1.98},
     # Meta Model API standard tier. Contributor requests permit Meta to use
     # prompts/completions for training in exchange for the lower rate.
     "meta:muse-spark-1.2": {"input": 1.25, "output": 4.25},
@@ -153,7 +158,29 @@ _SPEC_ALIASES = {
     "muse-code:": "meta:",
     # Pi specs name the provider: "pi:meta/<model>" prices as "meta:<model>".
     "pi:meta/": "meta:",
+    # DeepSeek Harness runs DeepSeek's own API models.
+    "dsh:": "deepseek:",
 }
+
+# Provider price multipliers by UTC time. DeepSeek bills 2x during peak hours,
+# 01:00 to 04:00 and 06:00 to 10:00 UTC, Monday to Friday (pricing page checked
+# 2026-10-19). The PRICES table holds the off-peak rate.
+PEAK_WINDOWS: dict[str, tuple[float, tuple[tuple[int, int], ...]]] = {
+    "deepseek:": (2.0, ((1, 4), (6, 10))),
+}
+
+
+def peak_multiplier(model: str, at: datetime) -> float:
+    """Price multiplier for a call to ``model`` made at ``at`` (timezone-aware)."""
+    if at.tzinfo is None:
+        raise ValueError("peak pricing needs a timezone-aware timestamp")
+    spec = _canonical_spec(model)
+    for prefix, (multiplier, windows) in PEAK_WINDOWS.items():
+        if spec.startswith(prefix):
+            utc = at.astimezone(UTC)
+            if utc.weekday() < 5 and any(start <= utc.hour < end for start, end in windows):
+                return multiplier
+    return 1.0
 
 
 def _canonical_spec(model: str) -> str:
@@ -215,6 +242,21 @@ def cost_usd(
         uncached * rate["input"] + cached * cached_rate + max(0, completion_tokens) * rate["output"]
     ) / _PER_MILLION
     return round(cost, 6)
+
+
+def cost_usd_at(
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    at: datetime,
+    *,
+    cached_input_tokens: int = 0,
+) -> float | None:
+    """``cost_usd`` for one call made at ``at``, with the provider's peak multiplier."""
+    base = cost_usd(
+        model, prompt_tokens, completion_tokens, cached_input_tokens=cached_input_tokens
+    )
+    return None if base is None else round(base * peak_multiplier(model, at), 6)
 
 
 def has_cached_input_price(model: str) -> bool:

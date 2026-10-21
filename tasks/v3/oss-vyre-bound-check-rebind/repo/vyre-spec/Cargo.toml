@@ -1,0 +1,38 @@
+[package]
+name = "vyre-spec"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+description = "Frozen data contracts for vyre  -  OpDef, AlgebraicLaw, Category, IntrinsicTable"
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["gpu", "ir", "specification", "wgsl", "vyre"]
+categories = ["algorithms", "api-bindings"]
+documentation = "https://docs.rs/vyre-spec"
+
+[dependencies]
+serde.workspace = true
+smallvec.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+serde_json.workspace = true
+vyre-foundation = { version = "0.6.1", path = "../vyre-foundation" }
+vyre-primitives = { version = "0.6.1", path = "../vyre-primitives" }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lints]
+workspace = true
+
+[[test]]
+name = "sweep_wire_roundtrip_oracle_matrix"
+path = "tests/sweep_wire_roundtrip_oracle_matrix.rs"
+[[test]]
+name = "sweep_wire_u32_volume_oracle_matrix"
+path = "tests/sweep_wire_u32_volume_oracle_matrix.rs"

@@ -1,0 +1,69 @@
+[package]
+name = "vyre-driver"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Driver layer: registry, runtime, pipeline, routing, diagnostics. Substrate-agnostic backend machinery. Part of the vyre GPU compiler."
+readme = "README.md"
+keywords = ["gpu", "compiler", "runtime", "registry", "vyre"]
+categories = ["compilers", "hardware-support", "api-bindings"]
+documentation = "https://docs.rs/vyre-driver"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[[test]]
+name = "cache_invalidation_default"
+path = "tests/cache_invalidation_default.rs"
+required-features = ["self-substrate-adapters"]
+
+[[test]]
+name = "sweep_dispatch_shape_oracle_matrix"
+path = "tests/sweep_dispatch_shape_oracle_matrix.rs"
+
+[[test]]
+name = "sweep_numeric_oracle_matrix"
+path = "tests/sweep_numeric_oracle_matrix.rs"
+
+[[test]]
+name = "driver_lifecycle_e2e"
+path = "tests/driver_lifecycle_e2e.rs"
+
+[features]
+default = []
+self-substrate-adapters = ["dep:vyre-self-substrate"]
+
+[dependencies]
+vyre-foundation = { workspace = true }
+vyre-self-substrate = { workspace = true, optional = true }
+vyre-spec.workspace = true
+vyre-macros.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+rustc-hash.workspace = true
+smallvec.workspace = true
+blake3.workspace = true
+bytemuck.workspace = true
+inventory.workspace = true
+toml.workspace = true
+arc-swap = { workspace = true }
+lasso.workspace = true
+dashmap.workspace = true
+fs2.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+# integration tests/benches assert against these crates' public APIs
+vyre = { workspace = true }
+vyre-driver-reference = { workspace = true }
+vyre-reference = { workspace = true }
+tempfile.workspace = true

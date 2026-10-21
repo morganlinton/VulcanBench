@@ -1,0 +1,28 @@
+schema_version = "1"
+op = "vyre-libs::hash::blake3_compress"
+source = "BLAKE3 reference implementation + blake3 crate on crates.io"
+notes = """
+Every witness feeds the one-block BLAKE3 compression-function output
+and asserts the first 32 bytes match `blake3::hash(input)`. The
+`flags` field is the OR of CHUNK_START | CHUNK_END | ROOT (= 11).
+
+Multi-block tree-hash vectors are post-0.6 (roadmap R-7 `blake3_chunk`).
+"""
+
+[[witness]]
+name = "empty-input"
+input = ""
+block_len = 0
+flags = 11
+
+[[witness]]
+name = "abc"
+input = "abc"
+block_len = 3
+flags = 11
+
+[[witness]]
+name = "64-byte-block"
+input_bytes_hex = "0007_0e15_1c23_2a31_383f_464d_545b_6269_7077_7e85_8c93_9aa1_a8af_b6bd_c4cb_d2d9_e0e7_eef5_fc03_0a11_181f_262d_343b_4249_5057_5e65_6c73_7a81_888f_969d_a4ab_b2b9"
+block_len = 64
+flags = 11

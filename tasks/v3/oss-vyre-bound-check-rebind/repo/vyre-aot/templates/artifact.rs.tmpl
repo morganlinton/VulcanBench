@@ -1,0 +1,375 @@
+//! Bundle loader: read manifest.json, decompress kernel, decompress weights.
+//!
+//! Self-contained  -  no vyre dependency at run-time.
+
+use std::fs;
+use std::io::Read;
+use std::path::{Component, Path, PathBuf};
+
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+
+const MANIFEST_SCHEMA_VERSION: &str = "vyre-aot-manifest-v1";
+const METRIC_RECORD_WORDS: u32 = 8;
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum Target {
+    Ptx,
+    SpirV,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum BufferMemoryKind {
+    Global,
+    Shared,
+    Constant,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum BufferAccessKind {
+    ReadOnly,
+    WriteOnly,
+    ReadWrite,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BufferEntry {
+    pub name: String,
+    pub binding: u32,
+    pub element_count: u32,
+    pub element_size_bytes: u32,
+    pub memory_kind: BufferMemoryKind,
+    pub access: BufferAccessKind,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct DispatchConfig {
+    pub workgroup_size: [u32; 3],
+    pub grid_size: [u32; 3],
+    pub dynamic_shared_bytes: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Manifest {
+    pub schema: String,
+    pub aot_version: String,
+    pub artifact_name: String,
+    pub target: Target,
+    pub entry_point: String,
+    pub dispatch: DispatchConfig,
+    pub kernel_file: String,
+    pub weights_file: String,
+    pub kernel_compression: String,
+    pub weights_compression: String,
+    pub buffers: Vec<BufferEntry>,
+    pub kernel_sha256_hex: String,
+    pub weights_sha256_hex: String,
+    #[serde(default)]
+    pub notes: String,
+    #[serde(default)]
+    pub vsa_fingerprint: Vec<u32>,
+}
+
+#[derive(Debug)]
+pub struct LoadedBundle {
+    pub manifest: Manifest,
+    pub kernel_bytes: Vec<u8>,
+    pub weight_bytes: Vec<u8>,
+}
+
+pub fn load_bundle(dir: &Path) -> Result<LoadedBundle, Box<dyn std::error::Error>> {
+    let manifest_path = dir.join("manifest.json");
+    let manifest_str = fs::read_to_string(&manifest_path)
+        .map_err(|e| format!("read manifest {}: {e}", manifest_path.display()))?;
+    let manifest: Manifest = serde_json::from_str(&manifest_str)?;
+    validate_manifest_contract(&manifest)?;
+
+    let kernel_compressed = read_bundle_file(dir, &manifest.kernel_file)?;
+    let kernel_bytes = match manifest.kernel_compression.as_str() {
+        "lzma" => decompress_lzma(&kernel_compressed)?,
+        "none" => kernel_compressed,
+        other => {
+            return Err(format!("unknown kernel_compression: {other}").into());
+        }
+    };
+    verify_sha256_hex("kernel", &kernel_bytes, &manifest.kernel_sha256_hex)?;
+
+    let weights_compressed = read_bundle_file(dir, &manifest.weights_file)?;
+    let weight_bytes = match manifest.weights_compression.as_str() {
+        s if s.starts_with("brotli") => decompress_brotli(&weights_compressed)?,
+        "none" => weights_compressed,
+        other => {
+            return Err(format!("unknown weights_compression: {other}").into());
+        }
+    };
+    verify_sha256_hex("weights", &weight_bytes, &manifest.weights_sha256_hex)?;
+
+    Ok(LoadedBundle {
+        manifest,
+        kernel_bytes,
+        weight_bytes,
+    })
+}
+
+fn read_bundle_file(
+    dir: &Path,
+    manifest_path: &str,
+) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let relative = validate_bundle_relative_path(manifest_path)?;
+    fs::read(dir.join(relative)).map_err(|error| {
+        format!("read bundle file {manifest_path:?}: {error}. Fix: ensure manifest paths name files inside the bundle directory.").into()
+    })
+}
+
+fn validate_bundle_relative_path(path: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    if path.is_empty() {
+        return Err("bundle manifest file path is empty. Fix: regenerate the bundle manifest with concrete artifact filenames.".into());
+    }
+    let candidate = Path::new(path);
+    if candidate.is_absolute() {
+        return Err(format!("bundle manifest file path {path:?} is absolute. Fix: use bundle-relative artifact filenames only.").into());
+    }
+    let mut clean = PathBuf::new();
+    for component in candidate.components() {
+        match component {
+            Component::Normal(part) => clean.push(part),
+            Component::CurDir => {}
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => {
+                return Err(format!("bundle manifest file path {path:?} escapes the bundle root. Fix: use plain bundle-relative artifact filenames.").into());
+            }
+        }
+    }
+    if clean.as_os_str().is_empty() {
+        return Err(format!("bundle manifest file path {path:?} resolves to the bundle root. Fix: name a concrete artifact file.").into());
+    }
+    Ok(clean)
+}
+
+fn validate_manifest_contract(manifest: &Manifest) -> Result<(), Box<dyn std::error::Error>> {
+    if manifest.schema != MANIFEST_SCHEMA_VERSION {
+        return Err(format!(
+            "unsupported manifest schema {:?}; expected {MANIFEST_SCHEMA_VERSION:?}. Fix: regenerate the bundle with the matching vyre-aot version.",
+            manifest.schema
+        )
+        .into());
+    }
+    if manifest.aot_version.is_empty() {
+        return Err("manifest aot_version is empty. Fix: regenerate the bundle from vyre-aot instead of hand-editing manifest.json.".into());
+    }
+    if manifest.artifact_name.is_empty() {
+        return Err("manifest artifact_name is empty. Fix: regenerate the bundle with a stable artifact name.".into());
+    }
+    if manifest.entry_point.is_empty() {
+        return Err("manifest entry_point is empty. Fix: compile a concrete visible GPU kernel entry before bundling.".into());
+    }
+    validate_dispatch_geometry(&manifest.dispatch)?;
+    validate_compression_contract(
+        "kernel_compression",
+        &manifest.kernel_compression,
+        &["lzma", "none"],
+    )?;
+    validate_weights_compression(&manifest.weights_compression)?;
+    let _ = validate_bundle_relative_path(&manifest.kernel_file)?;
+    let _ = validate_bundle_relative_path(&manifest.weights_file)?;
+    validate_sha256_manifest_field("kernel", &manifest.kernel_sha256_hex)?;
+    validate_sha256_manifest_field("weights", &manifest.weights_sha256_hex)?;
+    validate_buffer_table(&manifest.buffers)?;
+    if !manifest.vsa_fingerprint.is_empty() && manifest.vsa_fingerprint.len() != 8 {
+        return Err(format!(
+            "manifest vsa_fingerprint has {} lane(s); expected 8 or empty. Fix: regenerate the bundle from the optimized Program fingerprint writer.",
+            manifest.vsa_fingerprint.len()
+        )
+        .into());
+    }
+    Ok(())
+}
+
+fn validate_dispatch_geometry(dispatch: &DispatchConfig) -> Result<(), Box<dyn std::error::Error>> {
+    for axis in 0..3 {
+        if dispatch.workgroup_size[axis] == 0 {
+            return Err(format!(
+                "manifest workgroup_size axis {axis} is zero. Fix: derive explicit positive CUDA launch geometry before bundling."
+            )
+            .into());
+        }
+        if dispatch.grid_size[axis] == 0 {
+            return Err(format!(
+                "manifest grid_size axis {axis} is zero. Fix: bundle only finite dispatch geometry; runtime-grid placeholders are not supported by this launcher."
+            )
+            .into());
+        }
+    }
+    let _ = checked_axis_product("workgroup_size", dispatch.workgroup_size)?;
+    let _ = checked_axis_product("grid_size", dispatch.grid_size)?;
+    Ok(())
+}
+
+fn checked_axis_product(label: &str, axes: [u32; 3]) -> Result<u64, Box<dyn std::error::Error>> {
+    u64::from(axes[0])
+        .checked_mul(u64::from(axes[1]))
+        .and_then(|xy| xy.checked_mul(u64::from(axes[2])))
+        .ok_or_else(|| {
+            format!(
+                "manifest {label} {axes:?} overflows u64. Fix: shard the AOT dispatch before bundling."
+            )
+            .into()
+        })
+}
+
+fn validate_compression_contract(
+    field: &str,
+    value: &str,
+    allowed: &[&str],
+) -> Result<(), Box<dyn std::error::Error>> {
+    if allowed.iter().any(|candidate| *candidate == value) {
+        return Ok(());
+    }
+    Err(format!(
+        "manifest {field}={value:?} is unsupported. Fix: regenerate with one of {allowed:?}."
+    )
+    .into())
+}
+
+fn validate_weights_compression(value: &str) -> Result<(), Box<dyn std::error::Error>> {
+    if value == "none" || value.starts_with("brotli") {
+        return Ok(());
+    }
+    Err(format!(
+        "manifest weights_compression={value:?} is unsupported. Fix: regenerate with brotli-11 or none."
+    )
+    .into())
+}
+
+fn validate_buffer_table(buffers: &[BufferEntry]) -> Result<(), Box<dyn std::error::Error>> {
+    if buffers.is_empty() {
+        return Err("manifest buffer table is empty. Fix: emit at least the parameter buffer required by the launcher ABI.".into());
+    }
+    let mut bindings: Vec<(u32, usize)> = Vec::with_capacity(buffers.len());
+    let mut names: Vec<(&str, usize)> = Vec::with_capacity(buffers.len());
+    let mut metrics_buffers = 0_usize;
+
+    for (index, buffer) in buffers.iter().enumerate() {
+        if buffer.name.is_empty() {
+            return Err(format!(
+                "manifest buffer {index} has an empty name. Fix: emit stable buffer names before bundling."
+            )
+            .into());
+        }
+        if buffer.element_size_bytes == 0 {
+            return Err(format!(
+                "manifest buffer {index} `{}` has element_size_bytes=0. Fix: lower the buffer to a concrete fixed-width ABI element.",
+                buffer.name
+            )
+            .into());
+        }
+        let _ = checked_buffer_bytes(index, buffer)?;
+        if buffer.name == "metrics" {
+            metrics_buffers += 1;
+            if buffer.element_size_bytes != 4 {
+                return Err(format!(
+                    "manifest metrics buffer has element_size_bytes={} but metrics records are u32 words. Fix: emit metrics.element_size_bytes=4.",
+                    buffer.element_size_bytes
+                )
+                .into());
+            }
+            if buffer.element_count < METRIC_RECORD_WORDS {
+                return Err(format!(
+                    "manifest metrics buffer has {} word(s) but final records require at least {METRIC_RECORD_WORDS}. Fix: allocate a larger metrics ring.",
+                    buffer.element_count
+                )
+                .into());
+            }
+        }
+        bindings.push((buffer.binding, index));
+        names.push((buffer.name.as_str(), index));
+    }
+
+    bindings.sort_unstable_by_key(|(binding, _)| *binding);
+    for pair in bindings.windows(2) {
+        if pair[0].0 == pair[1].0 {
+            return Err(format!(
+                "manifest buffers {} and {} both use binding {}. Fix: emit a one-to-one CUDA argument table before bundling.",
+                pair[0].1, pair[1].1, pair[0].0
+            )
+            .into());
+        }
+    }
+    names.sort_unstable_by(|left, right| left.0.cmp(right.0));
+    for pair in names.windows(2) {
+        if pair[0].0 == pair[1].0 {
+            return Err(format!(
+                "manifest buffers {} and {} both use name `{}`. Fix: emit unique stable buffer names before bundling.",
+                pair[0].1, pair[1].1, pair[0].0
+            )
+            .into());
+        }
+    }
+    if metrics_buffers > 1 {
+        return Err(format!(
+            "manifest has {metrics_buffers} metrics buffers. Fix: emit exactly one `metrics` buffer."
+        )
+        .into());
+    }
+    Ok(())
+}
+
+fn checked_buffer_bytes(
+    index: usize,
+    buffer: &BufferEntry,
+) -> Result<u64, Box<dyn std::error::Error>> {
+    u64::from(buffer.element_count)
+        .checked_mul(u64::from(buffer.element_size_bytes))
+        .ok_or_else(|| {
+            format!(
+                "manifest buffer {index} `{}` byte size overflows u64. Fix: shard the buffer before bundling.",
+                buffer.name
+            )
+            .into()
+        })
+}
+
+fn verify_sha256_hex(
+    label: &str,
+    bytes: &[u8],
+    expected: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    validate_sha256_manifest_field(label, expected)?;
+    let actual = sha256_hex(bytes);
+    if !actual.eq_ignore_ascii_case(expected) {
+        return Err(format!("{label} SHA-256 mismatch: manifest={expected}, actual={actual}. Fix: reject the corrupted bundle and regenerate the artifact.").into());
+    }
+    Ok(())
+}
+
+fn validate_sha256_manifest_field(
+    label: &str,
+    expected: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if expected.len() != 64 || !expected.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err(format!("{label} SHA-256 manifest field {expected:?} is not a 64-character hex digest. Fix: regenerate manifest.json from the bundle writer.").into());
+    }
+    Ok(())
+}
+
+fn sha256_hex(input: &[u8]) -> String {
+    let digest = Sha256::digest(input);
+    let mut out = String::with_capacity(digest.len() * 2);
+    for byte in digest {
+        let _ = std::fmt::Write::write_fmt(&mut out, format_args!("{byte:02x}"));
+    }
+    out
+}
+
+fn decompress_lzma(input: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut out = Vec::new();
+    let mut reader = std::io::Cursor::new(input);
+    lzma_rs::lzma_decompress(&mut reader, &mut out)?;
+    Ok(out)
+}
+
+fn decompress_brotli(input: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut out = Vec::new();
+    let mut decoder = brotli::Decompressor::new(input, 4096);
+    decoder.read_to_end(&mut out)?;
+    Ok(out)
+}

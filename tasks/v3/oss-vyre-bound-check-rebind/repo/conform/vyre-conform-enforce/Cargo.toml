@@ -1,0 +1,32 @@
+[package]
+name = "vyre-conform-enforce"
+version = "0.6.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Algebraic-law prover for vyre ops over witness pairs."
+readme = "README.md"
+keywords = ["vyre", "conformance", "law", "prover"]
+categories = ["development-tools::testing"]
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+vyre.workspace = true
+vyre-conform-spec.workspace = true
+vyre-conform-generate.workspace = true
+
+[dev-dependencies]
+vyre-spec.workspace = true
+vyre-libs = { workspace = true, features = ["full", "security", "c-parser"] }
+vyre-primitives = { workspace = true, features = ["all-lego", "inventory-registry"] }
+vyre-intrinsics.workspace = true
+vyre-harness.workspace = true
+vyre-driver.workspace = true
+inventory.workspace = true
+toml.workspace = true

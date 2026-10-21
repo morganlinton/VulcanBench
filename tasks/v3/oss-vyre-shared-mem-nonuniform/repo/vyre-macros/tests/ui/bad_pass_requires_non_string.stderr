@@ -1,0 +1,5 @@
+error: pass metadata arrays accept only string literals. Fix: use ["analysis_name"].
+ --> tests/ui/bad_pass_requires_non_string.rs:5:17
+  |
+5 |     requires = [1],
+  |                 ^

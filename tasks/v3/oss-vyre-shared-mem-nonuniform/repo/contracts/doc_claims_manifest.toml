@@ -1,0 +1,91 @@
+# Doc-claim-to-test manifest.
+#
+# Every README / docs performance or capability claim that should be
+# regression-gated lands here as one row. The gate
+# (`scripts/check_doc_claim_to_test.sh`) verifies:
+#   - each claim's `doc` file exists and contains the `phrase`.
+#   - each claim's `test` file exists.
+#
+# Adding a new headline claim ("vyre dispatches in <50 µs", "wgpu+spirv
+# parity green on N programs") requires one row here AND a real
+# proving test/bench. Removing a claim requires removing both.
+#
+# This is the "for every claim the docs make, there is a test that
+# fails when the claim becomes false" contract from CLAUDE.md, encoded.
+
+[[claim]]
+id = "dispatch_hot_path_budgets"
+doc = "vyre-driver-wgpu/CONFIG.md"
+phrase = "latency / throughput micro-benches"
+test = "vyre-driver-wgpu/tests/dispatch_hot_path.rs"
+description = "Cached small-program latency + 4 MiB throughput dispatch contract."
+
+[[claim]]
+id = "pipeline_cache_byte_budget"
+doc = "vyre-driver-wgpu/CONFIG.md"
+phrase = "pipeline-cache byte budget"
+test = "vyre-driver-wgpu/tests/pipeline_cache_contract.rs"
+description = "In-memory pipeline-cache byte-budget enforcement (audit item #17)."
+
+[[claim]]
+id = "pipeline_cache_entry_budget"
+doc = "vyre-driver-wgpu/CONFIG.md"
+phrase = "pipeline-cache entry budget"
+test = "vyre-driver-wgpu/tests/pipeline_cache_contract.rs"
+description = "In-memory pipeline-cache entry-count enforcement (audit item #18)."
+
+[[claim]]
+id = "dispatch_allocation_contract"
+doc = "audits/VYRE_PERFORMANCE_ARCHITECTURE_INVENTORY_2026-04-28.md"
+phrase = "dispatch_allocation_contract.rs"
+test = "vyre-driver-wgpu/tests/dispatch_allocation_contract.rs"
+description = "Per-dispatch heap-allocation budget claim (audit item #10)."
+
+[[claim]]
+id = "primitives_lego_substrate"
+doc = "vyre-primitives/README.md"
+phrase = "Tier-2.5 LEGO substrate"
+test = "vyre-primitives/tests/region_adversarial.rs"
+description = "Tier-2.5 LEGO substrate compositional contract claim."
+
+[[claim]]
+id = "harness_universal_registry"
+doc = "vyre-harness/README.md"
+phrase = "Universal Cat-A op harness registry"
+test = "vyre-harness/tests/categorical_laws_proptest.rs"
+description = "Single-registry universal harness claim verified by categorical-laws proptest."
+
+[[claim]]
+id = "harness_self_consumer"
+doc = "vyre-harness/README.md"
+phrase = "OpEntry"
+test = "vyre-harness/tests/self_consumer_conform.rs"
+description = "OpEntry self-consumer conformance contract."
+
+[[claim]]
+id = "aot_no_runtime_dependency"
+doc = "vyre-aot/README.md"
+phrase = "removes the entire vyre runtime from the deployed image"
+test = "vyre-aot/tests/compile_smoke.rs"
+description = "AOT-emitted artifacts compile through the full pipeline (compile_smoke.rs)."
+
+[[claim]]
+id = "cuda_unsafe_policy"
+doc = "vyre-driver-cuda/src/lib.rs"
+phrase = "unsafe FFI"
+test = "vyre-driver-cuda/src/lib.rs"
+description = "CUDA crate documents its unsafe-code policy in lib.rs."
+
+[[claim]]
+id = "tier_b_zero_rust_extensibility"
+doc = "rules/README.md"
+phrase = "No Rust code required"
+test = "rules/op/decode.base64.toml"
+description = "Tier-B rule corpus extensibility  -  zero-Rust contribution path."
+
+[[claim]]
+id = "public_facade_consumer_path"
+doc = "vyre-core/README.md"
+phrase = "single user-facing import path"
+test = "examples/public_facade_smoke/src/main.rs"
+description = "Consumer uses `vyre::*` only; internal-import gate (#124) enforces this."

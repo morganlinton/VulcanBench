@@ -1,0 +1,78 @@
+schema_version = "1"
+op = "vyre-libs::matching::aho_corasick"
+source = "Aho-Corasick 1975 paper + aho-corasick crate regression corpus"
+notes = """
+Each witness feeds the CPU reference walk (state transitions from
+the compiled DFA) and the vyre IR executed through the reference
+interpreter. Both must produce byte-identical `expected_accepts`
+streams.
+
+The `patterns` list may include non-ASCII strings. Each pattern's
+accept id is `1-indexed by order in the list`  -  pattern index `i`
+produces `accept = i + 1` when its state is entered.
+"""
+
+[[witness]]
+name = "ac-paper-ushers"
+patterns = ["he", "she", "his", "hers"]
+haystack = "ushers"
+
+[[witness]]
+name = "single-pattern-interior"
+patterns = ["abc"]
+haystack = "xxabcxx"
+
+[[witness]]
+name = "single-pattern-prefix"
+patterns = ["abc"]
+haystack = "abcxxxx"
+
+[[witness]]
+name = "single-pattern-suffix"
+patterns = ["abc"]
+haystack = "xxxxabc"
+
+[[witness]]
+name = "single-pattern-no-match"
+patterns = ["abc"]
+haystack = "xxxyyyy"
+
+[[witness]]
+name = "overlapping-patterns"
+patterns = ["aa", "aaa"]
+haystack = "aaaa"
+
+[[witness]]
+name = "shared-suffix"
+patterns = ["abab", "babab"]
+haystack = "xababaxxbabaxbababx"
+
+[[witness]]
+name = "ambiguous-accept-chain"
+patterns = ["foo", "foobar", "bar"]
+haystack = "foobar"
+
+[[witness]]
+name = "single-byte-pattern"
+patterns = ["x"]
+haystack = "axbxcxd"
+
+[[witness]]
+name = "pattern-is-haystack"
+patterns = ["exact"]
+haystack = "exact"
+
+[[witness]]
+name = "two-patterns-same-start"
+patterns = ["cat", "cater"]
+haystack = "catering"
+
+[[witness]]
+name = "long-needle"
+patterns = ["abcdefghijklmnopqrstuvwxyz"]
+haystack = "xxxabcdefghijklmnopqrstuvwxyzxxx"
+
+[[witness]]
+name = "pathological-failure-chain"
+patterns = ["abab"]
+haystack = "ababababab"

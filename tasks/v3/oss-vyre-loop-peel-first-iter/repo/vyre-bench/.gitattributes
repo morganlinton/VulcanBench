@@ -1,0 +1,6 @@
+# Honest workload corpora — binary blobs tracked by git-lfs
+corpus/honest/**/* filter=lfs diff=lfs merge=lfs -text
+
+# Baselines and snapshots are plain JSON — do NOT LFS-track
+baselines/**/*.json !filter
+snapshots/**/*.json !filter

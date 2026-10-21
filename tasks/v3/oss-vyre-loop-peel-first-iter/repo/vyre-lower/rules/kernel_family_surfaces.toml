@@ -1,0 +1,32 @@
+schema_version = 1
+contract = "vyre-kernel-family-surfaces:v1"
+
+[[family]]
+family_id = "lower.rewrites"
+owner_lane = "lower_emit"
+root = "vyre-lower/src/rewrites"
+public_reexport = "vyre-lower/src/rewrites/mod.rs"
+schedule_config = "vyre-lower/rules/schedules/lower_rewrites.toml"
+evidence_writer = "vyre-lower/src/audit.rs"
+forbid_section_dividers = true
+forbidden_private_import_prefixes = ["vyre_emit_naga::", "vyre_emit_ptx::", "vyre_driver_cuda::", "vyre_driver_wgpu::"]
+
+[[family]]
+family_id = "lower.analyses"
+owner_lane = "lower_emit"
+root = "vyre-lower/src/analyses"
+public_reexport = "vyre-lower/src/analyses/mod.rs"
+schedule_config = "vyre-lower/rules/schedules/lower_analyses.toml"
+evidence_writer = "vyre-lower/src/audit.rs"
+forbid_section_dividers = true
+forbidden_private_import_prefixes = ["vyre_emit_naga::", "vyre_emit_ptx::", "vyre_driver_cuda::", "vyre_driver_wgpu::"]
+
+[[family]]
+family_id = "emit.naga"
+owner_lane = "lower_emit"
+root = "vyre-emit-naga/src/emitter"
+public_reexport = "vyre-emit-naga/src/emitter/mod.rs"
+schedule_config = "vyre-lower/rules/schedules/emit_naga.toml"
+evidence_writer = "vyre-emit-naga/src/lib.rs"
+forbid_section_dividers = true
+forbidden_private_import_prefixes = ["vyre_lower::rewrites::", "vyre_lower::analyses::"]

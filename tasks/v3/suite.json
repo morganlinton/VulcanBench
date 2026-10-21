@@ -1,6 +1,6 @@
 {
   "_charter": "CHARTER.md",
-  "_note": "VulcanBench v3: 23 tasks from real merged post-cutoff OSS PRs across five languages (Python 9, Rust 4, TypeScript 4, JavaScript 3, Go 3), each graded by hidden deterministic tests in a network-isolated Docker sandbox. Built as a direct response to OpenAI's 'Separating signal from noise in coding evaluations' audit of SWE-Bench Pro, which found ~30% of tasks broken across four failure modes. v3's countermeasures: (1) overly-strict tests -- graders assert behavior via public APIs, never exact error text or internal state; (2) underspecified prompts -- every issue.md states the expected behavior and lists acceptance examples whose constants are generated from the gold patch; (3) low-coverage tests -- a coverage floor of >=3 fail_to_pass tests per task, each independently verified to fail at the base commit (this floor caught and fixed an inflated pre-patch score on oss-zod-proto-catchall, where 2 of 4 tests passed unfixed); (4) misleading prompts -- the pass_to_pass regression guard never references the new feature, so it compiles and passes at the base commit. Every task is gated by scripts/validate_tasks.py: gold=1.0, pre-patch=0.0, deterministic over 3 runs.",
+  "_note": "VulcanBench v3: 24 tasks from real merged post-cutoff OSS PRs across five languages (Python 9, Rust 5, TypeScript 4, JavaScript 3, Go 3), each graded by hidden deterministic tests in a network-isolated Docker sandbox. Built as a direct response to OpenAI's 'Separating signal from noise in coding evaluations' audit of SWE-Bench Pro, which found ~30% of tasks broken across four failure modes. v3's countermeasures: (1) overly-strict tests -- graders assert behavior via public APIs, never exact error text or internal state; (2) underspecified prompts -- every issue.md states the expected behavior and lists acceptance examples whose constants are generated from the gold patch; (3) low-coverage tests -- a coverage floor of >=3 fail_to_pass tests per task, each independently verified to fail at the base commit (this floor caught and fixed an inflated pre-patch score on oss-zod-proto-catchall, where 2 of 4 tests passed unfixed); (4) misleading prompts -- the pass_to_pass regression guard never references the new feature, so it compiles and passes at the base commit. Every task is gated by scripts/validate_tasks.py: gold=1.0, pre-patch=0.0, deterministic over 3 runs.",
   "tasks": [
     "oss-flask-teardown-robust",
     "oss-aiohttp-upgrade-deferred",
@@ -24,7 +24,8 @@
     "oss-semver-xrange-order",
     "oss-chi-readfrom-tee-doublecount",
     "oss-cobra-noduplicateargs",
-    "oss-pflag-uintslice-hex"
+    "oss-pflag-uintslice-hex",
+    "oss-vyre-loop-peel-first-iter"
   ],
   "full": [
     "oss-flask-teardown-robust",
@@ -49,7 +50,8 @@
     "oss-semver-xrange-order",
     "oss-chi-readfrom-tee-doublecount",
     "oss-cobra-noduplicateargs",
-    "oss-pflag-uintslice-hex"
+    "oss-pflag-uintslice-hex",
+    "oss-vyre-loop-peel-first-iter"
   ],
   "python": [
     "oss-flask-teardown-robust",
@@ -66,7 +68,8 @@
     "oss-itertools-strip-prefix",
     "oss-jiff-signdur-panic",
     "oss-jiff-date-day-lt1",
-    "oss-jiff-strftime-negpad"
+    "oss-jiff-strftime-negpad",
+    "oss-vyre-loop-peel-first-iter"
   ],
   "typescript": [
     "oss-zod-invert-codec",

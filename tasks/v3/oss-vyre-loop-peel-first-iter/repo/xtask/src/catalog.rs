@@ -1,0 +1,269 @@
+//! `cargo_full run --bin xtask -- catalog`  -  generate subsystem-by-subsystem markdown
+//! tables of every registered op with its tier, exemption status,
+//! fixpoint contract, and declared witness presence.
+//!
+//! External consumers browsing the Linux-kernel-flat `vyre-primitives`
+//! layout need a one-page summary per subsystem so they can tell at a
+//! glance what primitives exist. This emits `docs/catalog/<subsystem>.md`
+//! files from the live inventory registries  -  there's no hand-maintained
+//! list to drift out of sync.
+
+use std::collections::BTreeMap;
+use std::fs;
+use std::io::{self, Read};
+use std::path::{Path, PathBuf};
+
+const MAX_CATALOG_TEXT_BYTES: u64 = 4_194_304;
+
+pub(crate) fn run(args: &[String]) {
+    let mut out_dir = default_out_dir();
+    let mut check = false;
+    let mut it = args.iter().skip(2);
+    while let Some(arg) = it.next() {
+        match arg.as_str() {
+            "--out" => {
+                out_dir = match it.next() {
+                    Some(path) => PathBuf::from(path),
+                    None => {
+                        eprintln!("Fix: `--out` needs a directory path");
+                        std::process::exit(1);
+                    }
+                }
+            }
+            "--check" => check = true,
+            other => {
+                eprintln!("Fix: unknown flag `{other}` for catalog. See --help.");
+                std::process::exit(1);
+            }
+        }
+    }
+
+    let catalog = collect();
+    if check {
+        check_against_disk(&catalog, &out_dir);
+    } else {
+        emit_to_disk(&catalog, &out_dir);
+    }
+}
+
+fn default_out_dir() -> PathBuf {
+    let manifest = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".to_string());
+    PathBuf::from(manifest).join("../docs/catalog")
+}
+
+struct OpRow {
+    op_id: &'static str,
+    // Retained for future per-row catalog formatting (e.g. grouping by
+    // subsystem inside a single rendered page). The collect() path
+    // already groups outer BTreeMap keys by subsystem, so the field
+    // is redundant with the map key for now.
+    #[allow(dead_code)]
+    subsystem: String,
+    witness: bool,
+    expected: bool,
+    tolerance: u32,
+}
+
+fn op_tolerance(op_id: &str) -> u32 {
+    match op_id {
+        "vyre-libs::nn::softmax" => 1,
+        "vyre-libs::nn::attention" => 4,
+        "vyre-libs::nn::gqa_attention" => 4,
+        "vyre-libs::nn::layer_norm" => 1,
+        "vyre-libs::nn::silu" => 1,
+        "vyre-libs::nn::logit_softcap" => 1,
+        "vyre-libs::nn::rms_norm" => 2,
+        "vyre-libs::nn::rms_norm_linear" => 2,
+        "vyre-libs::optim::newton_schulz_5step" => 4,
+        _ => 0,
+    }
+}
+
+fn collect() -> BTreeMap<String, Vec<OpRow>> {
+    let mut by_subsystem: BTreeMap<String, Vec<OpRow>> = BTreeMap::new();
+
+    for entry in vyre_libs::harness::all_entries() {
+        let subsystem = subsystem_for(entry.id);
+        by_subsystem
+            .entry(subsystem.clone())
+            .or_default()
+            .push(OpRow {
+                op_id: entry.id,
+                subsystem,
+                witness: entry.test_inputs.is_some(),
+                expected: entry.expected_output.is_some(),
+                tolerance: op_tolerance(entry.id),
+            });
+    }
+    for entry in vyre_primitives::harness::all_entries() {
+        let subsystem = subsystem_for(entry.id);
+        by_subsystem
+            .entry(subsystem.clone())
+            .or_default()
+            .push(OpRow {
+                op_id: entry.id,
+                subsystem,
+                witness: entry.test_inputs.is_some(),
+                expected: entry.expected_output.is_some(),
+                tolerance: op_tolerance(entry.id),
+            });
+    }
+    for entry in vyre_intrinsics::harness::all_entries() {
+        let subsystem = "intrinsics".to_string();
+        by_subsystem
+            .entry(subsystem.clone())
+            .or_default()
+            .push(OpRow {
+                op_id: entry.id,
+                subsystem,
+                witness: entry.test_inputs.is_some(),
+                expected: entry.expected_output.is_some(),
+                tolerance: op_tolerance(entry.id),
+            });
+    }
+    for rows in by_subsystem.values_mut() {
+        rows.sort_by_key(|row| row.op_id);
+    }
+    by_subsystem
+}
+
+fn subsystem_for(op_id: &str) -> String {
+    // `vyre-libs::<subsystem>::<rest>` or `vyre-intrinsics::<rest>`.
+    let no_prefix = op_id
+        .strip_prefix("vyre-libs::")
+        .or_else(|| op_id.strip_prefix("vyre-intrinsics::"))
+        .or_else(|| op_id.strip_prefix("vyre-primitives::"))
+        .unwrap_or(op_id);
+    match no_prefix.split_once("::") {
+        Some((subsystem, _)) => subsystem.to_string(),
+        None => no_prefix.to_string(),
+    }
+}
+
+fn render(subsystem: &str, rows: &[OpRow]) -> String {
+    let mut s = String::new();
+    s.push_str(&format!("# {subsystem}\n\n"));
+    s.push_str(
+        "Auto-generated by `cargo_full run --bin xtask -- catalog`. Do not hand-edit  -  \
+         regenerate from the live inventory registries instead.\n\n",
+    );
+    s.push_str(&format!(
+        "{} op(s) registered in this subsystem.\n\n",
+        rows.len()
+    ));
+    s.push_str("| op id | witness | expected_output | universal diff |\n");
+    s.push_str("| --- | :---: | :---: | --- |\n");
+    for row in rows {
+        let witness = if row.witness { "✓" } else { "–" };
+        let expected = if row.expected { "✓" } else { "–" };
+        let diff = if row.tolerance == 0 {
+            "byte-identity".to_string()
+        } else {
+            format!("{}-ULP", row.tolerance)
+        };
+        s.push_str(&format!(
+            "| `{}` | {} | {} | {} |\n",
+            row.op_id, witness, expected, diff
+        ));
+    }
+    s
+}
+
+fn emit_to_disk(catalog: &BTreeMap<String, Vec<OpRow>>, out_dir: &std::path::Path) {
+    fs::create_dir_all(out_dir).unwrap_or_else(|error| {
+        eprintln!("Fix: failed to create {}: {error}", out_dir.display());
+        std::process::exit(1);
+    });
+    for (subsystem, rows) in catalog {
+        let path = out_dir.join(format!("{subsystem}.md"));
+        let body = render(subsystem, rows);
+        fs::write(&path, body).unwrap_or_else(|error| {
+            eprintln!("Fix: failed to write {}: {error}", path.display());
+            std::process::exit(1);
+        });
+    }
+    let index = render_index(catalog);
+    let index_path = out_dir.join("README.md");
+    fs::write(&index_path, index).unwrap_or_else(|error| {
+        eprintln!("Fix: failed to write {}: {error}", index_path.display());
+        std::process::exit(1);
+    });
+    println!(
+        "wrote {} subsystem catalogs to {}",
+        catalog.len(),
+        out_dir.display()
+    );
+}
+
+fn check_against_disk(catalog: &BTreeMap<String, Vec<OpRow>>, out_dir: &std::path::Path) {
+    let mut drift = Vec::new();
+    for (subsystem, rows) in catalog {
+        let path = out_dir.join(format!("{subsystem}.md"));
+        let expected = render(subsystem, rows);
+        match read_text_bounded(&path) {
+            Ok(got) if got == expected => {}
+            Ok(_) => drift.push(format!("{} diverges from live inventory", path.display())),
+            Err(_) => drift.push(format!("{} missing on disk", path.display())),
+        }
+    }
+    let index = render_index(catalog);
+    let index_path = out_dir.join("README.md");
+    match read_text_bounded(&index_path) {
+        Ok(got) if got == index => {}
+        Ok(_) => drift.push(format!(
+            "{} diverges from live inventory",
+            index_path.display()
+        )),
+        Err(_) => drift.push(format!("{} missing on disk", index_path.display())),
+    }
+    if drift.is_empty() {
+        println!(
+            "catalog matches live inventory ({} subsystems)",
+            catalog.len()
+        );
+    } else {
+        eprintln!("catalog drift detected:");
+        for line in &drift {
+            eprintln!("  - {line}");
+        }
+        eprintln!(
+            "Fix: run `cargo_full run --bin xtask -- catalog` to regenerate, commit the updated files, then re-run --check."
+        );
+        std::process::exit(1);
+    }
+}
+
+fn render_index(catalog: &BTreeMap<String, Vec<OpRow>>) -> String {
+    let mut s = String::new();
+    s.push_str("# Vyre Op Catalog\n\n");
+    s.push_str(
+        "Auto-generated by `cargo_full run --bin xtask -- catalog`. One table per subsystem; \
+         each row is a registered `OpEntry` drawn from `vyre-primitives` \
+         (Tier 2.5), `vyre-libs` (Tier 3), and `vyre-intrinsics` (Tier 2) \
+         inventories.\n\n",
+    );
+    s.push_str("| subsystem | ops |\n| --- | ---: |\n");
+    for (subsystem, rows) in catalog {
+        s.push_str(&format!(
+            "| [{subsystem}]({subsystem}.md) | {} |\n",
+            rows.len()
+        ));
+    }
+    s
+}
+
+fn read_text_bounded(path: &Path) -> io::Result<String> {
+    let mut reader = fs::File::open(path)?.take(MAX_CATALOG_TEXT_BYTES.saturating_add(1));
+    let mut text = String::new();
+    reader.read_to_string(&mut text)?;
+    if text.len() as u64 > MAX_CATALOG_TEXT_BYTES {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!(
+                "{} exceeds {MAX_CATALOG_TEXT_BYTES} byte catalog read cap",
+                path.display()
+            ),
+        ));
+    }
+    Ok(text)
+}

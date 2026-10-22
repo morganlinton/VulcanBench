@@ -15,13 +15,17 @@ then NIGHT-STATUS.md and GATE-LOG.md.
   commons-lang were each solved two of two in 4 to 12 minutes of agent time.
   Only treesitter-query-anchor-matching held (Astra 0 of 3). Every solve was
   diff-reviewed as genuine. Details: GATE-LOG.md.
-- The Fable 5.1 half has not run: the owner's Claude plan needs usage
-  credits for Fable 5.1.
+- The Fable 5.1 half ran on tree-sitter 2026-10-22 (Mac Studio): 1 of 3
+  solved, the solve diff-reviewed as genuine, so the Fable prong is at the
+  n=5 top-up (two more attempts; admit iff at most one of them solves). The
+  other five candidates are already rejected on the Astra half; a Fable run
+  on them only decides Routine v1 recycling (PLAN.md section 3).
 
 ## Open decisions (owner)
 
-1. **Fable 5.1 access** for the gate's other half: usage credits on the
-   Claude plan, or an Anthropic API key (see "Running the gate").
+1. ~~**Fable 5.1 access**~~ Resolved 2026-10-22: the owner's Claude
+   subscription runs Fable 5.1 with a `claude setup-token` token and no usage
+   credits (see "Running the gate").
 2. **F5 floors**: the first wave suggests the floors do not by themselves
    make a task hard for Astra, and that upstream guard tests that a
    symptom-level fix breaks are the discriminating property (tree-sitter).
@@ -38,8 +42,18 @@ then NIGHT-STATUS.md and GATE-LOG.md.
    architecture-neutral `vulcanbench/sandbox:v5-base`, `-cfamily`, `-jvm`,
    `-rust` tags for the host CPU).
 3. Tools the scripts expect: `uv` (Python 3.12 for probe_verifier.py and
-   run_controls.py), `gh`, git. Node and Rust are only needed inside images.
-4. Credentials, created by the owner on the new host, never copied through
+   run_controls.py), `gh`, git and git-lfs. Node and Rust are only needed
+   inside images. The global git config on these Macs sets
+   `filter.lfs.required`, so command-line git fails outright (`git status`
+   included) until `brew install git-lfs` has run (hit on the Mac Studio,
+   2026-10-22).
+4. Docker Desktop's VM memory must cover every task container that runs at
+   once: at least 8 GiB for a compiled or JVM task at concurrency 1 (they
+   declare 6 GiB), and at least 16 GiB before a Python or JavaScript task
+   runs two at a time under decision (e) (tseslint declares 8 GiB per
+   container). The Mac Studio came with 7.75 GiB allotted (2026-10-22); raise
+   it in Docker Desktop settings before any `-n 2` run.
+5. Credentials, created by the owner on the new host, never copied through
    the repo:
    - GPT-6 Astra: `codex login` (writes `~/.codex/auth.json`).
    - Fable 5.1: `claude setup-token`, saved to
@@ -55,10 +69,11 @@ then NIGHT-STATUS.md and GATE-LOG.md.
 reference on each task, three attempts, with the wave-1 identifiers,
 decision (e) concurrency, the early exit at two solves, and a stop on known
 infrastructure failures. Output goes to `~/vulcanbench-gate` (outside the
-repo). The next run is the Fable half, starting with the candidate that
-held:
+repo). `GATE_ATTEMPTS` (default 3) and `GATE_JOB_SUFFIX` (default empty)
+exist for the n=5 top-up, which runs two more attempts into a fresh job
+directory. The next run is the tree-sitter Fable top-up:
 
-    scripts/frontier-v5/run_gate.sh fable treesitter-query-anchor-matching
+    GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup scripts/frontier-v5/run_gate.sh fable treesitter-query-anchor-matching
 
 After each task: diff-review every solve against the task's base (PHASE1.md),
 then record the result in GATE-LOG.md. Back up the job directories to the

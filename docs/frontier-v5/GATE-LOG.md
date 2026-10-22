@@ -32,11 +32,15 @@ launcher.
 | ioverlay-hole-binding-extraction | F5-rust | 2 of 2 solved (6.2, 7.3) | not run | **REJECT** (early exit) |
 | tseslint-type-params-mapped-types | F5-javascript | 2 of 2 solved (12.2, 10.8) | not run | **REJECT** (early exit) |
 | commons-lang-fraction-lowest-terms | F5-java | 2 of 2 solved (4.3, 4.4) | not run | **REJECT** (early exit) |
-| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | not run (blocked) | Astra prong passed; pending Fable |
+| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **1 of 3** (33.0, 27.3, 23.0) | Astra prong passed; Fable at exactly 1 of 3, n=5 top-up pending |
 
-All runs 2026-10-18, one attempt at a time except nx-digraph (two). Once a
-candidate had two solves, an early-exit watcher stopped its Harbor job and
-the remaining attempt was not counted.
+Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
+except nx-digraph (two). Once a candidate had two solves, an early-exit
+watcher stopped its Harbor job and the remaining attempt was not counted.
+The Fable run is 2026-10-22 on the Mac Studio (M1 Max, 32 GiB, Docker VM
+7.75 GiB), one attempt at a time, through `scripts/frontier-v5/run_gate.sh`.
+Agent minutes are covariates only (decision (e)), so the host change does
+not affect the gate.
 
 ### Diff review of every solve
 
@@ -89,13 +93,71 @@ task that beat the stronger reference, is solved quickly by Astra and leaves
 Frontier v5. PLAN.md section 3 recycles a task to Routine v1 when both
 references solve it; that is decided when the Fable half runs.
 
-## Blocked: the Fable 5.1 half
+### treesitter-query-anchor-matching, Fable 5.1 half (2026-10-22)
+
+Job `fable-treesitter-query-anchor-matching` (Harbor 0.24.0, `-k 3 -n 1`,
+Claude Code 2.1.302 pinned in the container, `claude-fable-5-1`, medium,
+subscription token with `CLAUDE_FORCE_OAUTH=1`). Three real sessions: every
+assistant turn reports the model as claude-fable-5-1, and the stream carries
+no auth, model-id or usage-limit event. Trials in run order:
+
+| Trial | Agent minutes | Assistant turns | Output tokens | Reward | Tests |
+| --- | --- | --- | --- | --- | --- |
+| MSBrnJS | 33.0 | 138 | 321k | 0 | 316 of 318 |
+| yaT8UJB | 27.3 | 151 | 449k | **1** | 318 of 318 |
+| L3VGnaw | 23.0 | 94 | 233k | 0 | 315 of 318 |
+
+The two failures have the Astra signature. Both miss the held-out
+`test_query_matches_with_leading_anchor_before_zero_quantifier` (unit D) and
+regress the upstream guard
+`test_query_matches_with_anchor_after_nested_zero_quantifier`, which passes
+at base; L3VGnaw also regresses the second guard,
+`test_query_matches_with_anchors_on_both_sides_of_zero_quantifier`, exactly
+as all three Astra runs did. The verifier ran normally in every trial (built,
+tamper scan clean, graded from libtest's own logfile).
+
+Diff review of the solve (yaT8UJB), against lib/src extracted from the task
+image rebuilt from the task's own Dockerfile: only `query.c` and
+`tree_cursor.c` differ, the two files the gold patch touches; 345 lines
+added and 29 removed (gold: 79 and 11). The change is a fuller
+reimplementation of the same semantics rather than a copy of upstream: a
+step flag for the zero-match skip of `?` and `*` (as in gold) plus a leading-
+anchor flag, per-state `force_immediate` and `suppress_immediate` to carry an
+anchor across a zero-matched quantifier or cancel a one-sided one, a
+synthetic last-child check step for trailing anchors with a per-depth bitset
+of later-named-sibling facts, syntax errors for anchors at either edge of a
+group, the identical `length == 7` MISSING-prefix fix, the same
+tree-cursor change (keep scanning enclosing invisible ancestors until a later
+named sibling is found), and a constraint-aware guard on the longest-match
+state drop. The added lines' token scan hits only one `#define` for a bit
+count and four `printf` lines inside the existing `DEBUG_ANALYZE_QUERY` step
+dump; no test-framework, assertion, exit, environment or process-spawn
+tokens. No tests were added or edited (the artifact is lib/src only). The
+solve counts.
+
+Gate state: Astra 0 of 3, Fable exactly 1 of 3. Under decision (b) the Fable
+prong gets the n=5 top-up: two more attempts, admit iff Fable finishes at or
+below 2 of 5 (at most one more solve). Pending the owner's go-ahead;
+`GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup scripts/frontier-v5/run_gate.sh fable
+treesitter-query-anchor-matching` runs it with the same identifiers.
+
+Subscription usage during the run, from Claude Code's rate-limit events:
+the five-hour window peaked at 34% and the seven-day window at 6%; overage
+is disabled at the organisation level, so a run that exhausts the five-hour
+window would stall rather than bill. Watch utilisation on longer runs.
+
+## Blocked (resolved 2026-10-22): the Fable 5.1 half
 
 On 2026-10-18 every Fable attempt was refused before starting: "Fable 5.1
 requires usage credits." The owner's Claude plan does not include Fable 5.1
 without usage credits. The owner chose to run the Astra half first; the
 Fable half needs usage credits on the plan or an Anthropic API key (owner's
 decision).
+
+Resolved 2026-10-22: the owner's Claude subscription runs Fable 5.1 with a
+`claude setup-token` token and no usage credits; the 2026-10-18 refusal did
+not recur, and the infrastructure guard in `run_gate.sh` would have stopped
+the run on that text before any attempt counted.
 
 ## Infrastructure failures (never counted)
 

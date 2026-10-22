@@ -34,7 +34,11 @@
 # scrubs them from every file it writes (a value of 1 replaced every "1" in
 # rewards, logs and artifacts on 2026-10-18).
 #
-# Output: $GATE_OUT (default ~/vulcanbench-gate, outside the repo)/jobs/<ref>-<task>,
+# n=5 top-up (decision (b), a prong at exactly 1 of 3): GATE_ATTEMPTS=2
+# GATE_JOB_SUFFIX=-topup runs two more attempts into a fresh job directory
+# next to the first one; the early exit still fires at two solves (3 of 5).
+#
+# Output: $GATE_OUT (default ~/vulcanbench-gate, outside the repo)/jobs/<ref>-<task><suffix>,
 # plus one summary line per trial on stdout. Record results in GATE-LOG.md
 # after diff-reviewing every solve.
 set -u
@@ -45,6 +49,8 @@ export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew
 # Outside the repo by default: logs/ is not git-ignored here, and gate
 # artifacts must never be committed.
 OUT="${GATE_OUT:-$HOME/vulcanbench-gate}"
+attempts="${GATE_ATTEMPTS:-3}"; suffix="${GATE_JOB_SUFFIX:-}"
+case "$attempts" in 1|2|3) ;; *) echo "run_gate: GATE_ATTEMPTS must be 1, 2 or 3 (got $attempts)" >&2; exit 2 ;; esac
 mkdir -p "$OUT/jobs"
 command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/frontier-v5/setup-host.sh installs it)" >&2; exit 2; }
 
@@ -92,11 +98,11 @@ for t in "$@"; do
   [ -f "$task/task.toml" ] || { echo "run_gate: no task $t" >&2; exit 2; }
   lang=$(sed -n 's/^vulcanbench_language = "\(.*\)"/\1/p' "$task/task.toml")
   case "$lang" in python|javascript) n=2 ;; *) n=1 ;; esac
-  job="$ref-$t"
+  job="$ref-$t$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
-  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
   (cd "$here" && env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
-     --ak version="$version" -k 3 -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
+     --ak version="$version" -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
      -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!
   stopped=""

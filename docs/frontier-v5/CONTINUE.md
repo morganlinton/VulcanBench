@@ -15,11 +15,12 @@ then NIGHT-STATUS.md and GATE-LOG.md.
   commons-lang were each solved two of two in 4 to 12 minutes of agent time.
   Only treesitter-query-anchor-matching held (Astra 0 of 3). Every solve was
   diff-reviewed as genuine. Details: GATE-LOG.md.
-- The Fable 5.1 half ran on tree-sitter 2026-10-22 (Mac Studio): 1 of 3
-  solved, the solve diff-reviewed as genuine, so the Fable prong is at the
-  n=5 top-up (two more attempts; admit iff at most one of them solves). The
-  other five candidates are already rejected on the Astra half; a Fable run
-  on them only decides Routine v1 recycling (PLAN.md section 3).
+- The Fable 5.1 half ran on tree-sitter 2026-10-22 (Mac Studio): 1 of 3,
+  then 1 of 2 in the n=5 top-up, so Fable finished 2 of 5, at the admit bar.
+  Both solves diff-reviewed as genuine. **treesitter-query-anchor-matching is
+  admitted as F5-c**, the first admitted task of Frontier v5 (GATE-LOG.md).
+  The other five candidates are rejected on the Astra half; a Fable run on
+  them only decides Routine v1 recycling (PLAN.md section 3).
 
 ## Open decisions (owner)
 
@@ -30,7 +31,9 @@ then NIGHT-STATUS.md and GATE-LOG.md.
    make a task hard for Astra, and that upstream guard tests that a
    symptom-level fix breaks are the discriminating property (tree-sitter).
    Whether to add that as a floor in a v3 plan (PLAN-v2.md's freeze rule) is
-   the owner's call. It decides what to source next.
+   the owner's call. It decides what to source next. The Fable half adds
+   one data point: Fable 5.1 solved tree-sitter 2 of 5 (the rejected five
+   were not run against it).
 3. Still open from v1: (d) publishing channel, (f) gold location.
 
 ## Setting up the host
@@ -71,9 +74,13 @@ decision (e) concurrency, the early exit at two solves, and a stop on known
 infrastructure failures. Output goes to `~/vulcanbench-gate` (outside the
 repo). `GATE_ATTEMPTS` (default 3) and `GATE_JOB_SUFFIX` (default empty)
 exist for the n=5 top-up, which runs two more attempts into a fresh job
-directory. The next run is the tree-sitter Fable top-up:
+directory, for example:
 
     GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup scripts/frontier-v5/run_gate.sh fable treesitter-query-anchor-matching
+
+No gate run is queued. What runs next is the owner's call (open decisions
+above): Fable on the five Astra-rejected candidates to decide Routine v1
+recycling, or new F5 candidates once the floor question is settled.
 
 After each task: diff-review every solve against the task's base (PHASE1.md),
 then record the result in GATE-LOG.md. Back up the job directories to the
@@ -85,6 +92,9 @@ private `vulcanbench-data-backup` repo the same way as the first wave.
   logs): private repo `morganlinton/vulcanbench-data-backup`,
   `archives/frontier-v5-gate-2026-10-18.tar.gz.part-*`, restore with
   `cat archives/<name>.tar.gz.part-* | tar -xzf - -C <destination>`.
+- Fable half raw evidence (both tree-sitter job directories, Harbor logs and
+  the run_gate.sh console logs, the whole `~/vulcanbench-gate` tree): same
+  repo, `archives/frontier-v5-gate-2026-10-22-fable.tar.gz.part-*`.
 - Validation and control tooling: `scripts/frontier-v5/probe_verifier.py`
   (base 0, gold 1, cheating probes 0) and `scripts/frontier-v5/run_controls.py`
   (F5 single-fix and leave-one-out controls).

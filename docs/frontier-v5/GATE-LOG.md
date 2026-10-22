@@ -32,7 +32,7 @@ launcher.
 | ioverlay-hole-binding-extraction | F5-rust | 2 of 2 solved (6.2, 7.3) | not run | **REJECT** (early exit) |
 | tseslint-type-params-mapped-types | F5-javascript | 2 of 2 solved (12.2, 10.8) | not run | **REJECT** (early exit) |
 | commons-lang-fraction-lowest-terms | F5-java | 2 of 2 solved (4.3, 4.4) | not run | **REJECT** (early exit) |
-| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **1 of 3** (33.0, 27.3, 23.0) | Astra prong passed; Fable at exactly 1 of 3, n=5 top-up pending |
+| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -135,16 +135,57 @@ dump; no test-framework, assertion, exit, environment or process-spawn
 tokens. No tests were added or edited (the artifact is lib/src only). The
 solve counts.
 
-Gate state: Astra 0 of 3, Fable exactly 1 of 3. Under decision (b) the Fable
-prong gets the n=5 top-up: two more attempts, admit iff Fable finishes at or
-below 2 of 5 (at most one more solve). Pending the owner's go-ahead;
-`GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup scripts/frontier-v5/run_gate.sh fable
-treesitter-query-anchor-matching` runs it with the same identifiers.
+Gate state after three attempts: Astra 0 of 3, Fable exactly 1 of 3. Under
+decision (b) the Fable prong got the n=5 top-up (next section): two more
+attempts, admit iff Fable finishes at or below 2 of 5.
 
 Subscription usage during the run, from Claude Code's rate-limit events:
 the five-hour window peaked at 34% and the seven-day window at 6%; overage
 is disabled at the organisation level, so a run that exhausts the five-hour
 window would stall rather than bill. Watch utilisation on longer runs.
+
+### treesitter-query-anchor-matching, Fable 5.1 top-up (2026-10-22): ADMIT
+
+Job `fable-treesitter-query-anchor-matching-topup`, launched 10:41 from
+commit b87199be with `GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup`, otherwise the
+same identifiers. Both sessions real (every assistant turn on
+claude-fable-5-1; no auth, model-id or usage-limit event; the five-hour
+window stayed allowed throughout):
+
+| Trial | Agent minutes | Assistant turns | Output tokens | Reward | Tests |
+| --- | --- | --- | --- | --- | --- |
+| R2Eua83 | 79.6 | 221 | 517k | 0 | 317 of 318 |
+| 6M56y22 | 27.2 | 111 | 269k | **1** | 318 of 318 |
+
+R2Eua83 fails only the held-out
+`test_query_matches_with_leading_anchor_before_zero_quantifier` (unit D) and
+regresses no guard: the longest Fable attempt got closest without getting
+there. That case is the one every failed attempt by either reference missed,
+and the one DESIGN.md names as the predicted miss.
+
+Diff review of the solve (6M56y22), against the same extracted base: three
+files differ, `query.c`, `tree_cursor.c` and `tree_cursor.h` (one new
+internal helper's declaration; the gold touches only the two `.c` files);
+366 lines added and 82 removed. A third distinct design for the same
+semantics: one state-transition function that carries a pending named-anchor
+flag across skipped optional and repeated steps and distinguishes
+sequential, dead-end, pass-through, alternative and repeat hops; trailing
+anchors marked on every child step of the level and enforced when a state
+leaves the level, through a new tree-cursor helper that asks whether a
+visible ancestor has later named siblings; anchor-aware fallibility in query
+analysis; a strictness-ordered guard on the longest-match state drop; the
+trailing group anchor as a syntax error; the identical `length == 7`
+MISSING-prefix fix; and the tree-cursor sibling scan factored into a helper
+that keeps scanning invisible ancestors until a named sibling is found. The
+added lines' token scan hits one `printf` inside the `DEBUG_ANALYZE_QUERY`
+step dump and nothing else; no tests added or edited. The solve counts.
+
+**Verdict: ADMIT.** Astra 0 of 3; Fable 2 of 5, at the bar set by decision
+(b). treesitter-query-anchor-matching takes the F5-c slot, the first task
+admitted to Frontier v5. Covariates: Fable's five attempts took 33.0, 27.3,
+23.0, 79.6 and 27.2 agent minutes against the 3-hour budget, Astra's three
+9.9, 12.2 and 7.6. The gold and the two solves are three different designs
+for the same anchor semantics.
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

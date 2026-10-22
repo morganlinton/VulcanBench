@@ -49,6 +49,8 @@ C. Slot-wise still almost all UNSLOTTED; comrak is the first task built to
 fill a frozen slot (F2-rust). Nothing is gate-measured; reference-model
 credentials are still the blocker.
 
+Continuing on a new host: docs/frontier-v5/CONTINUE.md (setup, credentials, the gate runner, open decisions).
+
 ## Gate, first wave (2026-10-18): read this first
 
 GPT-6 Astra (medium, Codex CLI 0.159.0) solved five of the six F5

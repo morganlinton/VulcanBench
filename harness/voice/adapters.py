@@ -35,10 +35,10 @@ import time
 import urllib.request
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-from pydantic import BaseModel
 from websockets.sync.client import connect as _ws_connect
 
 from harness.agent.providers import ProviderError
@@ -56,7 +56,8 @@ _TURN_TIMEOUT_S = 120.0
 _RECV_TIMEOUT_S = 90.0
 
 
-class VoiceAnswer(BaseModel):
+@dataclass(kw_only=True)
+class VoiceAnswer:
     text: str
     t_first_s: float
     t_total_s: float

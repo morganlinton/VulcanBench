@@ -712,8 +712,8 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
             "llm_response",
             {
                 "content": resp.content,
-                "tool_calls": [tc.model_dump() for tc in resp.tool_calls],
-                "usage": resp.usage.model_dump(),
+                "tool_calls": [tc.to_dict() for tc in resp.tool_calls],
+                "usage": resp.usage.to_dict(),
             },
         )
         if not deadline.ensure_time(collector, "llm_response", step):

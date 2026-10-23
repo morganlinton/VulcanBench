@@ -6,10 +6,10 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
 
 from harness import provenance
-from harness.cli import app
+from harness.cli import main
+from tests.cli_runner import CliRunner
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -111,13 +111,13 @@ def test_cli_suite_run_refuses_dirty_checkout(repo: Path, monkeypatch: pytest.Mo
     monkeypatch.chdir(repo)
     called = []
     monkeypatch.setattr("harness.cli.run_suite", lambda *a, **k: called.append(1))
-    result = CliRunner().invoke(app, ["run", "--suite", "v1", "--model", "openai:gpt-4o-mini"])
+    result = CliRunner().invoke(main, ["run", "--suite", "v1", "--model", "openai:gpt-4o-mini"])
     assert result.exit_code == 1
     assert "refusing to start a suite run" in result.output
     assert not called
 
     sweep = CliRunner().invoke(
-        app, ["effort-sweep", "--suite", "v1", "--model", "openai:gpt-4o-mini"]
+        main, ["effort-sweep", "--suite", "v1", "--model", "openai:gpt-4o-mini"]
     )
     assert sweep.exit_code == 1
     assert "refusing to start a suite run" in sweep.output

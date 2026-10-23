@@ -1354,6 +1354,47 @@ legacy-depotcore-binary-parity`.
 - Publication merges this directory with v3.26.3; no earlier record is
   rewritten.
 
+## Amendment v3.27, October 23, 2026: DeepSeek V4.1 Flash, judged by Muse Spark 1.3 and GPT-6.1 Sol
+
+Nothing in the rubric, controls, quirk keys, gates, repeats, seed or weights
+changes from v3.7. What changes is the population and the second judge.
+Protocol id `code-quality-maintenance-v3.27`; run directory
+`runs-code-quality-maintenance-v3.27`; runner
+`harness/maintenance_review_v327.py`, derived from the v3.24 and v3.25 runners.
+Population record: `docs/results/swe-v4-deepseek-flash-2026-10/comparison.json`,
+built by `scripts/cii-v4-board/build_deepseek_flash_population.py`.
+
+- Population: the October 2026 DeepSeek V4.1 Flash sweep of Frontier v4
+  (`deepseek-flash`, V4.1-Flash-1017) through DeepSeek Harness 0.2.1-rc.2
+  (solver `dsh:deepseek-flash`), with web tools, session-log upload and
+  telemetry off, at Low, High and Max (DeepSeek's API has no medium), one
+  attempt per task and level, 69 runs, from
+  `bench/2026-10-20-deepseek-dsh-frontier-v4`. The owner paused the sweep
+  twice between tasks; each run a pause interrupted is kept in the sweep's
+  `paused-interrupted/` folder and not judged. macOS went from 26 to 27.0.1
+  during the second pause; re-grading the 13 runs finished before it on 27.0.1
+  changed no score. The builder stops on any run whose solver, requested
+  effort, harness version or checkout state differs from the sweep's record.
+  All 69 runs reconstruct; nothing is excluded or missing.
+- Judges: Muse Spark 1.3 and GPT-6.1 Sol, the pair v3.20 used for Grok 4.7.
+  Grok 4.6 holds the usual second seat, but the Cursor account it judges
+  through was out of usage on October 23, and the owner chose GPT-6.1 Sol for
+  the seat. Both are neutral for a DeepSeek submission. Muse runs the v3.4
+  settings, read from the recovered v3.4 protocol as in v3.24, on the v3.4
+  binary matched by sha256; Muse Code's updater had removed the copy in
+  `~/.local/bin`, so the round runs a byte-identical backup. GPT-6.1 Sol runs
+  at medium through Codex CLI 0.159.0 on v3.20's Sol seat transport, with the
+  launcher and native binary pinned by sha256 as in v3.25. Every stage
+  re-checks the Muse binary and both Codex hashes.
+- Exam: both judges retake the exam under v3.27 before any counted call. One
+  failing panel is disclosed and the passing one publishes; two failures stop
+  the amendment.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the next level up (Max wraps to Low).
+- Comparability: a Flash score is a mean of Muse Spark 1.3 and GPT-6.1 Sol.
+  Claude Opus 5.5 and GPT-6.1 Sol's own columns are judged by Muse Spark 1.3
+  and Grok 4.6, so any card placing them side by side says the panels differ.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

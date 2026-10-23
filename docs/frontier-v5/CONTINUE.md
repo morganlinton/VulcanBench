@@ -21,6 +21,11 @@ then NIGHT-STATUS.md and GATE-LOG.md.
   admitted as F5-c**, the first admitted task of Frontier v5 (GATE-LOG.md).
   The other five candidates are rejected on the Astra half; a Fable run on
   them only decides Routine v1 recycling (PLAN.md section 3).
+- The first F2 candidate, comrak-gfm-tables-autolinks-parity (F2-rust), was
+  rejected on the Astra half 2026-10-22: 2 of 2 in 11 and 8 agent minutes,
+  every one of 5,410 parity cases matched, both solves genuine ports. Both
+  agents compiled the shipped C reference inside the sandbox and used it as
+  a differential oracle (GATE-LOG.md).
 
 ## Open decisions (owner)
 
@@ -35,6 +40,11 @@ then NIGHT-STATUS.md and GATE-LOG.md.
    one data point: Fable 5.1 solved tree-sitter 2 of 5 (the rejected five
    were not run against it).
 3. Still open from v1: (d) publishing channel, (f) gold location.
+4. **F2 shape** after comrak: DESIGN.md's revisit rule says the slot should
+   take a larger subsystem, and the sandbox's C toolchain let both agents
+   turn the shipped reference into an oracle. Decide whether F2 ships the
+   reference in a form the sandbox cannot build, or accepts measuring
+   porting speed against an oracle, before sourcing the next F2 candidate.
 
 ## Setting up the host
 
@@ -95,6 +105,8 @@ private `vulcanbench-data-backup` repo the same way as the first wave.
 - Fable half raw evidence (both tree-sitter job directories, Harbor logs and
   the run_gate.sh console logs, the whole `~/vulcanbench-gate` tree): same
   repo, `archives/frontier-v5-gate-2026-10-22-fable.tar.gz.part-*`.
+- comrak Astra run: same repo,
+  `archives/frontier-v5-gate-2026-10-22-astra-comrak.tar.gz.part-*`.
 - Validation and control tooling: `scripts/frontier-v5/probe_verifier.py`
   (base 0, gold 1, cheating probes 0) and `scripts/frontier-v5/run_controls.py`
   (F5 single-fix and leave-one-out controls).

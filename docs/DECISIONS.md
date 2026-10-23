@@ -7,6 +7,55 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-23: Reflection Beam on Frontier v4 through Mirror CLI; DeepSeek V4 Pro stopped
+
+### Decision
+
+The owner stopped the DeepSeek V4 Pro sweep after one Low task (settlecore,
+functional 0.0, $0.43 at list price; the interrupted second task is kept in
+`runs-effort-deepseek-v4pro-dsh/stopped-interrupted/` and is not part of any
+cell) and asked to benchmark Reflection AI's Beam instead. Beam
+(`Beam-1.0-501B-A23B`, 501B total and 23B active parameters, Apache-2.0
+weights, released 2026-10-16) is served on Reflection's API at
+`https://api.reflection.ai/openai/v1` (OpenAI Chat Completions only).
+
+Owner choices in chat, 2026-10-23:
+
+- Harness: Mirror CLI, Reflection's own coding agent (`reflection-mirror` on
+  PyPI, Apache-2.0, early beta), version 0.1.1, in its one-shot `exec` mode.
+  Adapter `harness/agent/mirror_cli.py`, spec `mirror:Beam-1.0-501B-A23B`,
+  pinned by version and a content hash of the installed package (bytecode
+  caches excluded).
+- Levels: all five. Beam's `reasoning_effort` takes low, medium, high, xhigh
+  and max (default max, reasoning always on), so the board's Extra high is
+  `xhigh`. 115 runs, one task at a time, flat 3-hour bound.
+- Mirror's `exec` refuses to run until its usage notice is acknowledged and
+  the folder is trusted. The owner approved writing both into a private Mirror
+  home created for each run (never the user's own `~/.mirror`), trusting only
+  that run's workspace.
+
+Settings that follow the board's existing rules: usage analytics off
+(`"analytics": false`; Mirror's analytics carry no content); web tools absent
+(Mirror only exposes them with a search provider key, and the run environment
+carries none); automatic tool approval inside the macOS outer sandbox, since
+Mirror's own sandbox workspaces need a microsandbox VM; updates off
+(`MIRROR_SKIP_UPDATE=1`, `--no-update`).
+
+Usage is read from Mirror's conversation database (`--database`), decoded
+with Mirror's own pinned protobuf schema; each assistant record carries its
+call's prompt, completion, cached and cache-write tokens, and every recorded
+inference must name the requested model (identity `harness-recorded`).
+Reflection publishes no Beam price (the public beta is "free to start"), so
+runs are unpriced: the board shows tokens and minutes, and cost stays blank
+until a list price exists.
+
+### Limits
+
+The API key (`REFLECTION_API_KEY`) is in the agent's environment and shell
+network is not isolated, so rotate it after the sweep. Mirror is an early beta;
+the pin prevents a CLI change mid-sweep, but not a Reflection-side change to
+what the model id serves.
+
 ## 2026-10-23: DeepSeek V4.1 Flash judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.27)
 
 ### Decision

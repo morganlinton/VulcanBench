@@ -74,6 +74,7 @@ def test_harness_list_json() -> None:
         "devin",
         "dsh",
         "grok-build",
+        "mirror",
         "muse-code",
         "pi",
         "zcode",

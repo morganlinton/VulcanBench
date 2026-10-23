@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from typer.testing import CliRunner
 
 import harness.voice.cli as voice_cli
 import harness.voice.runner as runner_mod
@@ -21,6 +20,7 @@ from harness.voice.report import build_report, to_markdown
 from harness.voice.runner import RunConfig, run_suite
 from harness.voice.stt import transcribe
 from harness.voice.tts import OpenAITTS, TTSProvider, get_tts
+from tests.cli_runner import CliRunner
 
 
 def _wav_bytes(seconds: float = 0.2) -> bytes:
@@ -180,7 +180,7 @@ def test_cli_render_and_report(
     monkeypatch.setattr(voice_cli, "get_tts", lambda name: _FakeTTS())
     cli = CliRunner()
     res = cli.invoke(
-        voice_cli.voice_app,
+        voice_cli.voice_main,
         [
             "render",
             "--questions", str(offline.questions_path),
@@ -194,10 +194,10 @@ def test_cli_render_and_report(
 
     run_dir = run_suite(offline)
     out = tmp_path / "report.md"
-    res = cli.invoke(voice_cli.voice_app, ["report", str(run_dir), "-o", str(out)])
+    res = cli.invoke(voice_cli.voice_main, ["report", str(run_dir), "-o", str(out)])
     assert res.exit_code == 0, res.output
     assert "Voice tax" in out.read_text()
-    res = cli.invoke(voice_cli.voice_app, ["report", str(run_dir), "--json"])
+    res = cli.invoke(voice_cli.voice_main, ["report", str(run_dir), "--json"])
     assert res.exit_code == 0 and '"voice_tax"' in res.output
 
 
@@ -213,7 +213,7 @@ def test_cli_run_invokes_runner(offline: RunConfig, monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(voice_cli, "run_suite", fake_run_suite)
     cli = CliRunner()
     res = cli.invoke(
-        voice_cli.voice_app,
+        voice_cli.voice_main,
         [
             "run", "-m", "fake-voice:echo,other:x",
             "--questions", str(offline.questions_path),

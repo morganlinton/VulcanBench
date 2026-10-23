@@ -22,8 +22,8 @@ Providers implemented:
                        (open-weights models, no key, $0 recorded cost).
 - ``xai:<model>``      xAI (Grok) OpenAI-compatible Chat Completions API.
 
-Only the Python standard library is used for HTTP so the harness stays
-dependency-light; ``tenacity`` provides retry/backoff.
+Only the Python standard library is used for HTTP and for retry/backoff, so
+the harness stays dependency-light.
 
 Usage::
 
@@ -33,8 +33,10 @@ Usage::
 
 from __future__ import annotations
 
+import functools
 import json
 import os
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -43,9 +45,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from pydantic import BaseModel, Field
-from tenacity import Retrying, retry, retry_if_exception, stop_after_attempt, wait_exponential
-
+from harness.agent.protocol import Model
 from harness.effort import zai_supports_effort
 from harness.pricing import cached_input_factor
 
@@ -59,15 +59,17 @@ class NonRetryableProviderError(ProviderError):
     (e.g. a response truncated at the output ceiling)."""
 
 
-class ToolInvocation(BaseModel):
+@dataclass(kw_only=True)
+class ToolInvocation(Model):
     """A single tool call requested by the model."""
 
     id: str = ""
     name: str
-    arguments: dict[str, Any] = Field(default_factory=dict)
+    arguments: dict[str, Any] = field(default_factory=dict)
 
 
-class TokenUsage(BaseModel):
+@dataclass(kw_only=True)
+class TokenUsage(Model):
     prompt_tokens: int = 0
     completion_tokens: int = 0
 
@@ -76,13 +78,14 @@ class TokenUsage(BaseModel):
         return self.prompt_tokens + self.completion_tokens
 
 
-class LLMResponse(BaseModel):
+@dataclass(kw_only=True)
+class LLMResponse(Model):
     """Uniform response shape across all providers."""
 
     content: str | None = None
-    tool_calls: list[ToolInvocation] = Field(default_factory=list)
-    usage: TokenUsage = Field(default_factory=TokenUsage)
-    raw: dict[str, Any] = Field(default_factory=dict)
+    tool_calls: list[ToolInvocation] = field(default_factory=list)
+    usage: TokenUsage = field(default_factory=TokenUsage)
+    raw: dict[str, Any] = field(default_factory=dict)
 
     @property
     def wants_tools(self) -> bool:
@@ -196,7 +199,17 @@ def _http_timeout(timeout_s: float | None, cap: float = DEFAULT_MAX_REQUEST_TIME
 
 
 _MAX_ATTEMPTS = 4
-_WAIT = wait_exponential(multiplier=1, min=1, max=20)
+
+
+def _wait_exponential(
+    attempt: int, *, multiplier: float = 1.0, lo: float = 1.0, hi: float = 20.0
+) -> float:
+    """Seconds to sleep after failed attempt ``attempt`` (1-based): 1, 2, 4, 8, capped at ``hi``."""
+    return max(lo, min(multiplier * 2.0 ** (attempt - 1), hi))
+
+
+#: Backoff schedule between attempts; tests replace it to skip the sleeps.
+_WAIT = _wait_exponential
 
 
 def _is_retryable(e: BaseException) -> bool:
@@ -224,22 +237,26 @@ def _call_with_retry[T](fn: Callable[..., T], attempts: int, *args: Any) -> T:
     NonRetryableProviderError (refusals, output-cap truncation) is surfaced
     immediately, a retry at the same settings cannot change the outcome.
     """
-    retryer = Retrying(
-        retry=retry_if_exception(_is_retryable),
-        wait=_WAIT,
-        stop=stop_after_attempt(attempts),
-        reraise=True,
-    )
-    result: T = retryer(fn, *args)
-    return result
+    attempts = max(1, attempts)
+    for attempt in range(1, attempts + 1):
+        try:
+            return fn(*args)
+        except ProviderError as e:
+            if not _is_retryable(e) or attempt >= attempts:
+                raise
+            time.sleep(_WAIT(attempt))
+    raise AssertionError("unreachable: the loop returns or raises")  # pragma: no cover
 
 
-_RETRY = retry(
-    retry=retry_if_exception(_is_retryable),
-    wait=_WAIT,
-    stop=stop_after_attempt(4),
-    reraise=True,
-)
+def _with_retry[**P, T](fn: Callable[P, T]) -> Callable[P, T]:
+    """Decorator form of :func:`_call_with_retry` with the full attempt budget."""
+
+    @functools.wraps(fn)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        return _call_with_retry(lambda: fn(*args, **kwargs), _MAX_ATTEMPTS)
+
+    return wrapper
+
 
 # Anthropic output ceiling by requested effort. Thinking bills against
 # ``max_tokens`` on always-on-thinking models (Fable 5) and adaptive models
@@ -1004,7 +1021,7 @@ class QwenProvider(LLMProvider):
             return self._complete_once(messages, tools, timeout, effort)
         return self._complete_with_retry(messages, tools, timeout, effort)
 
-    @_RETRY
+    @_with_retry
     def _complete_with_retry(
         self,
         messages: list[dict[str, Any]],
@@ -1125,7 +1142,7 @@ class DeepSeekProvider(LLMProvider):
             return self._complete_once(messages, tools, timeout, effort)
         return self._complete_with_retry(messages, tools, timeout, effort)
 
-    @_RETRY
+    @_with_retry
     def _complete_with_retry(
         self,
         messages: list[dict[str, Any]],

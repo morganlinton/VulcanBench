@@ -5,17 +5,17 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
 
 from harness import settings
 from harness.agent.loop import run_agent
-from harness.cli import app
+from harness.cli import main
 from harness.settings import (
     BlockedEffortError,
     blocked_efforts,
     check_effort_allowed,
     load_settings,
 )
+from tests.cli_runner import CliRunner
 
 
 def test_repository_settings_block_ultra() -> None:
@@ -58,12 +58,12 @@ def test_run_agent_refuses_blocked_effort_before_loading_anything(tmp_path: Path
 def test_cli_run_and_sweep_refuse_blocked_effort(tmp_path: Path) -> None:
     runner = CliRunner()
     result = runner.invoke(
-        app,
+        main,
         ["run", "--task", "x", "--model", "mock:model", "--effort", "ultra", "-o", str(tmp_path)],
     )
     assert result.exit_code == 1 and "blocked by vulcanbench.toml" in result.output
     result = runner.invoke(
-        app,
+        main,
         [
             "effort-sweep",
             "--suite",

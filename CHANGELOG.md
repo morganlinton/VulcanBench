@@ -38,6 +38,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Seven runtime dependencies dropped from the harness** (typer, rich,
+  pydantic, pydantic-settings, tenacity, docker, jsonschema), taking the core
+  install from 37 locked packages to 15 and the full lockfile from 89 to 73.
+  Behaviour is unchanged; the plumbing is now standard library:
+  - The CLI (`harness/cli.py`, `harness/voice/cli.py`) is built on argparse.
+    Every command, flag and exit code is the same, and `vulcanbench <command>
+    --help` still carries the full option help. Output is plain text with no
+    colour or markup (tables come from `harness/console.py`), so it reads the
+    same in a terminal, a log and a CI capture. `jsonschema` and
+    `pydantic-settings` were declared but never imported.
+  - The sandbox (`harness/sandbox/docker_executor.py`) drives the `docker` CLI
+    (`docker run|exec|stop|rm`) instead of the Docker SDK, the same binary the
+    CLI-agent adapters already use. The resource band maps one to one:
+    `--memory`, `--memory-reservation`, `--cpus`, `--cpu-shares`,
+    `--pids-limit`, `--network none`, `--cap-drop ALL`,
+    `--security-opt no-new-privileges`. A daemon failure during `exec` (docker
+    exit 125 with the daemon's message) still surfaces as `SandboxError`.
+    `VULCANBENCH_DOCKER_BIN` overrides the binary.
+  - Tool-call and provider models (`ToolCall`, `*Args`, `ToolInvocation`,
+    `TokenUsage`, `LLMResponse`, `MetricResult`, the voice `VoiceItem`,
+    `ScoreResult` and `VoiceAnswer`) are dataclasses. Tool arguments from a
+    model keep Pydantic's lax semantics through `Model.from_args`: unknown keys
+    are ignored, `"120"` is an int, `"true"` is a bool, and a missing required
+    key is reported to the model as a tool error.
+  - Provider retries are a short exponential-backoff loop in
+    `harness/agent/providers.py` with the same schedule (1, 2, 4, 8 s capped at
+    20 s, four attempts, budget-bounded) and the same retryable/non-retryable
+    split.
+  Tests drive the CLI through `tests/cli_runner.py`, a stand-in for Typer's
+  `CliRunner`, and fake the sandbox through the executor's `_run_docker` seam.
+  The console script entry point is `harness.cli:main`.
+
 - **The frontier suite directory is now `tasks/coding-intelligence-index-v4`**,
   matching its public name (Coding Intelligence Index v4). It was previously
   `tasks/cii-v2`, an internal build id that predated the public naming. The old

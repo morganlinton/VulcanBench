@@ -1,0 +1,2437 @@
+{
+ "cells": {
+  "dsflash/high": 23,
+  "dsflash/low": 23,
+  "dsflash/max": 23
+ },
+ "excluded": [],
+ "levels": {
+  "dsflash": [
+   "low",
+   "high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "dsflash": "DeepSeek V4.1 Flash (deepseek-flash) in DeepSeek Harness 0.2.1-rc.2"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": 0.039765,
+   "billed_cost_usd": 0.07953,
+   "duration_s": 284.572,
+   "effort": "low",
+   "finished_at": "2026-10-22T08:46:21.486432+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8196,
+   "reported_tokens": 2056987,
+   "run_id": "legacy-blendcore-binary-parity-f52e64b8",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2056987,
+    "result_receipts": null,
+    "stream_sha256": "5346f87c4f2f608cf72dde41f4b0befe399d3231c28995191a0a561a1f2f952b",
+    "usage": {
+     "cached_input_tokens": 1956352,
+     "input_tokens": 2015208,
+     "output_tokens": 41779,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-blendcore-binary-parity-f52e64b8",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "823e07191545957a7359b4a3df2a47e7895cee6d6301f771f1dd3cefadd08faa",
+    "summary": "90252dc981e360e024bcaf1f77533e539138f817fcdbaf3a07475486877dc949",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-22T08:41:36.909213+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.103285,
+   "billed_cost_usd": 0.206562,
+   "duration_s": 1255.957,
+   "effort": "low",
+   "finished_at": "2026-10-22T09:43:58.817319+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7514,
+   "reported_tokens": 9537593,
+   "run_id": "legacy-cellarcore-binary-parity-20e1b2d9",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9537593,
+    "result_receipts": null,
+    "stream_sha256": "d9e2c6abda3d84e371d90789a9f2d1eb8a0121e714e3f02cdecfc10c2137fcc9",
+    "usage": {
+     "cached_input_tokens": 9288320,
+     "input_tokens": 9453083,
+     "output_tokens": 84510,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-cellarcore-binary-parity-20e1b2d9",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "18da8329201d981e374fa00bfe25014b068971437142caae4f7b2c92ea54d4e7",
+    "summary": "9bcc224374dc0d385ae52a107a702072f0f73cf70cbe5ee2dc93c303ec2844ca",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-22T09:23:02.846208+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.03747,
+   "billed_cost_usd": 0.037469,
+   "duration_s": 245.709,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:28:17.844350+00:00",
+   "functional": 0.8,
+   "model": "dsflash",
+   "quality": 0.789,
+   "reported_tokens": 1848294,
+   "run_id": "legacy-codeccore-binary-parity-2305e1de",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1848294,
+    "result_receipts": null,
+    "stream_sha256": "65ad1e48fe6432f70dde7886a11a430621129400b2bb547c221677f5302ee657",
+    "usage": {
+     "cached_input_tokens": 1754880,
+     "input_tokens": 1807864,
+     "output_tokens": 40430,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-codeccore-binary-parity-2305e1de",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "bcec7194469c9262a921ef215434f9c4998440f74ba3e72fca181b545fca979c",
+    "summary": "c436bd3736bb12edf66780b74f07a77d2d0a347ecf2263ba68f1760cd2daad5b",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-22T00:24:12.158755+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.07046,
+   "billed_cost_usd": 0.140926,
+   "duration_s": 474.241,
+   "effort": "low",
+   "finished_at": "2026-10-22T09:11:00.387893+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7191,
+   "reported_tokens": 4223766,
+   "run_id": "legacy-depotcore-binary-parity-ff9ffa10",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4223766,
+    "result_receipts": null,
+    "stream_sha256": "4cdebe35cb118ca4cbc54d67284deedbfde630241dafa9a13893cc9e0a457a24",
+    "usage": {
+     "cached_input_tokens": 4038272,
+     "input_tokens": 4155942,
+     "output_tokens": 67824,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-depotcore-binary-parity-ff9ffa10",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "d9846297500e9417bdd3ec4ce4dba0636c5d6c8af74234c67a46eb11471ca4c7",
+    "summary": "fdb90e9371cc8d00affb138c5e34a9fae2f00db791fa3a660ae0ecac1b463d08",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-22T09:03:06.134242+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.027642,
+   "billed_cost_usd": 0.027641,
+   "duration_s": 214.295,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:24:12.068168+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8046,
+   "reported_tokens": 874852,
+   "run_id": "legacy-freightcore-binary-parity-e6cf07ed",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 874852,
+    "result_receipts": null,
+    "stream_sha256": "710331cd3a99cb85a55041096c057080ceab7babb6fe802153e71f96bcb6aba3",
+    "usage": {
+     "cached_input_tokens": 808576,
+     "input_tokens": 840907,
+     "output_tokens": 33945,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-freightcore-binary-parity-e6cf07ed",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "0a8290070de42363d6bc903389baaf03056587241200a00fbea664ad850d5fa9",
+    "summary": "9955573ef1b2caf145275ffd5cb60c970039ff4baa6c993456fe11a53b8f7381",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-22T00:20:37.766159+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.101765,
+   "billed_cost_usd": 0.20352,
+   "duration_s": 670.753,
+   "effort": "low",
+   "finished_at": "2026-10-22T09:03:06.054220+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.5976,
+   "reported_tokens": 11504690,
+   "run_id": "legacy-granarycore-binary-parity-63833dbe",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 11504690,
+    "result_receipts": null,
+    "stream_sha256": "5ce4cee0eb3ce879a8640d9093d49b4f0286846ba6cb10ef3987f20ee60aef44",
+    "usage": {
+     "cached_input_tokens": 11281024,
+     "input_tokens": 11428308,
+     "output_tokens": 76382,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-granarycore-binary-parity-63833dbe",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "d5a033b9b07ecd22b8645e92bd70ead438e15b50e3bdf3ea681968ae3de94e4c",
+    "summary": "e8af16abbef8b4ef103e7849b2d4a2b42c8c6f00ea9bff0a84ea39eeb9a801b4",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-22T08:51:55.293723+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.039225,
+   "billed_cost_usd": 0.039223,
+   "duration_s": 330.557,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:52:33.679518+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8053,
+   "reported_tokens": 1978983,
+   "run_id": "legacy-hedgecore-binary-parity-3485c00c",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1978983,
+    "result_receipts": null,
+    "stream_sha256": "dbc9a8345ca5cae85715fa00225e1047699a00a4fe92a62c3bc192c837d52ce0",
+    "usage": {
+     "cached_input_tokens": 1868544,
+     "input_tokens": 1941086,
+     "output_tokens": 37897,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-hedgecore-binary-parity-3485c00c",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "3b4c187734dbb52f35c8e68df814e442b538d10c1576c7ff01c2e8e3d39d7e24",
+    "summary": "566dbe9aa114980dadf84b94e5fcb92a7831af5c0d0d27f38316d771b189daf3",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-22T00:47:03.119238+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.112805,
+   "billed_cost_usd": 0.22561,
+   "duration_s": 722.295,
+   "effort": "low",
+   "finished_at": "2026-10-22T09:23:02.764956+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7366,
+   "reported_tokens": 12884196,
+   "run_id": "legacy-lodgecore-binary-parity-0da95408",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 12884196,
+    "result_receipts": null,
+    "stream_sha256": "5f832003bc363ae0848bee5d06e57832da039207271a038734fa6b002a0489dd",
+    "usage": {
+     "cached_input_tokens": 12618368,
+     "input_tokens": 12806250,
+     "output_tokens": 77946,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-lodgecore-binary-parity-0da95408",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "6e6136b549e1fd0390e6d8f482279e56b19d35f68f20f5638d7630e32b4f5aad",
+    "summary": "e5cb8595bed78690e78d80e40fbe5fd259ff1c2a1313359d2569a0fde7f49e05",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-22T09:11:00.459606+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.04977,
+   "billed_cost_usd": 0.09954,
+   "duration_s": 486.548,
+   "effort": "low",
+   "finished_at": "2026-10-20T07:27:15.504353+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7635,
+   "reported_tokens": 3038500,
+   "run_id": "legacy-matchcore-order-book-parity-98910fb8",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3038500,
+    "result_receipts": null,
+    "stream_sha256": "1d19e0035f7a1acaa27e2806e5dfc2d8ba0a04ec39a0094b545f33b3f1389625",
+    "usage": {
+     "cached_input_tokens": 2934784,
+     "input_tokens": 2982037,
+     "output_tokens": 56463,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-matchcore-order-book-parity-98910fb8",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "b9a4db1b9366d1f02f82f5c963dc7ac0d6478bd7de07b7ec34fe72fdaef5817c",
+    "summary": "cd192b0a34f3e9ced7cf2e784753b31d628dbb3d4d8eeb7fb1b8e2e32f17eaeb",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-20T07:19:08.942918+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.03857,
+   "billed_cost_usd": 0.038572,
+   "duration_s": 475.706,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:20:37.661814+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8177,
+   "reported_tokens": 1988957,
+   "run_id": "legacy-metercore-binary-parity-2dd0d6f9",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1988957,
+    "result_receipts": null,
+    "stream_sha256": "1d59d8dd73ce2880c793b0b1055018756ff9c03bf4b735e9ec41bbf5e7fd0775",
+    "usage": {
+     "cached_input_tokens": 1907840,
+     "input_tokens": 1943003,
+     "output_tokens": 45954,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-metercore-binary-parity-2dd0d6f9",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "f8405c62b26d918990d8f39aa48abb0dd1c9e480be24cf7168d907a454d4540e",
+    "summary": "4e75a297bdb824337fdbbe089e17fb14308d8dba3044d355395038b42bb8854f",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-22T00:12:41.947467+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.042845,
+   "billed_cost_usd": 0.08569,
+   "duration_s": 476.722,
+   "effort": "low",
+   "finished_at": "2026-10-22T08:41:36.824454+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8003,
+   "reported_tokens": 2501328,
+   "run_id": "legacy-pacecore-binary-parity-1d1fd2ac",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2501328,
+    "result_receipts": null,
+    "stream_sha256": "b62c66925fa6976a525b594b7f41e0b968c26f1454cef3c1e7cc9be3c61565bf",
+    "usage": {
+     "cached_input_tokens": 2399488,
+     "input_tokens": 2456061,
+     "output_tokens": 45267,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-pacecore-binary-parity-1d1fd2ac",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "5fa4248f11c2f7c2fe2e137b1ae50b0f2c38636e5b779d187670221286c5315e",
+    "summary": "7a3852288be7757ac430b0cc7c8e86bb5ded3f7436f929d538e7c2711c25ab4a",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-22T08:33:40.091126+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.114208,
+   "billed_cost_usd": 0.228416,
+   "duration_s": 756.107,
+   "effort": "low",
+   "finished_at": "2026-10-22T09:56:35.020565+00:00",
+   "functional": 0.9333,
+   "model": "dsflash",
+   "quality": 0.6742,
+   "reported_tokens": 13216515,
+   "run_id": "legacy-paddockcore-binary-parity-bb3a5865",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 13216515,
+    "result_receipts": null,
+    "stream_sha256": "56900786dc2bfe8e3e6db60e26f503277bd70766aa343cdfe8597572abe44b24",
+    "usage": {
+     "cached_input_tokens": 12968064,
+     "input_tokens": 13131990,
+     "output_tokens": 84525,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-paddockcore-binary-parity-bb3a5865",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "36717ea0ac4febb07f093360981cd64e556c198bda264f54894043fff2fe14a0",
+    "summary": "d5e36634ba3b75ccd6d3cef12a2b81ca4bbf3ffd49c3cd0e6d976b07950202a7",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-22T09:43:58.902804+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.103455,
+   "billed_cost_usd": 0.20691,
+   "duration_s": 632.828,
+   "effort": "low",
+   "finished_at": "2026-10-20T07:43:28.180490+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7994,
+   "reported_tokens": 10017261,
+   "run_id": "legacy-payrollcore-binary-parity-23522623",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 10017261,
+    "result_receipts": null,
+    "stream_sha256": "ac231b0cd5f8672783c19d3e1f1d39b0f3abd6f93f61e3c2167ac3bd540790d7",
+    "usage": {
+     "cached_input_tokens": 9799296,
+     "input_tokens": 9925345,
+     "output_tokens": 91916,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-payrollcore-binary-parity-23522623",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "bc349542a16385f150e3cdb9304cd3cdd9edb80a6f2b1040f8f2d7fda5ad2902",
+    "summary": "1243c370d5f1e66c9dddd7d9e8121d24c0cb56d8f578db32c2b63f2a2fe41952",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-20T07:32:55.346807+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.034571,
+   "billed_cost_usd": 0.06914,
+   "duration_s": 339.703,
+   "effort": "low",
+   "finished_at": "2026-10-20T07:32:55.262721+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7926,
+   "reported_tokens": 1667962,
+   "run_id": "legacy-qlite-store-parity-43379a81",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1667962,
+    "result_receipts": null,
+    "stream_sha256": "cd63938682ed13e317a7d4bbbca1d5750a04903ed526c7a339df50e7408958c3",
+    "usage": {
+     "cached_input_tokens": 1590400,
+     "input_tokens": 1627595,
+     "output_tokens": 40367,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-qlite-store-parity-43379a81",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "0cfaee6b0e3d378dbd57e7095353782badaa04dbaae199881c2471113f0a5873",
+    "summary": "f760c0d782dcfe4729386b684e911d7e17a8d597ca6e08fda4abc6b47f904069",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-20T07:27:15.590399+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.030629,
+   "billed_cost_usd": 0.030631,
+   "duration_s": 283.637,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:47:03.037011+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7737,
+   "reported_tokens": 1027601,
+   "run_id": "legacy-queuecore-binary-parity-9f76113b",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1027601,
+    "result_receipts": null,
+    "stream_sha256": "a45dac7e8afc6d44f5defe4e85dd87950e6e1c7f018c24d1f4ede0f492963014",
+    "usage": {
+     "cached_input_tokens": 950400,
+     "input_tokens": 991606,
+     "output_tokens": 35995,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-queuecore-binary-parity-9f76113b",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "abcfbc22076ec8629bfcfe47730ab2dc153ad65550104ede09dcdf2eee8bf937",
+    "summary": "0ead56dc9a96a6948671958641ce50b1629aff8c29ba7912f4fd83be7a590de3",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-22T00:42:19.396383+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.03279,
+   "billed_cost_usd": 0.032792,
+   "duration_s": 251.679,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:32:29.612406+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7909,
+   "reported_tokens": 1546011,
+   "run_id": "legacy-quotacore-binary-parity-e9fa46ac",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1546011,
+    "result_receipts": null,
+    "stream_sha256": "368c525865f4f2e99bb7d518b5979ca721c402a00bc60ef66c29797829a6bda6",
+    "usage": {
+     "cached_input_tokens": 1469312,
+     "input_tokens": 1508505,
+     "output_tokens": 37506,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-quotacore-binary-parity-e9fa46ac",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "3400c17103f7146496d3eee83868e6ad09542cd5c0595d699997b3d4e5242ccc",
+    "summary": "66aef91385e40051a1bd25f957ad5b32cb602d84b9102fa7e2b772c93fdc64fa",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-22T00:28:17.928824+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.051809,
+   "billed_cost_usd": 0.103624,
+   "duration_s": 842.336,
+   "effort": "low",
+   "finished_at": "2026-10-22T08:25:02.165148+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8339,
+   "reported_tokens": 3804077,
+   "run_id": "legacy-reflowcore-binary-parity-8a3fb2f1",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3804077,
+    "result_receipts": null,
+    "stream_sha256": "b7239fc16773b5f6dc44d2415850ca87597b46abcd791f19ee88e0d85a8bc861",
+    "usage": {
+     "cached_input_tokens": 3701760,
+     "input_tokens": 3747729,
+     "output_tokens": 56348,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-reflowcore-binary-parity-8a3fb2f1",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "8830965b89d7a11a00113c96392a198664e916e921524c775171a55219f58a3a",
+    "summary": "7da0e3d701f317276f9cd7113ba9df09e7f73e063bd13356d6c5e78e31b574a1",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-22T08:10:59.822608+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.042675,
+   "billed_cost_usd": 0.042675,
+   "duration_s": 443.134,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:59:56.902638+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7636,
+   "reported_tokens": 2070071,
+   "run_id": "legacy-schedcore-binary-parity-775ff294",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2070071,
+    "result_receipts": null,
+    "stream_sha256": "53c15cd753c33fa07a241ad34c24baeedb0e046a4bd5eccfaf9dd66db79b3aa5",
+    "usage": {
+     "cached_input_tokens": 1974016,
+     "input_tokens": 2020415,
+     "output_tokens": 49656,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-schedcore-binary-parity-775ff294",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "dd927fcdb59db7422cf499177380f0a66c6fec96c0111e70c4a5758de07203de",
+    "summary": "16be04677ca4eca336b33e3197e6be8550163d4d16943f0b545a211840e5a9ff",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-22T00:52:33.764241+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.069597,
+   "billed_cost_usd": 0.139194,
+   "duration_s": 487.802,
+   "effort": "low",
+   "finished_at": "2026-10-20T07:19:08.854224+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.766,
+   "reported_tokens": 4284845,
+   "run_id": "legacy-settlecore-binary-parity-7646f18c",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4284845,
+    "result_receipts": null,
+    "stream_sha256": "ad937ccdc5bdc455a06f713dd9d7fe7e7f80c71312933b48f9865571c92d4972",
+    "usage": {
+     "cached_input_tokens": 4125056,
+     "input_tokens": 4210948,
+     "output_tokens": 73897,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-settlecore-binary-parity-7646f18c",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "d7e9e69e849644743489505e8fbc8ba07024633f0e99f7b3ec6f889700b957d8",
+    "summary": "3f0ca6defebcd1ea1b6d3528eb8a734b1c767f6d03077fc6aa27a37eac5085be",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-20T07:11:01.013291+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.049884,
+   "billed_cost_usd": 0.049885,
+   "duration_s": 311.056,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:37:40.757037+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8119,
+   "reported_tokens": 2696673,
+   "run_id": "legacy-snapcore-binary-parity-2fc5601c",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2696673,
+    "result_receipts": null,
+    "stream_sha256": "917c66fbe4cc29a1f1a510753dbeb7d256e93364090aa31c2bd120c6092ea7f7",
+    "usage": {
+     "cached_input_tokens": 2567168,
+     "input_tokens": 2646102,
+     "output_tokens": 50571,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-snapcore-binary-parity-2fc5601c",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "5f82b4f866c5f41196a781471a58b6e425f04ca888a5c8dc77d811aeb506bad1",
+    "summary": "170aed74ef04e6d6708f5d647d56a1a35e50ded22ca64620c1555cc3ac93b3f2",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-22T00:32:29.696106+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.046065,
+   "billed_cost_usd": 0.092124,
+   "duration_s": 333.624,
+   "effort": "low",
+   "finished_at": "2026-10-22T08:51:55.210045+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8211,
+   "reported_tokens": 3061026,
+   "run_id": "legacy-stampcore-binary-parity-92a77020",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3061026,
+    "result_receipts": null,
+    "stream_sha256": "98db9e61599d0091c109cf72fb4a40ad03d12fbd1cf0aa487d47ee13f4d6d3bd",
+    "usage": {
+     "cached_input_tokens": 2948224,
+     "input_tokens": 3015915,
+     "output_tokens": 45111,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-stampcore-binary-parity-92a77020",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "0fd1696d05abf29c82cb6e53030dbf094b22aac98472e5194994d269f517f540",
+    "summary": "9efb2746f205918d4d3323f9024194177eacb85518c8e64c678e0f1c5590250f",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-22T08:46:21.577627+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.055568,
+   "billed_cost_usd": 0.11114,
+   "duration_s": 517.743,
+   "effort": "low",
+   "finished_at": "2026-10-22T08:33:40.010112+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8084,
+   "reported_tokens": 3086301,
+   "run_id": "legacy-tallycore-binary-parity-ffee4f5e",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3086301,
+    "result_receipts": null,
+    "stream_sha256": "5273ebf0609ae39a9a55fbcb4e9c8f442f40d79298006937c82e9e16ae972f12",
+    "usage": {
+     "cached_input_tokens": 2954880,
+     "input_tokens": 3026323,
+     "output_tokens": 59978,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-tallycore-binary-parity-ffee4f5e",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "c3b4057ff1306eff247e14c7bfe37378fce578f7fc2c2ffe356366c8178b1909",
+    "summary": "b203d7da32f64a1f459dc70b241671c1d2427fdb3632484de82978943cfa44d0",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-22T08:25:02.260531+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.032864,
+   "billed_cost_usd": 0.032865,
+   "duration_s": 278.461,
+   "effort": "low",
+   "finished_at": "2026-10-22T00:42:19.309164+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8313,
+   "reported_tokens": 1201927,
+   "run_id": "legacy-vaultcore-binary-parity-d3a8d747",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1201927,
+    "result_receipts": null,
+    "stream_sha256": "99cb9ce04d4d062b9ef6d7d1af134e2f83c1311f0c5c2ee873569a89e0c18fda",
+    "usage": {
+     "cached_input_tokens": 1120384,
+     "input_tokens": 1163546,
+     "output_tokens": 38381,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/low/legacy-vaultcore-binary-parity-d3a8d747",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "6eaf345ae5859a8b56a4f6f14db4fe4abcacf6eea085a629ba762f597418ef20",
+    "summary": "12a0e047a66efd0b4ccf8aa289d9f64e4129cafe3c9cadfccdd22b8f7b7cd8a1",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-22T00:37:40.844153+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.050221,
+   "billed_cost_usd": 0.050222,
+   "duration_s": 403.787,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:58:25.331993+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.818,
+   "reported_tokens": 3320704,
+   "run_id": "legacy-blendcore-binary-parity-d8f3d6d6",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3320704,
+    "result_receipts": null,
+    "stream_sha256": "69ff6d1b12765cbbeba2fdc51574ff0795c087acaed74766b11227c4b3c0ffc4",
+    "usage": {
+     "cached_input_tokens": 3200896,
+     "input_tokens": 3270377,
+     "output_tokens": 50327,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-blendcore-binary-parity-d8f3d6d6",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "d0352f660ddb361c25cb41489f78d3a250068d17efb89e85ecf18b4f193846f1",
+    "summary": "e298087aa5bab0719a34b90ca1f3b647674301b216cf7de38c0426ae385ac676",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-22T11:51:41.536085+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.086609,
+   "billed_cost_usd": 0.086605,
+   "duration_s": 527.265,
+   "effort": "high",
+   "finished_at": "2026-10-22T12:57:17.954535+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7461,
+   "reported_tokens": 7504727,
+   "run_id": "legacy-cellarcore-binary-parity-0e6d6d31",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7504727,
+    "result_receipts": null,
+    "stream_sha256": "8834d2cbb1289f60340c326da99cdb3f0b3947cd527c378d04e7f5c42dc5f662",
+    "usage": {
+     "cached_input_tokens": 7302912,
+     "input_tokens": 7428221,
+     "output_tokens": 76506,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-cellarcore-binary-parity-0e6d6d31",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "406388e07a084f06e40594d6424155c538dd8fcb9ef32a752947c296afb9fadb",
+    "summary": "af1300f2b1f94aab879152871b296d8810bd6158821085196898d28830103e42",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-22T12:48:30.682575+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.055823,
+   "billed_cost_usd": 0.055823,
+   "duration_s": 373.066,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:50:58.640337+00:00",
+   "functional": 0.7,
+   "model": "dsflash",
+   "quality": 0.8074,
+   "reported_tokens": 3364314,
+   "run_id": "legacy-codeccore-binary-parity-89f3e47f",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3364314,
+    "result_receipts": null,
+    "stream_sha256": "884967fb78f8adf1b23aa155d774458e73b865c24173495a7a9c5bcb44f01f4d",
+    "usage": {
+     "cached_input_tokens": 3248512,
+     "input_tokens": 3300520,
+     "output_tokens": 63794,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-codeccore-binary-parity-89f3e47f",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "0d936683395596fc1dce50609e743232d771198207cff304eadea49c06276b5c",
+    "summary": "1623ccb8bddf2ba2d1461c95fa42773e831417ae5697fc1d840dc0b3d25e5ff2",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-22T10:44:45.567300+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.106244,
+   "billed_cost_usd": 0.106246,
+   "duration_s": 814.102,
+   "effort": "high",
+   "finished_at": "2026-10-22T12:36:49.821924+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7114,
+   "reported_tokens": 9718238,
+   "run_id": "legacy-depotcore-binary-parity-14c60efe",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9718238,
+    "result_receipts": null,
+    "stream_sha256": "c5c6a5037647bc0b1dd8943c3ba3aaa417667566853bf5bb27a72a89da4f760e",
+    "usage": {
+     "cached_input_tokens": 9469440,
+     "input_tokens": 9628203,
+     "output_tokens": 90035,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-depotcore-binary-parity-14c60efe",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "ab0c6b6df9d5ca61383897aa07685015253f2e2cc810b39b33e980378981557b",
+    "summary": "4868e0cb063cd132de00adcd071381078f944115ae1899923775fe9b374ddfe8",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-22T12:23:15.710522+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.043198,
+   "billed_cost_usd": 0.043197,
+   "duration_s": 265.98,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:44:45.496292+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8103,
+   "reported_tokens": 2414993,
+   "run_id": "legacy-freightcore-binary-parity-1000aea0",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2414993,
+    "result_receipts": null,
+    "stream_sha256": "379e2b9a641c0060cc0a45b763049a3af4401d15b3974c2864f77ff03e04cb8c",
+    "usage": {
+     "cached_input_tokens": 2311936,
+     "input_tokens": 2368762,
+     "output_tokens": 46231,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-freightcore-binary-parity-1000aea0",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "ec229a3bf87fb3550aabbc266d86415bc64f193f2c7c803d9ac52e09da7034a0",
+    "summary": "432972db82aafd3ce4fbb4082e1f1c0fcc3d3b9b926af15fac233c8a6e1c8332",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-22T10:40:19.510670+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.155012,
+   "billed_cost_usd": 0.155011,
+   "duration_s": 1152.826,
+   "effort": "high",
+   "finished_at": "2026-10-22T12:23:15.633547+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.5976,
+   "reported_tokens": 18617416,
+   "run_id": "legacy-granarycore-binary-parity-9d93e8be",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 18617416,
+    "result_receipts": null,
+    "stream_sha256": "f393cdfa07c0d6dc0839bffe164e8a54922f4d8b0c3bbfaac7dc3e8e651b575f",
+    "usage": {
+     "cached_input_tokens": 18315264,
+     "input_tokens": 18495765,
+     "output_tokens": 121651,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-granarycore-binary-parity-9d93e8be",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "4904d45dd543117568255391798857a99746c7a91e236426081a84dd852d0617",
+    "summary": "b0de8435f24bc263d453652e425f81867936367cb5504d4c1e8a6c9e2d4a3f94",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-22T12:04:02.796864+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.0505,
+   "billed_cost_usd": 0.050501,
+   "duration_s": 424.257,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:24:08.078105+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8084,
+   "reported_tokens": 2893234,
+   "run_id": "legacy-hedgecore-binary-parity-2d8f0c1b",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2893234,
+    "result_receipts": null,
+    "stream_sha256": "22e99c8e9e9eb3767f42380df2e1424c3a0bb84040aad6242fa7b4ea202ecbcd",
+    "usage": {
+     "cached_input_tokens": 2782976,
+     "input_tokens": 2836318,
+     "output_tokens": 56916,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-hedgecore-binary-parity-2d8f0c1b",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "19129869f63edbf9e3dbb572f8bffdbc591a6871f8b405007683a65ef2b40cd5",
+    "summary": "b01f85668a553f240bf0c9291f396adb9f54db30e35295b5aa6fa352d9febdb5",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-22T11:17:03.815926+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.094385,
+   "billed_cost_usd": 0.094386,
+   "duration_s": 700.7,
+   "effort": "high",
+   "finished_at": "2026-10-22T12:48:30.607956+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7504,
+   "reported_tokens": 9994489,
+   "run_id": "legacy-lodgecore-binary-parity-ebc0071c",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9994489,
+    "result_receipts": null,
+    "stream_sha256": "0c1fcabfbda1c0311ed8070936a61b7e2f0e748a018b305ab016842e5a26038f",
+    "usage": {
+     "cached_input_tokens": 9795456,
+     "input_tokens": 9916393,
+     "output_tokens": 78096,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-lodgecore-binary-parity-ebc0071c",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "5b401586632f8c84289b03e7cd0df88c7f63bd40420168e226d28444e8f50926",
+    "summary": "3003f7ae9458aca853b61a7ddce8bc7710a4237d8a6128bee5229183efe6bc45",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-22T12:36:49.899192+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.069198,
+   "billed_cost_usd": 0.069199,
+   "duration_s": 886.966,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:19:50.572254+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7629,
+   "reported_tokens": 5551524,
+   "run_id": "legacy-matchcore-order-book-parity-68db7390",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5551524,
+    "result_receipts": null,
+    "stream_sha256": "f5a5163c90d59d962a9edf6638f5e53146060847f714e5dc49ce16fcd70e181e",
+    "usage": {
+     "cached_input_tokens": 5416064,
+     "input_tokens": 5479010,
+     "output_tokens": 72514,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-matchcore-order-book-parity-68db7390",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "f4f494f509bfdd951f5577ddb7e6c34c3831200f30ef26dd30394f3dd8144e64",
+    "summary": "4814f25bbed2fc541a2cb3a3bbab144f58e079309430641d188d4311c9fa09fd",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-22T10:05:03.597946+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.056215,
+   "billed_cost_usd": 0.056212,
+   "duration_s": 617.53,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:40:19.431314+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8296,
+   "reported_tokens": 3466065,
+   "run_id": "legacy-metercore-binary-parity-7caf1518",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3466065,
+    "result_receipts": null,
+    "stream_sha256": "e13dfa3dec5d4b24ca41f10a5d4ffce2411bda1c7bba416276fe368242bec253",
+    "usage": {
+     "cached_input_tokens": 3356544,
+     "input_tokens": 3400026,
+     "output_tokens": 66039,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-metercore-binary-parity-7caf1518",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "339643d20f2de5988c8086d73aeace39e6fcaa2f6542cda606022f0898637256",
+    "summary": "b4c7f7b7952a5583c881d2c582dcd3aa5ca68498bb8f30705614caa057da6108",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-22T10:30:01.892243+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.034628,
+   "billed_cost_usd": 0.034625,
+   "duration_s": 292.994,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:51:41.456761+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8083,
+   "reported_tokens": 1451195,
+   "run_id": "legacy-pacecore-binary-parity-876e0acf",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1451195,
+    "result_receipts": null,
+    "stream_sha256": "6334cc864640bfe5d0b60bf8b7319304d55d21623c6c09f0cbde2db484f0e84f",
+    "usage": {
+     "cached_input_tokens": 1370752,
+     "input_tokens": 1410196,
+     "output_tokens": 40999,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-pacecore-binary-parity-876e0acf",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "1bbe02e5f2b4b2cffe53a9c97177eb3aa1a65a806bfd9843dac689de2fa54936",
+    "summary": "9754e9bdf17218cc5350c277ec262e8ce63463cae43b307df56084c787d124c7",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-22T11:46:48.457179+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.161541,
+   "billed_cost_usd": 0.161545,
+   "duration_s": 1111.755,
+   "effort": "high",
+   "finished_at": "2026-10-22T13:15:49.796518+00:00",
+   "functional": 0.9333,
+   "model": "dsflash",
+   "quality": 0.6852,
+   "reported_tokens": 17880744,
+   "run_id": "legacy-paddockcore-binary-parity-52861d6c",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 17880744,
+    "result_receipts": null,
+    "stream_sha256": "91c03c0369e5b0b27ce8322182767cf3aba72a9efebe1f37c7201787937e5089",
+    "usage": {
+     "cached_input_tokens": 17584128,
+     "input_tokens": 17737863,
+     "output_tokens": 142881,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-paddockcore-binary-parity-52861d6c",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "984c8131d9c901b02a85678cdd8960ce79986f1113ea694a8800b5fdd88b6eb1",
+    "summary": "190a97c9e59d38d094c25263808159f7862c68ffba322faf8665bf84b5b60329",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-22T12:57:18.031710+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.042521,
+   "billed_cost_usd": 0.042521,
+   "duration_s": 263.933,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:30:01.812930+00:00",
+   "functional": 0.8,
+   "model": "dsflash",
+   "quality": 0.7886,
+   "reported_tokens": 2062586,
+   "run_id": "legacy-payrollcore-binary-parity-7cad6d37",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2062586,
+    "result_receipts": null,
+    "stream_sha256": "5632eac07d9bd12ba5719e88d08c5f6c31d8d00fd0f32e754efacc282471c021",
+    "usage": {
+     "cached_input_tokens": 1959040,
+     "input_tokens": 2015671,
+     "output_tokens": 46915,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-payrollcore-binary-parity-7cad6d37",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "f4e885c16e4bd346a3322c1236603330d7247c749f0164174fc6e9e19c6cd11c",
+    "summary": "e00a7c15166dcf50b52f1781f33572b982f704506c80d84bb27609d362a44021",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-22T10:25:37.873352+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.040287,
+   "billed_cost_usd": 0.040286,
+   "duration_s": 347.143,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:25:37.794973+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7879,
+   "reported_tokens": 2028825,
+   "run_id": "legacy-qlite-store-parity-0e769896",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2028825,
+    "result_receipts": null,
+    "stream_sha256": "6e8c41e2d16d2ea50f8556db74dd80a4f7df1890b10e2c3900f2da78c18d2bfb",
+    "usage": {
+     "cached_input_tokens": 1938432,
+     "input_tokens": 1982353,
+     "output_tokens": 46472,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-qlite-store-parity-0e769896",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "ba1a15b0f05f4d135a1976c082b9873e64b393b87e35aeb44921b973f6fe736e",
+    "summary": "e9f562181ee1cff605c456d3be6b0e84ef022ad21c3d5db019ad782b63dea7ca",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-22T10:19:50.647670+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.059387,
+   "billed_cost_usd": 0.05939,
+   "duration_s": 531.369,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:17:03.742246+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7857,
+   "reported_tokens": 3865101,
+   "run_id": "legacy-queuecore-binary-parity-5f9e6aeb",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3865101,
+    "result_receipts": null,
+    "stream_sha256": "fa1d2b63689514687790aa7cc5fa00897818fbfdc1b82ac97fc4562e828600e2",
+    "usage": {
+     "cached_input_tokens": 3729280,
+     "input_tokens": 3803266,
+     "output_tokens": 61835,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-queuecore-binary-parity-5f9e6aeb",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "31c91e6c0b066607974a06ccd3bf7e1c59e7083c868e8b7f8ce9968458ef03cc",
+    "summary": "be801f9ba54c97725a32a20c07263d054ddf88d99dae0623176a6a54ef57d744",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-22T11:08:12.366358+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.03628,
+   "billed_cost_usd": 0.036281,
+   "duration_s": 277.402,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:55:36.123652+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8075,
+   "reported_tokens": 1409029,
+   "run_id": "legacy-quotacore-binary-parity-78ff08b1",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1409029,
+    "result_receipts": null,
+    "stream_sha256": "e4372ab8ea9fb2c346a8aab2cb71d808d14af585ca491f0e1e6628b39f3ad685",
+    "usage": {
+     "cached_input_tokens": 1332224,
+     "input_tokens": 1362889,
+     "output_tokens": 46140,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-quotacore-binary-parity-78ff08b1",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "ab489c159a563910490fccc11daa10d49f64565bb471f9a93c997b0134ce09e4",
+    "summary": "4f9f7b8d8740c2b3a55efd5a5d09cdb0a319eb831aa414e1cf040562dcb833e4",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-22T10:50:58.716590+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.05497,
+   "billed_cost_usd": 0.05497,
+   "duration_s": 372.148,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:36:00.455260+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8136,
+   "reported_tokens": 2415383,
+   "run_id": "legacy-reflowcore-binary-parity-3eab750d",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2415383,
+    "result_receipts": null,
+    "stream_sha256": "57d2da3053753dfa078e596d7e4bf2a993f9482dd918de6fd23afc3b69630fbf",
+    "usage": {
+     "cached_input_tokens": 2285312,
+     "input_tokens": 2351820,
+     "output_tokens": 63563,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-reflowcore-binary-parity-3eab750d",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "fcd7d452ed9cbfa03b09653de7d3fce74d9245258c0c48a9aff001f9ee6a745c",
+    "summary": "83a3530e1673708b19e75352b630d648902541c96e693871550575e586cfcf47",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-22T11:29:48.299791+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.048559,
+   "billed_cost_usd": 0.048559,
+   "duration_s": 340.058,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:29:48.223692+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7571,
+   "reported_tokens": 2176834,
+   "run_id": "legacy-schedcore-binary-parity-2eb9db93",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2176834,
+    "result_receipts": null,
+    "stream_sha256": "33906f9e97311c2f5cbc47d99552c154efe85a24c9ee2814b97712e4bb6b3fbf",
+    "usage": {
+     "cached_input_tokens": 2074624,
+     "input_tokens": 2116827,
+     "output_tokens": 60007,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-schedcore-binary-parity-2eb9db93",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "30f540533b4301ff034c1292ab69e73213e6f0e4d7adc53688754df0aefc30df",
+    "summary": "7657eefdabd384555bb36d0423d0c2ae935609c2ab1adb2bc1082d189d74dd0d",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-22T11:24:08.160211+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.072304,
+   "billed_cost_usd": 0.103921,
+   "duration_s": 505.386,
+   "effort": "high",
+   "finished_at": "2026-10-22T10:05:03.519995+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7713,
+   "reported_tokens": 4748852,
+   "run_id": "legacy-settlecore-binary-parity-f34dff7e",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4748852,
+    "result_receipts": null,
+    "stream_sha256": "cb688723f1356534d5a70bb429c72a500257bb76d2ddcb399aeb3cb8215c0bea",
+    "usage": {
+     "cached_input_tokens": 4593664,
+     "input_tokens": 4670531,
+     "output_tokens": 78321,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-settlecore-binary-parity-f34dff7e",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "79e0037839e1ab09f549e374847138396320be389ed53b95fe8c20d3f94c365e",
+    "summary": "f93202cb1ec2f38e27e7ec7db9ee02179078816983bfffad7bbc693a1d4bcdda",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-22T09:56:38.122283+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.056799,
+   "billed_cost_usd": 0.0568,
+   "duration_s": 489.785,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:03:46.001462+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.827,
+   "reported_tokens": 4074978,
+   "run_id": "legacy-snapcore-binary-parity-59683e75",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4074978,
+    "result_receipts": null,
+    "stream_sha256": "e26e5f8b6ec73697c6348482120e01c3def56313308d53b6a54b757301a2e547",
+    "usage": {
+     "cached_input_tokens": 3963904,
+     "input_tokens": 4012209,
+     "output_tokens": 62769,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-snapcore-binary-parity-59683e75",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "c5562d44c92177071860f8fe27f49075ce5355687925b08d811d6707c59f2547",
+    "summary": "dbf5d77598f9ee6f35c3b94d0692860c205868416dfc2d32d54cc57f2b962890",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-22T10:55:36.206631+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.046494,
+   "billed_cost_usd": 0.046492,
+   "duration_s": 337.289,
+   "effort": "high",
+   "finished_at": "2026-10-22T12:04:02.714649+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8283,
+   "reported_tokens": 2539816,
+   "run_id": "legacy-stampcore-binary-parity-1e4728dc",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2539816,
+    "result_receipts": null,
+    "stream_sha256": "3fa00137e0fd344371e503aff6f9dfb33a8eba1a7640e7b57fd97783dac7014f",
+    "usage": {
+     "cached_input_tokens": 2430720,
+     "input_tokens": 2489066,
+     "output_tokens": 50750,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-stampcore-binary-parity-1e4728dc",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "dd7762e1b7daeece14c705c31792d143e08b43483fdb5238c2f5abbc05ea55a8",
+    "summary": "d9d823af7ec6cae09fa63b3e5ef88c95da799892b1ec9df4664090080d8faacb",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-22T11:58:25.418342+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.073909,
+   "billed_cost_usd": 0.073906,
+   "duration_s": 647.838,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:46:48.379679+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8094,
+   "reported_tokens": 5371882,
+   "run_id": "legacy-tallycore-binary-parity-5b9c74ad",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5371882,
+    "result_receipts": null,
+    "stream_sha256": "1dabe02efe23dd47aaa49a69d7d4007ded38f020ea35e3a9e62afcad5e1059a3",
+    "usage": {
+     "cached_input_tokens": 5211520,
+     "input_tokens": 5295837,
+     "output_tokens": 76045,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-tallycore-binary-parity-5b9c74ad",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "0fc4c07598eefb9a4782a35c6a9ae01ebb98749f23cad139623126f5f2ffdc79",
+    "summary": "9d839fcdf3e0ab5a99c33c20636730f331df73a572e14ebad454e8431f60a02a",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-22T11:36:00.532656+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.03817,
+   "billed_cost_usd": 0.038169,
+   "duration_s": 266.21,
+   "effort": "high",
+   "finished_at": "2026-10-22T11:08:12.288850+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.829,
+   "reported_tokens": 1622411,
+   "run_id": "legacy-vaultcore-binary-parity-f9c08819",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1622411,
+    "result_receipts": null,
+    "stream_sha256": "8d2746b1922cfc80be4c687f56dd91e10bdd274e70aedea5043dc3b88651393f",
+    "usage": {
+     "cached_input_tokens": 1533568,
+     "input_tokens": 1577426,
+     "output_tokens": 44985,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/high/legacy-vaultcore-binary-parity-f9c08819",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "688056841f99e88cc4297b0fcba35890d658d1e69c901542057f515dc3a7caf8",
+    "summary": "1ab283d1089e2f3b5c1fc14b67202ddb86c949e8121d9457ab3ac3971166e4e8",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-22T11:03:46.072271+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.042269,
+   "billed_cost_usd": 0.042268,
+   "duration_s": 325.971,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:33:01.934486+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8235,
+   "reported_tokens": 1764450,
+   "run_id": "legacy-blendcore-binary-parity-5d0f5a8a",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1764450,
+    "result_receipts": null,
+    "stream_sha256": "6e13f76c05fb7fbea812ba5749b618a9c7782e49ad5625a93bdec744209b1a67",
+    "usage": {
+     "cached_input_tokens": 1664128,
+     "input_tokens": 1715054,
+     "output_tokens": 49396,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-blendcore-binary-parity-5d0f5a8a",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "3f4ecd54ce1d362962f4a0497d9c678740038059bca8bd0e7d177968419bef12",
+    "summary": "e3e7f5f5b4e4b0a3bd03f71f6225168269cc65b2925197871b6196ccd5b711be",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-22T15:27:35.957466+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.141914,
+   "billed_cost_usd": 0.141914,
+   "duration_s": 1281.739,
+   "effort": "max",
+   "finished_at": "2026-10-22T17:11:21.159694+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7436,
+   "reported_tokens": 13884498,
+   "run_id": "legacy-cellarcore-binary-parity-6b61c70c",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 13884498,
+    "result_receipts": null,
+    "stream_sha256": "2c5fbea292c5704f89f0cd988170b8a0476b350fcabcd042372a6d3919f2c705",
+    "usage": {
+     "cached_input_tokens": 13596672,
+     "input_tokens": 13755720,
+     "output_tokens": 128778,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-cellarcore-binary-parity-6b61c70c",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "1a3f42a3fcdf23694336881ee63e68f31706ba4a69761be0f8fa93996d680306",
+    "summary": "56d4f8e57d55119a7d027fd1e646a742d79e2c476674b5f9273be248d567d694",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-22T16:49:59.408639+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.075311,
+   "billed_cost_usd": 0.075309,
+   "duration_s": 638.706,
+   "effort": "max",
+   "finished_at": "2026-10-22T14:04:05.688428+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7914,
+   "reported_tokens": 4806754,
+   "run_id": "legacy-codeccore-binary-parity-3e448c09",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4806754,
+    "result_receipts": null,
+    "stream_sha256": "41516037d865a8680071c680e4d7de9f67f309d9b0cb35fcfc50964acfdd1065",
+    "usage": {
+     "cached_input_tokens": 4638720,
+     "input_tokens": 4726333,
+     "output_tokens": 80421,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-codeccore-binary-parity-3e448c09",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "8e6fa2176dac3881584562ba80b44312cb17e1f7f79987a284e6bb6dae23c6b8",
+    "summary": "d5fb80d8db887bc2b77e175fc32845d500f7c99e84447d0f4219b23e0d151d55",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-22T13:53:26.974351+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.082055,
+   "billed_cost_usd": 0.082054,
+   "duration_s": 531.473,
+   "effort": "max",
+   "finished_at": "2026-10-22T16:06:19.397907+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7289,
+   "reported_tokens": 7490287,
+   "run_id": "legacy-depotcore-binary-parity-1a060e0d",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7490287,
+    "result_receipts": null,
+    "stream_sha256": "325d07a9dffd884e46db6c0c7785d99d5c609cb53fcc6be82874ba6e52214965",
+    "usage": {
+     "cached_input_tokens": 7300736,
+     "input_tokens": 7419798,
+     "output_tokens": 70489,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-depotcore-binary-parity-1a060e0d",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "ed2c207e3ec87e48836cb542d898537d90879c159bf77bc7799021a2c6c59152",
+    "summary": "03a17d2f9397a8f422cdb926b0ed9d01e37ae550bc85bbd12f75309e14185a8a",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-22T15:57:27.918303+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.033403,
+   "billed_cost_usd": 0.033405,
+   "duration_s": 307.91,
+   "effort": "max",
+   "finished_at": "2026-10-22T13:53:26.875449+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8094,
+   "reported_tokens": 1272281,
+   "run_id": "legacy-freightcore-binary-parity-865bb6af",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1272281,
+    "result_receipts": null,
+    "stream_sha256": "97c882c5a703a769c1062e210c78745a91a91e676173baf43cb8e858737dac9c",
+    "usage": {
+     "cached_input_tokens": 1201536,
+     "input_tokens": 1229644,
+     "output_tokens": 42637,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-freightcore-binary-parity-865bb6af",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "a4ae696e5f57b2e09c6af6c5f187fb14349aa9a17a8e37b47644dd3096a7a8ab",
+    "summary": "fae1b2527a15968205d8afe26970d8d7f4300fdcb883462efb4a89e2f7adcc82",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-22T13:48:18.959313+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.169663,
+   "billed_cost_usd": 0.169663,
+   "duration_s": 908.423,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:57:27.811253+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.6103,
+   "reported_tokens": 22424037,
+   "run_id": "legacy-granarycore-binary-parity-ab11de94",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 22424037,
+    "result_receipts": null,
+    "stream_sha256": "d30aadc92c3ae8abf9f3f8a1ba5cc9a9a29bef62f9c878c2818ae6805272ce83",
+    "usage": {
+     "cached_input_tokens": 22128000,
+     "input_tokens": 22293207,
+     "output_tokens": 130830,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-granarycore-binary-parity-ab11de94",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "ee343250c8d9085cf2b67c90202e4672f8bedf5d3b0e733f1743062a5ca48a34",
+    "summary": "5036635cea3c6f91bf66bb321a2ef8d93082089c53884de3a65c3d52da7fde54",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-22T15:42:19.376393+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.052129,
+   "billed_cost_usd": 0.052128,
+   "duration_s": 372.421,
+   "effort": "max",
+   "finished_at": "2026-10-22T14:47:28.794422+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8161,
+   "reported_tokens": 2839608,
+   "run_id": "legacy-hedgecore-binary-parity-4a36daec",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2839608,
+    "result_receipts": null,
+    "stream_sha256": "f533d6d8cf6b753c692754332bdf44e0e0ed7adb125a0bfe035905b26d349387",
+    "usage": {
+     "cached_input_tokens": 2726912,
+     "input_tokens": 2779510,
+     "output_tokens": 60098,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-hedgecore-binary-parity-4a36daec",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "b6ac0a3690eaf803e065c0ba415b64190b66febaf05a64cb05e4c17aca88821c",
+    "summary": "f40f50060de817d1074a30c97b95ddae2dc29c5ecd34f858d00ce1f0680214bb",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-22T14:41:16.367010+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.234021,
+   "billed_cost_usd": 0.234023,
+   "duration_s": 2619.777,
+   "effort": "max",
+   "finished_at": "2026-10-22T16:49:59.294538+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7333,
+   "reported_tokens": 34115772,
+   "run_id": "legacy-lodgecore-binary-parity-9d400a4b",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 34115772,
+    "result_receipts": null,
+    "stream_sha256": "fa7a7b9041fe386973bf9ee7154f3c41d6984ffb62fa10bc57bd154489a1596d",
+    "usage": {
+     "cached_input_tokens": 33720960,
+     "input_tokens": 33952136,
+     "output_tokens": 163636,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-lodgecore-binary-parity-9d400a4b",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "168e4cce326dd46edbe81a3c1a1e3b029714566b704c17958e4dcb17255512cc",
+    "summary": "f1a3195139db0baed37a36c904b804853635c7f8ec3b0d2fe6b9fa09778524af",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-22T16:06:19.501718+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.051086,
+   "billed_cost_usd": 0.051086,
+   "duration_s": 562.607,
+   "effort": "max",
+   "finished_at": "2026-10-22T13:33:15.622613+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7805,
+   "reported_tokens": 2729270,
+   "run_id": "legacy-matchcore-order-book-parity-667162a4",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2729270,
+    "result_receipts": null,
+    "stream_sha256": "9c62d853b22277ad086eebccb00746fdfce85b5a410ccf8ca0288ad932c5558d",
+    "usage": {
+     "cached_input_tokens": 2606208,
+     "input_tokens": 2674141,
+     "output_tokens": 55129,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-matchcore-order-book-parity-667162a4",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "ea88c7eed18cdba3d449e865655cae0346bdd7e545ae8730bd68404d0ea86259",
+    "summary": "1c5b8d48efae4af57842142aa474eb2a4459ccf152b9ddc226c1e5272cddcaf6",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-22T13:23:53.009745+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.041392,
+   "billed_cost_usd": 0.04139,
+   "duration_s": 327.122,
+   "effort": "max",
+   "finished_at": "2026-10-22T13:48:18.847756+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8085,
+   "reported_tokens": 2049594,
+   "run_id": "legacy-metercore-binary-parity-976b0dea",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2049594,
+    "result_receipts": null,
+    "stream_sha256": "1a7d67b6969a2d5316e4090d79372d64462a4ab5db9fcbcbb87beade6933b21c",
+    "usage": {
+     "cached_input_tokens": 1951360,
+     "input_tokens": 2003366,
+     "output_tokens": 46228,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-metercore-binary-parity-976b0dea",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "fd6c391e14aff16c2ffec14dd79273f053d9ea27f47893cdbd5421c83fcf19eb",
+    "summary": "e0f0374d9786bc97bbfa876cd0a680b5ee4d9c2c6ea5a0eef82acd8d3d2463d2",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-22T13:42:51.721268+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.091847,
+   "billed_cost_usd": 0.091846,
+   "duration_s": 610.403,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:27:35.855074+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8111,
+   "reported_tokens": 6984103,
+   "run_id": "legacy-pacecore-binary-parity-c13ed45e",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6984103,
+    "result_receipts": null,
+    "stream_sha256": "ab801716e6913567c141a53ceb70ab98147a4383566b92510d3730a2f149d895",
+    "usage": {
+     "cached_input_tokens": 6812544,
+     "input_tokens": 6882601,
+     "output_tokens": 101502,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-pacecore-binary-parity-c13ed45e",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "4c12c2ca4a25b4ae0d3e80f3c4ebd062f23604562e96cac73a1d8cdb3382edad",
+    "summary": "211a5a81db499bea60837f980ca6ec131c120e7bb12206d668ef867ee7811412",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-22T15:17:25.443040+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.092098,
+   "billed_cost_usd": 0.092094,
+   "duration_s": 497.41,
+   "effort": "max",
+   "finished_at": "2026-10-22T17:19:38.683578+00:00",
+   "functional": 0.9333,
+   "model": "dsflash",
+   "quality": 0.691,
+   "reported_tokens": 8812229,
+   "run_id": "legacy-paddockcore-binary-parity-7bb45067",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8812229,
+    "result_receipts": null,
+    "stream_sha256": "e9696f125c8f15dacfd54e9a8108326f5cf6223bfb31b69e4ffb924b136abe5c",
+    "usage": {
+     "cached_input_tokens": 8574464,
+     "input_tokens": 8743984,
+     "output_tokens": 68245,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-paddockcore-binary-parity-7bb45067",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "d513ba06638f53a1aa7ff2a52333dea975fb7e379bfd9f3bba6623b0521b2b6f",
+    "summary": "2ef578296d0c3502dfd41209f64f374f91d9c7f89ac723883d7714cbcfe98046",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-22T17:11:21.265427+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.038288,
+   "billed_cost_usd": 0.038289,
+   "duration_s": 263.75,
+   "effort": "max",
+   "finished_at": "2026-10-22T13:42:51.649441+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7856,
+   "reported_tokens": 1657915,
+   "run_id": "legacy-payrollcore-binary-parity-f81f1f38",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1657915,
+    "result_receipts": null,
+    "stream_sha256": "3a1c4121a74e1c7caca779f12c609ad9b71722da3faac59b63076194ac7ec51c",
+    "usage": {
+     "cached_input_tokens": 1565184,
+     "input_tokens": 1614175,
+     "output_tokens": 43740,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-payrollcore-binary-parity-f81f1f38",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "b2381a836be646fa5d63bb58892e130eedd6fd46ce8ff1d59277d60a35fafef0",
+    "summary": "8e93cc3c87569ba0d0d290dd2929a5d5b842f454f916ab1a44c4ddfcfa04dc86",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-22T13:38:27.894907+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.037949,
+   "billed_cost_usd": 0.03795,
+   "duration_s": 312.106,
+   "effort": "max",
+   "finished_at": "2026-10-22T13:38:27.813650+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7901,
+   "reported_tokens": 1684905,
+   "run_id": "legacy-qlite-store-parity-a9a9bf0b",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1684905,
+    "result_receipts": null,
+    "stream_sha256": "3d83e8f0a300c7b258c9a52be63e94cf34bd5a672ce62afb85ebe67ffd05cd60",
+    "usage": {
+     "cached_input_tokens": 1600640,
+     "input_tokens": 1639334,
+     "output_tokens": 45571,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-qlite-store-parity-a9a9bf0b",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "d4d13fd89373854aad5508192f46191c60f7064fd99be6a0609c5041891c60b5",
+    "summary": "eef3ac501a089b35cc7f0128f7f286417b06a64918568ffb265a3f1192cb5346",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-22T13:33:15.702967+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.041096,
+   "billed_cost_usd": 0.041095,
+   "duration_s": 492.539,
+   "effort": "max",
+   "finished_at": "2026-10-22T14:41:16.266562+00:00",
+   "functional": 0.75,
+   "model": "dsflash",
+   "quality": 0.7729,
+   "reported_tokens": 1449485,
+   "run_id": "legacy-queuecore-binary-parity-3c27358e",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1449485,
+    "result_receipts": null,
+    "stream_sha256": "bc439e69a53bad7d506af1ac989da3a3bc3e644ed3d9326e9689fdd03e62b3be",
+    "usage": {
+     "cached_input_tokens": 1358592,
+     "input_tokens": 1397516,
+     "output_tokens": 51969,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-queuecore-binary-parity-3c27358e",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "d83d7da91f4d9cb93038f87d5877c458721c047e506a09e1083cf8b2af841a15",
+    "summary": "b55906c3a95e8e4c6ee5936581f576976a1e0cc37f8dbc0130cfb9772552431a",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-22T14:33:03.723273+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.051791,
+   "billed_cost_usd": 0.051791,
+   "duration_s": 437.43,
+   "effort": "max",
+   "finished_at": "2026-10-22T14:11:23.230073+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7735,
+   "reported_tokens": 2517789,
+   "run_id": "legacy-quotacore-binary-parity-a9155b98",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2517789,
+    "result_receipts": null,
+    "stream_sha256": "4f31c82b84485d0987d8bf3e39332594c8b5e372c8fc00d6fcb2d109986da44d",
+    "usage": {
+     "cached_input_tokens": 2407680,
+     "input_tokens": 2455452,
+     "output_tokens": 62337,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-quotacore-binary-parity-a9155b98",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "06340295df4ff0ff6723f257508da2658c20d0690fa054967e37fa188de580f4",
+    "summary": "44f3320106a5668ef93dd6c6abccc44f7a268608693f7c12adc81e092e11b34d",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-22T14:04:05.792843+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.051219,
+   "billed_cost_usd": 0.051217,
+   "duration_s": 429.854,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:07:14.738403+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8211,
+   "reported_tokens": 2361558,
+   "run_id": "legacy-reflowcore-binary-parity-ccadf5fb",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2361558,
+    "result_receipts": null,
+    "stream_sha256": "6c8cac1bc30d7871e03d41d325b60e6133a098c7a4215573ecdffd2397779294",
+    "usage": {
+     "cached_input_tokens": 2250752,
+     "input_tokens": 2299678,
+     "output_tokens": 61880,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-reflowcore-binary-parity-ccadf5fb",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "3d957eb28302c798b664ef493589eac242cfd3c985180fe8c64be14da95bb9c2",
+    "summary": "400282a78edde72731a62e0fd785b1efa542c852b820d2dbc4b5151ccf2937be",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-22T15:00:04.879133+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.047345,
+   "billed_cost_usd": 0.047349,
+   "duration_s": 755.874,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:00:04.778607+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.75,
+   "reported_tokens": 2485332,
+   "run_id": "legacy-schedcore-binary-parity-90d64cf5",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2485332,
+    "result_receipts": null,
+    "stream_sha256": "d58b9d5eddc9cca3686f23fcf8482b83bea6e2b21f282b9144ee283eb216767b",
+    "usage": {
+     "cached_input_tokens": 2377216,
+     "input_tokens": 2432007,
+     "output_tokens": 53325,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-schedcore-binary-parity-90d64cf5",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "f231b39975dd4685cf2f062bc0ddffae98be9315717878d91bb2313b88769462",
+    "summary": "eeb67d0de06a4ed480b2aba5dc5c54fdfacc44295e68f61980aebcf5410b3006",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-22T14:47:28.898504+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.080277,
+   "billed_cost_usd": 0.080272,
+   "duration_s": 480.121,
+   "effort": "max",
+   "finished_at": "2026-10-22T13:23:52.936107+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7718,
+   "reported_tokens": 6464581,
+   "run_id": "legacy-settlecore-binary-parity-ba7ef320",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6464581,
+    "result_receipts": null,
+    "stream_sha256": "ed4ab9d293f9815837b42a79667a26a8735732db6518a997f6cbb408e9018837",
+    "usage": {
+     "cached_input_tokens": 6293504,
+     "input_tokens": 6385171,
+     "output_tokens": 79410,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-settlecore-binary-parity-ba7ef320",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "fd0ccb79b4e3a280603031a42f5f422e22337b53c117206718268bd5ad04c571",
+    "summary": "f09de665a69f6393a57b03f1303db0fa608e990eee0c92cd1567ee345b8abd01",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-22T13:15:52.809314+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.050883,
+   "billed_cost_usd": 0.050884,
+   "duration_s": 624.457,
+   "effort": "max",
+   "finished_at": "2026-10-22T14:21:47.795640+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8144,
+   "reported_tokens": 2806340,
+   "run_id": "legacy-snapcore-binary-parity-f2e176db",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2806340,
+    "result_receipts": null,
+    "stream_sha256": "d9f90ad9260afb277fe67f508e9e5be8bdcbe61a98491ab2b003719f0a73f3da",
+    "usage": {
+     "cached_input_tokens": 2675072,
+     "input_tokens": 2754856,
+     "output_tokens": 51484,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-snapcore-binary-parity-f2e176db",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "dbada62009caf1baa1a9f13b1f84b8cce31dd3d9da92018f6af11cf5f90d1226",
+    "summary": "6bc904929358300d9922fdc4fd6464927743dcdac8b1acac88dd2f8e72e83150",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-22T14:11:23.332240+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.067275,
+   "billed_cost_usd": 0.067275,
+   "duration_s": 557.227,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:42:19.270410+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.8206,
+   "reported_tokens": 4747558,
+   "run_id": "legacy-stampcore-binary-parity-a22e4205",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4747558,
+    "result_receipts": null,
+    "stream_sha256": "2dea4e6c58a902f3e799e58ac4c14e2587407cb431b3251670e16c0ef7ee42c7",
+    "usage": {
+     "cached_input_tokens": 4603264,
+     "input_tokens": 4676845,
+     "output_tokens": 70713,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-stampcore-binary-parity-a22e4205",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "5fae921f3195346681c8f31b0d73039f1ccea747190fd4f0281020e1267035b8",
+    "summary": "23f992e65034478c1e614b1ab3059f646e581cccd9d5f52ec006e4d081fc5437",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-22T15:33:02.038811+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.064192,
+   "billed_cost_usd": 0.064193,
+   "duration_s": 610.492,
+   "effort": "max",
+   "finished_at": "2026-10-22T15:17:25.340284+00:00",
+   "functional": 1.0,
+   "model": "dsflash",
+   "quality": 0.7986,
+   "reported_tokens": 3621535,
+   "run_id": "legacy-tallycore-binary-parity-ad2b5a51",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3621535,
+    "result_receipts": null,
+    "stream_sha256": "4a25de69ddabd6fb58d9ddb44d7d61b404c12175b3b2032f10119426788c36c1",
+    "usage": {
+     "cached_input_tokens": 3480192,
+     "input_tokens": 3549201,
+     "output_tokens": 72334,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-tallycore-binary-parity-ad2b5a51",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "51ce23b1b733632ee96c6e62186c6781a6db1ffffc5c6c5340a8334fd73d15f8",
+    "summary": "fef583ab635bd9b4a24b2f759439d03d4676238b8beac844188d664c0e67827c",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-22T15:07:14.840206+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": 0.065798,
+   "billed_cost_usd": 0.0658,
+   "duration_s": 675.712,
+   "effort": "max",
+   "finished_at": "2026-10-22T14:33:03.619185+00:00",
+   "functional": 0.7778,
+   "model": "dsflash",
+   "quality": 0.8196,
+   "reported_tokens": 4779689,
+   "run_id": "legacy-vaultcore-binary-parity-886005c1",
+   "security": 1.0,
+   "solver_cli_version": "0.2.1-rc.2",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4779689,
+    "result_receipts": null,
+    "stream_sha256": "83d2202ddeb8b9ce8b585a6fa93f4038d2afdd75f95c3671c4b196e6d6ca2658",
+    "usage": {
+     "cached_input_tokens": 4647808,
+     "input_tokens": 4708417,
+     "output_tokens": 71272,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-23-deepseek-flash-judging-v327/runs-effort-deepseek-flash-dsh/max/legacy-vaultcore-binary-parity-886005c1",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "eefeaed104987e45655e8ab91bf9cbbb4a1e628e238401e30e666770e76acb7f",
+    "summary": "96d4d12f5aaaf7e9eaa3510f713d15dc8e25ea02cc0e78d0ba6cc52ace977bc0",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-22T14:21:47.897706+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4"
+}

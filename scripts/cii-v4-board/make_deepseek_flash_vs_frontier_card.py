@@ -285,7 +285,6 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             color=COLORS[m],
             lw=2,
             zorder=2,
-            linestyle=(0, (4, 2)) if m == "dsflash" else "-",
         )
         ax.errorbar(
             xs,

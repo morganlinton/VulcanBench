@@ -56,7 +56,18 @@ from harness.redaction import sanitize
 from harness.sandbox.docker_executor import ResourceSpec
 
 CLI_AGENT_PROVIDERS = frozenset(
-    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code", "devin", "pi", "dsh"}
+    {
+        "claude-code",
+        "codex",
+        "cursor",
+        "grok-build",
+        "zcode",
+        "muse-code",
+        "devin",
+        "pi",
+        "dsh",
+        "mirror",
+    }
 )
 
 # Claude Code's headless result text when a subscription window is exhausted
@@ -2791,6 +2802,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
         from harness.agent.pi_agent import PiAdapter  # noqa: PLC0415
 
         return PiAdapter()
+    if name == "mirror":
+        # Same lazy import: mirror_cli builds on this module's helpers.
+        from harness.agent.mirror_cli import MirrorAdapter  # noqa: PLC0415
+
+        return MirrorAdapter()
     if name == "dsh":
         # Same lazy import: deepseek_harness builds on this module's helpers.
         from harness.agent.deepseek_harness import DeepSeekHarnessAdapter  # noqa: PLC0415

@@ -49,6 +49,20 @@ Reflection publishes no Beam price (the public beta is "free to start"), so
 runs are unpriced: the board shows tokens and minutes, and cost stays blank
 until a list price exists.
 
+Model id: the API's `/models` lists only `Beam-501B-A23B`, which Mirror's
+source calls "a Reflection API alias of the default Beam model"; Mirror's
+default for `--api reflection` is the versioned `Beam-1.0-501B-A23B`, and the
+API serves and echoes both (checked 2026-10-23). The adapter requests the
+versioned id, so a later Beam version behind the alias cannot slip in.
+
+Pilot evidence (2026-10-23, from the working checkout, not board data):
+hello-world at Low solved in 4 calls; `legacy-qlite-store-parity` at Low
+ended after 16 calls and 24 seconds with "Done." and functional 0.0. Its
+first probes met the legacy binary without an execute bit, which is how the
+harness has always staged task files (plain byte copies), so every published
+column had the same start; DeepSeek V4.1 Flash and Sonnet 5.5 ran `chmod`.
+No call was refused by the API.
+
 ### Limits
 
 The API key (`REFLECTION_API_KEY`) is in the agent's environment and shell

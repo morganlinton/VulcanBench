@@ -7,6 +7,38 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-23: DeepSeek V4.1 Flash judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.27)
+
+### Decision
+
+The Flash sweep finished on 2026-10-22: 69 runs, Low, High and Max, no
+timeouts, no overlapping jobs. The owner asked for its combined score before
+anything is published, so Code quality is judged as v3.27.
+
+The standard second judge, Grok 4.6, runs through Cursor, and the Cursor
+account was out of usage on 2026-10-23 ("You're out of usage"; a one-word probe
+through the pinned Cursor 2026.10.01-e373342 failed). Owner choice in chat: put
+GPT-6.1 Sol in the seat, as v3.20 did for Grok 4.7, rather than wait for
+Cursor. Muse Spark 1.3 keeps the other seat. Both answered a probe on
+2026-10-23 through their pinned binaries.
+
+Two run-condition notes carried into the protocol:
+
+- Muse Code's updater had deleted the v3.4 Muse binary from `~/.local/bin`.
+  Byte-identical backups (sha256 `4c0f9600...0577a7`) are in
+  `~/.vulcanbench/pinned/` and `~/.local/share/vulcanbench/muse-binaries/`;
+  the chain points `VULCANBENCH_MUSE_BINARY` at the first.
+- macOS went from 26 to 27.0.1 during the sweep's second pause (2026-10-22).
+  Re-grading the 13 Low runs finished before it, on 27.0.1, gave 13 identical
+  functional scores, and the pinned dsh install hash was unchanged.
+
+### Consequence
+
+Flash's combined score is a Muse Spark 1.3 and GPT-6.1 Sol mean, while the
+columns it will be compared with (Claude Opus 5.5, GPT-6.1 Sol) are Muse Spark
+1.3 and Grok 4.6 means. Cards and pages say so. GPT-6.1 Sol therefore judges a
+column it is shown beside; its own column was judged without it.
+
 ## 2026-10-19: DeepSeek V4.1 Flash and V4 Pro on Frontier v4 through DeepSeek Harness
 
 ### Decision

@@ -14,7 +14,10 @@
 # Concurrency follows decision (e): Python and JavaScript tasks run two
 # attempts at a time, compiled and JVM tasks one (16 GiB hosts).
 # Early exit: two solves by the reference end a task's gate as a reject, so
-# the Harbor job is stopped as soon as two trials have reward 1.
+# the Harbor job is stopped as soon as two trials have reward 1. Killing
+# `harbor run` does not stop the running trial's sandbox containers, which
+# keep the agent (and its quota use) alive until the task timeout (seen
+# 2026-10-22, comrak), so stop_sandboxes removes them after every stop.
 # Infrastructure guard: a finished trial whose agent log shows an auth,
 # model-id, usage-credit or usage-limit failure stops the whole run; such
 # trials are not gate results. Move their job directory aside (INFRA-*).
@@ -85,6 +88,16 @@ print(n)
 PY
 }
 
+stop_sandboxes() { # task name -> remove this task's leftover sandbox containers and networks
+  # Harbor names a trial's compose project <first 32 chars of the task name>__<trial id>__env.
+  local prefix ids n
+  prefix=$(printf '%s' "${1:0:32}" | tr 'A-Z' 'a-z')
+  ids=$(docker ps -aq --filter "name=^${prefix}__" 2>/dev/null)
+  [ -n "$ids" ] && { echo "--- $1: removing leftover sandbox containers"; docker rm -f $ids >/dev/null 2>&1; }
+  for n in $(docker network ls -q --filter "name=^${prefix}__" 2>/dev/null); do docker network rm "$n" >/dev/null 2>&1; done
+  return 0
+}
+
 infra_hit() { # job dir -> prints the first trial with an infrastructure failure
   local tr
   for tr in "$1"/*__*; do
@@ -111,7 +124,8 @@ for t in "$@"; do
     bad=$(infra_hit "$OUT/jobs/$job")
     if [ -n "$bad" ]; then
       echo "!!! $t: infrastructure failure in $bad (matches: $INFRA_RE); stopping the run"
-      kill -INT "$hpid" 2>/dev/null; sleep 20; kill "$hpid" 2>/dev/null
+      kill -INT "$hpid" 2>/dev/null; sleep 20; kill "$hpid" 2>/dev/null; wait "$hpid" 2>/dev/null
+      stop_sandboxes "$t"
       echo "!!! move $OUT/jobs/$job aside as INFRA-..., fix the cause, and rerun"; exit 1
     fi
     if [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
@@ -120,6 +134,7 @@ for t in "$@"; do
     fi
   done
   wait "$hpid" 2>/dev/null
+  stop_sandboxes "$t"
   if [ -z "$stopped" ]; then
     bad=$(infra_hit "$OUT/jobs/$job")
     [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; exit 1; }

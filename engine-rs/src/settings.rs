@@ -92,7 +92,10 @@ mod tests {
     #[test]
     fn refuses_blocked_levels_from_the_checked_in_file() {
         let path = settings_path();
-        assert!(path.is_file(), "vulcanbench.toml should sit beside engine-rs/");
+        assert!(
+            path.is_file(),
+            "vulcanbench.toml should sit beside engine-rs/"
+        );
         assert!(check_effort_allowed(None, &path).is_ok());
         assert!(check_effort_allowed(Some("high"), &path).is_ok());
         let err = check_effort_allowed(Some(" Ultra "), &path).expect_err("ultra is blocked");

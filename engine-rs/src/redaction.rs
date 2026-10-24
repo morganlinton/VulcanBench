@@ -128,7 +128,10 @@ fn match_at(bytes: &[u8], at: usize, pattern: &Pattern) -> Option<usize> {
         }
         pos += tail.len();
     }
-    let run = rest[pos..].iter().take_while(|b| (pattern.class)(**b)).count();
+    let run = rest[pos..]
+        .iter()
+        .take_while(|b| (pattern.class)(**b))
+        .count();
     if run < pattern.min {
         return None;
     }
@@ -282,7 +285,10 @@ mod tests {
             "Authorization: Bearer [REDACTED]"
         );
         assert_eq!(redact("bearer\tshort"), "bearer\tshort");
-        assert_eq!(redact("bearerNoSpaceAAAAAAAAAAAAAAAA"), "bearerNoSpaceAAAAAAAAAAAAAAAA");
+        assert_eq!(
+            redact("bearerNoSpaceAAAAAAAAAAAAAAAA"),
+            "bearerNoSpaceAAAAAAAAAAAAAAAA"
+        );
     }
 
     #[test]
@@ -294,7 +300,10 @@ mod tests {
         };
         let capped = items[0].as_str().expect("string");
         assert!(capped.ends_with("...[truncated 5 chars]"));
-        assert_eq!(char_len(capped), MAX_FIELD_CHARS + "...[truncated 5 chars]".len());
+        assert_eq!(
+            char_len(capped),
+            MAX_FIELD_CHARS + "...[truncated 5 chars]".len()
+        );
         assert_eq!(items[1], Value::Int(1));
     }
 }

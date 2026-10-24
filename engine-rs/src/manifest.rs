@@ -31,7 +31,13 @@ const CODE_SUFFIXES: [&str; 19] = [
     "py", "go", "ts", "tsx", "js", "jsx", "mjs", "cjs", "java", "rs", "rb", "cs", "c", "h", "cc",
     "cpp", "cxx", "hh", "hpp",
 ];
-const WORKSPACE_SKIP: [&str; 5] = ["issue.md", ".vulcanbenchignore", ".coverage", ".gitignore", ".gitattributes"];
+const WORKSPACE_SKIP: [&str; 5] = [
+    "issue.md",
+    ".vulcanbenchignore",
+    ".coverage",
+    ".gitignore",
+    ".gitattributes",
+];
 
 pub fn repo_scale(metadata: &Value) -> &'static str {
     metadata
@@ -60,11 +66,17 @@ fn scale_defaults(metadata: &Value) -> (i64, f64) {
     SCALE_DEFAULTS
         .iter()
         .find(|(s, _, _)| *s == scale)
-        .map_or((DEFAULT_MAX_STEPS, 0.0), |(_, steps, timeout)| (*steps, *timeout))
+        .map_or((DEFAULT_MAX_STEPS, 0.0), |(_, steps, timeout)| {
+            (*steps, *timeout)
+        })
 }
 
 /// Step budget from metadata; a CLI value caps it unless `override` is set.
-pub fn resolve_max_steps(metadata: &Value, cli_max_steps: Option<i64>, override_budgets: bool) -> i64 {
+pub fn resolve_max_steps(
+    metadata: &Value,
+    cli_max_steps: Option<i64>,
+    override_budgets: bool,
+) -> i64 {
     if let (true, Some(cli)) = (override_budgets, cli_max_steps) {
         return cli;
     }
@@ -80,7 +92,11 @@ pub fn resolve_max_steps(metadata: &Value, cli_max_steps: Option<i64>, override_
 }
 
 /// Wall-clock budget from hints or scale defaults; a CLI value caps it.
-pub fn resolve_agent_timeout_s(metadata: &Value, cli_timeout: Option<f64>, override_budgets: bool) -> Option<f64> {
+pub fn resolve_agent_timeout_s(
+    metadata: &Value,
+    cli_timeout: Option<f64>,
+    override_budgets: bool,
+) -> Option<f64> {
     if let (true, Some(cli)) = (override_budgets, cli_timeout) {
         return Some(cli);
     }
@@ -124,11 +140,19 @@ fn host_command_first_line(args: &[&str], timeout: i64) -> Option<String> {
     process::which(args[0])?;
     let mut command = Command::new(args[0]);
     command.args(&args[1..]);
-    let done = process::run(&mut command, Some(Duration::from_secs(timeout.max(1) as u64))).ok()?;
+    let done = process::run(
+        &mut command,
+        Some(Duration::from_secs(timeout.max(1) as u64)),
+    )
+    .ok()?;
     if done.timed_out {
         return None;
     }
-    let output = if done.stdout.is_empty() { &done.stderr } else { &done.stdout };
+    let output = if done.stdout.is_empty() {
+        &done.stderr
+    } else {
+        &done.stdout
+    };
     process::first_output_line(output)
 }
 
@@ -237,7 +261,12 @@ pub fn minimal_manifest(model: &str, judge_model: Option<&str>, network: bool) -
 }
 
 /// Records the environment a run executed in, for audit and reproducibility.
-pub fn collect_manifest(model: &str, judge_model: Option<&str>, network: bool, deadline: &Deadline) -> Value {
+pub fn collect_manifest(
+    model: &str,
+    judge_model: Option<&str>,
+    network: bool,
+    deadline: &Deadline,
+) -> Value {
     if clamp_timeout(10, deadline.remaining_s()).is_none() {
         let mut manifest = minimal_manifest(model, judge_model, network);
         manifest.insert("budget_exceeded", true);
@@ -245,7 +274,8 @@ pub fn collect_manifest(model: &str, judge_model: Option<&str>, network: bool, d
     }
     let mut tools = Value::object();
     for tool in MANIFEST_TOOLS {
-        let version = clamp_timeout(10, deadline.remaining_s()).and_then(|timeout| tool_version(tool, timeout));
+        let version = clamp_timeout(10, deadline.remaining_s())
+            .and_then(|timeout| tool_version(tool, timeout));
         tools.insert(tool, version);
     }
     let python = runtime_python();
@@ -279,9 +309,14 @@ mod tests {
         assert_eq!(resolve_agent_timeout_s(&micro, None, false), Some(300.0));
         let hinted = parse(r#"{"repo_scale": "large", "agent_hints": {"suggested_max_steps": 120, "suggested_timeout_s": 5400}}"#).expect("json");
         assert_eq!(resolve_max_steps(&hinted, None, false), 120);
-        assert_eq!(resolve_agent_timeout_s(&hinted, Some(100.0), false), Some(100.0));
+        assert_eq!(
+            resolve_agent_timeout_s(&hinted, Some(100.0), false),
+            Some(100.0)
+        );
         assert_eq!(resolve_verifier_timeout_s(&hinted, 120), 120);
-        assert!(system_prompt_for_task(&hinted, "base").starts_with("base\n\nThis is a large codebase"));
+        assert!(
+            system_prompt_for_task(&hinted, "base").starts_with("base\n\nThis is a large codebase")
+        );
         assert_eq!(system_prompt_for_task(&micro, "base"), "base");
     }
 }

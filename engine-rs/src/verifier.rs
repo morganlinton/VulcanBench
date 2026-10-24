@@ -77,12 +77,17 @@ fn infrastructure_reason(cmd: &str, outcome: &RunnerOutcome) -> Option<&'static 
     }
     let missing_exit = matches!(outcome.exit_code, 126 | 127);
     let not_found = MISSING_COMMANDS.iter().any(|tool| {
-        output.contains(&format!("{tool}: not found")) || output.contains(&format!("{tool}: command not found"))
+        output.contains(&format!("{tool}: not found"))
+            || output.contains(&format!("{tool}: command not found"))
     });
     if missing_exit && not_found {
         return Some("verifier toolchain command is unavailable");
     }
-    if missing_exit && MISSING_COMMANDS.iter().any(|tool| cmd.trim_start().starts_with(tool)) {
+    if missing_exit
+        && MISSING_COMMANDS
+            .iter()
+            .any(|tool| cmd.trim_start().starts_with(tool))
+    {
         return Some("verifier toolchain command is unavailable");
     }
     None
@@ -196,8 +201,15 @@ mod tests {
 
     #[test]
     fn infrastructure_reasons() {
-        let timed_out = RunnerOutcome { exit_code: 124, stdout: String::new(), stderr: String::new() };
-        assert_eq!(infrastructure_reason("pytest", &timed_out), Some("verifier command timed out"));
+        let timed_out = RunnerOutcome {
+            exit_code: 124,
+            stdout: String::new(),
+            stderr: String::new(),
+        };
+        assert_eq!(
+            infrastructure_reason("pytest", &timed_out),
+            Some("verifier command timed out")
+        );
         let missing = RunnerOutcome {
             exit_code: 127,
             stdout: String::new(),
@@ -207,7 +219,11 @@ mod tests {
             infrastructure_reason("cargo test", &missing),
             Some("verifier toolchain command is unavailable")
         );
-        let failing = RunnerOutcome { exit_code: 1, stdout: "FAILED".to_owned(), stderr: String::new() };
+        let failing = RunnerOutcome {
+            exit_code: 1,
+            stdout: "FAILED".to_owned(),
+            stderr: String::new(),
+        };
         assert_eq!(infrastructure_reason("pytest", &failing), None);
     }
 }

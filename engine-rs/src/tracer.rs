@@ -27,7 +27,12 @@ impl TraceCollector {
     /// # Errors
     ///
     /// When the run directory cannot be created.
-    pub fn new(run_dir: &Path, run_id: &str, task_id: &str, model: &str) -> Result<Self, EngineError> {
+    pub fn new(
+        run_dir: &Path,
+        run_id: &str,
+        task_id: &str,
+        model: &str,
+    ) -> Result<Self, EngineError> {
         fs::create_dir_all(run_dir)
             .map_err(|e| EngineError::io(format!("creating {}", run_dir.display()), e))?;
         Ok(Self {
@@ -63,8 +68,7 @@ impl TraceCollector {
             .append(true)
             .open(&self.trace_path)
             .map_err(|e| EngineError::io(format!("opening {}", self.trace_path.display()), e))?;
-        writeln!(file, "{}", event.to_json())
-            .map_err(|e| EngineError::io("writing trace event", e))
+        writeln!(file, "{}", event.to_json()).map_err(|e| EngineError::io("writing trace event", e))
     }
 
     /// Writes `summary.json` and returns the sanitized summary.

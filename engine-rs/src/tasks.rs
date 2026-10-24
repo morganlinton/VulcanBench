@@ -149,10 +149,10 @@ pub fn list_task_ids(tasks_root: &Path) -> Vec<String> {
 
 /// `Path.read_text(encoding="utf-8")`: UTF-8 with universal newlines.
 pub fn read_text(path: &Path) -> Result<String, EngineError> {
-    let bytes = fs::read(path).map_err(|e| EngineError::io(format!("reading {}", path.display()), e))?;
-    let text = String::from_utf8(bytes).map_err(|e| {
-        EngineError::Invalid(format!("{} is not valid UTF-8: {e}", path.display()))
-    })?;
+    let bytes =
+        fs::read(path).map_err(|e| EngineError::io(format!("reading {}", path.display()), e))?;
+    let text = String::from_utf8(bytes)
+        .map_err(|e| EngineError::Invalid(format!("{} is not valid UTF-8: {e}", path.display())))?;
     Ok(universal_newlines(&text))
 }
 
@@ -196,7 +196,8 @@ fn sorted_files(root: &Path) -> io::Result<Vec<PathBuf>> {
 }
 
 fn hash_dir(hasher: &mut Sha256, label: &str, root: &Path) -> Result<(), EngineError> {
-    let files = sorted_files(root).map_err(|e| EngineError::io(format!("walking {}", root.display()), e))?;
+    let files = sorted_files(root)
+        .map_err(|e| EngineError::io(format!("walking {}", root.display()), e))?;
     for rel in files {
         let bytes = fs::read(root.join(&rel))
             .map_err(|e| EngineError::io(format!("reading {}", root.join(&rel).display()), e))?;
@@ -251,7 +252,9 @@ pub fn task_hash(task: &Task) -> Result<String, EngineError> {
         let compose_path = task.root.join(compose);
         if compose_path.is_file() {
             hasher.update(b"environment\0");
-            hasher.update(&fs::read(compose_path).map_err(|e| EngineError::io("reading compose", e))?);
+            hasher.update(
+                &fs::read(compose_path).map_err(|e| EngineError::io("reading compose", e))?,
+            );
             hasher.update(b"\0");
         }
     }
@@ -293,16 +296,24 @@ pub fn should_ignore(rel: &Path, ignored: &[PathBuf]) -> bool {
             return true;
         }
         // A bare name (no directory part) also matches as the first component.
-        let bare = pattern.parent().map(|p| p.as_os_str().is_empty()).unwrap_or(true);
-        bare && rel.components().next().is_some_and(|first| first.as_os_str() == pattern.as_os_str())
+        let bare = pattern
+            .parent()
+            .map(|p| p.as_os_str().is_empty())
+            .unwrap_or(true);
+        bare && rel
+            .components()
+            .next()
+            .is_some_and(|first| first.as_os_str() == pattern.as_os_str())
     })
 }
 
 fn copytree(src: &Path, dst: &Path) -> Result<(), EngineError> {
-    fs::create_dir_all(dst).map_err(|e| EngineError::io(format!("creating {}", dst.display()), e))?;
+    fs::create_dir_all(dst)
+        .map_err(|e| EngineError::io(format!("creating {}", dst.display()), e))?;
     let mut stack = vec![src.to_path_buf()];
     while let Some(dir) = stack.pop() {
-        let entries = fs::read_dir(&dir).map_err(|e| EngineError::io(format!("listing {}", dir.display()), e))?;
+        let entries = fs::read_dir(&dir)
+            .map_err(|e| EngineError::io(format!("listing {}", dir.display()), e))?;
         for entry in entries {
             let entry = entry.map_err(|e| EngineError::io("listing task files", e))?;
             let path = entry.path();
@@ -317,8 +328,9 @@ fn copytree(src: &Path, dst: &Path) -> Result<(), EngineError> {
                 stack.push(path);
             } else {
                 if let Some(parent) = target.parent() {
-                    fs::create_dir_all(parent)
-                        .map_err(|e| EngineError::io(format!("creating {}", parent.display()), e))?;
+                    fs::create_dir_all(parent).map_err(|e| {
+                        EngineError::io(format!("creating {}", parent.display()), e)
+                    })?;
                 }
                 fs::copy(&path, &target)
                     .map_err(|e| EngineError::io(format!("copying {}", path.display()), e))?;
@@ -413,7 +425,8 @@ mod tests {
 
     #[test]
     fn sorted_keys_is_recursive() {
-        let value = json::parse(r#"{"b": {"z": 1, "a": 2}, "a": [ {"y": 1, "x": 2} ]}"#).expect("parses");
+        let value =
+            json::parse(r#"{"b": {"z": 1, "a": 2}, "a": [ {"y": 1, "x": 2} ]}"#).expect("parses");
         assert_eq!(
             sorted_keys(&value).to_json(),
             r#"{"a": [{"x": 2, "y": 1}], "b": {"a": 2, "z": 1}}"#

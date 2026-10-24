@@ -17,7 +17,9 @@ use crate::manifest::{
     resolve_verifier_timeout_s, system_prompt_for_task, task_workspace_stats,
 };
 use crate::process;
-use crate::protocol::{openai_tool_schemas, RunCommandArgs, ToolCall, ToolObservation, VALID_TOOLS};
+use crate::protocol::{
+    openai_tool_schemas, RunCommandArgs, ToolCall, ToolObservation, VALID_TOOLS,
+};
 use crate::provenance::source_provenance;
 use crate::provider::{get_provider, Provider, ToolInvocation};
 use crate::pyfmt::{char_len, char_prefix, py_repr_str, py_round, py_str, utc_now_isoformat};
@@ -28,7 +30,8 @@ use crate::tasks::{load_task, prepare_workspace, task_hash, Task};
 use crate::tracer::TraceCollector;
 use crate::verifier::{run_declarative_verifier, run_verifier, RunnerOutcome, DEFAULT_TIMEOUT};
 
-pub const SYSTEM_PROMPT: &str = "You are an autonomous software engineering agent. Solve the task described \
+pub const SYSTEM_PROMPT: &str =
+    "You are an autonomous software engineering agent. Solve the task described \
 in the issue by using the provided tools to inspect and edit files and run \
 tests. Make the smallest correct change. When the task is complete and tests \
 pass, reply with a final message beginning with 'FINISH:' and stop calling \
@@ -39,7 +42,8 @@ const FINISH_MARKER: &str = "FINISH:";
 /// Cap on the serialized tool observation fed back to the model.
 const MAX_OBSERVATION_CHARS: usize = 8_000;
 
-const WORKSPACE_GITIGNORE: &str = ".coverage\n__pycache__/\n.pytest_cache/\n.ruff_cache/\n*.pyc\n.cursor/\n.grok/\n.zcode/\n\
+const WORKSPACE_GITIGNORE: &str =
+    ".coverage\n__pycache__/\n.pytest_cache/\n.ruff_cache/\n*.pyc\n.cursor/\n.grok/\n.zcode/\n\
 .devin/\n\
 target/\nnode_modules/\ndist/\nbuild/\n.gocache/\n.nyc_output/\n*.egg-info/\n\
 *.o\n*.a\n*.dSYM/\nCMakeFiles/\nCMakeCache.txt\ncmake-build-*/\nzz_hidden_build/\n";
@@ -134,8 +138,10 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
             "multi-service task environments are not implemented in the Rust spike".to_owned(),
         ));
     }
-    let effective_max_steps = resolve_max_steps(&task.metadata, opts.max_steps, opts.override_budgets);
-    let effective_timeout = resolve_agent_timeout_s(&task.metadata, opts.timeout_s, opts.override_budgets);
+    let effective_max_steps =
+        resolve_max_steps(&task.metadata, opts.max_steps, opts.override_budgets);
+    let effective_timeout =
+        resolve_agent_timeout_s(&task.metadata, opts.timeout_s, opts.override_budgets);
 
     let run_id = format!("{}-{}", task.task_id, short_hex());
     let run_dir = opts.output_dir.join(&run_id);
@@ -180,7 +186,8 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
     // The patch is an integrity artifact: redacted, never length-capped.
     fs::write(run_dir.join("final.patch"), redact(&patch))
         .map_err(|e| EngineError::io("writing final.patch", e))?;
-    ctx.collector.record("diff", obj! { "patch" => patch.as_str() })?;
+    ctx.collector
+        .record("diff", obj! { "patch" => patch.as_str() })?;
 
     let (functional, verifier_payload) = verify_with_budget(&task, &mut ctx)?;
     let manifest = collect_manifest_with_budget(opts, &task, &mut ctx)?;
@@ -199,7 +206,11 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
     )?;
     ctx.collector.record("metric_computed", scores.clone())?;
 
-    let cost = compute_cost(&opts.model, outcome.prompt_tokens, outcome.completion_tokens);
+    let cost = compute_cost(
+        &opts.model,
+        outcome.prompt_tokens,
+        outcome.completion_tokens,
+    );
     let economics = api_receipt(
         cost.get("total").and_then(Value::as_f64),
         cost.get("judges").and_then(Value::as_f64),
@@ -261,7 +272,10 @@ fn run_model_loop(
         actual_steps: 0,
     };
     for step in 1..=max_steps {
-        if !ctx.deadline.ensure_time(ctx.collector, "llm_request", Some(step))? {
+        if !ctx
+            .deadline
+            .ensure_time(ctx.collector, "llm_request", Some(step))?
+        {
             break;
         }
         outcome.actual_steps = step;
@@ -283,7 +297,11 @@ fn run_model_loop(
         };
         outcome.prompt_tokens += resp.usage.prompt_tokens;
         outcome.completion_tokens += resp.usage.completion_tokens;
-        let tool_calls: Vec<Value> = resp.tool_calls.iter().map(ToolInvocation::to_dict).collect();
+        let tool_calls: Vec<Value> = resp
+            .tool_calls
+            .iter()
+            .map(ToolInvocation::to_dict)
+            .collect();
         ctx.collector.record(
             "llm_response",
             obj! {
@@ -292,7 +310,10 @@ fn run_model_loop(
                 "usage" => resp.usage.to_dict(),
             },
         )?;
-        if !ctx.deadline.ensure_time(ctx.collector, "llm_response", Some(step))? {
+        if !ctx
+            .deadline
+            .ensure_time(ctx.collector, "llm_response", Some(step))?
+        {
             break;
         }
         // The per-run cost ceiling (--max-run-cost) needs the price table and
@@ -307,7 +328,10 @@ fn run_model_loop(
         }
         for tc in &resp.tool_calls {
             let stage = format!("tool:{}", tc.name);
-            if !ctx.deadline.ensure_time(ctx.collector, &stage, Some(step))? {
+            if !ctx
+                .deadline
+                .ensure_time(ctx.collector, &stage, Some(step))?
+            {
                 break;
             }
             let observation = execute_tool(ctx.executor, tc, ctx.deadline.remaining_s());
@@ -323,26 +347,34 @@ fn run_model_loop(
                     "error" => observation.error.as_deref(),
                 },
             )?;
-            let mut content = observation.as_value().to_json();
-            let length = char_len(&content);
-            if length > MAX_OBSERVATION_CHARS {
-                let omitted = length - MAX_OBSERVATION_CHARS;
-                content = format!(
-                    "{}...[output truncated: {omitted} chars omitted]",
-                    char_prefix(&content, MAX_OBSERVATION_CHARS)
-                );
-            }
             messages.push(obj! {
                 "role" => "tool",
                 "tool_call_id" => tc.id.as_str(),
-                "content" => content,
+                "content" => truncate_observation(observation.as_value().to_json()),
             });
-            if !ctx.deadline.ensure_time(ctx.collector, &stage, Some(step))? {
+            if !ctx
+                .deadline
+                .ensure_time(ctx.collector, &stage, Some(step))?
+            {
                 break;
             }
         }
     }
     Ok(outcome)
+}
+
+/// Caps the serialized observation fed back to the model, with an explicit
+/// marker so the model knows it saw a partial result (`len()` counts code points).
+fn truncate_observation(content: String) -> String {
+    let length = char_len(&content);
+    if length <= MAX_OBSERVATION_CHARS {
+        return content;
+    }
+    let omitted = length - MAX_OBSERVATION_CHARS;
+    format!(
+        "{}...[output truncated: {omitted} chars omitted]",
+        char_prefix(&content, MAX_OBSERVATION_CHARS)
+    )
 }
 
 fn assistant_message(content: Option<&str>, tool_calls: &[ToolInvocation]) -> Value {
@@ -376,7 +408,11 @@ fn requested_timeout(value: &Value) -> Option<i64> {
     }
 }
 
-fn execute_tool(executor: &LocalToolExecutor, tc: &ToolInvocation, remaining: Option<f64>) -> ToolObservation {
+fn execute_tool(
+    executor: &LocalToolExecutor,
+    tc: &ToolInvocation,
+    remaining: Option<f64>,
+) -> ToolObservation {
     if !VALID_TOOLS.contains(&tc.name.as_str()) {
         return ToolObservation::err(format!("unknown tool {}", py_repr_str(&tc.name)));
     }
@@ -397,20 +433,33 @@ fn execute_tool(executor: &LocalToolExecutor, tc: &ToolInvocation, remaining: Op
                 }
                 args.insert("timeout", requested.min(cap));
             }
-            executor.execute(&ToolCall { tool: tc.name.clone(), args })
+            executor.execute(&ToolCall {
+                tool: tc.name.clone(),
+                args,
+            })
         }
         "run_tests" => {
-            let args = RunCommandArgs::new("python -m pytest -q --tb=no || true", tool_timeout(remaining));
+            let args = RunCommandArgs::new(
+                "python -m pytest -q --tb=no || true",
+                tool_timeout(remaining),
+            );
             match executor.run_command(&args) {
                 Ok(result) => ToolObservation::ok(result),
                 Err(message) => ToolObservation::err(message),
             }
         }
-        _ => executor.execute(&ToolCall { tool: tc.name.clone(), args: tc.arguments.clone() }),
+        _ => executor.execute(&ToolCall {
+            tool: tc.name.clone(),
+            args: tc.arguments.clone(),
+        }),
     }
 }
 
-fn run_task_setup(task: &Task, executor: &LocalToolExecutor, collector: &mut TraceCollector) -> Result<(), EngineError> {
+fn run_task_setup(
+    task: &Task,
+    executor: &LocalToolExecutor,
+    collector: &mut TraceCollector,
+) -> Result<(), EngineError> {
     let timeout = i64::try_from(task.setup_timeout_s()).unwrap_or(600);
     for (name, cmd) in task.setup_commands() {
         let started = std::time::Instant::now();
@@ -442,7 +491,9 @@ fn runner_outcome(executor: &LocalToolExecutor, cmd: &str, timeout: i64) -> Runn
             let non_empty = |key: &str| res.get(key).map(py_str).filter(|s| !s.is_empty());
             RunnerOutcome {
                 exit_code: res.get("exit_code").and_then(Value::as_i64).unwrap_or(1),
-                stdout: non_empty("stdout").or_else(|| non_empty("result")).unwrap_or_default(),
+                stdout: non_empty("stdout")
+                    .or_else(|| non_empty("result"))
+                    .unwrap_or_default(),
                 stderr: non_empty("stderr").unwrap_or_default(),
             }
         }
@@ -482,12 +533,17 @@ fn verify_with_budget(task: &Task, ctx: &mut RunContext<'_>) -> Result<(f64, Val
         .and_then(Value::as_f64)
         .unwrap_or(0.0);
     if ctx.deadline.is_expired() {
-        ctx.deadline.record_exceeded(ctx.collector, "verify", None)?;
+        ctx.deadline
+            .record_exceeded(ctx.collector, "verify", None)?;
     }
     Ok((functional, payload))
 }
 
-fn collect_manifest_with_budget(opts: &RunOptions, task: &Task, ctx: &mut RunContext<'_>) -> Result<Value, EngineError> {
+fn collect_manifest_with_budget(
+    opts: &RunOptions,
+    task: &Task,
+    ctx: &mut RunContext<'_>,
+) -> Result<Value, EngineError> {
     let judge_model = opts.judge_model.as_deref();
     let workspace = ctx.executor.workspace();
     if !ctx.deadline.ensure_time(ctx.collector, "manifest", None)? {
@@ -498,14 +554,22 @@ fn collect_manifest_with_budget(opts: &RunOptions, task: &Task, ctx: &mut RunCon
     let mut manifest = collect_manifest(&opts.model, judge_model, opts.network, ctx.deadline);
     manifest.extend(task_workspace_stats(task, workspace));
     if ctx.deadline.is_expired() {
-        ctx.deadline.record_exceeded(ctx.collector, "manifest", None)?;
+        ctx.deadline
+            .record_exceeded(ctx.collector, "manifest", None)?;
     }
     Ok(manifest)
 }
 
-fn evaluate_with_budget(ctx: &mut RunContext<'_>, params: &EvaluateParams<'_>) -> Result<Value, EngineError> {
+fn evaluate_with_budget(
+    ctx: &mut RunContext<'_>,
+    params: &EvaluateParams<'_>,
+) -> Result<Value, EngineError> {
     if !ctx.deadline.ensure_time(ctx.collector, "evaluate", None)? {
-        return Ok(budget_exceeded_scores(params.functional, params.total_tokens, params.steps));
+        return Ok(budget_exceeded_scores(
+            params.functional,
+            params.total_tokens,
+            params.steps,
+        ));
     }
     let mut scores = evaluate_run(params, ctx.collector, ctx.deadline)?;
     if ctx.deadline.exceeded {
@@ -538,7 +602,11 @@ fn compute_cost(model: &str, prompt_tokens: i64, completion_tokens: i64) -> Valu
 
 /// `EconomicsReceipt.as_summary()` for a metered API run.
 fn api_receipt(total_cost_usd: Option<f64>, grading_cost_usd: Option<f64>) -> Value {
-    let quality = if total_cost_usd.is_some() { "provider-priced" } else { "unavailable" };
+    let quality = if total_cost_usd.is_some() {
+        "provider-priced"
+    } else {
+        "unavailable"
+    };
     obj! {
         "billing_mode" => "api-metered",
         "cost_basis" => "metered-api-pricing",
@@ -580,7 +648,11 @@ fn git_init(workspace: &Path) -> Result<(), EngineError> {
         .map_err(|e| EngineError::io("writing workspace .gitignore", e))?;
     git(workspace, &["init", "-q"], true)?;
     git(workspace, &["add", "-A"], true)?;
-    git(workspace, &["commit", "-q", "--allow-empty", "-m", "base"], true)?;
+    git(
+        workspace,
+        &["commit", "-q", "--allow-empty", "-m", "base"],
+        true,
+    )?;
     Ok(())
 }
 
@@ -612,22 +684,39 @@ mod tests {
             r#"{"agent": 0.0, "judges": 0.0, "total": 0.0, "model_priced": true, "agent_input_tokens": 320, "agent_cached_input_tokens": 0, "agent_uncached_input_tokens": 320, "cache_pricing_applied": false}"#
         );
         let receipt = api_receipt(Some(0.0), Some(0.0));
-        assert_eq!(receipt.get("billing_mode"), Some(&Value::Str("api-metered".to_owned())));
+        assert_eq!(
+            receipt.get("billing_mode"),
+            Some(&Value::Str("api-metered".to_owned()))
+        );
         assert_eq!(
             receipt.get("measurement_quality").map(Value::to_json),
             Some(r#"{"marginal_cash_usd": "provider-priced", "api_equivalent_cost_usd": "provider-priced"}"#.to_owned())
         );
-        assert!(compute_cost("openai:x", 1, 1).get("total").is_some_and(Value::is_null));
+        assert!(compute_cost("openai:x", 1, 1)
+            .get("total")
+            .is_some_and(Value::is_null));
     }
 
     #[test]
     fn assistant_message_and_timeouts() {
-        let calls = vec![ToolInvocation { id: String::new(), name: "read_file".to_owned(), arguments: obj! { "path" => "a" } }];
+        let calls = vec![ToolInvocation {
+            id: String::new(),
+            name: "read_file".to_owned(),
+            arguments: obj! { "path" => "a" },
+        }];
         let message = assistant_message(None, &calls);
         assert_eq!(
             message.to_json(),
             r#"{"role": "assistant", "content": "", "tool_calls": [{"id": "call_0", "type": "function", "function": {"name": "read_file", "arguments": "{\"path\": \"a\"}"}}]}"#
         );
+        let long = "é".repeat(MAX_OBSERVATION_CHARS + 3);
+        let truncated = truncate_observation(long);
+        assert!(truncated.ends_with("...[output truncated: 3 chars omitted]"));
+        assert_eq!(
+            char_len(&truncated),
+            MAX_OBSERVATION_CHARS + "...[output truncated: 3 chars omitted]".len()
+        );
+        assert_eq!(truncate_observation("short".to_owned()), "short");
         assert_eq!(requested_timeout(&Value::Str(" 7 ".to_owned())), Some(7));
         assert_eq!(requested_timeout(&Value::Float(9.9)), Some(9));
         assert_eq!(requested_timeout(&Value::Str("soon".to_owned())), None);

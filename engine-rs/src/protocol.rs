@@ -165,7 +165,10 @@ fn coerce_int(name: &str, value: &Value) -> ArgResult<i64> {
         Value::Float(f) if f.fract() == 0.0 && f.is_finite() => Ok(*f as i64),
         Value::Str(s) => parse_py_int(s)
             .ok_or_else(|| format!("{name}: expected an integer, got {}", py_repr(value))),
-        other => Err(format!("{name}: expected an integer, got {}", py_repr(other))),
+        other => Err(format!(
+            "{name}: expected an integer, got {}",
+            py_repr(other)
+        )),
     }
 }
 
@@ -181,10 +184,16 @@ fn coerce_bool(name: &str, value: &Value) -> ArgResult<bool> {
             } else if FALSE_WORDS.contains(&lowered.as_str()) {
                 Ok(false)
             } else {
-                Err(format!("{name}: expected a boolean, got {}", py_repr(value)))
+                Err(format!(
+                    "{name}: expected a boolean, got {}",
+                    py_repr(value)
+                ))
             }
         }
-        other => Err(format!("{name}: expected a boolean, got {}", py_repr(other))),
+        other => Err(format!(
+            "{name}: expected a boolean, got {}",
+            py_repr(other)
+        )),
     }
 }
 
@@ -249,8 +258,7 @@ impl<'a> Args<'a> {
     }
 
     fn bool_or(&self, name: &str, default: bool) -> ArgResult<bool> {
-        self.get(name)
-            .map_or(Ok(default), |v| coerce_bool(name, v))
+        self.get(name).map_or(Ok(default), |v| coerce_bool(name, v))
     }
 }
 
@@ -293,7 +301,6 @@ pub struct SearchCodeArgs {
     pub query: String,
     pub glob: Option<String>,
     /// Accepted for schema parity; the Python executor ignores it too.
-    #[expect(dead_code, reason = "no semantic search backend exists yet")]
     pub semantic: bool,
     pub timeout: Option<i64>,
 }
@@ -361,16 +368,27 @@ mod tests {
 
     #[test]
     fn lax_scalar_coercion() {
-        let raw = parse(r#"{"cmd": "ls", "timeout": "120", "cwd": null, "extra": 1}"#).expect("json");
+        let raw =
+            parse(r#"{"cmd": "ls", "timeout": "120", "cwd": null, "extra": 1}"#).expect("json");
         let args = RunCommandArgs::from_args(&raw).expect("coerces");
-        assert_eq!(args, RunCommandArgs { cmd: "ls".to_owned(), cwd: None, timeout: Some(120) });
+        assert_eq!(
+            args,
+            RunCommandArgs {
+                cmd: "ls".to_owned(),
+                cwd: None,
+                timeout: Some(120)
+            }
+        );
         let raw = parse(r#"{"dir": "src", "recursive": "yes"}"#).expect("json");
         assert!(ListFilesArgs::from_args(&raw).expect("coerces").recursive);
         let raw = parse(r#"{"path": "a", "start_line": 2.0, "limit": true}"#).expect("json");
         let args = ReadFileArgs::from_args(&raw).expect("coerces");
         assert_eq!((args.start_line, args.limit), (Some(2), Some(1)));
         let raw = parse(r#"{"query": "x"}"#).expect("json");
-        assert_eq!(SearchCodeArgs::from_args(&raw).expect("coerces").timeout, Some(30));
+        assert_eq!(
+            SearchCodeArgs::from_args(&raw).expect("coerces").timeout,
+            Some(30)
+        );
     }
 
     #[test]
@@ -408,7 +426,13 @@ mod tests {
             .as_array()
             .expect("list")
             .iter()
-            .map(|t| t.get("function").and_then(|f| f.get("name")).and_then(Value::as_str).expect("name").to_owned())
+            .map(|t| {
+                t.get("function")
+                    .and_then(|f| f.get("name"))
+                    .and_then(Value::as_str)
+                    .expect("name")
+                    .to_owned()
+            })
             .collect();
         assert_eq!(names, VALID_TOOLS);
     }

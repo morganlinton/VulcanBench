@@ -97,7 +97,11 @@ fn has_cpp_sources(workspace: &Path) -> bool {
         let skipped = rel
             .components()
             .any(|c| SKIP_DIRS.contains(&c.as_os_str().to_string_lossy().as_ref()));
-        !skipped && matches!(extension(&rel.to_string_lossy()).as_str(), "cc" | "cpp" | "cxx")
+        !skipped
+            && matches!(
+                extension(&rel.to_string_lossy()).as_str(),
+                "cc" | "cpp" | "cxx"
+            )
     })
 }
 
@@ -169,7 +173,11 @@ fn ruff_violations(workspace: &Path, abs_files: &[PathBuf], remaining: Option<f6
     if done.timed_out {
         return None;
     }
-    let text = if done.stdout.is_empty() { "[]" } else { done.stdout.as_str() };
+    let text = if done.stdout.is_empty() {
+        "[]"
+    } else {
+        done.stdout.as_str()
+    };
     match json::parse(text) {
         Ok(Value::Array(items)) => Some(i64::try_from(items.len()).unwrap_or(i64::MAX)),
         Ok(Value::Object(entries)) => Some(i64::try_from(entries.len()).unwrap_or(i64::MAX)),
@@ -235,7 +243,11 @@ fn python_quality(workspace: &Path, files: &[String], remaining: Option<f64>) ->
     if abs_files.is_empty() {
         return MetricResult::reason("changed files no longer exist");
     }
-    let loc = abs_files.iter().map(|p| nonblank_loc(p.as_path())).sum::<usize>().max(1);
+    let loc = abs_files
+        .iter()
+        .map(|p| nonblank_loc(p.as_path()))
+        .sum::<usize>()
+        .max(1);
     let Some(violations) = ruff_violations(workspace, &abs_files, remaining) else {
         return MetricResult::unscored(obj! {
             "tool" => "ruff+radon",
@@ -310,14 +322,18 @@ pub fn score_from_counts(high: i64, medium: i64, low: i64) -> f64 {
 
 fn python_security(workspace: &Path, files: &[String], remaining: Option<f64>) -> MetricResult {
     if process::which("bandit").is_none() {
-        return MetricResult::unscored(obj! { "tool" => "bandit", "reason" => "bandit not on PATH" });
+        return MetricResult::unscored(
+            obj! { "tool" => "bandit", "reason" => "bandit not on PATH" },
+        );
     }
     let abs_files = existing_abs_files(workspace, files);
     if abs_files.is_empty() {
         return MetricResult::reason("changed files no longer exist");
     }
     let Some(timeout) = clamp_timeout(180, remaining) else {
-        return MetricResult::unscored(obj! { "tool" => "bandit", "reason" => "run budget exceeded" });
+        return MetricResult::unscored(
+            obj! { "tool" => "bandit", "reason" => "run budget exceeded" },
+        );
     };
     let mut command = Command::new("bandit");
     command
@@ -330,7 +346,11 @@ fn python_security(workspace: &Path, files: &[String], remaining: Option<f64>) -
             return MetricResult::unscored(obj! { "tool" => "bandit", "reason" => "timed out" });
         }
     };
-    let text = if done.stdout.is_empty() { "{}" } else { done.stdout.as_str() };
+    let text = if done.stdout.is_empty() {
+        "{}"
+    } else {
+        done.stdout.as_str()
+    };
     let Ok(parsed) = json::parse(text) else {
         return MetricResult::unscored(obj! {
             "tool" => "bandit",
@@ -378,7 +398,12 @@ enum Metric {
     Security,
 }
 
-fn assess(metric: Metric, workspace: &Path, changed_files: &[String], remaining: Option<f64>) -> MetricResult {
+fn assess(
+    metric: Metric,
+    workspace: &Path,
+    changed_files: &[String],
+    remaining: Option<f64>,
+) -> MetricResult {
     let by_lang = group_by_language(changed_files, workspace);
     if by_lang.is_empty() {
         return MetricResult::reason("no recognized source files changed");
@@ -392,8 +417,12 @@ fn assess(metric: Metric, workspace: &Path, changed_files: &[String], remaining:
             match (metric, lang.as_str()) {
                 (Metric::Quality, "python") => python_quality(workspace, files, remaining),
                 (Metric::Security, "python") => python_security(workspace, files, remaining),
-                (Metric::Quality, _) => MetricResult::reason("no quality analyzer for this language"),
-                (Metric::Security, _) => MetricResult::reason("no security scanner for this language"),
+                (Metric::Quality, _) => {
+                    MetricResult::reason("no quality analyzer for this language")
+                }
+                (Metric::Security, _) => {
+                    MetricResult::reason("no security scanner for this language")
+                }
             }
         };
         let mut details = result.details.clone();
@@ -403,7 +432,8 @@ fn assess(metric: Metric, workspace: &Path, changed_files: &[String], remaining:
             scores.push(score);
         }
     }
-    let overall = (!scores.is_empty()).then(|| py_round(scores.iter().sum::<f64>() / scores.len() as f64, 4));
+    let overall =
+        (!scores.is_empty()).then(|| py_round(scores.iter().sum::<f64>() / scores.len() as f64, 4));
     let mut details = obj! { "languages" => per_lang };
     if overall.is_none() {
         let reason = match metric {
@@ -418,11 +448,19 @@ fn assess(metric: Metric, workspace: &Path, changed_files: &[String], remaining:
     }
 }
 
-pub fn assess_quality(workspace: &Path, changed_files: &[String], remaining: Option<f64>) -> MetricResult {
+pub fn assess_quality(
+    workspace: &Path,
+    changed_files: &[String],
+    remaining: Option<f64>,
+) -> MetricResult {
     assess(Metric::Quality, workspace, changed_files, remaining)
 }
 
-pub fn assess_security(workspace: &Path, changed_files: &[String], remaining: Option<f64>) -> MetricResult {
+pub fn assess_security(
+    workspace: &Path,
+    changed_files: &[String],
+    remaining: Option<f64>,
+) -> MetricResult {
     assess(Metric::Security, workspace, changed_files, remaining)
 }
 
@@ -459,7 +497,12 @@ pub fn score_run(inputs: ScoreInputs, extra: Option<Value>) -> Value {
     };
     let present: Vec<(f64, f64)> = WEIGHTS
         .iter()
-        .filter_map(|(name, weight)| metrics.get(name).and_then(Value::as_f64).map(|v| (*weight, v)))
+        .filter_map(|(name, weight)| {
+            metrics
+                .get(name)
+                .and_then(Value::as_f64)
+                .map(|v| (*weight, v))
+        })
         .collect();
     let weight_sum: f64 = present.iter().map(|(w, _)| w).sum();
     let weight_sum = if weight_sum == 0.0 { 1.0 } else { weight_sum };
@@ -522,7 +565,11 @@ pub fn evaluate_run(
         deadline.record_exceeded(collector, "quality", None)?;
         MetricResult::reason("run budget exceeded")
     } else {
-        assess_quality(params.workspace, params.changed_files, deadline.remaining_s())
+        assess_quality(
+            params.workspace,
+            params.changed_files,
+            deadline.remaining_s(),
+        )
     };
     collector.record("quality_detail", quality.details.clone())?;
 
@@ -530,7 +577,11 @@ pub fn evaluate_run(
         deadline.record_exceeded(collector, "security", None)?;
         MetricResult::reason("run budget exceeded")
     } else {
-        assess_security(params.workspace, params.changed_files, deadline.remaining_s())
+        assess_security(
+            params.workspace,
+            params.changed_files,
+            deadline.remaining_s(),
+        )
     };
     collector.record("security_detail", security.details.clone())?;
 
@@ -614,13 +665,21 @@ mod tests {
 
     #[test]
     fn language_grouping_keeps_first_seen_order() {
-        let files = vec!["b.rs".to_owned(), "a.py".to_owned(), "c.py".to_owned(), "x.txt".to_owned()];
+        let files = vec![
+            "b.rs".to_owned(),
+            "a.py".to_owned(),
+            "c.py".to_owned(),
+            "x.txt".to_owned(),
+        ];
         let grouped = group_by_language(&files, Path::new("/nonexistent"));
         assert_eq!(
             grouped,
             vec![
                 ("rust".to_owned(), vec!["b.rs".to_owned()]),
-                ("python".to_owned(), vec!["a.py".to_owned(), "c.py".to_owned()]),
+                (
+                    "python".to_owned(),
+                    vec!["a.py".to_owned(), "c.py".to_owned()]
+                ),
             ]
         );
         assert!(is_test_file("pkg/tests/test_x.py"));

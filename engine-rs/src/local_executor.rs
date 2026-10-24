@@ -79,7 +79,9 @@ fn read_text_py(path: &Path) -> Result<String, String> {
     let text = String::from_utf8(bytes).map_err(|e| {
         let pos = e.utf8_error().valid_up_to();
         let byte = e.as_bytes().get(pos).copied().unwrap_or(0);
-        format!("'utf-8' codec can't decode byte 0x{byte:02x} in position {pos}: invalid start byte")
+        format!(
+            "'utf-8' codec can't decode byte 0x{byte:02x} in position {pos}: invalid start byte"
+        )
     })?;
     Ok(universal_newlines(&text))
 }
@@ -172,7 +174,8 @@ impl LocalToolExecutor {
             let lines = py_splitlines(&text, true);
             let start = (start_line - 1).max(0);
             let limit = args.limit.filter(|l| *l != 0);
-            let end = start + limit.unwrap_or_else(|| i64::try_from(lines.len()).unwrap_or(i64::MAX));
+            let end =
+                start + limit.unwrap_or_else(|| i64::try_from(lines.len()).unwrap_or(i64::MAX));
             text = py_slice(&lines, start, end).concat();
         }
         Ok(Value::Str(text))
@@ -186,12 +189,18 @@ impl LocalToolExecutor {
         let timeout = args.timeout.filter(|t| *t != 0).unwrap_or(30);
         if process::which("rg").is_some() {
             let mut command = Command::new("rg");
-            command.args(["--json", "-n"]).arg(&args.query).arg(&self.workspace);
+            command
+                .args(["--json", "-n"])
+                .arg(&args.query)
+                .arg(&self.workspace);
             if let Some(glob) = &args.glob {
                 command.args(["--glob", glob]);
             }
-            let done = process::run(&mut command, Some(Duration::from_secs(timeout.max(0) as u64)))
-                .map_err(|e| e.to_string())?;
+            let done = process::run(
+                &mut command,
+                Some(Duration::from_secs(timeout.max(0) as u64)),
+            )
+            .map_err(|e| e.to_string())?;
             if done.timed_out {
                 return Err(format!("Command 'rg' timed out after {timeout} seconds"));
             }
@@ -223,7 +232,9 @@ impl LocalToolExecutor {
         let needle = args.query.to_lowercase();
         let mut matches = Vec::new();
         for rel in walk_files(&self.workspace).unwrap_or_default() {
-            if rel.extension().and_then(|e| e.to_str()) != Some("py") || should_ignore(&rel, &ignored) {
+            if rel.extension().and_then(|e| e.to_str()) != Some("py")
+                || should_ignore(&rel, &ignored)
+            {
                 continue;
             }
             if let Ok(text) = read_text_py(&self.workspace.join(&rel)) {
@@ -380,7 +391,13 @@ fn opcodes(a: &[String], b: &[String]) -> Vec<Opcode> {
                     i += 1;
                     j += 1;
                 }
-                codes.push((Tag::Equal, prefix + start.0, prefix + i, prefix + start.1, prefix + j));
+                codes.push((
+                    Tag::Equal,
+                    prefix + start.0,
+                    prefix + i,
+                    prefix + start.1,
+                    prefix + j,
+                ));
                 ci = i;
                 cj = j;
             } else if table[(i + 1) * (m + 1) + j] >= table[i * (m + 1) + j + 1] {
@@ -392,7 +409,13 @@ fn opcodes(a: &[String], b: &[String]) -> Vec<Opcode> {
         push_change(&mut codes, prefix + ci, prefix + n, prefix + cj, prefix + m);
     }
     if suffix > 0 {
-        codes.push((Tag::Equal, a.len() - suffix, a.len(), b.len() - suffix, b.len()));
+        codes.push((
+            Tag::Equal,
+            a.len() - suffix,
+            a.len(),
+            b.len() - suffix,
+            b.len(),
+        ));
     }
     codes
 }
@@ -414,12 +437,24 @@ fn grouped_opcodes(mut codes: Vec<Opcode>, n: usize) -> Vec<Vec<Opcode>> {
     }
     if let Some(first) = codes.first_mut() {
         if first.0 == Tag::Equal {
-            *first = (Tag::Equal, first.1.max(first.2.saturating_sub(n)), first.2, first.3.max(first.4.saturating_sub(n)), first.4);
+            *first = (
+                Tag::Equal,
+                first.1.max(first.2.saturating_sub(n)),
+                first.2,
+                first.3.max(first.4.saturating_sub(n)),
+                first.4,
+            );
         }
     }
     if let Some(last) = codes.last_mut() {
         if last.0 == Tag::Equal {
-            *last = (Tag::Equal, last.1, last.2.min(last.1 + n), last.3, last.4.min(last.3 + n));
+            *last = (
+                Tag::Equal,
+                last.1,
+                last.2.min(last.1 + n),
+                last.3,
+                last.4.min(last.3 + n),
+            );
         }
     }
     let mut groups = Vec::new();
@@ -433,7 +468,8 @@ fn grouped_opcodes(mut codes: Vec<Opcode>, n: usize) -> Vec<Vec<Opcode>> {
         }
         group.push((tag, i1, i2, j1, j2));
     }
-    if !group.is_empty() && !(group.len() == 1 && group[0].0 == Tag::Equal) {
+    let only_context = group.len() == 1 && group[0].0 == Tag::Equal;
+    if !group.is_empty() && !only_context {
         groups.push(group);
     }
     groups
@@ -467,12 +503,22 @@ pub fn unified_diff(a: &[String], b: &[String], fromfile: &str, tofile: &str) ->
         ));
         for (tag, i1, i2, j1, j2) in group {
             match tag {
-                Tag::Equal => a[i1..i2].iter().for_each(|l| out.push_str(&format!(" {l}"))),
-                Tag::Delete => a[i1..i2].iter().for_each(|l| out.push_str(&format!("-{l}"))),
-                Tag::Insert => b[j1..j2].iter().for_each(|l| out.push_str(&format!("+{l}"))),
+                Tag::Equal => a[i1..i2]
+                    .iter()
+                    .for_each(|l| out.push_str(&format!(" {l}"))),
+                Tag::Delete => a[i1..i2]
+                    .iter()
+                    .for_each(|l| out.push_str(&format!("-{l}"))),
+                Tag::Insert => b[j1..j2]
+                    .iter()
+                    .for_each(|l| out.push_str(&format!("+{l}"))),
                 Tag::Replace => {
-                    a[i1..i2].iter().for_each(|l| out.push_str(&format!("-{l}")));
-                    b[j1..j2].iter().for_each(|l| out.push_str(&format!("+{l}")));
+                    a[i1..i2]
+                        .iter()
+                        .for_each(|l| out.push_str(&format!("-{l}")));
+                    b[j1..j2]
+                        .iter()
+                        .for_each(|l| out.push_str(&format!("+{l}")));
                 }
             }
         }
@@ -516,19 +562,37 @@ mod tests {
             .expect("creates");
         assert_eq!(created, Value::Str("+ print(1)\n".to_owned()));
         let listed = executor
-            .list_files(&ListFilesArgs { dir: ".".to_owned(), recursive: true })
+            .list_files(&ListFilesArgs {
+                dir: ".".to_owned(),
+                recursive: true,
+            })
             .expect("lists");
         assert_eq!(listed, Value::from(vec!["hello.py".to_owned()]));
         let read = executor
-            .read_file(&ReadFileArgs { path: "hello.py".to_owned(), start_line: Some(1), limit: Some(5) })
+            .read_file(&ReadFileArgs {
+                path: "hello.py".to_owned(),
+                start_line: Some(1),
+                limit: Some(5),
+            })
             .expect("reads");
         assert_eq!(read, Value::Str("print(1)\n".to_owned()));
         let missing = executor
-            .read_file(&ReadFileArgs { path: "nope.py".to_owned(), start_line: None, limit: None })
+            .read_file(&ReadFileArgs {
+                path: "nope.py".to_owned(),
+                start_line: None,
+                limit: None,
+            })
             .expect_err("missing file");
-        assert!(missing.starts_with("[Errno 2] No such file or directory: '"), "{missing}");
+        assert!(
+            missing.starts_with("[Errno 2] No such file or directory: '"),
+            "{missing}"
+        );
         let escape = executor
-            .read_file(&ReadFileArgs { path: "../../etc/passwd".to_owned(), start_line: None, limit: None })
+            .read_file(&ReadFileArgs {
+                path: "../../etc/passwd".to_owned(),
+                start_line: None,
+                limit: None,
+            })
             .expect_err("escape");
         assert_eq!(escape, "path escapes workspace");
         let ran = executor
@@ -536,7 +600,10 @@ mod tests {
             .expect("runs");
         assert_eq!(ran.get("exit_code"), Some(&Value::Int(2)));
         assert_eq!(ran.get("stdout"), Some(&Value::Str("out".to_owned())));
-        let unknown = executor.execute(&ToolCall { tool: "run_build".to_owned(), args: Value::object() });
+        let unknown = executor.execute(&ToolCall {
+            tool: "run_build".to_owned(),
+            args: Value::object(),
+        });
         assert_eq!(unknown.error.as_deref(), Some("unknown tool run_build"));
         let _ = fs::remove_dir_all(&dir);
     }

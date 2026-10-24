@@ -17,6 +17,7 @@ Exit status 0 means parity; 1 means a diff was printed; 2 means a run failed.
 
 Usage: python3 engine-rs/scripts/parity.py [--task hello-world] [--keep]
        [--release] [--skip-build] [--out DIR]
+       [--effort LEVEL] [--max-steps N] [--timeout S]   (passed to both engines)
 """
 
 from __future__ import annotations
@@ -48,6 +49,10 @@ def venv_bin() -> Path:
 def run_env() -> dict:
     env = dict(os.environ)
     env["PATH"] = f"{venv_bin()}{os.pathsep}{env.get('PATH', '')}"
+    # The venv's editable finder is the normal import path for ``harness``;
+    # the repo root on PYTHONPATH is the same code and survives a venv whose
+    # .pth files are unreadable (seen on macOS with a hidden flag on them).
+    env["PYTHONPATH"] = os.pathsep.join(p for p in (str(REPO_ROOT), env.get("PYTHONPATH", "")) if p)
     return env
 
 
@@ -158,9 +163,12 @@ def main() -> int:
     parser.add_argument("--release", action="store_true", help="build the Rust engine in release mode")
     parser.add_argument("--skip-build", action="store_true", help="use the existing cargo build")
     parser.add_argument("--out", type=Path, default=None, help="directory for the two run outputs")
+    parser.add_argument("--effort", default=None, help="pass --effort to both engines")
+    parser.add_argument("--max-steps", default=None, help="pass --max-steps to both engines")
+    parser.add_argument("--timeout", default=None, help="pass --timeout to both engines")
     args = parser.parse_args()
 
-    if not (venv_bin() / "vulcanbench").exists():
+    if not (venv_bin() / "python").exists():
         print(f"no vulcanbench in {venv_bin()}; create the venv first (see engine-rs/README.md)", file=sys.stderr)
         return 2
 
@@ -172,8 +180,13 @@ def main() -> int:
     base = args.out or Path(tempfile.mkdtemp(prefix="vulcanbench-parity-"))
     base.mkdir(parents=True, exist_ok=True)
     common = ["run", "--task", args.task, "--model", "mock:synthetic", "--sandbox", "local", "--no-judges"]
+    for flag in ("effort", "max_steps", "timeout"):
+        value = getattr(args, flag)
+        if value is not None:
+            common += [f"--{flag.replace('_', '-')}", str(value)]
     try:
-        python_dir = run_engine("python", [str(venv_bin() / "vulcanbench")] + common, base / "python")
+        python_cli = [str(venv_bin() / "python"), "-c", "from harness.cli import main; main()"]
+        python_dir = run_engine("python", python_cli + common, base / "python")
         rust_dir = run_engine("rust", [str(binary)] + common, base / "rust")
         ok = compare(load_run(python_dir), load_run(rust_dir))
     finally:

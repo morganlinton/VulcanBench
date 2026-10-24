@@ -58,7 +58,7 @@ pub trait Provider {
 
     /// # Errors
     ///
-    /// `EngineError::Provider` when no response can be produced.
+    /// A provider that cannot produce a response; the mock never fails.
     fn complete(&self, messages: &[Value], tools: &Value) -> Result<LlmResponse, EngineError>;
 }
 
@@ -215,7 +215,10 @@ mod tests {
         }
         let last = provider.complete(&messages, &tools).expect("ok");
         assert!(!last.wants_tools());
-        assert_eq!(last.content.as_deref(), Some("FINISH: implemented and verified."));
+        assert_eq!(
+            last.content.as_deref(),
+            Some("FINISH: implemented and verified.")
+        );
         assert_eq!(last.usage.prompt_tokens, 110);
     }
 

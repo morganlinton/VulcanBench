@@ -314,7 +314,10 @@ mod tests {
     fn parses_the_settings_file_shape() {
         let text = "# VulcanBench operator settings\n\n[effort]\n# blocked levels\nblocked = [\"ultra\"]  # trailing comment\n\n[sweep]\nconcurrency = 1\nratio = 0.5\nenabled = true\nname = 'plain'\n";
         let doc = parse(text).expect("parses");
-        let blocked = doc.get("effort").and_then(|e| e.get("blocked")).expect("blocked");
+        let blocked = doc
+            .get("effort")
+            .and_then(|e| e.get("blocked"))
+            .expect("blocked");
         assert_eq!(blocked, &Value::Array(vec![Value::Str("ultra".to_owned())]));
         let sweep = doc.get("sweep").expect("sweep");
         assert_eq!(sweep.get("concurrency"), Some(&Value::Int(1)));
@@ -328,7 +331,10 @@ mod tests {
         let text = "[a.b]\nxs = [\n  1,\n  2,\n]\n\"quoted key\" = \"v\\n\"\n";
         let doc = parse(text).expect("parses");
         let b = doc.get("a").and_then(|a| a.get("b")).expect("a.b");
-        assert_eq!(b.get("xs"), Some(&Value::Array(vec![Value::Int(1), Value::Int(2)])));
+        assert_eq!(
+            b.get("xs"),
+            Some(&Value::Array(vec![Value::Int(1), Value::Int(2)]))
+        );
         assert_eq!(b.get("quoted key"), Some(&Value::Str("v\n".to_owned())));
     }
 

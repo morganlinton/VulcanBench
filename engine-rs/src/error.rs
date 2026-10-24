@@ -1,5 +1,6 @@
 //! The engine's error type and its mapping onto the Python CLI's exit codes
-//! and message prefixes.
+//! and message prefixes. `ProviderError` (exit code 2) has no producer in the
+//! spike because the only provider is the in-process mock.
 
 use std::fmt;
 use std::io;
@@ -8,8 +9,6 @@ use std::io;
 pub enum EngineError {
     /// `SandboxError` in the Python harness: exit code 3.
     Sandbox(String),
-    /// `ProviderError`: exit code 2.
-    Provider(String),
     /// `VerifierInfrastructureError`: exit code 3.
     VerifierInfrastructure(String),
     /// `ValueError`, `FileNotFoundError` and `BlockedEffortError`: exit code 1.
@@ -30,7 +29,6 @@ impl EngineError {
     pub fn exit_code(&self) -> i32 {
         match self {
             EngineError::Sandbox(_) | EngineError::VerifierInfrastructure(_) => 3,
-            EngineError::Provider(_) => 2,
             EngineError::Invalid(_) | EngineError::Io { .. } => 1,
         }
     }
@@ -39,7 +37,6 @@ impl EngineError {
     pub fn cli_prefix(&self) -> &'static str {
         match self {
             EngineError::Sandbox(_) => "sandbox error",
-            EngineError::Provider(_) => "provider error",
             EngineError::VerifierInfrastructure(_) => "verifier infrastructure error",
             EngineError::Invalid(_) | EngineError::Io { .. } => "error",
         }
@@ -50,7 +47,6 @@ impl fmt::Display for EngineError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             EngineError::Sandbox(m)
-            | EngineError::Provider(m)
             | EngineError::VerifierInfrastructure(m)
             | EngineError::Invalid(m) => f.write_str(m),
             EngineError::Io { context, source } => write!(f, "{context}: {source}"),

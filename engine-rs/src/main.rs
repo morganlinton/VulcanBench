@@ -34,7 +34,8 @@ use crate::provenance::{source_provenance, ALLOW_DIRTY_ENV};
 use crate::pyfmt::{py_repr_str, py_str};
 use crate::tasks::list_task_ids;
 
-const USAGE: &str = "usage: vulcanbench-engine run --task <id> --model <provider:model> [--sandbox local] \
+const USAGE: &str =
+    "usage: vulcanbench-engine run --task <id> --model <provider:model> [--sandbox local] \
 [--no-judges] [--output-dir <dir>] [--max-steps <n>] [--timeout <s>] [--effort <level>] \
 [--tasks-root <dir>] [--override-budgets] [--allow-dirty] [--dry-run]";
 
@@ -126,13 +127,19 @@ fn parse_run_args(args: &[String]) -> Result<RunArgs, String> {
             "--max-steps" => {
                 let v = take_value(&mut i)?;
                 parsed.max_steps = Some(v.parse().map_err(|_| {
-                    format!("argument --max-steps: invalid int value: {}", py_repr_str(&v))
+                    format!(
+                        "argument --max-steps: invalid int value: {}",
+                        py_repr_str(&v)
+                    )
                 })?);
             }
             "--timeout" => {
                 let v = take_value(&mut i)?;
                 parsed.timeout = Some(v.parse().map_err(|_| {
-                    format!("argument --timeout: invalid float value: {}", py_repr_str(&v))
+                    format!(
+                        "argument --timeout: invalid float value: {}",
+                        py_repr_str(&v)
+                    )
                 })?);
             }
             "--judges" => parsed.judges = true,
@@ -147,8 +154,8 @@ fn parse_run_args(args: &[String]) -> Result<RunArgs, String> {
             "--dry-run" => parsed.dry_run = true,
             other => {
                 return Err(format!(
-                    "unrecognized arguments: {other} (the spike supports a subset of vulcanbench run)"
-                ))
+                "unrecognized arguments: {other} (the spike supports a subset of vulcanbench run)"
+            ))
             }
         }
         i += 1;
@@ -165,7 +172,9 @@ fn run_command(args: &[String]) -> i32 {
         Err(message) => return usage_error(&message),
     };
     let model = parsed.model.clone().expect("checked by the parser");
-    if let Err(err) = settings::check_effort_allowed(parsed.effort.as_deref(), &settings::settings_path()) {
+    if let Err(err) =
+        settings::check_effort_allowed(parsed.effort.as_deref(), &settings::settings_path())
+    {
         println!("error {err}");
         return 1;
     }
@@ -187,8 +196,15 @@ fn run_command(args: &[String]) -> i32 {
     let task = parsed.task.clone().expect("checked above");
     let known = list_task_ids(&parsed.tasks_root);
     if !known.contains(&task) {
-        let available = if known.is_empty() { "(none)".to_owned() } else { known.join(", ") };
-        println!("unknown task {}. Available: {available}", py_repr_str(&task));
+        let available = if known.is_empty() {
+            "(none)".to_owned()
+        } else {
+            known.join(", ")
+        };
+        println!(
+            "unknown task {}. Available: {available}",
+            py_repr_str(&task)
+        );
         return 1;
     }
     if parsed.dry_run {
@@ -228,9 +244,18 @@ fn run_command(args: &[String]) -> i32 {
     };
     match run_agent(&options) {
         Ok(result) => {
-            let scores = result.summary.get("scores").cloned().unwrap_or_else(Value::object);
-            let economics = result.summary.get("economics").cloned().unwrap_or_else(Value::object);
-            let field = |v: &Value, key: &str| v.get(key).map(py_str).unwrap_or_else(|| "None".to_owned());
+            let scores = result
+                .summary
+                .get("scores")
+                .cloned()
+                .unwrap_or_else(Value::object);
+            let economics = result
+                .summary
+                .get("economics")
+                .cloned()
+                .unwrap_or_else(Value::object);
+            let field =
+                |v: &Value, key: &str| v.get(key).map(py_str).unwrap_or_else(|| "None".to_owned());
             println!("run complete {}", result.run_id);
             println!(
                 "functional={} quality={} security={} human_like={} total={} marginal_cash=${} api_equivalent=${}",
@@ -272,7 +297,10 @@ fn main() {
         }
         Some(other) => {
             eprintln!("{USAGE}");
-            eprintln!("vulcanbench-engine: error: unknown command {}", py_repr_str(other));
+            eprintln!(
+                "vulcanbench-engine: error: unknown command {}",
+                py_repr_str(other)
+            );
             2
         }
     };
@@ -293,18 +321,34 @@ mod tests {
 
     #[test]
     fn run_args_subset() {
-        let args: Vec<String> = ["--task", "hello-world", "-m", "mock:synthetic", "--sandbox=local", "--no-judges", "-o", "./out"]
-            .iter()
-            .map(|s| (*s).to_owned())
-            .collect();
+        let args: Vec<String> = [
+            "--task",
+            "hello-world",
+            "-m",
+            "mock:synthetic",
+            "--sandbox=local",
+            "--no-judges",
+            "-o",
+            "./out",
+        ]
+        .iter()
+        .map(|s| (*s).to_owned())
+        .collect();
         let parsed = parse_run_args(&args).expect("parses");
         assert_eq!(parsed.task.as_deref(), Some("hello-world"));
         assert_eq!(parsed.sandbox, "local");
         assert!(!parsed.judges);
         assert_eq!(parsed.output_dir, PathBuf::from("out"));
-        let missing = parse_run_args(&["--task".to_owned(), "x".to_owned()]).expect_err("needs model");
+        let missing =
+            parse_run_args(&["--task".to_owned(), "x".to_owned()]).expect_err("needs model");
         assert!(missing.contains("--model"));
-        let bad = parse_run_args(&["-m".to_owned(), "a:b".to_owned(), "--repeat".to_owned(), "2".to_owned()]).expect_err("unsupported");
+        let bad = parse_run_args(&[
+            "-m".to_owned(),
+            "a:b".to_owned(),
+            "--repeat".to_owned(),
+            "2".to_owned(),
+        ])
+        .expect_err("unsupported");
         assert!(bad.contains("unrecognized"));
     }
 }

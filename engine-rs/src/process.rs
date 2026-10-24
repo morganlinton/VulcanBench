@@ -105,7 +105,7 @@ pub fn first_output_line(output: &str) -> Option<String> {
 }
 
 /// `TimeoutExpired`'s message shape for a timed out shell command.
-pub fn timeout_message(cmd: &str, seconds: f64) -> String {
+pub fn timeout_message(cmd: &str, seconds: i64) -> String {
     format!("Command '{cmd}' timed out after {seconds} seconds")
 }
 
@@ -116,7 +116,10 @@ mod tests {
     #[test]
     fn captures_and_times_out() {
         let ok = shell("printf hi; printf err >&2; exit 3", Path::new("/"), None).expect("runs");
-        assert_eq!((ok.exit_code, ok.stdout.as_str(), ok.stderr.as_str()), (3, "hi", "err"));
+        assert_eq!(
+            (ok.exit_code, ok.stdout.as_str(), ok.stderr.as_str()),
+            (3, "hi", "err")
+        );
         assert!(!ok.timed_out);
         let slow = shell(
             "printf partial; exec sleep 5",
@@ -128,7 +131,10 @@ mod tests {
         assert_eq!(slow.stdout, "partial");
         assert!(which("sh").is_some());
         assert!(which("definitely-not-a-binary-xyz").is_none());
-        assert_eq!(first_output_line("\n  v 1.0 \nmore"), Some("v 1.0".to_owned()));
+        assert_eq!(
+            first_output_line("\n  v 1.0 \nmore"),
+            Some("v 1.0".to_owned())
+        );
         assert_eq!(first_output_line("  "), None);
     }
 }

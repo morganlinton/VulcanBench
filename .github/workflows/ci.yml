@@ -133,3 +133,36 @@ jobs:
             cargo fmt --version &&
             cargo audit --version
           '
+
+  rust-engine-spike:
+    # The zero-crate Rust run engine under engine-rs/. Offline only: the
+    # parity script runs both engines on the mock model, no provider call.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12 (both engines score through the venv's analyzers)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+      - name: Set up Rust (engine-rs/rust-toolchain.toml pins the same version)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.87.0"
+          components: clippy, rustfmt
+      - name: Create the venv the parity script expects
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -e ".[dev,test]"
+      - name: cargo fmt
+        working-directory: engine-rs
+        run: cargo fmt --check
+      - name: cargo clippy
+        working-directory: engine-rs
+        run: cargo clippy --all-targets -- -D warnings
+      - name: cargo test
+        working-directory: engine-rs
+        run: cargo test
+      - name: Offline mock parity against the Python engine
+        run: python3 engine-rs/scripts/parity.py --release

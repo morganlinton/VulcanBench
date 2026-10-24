@@ -34,6 +34,7 @@ launcher.
 | commons-lang-fraction-lowest-terms | F5-java | 2 of 2 solved (4.3, 4.4) | not run | **REJECT** (early exit) |
 | treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
+| black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | not run | Astra prong passed (2026-10-24); pending Fable |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -234,6 +235,53 @@ solves 3/3 means the reconstruction volume is too small for F2 and the slot
 should take a larger subsystem"); the oracle route is a second lever for the
 owner: ship the reference in a form the sandbox cannot build or run, or
 accept that F2 measures porting speed against an oracle.
+
+### black-fmt-skip-region-handling, Astra half (2026-10-24): the Astra prong passed
+
+The first wave-1 candidate (WAVE1-F5.md), built under floor 8 and validated
+the same day (its DESIGN.md). Job `astra-black-fmt-skip-region-handling`,
+launched 15:54 PDT on the Mac Studio from a run worktree pinned to d75dd420
+(the task's commit), `run_gate.sh` at that commit (main's version, without
+the top-up knobs and the container cleanup of this branch), identifiers as in
+wave 1 (Codex CLI 0.159.0, `gpt-6-astra`, medium, `-k 3`), concurrency 2 per
+decision (e) for a Python task. Every session real: Harbor's invocation
+records `--model gpt-6-astra` and `model_reasoning_effort=medium`, 76 to 86
+command executions per trial, no auth, model-id or usage-limit event. No
+containers were left behind (no early exit fired).
+
+| Trial | Agent minutes | Reward | Held-out | Guards |
+| --- | --- | --- | --- | --- |
+| LBgCaAJ | 6.1 | 0 | 6 of 7 | hold (596 of 596) |
+| dRzhS4G | 6.0 | 0 | 6 of 7 | hold |
+| Qf6uoFa | 5.6 | 0 | 6 of 7 | hold |
+
+**0 of 3: the Astra prong passed.** All three attempts fail the same way:
+`fmtskip_opening_bracket_split` (the #5538 case, code after a hidden
+opening-bracket region on the same line when the hidden code ends in code)
+fails, and nothing else does. Each attempt changed `src/black/comments.py`
+(the walk and the serializer) and `src/blib2to3/pytree.py` (the `Leaf`
+class), about 100 to 130 lines added and 70 to 90 removed, and none touched
+`src/black/linegen.py`, where upstream's #5538 and #5586 live; the
+conditional case nonetheless passes under their changes. The tamper scans
+are clean and no added line touches the test runner. Each closing message
+reports the visible suite green ("598 passed, 3 skipped") plus 51 to 121
+self-generated combinations checked for AST equivalence and stability, and
+declares the work done at about six minutes.
+
+What held, and what did not. The floor-8 guard mechanism did not fire: no
+attempt took the `climb-any-parent` shortcut that the naive control showed
+would break `fmtskip_type_params`; all three widened the walk in a way the
+596 guards accept. What stopped them is the second mechanism recorded for
+tree-sitter and in this task's DESIGN.md: a held-out combination that the
+visible suite cannot reveal and that their own randomized checks did not
+reach. Astra's six-minute finish is the premature-completion pattern of the
+first wave (every visible signal green, then done), and here that signal was
+wrong by exactly one case.
+
+Next: the Fable 5.1 half (three attempts, admit iff at most 1 of 3, n=5
+top-up at exactly 1 of 3), on the owner's approval. Covariates: 6.1, 5.6 and
+6.0 agent minutes against the 3-hour budget; the run took 15 minutes end to
+end including both image builds.
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

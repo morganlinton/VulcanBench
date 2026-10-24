@@ -1395,6 +1395,38 @@ built by `scripts/cii-v4-board/build_deepseek_flash_population.py`.
   Claude Opus 5.5 and GPT-6.1 Sol's own columns are judged by Muse Spark 1.3
   and Grok 4.6, so any card placing them side by side says the panels differ.
 
+## Amendment v3.28, October 24, 2026: Reflection Beam, judged by Muse Spark 1.3 and GPT-6.1 Sol
+
+Everything is as in v3.27 except the population. Protocol id
+`code-quality-maintenance-v3.28`; run directory
+`runs-code-quality-maintenance-v3.28`; runner
+`harness/maintenance_review_v328.py`, derived from the v3.27 runner. Population
+record: `docs/results/swe-v4-beam-2026-10/comparison.json`, built by
+`scripts/cii-v4-board/build_beam_population.py`.
+
+- Population: the October 2026 Reflection Beam sweep of Frontier v4
+  (`Beam-1.0-501B-A23B`) through Mirror CLI 0.1.1 (solver
+  `mirror:Beam-1.0-501B-A23B`), Low to Max (Extra high is Beam's `xhigh`), one
+  attempt per task and level, 115 runs, from
+  `bench/2026-10-23-beam-mirror-frontier-v4`. Each run had a private Mirror
+  home with the usage notice acknowledged and only its workspace trusted
+  (owner approved), analytics off and no web search keys. The builder stops
+  on any run whose solver, requested effort, harness version or checkout
+  state differs from the sweep's record.
+- Exclusions: a run that ends with an empty patch has no code to review and is
+  not judged, as in v3.15 and v3.24; it counts as a failed task. Beam ends
+  some Low and Medium runs without changing any file, so those cells freeze
+  below 23 and the population record lists each exclusion with its reason.
+- Judges: Muse Spark 1.3 and GPT-6.1 Sol, as in v3.27. Grok 4.6's Cursor
+  account was out of usage again on October 24; the owner agreed to keep
+  GPT-6.1 Sol in the seat. Both are neutral for a Reflection submission and
+  retake the exam under v3.28.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the next level up (Max wraps to Low).
+- Comparability: as in v3.27; a Beam score is a Muse Spark 1.3 and GPT-6.1 Sol
+  mean, like DeepSeek V4.1 Flash's, and any card beside Muse Spark 1.3 and
+  Grok 4.6 columns says the panels differ.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

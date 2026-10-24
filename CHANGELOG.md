@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Mirror CLI harness** (`--harness mirror`, `mirror:<model>` specs,
+  `harness/agent/mirror_cli.py`): runs a task in Reflection AI's own coding
+  agent for Beam (`mirror exec` with the task on stdin), pinned to
+  reflection-mirror 0.1.1 by version and package tree hash, inside the same
+  macOS outer sandbox as Muse Code. Each run gets a private Mirror home that
+  acknowledges the usage notice and trusts only that run's workspace, with
+  analytics off, updates off, automatic tool approval and no web tools (the
+  run environment carries no search provider key). Token usage is decoded
+  from Mirror's conversation database with Mirror's own pinned protobuf
+  schema; every recorded inference must name the requested model, and a
+  finished run with no usage fails closed. An explicit effort is required:
+  low, medium, high, extra-high (sent as `xhigh`) or max. Beam has no
+  published price, so runs are unpriced. Decision entry 2026-10-23 in
+  `docs/DECISIONS.md`; tests in `tests/test_mirror_cli.py`.
+
 ## [0.9.0] - 2026-10-23
 
 ### Added

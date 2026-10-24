@@ -44,8 +44,15 @@ explicitly instead, each a patch from base written for that one variant:
                {"name": "loo:bug1", "patch": "tests/controls/loo-bug1.diff"}, ...]
 
 Explicit variants replace the generated single and leave-one-out variants;
-gold-from-parts is still run from "parts". Prints a table of held-out
-(fail_to_pass) checks passing per variant and writes <work>/controls-report.json.
+gold-from-parts is still run from "parts".
+Naive-fix controls (F5 floor 8, docs/frontier-v5/PLAN-v3.md) are listed under
+"naive" and run in addition to every other variant, each a patch from base:
+  "naive": [{"name": "vacuous-anchor", "patch": "tests/controls/naive-vacuous-anchor.diff"}]
+A naive:<name> variant meets floor 8 iff it builds, clears at least one
+fail_to_pass check and regresses at least one pass_to_pass check (a guard).
+Prints a table of held-out (fail_to_pass) checks passing per variant, the
+pass_to_pass checks each variant regresses, a floor-8 line per naive variant,
+and writes <work>/controls-report.json.
 Reuses scripts/frontier-v5/probe_verifier.py for images, artifacts and runs.
 """
 
@@ -69,6 +76,11 @@ from probe_verifier import extract, proxy_args, run_verifier, sh
 # spaces and ": " (vitest ids are test code), so the status is taken from the
 # end of the line, not from the first separator.
 F2P_LINE = re.compile(r"^fail_to_pass: (.+): (\w+)(?: \(want \w+\))?$", re.M)
+# Same shape for guards; checkers that print only the 0/1 summary leave the
+# list empty and the regression is read from reward.json's pass_to_pass.
+P2P_LINE = re.compile(r"^pass_to_pass: (.+): (\w+)(?: \(want \w+\))?$", re.M)
+# Verifiers with a whole-suite guard wall name its unexpected failures too.
+GUARD_LINE = re.compile(r"^guard_suite: unexpected failure: (.+)$", re.M)
 
 
 def apply(root: Path, patch: Path, reverse: bool = False) -> str | None:
@@ -105,10 +117,12 @@ def plan_variants(spec: dict) -> dict[str, list[list[dict]]]:
     variants: dict[str, list[list[dict]]] = {"gold-from-parts": [parts]}
     if len(causes) < len(parts):
         variants["causes-only"] = [causes]
+    naive = {f"naive:{v['name']}": [[{"name": v["name"], "patch": v["patch"]}]] for v in spec.get("naive", [])}
     explicit = spec.get("variants")
     if explicit:
         for v in explicit:
             variants[v["name"]] = [[{"name": v["name"], "patch": v["patch"]}]]
+        variants.update(naive)
         return variants
     for c in causes:
         group = next((g for g in coupled if c["name"] in g), {c["name"]})
@@ -119,6 +133,7 @@ def plan_variants(spec: dict) -> dict[str, list[list[dict]]]:
         if group != {c["name"]}:
             tries.append([p for p in parts if p["name"] not in group])
         variants[f"loo:{c['name']}"] = tries
+    variants.update(naive)
     return variants
 
 
@@ -146,14 +161,25 @@ def run_variant(ctx: dict, vname: str, tries: list[list[dict]]) -> dict:
         if (out / f).is_file()
     )
     failing = sorted({m.group(1) for m in F2P_LINE.finditer(text) if m.group(2) != "passed"})
+    # A guard is a check that passes at base and gold. Verifiers with a
+    # whole-suite guard wall list every failed test, held-out ones included,
+    # so the held-out ids are removed before a failure counts as a regression.
+    regressed = sorted(
+        (
+            {m.group(1) for m in P2P_LINE.finditer(text) if m.group(2) not in ("passed", "ok")}
+            | {m.group(1) for m in GUARD_LINE.finditer(text)}
+        )
+        - set(ctx["f2p"])
+    )
+    guards_hold = r.get("pass_to_pass") == 1 and not regressed
     total = len(ctx["f2p"])
     note = f" (absent: {','.join(left_out)})" if errs else ""
     print(
         f"ran  {vname:28s} reward={r.get('reward')} f2p {total - len(failing)}/{total}{note} "
-        f"failing={failing}",
+        f"failing={failing} guards={'hold' if guards_hold else 'REGRESSED'} regressed={regressed}",
         flush=True,
     )
-    return {
+    result = {
         "status": "ran",
         "causes_absent": left_out,
         "fallback": errs[0] if errs else None,
@@ -161,8 +187,27 @@ def run_variant(ctx: dict, vname: str, tries: list[list[dict]]) -> dict:
         "f2p_passing": total - len(failing),
         "f2p_total": total,
         "f2p_failing": failing,
+        "p2p_regressed": regressed,
+        "guards_hold": guards_hold,
         "metrics": r,
     }
+    if vname.startswith("naive:"):
+        # F5 floor 8 (PLAN-v3.md): a real partial fix that the project's own
+        # tests reject. build_ok is absent from some verifiers; a reward with
+        # fail_to_pass or pass_to_pass recorded means the artifact built.
+        built = r.get("build_ok", 1) == 1 and ("pass_to_pass" in r or "fail_to_pass" in r)
+        result["floor8"] = {
+            "builds": built,
+            "clears_some_f2p": total - len(failing) >= 1,
+            "regresses_a_guard": not guards_hold,
+        }
+        result["floor8"]["met"] = all(result["floor8"].values())
+        print(
+            f"     floor 8 {'MET' if result['floor8']['met'] else 'not met'}: builds={built} "
+            f"clears_some_f2p={total - len(failing) >= 1} regresses_a_guard={not guards_hold}",
+            flush=True,
+        )
+    return result
 
 
 def main() -> int:

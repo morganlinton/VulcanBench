@@ -1,0 +1,423 @@
+diff --git a/lib/src/query.c b/lib/src/query.c
+index 4adf9f0..07d2df9 100644
+--- a/lib/src/query.c
++++ b/lib/src/query.c
+@@ -61,9 +61,21 @@ typedef struct {
+  * Steps have some additional fields in order to handle the `.` (or "anchor") operator,
+  * which forbids additional child nodes:
+  * - `is_immediate` - Indicates that the node matching this step cannot be preceded
+- *    by other sibling nodes that weren't specified in the pattern.
+- * - `is_last_child` - Indicates that the node matching this step cannot have any
+- *    subsequent named siblings.
++ *    by other sibling nodes that weren't specified in the pattern. If the sibling
++ *    pattern before the anchor is quantified and matched nothing, the anchor has
++ *    nothing to anchor to and is ignored (see `QueryState.anchor_is_vacuous`).
++ * - `exit_anchor_mask` - A bit set for each pattern depth `d` at which an enclosing
++ *    parent pattern ends with a trailing anchor (`(parent (child) .)`). When a state
++ *    matches this step and then leaves the child list at depth `d`, the most recently
++ *    matched node at depth `d` must have no later named siblings. Keeping this on
++ *    every descendant step (rather than a flag on the last child step) lets the
++ *    requirement apply to the last node that was *actually* matched, which matters
++ *    when the last child pattern is repeated or optional.
++ * - `is_followed_by_anchor` - Indicates that the next sibling step in the pattern
++ *    is immediate. The choice of node for this step then determines whether the
++ *    pattern can continue, so a state cannot commit to the first matching node.
++ * - `alternative_is_skip` - Indicates that this step's `alternative_index` skips
++ *    over a quantified (`?` or `*`) sibling pattern without matching anything.
+  *
+  * For simple patterns, steps are matched in sequential order. But in order to
+  * handle alternative/repeated/optional sub-patterns, query steps are not always
+@@ -105,9 +117,11 @@ typedef struct {
+   uint16_t depth;
+   uint16_t alternative_index;
+   uint16_t negated_field_list_id;
++  uint32_t exit_anchor_mask;
+   bool is_named: 1;
+   bool is_immediate: 1;
+-  bool is_last_child: 1;
++  bool is_followed_by_anchor: 1;
++  bool alternative_is_skip: 1;
+   bool is_pass_through: 1;
+   bool is_dead_end: 1;
+   bool is_inside_alternation: 1;
+@@ -197,6 +211,9 @@ typedef struct {
+  *    different steps in their pattern. This means that in order to obey the
+  *    'longest-match' rule, this state should not be returned as a match until
+  *    it is clear that there can be no other alternative match with more captures.
++ * - `anchor_is_vacuous` - A flag that indicates that the state reached its current
++ *    step by skipping a quantified sibling pattern that matched nothing. An anchor
++ *    on the current step then has no preceding node to anchor to, so it is ignored.
+  */
+ typedef struct {
+   uint32_t id;
+@@ -208,6 +225,7 @@ typedef struct {
+   uint16_t consumed_capture_count: 12;
+   bool seeking_immediate_match: 1;
+   bool has_in_progress_alternatives: 1;
++  bool anchor_is_vacuous: 1;
+   bool dead: 1;
+   bool needs_parent: 1;
+ } QueryState;
+@@ -1630,7 +1648,9 @@ static void ts_query__dump_steps(const TSQuery *self, const char *label) {
+     if (s->is_immediate) printf(" IMM");
+     if (s->is_pass_through) printf(" PASS");
+     if (s->is_dead_end) printf(" DEAD");
+-    if (s->is_last_child) printf(" LAST");
++    if (s->is_followed_by_anchor) printf(" PRE_ANCHOR");
++    if (s->alternative_is_skip) printf(" ALT_SKIP");
++    if (s->exit_anchor_mask) printf(" EXIT_ANCHOR=%x", s->exit_anchor_mask);
+     if (s->is_named) printf(" NAMED");
+     if (s->is_missing) printf(" MISSING");
+     if (s->is_inside_alternation) printf(" INALT");
+@@ -1647,7 +1667,40 @@ static void ts_query__dump_steps(const TSQuery *self, const char *label) {
+ }
+ #endif
+ 
++// Determine whether the sibling step that follows the given step is immediate.
++// Child steps are skipped, dead-end steps are followed to their alternative, and
++// pass-through steps (the loop-back of a quantifier) are stepped over, since the
++// state that continues past a repetition is the one that lands on the next sibling.
++static bool ts_query__step_is_followed_by_anchor(const TSQuery *self, uint32_t step_index) {
++  const QueryStep *step = array_get(&self->steps, step_index);
++  if (step->is_dead_end || step->is_pass_through) return false;
++  uint32_t i = step_index + 1;
++  // Dead-end steps may redirect backwards (see the alternation fix-up in `ts_query_new`),
++  // so bound the walk to guard against cycles.
++  for (uint32_t visited = 0; i < self->steps.size && visited < self->steps.size; visited++) {
++    const QueryStep *next_step = array_get(&self->steps, i);
++    if (next_step->depth == PATTERN_DONE_MARKER || next_step->depth < step->depth) return false;
++    if (next_step->depth > step->depth) {
++      i++;
++    } else if (next_step->is_dead_end) {
++      if (next_step->alternative_index == NONE) return false;
++      i = next_step->alternative_index;
++    } else if (next_step->is_pass_through) {
++      i++;
++    } else {
++      return next_step->is_immediate;
++    }
++  }
++  return false;
++}
++
+ static bool ts_query__analyze_patterns(TSQuery *self, unsigned *error_offset) {
++  for (unsigned i = 0; i < self->steps.size; i++) {
++    QueryStep *step = array_get(&self->steps, i);
++    if (step->depth == PATTERN_DONE_MARKER) continue;
++    step->is_followed_by_anchor = ts_query__step_is_followed_by_anchor(self, i);
++  }
++
+   Array(uint16_t) non_rooted_pattern_start_steps = array_new();
+   for (unsigned i = 0; i < self->pattern_map.size; i++) {
+     PatternEntry *pattern = array_get(&self->pattern_map, i);
+@@ -2485,9 +2538,11 @@ static TSQueryError ts_query__parse_pattern(
+     // If this parenthesis is followed by a node, then it represents a grouped sequence.
+     if (stream->next == '(' || stream->next == '"' || stream->next == '[') {
+       bool child_is_immediate = is_immediate;
++      const char *anchor_position = NULL;
+       CaptureQuantifiers child_capture_quantifiers = capture_quantifiers_new();
+       for (;;) {
+         if (stream->next == '.') {
++          anchor_position = stream->input;
+           child_is_immediate = true;
+           stream_advance(stream);
+           stream_skip_whitespace(stream);
+@@ -2502,6 +2557,13 @@ static TSQueryError ts_query__parse_pattern(
+         );
+         if (e == PARENT_DONE) {
+           if (stream->next == ')') {
++            // A group has no parent node, so an anchor after its last element
++            // has nothing to anchor to.
++            if (anchor_position) {
++              capture_quantifiers_delete(&child_capture_quantifiers);
++              stream_reset(stream, anchor_position);
++              return TSQueryErrorSyntax;
++            }
+             stream_advance(stream);
+             break;
+           }
+@@ -2515,6 +2577,7 @@ static TSQueryError ts_query__parse_pattern(
+         capture_quantifiers_add_all(capture_quantifiers, &child_capture_quantifiers);
+         capture_quantifiers_clear(&child_capture_quantifiers);
+         child_is_immediate = false;
++        anchor_position = NULL;
+       }
+ 
+       capture_quantifiers_delete(&child_capture_quantifiers);
+@@ -2540,7 +2603,7 @@ static TSQueryError ts_query__parse_pattern(
+         // Parse the wildcard symbol
+         if (length == 1 && node_name[0] == '_') {
+           symbol = WILDCARD_SYMBOL;
+-        } else if (!strncmp(node_name, "MISSING", length)) {
++        } else if (length == 7 && !strncmp(node_name, "MISSING", length)) {
+           is_missing = true;
+           stream_skip_whitespace(stream);
+ 
+@@ -2749,21 +2812,16 @@ static TSQueryError ts_query__parse_pattern(
+                 capture_quantifiers_delete(&child_capture_quantifiers);
+                 return TSQueryErrorSyntax;
+               }
+-              // Mark this step *and* its alternatives as the last child of the parent.
+-              QueryStep *last_child_step = array_get(&self->steps, last_child_step_index);
+-              last_child_step->is_last_child = true;
+-              if (
+-                last_child_step->alternative_index != NONE &&
+-                last_child_step->alternative_index < self->steps.size
+-              ) {
+-                QueryStep *alternative_step = array_get(&self->steps, last_child_step->alternative_index);
+-                alternative_step->is_last_child = true;
+-                while (
+-                  alternative_step->alternative_index != NONE &&
+-                  alternative_step->alternative_index < self->steps.size
+-                ) {
+-                  alternative_step = array_get(&self->steps, alternative_step->alternative_index);
+-                  alternative_step->is_last_child = true;
++              // A trailing anchor requires that the last node matched among this
++              // node's children has no later named siblings. Which child step
++              // that is can only be known at match time (the last child pattern
++              // may be optional or repeated), so record the requirement on every
++              // descendant step: whenever a state leaves this node's child list
++              // after matching one of them, the check is performed.
++              uint32_t child_depth = depth + 1;
++              if (child_depth < 32) {
++                for (uint32_t i = starting_step_index + 1; i < self->steps.size; i++) {
++                  array_get(&self->steps, i)->exit_anchor_mask |= 1u << child_depth;
+                 }
+               }
+             }
+@@ -2987,6 +3045,7 @@ static TSQueryError ts_query__parse_pattern(
+         step = array_get(&self->steps, step->alternative_index);
+       }
+       step->alternative_index = self->steps.size;
++      step->alternative_is_skip = true;
+       break;
+     case TSQuantifierZeroOrOne:
+       step = array_get(&self->steps, starting_step_index);
+@@ -2994,6 +3053,7 @@ static TSQueryError ts_query__parse_pattern(
+         step = array_get(&self->steps, step->alternative_index);
+       }
+       step->alternative_index = self->steps.size;
++      step->alternative_is_skip = true;
+       break;
+     default:
+       break;
+@@ -3659,6 +3719,22 @@ int ts_query_cursor__compare_nodes(TSNode left, TSNode right) {
+   return 0;
+ }
+ 
++// Determine whether `state` can stand in for `other_state` when both are at the same
++// step of the same pattern: everything that `other_state` could still match from here,
++// `state` could match too. A state that requires its next node to be an immediate
++// sibling, or that honors an anchor that the other state ignores, is more constrained.
++static inline bool ts_query_cursor__state_subsumes(
++  const TSQueryCursor *self,
++  const QueryState *state,
++  const QueryState *other_state
++) {
++  const QueryStep *step = array_get(&self->query->steps, state->step_index);
++  if (step->depth == PATTERN_DONE_MARKER) return true;
++  if (state->seeking_immediate_match && !other_state->seeking_immediate_match) return false;
++  if (step->is_immediate && other_state->anchor_is_vacuous && !state->anchor_is_vacuous) return false;
++  return true;
++}
++
+ // Determine if either state contains a superset of the other state's captures.
+ void ts_query_cursor__compare_captures(
+   TSQueryCursor *self,
+@@ -3757,6 +3833,41 @@ static void ts_query_cursor__sort_states_by_capture(TSQueryCursor *self) {
+   }
+ }
+ 
++// After a state has matched `step` at `node` and moved on to the step at
++// `next_step_index`, check the trailing anchors of every parent pattern whose child
++// list the state has now left. For each such parent, the node that the state matched
++// last within that child list (`node` itself or one of its ancestors) must have no
++// later named siblings.
++static bool ts_query_cursor__exit_satisfies_trailing_anchors(
++  const TSQueryCursor *self,
++  const QueryStep *step,
++  uint16_t next_step_index,
++  TSNode node,
++  bool node_has_later_named_siblings
++) {
++  const QueryStep *next_step = array_get(&self->query->steps, next_step_index);
++  uint32_t new_depth = next_step->depth == PATTERN_DONE_MARKER ? 0 : next_step->depth;
++  TSNode ancestor = node;
++  uint32_t ancestor_depth = step->depth;
++  for (uint32_t d = step->depth; d > new_depth; d--) {
++    if (d >= 32 || !(step->exit_anchor_mask & (1u << d))) continue;
++    bool has_later_named_siblings;
++    if (d == step->depth) {
++      has_later_named_siblings = node_has_later_named_siblings;
++    } else {
++      while (ancestor_depth > d) {
++        ancestor = ts_node_parent(ancestor);
++        ancestor_depth--;
++      }
++      has_later_named_siblings =
++        ts_node_is_null(ancestor) ||
++        !ts_node_is_null(ts_node_next_named_sibling(ancestor));
++    }
++    if (has_later_named_siblings) return false;
++  }
++  return true;
++}
++
+ static void ts_query_cursor__add_state(
+   TSQueryCursor *self,
+   const PatternEntry *pattern
+@@ -3814,6 +3925,7 @@ static void ts_query_cursor__add_state(
+     .consumed_capture_count = 0,
+     .seeking_immediate_match = true,
+     .has_in_progress_alternatives = false,
++    .anchor_is_vacuous = false,
+     .needs_parent = step->depth == 1,
+     .dead = false,
+   }));
+@@ -4254,12 +4366,12 @@ static inline bool ts_query_cursor__advance(
+             node_does_match = symbol == step->symbol && (!step->is_missing || is_missing);
+           }
+           bool later_sibling_can_match = has_later_siblings;
+-          if ((step->is_immediate && is_named) || state->seeking_immediate_match) {
++          if (
++            (step->is_immediate && is_named && !state->anchor_is_vacuous) ||
++            state->seeking_immediate_match
++          ) {
+             later_sibling_can_match = false;
+           }
+-          if (step->is_last_child && has_later_named_siblings) {
+-            node_does_match = false;
+-          }
+           if (step->supertype_symbol) {
+             bool has_supertype = false;
+             for (unsigned k = 0; k < supertype_count; k++) {
+@@ -4318,9 +4430,12 @@ static inline bool ts_query_cursor__advance(
+           // children. If this pattern step could match later children within the same
+           // parent, then this query state cannot simply be updated in place. It must be
+           // split into two states: one that matches this node, and one which skips over
+-          // this node, to preserve the possibility of matching later siblings.
++          // this node, to preserve the possibility of matching later siblings. This is
++          // also needed when the next sibling step is anchored to this one, because
++          // the anchor can only be satisfied relative to the right choice of node.
+           if (later_sibling_can_match && (
+             step->contains_captures ||
++            step->is_followed_by_anchor ||
+             ts_query__step_is_fallible(self->query, state->step_index)
+           )) {
+             if (ts_query_cursor__copy_state(self, &state)) {
+@@ -4376,6 +4491,7 @@ static inline bool ts_query_cursor__advance(
+ 
+           // Advance this state to the next step of its pattern.
+           state->step_index++;
++          state->anchor_is_vacuous = false;
+           LOG(
+             "  advance state. pattern:%u, step:%u\n",
+             state->pattern_index,
+@@ -4420,8 +4536,11 @@ static inline bool ts_query_cursor__advance(
+               // A "pass-through" step exists only to add a branch into the step sequence,
+               // via its alternative_index. When a state reaches a pass-through step, it splits
+               // in order to process the alternative step, and then it advances to the next step.
++              // A pass-through step is only reached once the repeated pattern has matched, so
++              // an anchor on the step after it applies.
+               if (child_step->is_pass_through) {
+                 child_state->step_index++;
++                child_state->anchor_is_vacuous = false;
+                 k--;
+               }
+ 
+@@ -4440,10 +4559,38 @@ static inline bool ts_query_cursor__advance(
+                 copy->step_index = child_step->alternative_index;
+                 if (child_step->is_pass_through) {
+                   copy->seeking_immediate_match = true;
++                  copy->anchor_is_vacuous = false;
++                } else if (child_step->alternative_is_skip) {
++                  // The copy skips a quantified sibling pattern without matching anything,
++                  // so an anchor on the step it lands on has nothing to anchor to.
++                  copy->anchor_is_vacuous = true;
+                 }
+               }
+             }
+           }
++
++          // If any of the resulting states has left the child list of a parent pattern
++          // that ends with a trailing anchor, then the node that was matched last within
++          // that child list must not have any later named siblings.
++          if (step->exit_anchor_mask) {
++            for (unsigned k = j; k < end_index; k++) {
++              QueryState *child_state = array_get(&self->states, k);
++              if (!ts_query_cursor__exit_satisfies_trailing_anchors(
++                self,
++                step,
++                child_state->step_index,
++                node,
++                has_later_named_siblings
++              )) {
++                LOG(
++                  "  node is not last child. pattern:%u, step:%u\n",
++                  child_state->pattern_index,
++                  child_state->step_index
++                );
++                child_state->dead = true;
++              }
++            }
++          }
+         }
+ 
+         // Order states by capture position so the dedup pass below can stop scanning a
+@@ -4505,7 +4652,10 @@ static inline bool ts_query_cursor__advance(
+               &right_contains_left
+             );
+             if (left_contains_right) {
+-              if (state->step_index == other_state->step_index) {
++              if (
++                state->step_index == other_state->step_index &&
++                ts_query_cursor__state_subsumes(self, state, other_state)
++              ) {
+                 LOG(
+                   "  drop shorter state. pattern: %u, step_index: %u\n",
+                   state->pattern_index,
+@@ -4519,7 +4669,10 @@ static inline bool ts_query_cursor__advance(
+               other_state->has_in_progress_alternatives = true;
+             }
+             if (right_contains_left) {
+-              if (state->step_index == other_state->step_index) {
++              if (
++                state->step_index == other_state->step_index &&
++                ts_query_cursor__state_subsumes(self, other_state, state)
++              ) {
+                 LOG(
+                   "  drop shorter state. pattern: %u, step_index: %u\n",
+                   state->pattern_index,
+diff --git a/lib/src/tree_cursor.c b/lib/src/tree_cursor.c
+index ed79ef7..adb47d7 100644
+--- a/lib/src/tree_cursor.c
++++ b/lib/src/tree_cursor.c
+@@ -557,8 +557,11 @@ void ts_tree_cursor_current_status(
+       (*supertype_count)++;
+     }
+ 
+-    // Determine if the current node has later siblings.
+-    if (!*has_later_siblings) {
++    // Determine if the current node has later siblings. The later siblings of an
++    // invisible ancestor are also later siblings of the current node, so keep
++    // scanning at each invisible level until a later *named* sibling is found;
++    // an earlier level may only have had anonymous ones.
++    if (!*has_later_named_siblings) {
+       unsigned sibling_count = parent_entry->subtree->ptr->child_count;
+       unsigned structural_child_index = entry->structural_child_index;
+       if (!ts_subtree_extra(*entry->subtree)) structural_child_index++;
+@@ -570,14 +573,12 @@ void ts_tree_cursor_current_status(
+         );
+         if (sibling_metadata.visible) {
+           *has_later_siblings = true;
+-          if (*has_later_named_siblings) break;
+           if (sibling_metadata.named) {
+             *has_later_named_siblings = true;
+             break;
+           }
+         } else if (ts_subtree_visible_child_count(sibling) > 0) {
+           *has_later_siblings = true;
+-          if (*has_later_named_siblings) break;
+           if (sibling.ptr->named_child_count > 0) {
+             *has_later_named_siblings = true;
+             break;

@@ -7,6 +7,24 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-24: Reflection Beam judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.28)
+
+Beam's Code quality is judged as v3.28 with the v3.27 panel. A one-word probe
+through the pinned Cursor 2026.10.01-e373342 on 2026-10-24 still returned
+"You're out of usage", so Grok 4.6 cannot take its usual seat. The owner agreed
+in chat to keep GPT-6.1 Sol in it, as for DeepSeek V4.1 Flash, so the two
+newest columns share a panel even though it differs from the Muse Spark 1.3 and
+Grok 4.6 pair behind most of the board.
+
+One harness interaction is disclosed with Beam's results. Task files are staged
+without execute bits (as for every published column); where a model meets
+"Permission denied" on the legacy binary, Mirror appends "[Sandbox note: The
+sandbox denied access to this resource.]". At Low, two of Beam's 23 final
+answers said the sandbox blocked the binary, which it does not; `chmod` works.
+The Mirror adapter archives model messages and usage but not tool calls, so
+how often Beam saw the note cannot be counted; the adapter gains tool-call
+archiving after the sweep.
+
 ## 2026-10-23: Reflection Beam on Frontier v4 through Mirror CLI; DeepSeek V4 Pro stopped
 
 ### Decision

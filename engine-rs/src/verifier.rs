@@ -96,7 +96,7 @@ fn infrastructure_reason(cmd: &str, outcome: &RunnerOutcome) -> Option<&'static 
 fn run_group(
     entries: &[Value],
     timeout: i64,
-    runner: &dyn Fn(&str, i64) -> RunnerOutcome,
+    runner: &dyn Fn(&str, i64) -> Result<RunnerOutcome, EngineError>,
 ) -> Result<Value, EngineError> {
     let mut results = Value::object();
     for (i, entry) in entries.iter().enumerate() {
@@ -109,7 +109,7 @@ fn run_group(
             results.insert(name, false);
             continue;
         }
-        let outcome = runner(&cmd, timeout);
+        let outcome = runner(&cmd, timeout)?;
         if let Some(reason) = infrastructure_reason(&cmd, &outcome) {
             return Err(EngineError::VerifierInfrastructure(format!(
                 "{reason}: {name} ({cmd})"
@@ -137,7 +137,7 @@ fn all_true(results: &Value) -> bool {
 pub fn run_declarative_verifier(
     task: &Task,
     workspace: &Path,
-    runner: &dyn Fn(&str, i64) -> RunnerOutcome,
+    runner: &dyn Fn(&str, i64) -> Result<RunnerOutcome, EngineError>,
     timeout: i64,
 ) -> Result<Value, EngineError> {
     install_hidden_tests(task, workspace)?;

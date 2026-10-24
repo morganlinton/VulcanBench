@@ -1,5 +1,6 @@
 //! The run engine: `run_agent` and the ReAct step loop from
-//! `harness/agent/loop.py`, for the mock provider in the local sandbox.
+//! `harness/agent/loop.py`, for the mock and Anthropic providers in the local
+//! or Docker sandbox.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -7,15 +8,20 @@ use std::process::Command;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::deadline::{budget_exhausted, tool_timeout, Deadline};
+use crate::docker_executor::{
+    docker_available, resolve_sandbox_image, DockerExecutor, ResourceSpec,
+};
 use crate::effort::{effort_config, EffortConfig};
 use crate::error::EngineError;
 use crate::evaluator::{budget_exceeded_scores, evaluate_run, EvaluateParams};
+use crate::executor::Executor;
 use crate::json::{obj, Value};
 use crate::local_executor::LocalToolExecutor;
 use crate::manifest::{
     collect_manifest, minimal_manifest, resolve_agent_timeout_s, resolve_max_steps,
     resolve_verifier_timeout_s, system_prompt_for_task, task_workspace_stats,
 };
+use crate::pricing::{cost_usd, is_priced};
 use crate::process;
 use crate::protocol::{
     openai_tool_schemas, RunCommandArgs, ToolCall, ToolObservation, VALID_TOOLS,
@@ -59,9 +65,12 @@ pub struct RunOptions {
     pub judges: bool,
     pub judge_model: Option<String>,
     pub sandbox: String,
+    pub image: Option<String>,
     pub network: bool,
+    pub resources: ResourceSpec,
     pub timeout_s: Option<f64>,
     pub effort: Option<String>,
+    pub max_run_cost: Option<f64>,
     pub override_budgets: bool,
 }
 
@@ -82,7 +91,7 @@ struct LoopOutcome {
 
 struct RunContext<'a> {
     collector: &'a mut TraceCollector,
-    executor: &'a LocalToolExecutor,
+    executor: &'a Executor,
     deadline: &'a mut Deadline,
 }
 
@@ -105,18 +114,13 @@ fn short_hex() -> String {
 /// # Errors
 ///
 /// Every failure the Python CLI maps to an exit code: blocked effort, unknown
-/// task or provider, unsupported sandbox, verifier infrastructure, I/O.
+/// task or provider, sandbox failures, provider failures, verifier
+/// infrastructure, I/O.
 pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
     settings::check_effort_allowed(opts.effort.as_deref(), &settings::settings_path())?;
     let task = load_task(&opts.task_id, &opts.tasks_root)?;
     let provider = get_provider(&opts.model)?;
     let effort_meta = effort_config(provider.name(), opts.effort.as_deref())?;
-    if opts.sandbox != "local" {
-        return Err(EngineError::Sandbox(format!(
-            "sandbox {} is not implemented in the Rust spike; pass --sandbox local",
-            py_repr_str(&opts.sandbox)
-        )));
-    }
     if opts.judges {
         return Err(EngineError::Invalid(
             "the human_like judge ensemble is not implemented in the Rust spike; pass --no-judges"
@@ -154,8 +158,7 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
     let workspace = run_dir.join("workspace");
     prepare_workspace(&task, &workspace)?;
     git_init(&workspace)?;
-    let executor = LocalToolExecutor::new(&workspace)?;
-    collector.record("sandbox", obj! { "mode" => "local" })?;
+    let executor = make_executor(opts, &task, &workspace, &mut collector)?;
     run_task_setup(&task, &executor, &mut collector)?;
 
     let started_at = utc_now_isoformat();
@@ -172,14 +175,20 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
         deadline: &mut deadline,
     };
     let effort_summary = effort_meta.as_ref().map(EffortConfig::as_summary);
-    let outcome = run_model_loop(
-        &mut ctx,
-        provider.as_ref(),
-        &tools,
-        &mut messages,
-        effective_max_steps,
-        effort_summary.as_ref(),
-    )?;
+    let provider_effort = effort_meta
+        .as_ref()
+        .filter(|e| e.supported)
+        .and_then(|e| e.provider_value.clone());
+    let loop_inputs = LoopInputs {
+        provider: provider.as_ref(),
+        tools: &tools,
+        max_steps: effective_max_steps,
+        effort_summary: effort_summary.as_ref(),
+        provider_effort: provider_effort.as_deref(),
+        model: &opts.model,
+        max_run_cost: opts.max_run_cost,
+    };
+    let outcome = run_model_loop(&mut ctx, &loop_inputs, &mut messages)?;
 
     let patch = git_diff(&workspace)?;
     let changed_files = git_changed_files(&workspace)?;
@@ -191,6 +200,9 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
 
     let (functional, verifier_payload) = verify_with_budget(&task, &mut ctx)?;
     let manifest = collect_manifest_with_budget(opts, &task, &mut ctx)?;
+    // Quality, security and judges run host-side over the mounted workspace,
+    // so the container comes down now, as in the Python engine's `finally`.
+    executor.close();
 
     let total_tokens = outcome.prompt_tokens + outcome.completion_tokens;
     let scores = evaluate_with_budget(
@@ -251,18 +263,85 @@ pub fn run_agent(opts: &RunOptions) -> Result<RunResult, EngineError> {
     let summary = collector.finalize(scores, extra)?;
     // replay.html is out of scope for the spike; the Python engine renders it here.
     if std::env::var_os("VULCANBENCH_API_BASE").is_some() {
-        eprintln!("[vulcanbench-engine] VULCANBENCH_API_BASE is set but the spike has no HTTP client; write-through skipped");
+        eprintln!("[vulcanbench-engine] VULCANBENCH_API_BASE is set but the spike has no backend client; write-through skipped");
     }
     Ok(RunResult { run_id, summary })
 }
 
+/// `_make_executor`: the sandbox for the requested mode. `docker` fails when
+/// the daemon is unavailable; `auto` falls back to the host only with the
+/// explicit `VULCANBENCH_ALLOW_HOST_EXEC=1` opt-in, loudly.
+fn make_executor(
+    opts: &RunOptions,
+    task: &Task,
+    workspace: &Path,
+    collector: &mut TraceCollector,
+) -> Result<Executor, EngineError> {
+    let resolved_image = resolve_sandbox_image(task, opts.image.as_deref());
+    let docker = |collector: &mut TraceCollector| -> Result<Executor, EngineError> {
+        collector.record(
+            "sandbox",
+            obj! {
+                "mode" => "docker",
+                "image" => resolved_image.as_str(),
+                "network" => opts.network,
+                "resources" => opts.resources.to_dict(),
+            },
+        )?;
+        Ok(Executor::Docker(DockerExecutor::new(
+            workspace,
+            &resolved_image,
+            opts.network,
+            opts.resources.clone(),
+        )?))
+    };
+    match opts.sandbox.as_str() {
+        "local" => {
+            collector.record("sandbox", obj! { "mode" => "local" })?;
+            Ok(Executor::Local(LocalToolExecutor::new(workspace)?))
+        }
+        "docker" => docker(collector),
+        "auto" => {
+            if docker_available() {
+                return docker(collector);
+            }
+            if std::env::var("VULCANBENCH_ALLOW_HOST_EXEC").ok().as_deref() != Some("1") {
+                return Err(EngineError::Sandbox(
+                    "sandbox 'auto': Docker daemon unavailable. Refusing to run \
+                     model-written commands on the host. Start Docker, pass \
+                     --sandbox local, or set VULCANBENCH_ALLOW_HOST_EXEC=1 to allow \
+                     the fallback."
+                        .to_owned(),
+                ));
+            }
+            collector.record(
+                "sandbox_fallback",
+                obj! { "requested" => "auto", "using" => "local", "reason" => "docker daemon unavailable" },
+            )?;
+            eprintln!("[vulcanbench] WARNING: Docker daemon unavailable; falling back to local (host) execution.");
+            Ok(Executor::Local(LocalToolExecutor::new(workspace)?))
+        }
+        other => Err(EngineError::Invalid(format!(
+            "unknown sandbox mode {}; expected local|docker|auto",
+            py_repr_str(other)
+        ))),
+    }
+}
+
+struct LoopInputs<'a> {
+    provider: &'a dyn Provider,
+    tools: &'a Value,
+    max_steps: i64,
+    effort_summary: Option<&'a Value>,
+    provider_effort: Option<&'a str>,
+    model: &'a str,
+    max_run_cost: Option<f64>,
+}
+
 fn run_model_loop(
     ctx: &mut RunContext<'_>,
-    provider: &dyn Provider,
-    tools: &Value,
+    inputs: &LoopInputs<'_>,
     messages: &mut Vec<Value>,
-    max_steps: i64,
-    effort: Option<&Value>,
 ) -> Result<LoopOutcome, EngineError> {
     let mut outcome = LoopOutcome {
         prompt_tokens: 0,
@@ -271,7 +350,7 @@ fn run_model_loop(
         cost_capped: false,
         actual_steps: 0,
     };
-    for step in 1..=max_steps {
+    for step in 1..=inputs.max_steps {
         if !ctx
             .deadline
             .ensure_time(ctx.collector, "llm_request", Some(step))?
@@ -280,11 +359,16 @@ fn run_model_loop(
         }
         outcome.actual_steps = step;
         let mut request = obj! { "step" => step, "messages" => messages.len() };
-        if let Some(effort) = effort {
+        if let Some(effort) = inputs.effort_summary {
             request.insert("effort", effort.clone());
         }
         ctx.collector.record("llm_request", request)?;
-        let resp = match provider.complete(messages, tools) {
+        let resp = match inputs.provider.complete(
+            messages,
+            inputs.tools,
+            ctx.deadline.remaining_s(),
+            inputs.provider_effort,
+        ) {
             Ok(resp) => resp,
             Err(err) => {
                 if ctx.deadline.is_expired() {
@@ -316,8 +400,26 @@ fn run_model_loop(
         {
             break;
         }
-        // The per-run cost ceiling (--max-run-cost) needs the price table and
-        // is not part of the spike, so cost_capped stays false.
+        // Per-run cost ceiling: stop before paying for another call once this
+        // run's own spend crosses the cap. Only enforceable for priced models.
+        if let Some(cap) = inputs.max_run_cost {
+            if let Some(run_cost) = cost_usd(
+                inputs.model,
+                outcome.prompt_tokens,
+                outcome.completion_tokens,
+                0,
+            ) {
+                if run_cost >= cap {
+                    ctx.collector.record(
+                        "cost_cap_exceeded",
+                        obj! { "cost_usd" => run_cost, "max_run_cost" => cap, "step" => step },
+                    )?;
+                    outcome.cost_capped = true;
+                    messages.push(assistant_message(resp.content.as_deref(), &resp.tool_calls));
+                    break;
+                }
+            }
+        }
         messages.push(assistant_message(resp.content.as_deref(), &resp.tool_calls));
         if !resp.wants_tools() {
             outcome.finished = resp
@@ -409,7 +511,7 @@ fn requested_timeout(value: &Value) -> Option<i64> {
 }
 
 fn execute_tool(
-    executor: &LocalToolExecutor,
+    executor: &Executor,
     tc: &ToolInvocation,
     remaining: Option<f64>,
 ) -> ToolObservation {
@@ -457,13 +559,13 @@ fn execute_tool(
 
 fn run_task_setup(
     task: &Task,
-    executor: &LocalToolExecutor,
+    executor: &Executor,
     collector: &mut TraceCollector,
 ) -> Result<(), EngineError> {
     let timeout = i64::try_from(task.setup_timeout_s()).unwrap_or(600);
     for (name, cmd) in task.setup_commands() {
         let started = std::time::Instant::now();
-        let exit_code = runner_outcome(executor, &cmd, timeout).exit_code;
+        let exit_code = runner_outcome(executor, &cmd, timeout)?.exit_code;
         let duration = py_round(started.elapsed().as_secs_f64(), 3);
         collector.record(
             "setup",
@@ -479,23 +581,35 @@ fn run_task_setup(
     Ok(())
 }
 
-/// `_executor_runner_outcome`: one verifier command through the executor.
-fn runner_outcome(executor: &LocalToolExecutor, cmd: &str, timeout: i64) -> RunnerOutcome {
+/// `_executor_runner_outcome`: one verifier command through the executor. An
+/// OOM kill at the sandbox ceiling is an infrastructure event, never a verdict.
+fn runner_outcome(
+    executor: &Executor,
+    cmd: &str,
+    timeout: i64,
+) -> Result<RunnerOutcome, EngineError> {
     match executor.run_command(&RunCommandArgs::new(cmd, Some(timeout))) {
-        Err(message) => RunnerOutcome {
+        Err(message) => Ok(RunnerOutcome {
             exit_code: 124,
             stdout: String::new(),
             stderr: message,
-        },
+        }),
         Ok(res) => {
+            let oom = res.get("oom_killed").and_then(Value::as_bool) == Some(true);
+            if let (true, Some(ceiling)) = (oom, executor.mem_ceiling()) {
+                return Err(EngineError::VerifierInfrastructure(format!(
+                    "verifier command OOM-killed at the sandbox memory ceiling ({ceiling}): {}",
+                    py_repr_str(cmd)
+                )));
+            }
             let non_empty = |key: &str| res.get(key).map(py_str).filter(|s| !s.is_empty());
-            RunnerOutcome {
+            Ok(RunnerOutcome {
                 exit_code: res.get("exit_code").and_then(Value::as_i64).unwrap_or(1),
                 stdout: non_empty("stdout")
                     .or_else(|| non_empty("result"))
                     .unwrap_or_default(),
                 stderr: non_empty("stderr").unwrap_or_default(),
-            }
+            })
         }
     }
 }
@@ -547,11 +661,17 @@ fn collect_manifest_with_budget(
     let judge_model = opts.judge_model.as_deref();
     let workspace = ctx.executor.workspace();
     if !ctx.deadline.ensure_time(ctx.collector, "manifest", None)? {
-        let mut manifest = minimal_manifest(&opts.model, judge_model, opts.network);
+        let mut manifest = minimal_manifest(&opts.model, judge_model, opts.network, ctx.executor);
         manifest.extend(task_workspace_stats(task, workspace));
         return Ok(manifest);
     }
-    let mut manifest = collect_manifest(&opts.model, judge_model, opts.network, ctx.deadline);
+    let mut manifest = collect_manifest(
+        &opts.model,
+        judge_model,
+        opts.network,
+        ctx.executor,
+        ctx.deadline,
+    );
     manifest.extend(task_workspace_stats(task, workspace));
     if ctx.deadline.is_expired() {
         ctx.deadline
@@ -578,21 +698,16 @@ fn evaluate_with_budget(
     Ok(scores)
 }
 
-/// USD cost of a model call, or `None` when unpriced. The spike's price table
-/// holds only the free `mock:` provider.
-fn cost_usd(model: &str, _prompt_tokens: i64, _completion_tokens: i64) -> Option<f64> {
-    model.starts_with("mock:").then_some(0.0)
-}
-
+/// `_compute_cost`: agent plus judge cost; `total` is `None` for unpriced models.
 fn compute_cost(model: &str, prompt_tokens: i64, completion_tokens: i64) -> Value {
-    let agent = cost_usd(model, prompt_tokens, completion_tokens).map(|c| py_round(c, 6));
+    let agent = cost_usd(model, prompt_tokens, completion_tokens, 0);
     let judges = 0.0;
     let total = agent.map(|a| py_round(a + judges, 6));
     obj! {
         "agent" => agent,
         "judges" => judges,
         "total" => total,
-        "model_priced" => cost_usd(model, 0, 0).is_some(),
+        "model_priced" => is_priced(model),
         "agent_input_tokens" => prompt_tokens,
         "agent_cached_input_tokens" => 0,
         "agent_uncached_input_tokens" => prompt_tokens.max(0),
@@ -695,6 +810,9 @@ mod tests {
         assert!(compute_cost("openai:x", 1, 1)
             .get("total")
             .is_some_and(Value::is_null));
+        let priced = compute_cost("anthropic:claude-opus-5-5", 1_000_000, 100_000);
+        assert_eq!(priced.get("total"), Some(&Value::Float(6.0)));
+        assert_eq!(priced.get("model_priced"), Some(&Value::Bool(true)));
     }
 
     #[test]

@@ -4,8 +4,8 @@ diff the normalised artifacts.
 
 Runs ``vulcanbench run`` (Python, from the repo's .venv) and
 ``vulcanbench-engine run`` (Rust, built with cargo) on the same task with the
-mock model in the local sandbox, then compares ``summary.json``,
-``trace.jsonl`` and ``final.patch`` after replacing the volatile fields:
+mock model, then compares ``summary.json``, ``trace.jsonl`` and
+``final.patch`` after replacing the volatile fields:
 
 - run ids (``<task>-<8 hex>``) and the output directories they appear in,
 - every ``ts`` / ``started_at`` / ``finished_at`` timestamp,
@@ -15,9 +15,19 @@ mock model in the local sandbox, then compares ``summary.json``,
 Everything else, including object key order, must match byte for byte.
 Exit status 0 means parity; 1 means a diff was printed; 2 means a run failed.
 
+Live mode (``--model anthropic:<model>``) compares two real runs. Model output
+is not deterministic, so the comparison is structural: every scalar leaf is
+replaced by its type name and lists keep only their first element's shape, which
+checks that both engines record the same fields, in the same order, with the
+same kinds of values (cost_detail, economics, manifest, source, verifier,
+effort), and that the trace carries the same event types with the same data
+keys. A live run spends API quota, so the script refuses to start one unless
+``--approve-spend`` is passed; without it, it prints what the run would be
+(model, task, effort, estimated cost at list price) and exits 3.
+
 Usage: python3 engine-rs/scripts/parity.py [--task hello-world] [--keep]
-       [--release] [--skip-build] [--out DIR]
-       [--effort LEVEL] [--max-steps N] [--timeout S]   (passed to both engines)
+       [--release] [--skip-build] [--out DIR] [--model SPEC] [--approve-spend]
+       [--sandbox local|docker] [--effort LEVEL] [--max-steps N] [--timeout S]
 """
 
 from __future__ import annotations
@@ -37,6 +47,7 @@ ENGINE_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = ENGINE_DIR.parent
 RUN_ID_RE = re.compile(r"^(?P<task>.+)-[0-9a-f]{8}$")
 PYTEST_TIME_RE = re.compile(r" in \d+\.\d+s")
+ARTIFACTS = ("summary.json", "trace.jsonl", "final.patch")
 
 
 def venv_bin() -> Path:
@@ -118,6 +129,18 @@ def normalise_trace(lines: list, run_id: str, out_dir: Path) -> list:
     return events
 
 
+SCALAR_NAMES = ((type(None), "null"), (bool, "bool"), (int, "int"), (float, "float"))
+
+
+def shape(value):
+    """Scalars become their type name, so two live runs compare structurally."""
+    if isinstance(value, dict):
+        return {k: shape(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [shape(value[0])] if value else []
+    return next((name for kind, name in SCALAR_NAMES if isinstance(value, kind)), "str")
+
+
 def load_run(run_dir: Path) -> dict:
     run_id = run_dir.name
     if not RUN_ID_RE.match(run_id):
@@ -126,17 +149,27 @@ def load_run(run_dir: Path) -> dict:
     summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
     trace = (run_dir / "trace.jsonl").read_text(encoding="utf-8").splitlines()
     patch = (run_dir / "final.patch").read_text(encoding="utf-8")
+    events = normalise_trace(trace, run_id, out_dir)
+    data_keys: dict = {}
+    for event in events:
+        data = event.get("data")
+        keys = sorted(data.keys()) if isinstance(data, dict) else type(data).__name__
+        data_keys.setdefault(event.get("type"), keys)
     return {
         "summary.json": json.dumps(normalise_summary(summary, run_id, out_dir), indent=2),
-        "trace.jsonl": "\n".join(json.dumps(e) for e in normalise_trace(trace, run_id, out_dir)),
+        "trace.jsonl": "\n".join(json.dumps(e) for e in events),
         "final.patch": patch,
-        "raw_summary": (run_dir / "summary.json").read_bytes(),
+        "summary.json (shape)": json.dumps(shape(summary), indent=2),
+        "trace.jsonl (event types and data keys)": json.dumps(data_keys, indent=2, sort_keys=True),
     }
 
 
-def compare(python_run: dict, rust_run: dict) -> bool:
+def compare(python_run: dict, rust_run: dict, live: bool) -> bool:
+    names = (
+        ("summary.json (shape)", "trace.jsonl (event types and data keys)") if live else ARTIFACTS
+    )
     ok = True
-    for artifact in ("summary.json", "trace.jsonl", "final.patch"):
+    for artifact in names:
         expected = python_run[artifact]
         actual = rust_run[artifact]
         if expected == actual:
@@ -153,9 +186,44 @@ def compare(python_run: dict, rust_run: dict) -> bool:
         sys.stdout.writelines(diff)
         if not expected.endswith("\n") or not actual.endswith("\n"):
             print()
-    # Key order and layout: the raw summary bytes must agree once the same
-    # normalisation is applied textually (indent, separators, trailing newline).
     return ok
+
+
+def estimate_cost(model: str, input_tokens: int = 6000, output_tokens: int = 1200):
+    """List-price estimate for one engine's hello-world run, via the venv's harness.pricing."""
+    code = (
+        "from harness.pricing import cost_usd; "
+        f"print(cost_usd({model!r}, {input_tokens}, {output_tokens}))"
+    )
+    proc = subprocess.run(
+        [str(venv_bin() / "python"), "-c", code],
+        check=False,
+        cwd=REPO_ROOT,
+        env=run_env(),
+        capture_output=True,
+        text=True,
+    )
+    text = proc.stdout.strip()
+    return None if proc.returncode != 0 or text in ("", "None") else float(text)
+
+
+def refuse_unapproved_spend(args: argparse.Namespace) -> int:
+    per_engine = estimate_cost(args.model)
+    if per_engine is None:
+        cost_note = "unpriced model: cost unknown"
+    else:
+        cost_note = (
+            f"about ${per_engine:.2f} per engine at list price, ${2 * per_engine:.2f} for both "
+            "(assuming 6,000 input and 1,200 output tokens per run)"
+        )
+    print("A live parity run spends API quota and needs the owner's approval. It would run:")
+    print(f"  model:   {args.model}")
+    print(f"  task:    {args.task}")
+    print(f"  sandbox: {args.sandbox}")
+    print(f"  effort:  {args.effort or '(default)'}")
+    print(f"  cost:    {cost_note}")
+    print("Re-run with --approve-spend to start it. Nothing was run.")
+    return 3
 
 
 def main() -> int:
@@ -169,6 +237,15 @@ def main() -> int:
     )
     parser.add_argument("--skip-build", action="store_true", help="use the existing cargo build")
     parser.add_argument("--out", type=Path, default=None, help="directory for the two run outputs")
+    parser.add_argument(
+        "--model", default="mock:synthetic", help="model spec for both engines (default mock)"
+    )
+    parser.add_argument(
+        "--approve-spend",
+        action="store_true",
+        help="allow a live run that spends API quota (the owner's explicit approval)",
+    )
+    parser.add_argument("--sandbox", default="local", help="sandbox for both engines: local|docker")
     parser.add_argument("--effort", default=None, help="pass --effort to both engines")
     parser.add_argument("--max-steps", default=None, help="pass --max-steps to both engines")
     parser.add_argument("--timeout", default=None, help="pass --timeout to both engines")
@@ -180,6 +257,10 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+
+    live = not args.model.startswith("mock:")
+    if live and not args.approve_spend:
+        return refuse_unapproved_spend(args)
 
     if args.skip_build:
         binary = (
@@ -195,9 +276,9 @@ def main() -> int:
         "--task",
         args.task,
         "--model",
-        "mock:synthetic",
+        args.model,
         "--sandbox",
-        "local",
+        args.sandbox,
         "--no-judges",
     ]
     for flag in ("effort", "max_steps", "timeout"):
@@ -208,13 +289,14 @@ def main() -> int:
         python_cli = [str(venv_bin() / "python"), "-c", "from harness.cli import main; main()"]
         python_dir = run_engine("python", [*python_cli, *common], base / "python")
         rust_dir = run_engine("rust", [str(binary), *common], base / "rust")
-        ok = compare(load_run(python_dir), load_run(rust_dir))
+        ok = compare(load_run(python_dir), load_run(rust_dir), live)
     finally:
         if args.keep or args.out:
             print(f"runs kept under {base}")
         else:
             shutil.rmtree(base, ignore_errors=True)
-    print("PARITY" if ok else "NO PARITY")
+    verdict = "STRUCTURAL PARITY" if live else "PARITY"
+    print(verdict if ok else f"NO {verdict}")
     return 0 if ok else 1
 
 

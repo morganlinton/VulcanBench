@@ -79,6 +79,21 @@ pub fn effort_config(
             provider_value: None,
             supported: false,
         })),
+        // Anthropic Messages API `output_config.effort`; `max` and `minimal`
+        // are recorded but not sent, exactly as in harness/effort.py.
+        "anthropic" => {
+            let provider_value = match effort.as_str() {
+                "low" | "medium" | "high" => Some(effort.clone()),
+                "extra-high" => Some("xhigh".to_owned()),
+                _ => None,
+            };
+            Ok(Some(EffortConfig {
+                requested: effort,
+                provider: provider_name,
+                supported: provider_value.is_some(),
+                provider_value,
+            }))
+        }
         _ => Err(EngineError::Invalid(format!(
             "effort mapping for provider {} is not ported in the Rust spike",
             py_repr_str(provider)

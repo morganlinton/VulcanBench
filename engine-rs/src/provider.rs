@@ -1,6 +1,9 @@
-//! The provider contract and the deterministic `mock` provider, ported from
-//! `harness/agent/providers.py`. No HTTP provider is included in the spike.
+//! The provider contract, the deterministic `mock` provider, and the spec
+//! parser (`harness/agent/providers.py`). The Anthropic provider lives in
+//! [`crate::anthropic`]; every other provider is still unported.
 
+use crate::anthropic::AnthropicProvider;
+use crate::curl::CurlClient;
 use crate::error::EngineError;
 use crate::json::{obj, Value};
 use crate::pyfmt::{py_repr_str, py_str};
@@ -52,14 +55,22 @@ impl LlmResponse {
     }
 }
 
-/// A model backend. Messages are the OpenAI-style chat dicts the loop builds.
+/// A model backend. Messages are the OpenAI-style chat dicts the loop builds;
+/// `timeout_s` is the run's remaining budget and `effort` the provider's own
+/// value for the requested level, when it supports one.
 pub trait Provider {
     fn name(&self) -> &str;
 
     /// # Errors
     ///
-    /// A provider that cannot produce a response; the mock never fails.
-    fn complete(&self, messages: &[Value], tools: &Value) -> Result<LlmResponse, EngineError>;
+    /// `EngineError::Provider` when no response can be produced.
+    fn complete(
+        &self,
+        messages: &[Value],
+        tools: &Value,
+        timeout_s: Option<f64>,
+        effort: Option<&str>,
+    ) -> Result<LlmResponse, EngineError>;
 }
 
 /// Deterministic, offline provider: read the issue, create `hello.py`, run
@@ -76,7 +87,13 @@ impl Provider for MockProvider {
         "mock"
     }
 
-    fn complete(&self, messages: &[Value], _tools: &Value) -> Result<LlmResponse, EngineError> {
+    fn complete(
+        &self,
+        messages: &[Value],
+        _tools: &Value,
+        _timeout_s: Option<f64>,
+        _effort: Option<&str>,
+    ) -> Result<LlmResponse, EngineError> {
         if messages
             .iter()
             .any(|m| content_text(m).contains("VULCANBENCH_JUDGE"))
@@ -182,17 +199,21 @@ pub fn parse_model_spec(spec: &str) -> Result<(String, String), EngineError> {
     Ok((provider, model))
 }
 
-/// Constructs the provider for a spec. Only `mock` exists in the spike.
+/// Constructs the provider for a spec: `mock`, or `anthropic` over curl.
 ///
 /// # Errors
 ///
 /// A malformed spec, or a provider the spike does not implement.
 pub fn get_provider(spec: &str) -> Result<Box<dyn Provider>, EngineError> {
-    let (provider, _model) = parse_model_spec(spec)?;
+    let (provider, model) = parse_model_spec(spec)?;
     match provider.as_str() {
         "mock" => Ok(Box::new(MockProvider)),
+        "anthropic" => Ok(Box::new(AnthropicProvider::new(
+            &model,
+            Box::new(CurlClient::from_environment()),
+        ))),
         other => Err(EngineError::Invalid(format!(
-            "provider {} is not implemented in the Rust spike; only 'mock' runs (no HTTP, no TLS)",
+            "provider {} is not implemented in the Rust spike; known: anthropic, mock",
             py_repr_str(other)
         ))),
     }
@@ -207,13 +228,17 @@ mod tests {
         let provider = MockProvider;
         let tools = Value::Array(Vec::new());
         let mut messages = vec![obj! { "role" => "system", "content" => "x" }];
-        let first = provider.complete(&messages, &tools).expect("ok");
+        let first = provider
+            .complete(&messages, &tools, None, None)
+            .expect("ok");
         assert_eq!(first.tool_calls[0].name, "read_file");
         assert_eq!(first.usage.prompt_tokens, 50);
         for _ in 0..3 {
             messages.push(obj! { "role" => "tool", "content" => "{}" });
         }
-        let last = provider.complete(&messages, &tools).expect("ok");
+        let last = provider
+            .complete(&messages, &tools, Some(1.0), Some("high"))
+            .expect("ok");
         assert!(!last.wants_tools());
         assert_eq!(
             last.content.as_deref(),
@@ -233,5 +258,11 @@ mod tests {
             "model spec must be 'provider:model', got 'nocolon'"
         );
         assert!(get_provider("openai:gpt").is_err());
+        assert_eq!(
+            get_provider("anthropic:claude-opus-5-5")
+                .expect("built")
+                .name(),
+            "anthropic"
+        );
     }
 }

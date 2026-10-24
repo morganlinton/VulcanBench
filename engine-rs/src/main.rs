@@ -1,18 +1,25 @@
 //! `vulcanbench-engine`: a zero-crate Rust spike of the VulcanBench run engine.
 //!
-//! Only `run --task <id> --model mock:<name> --sandbox local --no-judges` is
-//! implemented. The Python harness (`harness/`) remains the engine of record;
-//! this binary exists to measure the cost and the parity risk of a port.
+//! `run --task <id> --model <mock:name | anthropic:model> --sandbox <local|docker|auto>
+//! --no-judges` is implemented. The Python harness (`harness/`) remains the
+//! engine of record; this binary exists to measure the cost and the parity
+//! risk of a port.
 
+mod anthropic;
+mod curl;
 mod deadline;
+mod docker_executor;
 mod dotenv;
 mod effort;
 mod engine;
 mod error;
 mod evaluator;
+mod executor;
+mod http;
 mod json;
 mod local_executor;
 mod manifest;
+mod pricing;
 mod process;
 mod protocol;
 mod provenance;
@@ -28,16 +35,18 @@ mod verifier;
 
 use std::path::{Component, Path, PathBuf};
 
+use crate::docker_executor::ResourceSpec;
 use crate::engine::{run_agent, RunOptions};
 use crate::json::Value;
 use crate::provenance::{source_provenance, ALLOW_DIRTY_ENV};
 use crate::pyfmt::{py_repr_str, py_str};
 use crate::tasks::list_task_ids;
 
-const USAGE: &str =
-    "usage: vulcanbench-engine run --task <id> --model <provider:model> [--sandbox local] \
+const USAGE: &str = "usage: vulcanbench-engine run --task <id> --model <provider:model> [--sandbox local|docker|auto] \
 [--no-judges] [--output-dir <dir>] [--max-steps <n>] [--timeout <s>] [--effort <level>] \
-[--tasks-root <dir>] [--override-budgets] [--allow-dirty] [--dry-run]";
+[--image <ref>] [--network] [--mem-floor <size>] [--mem-ceiling <size>] [--cpu-floor <n>] \
+[--cpu-ceiling <n>] [--pids-limit <n>] [--max-run-cost <usd>] [--tasks-root <dir>] \
+[--override-budgets] [--allow-dirty] [--dry-run]";
 
 /// Options of the `run` subcommand (the subset of `vulcanbench run` the spike takes).
 #[derive(Debug)]
@@ -51,8 +60,11 @@ struct RunArgs {
     judges: bool,
     judge_model: Option<String>,
     sandbox: String,
+    image: Option<String>,
     network: bool,
+    resources: ResourceSpec,
     timeout: Option<f64>,
+    max_run_cost: Option<f64>,
     override_budgets: bool,
     effort: Option<String>,
     allow_dirty: bool,
@@ -80,6 +92,15 @@ fn usage_error(message: &str) -> i32 {
     2
 }
 
+fn parse_number<T: std::str::FromStr>(flag: &str, kind: &str, raw: &str) -> Result<T, String> {
+    raw.parse().map_err(|_| {
+        format!(
+            "argument {flag}: invalid {kind} value: {}",
+            py_repr_str(raw)
+        )
+    })
+}
+
 fn parse_run_args(args: &[String]) -> Result<RunArgs, String> {
     let mut parsed = RunArgs {
         task: None,
@@ -95,8 +116,11 @@ fn parse_run_args(args: &[String]) -> Result<RunArgs, String> {
         judges: true,
         judge_model: None,
         sandbox: "docker".to_owned(),
+        image: None,
         network: false,
+        resources: ResourceSpec::default(),
         timeout: None,
+        max_run_cost: None,
         override_budgets: false,
         effort: None,
         allow_dirty: false,
@@ -125,29 +149,33 @@ fn parse_run_args(args: &[String]) -> Result<RunArgs, String> {
             "--model" | "-m" => parsed.model = Some(take_value(&mut i)?),
             "--output-dir" | "-o" => parsed.output_dir = pathlib_path(&take_value(&mut i)?),
             "--max-steps" => {
-                let v = take_value(&mut i)?;
-                parsed.max_steps = Some(v.parse().map_err(|_| {
-                    format!(
-                        "argument --max-steps: invalid int value: {}",
-                        py_repr_str(&v)
-                    )
-                })?);
+                parsed.max_steps = Some(parse_number(flag, "int", &take_value(&mut i)?)?)
             }
             "--timeout" => {
-                let v = take_value(&mut i)?;
-                parsed.timeout = Some(v.parse().map_err(|_| {
-                    format!(
-                        "argument --timeout: invalid float value: {}",
-                        py_repr_str(&v)
-                    )
-                })?);
+                parsed.timeout = Some(parse_number(flag, "float", &take_value(&mut i)?)?)
+            }
+            "--max-run-cost" => {
+                parsed.max_run_cost = Some(parse_number(flag, "float", &take_value(&mut i)?)?)
             }
             "--judges" => parsed.judges = true,
             "--no-judges" => parsed.judges = false,
             "--judge-model" => parsed.judge_model = Some(take_value(&mut i)?),
             "--sandbox" => parsed.sandbox = take_value(&mut i)?,
+            "--image" => parsed.image = Some(take_value(&mut i)?),
             "--network" => parsed.network = true,
             "--no-network" => parsed.network = false,
+            "--mem-floor" => parsed.resources.mem_floor = Some(take_value(&mut i)?),
+            "--mem-ceiling" => parsed.resources.mem_ceiling = take_value(&mut i)?,
+            "--cpu-floor" => {
+                parsed.resources.cpu_floor =
+                    Some(parse_number(flag, "float", &take_value(&mut i)?)?)
+            }
+            "--cpu-ceiling" => {
+                parsed.resources.cpu_ceiling = parse_number(flag, "float", &take_value(&mut i)?)?
+            }
+            "--pids-limit" => {
+                parsed.resources.pids_limit = parse_number(flag, "int", &take_value(&mut i)?)?
+            }
             "--override-budgets" => parsed.override_budgets = true,
             "--effort" => parsed.effort = Some(take_value(&mut i)?),
             "--allow-dirty" => parsed.allow_dirty = true,
@@ -185,6 +213,19 @@ fn run_command(args: &[String]) -> i32 {
     if parsed.suite.is_some() {
         println!("error suite runs are not implemented in the Rust spike; pass --task");
         return 1;
+    }
+    if let Some(cap) = parsed.max_run_cost {
+        if !(cap.is_finite() && cap > 0.0) {
+            println!(
+                "error --max-run-cost must be a finite number > 0, got {}",
+                json::format_float(cap)
+            );
+            return 1;
+        }
+        if !pricing::is_priced(&model) {
+            println!("error --max-run-cost needs a priced model; no price for {model}");
+            return 1;
+        }
     }
     if !matches!(parsed.sandbox.as_str(), "local" | "docker" | "auto") {
         println!(
@@ -237,9 +278,12 @@ fn run_command(args: &[String]) -> i32 {
         judges: parsed.judges,
         judge_model: parsed.judge_model,
         sandbox: parsed.sandbox,
+        image: parsed.image,
         network: parsed.network,
+        resources: parsed.resources,
         timeout_s: parsed.timeout,
         effort: parsed.effort,
+        max_run_cost: parsed.max_run_cost,
         override_budgets: parsed.override_budgets,
     };
     match run_agent(&options) {
@@ -330,6 +374,16 @@ mod tests {
             "--no-judges",
             "-o",
             "./out",
+            "--mem-floor",
+            "1g",
+            "--cpu-ceiling",
+            "4",
+            "--pids-limit",
+            "64",
+            "--image",
+            "img:1",
+            "--max-run-cost",
+            "0.5",
         ]
         .iter()
         .map(|s| (*s).to_owned())
@@ -339,6 +393,11 @@ mod tests {
         assert_eq!(parsed.sandbox, "local");
         assert!(!parsed.judges);
         assert_eq!(parsed.output_dir, PathBuf::from("out"));
+        assert_eq!(parsed.resources.mem_floor.as_deref(), Some("1g"));
+        assert_eq!(parsed.resources.cpu_ceiling, 4.0);
+        assert_eq!(parsed.resources.pids_limit, 64);
+        assert_eq!(parsed.image.as_deref(), Some("img:1"));
+        assert_eq!(parsed.max_run_cost, Some(0.5));
         let missing =
             parse_run_args(&["--task".to_owned(), "x".to_owned()]).expect_err("needs model");
         assert!(missing.contains("--model"));
@@ -350,5 +409,13 @@ mod tests {
         ])
         .expect_err("unsupported");
         assert!(bad.contains("unrecognized"));
+        let bad_num = parse_run_args(&[
+            "-m".to_owned(),
+            "a:b".to_owned(),
+            "--pids-limit".to_owned(),
+            "many".to_owned(),
+        ])
+        .expect_err("int");
+        assert_eq!(bad_num, "argument --pids-limit: invalid int value: 'many'");
     }
 }

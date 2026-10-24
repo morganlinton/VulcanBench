@@ -1,8 +1,9 @@
 //! Subprocess helpers: PATH lookup like `shutil.which` and captured runs with
-//! a wall-clock timeout like `subprocess.run(..., timeout=...)`.
+//! a wall-clock timeout like `subprocess.run(..., timeout=...)`, optionally
+//! feeding the child's stdin.
 
 use std::env;
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 use std::os::unix::fs::PermissionsExt;
 use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
@@ -47,10 +48,35 @@ fn is_executable(path: &Path) -> bool {
 ///
 /// Fails when the process cannot be spawned (missing binary, bad cwd).
 pub fn run(command: &mut Command, timeout: Option<Duration>) -> io::Result<Completed> {
-    command.stdin(Stdio::null());
+    run_with_input(command, None, timeout)
+}
+
+/// [`run`] with bytes written to the child's stdin (closed afterwards). The
+/// writer runs on its own thread so a child that does not read before it
+/// writes cannot deadlock the parent.
+///
+/// # Errors
+///
+/// Fails when the process cannot be spawned.
+pub fn run_with_input(
+    command: &mut Command,
+    input: Option<Vec<u8>>,
+    timeout: Option<Duration>,
+) -> io::Result<Completed> {
+    command.stdin(if input.is_some() {
+        Stdio::piped()
+    } else {
+        Stdio::null()
+    });
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());
     let mut child = command.spawn()?;
+    let writer = match (input, child.stdin.take()) {
+        (Some(bytes), Some(mut stdin)) => Some(thread::spawn(move || {
+            let _ = stdin.write_all(&bytes);
+        })),
+        _ => None,
+    };
     let stdout = child.stdout.take().expect("stdout was piped");
     let stderr = child.stderr.take().expect("stderr was piped");
     let out_reader = thread::spawn(move || read_all(stdout));
@@ -68,6 +94,9 @@ pub fn run(command: &mut Command, timeout: Option<Duration>) -> io::Result<Compl
         }
         thread::sleep(Duration::from_millis(5));
     };
+    if let Some(writer) = writer {
+        let _ = writer.join();
+    }
     let stdout = out_reader.join().unwrap_or_default();
     let stderr = err_reader.join().unwrap_or_default();
     let exit_code = status
@@ -136,5 +165,14 @@ mod tests {
             Some("v 1.0".to_owned())
         );
         assert_eq!(first_output_line("  "), None);
+    }
+
+    #[test]
+    fn feeds_stdin() {
+        let mut command = Command::new("/bin/sh");
+        command.args(["-c", "cat; printf ' and more'"]);
+        let done = run_with_input(&mut command, Some(b"from stdin".to_vec()), None).expect("runs");
+        assert_eq!(done.stdout, "from stdin and more");
+        assert_eq!(done.exit_code, 0);
     }
 }

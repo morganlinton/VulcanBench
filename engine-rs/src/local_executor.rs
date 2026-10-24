@@ -102,7 +102,7 @@ impl LocalToolExecutor {
         &self.workspace
     }
 
-    fn resolve(&self, p: &str) -> Result<PathBuf, String> {
+    pub(crate) fn resolve(&self, p: &str) -> Result<PathBuf, String> {
         let path = resolve_path(&self.workspace.join(p));
         if !path.starts_with(&self.workspace) {
             return Err("path escapes workspace".to_owned());

@@ -1,15 +1,18 @@
 //! The run manifest: the environment a run executed in (`_collect_manifest`
 //! and `_task_workspace_stats` in `harness/agent/loop.py`, plus the shared
-//! task-metadata helpers of `harness/task_metadata.py`).
+//! task-metadata helpers of `harness/task_metadata.py`). Under the Docker
+//! sandbox the tool and runtime probes run inside the container.
 
 use std::path::Path;
 use std::process::Command;
 use std::time::Duration;
 
 use crate::deadline::{clamp_timeout, Deadline};
+use crate::executor::Executor;
 use crate::json::{obj, Value};
 use crate::process;
-use crate::pyfmt::py_splitlines;
+use crate::protocol::RunCommandArgs;
+use crate::pyfmt::{py_splitlines, py_str};
 use crate::tasks::{walk_files, Task};
 
 const MANIFEST_TOOLS: [&str; 6] = ["git", "ruff", "bandit", "radon", "go", "node"];
@@ -156,11 +159,37 @@ fn host_command_first_line(args: &[&str], timeout: i64) -> Option<String> {
     process::first_output_line(output)
 }
 
-fn tool_version(cmd: &str, timeout: i64) -> Option<String> {
-    if cmd == "go" {
-        host_command_first_line(&["go", "version"], timeout)
+/// `_executor_command_first_line`: a trusted probe in the execution environment.
+fn executor_command_first_line(executor: &Executor, cmd: &str, timeout: i64) -> Option<String> {
+    let result = executor
+        .run_command(&RunCommandArgs::new(cmd, Some(timeout)))
+        .ok()?;
+    if result.get("exit_code").and_then(Value::as_i64).unwrap_or(1) != 0 {
+        return None;
+    }
+    let text = ["stdout", "stderr"]
+        .iter()
+        .find_map(|key| result.get(key).map(py_str).filter(|s| !s.is_empty()))
+        .unwrap_or_default();
+    process::first_output_line(&text)
+}
+
+fn tool_version(cmd: &str, executor: &Executor, timeout: i64) -> Option<String> {
+    let version_cmd = if cmd == "go" {
+        "go version".to_owned()
     } else {
-        host_command_first_line(&[cmd, "--version"], timeout)
+        format!("{cmd} --version")
+    };
+    match executor {
+        Executor::Docker(_) => executor_command_first_line(
+            executor,
+            &format!("command -v {cmd} >/dev/null 2>&1 && {version_cmd}"),
+            timeout,
+        ),
+        Executor::Local(_) => {
+            let args: Vec<&str> = version_cmd.split(' ').collect();
+            host_command_first_line(&args, timeout)
+        }
     }
 }
 
@@ -177,12 +206,31 @@ pub fn runtime_python() -> String {
     "unknown".to_owned()
 }
 
+/// `_runtime_python`: inside the container the raw first line of
+/// `python --version` (the Python engine does not strip the prefix there).
+fn sandbox_python(executor: &Executor, timeout: i64) -> String {
+    match executor {
+        Executor::Docker(_) => executor_command_first_line(executor, "python --version", timeout)
+            .or_else(|| executor_command_first_line(executor, "python3 --version", timeout))
+            .unwrap_or_else(runtime_python),
+        Executor::Local(_) => runtime_python(),
+    }
+}
+
 /// `sys.platform` for this host.
 pub fn host_platform() -> &'static str {
     match std::env::consts::OS {
         "macos" => "darwin",
         "windows" => "win32",
         other => other,
+    }
+}
+
+fn sandbox_platform(executor: &Executor, timeout: i64) -> String {
+    match executor {
+        Executor::Docker(_) => executor_command_first_line(executor, "uname -srm", timeout)
+            .unwrap_or_else(|| host_platform().to_owned()),
+        Executor::Local(_) => host_platform().to_owned(),
     }
 }
 
@@ -228,36 +276,58 @@ pub fn task_workspace_stats(task: &Task, workspace: &Path) -> Value {
     }
 }
 
-fn sandbox_block(network: bool) -> Value {
+fn sandbox_block(executor: &Executor, network: bool) -> Value {
     obj! {
-        "mode" => "local",
-        "image" => Value::Null,
+        "mode" => executor.mode(),
+        "image" => executor.image(),
         "network" => network,
-        "resources" => Value::Null,
-        "oom_kills" => Value::Null,
+        "resources" => executor.resources(),
+        "oom_kills" => executor.oom_kills(),
+    }
+}
+
+fn manifest_shell(
+    model: &str,
+    judge_model: Option<&str>,
+    runtime: Value,
+    sandbox: Value,
+    tools: Value,
+) -> Value {
+    obj! {
+        "model" => model,
+        "judge_model" => judge_model.unwrap_or(model),
+        "runtime" => runtime,
+        "sandbox" => sandbox,
+        "tools" => tools,
     }
 }
 
 /// The manifest when the budget ran out before any probe could run.
-pub fn minimal_manifest(model: &str, judge_model: Option<&str>, network: bool) -> Value {
+pub fn minimal_manifest(
+    model: &str,
+    judge_model: Option<&str>,
+    network: bool,
+    executor: &Executor,
+) -> Value {
     let python = runtime_python();
     let platform = host_platform();
     let mut tools = Value::object();
     for tool in MANIFEST_TOOLS {
         tools.insert(tool, Value::Null);
     }
-    obj! {
-        "model" => model,
-        "judge_model" => judge_model.unwrap_or(model),
-        "runtime" => obj! {
-            "python" => python.as_str(),
-            "platform" => platform,
-            "host_python" => python.as_str(),
-            "host_platform" => platform,
-        },
-        "sandbox" => sandbox_block(network),
-        "tools" => tools,
-    }
+    let runtime = obj! {
+        "python" => python.as_str(),
+        "platform" => platform,
+        "host_python" => python.as_str(),
+        "host_platform" => platform,
+    };
+    manifest_shell(
+        model,
+        judge_model,
+        runtime,
+        sandbox_block(executor, network),
+        tools,
+    )
 }
 
 /// Records the environment a run executed in, for audit and reproducibility.
@@ -265,33 +335,34 @@ pub fn collect_manifest(
     model: &str,
     judge_model: Option<&str>,
     network: bool,
+    executor: &Executor,
     deadline: &Deadline,
 ) -> Value {
-    if clamp_timeout(10, deadline.remaining_s()).is_none() {
-        let mut manifest = minimal_manifest(model, judge_model, network);
+    let Some(runtime_timeout) = clamp_timeout(10, deadline.remaining_s()) else {
+        let mut manifest = minimal_manifest(model, judge_model, network, executor);
         manifest.insert("budget_exceeded", true);
         return manifest;
-    }
+    };
     let mut tools = Value::object();
     for tool in MANIFEST_TOOLS {
         let version = clamp_timeout(10, deadline.remaining_s())
-            .and_then(|timeout| tool_version(tool, timeout));
+            .and_then(|timeout| tool_version(tool, executor, timeout));
         tools.insert(tool, version);
     }
-    let python = runtime_python();
-    let platform = host_platform();
-    obj! {
-        "model" => model,
-        "judge_model" => judge_model.unwrap_or(model),
-        "runtime" => obj! {
-            "python" => python.as_str(),
-            "platform" => platform,
-            "host_python" => python.as_str(),
-            "host_platform" => platform,
-        },
-        "sandbox" => sandbox_block(network),
-        "tools" => tools,
-    }
+    let host_python = runtime_python();
+    let runtime = obj! {
+        "python" => sandbox_python(executor, runtime_timeout),
+        "platform" => sandbox_platform(executor, runtime_timeout),
+        "host_python" => host_python.as_str(),
+        "host_platform" => host_platform(),
+    };
+    manifest_shell(
+        model,
+        judge_model,
+        runtime,
+        sandbox_block(executor, network),
+        tools,
+    )
 }
 
 #[cfg(test)]

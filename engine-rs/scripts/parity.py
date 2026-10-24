@@ -66,9 +66,11 @@ def build_rust(release: bool) -> Path:
 
 def run_engine(label: str, argv: list, out_dir: Path) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
-    cmd = argv + ["--output-dir", str(out_dir)]
+    cmd = [*argv, "--output-dir", str(out_dir)]
     print(f"[{label}] {' '.join(cmd)}")
-    proc = subprocess.run(cmd, cwd=REPO_ROOT, env=run_env(), capture_output=True, text=True)
+    proc = subprocess.run(
+        cmd, check=False, cwd=REPO_ROOT, env=run_env(), capture_output=True, text=True
+    )
     sys.stdout.write(proc.stdout)
     if proc.returncode != 0:
         sys.stderr.write(proc.stderr)
@@ -157,10 +159,14 @@ def compare(python_run: dict, rust_run: dict) -> bool:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--task", default="hello-world")
     parser.add_argument("--keep", action="store_true", help="keep the temporary run directories")
-    parser.add_argument("--release", action="store_true", help="build the Rust engine in release mode")
+    parser.add_argument(
+        "--release", action="store_true", help="build the Rust engine in release mode"
+    )
     parser.add_argument("--skip-build", action="store_true", help="use the existing cargo build")
     parser.add_argument("--out", type=Path, default=None, help="directory for the two run outputs")
     parser.add_argument("--effort", default=None, help="pass --effort to both engines")
@@ -169,25 +175,39 @@ def main() -> int:
     args = parser.parse_args()
 
     if not (venv_bin() / "python").exists():
-        print(f"no vulcanbench in {venv_bin()}; create the venv first (see engine-rs/README.md)", file=sys.stderr)
+        print(
+            f"no vulcanbench in {venv_bin()}; create the venv first (see engine-rs/README.md)",
+            file=sys.stderr,
+        )
         return 2
 
     if args.skip_build:
-        binary = ENGINE_DIR / "target" / ("release" if args.release else "debug") / "vulcanbench-engine"
+        binary = (
+            ENGINE_DIR / "target" / ("release" if args.release else "debug") / "vulcanbench-engine"
+        )
     else:
         binary = build_rust(args.release)
 
     base = args.out or Path(tempfile.mkdtemp(prefix="vulcanbench-parity-"))
     base.mkdir(parents=True, exist_ok=True)
-    common = ["run", "--task", args.task, "--model", "mock:synthetic", "--sandbox", "local", "--no-judges"]
+    common = [
+        "run",
+        "--task",
+        args.task,
+        "--model",
+        "mock:synthetic",
+        "--sandbox",
+        "local",
+        "--no-judges",
+    ]
     for flag in ("effort", "max_steps", "timeout"):
         value = getattr(args, flag)
         if value is not None:
             common += [f"--{flag.replace('_', '-')}", str(value)]
     try:
         python_cli = [str(venv_bin() / "python"), "-c", "from harness.cli import main; main()"]
-        python_dir = run_engine("python", python_cli + common, base / "python")
-        rust_dir = run_engine("rust", [str(binary)] + common, base / "rust")
+        python_dir = run_engine("python", [*python_cli, *common], base / "python")
+        rust_dir = run_engine("rust", [str(binary), *common], base / "rust")
         ok = compare(load_run(python_dir), load_run(rust_dir))
     finally:
         if args.keep or args.out:

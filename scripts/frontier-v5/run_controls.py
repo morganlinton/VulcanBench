@@ -117,7 +117,10 @@ def plan_variants(spec: dict) -> dict[str, list[list[dict]]]:
     variants: dict[str, list[list[dict]]] = {"gold-from-parts": [parts]}
     if len(causes) < len(parts):
         variants["causes-only"] = [causes]
-    naive = {f"naive:{v['name']}": [[{"name": v["name"], "patch": v["patch"]}]] for v in spec.get("naive", [])}
+    naive = {
+        f"naive:{v['name']}": [[{"name": v["name"], "patch": v["patch"]}]]
+        for v in spec.get("naive", [])
+    }
     explicit = spec.get("variants")
     if explicit:
         for v in explicit:

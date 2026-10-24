@@ -58,7 +58,11 @@ candidates, two of two each, in 4 to 12 minutes of agent time: nx-digraph,
 geos, ioverlay, tseslint and commons-lang are rejected. Only
 treesitter-query-anchor-matching held (Astra 0 of 3, each run missing one
 zero-quantifier case and breaking an upstream guard test). The Fable 5.1
-half is blocked: the owner's Claude plan needs usage credits for Fable 5.1.
+half ran 2026-10-22 (Mac Studio): 2 of 5 on tree-sitter after the n=5
+top-up, at the admit bar, so treesitter-query-anchor-matching is admitted as
+F5-c, the first admitted task of Frontier v5. The same evening the Astra
+half rejected comrak (F2-rust), 2 of 2 in 8 to 11 minutes; both agents
+compiled the shipped C reference as a local oracle (GATE-LOG.md).
 Every solve was diff-reviewed as genuine. Details, evidence and the
 implication for the F5 floors: docs/frontier-v5/GATE-LOG.md.
 

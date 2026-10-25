@@ -7,6 +7,45 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-25: Frontier v5 wave 1 takes Claude Opus 5.5 as the second gate reference
+
+### Decision
+
+Owner, in chat, 2026-10-25. For F5 wave 1 (docs/frontier-v5/WAVE1-F5.md),
+starting with black-fmt-skip-region-handling, the second reference of
+decision (b) (2026-10-06) is `claude-code:claude-opus-5-5` at medium effort,
+Claude Code 2.1.302 (the wave-1 CLI pin), in place of
+`claude-code:claude-fable-5-1`. GPT-6 Astra is unchanged. The gate rule is
+unchanged: admit iff each reference solves at most 1 of 3, n=5 top-up at
+exactly 1 of 3, early exit at two solves. `run_gate.sh` gains the `opus`
+reference and a usage pre-flight, and GATE-LOG.md's identifier table gains
+the row.
+
+Comparability. treesitter-query-anchor-matching was admitted on 2026-10-22
+with Fable 5.1 at 2 of 5; that record stands and no admission is revoked.
+Its second prong is to be re-run under Opus 5.5 when quota allows (three
+attempts, same rule) and both results recorded, so every wave-1 admit has an
+Opus 5.5 prong. Fable 5.1 results already in the log stay as covariates.
+
+### Evidence
+
+- The black Fable half had to be stopped by hand on 2026-10-24 two minutes
+  in: the subscription's weekly window (overage included) read 94% with
+  overage disabled at the organisation level, resetting 2026-10-28
+  (GATE-LOG.md, black section). Waiting would cost four days per candidate.
+- Terminal-Bench 4.0, October 2026: Claude Opus 5.5 leads at 64.8 to 66.4%
+  while Claude Fable 5.1 scores about 58% (docs/frontier-v5/TASK-SHAPE-STUDY.md),
+  so Opus 5.5 is at least as strong a reference on agentic coding. Decision
+  (b) chose Fable 5.1 as one of the two models that saturated Frontier v4;
+  Opus 5.5 was not measured on v4.
+
+### Cost and revisit
+
+One extra three-attempt prong (tree-sitter under Opus 5.5). Revisit if Opus
+5.5's own usage window binds the same way, when Fable 5.1 access is
+unconstrained again, or when the frontier moves (decision (b)'s re-gate
+rule).
+
 ## 2026-10-19: DeepSeek V4.1 Flash and V4 Pro on Frontier v4 through DeepSeek Harness
 
 ### Decision

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Frontier v5 admission gate runner (docs/frontier-v5/GATE-LOG.md).
 #
-# usage: scripts/frontier-v5/run_gate.sh <astra|fable> <task> [<task> ...]
+# usage: scripts/frontier-v5/run_gate.sh <astra|fable|opus> <task> [<task> ...]
 #
 # Runs one reference model on each named task (tasks/frontier-v5/<task>)
 # through the real `harbor run`, three attempts per task, per the protocol in
@@ -10,6 +10,8 @@
 #
 #   astra  harbor -a codex       -m gpt-6-astra       Codex CLI 0.159.0,   medium
 #   fable  harbor -a claude-code -m claude-fable-5-1  Claude Code 2.1.302, medium
+#   opus   harbor -a claude-code -m claude-opus-5-5   Claude Code 2.1.302, medium
+#          (second reference for wave 1 from 2026-10-25, docs/DECISIONS.md)
 #
 # Concurrency follows decision (e): Python and JavaScript tasks run two
 # attempts at a time, compiled and JVM tasks one (16 GiB hosts).
@@ -26,12 +28,17 @@
 #   astra  the ChatGPT login in ~/.codex/auth.json (`codex login`); Harbor
 #          injects it because CODEX_FORCE_AUTH_JSON=1 is set in its own
 #          environment.
-#   fable  either a Claude subscription token in a private env file
+#   fable, opus  either a Claude subscription token in a private env file
 #          (CLAUDE_GATE_ENV, default ~/.config/vulcanbench/claude-gate.env,
 #          one line CLAUDE_CODE_OAUTH_TOKEN=..., from `claude setup-token`),
 #          used with CLAUDE_FORCE_OAUTH=1; or, with FABLE_AUTH=api, an
 #          ANTHROPIC_API_KEY line in that same file. A subscription needs
 #          usage credits for Fable 5.1.
+#          Before a claude-code run the script makes one one-turn call with the
+#          host `claude` CLI to read the subscription's usage windows and
+#          refuses to start above GATE_USAGE_MAX (default 0.85) unless
+#          GATE_USAGE_OVERRIDE=1 (the 2026-10-24 black Fable run had to be
+#          stopped by hand at 94% of the weekly window).
 #
 # Never pass flag values with --ae: Harbor treats --ae values as secrets and
 # scrubs them from every file it writes (a value of 1 replaced every "1" in
@@ -62,18 +69,39 @@ case "$ref" in
     agent=codex; model=gpt-6-astra; version=0.159.0
     [ -f "$HOME/.codex/auth.json" ] || { echo "run_gate: ~/.codex/auth.json missing; run \`codex login\`" >&2; exit 2; }
     auth_env=(CODEX_FORCE_AUTH_JSON=1); auth_args=() ;;
-  fable)
-    agent=claude-code; model=claude-fable-5-1; version=2.1.302
+  fable|opus)
+    agent=claude-code; version=2.1.302
+    case "$ref" in fable) model=claude-fable-5-1 ;; opus) model=claude-opus-5-5 ;; esac
     envf="${CLAUDE_GATE_ENV:-$HOME/.config/vulcanbench/claude-gate.env}"
     [ -f "$envf" ] || { echo "run_gate: $envf missing (see the header for how to create it)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
-  *) echo "run_gate: reference must be astra or fable" >&2; exit 2 ;;
+  *) echo "run_gate: reference must be astra, fable or opus" >&2; exit 2 ;;
 esac
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit
 # message; kept narrow so ordinary output (code the agent reads) never matches.
 INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit'
+
+usage_preflight() { # claude-code refs: one one-turn call reads the subscription windows; refuse above GATE_USAGE_MAX
+  local max="${GATE_USAGE_MAX:-0.85}" out rl_status rl_util
+  command -v claude >/dev/null || { echo "run_gate: no claude CLI on PATH, skipping the usage preflight" >&2; return 0; }
+  out=$( ( set -a; . "$envf"; set +a; claude -p --model "$model" --output-format stream-json --verbose --max-turns 1 'Reply with the single word ok.' 2>/dev/null ) \
+    | grep '"rate_limit_event"' | tail -1 | python3 -c '
+import json, sys
+line = sys.stdin.read().strip()
+if not line: sys.exit(0)
+d = json.loads(line)["rate_limit_info"]; w = d.get("unifiedWindows") or {}
+m = max([v.get("utilization") or 0 for v in w.values()] or [0])
+print("%s %.2f %s" % (d.get("status"), m, " ".join("%s=%.2f" % (k, v.get("utilization") or 0) for k, v in w.items())))' )
+  [ -n "$out" ] || { echo "run_gate: usage preflight saw no rate-limit event, continuing" >&2; return 0; }
+  echo "=== usage preflight $model: $out"
+  rl_status=${out%% *}; rl_util=$(printf '%s' "$out" | awk '{print $2}')
+  if [ "${GATE_USAGE_OVERRIDE:-0}" != 1 ] && { [ "$rl_status" != allowed ] || awk -v u="$rl_util" -v m="$max" 'BEGIN{exit !(u > m)}'; }; then
+    echo "!!! usage window at $rl_util (status $rl_status) is above GATE_USAGE_MAX=$max; not starting. Set GATE_USAGE_OVERRIDE=1 to run anyway." >&2
+    exit 2
+  fi
+}
 
 solves() { # job dir -> number of reward-1 trials
   python3 - "$1" <<'PY'
@@ -113,6 +141,7 @@ for t in "$@"; do
   case "$lang" in python|javascript) n=2 ;; *) n=1 ;; esac
   job="$ref-$t$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
+  [ "$agent" = claude-code ] && usage_preflight
   echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
   (cd "$here" && env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
      --ak version="$version" -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \

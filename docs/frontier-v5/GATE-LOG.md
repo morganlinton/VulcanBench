@@ -15,6 +15,7 @@ host.
 | --- | --- | --- | --- | --- |
 | GPT-6 Astra | `harbor run -a codex` | `gpt-6-astra` | Codex CLI 0.159.0 (`--ak version=0.159.0`) | medium |
 | Claude Fable 5.1 | `harbor run -a claude-code` | `claude-fable-5-1` | Claude Code 2.1.302 (`--ak version=2.1.302`) | medium |
+| Claude Opus 5.5 (second reference for wave 1 from 2026-10-25, DECISIONS.md) | `harbor run -a claude-code` | `claude-opus-5-5` | Claude Code 2.1.302 (`--ak version=2.1.302`) | medium |
 
 Harbor 0.24.0, `-k 3` attempts, no retries. Astra authenticates with the
 owner's ChatGPT login (`~/.codex/auth.json`, injected by Harbor when
@@ -278,10 +279,12 @@ reach. Astra's six-minute finish is the premature-completion pattern of the
 first wave (every visible signal green, then done), and here that signal was
 wrong by exactly one case.
 
-Next: the Fable 5.1 half (three attempts, admit iff at most 1 of 3, n=5
+Next: the second prong (three attempts, admit iff at most 1 of 3, n=5
 top-up at exactly 1 of 3), on the owner's approval. Covariates: 6.1, 5.6 and
 6.0 agent minutes against the 3-hour budget; the run took 15 minutes end to
-end including both image builds.
+end including both image builds. On 2026-10-25 the owner made Claude Opus
+5.5 the second reference for wave 1 (DECISIONS.md), so black's second prong
+runs as `opus`, not `fable`.
 
 Fable half, first start (2026-10-24 17:51 PDT): stopped by the operator at
 17:53, two minutes in, before either attempt had a result. The run's first

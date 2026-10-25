@@ -283,6 +283,19 @@ top-up at exactly 1 of 3), on the owner's approval. Covariates: 6.1, 5.6 and
 6.0 agent minutes against the 3-hour budget; the run took 15 minutes end to
 end including both image builds.
 
+Fable half, first start (2026-10-24 17:51 PDT): stopped by the operator at
+17:53, two minutes in, before either attempt had a result. The run's first
+rate-limit event reported status `allowed_warning` with the subscription's
+seven-day window (overage included) at 94%, the five-hour window at 13%;
+with two sessions running on a 3-hour budget the run could have exhausted
+the week's allowance mid-attempt and produced invalid results. Not an
+attempt and not an infrastructure failure: the partial job directory is set
+aside as `STOPPED-usage-pause-fable-black-fmt-skip-region-handling`, the
+sandboxes were removed by hand, and the owner chose to rerun after the
+window resets on 2026-10-28 08:00. Lesson for the runner: check the usage
+windows before a Fable launch and stop above a threshold, rather than
+watching after the fact.
+
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 
 On 2026-10-18 every Fable attempt was refused before starting: "Fable 5.1

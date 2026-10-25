@@ -35,7 +35,7 @@ launcher.
 | commons-lang-fraction-lowest-terms | F5-java | 2 of 2 solved (4.3, 4.4) | not run | **REJECT** (early exit) |
 | treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
-| black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | not run | Astra prong passed (2026-10-24); pending Fable |
+| black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -298,6 +298,52 @@ sandboxes were removed by hand, and the owner chose to rerun after the
 window resets on 2026-10-28 08:00. Lesson for the runner: check the usage
 windows before a Fable launch and stop above a threshold, rather than
 watching after the fact.
+
+### black-fmt-skip-region-handling, Opus 5.5 half (2026-10-25): ADMIT
+
+The first run under the 2026-10-25 decision that makes Claude Opus 5.5 the
+wave-1 second reference (DECISIONS.md). Job
+`opus-black-fmt-skip-region-handling`, launched 04:51 PDT from a run
+worktree pinned to 8b4d1ad0 (tag `bench/2026-10-25-black-opus-gate`: the
+task at 5be950c6 plus `run_gate.sh` from this branch with the `opus`
+reference and the usage pre-flight), Claude Code 2.1.302 in the container,
+`claude-opus-5-5`, medium, `-k 3 -n 2`. The pre-flight read the subscription
+windows before starting: five-hour 5%, seven-day 54%, status allowed, and no
+third window, so Opus 5.5 draws from a different allowance than the one that
+stopped the Fable run. Every session real: all 95 to 250 assistant turns on
+`claude-opus-5-5`, no auth, model-id or usage-limit event; the run ended with
+the five-hour window at 10% and the seven-day at 55%.
+
+| Trial | Agent minutes | Assistant turns | Reward | Held-out | Guards |
+| --- | --- | --- | --- | --- | --- |
+| NKdDBfG | 13.1 | 95 | 0 | 5 of 7 | hold (596 of 596) |
+| iEWmoMQ | 13.5 | 104 | 0 | 5 of 7 | hold |
+| r3sKbnf | 37.6 | 250 | 0 | 6 of 7 | hold |
+
+**0 of 3.** All three miss `fmtskip_opening_bracket_split`, the case every
+Astra attempt missed too; the two shorter attempts also miss
+`fmtskip_paired_header` (the inner skipped bracket inside a header). No
+guard regressed in any attempt. Changes: `src/black/comments.py` only in the
+two shorter attempts (+199/-14, +195/-49), `comments.py` plus one new field
+on `Leaf` in `src/blib2to3/pytree.py` in the long one (+313/-75); none
+touched `src/black/linegen.py`, where two of the upstream fixes live. Tamper
+scans clean; no added line touches the test runner. Each closing message
+states that all six reported cases now format correctly, are stable and keep
+the AST, and that the agent's own added case files pass: the attempts fixed
+the instruction's examples and the visible suite stayed green, while the
+hidden case files, which cover the same directives in more combinations, did
+not. The instruction had said "do not special-case the examples"; the miss
+is the generalisation, not the example.
+
+**Verdict: ADMIT.** Astra 0 of 3 (2026-10-24) and Opus 5.5 0 of 3
+(2026-10-25). black-fmt-skip-region-handling takes the F5-python slot, the
+second task admitted to Frontier v5 and the first to hold both references at
+zero. Anatomy for the floor-8 record: across six frontier attempts the guard
+mechanism never fired (every attempt kept all 596 guards green), and the
+held-out combinations stopped all six. On this task the second mechanism
+did all the work; the guard that the naive control trips was a shortcut no
+frontier agent took. The task was built under floor 8 and meets it, but what
+held it was the held-out coverage.
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

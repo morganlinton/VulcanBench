@@ -26,6 +26,14 @@ then NIGHT-STATUS.md and GATE-LOG.md.
   every one of 5,410 parity cases matched, both solves genuine ports. Both
   agents compiled the shipped C reference inside the sandbox and used it as
   a differential oracle (GATE-LOG.md).
+- **black-fmt-skip-region-handling is admitted as F5-python (2026-10-25)**,
+  the first wave-1 task and the first to hold both references at 0 of 3:
+  Astra 6 minutes per attempt, Opus 5.5 13 to 38 minutes, every guard green,
+  every attempt missing the same held-out case. The Fable half was stopped at
+  94% of the weekly window and the owner made Claude Opus 5.5 the wave-1
+  second reference (DECISIONS.md 2026-10-25); `run_gate.sh opus` runs it and
+  a usage pre-flight refuses to start above GATE_USAGE_MAX. tree-sitter's
+  second prong is to be re-run under Opus 5.5 for comparability.
 
 ## Open decisions (owner)
 
@@ -88,9 +96,11 @@ directory, for example:
 
     GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup scripts/frontier-v5/run_gate.sh fable treesitter-query-anchor-matching
 
-No gate run is queued. What runs next is the owner's call (open decisions
-above): Fable on the five Astra-rejected candidates to decide Routine v1
-recycling, or new F5 candidates once the floor question is settled.
+Queued on the owner's approval: tree-sitter's second prong under Opus 5.5
+(`run_gate.sh opus treesitter-query-anchor-matching`, three attempts, for
+comparability with black). Wave 1 continues with pulldown-cmark (Rust),
+then prettier, Java and C++ (WAVE1-F5.md). The Fable half on the five
+Astra-rejected candidates (Routine v1 recycling) stays optional.
 
 After each task: diff-review every solve against the task's base (PHASE1.md),
 then record the result in GATE-LOG.md. Back up the job directories to the

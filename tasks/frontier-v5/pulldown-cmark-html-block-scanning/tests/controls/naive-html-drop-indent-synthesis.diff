@@ -1,0 +1,22 @@
+diff --git a/pulldown-cmark/src/firstpass.rs b/pulldown-cmark/src/firstpass.rs
+index 5dd9957..0fa6152 100644
+--- a/pulldown-cmark/src/firstpass.rs
++++ b/pulldown-cmark/src/firstpass.rs
+@@ -1396,7 +1396,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         loop {
+             let line_start_ix = ix;
+             ix += scan_nextline(&bytes[ix..]);
+-            self.append_html_line(remaining_space.max(indent), line_start_ix, ix);
++            self.append_html_line(remaining_space, line_start_ix, ix);
+ 
+             let mut line_start = LineStart::new(&bytes[ix..]);
+             let n_containers = scan_containers(&self.tree, &mut line_start, self.options, false);
+@@ -1445,7 +1445,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         loop {
+             let line_start_ix = ix;
+             ix += scan_nextline(&bytes[ix..]);
+-            self.append_html_line(remaining_space.max(indent), line_start_ix, ix);
++            self.append_html_line(remaining_space, line_start_ix, ix);
+ 
+             let mut line_start = LineStart::new(&bytes[ix..]);
+             let n_containers = scan_containers(&self.tree, &mut line_start, self.options, false);

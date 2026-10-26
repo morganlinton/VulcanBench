@@ -1,0 +1,13 @@
+diff --git a/pulldown-cmark/src/firstpass.rs b/pulldown-cmark/src/firstpass.rs
+index 5dd9957..3bfb943 100644
+--- a/pulldown-cmark/src/firstpass.rs
++++ b/pulldown-cmark/src/firstpass.rs
+@@ -1405,7 +1405,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+                 break;
+             }
+ 
+-            if self.text[line_start_ix..ix].contains(html_end_tag) {
++            if self.text[line_start_ix..ix].to_ascii_lowercase().contains(html_end_tag) {
+                 end_ix = ix;
+                 break;
+             }

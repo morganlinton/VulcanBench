@@ -1,4 +1,4 @@
-"""Reflection Beam, Claude Opus 5.5 and GPT-6.1 Sol on VulcanBench Frontier v4.
+"""Reflection Beam, Muse Wonder Full, Claude Opus 5.5 and GPT-6.1 Sol on VulcanBench Frontier v4.
 
 One card in the format of the Sonnet 5.5 and DeepSeek V4.1 Flash comparison
 cards: combined score and time per task at every effort level, and a table per
@@ -9,6 +9,10 @@ Sources, nothing re-run or re-judged:
 
 - Claude Opus 5.5 and GPT-6.1 Sol: their published per-level rows (Code quality
   v3.15 and v3.18, Muse Spark 1.3 and Grok 4.6), as on the earlier cards.
+- Muse Wonder Full: its published per-level rows (Code quality v3.26 to v3.26.3,
+  Claude Opus 5.5 and GPT-6.1 Sol) from musewonder-full-vs-frontier.json, Low
+  to Extra high; Max was not run in Contributor mode. Its cost is the published
+  estimate at the Muse Wonder 1.0 list price.
 - Reflection Beam: the Code quality v3.28 summary (Muse Spark 1.3 and GPT-6.1
   Sol) and its run summaries in runs-effort-beam-mirror. Runs that changed no
   source code are not judged (owner decision 2026-10-26); at the levels where
@@ -43,16 +47,24 @@ from harness.retrospective_judging import LEVELS, digest, save  # noqa: E402
 PUBLISHED = ROOT / "docs/results/swe-v4-opus55-2026-09/opus55-astra-fable-efforts.csv"
 SOL = ROOT / "docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-efforts.csv"
 SOL_COST = ROOT / "docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-economics-efforts.csv"
+WONDER = ROOT / "docs/results/swe-v4-musewonder-full-2026-10/musewonder-full-vs-frontier.json"
 OUTPUT = ROOT / "docs/results/swe-v4-beam-2026-10"
 RUNS = ROOT / "runs-effort-beam-mirror"
-MODELS = ("beam", "opus55", "gpt61sol")
-NAMES = {"beam": "Reflection Beam", "opus55": "Claude Opus 5.5", "gpt61sol": "GPT-6.1 Sol"}
-# Beam takes a violet no lab on the board uses (validated against the other two
-# for color-vision separation); Opus 5.5 and GPT-6.1 Sol keep their hues from the
-# Sonnet 5.5 comparison card. Markers, direct labels and the table carry
-# identity as well as color.
-COLORS = {"beam": "#7C4DFF", "opus55": "#8C3A1F", "gpt61sol": "#10A37F"}
-MARKERS = {"beam": "o", "opus55": "D", "gpt61sol": "^"}
+MODELS = ("beam", "wonder", "opus55", "gpt61sol")
+NAMES = {
+    "beam": "Reflection Beam",
+    "wonder": "Muse Wonder Full",
+    "opus55": "Claude Opus 5.5",
+    "gpt61sol": "GPT-6.1 Sol",
+}
+# Muse Wonder Full keeps Meta blue; Beam takes a purple no lab on the board uses
+# (the earlier violet was too close to Meta blue for deutan vision). Opus 5.5 and
+# GPT-6.1 Sol keep their hues from the Sonnet 5.5 comparison card. All four pass
+# the palette validator's all-pairs color-vision checks; markers, direct labels
+# and the table carry identity as well as color.
+COLORS = {"beam": "#9C27B0", "wonder": "#0866FF", "opus55": "#8C3A1F", "gpt61sol": "#10A37F"}
+MARKERS = {"beam": "o", "wonder": "s", "opus55": "D", "gpt61sol": "^"}
+UNJUDGED_AS_ZERO = {"beam": "no-code runs as 0", "wonder": "timeouts as 0"}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 CLAUDE_MAIN = {"opus55": "claude-opus-5-5"}
 
@@ -71,7 +83,7 @@ def mean_se(values):
 
 
 def load_groups(judging: Path):
-    """Per-level aggregates: Opus 5.5 and GPT-6.1 Sol from published tables, Beam from v3.28."""
+    """Per-level aggregates: Opus 5.5, GPT-6.1 Sol and Muse Wonder Full published, Beam from v3.28."""
     groups = {}
     with PUBLISHED.open() as handle:
         for r in csv.DictReader(handle):
@@ -111,6 +123,22 @@ def load_groups(judging: Path):
                 "fb_runs": 0,
                 "fb_share": None,
             }
+    wonder = json.loads(WONDER.read_text())
+    require(wonder["final"], "the Muse Wonder Full card table is not final")
+    for e, w in wonder["groups"]["wonder"].items():
+        groups["wonder", e] = {
+            "n": w["n"],
+            "combined": {"n": w["n_judged"], "mean": w["combined"], "se": w["combined_se"]},
+            "zero": {"mean": w["combined_timeouts_zero"], "runs": w["timeouts"]}
+            if w["timeouts"]
+            else None,
+            "code_quality": {"mean": None},
+            "passed": w["passed"],
+            "usd": {"mean": w["usd"], "estimate": True},
+            "minutes": {"mean": w["minutes"]},
+            "fb_runs": 0,
+            "fb_share": None,
+        }
     summary = json.loads((judging / "summary.json").read_text())
     require(
         summary["failed_panels"] == [] and len(summary["passing_panels"]) == 2,
@@ -151,17 +179,20 @@ def load_groups(judging: Path):
             "fb_share": None,
         }
     for m in MODELS:
-        for e in LEVELS:
+        for e in levels_of(m):
             require((m, e) in groups, f"{m} {e} missing")
     sources = {
-        "published_tables": {p.name: digest(p.read_bytes()) for p in (PUBLISHED, SOL, SOL_COST)},
+        "published_tables": {
+            p.name: digest(p.read_bytes()) for p in (PUBLISHED, SOL, SOL_COST, WONDER)
+        },
         "v3.28_summary_sha256": digest((judging / "summary.json").read_bytes()),
     }
     return groups, True, sources
 
 
 def levels_of(m):
-    return LEVELS
+    """Muse Wonder Full has no Max: Muse Code's Contributor mode does not offer it."""
+    return LEVELS[:-1] if m == "wonder" else LEVELS
 
 
 def main():  # noqa: PLR0912, PLR0915, one linear figure
@@ -172,7 +203,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    W, H = 16, 16.9
+    W, H = 16, 19.3
     fig = plt.figure(figsize=(W, H), dpi=150, facecolor=PAPER)
     yf = lambda i: 1 - i / H  # noqa: E731
 
@@ -215,22 +246,23 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         left,
         1.72,
-        "VulcanBench Frontier v4: Reflection Beam, Opus 5.5 and GPT-6.1 Sol",
+        "VulcanBench Frontier v4: Reflection Beam against the frontier",
         30,
         True,
         heading=True,
     )
     order = sorted(MODELS, key=lambda m: -groups[m, best[m]]["combined"]["mean"])
     head = "  ·  ".join(
-        f"{NAMES[m]} {groups[m, best[m]]['combined']['mean']:.2f} at {best[m].replace('-', ' ')}"
+        f"{NAMES[m].replace('Claude ', '').replace('Reflection ', '')} "
+        f"{groups[m, best[m]]['combined']['mean']:.2f} ({best[m].replace('-', ' ').capitalize()})"
         for m in order
     )
-    text(left, 2.22, f"Best combined score per model: {head}.", 15)
+    text(left, 2.22, f"Best combined score: {head}.", 14.5)
     text(
         left,
         2.60,
-        "23 hard legacy-reconstruction tasks per effort level. Code quality judged by Muse Spark 1.3 with Grok 4.6 "
-        "(Opus 5.5, Sol) or GPT-6.1 Sol (Beam).",
+        "23 hard legacy-reconstruction tasks per effort level. Code quality panels differ by model (see notes); "
+        "Muse Wonder Full has no Max level.",
         13.5,
         color=MUTED,
     )
@@ -252,7 +284,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
         label = f"{NAMES[m]}{' (with fallback)' if m in CLAUDE_MAIN else ''}"
         text(x + 0.016, 3.05, label, 13, True)
-        x += {"beam": 0.25, "opus55": 0.29, "gpt61sol": 0}[m]
+        x += {"beam": 0.19, "wonder": 0.20, "opus55": 0.27, "gpt61sol": 0}[m]
 
     def axis(x0, w, top, h):
         ax = fig.add_axes([x0, yf(top + h), w, h / H], facecolor=PAPER)
@@ -276,17 +308,19 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     ax = axis(0.085, 0.40, 4.25, 3.2)
     vals = [groups[m, e]["combined"] for m in MODELS for e in levels_of(m)]
     zeros = [
-        (LEVELS.index(e), groups["beam", e]["zero"]["mean"])
-        for e in LEVELS
-        if groups["beam", e]["zero"]
+        (m, LEVELS.index(e), groups[m, e]["zero"]["mean"])
+        for m in UNJUDGED_AS_ZERO
+        for e in levels_of(m)
+        if groups[m, e]["zero"]
     ]
-    lo = math.floor(min([v["mean"] - v["se"] for v in vals] + [z for _, z in zeros])) - 2
-    hi = math.ceil(max(v["mean"] + v["se"] for v in vals)) + 1
-    # End labels: keep at least ~6.5% of the axis between neighbours so close finishes stay legible.
-    gap = 0.065 * (hi - lo)
+    lo = math.floor(min([v["mean"] - v["se"] for v in vals] + [z for _, _, z in zeros])) - 2
+    hi = math.ceil(max(v["mean"] + v["se"] for v in vals)) + 5
+    # End labels: keep at least 5% of the axis between neighbours so close finishes stay legible.
+    gap = 0.05 * (hi - lo)
     label_y = {}
-    for m in sorted(MODELS, key=lambda m: groups[m, "max"]["combined"]["mean"]):
-        y_end = groups[m, "max"]["combined"]["mean"]
+    end = {m: groups[m, levels_of(m)[-1]]["combined"]["mean"] for m in MODELS}
+    for m in sorted(MODELS, key=end.get):
+        y_end = end[m]
         floor = max(label_y.values(), default=-math.inf) + gap
         label_y[m] = max(y_end, floor)
     ax.set_ylim(lo, hi)
@@ -318,8 +352,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
         ax.annotate(
             NAMES[m].replace("Claude ", "").replace("Reflection ", ""),
-            (4, ys[-1]),
-            xytext=(4.12, label_y[m]),
+            (xs[-1], ys[-1]),
+            xytext=(4.12, label_y[m]),  # one label column, past Max, for every model
             textcoords="data",
             va="center",
             fontsize=10.5,
@@ -328,26 +362,27 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             weight=700,
         )
 
-    if zeros:
+    for m, x, z in zeros:
         ax.scatter(
-            [x for x, _ in zeros],
-            [z for _, z in zeros],
+            [x],
+            [z],
             s=64,
+            marker=MARKERS[m],
             facecolors=PAPER,
-            edgecolors=COLORS["beam"],
+            edgecolors=COLORS[m],
             linewidths=1.6,
             zorder=4,
         )
-        for x, z in zeros:
-            ax.annotate(
-                "no-code runs as 0",
-                (x, z),
-                xytext=(8, -3),
-                textcoords="offset points",
-                fontsize=9,
-                color=MUTED,
-                fontfamily="Geist",
-            )
+        ax.annotate(
+            UNJUDGED_AS_ZERO[m],
+            (x, z),
+            xytext=(8, -3) if m == "beam" else (-8, -10),
+            ha="left" if m == "beam" else "right",
+            textcoords="offset points",
+            fontsize=9,
+            color=MUTED,
+            fontfamily="Geist",
+        )
 
     text(0.56, 3.62, "Time per task", 20, True, heading=True)
     text(
@@ -358,7 +393,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         color=MUTED,
     )
     ax = axis(0.585, 0.355, 4.25, 3.2)
-    shifts = {"beam": -0.26, "opus55": 0.0, "gpt61sol": 0.26}
+    shifts = {"beam": -0.3, "wonder": -0.1, "opus55": 0.1, "gpt61sol": 0.3}
     top = max(groups[m, e]["minutes"]["mean"] for m in MODELS for e in levels_of(m))
     ax.set_ylim(0, top * 1.22)
     for m in MODELS:
@@ -367,7 +402,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ax.bar(
             [i + shifts[m] for i in idx],
             ys,
-            width=0.25,
+            width=0.2,
             color=COLORS[m],
             edgecolor=INK,
             linewidth=0.5,
@@ -381,7 +416,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 textcoords="offset points",
                 ha="center",
                 va="bottom",
-                fontsize=8.5,
+                fontsize=7.5,
                 fontfamily="IBM Plex Mono",
                 color=INK,
             )
@@ -419,19 +454,24 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             ("Tasks passed of 23", lambda g: str(g["passed"]), False),
             (
                 "Cost per task, USD",
-                lambda g: "n/a" if g["usd"]["mean"] is None else f"{g['usd']['mean']:.2f}",
+                lambda g: (
+                    "n/a"
+                    if g["usd"]["mean"] is None
+                    else ("~" if g["usd"].get("estimate") else "") + f"{g['usd']['mean']:.2f}"
+                ),
                 False,
             ),
         ]
-        if m == "beam":
+        if m in UNJUDGED_AS_ZERO:
             measures.insert(
                 1,
                 (
-                    "Combined, no-code runs as 0",
+                    f"Combined, {UNJUDGED_AS_ZERO[m]}",
                     lambda g: f"{g['zero']['mean']:.2f}" if g["zero"] else "same",
                     False,
                 ),
             )
+        if m == "beam":
             measures.append(("Minutes per task", lambda g: f"{g['minutes']['mean']:.1f}", False))
             measures.append(
                 ("Tokens per task, millions", lambda g: f"{g['tokens']['mean'] / 1e6:.2f}", False)
@@ -449,7 +489,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             text(left + 0.012, y, label, 12, color=INK if strong else MUTED)
             for e in LEVELS:
                 if (m, e) not in groups:
-                    text(cols[e], y, "n/a", 12, numeric=True, ha="right", color=MUTED)
+                    text(cols[e], y, "not run", 12, ha="right", color=MUTED)
                     continue
                 g = groups[m, e]
                 emph = strong and e == best[m]
@@ -472,14 +512,22 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "runs that changed no source code (12 at Low, 3 at Medium, file-mode or scratch changes only, or none); they are not judged "
         "and count as failed, and the row below shows the combined score counting them as 0. Max is over 22: one run's evidence was "
         "too large for either judge to review.",
-        "Protocols: Beam is Code quality v3.28, Opus 5.5 is v3.15 and GPT-6.1 Sol is v3.18, with the same rubric, controls and "
-        "weights. Opus 5.5 and Sol were judged by Muse Spark 1.3 and Grok 4.6; Beam by Muse Spark 1.3 and GPT-6.1 Sol, because Grok "
-        "4.6's Cursor account was out of usage. The panels are not calibrated against each other, and Sol judged a column it is shown beside.",
+        "Muse Wonder Full: High and Extra high are over 22 judged runs; paddockcore (High) and depotcore (Extra high) hit the 3-hour "
+        "task limit and left no finished code, and the row below counts them as 0. It ran on a Muse Code subscription in Contributor "
+        "mode, which offers no Max; Meta lists no API price, so its cost (~) is an estimate at the Muse Wonder 1.0 list price. Its rows "
+        "are as published on 18 October; Extra high depotcore overlapped another local job for 145 of its 180 minutes, and its clean "
+        "rerun has not been judged yet.",
+        "Protocols: Beam is Code quality v3.28, Muse Wonder Full v3.26 to v3.26.3, Opus 5.5 v3.15 and GPT-6.1 Sol v3.18, with the "
+        "same rubric, controls and weights. Opus 5.5 and Sol were judged by Muse Spark 1.3 and Grok 4.6; Beam by Muse Spark 1.3 and "
+        "GPT-6.1 Sol, because Grok 4.6's Cursor account was out of usage; Muse Wonder Full by Claude Opus 5.5 and GPT-6.1 Sol, because "
+        "Muse Spark is a Meta model. The panels are not calibrated against each other, and Opus 5.5 and Sol judged columns they are "
+        "shown beside.",
         "Beam ran in Reflection's Mirror CLI 0.1.1 (early beta) through Reflection's API; Reflection publishes no price, so it has no "
         "cost. Mirror labels a Permission denied error as a sandbox denial, and two Low runs ended believing the sandbox blocked "
         "the legacy binary. A daily API token limit paused the sweep once; no finished run was affected.",
-        "Harnesses differ (Mirror CLI 0.1.1, Claude Code 2.1.280, Codex 0.159.0), so small gaps are harness confounded. Opus 5.5 "
-        "and GPT-6.1 Sol numbers are their published per-level rows; nothing was re-run or re-judged.",
+        "Harnesses differ (Mirror CLI 0.1.1, Muse Code 1.4.6 and 1.4.9, Claude Code 2.1.280, Codex 0.159.0), so small gaps are "
+        "harness confounded. Muse Wonder Full, Opus 5.5 and GPT-6.1 Sol numbers are their published per-level rows; nothing was "
+        "re-run or re-judged.",
     ]
     yy = y + 0.12
     for n in notes:
@@ -522,7 +570,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                     g["combined"]["n"],
                     f"{g['combined']['mean']:.4f}",
                     f"{g['combined']['se']:.4f}",
-                    f"{g['code_quality']['mean']:.4f}",
+                    "" if g["code_quality"]["mean"] is None else f"{g['code_quality']['mean']:.4f}",
                     g["passed"],
                     "" if g["usd"]["mean"] is None else f"{g['usd']['mean']:.4f}",
                     f"{g['minutes']['mean']:.4f}",

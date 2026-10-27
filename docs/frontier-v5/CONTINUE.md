@@ -40,13 +40,11 @@ then NIGHT-STATUS.md and GATE-LOG.md.
 1. ~~**Fable 5.1 access**~~ Resolved 2026-10-22: the owner's Claude
    subscription runs Fable 5.1 with a `claude setup-token` token and no usage
    credits (see "Running the gate").
-2. **F5 floors**: the first wave suggests the floors do not by themselves
-   make a task hard for Astra, and that upstream guard tests that a
-   symptom-level fix breaks are the discriminating property (tree-sitter).
-   Whether to add that as a floor in a v3 plan (PLAN-v2.md's freeze rule) is
-   the owner's call. It decides what to source next. The Fable half adds
-   one data point: Fable 5.1 solved tree-sitter 2 of 5 (the rejected five
-   were not run against it).
+2. ~~**F5 floors**~~ Decided 2026-10-26: floor 8 is amended so a candidate
+   meets it by a guarded fix (route a) or by combination coverage (route b);
+   PLAN-v3.md section 2, with the measurement on five tasks. Black meets both
+   routes; pulldown-cmark and sqlparser-rs meet neither, so whether a
+   floor-8 miss that holds the gate may be admitted is PLAN-v3 decision (g').
 3. Still open from v1: (d) publishing channel, (f) gold location.
 4. **F2 shape** after comrak: DESIGN.md's revisit rule says the slot should
    take a larger subsystem, and the sandbox's C toolchain let both agents
@@ -98,8 +96,14 @@ directory, for example:
 
 Queued on the owner's approval: tree-sitter's second prong under Opus 5.5
 (`run_gate.sh opus treesitter-query-anchor-matching`, three attempts, for
-comparability with black). Wave 1 continues with pulldown-cmark (Rust),
-then prettier, Java and C++ (WAVE1-F5.md). The Fable half on the five
+comparability with black). Wave 1 built so far (WAVE1-F5.md): black
+(admitted), pulldown-cmark (Astra 0 of 3, floor 8 not met, Opus half not
+run), the sqlparser-rs reserve (floor 8 not met, not gated) and
+prettier-comment-attachment-stability (F5-javascript, branch
+`frontier-v5-prettier`: floors 1 to 8 met by route (a), validated 2026-10-27,
+not gated; its next step is the Astra half,
+`run_gate.sh astra prettier-comment-attachment-stability` from a run worktree
+pinned to its commit). Then Java and C++. The Fable half on the five
 Astra-rejected candidates (Routine v1 recycling) stays optional.
 
 After each task: diff-review every solve against the task's base (PHASE1.md),

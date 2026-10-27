@@ -18,6 +18,9 @@ tests/controls.json:
      ...],
    "coupled": [["#1784", "#1787"]]}    # optional: a fallback group, see loo
 
+A part may carry a "rebased" patch: the same changed lines with their
+context rebased onto base, used only when the upstream diff fails because its
+context lines belong to a neighbouring part (textual, not semantic, coupling).
 A "glue" part carries no cause (for example an upstream Javadoc commit inside
 the range): it is applied wherever it applies and never controlled itself.
 Variants, each graded by the real verifier on a fresh artifact:
@@ -103,6 +106,9 @@ def build_variant(base: Path, dest: Path, root: str, parts: list[dict], task: Pa
     shutil.copytree(base, dest, symlinks=True)
     for p in parts:
         err = apply(dest / root, task / p["patch"])
+        if err and p.get("rebased"):
+            # Same changed lines, context rebased past a neighbouring part.
+            err = apply(dest / root, task / p["rebased"])
         if err:
             if p.get("glue"):
                 continue

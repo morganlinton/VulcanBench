@@ -36,6 +36,7 @@ launcher.
 | treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
+| pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met) | **0 of 3** (3.7, 4.4, 3.2) | not run | Astra prong passed (2026-10-26); a floor-8 test run on the owner's approval |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -344,6 +345,40 @@ held-out combinations stopped all six. On this task the second mechanism
 did all the work; the guard that the naive control trips was a shortcut no
 frontier agent took. The task was built under floor 8 and meets it, but what
 held it was the held-out coverage.
+
+### pulldown-cmark-html-block-scanning, Astra half (2026-10-26): a floor-8 test
+
+Built and validated 2026-10-26 (its DESIGN.md); floors 1 to 7 met, **floor 8
+not met** by six naive fixes, so by WAVE1-F5.md it would not be gated. The
+owner approved an Astra-only run to test whether floor 8 matters. Job
+`astra-pulldown-cmark-html-block-scanning`, launched 17:30 PDT from a run
+worktree pinned to 8166c6bb (tag `bench/2026-10-26-pulldown-astra-gate`:
+the task at 9fc86e09 plus the current `run_gate.sh`), wave-1 identifiers,
+concurrency 1 (Rust). Sessions real (`--model gpt-6-astra`, dozens of
+commands each, no auth or usage event); no containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out failing | Guards |
+| --- | --- | --- | --- | --- |
+| C8uUgzi | 3.7 | 0 | 6 of 24 (r259, r260, r261, r273, r274, r277) | hold (1,388) |
+| NzwKGhN | 4.4 | 0 | 6 of 24 (same six) | hold |
+| qckhmcQ | 3.2 | 0 | 3 of 24 (r273, r274, r277) | hold |
+
+**0 of 3.** Every attempt kept all 1,388 guards green and declared done in 3
+to 4.5 minutes; all three miss hidden examples 273, 274 and 277 (inline HTML
+scanner cases from #1169), two also miss 259 to 261 (type 1 end tags that do
+not match the start tag, #1163). This is the black pattern again: the guard
+mechanism never fired, the held-out combinations stopped every attempt, and
+the agent finished early with its visible signal green.
+
+What it says about floor 8: a task that fails floor 8 held the stronger
+reference at zero. On the evidence so far (black and pulldown-cmark, both
+0 of 3 for Astra with no guard tripped), floor 8 is **not necessary** for a
+task to hold; held-out coverage of combinations the visible suite does not
+show is doing the work. Floor 8 as written would have discarded this task.
+A proposed amendment for the owner: accept a candidate that meets floor 8
+**or** has at least N held-out checks that no single-cause fix clears and
+that the visible suite cannot reveal (measured by the existing single-fix
+controls). The second prong (Opus 5.5) has not run.
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

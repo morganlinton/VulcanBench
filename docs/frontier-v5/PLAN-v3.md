@@ -12,8 +12,9 @@ invocation is requested by it.
 
 Scope. This document amends exactly two things:
 
-1. the F5 admission floors (PLAN-v2.md section 2) gain floor 8, a guarded
-   fix shown by a naive-fix control;
+1. the F5 admission floors (PLAN-v2.md section 2) gain floor 8, met by a
+   guarded fix (shown by a naive-fix control) or by combination coverage
+   (shown by unit controls), as amended on 2026-10-26 (section 2);
 2. the F2 definition (PLAN.md section 2) gains a reference-shape floor with a
    build probe, with two alternatives laid out for the owner.
 
@@ -85,14 +86,18 @@ five (about ten attempts with early exits; it also decides their Routine v1
 recycling under PLAN.md section 3). This proposal is written so either path
 leads to the same decision points.
 
-## 2. Proposal A: F5 floor 8, a guarded fix, shown by a naive-fix control
+## 2. Proposal A: F5 floor 8, a guarded fix or combination coverage
 
 ### Definition
 
 Add to the F5 floors of PLAN-v2.md section 2:
 
-8. **Guarded fix.** The obvious fix is wrong in a way the project's own tests
-   detect. Before the gate, the author writes the *naive fix*: the
+8. **Guarded fix or combination coverage.** A candidate meets floor 8 by
+   either route below; both are measured before the gate with the task's real
+   verifier, and DESIGN.md records which route it meets (or both).
+
+   **Route (a), guarded fix.** The obvious fix is wrong in a way the project's
+   own tests detect. Before the gate, the author writes the *naive fix*: the
    symptom-level patch a competent reader of the instruction and the failing
    behaviour would write first, which addresses the reported symptoms where
    they surface without the structural change the upstream fix made. It is
@@ -111,6 +116,52 @@ Add to the F5 floors of PLAN-v2.md section 2:
    naive fix are named in DESIGN.md, and they stay in `pass_to_pass`, never
    in the visible tests.
 
+   **Route (b), combination coverage.** At least one fail-to-pass check that
+   no single repair unit clears and no pre-registered naive fix clears. A
+   repair unit is one cause's part, or a source-coupled group of parts (the
+   task's `coupled` groups, which cannot apply apart) applied together, each
+   alone on base. Such a check passes only when two or more independent
+   causes are fixed together, so no partial repair the visible suite could
+   confirm reaches it. The checks are named in DESIGN.md and stay out of the
+   visible tests, like every held-out case.
+
+   Route (b) counts units, not single parts: counted by single parts and
+   naive fixes only, the rejected commons-lang task has one uncovered check
+   (`testAddSubtractZeroOperand`), but its coupled pair #1784 and #1787
+   clears it, so it is one cause's repair, not a combination.
+
+### Amendment of 2026-10-26 and its measurement
+
+The owner directed this amendment on 2026-10-26 after two wave-1 tasks
+missed route (a): pulldown-cmark held GPT-6 Astra at 0 of 3 (GATE-LOG.md,
+Astra half only) with no naive fix tripping a guard, and the sqlparser-rs
+reserve missed it the same way. Route (b) was added so a task can qualify on
+held-out coverage instead of a guard. It was then measured on every F5 task
+with a gate record or a full control set, with `run_controls.py`'s `unit:`
+variants (one per coupled group) and local Docker only, no model calls:
+
+| Task | Gate record | Route (a): naive fix trips a guard | Route (b): checks no unit or naive fix clears | Floor 8 |
+| --- | --- | --- | --- | --- |
+| treesitter-query-anchor-matching | ADMIT (Astra 0 of 3, Fable 2 of 5) | met, five of six model shortcuts | not measured (no per-cause unit run) | met |
+| black-fmt-skip-region-handling | ADMIT (Astra 0 of 3, Opus 5.5 0 of 3) | met (`climb-any-parent`) | 1 of 7 (`fmtskip_opening_bracket_conditional`) | met, both routes |
+| commons-lang-fraction-lowest-terms | REJECT (Astra 2 of 2) | not met | 0 of 6 | not met |
+| pulldown-cmark-html-block-scanning | Astra 0 of 3, Opus 5.5 half not run | not met | 0 of 24 (the three checks no single part clears are cleared by the coupled pair #1163 and #1180) | not met |
+| sqlparser-display-round-trip | not gated | not met | 0 of 8 (both coupled pairs clear the checks no single part clears) | not met |
+
+Reading:
+
+- The amended floor still excludes the reject, as PLAN-v3's stopping rule
+  requires.
+- It does not admit pulldown-cmark or sqlparser. On both, every held-out
+  check is reached by some single unit of repair; what held Astra on
+  pulldown-cmark is coverage of a different kind (every attempt kept the
+  1,388 guards green and declared itself done while missing cases of the
+  rules it had fixed), which neither route measures.
+- So on the five tasks measured, routes (a) and (b) give the same verdicts,
+  and route (b) is a second witness rather than a wider door. Whether a task
+  that misses both routes but holds the gate (pulldown-cmark, if the Opus 5.5
+  half also holds) may be admitted is decision (g') in section 6.
+
 Floors 1 to 7 stay as they are. They did not admit a weak task; they were
 simply not sufficient, and they still rule out independent-fix breadth
 (luxon, fmt, yyjson) and single-cause tasks (petgraph).
@@ -126,7 +177,10 @@ additions, no model call involved:
   shows only held-out checks passing);
 - a floor-8 line in the report: pass iff some `naive:` variant has
   `build_ok` 1, clears at least one fail-to-pass check and regresses at least
-  one pass-to-pass check.
+  one pass-to-pass check;
+- `unit:<a+b>` variants, one per `coupled` group (base plus that group's
+  parts together), so route (b) can be read off the single, unit and naive
+  rows of the report.
 
 ### Calibration before sourcing (no quota)
 
@@ -240,7 +294,7 @@ is complete passes divided by 78.
 | F2 Differential parity | 6, one per language | 6/26 | reference-shape floor (Proposal B) |
 | F3 Long-horizon volume | 6, one per language | 6/26 | none |
 | F4 Opaque-component parity | 2, Python and Java | 2/26 | none |
-| F5 Concentrated multi-bug correctness | 6, one per language | 6/26 | floor 8 (Proposal A) |
+| F5 Concentrated multi-bug correctness | 6, one per language | 6/26 | floor 8, either route (Proposal A) |
 
 Slot state at the proposal date: F5-c admitted (tree-sitter); every other
 slot open; six rejected candidates recycled or held per PLAN.md section 3
@@ -260,9 +314,18 @@ once their Fable half is run or waived.
 
 ## 6. Owner decisions
 
-(g) **F5 floor 8.** Adopt the guarded-fix floor and the naive-fix control as
-written in section 2, or amend it. Recommended: adopt, after the two
-calibration runs in section 2 come out as predicted.
+(g) **F5 floor 8.** Decided by the owner on 2026-10-26: amend floor 8 so
+either route of section 2 qualifies, and continue wave 1. Calibrated as
+above; it takes effect with the v3 freeze.
+
+(g') **A task that misses floor 8 and holds the gate.** Floor 8 is a
+pre-gate screen, and the gate decides admission. pulldown-cmark misses both
+routes and held Astra; sqlparser misses both and is not gated. Options:
+keep floor 8 binding (neither is gated further, and pulldown-cmark's Astra
+half stands as evidence only), or let a floor-8 miss be gated at the owner's
+discretion and admitted on the gate alone, with the miss recorded. The
+second costs little when the task is weak (Astra-first, early exit at 2) and
+keeps a task that holds; the first keeps the floor meaningful as a filter.
 
 (h) **F2 shape.** B1, B2 or B3. Recommended: B1, decided after the comrak-v2
 diagnostic if the owner funds it, otherwise on the comrak evidence alone.

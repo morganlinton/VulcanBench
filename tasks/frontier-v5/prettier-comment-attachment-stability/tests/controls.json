@@ -1,0 +1,70 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md and PLAN-v3.md). Each part is the upstream merge's src diff; 06 is the one handle-comments.js hunk of the refactor #19921, which edits a line #19905 added (glue, no cause). base + all parts is byte-identical to solution/gold_patch.diff and to upstream src at the pin (checked 2026-10-26). #19930 edits the helper and the condition #19893 added, and #19905 rewrites the condition #19902 changed, so each pair is one coupled unit.",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "#19894",
+      "patch": "tests/controls/01-19894.diff",
+      "upstream": "52d170534"
+    },
+    {
+      "name": "#19893",
+      "patch": "tests/controls/02-19893.diff",
+      "upstream": "24a616d0b"
+    },
+    {
+      "name": "#19897",
+      "patch": "tests/controls/03-19897.diff",
+      "upstream": "e7b8a4f86"
+    },
+    {
+      "name": "#19902",
+      "patch": "tests/controls/04-19902.diff",
+      "upstream": "055dba425"
+    },
+    {
+      "name": "#19905",
+      "patch": "tests/controls/05-19905.diff",
+      "upstream": "11d55846a"
+    },
+    {
+      "name": "glue-19921",
+      "patch": "tests/controls/06-glue-19921.diff",
+      "upstream": "893fd3b12",
+      "glue": true
+    },
+    {
+      "name": "#19930",
+      "patch": "tests/controls/07-19930.diff",
+      "upstream": "5a0fdd974"
+    }
+  ],
+  "coupled": [
+    [
+      "#19893",
+      "#19930"
+    ],
+    [
+      "#19902",
+      "#19905"
+    ]
+  ],
+  "naive": [
+    {
+      "name": "statement-ends-at-expression",
+      "patch": "tests/controls/naive-statement-ends-at-expression.diff"
+    },
+    {
+      "name": "outer-assignment-trailing",
+      "patch": "tests/controls/naive-outer-assignment-trailing.diff"
+    },
+    {
+      "name": "dangling-after-keyword",
+      "patch": "tests/controls/naive-dangling-after-keyword.diff"
+    },
+    {
+      "name": "leading-on-annotation",
+      "patch": "tests/controls/naive-leading-on-annotation.diff"
+    }
+  ]
+}

@@ -1,0 +1,838 @@
+diff --git a/tests/format/js/arrows/__snapshots__/format.test.js.snap b/tests/format/js/arrows/__snapshots__/format.test.js.snap
+index 0821fd6fd..24a3d0d21 100644
+--- a/tests/format/js/arrows/__snapshots__/format.test.js.snap
++++ b/tests/format/js/arrows/__snapshots__/format.test.js.snap
+@@ -236,80 +236,6 @@ a = b => {
+ ================================================================================
+ `;
+ 
+-exports[`arrow-chain-with-trailing-comments.js - {"arrowParens":"always"} format 1`] = `
+-====================================options=====================================
+-arrowParens: "always"
+-parsers: ["babel", "typescript"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-x = (bifornCringerMoshedPerplexSawder) => ((askTrovenaBeenaDependsRowans, glimseGlyphsHazardNoopsTieTie) => (f00) => {
+-  averredBathersBoxroomBuggyNurl();
+-} // BOOM
+-)
+-
+-x2 = (a) => ((askTrovenaBeenaDependsRowans1, askTrovenaBeenaDependsRowans2, askTrovenaBeenaDependsRowans3) => {
+-  c();
+-} /* ! */ // KABOOM
+-)
+-
+-=====================================output=====================================
+-x =
+-  (bifornCringerMoshedPerplexSawder) =>
+-  (askTrovenaBeenaDependsRowans, glimseGlyphsHazardNoopsTieTie) =>
+-  (f00) => {
+-    averredBathersBoxroomBuggyNurl();
+-  }; // BOOM
+-
+-x2 =
+-  (a) =>
+-  (
+-    askTrovenaBeenaDependsRowans1,
+-    askTrovenaBeenaDependsRowans2,
+-    askTrovenaBeenaDependsRowans3,
+-  ) => {
+-    c();
+-  }; /* ! */ // KABOOM
+-
+-================================================================================
+-`;
+-
+-exports[`arrow-chain-with-trailing-comments.js - {"arrowParens":"avoid"} format 1`] = `
+-====================================options=====================================
+-arrowParens: "avoid"
+-parsers: ["babel", "typescript"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-x = (bifornCringerMoshedPerplexSawder) => ((askTrovenaBeenaDependsRowans, glimseGlyphsHazardNoopsTieTie) => (f00) => {
+-  averredBathersBoxroomBuggyNurl();
+-} // BOOM
+-)
+-
+-x2 = (a) => ((askTrovenaBeenaDependsRowans1, askTrovenaBeenaDependsRowans2, askTrovenaBeenaDependsRowans3) => {
+-  c();
+-} /* ! */ // KABOOM
+-)
+-
+-=====================================output=====================================
+-x =
+-  bifornCringerMoshedPerplexSawder =>
+-  (askTrovenaBeenaDependsRowans, glimseGlyphsHazardNoopsTieTie) =>
+-  f00 => {
+-    averredBathersBoxroomBuggyNurl();
+-  }; // BOOM
+-
+-x2 =
+-  a =>
+-  (
+-    askTrovenaBeenaDependsRowans1,
+-    askTrovenaBeenaDependsRowans2,
+-    askTrovenaBeenaDependsRowans3,
+-  ) => {
+-    c();
+-  }; /* ! */ // KABOOM
+-
+-================================================================================
+-`;
+-
+ exports[`assignment-chain-with-arrow-chain.js - {"arrowParens":"always"} format 1`] = `
+ ====================================options=====================================
+ arrowParens: "always"
+diff --git a/tests/format/js/arrows/arrow-chain-with-trailing-comments.js b/tests/format/js/arrows/arrow-chain-with-trailing-comments.js
+deleted file mode 100644
+index e5fc47736..000000000
+--- a/tests/format/js/arrows/arrow-chain-with-trailing-comments.js
++++ /dev/null
+@@ -1,9 +0,0 @@
+-x = (bifornCringerMoshedPerplexSawder) => ((askTrovenaBeenaDependsRowans, glimseGlyphsHazardNoopsTieTie) => (f00) => {
+-  averredBathersBoxroomBuggyNurl();
+-} // BOOM
+-)
+-
+-x2 = (a) => ((askTrovenaBeenaDependsRowans1, askTrovenaBeenaDependsRowans2, askTrovenaBeenaDependsRowans3) => {
+-  c();
+-} /* ! */ // KABOOM
+-)
+diff --git a/tests/format/js/sequence-expression/__snapshots__/format.test.js.snap b/tests/format/js/sequence-expression/__snapshots__/format.test.js.snap
+index c3852f535..0857a0032 100644
+--- a/tests/format/js/sequence-expression/__snapshots__/format.test.js.snap
++++ b/tests/format/js/sequence-expression/__snapshots__/format.test.js.snap
+@@ -81,52 +81,6 @@ const a = () => () =>
+ ================================================================================
+ `;
+ 
+-exports[`parenthesized.js format 1`] = `
+-====================================options=====================================
+-parsers: ["babel", "flow", "typescript"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-console.log(
+-  /* 1 */
+-  (
+-    /* 2 */
+-    (
+-      /* 3 */
+-      first
+-      /* 4 */
+-    )
+-    /* 5 */
+-    ,
+-    /* 6 */
+-    (
+-      /* 7 */
+-      last
+-      /* 8 */
+-    )
+-    /* 9 */
+-  )
+-  /* 10 */
+-);
+-
+-=====================================output=====================================
+-console.log(
+-  /* 1 */
+-  /* 2 */
+-  /* 3 */
+-  (first,
+-  /* 4 */
+-  /* 5 */
+-  /* 6 */
+-  /* 7 */
+-  last),
+-  /* 8 */
+-  /* 9 */
+-  /* 10 */
+-);
+-
+-================================================================================
+-`;
+-
+ exports[`parenthesized-trailing-comment.js format 1`] = `
+ ====================================options=====================================
+ parsers: ["babel", "flow", "typescript"]
+@@ -168,10 +122,6 @@ const x22 = (a = c) /* comment */;
+ 
+ assigned = (a, b, c /* comment */);
+ assigned = (a, b, c) /* comment */;
+-assigned = (a = c /* comment */);
+-x = y = (a = c /* comment */);
+-obj.p = (a = c /* comment */);
+-assigned = ((a = c) /* comment */);
+ 
+ function f() {
+   return (a, b, c /* comment */);
+@@ -208,10 +158,6 @@ foo(); /* comment */
+ 
+ assigned = (a, b, c /* comment */);
+ assigned = (a, b, c); /* comment */
+-assigned = a = c; /* comment */
+-x = y = a = c; /* comment */
+-obj.p = a = c; /* comment */
+-assigned = a = c; /* comment */
+ 
+ function f() {
+   return (a, b, c /* comment */);
+diff --git a/tests/format/js/sequence-expression/parenthesized-trailing-comment.js b/tests/format/js/sequence-expression/parenthesized-trailing-comment.js
+index c32f6898e..525ebfdef 100644
+--- a/tests/format/js/sequence-expression/parenthesized-trailing-comment.js
++++ b/tests/format/js/sequence-expression/parenthesized-trailing-comment.js
+@@ -34,10 +34,6 @@ const x22 = (a = c) /* comment */;
+ 
+ assigned = (a, b, c /* comment */);
+ assigned = (a, b, c) /* comment */;
+-assigned = (a = c /* comment */);
+-x = y = (a = c /* comment */);
+-obj.p = (a = c /* comment */);
+-assigned = ((a = c) /* comment */);
+ 
+ function f() {
+   return (a, b, c /* comment */);
+diff --git a/tests/format/js/sequence-expression/parenthesized.js b/tests/format/js/sequence-expression/parenthesized.js
+deleted file mode 100644
+index 5fc2a7032..000000000
+--- a/tests/format/js/sequence-expression/parenthesized.js
++++ /dev/null
+@@ -1,21 +0,0 @@
+-console.log(
+-  /* 1 */
+-  (
+-    /* 2 */
+-    (
+-      /* 3 */
+-      first
+-      /* 4 */
+-    )
+-    /* 5 */
+-    ,
+-    /* 6 */
+-    (
+-      /* 7 */
+-      last
+-      /* 8 */
+-    )
+-    /* 9 */
+-  )
+-  /* 10 */
+-);
+diff --git a/tests/format/typescript/class-comment/__snapshots__/format.test.js.snap b/tests/format/typescript/class-comment/__snapshots__/format.test.js.snap
+index 54442b8b7..1a4e3878f 100644
+--- a/tests/format/typescript/class-comment/__snapshots__/format.test.js.snap
++++ b/tests/format/typescript/class-comment/__snapshots__/format.test.js.snap
+@@ -15,14 +15,6 @@ class a2 extends b implements z { // comment
+   constructor() {}
+ }
+ 
+-class a3 extends b
+-implements
+-// comment
+-z,
+-y {
+-  constructor() {}
+-}
+-
+ class a4 extends b
+ implements z, // comment
+ y {
+@@ -36,48 +28,6 @@ class a5 extends b  implements
+   constructor() {}
+ }
+ 
+-class a6 extends b  implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-    {
+-  constructor() {}
+-}
+-
+-class a7 extends b  implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-         // comment-y3
+-    {
+-      //comment-body
+-  constructor() {}
+-}
+-
+-class a8 extends b // comment-b
+- implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-    {
+-  constructor() {}
+-}
+-
+-class a9 extends
+-// comment-b1
+-b // comment-b2
+-// comment-b3
+- implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-    {
+-  constructor() {}
+-}
+ 
+ =====================================output=====================================
+ class a1
+@@ -92,16 +42,6 @@ class a2 extends b implements z {
+   constructor() {}
+ }
+ 
+-class a3
+-  extends b
+-  implements
+-    // comment
+-    z,
+-    y
+-{
+-  constructor() {}
+-}
+-
+ class a4
+   extends b
+   implements
+@@ -121,58 +61,6 @@ class a5
+   constructor() {}
+ }
+ 
+-class a6
+-  extends b
+-  implements
+-    // comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y
+-{
+-  // comment-y2
+-  constructor() {}
+-}
+-
+-class a7
+-  extends b
+-  implements
+-    // comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y
+-{
+-  // comment-y2
+-  // comment-y3
+-  //comment-body
+-  constructor() {}
+-}
+-
+-class a8
+-  extends b // comment-b
+-  implements
+-    // comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y
+-{
+-  // comment-y2
+-  constructor() {}
+-}
+-
+-class a9
+-  // comment-b1
+-  extends b // comment-b2
+-  // comment-b3
+-  implements
+-    // comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y
+-{
+-  // comment-y2
+-  constructor() {}
+-}
+-
+ ================================================================================
+ `;
+ 
+@@ -265,40 +153,6 @@ class G4<
+ ================================================================================
+ `;
+ 
+-exports[`issue-16228.ts format 1`] = `
+-====================================options=====================================
+-parsers: ["typescript", "flow"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-class C11 extends S implements /* foo */ Foo, /* bar */ Bar {
+-}
+-class C12 extends S implements /* foo */ Foo, /* bar */ Bar, /* baz */ Baz__________________________________ {
+-}
+-
+-interface I11 extends /* foo */ Foo, /* bar */ Bar {
+-}
+-interface I12 extends /* foo */ Foo, /* bar */ Bar, /* baz */ Baz__________________________________ {
+-}
+-
+-=====================================output=====================================
+-class C11 extends S implements /* foo */ Foo, /* bar */ Bar {}
+-class C12
+-  extends S
+-  implements
+-    /* foo */ Foo,
+-    /* bar */ Bar,
+-    /* baz */ Baz__________________________________ {}
+-
+-interface I11 extends /* foo */ Foo, /* bar */ Bar {}
+-interface I12
+-  extends
+-    /* foo */ Foo,
+-    /* bar */ Bar,
+-    /* baz */ Baz__________________________________ {}
+-
+-================================================================================
+-`;
+-
+ exports[`misc.ts format 1`] = `
+ ====================================options=====================================
+ parsers: ["typescript", "flow"]
+diff --git a/tests/format/typescript/class-comment/class-implements.ts b/tests/format/typescript/class-comment/class-implements.ts
+index dea8b6643..904083297 100644
+--- a/tests/format/typescript/class-comment/class-implements.ts
++++ b/tests/format/typescript/class-comment/class-implements.ts
+@@ -8,14 +8,6 @@ class a2 extends b implements z { // comment
+   constructor() {}
+ }
+ 
+-class a3 extends b
+-implements
+-// comment
+-z,
+-y {
+-  constructor() {}
+-}
+-
+ class a4 extends b
+ implements z, // comment
+ y {
+@@ -29,45 +21,3 @@ class a5 extends b  implements
+   constructor() {}
+ }
+ 
+-class a6 extends b  implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-    {
+-  constructor() {}
+-}
+-
+-class a7 extends b  implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-         // comment-y3
+-    {
+-      //comment-body
+-  constructor() {}
+-}
+-
+-class a8 extends b // comment-b
+- implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-    {
+-  constructor() {}
+-}
+-
+-class a9 extends
+-// comment-b1
+-b // comment-b2
+-// comment-b3
+- implements
+-// comment-z1
+-    z, // comment-z2
+-    // comment-y1
+-    y // comment-y2
+-    {
+-  constructor() {}
+-}
+diff --git a/tests/format/typescript/class-comment/issue-16228.ts b/tests/format/typescript/class-comment/issue-16228.ts
+deleted file mode 100644
+index ec01fe415..000000000
+--- a/tests/format/typescript/class-comment/issue-16228.ts
++++ /dev/null
+@@ -1,9 +0,0 @@
+-class C11 extends S implements /* foo */ Foo, /* bar */ Bar {
+-}
+-class C12 extends S implements /* foo */ Foo, /* bar */ Bar, /* baz */ Baz__________________________________ {
+-}
+-
+-interface I11 extends /* foo */ Foo, /* bar */ Bar {
+-}
+-interface I12 extends /* foo */ Foo, /* bar */ Bar, /* baz */ Baz__________________________________ {
+-}
+diff --git a/tests/format/typescript/comments/consistent-with-flow/11639.ts b/tests/format/typescript/comments/consistent-with-flow/11639.ts
+deleted file mode 100644
+index b36a59ba7..000000000
+--- a/tests/format/typescript/comments/consistent-with-flow/11639.ts
++++ /dev/null
+@@ -1,14 +0,0 @@
+-const foo = forwardRef<any>(({
+-      // foo
+-      size,
+-      // onClose,
+-      // onOpen,
+-    }: PopoverProps,
+-) => {})
+-
+-export function Component({
+-  prop,
+-  // comment
+-}: Type) {
+-  return div;
+-}
+diff --git a/tests/format/typescript/comments/consistent-with-flow/15707.ts b/tests/format/typescript/comments/consistent-with-flow/15707.ts
+deleted file mode 100644
+index 957ba97a5..000000000
+--- a/tests/format/typescript/comments/consistent-with-flow/15707.ts
++++ /dev/null
+@@ -1,67 +0,0 @@
+-const {
+-  foo11,
+-  // bar
+-  // baz
+-}: Foo = expr;
+-
+-const {
+-  foo21,
+-  // bar
+-  foo22,
+-  // baz
+-}: Foo = expr;
+-
+-const [
+-  foo31,
+-  // bar
+-  // baz
+-]: Foo = expr;
+-
+-const [
+-  foo41,
+-  // bar
+-  foo42,
+-  // baz
+-]: Foo = expr;
+-
+-function method({
+-  foo,
+-  // bar = "bar",
+-  // bazz = "bazz",
+-}: Foo) {}
+-
+-function method({
+-  foo1,
+-  // bar = "bar",
+-  foo2
+-  // bazz = "bazz",
+-}: Foo) {}
+-
+-function method([
+-  foo,
+-  // bar = "bar",
+-  foo2
+-  // bazz = "bazz",
+-]: Foo) {}
+-
+-const {
+-  // bar
+-  // baz
+-}: Foo = expr;
+-
+-const [
+-  // bar
+-  // baz
+-]: Foo = expr;
+-
+-const { // foo
+-}: Foo = expr;
+-const { // foo
+-  bar61
+-}: Foo = expr;
+-
+-const [ // bar
+-]: Foo = expr;
+-const [ // bar
+-  bar71
+-]: Foo = expr;
+diff --git a/tests/format/typescript/comments/consistent-with-flow/19903.ts b/tests/format/typescript/comments/consistent-with-flow/19903.ts
+deleted file mode 100644
+index 5b9d386b8..000000000
+--- a/tests/format/typescript/comments/consistent-with-flow/19903.ts
++++ /dev/null
+@@ -1,15 +0,0 @@
+-const []
+-  // bar
+-  : Foo = expr;
+-
+-const {}
+-  // bar
+-  : Foo = expr;
+-
+-const [foo1]
+-  // bar
+-  : Foo = expr;
+-
+-const {foo2}
+-  // bar
+-  : Foo = expr;
+diff --git a/tests/format/typescript/comments/consistent-with-flow/__snapshots__/format.test.js.snap b/tests/format/typescript/comments/consistent-with-flow/__snapshots__/format.test.js.snap
+index 3a93c9db0..10a0b6998 100644
+--- a/tests/format/typescript/comments/consistent-with-flow/__snapshots__/format.test.js.snap
++++ b/tests/format/typescript/comments/consistent-with-flow/__snapshots__/format.test.js.snap
+@@ -1,233 +1,5 @@
+ // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+ 
+-exports[`11639.ts format 1`] = `
+-====================================options=====================================
+-parsers: ["typescript", "flow"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-const foo = forwardRef<any>(({
+-      // foo
+-      size,
+-      // onClose,
+-      // onOpen,
+-    }: PopoverProps,
+-) => {})
+-
+-export function Component({
+-  prop,
+-  // comment
+-}: Type) {
+-  return div;
+-}
+-
+-=====================================output=====================================
+-const foo = forwardRef<any>(
+-  ({
+-    // foo
+-    size,
+-    // onClose,
+-    // onOpen,
+-  }: PopoverProps) => {},
+-);
+-
+-export function Component({
+-  prop,
+-  // comment
+-}: Type) {
+-  return div;
+-}
+-
+-================================================================================
+-`;
+-
+-exports[`15707.ts format 1`] = `
+-====================================options=====================================
+-parsers: ["typescript", "flow"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-const {
+-  foo11,
+-  // bar
+-  // baz
+-}: Foo = expr;
+-
+-const {
+-  foo21,
+-  // bar
+-  foo22,
+-  // baz
+-}: Foo = expr;
+-
+-const [
+-  foo31,
+-  // bar
+-  // baz
+-]: Foo = expr;
+-
+-const [
+-  foo41,
+-  // bar
+-  foo42,
+-  // baz
+-]: Foo = expr;
+-
+-function method({
+-  foo,
+-  // bar = "bar",
+-  // bazz = "bazz",
+-}: Foo) {}
+-
+-function method({
+-  foo1,
+-  // bar = "bar",
+-  foo2
+-  // bazz = "bazz",
+-}: Foo) {}
+-
+-function method([
+-  foo,
+-  // bar = "bar",
+-  foo2
+-  // bazz = "bazz",
+-]: Foo) {}
+-
+-const {
+-  // bar
+-  // baz
+-}: Foo = expr;
+-
+-const [
+-  // bar
+-  // baz
+-]: Foo = expr;
+-
+-const { // foo
+-}: Foo = expr;
+-const { // foo
+-  bar61
+-}: Foo = expr;
+-
+-const [ // bar
+-]: Foo = expr;
+-const [ // bar
+-  bar71
+-]: Foo = expr;
+-
+-=====================================output=====================================
+-const {
+-  foo11,
+-  // bar
+-  // baz
+-}: Foo = expr;
+-
+-const {
+-  foo21,
+-  // bar
+-  foo22,
+-  // baz
+-}: Foo = expr;
+-
+-const [
+-  foo31,
+-  // bar
+-  // baz
+-]: Foo = expr;
+-
+-const [
+-  foo41,
+-  // bar
+-  foo42,
+-  // baz
+-]: Foo = expr;
+-
+-function method({
+-  foo,
+-  // bar = "bar",
+-  // bazz = "bazz",
+-}: Foo) {}
+-
+-function method({
+-  foo1,
+-  // bar = "bar",
+-  foo2,
+-  // bazz = "bazz",
+-}: Foo) {}
+-
+-function method([
+-  foo,
+-  // bar = "bar",
+-  foo2,
+-  // bazz = "bazz",
+-]: Foo) {}
+-
+-const {
+-  // bar
+-  // baz
+-}: Foo = expr;
+-
+-const [
+-  // bar
+-  // baz
+-]: Foo = expr;
+-
+-const {
+-  // foo
+-}: Foo = expr;
+-const {
+-  // foo
+-  bar61,
+-}: Foo = expr;
+-
+-const [
+-  // bar
+-]: Foo = expr;
+-const [
+-  // bar
+-  bar71,
+-]: Foo = expr;
+-
+-================================================================================
+-`;
+-
+-exports[`19903.ts format 1`] = `
+-====================================options=====================================
+-parsers: ["typescript", "flow"]
+-                                                      printWidth: 80 (default) |
+-=====================================input======================================
+-const []
+-  // bar
+-  : Foo = expr;
+-
+-const {}
+-  // bar
+-  : Foo = expr;
+-
+-const [foo1]
+-  // bar
+-  : Foo = expr;
+-
+-const {foo2}
+-  // bar
+-  : Foo = expr;
+-
+-=====================================output=====================================
+-const [] // bar
+-: Foo = expr;
+-
+-const {} // bar
+-: Foo = expr;
+-
+-const [foo1] // bar
+-: Foo = expr;
+-
+-const {
+-  foo2,
+-} // bar
+-: Foo = expr;
+-
+-================================================================================
+-`;
+-
+ exports[`after-jsx-generic.tsx format 1`] = `
+ ====================================options=====================================
+ parsers: ["typescript", "flow"]

@@ -1,9 +1,11 @@
 """Reflection Beam, Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra on VulcanBench Frontier v4.
 
-One card in the format of the Sonnet 5.5 and DeepSeek V4.1 Flash comparison
-cards: combined score and time per task at every effort level, and a table per
-column. Reflection publishes no Beam price, so the right panel shows minutes,
-not cost, and Beam's cost row reads n/a.
+A compact 16:9 card (owner request 2026-10-27): the model and version as the
+title, then two charts, combined score and time per task at every effort
+level, and one footnote line that keeps the judged run counts and the judge
+panels visible. The per-level table it used to carry is written to the CSV
+beside the card. Reflection publishes no Beam price, so the right panel shows
+minutes, not cost.
 
 The three frontier models finish within a few points of each other and Beam
 20 to 50 points lower, so the combined score panel breaks its axis: the
@@ -32,7 +34,6 @@ import json
 import math
 import statistics
 import sys
-import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -205,7 +206,7 @@ def levels_of(m):
     return LEVELS
 
 
-def main():  # noqa: PLR0912, PLR0915, one linear figure
+def main():  # noqa: PLR0915, one linear figure
     parser = argparse.ArgumentParser()
     parser.add_argument("--judging", type=Path, required=True)
     groups, final, sources = load_groups(parser.parse_args().judging)
@@ -213,7 +214,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    W, H = 16, 19.0
+    W, H = 16, 9.0
     fig = plt.figure(figsize=(W, H), dpi=150, facecolor=PAPER)
     yf = lambda i: 1 - i / H  # noqa: E731
 
@@ -249,40 +250,19 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     )
     logo.axis("off")
     text(left + 0.038, 0.65, "VulcanBench", 20, True, heading=True)
-    text(right, 0.65, "October 2026", 14, ha="right", color=MUTED)
+    text(right, 0.65, "Frontier v4  ·  October 2026", 14, ha="right", color=MUTED)
     line(left, right, 1.05, INK, 1.2)
 
     best = {m: max(levels_of(m), key=lambda e: groups[m, e]["combined"]["mean"]) for m in MODELS}
-    text(
-        left,
-        1.72,
-        "VulcanBench Frontier v4: Reflection Beam against the frontier",
-        30,
-        True,
-        heading=True,
-    )
+    text(left, 1.72, "Reflection Beam 1.0 (501B-A23B)", 30, True, heading=True)
     order = sorted(MODELS, key=lambda m: -groups[m, best[m]]["combined"]["mean"])
-    head = "  ·  ".join(
-        f"{NAMES[m].replace('Claude ', '').replace('Reflection ', '')} "
-        f"{groups[m, best[m]]['combined']['mean']:.2f} ({best[m].replace('-', ' ').capitalize()})"
-        for m in order
-    )
-    text(left, 2.22, f"Best combined score: {head}.", 14.5)
-    text(
-        left,
-        2.60,
-        "23 hard legacy-reconstruction tasks per effort level. Code quality judged by Muse Spark 1.3 with Grok 4.6 "
-        "(Opus 5.5, Sol, Astra) or GPT-6.1 Sol (Beam).",
-        13.5,
-        color=MUTED,
-    )
 
     x = left
     for m in MODELS:
         fig.add_artist(
             plt.Line2D(
                 [x + 0.004],
-                [yf(3.05)],
+                [yf(2.4)],
                 transform=fig.transFigure,
                 marker=MARKERS[m],
                 color=COLORS[m],
@@ -293,7 +273,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             )
         )
         label = f"{NAMES[m]}{' (with fallback)' if m in CLAUDE_MAIN else ''}"
-        text(x + 0.016, 3.05, label, 13, True)
+        text(x + 0.016, 2.4, label, 13, True)
         x += {"beam": 0.19, "opus55": 0.27, "gpt61sol": 0.15, "astra": 0}[m]
 
     def axis(x0, w, top, h):
@@ -307,11 +287,11 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ax.set_xticks(range(len(LEVELS)), [e.replace("-", " ").capitalize() for e in LEVELS])
         return ax
 
-    text(left, 3.62, "Combined score", 20, True, heading=True)
+    text(left, 3.0, "Combined score", 20, True, heading=True)
     # Broken axis: a zoomed band for the three frontier models over Beam's own band.
-    top_h, gap_h, bot_h = 1.7, 0.14, 1.36
-    upper = axis(0.085, 0.40, 4.25, top_h)
-    lower = axis(0.085, 0.40, 4.25 + top_h + gap_h, bot_h)
+    top_h, gap_h, bot_h = 2.1, 0.14, 1.66
+    upper = axis(0.085, 0.40, 3.7, top_h)
+    lower = axis(0.085, 0.40, 3.7 + top_h + gap_h, bot_h)
     front = [groups[m, e]["combined"] for m in FRONTIER for e in LEVELS]
     up_lo = math.floor(min(v["mean"] - v["se"] for v in front))
     up_hi = math.ceil(max(v["mean"] + v["se"] for v in front)) + 1
@@ -321,8 +301,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     require(lo_hi < up_lo, "Beam and the frontier band overlap; the broken axis would hide data")
     text(
         left,
-        3.94,
-        f"/100  ·  higher is better  ·  axis broken between {lo_hi} and {up_lo}  ·  whiskers +/-1 se",
+        3.32,
+        f"higher is better  ·  axis broken between {lo_hi} and {up_lo}  ·  whiskers ±1 se",
         12,
         color=MUTED,
     )
@@ -409,15 +389,9 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             fontfamily="Geist",
         )
 
-    text(0.56, 3.62, "Time per task", 20, True, heading=True)
-    text(
-        0.56,
-        3.94,
-        "mean wall-clock minutes per task  ·  lower is faster  ·  Beam has no published price",
-        12,
-        color=MUTED,
-    )
-    ax = axis(0.585, 0.355, 4.25, 3.2)
+    text(0.56, 3.0, "Time per task", 20, True, heading=True)
+    text(0.56, 3.32, "minutes  ·  lower is faster", 12, color=MUTED)
+    ax = axis(0.585, 0.355, 3.7, top_h + gap_h + bot_h)
     shifts = {"beam": -0.3, "opus55": -0.1, "gpt61sol": 0.1, "astra": 0.3}
     top = max(groups[m, e]["minutes"]["mean"] for m in MODELS for e in levels_of(m))
     ax.set_ylim(0, top * 1.22)
@@ -446,116 +420,26 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 color=INK,
             )
 
-    ty = 8.35
-    text(left, ty, "Table 1  |  Every effort level", 14.5, heading=True)
-    cols = dict(zip(LEVELS, (0.54, 0.64, 0.74, 0.84, 0.94), strict=True))
-    line(left, right, ty + 0.28, INK, 1.2)
-    text(left, ty + 0.52, "Model and measure", 12.5, True)
-    for e in LEVELS:
-        text(cols[e], ty + 0.52, e.replace("-", " ").capitalize(), 12.5, True, ha="right")
-    line(left, right, ty + 0.72, INK, 0.6)
-    y = ty + 0.98
-    for m in MODELS:
-        text(left, y, NAMES[m], 13, True)
-        fig.add_artist(
-            plt.Line2D(
-                [left - 0.012],
-                [yf(y)],
-                transform=fig.transFigure,
-                marker=MARKERS[m],
-                color=COLORS[m],
-                markersize=7,
-                markeredgecolor=INK,
-                markeredgewidth=0.5,
-                linestyle="none",
-            )
+    short = {m: NAMES[m].replace("Claude ", "").replace("Reflection ", "") for m in MODELS}
+    partial = "; ".join(
+        short[m]
+        + " "
+        + ", ".join(
+            f"{e.replace('-', ' ').capitalize()} {groups[m, e]['combined']['n']}"
+            for e in LEVELS
+            if groups[m, e]["combined"]["n"] < 23
         )
-        measures = [
-            (
-                "Combined score",
-                lambda g: f"{g['combined']['mean']:.2f}" + ("*" if g["combined"]["n"] < 23 else ""),
-                True,
-            ),
-            ("Tasks passed of 23", lambda g: str(g["passed"]), False),
-            (
-                "Cost per task, USD",
-                lambda g: (
-                    "n/a"
-                    if g["usd"]["mean"] is None
-                    else ("~" if g["usd"].get("estimate") else "") + f"{g['usd']['mean']:.2f}"
-                ),
-                False,
-            ),
-        ]
-        if m in UNJUDGED_AS_ZERO:
-            measures.insert(
-                1,
-                (
-                    f"Combined, {UNJUDGED_AS_ZERO[m]}",
-                    lambda g: f"{g['zero']['mean']:.2f}" if g["zero"] else "same",
-                    False,
-                ),
-            )
-        if m == "beam":
-            measures.append(("Minutes per task", lambda g: f"{g['minutes']['mean']:.1f}", False))
-            measures.append(
-                ("Tokens per task, millions", lambda g: f"{g['tokens']['mean'] / 1e6:.2f}", False)
-            )
-        if m in CLAUDE_MAIN:
-            measures.append(
-                (
-                    "Fallback share of replies (runs)",
-                    lambda g: f"{g['fb_share']:.1f}% ({g['fb_runs']})",
-                    False,
-                )
-            )
-        for label, fn, strong in measures:
-            y += 0.30
-            text(left + 0.012, y, label, 12, color=INK if strong else MUTED)
-            for e in LEVELS:
-                if (m, e) not in groups:
-                    text(cols[e], y, "not run", 12, ha="right", color=MUTED)
-                    continue
-                g = groups[m, e]
-                emph = strong and e == best[m]
-                text(
-                    cols[e],
-                    y,
-                    fn(g),
-                    13 if strong else 12,
-                    emph,
-                    numeric=True,
-                    ha="right",
-                    color=INK,
-                )
-        y += 0.40
-        line(left, right, y - 0.2, RULE, 0.6)
-    line(left, right, y - 0.2, INK, 1.2)
-
-    notes = [
-        "* Combined score over the judged runs when fewer than 23. Bold marks each model's best level. Beam's Low and Medium include "
-        "runs that changed no source code (12 at Low, 3 at Medium, file-mode or scratch changes only, or none); they are not judged "
-        "and count as failed, and the row below shows the combined score counting them as 0. Max is over 22: one run's evidence was "
-        "too large for either judge to review.",
-        "Protocols: Beam is Code quality v3.28, Opus 5.5 is v3.15, GPT-6.1 Sol is v3.18 and GPT-6 Astra is v3.4, with the same "
-        "rubric, controls and weights. Opus 5.5, Sol and Astra were judged by Muse Spark 1.3 and Grok 4.6; Beam by Muse Spark 1.3 "
-        "and GPT-6.1 Sol, because Grok 4.6's Cursor account was out of usage. The panels are not calibrated against each other, and "
-        "Sol judged a column it is shown beside.",
-        "Costs are at list price: Opus 5.5 is Claude Code's own total; GPT-6.1 Sol is its Codex token receipts; GPT-6 Astra is its "
-        "report's central estimate. Astra and Sol charge more on requests over 272K input tokens and per-request sizes were not "
-        "recorded, so that premium is not applied (Astra's report gives an upper bound).",
-        "Beam ran in Reflection's Mirror CLI 0.1.1 (early beta) through Reflection's API; Reflection publishes no price, so it has no "
-        "cost. Mirror labels a Permission denied error as a sandbox denial, and two Low runs ended believing the sandbox blocked "
-        "the legacy binary. A daily API token limit paused the sweep once; no finished run was affected.",
-        "Harnesses differ (Mirror CLI 0.1.1, Claude Code 2.1.280, Codex), so small gaps are harness confounded. Opus 5.5, GPT-6.1 Sol "
-        "and GPT-6 Astra numbers are their published per-level rows; nothing was re-run or re-judged.",
-    ]
-    yy = y + 0.12
-    for n in notes:
-        for w in textwrap.wrap(n, 200):
-            text(left, yy, w, 10.5, color=MUTED)
-            yy += 0.24
-        yy += 0.05
+        for m in MODELS
+        if any(groups[m, e]["combined"]["n"] < 23 for e in LEVELS)
+    )
+    text(
+        left,
+        8.45,
+        f"Judged runs: 23 per point except {partial}. Code quality judges: Muse Spark 1.3 with GPT-6.1 Sol "
+        "(Beam) or Grok 4.6 (others). Harnesses differ.",
+        11,
+        color=MUTED,
+    )
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
     suffix = "" if final else "-preliminary"

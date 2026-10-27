@@ -1,0 +1,3865 @@
+{
+ "cells": {
+  "beam/extra-high": 23,
+  "beam/high": 23,
+  "beam/low": 21,
+  "beam/max": 23,
+  "beam/medium": 22
+ },
+ "excluded": [
+  {
+   "duration_s": 17.475,
+   "effort": "low",
+   "finished": true,
+   "functional": 0.0,
+   "model": "beam",
+   "reason": "Incomplete source run: /Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-blendcore-binary-parity-48d9fcee",
+   "run_id": "legacy-blendcore-binary-parity-48d9fcee",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "duration_s": 15.721,
+   "effort": "low",
+   "finished": true,
+   "functional": 0.0,
+   "model": "beam",
+   "reason": "Incomplete source run: /Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-metercore-binary-parity-ba0eba67",
+   "run_id": "legacy-metercore-binary-parity-ba0eba67",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "duration_s": 588.384,
+   "effort": "medium",
+   "finished": true,
+   "functional": 0.0,
+   "model": "beam",
+   "reason": "Incomplete source run: /Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-granarycore-binary-parity-ba5d4f01",
+   "run_id": "legacy-granarycore-binary-parity-ba5d4f01",
+   "task": "legacy-granarycore-binary-parity"
+  }
+ ],
+ "levels": {
+  "beam": [
+   "low",
+   "medium",
+   "high",
+   "extra-high",
+   "max"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "beam": "Reflection Beam (Beam-1.0-501B-A23B) in Mirror CLI 0.1.1"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 24.961,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:24:12.096496+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.873,
+   "reported_tokens": 150645,
+   "run_id": "legacy-cellarcore-binary-parity-6b01adfd",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 150645,
+    "result_receipts": null,
+    "stream_sha256": "3b114824a02d727f46f5d81d07a9cfd0830618c97629e39bab379eaf8c7589a6",
+    "usage": {
+     "cached_input_tokens": 123776,
+     "input_tokens": 148226,
+     "output_tokens": 2419,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-cellarcore-binary-parity-6b01adfd",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "2c4d62e342fe99902e1e21edd4c8c1e591a37090ec7679ba9f7f931934b75edb",
+    "summary": "08d3a08a012517a39ec6d8d8488a0d582ea812df76d7f4363d8a0dd5f964421e",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-23T21:23:47.133003+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 21.167,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:18:39.942689+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8231,
+   "reported_tokens": 113496,
+   "run_id": "legacy-codeccore-binary-parity-3a2d8252",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 113496,
+    "result_receipts": null,
+    "stream_sha256": "8da26cb58497ce18ff5f1cee715f58e9995e6296078150e42e2368570da69561",
+    "usage": {
+     "cached_input_tokens": 91008,
+     "input_tokens": 111399,
+     "output_tokens": 2097,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-codeccore-binary-parity-3a2d8252",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "b08be558e4cc3d24059b8eb2d3e66904395aba9aa714af711114d2280387bccc",
+    "summary": "3491729fd2dd053219c34f5d51566549112d877145a1f49a8e885b90a41d4bc1",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-23T21:18:18.773791+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 23.421,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:23:29.984484+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 85993,
+   "run_id": "legacy-depotcore-binary-parity-adc81b3f",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 85993,
+    "result_receipts": null,
+    "stream_sha256": "96138289379a7273919c75e9f38819c65e090131909f081409b8610b79fbb8f3",
+    "usage": {
+     "cached_input_tokens": 67648,
+     "input_tokens": 83705,
+     "output_tokens": 2288,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-depotcore-binary-parity-adc81b3f",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "6f534060907702608159f5c0abe6a3d5ee7107dcd518194d36f6452b4dc5bc70",
+    "summary": "923dbcbf8cf8cb6d78aa2a2a2dc838a6e251fd63d1977bdd53f7ab2bdf6b96b8",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-23T21:23:06.561739+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 34.914,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:18:18.705668+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8362,
+   "reported_tokens": 68161,
+   "run_id": "legacy-freightcore-binary-parity-f21c56d0",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 68161,
+    "result_receipts": null,
+    "stream_sha256": "c090733ed2314a62da7671c5263be15c6b62505a6c9167e3b389d4830d856aaa",
+    "usage": {
+     "cached_input_tokens": 52736,
+     "input_tokens": 66412,
+     "output_tokens": 1749,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-freightcore-binary-parity-f21c56d0",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "6198374c1f52d384da0aff852919d2b66135117dcd540816c495e38c0cc8d6cf",
+    "summary": "d688afb7e76952a4240798a4b6015a2815ef3ead26c167a29d65428f942e7632",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-23T21:17:43.789536+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 21.619,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:23:06.489755+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 64582,
+   "run_id": "legacy-granarycore-binary-parity-11360001",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 64582,
+    "result_receipts": null,
+    "stream_sha256": "9c636fe455e5f45d3aa6537a77bc098ad198cc81a26fdb958509806ab804c68f",
+    "usage": {
+     "cached_input_tokens": 48384,
+     "input_tokens": 63081,
+     "output_tokens": 1501,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-granarycore-binary-parity-11360001",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "dedef8611dd432284ae2c9e2d2a972a9e007b3a82f55d0c6998028774238592e",
+    "summary": "ed7702b7f6cd495b23d1dc67541055418c80b7ea9223fbed5602f31ad31623a9",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-23T21:22:44.869570+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 18.66,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:20:46.413447+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 56620,
+   "run_id": "legacy-hedgecore-binary-parity-d668c634",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 56620,
+    "result_receipts": null,
+    "stream_sha256": "ab5e8676ad0ea465d22aa7fa2d1012c8c37658c52ee729fec81685f0300bf969",
+    "usage": {
+     "cached_input_tokens": 45888,
+     "input_tokens": 54330,
+     "output_tokens": 2290,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-hedgecore-binary-parity-d668c634",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "702b2c0a6f800a483bb824c0bc115fbc7c0ff11195c09e122fcb62883148956c",
+    "summary": "2fb22b6a903ead9a9d7d9424d4940b88b50205e236339c161e46e7eb8c9b148f",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-23T21:20:27.751316+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 17.003,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:23:47.058845+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 79917,
+   "run_id": "legacy-lodgecore-binary-parity-6feed5c2",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 79917,
+    "result_receipts": null,
+    "stream_sha256": "fe91eff4338dbfe6873261fb2314fc4c3a846ab2ce9978797ce1372e30d79a10",
+    "usage": {
+     "cached_input_tokens": 67648,
+     "input_tokens": 78102,
+     "output_tokens": 1815,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-lodgecore-binary-parity-6feed5c2",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "5e455761cf40fb1ee84a67de5252f604302e0cad96e3ef6c9948bc69a095f7d6",
+    "summary": "6099778ceaf415b572c8338eeaa911eab7e244b7d67d4da985d55df7d7f019ed",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-23T21:23:30.054228+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 23.421,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:16:47.714054+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 99794,
+   "run_id": "legacy-matchcore-order-book-parity-76225396",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 99794,
+    "result_receipts": null,
+    "stream_sha256": "f987a0189bec6ee1d5bdc39a8721c7b67b8533b0afa62ab53b51f7e1a57ae907",
+    "usage": {
+     "cached_input_tokens": 81024,
+     "input_tokens": 96943,
+     "output_tokens": 2851,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-matchcore-order-book-parity-76225396",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "89e4430832b56107e14864a26fe9f110b786527bd89ad178fab91fe78d38fa5a",
+    "summary": "b3f5ce84d8832dc7bee9588e89a090ee67fff1bee8e100f76d7c616d36b75a0d",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-23T21:16:24.291431+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 20.409,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:22:04.645139+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 98918,
+   "run_id": "legacy-pacecore-binary-parity-dd3b102a",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 98918,
+    "result_receipts": null,
+    "stream_sha256": "2ef9b1597d9fcf5545d4fc04ef90087557f70f1277108a04616ecca20684ca2b",
+    "usage": {
+     "cached_input_tokens": 77440,
+     "input_tokens": 96347,
+     "output_tokens": 2571,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-pacecore-binary-parity-dd3b102a",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "6772ac35d454c468de9b26efa52beac19be7da458fc4fdb7ff8e48e3930fc0e7",
+    "summary": "bcc9c10181fe3ba24a9ba524e5c56e4294fdcb60d89eb4a6ed4891f94334e700",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-23T21:21:44.234135+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 19.953,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:24:32.125700+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.6446,
+   "reported_tokens": 64545,
+   "run_id": "legacy-paddockcore-binary-parity-5726c075",
+   "security": 0.2,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 64545,
+    "result_receipts": null,
+    "stream_sha256": "b210671f61f7f2199843e6248c8d48326da7b9e67796b234e19dfb49e2b6edb7",
+    "usage": {
+     "cached_input_tokens": 51968,
+     "input_tokens": 62999,
+     "output_tokens": 1546,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-paddockcore-binary-parity-5726c075",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "5cbdebd77f08c3c953518d145eb804658660449ea0f449524522d3f005589a5e",
+    "summary": "461c9c4dbe00c30962c3baa39a689b8f389dbf3cc536508f75f71ac0c5d778cc",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-23T21:24:12.170779+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 18.676,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:17:27.921556+00:00",
+   "functional": 0.1,
+   "model": "beam",
+   "quality": 0.8372,
+   "reported_tokens": 69397,
+   "run_id": "legacy-payrollcore-binary-parity-154f1be7",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 69397,
+    "result_receipts": null,
+    "stream_sha256": "c2e983bf50eaf144c56b5a424b59f844c0350031e8722e44a52565b91c63b04e",
+    "usage": {
+     "cached_input_tokens": 47808,
+     "input_tokens": 67437,
+     "output_tokens": 1960,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-payrollcore-binary-parity-154f1be7",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "95db9648045a65674458ec8d8fef4b0f7088674cfa17eba944f33c5149733327",
+    "summary": "2c2554de563acd05c13a653907bf8dc2c8d79f0dee55a1ebe6df3acba0599b2e",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-23T21:17:09.242915+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 21.382,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:17:09.172920+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 115508,
+   "run_id": "legacy-qlite-store-parity-7239fa62",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 115508,
+    "result_receipts": null,
+    "stream_sha256": "8d939ab6f8184f86f73367b577018f1cc8b5f070946a7af5975319972fd58970",
+    "usage": {
+     "cached_input_tokens": 103296,
+     "input_tokens": 113480,
+     "output_tokens": 2028,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-qlite-store-parity-7239fa62",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "41f3469705a1647aaadb0a93599e964707e9b9242908796c8fb090bc9e3bfc33",
+    "summary": "3ef77a7f1db0928aa9b89b34cf9bb4f47f2f7d9520cd128292621bcb1cbfccb6",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-23T21:16:47.788723+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 21.112,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:20:27.682197+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 84115,
+   "run_id": "legacy-queuecore-binary-parity-57969416",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 84115,
+    "result_receipts": null,
+    "stream_sha256": "0d6120395540a6b3a448d5281c1a06b033789d0d1a6407603ec077a793899f59",
+    "usage": {
+     "cached_input_tokens": 73216,
+     "input_tokens": 81523,
+     "output_tokens": 2592,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-queuecore-binary-parity-57969416",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "e344e030fc43ae2d93dcc7d4a566e1f459664074ad894062b20a7eac60f8c16a",
+    "summary": "97b7e06c65c97585fd3d3b0be5d86bab42e056ae871f0171115693a2197c1a19",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-23T21:20:06.568462+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 37.856,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:19:17.876588+00:00",
+   "functional": 0.1,
+   "model": "beam",
+   "quality": 0.7987,
+   "reported_tokens": 139323,
+   "run_id": "legacy-quotacore-binary-parity-9788914f",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 139323,
+    "result_receipts": null,
+    "stream_sha256": "9405420f3e036df128a546b261ef5065eacd6d60894fc8798ac0bfa4693a2353",
+    "usage": {
+     "cached_input_tokens": 107008,
+     "input_tokens": 133388,
+     "output_tokens": 5935,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-quotacore-binary-parity-9788914f",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "30b5eba5a20d932c0bb267df45dfd8444cbe61bc3e14e677c3d5c148f7a1f348",
+    "summary": "4e086e909cbacd218f43ca4e43bcb5697c817806149e73ad1a2982738f08ffbb",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-23T21:18:40.018246+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 21.556,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:21:26.775610+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8352,
+   "reported_tokens": 86699,
+   "run_id": "legacy-reflowcore-binary-parity-362a96dc",
+   "security": 0.65,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 86699,
+    "result_receipts": null,
+    "stream_sha256": "554301f9db4095af471b71652fbe546c22c87b323c86fc67c83c727ae73746ba",
+    "usage": {
+     "cached_input_tokens": 71360,
+     "input_tokens": 84304,
+     "output_tokens": 2395,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-reflowcore-binary-parity-362a96dc",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "9bf1c9df34d6ddad9c18e60bdd238fa96cbb364ef86778c53299c8d1fdb1eff7",
+    "summary": "ca2b1c4907aeb6e004c265436bab3c1dc3f81420d8a4f828d25fc946a6f62cca",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-23T21:21:05.217084+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 18.658,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:21:05.146724+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 68909,
+   "run_id": "legacy-schedcore-binary-parity-3e053034",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 68909,
+    "result_receipts": null,
+    "stream_sha256": "77b409aa74e94406d5ede307107d8c994924ac31260afb51a678489532867388",
+    "usage": {
+     "cached_input_tokens": 52544,
+     "input_tokens": 66580,
+     "output_tokens": 2329,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-schedcore-binary-parity-3e053034",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "58b0a6422baf5ecfe780e722b6c29cebd53e35b477f0d966c4b01ca9b050c5a2",
+    "summary": "013f98b7278f8c5364d50b816054afa9f3c9ca3201d83b121a5eb3c22f6160b5",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-23T21:20:46.486402+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 35.066,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:16:24.214837+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8083,
+   "reported_tokens": 86036,
+   "run_id": "legacy-settlecore-binary-parity-ba217ad0",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 86036,
+    "result_receipts": null,
+    "stream_sha256": "035fe57d1fe8c9030f0a05ed4b0457a2cd475bc1714265f028259e9988e46a12",
+    "usage": {
+     "cached_input_tokens": 73280,
+     "input_tokens": 83436,
+     "output_tokens": 2600,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-settlecore-binary-parity-ba217ad0",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "d986477a609d447c820e554b256eef5a13ff92cb2aaa912d960f4b9c0d4bb618",
+    "summary": "82dd886bcb788af9f1e5f67a03c04e7ff4f24ab4081bba34abb03e6d03d0e9cd",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-23T21:15:49.146097+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 30.501,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:19:48.451553+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8376,
+   "reported_tokens": 113725,
+   "run_id": "legacy-snapcore-binary-parity-9af1e0ee",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 113725,
+    "result_receipts": null,
+    "stream_sha256": "41d3a3aafda42f65a2da1468b6cab5572f6736f70707e9a333b17ecd7b1a8d2a",
+    "usage": {
+     "cached_input_tokens": 83136,
+     "input_tokens": 110954,
+     "output_tokens": 2771,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-snapcore-binary-parity-9af1e0ee",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "17f8d5fe2658b3656f89d4bdc2a3ea0cf16d95eeb14a71e989bb72c6f566258c",
+    "summary": "d643c969c6d0be8a239716fa0d5e959aed1b9876a19276dd7cbfed5a04f06149",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-23T21:19:17.948701+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 22.533,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:22:44.795498+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8282,
+   "reported_tokens": 91797,
+   "run_id": "legacy-stampcore-binary-parity-e2c9490f",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 91797,
+    "result_receipts": null,
+    "stream_sha256": "10aef88011fe33f132571e8479fbdac78cab30f21d6b2df542a6d530bd44f8d5",
+    "usage": {
+     "cached_input_tokens": 79040,
+     "input_tokens": 89123,
+     "output_tokens": 2674,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-stampcore-binary-parity-e2c9490f",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "a34f9527f7a41422f6a29898549ea44068e9f790e9bbd4ce2bf9e0646b041f50",
+    "summary": "f17fcc7fe9633c311fbec694a4162817d961ca776a2082d3e2c7e91ebb12cce7",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-23T21:22:22.260400+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 17.315,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:21:44.163979+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 77399,
+   "run_id": "legacy-tallycore-binary-parity-df996c6d",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 77399,
+    "result_receipts": null,
+    "stream_sha256": "73e4f8b49afd9e85088e20b9f17ff1fcd1af7742ccf4bd120e400fc84e1c5bdd",
+    "usage": {
+     "cached_input_tokens": 59648,
+     "input_tokens": 75988,
+     "output_tokens": 1411,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-tallycore-binary-parity-df996c6d",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "427e2aa208b6c22d93163602353613cdee429496f7ba5a57f7107091d3191561",
+    "summary": "99553bb4a46d813a4e3093366d63124370951271d456a779260809c3ff02db98",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-23T21:21:26.847066+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 17.973,
+   "effort": "low",
+   "finished_at": "2026-10-23T21:20:06.497368+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8409,
+   "reported_tokens": 62349,
+   "run_id": "legacy-vaultcore-binary-parity-800cb496",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 62349,
+    "result_receipts": null,
+    "stream_sha256": "b7cc0e874793b4bd5df9d1619ed1e70a88af664bc7470718e04579e02601a3d5",
+    "usage": {
+     "cached_input_tokens": 50112,
+     "input_tokens": 60130,
+     "output_tokens": 2219,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/low/legacy-vaultcore-binary-parity-800cb496",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "5a8fbc3a1ae9446b2b9a1b86350752a592d053f3587c69363f90791d3be15406",
+    "summary": "04dfab5dad9b0a1929192570f936693f204d367ae254532d0fc4b457d517ae54",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-23T21:19:48.522471+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 76.51,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:54:27.258617+00:00",
+   "functional": 0.1111,
+   "model": "beam",
+   "quality": 0.8388,
+   "reported_tokens": 534810,
+   "run_id": "legacy-blendcore-binary-parity-5403223b",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 534810,
+    "result_receipts": null,
+    "stream_sha256": "f73e4ffe9205328f6a8fc03840415c203441d949b384b44fa40c268abb9bc8ee",
+    "usage": {
+     "cached_input_tokens": 494400,
+     "input_tokens": 523696,
+     "output_tokens": 11114,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-blendcore-binary-parity-5403223b",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "14b53fb51253a4e2cd1dc9366d733fcc04a2d8e7a4fd6a8b942bd527fe869f10",
+    "summary": "ddf836f9f54b17b7df4b91c778855b65a496b8e72b2d2e87f16d3c13cf142faf",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-23T21:53:10.745476+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 110.434,
+   "effort": "medium",
+   "finished_at": "2026-10-23T22:08:31.826901+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 222366,
+   "run_id": "legacy-cellarcore-binary-parity-e53ff97a",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 222366,
+    "result_receipts": null,
+    "stream_sha256": "3f6a123d44147b0d0951fe9e82356fcb3e3deab9314b5c0400c848748915f374",
+    "usage": {
+     "cached_input_tokens": 199744,
+     "input_tokens": 218066,
+     "output_tokens": 4300,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-cellarcore-binary-parity-e53ff97a",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "e725aa083f801670875ba57a73611a0573cea6c4e976b63e02bead05b9f01e01",
+    "summary": "942f670beb307c345d76dcc32e634410e05a013f4f4963a07347c138c2d2c4ac",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-23T22:06:41.388985+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 49.964,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:40:39.214696+00:00",
+   "functional": 0.2,
+   "model": "beam",
+   "quality": 0.8175,
+   "reported_tokens": 395268,
+   "run_id": "legacy-codeccore-binary-parity-b35d204b",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 395268,
+    "result_receipts": null,
+    "stream_sha256": "72cda4d656a68e30491e9d5bbfc30640bb8fb7e058c5daabfa04dad91dfdac35",
+    "usage": {
+     "cached_input_tokens": 344576,
+     "input_tokens": 387183,
+     "output_tokens": 8085,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-codeccore-binary-parity-b35d204b",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "4d2016e95de7882171a1d5025abdcc765cdea781a9311d1b85a960f55c7814ee",
+    "summary": "cb36fb476cf1628e94e280edaa9b71f76469d726d6fac15cb59cdef69fb4b35b",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-23T21:39:49.248158+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 37.091,
+   "effort": "medium",
+   "finished_at": "2026-10-23T22:05:53.392562+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": null,
+   "reported_tokens": 207955,
+   "run_id": "legacy-depotcore-binary-parity-9306920e",
+   "security": null,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 207955,
+    "result_receipts": null,
+    "stream_sha256": "fb348e3a3e006d84ac32829c3e0aff17b7336b3ef94413ed7fe7932bcd69e01e",
+    "usage": {
+     "cached_input_tokens": 186240,
+     "input_tokens": 203201,
+     "output_tokens": 4754,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-depotcore-binary-parity-9306920e",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "01bd4ae2bf51d63c1d957e2a8a13c662acb3cb0d7a34269e70b285e6810dcbc9",
+    "summary": "5648aefe31830784a4d35e8b58ef98f4e4b8091d7d669cbf07b38fbf473b1cad",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-23T22:05:16.299123+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 303.005,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:39:49.170867+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8342,
+   "reported_tokens": 396521,
+   "run_id": "legacy-freightcore-binary-parity-129a1653",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 396521,
+    "result_receipts": null,
+    "stream_sha256": "c998cffed98306b8dabfbaf0f177e0e1056bf4625cbfc196198bfeee8d627e30",
+    "usage": {
+     "cached_input_tokens": 346432,
+     "input_tokens": 388694,
+     "output_tokens": 7827,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-freightcore-binary-parity-129a1653",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "ad2861066839e52b33c717f876ffc032d1ea47bbeee5d2dc60db1df23027c9ed",
+    "summary": "08ef0bd83e2908f97a2869eb091b0d9eea3d8094b4d543a521e6e314c7a3a056",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-23T21:34:46.163331+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 44.27,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:50:13.354993+00:00",
+   "functional": 0.25,
+   "model": "beam",
+   "quality": 0.8248,
+   "reported_tokens": 280787,
+   "run_id": "legacy-hedgecore-binary-parity-8d1b6eac",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 280787,
+    "result_receipts": null,
+    "stream_sha256": "c41c492b1d522eb974d62259d4ea0d2fabf25919fb34b4cba4930826fbfd8ac8",
+    "usage": {
+     "cached_input_tokens": 254976,
+     "input_tokens": 273676,
+     "output_tokens": 7111,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-hedgecore-binary-parity-8d1b6eac",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "3586427e4184ca3d827180d8e26917bde8b61ea80ee4d35163b540cc30e45786",
+    "summary": "d12027d4c265023e55589e4b9576b79d978dbc6113e6fb68094c73e62b9a6e0a",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-23T21:49:29.081988+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 47.841,
+   "effort": "medium",
+   "finished_at": "2026-10-23T22:06:41.307212+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7642,
+   "reported_tokens": 315939,
+   "run_id": "legacy-lodgecore-binary-parity-1c84b5a9",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 315939,
+    "result_receipts": null,
+    "stream_sha256": "f4e42424ad49e3dccc28d8e12a4dc0b930d742a30947f8653bd9ef328976ee02",
+    "usage": {
+     "cached_input_tokens": 265984,
+     "input_tokens": 308927,
+     "output_tokens": 7012,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-lodgecore-binary-parity-1c84b5a9",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "c718366623bb01dedcff02a6b8afcc85e2b35b75437c2e14e1887f884a76178f",
+    "summary": "ca9db1715b335fe1312efd23e2bdf66fcb565d257db66c3c4baecba70ca35a0e",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-23T22:05:53.464016+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 70.039,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:30:45.313220+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7895,
+   "reported_tokens": 481299,
+   "run_id": "legacy-matchcore-order-book-parity-b102aa67",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 481299,
+    "result_receipts": null,
+    "stream_sha256": "ad00566c3cbffe5ceba639de7d879a49933c90bf82729ebd8c7f00e59161a102",
+    "usage": {
+     "cached_input_tokens": 427456,
+     "input_tokens": 473925,
+     "output_tokens": 7374,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-matchcore-order-book-parity-b102aa67",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "56216ebf125ce7c175134bd105afef19c279e773e6ebeb468a58e9bd00a78ee1",
+    "summary": "075472131aa953a34d571c0d6960fb5d80582bac44a6f83559c31badc100749e",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-23T21:29:35.272282+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 48.339,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:34:46.090213+00:00",
+   "functional": 0.1111,
+   "model": "beam",
+   "quality": 0.838,
+   "reported_tokens": 358342,
+   "run_id": "legacy-metercore-binary-parity-1194874e",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 358342,
+    "result_receipts": null,
+    "stream_sha256": "b01ac66a968200c46072137fef546abcb1d25988c331929dd8e8da204503bc19",
+    "usage": {
+     "cached_input_tokens": 323264,
+     "input_tokens": 350560,
+     "output_tokens": 7782,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-metercore-binary-parity-1194874e",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "94b48b842b59850db098301c83d9d0d832187c5a1c721e3d429c757119b33662",
+    "summary": "7995aa06c8e33b4523f4c6e8564f7592ba017c85e1c1b7a00601d214778c41d5",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-23T21:33:57.749148+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 29.544,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:53:10.675623+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8167,
+   "reported_tokens": 209521,
+   "run_id": "legacy-pacecore-binary-parity-b309ca9f",
+   "security": 0.9,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 209521,
+    "result_receipts": null,
+    "stream_sha256": "ec5e17c872d613d7916ae8996f163f18af788a16dd6873f354119da5c5b3bf0d",
+    "usage": {
+     "cached_input_tokens": 179712,
+     "input_tokens": 205131,
+     "output_tokens": 4390,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-pacecore-binary-parity-b309ca9f",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "ab00b996725b9efe11d237c1582025bccdd3025fd3837da390e5e9166fd7e375",
+    "summary": "85744e47aca1063a5550965f0398c0dccbc40fdadbab71db87bd72c91d3d8d92",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-23T21:52:41.129106+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 31.893,
+   "effort": "medium",
+   "finished_at": "2026-10-23T22:09:03.800014+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.6792,
+   "reported_tokens": 151739,
+   "run_id": "legacy-paddockcore-binary-parity-e833fd35",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 151739,
+    "result_receipts": null,
+    "stream_sha256": "8ef6d0e0a54a78c4766c72e180321c6cbd220b06051089b4d2bf0f3c9d5b301a",
+    "usage": {
+     "cached_input_tokens": 133632,
+     "input_tokens": 147230,
+     "output_tokens": 4509,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-paddockcore-binary-parity-e833fd35",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "b6837477601593db1be8214b319164b873d8d225a7037589ac8e90c0a24cfe85",
+    "summary": "45c3ba78dbfc7b1dfadf34b8d5d7fb0015a87817a03f59c879a3ff11b815fd85",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-23T22:08:31.904458+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 83.902,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:33:57.676716+00:00",
+   "functional": 0.3,
+   "model": "beam",
+   "quality": 0.8295,
+   "reported_tokens": 701032,
+   "run_id": "legacy-payrollcore-binary-parity-4f51ec6e",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 701032,
+    "result_receipts": null,
+    "stream_sha256": "8c43a3d022524bd9dc1f60e3aa41b5e04ebacef1af4ea50c70b1474101f02fa9",
+    "usage": {
+     "cached_input_tokens": 641408,
+     "input_tokens": 686318,
+     "output_tokens": 14714,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-payrollcore-binary-parity-4f51ec6e",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "d69bba072b2675495c5dd6ea4003e649ea9510340a799dc0a4631537ffe5862d",
+    "summary": "3dbb74b53e94c7fd2a6c9c6ba5b44b64cefd385b66110b04e433708c3c03b33f",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-23T21:32:33.772594+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 108.304,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:32:33.698547+00:00",
+   "functional": 0.4444,
+   "model": "beam",
+   "quality": 0.7946,
+   "reported_tokens": 1426161,
+   "run_id": "legacy-qlite-store-parity-37ff96a6",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1426161,
+    "result_receipts": null,
+    "stream_sha256": "bda204b302cea790e51a88bc4e9f02e07e91ac4c37887822f6edcc6b13f72b57",
+    "usage": {
+     "cached_input_tokens": 1322240,
+     "input_tokens": 1408216,
+     "output_tokens": 17945,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-qlite-store-parity-37ff96a6",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "96a00a16a94037684f334bbdb47c0b32b8adc457ac71afb847e656ea518a2312",
+    "summary": "2cf64ad38cc904f0509f939273a369c2d9cafa407bb0965d3422560db2920b84",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-23T21:30:45.391771+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 44.368,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:49:29.011989+00:00",
+   "functional": 0.25,
+   "model": "beam",
+   "quality": 0.8089,
+   "reported_tokens": 302506,
+   "run_id": "legacy-queuecore-binary-parity-83d1fa90",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 302506,
+    "result_receipts": null,
+    "stream_sha256": "92cf04e64604d786036c9ab717ec87e50bf6d5637acf8c2f669333507e3728d5",
+    "usage": {
+     "cached_input_tokens": 265472,
+     "input_tokens": 294367,
+     "output_tokens": 8139,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-queuecore-binary-parity-83d1fa90",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "1c05301569cd8dfcd66694fd823e4cca0050030fa2a6c6b17e35e33a1011a4c9",
+    "summary": "5c521f1a275a25d0dac8629791103ab73a595231e248e4655bd565d7ca112d6d",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-23T21:48:44.640062+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 137.136,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:42:56.425557+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7938,
+   "reported_tokens": 216892,
+   "run_id": "legacy-quotacore-binary-parity-9a3e4385",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 216892,
+    "result_receipts": null,
+    "stream_sha256": "2e3b64b9d45180152d724e303bdb3c9b60c0c4dc5a3744b1b8b66d8e23dfbc05",
+    "usage": {
+     "cached_input_tokens": 183424,
+     "input_tokens": 208752,
+     "output_tokens": 8140,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-quotacore-binary-parity-9a3e4385",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "8043d72c12245f06d5e054759841d63aeb57bb8e90f71d72d93c59f141c0bb32",
+    "summary": "11f01f4d91f2f1745359ed4b75b1acb0c17c67955c3c9bdcb497b76df536c61e",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-23T21:40:39.287719+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 51.22,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:51:43.909565+00:00",
+   "functional": 0.125,
+   "model": "beam",
+   "quality": 0.852,
+   "reported_tokens": 357142,
+   "run_id": "legacy-reflowcore-binary-parity-3087de9f",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 357142,
+    "result_receipts": null,
+    "stream_sha256": "57f754b98372f9fa5f6400b8602d42541c56ada9377f79e053b07e24355065f1",
+    "usage": {
+     "cached_input_tokens": 314432,
+     "input_tokens": 348504,
+     "output_tokens": 8638,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-reflowcore-binary-parity-3087de9f",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "43a68694cf677ef65c8d4b346afb69cd9d76fe2fbf477bc866d8aae7c6a15573",
+    "summary": "d31873b4275d1f27031a565548c55efd9770c3944aa907d64f50a7ddd2241107",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-23T21:50:52.687580+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 39.183,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:50:52.618431+00:00",
+   "functional": 0.375,
+   "model": "beam",
+   "quality": 0.7633,
+   "reported_tokens": 229836,
+   "run_id": "legacy-schedcore-binary-parity-afc565ec",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 229836,
+    "result_receipts": null,
+    "stream_sha256": "85323c0f324269600ee2d9987ed353186616c40ccd72fe690799efe0b7551f9f",
+    "usage": {
+     "cached_input_tokens": 205632,
+     "input_tokens": 222845,
+     "output_tokens": 6991,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-schedcore-binary-parity-afc565ec",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "504ae7e30a5cf083f8abd6bb0fef9cc6b3e2db73853e73cacbfc20c13a68d0e9",
+    "summary": "a7ccb4bba426e1f09f37384f392aaa102005eabb864eed19fc1ad56d5eb5067b",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-23T21:50:13.431044+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 300.906,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:29:35.198968+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7968,
+   "reported_tokens": 550392,
+   "run_id": "legacy-settlecore-binary-parity-06827246",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 550392,
+    "result_receipts": null,
+    "stream_sha256": "80fa7d0040c532d2218594ce9cd412763c740083086a4eeef498be5367e286ce",
+    "usage": {
+     "cached_input_tokens": 484928,
+     "input_tokens": 539256,
+     "output_tokens": 11136,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-settlecore-binary-parity-06827246",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "83379267cd4e27f8ef7aee718400ace83f7de79bf27f1fd80e6373902ae335b4",
+    "summary": "922e8797f1762cb2fcc1ee3d9da080d73220b4f6c3efc23bff3ff054e1babe94",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-23T21:24:34.290089+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 275.835,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:47:32.335257+00:00",
+   "functional": 0.2,
+   "model": "beam",
+   "quality": 0.837,
+   "reported_tokens": 540486,
+   "run_id": "legacy-snapcore-binary-parity-a4cbe7d3",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 540486,
+    "result_receipts": null,
+    "stream_sha256": "890582edb99bd42941edc207520ef3f97bd703c887eab4c6350dc9b97ee17ac2",
+    "usage": {
+     "cached_input_tokens": 491456,
+     "input_tokens": 532457,
+     "output_tokens": 8029,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-snapcore-binary-parity-a4cbe7d3",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "b10ad5477685ba7422a64e14c40e4385bd7f9da59cade549a8dd7105699730ef",
+    "summary": "8c85465a32ff0cd9a02ac5e7a4905a8cf7cb406ca0318b159d728bfa8597d003",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-23T21:42:56.495567+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 60.417,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:55:27.751320+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8294,
+   "reported_tokens": 601878,
+   "run_id": "legacy-stampcore-binary-parity-8532117e",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 601878,
+    "result_receipts": null,
+    "stream_sha256": "108e0d805023e768b791568ff5747c533a1a5c457a208edc10c22c1d9f8dde91",
+    "usage": {
+     "cached_input_tokens": 543552,
+     "input_tokens": 594242,
+     "output_tokens": 7636,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-stampcore-binary-parity-8532117e",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "bd9855bb591cae557d6c0177c0087532bc82297ab5a0f6b85462c515607b6a6b",
+    "summary": "18dddf1b4e7b8dc7d865ae26dacafbe30c9c0b5871f712fbbb7273e21e9bbdfa",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-23T21:54:27.330640+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 57.067,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:52:41.050258+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8456,
+   "reported_tokens": 347371,
+   "run_id": "legacy-tallycore-binary-parity-9c07566c",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 347371,
+    "result_receipts": null,
+    "stream_sha256": "bfe0bb1ffae4b518e4b8543029ac94d0cf3782ec180c7aa4329288d33cb429ce",
+    "usage": {
+     "cached_input_tokens": 305472,
+     "input_tokens": 338150,
+     "output_tokens": 9221,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-tallycore-binary-parity-9c07566c",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "b0bbd2ebbb15a1fa2786cc6125fda630b63250de0c6d02e9926648d857456dfc",
+    "summary": "6600f10b7d04f86a9e9cacd39b81601778ab4d4e189ec61b4f845cf58e7194d8",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-23T21:51:43.979298+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 72.144,
+   "effort": "medium",
+   "finished_at": "2026-10-23T21:48:44.564460+00:00",
+   "functional": 0.1111,
+   "model": "beam",
+   "quality": 0.8398,
+   "reported_tokens": 694700,
+   "run_id": "legacy-vaultcore-binary-parity-a1bfd0d6",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 694700,
+    "result_receipts": null,
+    "stream_sha256": "c5845a1a86252bee2fe4a392362e622cace9af374c14ecc09aab1110c83e9dfc",
+    "usage": {
+     "cached_input_tokens": 646976,
+     "input_tokens": 682413,
+     "output_tokens": 12287,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/medium/legacy-vaultcore-binary-parity-a1bfd0d6",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "2ac89a70c9ff27e0adacda9de721c77e95be137fc79cb37118ede81f2ecc0c98",
+    "summary": "478b0bf8565c9dd256305cd8447adf10d4b346160fa8ca738e7e683bec626f25",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-23T21:47:32.418407+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 521.973,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:58:41.299443+00:00",
+   "functional": 0.2222,
+   "model": "beam",
+   "quality": 0.8239,
+   "reported_tokens": 2273738,
+   "run_id": "legacy-blendcore-binary-parity-4cd8820c",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2273738,
+    "result_receipts": null,
+    "stream_sha256": "2574ff6bd51b40c947afacc15f07af0ea847a515f11a7b41a39ccfe4c8905ea5",
+    "usage": {
+     "cached_input_tokens": 2117184,
+     "input_tokens": 2235876,
+     "output_tokens": 37862,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-blendcore-binary-parity-4cd8820c",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "d1eb6b85ec4136c492f902bcceca1ff6557fdf9c5f0a2af0569a634146700bc4",
+    "summary": "23cb0b9b152dfa875c620a66345ee40cec3455fc751337508c9bb4a65c461699",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-24T00:49:59.320633+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 263.746,
+   "effort": "high",
+   "finished_at": "2026-10-24T01:37:06.117181+00:00",
+   "functional": 0.2857,
+   "model": "beam",
+   "quality": 0.7525,
+   "reported_tokens": 5359185,
+   "run_id": "legacy-cellarcore-binary-parity-b1a1e416",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5359185,
+    "result_receipts": null,
+    "stream_sha256": "717d2fac32b1d4b24b5185528bb4fad7795db577be13510b4d431bef9e1d9d2a",
+    "usage": {
+     "cached_input_tokens": 5163776,
+     "input_tokens": 5311692,
+     "output_tokens": 47493,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-cellarcore-binary-parity-b1a1e416",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "09693e88a1d6c0c3472d7341f79d8bf86175e560f3e5ee7812c9267c4086a334",
+    "summary": "f137215e4a80a84206d9550bb233ce9fa19c873f1e0554ed13f0aafbe2796285",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-24T01:32:42.367813+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 836.868,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:34:01.575160+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.802,
+   "reported_tokens": 4763160,
+   "run_id": "legacy-codeccore-binary-parity-26b8bd1e",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4763160,
+    "result_receipts": null,
+    "stream_sha256": "3ada71ff811872e64f32918eac9f7e23f1b400b271d626771464ba4939f4def8",
+    "usage": {
+     "cached_input_tokens": 4625536,
+     "input_tokens": 4715128,
+     "output_tokens": 48032,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-codeccore-binary-parity-26b8bd1e",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "0e816277f1e143db12a697e016498055f0b64201d0527982930172077fdee90a",
+    "summary": "4ef69b5be65b1c2d21c5857c6c06c0b994b77f2c6758d9057cc196e3ea46f4ac",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-23T23:20:04.700741+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 207.258,
+   "effort": "high",
+   "finished_at": "2026-10-24T01:27:18.632358+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7577,
+   "reported_tokens": 1981870,
+   "run_id": "legacy-depotcore-binary-parity-285f000e",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1981870,
+    "result_receipts": null,
+    "stream_sha256": "2b3f71dab84b365c9fb638b25e15e667ca3d3b5f17ac08aad07198a2bd83fb18",
+    "usage": {
+     "cached_input_tokens": 1803584,
+     "input_tokens": 1948993,
+     "output_tokens": 32877,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-depotcore-binary-parity-285f000e",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "10a4ba37f4bb85fc826a2f086350284c4fc3c3e341b4acbfa9e02fa267266f13",
+    "summary": "57bbb3ea4c705bdb0625debd05362f27cc09a1249174182c7d92ba2954d87c4b",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-24T01:23:51.369517+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 655.866,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:20:04.615713+00:00",
+   "functional": 0.4444,
+   "model": "beam",
+   "quality": 0.8137,
+   "reported_tokens": 2484109,
+   "run_id": "legacy-freightcore-binary-parity-3d71805c",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2484109,
+    "result_receipts": null,
+    "stream_sha256": "ad19911edd60d8aabbf57655e4054d8ba08cc326c22491511f1183635e8d7a76",
+    "usage": {
+     "cached_input_tokens": 2284096,
+     "input_tokens": 2448950,
+     "output_tokens": 35159,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-freightcore-binary-parity-3d71805c",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "e62da74f3d24369cfaa919f4f0d9c9ec9b691b553cdea94ed2da9e83dbef4312",
+    "summary": "fc99730d3c74b8abff82f527af9011094c7380ab3fadb41dd65c31bf9791fbae",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-23T23:09:08.745306+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1141.775,
+   "effort": "high",
+   "finished_at": "2026-10-24T01:23:51.283387+00:00",
+   "functional": 0.1429,
+   "model": "beam",
+   "quality": 0.73,
+   "reported_tokens": 2581150,
+   "run_id": "legacy-granarycore-binary-parity-50bea2f4",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2581150,
+    "result_receipts": null,
+    "stream_sha256": "a9e746c385e0dacdc3ec958a8cf0969c1620095315b0571207aa3a545a85aa11",
+    "usage": {
+     "cached_input_tokens": 2351808,
+     "input_tokens": 2549593,
+     "output_tokens": 31557,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-granarycore-binary-parity-50bea2f4",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "9ab31e6d10739433707436b448f3ae4ec1ce22328431711769a7e55e9fba6768",
+    "summary": "9f6b1c6742b99390e924c9a22e1c8c56a07443b5dccc7ecc56c13ec2e33e7291",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-24T01:04:49.500277+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1286.651,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:25:11.425116+00:00",
+   "functional": 0.5,
+   "model": "beam",
+   "quality": 0.7858,
+   "reported_tokens": 4471281,
+   "run_id": "legacy-hedgecore-binary-parity-714d9100",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4471281,
+    "result_receipts": null,
+    "stream_sha256": "9e1bcc8c8e2956f5d221c788a602e2998d82c3657615bc4f62d237c519659e4f",
+    "usage": {
+     "cached_input_tokens": 4224448,
+     "input_tokens": 4400625,
+     "output_tokens": 70656,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-hedgecore-binary-parity-714d9100",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "8b1059051253f71fbfb992a29a2fb4427f82b974c21aba7ffb6673f6d669ee82",
+    "summary": "f0070b44c5458948edb355e10b068528b2dffbf8c01fb09d45fdb1b95d786626",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-24T00:03:44.765093+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 323.569,
+   "effort": "high",
+   "finished_at": "2026-10-24T01:32:42.281289+00:00",
+   "functional": 0.25,
+   "model": "beam",
+   "quality": 0.7579,
+   "reported_tokens": 2731682,
+   "run_id": "legacy-lodgecore-binary-parity-ab2a5323",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2731682,
+    "result_receipts": null,
+    "stream_sha256": "9f9f8e633ccbcf436ee8fb990f7250d2f7d3c4b627d89306a799c947c6ec6151",
+    "usage": {
+     "cached_input_tokens": 2532288,
+     "input_tokens": 2693280,
+     "output_tokens": 38402,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-lodgecore-binary-parity-ab2a5323",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "76141aca2af782b831464d13c809d9d6215e66e7c425f3f15ddef0726fbf2724",
+    "summary": "4d2b977a1c9dab8a26cdeb508ab30d85c82b036e1dd006c6d69c131da962ad25",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-24T01:27:18.712006+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1785.195,
+   "effort": "high",
+   "finished_at": "2026-10-23T22:44:55.084105+00:00",
+   "functional": 0.7778,
+   "model": "beam",
+   "quality": 0.7554,
+   "reported_tokens": 6032088,
+   "run_id": "legacy-matchcore-order-book-parity-1d7738d7",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6032088,
+    "result_receipts": null,
+    "stream_sha256": "227f55dde0d537976515fc5c6f4f7276c3cc6db35feba71cfd612b1635f11917",
+    "usage": {
+     "cached_input_tokens": 5761728,
+     "input_tokens": 5973967,
+     "output_tokens": 58121,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-matchcore-order-book-parity-1d7738d7",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "fea076bc5c3fb484703d672455fc2aacfad461fbb4e8b66d9c132efe85db5b29",
+    "summary": "edaa07a97df2539739907f67169eea1a11a0ba7462f96cf3e091327e9eb39616",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-23T22:15:09.877994+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 438.145,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:09:08.670460+00:00",
+   "functional": 0.6667,
+   "model": "beam",
+   "quality": 0.8191,
+   "reported_tokens": 1578021,
+   "run_id": "legacy-metercore-binary-parity-30ff8d61",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1578021,
+    "result_receipts": null,
+    "stream_sha256": "90befbabb8a33a1fdc3ac12798d4242643fe8b7469af7d824982f31bd62331aa",
+    "usage": {
+     "cached_input_tokens": 1460096,
+     "input_tokens": 1547220,
+     "output_tokens": 30801,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-metercore-binary-parity-30ff8d61",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "cc7f17cf938e82b567fba7b30691e96c9f540bfcb6950e613440e372619b7ae2",
+    "summary": "fd301d35eb7f402b49c7ec19bcde888f4732d31bb8835d44fce6e4f69a8c7d02",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-23T23:01:50.520475+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 396.099,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:49:59.245540+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8189,
+   "reported_tokens": 2430851,
+   "run_id": "legacy-pacecore-binary-parity-3274f12f",
+   "security": 0.4,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2430851,
+    "result_receipts": null,
+    "stream_sha256": "70b2ab16965bcfcfb6c548dd4998bd979ff43e765d50c21edf34c88fa114c184",
+    "usage": {
+     "cached_input_tokens": 2306240,
+     "input_tokens": 2400773,
+     "output_tokens": 30078,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-pacecore-binary-parity-3274f12f",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "8ff3d959cc873b81b09fb2186c944b74e5c69501f1e457f84f3985fca792c82e",
+    "summary": "9e76e32e99e5df73af2b2b0b01159a1ef4f4f648f450f4ed6ff707a900b8f048",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-24T00:43:23.141114+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 220.245,
+   "effort": "high",
+   "finished_at": "2026-10-24T01:40:46.443216+00:00",
+   "functional": 0.2667,
+   "model": "beam",
+   "quality": 0.6699,
+   "reported_tokens": 3466289,
+   "run_id": "legacy-paddockcore-binary-parity-12d0150a",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3466289,
+    "result_receipts": null,
+    "stream_sha256": "faf230205add1802cc753dc4e5b58935f888335aa9233b34db805cd6d5660805",
+    "usage": {
+     "cached_input_tokens": 3299968,
+     "input_tokens": 3423940,
+     "output_tokens": 42349,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-paddockcore-binary-parity-12d0150a",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "e8d1b830a63573a4d591463c1ff6a997174d7f02a051516b9c2c577a10e314a4",
+    "summary": "2305e8a6758135303b802b5fe1890811107d9d9fb05be5f94b11dfbaaaa52154",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-24T01:37:06.195364+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 824.898,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:01:50.447397+00:00",
+   "functional": 0.7,
+   "model": "beam",
+   "quality": 0.7886,
+   "reported_tokens": 3262949,
+   "run_id": "legacy-payrollcore-binary-parity-2f3e3cd1",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3262949,
+    "result_receipts": null,
+    "stream_sha256": "899e233c9dbdf69e001db77c0894c26f7b87b7718270ae030c0c20d3ec688ce7",
+    "usage": {
+     "cached_input_tokens": 2945792,
+     "input_tokens": 3209039,
+     "output_tokens": 53910,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-payrollcore-binary-parity-2f3e3cd1",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "e258dea55bc5741874a7654dd54850f1957205f8979d63f1930d3c4fd4fb47a9",
+    "summary": "0c996f01f3de6dec5e781cf6426fd26a78adff51d804afa29f1fd1b9ce5e605e",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-23T22:48:05.542740+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 190.29,
+   "effort": "high",
+   "finished_at": "2026-10-23T22:48:05.466308+00:00",
+   "functional": 0.5556,
+   "model": "beam",
+   "quality": 0.7825,
+   "reported_tokens": 4415819,
+   "run_id": "legacy-qlite-store-parity-02de51aa",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4415819,
+    "result_receipts": null,
+    "stream_sha256": "57da3585c0d4a48e2f8cdf7af4ec776de202c60edb335856b71faf75ea4643d7",
+    "usage": {
+     "cached_input_tokens": 4273728,
+     "input_tokens": 4380098,
+     "output_tokens": 35721,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-qlite-store-parity-02de51aa",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "79ae383f4c3a117aa7a5591ac34a2a4950b401286a2c981d855285b041b83867",
+    "summary": "583f4ea5de3fb2eafc6c78b43530c5cf2b0b403d2e05375b4865c6a06fc0cb1a",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-23T22:44:55.167909+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 344.353,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:03:44.692060+00:00",
+   "functional": 0.25,
+   "model": "beam",
+   "quality": 0.7874,
+   "reported_tokens": 4751410,
+   "run_id": "legacy-queuecore-binary-parity-379f8a42",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4751410,
+    "result_receipts": null,
+    "stream_sha256": "3dccaa1eeac6931a0db0b8a864f5a5e38aa8ab8431ad6d45f8b85c8ea0b5d616",
+    "usage": {
+     "cached_input_tokens": 4437632,
+     "input_tokens": 4701336,
+     "output_tokens": 50074,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-queuecore-binary-parity-379f8a42",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "5546d7f9bbf2e48c5fbc5a723d4f1e941fad159fb41f4d1b49b95ecb7d8e7e88",
+    "summary": "04e9db59d5e193ade8f5a314eac5fbb14d5243b235d54354a9354160ac8b6793",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-23T23:58:00.332969+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 210.812,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:37:32.463468+00:00",
+   "functional": 0.5,
+   "model": "beam",
+   "quality": 0.8208,
+   "reported_tokens": 3364955,
+   "run_id": "legacy-quotacore-binary-parity-c0e9330b",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3364955,
+    "result_receipts": null,
+    "stream_sha256": "b985aa4147ef4d33584223d54f632479e651bcad5bc457bfd876880f2812a11e",
+    "usage": {
+     "cached_input_tokens": 3200960,
+     "input_tokens": 3324058,
+     "output_tokens": 40897,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-quotacore-binary-parity-c0e9330b",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "2c6e2a62edc24b4ec7dd4cc7077592b0e50cad77f7592088b8da4063a6d3b0ae",
+    "summary": "71c322f6336f716831971890c31dbd24ed4ae84c36cee4036b025e31747c33a8",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-23T23:34:01.648424+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 260.933,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:37:07.412767+00:00",
+   "functional": 0.5,
+   "model": "beam",
+   "quality": 0.7905,
+   "reported_tokens": 3872839,
+   "run_id": "legacy-reflowcore-binary-parity-df1ee37d",
+   "security": 0.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3872839,
+    "result_receipts": null,
+    "stream_sha256": "a7203374b63d8e8dc0d720dd831a68aeef14c002befb87f31488e448c7b12638",
+    "usage": {
+     "cached_input_tokens": 3686144,
+     "input_tokens": 3823107,
+     "output_tokens": 49732,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-reflowcore-binary-parity-df1ee37d",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "1b12566e2f2c5427b5586ba59518410b441ddcd88b7a3fa130b69fe2c1ac2d11",
+    "summary": "47072d1989d5b004a2bf22002dd1cfd5bb2f50c09e4db68681d7b2ad8c22105a",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-24T00:32:46.478239+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 454.886,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:32:46.395916+00:00",
+   "functional": 0.875,
+   "model": "beam",
+   "quality": 0.7376,
+   "reported_tokens": 2778177,
+   "run_id": "legacy-schedcore-binary-parity-9fb875c3",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2778177,
+    "result_receipts": null,
+    "stream_sha256": "0769a7e7e6f81e79272fccc91228fe56a8cf28e1f4352e84520460de19350fa4",
+    "usage": {
+     "cached_input_tokens": 2592896,
+     "input_tokens": 2733712,
+     "output_tokens": 44465,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-schedcore-binary-parity-9fb875c3",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "4a326cd6680bad335698bd53c0b8e8dff713650b15a0547b1991ee6019cb7e6d",
+    "summary": "c9b0a4334cb25b39f524a43867fc323e1b5f32bbb4fcc6f9c58b9fba3bcf7fcd",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-24T00:25:11.503241+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 363.605,
+   "effort": "high",
+   "finished_at": "2026-10-23T22:15:09.800177+00:00",
+   "functional": 0.3,
+   "model": "beam",
+   "quality": 0.7847,
+   "reported_tokens": 5447876,
+   "run_id": "legacy-settlecore-binary-parity-b00c622f",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5447876,
+    "result_receipts": null,
+    "stream_sha256": "3b0d232360ec393b19546f8c34ec80144ee791dc9505b814b54a94a8de96cb98",
+    "usage": {
+     "cached_input_tokens": 5149312,
+     "input_tokens": 5388014,
+     "output_tokens": 59862,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-settlecore-binary-parity-b00c622f",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "241c5be3c9e8ed9d1ad3f15a1f2624fd0e0cac3767015685adbb8617885f0938",
+    "summary": "830533f4d764fc9da133aa8a9d13d15e9f158dc153dc03fcbf6a47287006c759",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-23T22:09:06.190689+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 556.584,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:46:49.126306+00:00",
+   "functional": 0.4,
+   "model": "beam",
+   "quality": 0.8287,
+   "reported_tokens": 1009385,
+   "run_id": "legacy-snapcore-binary-parity-c838ec10",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1009385,
+    "result_receipts": null,
+    "stream_sha256": "9fb4f0afee0963bb82de62b366023ac01aa07c1923a36effbb89b2897053f7e9",
+    "usage": {
+     "cached_input_tokens": 930176,
+     "input_tokens": 990044,
+     "output_tokens": 19341,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-snapcore-binary-parity-c838ec10",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "53fe9f160368039f373660aa48136c8463ac4ef1ae8fc7ae5f636e828e9ab3cf",
+    "summary": "12d63aa073f31357d8f4201089d3b5afb8cf510e07e591776588af35cf111fc1",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-23T23:37:32.532289+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 368.046,
+   "effort": "high",
+   "finished_at": "2026-10-24T01:04:49.420311+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8123,
+   "reported_tokens": 1617177,
+   "run_id": "legacy-stampcore-binary-parity-7b654ce8",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 1617177,
+    "result_receipts": null,
+    "stream_sha256": "9b07e4205c044487aa4f81f836395b1e5235fc70e66abc0855041cc5ea5accac",
+    "usage": {
+     "cached_input_tokens": 1510144,
+     "input_tokens": 1590714,
+     "output_tokens": 26463,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-stampcore-binary-parity-7b654ce8",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "6f4d2b48b6bf26a1f1094311e705c2ba4684b063594a098b1bb02ff8374ccae4",
+    "summary": "6bd5047528758b0067041d99df013168c4832b0c2efe014fa8cf3e6e11f35449",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-24T00:58:41.371952+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 375.561,
+   "effort": "high",
+   "finished_at": "2026-10-24T00:43:23.068874+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8086,
+   "reported_tokens": 3995094,
+   "run_id": "legacy-tallycore-binary-parity-cd801d37",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3995094,
+    "result_receipts": null,
+    "stream_sha256": "b32f610d33494201bae34e5fdcbded2ba546f41156f17cc638fd7cf33c29f2df",
+    "usage": {
+     "cached_input_tokens": 3822400,
+     "input_tokens": 3945594,
+     "output_tokens": 49500,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-tallycore-binary-parity-cd801d37",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "a26a8cd2b1bbee302f207f1a8c3ab1d89531fe482ea6df8216a784339ac887d5",
+    "summary": "5f73df7580c79970748a0ac0a529ae585b8ec2c283d42663fc70d06b8aab9c52",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-24T00:37:07.502457+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 671.049,
+   "effort": "high",
+   "finished_at": "2026-10-23T23:58:00.257851+00:00",
+   "functional": 0.5556,
+   "model": "beam",
+   "quality": 0.8369,
+   "reported_tokens": 3407757,
+   "run_id": "legacy-vaultcore-binary-parity-0dfd7e50",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3407757,
+    "result_receipts": null,
+    "stream_sha256": "f6bbf40435c2820d2ba6be4c459dc0fe46d052f46fd52f8383edc7d30c174e00",
+    "usage": {
+     "cached_input_tokens": 3269504,
+     "input_tokens": 3368939,
+     "output_tokens": 38818,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/high/legacy-vaultcore-binary-parity-0dfd7e50",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "aa4aa3d3cefbf61c837b56fe7e7a1f9cf85fcfbad489aa0e242514851976daae",
+    "summary": "06cfd57a5dfb7b5fa2b4fb762a3be0ab5c8fa4011c51f359f4a14f444e0e0ef1",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-23T23:46:49.202580+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3424.16,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T06:38:22.353039+00:00",
+   "functional": 0.2222,
+   "model": "beam",
+   "quality": 0.791,
+   "reported_tokens": 34977021,
+   "run_id": "legacy-blendcore-binary-parity-aa678672",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 34977021,
+    "result_receipts": null,
+    "stream_sha256": "efb34ae82c5a8bdcb3732379abda6f9b15ce396056d15e69052966b2a0c6d97a",
+    "usage": {
+     "cached_input_tokens": 34410880,
+     "input_tokens": 34824726,
+     "output_tokens": 152295,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-blendcore-binary-parity-aa678672",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "747e7dc30f6d9051227c37cb910a6b9d50abe0304f6a4fd576f7a2207dbfa684",
+    "summary": "0d68e37b8a173c718e3ea508699019bee2811dcae2a367e8e4b3745847241fb1",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-24T05:41:18.178173+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3204.29,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T08:40:01.395591+00:00",
+   "functional": 0.5,
+   "model": "beam",
+   "quality": 0.7389,
+   "reported_tokens": 38160119,
+   "run_id": "legacy-cellarcore-binary-parity-f2111d3e",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 38160119,
+    "result_receipts": null,
+    "stream_sha256": "d8fd938d91727fe7f26de25d87843dbb883d799fb8ca9423e333a9b39138b44c",
+    "usage": {
+     "cached_input_tokens": 37587968,
+     "input_tokens": 38003004,
+     "output_tokens": 157115,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-cellarcore-binary-parity-f2111d3e",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "8cb392cf1cfd4382184baf710ea434e7c2e357fb9925690bfb025d71a9cf25ee",
+    "summary": "27dd238fb75df82de860a8765fe8097e13f443ab88cf155ae712ae207d5d74f2",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-24T07:46:37.098089+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1936.793,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T03:50:21.712425+00:00",
+   "functional": 0.4,
+   "model": "beam",
+   "quality": 0.8284,
+   "reported_tokens": 8317919,
+   "run_id": "legacy-codeccore-binary-parity-8f50e046",
+   "security": 0.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8317919,
+    "result_receipts": null,
+    "stream_sha256": "986c7b7b76416196afe62c5ec1b466d499a61cf5705b4abc5d9aab7e2e126fff",
+    "usage": {
+     "cached_input_tokens": 8043392,
+     "input_tokens": 8258071,
+     "output_tokens": 59848,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-codeccore-binary-parity-8f50e046",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "5cb803827fe0e5d984026f713da126a90e284be26e8c15075da966a3395c7ed6",
+    "summary": "4036656220ce4c784a31f5f1a29e03ab5a7d719a04c4ea45717269d154157926",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-24T03:18:04.906879+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1187.596,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T07:29:02.272052+00:00",
+   "functional": 0.4286,
+   "model": "beam",
+   "quality": 0.731,
+   "reported_tokens": 26137664,
+   "run_id": "legacy-depotcore-binary-parity-c29d78cd",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 26137664,
+    "result_receipts": null,
+    "stream_sha256": "1eea5f09d8c3579d9c2d15cbc139a54ae4afaf1306c80838277c493e95b71fb0",
+    "usage": {
+     "cached_input_tokens": 25667840,
+     "input_tokens": 25992010,
+     "output_tokens": 145654,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-depotcore-binary-parity-c29d78cd",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "f5140ada3b14ffe3fe3a71a59d4eb2832a8f85d8c84d867b60ce784b65a9a5da",
+    "summary": "ad37d470b805447a047bf43177af37adfeebea403c97eb03bf11294fc29a873a",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-24T07:09:14.670693+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 787.354,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T03:18:04.832385+00:00",
+   "functional": 0.5556,
+   "model": "beam",
+   "quality": 0.8189,
+   "reported_tokens": 9815195,
+   "run_id": "legacy-freightcore-binary-parity-fd8523e2",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9815195,
+    "result_receipts": null,
+    "stream_sha256": "65285929f6fede4c573b5fd77b29085a73cfda1f0e03fc40c59d2bbcf163ff58",
+    "usage": {
+     "cached_input_tokens": 9443392,
+     "input_tokens": 9719977,
+     "output_tokens": 95218,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-freightcore-binary-parity-fd8523e2",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "bc361b8bed784aeaf569e86ea297154e184ea71f3db9e35fe2b1cd1c87a8d7bf",
+    "summary": "9e1f5671ee5eabd022486c95ee42d93868ada611268ecb95a9bf42624ae807db",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-24T03:04:57.472612+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 928.866,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T07:09:14.592748+00:00",
+   "functional": 0.1429,
+   "model": "beam",
+   "quality": 0.6728,
+   "reported_tokens": 16476056,
+   "run_id": "legacy-granarycore-binary-parity-d2b5422a",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 16476056,
+    "result_receipts": null,
+    "stream_sha256": "919ae485cde5ff720439a23f8aa22d0f60b4f88925360181fc93e26da9ccf1a9",
+    "usage": {
+     "cached_input_tokens": 16167040,
+     "input_tokens": 16360593,
+     "output_tokens": 115463,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-granarycore-binary-parity-d2b5422a",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "d896809c939be964859d47f3edada563ac3e9079bc767fae5252c8153b05ab2b",
+    "summary": "199eed21dd0648b7e725adf5f076983955f7606d40745cf25afe0825d20b8580",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-24T06:53:45.721635+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 887.186,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T05:02:55.051033+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8036,
+   "reported_tokens": 5446894,
+   "run_id": "legacy-hedgecore-binary-parity-c129877f",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5446894,
+    "result_receipts": null,
+    "stream_sha256": "b4d9f0757727b084e5083d51a2eaea8150a110ff16a70a8ebcb1a05fb325025c",
+    "usage": {
+     "cached_input_tokens": 5171264,
+     "input_tokens": 5374576,
+     "output_tokens": 72318,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-hedgecore-binary-parity-c129877f",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "a5d70c0a9ac13ca361d567debd6e00f5a31e281aaea312ba02a7d366631eaf57",
+    "summary": "ea3ed79535b5a7db256dbfd2c871ed4ec1dbebf05553b1f713b89493142bcabf",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-24T04:48:07.859829+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1054.672,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T07:46:37.021933+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7257,
+   "reported_tokens": 31885326,
+   "run_id": "legacy-lodgecore-binary-parity-8017a56c",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 31885326,
+    "result_receipts": null,
+    "stream_sha256": "13157622ff9a12be38ca751b106bc2878ecd5c24e30e4efbe2a8ef3bfdc84ac7",
+    "usage": {
+     "cached_input_tokens": 31296640,
+     "input_tokens": 31723192,
+     "output_tokens": 162134,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-lodgecore-binary-parity-8017a56c",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "ef93d5fc544f1ab6101f2fc19d04562c570dbbb31aefe6973b613ef209e64db7",
+    "summary": "9727463065634d77c35391ab4318e0c89b7977236c552d488d86444b7f64391f",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-24T07:29:02.344228+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1016.068,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T02:04:09.685924+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.7382,
+   "reported_tokens": 7552928,
+   "run_id": "legacy-matchcore-order-book-parity-24dcacce",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7552928,
+    "result_receipts": null,
+    "stream_sha256": "c1397e1615cd746df8e518a30181a2a74491901ace7fd86020486a8cb05b34c4",
+    "usage": {
+     "cached_input_tokens": 7211904,
+     "input_tokens": 7495807,
+     "output_tokens": 57121,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-matchcore-order-book-parity-24dcacce",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "d74e2746bc4e45c9dcc381f3d5f1c1efec67ba8e06c450e1239ded9095e787cf",
+    "summary": "23ae2c3b8e34eef03876f78355c856568aa7cdb690206e0c2c2d90260c4194b3",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-24T01:47:13.613573+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1007.842,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T03:04:57.399213+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8114,
+   "reported_tokens": 3017295,
+   "run_id": "legacy-metercore-binary-parity-c1e94737",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3017295,
+    "result_receipts": null,
+    "stream_sha256": "5ec4109fc9866cb1661e540eda22ad728bf0e5eb7246098de8510a8749e90e04",
+    "usage": {
+     "cached_input_tokens": 2833984,
+     "input_tokens": 2973655,
+     "output_tokens": 43640,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-metercore-binary-parity-c1e94737",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "6ca0ad54cd8ff678859efc48109e9b4cb31c8775f46d031371ad746c9999b0f4",
+    "summary": "f090697b852d64b4cf16f7a515c4b0d37ac66cb23b37cef20464b3aae1c47514",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-24T02:48:09.549760+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 377.202,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T05:41:18.105012+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.824,
+   "reported_tokens": 4267862,
+   "run_id": "legacy-pacecore-binary-parity-263d788b",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4267862,
+    "result_receipts": null,
+    "stream_sha256": "4771c1545f891a9adc77a1014f8357bcf602b29dae248f3bda95f9267fdf1ef9",
+    "usage": {
+     "cached_input_tokens": 4066880,
+     "input_tokens": 4218800,
+     "output_tokens": 49062,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-pacecore-binary-parity-263d788b",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "9dc38452b50d00751f551a8575b4b5ae12421f8db2ab2f69dc02280ee01ae0e0",
+    "summary": "7cda81354a92534dd2211fc959d62dbe89d06f1c1c53cb953630abfb6f92bf48",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-24T05:35:00.899731+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 728.223,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T08:52:09.696940+00:00",
+   "functional": 0.4,
+   "model": "beam",
+   "quality": 0.6959,
+   "reported_tokens": 12248754,
+   "run_id": "legacy-paddockcore-binary-parity-7a2db5d7",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 12248754,
+    "result_receipts": null,
+    "stream_sha256": "4f9274a8f8529af74676709ddadd881ba30ba0937e723bd2dc962ea3e5a6d542",
+    "usage": {
+     "cached_input_tokens": 11792960,
+     "input_tokens": 12147027,
+     "output_tokens": 101727,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-paddockcore-binary-parity-7a2db5d7",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "703a966808fad512c0a491a287865399c4f51c72a6ea8e471b7e4a12676da76e",
+    "summary": "c74ce30a3cb0e9ec2d13e4b1c073ef3b870c423bfd9d631981074bd5f4310adf",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-24T08:40:01.468531+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1562.834,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T02:48:09.471721+00:00",
+   "functional": 0.9,
+   "model": "beam",
+   "quality": 0.7901,
+   "reported_tokens": 6704499,
+   "run_id": "legacy-payrollcore-binary-parity-62391aae",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6704499,
+    "result_receipts": null,
+    "stream_sha256": "dee2463568d4fd42bdb7f08b4a2e153575ef5023866f86b0d893fcadd5072e67",
+    "usage": {
+     "cached_input_tokens": 6450368,
+     "input_tokens": 6637816,
+     "output_tokens": 66683,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-payrollcore-binary-parity-62391aae",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "43de7c37004d7786d86819c758787f73f0839bd58cfd6199659923aa393641aa",
+    "summary": "d3de352ab75a6b9f34ef1e61372c20af9081b7094ac4db897aaa0d433c4477fb",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-24T02:22:06.626472+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1076.775,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T02:22:06.549300+00:00",
+   "functional": 0.7778,
+   "model": "beam",
+   "quality": 0.7659,
+   "reported_tokens": 2407044,
+   "run_id": "legacy-qlite-store-parity-f0e140c7",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 2407044,
+    "result_receipts": null,
+    "stream_sha256": "061e644f82ae937242e4822a55d3edae9ad5d4bccaaa81f75c3b0bdc5b5c3ed7",
+    "usage": {
+     "cached_input_tokens": 2262464,
+     "input_tokens": 2373457,
+     "output_tokens": 33587,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-qlite-store-parity-f0e140c7",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "26b3589f88916ac9efef467cac3bdb70ce32b7510ac18ba63bca8d35f144ef66",
+    "summary": "effb5a1f12b75a24f508f1fda1ca74de1ee99c315ee9ddac865083ec38522080",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-24T02:04:09.769925+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 547.05,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T04:48:07.788969+00:00",
+   "functional": 0.5,
+   "model": "beam",
+   "quality": 0.8077,
+   "reported_tokens": 14462905,
+   "run_id": "legacy-queuecore-binary-parity-e37857c9",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 14462905,
+    "result_receipts": null,
+    "stream_sha256": "c8a47d0be6900b1045f20fd7857bf7e4d9aafc11caef1a1a42ab6fdb08753122",
+    "usage": {
+     "cached_input_tokens": 14131776,
+     "input_tokens": 14351997,
+     "output_tokens": 110908,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-queuecore-binary-parity-e37857c9",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "b4515b499733f0a60f6a6dbc612847ccbcdcdc9aca5e7345d234ceb10653d33e",
+    "summary": "df07c49efbe033a3db3a335b89bb25c835972c321334fdd1e4bf2d597b16ce1e",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-24T04:39:00.733769+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 474.081,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T03:58:15.889976+00:00",
+   "functional": 0.8,
+   "model": "beam",
+   "quality": 0.8027,
+   "reported_tokens": 3057312,
+   "run_id": "legacy-quotacore-binary-parity-73dfe3c4",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3057312,
+    "result_receipts": null,
+    "stream_sha256": "6c198296bd6b670cf3a93a06d4794a573387a31c7b32db23934bf44aeaf64aa8",
+    "usage": {
+     "cached_input_tokens": 2934016,
+     "input_tokens": 3011218,
+     "output_tokens": 46094,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-quotacore-binary-parity-73dfe3c4",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "a2b89c28dafac98d44b2e43768e6c8f3de321db1436c7c815648e221c1ac61df",
+    "summary": "83952dbbc81c1f3cdf476a3c5bff63e41e3094b3bddc010d7cecdfadee200bc8",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-24T03:50:21.803821+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 505.21,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T05:25:04.358625+00:00",
+   "functional": 0.75,
+   "model": "beam",
+   "quality": 0.8144,
+   "reported_tokens": 8657109,
+   "run_id": "legacy-reflowcore-binary-parity-bcba01a6",
+   "security": 0.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8657109,
+    "result_receipts": null,
+    "stream_sha256": "5f033f4f9ffa09bc8ecd6e54a8ec157ed2235fde083f55f62e4616d22840432b",
+    "usage": {
+     "cached_input_tokens": 8411520,
+     "input_tokens": 8567867,
+     "output_tokens": 89242,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-reflowcore-binary-parity-bcba01a6",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "6dd595a513b41ffea79374c9125e5c3780fbdf1f9a18daa48660d511d41ce32a",
+    "summary": "3bfdcf4911c9b39da05ae0a1993cb1e665a917daebb2479461601526efa85342",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-24T05:16:39.146371+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 823.941,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T05:16:39.071646+00:00",
+   "functional": 0.875,
+   "model": "beam",
+   "quality": 0.7636,
+   "reported_tokens": 4712186,
+   "run_id": "legacy-schedcore-binary-parity-9e9ae91c",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4712186,
+    "result_receipts": null,
+    "stream_sha256": "920fc72a6da20d65fcdd2d507c16a0cc026e78e9c7ae5f4b6e9870449fae2954",
+    "usage": {
+     "cached_input_tokens": 4555648,
+     "input_tokens": 4650952,
+     "output_tokens": 61234,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-schedcore-binary-parity-9e9ae91c",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "238bcb95073ac890601c961627ff7cf08684661759da38ed0fa1ff22fd597bdd",
+    "summary": "8919dc5e9ddf47187dadf4b89cd6ddb0b76d815f4611c3ddd72cfaaefefdd40e",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-24T05:02:55.125187+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 384.651,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T01:47:13.543150+00:00",
+   "functional": 0.3,
+   "model": "beam",
+   "quality": 0.7699,
+   "reported_tokens": 13969481,
+   "run_id": "legacy-settlecore-binary-parity-7fb10157",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 13969481,
+    "result_receipts": null,
+    "stream_sha256": "c62ac67d5ef7f95124d18dd9701694b26be903961691d9d11d5acf2499010fcb",
+    "usage": {
+     "cached_input_tokens": 13463680,
+     "input_tokens": 13877449,
+     "output_tokens": 92032,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-settlecore-binary-parity-7fb10157",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "e1e6d420cef805846f318ffc79d7770601ecb183848b9ba07c7ce165f3b71989",
+    "summary": "19e494a14e2770dbad83e2e32d51efc83676091b0b090dced5a0424b3db594df",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-24T01:40:48.888701+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1495.441,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T04:23:11.410997+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8083,
+   "reported_tokens": 4147866,
+   "run_id": "legacy-snapcore-binary-parity-bf0c6f60",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4147866,
+    "result_receipts": null,
+    "stream_sha256": "294e381d9c984ce7b3132b85839a564793f53ad5fd2ba1296183c5da048f2b12",
+    "usage": {
+     "cached_input_tokens": 3906560,
+     "input_tokens": 4097948,
+     "output_tokens": 49918,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-snapcore-binary-parity-bf0c6f60",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "cd2595f11d8d20bc914df93939ed40d3b95deb3a4f97d74c40568e75ec3fa843",
+    "summary": "6d04b80da6f21f3be4449ecc87eb1378cdf941647a789ec425fccbc8008371da",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-24T03:58:15.960706+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 923.213,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T06:53:45.648651+00:00",
+   "functional": 0.8889,
+   "model": "beam",
+   "quality": 0.7703,
+   "reported_tokens": 15913913,
+   "run_id": "legacy-stampcore-binary-parity-a9fcc283",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 15913913,
+    "result_receipts": null,
+    "stream_sha256": "aa6ff0f19248d79a884ee62e4c7c4e3adb61a24c38ebb95c1411d5b3949c8087",
+    "usage": {
+     "cached_input_tokens": 15453312,
+     "input_tokens": 15805689,
+     "output_tokens": 108224,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-stampcore-binary-parity-a9fcc283",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "0a933f9cb1a1a71c62fe45d2898c16fe00cf5096c5d10033bcc0a5d60f46bb24",
+    "summary": "b595662204aff65c098f48b6c3ffab2be331f440ce713a2b962df5cfab113ea2",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-24T06:38:22.431086+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 596.388,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T05:35:00.827498+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8008,
+   "reported_tokens": 7992036,
+   "run_id": "legacy-tallycore-binary-parity-3a278af3",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 7992036,
+    "result_receipts": null,
+    "stream_sha256": "b7cb9593f2a495f63cbeeddb0c58f93ae1eefe55f3b839e26d8e7f42aa82cdeb",
+    "usage": {
+     "cached_input_tokens": 7695744,
+     "input_tokens": 7918861,
+     "output_tokens": 73175,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-tallycore-binary-parity-3a278af3",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "dfa1aea8bd54d6af8615c28e203c0c5899e7594989b9220ad89063110d665341",
+    "summary": "87b35dbeb45985afec448ec356a7fc2b2f04c932863fb185ddd9e10e8ae30251",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-24T05:25:04.433845+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 949.173,
+   "effort": "extra-high",
+   "finished_at": "2026-10-24T04:39:00.660054+00:00",
+   "functional": 0.5556,
+   "model": "beam",
+   "quality": 0.8083,
+   "reported_tokens": 5266176,
+   "run_id": "legacy-vaultcore-binary-parity-5bd165fa",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5266176,
+    "result_receipts": null,
+    "stream_sha256": "fabb1b70f23edba0e20a85056cd33aa5149a7ea92c55c594b6a4a805a5a099f9",
+    "usage": {
+     "cached_input_tokens": 4998144,
+     "input_tokens": 5209963,
+     "output_tokens": 56213,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/extra-high/legacy-vaultcore-binary-parity-5bd165fa",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "4ba5827ff224ce4cfe6d7765122f91a573a06836ffbdc8c421e7b9553a2c5041",
+    "summary": "34b189429cb88d268ecc4eb7586c546b1c6eec454d557f40b14a6e4a7fe7897b",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-24T04:23:11.483428+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1807.864,
+   "effort": "max",
+   "finished_at": "2026-10-25T01:31:03.167675+00:00",
+   "functional": 0.4444,
+   "model": "beam",
+   "quality": 0.7565,
+   "reported_tokens": 11312883,
+   "run_id": "legacy-blendcore-binary-parity-6cc493a8",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 11312883,
+    "result_receipts": null,
+    "stream_sha256": "fbd1bf44f06a62d923d34a8accf39eaee2bf0371137a743e2b42b482cfbaf333",
+    "usage": {
+     "cached_input_tokens": 10884672,
+     "input_tokens": 11196421,
+     "output_tokens": 116462,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-blendcore-binary-parity-6cc493a8",
+   "source_hashes": {
+    "issue": "71973507dd38adbf571cf538e977d993924c0475260d1ceb563389b21aa752fa",
+    "patch": "e94d0efc52da52ae32a21902aadd1f9e18abc63e3a7ccf638dc488664bad4196",
+    "summary": "7717ff4a0646777b06d3bd4c0de0a5448a1a5daf7bb9758edcf776bca94c4728",
+    "task": "edbea8a8869f8f2c71351caed7934cfb906c8d392da0fbd6c25d073bda783366"
+   },
+   "started_at": "2026-10-25T01:00:55.291968+00:00",
+   "task": "legacy-blendcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2009.9,
+   "effort": "max",
+   "finished_at": "2026-10-25T03:59:24.822512+00:00",
+   "functional": 0.5714,
+   "model": "beam",
+   "quality": 0.841,
+   "reported_tokens": 42239994,
+   "run_id": "legacy-cellarcore-binary-parity-0bf06b27",
+   "security": 0.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 42239994,
+    "result_receipts": null,
+    "stream_sha256": "d24191d3981c12c7e74af560ea131e3b785fe9774a7a5bcda41b0f5e6b42fc6d",
+    "usage": {
+     "cached_input_tokens": 41405504,
+     "input_tokens": 42019503,
+     "output_tokens": 220491,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-cellarcore-binary-parity-0bf06b27",
+   "source_hashes": {
+    "issue": "8d527510d3e06c804666eac263c15ac85f32f759668132c124442b9f98f0c4c6",
+    "patch": "cd9335d8249cd997454159f511476bd6913e1e9a2ff5ef6c550af5d70ceeafba",
+    "summary": "00ba7f138cf1a17a212bf945bb8116654b62fbf5d302ccf8d49992f121f6ceb5",
+    "task": "14623e543d6119bb11558ed1267c38f921dac169333092fb0d468cc2c3f82c0e"
+   },
+   "started_at": "2026-10-25T03:25:54.913201+00:00",
+   "task": "legacy-cellarcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 689.556,
+   "effort": "max",
+   "finished_at": "2026-10-24T10:34:50.070735+00:00",
+   "functional": 0.6,
+   "model": "beam",
+   "quality": 0.8059,
+   "reported_tokens": 6775213,
+   "run_id": "legacy-codeccore-binary-parity-bcd8b124",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6775213,
+    "result_receipts": null,
+    "stream_sha256": "db43cb5d5ef835dc1e424bc34c57b13d32268c006e293487417ae04f7d834969",
+    "usage": {
+     "cached_input_tokens": 6416384,
+     "input_tokens": 6706142,
+     "output_tokens": 69071,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-codeccore-binary-parity-bcd8b124",
+   "source_hashes": {
+    "issue": "4fd31335c0834dcc139f331bcc558e5046fca8111e2f20c4b673a4e2a770da09",
+    "patch": "83d00803f072201dc1b1e34931c5af77bbc2948c62d5880d836e04a458769ceb",
+    "summary": "e04b1eb6203f67efc3bc00372f191f9565949fc7e03e55b6d8dbacbb4dd84410",
+    "task": "79993e47183af4274cd12dd18e21d9bcc2d2d74baa6ab076d78c29be59b2fd7d"
+   },
+   "started_at": "2026-10-24T10:23:20.509682+00:00",
+   "task": "legacy-codeccore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 3182.281,
+   "effort": "max",
+   "finished_at": "2026-10-25T03:01:03.322774+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7022,
+   "reported_tokens": 39971941,
+   "run_id": "legacy-depotcore-binary-parity-de5d1608",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 39971941,
+    "result_receipts": null,
+    "stream_sha256": "914f6c7d92bad1e37de8058c64b1b1907d3913aad9e404ddbd7713998483a005",
+    "usage": {
+     "cached_input_tokens": 38822016,
+     "input_tokens": 39663414,
+     "output_tokens": 308527,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-depotcore-binary-parity-de5d1608",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "8f338c67c54af9b823aa4c084313b73960f6cacaeca6a5a420ec5b434d015b91",
+    "summary": "ad5b795673574e4ffab2a38112b2342ea2c6c4b19192bb19efce33cdeb86e900",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-25T02:08:01.023085+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1151.926,
+   "effort": "max",
+   "finished_at": "2026-10-24T10:23:20.435644+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8008,
+   "reported_tokens": 4456824,
+   "run_id": "legacy-freightcore-binary-parity-f061503a",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4456824,
+    "result_receipts": null,
+    "stream_sha256": "3da680536300b44d508733685441e80c95eb3057cb98f3372899e1ee36e843bb",
+    "usage": {
+     "cached_input_tokens": 4214400,
+     "input_tokens": 4405767,
+     "output_tokens": 51057,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-freightcore-binary-parity-f061503a",
+   "source_hashes": {
+    "issue": "1b226a33c981588ee7e1cb9e37c9d4c3588eb760c55a3d59901d72629e279583",
+    "patch": "51cc9214878eb646a610d7f54c744a4e39e0897201c45aaff6eb26015aa91b1a",
+    "summary": "8ce452b17bdc4686937b1d23fbc2aa0ac0ae4de74c5e7d4cd0ac8939f8ea1ba2",
+    "task": "aee89697698f6bf517bb5b764f9291612715a6300c24a5466a08cd21334f47fb"
+   },
+   "started_at": "2026-10-24T10:04:08.503762+00:00",
+   "task": "legacy-freightcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1366.817,
+   "effort": "max",
+   "finished_at": "2026-10-25T02:08:00.941559+00:00",
+   "functional": 0.1429,
+   "model": "beam",
+   "quality": 0.6748,
+   "reported_tokens": 16444273,
+   "run_id": "legacy-granarycore-binary-parity-fb29902b",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 16444273,
+    "result_receipts": null,
+    "stream_sha256": "7a0db4fc38bffa40863013fa501abdaf1896bbb6c5a85f75387148c4f6ef7b37",
+    "usage": {
+     "cached_input_tokens": 15958016,
+     "input_tokens": 16348865,
+     "output_tokens": 95408,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-granarycore-binary-parity-fb29902b",
+   "source_hashes": {
+    "issue": "6d647657b62cb5fc3781358daf2cbe77968fd93223ae20dfbb016a5c202e8ca1",
+    "patch": "ba64b4207abf6d54306be63c096c0154d78211d85a80c9d4ce78a7aa4ab00e5f",
+    "summary": "2b35383189994f6af6714abd5dcd1f04ac0c40356c97619cec1df3c65d9cf0c1",
+    "task": "f52e631dd039ac0f8bdafb1d56d6f279cd170853ebfc7e0d56fa8c6dd485bb92"
+   },
+   "started_at": "2026-10-25T01:45:14.112867+00:00",
+   "task": "legacy-granarycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2400.952,
+   "effort": "max",
+   "finished_at": "2026-10-24T12:15:19.802097+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8668,
+   "reported_tokens": 29136941,
+   "run_id": "legacy-hedgecore-binary-parity-aa58c2dc",
+   "security": 0.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 29136941,
+    "result_receipts": null,
+    "stream_sha256": "bdd313d791da5a3a81b0c0e2a045b55a63adc501c631a49ccbedc1711a2737fb",
+    "usage": {
+     "cached_input_tokens": 28190912,
+     "input_tokens": 28914506,
+     "output_tokens": 222435,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-hedgecore-binary-parity-aa58c2dc",
+   "source_hashes": {
+    "issue": "f7ab96afa990b950661263fceaa119c5888e02e34e98ba0fba49d9edef6bf493",
+    "patch": "d932d8d493c12f56414be80eb840ba99380752b861119ae4d5245d61098e0e6b",
+    "summary": "820d67dd25e57c1e192ad9a7fba39eddc21aa06102b3ead65ade1a5b674ab342",
+    "task": "3b92343e6adab8117d03ac535e06bc0e232f6b76e03072ed2e0aab25fe27e8e4"
+   },
+   "started_at": "2026-10-24T11:35:18.842064+00:00",
+   "task": "legacy-hedgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1491.423,
+   "effort": "max",
+   "finished_at": "2026-10-25T03:25:54.831740+00:00",
+   "functional": 0.4167,
+   "model": "beam",
+   "quality": 0.755,
+   "reported_tokens": 36556936,
+   "run_id": "legacy-lodgecore-binary-parity-ad5f7780",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 36556936,
+    "result_receipts": null,
+    "stream_sha256": "b64b258d3a32820a5fc8e34451625a8437af97717fcc6d3fccef907c322f101e",
+    "usage": {
+     "cached_input_tokens": 35696256,
+     "input_tokens": 36335243,
+     "output_tokens": 221693,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-lodgecore-binary-parity-ad5f7780",
+   "source_hashes": {
+    "issue": "8bfa50aababa2eac976e053842bb6cefd0303e564a1c0fa9df8f28094feb1d4b",
+    "patch": "d091c2637ec240c82154c6880dda0f1f612883ba4991446ad67b45b3840a116b",
+    "summary": "4686dd6fe51f2529adc687cec127d4b921aad4f44704ce5eb40e6cc4855f3841",
+    "task": "6661ccff9c7bfbc304fc27dbb23833a21a3c9897a6980b5a8c85b9ad4af1f75d"
+   },
+   "started_at": "2026-10-25T03:01:03.399317+00:00",
+   "task": "legacy-lodgecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1588.075,
+   "effort": "max",
+   "finished_at": "2026-10-24T09:37:06.785664+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.6716,
+   "reported_tokens": 20564355,
+   "run_id": "legacy-matchcore-order-book-parity-4b85aad0",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 20564355,
+    "result_receipts": null,
+    "stream_sha256": "9bf112c3d1351530dd76673ec9cd81a83e3a0c885d4f1eaa7f9cc2a196b357ec",
+    "usage": {
+     "cached_input_tokens": 19951168,
+     "input_tokens": 20460891,
+     "output_tokens": 103464,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-matchcore-order-book-parity-4b85aad0",
+   "source_hashes": {
+    "issue": "f1e1db111adeab5b500b528e9038734373300056df57bbc7b1904d39806944e8",
+    "patch": "8ea4fd163ca6c2aeeeeef2bed00f4b091cae0cf13f5f86546822ad61996dc61b",
+    "summary": "587f240a7e370e0bb9939c7ab6ff229d475804d4315579360b23c1f8904dbdd3",
+    "task": "339de35e45cd4edbfb2ebd91e8ae32cb86ac46b7cb363449d2148e651d43fbcb"
+   },
+   "started_at": "2026-10-24T09:10:38.704367+00:00",
+   "task": "legacy-matchcore-order-book-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 437.986,
+   "effort": "max",
+   "finished_at": "2026-10-24T10:04:08.422596+00:00",
+   "functional": 0.6667,
+   "model": "beam",
+   "quality": 0.8239,
+   "reported_tokens": 3300072,
+   "run_id": "legacy-metercore-binary-parity-d61a21b9",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 3300072,
+    "result_receipts": null,
+    "stream_sha256": "118cca518807a5c0aae11a982b97e529602827841d152a5bd6f547d43df4d752",
+    "usage": {
+     "cached_input_tokens": 3105216,
+     "input_tokens": 3254270,
+     "output_tokens": 45802,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-metercore-binary-parity-d61a21b9",
+   "source_hashes": {
+    "issue": "3757f2e1f10984b13a7a8d6d573d3f941d24793e5ad62b4defda1133a1a175e5",
+    "patch": "877bf84392b7bd40e83998e9b7c7a54f191609bc65fe18337babe4788cda0d7a",
+    "summary": "17f3222183ea4222d0c39ef5443f1cb7d7edd89c89bc4206fd93d0de340d325f",
+    "task": "2b42dff1baf192f99e10bfbfe508572e99669577794bca67dbb0e1b5b50cfbb0"
+   },
+   "started_at": "2026-10-24T09:56:50.433131+00:00",
+   "task": "legacy-metercore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1970.053,
+   "effort": "max",
+   "finished_at": "2026-10-25T01:00:55.215499+00:00",
+   "functional": 0.8889,
+   "model": "beam",
+   "quality": 0.792,
+   "reported_tokens": 10635417,
+   "run_id": "legacy-pacecore-binary-parity-62524c92",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 10635417,
+    "result_receipts": null,
+    "stream_sha256": "cc9207cc6cb391d9691cfcfcf3cd618bda637c7589e5c9c471b926ab6abacb87",
+    "usage": {
+     "cached_input_tokens": 10250624,
+     "input_tokens": 10534726,
+     "output_tokens": 100691,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-pacecore-binary-parity-62524c92",
+   "source_hashes": {
+    "issue": "040e03f657055fe98cabee00ef8da7f2983ba69d446aecad3eeb4cc8f58dcbe6",
+    "patch": "e6d88d12217f220a1fd3a3d91c16a2d5c2f273154320f5bb6d930a33c1127a1d",
+    "summary": "f3ed1a369f68821918e05357c03ff89d99f906189b9d43e369dc16a649dec832",
+    "task": "cb57aeeefa7fe2e3448ebf2945b5a4920d8be822e7f671d2c13355a96fa69fa3"
+   },
+   "started_at": "2026-10-25T00:28:05.153474+00:00",
+   "task": "legacy-pacecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1904.14,
+   "effort": "max",
+   "finished_at": "2026-10-25T04:31:09.053572+00:00",
+   "functional": 0.3333,
+   "model": "beam",
+   "quality": 0.6228,
+   "reported_tokens": 66732094,
+   "run_id": "legacy-paddockcore-binary-parity-b234a4a4",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 66732094,
+    "result_receipts": null,
+    "stream_sha256": "ceaac5d1030e9d4c5e02d809a2085fa6c03c2fd533a717cdc883e7d42e726de2",
+    "usage": {
+     "cached_input_tokens": 65534464,
+     "input_tokens": 66462368,
+     "output_tokens": 269726,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-paddockcore-binary-parity-b234a4a4",
+   "source_hashes": {
+    "issue": "f0d2a362ff60f2fdee92d98e55c0d46b8732e3b29aea80b64717ed5e3d241ff2",
+    "patch": "38e66c2b4589163811b3eb709e34ac681e35fe7d1ea4142deaf94ed8c5735390",
+    "summary": "49aaa7778c3d8c7b0500716b664e8b5ceb55f185bb2c75a7f4d329e145da7bf3",
+    "task": "f02ead4f1144990632936d6cc8af725ee6862f7234fe5138fa48698faa2ad644"
+   },
+   "started_at": "2026-10-25T03:59:24.903897+00:00",
+   "task": "legacy-paddockcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 625.075,
+   "effort": "max",
+   "finished_at": "2026-10-24T09:56:50.359073+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.7741,
+   "reported_tokens": 9286343,
+   "run_id": "legacy-payrollcore-binary-parity-d3e9f1e9",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9286343,
+    "result_receipts": null,
+    "stream_sha256": "3f825e24eb05ccc71ae777edb58b654d64e9e33b296a595e0e83dc298d0722c1",
+    "usage": {
+     "cached_input_tokens": 8868160,
+     "input_tokens": 9199335,
+     "output_tokens": 87008,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-payrollcore-binary-parity-d3e9f1e9",
+   "source_hashes": {
+    "issue": "5a1f9d059d2fd3e741fcb3f929830c9f3f8edaa4aafa8c4bb6ba4ae26182fa6e",
+    "patch": "b07b5ae52e804c4a66425df69bf5ecb444653d0db7d8d89add89bdf97cd9782e",
+    "summary": "269c761f099e2bf65613c3adf91aa2187a2f859d4c80527d9030a0b8ae7e106e",
+    "task": "717b8a73907075008457ecc01fa25b38e18c2edf1dabbdf2aac18f2e8d7c2c96"
+   },
+   "started_at": "2026-10-24T09:46:25.278527+00:00",
+   "task": "legacy-payrollcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 558.349,
+   "effort": "max",
+   "finished_at": "2026-10-24T09:46:25.208933+00:00",
+   "functional": 0.8889,
+   "model": "beam",
+   "quality": 0.7925,
+   "reported_tokens": 6074189,
+   "run_id": "legacy-qlite-store-parity-1d04da27",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6074189,
+    "result_receipts": null,
+    "stream_sha256": "9aad077a1b8852754eec198308e187b3c6639868fd5312b53de2c0f4492b3937",
+    "usage": {
+     "cached_input_tokens": 5829632,
+     "input_tokens": 6005732,
+     "output_tokens": 68457,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-qlite-store-parity-1d04da27",
+   "source_hashes": {
+    "issue": "99c380d8eb469bdfc2fb361203251c8c5acf9667fffdffc4dfaac309b4336b6a",
+    "patch": "e5d72d83c7a66f424ae91924c84bd35977a69c0ae99ab0d535a7bde7abcddd9e",
+    "summary": "48db4c5ed588ee777a678fd06f829eded7bd8fb686ffe0490a7cfeab9061230b",
+    "task": "ca5322f8165e0d9aa9fde0a66980b770c7121a830b0d36c73027d6bef829bd3a"
+   },
+   "started_at": "2026-10-24T09:37:06.855188+00:00",
+   "task": "legacy-qlite-store-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1893.853,
+   "effort": "max",
+   "finished_at": "2026-10-24T11:35:18.767244+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.8237,
+   "reported_tokens": 37115286,
+   "run_id": "legacy-queuecore-binary-parity-e9f2686e",
+   "security": 0.25,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 37115286,
+    "result_receipts": null,
+    "stream_sha256": "6ac7fe5383c111cd59da234bc7a97f8b17312f2a82797a2c65e6f240e662fb2c",
+    "usage": {
+     "cached_input_tokens": 36465216,
+     "input_tokens": 36977682,
+     "output_tokens": 137604,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-queuecore-binary-parity-e9f2686e",
+   "source_hashes": {
+    "issue": "21f78c09a60764a8ce8a3f7281a60fabe9ee3a8fb4a8aef7bb7b67611049e8bc",
+    "patch": "6f0ab677b6157eadd5cfa596a5c24034f603634d96e9ca2fe941a8ff3cdc9d38",
+    "summary": "499134a93207d7349ea07a497079058d645ce5beb65cb9a67915ab6a6891eda5",
+    "task": "a264780309ac649a9567bbdcd61651a74010be71ee1b4e22201645ac4075050b"
+   },
+   "started_at": "2026-10-24T11:03:44.907447+00:00",
+   "task": "legacy-queuecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 686.191,
+   "effort": "max",
+   "finished_at": "2026-10-24T10:46:16.338925+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8344,
+   "reported_tokens": 5415313,
+   "run_id": "legacy-quotacore-binary-parity-fa012f1d",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5415313,
+    "result_receipts": null,
+    "stream_sha256": "2ebb4b72aba8c9e390ec0c641084d2345ebf48101576aa1fe26e0d04bb8f3ddf",
+    "usage": {
+     "cached_input_tokens": 5065856,
+     "input_tokens": 5353286,
+     "output_tokens": 62027,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-quotacore-binary-parity-fa012f1d",
+   "source_hashes": {
+    "issue": "3fe6e860d1da6c5cf53cf93f358725d337ef7195771d948fb50c6c595e68de7b",
+    "patch": "d741ca821b86ef7f974aee03df884262c663342945851d515aa0caddb6d67948",
+    "summary": "b56fdde3d6403c1a340f6154454bba7cf3ec88f359fe0dd38366d0b3bcc65c0d",
+    "task": "8fc60b8cfca8516e292e128144c0018073d3a2f71fc6c93718c70a319f0b9ccc"
+   },
+   "started_at": "2026-10-24T10:34:50.143966+00:00",
+   "task": "legacy-quotacore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 523.423,
+   "effort": "max",
+   "finished_at": "2026-10-25T00:13:51.204447+00:00",
+   "functional": 0.625,
+   "model": "beam",
+   "quality": 0.8438,
+   "reported_tokens": 10141820,
+   "run_id": "legacy-reflowcore-binary-parity-48978d58",
+   "security": 0.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 10141820,
+    "result_receipts": null,
+    "stream_sha256": "91909617e8a0611895c55f49b8efee850cb3a096580861e38144266564858c39",
+    "usage": {
+     "cached_input_tokens": 9776576,
+     "input_tokens": 10056484,
+     "output_tokens": 85336,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-reflowcore-binary-parity-48978d58",
+   "source_hashes": {
+    "issue": "731245634fe9b02b41ebb1a40bdfe2fdb0137535b57b194b3dcd9e2f306fc793",
+    "patch": "a809a45c22d6dc985ed952b2ea0c30e91097137df0a35c6bc99518f9226622f5",
+    "summary": "5746a56230ea1d59380b45a84b6f724b052caceb9428a64a8780117e13142ee9",
+    "task": "d666cf4cc81d154882ae8a5e633e923ab7b3b32d1d3003a3872fc544853109fe"
+   },
+   "started_at": "2026-10-25T00:05:07.776907+00:00",
+   "task": "legacy-reflowcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 2827.194,
+   "effort": "max",
+   "finished_at": "2026-10-24T13:02:27.082009+00:00",
+   "functional": 0.75,
+   "model": "beam",
+   "quality": 0.7681,
+   "reported_tokens": 4370531,
+   "run_id": "legacy-schedcore-binary-parity-c3baa0c9",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 4370531,
+    "result_receipts": null,
+    "stream_sha256": "f4f8bec7ebe83c5b3f4b1a4b54fe886d9a1bd18978b6582d495e76a570e23488",
+    "usage": {
+     "cached_input_tokens": 4157568,
+     "input_tokens": 4319225,
+     "output_tokens": 51306,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-schedcore-binary-parity-c3baa0c9",
+   "source_hashes": {
+    "issue": "755e5c68dcd7589b6d14bfa59daff16219326f32e33e1eee3aeda977cb17db40",
+    "patch": "f421b1f9dd7f67a03d572b38cc9739e4590740518f0e1761ce1d1f60fc034b4a",
+    "summary": "9657f333f8d67e47f91577b18c1f86d1bf2eba8ad642d0638927577c4095f711",
+    "task": "e7cdc8747144dacdd89758a81003fe86488b706e39aed2ed3e5a3415e164e448"
+   },
+   "started_at": "2026-10-24T12:15:19.873662+00:00",
+   "task": "legacy-schedcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 1106.332,
+   "effort": "max",
+   "finished_at": "2026-10-24T09:10:38.633530+00:00",
+   "functional": 0.0,
+   "model": "beam",
+   "quality": 0.7584,
+   "reported_tokens": 6190036,
+   "run_id": "legacy-settlecore-binary-parity-34b6b98d",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6190036,
+    "result_receipts": null,
+    "stream_sha256": "26f4eba41a483ad89a127b5c5edce9322ae7077609ce1b7cbbe9bf24ac3bf0b7",
+    "usage": {
+     "cached_input_tokens": 5874496,
+     "input_tokens": 6127646,
+     "output_tokens": 62390,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-settlecore-binary-parity-34b6b98d",
+   "source_hashes": {
+    "issue": "d8e894a0a9d1b948cf6fd79cdd48da5f0ad0ed19cc64c33162e6d26996b1032f",
+    "patch": "cbc30abb908810eb94f9b92997add01e73f4312fb98d8004412aff1c8f912208",
+    "summary": "cb19018726354fc8737b8e17c6447183cf828a961071c3d292889240e3a94b99",
+    "task": "55bfeaa8853688fd3dd113703fcbc7acd3779d4c15a5d80eae6160e440455fa6"
+   },
+   "started_at": "2026-10-24T08:52:12.295715+00:00",
+   "task": "legacy-settlecore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 446.306,
+   "effort": "max",
+   "finished_at": "2026-10-24T10:53:42.718798+00:00",
+   "functional": 0.4,
+   "model": "beam",
+   "quality": 0.8196,
+   "reported_tokens": 5713184,
+   "run_id": "legacy-snapcore-binary-parity-5c323e7b",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 5713184,
+    "result_receipts": null,
+    "stream_sha256": "ea5f00faf1ae79423093d5ec9f7dd5f783892a44e5a3fb3835a71154b93a8fd1",
+    "usage": {
+     "cached_input_tokens": 5452736,
+     "input_tokens": 5653303,
+     "output_tokens": 59881,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-snapcore-binary-parity-5c323e7b",
+   "source_hashes": {
+    "issue": "81aa4cc69744bf85fa4482687a9f92517f98757d35ab9007c2331a30df50fc3b",
+    "patch": "99f53d2d471305a1bb7a21aee41026c177531171c93a746756c56bcb64822d4e",
+    "summary": "7dc95d9627dd60f96d9ea46f9f0c7582d4b831cfba92fb455864717ff2be2d4a",
+    "task": "2e5277103fde7f2b7acb26f5537cde9b84fb6a0b67737fe7f6aa6a697dba1e0d"
+   },
+   "started_at": "2026-10-24T10:46:16.408944+00:00",
+   "task": "legacy-snapcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 850.784,
+   "effort": "max",
+   "finished_at": "2026-10-25T01:45:14.035724+00:00",
+   "functional": 1.0,
+   "model": "beam",
+   "quality": 0.8155,
+   "reported_tokens": 8429129,
+   "run_id": "legacy-stampcore-binary-parity-6e09cca5",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 8429129,
+    "result_receipts": null,
+    "stream_sha256": "3d3d13011bd1dc62299ef2c6821ab88e4465c9ac570a6296da86cf3323530181",
+    "usage": {
+     "cached_input_tokens": 8041984,
+     "input_tokens": 8361476,
+     "output_tokens": 67653,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-stampcore-binary-parity-6e09cca5",
+   "source_hashes": {
+    "issue": "e0fba19b0fe2d866dbc25aaa88521c8d15a83b0f2c3b01c816b26e918cce0e94",
+    "patch": "07e19349ad539b94652883aa87f9f359ac85139c4eb5d2f25d03da7deeb3c5c4",
+    "summary": "83238d08eb2c46245bb0210ad65887a21233019831df23cfb4daadbf69e43e02",
+    "task": "ee0d9497c8645950b5b43b7c1084e61312e3de76d5e662bc566b7f65c41ab9da"
+   },
+   "started_at": "2026-10-25T01:31:03.246943+00:00",
+   "task": "legacy-stampcore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 853.782,
+   "effort": "max",
+   "finished_at": "2026-10-25T00:28:05.066692+00:00",
+   "functional": 0.125,
+   "model": "beam",
+   "quality": 0.8165,
+   "reported_tokens": 9961000,
+   "run_id": "legacy-tallycore-binary-parity-456564c7",
+   "security": 0.85,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 9961000,
+    "result_receipts": null,
+    "stream_sha256": "6178fabb37d0a9ebfc438c3b8bd0001bcab0c0c6bdd702952c290ebf825b550c",
+    "usage": {
+     "cached_input_tokens": 9513792,
+     "input_tokens": 9872441,
+     "output_tokens": 88559,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-tallycore-binary-parity-456564c7",
+   "source_hashes": {
+    "issue": "e3efa85367206ef3782344ad4b82f17b65bf745b4761ae5a8e1ff5d223a73b9b",
+    "patch": "d1566cd63343a217195bf1acdb4f6c88d4f2c74337cf0c19eb4479c6a9b55bba",
+    "summary": "8534012b05b01b29dc2e360b48080c751c81e9a8cd30e88739bc247f6e1cc29b",
+    "task": "626198e10ed7cde68874859f04280f4d06188c3e9255f48fa4cddc5fca281bfc"
+   },
+   "started_at": "2026-10-25T00:13:51.279427+00:00",
+   "task": "legacy-tallycore-binary-parity"
+  },
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 602.039,
+   "effort": "max",
+   "finished_at": "2026-10-24T11:03:44.831926+00:00",
+   "functional": 0.5556,
+   "model": "beam",
+   "quality": 0.8302,
+   "reported_tokens": 6749303,
+   "run_id": "legacy-vaultcore-binary-parity-ea34bb51",
+   "security": 1.0,
+   "solver_cli_version": "0.1.1",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 6749303,
+    "result_receipts": null,
+    "stream_sha256": "24ac6bbb93dae0a38219aa95286a926e0f07ee9e24bb36bfd6581225764ce1fe",
+    "usage": {
+     "cached_input_tokens": 6450816,
+     "input_tokens": 6681855,
+     "output_tokens": 67448,
+     "reasoning_output_tokens": 0
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench-runs/bench-2026-10-24-beam-judging-v328/runs-effort-beam-mirror/max/legacy-vaultcore-binary-parity-ea34bb51",
+   "source_hashes": {
+    "issue": "6872d041f796189f0e5451432a4bfdd373a7da164ab5a122978565f8c2d49a4e",
+    "patch": "784c8caef5310af4ddc52b6bfd9c6c17c8d6eaa556d8d54476ea01951324ec22",
+    "summary": "ea9baa9af6df48585d5e4cdd387347c0c287f9559a6b14ec5083bd1c19b3ab5d",
+    "task": "a6e1b00dc9a61f29af86c47b0c578b0bb2a9dbe9ab750fd76cf1afc339fc76b6"
+   },
+   "started_at": "2026-10-24T10:53:42.789497+00:00",
+   "task": "legacy-vaultcore-binary-parity"
+  }
+ ],
+ "suite": "coding-intelligence-index-v4"
+}

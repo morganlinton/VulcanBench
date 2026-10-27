@@ -1,18 +1,20 @@
-"""Reflection Beam, Muse Wonder Full, Claude Opus 5.5 and GPT-6.1 Sol on VulcanBench Frontier v4.
+"""Reflection Beam, Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra on VulcanBench Frontier v4.
 
 One card in the format of the Sonnet 5.5 and DeepSeek V4.1 Flash comparison
 cards: combined score and time per task at every effort level, and a table per
 column. Reflection publishes no Beam price, so the right panel shows minutes,
 not cost, and Beam's cost row reads n/a.
 
+The three frontier models finish within a few points of each other and Beam
+20 to 50 points lower, so the combined score panel breaks its axis: the
+frontier band gets its own zoomed scale above Beam's, and the break is drawn
+and named on the card. On one shared scale the frontier lines would merge.
+
 Sources, nothing re-run or re-judged:
 
-- Claude Opus 5.5 and GPT-6.1 Sol: their published per-level rows (Code quality
-  v3.15 and v3.18, Muse Spark 1.3 and Grok 4.6), as on the earlier cards.
-- Muse Wonder Full: its published per-level rows (Code quality v3.26 to v3.26.3,
-  Claude Opus 5.5 and GPT-6.1 Sol) from musewonder-full-vs-frontier.json, Low
-  to Extra high; Max was not run in Contributor mode. Its cost is the published
-  estimate at the Muse Wonder 1.0 list price.
+- Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra: their published per-level rows
+  (Code quality v3.15, v3.18 and v3.4, all Muse Spark 1.3 and Grok 4.6), as on
+  the earlier cards. Astra's cost is its report's central estimate at list price.
 - Reflection Beam: the Code quality v3.28 summary (Muse Spark 1.3 and GPT-6.1
   Sol) and its run summaries in runs-effort-beam-mirror. Runs that changed no
   source code are not judged (owner decision 2026-10-26); at the levels where
@@ -47,24 +49,28 @@ from harness.retrospective_judging import LEVELS, digest, save  # noqa: E402
 PUBLISHED = ROOT / "docs/results/swe-v4-opus55-2026-09/opus55-astra-fable-efforts.csv"
 SOL = ROOT / "docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-efforts.csv"
 SOL_COST = ROOT / "docs/results/swe-v4-gpt61-sol-2026-09/gpt61-sol-v318-economics-efforts.csv"
-WONDER = ROOT / "docs/results/swe-v4-musewonder-full-2026-10/musewonder-full-vs-frontier.json"
+ASTRA = ROOT / "docs/results/swe-v4-astra-fable51-2026-09/astra-vs-fable51-v34-efforts.csv"
+ASTRA_COST = (
+    ROOT / "docs/results/swe-v4-astra-fable51-2026-09/astra-vs-fable51-v34-economics-efforts.csv"
+)
 OUTPUT = ROOT / "docs/results/swe-v4-beam-2026-10"
 RUNS = ROOT / "runs-effort-beam-mirror"
-MODELS = ("beam", "wonder", "opus55", "gpt61sol")
+MODELS = ("beam", "opus55", "gpt61sol", "astra")
+FRONTIER = ("opus55", "gpt61sol", "astra")
 NAMES = {
     "beam": "Reflection Beam",
-    "wonder": "Muse Wonder Full",
     "opus55": "Claude Opus 5.5",
     "gpt61sol": "GPT-6.1 Sol",
+    "astra": "GPT-6 Astra",
 }
-# Muse Wonder Full keeps Meta blue; Beam takes a purple no lab on the board uses
-# (the earlier violet was too close to Meta blue for deutan vision). Opus 5.5 and
-# GPT-6.1 Sol keep their hues from the Sonnet 5.5 comparison card. All four pass
-# the palette validator's all-pairs color-vision checks; markers, direct labels
-# and the table carry identity as well as color.
-COLORS = {"beam": "#9C27B0", "wonder": "#0866FF", "opus55": "#8C3A1F", "gpt61sol": "#10A37F"}
-MARKERS = {"beam": "o", "wonder": "s", "opus55": "D", "gpt61sol": "^"}
-UNJUDGED_AS_ZERO = {"beam": "no-code runs as 0", "wonder": "timeouts as 0"}
+# Beam takes a violet no lab on the board uses; Opus 5.5 and GPT-6.1 Sol keep their
+# hues from the Sonnet 5.5 comparison card. A second OpenAI green fails the palette
+# validator against Sol's (too dark or too gray), so Astra takes a dark gold. All
+# four pass the all-pairs color-vision checks; markers, direct labels and the table
+# carry identity as well as color.
+COLORS = {"beam": "#7C4DFF", "opus55": "#8C3A1F", "gpt61sol": "#10A37F", "astra": "#B8860B"}
+MARKERS = {"beam": "o", "opus55": "D", "gpt61sol": "^", "astra": "s"}
+UNJUDGED_AS_ZERO = {"beam": "no-code runs as 0"}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
 CLAUDE_MAIN = {"opus55": "claude-opus-5-5"}
 
@@ -83,7 +89,7 @@ def mean_se(values):
 
 
 def load_groups(judging: Path):
-    """Per-level aggregates: Opus 5.5, GPT-6.1 Sol and Muse Wonder Full published, Beam from v3.28."""
+    """Per-level aggregates: Opus 5.5, GPT-6.1 Sol and GPT-6 Astra published, Beam from v3.28."""
     groups = {}
     with PUBLISHED.open() as handle:
         for r in csv.DictReader(handle):
@@ -123,22 +129,27 @@ def load_groups(judging: Path):
                 "fb_runs": 0,
                 "fb_share": None,
             }
-    wonder = json.loads(WONDER.read_text())
-    require(wonder["final"], "the Muse Wonder Full card table is not final")
-    for e, w in wonder["groups"]["wonder"].items():
-        groups["wonder", e] = {
-            "n": w["n"],
-            "combined": {"n": w["n_judged"], "mean": w["combined"], "se": w["combined_se"]},
-            "zero": {"mean": w["combined_timeouts_zero"], "runs": w["timeouts"]}
-            if w["timeouts"]
-            else None,
-            "code_quality": {"mean": None},
-            "passed": w["passed"],
-            "usd": {"mean": w["usd"], "estimate": True},
-            "minutes": {"mean": w["minutes"]},
-            "fb_runs": 0,
-            "fb_share": None,
-        }
+    with ASTRA_COST.open() as handle:
+        astra_cost = {r["effort"]: r for r in csv.DictReader(handle) if r["model"] == "astra"}
+    with ASTRA.open() as handle:
+        for r in csv.DictReader(handle):
+            if r["model"] != "astra":
+                continue
+            c = astra_cost[r["effort"]]
+            groups["astra", r["effort"]] = {
+                "n": int(r["n"]),
+                "combined": {
+                    "n": int(r["n"]),
+                    "mean": float(r["combined_v3"]),
+                    "se": float(r["combined_v3_se"]),
+                },
+                "code_quality": {"mean": float(r["code_quality"])},
+                "passed": int(r["passed"]),
+                "usd": {"mean": float(c["mean_usd"])},
+                "minutes": {"mean": float(r["minutes"])},
+                "fb_runs": 0,
+                "fb_share": None,
+            }
     summary = json.loads((judging / "summary.json").read_text())
     require(
         summary["failed_panels"] == [] and len(summary["passing_panels"]) == 2,
@@ -183,7 +194,7 @@ def load_groups(judging: Path):
             require((m, e) in groups, f"{m} {e} missing")
     sources = {
         "published_tables": {
-            p.name: digest(p.read_bytes()) for p in (PUBLISHED, SOL, SOL_COST, WONDER)
+            p.name: digest(p.read_bytes()) for p in (PUBLISHED, SOL, SOL_COST, ASTRA, ASTRA_COST)
         },
         "v3.28_summary_sha256": digest((judging / "summary.json").read_bytes()),
     }
@@ -191,8 +202,7 @@ def load_groups(judging: Path):
 
 
 def levels_of(m):
-    """Muse Wonder Full has no Max: Muse Code's Contributor mode does not offer it."""
-    return LEVELS[:-1] if m == "wonder" else LEVELS
+    return LEVELS
 
 
 def main():  # noqa: PLR0912, PLR0915, one linear figure
@@ -203,7 +213,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
     plt.rcParams.update({"font.family": "Geist", "text.color": INK, "svg.fonttype": "path"})
-    W, H = 16, 19.3
+    W, H = 16, 19.0
     fig = plt.figure(figsize=(W, H), dpi=150, facecolor=PAPER)
     yf = lambda i: 1 - i / H  # noqa: E731
 
@@ -261,8 +271,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     text(
         left,
         2.60,
-        "23 hard legacy-reconstruction tasks per effort level. Code quality panels differ by model (see notes); "
-        "Muse Wonder Full has no Max level.",
+        "23 hard legacy-reconstruction tasks per effort level. Code quality judged by Muse Spark 1.3 with Grok 4.6 "
+        "(Opus 5.5, Sol, Astra) or GPT-6.1 Sol (Beam).",
         13.5,
         color=MUTED,
     )
@@ -284,7 +294,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
         label = f"{NAMES[m]}{' (with fallback)' if m in CLAUDE_MAIN else ''}"
         text(x + 0.016, 3.05, label, 13, True)
-        x += {"beam": 0.19, "wonder": 0.20, "opus55": 0.27, "gpt61sol": 0}[m]
+        x += {"beam": 0.19, "opus55": 0.27, "gpt61sol": 0.15, "astra": 0}[m]
 
     def axis(x0, w, top, h):
         ax = fig.add_axes([x0, yf(top + h), w, h / H], facecolor=PAPER)
@@ -298,44 +308,57 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         return ax
 
     text(left, 3.62, "Combined score", 20, True, heading=True)
+    # Broken axis: a zoomed band for the three frontier models over Beam's own band.
+    top_h, gap_h, bot_h = 1.7, 0.14, 1.36
+    upper = axis(0.085, 0.40, 4.25, top_h)
+    lower = axis(0.085, 0.40, 4.25 + top_h + gap_h, bot_h)
+    front = [groups[m, e]["combined"] for m in FRONTIER for e in LEVELS]
+    up_lo = math.floor(min(v["mean"] - v["se"] for v in front))
+    up_hi = math.ceil(max(v["mean"] + v["se"] for v in front)) + 1
+    beam = [groups["beam", e] for e in LEVELS]
+    lo_lo = 5 * math.floor((min(g["zero"]["mean"] for g in beam if g["zero"]) - 3) / 5)
+    lo_hi = 5 * math.ceil((max(g["combined"]["mean"] + g["combined"]["se"] for g in beam) + 2) / 5)
+    require(lo_hi < up_lo, "Beam and the frontier band overlap; the broken axis would hide data")
     text(
         left,
         3.94,
-        "/100  ·  higher is better  ·  focused scale  ·  whiskers +/-1 se",
+        f"/100  ·  higher is better  ·  axis broken between {lo_hi} and {up_lo}  ·  whiskers +/-1 se",
         12,
         color=MUTED,
     )
-    ax = axis(0.085, 0.40, 4.25, 3.2)
-    vals = [groups[m, e]["combined"] for m in MODELS for e in levels_of(m)]
-    zeros = [
-        (m, LEVELS.index(e), groups[m, e]["zero"]["mean"])
-        for m in UNJUDGED_AS_ZERO
-        for e in levels_of(m)
-        if groups[m, e]["zero"]
-    ]
-    lo = math.floor(min([v["mean"] - v["se"] for v in vals] + [z for _, _, z in zeros])) - 2
-    hi = math.ceil(max(v["mean"] + v["se"] for v in vals)) + 5
-    # End labels: keep at least 5% of the axis between neighbours so close finishes stay legible.
-    gap = 0.05 * (hi - lo)
-    label_y = {}
-    end = {m: groups[m, levels_of(m)[-1]]["combined"]["mean"] for m in MODELS}
-    for m in sorted(MODELS, key=end.get):
-        y_end = end[m]
-        floor = max(label_y.values(), default=-math.inf) + gap
-        label_y[m] = max(y_end, floor)
-    ax.set_ylim(lo, hi)
-    ax.set_xlim(-0.35, len(LEVELS) - 0.35)
-    for m in MODELS:
-        xs = [LEVELS.index(e) for e in levels_of(m)]
-        ys = [groups[m, e]["combined"]["mean"] for e in levels_of(m)]
-        es = [groups[m, e]["combined"]["se"] for e in levels_of(m)]
-        ax.plot(
-            xs,
-            ys,
-            color=COLORS[m],
-            lw=2,
-            zorder=2,
+    upper.set_ylim(up_lo, up_hi)
+    upper.set_yticks(range(up_lo + up_lo % 2, up_hi + 1, 2))
+    lower.set_ylim(lo_lo, lo_hi)
+    lower.set_yticks(range(lo_lo + (-lo_lo) % 20, lo_hi + 1, 20))
+    upper.spines["bottom"].set_visible(False)
+    upper.tick_params(axis="x", labelbottom=False)
+    for a, y0 in ((upper, 0), (lower, 1)):
+        a.set_xlim(-0.35, len(LEVELS) - 0.35)
+        h = top_h if a is upper else bot_h
+        dy = 0.06 / h  # break marks the same physical size on both bands
+        a.plot(
+            [-0.012, 0.012],
+            [y0 - dy, y0 + dy],
+            transform=a.transAxes,
+            color=INK,
+            lw=1,
+            clip_on=False,
         )
+    # End labels: at least ~10% of the frontier band between neighbours so close finishes stay legible.
+    gap = 0.10 * (up_hi - up_lo)
+    label_y = {}
+    end = {m: groups[m, "max"]["combined"]["mean"] for m in FRONTIER}
+    for m in sorted(FRONTIER, key=end.get):
+        label_y[m] = max(end[m], max(label_y.values(), default=-math.inf) + gap)
+    label_y["beam"] = groups["beam", "max"]["combined"]["mean"]
+    # Opus 5.5 and Sol nearly coincide at Low; a small sideways dodge keeps both whiskers visible.
+    dodge = {"beam": 0.0, "opus55": -0.07, "gpt61sol": 0.0, "astra": 0.07}
+    for m in MODELS:
+        ax = lower if m == "beam" else upper
+        xs = [LEVELS.index(e) + dodge[m] for e in LEVELS]
+        ys = [groups[m, e]["combined"]["mean"] for e in LEVELS]
+        es = [groups[m, e]["combined"]["se"] for e in LEVELS]
+        ax.plot(xs, ys, color=COLORS[m], lw=2, zorder=2)
         ax.errorbar(
             xs,
             ys,
@@ -353,7 +376,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ax.annotate(
             NAMES[m].replace("Claude ", "").replace("Reflection ", ""),
             (xs[-1], ys[-1]),
-            xytext=(4.12, label_y[m]),  # one label column, past Max, for every model
+            xytext=(4.18, label_y[m]),
             textcoords="data",
             va="center",
             fontsize=10.5,
@@ -361,23 +384,25 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             fontfamily="Geist",
             weight=700,
         )
-
-    for m, x, z in zeros:
-        ax.scatter(
+    for e in LEVELS:
+        z = groups["beam", e]["zero"]
+        if not z:
+            continue
+        x = LEVELS.index(e)
+        lower.scatter(
             [x],
-            [z],
+            [z["mean"]],
             s=64,
-            marker=MARKERS[m],
+            marker=MARKERS["beam"],
             facecolors=PAPER,
-            edgecolors=COLORS[m],
+            edgecolors=COLORS["beam"],
             linewidths=1.6,
             zorder=4,
         )
-        ax.annotate(
-            UNJUDGED_AS_ZERO[m],
-            (x, z),
-            xytext=(8, -3) if m == "beam" else (-8, -10),
-            ha="left" if m == "beam" else "right",
+        lower.annotate(
+            UNJUDGED_AS_ZERO["beam"],
+            (x, z["mean"]),
+            xytext=(8, -3),
             textcoords="offset points",
             fontsize=9,
             color=MUTED,
@@ -393,7 +418,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         color=MUTED,
     )
     ax = axis(0.585, 0.355, 4.25, 3.2)
-    shifts = {"beam": -0.3, "wonder": -0.1, "opus55": 0.1, "gpt61sol": 0.3}
+    shifts = {"beam": -0.3, "opus55": -0.1, "gpt61sol": 0.1, "astra": 0.3}
     top = max(groups[m, e]["minutes"]["mean"] for m in MODELS for e in levels_of(m))
     ax.set_ylim(0, top * 1.22)
     for m in MODELS:
@@ -512,22 +537,18 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "runs that changed no source code (12 at Low, 3 at Medium, file-mode or scratch changes only, or none); they are not judged "
         "and count as failed, and the row below shows the combined score counting them as 0. Max is over 22: one run's evidence was "
         "too large for either judge to review.",
-        "Muse Wonder Full: High and Extra high are over 22 judged runs; paddockcore (High) and depotcore (Extra high) hit the 3-hour "
-        "task limit and left no finished code, and the row below counts them as 0. It ran on a Muse Code subscription in Contributor "
-        "mode, which offers no Max; Meta lists no API price, so its cost (~) is an estimate at the Muse Wonder 1.0 list price. Its rows "
-        "are as published on 18 October; Extra high depotcore overlapped another local job for 145 of its 180 minutes, and its clean "
-        "rerun has not been judged yet.",
-        "Protocols: Beam is Code quality v3.28, Muse Wonder Full v3.26 to v3.26.3, Opus 5.5 v3.15 and GPT-6.1 Sol v3.18, with the "
-        "same rubric, controls and weights. Opus 5.5 and Sol were judged by Muse Spark 1.3 and Grok 4.6; Beam by Muse Spark 1.3 and "
-        "GPT-6.1 Sol, because Grok 4.6's Cursor account was out of usage; Muse Wonder Full by Claude Opus 5.5 and GPT-6.1 Sol, because "
-        "Muse Spark is a Meta model. The panels are not calibrated against each other, and Opus 5.5 and Sol judged columns they are "
-        "shown beside.",
+        "Protocols: Beam is Code quality v3.28, Opus 5.5 is v3.15, GPT-6.1 Sol is v3.18 and GPT-6 Astra is v3.4, with the same "
+        "rubric, controls and weights. Opus 5.5, Sol and Astra were judged by Muse Spark 1.3 and Grok 4.6; Beam by Muse Spark 1.3 "
+        "and GPT-6.1 Sol, because Grok 4.6's Cursor account was out of usage. The panels are not calibrated against each other, and "
+        "Sol judged a column it is shown beside.",
+        "Costs are at list price: Opus 5.5 is Claude Code's own total; GPT-6.1 Sol is its Codex token receipts; GPT-6 Astra is its "
+        "report's central estimate. Astra and Sol charge more on requests over 272K input tokens and per-request sizes were not "
+        "recorded, so that premium is not applied (Astra's report gives an upper bound).",
         "Beam ran in Reflection's Mirror CLI 0.1.1 (early beta) through Reflection's API; Reflection publishes no price, so it has no "
         "cost. Mirror labels a Permission denied error as a sandbox denial, and two Low runs ended believing the sandbox blocked "
         "the legacy binary. A daily API token limit paused the sweep once; no finished run was affected.",
-        "Harnesses differ (Mirror CLI 0.1.1, Muse Code 1.4.6 and 1.4.9, Claude Code 2.1.280, Codex 0.159.0), so small gaps are "
-        "harness confounded. Muse Wonder Full, Opus 5.5 and GPT-6.1 Sol numbers are their published per-level rows; nothing was "
-        "re-run or re-judged.",
+        "Harnesses differ (Mirror CLI 0.1.1, Claude Code 2.1.280, Codex), so small gaps are harness confounded. Opus 5.5, GPT-6.1 Sol "
+        "and GPT-6 Astra numbers are their published per-level rows; nothing was re-run or re-judged.",
     ]
     yy = y + 0.12
     for n in notes:

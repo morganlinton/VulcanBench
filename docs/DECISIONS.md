@@ -7,6 +7,35 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-26: GPT-6.1 Terra runs on Frontier v4 on its release day, on the pinned Codex 0.159.0
+
+### Decision
+
+GPT-6.1 Terra (`gpt-6.1-terra`, released in the API and Codex on
+2026-10-26) is swept on VulcanBench Frontier v4 at Low, Medium, High,
+Extra-high and Max through Codex on the ChatGPT subscription
+(`scripts/run_gpt61_terra_v4.sh`, outputs `runs-effort-gpt61-terra/`). Owner
+request in chat, 2026-10-26. This is a new model, not the GPT-5.6 Terra
+already on the board (`docs/results/swe-v4-terra-2026-09/`). It runs one task
+at a time from a run worktree pinned to a bench tag, like every sweep.
+
+The column runs on Codex CLI 0.159.0 from its own prefix
+(`~/.local/share/vulcanbench/codex-0.159.0/`), the same pin GPT-6.1 Sol ran
+on. Every other Codex column keeps its version.
+
+### Evidence
+
+- OpenAI's Codex models page: "GPT-6.1 Terra requires Codex CLI 0.159.0 or
+  later." One-line probes on the ChatGPT login on 2026-10-26 ("Reply with
+  the single word OK.") answered on 0.159.0 at `low` and at `max`.
+- List prices, checked 2026-10-26 at developers.openai.com/api/docs/pricing
+  and the model page (USD per 1M tokens, standard, short context): $1.00
+  input, $0.05 cached input, $5.00 output. Prompts over 272K input tokens
+  bill the whole request at 2x input and cache, 1.5x output; that tier is
+  not inferred by `harness/pricing.py`. The API exposes effort `none`,
+  `low`, `medium`, `high`, `xhigh` and `max`; ultra is not an API level and
+  stays blocked (`vulcanbench.toml`).
+
 ## 2026-10-24: Reflection Beam judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.28)
 
 Beam's Code quality is judged as v3.28 with the v3.27 panel. A one-word probe

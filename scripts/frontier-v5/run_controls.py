@@ -30,6 +30,9 @@ Variants, each graded by the real verifier on a fresh artifact:
                   parts compose to the gold
   causes-only     base + every cause, no glue (only when glue exists): reward
                   1 shows no glue part is needed to pass
+  unit:<a+b>      base + one "coupled" group's parts together (plus glue):
+                  what one unit of repair clears when its parts cannot apply
+                  apart
 
 A variant whose patches do not apply is recorded "n/a" with the reason; that
 is itself evidence of source-level coupling when the parts are upstream
@@ -136,6 +139,10 @@ def plan_variants(spec: dict) -> dict[str, list[list[dict]]]:
         if group != {c["name"]}:
             tries.append([p for p in parts if p["name"] not in group])
         variants[f"loo:{c['name']}"] = tries
+    # A coupled group is one unit of repair: its parts do not apply apart, so
+    # the held-out checks it clears alone are what one cause reaches.
+    for g in spec.get("coupled", []):
+        variants[f"unit:{'+'.join(g)}"] = [[p for p in parts if p.get("glue") or p["name"] in g]]
     variants.update(naive)
     return variants
 

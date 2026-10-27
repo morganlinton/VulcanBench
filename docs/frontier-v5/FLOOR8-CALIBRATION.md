@@ -136,3 +136,25 @@ Adopt floor 8 (PLAN-v3 decision (g)) as calibrated here, with the
 `run_controls.py` additions as its measurement, and source the first F5 wave
 under it. A second negative point on GEOS is cheap in effort and expensive in
 build time; run it when the GEOS images are next built for another reason.
+
+## Addendum 2026-10-26: unit controls for the combination route
+
+The owner amended floor 8 on 2026-10-26 (PLAN-v3.md section 2): a task meets
+it by a guarded fix (route a, above) or by combination coverage (route b), at
+least one held-out check that no single repair unit and no naive fix clears.
+A repair unit is one part, or one `coupled` group applied together, since
+those parts cannot apply apart. `run_controls.py` gained a `unit:<a+b>`
+variant per coupled group to measure it.
+
+| Task | Coupled unit | Held-out checks it clears | Checks no unit or naive fix clears |
+| --- | --- | --- | --- |
+| commons-lang-fraction-lowest-terms (reject) | #1784+#1787 | 2 of 6, including `testAddSubtractZeroOperand`, the one no single part clears | 0 of 6 |
+| black-fmt-skip-region-handling (admit) | #5522+#5584 | 2 of 7 | 1 of 7: `fmtskip_opening_bracket_conditional` |
+| pulldown-cmark-html-block-scanning | #1163+#1180 | 7 of 24, including regression examples 278 to 280 | 0 of 24 |
+| sqlparser-display-round-trip | #2542+#2537; #2541+#2577 | 4 of 8; 3 of 8 | 0 of 8 |
+
+Counting single parts only would have given the reject an uncovered check;
+counting units does not. Route (b) separates the reject from black, as route
+(a) does, and admits neither pulldown-cmark nor sqlparser.
+
+Runs: `~/vulcanbench-gate/controls/*-units-20261026-2001`.

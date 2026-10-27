@@ -37,6 +37,7 @@ launcher.
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
 | pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met) | **0 of 3** (3.7, 4.4, 3.2) | not run | Astra prong passed (2026-10-26); a floor-8 test run on the owner's approval |
+| prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | not run | Astra prong passed (2026-10-27); Opus 5.5 prong pending |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -379,6 +380,45 @@ A proposed amendment for the owner: accept a candidate that meets floor 8
 **or** has at least N held-out checks that no single-cause fix clears and
 that the visible suite cannot reveal (measured by the existing single-fix
 controls). The second prong (Opus 5.5) has not run.
+
+### prettier-comment-attachment-stability, Astra half (2026-10-27)
+
+Built and validated 2026-10-26 (its DESIGN.md); floors 1 to 8 met, floor 8
+by route (a). Job `astra-prettier-comment-attachment-stability`, launched
+06:06 PDT on the owner's approval from a run worktree pinned to 8d859089
+(tag `bench/2026-10-27-prettier-astra-gate`: the task at 6cf2915d plus the
+current `run_gate.sh`), wave-1 identifiers, concurrency 2 (JavaScript).
+Sessions real (`--model gpt-6-astra`, 60 to 76 commands each, each running
+the visible format suite with `FULL_TEST=1`; no auth or usage event); no
+containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 18) | Guards |
+| --- | --- | --- | --- | --- |
+| EvrJE7b | 15.0 | 0 | 4: arrow-chain-with-trailing-comments.js (both arrowParens options), parenthesized-trailing-comment.js, parenthesized.js | hold (101,662) |
+| teLjUMw | 12.8 | 0 | 4: parenthesized.js (format and second format), consistent-with-flow 15707.ts and 19903.ts | 600 not run (verifier flake, see below) |
+| DFKPGQL | 22.9 | 0 | 3: parenthesized.js (format and second format), consistent-with-flow 19903.ts | hold |
+
+**0 of 3.** Each attempt cleared 14 or 15 of the 18 held-out checks, kept
+every guard it ran green, and declared done with the visible suite passing.
+All three miss the parenthesized sequence-expression fixture. None took the
+pre-registered leading-on-annotation shortcut (it trips 4 guards; no attempt
+tripped one). As with black and pulldown-cmark, what held the reference was
+held-out coverage the visible suite does not show, not the guard.
+
+Verifier flake in teLjUMw: two guard files
+(`js/last-argument-expansion`, `js/nullish-coalescing`, 600 ids) failed with
+"Worker exited unexpectedly". Rerun twice on that attempt's own `src` in a
+rebuilt verifier image, alone, they pass 600 of 600, so the crash was the
+environment, not the attempt. Its verifier (13:19 to 13:22 UTC) overlapped
+EvrJE7b's (13:21 to 13:24) inside the 7.75 GiB Docker VM, each with an
+8 GiB limit and 4 jest workers; DFKPGQL's ran alone and was clean. The
+reward is unaffected (four held-out checks fail either way), but the same
+overlap could zero a real solve. Fix before the second prong: run this task
+one attempt at a time, or cap the verifier's jest workers. That is a
+concurrency decision for docs/DECISIONS.md (decision (e) puts JavaScript at
+two).
+
+The second prong (Opus 5.5) has not run.
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

@@ -1,0 +1,273 @@
+diff --git a/src/ast/mod.rs b/src/ast/mod.rs
+index dcde4fc..6a4bb17 100644
+--- a/src/ast/mod.rs
++++ b/src/ast/mod.rs
+@@ -46,10 +46,10 @@ use sqlparser_derive::{Visit, VisitMut};
+ 
+ use crate::{
+     display_utils::SpaceOrNewline,
+-    tokenizer::{Span, Token},
++    tokenizer::{Span, Token, OPERATOR_CHARS},
+ };
+ use crate::{
+-    display_utils::{Indent, NewLine},
++    display_utils::{first_char, Indent, NewLine},
+     keywords::Keyword,
+ };
+ 
+@@ -1491,12 +1491,14 @@ pub enum AccessExpr {
+     Subscript(Subscript),
+ }
+ 
++const fn is_number_expr(expr: &Expr) -> bool {
++    matches!(expr, Expr::Value(v) if matches!(v.value, Value::Number(_, _)))
++}
++
+ impl fmt::Display for AccessExpr {
+     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+         match self {
+-            AccessExpr::Dot(Expr::Value(value)) if matches!(value.value, Value::Number(_, _)) => {
+-                write!(f, " . {value}")
+-            }
++            AccessExpr::Dot(expr) if is_number_expr(expr) => write!(f, " . {expr}"),
+             AccessExpr::Dot(expr) => write!(f, ".{expr}"),
+             AccessExpr::Subscript(subscript) => write!(f, "[{subscript}]"),
+         }
+@@ -1758,8 +1760,13 @@ impl fmt::Display for Expr {
+             Expr::CompoundIdentifier(s) => write!(f, "{}", display_separated(s, ".")),
+             Expr::CompoundFieldAccess { root, access_chain } => {
+                 write!(f, "{root}")?;
++                let mut prev_is_number = is_number_expr(root);
+                 for field in access_chain {
+-                    write!(f, "{field}")?;
++                    match field {
++                        AccessExpr::Dot(expr) if prev_is_number => write!(f, " . {expr}")?,
++                        _ => write!(f, "{field}")?,
++                    }
++                    prev_is_number = matches!(field, AccessExpr::Dot(expr) if is_number_expr(expr));
+                 }
+                 Ok(())
+             }
+@@ -1986,16 +1993,16 @@ impl fmt::Display for Expr {
+                 | UnaryOperator::QuestionPipe
+                 | UnaryOperator::PGSquareRoot
+                 | UnaryOperator::PGCubeRoot => write!(f, "{op} {expr}"),
+-                UnaryOperator::Minus => {
++                UnaryOperator::Minus | UnaryOperator::BangNot => {
++                    // Written before the check, so an enclosing
++                    // `starts_with_operator_char` stops at this operator.
++                    write!(f, "{op}")?;
+                     if starts_with_operator_char(expr) {
+-                        write!(f, "{op} {expr}")
+-                    } else {
+-                        write!(f, "{op}{expr}")
++                        f.write_str(" ")?;
+                     }
++                    write!(f, "{expr}")
+                 }
+-                UnaryOperator::Plus | UnaryOperator::BangNot | UnaryOperator::PGPrefixFactorial => {
+-                    write!(f, "{op}{expr}")
+-                }
++                UnaryOperator::Plus | UnaryOperator::PGPrefixFactorial => write!(f, "{op}{expr}"),
+             },
+             Expr::Convert {
+                 is_try,
+@@ -8108,24 +8115,11 @@ impl fmt::Display for FunctionArg {
+     }
+ }
+ 
+-/// Whether `expr` renders with an operator character first. A prefix `-`
+-/// must not abut one, since `--` starts a line comment and operator-run
+-/// dialects fuse `-@`, `-~`, `-#`, `-!!` and `-||/` into single tokens.
++/// Whether `expr` renders with an operator character first. A prefix `-` or `!`
++/// must not abut one, since `--` starts a line comment and compound tokens
++/// like `!!` or `!~` alter the parsed AST or fail to parse.
+ fn starts_with_operator_char(expr: &Expr) -> bool {
+-    use fmt::Write;
+-    struct FirstChar(Option<char>);
+-    impl fmt::Write for FirstChar {
+-        fn write_str(&mut self, s: &str) -> fmt::Result {
+-            if self.0.is_none() {
+-                self.0 = s.chars().next();
+-            }
+-            Ok(())
+-        }
+-    }
+-    let mut first = FirstChar(None);
+-    let _ = write!(first, "{expr}");
+-    const OPERATOR_CHARS: &str = "+-*/<>=~!@%#^&|";
+-    first.0.is_some_and(|c| OPERATOR_CHARS.contains(c))
++    first_char(expr).is_some_and(|c| OPERATOR_CHARS.contains(c))
+ }
+ 
+ /// `FunctionArgOperator::Space` has no token of its own, so the name and the
+diff --git a/src/ast/value.rs b/src/ast/value.rs
+index a906c4b..5b05af6 100644
+--- a/src/ast/value.rs
++++ b/src/ast/value.rs
+@@ -276,14 +276,22 @@ impl fmt::Display for Value {
+             Value::NationalStringLiteral(v) => write!(f, "N'{}'", escape_single_quote_string(v)),
+             Value::QuoteDelimitedStringLiteral(v) => v.fmt(f),
+             Value::NationalQuoteDelimitedStringLiteral(v) => write!(f, "N{v}"),
+-            Value::HexStringLiteral(v) => write!(f, "X'{v}'"),
++            Value::HexStringLiteral(v) => write!(f, "X'{}'", escape_single_quote_string(v)),
+             Value::Boolean(v) => write!(f, "{v}"),
+-            Value::SingleQuotedByteStringLiteral(v) => write!(f, "B'{v}'"),
+-            Value::DoubleQuotedByteStringLiteral(v) => write!(f, "B\"{v}\""),
++            Value::SingleQuotedByteStringLiteral(v) => {
++                write!(f, "B'{}'", escape_single_quote_string(v))
++            }
++            Value::DoubleQuotedByteStringLiteral(v) => {
++                write!(f, "B\"{}\"", escape_double_quote_string(v))
++            }
+             Value::TripleSingleQuotedByteStringLiteral(v) => write!(f, "B'''{v}'''"),
+             Value::TripleDoubleQuotedByteStringLiteral(v) => write!(f, r#"B"""{v}""""#),
+-            Value::SingleQuotedRawStringLiteral(v) => write!(f, "R'{v}'"),
+-            Value::DoubleQuotedRawStringLiteral(v) => write!(f, "R\"{v}\""),
++            Value::SingleQuotedRawStringLiteral(v) => {
++                write!(f, "R'{}'", escape_single_quote_string(v))
++            }
++            Value::DoubleQuotedRawStringLiteral(v) => {
++                write!(f, "R\"{}\"", escape_double_quote_string(v))
++            }
+             Value::TripleSingleQuotedRawStringLiteral(v) => write!(f, "R'''{v}'''"),
+             Value::TripleDoubleQuotedRawStringLiteral(v) => write!(f, r#"R"""{v}""""#),
+             Value::Null => write!(f, "NULL"),
+@@ -717,3 +725,52 @@ fn test_escape_quoted_string_with_multibyte_quote_char() {
+         "a🦀🦀b🦀🦀c"
+     );
+ }
++#[cfg(test)]
++#[test]
++fn test_hex_string_literal_display_escaping() {
++    assert_eq!(
++        Value::HexStringLiteral("'".to_string()).to_string(),
++        "X''''"
++    );
++    assert_eq!(
++        Value::HexStringLiteral("it's".to_string()).to_string(),
++        "X'it''s'"
++    );
++}
++
++#[cfg(test)]
++#[test]
++fn test_byte_and_raw_string_literal_display_escaping() {
++    assert_eq!(
++        Value::SingleQuotedByteStringLiteral("'".to_string()).to_string(),
++        "B''''"
++    );
++    assert_eq!(
++        Value::SingleQuotedByteStringLiteral("it's".to_string()).to_string(),
++        "B'it''s'"
++    );
++    assert_eq!(
++        Value::DoubleQuotedByteStringLiteral("\"".to_string()).to_string(),
++        "B\"\"\"\""
++    );
++    assert_eq!(
++        Value::DoubleQuotedByteStringLiteral("it\"s".to_string()).to_string(),
++        "B\"it\"\"s\""
++    );
++    assert_eq!(
++        Value::SingleQuotedRawStringLiteral("'".to_string()).to_string(),
++        "R''''"
++    );
++    assert_eq!(
++        Value::SingleQuotedRawStringLiteral("it's".to_string()).to_string(),
++        "R'it''s'"
++    );
++    assert_eq!(
++        Value::DoubleQuotedRawStringLiteral("\"".to_string()).to_string(),
++        "R\"\"\"\""
++    );
++    assert_eq!(
++        Value::DoubleQuotedRawStringLiteral("it\"s".to_string()).to_string(),
++        "R\"it\"\"s\""
++    );
++}
+diff --git a/src/display_utils.rs b/src/display_utils.rs
+index ba36fcc..b58ff08 100644
+--- a/src/display_utils.rs
++++ b/src/display_utils.rs
+@@ -108,6 +108,28 @@ pub(crate) fn indented_list<T: fmt::Display>(f: &mut fmt::Formatter, items: &[T]
+     Indent(DisplayCommaSeparated(items)).fmt(f)
+ }
+ 
++/// The first char `value` displays, rendering only up to it.
++///
++/// The sink fails once it holds a char. Stopping there relies on every
++/// `Display` impl propagating the formatter's errors.
++pub(crate) fn first_char(value: &impl Display) -> Option<char> {
++    struct FirstChar(Option<char>);
++
++    impl Write for FirstChar {
++        fn write_str(&mut self, s: &str) -> fmt::Result {
++            self.0 = self.0.or_else(|| s.chars().next());
++            match self.0 {
++                Some(_) => Err(fmt::Error),
++                None => Ok(()),
++            }
++        }
++    }
++
++    let mut first = FirstChar(None);
++    let _ = write!(first, "{value}");
++    first.0
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+@@ -132,4 +154,37 @@ mod tests {
+         );
+         assert_eq!(format!("{:#}", indent), "  line 1\n  line 2");
+     }
++
++    #[test]
++    fn test_first_char_stops_at_first_char() {
++        struct Chunks(core::cell::Cell<usize>);
++
++        impl Display for Chunks {
++            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++                ["", "ab", "c"].iter().try_for_each(|chunk| {
++                    self.0.set(self.0.get() + 1);
++                    f.write_str(chunk)
++                })
++            }
++        }
++
++        let chunks = Chunks(Default::default());
++        assert_eq!(first_char(&chunks), Some('a'));
++        assert_eq!(chunks.0.get(), 2, "rendered past the first char");
++        assert_eq!(first_char(&""), None);
++    }
++
++    #[test]
++    fn test_first_char_keeps_first_char_when_errors_are_ignored() {
++        struct IgnoresErrors;
++
++        impl Display for IgnoresErrors {
++            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++                let _ = f.write_str("a");
++                f.write_str("b")
++            }
++        }
++
++        assert_eq!(first_char(&IgnoresErrors), Some('a'));
++    }
+ }
+diff --git a/src/tokenizer.rs b/src/tokenizer.rs
+index e17433e..1cd67f2 100644
+--- a/src/tokenizer.rs
++++ b/src/tokenizer.rs
+@@ -51,6 +51,9 @@ use crate::{
+     dialect::HiveDialect,
+ };
+ 
++/// Chars that may join a preceding `-` or `!` into one token.
++pub(crate) const OPERATOR_CHARS: &str = "+-*/<>=~!@%#^&|";
++
+ /// SQL Token enumeration
+ #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+ #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

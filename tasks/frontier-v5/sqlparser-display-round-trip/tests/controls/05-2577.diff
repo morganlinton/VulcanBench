@@ -1,0 +1,136 @@
+diff --git a/src/ast/mod.rs b/src/ast/mod.rs
+index 5e0bb8b..6a4bb17 100644
+--- a/src/ast/mod.rs
++++ b/src/ast/mod.rs
+@@ -46,10 +46,10 @@ use sqlparser_derive::{Visit, VisitMut};
+ 
+ use crate::{
+     display_utils::SpaceOrNewline,
+-    tokenizer::{Span, Token},
++    tokenizer::{Span, Token, OPERATOR_CHARS},
+ };
+ use crate::{
+-    display_utils::{Indent, NewLine},
++    display_utils::{first_char, Indent, NewLine},
+     keywords::Keyword,
+ };
+ 
+@@ -1994,11 +1994,13 @@ impl fmt::Display for Expr {
+                 | UnaryOperator::PGSquareRoot
+                 | UnaryOperator::PGCubeRoot => write!(f, "{op} {expr}"),
+                 UnaryOperator::Minus | UnaryOperator::BangNot => {
++                    // Written before the check, so an enclosing
++                    // `starts_with_operator_char` stops at this operator.
++                    write!(f, "{op}")?;
+                     if starts_with_operator_char(expr) {
+-                        write!(f, "{op} {expr}")
+-                    } else {
+-                        write!(f, "{op}{expr}")
++                        f.write_str(" ")?;
+                     }
++                    write!(f, "{expr}")
+                 }
+                 UnaryOperator::Plus | UnaryOperator::PGPrefixFactorial => write!(f, "{op}{expr}"),
+             },
+@@ -8116,14 +8118,8 @@ impl fmt::Display for FunctionArg {
+ /// Whether `expr` renders with an operator character first. A prefix `-` or `!`
+ /// must not abut one, since `--` starts a line comment and compound tokens
+ /// like `!!` or `!~` alter the parsed AST or fail to parse.
+-fn starts_with_operator_char(mut expr: &Expr) -> bool {
+-    loop {
+-        match expr {
+-            Expr::UnaryOp { op, .. } => return !matches!(op, UnaryOperator::Not),
+-            Expr::BinaryOp { left, .. } => expr = left,
+-            _ => return false,
+-        }
+-    }
++fn starts_with_operator_char(expr: &Expr) -> bool {
++    first_char(expr).is_some_and(|c| OPERATOR_CHARS.contains(c))
+ }
+ 
+ /// `FunctionArgOperator::Space` has no token of its own, so the name and the
+diff --git a/src/display_utils.rs b/src/display_utils.rs
+index ba36fcc..b58ff08 100644
+--- a/src/display_utils.rs
++++ b/src/display_utils.rs
+@@ -108,6 +108,28 @@ pub(crate) fn indented_list<T: fmt::Display>(f: &mut fmt::Formatter, items: &[T]
+     Indent(DisplayCommaSeparated(items)).fmt(f)
+ }
+ 
++/// The first char `value` displays, rendering only up to it.
++///
++/// The sink fails once it holds a char. Stopping there relies on every
++/// `Display` impl propagating the formatter's errors.
++pub(crate) fn first_char(value: &impl Display) -> Option<char> {
++    struct FirstChar(Option<char>);
++
++    impl Write for FirstChar {
++        fn write_str(&mut self, s: &str) -> fmt::Result {
++            self.0 = self.0.or_else(|| s.chars().next());
++            match self.0 {
++                Some(_) => Err(fmt::Error),
++                None => Ok(()),
++            }
++        }
++    }
++
++    let mut first = FirstChar(None);
++    let _ = write!(first, "{value}");
++    first.0
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+@@ -132,4 +154,37 @@ mod tests {
+         );
+         assert_eq!(format!("{:#}", indent), "  line 1\n  line 2");
+     }
++
++    #[test]
++    fn test_first_char_stops_at_first_char() {
++        struct Chunks(core::cell::Cell<usize>);
++
++        impl Display for Chunks {
++            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++                ["", "ab", "c"].iter().try_for_each(|chunk| {
++                    self.0.set(self.0.get() + 1);
++                    f.write_str(chunk)
++                })
++            }
++        }
++
++        let chunks = Chunks(Default::default());
++        assert_eq!(first_char(&chunks), Some('a'));
++        assert_eq!(chunks.0.get(), 2, "rendered past the first char");
++        assert_eq!(first_char(&""), None);
++    }
++
++    #[test]
++    fn test_first_char_keeps_first_char_when_errors_are_ignored() {
++        struct IgnoresErrors;
++
++        impl Display for IgnoresErrors {
++            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++                let _ = f.write_str("a");
++                f.write_str("b")
++            }
++        }
++
++        assert_eq!(first_char(&IgnoresErrors), Some('a'));
++    }
+ }
+diff --git a/src/tokenizer.rs b/src/tokenizer.rs
+index e17433e..1cd67f2 100644
+--- a/src/tokenizer.rs
++++ b/src/tokenizer.rs
+@@ -51,6 +51,9 @@ use crate::{
+     dialect::HiveDialect,
+ };
+ 
++/// Chars that may join a preceding `-` or `!` into one token.
++pub(crate) const OPERATOR_CHARS: &str = "+-*/<>=~!@%#^&|";
++
+ /// SQL Token enumeration
+ #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+ #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

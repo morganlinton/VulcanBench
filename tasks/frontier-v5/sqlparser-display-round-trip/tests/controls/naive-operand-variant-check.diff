@@ -1,0 +1,27 @@
+diff --git a/src/ast/mod.rs b/src/ast/mod.rs
+index dcde4fc..69ec219 100644
+--- a/src/ast/mod.rs
++++ b/src/ast/mod.rs
+@@ -1987,13 +1987,20 @@ impl fmt::Display for Expr {
+                 | UnaryOperator::PGSquareRoot
+                 | UnaryOperator::PGCubeRoot => write!(f, "{op} {expr}"),
+                 UnaryOperator::Minus => {
+-                    if starts_with_operator_char(expr) {
++                    if matches!(expr.as_ref(), Expr::UnaryOp { .. }) {
+                         write!(f, "{op} {expr}")
+                     } else {
+                         write!(f, "{op}{expr}")
+                     }
+                 }
+-                UnaryOperator::Plus | UnaryOperator::BangNot | UnaryOperator::PGPrefixFactorial => {
++                UnaryOperator::BangNot => {
++                    if matches!(expr.as_ref(), Expr::UnaryOp { .. }) {
++                        write!(f, "{op} {expr}")
++                    } else {
++                        write!(f, "{op}{expr}")
++                    }
++                }
++                UnaryOperator::Plus | UnaryOperator::PGPrefixFactorial => {
+                     write!(f, "{op}{expr}")
+                 }
+             },

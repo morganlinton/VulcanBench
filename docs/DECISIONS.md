@@ -7,6 +7,40 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-27: the prettier gate runs one attempt at a time
+
+### Decision
+
+Owner, in chat, 2026-10-27. prettier-comment-attachment-stability's gate
+runs at concurrency 1, overriding decision (e)'s two for JavaScript tasks.
+`run_gate.sh` gains `GATE_CONCURRENCY` (1 or 2), printed on its `===` line;
+the Opus 5.5 half runs with `GATE_CONCURRENCY=1`. The task is unchanged:
+both halves grade against the same task commit (6cf2915d). The other
+alternative, capping the verifier's jest workers, was declined because it
+changes the verifier between the two halves and needs re-validation.
+
+### Evidence
+
+In the Astra half (2026-10-27, GATE-LOG.md), attempt teLjUMw's verifier lost
+two guard files (600 ids) to "Worker exited unexpectedly" while it overlapped
+attempt EvrJE7b's verifier from 13:21 to 13:22 UTC. Each verifier has an
+8 GiB limit and runs 4 jest workers over the full prettier suite with
+`FULL_TEST=1`; the Docker VM on the Mac Studio has 7.75 GiB. The attempt's
+own `src`, rerun alone on those two files twice, passed 600 of 600 both
+times, and the attempt whose verifier ran alone (DFKPGQL) was clean. That
+reward was 0 either way (four held-out checks fail), but the same overlap
+could zero a solve.
+
+### Revisit triggers
+
+- A host with a Docker VM of 16 GiB or more (two verifiers fit).
+- Another task with a verifier of 8 GiB or more: decide whether it runs at
+  one too.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh` (the override and its header note).
+
 ## 2026-10-25: Frontier v5 wave 1 takes Claude Opus 5.5 as the second gate reference
 
 ### Decision

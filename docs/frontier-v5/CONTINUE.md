@@ -96,16 +96,24 @@ directory, for example:
 
 Queued on the owner's approval: tree-sitter's second prong under Opus 5.5
 (`run_gate.sh opus treesitter-query-anchor-matching`, three attempts, for
-comparability with black). Wave 1 built so far (WAVE1-F5.md): black
-(admitted), pulldown-cmark (Astra 0 of 3, floor 8 not met, Opus half not
-run), the sqlparser-rs reserve (floor 8 not met, not gated) and
-prettier-comment-attachment-stability (F5-javascript, branch
-`frontier-v5-prettier`: floors 1 to 8 met by route (a); **admitted** as
-F5-javascript on 2026-10-27, Astra 0 of 3 and Opus 5.5 0 of 3 (run one
-attempt at a time, docs/DECISIONS.md 2026-10-27). Before it is frozen, its
-tamper scan needs a fix: `\bexpect\b` flags `// @ts-expect-error` comments,
-a prettier idiom (GATE-LOG); no gate reward changed). Then Java and C++. The Fable half on the five
-Astra-rejected candidates (Routine v1 recycling) stays optional.
+comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
+
+| Slot | Task (branch) | Floors | Gate |
+| --- | --- | --- | --- |
+| F5-python | black-fmt-skip-region-handling | 1 to 8 | **admitted** (Astra 0 of 3, Opus 5.5 0 of 3) |
+| F5-javascript | prettier-comment-attachment-stability (`frontier-v5-prettier`) | 1 to 8, route (a) | **admitted** 2026-10-27 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time); tamper-scan fix for `@ts-expect-error` re-validated after the gate |
+| F5-rust | pulldown-cmark-html-block-scanning (`frontier-v5-pulldown-cmark`) | 1 to 7, floor 8 not met | Astra 0 of 3; Opus half not run; owner decision (g') |
+| F5-rust reserve | sqlparser-display-round-trip (`frontier-v5-sqlparser`) | 1 to 7, floor 8 not met | not gated |
+| F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | not gated; built and validated 2026-10-27 |
+| F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | not gated; built and validated 2026-10-27 |
+
+Next, each on the owner's approval (they spend quota): the Astra half on
+javaparser and on Boost.URL (`run_gate.sh astra <task>` from a run worktree
+pinned to the task's commit; JVM and C++ run one attempt at a time by
+decision (e)), then their Opus 5.5 halves. javaparser dropped #5147 into the
+base (its held-out test passes at base in most runs; its DESIGN.md has the
+measurements). The Fable half on the five Astra-rejected candidates
+(Routine v1 recycling) stays optional.
 
 After each task: diff-review every solve against the task's base (PHASE1.md),
 then record the result in GATE-LOG.md. Back up the job directories to the

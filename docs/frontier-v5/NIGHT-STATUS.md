@@ -3,6 +3,44 @@
 Read this first. It summarizes a night of autonomous authoring, what is
 validated, what is blocked on you, and the one design question that matters.
 
+## Overnight 2026-10-27 into 2026-10-28: wave 1 is fully built
+
+No model quota was spent overnight; every run was local Docker.
+
+1. **prettier is admitted and re-validated.** The tamper-scan false positive
+   on `// @ts-expect-error` is fixed (directive tokens are removed before the
+   rule runs; real tampering is still flagged), and the task re-validated:
+   base 0, gold 1, three probes 0, Harbor oracle 1 and nop 0. Rescanning all
+   six gate attempts changes no reward. Branch `frontier-v5-prettier`.
+2. **Java: javaparser-member-resolution-scope** (`frontier-v5-javaparser`).
+   Three symbol-solver fixes (#5139, #5141, #5145) plus a follow-up
+   refactor: qualified calls and nested type names that escape into the
+   receiver's file imports, and unresolvable ancestors above the direct ones.
+   12 held-out checks, 4,932 guards, about 55 seconds per run. Floor 8 by
+   route (a): the pre-registered members-only shortcut clears 4 checks and
+   trips 4 guards, three of them the tests #5139's PR names. #5147 was built
+   in and then moved into the base: run alone its held-out test passes at
+   base 30 of 30 times, and in 16 of 20 symbol-solver runs, so it could not
+   grade that fix.
+3. **C++: boosturl-path-compare-normalize** (`frontier-v5-boosturl`). The
+   nine one-commit fixes of Boost.URL PR #1009 (compare hang, compare and
+   hash disagreeing with normalize, segment count after normalize, four
+   decoded-size bugs), built against the Boost 1.92.0 CMake tarball. The
+   runner selects whole suites only and the base hangs, so each held-out
+   check is one fix's own test, split out of the pin's test files by
+   `git blame` and run on its own with a timeout, plus the pin's full
+   `url` and `url_base` suites: 10 checks, 77 guards, about 90 seconds per
+   run, with a must-fail sentinel against forged summaries. Floor 8 by
+   route (a): the compare rewrite with "%2F" decoded trips the visible
+   encoded-slash test the maintainer's commit message names.
+
+Both new tasks: base 0, gold 1, cheating probes 0, Harbor oracle 1 and nop 0,
+naive fixes committed before any control run. Neither is gated. Waiting on
+you: the Astra halves on javaparser and Boost.URL (quota), the Opus 5.5
+prong on tree-sitter, decision (g') for pulldown-cmark and sqlparser, PRs
+for the new branches, and pushing the Opus-half prettier archive to the
+backup repo.
+
 ## TL;DR
 
 Seven tasks are built and locally validated (base scores 0, gold scores 1,

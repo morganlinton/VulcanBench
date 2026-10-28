@@ -1,0 +1,12 @@
+diff --git a/include/boost/url/impl/url_base.hpp b/include/boost/url/impl/url_base.hpp
+index 1910bbf..f8c436f 100644
+--- a/include/boost/url/impl/url_base.hpp
++++ b/include/boost/url/impl/url_base.hpp
+@@ -2579,6 +2579,7 @@ set_scheme_impl(
+         impl_.set_size(
+             id_path,
+             impl_.len(id_path) - 2);
++        impl_.decoded_[id_path] -= 2;
+         s_[size()] = '\0';
+     }
+ 

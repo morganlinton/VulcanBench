@@ -1,0 +1,16 @@
+diff --git a/include/boost/url/impl/url_base.hpp b/include/boost/url/impl/url_base.hpp
+index b68ac91..6813ab0 100644
+--- a/include/boost/url/impl/url_base.hpp
++++ b/include/boost/url/impl/url_base.hpp
+@@ -313,8 +313,11 @@ set_encoded_authority(
+         dest[n - 1] = '/';
+     impl_.apply_authority(a.u_);
+     if(need_slash)
++    {
+         impl_.adjust_right(
+                 id_query, id_end, 1);
++        ++impl_.decoded_[id_path];
++    }
+     return *this;
+ }
+ 

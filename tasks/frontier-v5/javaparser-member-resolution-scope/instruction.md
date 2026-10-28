@@ -9,7 +9,7 @@ cd /app
 mvn -pl javaparser-symbol-solver-testing,javaparser-core-testing -am test
 ```
 
-The suite passes as given. Users report four ways the symbol solver's answers
+The suite passes as given. Users report three ways the symbol solver's answers
 differ from what `javac` does, and the current tests do not notice:
 
 - A qualified method call on a type read from source, such as `Host.ping()`,
@@ -30,10 +30,6 @@ differ from what `javac` does, and the current tests do not notice:
   nothing to do with the missing type. A missing direct ancestor is already
   tolerated. A question whose answer really depends on the missing type must
   still raise the unsolved-symbol error, never return a wrong answer.
-
-- Calls such as `Arrays.copyOf(ints, n)` with an `int[]` argument fail with a
-  method ambiguity error: the `int[]` argument is accepted for `long[]`,
-  `float[]` and `double[]` parameters, which Java forbids.
 
 Fix the underlying causes so that each of these resolves as `javac` would,
 and so that everything that resolves correctly today keeps resolving the

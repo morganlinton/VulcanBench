@@ -37,7 +37,7 @@ launcher.
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
 | pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met) | **0 of 3** (3.7, 4.4, 3.2) | not run | Astra prong passed (2026-10-26); a floor-8 test run on the owner's approval |
-| prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | not run | Astra prong passed (2026-10-27); Opus 5.5 prong pending |
+| prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix pending before freeze |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -418,7 +418,43 @@ one attempt at a time, or cap the verifier's jest workers. That is a
 concurrency decision for docs/DECISIONS.md (decision (e) puts JavaScript at
 two).
 
-The second prong (Opus 5.5) has not run.
+### prettier-comment-attachment-stability, Opus 5.5 half (2026-10-27): admitted
+
+Job `opus-prettier-comment-attachment-stability`, launched 16:02 PDT on the
+owner's approval from a run worktree pinned to 2a87c408 (tag
+`bench/2026-10-27-prettier-opus-gate`: the task at 6cf2915d, as in the Astra
+half, plus `run_gate.sh` with `GATE_CONCURRENCY`), wave-1 identifiers,
+`GATE_CONCURRENCY=1` (docs/DECISIONS.md 2026-10-27). Usage pre-flight 0.63
+of the weekly window. Sessions real (every turn on `claude-opus-5-5`, 88 to
+107 tool calls each, each running the visible suite with `FULL_TEST=1`; no
+auth or usage event); no containers left behind. No verifier overlap, no
+worker crash.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 18) | Guards | Tamper scan |
+| --- | --- | --- | --- | --- | --- |
+| AVWpv4E | 32.5 | 0 | 1: consistent-with-flow 15707.ts | hold (101,662) | flagged, false positive |
+| FtaxW5N | 27.4 | 0 | 5: arrow-chain-with-trailing-comments.js (format and second format, both arrowParens options), parenthesized.js | 16 regressed, all other parsers on the same held-out fixture | flagged, false positive |
+| ZbFiFtY | 25.6 | 0 | 2: parenthesized.js (format and second format) | hold | clean |
+
+**0 of 3.** Every attempt declared done with the visible suite passing. The
+closest (AVWpv4E) cleared 17 of 18. Across both halves the parenthesized
+sequence fixture is missed by five of six attempts. No attempt took the
+pre-registered leading-on-annotation shortcut. FtaxW5N's 16 regressions are
+the other parsers' checks on the held-out arrow-chain fixture, which the
+visible suite cannot show.
+
+Tamper-scan false positive. The scan's JavaScript rule includes
+`\bexpect\b`, which matches the `expect` in `// @ts-expect-error -- Safe`,
+an idiom prettier's own `src` uses 97 times. Two attempts added such lines
+(in `handle-comments.js` and `print/class.js`), so `tamper_clean` is 0 for
+them. No reward changed: both also fail held-out checks, and the verifier
+still ran and graded the full suite. A solve written in the same idiom would
+be zeroed, so the rule needs fixing (exempt `@ts-expect-error` and
+`@ts-ignore` comments) and the task re-validated before it is frozen.
+
+**Verdict: ADMIT** (F5-javascript, 2026-10-27): GPT-6 Astra 0 of 3 and
+Claude Opus 5.5 0 of 3, the same rule black was admitted under. Floors 1 to
+8 met, floor 8 by route (a).
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

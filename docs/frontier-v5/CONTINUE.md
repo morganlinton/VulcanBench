@@ -100,11 +100,11 @@ comparability with black). Wave 1 built so far (WAVE1-F5.md): black
 (admitted), pulldown-cmark (Astra 0 of 3, floor 8 not met, Opus half not
 run), the sqlparser-rs reserve (floor 8 not met, not gated) and
 prettier-comment-attachment-stability (F5-javascript, branch
-`frontier-v5-prettier`: floors 1 to 8 met by route (a); Astra 0 of 3 on
-2026-10-27, 14 or 15 of 18 held-out checks per attempt; its next step is the
-Opus 5.5 half, after fixing the verifier-overlap flake recorded in GATE-LOG,
-by running it one attempt at a time or capping the verifier's jest workers).
-Then Java and C++. The Fable half on the five
+`frontier-v5-prettier`: floors 1 to 8 met by route (a); **admitted** as
+F5-javascript on 2026-10-27, Astra 0 of 3 and Opus 5.5 0 of 3 (run one
+attempt at a time, docs/DECISIONS.md 2026-10-27). Before it is frozen, its
+tamper scan needs a fix: `\bexpect\b` flags `// @ts-expect-error` comments,
+a prettier idiom (GATE-LOG); no gate reward changed). Then Java and C++. The Fable half on the five
 Astra-rejected candidates (Routine v1 recycling) stays optional.
 
 After each task: diff-review every solve against the task's base (PHASE1.md),

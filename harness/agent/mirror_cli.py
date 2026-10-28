@@ -26,6 +26,19 @@ stored ``AgentMessage`` is decoded with Mirror's own protobuf schema, and every
 assistant chat record contributes its ``usage``. Reflection publishes no price
 for Beam yet, so runs are unpriced unless the price table gains an entry.
 
+Full traces (owner decision 2026-10-27, docs/DECISIONS.md): every run keeps
+its whole conversation. The database is copied into the run directory
+(``mirror-session/state.db``, via SQLite's backup API so a write-ahead log is
+folded in) and its SHA-256 is recorded in a ``mirror_database`` trace event.
+``cli-agent-stream.jsonl`` carries the decoded transcript: the task and system
+text, each assistant step's text, reasoning and tool calls (id, name,
+arguments), each tool result with its call id, success flag, exit code,
+duration and touched paths, and the approval, log, task-result and context
+records. A run that cannot archive its database fails closed, like a run
+without auditable usage: a scored run whose trace is missing would be
+unauditable, and the October 2026 Beam sweep, which kept only usage, showed the
+gap.
+
 Imported lazily by cli_agents to avoid circular adapter registration.
 """
 
@@ -35,6 +48,7 @@ import hashlib
 import json
 import os
 import signal
+import sqlite3
 import subprocess
 import tempfile
 import threading
@@ -115,13 +129,18 @@ def sandbox_context(scratch: Path) -> str:
 
 _DECODER = r"""
 import json, sqlite3, sys
-from mirror.protocol import agent_pb2
+from google.protobuf.json_format import MessageToDict
+from mirror.protocol import agent_pb2 as pb
+def struct(s):
+    return MessageToDict(s)
 rows = []
 db = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
 for seq, payload in db.execute("select sequence, payload from react_entry order by session_id, sequence"):
-    m = agent_pb2.AgentMessage()
+    m = pb.AgentMessage()
     m.ParseFromString(payload)
     row = {"sequence": seq, "id": m.id, "time": m.timestamp.seconds + m.timestamp.nanos / 1e9}
+    if m.turn_id:
+        row["turn_id"] = m.turn_id
     if m.HasField("inference"):
         row["model"] = m.inference.model
         row["effort"] = m.inference.reasoning_effort
@@ -131,8 +150,53 @@ for seq, payload in db.execute("select sequence, payload from react_entry order 
         if c.HasField("usage"):
             row["usage"] = {"prompt": c.usage.prompt_tokens, "completion": c.usage.completion_tokens,
                             "cached": c.usage.cached_tokens, "cache_write": c.usage.cache_write_tokens}
+        if c.HasField("system"):
+            row["text"] = c.system.content
+        if c.HasField("user"):
+            row["text"] = c.user.content
         if c.HasField("assistant"):
-            row["text"] = c.assistant.content
+            a = c.assistant
+            row["text"] = a.content
+            if a.reasoning_content:
+                row["reasoning"] = a.reasoning_content
+            if len(a.reasoning_details):
+                row["reasoning_details"] = [struct(d) for d in a.reasoning_details]
+            if a.refusal:
+                row["refusal"] = a.refusal
+            row["tool_calls"] = [{"id": t.id, "name": t.function.name, "arguments": t.function.arguments}
+                                 for t in a.tool_calls]
+        if c.HasField("tool"):
+            row["tool_call_id"] = c.tool.tool_call_id
+            row["tool_name"] = c.tool.name
+            row["result"] = c.tool.content
+        if c.display:
+            row["display"] = c.display
+        if c.HasField("tool") or c.success:
+            row["success"] = c.success
+        if c.truncated:
+            row["truncated"] = True
+    if m.HasField("metadata"):
+        row["metadata"] = {"exit_code": m.metadata.exit_code,
+                           "tool_duration_seconds": m.metadata.tool_duration_seconds,
+                           "touched": [{"path": t.path, "kind": pb.TouchedKind.Name(t.kind)}
+                                       for t in m.metadata.touched]}
+    if m.HasField("tool_approval"):
+        r = m.tool_approval
+        row["tool_approval"] = {"call_id": r.call_id, "tool_name": r.tool_name,
+                                "outcome": pb.ToolApprovalOutcome.Name(r.outcome),
+                                "source": pb.ApprovalSource.Name(r.source)}
+    if m.HasField("task_result"):
+        r = m.task_result
+        row["task_result"] = {"task_id": r.task_id, "tool_name": r.tool_name, "content": r.content,
+                              "display": r.display, "success": r.success}
+    if m.HasField("context_window"):
+        w = m.context_window
+        row["context_window"] = {"system_prompt": w.system_prompt, "metadata": struct(w.metadata)}
+        if w.HasField("compaction"):
+            row["context_window"]["compaction"] = {"model": w.compaction.model, "summary": w.compaction.summary}
+    if m.HasField("extension"):
+        row["extension"] = {"extension": m.extension.extension, "kind": m.extension.kind,
+                            "data": struct(m.extension.data)}
     if m.HasField("log"):
         row["log"] = {"level": m.log.level, "text": m.log.text}
     rows.append(row)
@@ -154,6 +218,26 @@ def decode_database(python: Path, packages: Path, database: Path) -> list[dict[s
         raise ProviderError(f"Cannot decode Mirror database: {proc.stderr[-500:]}")
     rows: list[dict[str, Any]] = json.loads(proc.stdout)
     return rows
+
+
+def archive_database(database: Path, target: Path) -> dict[str, Any]:
+    """Copy Mirror's database with SQLite's backup API and return its size and SHA-256."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        source = sqlite3.connect(f"file:{database}?mode=ro", uri=True)
+        try:
+            copy = sqlite3.connect(target)
+            try:
+                source.backup(copy)
+            finally:
+                copy.close()
+        finally:
+            source.close()
+        with target.open("rb") as handle:
+            sha = hashlib.file_digest(handle, "sha256").hexdigest()
+    except (OSError, sqlite3.Error) as exc:
+        raise ProviderError(f"Cannot archive Mirror database: {exc}") from exc
+    return {"path": f"mirror-session/{target.name}", "bytes": target.stat().st_size, "sha256": sha}
 
 
 def collect_usage(rows: list[dict[str, Any]], model: str) -> dict[str, Any]:
@@ -243,6 +327,8 @@ class MirrorAdapter:
             )
         if timeout_s is None or timeout_s <= 0:
             raise ProviderError("Mirror requires a positive wall-clock timeout")
+        if not stream_log_path:
+            raise ProviderError("Mirror runs need a stream log path to archive the full trace")
         key = os.environ.get(API_KEY_ENV)
         if not key:
             raise ProviderError(f"Mirror needs {API_KEY_ENV}")
@@ -381,27 +467,26 @@ class MirrorAdapter:
             if database.exists()
             else []
         )
-        if stream_log_path:
-            log = Path(stream_log_path)
-            with log.open("w") as sink:
-                for row in rows:
-                    sink.write(json.dumps(sanitize(row)) + "\n")
-            archive = log.parent / "mirror-session"
-            archive.mkdir(exist_ok=True)
-            (archive / "stdout.txt").write_text(str(sanitize("".join(stdout_parts))))
-            (archive / "stderr.txt").write_text(str(sanitize(stderr_text)))
-            (archive / "boundary.sb").write_text(profile)
-            for path in (
-                sorted((home / ".mirror/logs").rglob("*"))
-                if (home / ".mirror/logs").exists()
-                else []
-            ):
-                if path.is_file():
-                    target = archive / "logs" / path.relative_to(home / ".mirror/logs")
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(str(sanitize(path.read_text(errors="replace"))))
+        log = Path(stream_log_path)
+        archive = log.parent / "mirror-session"
+        archive.mkdir(exist_ok=True)
+        if database.exists():
+            collector.record("mirror_database", archive_database(database, archive / "state.db"))
+        with log.open("w") as sink:
+            for row in rows:
+                sink.write(json.dumps(sanitize(row)) + "\n")
+        (archive / "stdout.txt").write_text(str(sanitize("".join(stdout_parts))))
+        (archive / "stderr.txt").write_text(str(sanitize(stderr_text)))
+        (archive / "boundary.sb").write_text(profile)
+        for path in (
+            sorted((home / ".mirror/logs").rglob("*")) if (home / ".mirror/logs").exists() else []
+        ):
+            if path.is_file():
+                target = archive / "logs" / path.relative_to(home / ".mirror/logs")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(str(sanitize(path.read_text(errors="replace"))))
         for row in rows:
-            if row.get("text"):
+            if row.get("role") == "assistant" and row.get("text"):
                 collector.record("assistant_text", {"text": row["text"]})
         usage = collect_usage(rows, api_model)
         outcome.prompt_tokens = usage["prompt"]

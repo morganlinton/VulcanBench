@@ -120,7 +120,10 @@ measurements). The Fable half on the five Astra-rejected candidates
 
 After each task: diff-review every solve against the task's base (PHASE1.md),
 then record the result in GATE-LOG.md. Back up the job directories to the
-private `vulcanbench-data-backup` repo the same way as the first wave.
+private `vulcanbench-data-backup` repo with its `tools/add-archive --stream
+suite-building --root ~/vulcanbench-gate` (one manifest per archive, so a
+sweep host backing up at the same time never conflicts; never edit that
+repo's README by hand).
 
 ## Evidence and history
 

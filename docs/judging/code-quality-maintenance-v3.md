@@ -1427,6 +1427,42 @@ record: `docs/results/swe-v4-beam-2026-10/comparison.json`, built by
   mean, like DeepSeek V4.1 Flash's, and any card beside Muse Spark 1.3 and
   Grok 4.6 columns says the panels differ.
 
+## Amendment v3.29, October 28, 2026: GPT-6.1 Terra, judged by Muse Spark 1.3 and Grok 4.6
+
+The v3.24 protocol on a new population, with the Cursor pin held to the
+version v3.24 used. Nothing in the rubric, controls, quirk keys, gates,
+repeats, seed, weights or judge settings changes. Protocol id
+`code-quality-maintenance-v3.29`; run directory
+`runs-code-quality-maintenance-v3.29`; runner
+`harness/maintenance_review_v329.py`, derived from the v3.24 runner.
+Population record: `docs/results/swe-v4-gpt61-terra-2026-10/comparison.json`,
+built by `scripts/cii-v4-board/build_gpt61terra_population.py`.
+
+- Population: the October 2026 GPT-6.1 Terra sweep of Frontier v4
+  (`gpt-6.1-terra`) through Codex CLI 0.159.0 on the ChatGPT subscription
+  (solver `codex:gpt-6.1-terra`), Low to Max (Extra high is Codex's `xhigh`),
+  one attempt per task and level, 115 runs, from
+  `bench/2026-10-27-gpt61-terra-frontier-v4`, so task hashes match the suite
+  lock and no bridge is used. No run timed out and none ended with an empty
+  patch, so every cell freezes at 23.
+- Judges: Muse Spark 1.3 and Grok 4.6, the pair that judged GPT-6.1 Sol
+  (v3.18) and Claude Opus 5.5 (v3.15). Both are neutral for an OpenAI
+  submission (owner choice in chat, October 28) and retake the exam under
+  v3.29 before any counted call. Settings are read from the recovered v3.3
+  and v3.4 protocols, each checked against its published sha256, as in v3.24.
+  GPT-6.1 Sol, the second seat in v3.27 and v3.28, is from Terra's own lab
+  and does not sit.
+- Cursor: pinned to `2026.10.01-e373342` and the digest v3.24 recorded, as in
+  v3.25. Cursor has since updated itself to `2026.10.14-941492e`; the round
+  judges through the pinned version's own launcher and re-checks its digest
+  before every stage. Cursor reports Grok 4.6's display name as "Grok 4.6
+  Medium" (frozen: "Cursor Grok 4.6 Medium"); `v3_resume` accepts that
+  rename and records it per call, as in v3.23 and v3.24.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the level two steps up (wrapping), as in v3.24.
+- Comparability: a Terra score is a Muse Spark 1.3 and Grok 4.6 mean, the
+  same panel as the GPT-6.1 Sol and Claude Opus 5.5 columns.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

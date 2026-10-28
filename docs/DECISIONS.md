@@ -7,6 +7,33 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-28: GPT-6.1 Terra is judged by Muse Spark 1.3 and Grok 4.6 (v3.29)
+
+### Decision
+
+GPT-6.1 Terra's Code quality is judged as v3.29 by Muse Spark 1.3 and Grok
+4.6, the panel behind the GPT-6.1 Sol (v3.18) and Claude Opus 5.5 (v3.15)
+columns, so the three can share a card without a panel caveat. Owner choice
+in chat, 2026-10-28, over Muse Spark 1.3 with GPT-6.1 Sol (the v3.27 and
+v3.28 pair; Sol is Terra's own lab) and Muse Spark 1.3 with Opus 5.5. The
+round runs from its own bench tag after the sweep, so no sweep overlaps the
+judging window. Results, the comparison card against GPT-6.1 Sol, Claude
+Opus 5.5 and GPT-6 Astra, and the redacted traces follow in a results PR.
+
+### Evidence
+
+- The sweep (`bench/2026-10-27-gpt61-terra-frontier-v4`) finished on
+  2026-10-27 at 16:16 PDT: 115 runs, no timeouts, no empty patches, every
+  run on Codex 0.159.0 from the clean tag. Every run's evidence
+  reconstructs through v2's own path, so v3.18's binary-fixture fallback is
+  not needed.
+- Grok 4.6 answered one-line probes on 2026-10-28 through both the current
+  Cursor (`2026.10.14-941492e`) and the pinned `2026.10.01-e373342`, whose
+  version-directory digest still equals v3.24's. The Cursor usage limit that
+  kept Grok out of v3.27 and v3.28 no longer applies.
+- A dry `prepare` into a scratch directory froze 115 submissions (23 per
+  level), 23 quirk keys, full evidence, largest prompt 77,081 characters.
+
 ## 2026-10-27: Mirror runs keep full traces
 
 The owner requires every Mirror (Reflection Beam) run to keep a full trace from

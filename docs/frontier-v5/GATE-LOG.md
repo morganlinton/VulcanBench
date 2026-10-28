@@ -37,7 +37,9 @@ launcher.
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
 | pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met) | **0 of 3** (3.7, 4.4, 3.2) | not run | Astra prong passed (2026-10-26); a floor-8 test run on the owner's approval |
-| prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix pending before freeze |
+| prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
+| javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | Opus 5.5: not run | Astra prong passed (2026-10-28); Opus 5.5 half on the owner's approval |
+| boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -455,6 +457,72 @@ be zeroed, so the rule needs fixing (exempt `@ts-expect-error` and
 **Verdict: ADMIT** (F5-javascript, 2026-10-27): GPT-6 Astra 0 of 3 and
 Claude Opus 5.5 0 of 3, the same rule black was admitted under. Floors 1 to
 8 met, floor 8 by route (a).
+
+### javaparser-member-resolution-scope, Astra half (2026-10-28): the Astra prong passed
+
+Built and validated 2026-10-27 (its DESIGN.md); floors 1 to 8 met, floor 8
+by route (a). Job `astra-javaparser-member-resolution-scope`, launched 06:05
+PDT on the owner's approval from a run worktree pinned to 4bdd2330 (tag
+`bench/2026-10-28-wave1-java-cpp-astra-gate`: this task at c23c3cc6 and
+Boost.URL at dd75baa6, plus `run_gate.sh` from a12619e2), wave-1
+identifiers, concurrency 1 (JVM). The two tasks ran back to back, so no two
+verifiers shared the Docker VM. Sessions real (`gpt-6-astra`, 33 to 42
+commands each; no auth or usage event); no containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 12) | Guards (4,932) |
+| --- | --- | --- | --- | --- |
+| hVQxFAq | 9.8 | 0 | 2: Issue4985Test fields visible to inheritors, subclass assignable | hold |
+| QG9xa4z | 9.7 | 0 | 2: the same two | hold |
+| LfMf7es | 7.7 | 0 | 2: the same two | hold |
+
+**0 of 3.** Every attempt cleared 10 of the 12 held-out checks, kept every
+guard green and declared done with both visible test modules passing. All
+three miss the same two incomplete-hierarchy checks: fields of a class whose
+ancestor cannot be resolved stay visible to its subclasses, and such a
+subclass stays assignable to it. The attempts made method lookup tolerate a
+missing distant ancestor but left the field and assignability paths alone.
+None took the pre-registered members-only shortcut (it regresses 4 guards; no
+attempt regressed one). As with black and prettier, held-out coverage the
+visible suite does not show is what held the reference.
+
+### boosturl-path-compare-normalize, Astra half (2026-10-28): REJECT
+
+Same run commit and launcher as javaparser above, started 06:37 PDT when
+javaparser finished, concurrency 1 (C++). Sessions real (`gpt-6-astra`, 44
+and 29 commands; no auth or usage event). Two solves ended the gate early;
+the third attempt (uQbK8V2) was stopped by the early exit after 5 commands
+and is not an attempt (its compose sidecar error is the stop). Leftover
+sandbox containers removed by the launcher.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 10) | Guards (77) |
+| --- | --- | --- | --- | --- |
+| Lrrd5aF | 17.7 | **1** | none | hold |
+| gnfoL2m | 21.6 | **1** | none | hold |
+
+**2 of 2, reject.** Diff-reviewed against the base (the pin minus the nine
+fixes): both edit exactly the gold's four files (`detail/normalize.hpp`,
+`impl/url_base.hpp`, `impl/url_view_base.hpp`, `src/detail/normalize.cpp`),
+about 360 lines added and 380 removed each. Each replaces the allocating
+compare and hash with its own allocation-free normalized-path walker, a
+forward pass that finds where relative prefixes cancel and a reverse walk
+that consumes parent segments, shared by comparison and hashing, and fixes
+the segment-count and modifier size bookkeeping and the `"./"` scheme-removal
+case. The two walkers are structured differently from each other and from the
+gold. No test strings are special-cased (the only literals added are hex
+digits and `%2E`/`%2e`), the tamper scan and sentinel are clean, and neither
+session fetched anything: the `github.com/boostorg/url/issues/992` URL in both
+transcripts is a comment in the base's own `test/unit/url.cpp` that the agents
+read. gnfoL2m checked itself against 330,000 generated paths and 100,000
+ordering and hash pairs it wrote; Lrrd5aF against one million generated
+normalization cases plus ordering, hashing and modifier checks.
+Neither took the pre-registered slash-decoded shortcut.
+
+The nine fixes concentrate in one subsystem the visible suite already
+exercises from many angles, and a reference that writes its own differential
+checks against RFC 3986 section 5.2.4 reaches the held-out cases without
+seeing them. That is the same lesson as comrak (an oracle inside the sandbox
+lets the agent grade itself), here with the RFC as the oracle. The F5-cpp
+slot needs another candidate.
 
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 

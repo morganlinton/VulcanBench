@@ -104,14 +104,17 @@ comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
 | F5-javascript | prettier-comment-attachment-stability (`frontier-v5-prettier`) | 1 to 8, route (a) | **admitted** 2026-10-27 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time); tamper-scan fix for `@ts-expect-error` re-validated after the gate |
 | F5-rust | pulldown-cmark-html-block-scanning (`frontier-v5-pulldown-cmark`) | 1 to 7, floor 8 not met | Astra 0 of 3; Opus half not run; owner decision (g') |
 | F5-rust reserve | sqlparser-display-round-trip (`frontier-v5-sqlparser`) | 1 to 7, floor 8 not met | not gated |
-| F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | not gated; built and validated 2026-10-27 |
-| F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | not gated; built and validated 2026-10-27 |
+| F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | Astra 0 of 3 (2026-10-28); Opus 5.5 half on the owner's approval |
+| F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | **rejected** 2026-10-28 (Astra 2 of 2, genuine; slot needs a new candidate) |
 
-Next, each on the owner's approval (they spend quota): the Astra half on
-javaparser and on Boost.URL (`run_gate.sh astra <task>` from a run worktree
-pinned to the task's commit; JVM and C++ run one attempt at a time by
-decision (e)), then their Opus 5.5 halves. javaparser dropped #5147 into the
-base (its held-out test passes at base in most runs; its DESIGN.md has the
+Next, on the owner's approval (it spends quota): javaparser's Opus 5.5 half
+(`run_gate.sh opus javaparser-member-resolution-scope` from the run worktree
+pinned to `bench/2026-10-28-wave1-java-cpp-astra-gate`, one attempt at a time
+by decision (e)). Boost.URL was solved twice by Astra with self-written
+RFC 3986 differential checks (GATE-LOG.md), so F5-cpp needs a new candidate,
+ideally one whose held-out behaviour has no public specification the agent
+can turn into an oracle. javaparser dropped #5147 into the base (its
+held-out test passes at base in most runs; its DESIGN.md has the
 measurements). The Fable half on the five Astra-rejected candidates
 (Routine v1 recycling) stays optional.
 

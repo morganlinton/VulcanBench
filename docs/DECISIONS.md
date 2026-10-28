@@ -7,6 +7,48 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-27: Mirror runs keep full traces
+
+The owner requires every Mirror (Reflection Beam) run to keep a full trace from
+now on. The October 23 to 25 Beam sweep did not: the adapter decoded Mirror's
+conversation database only for token usage, so each run directory keeps the
+step skeleton (order, timestamps, tokens per model step) and the final patch,
+but no tool names, arguments, results or reasoning. On 2026-10-27 the owner
+chose to publish that sweep as a structure-only traces repository and to fix
+the adapter for future runs.
+
+What changed in `harness/agent/mirror_cli.py`:
+
+- Mirror's database is copied into the run directory as
+  `mirror-session/state.db` through SQLite's backup API (so a write-ahead log
+  is folded in), and its size and SHA-256 go into a `mirror_database` trace
+  event.
+- `cli-agent-stream.jsonl` now carries the decoded transcript, read with
+  Mirror 0.1.1's own protobuf schema: the task and system text; each assistant
+  step's text, reasoning (`reasoning_content`, plus `reasoning_details` when
+  present) and tool calls (`id`, `function.name`, `function.arguments`); each
+  tool result (`tool_call_id`, `name`, `content`, success) with its metadata
+  record (exit code, duration, touched paths); and the tool-approval, log,
+  task-result, context-window and extension records. Token accounting and its
+  fail-closed checks are unchanged.
+- A run that cannot archive its database fails closed, as a run without
+  auditable usage already does, and the adapter refuses to start without a
+  stream log path to archive into.
+
+Verified without API calls: the new decoder was run against a real Beam
+database from the October sweep (a Max run, 2,149 records: 537 assistant
+steps, all with reasoning and tool calls; 536 tool results). A test builds a
+database with the pinned schema and decodes it; CI skips it because the pinned
+install is not on the runner, and a second test covers archive, hashing and
+the stream rows without it.
+
+Found while doing this: the adapter never removes its per-run scratch folder,
+and the October sweep's 1,334 scratch folders (115 scored runs plus the
+infra-aborted attempts) were still in the system temp directory with their
+databases. They were copied outside the repository on 2026-10-27 before the OS
+could purge them. Matching them to scored runs and republishing full traces
+from them is a separate owner decision.
+
 ## 2026-10-26: GPT-6.1 Terra runs on Frontier v4 on its release day, on the pinned Codex 0.159.0
 
 ### Decision

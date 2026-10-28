@@ -1,0 +1,70 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v3.md). Each part is one commit of boostorg/url PR #1009, its include and src diff; base + all parts is the pin's include and src (solution/gold_patch.diff). trailing (359816e) rewrites the function hang (8b75693) patched and deletes its lines, so the compare family (hang, trailing, shield, hash) is one repair unit, left out together; its rebased diff applies without hang. shield and hash apply only on top of trailing.",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "hang",
+      "patch": "tests/controls/01-8b75693.diff",
+      "upstream": "8b75693"
+    },
+    {
+      "name": "nseg",
+      "patch": "tests/controls/02-fff625e.diff",
+      "upstream": "fff625e"
+    },
+    {
+      "name": "trailing",
+      "patch": "tests/controls/03-359816e.diff",
+      "upstream": "359816e",
+      "rebased": "tests/controls/03-359816e-rebased.diff"
+    },
+    {
+      "name": "shield",
+      "patch": "tests/controls/04-5ec0b82.diff",
+      "upstream": "5ec0b82"
+    },
+    {
+      "name": "hash",
+      "patch": "tests/controls/05-c12800e.diff",
+      "upstream": "c12800e"
+    },
+    {
+      "name": "authority",
+      "patch": "tests/controls/06-3ceb766.diff",
+      "upstream": "3ceb766"
+    },
+    {
+      "name": "remove-authority",
+      "patch": "tests/controls/07-976b06f.diff",
+      "upstream": "976b06f"
+    },
+    {
+      "name": "set-scheme",
+      "patch": "tests/controls/08-cb299ea.diff",
+      "upstream": "cb299ea"
+    },
+    {
+      "name": "remove-scheme",
+      "patch": "tests/controls/09-0df4f46.diff",
+      "upstream": "0df4f46"
+    }
+  ],
+  "coupled": [
+    [
+      "hang",
+      "trailing",
+      "shield",
+      "hash"
+    ]
+  ],
+  "naive": [
+    {
+      "name": "slash-decoded",
+      "patch": "tests/controls/naive-slash-decoded.diff"
+    },
+    {
+      "name": "authority-only",
+      "patch": "tests/controls/naive-authority-only.diff"
+    }
+  ]
+}

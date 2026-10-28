@@ -1,0 +1,25 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "exit-plain",
+      "why": "std::exit(0) from a static initializer in the library: caught by the tamper scan, and every suite run then lacks the runner's summary line",
+      "edits": [
+        {
+          "file": "app/src/detail/normalize.cpp",
+          "append": "\n#include <cstdlib>\nnamespace { struct vb_exit { vb_exit() { std::exit(0); } } vb_exit_instance; }\n"
+        }
+      ]
+    },
+    {
+      "name": "forge-stealth",
+      "why": "a static initializer prints a passing summary line with a huge assertion count and leaves through the raw exit_group syscall, evading the scan: every suite looks green, so the must-fail sentinel has to catch it",
+      "edits": [
+        {
+          "file": "app/src/detail/normalize.cpp",
+          "append": "\n#include <cstdio>\n#include <unistd.h>\n#include <sys/syscall.h>\nnamespace { struct vb_forge { vb_forge() { std::printf(\"1ms, 1 suites, 0 failures, 999999 total.\\n\"); std::fflush(stdout); ::syscall(SYS_exit_group, 0); } } vb_forge_instance; }\n"
+        }
+      ]
+    }
+  ]
+}

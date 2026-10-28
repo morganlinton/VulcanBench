@@ -43,6 +43,15 @@ CODE = {
     "cpp-tut": r"\btut\b|tests summary|\btest_result\b|\bXMLTester\b|case\s*\d*\s*,\s*test\b|\b(ok|failed)\.\s*\""
                r"|\b(_exit|_Exit|quick_exit|exit|abort)\s*\(|/proc/self|\bdl(sym|open)\b",
 }
+# Text removed from an added line before the code patterns run. TypeScript
+# directive comments (`// @ts-expect-error -- Safe`, used 97 times in
+# prettier's own src) contain "expect" as a word, which the javascript rule
+# matches; only the directive token is removed, so the rest of the line is
+# still scanned. Gate 2026-10-27 (GATE-LOG.md): two attempts were flagged for
+# exactly this.
+STRIP = {
+    "javascript": re.compile(r"@ts-(expect-error|ignore|nocheck|check)\b"),
+}
 NAMES = {
     "python": r"(^|/)(conftest\.py|pytest\.ini|sitecustomize\.py|usercustomize\.py)$|\.pth$",
     "java": r"(^|/)(junit-platform\.properties|META-INF/services/.*)$|(^|/)org/junit/",
@@ -77,6 +86,7 @@ def main():
     ignore = re.compile(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None
     code, names = re.compile(CODE[lang]), re.compile(NAMES[lang])
     junk = JUNK.get(lang)
+    strip = STRIP.get(lang)
     findings = []
     for root, _dirs, files in os.walk(agent):
         for fn in files:
@@ -98,7 +108,7 @@ def main():
                 continue
             for line in difflib.unified_diff(theirs, ours, lineterm="", n=0):
                 if line.startswith("+") and not line.startswith("+++"):
-                    m = code.search(line)
+                    m = code.search(strip.sub("", line) if strip else line)
                     if m:
                         findings.append(f"{rel}: added line references '{m.group(0)}': {line[1:].strip()[:160]}")
     for f in findings:

@@ -104,15 +104,15 @@ comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
 | F5-javascript | prettier-comment-attachment-stability (`frontier-v5-prettier`) | 1 to 8, route (a) | **admitted** 2026-10-27 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time); tamper-scan fix for `@ts-expect-error` re-validated after the gate |
 | F5-rust | pulldown-cmark-html-block-scanning (`frontier-v5-pulldown-cmark`) | 1 to 7, floor 8 not met | Astra 0 of 3; Opus half not run; owner decision (g') |
 | F5-rust reserve | sqlparser-display-round-trip (`frontier-v5-sqlparser`) | 1 to 7, floor 8 not met | not gated |
-| F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | Astra 0 of 3 (2026-10-28); Opus 5.5 half on the owner's approval |
+| F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | **admitted** 2026-10-29 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time) |
 | F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | **rejected** 2026-10-28 (Astra 2 of 2, genuine; slot needs a new candidate) |
 | F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | not gated; built and validated 2026-10-28 |
 
-Next, on the owner's approval (it spends quota): javaparser's Opus 5.5 half
-(`run_gate.sh opus javaparser-member-resolution-scope` from the run worktree
-pinned to `bench/2026-10-28-wave1-java-cpp-astra-gate`, one attempt at a time
-by decision (e)), and the Astra half on cli11-toml-config-round-trip (a run
-worktree pinned to its commit, one attempt at a time). Boost.URL was solved
+Next, on the owner's approval (it spends quota): the Astra half on
+cli11-toml-config-round-trip (a run worktree pinned to its commit, one
+attempt at a time by decision (e)). Wave 1 now has four admitted F5 slots
+(python, javascript, java, and c from the first wave); rust waits on
+decision (g') and cpp on CLI11's gate. Boost.URL was solved
 twice by Astra with self-written RFC 3986 differential checks (GATE-LOG.md);
 its replacement is CLI11's config reader and writer, chosen because its
 rules have no external specification or conformance data. The listed C++

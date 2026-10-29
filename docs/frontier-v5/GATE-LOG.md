@@ -38,7 +38,7 @@ launcher.
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
 | pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met) | **0 of 3** (3.7, 4.4, 3.2) | not run | Astra prong passed (2026-10-26); a floor-8 test run on the owner's approval |
 | prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
-| javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | Opus 5.5: not run | Astra prong passed (2026-10-28); Opus 5.5 half on the owner's approval |
+| javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
@@ -484,6 +484,38 @@ missing distant ancestor but left the field and assignability paths alone.
 None took the pre-registered members-only shortcut (it regresses 4 guards; no
 attempt regressed one). As with black and prettier, held-out coverage the
 visible suite does not show is what held the reference.
+
+### javaparser-member-resolution-scope, Opus 5.5 half (2026-10-29): admitted
+
+Job `opus-javaparser-member-resolution-scope`, launched 06:40 PDT on the
+owner's approval from the same run worktree as the Astra half (4bdd2330, tag
+`bench/2026-10-28-wave1-java-cpp-astra-gate`), wave-1 identifiers,
+`GATE_CONCURRENCY=1` (JVM). Usage pre-flight 0.01 of the weekly window.
+Sessions real (every turn on `claude-opus-5-5`, 69 to 116 tool calls each,
+each running the Maven suites 9 to 22 times; no auth, usage or API error
+event); no containers left behind. Finished 07:57.
+
+| Trial | Agent minutes | Tool calls | Output tokens | Reward | Held-out failing (of 12) | Guards (4,932) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 9hUc4ci | 20.9 | 69 | 198k | 0 | 1: Issue4985Test fields visible to inheritors | hold |
+| dDuUVkH | 28.9 | 116 | 214k | 0 | 1: the same | hold |
+| viNEEKe | 21.3 | 93 | 182k | 0 | 1: the same | hold |
+
+**0 of 3.** Every attempt compiled, kept every guard green, had a clean
+tamper scan and cleared 11 of the 12 held-out checks. Diff review against
+the base: each is a genuine fix across the symbol solver's contexts and
+declarations (11 to 16 files, 275 to 537 added lines) plus
+`ResolvedReferenceType` in the core (only main sources are graded; the
+verifier runs the pristine tests). Opus 5.5
+got one check further than Astra (the subclass of a class with an
+unresolvable ancestor stays assignable to it) but, like all six attempts
+across both halves, left the field path alone: fields of such a class do not
+stay visible to its subclasses. None took the pre-registered members-only
+shortcut.
+
+**Verdict: ADMIT** (F5-java, 2026-10-29): GPT-6 Astra 0 of 3 and Claude Opus
+5.5 0 of 3, the rule black and prettier were admitted under. Floors 1 to 8
+met, floor 8 by route (a).
 
 ### boosturl-path-compare-normalize, Astra half (2026-10-28): REJECT
 

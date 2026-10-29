@@ -14,7 +14,7 @@ VULCANBENCH := $(VENV_BIN)/vulcanbench
 # the venv. This makes `make ci` behave the same from any shell.
 export PATH := $(abspath $(VENV_BIN)):$(PATH)
 
-.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci check-suites freeze-suite bench-tag run-worktree docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-all agent-image-codex
+.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci check-suites freeze-suite bench-tag run-worktree gui gui-backend gui-dashboard docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-all agent-image-codex
 .DEFAULT_GOAL := help
 
 help: ## Show this help
@@ -118,6 +118,16 @@ vulcanbench-version: setup ## Smoke: verify CLI entrypoint
 
 dashboard-dev: ## Start Next.js dashboard (assumes npm install done)
 	cd dashboard && npm run dev
+
+# Local run GUI (docs/GUI.md). Loopback only; the runner routes refuse other clients.
+gui-backend: setup ## Run GUI backend with the runner enabled on 127.0.0.1:8000
+	bash scripts/gui_backend.sh 8000
+
+gui-dashboard: ## Run GUI dashboard bound to 127.0.0.1:3000 (needs npm install in dashboard/)
+	cd dashboard && npm run dev -- --hostname 127.0.0.1 --port 3000
+
+gui: ## Run GUI: backend and dashboard together (Ctrl-C stops both)
+	@$(MAKE) -j2 gui-backend gui-dashboard
 
 validate-tasks: setup ## Validate all task definitions (gold-solves, fail-to-pass, determinism)
 	$(VENV_BIN)/python scripts/validate_tasks.py tasks/v1

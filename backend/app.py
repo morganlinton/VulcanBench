@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from backend import db
+from backend.runner.routes import router as runner_router
 from harness import __version__
 from harness.calibration import calibrate_tasks
 from harness.leaderboard import aggregate_by_model, filter_rows_by_repo_scale, scan_leaderboard
@@ -59,6 +60,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Local run GUI (backend/runner): opt-in with VULCANBENCH_RUNNER=1, loopback only.
+app.include_router(runner_router)
 
 
 def _require_write_token(authorization: str | None = Header(default=None)) -> None:

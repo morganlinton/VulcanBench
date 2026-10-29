@@ -148,6 +148,8 @@ cython_debug/
 
 # Project specific
 runs/
+# The dashboard's Runs page is source, not run output.
+!dashboard/app/runs/
 tasks/v1/*/repo_snapshot.tar.gz
 tasks/v1/*/repo_snapshot/
 *.tar.gz

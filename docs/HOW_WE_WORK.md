@@ -291,6 +291,16 @@ clean checkout of it, and the run's `source.tasks` block records that repo's
 commit next to VulcanBench's `source.harness`. Locks and the PR hygiene
 workflow are VulcanBench-only for now; port them when those repos need them.
 
+### Watching runs from the GUI
+
+`make gui` starts a localhost page (`http://127.0.0.1:3000/runs`) that lists
+every gate job and harness run under the configured roots with its bench tag,
+attempts, rewards, containers and a live log tail, plus a first-attempt check
+that flags sessions that never used the requested model or made no tool calls.
+It reads only in this version; launching from it comes later and will go
+through the same `run_worktree.sh` and `run_gate.sh` paths described above.
+See [GUI.md](GUI.md).
+
 ## Results: what goes in git and what does not
 
 | Goes in git | Stays out of git |

@@ -18,6 +18,7 @@ export default function VulcanBenchHome() {
           <Link href="/reports" className="inline-flex h-12 items-center rounded-full border border-white/20 px-8 text-sm hover:bg-white/5">Reports</Link>
           <Link href="/tasks" className="inline-flex h-12 items-center rounded-full border border-white/20 px-8 text-sm hover:bg-white/5">Tasks</Link>
           <Link href="/submit" className="inline-flex h-12 items-center rounded-full border border-white/20 px-8 text-sm hover:bg-white/5">Submit a task</Link>
+          <Link href="/runs" className="inline-flex h-12 items-center rounded-full border border-emerald-500/40 px-8 text-sm text-emerald-300 hover:bg-emerald-500/10">Runs</Link>
           <a href={`https://github.com/${REPO}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center rounded-full border border-white/20 px-8 text-sm hover:bg-white/5">GitHub</a>
         </div>
         <div className="mt-16 text-xs text-zinc-500">

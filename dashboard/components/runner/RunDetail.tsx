@@ -16,6 +16,7 @@ import {
 } from "@/lib/runner";
 import { FirstCheckBadge, StatusBadge } from "./Badges";
 import { LogTail, type LogChoice } from "./LogTail";
+import { StopButton } from "./QueuePanel";
 import { RunnerUnavailable } from "./RunnerUnavailable";
 import { usePolling } from "./usePolling";
 
@@ -171,7 +172,17 @@ export function RunDetail({ id }: { id: string }) {
         <h1 className="text-3xl font-semibold tracking-tight font-mono">{run.name}</h1>
         <StatusBadge status={run.status} />
         <FirstCheckBadge check={run.first_check} />
+        {run.job && (
+          <StopButton job={{ id: run.job.id as number, status: run.status, name: run.name }} label="Stop run" />
+        )}
       </div>
+      {run.job && (
+        <div className="mt-1 text-xs text-zinc-500">
+          job {String(run.job.id)}{run.job.phase === "prepare" ? ", preparing the worktree" : ""}
+          {run.job.stop_requested_at ? `, stop requested ${fmtTime(run.job.stop_requested_at as string)}` : ""}
+          {run.job.exit_code !== null && run.job.exit_code !== undefined ? `, exit code ${String(run.job.exit_code)}` : ""}
+        </div>
+      )}
       {run.notes.length > 0 && (
         <ul className="mt-2 text-xs text-amber-300 list-disc pl-4">
           {run.notes.map((n) => <li key={n}>{n}</li>)}

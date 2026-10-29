@@ -13,7 +13,8 @@ export default function RunsPage() {
         </div>
         <p className="text-sm text-zinc-400 max-w-3xl">
           Every gate job and harness run under the configured roots, running or finished, whether
-          the GUI launched it or not. Reads only: nothing on this page starts or stops anything.
+          the GUI launched it or not. Runs the GUI owns can be stopped here; new runs start from the
+          Launch page only.
         </p>
         <RunsTable />
       </div>

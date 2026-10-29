@@ -119,3 +119,56 @@ def descendants(pid: int, procs: list[Proc]) -> list[Proc]:
             out.append(child)
             stack.append(child.pid)
     return out
+
+
+# ------------------------------------------------------------ identity --
+# The supervisor records (pid, lstart, boot time, an argv token) when it
+# starts a child and checks all four when it re-adopts the job after a
+# backend restart, so a recycled pid is never mistaken for the run.
+
+
+def boot_time() -> str | None:
+    """A string that changes on every reboot (macOS kern.boottime or Linux btime)."""
+    try:
+        proc = subprocess.run(
+            ["sysctl", "-n", "kern.boottime"],
+            capture_output=True,
+            text=True,
+            timeout=_TIMEOUT_S,
+            check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            m = re.search(r"sec\s*=\s*(\d+)", proc.stdout)
+            return m.group(1) if m else proc.stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    try:
+        with open("/proc/stat", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("btime "):
+                    return line.split()[1]
+    except OSError:
+        pass
+    return None
+
+
+def find_pid(pid: int, procs: list[Proc] | None = None) -> Proc | None:
+    for p in procs if procs is not None else list_processes():
+        if p.pid == pid:
+            return p
+    return None
+
+
+def same_process(
+    pid: int,
+    lstart: str | None,
+    token: str | None,
+    procs: list[Proc] | None = None,
+) -> bool:
+    """True when ``pid`` is alive, not a zombie, started at ``lstart`` and runs ``token``."""
+    p = find_pid(pid, procs)
+    if p is None or p.zombie:
+        return False
+    if lstart and p.lstart != re.sub(r"\s+", " ", lstart.strip()):
+        return False
+    return not token or token in p.command

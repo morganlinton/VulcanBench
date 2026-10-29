@@ -2,6 +2,8 @@
 # Frontier v5 admission gate runner (docs/frontier-v5/GATE-LOG.md).
 #
 # usage: scripts/frontier-v5/run_gate.sh <astra|fable|opus> <task> [<task> ...]
+#        scripts/frontier-v5/run_gate.sh --refs
+#        GATE_PREFLIGHT_ONLY=1 scripts/frontier-v5/run_gate.sh <ref> [<task>]
 #
 # Runs one reference model on each named task (tasks/frontier-v5/<task>)
 # through the real `harbor run`, three attempts per task, per the protocol in
@@ -27,6 +29,21 @@
 # model-id, usage-credit or usage-limit failure stops the whole run; such
 # trials are not gate results. Move their job directory aside (INFRA-*).
 #
+# Stopping: SIGINT or SIGTERM to this script stops the run cleanly. Harbor
+# is started as a direct child with SIGINT at its default disposition (a
+# background list in bash 3.2 ignores SIGINT, which is why the early exit
+# used to leave harbor running, docs/DECISIONS.md 2026-10-29), so one SIGINT
+# makes harbor cancel its trial and run `docker compose down`; the script
+# waits up to 90 s, escalates to SIGTERM then SIGKILL, and sweeps the task's
+# sandbox containers either way. Exit codes: 0 done, 1 infrastructure
+# failure, 2 refused before harbor started, 130 stopped on a signal.
+#
+# Status file: $GATE_OUT/<job>.status.json is rewritten atomically at every
+# phase change (preflight, running, stopping, done, infra_failed, stopped)
+# with the pids, solves, harbor's exit code and the stop reason, so a
+# watcher (the local run GUI, backend/runner) never has to infer state from
+# harbor's result.json, which has no finished_at on a cancelled job.
+#
 # Authentication (never read or printed by this script):
 #   astra  the ChatGPT login in ~/.codex/auth.json (`codex login`); Harbor
 #          injects it because CODEX_FORCE_AUTH_JSON=1 is set in its own
@@ -42,6 +59,15 @@
 #          refuses to start above GATE_USAGE_MAX (default 0.85) unless
 #          GATE_USAGE_OVERRIDE=1 (the 2026-10-24 black Fable run had to be
 #          stopped by hand at 94% of the weekly window).
+#          GATE_PREFLIGHT_ONLY=1 runs just that check and prints one JSON
+#          line (model, status, max_utilization, windows, would_start);
+#          exit 0 if a run would start, 2 if it would be refused.
+#
+# GATE_POLL_S (default 60) is how often the monitor loop looks for solves and
+# infrastructure failures; the script's own tests set it low.
+#
+# --refs prints one JSON line per reference (name, agent, model, version)
+# and exits, so a launcher never has to parse this file.
 #
 # Never pass flag values with --ae: Harbor treats --ae values as secrets and
 # scrubs them from every file it writes (a value of 1 replaced every "1" in
@@ -55,8 +81,15 @@
 # plus one summary line per trial on stdout. Record results in GATE-LOG.md
 # after diff-reviewing every solve.
 set -u
-ref="${1:?usage: run_gate.sh <astra|fable> <task> [<task> ...]}"; shift
-[ $# -gt 0 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
+if [ "${1:-}" = --refs ]; then
+  echo '{"name": "astra", "agent": "codex", "model": "gpt-6-astra", "version": "0.159.0"}'
+  echo '{"name": "fable", "agent": "claude-code", "model": "claude-fable-5-1", "version": "2.1.302"}'
+  echo '{"name": "opus", "agent": "claude-code", "model": "claude-opus-5-5", "version": "2.1.302"}'
+  exit 0
+fi
+preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
+ref="${1:?usage: run_gate.sh <astra|fable|opus> <task> [<task> ...]}"; shift
+[ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
 # Outside the repo by default: logs/ is not git-ignored here, and gate
@@ -86,9 +119,45 @@ esac
 # message; kept narrow so ordinary output (code the agent reads) never matches.
 INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit'
 
+# Per-task state the helpers below read; set in the task loop.
+job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
+stop_flag=""; spid=""
+
+write_status() { # phase [exit_code] [stop_reason] -> atomic rewrite of $status_file
+  [ -n "$status_file" ] || return 0
+  python3 - "$status_file" "$1" "${2:-}" "${3:-}" "$job" "$t" "$ref" "$agent" "$model" \
+    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" <<'PY'
+import glob, json, os, sys, time
+(path, phase, code, reason, job, task, ref, agent, model,
+ pid, hpid, started, repo, job_dir) = sys.argv[1:15]
+solves = 0
+for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
+    try:
+        solves += json.load(open(p)).get("reward") == 1
+    except Exception:
+        pass
+d = {
+    "job": job, "task": task, "ref": ref, "agent": agent, "model": model,
+    "effort": "medium", "pid": int(pid), "harbor_pid": int(hpid) if hpid else None,
+    "phase": phase, "solves": solves, "started_at": started,
+    "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    "exit_code": int(code) if code else None, "stop_reason": reason or None,
+    "repo": repo or None, "job_dir": job_dir,
+}
+tmp = path + ".tmp"
+with open(tmp, "w") as fh:
+    json.dump(d, fh, indent=1)
+os.replace(tmp, path)
+PY
+}
+
 usage_preflight() { # claude-code refs: one one-turn call reads the subscription windows; refuse above GATE_USAGE_MAX
-  local max="${GATE_USAGE_MAX:-0.85}" out rl_status rl_util
-  command -v claude >/dev/null || { echo "run_gate: no claude CLI on PATH, skipping the usage preflight" >&2; return 0; }
+  local max="${GATE_USAGE_MAX:-0.85}" out rl_status rl_util verdict
+  if ! command -v claude >/dev/null; then
+    echo "run_gate: no claude CLI on PATH, skipping the usage preflight" >&2
+    [ "$preflight_only" = 1 ] && { printf '{"model": "%s", "status": "unknown", "would_start": true, "note": "no claude CLI on PATH"}\n' "$model"; exit 0; }
+    return 0
+  fi
   out=$( ( set -a; . "$envf"; set +a; claude -p --model "$model" --output-format stream-json --verbose --max-turns 1 'Reply with the single word ok.' 2>/dev/null ) \
     | grep '"rate_limit_event"' | tail -1 | python3 -c '
 import json, sys
@@ -97,14 +166,42 @@ if not line: sys.exit(0)
 d = json.loads(line)["rate_limit_info"]; w = d.get("unifiedWindows") or {}
 m = max([v.get("utilization") or 0 for v in w.values()] or [0])
 print("%s %.2f %s" % (d.get("status"), m, " ".join("%s=%.2f" % (k, v.get("utilization") or 0) for k, v in w.items())))' )
-  [ -n "$out" ] || { echo "run_gate: usage preflight saw no rate-limit event, continuing" >&2; return 0; }
-  echo "=== usage preflight $model: $out"
+  if [ -z "$out" ]; then
+    echo "run_gate: usage preflight saw no rate-limit event, continuing" >&2
+    [ "$preflight_only" = 1 ] && { printf '{"model": "%s", "status": "unknown", "would_start": true, "note": "no rate-limit event in the probe"}\n' "$model"; exit 0; }
+    return 0
+  fi
   rl_status=${out%% *}; rl_util=$(printf '%s' "$out" | awk '{print $2}')
+  verdict=start
   if [ "${GATE_USAGE_OVERRIDE:-0}" != 1 ] && { [ "$rl_status" != allowed ] || awk -v u="$rl_util" -v m="$max" 'BEGIN{exit !(u > m)}'; }; then
+    verdict=refuse
+  fi
+  if [ "$preflight_only" = 1 ]; then
+    python3 -c '
+import json, sys
+words = sys.argv[1].split()
+windows = {}
+for w in words[2:]:
+    k, _, v = w.partition("=")
+    windows[k] = float(v)
+print(json.dumps({"model": sys.argv[2], "status": words[0], "max_utilization": float(words[1]),
+                  "windows": windows, "max_allowed": float(sys.argv[3]),
+                  "would_start": sys.argv[4] == "start"}))' "$out" "$model" "$max" "$verdict"
+    [ "$verdict" = start ] && exit 0 || exit 2
+  fi
+  echo "=== usage preflight $model: $out"
+  if [ "$verdict" = refuse ]; then
     echo "!!! usage window at $rl_util (status $rl_status) is above GATE_USAGE_MAX=$max; not starting. Set GATE_USAGE_OVERRIDE=1 to run anyway." >&2
+    write_status infra_failed 2 usage
     exit 2
   fi
 }
+
+if [ "$preflight_only" = 1 ]; then
+  if [ "$agent" = claude-code ]; then usage_preflight; fi
+  printf '{"model": "%s", "status": "not_applicable", "would_start": true, "note": "no usage preflight for %s"}\n' "$model" "$agent"
+  exit 0
+fi
 
 solves() { # job dir -> number of reward-1 trials
   python3 - "$1" <<'PY'
@@ -137,6 +234,38 @@ infra_hit() { # job dir -> prints the first trial with an infrastructure failure
   done
 }
 
+stop_harbor() { # SIGINT harbor (its cancel path runs `docker compose down`), escalate, reap, sweep
+  local i
+  trap '' INT TERM
+  [ -n "$hpid" ] || return 0
+  kill -INT "$hpid" 2>/dev/null
+  i=0; while [ "$i" -lt 90 ] && kill -0 "$hpid" 2>/dev/null; do sleep 1; i=$((i + 1)); done
+  if kill -0 "$hpid" 2>/dev/null; then
+    echo "!!! $t: harbor did not stop within 90 s of SIGINT; sending SIGTERM"
+    kill -TERM "$hpid" 2>/dev/null
+    i=0; while [ "$i" -lt 15 ] && kill -0 "$hpid" 2>/dev/null; do sleep 1; i=$((i + 1)); done
+  fi
+  kill -0 "$hpid" 2>/dev/null && { echo "!!! $t: harbor did not stop; sending SIGKILL"; kill -KILL "$hpid" 2>/dev/null; }
+  wait "$hpid" 2>/dev/null; hcode=$?
+  stop_sandboxes "$t"
+}
+
+print_trials() { # job dir -> one summary line per trial
+  local tr
+  for tr in "$1"/*__*; do
+    [ -d "$tr" ] || continue
+    echo "  $(basename "$tr"): $(cat "$tr/verifier/reward.json" 2>/dev/null || echo 'stopped, no reward')"
+  done
+}
+
+on_signal() { # record the signal; the monitor loop acts on it after its current step
+  stop_flag=$1
+  [ -n "$spid" ] && kill "$spid" 2>/dev/null
+  return 0
+}
+trap 'on_signal INT' INT
+trap 'on_signal TERM' TERM
+
 for t in "$@"; do
   task="$here/tasks/frontier-v5/$t"
   [ -f "$task/task.toml" ] || { echo "run_gate: no task $t" >&2; exit 2; }
@@ -145,37 +274,62 @@ for t in "$@"; do
   case "${GATE_CONCURRENCY:-}" in "") ;; 1|2) n=$GATE_CONCURRENCY ;; *) echo "run_gate: GATE_CONCURRENCY must be 1 or 2" >&2; exit 2 ;; esac
   job="$ref-$t$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
+  status_file="$OUT/$job.status.json"; hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  write_status preflight
   [ "$agent" = claude-code ] && usage_preflight
+  if [ -n "$stop_flag" ]; then
+    echo "!!! $t: stop requested (SIG$stop_flag) before harbor started"
+    write_status stopped 130 "signal-$stop_flag"; exit 130
+  fi
   echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
-  (cd "$here" && env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
+  # A background list runs with SIGINT ignored (bash 3.2 has no `trap - INT`
+  # that survives the fork), so harbor is exec'd through a python one-liner
+  # that restores the default disposition. $! is then harbor's own pid.
+  (cd "$here" && exec python3 -c 'import os, signal, sys
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+os.execvp(sys.argv[1], sys.argv[1:])' \
+     env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
      --ak version="$version" -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
      -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!
+  write_status running
   stopped=""
   while kill -0 "$hpid" 2>/dev/null; do
-    sleep 60
+    if [ -z "$stop_flag" ]; then
+      sleep "${GATE_POLL_S:-60}" & spid=$!
+      wait "$spid" 2>/dev/null; kill "$spid" 2>/dev/null; spid=""
+    fi
+    if [ -n "$stop_flag" ]; then
+      echo "!!! $t: stop requested (SIG$stop_flag); stopping harbor and the sandboxes"
+      write_status stopping "" "signal-$stop_flag"
+      stop_harbor
+      print_trials "$OUT/jobs/$job"
+      write_status stopped "$hcode" "signal-$stop_flag"
+      exit 130
+    fi
     bad=$(infra_hit "$OUT/jobs/$job")
     if [ -n "$bad" ]; then
       echo "!!! $t: infrastructure failure in $bad (matches: $INFRA_RE); stopping the run"
-      kill -INT "$hpid" 2>/dev/null; sleep 20; kill "$hpid" 2>/dev/null; wait "$hpid" 2>/dev/null
-      stop_sandboxes "$t"
+      write_status stopping "" "infra:$bad"
+      stop_harbor
+      write_status infra_failed "$hcode" "infra:$bad"
       echo "!!! move $OUT/jobs/$job aside as INFRA-..., fix the cause, and rerun"; exit 1
     fi
     if [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
       echo "--- $t: two solves, early reject; stopping the remaining attempt"
-      kill -INT "$hpid" 2>/dev/null; sleep 20; kill "$hpid" 2>/dev/null; stopped=1
+      write_status stopping "" early-reject
+      stop_harbor; stopped=1
+      trap 'on_signal INT' INT; trap 'on_signal TERM' TERM
     fi
   done
-  wait "$hpid" 2>/dev/null
+  if [ -z "$hcode" ]; then wait "$hpid" 2>/dev/null; hcode=$?; fi
   stop_sandboxes "$t"
   if [ -z "$stopped" ]; then
     bad=$(infra_hit "$OUT/jobs/$job")
-    [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; exit 1; }
+    [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; write_status infra_failed "$hcode" "infra:$bad"; exit 1; }
   fi
-  for tr in "$OUT/jobs/$job"/*__*; do
-    [ -d "$tr" ] || continue
-    echo "  $(basename "$tr"): $(cat "$tr/verifier/reward.json" 2>/dev/null || echo 'stopped, no reward')"
-  done
+  print_trials "$OUT/jobs/$job"
   echo "--- $t: $(solves "$OUT/jobs/$job") solve(s) $(date '+%F %H:%M:%S')"
+  write_status done "$hcode" "${stopped:+early-reject}"
 done
 echo "=== DONE $(date '+%F %H:%M:%S')"

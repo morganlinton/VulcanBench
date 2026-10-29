@@ -73,6 +73,7 @@ export interface RunBase {
   first_check: FirstCheck | null;
   infra_retries: number | null;
   notes: string[];
+  job: Record<string, unknown> | null;
 }
 
 export interface RunRow extends RunBase {
@@ -231,4 +232,220 @@ export function rewardValue(reward: Reward | null): number | null {
   const f = reward.functional;
   if (typeof f === "number") return f >= 1 ? 1 : 0;
   return null;
+}
+
+// ----------------------------------------------------------------- launch --
+
+export interface JobSpecSummary {
+  argv: string[] | null;
+  cwd: string | null;
+  env: Record<string, string> | null;
+  prep_argv: string[] | null;
+  needs_prep: boolean | null;
+  tag: string | null;
+  worktree: string | null;
+  estimate: GateEstimate | null;
+  warnings: string[] | null;
+}
+
+export interface JobSummary {
+  id: number;
+  kind: string;
+  name: string;
+  status: string;
+  spec: JobSpecSummary;
+  plan_hash: string | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  phase: string | null;
+  pid: number | null;
+  pgid: number | null;
+  exit_code: number | null;
+  stop_requested_at: string | null;
+  stop_reason: string | null;
+  stop_signalled_at: string | null;
+  stop_escalated_at: string | null;
+  console_log: string | null;
+  notes: string[];
+}
+
+export interface SupervisorInfo {
+  status: "active" | "inactive" | "disabled" | "stopped";
+  detail: string | null;
+  last_tick?: string | null;
+  last_error?: string | null;
+  hold_reason?: string | null;
+  children?: number[];
+}
+
+export interface QueueData {
+  jobs: JobSummary[];
+  supervisor: SupervisorInfo;
+  outside: { pid: number; command: string }[];
+}
+
+export interface GateRef {
+  name: string;
+  agent: string;
+  model: string;
+  version: string;
+}
+
+export interface WorktreeInfo {
+  tag: string;
+  path: string;
+  exists: boolean;
+  tag_commit: string | null;
+  head: string | null;
+  at_tag: boolean;
+  dirty: string[];
+  script: { present: boolean; status_file: boolean; preflight_only: boolean; refs: boolean };
+  problems: string[];
+}
+
+export interface GateTask {
+  name: string;
+  language: string | null;
+  default_concurrency: number;
+}
+
+export interface LaunchOptions {
+  kinds: string[];
+  refs: GateRef[];
+  tags: string[];
+  tag: string | null;
+  worktree: WorktreeInfo | null;
+  tasks: GateTask[];
+  attempts: number[];
+  concurrency: number[];
+  gate_effort: string;
+  credentials: { codex_auth: boolean; claude_gate_env: boolean };
+  gate_out: string;
+  run_worktrees: string;
+}
+
+export interface GateEstimate {
+  attempts: number;
+  concurrency: number;
+  task_timeout_s: number;
+  max_wall_s: number;
+  billing: string;
+  early_exit: string;
+  infra_retries: string;
+}
+
+export interface UsageCheck {
+  status: string;
+  would_start: boolean;
+  max_utilization?: number;
+  windows?: Record<string, number>;
+  max_allowed?: number;
+  note?: string;
+  exit_code?: number;
+  model?: string;
+}
+
+export interface GatePlanSpec {
+  kind: "gate";
+  job_name: string;
+  ref: string;
+  agent: string;
+  model: string;
+  harness_version: string;
+  effort: string;
+  task: string;
+  task_language: string | null;
+  tag: string;
+  tag_commit: string | null;
+  worktree: string;
+  needs_prep: boolean;
+  attempts: number;
+  concurrency: number;
+  concurrency_overridden: boolean;
+  suffix: string;
+  argv: string[];
+  cwd: string;
+  env: Record<string, string>;
+  env_passthrough: string[];
+  prep_argv: string[] | null;
+  prep_env: Record<string, string> | null;
+  job_dir: string;
+  status_file: string;
+  script_features: WorktreeInfo["script"];
+  estimate: GateEstimate;
+  usage_check_required: boolean;
+  warnings: string[];
+  hash: string;
+}
+
+export interface LaunchPlan {
+  id: string;
+  hash: string;
+  kind: string;
+  spec: GatePlanSpec;
+  created_at: string;
+  expires_at: string;
+  confirmed_at: string | null;
+  job_id: number | null;
+  usage_check: UsageCheck | null;
+  usage_checked_at: string | null;
+  live_reason: string | null;
+  usage_check_ok: boolean;
+}
+
+async function runnerSend<T>(method: string, path: string, body?: unknown): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method,
+      cache: "no-store",
+      headers: body === undefined ? undefined : { "content-type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new RunnerError(0, `backend unreachable at ${API_BASE}`);
+  }
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = (await res.json()) as { detail?: unknown };
+      if (typeof data.detail === "string") detail = data.detail;
+      else if (data.detail) detail = JSON.stringify(data.detail);
+    } catch {
+      // keep statusText
+    }
+    throw new RunnerError(res.status, detail);
+  }
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+export function runnerPost<T>(path: string, body?: unknown): Promise<T> {
+  return runnerSend<T>("POST", path, body);
+}
+
+export function runnerDelete(path: string): Promise<void> {
+  return runnerSend<void>("DELETE", path);
+}
+
+export function shellQuote(arg: string): string {
+  return /^[A-Za-z0-9_./:=@%+,-]+$/.test(arg) ? arg : `'${arg.replace(/'/g, `'\\''`)}'`;
+}
+
+export function commandLine(env: Record<string, string> | null | undefined, argv: string[]): string {
+  const prefix = Object.entries(env ?? {}).map(([k, v]) => `${k}=${shellQuote(v)}`);
+  return [...prefix, ...argv.map(shellQuote)].join(" ");
+}
+
+export function fmtDuration(s: number): string {
+  const h = Math.floor(s / 3600);
+  const m = Math.round((s % 3600) / 60);
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
+export function fmtPercent(v: number | undefined): string {
+  if (v === undefined || !Number.isFinite(v)) return "n/a";
+  return `${Math.round(v * 100)}%`;
 }

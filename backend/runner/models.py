@@ -74,6 +74,7 @@ class RunView:
     first_check: FirstCheck | None = None
     infra_retries: int | None = None
     notes: list[str] = field(default_factory=list)
+    job: dict[str, Any] | None = None  # the queue's record when the GUI owns this run
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -7,6 +7,8 @@ exactly the tree it needs under ``tmp_path``.
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -279,3 +281,57 @@ def harness_run(
             )
         )
     return d
+
+
+# --------------------------------------------------------------- launches --
+
+REPO = Path(__file__).resolve().parents[1]
+GATE_SCRIPT_SRC = REPO / "scripts" / "frontier-v5" / "run_gate.sh"
+WORKTREE_SCRIPT_SRC = REPO / "scripts" / "run_worktree.sh"
+
+
+def git(cwd: Path, *args: str) -> str:
+    env = {
+        "PATH": "/usr/bin:/bin:/usr/local/bin",
+        "HOME": str(cwd),
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@example.com",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@example.com",
+    }
+    out = subprocess.run(
+        ["git", "-C", str(cwd), *args], capture_output=True, text=True, check=True, env=env
+    )
+    return out.stdout.strip()
+
+
+def fake_repo(
+    tmp_path: Path, *, tag: str = "bench/2026-10-29-test", tasks: tuple[str, ...] = ("demo-task",)
+) -> Path:
+    """A throwaway repository with run_gate.sh, run_worktree.sh and Frontier v5 tasks at ``tag``."""
+    repo = tmp_path / "repo"
+    (repo / "scripts" / "frontier-v5").mkdir(parents=True)
+    shutil.copy(GATE_SCRIPT_SRC, repo / "scripts" / "frontier-v5" / "run_gate.sh")
+    shutil.copy(WORKTREE_SCRIPT_SRC, repo / "scripts" / "run_worktree.sh")
+    for name in tasks:
+        d = repo / "tasks" / "frontier-v5" / name
+        d.mkdir(parents=True)
+        (d / "task.toml").write_text('[metadata]\nvulcanbench_language = "python"\n')
+    (repo / "harness").mkdir()
+    (repo / "harness" / "__init__.py").write_text("")
+    (repo / "vulcanbench.toml").write_text('[effort]\nblocked = ["ultra"]\n')
+    git(repo, "init", "-q", "-b", "main")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "init")
+    git(repo, "tag", tag)
+    return repo
+
+
+def fake_worktree(repo: Path, cfg: RunnerConfig, tag: str = "bench/2026-10-29-test") -> Path:
+    """What run_worktree.sh would leave behind: a detached checkout at the tag with a .venv marker."""
+    wt = cfg.run_worktrees / tag.replace("/", "-")
+    wt.parent.mkdir(parents=True, exist_ok=True)
+    git(repo, "worktree", "add", "--detach", str(wt), tag)
+    (wt / ".venv" / "bin").mkdir(parents=True)
+    (wt / ".venv" / "bin" / "python").write_text("")
+    return wt

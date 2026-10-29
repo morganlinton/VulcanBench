@@ -9,11 +9,14 @@ import pytest
 pytest.importorskip("fastapi")
 pytest.importorskip("httpx")
 
+import json
+
 from fastapi.testclient import TestClient
 
 import backend.app as appmod
-from backend.runner import docker_ps, procs
-from tests.runner_fixtures import gate_job, make_config
+from backend.runner import docker_ps, launch, procs
+from backend.runner import state as state_mod
+from tests.runner_fixtures import fake_repo, fake_worktree, gate_job, make_config
 
 
 @pytest.fixture
@@ -78,3 +81,188 @@ def test_log_tail_is_allowlisted_and_redacted(runner_env: Path) -> None:
         assert r.status_code == 404, bad
     r = c.get("/api/runner/runs/gate:opus-t/log", params={"source": "nope.log"})
     assert r.status_code == 404
+
+
+# ------------------------------------------------------------- launching --
+
+
+@pytest.fixture
+def launch_env(runner_env: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Path]:
+    cfg = make_config(runner_env)
+    repo = fake_repo(runner_env)
+    monkeypatch.setattr(launch, "REPO_ROOT", repo)
+    launch._refs_cache.clear()
+    wt = fake_worktree(repo, cfg)
+    return {"repo": repo, "worktree": wt}
+
+
+def _plan(c: TestClient, **over: object) -> dict[str, object]:
+    body: dict[str, object] = {
+        "kind": "gate",
+        "ref": "astra",
+        "task": "demo-task",
+        "tag": "bench/2026-10-29-test",
+    }
+    body.update(over)
+    r = c.post("/api/runner/plans", json=body)
+    assert r.status_code == 201, r.text
+    data: dict[str, object] = r.json()
+    return data
+
+
+def test_options_and_plan_shape(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    opts = c.get("/api/runner/options").json()
+    assert opts["tags"] == ["bench/2026-10-29-test"] and opts["worktree"]["exists"] is True
+    assert [t["name"] for t in opts["tasks"]] == ["demo-task"]
+    plan = _plan(c, attempts=2)
+    spec = plan["spec"]
+    assert isinstance(spec, dict)
+    assert spec["argv"][0] == "bash" and spec["argv"][2:] == ["astra", "demo-task"]
+    assert spec["env"] == {
+        "GATE_OUT": str(make_config(launch_env["repo"].parent).gate_out),
+        "GATE_ATTEMPTS": "2",
+    }
+    assert plan["live_reason"] is None and plan["usage_check_ok"] is True
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in r_text(plan)
+
+
+def r_text(obj: object) -> str:
+    return json.dumps(obj)
+
+
+def test_plan_refusals_are_http_errors(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    r = c.post(
+        "/api/runner/plans",
+        json={"kind": "gate", "ref": "ultra", "task": "demo-task", "tag": "bench/2026-10-29-test"},
+    )
+    assert r.status_code == 422
+    r = c.post(
+        "/api/runner/plans",
+        json={"kind": "suite", "ref": "astra", "task": "demo-task", "tag": "bench/2026-10-29-test"},
+    )
+    assert r.status_code == 422
+    r = c.post(
+        "/api/runner/plans",
+        json={
+            "kind": "gate",
+            "ref": "astra",
+            "task": "demo-task",
+            "tag": "bench/2026-10-29-test",
+            "attempts": 9,
+        },
+    )
+    assert r.status_code == 422
+    assert c.get("/api/runner/plans/nope").status_code == 404
+
+
+def test_confirm_needs_the_hash_and_a_live_plan(
+    launch_env: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    c = _local()
+    plan = _plan(c)
+    pid = str(plan["id"])
+    assert c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": "0" * 16}).status_code == 409
+    r = c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]})
+    assert r.status_code == 201, r.text
+    job = r.json()
+    assert (
+        job["status"] == "queued"
+        and job["name"] == "astra-demo-task"
+        and job["spec"]["argv"][2:] == ["astra", "demo-task"]
+    )
+    assert (
+        c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]}).status_code == 409
+    )
+    # The queue and the Runs page both show it; nothing started (no supervisor in tests).
+    q = c.get("/api/runner/queue").json()
+    assert [j["id"] for j in q["jobs"]] == [job["id"]] and q["supervisor"]["status"] in {
+        "disabled",
+        "stopped",
+        "inactive",
+    }
+    runs = c.get("/api/runner/runs").json()
+    row = next(r for r in runs if r["id"] == f"job:{job['id']}")
+    assert (
+        row["status"] == "queued"
+        and row["owned"] is True
+        and row["source_tag"] == "bench/2026-10-29-test"
+    )
+    full = c.get(f"/api/runner/runs/job:{job['id']}").json()
+    assert full["job"]["id"] == job["id"] and full["trials"] == []
+    # An expired plan cannot be confirmed.
+    monkeypatch.setattr(state_mod, "PLAN_TTL_S", 0)
+    stale = _plan(c, suffix="-b")
+    r = c.post(f"/api/runner/plans/{stale['id']}/confirm", json={"hash": stale["hash"]})
+    assert r.status_code == 409 and "expired" in r.json()["detail"]
+
+
+def test_claude_refs_need_a_fresh_usage_check(
+    launch_env: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    c = _local()
+    plan = _plan(c, ref="opus")
+    pid = str(plan["id"])
+    assert plan["usage_check_ok"] is False
+    r = c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]})
+    assert r.status_code == 409 and "usage check" in r.json()["detail"]
+    calls: list[str] = []
+
+    def fake_preflight(_cfg: object, spec: dict[str, object], **_: object) -> dict[str, object]:
+        calls.append(str(spec["ref"]))
+        return {"status": "allowed", "max_utilization": 0.3, "would_start": True}
+
+    monkeypatch.setattr(launch, "run_usage_preflight", fake_preflight)
+    checked = c.post(f"/api/runner/plans/{pid}/usage").json()
+    assert (
+        calls == ["opus"]
+        and checked["usage_check"]["would_start"] is True
+        and checked["usage_check_ok"] is True
+    )
+    r = c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]})
+    assert r.status_code == 201, r.text
+    # A refused pre-flight blocks confirm.
+    monkeypatch.setattr(
+        launch,
+        "run_usage_preflight",
+        lambda *_a, **_k: {"status": "allowed", "max_utilization": 0.9, "would_start": False},
+    )
+    plan2 = _plan(c, ref="opus", suffix="-b")
+    c.post(f"/api/runner/plans/{plan2['id']}/usage")
+    assert (
+        c.post(f"/api/runner/plans/{plan2['id']}/confirm", json={"hash": plan2["hash"]}).status_code
+        == 409
+    )
+
+
+def test_confirm_revalidates_the_worktree(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    plan = _plan(c)
+    (launch_env["worktree"] / "tasks" / "frontier-v5" / "demo-task" / "task.toml").write_text(
+        "changed\n"
+    )
+    r = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]})
+    assert r.status_code == 409 and "uncommitted changes" in r.json()["detail"]
+
+
+def test_queue_stop_and_remove(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    a = c.post(
+        f"/api/runner/plans/{_plan(c)['id']}/confirm", json={"hash": _plan(c, suffix="-x")["hash"]}
+    )
+    assert a.status_code == 409  # hash of a different plan
+    plan = _plan(c)
+    job = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]}).json()
+    jid = job["id"]
+    got = c.get(f"/api/runner/jobs/{jid}").json()
+    assert got["status"] == "queued" and got["console"] == ""
+    stopped = c.post(f"/api/runner/jobs/{jid}/stop", json={"reason": "changed my mind"}).json()
+    assert stopped["status"] == "stopped" and stopped["stop_reason"] == "changed my mind"
+    assert c.post(f"/api/runner/jobs/{jid}/stop").status_code == 409
+    assert c.delete(f"/api/runner/jobs/{jid}").status_code == 409
+    plan2 = _plan(c, suffix="-again")
+    job2 = c.post(f"/api/runner/plans/{plan2['id']}/confirm", json={"hash": plan2["hash"]}).json()
+    assert c.delete(f"/api/runner/jobs/{job2['id']}").status_code == 204
+    assert c.get(f"/api/runner/jobs/{job2['id']}").status_code == 404
+    assert c.get("/api/runner/jobs/999").status_code == 404

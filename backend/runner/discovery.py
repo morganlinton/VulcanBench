@@ -28,9 +28,12 @@ from backend.runner.config import RunnerConfig
 from backend.runner.docker_ps import Container, list_containers
 from backend.runner.models import ContainerView, RunView, TrialView
 from backend.runner.procs import Proc, find_harbor_job, find_vulcanbench_runs, list_processes
+from backend.runner.state import Job
 
 GATE_PREFIX = "gate:"
 HARNESS_PREFIX = "harness:"
+JOB_PREFIX = "job:"
+CONSOLE_LOG = "console.log"
 
 # Files the log endpoint may serve, relative to a job, trial or run dir.
 # Nothing under agent/sessions or agent/setup is ever listed or served.
@@ -159,12 +162,18 @@ class Discovery:
         containers: list[Container] | None = None,
         now: datetime | None = None,
         source_info: SourceInfo = git_source_info,
+        jobs: list[Job] | None = None,
     ) -> None:
         self.cfg = cfg
         self.procs = procs if procs is not None else list_processes()
         self.containers = containers if containers is not None else list_containers()
         self.now = now or datetime.now(UTC)
         self.source_info = source_info
+        # The queue's records, newest last so the latest job for a name wins.
+        self.jobs = list(jobs or [])
+        self.jobs_by_name: dict[str, Job] = {}
+        for j in sorted(self.jobs, key=lambda j: j.id):
+            self.jobs_by_name[j.name] = j
 
     # ----------------------------------------------------------------- gate --
 
@@ -253,12 +262,25 @@ class Discovery:
         if first_check is None and trials:
             first_check = trials[-1].first_check
 
+        job = self.jobs_by_name.get(job_name)
+        if job is not None:
+            status = _owned_status(status, job, alive)
+            notes.extend(n for n in job.notes if n not in notes)
+            if job.console_log and Path(job.console_log).is_file():
+                logs.append(CONSOLE_LOG)
+            if not source_tag and job.spec.get("tag"):
+                source_tag = str(job.spec["tag"])
+            if status in {"running", "stopping", "preparing"}:
+                finished = None
+                if started is not None:
+                    elapsed = (self.now - started).total_seconds()
+
         return RunView(
             id=GATE_PREFIX + job_name,
             kind="gate",
             name=job_name,
             status=status,
-            owned=False,
+            owned=job is not None,
             suite_or_task=task,
             model=str(model) if model else None,
             harness=str(harness) if harness else None,
@@ -279,6 +301,56 @@ class Discovery:
             log_sources=logs,
             first_check=first_check,
             notes=notes,
+            job=job_summary(job) if job is not None else None,
+        )
+
+    def owned_without_dir(self) -> list[RunView]:
+        """Queue entries that have no job directory yet (queued, preparing, refused)."""
+        out: list[RunView] = []
+        for job in self.jobs:
+            if job.kind != "gate":
+                continue
+            job_dir = Path(str(job.spec.get("job_dir") or self.cfg.gate_jobs_dir / job.name))
+            if job_dir.is_dir():
+                continue
+            out.append(self.job_view(job))
+        return out
+
+    def job_view(self, job: Job) -> RunView:
+        spec = job.spec
+        started = parse_dt(job.started_at) or parse_dt(job.created_at)
+        finished = parse_dt(job.finished_at)
+        elapsed = None
+        if started and job.status in {"preparing", "running", "stopping"}:
+            elapsed = (self.now - started).total_seconds()
+        elif started and finished:
+            elapsed = (finished - started).total_seconds()
+        logs = [CONSOLE_LOG] if job.console_log and Path(job.console_log).is_file() else []
+        return RunView(
+            id=JOB_PREFIX + str(job.id),
+            kind=str(spec.get("kind") or job.kind),
+            name=job.name,
+            status=job.status,
+            owned=True,
+            suite_or_task=str(spec["task"]) if spec.get("task") else None,
+            model=str(spec["model"]) if spec.get("model") else None,
+            harness=str(spec["agent"]) if spec.get("agent") else None,
+            effort=str(spec["effort"]) if spec.get("effort") else None,
+            source_tag=str(spec["tag"]) if spec.get("tag") else None,
+            source_commit=str(spec["tag_commit"]) if spec.get("tag_commit") else None,
+            source_dir=str(spec["worktree"]) if spec.get("worktree") else None,
+            attempts_done=0,
+            attempts_total=int(spec["attempts"]) if isinstance(spec.get("attempts"), int) else None,
+            solves=None,
+            started_at=iso(started) if job.started_at else None,
+            finished_at=iso(finished),
+            elapsed_s=elapsed,
+            pid=job.pid,
+            path=None,
+            trials=[],
+            log_sources=logs,
+            notes=list(job.notes),
+            job=job_summary(job),
         )
 
     def _gate_status(  # noqa: PLR0911
@@ -545,7 +617,7 @@ class Discovery:
     # ------------------------------------------------------------------ all --
 
     def all_runs(self) -> list[RunView]:
-        runs = self.gate_runs() + self.harness_runs()
+        runs = self.gate_runs() + self.harness_runs() + self.owned_without_dir()
         active = {"external_running", "running", "preparing", "stopping", "queued"}
         runs.sort(
             key=lambda r: (0 if r.status in active else 1, r.started_at or ""),
@@ -560,9 +632,20 @@ class Discovery:
         return head + tail
 
     def get(self, run_id: str) -> RunView | None:  # noqa: PLR0911
+        if run_id.startswith(JOB_PREFIX):
+            rest = run_id[len(JOB_PREFIX) :]
+            if not rest.isdigit():
+                return None
+            job = next((j for j in self.jobs if j.id == int(rest)), None)
+            if job is None:
+                return None
+            job_dir = Path(str(job.spec.get("job_dir") or self.cfg.gate_jobs_dir / job.name))
+            if job_dir.is_dir() and _safe_child(self.cfg.gate_jobs_dir, job_dir):
+                return self.gate_job(job_dir)
+            return self.job_view(job)
         if run_id.startswith(GATE_PREFIX):
-            job = run_id[len(GATE_PREFIX) :]
-            job_dir = self.cfg.gate_jobs_dir / job
+            job_name = run_id[len(GATE_PREFIX) :]
+            job_dir = self.cfg.gate_jobs_dir / job_name
             if not _safe_child(self.cfg.gate_jobs_dir, job_dir) or not job_dir.is_dir():
                 return None
             return self.gate_job(job_dir)
@@ -587,6 +670,12 @@ class Discovery:
         self, run: RunView, source: str, trial: str | None
     ) -> Path | None:
         """Path for a log the page may show, or None if it is not on the allowlist."""
+        if source == CONSOLE_LOG and trial is None and run.job:
+            console = run.job.get("console_log")
+            target = Path(str(console)) if console else None
+            if target is None or not _safe_child(self.cfg.home / "jobs", target):
+                return None
+            return target if target.is_file() else None
         if run.path is None:
             return None
         base = Path(run.path)
@@ -611,6 +700,46 @@ class Discovery:
             return None
         target = base / source
         return target if _safe_child(base, target) and target.is_file() else None
+
+
+def _owned_status(disk_status: str, job: Job, harbor_alive: bool) -> str:
+    """What the Runs page shows for a job the queue owns."""
+    if job.status in {"queued", "preparing", "stopping"}:
+        return job.status
+    if job.status == "running":
+        return "running"
+    if disk_status in {"external_running"} and harbor_alive:
+        # The queue says it ended but harbor is still there: show it, the supervisor sweeps.
+        return "stopping" if job.status == "stopped" else "external_running"
+    if disk_status in {"lost", "unknown", "stopped"} and job.status in {
+        "failed",
+        "infra_failed",
+        "lost",
+        "stopped",
+    }:
+        return job.status
+    return disk_status
+
+
+def job_summary(job: Job) -> dict[str, Any]:
+    d = job.to_dict()
+    d.pop("spec", None)
+    spec = job.spec
+    d["spec"] = {
+        k: spec.get(k)
+        for k in (
+            "argv",
+            "cwd",
+            "env",
+            "prep_argv",
+            "needs_prep",
+            "tag",
+            "worktree",
+            "estimate",
+            "warnings",
+        )
+    }
+    return d
 
 
 def _safe_child(base: Path, target: Path) -> bool:

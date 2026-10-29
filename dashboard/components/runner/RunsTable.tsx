@@ -14,6 +14,7 @@ import {
 import { FirstCheckBadge, RewardDots, StatusBadge } from "./Badges";
 import { usePolling } from "./usePolling";
 import { RunnerUnavailable } from "./RunnerUnavailable";
+import { QueuePanel } from "./QueuePanel";
 
 function SourceCell({ run }: { run: RunRow }) {
   if (!run.source_tag && !run.source_commit) return <span className="text-zinc-600">unknown</span>;
@@ -36,7 +37,7 @@ function Row({ run }: { run: RunRow }) {
       <td className="p-3 align-top"><StatusBadge status={run.status} /></td>
       <td className="p-3 align-top">
         <Link href={runHref(run.id)} className="font-mono text-emerald-400 hover:underline">{run.name}</Link>
-        <div className="text-xs text-zinc-500">{run.kind}{run.owned ? "" : ", external"}</div>
+        <div className="text-xs text-zinc-500">{run.kind}{run.owned ? ", from the GUI" : ", external"}</div>
       </td>
       <td className="p-3 align-top">
         <div className="text-zinc-200">{suite ?? run.suite_or_task ?? "n/a"}</div>
@@ -107,6 +108,7 @@ export function RunsTable() {
         {error && data && <span className="text-amber-300">last refresh failed: {error.message}</span>}
         <span className="text-zinc-600">polls every 4 s</span>
       </div>
+      <QueuePanel />
       <Section title="Active" runs={active} empty="Nothing is running. Runs launched by hand appear here as external once their process is visible." />
       <Section title="Finished" runs={done} empty="No finished runs under the configured roots." />
     </div>

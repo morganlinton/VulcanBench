@@ -176,12 +176,12 @@ function PlanCard({ plan, onPlan, onQueued }: { plan: LaunchPlan; onPlan: (p: La
         <div className={label}>Exactly what runs</div>
         {spec.prep_argv && (
           <pre className="rounded-lg bg-black/40 p-3 text-xs text-zinc-300 overflow-x-auto whitespace-pre-wrap break-all">
-            <span className="text-zinc-500"># 1. prepare the run worktree (no model calls)\n</span>
+            <span className="text-zinc-500">{"# 1. prepare the run worktree (no model calls)\n"}</span>
             {commandLine(spec.prep_env, spec.prep_argv)}
           </pre>
         )}
         <pre className="mt-2 rounded-lg bg-black/40 p-3 text-xs text-zinc-200 overflow-x-auto whitespace-pre-wrap break-all">
-          <span className="text-zinc-500"># {spec.prep_argv ? "2. " : ""}cd {spec.cwd}\n</span>
+          <span className="text-zinc-500">{`# ${spec.prep_argv ? "2. " : ""}cd ${spec.cwd}\n`}</span>
           {commandLine(spec.env, spec.argv)}
         </pre>
         <div className="mt-1 text-xs text-zinc-500">

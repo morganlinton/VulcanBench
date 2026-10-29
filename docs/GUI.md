@@ -89,7 +89,11 @@ job is active and no `harbor run` or `vulcanbench run` launched outside the
 GUI is visible, re-validating the plan right before the child starts. If the
 plan's worktree does not exist yet, the job first runs
 `scripts/run_worktree.sh <tag>` (shown as a separate step in the plan and
-as the **preparing** status), then the gate command.
+as the **preparing** status), then the gate command. The worktree's
+`make setup` output lands in `<worktree>/.venv-setup.log`; when it fails, the
+job's console log shows the tail and the job ends as **failed**. A half-made
+worktree has to be removed by hand (`git worktree remove <dir>`) before the
+same tag can be planned again.
 
 **Stop** on a queue row or a run page persists a stop request. The supervisor
 sends SIGINT to the script; the script's trap cancels harbor (which runs
@@ -142,6 +146,19 @@ atomic `$GATE_OUT/<job>.status.json` with the phase (`preflight`, `running`,
 code and the stop reason, `--refs`, `GATE_PREFLIGHT_ONLY=1`, and
 `GATE_POLL_S` for its tests. Older bench tags carry the older script; the
 plan warns when that is the case, and a stop then signals harbor directly.
+
+## Dry run without spending quota
+
+The whole launch path can be exercised with a stub harbor. Start the backend
+with a scratch `HOME` whose `.local/bin/harbor` is a small script that writes
+the job layout and sleeps until SIGINT (`run_gate.sh` puts `$HOME/.local/bin`
+first on PATH), empty `~/.codex/auth.json` and `claude-gate.env` placeholders
+(they are only checked for existence), and `VULCANBENCH_RUNNER_HOME`,
+`VULCANBENCH_RUNNER_GATE_OUT` and `VULCANBENCH_RUNNER_RUN_WORKTREES` pointing
+at scratch directories; tag the commit under test as a local `bench/...` tag
+and plan a run from it. Do not click **Check usage** in that setup: it would
+call the real `claude` CLI. `tests/test_run_gate_script.py` and
+`tests/test_runner_supervisor.py` do the same with fakes, automatically.
 
 ## Starting it
 

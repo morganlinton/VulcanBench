@@ -7,6 +7,54 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-29: run_gate.sh stops harbor for real; gate runs can be queued from the local GUI
+
+### Decision
+
+Owner, in chat, 2026-10-29. `scripts/frontier-v5/run_gate.sh` starts
+harbor as a direct, interruptible child and traps INT and TERM, so one
+signal to the script (from a terminal or from the local run GUI) cancels
+the running attempt through harbor's own path, removes the task's sandbox
+containers and records the outcome in `$GATE_OUT/<job>.status.json`. The
+GUI (docs/GUI.md) launches gate runs only through this script, from a
+`run_worktree.sh` worktree pinned to a bench tag, one job at a time, after a
+confirm click that shows the exact command; the usage pre-flight runs only
+on an explicit click because it spends one model turn.
+
+### Evidence
+
+- The early exit and the infrastructure stop never reached harbor. In bash
+  3.2 a backgrounded list runs with SIGINT ignored and `$!` is the subshell,
+  not harbor, so `kill -INT "$hpid"` hit a bash that ignored it and the plain
+  `kill` 20 s later removed the subshell while harbor kept running,
+  reparented, until `stop_sandboxes` pulled its containers away. Seen on the
+  live process tree of `opus-javaparser-member-resolution-scope` on
+  2026-10-29 (script 2071, subshell 2126, harbor 2128) and on the Boost.URL
+  early exit, whose third trial ended in a compose `RuntimeError` rather
+  than a cancel.
+- Harbor has no SIGTERM handler; only SIGINT runs its cancel path
+  (`docker compose down`, log copy), which took more than the old 20 s
+  grace in the comrak and Boost.URL stops. The new script waits 90 s before
+  escalating.
+- `tests/test_run_gate_script.py` drives the script with a fake harbor: a
+  SIGINT to the script ends harbor in well under a second, the status file
+  goes `preflight`, `running`, `stopping`, `stopped` with exit code 130, the
+  early reject and the infrastructure guard still fire, and every stdout
+  line the GATE-LOG workflow greps for is unchanged.
+
+### Revisit triggers
+
+- Harbor gains a SIGTERM handler or a cancel command: the python
+  signal-reset wrapper and the 90 s wait can go.
+- A stop that still leaves containers behind: the sweep runs by compose
+  project name, so a harbor release that renames projects needs a new
+  prefix.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh`, `backend/runner/`, the dashboard's Launch
+and Runs pages, `docs/GUI.md`.
+
 ## 2026-10-28: GPT-6.1 Terra is judged by Muse Spark 1.3 and Grok 4.6 (v3.29)
 
 ### Decision

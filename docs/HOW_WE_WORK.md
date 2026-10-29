@@ -297,9 +297,12 @@ workflow are VulcanBench-only for now; port them when those repos need them.
 every gate job and harness run under the configured roots with its bench tag,
 attempts, rewards, containers and a live log tail, plus a first-attempt check
 that flags sessions that never used the requested model or made no tool calls.
-It reads only in this version; launching from it comes later and will go
-through the same `run_worktree.sh` and `run_gate.sh` paths described above.
-See [GUI.md](GUI.md).
+Its Launch page queues Frontier v5 gate runs through the same
+`run_worktree.sh` and `run_gate.sh` paths described above: the worktree must
+be at the bench tag and clean, the exact command is shown before a confirm
+click, the queue runs one job at a time, and a stop goes through the
+script's own trap. Suite and task launches come in the next milestone. See
+[GUI.md](GUI.md).
 
 ## Results: what goes in git and what does not
 

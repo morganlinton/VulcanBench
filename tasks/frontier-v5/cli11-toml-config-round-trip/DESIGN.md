@@ -2,9 +2,10 @@
 
 Status: F5 wave 1 replacement candidate for slot F5-cpp, after
 boosturl-path-compare-normalize was rejected at the gate on 2026-10-28
-(docs/frontier-v5/GATE-LOG.md). Drafted 2026-10-28. Base and held-out
-checks are measured (below); the controls, probes and the Harbor oracle
-are not yet run.
+(docs/frontier-v5/GATE-LOG.md). Drafted and validated 2026-10-28: base 0,
+gold 1, every probe 0, Harbor oracle 1 and nop 0; F5 floors 1 to 8 met,
+floor 8 by route (a), floor 3 only on its source branch (below). Not
+gated.
 
 ## Why this candidate
 
@@ -96,10 +97,94 @@ held-out check and regress at least one guard. If neither does, that is
 recorded and the candidate fails floor 8; no other naive fix is searched
 for.
 
-## Still to do before any gate run
+## Verifier
 
-Controls (floors 1 to 7 and the naive fixes) with `run_controls.py`; the
-verifier (pristine tree with the pin's tests, only `include/CLI` copied
-from the agent, Catch2 JUnit per case, a must-fail sentinel per test
-program, pinned case count); cheating probes; base 0 and gold 1 three
-times; the Harbor oracle and nop paths; the symptoms-only instruction.
+- Separate image, no network. `/pristine` is the pin with the four fixes'
+  `Config_inl.hpp` changes reverse-applied and the pin's full tests, built
+  by `make_base.py` from the clone's own history and checksum-verified
+  (the agent image is built the same way, minus the 17 held-out cases).
+  Neither image carries the gold diff or the held-out tests in a file.
+- Only `include/CLI` is copied from the agent (CLI11 is header-only and
+  the tests include `CLI/...`): a header planted elsewhere in `include/`,
+  such as `catch2/catch.hpp`, would precede the real Catch2 on the include
+  path. The tamper scan (`cpp-catch2` rules: forced exits, `/proc/self`,
+  Catch2 and JUnit names, new `catch*` files) still reads the whole tree.
+- A must-fail sentinel case is appended to each of the 24 test programs;
+  each program runs alone from the build's `tests` directory, as ctest runs
+  it, with Catch2's JUnit reporter. A program counts only if its report
+  parses, lists the sentinel as failed, and it exited non-zero without a
+  timeout or signal. Ids are `<program>::<case>` (Catch2 reports one entry
+  per leaf section): 11 fail-to-pass, 1,098 pass-to-pass, 1,109 pinned.
+- Catch2 v2.13.10 is a minimal CMake package at `/opt/catch2`
+  (`CMAKE_PREFIX_PATH`), so the agent's build and the verifier's are
+  offline and identical; the header is checksum-verified.
+
+## Difficulty hypothesis (written 2026-10-28, before any gate run)
+
+The six causes are independent (every single-fix control clears exactly
+its own checks), so this task tests finding and fixing six small defects
+from symptoms, with a guard wall that punishes the blunt fix for the
+largest one. Predicted misses for a reference that fixes what the
+instruction names: the fallthrough half of the duplicate-output defect
+(the `+` group half is the obvious one), the quoted-section variant of the
+trailing-comment header, and the closer cases of the multiline reader
+(spaces or a comment after the closing quotes, one or two extra quote
+characters before them), which no visible test exercises. Predicted
+failure of the task itself: a reference that writes its own round-trip
+checks for each symptom finds all six, as Boost.URL's references did with
+the RFC; here the instruction is the only description of the rules.
+
+## Validation record (2026-10-28, arm64, v5-cfamily)
+
+`scripts/frontier-v5/probe_verifier.py` (the real verifier, separate
+container, no network, artifacts read-only):
+
+| Artifact | Reward | Notes |
+| --- | --- | --- |
+| base | 0 | builds, sentinels hold, 11 fail-to-pass fail, 1,109 cases seen |
+| gold | 1 | every check passes, 1,109 cases seen |
+| probe exit-plain | 0 | tamper scan flags `exit(`; no program reports, sentinels missing |
+| probe forge-stealth | 0 | evades the scan as intended; forged reports lack the sentinel and every id |
+| probe catch-shadow | 0 | the planted `include/catch2/catch.hpp` is never copied (suite runs normally) and the scan flags the file |
+
+Through Harbor 0.24.0 (`harbor run -a oracle` and `-a nop`, one attempt
+each): oracle reward 1, nop reward 0, 1,109 cases seen in both. Base scored
+0 three times (bootstrap run, probe audit, nop) and gold 1 four times
+(bootstrap run, probe audit, gold-from-parts, oracle).
+
+Both images rebuild the base from upstream history and pass their
+checksums; each builds in about 40 seconds and the full verifier run takes
+about a minute.
+
+## F5 controls (`run_controls.py` with the floor-8 additions, 2026-10-28)
+
+| Variant | Fail-to-pass cleared (of 11) | Guards |
+| --- | --- | --- |
+| gold-from-parts | 11 (reward 1) | hold |
+| single:p1361 / header / docstring / writer-join / p1451 / p1463 | 1 / 2 / 1 / 1 / 2 / 4 | hold |
+| loo:p1361 / header / docstring / writer-join / p1451 / p1463 | 10 / 9 / 10 / 10 / 9 / 7 | hold |
+| naive:no-quote-processing | 1 (TomlOutputMultilineStringWithQuotes) | 8 regressed: `StringBased: Quotes`, `StringBased: TomlMultiLineStringBinary`, `TOMLStringVector`, `TOMLStringVectorMultiline`, `jsonLikeParsing`, `ConfigWriteAllDefaults`, `ConfigWriteDefaultActiveSubcommands`, `RoundTripEmptyVector` |
+| naive:skip-nameless-groups | 0 | 7 regressed: the four plain option-group output cases and the three `+` group cases that pass at base |
+
+Floors:
+
+1. Several causes: six, each with its own held-out check. Met.
+2. Concentration: one file, `Config_inl.hpp` (reader and writer). Met.
+3. Interaction: met only on the source branch. #1451's upstream diff does
+   not apply without #1369's writer hunks (they share the group-header
+   line), shown by the controls falling back to the rebased diff. No
+   held-out check needs two fixes: every single-fix control clears exactly
+   its own checks. This is weaker interaction than javaparser's or
+   Boost.URL's and is recorded as this candidate's main risk alongside its
+   size.
+4. Necessity: every leave-one-out leaves its own checks failing. Met.
+5. No dominant fix: the largest single fix clears 4 of 11. Met.
+6. At least 5 fail-to-pass checks: 11. Met.
+7. Contract: symptoms-only instruction, no issue or PR identifiers; only
+   `include/CLI` graded. Met.
+8. Route (a): `no-quote-processing` builds, clears 1 held-out check and
+   regresses 8 guards, as predicted (`StringBased: Quotes` among them).
+   Met. The second prediction failed: `skip-nameless-groups` clears no
+   held-out check (it does not stop the fallthrough duplication either, and
+   the `+` group case it was predicted to clear still fails), so it does not
+   count.

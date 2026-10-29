@@ -1,0 +1,14 @@
+--- a/include/CLI/impl/Config_inl.hpp
++++ b/include/CLI/impl/Config_inl.hpp
+@@ -484,10 +484,7 @@
+         try {
+             parents = detail::generate_parents(currentSection, name, parentSeparatorChar);
+             detail::process_quoted_string(name, '"', '\'', true);
+-            // clean up quotes on the items and check for escaped strings
+-            for(auto &it : items_buffer) {
+-                detail::process_quoted_string(it, stringQuote, literalQuote);
+-            }
++            // values are used as read: reprocessing quotes and escapes altered multiline content
+         } catch(const std::invalid_argument &ia) {
+             throw CLI::ParseError(ia.what(), CLI::ExitCodes::InvalidError);
+         }

@@ -4,8 +4,9 @@
 
 Status: F5 wave 1 candidate for slot F5-java (docs/frontier-v5/WAVE1-F5.md,
 primary), built 2026-10-27 overnight. Measured on the Mac Studio (arm64), no
-model calls. **Floors 1 to 8 met** (floor 8 by route (a)). Validated. Not
-gated.
+model calls. **Floors 1 to 8 met** (floor 8 by route (a)). Validated.
+**Admitted as F5-java on 2026-10-29**: GPT-6 Astra 0 of 3 and Claude Opus
+5.5 0 of 3 at medium (docs/frontier-v5/GATE-LOG.md).
 
 ## Family fit
 

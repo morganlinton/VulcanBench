@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { LaunchForm } from "@/components/runner/LaunchForm";
 
 export const dynamic = "force-dynamic";
@@ -15,11 +16,13 @@ export default function LaunchPage() {
           </div>
         </div>
         <p className="text-sm text-zinc-400 max-w-3xl">
-          Plan a run, read the exact command and the estimate, check usage, then confirm. The job goes
-          to a queue that runs one task at a time; nothing starts without the confirm click and nothing
-          retries on its own.
+          Benchmark a model on a suite across effort levels, or run a Frontier v5 gate task. Build the
+          plan, read the exact commands and the estimate, then confirm. Jobs go to a queue that runs one
+          task at a time; nothing starts without the confirm click and nothing retries on its own.
         </p>
-        <LaunchForm />
+        <Suspense fallback={<div className="mt-6 text-sm text-zinc-500">loading</div>}>
+          <LaunchForm />
+        </Suspense>
       </div>
     </div>
   );

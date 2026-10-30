@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import {
   commandLine,
   fmtDuration,
@@ -10,18 +10,18 @@ import {
   fmtTime,
   runnerGet,
   runnerPost,
+  type GatePlanSpec,
   type GateRef,
   type JobSummary,
   type LaunchOptions,
   type LaunchPlan,
-  type WorktreeInfo,
 } from "@/lib/runner";
+import { Countdown, Warnings, WorktreeCard, button, field, label } from "./launchShared";
 import { RunnerUnavailable } from "./RunnerUnavailable";
+import { SweepForm } from "./SweepForm";
 import { usePolling } from "./usePolling";
 
-const field = "w-full rounded-md border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500/60 focus:outline-none";
-const label = "block text-xs uppercase tracking-wider text-zinc-500 mb-1";
-const button = "rounded-md px-4 py-2 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed";
+type Kind = "sweep" | "gate";
 
 function RefPicker({ refs, value, onChange, credentials }: { refs: GateRef[]; value: string; onChange: (v: string) => void; credentials: LaunchOptions["credentials"] }) {
   return (
@@ -49,42 +49,9 @@ function RefPicker({ refs, value, onChange, credentials }: { refs: GateRef[]; va
   );
 }
 
-function WorktreeCard({ wt }: { wt: WorktreeInfo }) {
-  return (
-    <div className="rounded-xl border border-white/10 p-3 text-xs">
-      <div className="text-zinc-400">run worktree</div>
-      <div className="font-mono text-zinc-200 break-all">{wt.path}</div>
-      {wt.exists ? (
-        <div className="mt-1 space-y-0.5">
-          <div className={wt.at_tag ? "text-emerald-300" : "text-rose-300"}>
-            {wt.at_tag ? `detached at ${wt.tag} (${wt.head})` : `HEAD ${wt.head ?? "?"} is not at ${wt.tag} (${wt.tag_commit ?? "?"})`}
-          </div>
-          {wt.dirty.length > 0 && <div className="text-rose-300">uncommitted: {wt.dirty.join(", ")}</div>}
-          {!wt.script.status_file && <div className="text-amber-300">this tag&apos;s run_gate.sh predates the status file and the stand-alone usage check</div>}
-        </div>
-      ) : (
-        <div className="mt-1 text-amber-300">
-          not created yet: the plan will run scripts/run_worktree.sh {wt.tag} first (make setup takes minutes)
-        </div>
-      )}
-      {wt.problems.filter((p) => wt.exists || !p.includes("not a git")).map((p) => (
-        <div key={p} className="text-rose-300">{p}</div>
-      ))}
-    </div>
-  );
-}
+type GatePlan = LaunchPlan<GatePlanSpec>;
 
-function Countdown({ until }: { until: string }) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const left = Math.max(0, Math.floor((new Date(until).getTime() - now) / 1000));
-  return <span className={left < 60 ? "text-rose-300" : "text-zinc-500"}>{left > 0 ? `plan valid for ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` : "plan expired"}</span>;
-}
-
-function UsagePanel({ plan, onChecked }: { plan: LaunchPlan; onChecked: (p: LaunchPlan) => void }) {
+function UsagePanel({ plan, onChecked }: { plan: GatePlan; onChecked: (p: GatePlan) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const spec = plan.spec;
@@ -93,7 +60,7 @@ function UsagePanel({ plan, onChecked }: { plan: LaunchPlan; onChecked: (p: Laun
     setBusy(true);
     setError(null);
     try {
-      onChecked(await runnerPost<LaunchPlan>(`/api/runner/plans/${plan.id}/usage`));
+      onChecked(await runnerPost<GatePlan>(`/api/runner/plans/${plan.id}/usage`));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -137,7 +104,7 @@ function UsagePanel({ plan, onChecked }: { plan: LaunchPlan; onChecked: (p: Laun
   );
 }
 
-function PlanCard({ plan, onPlan, onQueued }: { plan: LaunchPlan; onPlan: (p: LaunchPlan) => void; onQueued: (j: JobSummary) => void }) {
+function PlanCard({ plan, onPlan, onQueued }: { plan: GatePlan; onPlan: (p: GatePlan) => void; onQueued: (j: JobSummary) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const spec = plan.spec;
@@ -151,7 +118,7 @@ function PlanCard({ plan, onPlan, onQueued }: { plan: LaunchPlan; onPlan: (p: La
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       try {
-        onPlan(await runnerGet<LaunchPlan>(`/api/runner/plans/${plan.id}`));
+        onPlan(await runnerGet<GatePlan>(`/api/runner/plans/${plan.id}`));
       } catch {
         // keep what we have
       }
@@ -166,11 +133,7 @@ function PlanCard({ plan, onPlan, onQueued }: { plan: LaunchPlan; onPlan: (p: La
         <div className="text-xs"><Countdown until={plan.expires_at} /> <span className="text-zinc-600 ml-2 font-mono">hash {plan.hash}</span></div>
       </div>
 
-      {spec.warnings.length > 0 && (
-        <ul className="list-disc pl-5 text-xs text-amber-300 space-y-0.5">
-          {spec.warnings.map((w) => <li key={w}>{w}</li>)}
-        </ul>
-      )}
+      <Warnings items={spec.warnings} />
 
       <div>
         <div className={label}>Exactly what runs</div>
@@ -234,27 +197,58 @@ function PlanCard({ plan, onPlan, onQueued }: { plan: LaunchPlan; onPlan: (p: La
 }
 
 export function LaunchForm() {
-  const router = useRouter();
-  const [tagChoice, setTagChoice] = useState<string | null>(null);
-  const { data: opts, error } = usePolling<LaunchOptions>(
+  const params = useSearchParams();
+  const [kind, setKind] = useState<Kind>(params.get("kind") === "gate" ? "gate" : "sweep");
+  const [tagChoice, setTagChoice] = useState<string | null>(params.get("tag"));
+  const { data: opts, error, refresh } = usePolling<LaunchOptions>(
     () => runnerGet<LaunchOptions>(`/api/runner/options${tagChoice ? `?tag=${encodeURIComponent(tagChoice)}` : ""}`),
     0,
     tagChoice ?? "",
   );
+
+  if (error && !opts) return <RunnerUnavailable error={error} />;
+  if (!opts) return <div className="mt-6 text-sm text-zinc-500">loading options</div>;
+  const tag = opts.tag ?? "";
+
+  return (
+    <div className="mt-6">
+      <div className={label}>What to run</div>
+      <div className="flex gap-2 text-sm">
+        {([
+          ["sweep", "Benchmark a model (suite, effort levels)"],
+          ["gate", "Frontier v5 gate task"],
+        ] as [Kind, string][]).map(([k, text]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setKind(k)}
+            className={`rounded-full border px-3 py-1 ${kind === k ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+      {kind === "sweep" ? (
+        <SweepForm opts={opts} tag={tag} onTag={setTagChoice} refreshOptions={refresh} />
+      ) : (
+        <GateForm opts={opts} tag={tag} onTag={setTagChoice} />
+      )}
+    </div>
+  );
+}
+
+function GateForm({ opts, tag, onTag }: { opts: LaunchOptions; tag: string; onTag: (t: string) => void }) {
+  const router = useRouter();
   const [ref, setRef] = useState("");
   const [taskChoice, setTaskChoice] = useState<string | null>(null);
   const [attempts, setAttempts] = useState(3);
   const [concurrency, setConcurrency] = useState<"" | "1" | "2">("");
   const [suffix, setSuffix] = useState("");
-  const [plan, setPlan] = useState<LaunchPlan | null>(null);
+  const [plan, setPlan] = useState<GatePlan | null>(null);
   const [building, setBuilding] = useState(false);
   const [buildError, setBuildError] = useState<string | null>(null);
   const [queued, setQueued] = useState<JobSummary | null>(null);
 
-  if (error && !opts) return <RunnerUnavailable error={error} />;
-  if (!opts) return <div className="mt-6 text-sm text-zinc-500">loading options</div>;
-
-  const tag = opts.tag ?? "";
   const refName = opts.refs.some((r) => r.name === ref) ? ref : (opts.refs[0]?.name ?? "");
   const task = taskChoice && opts.tasks.some((t) => t.name === taskChoice) ? taskChoice : (opts.tasks[0]?.name ?? "");
   const taskInfo = opts.tasks.find((t) => t.name === task);
@@ -265,7 +259,7 @@ export function LaunchForm() {
     setBuildError(null);
     setPlan(null);
     try {
-      const p = await runnerPost<LaunchPlan>("/api/runner/plans", {
+      const p = await runnerPost<GatePlan>("/api/runner/plans", {
         kind: "gate",
         ref: refName,
         task,
@@ -299,14 +293,6 @@ export function LaunchForm() {
     <div className="mt-6 space-y-6">
       <div className="rounded-2xl border border-white/10 p-5 space-y-5">
         <div>
-          <div className={label}>Kind</div>
-          <div className="flex gap-2 text-sm">
-            <span className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-3 py-1">Frontier v5 gate run</span>
-            <span className="rounded-full border border-white/10 px-3 py-1 text-zinc-500" title="Milestone 3">suite or task run (coming next)</span>
-          </div>
-        </div>
-
-        <div>
           <div className={label}>Reference model</div>
           <RefPicker refs={opts.refs} value={refName} onChange={(v) => { setRef(v); setPlan(null); }} credentials={opts.credentials} />
         </div>
@@ -314,10 +300,10 @@ export function LaunchForm() {
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className={label} htmlFor="tag">Bench tag</label>
-            <select id="tag" className={field} value={tag} onChange={(e) => { setTagChoice(e.target.value); setTaskChoice(null); setPlan(null); }}>
+            <select id="tag" className={field} value={tag} onChange={(e) => { onTag(e.target.value); setTaskChoice(null); setPlan(null); }}>
               {opts.tags.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
-            <div className="mt-2">{opts.worktree && <WorktreeCard wt={opts.worktree} />}</div>
+            <div className="mt-2">{opts.worktree && <WorktreeCard wt={opts.worktree} gate />}</div>
           </div>
           <div>
             <label className={label} htmlFor="task">Task at this tag</label>

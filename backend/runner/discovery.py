@@ -174,6 +174,19 @@ class Discovery:
         self.jobs_by_name: dict[str, Job] = {}
         for j in sorted(self.jobs, key=lambda j: j.id):
             self.jobs_by_name[j.name] = j
+        # Suite levels the GUI launched, by output directory: a run dir under one
+        # of these belongs to that job.
+        self.suite_jobs: list[tuple[Path, Job]] = [
+            (Path(str(j.spec["out_dir"])), j)
+            for j in sorted(self.jobs, key=lambda j: j.id)
+            if j.kind == "suite" and j.spec.get("out_dir")
+        ]
+
+    def _owning_job(self, run_dir: Path) -> Job | None:
+        for out_dir, job in reversed(self.suite_jobs):
+            if _safe_child(out_dir, run_dir) and run_dir != out_dir:
+                return job
+        return None
 
     # ----------------------------------------------------------------- gate --
 
@@ -305,14 +318,14 @@ class Discovery:
         )
 
     def owned_without_dir(self) -> list[RunView]:
-        """Queue entries that have no job directory yet (queued, preparing, refused)."""
+        """Queue entries shown as their own row: gate jobs with no job directory yet,
+        every suite level (its runs are rows of their own) and worktree preparations."""
         out: list[RunView] = []
         for job in self.jobs:
-            if job.kind != "gate":
-                continue
-            job_dir = Path(str(job.spec.get("job_dir") or self.cfg.gate_jobs_dir / job.name))
-            if job_dir.is_dir():
-                continue
+            if job.kind == "gate":
+                job_dir = Path(str(job.spec.get("job_dir") or self.cfg.gate_jobs_dir / job.name))
+                if job_dir.is_dir():
+                    continue
             out.append(self.job_view(job))
         return out
 
@@ -326,27 +339,39 @@ class Discovery:
         elif started and finished:
             elapsed = (finished - started).total_seconds()
         logs = [CONSOLE_LOG] if job.console_log and Path(job.console_log).is_file() else []
+        attempts_done = 0
+        attempts_total = int(spec["attempts"]) if isinstance(spec.get("attempts"), int) else None
+        solves: int | None = None
+        cost: float | None = None
+        path: str | None = None
+        if job.kind == "suite":
+            out_dir = Path(str(spec.get("out_dir") or ""))
+            path = str(out_dir)
+            n_tasks = int(spec.get("n_tasks") or len(spec.get("task_ids") or []))
+            attempts_total = n_tasks * int(spec.get("repeat") or 1) or None
+            attempts_done, solves, cost = _count_results(out_dir)
         return RunView(
             id=JOB_PREFIX + str(job.id),
             kind=str(spec.get("kind") or job.kind),
             name=job.name,
             status=job.status,
             owned=True,
-            suite_or_task=str(spec["task"]) if spec.get("task") else None,
+            suite_or_task=str(spec.get("task") or spec.get("suite") or "") or None,
             model=str(spec["model"]) if spec.get("model") else None,
-            harness=str(spec["agent"]) if spec.get("agent") else None,
+            harness=str(spec.get("agent") or spec.get("harness") or "") or None,
             effort=str(spec["effort"]) if spec.get("effort") else None,
             source_tag=str(spec["tag"]) if spec.get("tag") else None,
             source_commit=str(spec["tag_commit"]) if spec.get("tag_commit") else None,
             source_dir=str(spec["worktree"]) if spec.get("worktree") else None,
-            attempts_done=0,
-            attempts_total=int(spec["attempts"]) if isinstance(spec.get("attempts"), int) else None,
-            solves=None,
+            attempts_done=attempts_done,
+            attempts_total=attempts_total,
+            solves=solves,
             started_at=iso(started) if job.started_at else None,
             finished_at=iso(finished),
             elapsed_s=elapsed,
+            cost_usd=cost,
             pid=job.pid,
-            path=None,
+            path=path,
             trials=[],
             log_sources=logs,
             notes=list(job.notes),
@@ -541,6 +566,15 @@ class Discovery:
             else:
                 status = "stopped"
                 notes.append("trace stopped growing with no summary.json")
+        owner = self._owning_job(run_dir)
+        if owner is not None and summary is None:
+            # The queue knows whether the level is still running; the process table does not need to.
+            if owner.status in {"running", "stopping"}:
+                status = "running" if owner.status == "running" else "stopping"
+                notes = [n for n in notes if "no vulcanbench process" not in n]
+            elif status in {"running", "external_running"}:
+                status = "stopped"
+                notes.append(f"the level's job is {owner.status}")
         elapsed = None
         if started is not None:
             end = finished or (self.now if status in {"running", "external_running"} else last_ts)
@@ -581,7 +615,8 @@ class Discovery:
             kind="suite" if suite else "task",
             name=run_id,
             status=status,
-            owned=False,
+            owned=owner is not None,
+            job=job_summary(owner) if owner is not None else None,
             suite_or_task=str(suite or task_id or ""),
             model=bare_model or model_spec or None,
             harness=harness or "vulcan",
@@ -618,7 +653,7 @@ class Discovery:
 
     def all_runs(self) -> list[RunView]:
         runs = self.gate_runs() + self.harness_runs() + self.owned_without_dir()
-        active = {"external_running", "running", "preparing", "stopping", "queued"}
+        active = {"external_running", "running", "preparing", "stopping", "queued", "waiting"}
         runs.sort(
             key=lambda r: (0 if r.status in active else 1, r.started_at or ""),
         )
@@ -639,6 +674,8 @@ class Discovery:
             job = next((j for j in self.jobs if j.id == int(rest)), None)
             if job is None:
                 return None
+            if job.kind != "gate":
+                return self.job_view(job)
             job_dir = Path(str(job.spec.get("job_dir") or self.cfg.gate_jobs_dir / job.name))
             if job_dir.is_dir() and _safe_child(self.cfg.gate_jobs_dir, job_dir):
                 return self.gate_job(job_dir)
@@ -721,6 +758,30 @@ def _owned_status(disk_status: str, job: Job, harbor_alive: bool) -> str:
     return disk_status
 
 
+def _count_results(out_dir: Path) -> tuple[int, int, float | None]:
+    """(runs with a summary, runs that passed, summed cost) directly under a level's output dir."""
+    if not out_dir.is_dir():
+        return 0, 0, None
+    done = passed = 0
+    cost = 0.0
+    known = False
+    for d in out_dir.iterdir():
+        if not d.is_dir():
+            continue
+        summary = read_json(d / "summary.json")
+        if summary is None:
+            continue
+        done += 1
+        scores = summary.get("scores")
+        if isinstance(scores, dict) and scores.get("functional") == 1.0:
+            passed += 1
+        c = summary.get("cost_usd")
+        if isinstance(c, (int, float)):
+            cost += float(c)
+            known = True
+    return done, passed, (round(cost, 4) if known else None)
+
+
 def job_summary(job: Job) -> dict[str, Any]:
     d = job.to_dict()
     d.pop("spec", None)
@@ -731,12 +792,23 @@ def job_summary(job: Job) -> dict[str, Any]:
             "argv",
             "cwd",
             "env",
+            "path_prepend",
             "prep_argv",
             "needs_prep",
             "tag",
             "worktree",
             "estimate",
             "warnings",
+            "sweep_id",
+            "sweep_name",
+            "model",
+            "harness",
+            "suite",
+            "suite_name",
+            "effort",
+            "out_dir",
+            "resume_at",
+            "quota_continue",
         )
     }
     return d

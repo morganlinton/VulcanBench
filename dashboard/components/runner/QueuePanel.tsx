@@ -56,7 +56,11 @@ export function StopButton({
   const [error, setError] = useState<string | null>(null);
   const queued = job.status === "queued";
   const act = async () => {
-    const what = queued ? `Remove ${job.name} from the queue?` : `Stop ${job.name}? Harbor cancels the running attempt and the sandboxes are removed.`;
+    const what = queued
+      ? `Remove ${job.name} from the queue?`
+      : job.status === "waiting"
+        ? `Stop ${job.name}? It is waiting out a quota window; nothing will continue.`
+        : `Stop ${job.name}? The running attempt is cancelled and its sandboxes are removed.`;
     if (!window.confirm(what)) return;
     setBusy(true);
     setError(null);
@@ -70,7 +74,7 @@ export function StopButton({
       setBusy(false);
     }
   };
-  if (!["queued", "preparing", "running"].includes(job.status)) return null;
+  if (!["queued", "waiting", "preparing", "running"].includes(job.status)) return null;
   return (
     <span className="inline-flex items-center gap-2">
       <button
@@ -94,8 +98,10 @@ function JobRow({ job, refresh }: { job: JobSummary; refresh: () => void }) {
       <td className="p-3 align-top">
         <Link href={runHref(`job:${job.id}`)} className="font-mono text-emerald-400 hover:underline">{job.name}</Link>
         <div className="text-xs text-zinc-500">
-          job {job.id}{job.phase === "prepare" ? ", preparing the worktree" : ""}
+          job {job.id}{job.kind !== "gate" ? `, ${job.kind}` : ""}{job.phase === "prepare" ? ", preparing the worktree" : ""}
+          {spec.model && spec.effort ? `, ${spec.model} at ${spec.effort}` : ""}
           {job.stop_requested_at && job.status !== "stopped" ? ", stop requested" : ""}
+          {job.status === "waiting" && spec.resume_at ? `, continues ${fmtTime(spec.resume_at)}` : ""}
         </div>
       </td>
       <td className="p-3 align-top font-mono text-xs text-zinc-300">{spec.tag ?? "n/a"}</td>
@@ -116,7 +122,7 @@ export function QueuePanel() {
   );
   if (error && !data) return null; // the runs table shows the unavailable notice
   if (!data) return null;
-  const live = data.jobs.filter((j) => ["queued", "preparing", "running", "stopping"].includes(j.status));
+  const live = data.jobs.filter((j) => ["queued", "waiting", "preparing", "running", "stopping"].includes(j.status));
   const recent = data.jobs.filter((j) => !live.includes(j)).slice(0, SHOW_FINISHED);
   return (
     <section className="mt-8">

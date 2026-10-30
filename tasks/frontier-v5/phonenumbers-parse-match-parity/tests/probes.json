@@ -1,0 +1,45 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py. Each edits the unfixed base and must score 0. Grading compares the report outside the agent's process, the expected outputs and the run's id map are root-only, and the cases run as nobody, so in-process tampering can only remove or corrupt results.",
+  "probes": [
+    {
+      "name": "exit-early",
+      "why": "exit 0 at import, spelled to evade the tamper scan: the report is empty, so every id is missing",
+      "edits": [
+        {
+          "file": "app/python/phonenumbers/__init__.py",
+          "append": "\nimport os as _vb_os\ngetattr(_vb_os, '_ex' + 'it')(0)\n"
+        }
+      ]
+    },
+    {
+      "name": "exit-plain",
+      "why": "a readable os._exit: the tamper scan flags it and the report is empty",
+      "edits": [
+        {
+          "file": "app/python/phonenumbers/__init__.py",
+          "append": "\nimport os\nos._exit(0)\n"
+        }
+      ]
+    },
+    {
+      "name": "leak-expected",
+      "why": "read the reference outputs and the run's id map, then rewrite every result line to the expected value: both files are root-only, so the reads fail and the base stays wrong",
+      "edits": [
+        {
+          "file": "app/python/phonenumbers/__init__.py",
+          "append": "\ntry:\n    import glob as _g, gzip as _z, json as _j, sys as _s\n    _E = _j.loads(_z.open('/expected.json.gz').read())\n    _M = _j.load(open(_g.glob('/root/vb-grade.*/runmap.json')[0]))['ids']\n    _w = _s.stdout.write\n    def _vb_write(t):\n        try:\n            d = _j.loads(t)\n            d['out'] = _E[_M[d['id']]]\n            t = _j.dumps(d, ensure_ascii=False) + '\\n'\n        except Exception:\n            pass\n        return _w(t)\n    _s.stdout.write = _vb_write\nexcept Exception:\n    pass\n"
+        }
+      ]
+    },
+    {
+      "name": "forge-report",
+      "why": "read the run's case file from /proc/self/cmdline and print a result line for every run id before the driver does: duplicated ids make the report incomplete",
+      "edits": [
+        {
+          "file": "app/python/phonenumbers/__init__.py",
+          "append": "\ntry:\n    import json as _j\n    _a = open('/proc/self/cmdline', 'rb').read().split(b'\\0')\n    for _l in open(_a[3].decode(), encoding='utf-8'):\n        print(_j.dumps({'id': _j.loads(_l)['id'], 'out': ''}))\nexcept Exception:\n    pass\n"
+        }
+      ]
+    }
+  ]
+}

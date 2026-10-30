@@ -1,0 +1,200 @@
+{"expected": "ERR TOO_LONG", "from": "RO", "id": "k00027", "op": "orig", "region": "RO", "text": "+40 21 123 4567 x9641174386439490"}
+{"expected": "false", "id": "k00034", "op": "alpha", "text": "011 54 9 11 231"}
+{"expected": "cc=57 nn=850011987678", "id": "k00109", "op": "parse", "raw": false, "region": "CO", "text": "08500 11-9876-78"}
+{"a": "+1 500-234-5678", "b": "5002345678", "expected": "NSN_MATCH", "id": "k00222", "op": "match", "region": "AI"}
+{"carrier": "", "expected": "050 123 4567\n0971 50 123 4567\n050 123 4567\n0501234567\n050 123 4567\n050 123 4567", "from": "AE", "id": "k00286", "num": {"cc": 971, "nn": 501234567, "pdcc": "41", "raw": "+971 50 123 4567"}, "op": "dial"}
+{"expected": "cc=32 nn=231234 raw=0 3 0 -3 2 23 12 34 ccs=FROM_NUMBER_WITH_IDD", "id": "k00329", "op": "parse", "raw": true, "region": "SG", "text": "0 3 0 -3 2 23 12 34"}
+{"expected": "cc=36 nn=345678901", "id": "k00366", "op": "parse", "raw": false, "region": "HU", "text": "345 678 901"}
+{"expected": "false\nUNKNOWN\nTZ\nTOO_SHORT\n0\n0\ntrue\nfalse", "id": "k00452", "num": {"cc": 255, "nn": 41234567}, "op": "valid"}
+{"expected": "11 24 +870301234567 | cc=870 nn=301234567", "id": "k00546", "leniency": "EXACT_GROUPING", "op": "find", "region": null, "text": "Call me at +870301234567 please."}
+{"expected": "cc=27 nn=862345678 raw=086 234 5678 ccs=FROM_DEFAULT_COUNTRY\n086 234 5678\n0086 234 5678", "from": "ZA", "id": "k00603", "op": "orig", "region": "ZA", "text": "086 234 5678"}
+{"carrier": "0", "expected": "800 123 456 ext. 6339\n800 123 456 ext. 6339\n800 123 456\n800123456\n800 123 456 ext. 6339\n800 123 456 ext. 6339", "from": "CZ", "id": "k00669", "num": {"cc": 420, "ext": "6339", "nn": 800123456}, "op": "dial"}
+{"expected": "true", "id": "k00695", "op": "alpha", "text": "+501/22A-1AEH"}
+{"expected": "+42185012345\n+421 85012345\n85012345\ntel:+421-85012345", "id": "k00722", "num": {"cc": 421, "nn": 85012345}, "op": "fmt"}
+{"a": "1544-1234 ext#556357873", "b": "+212528812345", "expected": "NO_MATCH", "id": "k00812", "op": "match", "region": null}
+{"a": "tel:1801234;phone-context=www.google.com", "b": "tel:+675-180-1234", "expected": "EXACT_MATCH", "id": "k00947", "op": "match", "region": "PG"}
+{"a": "200 123 45", "b": "+522001234567", "expected": "NO_MATCH", "id": "k00983", "op": "match", "region": null}
+{"expected": "cc=421 nn=690123456 raw=+421690123456 ccs=FROM_NUMBER_WITH_PLUS_SIGN", "id": "k01090", "op": "parse", "raw": true, "region": "NC", "text": "+421690123456"}
+{"expected": "false\nUNKNOWN\nLV\nTOO_SHORT\n0\n0\ntrue\nfalse", "id": "k01179", "num": {"cc": 371, "nn": 6312345}, "op": "valid"}
+{"expected": "5 15 0800123456 | cc=358 nn=800123456\n18 36 (00 218 21-2345678 | cc=218 nn=212345678", "id": "k01206", "leniency": "EXACT_GROUPING", "op": "find", "region": "AX", "text": "Tel. 0800123456.) (00 218 21-2345678"}
+{"expected": "false", "id": "k01262", "op": "alpha", "text": "650 2"}
+{"expected": "cc=64 nn=33316005 raw=0064 3 331 6005 ccs=FROM_NUMBER_WITH_IDD", "id": "k01298", "op": "parse", "raw": true, "region": "FR", "text": "0064 3 331 6005"}
+{"expected": "+5922201234\n+592 220 1234\n220 1234\ntel:+592-220-1234", "id": "k01433", "num": {"cc": 592, "nn": 2201234}, "op": "fmt"}
+{"expected": "cc=800 nn=12345", "id": "k01461", "op": "parse", "raw": false, "region": "GG", "text": "+800 1234 5"}
+{"expected": "", "id": "k01478", "leniency": "EXACT_GROUPING", "op": "find", "region": "CO", "text": "$20 "}
+{"expected": "true\nFIXED_LINE\nKY\nIS_POSSIBLE\n3\n3\ntrue\ntrue", "id": "k01495", "num": {"cc": 1, "nn": 3452221234}, "op": "valid"}
+{"expected": "cc=36 nn=123", "id": "k01534", "op": "parse", "raw": false, "region": "HU", "text": "１２３"}
+{"expected": "false", "id": "k01554", "op": "alpha", "text": "+5492234654321"}
+{"expected": "cc=355 nn=672123456", "id": "k01558", "op": "parse", "raw": false, "region": "TC", "text": "011―355―67―212―3456"}
+{"expected": "cc=250 nn=250123456 raw=250 123 456; ccs=FROM_DEFAULT_COUNTRY\n250 123 456\n00 250 250 123 456", "from": "GB", "id": "k01602", "op": "orig", "region": "RW", "text": "250 123 456;"}
+{"expected": "cc=230 nn=3012345", "id": "k01624", "op": "parse", "raw": false, "region": "ER", "text": "00 230 301 2345"}
+{"expected": "cc=36 nn=212", "id": "k01638", "op": "parse", "raw": false, "region": "HU", "text": "212"}
+{"expected": "ERR NOT_A_NUMBER", "from": "BQ", "id": "k01745", "op": "orig", "region": "BQ", "text": "71L 1BDG"}
+{"carrier": "12", "expected": "00 1 684-733-1234\n00 1 6847331234\n+1 684-733-1234\n+16847331234\n(684) 733-1234\n(684) 733-1234", "from": "LA", "id": "k02130", "num": {"cc": 1, "nn": 6847331234, "raw": "06847331234"}, "op": "dial"}
+{"carrier": "41", "expected": "081234 56789\n081234 56789\n081234 56789\n08123456789\n081234 56789\n081234 56789", "from": "IN", "id": "k02192", "num": {"cc": 91, "nn": 8123456789, "pdcc": "21"}, "op": "dial"}
+{"a": "0 91 81234 56789", "b": "+91123456789", "expected": "SHORT_NSN_MATCH", "id": "k02298", "op": "match", "region": null}
+{"expected": "0\n00\n00／\n00／3\n00／35\n00／352\n00／352／\n00／352／8\n00／352／80\n00／352／801\n00／352／801／\n00／352／801／1\npos=2", "id": "k02302", "keys": "00／352／801／1", "op": "ayt", "region": "ET", "remember": 1}
+{"a": "080 123 4KMR", "b": "+27 80 12E HKMR", "expected": "EXACT_MATCH", "id": "k02320", "op": "match", "region": "ZA"}
+{"carrier": "21", "expected": "+678 22123\n+678 22123\n+678 22123\n+67822123\n22123\n22123", "from": "CO", "id": "k02355", "num": {"cc": 678, "nn": 22123}, "op": "dial"}
+{"a": "+596810123456", "b": "+596 810 12 34 56", "expected": "EXACT_MATCH", "id": "k02386", "op": "match", "region": "MQ"}
+{"expected": "false", "id": "k02424", "op": "alpha", "text": "+52 800"}
+{"expected": "0 11 0664 123456 | cc=43 nn=664123456\n12 35 00 299 22 12 34;ext=564 | cc=299 nn=221234 ext=564", "id": "k02459", "leniency": "STRICT_GROUPING", "op": "find", "region": "AT", "text": "0664 123456\n00 299 22 12 34;ext=564\n+43 1 2DGLMSUX0"}
+{"expected": "cc=1 nn=2684601234 raw=Tel: +1 268-460-1234– ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+1 268-460-1234\n00 1 268-460-1234-", "from": "BH", "id": "k02640", "op": "orig", "region": "AG", "text": "Tel: +1 268-460-1234–"}
+{"expected": "true\nPERSONAL_NUMBER\nUS\nIS_POSSIBLE\n0\n3\ntrue\nfalse", "id": "k02646", "num": {"cc": 1, "ext": "23961", "nn": 5002345678}, "op": "valid"}
+{"expected": "", "id": "k02686", "leniency": "STRICT_GROUPING", "op": "find", "region": "BM", "text": "abc((900))―212-3456; +937012345"}
+{"expected": "cc=33 nn=211 raw=211 ccs=FROM_DEFAULT_COUNTRY", "id": "k02835", "op": "parse", "raw": true, "region": "FR", "text": "211"}
+{"expected": "+\n+4\n+40 \n+40 \n+40 8\n+40 80\n+40 800\n+40 800 \n+40 800 1\n+40 800 12\n+40 800 123\n+40 800 123 \n+40 800 123 I\n+40 800 123 IJ\n+40 800 123 IJO\npos=7", "id": "k02961", "keys": "+40 800 123 IJO", "op": "ayt", "region": "RO", "remember": 6}
+{"carrier": "", "expected": "+53 7 1234567\n+53 TEL53-7-1234567\n+53 7 1234567\n+5371234567\n(07) 1234567\n(07) 1234567", "from": "ZZ", "id": "k02980", "num": {"cc": 53, "nn": 71234567, "pdcc": "31", "raw": "tel:+53-7-1234567"}, "op": "dial"}
+{"carrier": "41", "expected": "00 1 800-212-3456\n00 1 800-212-3456\n+1 800-212-3456\n+18002123456\n(800) 212-3456\n(800) 212-3456", "from": "GM", "id": "k03054", "num": {"cc": 1, "nn": 8002123456, "pdcc": "21"}, "op": "dial"}
+{"expected": "", "id": "k03251", "leniency": "EXACT_GROUPING", "op": "find", "region": "QA", "text": "((00)~44~901~234~5678~x~838248754377488799517)"}
+{"expected": "ERR NOT_A_NUMBER", "from": "GB", "id": "k03332", "op": "orig", "region": "GB", "text": "9$1"}
+{"expected": "true\nFIXED_LINE\nBR\nIS_POSSIBLE\n2\n2\ntrue\ntrue", "id": "k03432", "num": {"cc": 55, "ext": "61526", "nn": 1123456789}, "op": "valid"}
+{"expected": "+497001234567\n+49 7001234567\n7001234567\ntel:+49-7001234567", "id": "k03442", "num": {"cc": 49, "nn": 7001234567}, "op": "fmt"}
+{"expected": "", "id": "k03443", "leniency": "EXACT_GROUPING", "op": "find", "region": "KH", "text": "+85591234567%"}
+{"carrier": "21", "expected": "00 1 268-460-1234\n00 1 268-460-1234\n+1 268-460-1234\n+12684601234\n(268) 460-1234\n(268) 460-1234", "from": "UZ", "id": "k03468", "num": {"cc": 1, "nn": 2684601234}, "op": "dial"}
+{"carrier": "31", "expected": "011 52 800 123 4567\n011 52 800 123 4567\n+52 800 123 4567\n+528001234567\n800 123 4567\n800 123 4567", "from": "DO", "id": "k03484", "num": {"cc": 52, "nn": 8001234567, "pdcc": "0"}, "op": "dial"}
+{"expected": "false", "id": "k03536", "op": "alpha", "text": "+９９８ ９１ ２３４ ５６ ７８"}
+{"a": "00 673 534 5678", "b": "+673 345678", "expected": "SHORT_NSN_MATCH", "id": "k03617", "op": "match", "region": null}
+{"expected": "(\n((\n((0\n((07\n((07)\n((07))\n((07))​\n((07))​1\n((07))​12\n((07))​123\n((07))​1234\npos=3", "id": "k03619", "keys": "((07))​1234", "op": "ayt", "region": "CU", "remember": 2}
+{"expected": "cc=263 nn=1234567890 raw=123-456-7890 ccs=FROM_DEFAULT_COUNTRY", "id": "k03656", "op": "parse", "raw": true, "region": "ZW", "text": "123-456-7890"}
+{"expected": "cc=57 nn=3001650 ilz raw=00300 1 650 ccs=FROM_DEFAULT_COUNTRY", "id": "k03665", "op": "parse", "raw": true, "region": "CO", "text": "00300 1 650"}
+{"expected": "0 16 +233 30 234 5678 | cc=233 nn=302345678", "id": "k03792", "leniency": "POSSIBLE", "op": "find", "region": "ZZ", "text": "+233 30 234 5678"}
+{"expected": "true\nMOBILE\nVE\nIS_POSSIBLE\n0\n3\ntrue\nfalse", "id": "k03813", "num": {"cc": 58, "ext": "65917", "nn": 4121234567}, "op": "valid"}
+{"a": "+ +243 12 34567/", "b": "1234567", "expected": "ERR NOT_A_NUMBER", "id": "k03889", "op": "match", "region": "CD"}
+{"expected": "true\nVOICEMAIL\nIE\nIS_POSSIBLE\n0\n2\ntrue\nfalse", "id": "k03902", "num": {"cc": 353, "ext": "14606", "nn": 8551234567}, "op": "valid"}
+{"expected": "cc=30 nn=1 ilz raw=00300 1  ccs=FROM_NUMBER_WITH_IDD", "id": "k03956", "op": "parse", "raw": true, "region": "FR", "text": "00300 1 "}
+{"expected": "", "id": "k04003", "leniency": "EXACT_GROUPING", "op": "find", "region": "DE", "text": "(800) 901-3355 ,x 7246433"}
+{"expected": "0\n08\n080\npos=2", "id": "k04108", "keys": "080", "op": "ayt", "region": "RS", "remember": 1}
+{"expected": "3 21 ＋212 5 92 40 12 34 | cc=212 nn=592401234", "id": "k04180", "leniency": "POSSIBLE", "op": "find", "region": "MA", "text": "abc＋212 5 92 40 12 34) ((684) 622-1234 e 403027"}
+{"carrier": "41", "expected": "00 685 72 12345\n00 685 72 12345\n+685 72 12345\n+6857212345\n72 12345\n72 12345", "from": "AZ", "id": "k04294", "num": {"cc": 685, "nn": 7212345, "pdcc": "23"}, "op": "dial"}
+{"expected": "0 25 (800) 901-3355 ,x 7246433 | cc=1 nn=8009013355 ext=7246433", "id": "k04348", "leniency": "VALID", "op": "find", "region": "US", "text": "(800) 901-3355 ,x 7246433"}
+{"expected": "1\n12\n123\n1234\n12345\n123456\n1234567\n12345678\n123456789\n123456789;\n123456789;p\n123456789;ph\n123456789;pho\n123456789;phon\n123456789;phone\n123456789;phone-\n123456789;phone-c\n123456789;phone-co\n123456789;phone-con\n123456789;phone-cont\n123456789;phone-conte\n123456789;phone-contex", "id": "k04528", "keys": "123456789;phone-contex", "op": "ayt", "region": "MY", "remember": -1}
+{"expected": "0\n01\n012\n012-\n012-3\n012-34\n012-345\n012-345 \n012-345 6\n012-345 67\n012-345 678\n012-345 6789", "id": "k04706", "keys": "012-345 6789", "op": "ayt", "region": "MY", "remember": -1}
+{"expected": "13 26 +590976012345 | cc=590 nn=976012345", "id": "k04837", "leniency": "VALID", "op": "find", "region": "ZZ", "text": "My number is +590976012345 tel 00 598 21123"}
+{"expected": "false\nUNKNOWN\nTN\nTOO_SHORT\n0\n0\ntrue\nfalse", "id": "k04849", "num": {"cc": 216, "nn": 8110123}, "op": "valid"}
+{"expected": "1 24 00‐255‐41‐234‐5678x, 06 | cc=255 nn=412345678 ext=06", "id": "k04959", "leniency": "POSSIBLE", "op": "find", "region": "MT", "text": "x00‐255‐41‐234‐5678x, 06 6981 2  +96K 1V01 CEG"}
+{"expected": "cc=380 nn=800123456 raw=tel. +380 800 123 456x ccs=FROM_NUMBER_WITH_PLUS_SIGN", "id": "k05024", "op": "parse", "raw": true, "region": "UA", "text": "tel. +380 800 123 456x"}
+{"expected": "cc=1 nn=6847331234 raw=+1 684-733-1234 ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+1 684-733-1234\n1 684-733-1234", "from": "AS", "id": "k05029", "op": "orig", "region": "AS", "text": "+1 684-733-1234"}
+{"expected": "ERR INVALID_COUNTRY_CODE", "id": "k05078", "op": "parse", "raw": true, "region": "ZZ", "text": "242 365 1234"}
+{"expected": "cc=374 nn=10123456 raw=tel:+374-10-123456 ccs=FROM_NUMBER_WITH_PLUS_SIGN", "id": "k05339", "op": "parse", "raw": true, "region": "AM", "text": "tel:+374-10-123456"}
+{"expected": "cc=993 nn=123456780 raw=1234 56780 ccs=FROM_DEFAULT_COUNTRY", "id": "k05360", "op": "parse", "raw": true, "region": "TM", "text": "1234 56780"}
+{"expected": "+911800123456\n+91 1800 12 3456\n1800 12 3456\ntel:+91-1800-12-3456", "id": "k05406", "num": {"cc": 91, "nn": 1800123456}, "op": "fmt"}
+{"expected": "cc=82 nn=51234 raw=+82 51-234 ccs=FROM_NUMBER_WITH_PLUS_SIGN", "id": "k05505", "op": "parse", "raw": true, "region": "RU", "text": "+82 51-234"}
+{"expected": "cc=358 nn=10112345 raw=010 112345 ccs=FROM_DEFAULT_COUNTRY", "id": "k05557", "op": "parse", "raw": true, "region": "FI", "text": "010 112345"}
+{"expected": "+3612345678\n+36 1 234 5678\n(06 1) 234 5678\ntel:+36-1-234-5678", "id": "k05583", "num": {"cc": 36, "nn": 12345678}, "op": "fmt"}
+{"expected": "cc=992 nn=372123456 raw=+９９２ ３７２ １２ ３４５６ ccs=FROM_NUMBER_WITH_PLUS_SIGN", "id": "k05676", "op": "parse", "raw": true, "region": null, "text": "+９９２ ３７２ １２ ３４５６"}
+{"expected": "true\nFIXED_LINE\nMX\nIS_POSSIBLE\n3\n3\ntrue\ntrue", "id": "k05702", "num": {"cc": 52, "nn": 2001234567}, "op": "valid"}
+{"expected": "true", "id": "k05812", "op": "alpha", "text": "08081BDIJ"}
+{"carrier": "0", "expected": "0011 92 21 111 825 888\n0011 92 21 111 825 888\n+92 21 111 825 888\n+9221111825888\n(021) 111 825 888\n(021) 111 825 888", "from": "CC", "id": "k05864", "num": {"cc": 92, "nn": 21111825888, "pdcc": "0"}, "op": "dial"}
+{"carrier": "41", "expected": "0599 123 456\n0599 1AF HKN\n0599 123 456\n0599123456\n0599 123 456\n0599 123 456", "from": "PS", "id": "k05996", "num": {"cc": 970, "nn": 599123456, "raw": "+970 599 1AF HKN"}, "op": "dial"}
+{"expected": "(\n(0\n(00\n(00)\n(00).\n(00).3\n(00).37\n(00).378\n(00).378.\n(00).378.0\n(00).378.05\n(00).378.054\n(00).378.0549\n(00).378.0549.\n(00).378.0549.8\n(00).378.0549.88\n(00).378.0549.886\n(00).378.0549.8863\n(00).378.0549.88637\n(00).378.0549.886377", "id": "k06069", "keys": "(00).378.0549.886377", "op": "ayt", "region": "PT", "remember": -1}
+{"expected": "0\n00\n00 \n00 6\n00 61\n00 61 \n00 61 1\n00 61 18\n00 61 180\n00 61 1800\n00 61 1800 \n00 61 1800 1\n00 61 1800 12\n00 61 1800 123\n00 61 1800 123 \n00 61 1800 123 4\n00 61 1800 123 45\n00 61 1800 123 456", "id": "k06098", "keys": "00 61 1800 123 456", "op": "ayt", "region": "YT", "remember": -1}
+{"expected": "false", "id": "k06262", "op": "alpha", "text": "+३२ ४५० ०० १२ ३४"}
+{"expected": "+15219023456\n+1 521-902-3456\n(521) 902-3456\ntel:+1-521-902-3456", "id": "k06316", "num": {"cc": 1, "nn": 5219023456}, "op": "fmt"}
+{"a": "+232―22―221234", "b": "+23222221234", "expected": "EXACT_MATCH", "id": "k06417", "op": "match", "region": "SL"}
+{"expected": "6\n65\n65　\n65　0\n65　01\n65　01　\n65　01　2\n65　01　23\npos=5", "id": "k06495", "keys": "65　01　23", "op": "ayt", "region": "ML", "remember": 4}
+{"expected": "true\nUAN\nPT\nIS_POSSIBLE\n0\n3\ntrue\nfalse", "id": "k06624", "num": {"cc": 351, "nn": 707123456}, "op": "valid"}
+{"expected": "+212801234567\n+212 80-1234567\n080-1234567\ntel:+212-80-1234567", "id": "k06696", "num": {"cc": 212, "nn": 801234567}, "op": "fmt"}
+{"expected": "cc=1 nn=3101234 raw=3101234 ccs=FROM_DEFAULT_COUNTRY\n310-1234\n1 3101234", "from": "CA", "id": "k06785", "op": "orig", "region": "CA", "text": "3101234"}
+{"expected": "true", "id": "k06925", "op": "alpha", "text": "00－1－900-21B-FGLM"}
+{"expected": "ERR NOT_A_NUMBER", "id": "k06926", "op": "parse", "raw": true, "region": "CN", "text": "+43"}
+{"expected": "", "id": "k06940", "leniency": "VALID", "op": "find", "region": "NZ", "text": "(80).(585) (79).(9)64"}
+{"expected": "+9705991234562\n+970 5991234562\n5991234562\ntel:+970-5991234562", "id": "k06954", "num": {"cc": 970, "nn": 5991234562}, "op": "fmt"}
+{"expected": "ERR NOT_A_NUMBER", "id": "k07062", "op": "parse", "raw": false, "region": "GN", "text": "+68R C0.1B.EI"}
+{"a": "080 12E ILM", "b": "+٣٨٧ ٨٠ ١٢٣ ٤٥٦", "expected": "EXACT_MATCH", "id": "k07076", "op": "match", "region": "BA"}
+{"expected": "ERR INVALID_COUNTRY_CODE", "id": "k07179", "op": "parse", "raw": true, "region": "001", "text": "9-1-1"}
+{"carrier": "23", "expected": "240 1234\n240 1234\n240 1234\n2401234\n240 1234\n240 1234", "from": "BW", "id": "k07208", "num": {"cc": 267, "nn": 2401234, "pdcc": "1234"}, "op": "dial"}
+{"expected": "(\n(8\n(80\n(800\n(800)\n(800) \n(800) 2\n(800) 23\n(800) 234\n(800) 234-\n(800) 234-5\n(800) 234-56\n(800) 234-567\n(800) 234-5678\n(800) 234-5678 \n(800) 234-5678 e\n(800) 234-5678 ex\n(800) 234-5678 ext\n(800) 234-5678 ext.\n(800) 234-5678 ext. \n(800) 234-5678 ext. 5\n(800) 234-5678 ext. 50\npos=5", "id": "k07286", "keys": "(800) 234-5678 ext. 50", "op": "ayt", "region": "VI", "remember": 4}
+{"expected": "+\n+9\n+97\n+971 \n+971 \n+971 7\n+971 70\n+971 700\n+971 700 \n+971 700 0\n+971 700 0 \n+971 700 0 1\n+971 700 0 12\n+971 700 0 123\n+971 700 0 1234\n+971 700 0 12345", "id": "k07341", "keys": "+971 700 0 12345", "op": "ayt", "region": "AE", "remember": -1}
+{"expected": "0\n01\n010\n010 \n010 1\n010 12", "id": "k07349", "keys": "010 12", "op": "ayt", "region": "CN", "remember": -1}
+{"expected": "cc=1 nn=5002345678 raw=5002345678 ccs=FROM_DEFAULT_COUNTRY\n(500) 234-5678\n1 5002345678", "from": "US", "id": "k07364", "op": "orig", "region": "US", "text": "5002345678"}
+{"expected": "13 32 (00)⁠212⁠80-1234567 | cc=212 nn=801234567", "id": "k07395", "leniency": "STRICT_GROUPING", "op": "find", "region": "EE", "text": "My number is (00)⁠212⁠80-1234567"}
+{"expected": "cc=853 nn=28212345", "id": "k07404", "op": "parse", "raw": false, "region": "US", "text": "011 853 2821 2345"}
+{"expected": "+2205661234\n+220 566 1234\n566 1234\ntel:+220-566-1234", "id": "k07413", "num": {"cc": 220, "nn": 5661234}, "op": "fmt"}
+{"expected": "0 20 +44 2034567890 X 456 | cc=44 nn=2034567890 ext=456", "id": "k07419", "leniency": "POSSIBLE", "op": "find", "region": "AU", "text": "+44 2034567890 X 456"}
+{"carrier": "41", "expected": "00 382 60 123 456\n00 382 60123456PHONE-CONTEXT\n+382 60 123 456\n+38260123456\n060 123 456\n060 123 456", "from": "BE", "id": "k07464", "num": {"cc": 382, "nn": 60123456, "raw": "tel:+382-60123456;phone-context=;ext=55"}, "op": "dial"}
+{"carrier": "1234", "expected": "00 238 340 12 34 ext. 1207\n00 238 3401234 ext. 1207\n+238 340 12 34\n+2383401234\n340 12 34 ext. 1207\n340 12 34 ext. 1207", "from": "GB", "id": "k07475", "num": {"cc": 238, "ext": "1207", "nn": 3401234, "raw": "+2383401234"}, "op": "dial"}
+{"expected": "+651900123456\n+65 1900123456\n1900123456\ntel:+65-1900123456", "id": "k07525", "num": {"cc": 65, "nn": 1900123456}, "op": "fmt"}
+{"expected": "+22222123456\n+222 22 12 34 56\n22 12 34 56\ntel:+222-22-12-34-56", "id": "k07682", "num": {"cc": 222, "nn": 22123456}, "op": "fmt"}
+{"expected": "+\n+8\n+85\n+855 \n+855-\n+855-2\n+855-23\n+855-237\n+855-2375\n+855-23756\n+855-237567\n+855-2375678\n+855-23756789\n+855-23756789;\n+855-23756789;p\n+855-23756789;ph\n+855-23756789;pho\n+855-23756789;phon\n+855-23756789;phone\n+855-23756789;phone-\n+855-23756789;phone-c\n+855-23756789;phone-co\n+855-23756789;phone-con\n+855-23756789;phone-cont\n+855-23756789;phone-conte\n+855-23756789;phone-contex\n+855-23756789;phone-context\n+855-23756789;phone-context=\n+855-23756789;phone-context=a\n+855-23756789;phone-context=ab\n+855-23756789;phone-context=abc\n+855-23756789;phone-context=abc;\n+855-23756789;phone-context=abc;e\n+855-23756789;phone-context=abc;ex\n+855-23756789;phone-context=abc;ext\n+855-23756789;phone-context=abc;ext=\n+855-23756789;phone-context=abc;ext=5\n+855-23756789;phone-context=abc;ext=55\npos=27", "id": "k07738", "keys": "+855-23756789;phone-context=abc;ext=55", "op": "ayt", "region": "KH", "remember": 26}
+{"expected": "cc=54 nn=8001234567", "id": "k07741", "op": "parse", "raw": false, "region": "MX", "text": "++54 800-123-4567"}
+{"a": "00 675 270 0123", "b": "+44 2034567890x456", "expected": "NO_MATCH", "id": "k07767", "op": "match", "region": null}
+{"expected": "false", "id": "k07972", "op": "alpha", "text": "(+1 800-AFG-KMRV)"}
+{"expected": "true\nFIXED_LINE\nGB\nIS_POSSIBLE\n3\n3\ntrue\ntrue", "id": "k07981", "num": {"cc": 44, "nn": 1212345678}, "op": "valid"}
+{"expected": "ERR NOT_A_NUMBER", "id": "k08013", "op": "parse", "raw": true, "region": "SA", "text": "tel:+1-5002345678;phone-context=+-1"}
+{"a": "tel:+420-212-345-678", "b": "9001234", "expected": "NO_MATCH", "id": "k08061", "op": "match", "region": null}
+{"expected": "*\n*7\n*71\n*712\n*712 \n*712 3\n*712 34\n*712 345\n*712 345/", "id": "k08171", "keys": "*712 345/", "op": "ayt", "region": "AD", "remember": -1}
+{"carrier": "15", "expected": "0~0 509 22 45 3300\n00 509 22453300\n+509 22 45 3300\n+50922453300\n22 45 3300\n22 45 3300", "from": "UA", "id": "k08201", "num": {"cc": 509, "nn": 22453300, "raw": "+509­22­45­3300"}, "op": "dial"}
+{"expected": "+59894231234\n+598 94 231 234\n094 231 234\ntel:+598-94-231-234", "id": "k08310", "num": {"cc": 598, "nn": 94231234}, "op": "fmt"}
+{"expected": "cc=598 nn=21231234 raw=+(598).2123.1234 ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+598 2123 1234\n2123.1234", "from": "UY", "id": "k08323", "op": "orig", "region": "UY", "text": "+(598).2123.1234"}
+{"expected": "cc=386 nn=6001234567", "id": "k08420", "op": "parse", "raw": false, "region": "SI", "text": "6001234567"}
+{"expected": "0 17 0081-650-333-6000 | cc=81 nn=6503336000", "id": "k08447", "leniency": "POSSIBLE", "op": "find", "region": "AO", "text": "0081-650-333-6000"}
+{"expected": "+3280012345\n+32 800 12 345\n0800 12 345\ntel:+32-800-12-345", "id": "k08464", "num": {"cc": 32, "nn": 80012345}, "op": "fmt"}
+{"expected": "true", "id": "k08589", "op": "alpha", "text": "00 1 180-SIX"}
+{"expected": "+35057123456\n+350 57123456\n57123456\ntel:+350-57123456", "id": "k08606", "num": {"cc": 350, "nn": 57123456}, "op": "fmt"}
+{"expected": "cc=994 nn=881234567 raw=+994 88 123 45 67 ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+994 88 123 45 67\n00 994 994 88 123 45 67", "from": "HU", "id": "k08638", "op": "orig", "region": "AZ", "text": "+994 88 123 45 67"}
+{"expected": "ERR INVALID_COUNTRY_CODE", "from": "VI", "id": "k08900", "op": "orig", "region": "001", "text": "901123456"}
+{"expected": "true", "id": "k08914", "op": "alpha", "text": "87 001 234L int.HK"}
+{"expected": "false\nUNKNOWN\nDJ\nTOO_SHORT\n0\n0\ntrue\nfalse", "id": "k08958", "num": {"cc": 253, "nn": 2136000}, "op": "valid"}
+{"expected": "true\nFIXED_LINE\nGQ\nIS_POSSIBLE\n0\n3\ntrue\ntrue", "id": "k09027", "num": {"cc": 240, "nn": 333091234}, "op": "valid"}
+{"expected": "0\n00\n00 \n00 2\n00 23\n00 231\n00 231 \n00 231 7\n00 231 77\n00 231 77 \n00 231 77 0\n00 231 77 01\n00 231 77 012\n00 231 77 012 \n00 231 77 012 3", "id": "k09179", "keys": "00 231 77 012 3", "op": "ayt", "region": "FJ", "remember": -1}
+{"expected": "9\n90\n90 1\n90 12\n90 12 3\n90 12 34\n90 12 34 5\n90 12 34 56", "id": "k09225", "keys": "90123456", "op": "ayt", "region": "DK", "remember": -1}
+{"expected": "false", "id": "k09252", "op": "alpha", "text": "tel:+38E-HF-B01-CEI"}
+{"expected": "true\nMOBILE\nTH\nIS_POSSIBLE\n0\n2\ntrue\nfalse", "id": "k09271", "num": {"cc": 66, "nn": 812345678}, "op": "valid"}
+{"expected": "0 21 +353 76 123 4567 ＃271 | cc=353 nn=761234567 ext=271", "id": "k09277", "leniency": "STRICT_GROUPING", "op": "find", "region": "IE", "text": "+353 76 123 4567 ＃271"}
+{"expected": "+\n+ \n+ 6\n+ 60\n+ 60 \n+ 60 1\n+ 60 15\n+ 60 154\n+ 60 154-\n+ 60 154-6\n+ 60 154-60\n+ 60 154-601\n+ 60 154-601 \n+ 60 154-601 2\n+ 60 154-601 23\n+ 60 154-601 234\n+ 60 154-601 2345\npos=17", "id": "k09317", "keys": "+ 60 154-601 2345", "op": "ayt", "region": "MY", "remember": 16}
+{"expected": "8\n80\n809\n809-2\n809-23\n809-234\n809-2345\n(809) 234-56\n(809) 234-567\n(809) 234-5678", "id": "k09387", "keys": "8092345678", "op": "ayt", "region": "DO", "remember": -1}
+{"expected": "cc=358 nn=412345678 raw=+358 41 2345678 ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+358 41 2345678\n+358 358 41 2345678", "from": "BO", "id": "k09411", "op": "orig", "region": "BO", "text": "+358 41 2345678"}
+{"expected": "cc=599 nn=6001234", "id": "k09416", "op": "parse", "raw": false, "region": "CW", "text": "+599 600 1234"}
+{"expected": "cc=1 nn=43121286979", "id": "k09540", "op": "parse", "raw": false, "region": "BS", "text": "143121286979"}
+{"expected": "cc=213 nn=808123456 raw=0 808123456 ccs=FROM_DEFAULT_COUNTRY", "id": "k09676", "op": "parse", "raw": true, "region": "DZ", "text": "0 808123456"}
+{"expected": "ERR NOT_A_NUMBER", "from": "MH", "id": "k09691", "op": "orig", "region": "MH", "text": "011 374 900 12 345#9115322139"}
+{"expected": "0 15 ＋ 800 1234 5678 | cc=800 nn=12345678", "id": "k09831", "leniency": "EXACT_GROUPING", "op": "find", "region": null, "text": "＋ 800 1234 5678 is the office line tel 00 91 1800 12 3456 ext#54579"}
+{"carrier": "1234", "expected": "00 972 50-234-5678\n00 972 --\n+972 50-234-5678\n+972502345678\n050-234-5678\n050-234-5678", "from": "TO", "id": "k09899", "num": {"cc": 972, "nn": 502345678, "raw": "०५०-२३४-५६७८"}, "op": "dial"}
+{"carrier": "1234", "expected": "00 61 2 1234 5678\n00 61 61 2 12EI LOPT\n+61 2 1234 5678\n+61212345678\n1234 (2) 1234 5678\n1234 (2) 1234 5678", "from": "HR", "id": "k09940", "num": {"cc": 61, "nn": 212345678, "raw": "+61 2 12EI LOPT"}, "op": "dial"}
+{"expected": "cc=64 nn=33316005", "id": "k09942", "op": "parse", "raw": false, "region": "PL", "text": "Tel: +64 3 331 6005"}
+{"expected": "8\n8 \n8 (\n8 (7\n8 (71\n8 (712\n8 (7123\n8 (71234\n8 (71234)\n8 (71234) \n8 (71234) 5\n8 (71234) 5 \n8 (71234) 5 6\n8 (71234) 5 67", "id": "k09953", "keys": "8 (71234) 5 67", "op": "ayt", "region": "KZ", "remember": -1}
+{"expected": "true", "id": "k10000", "op": "alpha", "text": "+258 82 123 IJOQ"}
+{"expected": "0\n02\n020 \n020 \n020 1\n020 1 \n020 1 7\n020 1 75\n020 1 758", "id": "k10452", "keys": "020 1 758", "op": "ayt", "region": "MU", "remember": -1}
+{"expected": "true\nUAN\nCY\nIS_POSSIBLE\n0\n2\ntrue\nfalse", "id": "k10556", "num": {"cc": 357, "nn": 77123456}, "op": "valid"}
+{"expected": "+\n+1\n+1 \n+1 5\n+1 50\n+1 500\n+1 500-\n+1 500-2\n+1 500-23\n+1 500-234\n+1 500-234-\n+1 500-234-5\n+1 500-234-56\n+1 500-234-567\n+1 500-234-5678\n+1 500-234-5678–", "id": "k10642", "keys": "+1 500-234-5678–", "op": "ayt", "region": "VI", "remember": -1}
+{"expected": "0 18 00⁠250⁠720⁠123⁠456 | cc=250 nn=720123456", "id": "k10645", "leniency": "EXACT_GROUPING", "op": "find", "region": "UZ", "text": "00⁠250⁠720⁠123⁠456,⁠38, ext. 12, 1800123456"}
+{"expected": "0 17 +49494949 ext. 49 | cc=49 nn=494949 ext=49", "id": "k10745", "leniency": "STRICT_GROUPING", "op": "find", "region": "AO", "text": "+49494949 ext. 49"}
+{"expected": "+38730212345\n+387 30 212-345\n030 212-345\ntel:+387-30-212-345", "id": "k10770", "num": {"cc": 387, "nn": 30212345}, "op": "fmt"}
+{"expected": "false\nUNKNOWN\nLR\nTOO_LONG\n0\n0\ntrue\nfalse", "id": "k10847", "num": {"cc": 231, "nn": 3320212347}, "op": "valid"}
+{"expected": "cc=258 nn=800123456 raw=800 123 456 ccs=FROM_DEFAULT_COUNTRY\n800 123 456\n00 258 800 123 456", "from": "EE", "id": "k10850", "op": "orig", "region": "MZ", "text": "800 123 456"}
+{"expected": "", "id": "k10899", "leniency": "VALID", "op": "find", "region": "ZZ", "text": "[091-2345678]"}
+{"expected": "cc=1 nn=5002345678 raw=(00) 1 500-234-5678 ccs=FROM_NUMBER_WITH_IDD\n00 1 500-234-5678\n00 1 500-234-5678", "from": "GP", "id": "k10928", "op": "orig", "region": "EE", "text": "(00) 1 500-234-5678"}
+{"expected": "cc=222 nn=22123456 raw=+222 22 12 34 56 ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+222 22 12 34 56\n011 222 222 22 12 34 56", "from": "TC", "id": "k10933", "op": "orig", "region": "MR", "text": "+222 22 12 34 56"}
+{"expected": "cc=1 nn=876210123439853", "id": "k10959", "op": "parse", "raw": false, "region": "KG", "text": "00／1／876-210-1234／ext／53"}
+{"expected": "+\n+2\n+22\n+225 \n+225 0\n+225 01\n+225 01 2\n+225 01 23\n+225 01 23 4\n+225 01 23 45\n+225 01 23 45 6\n+225 01 23 45 67", "id": "k11015", "keys": "+22501234567", "op": "ayt", "region": "CI", "remember": -1}
+{"expected": "cc=44 nn=7912345678", "id": "k11052", "op": "parse", "raw": false, "region": "BS", "text": "011 44 7912 345 678"}
+{"expected": "cc=86 nn=112442 ilz", "id": "k11253", "op": "parse", "raw": false, "region": "CN", "text": "011 244 2"}
+{"expected": "false", "id": "k11284", "op": "alpha", "text": "(0)3 0 -3 2 23 12 34"}
+{"expected": "false\nUNKNOWN\nJP\nIS_POSSIBLE\n0\n0\ntrue\nfalse", "id": "k11287", "num": {"cc": 81, "nn": 20123456786}, "op": "valid"}
+{"a": "0791⁠234⁠5678", "b": "+964 791 234 5678", "expected": "NSN_MATCH", "id": "k11293", "op": "match", "region": null}
+{"expected": "true\nMOBILE\nBZ\nIS_POSSIBLE\n0\n3\ntrue\nfalse", "id": "k11328", "num": {"cc": 501, "nn": 6221234}, "op": "valid"}
+{"carrier": "31", "expected": "06 21 123 4567\n06 36 21 123 4LNS\n06 21 123 4567\n06211234567\n06 21 123 4567\n06 21 123 4567", "from": "HU", "id": "k11333", "num": {"cc": 36, "nn": 211234567, "raw": "+36 21 123 4LNS"}, "op": "dial"}
+{"expected": "+44153445678\n+44 1534 45678\n01534 45678\ntel:+44-1534-45678", "id": "k11406", "num": {"cc": 44, "nn": 153445678}, "op": "fmt"}
+{"expected": "ERR NOT_A_NUMBER", "from": "IT", "id": "k11487", "op": "orig", "region": "GE", "text": "tel:+995-706123456;phone-context=+995 70"}
+{"expected": "cc=49 nn=7345678901", "id": "k11493", "op": "parse", "raw": false, "region": "DE", "text": "7345678901"}
+{"expected": "cc=7 nn=1187654321 ilz raw=011 8765-4321 ccs=FROM_DEFAULT_COUNTRY\n011 8765-4321\n011 8765-4321", "from": "RU", "id": "k11509", "op": "orig", "region": "RU", "text": "011 8765-4321"}
+{"carrier": "23", "expected": "00 354 410 1234\n00 354 410 1234\n+354 410 1234\n+3544101234\n410 1234\n410 1234", "from": "JO", "id": "k11531", "num": {"cc": 354, "nn": 4101234}, "op": "dial"}
+{"expected": "cc=61 nn=1234567 raw=+61 1234 567 ccs=FROM_NUMBER_WITH_PLUS_SIGN", "id": "k11578", "op": "parse", "raw": true, "region": "GB", "text": "+61 1234 567"}
+{"expected": "true\nFIXED_LINE\nBN\nIS_POSSIBLE\n0\n3\ntrue\ntrue", "id": "k11610", "num": {"cc": 673, "nn": 2345678}, "op": "valid"}
+{"expected": "cc=82 nn=7012345678", "id": "k11703", "op": "parse", "raw": false, "region": "CI", "text": "00 82 70-1234-5678"}
+{"expected": "", "id": "k11780", "leniency": "STRICT_GROUPING", "op": "find", "region": "UZ", "text": "+78081234567340%"}
+{"expected": "+3834320123\n+383 4320123\n4320123\ntel:+383-4320123", "id": "k11896", "num": {"cc": 383, "nn": 4320123}, "op": "fmt"}
+{"expected": "+358600123456\n+358 600 123456\n0600 123456\ntel:+358-600-123456", "id": "k11954", "num": {"cc": 358, "nn": 600123456}, "op": "fmt"}
+{"expected": "12 28 +979 1 2345 6789 | cc=979 nn=123456789", "id": "k12068", "leniency": "EXACT_GROUPING", "op": "find", "region": null, "text": "Reach us on +979 1 2345 6789 or 011-9."}
+{"expected": "+50321234567\n+503 2123 4567 ext. 37757\n2123 4567 ext. 37757\ntel:+503-2123-4567;ext=37757", "id": "k12110", "num": {"cc": 503, "ext": "37757", "nn": 21234567}, "op": "fmt"}
+{"expected": "false\nUNKNOWN\nNG\nTOO_SHORT\n0\n3\ntrue\nfalse", "id": "k12149", "num": {"cc": 234, "nn": 802123456}, "op": "valid"}
+{"expected": "7\n70\n707\n707 1\n707 12\n707 123\n707 123 4\n707 123 45\n707 123 456", "id": "k12214", "keys": "707123456", "op": "ayt", "region": "PT", "remember": -1}
+{"expected": "0\n01\n011 \n011/\n011/4\n011/42\n011/421\n011/421/\n011/421/9\n011/421/90\n011/421/909\n011/421/9090\n011/421/90901\n011/421/909012\n011/421/9090123\n011/421/9090123/\n011/421/9090123/e\n011/421/9090123/ex\n011/421/9090123/ext\n011/421/9090123/ext/\n011/421/9090123/ext/4\n011/421/9090123/ext/40\n011/421/9090123/ext/405\n011/421/9090123/ext/4058\n011/421/9090123/ext/40581\n011/421/9090123/ext/405818", "id": "k12314", "keys": "011/421/9090123/ext/405818", "op": "ayt", "region": "PR", "remember": -1}
+{"expected": "11 26 +٤٤ ٧٩٢٤ ١٢٣٤٥٦ | cc=44 nn=7924123456", "id": "k12330", "leniency": "EXACT_GROUPING", "op": "find", "region": "IM", "text": "12/10/2012 +٤٤ ٧٩٢٤ ١٢٣٤٥٦ / 58 00 11 10"}
+{"expected": "ERR NOT_A_NUMBER", "id": "k12444", "op": "parse", "raw": true, "region": "YT", "text": "tel:801234567;phone-context=1-;isub=123"}
+{"expected": "cc=222 nn=35123456 raw=+222 35 12 34 56 ccs=FROM_NUMBER_WITH_PLUS_SIGN\n+222 35 12 34 56\n00 222 222 35 12 34 56", "from": "YT", "id": "k12469", "op": "orig", "region": "MR", "text": "+222 35 12 34 56"}
+{"expected": "+\n+2\n+27 \n+27 \n+27 8\n+27 86\n+27 860\n+27 860 \n+27 860 1\n+27 860 12\n+27 860 123\n+27 860 123 \npos=2", "id": "k12659", "keys": "+27 860 123 ", "op": "ayt", "region": "ZA", "remember": 1}
+{"expected": "+9738012345\n+973 8012345\n8012345\ntel:+973-8012345", "id": "k12797", "num": {"cc": 973, "nn": 8012345}, "op": "fmt"}
+{"expected": "cc=224 nn=601123456 raw=(601).12.34.56 ccs=FROM_DEFAULT_COUNTRY", "id": "k12805", "op": "parse", "raw": true, "region": "GN", "text": "(601).12.34.56"}
+{"a": "Tel: +1 268-460-1234/", "b": "+1 4601234", "expected": "SHORT_NSN_MATCH", "id": "k12890", "op": "match", "region": null}

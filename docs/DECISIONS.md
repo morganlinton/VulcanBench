@@ -7,6 +7,54 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-29: every run logs its tool calls
+
+### Decision
+
+Owner request in chat, 2026-10-29: tool calls are part of every trace, for
+every harness. Each run directory now holds `tool-calls.jsonl`, one line per
+call in a shared schema (tool name and kind, call id, arguments, status, exit
+code, output length, start and end times), and `summary.json` carries a
+`tool_calls` count block. Public traces publish one `tool_call` event per call
+through `public_events()`: names, timing and outcomes, never inputs or
+outputs. A harness added without an extractor fails `tests/test_tool_calls.py`.
+Field list and commands: [REPRODUCIBILITY.md](REPRODUCIBILITY.md#tool-calls).
+
+### Evidence
+
+- Before this, only the native loop, Claude Code, Codex and Cursor wrote
+  per-tool events into `trace.jsonl`. The other seven harnesses kept tool
+  calls only in their stream or session archive, each in its own shape. No
+  harness recorded a call's start, end and outcome together, and each public
+  traces exporter picked its own fields (the Beam traces have no tool names).
+- A read-only pass of the new extractors over the local run folders on
+  2026-10-29: Claude Code 664 runs and 49,820 calls, Codex 513 and 13,170,
+  Muse Code 118 and 9,758, dsh 70 and 4,244, Pi 6 and 273, the native loop
+  127 and 381. Claude Code, Muse Code, dsh and Pi calls have both times.
+  Codex and native-loop runs made before this change have end times only
+  (Codex: 94% of calls; 60 legacy runs under `runs/` predate the current
+  Codex trace format). Mirror's 115 Beam runs return `unavailable`: that
+  adapter kept no tool names (the 2026-10-27 entry).
+
+### What changed
+
+- `harness/agent/tool_calls.py`: one extractor per harness, the schema, the
+  summary block and `public_events()`.
+- The loop writes the log when every run finishes. The native loop now
+  records `tool_call` before the tool runs and gives the observation the call
+  id and duration; the Codex adapter records a `tool_call` trace event when a
+  tool item starts and puts the item id on its observation. Both give start
+  times from now on.
+- `vulcanbench tool-calls <dir> [--write]` builds the log for older runs. It
+  adds only `tool-calls.jsonl`; it never rewrites `summary.json`, whose hash
+  frozen judging rounds pin.
+
+### Revisit triggers
+
+- Cursor, Grok Build, Z Code and Devin have no runs on this machine; their
+  extractors follow the adapters' own code and test fixtures. Check
+  `tool-calls.jsonl` on each one's next smoke run.
+
 ## 2026-10-28: GPT-6.1 Terra is judged by Muse Spark 1.3 and Grok 4.6 (v3.29)
 
 ### Decision

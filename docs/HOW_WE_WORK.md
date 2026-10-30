@@ -324,6 +324,13 @@ Muse Spark 1.3 traces), attach a redacted bundle to a GitHub Release (assets
 can be up to 2 GB each, are versioned, and do not bloat the clone) and commit
 a short README under `traces/<name>/` pointing at it.
 
+**Public traces include tool calls.** Every redacted trace carries one
+`tool_call` event per call, built from the run's `tool-calls.jsonl` with
+`public_events()` in `harness/agent/tool_calls.py`: tool name, kind, status,
+exit code, output length and timing. Inputs and outputs stay withheld. For a
+sweep made before the log existed, run `vulcanbench tool-calls <sweep dir>
+--write` first ([REPRODUCIBILITY.md](REPRODUCIBILITY.md#tool-calls)).
+
 **The existing `traces/` folder** (about 550 MB, mostly the Muse Spark 1.3
 Frontier v4 traces) stays where it is so existing links keep working. Removing
 it from the tree would not shrink history anyway; only a history rewrite

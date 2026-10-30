@@ -1174,6 +1174,49 @@ def audit_runs(
         )
 
 
+def record_tool_calls(
+    *, runs_dir: Path = _RUNS_DIR, write: bool = False, force: bool = False
+) -> None:
+    """Build ``tool-calls.jsonl`` for runs that finished before the log existed.
+
+    New runs write it when they finish. This reads the same sources (the
+    harness's stream, session log or trace) for older runs. It only adds
+    ``tool-calls.jsonl``: ``summary.json`` is left alone, because frozen judging
+    rounds pin its hash. Without ``--write`` it reports what it would capture.
+    """
+    from harness.agent import tool_calls as tc  # noqa: PLC0415
+
+    counts: dict[str, int] = {}
+    total = written = 0
+    for sp in sorted(runs_dir.rglob("summary.json")):
+        try:
+            summary = json.loads(sp.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(summary, dict) or "task_id" not in summary:
+            continue
+        harness = tc.harness_of(summary)
+        try:
+            calls = tc.extract(sp.parent, harness)
+        except tc.CaptureUnavailable as exc:
+            key = f"{harness}: unavailable ({exc})"
+            counts[key] = counts.get(key, 0) + 1
+            continue
+        key = f"{harness}: recorded"
+        counts[key] = counts.get(key, 0) + 1
+        total += len(calls)
+        if write and (force or not (sp.parent / tc.FILENAME).exists()):
+            tc.save(sp.parent, calls)
+            written += 1
+
+    runs = sum(counts.values())
+    echo(
+        f"{runs} run(s), {total} tool call(s); {written} log(s) written{'' if write else ' (dry run)'}"
+    )
+    for key in sorted(counts):
+        echo(f"  {key}: {counts[key]}")
+
+
 def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argument per option
     """The ``vulcanbench`` argument parser: one sub-parser per command."""
     parser = argparse.ArgumentParser(
@@ -1713,6 +1756,24 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
         help="Persist web_audit into each run's summary.json",
     )
     g.add_argument("--dry-run", dest="write", action="store_false", help="opposite of --write")
+
+    p = add_command(commands, "tool-calls", record_tool_calls)
+    p.add_argument(
+        "runs_dir",
+        type=Path,
+        nargs="?",
+        default=_RUNS_DIR,
+        help="Directory of runs (recursive)",
+    )
+    p.add_argument(
+        "--write",
+        dest="write",
+        action="store_true",
+        help="Write tool-calls.jsonl where a run has none (default: report only)",
+    )
+    p.add_argument(
+        "--force", dest="force", action="store_true", help="With --write, rebuild existing logs too"
+    )
 
     harness_commands = add_group(
         commands, "harness", "Inspect subscription-backed execution harnesses"

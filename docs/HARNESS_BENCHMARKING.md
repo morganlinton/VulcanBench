@@ -363,6 +363,8 @@ External-harness summaries record:
 - Model-identity confidence
 - Requested effort and the actual value sent
 - Raw, redacted CLI event stream
+- Every tool call in the shared schema (`tool-calls.jsonl`, counted in the
+  summary's `tool_calls` block; see [REPRODUCIBILITY.md](REPRODUCIBILITY.md#tool-calls))
 - Token and cache usage exposed by the CLI
 - Economics measurement basis
 - Task hash, environment manifest, final patch, and verifier result
@@ -397,6 +399,9 @@ can enforce the API-equivalent cap during a run.
 7. Publish pass@1 with uncertainty, latency, quota/cost basis, and harness
    version.
 8. Keep a small raw-API control subset to estimate the harness delta.
+9. Check the smoke task's `tool-calls.jsonl` before the sweep. A harness whose
+   summary says `"capture": "unavailable"` or `"error"` is not logging its tool
+   calls, and its public traces would ship without them.
 
 Use Docker verification for publication runs. A missing verifier dependency is
 an infrastructure error, not a model failure; VulcanBench now surfaces and

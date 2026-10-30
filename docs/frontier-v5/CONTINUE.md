@@ -109,7 +109,7 @@ comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
 | F5-rust reserve | sqlparser-display-round-trip (`frontier-v5-sqlparser`) | 1 to 7, floor 8 not met | not gated |
 | F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | **admitted** 2026-10-29 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time) |
 | F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | **rejected** 2026-10-28 (Astra 2 of 2, genuine; slot needs a new candidate) |
-| F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | **admitted by the gate rule** 2026-10-30 (Astra 0 of 3, Opus 5.5 0 of 3), flagged: held only by two held-out guards (GATE-LOG.md); owner review before the freeze |
+| F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | **admitted by the gate rule** 2026-10-30 (Astra 0 of 3, Opus 5.5 0 of 3), flagged: held only by two held-out guards (GATE-LOG.md); accepted by the owner 2026-10-30 with the flag kept |
 
 Gate runs have a standing approval from 2026-10-30 to 2026-11-06
 (DECISIONS.md): each validated candidate's Astra half, then its Opus 5.5

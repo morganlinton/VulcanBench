@@ -705,4 +705,5 @@ only by guards. The task measures "fix six defects without disturbing two
 neighbouring edge behaviours", which is a legitimate skill but a narrow
 margin: one reference noticing either edge case would flip it. Whether a
 hold of this shape belongs in Frontier v5 is the owner's call before the
-freeze.
+freeze. **Owner, in chat, 2026-10-30: accepted as F5-cpp, with this flag
+kept on the record.**

@@ -7,6 +7,52 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-30: Frontier v5 gate runs have a standing approval for one week; (g') and (h) decided
+
+### Decision
+
+Owner, in chat, 2026-10-30, with the goal of finishing Frontier v5 within
+the week. Three decisions:
+
+1. **Standing approval for gate runs, 2026-10-30 to 2026-11-06.** Each built
+   and validated candidate's gate runs without a per-run confirmation: the
+   GPT-6 Astra half, then the Claude Opus 5.5 half if Astra holds. Gate runs
+   still go only through `scripts/frontier-v5/run_gate.sh`, from a run
+   worktree pinned to a pushed `bench/...` tag, one attempt at a time
+   (`GATE_CONCURRENCY=1`), under the usage pre-flight's default cap
+   (`GATE_USAGE_MAX=0.85`). Every result is reported to the owner. Still
+   asked first: an n=5 top-up, a re-run of a finished half, any override of
+   the pre-flight, and any run outside the gate (sweeps, diagnostics such as
+   comrak-v2). The approval lapses at the end of 2026-11-06.
+2. **(g') A task that misses floor 8 and holds the gate.** Floor 8 is a
+   pre-gate screen; a candidate that misses it may be gated at the owner's
+   discretion and admitted on the gate alone, with the miss recorded in its
+   GATE-LOG verdict. Applied first to pulldown-cmark-html-block-scanning
+   (Astra 0 of 3 on 2026-10-26), whose Opus 5.5 half runs next. sqlparser
+   stays a reserve.
+3. **(h) F2 shape: B1, without the comrak-v2 diagnostic.** The agent image
+   cannot build or run the reference, verified at validation. Decided on the
+   comrak evidence alone (both Astra solves used the compiled C reference as
+   an oracle); (i) is therefore not funded.
+
+### Evidence
+
+Wave 1 so far (GATE-LOG.md): 4 of 26 slots admitted, every reject decided by
+the Astra half, and every gate run since 2026-10-22 approved one at a time
+with no change in protocol. The per-run wait is now the slowest step.
+
+### Revisit triggers
+
+- 2026-11-06: the standing approval lapses unless the owner renews it.
+- A gate run that hits an infrastructure failure (login, usage window,
+  Docker VM memory): stop the queue and ask before resuming.
+- An F2 candidate whose reference cannot be removed from the agent image
+  without breaking its build: bring it to the owner rather than relaxing B1.
+
+### What this touched
+
+docs/frontier-v5/CONTINUE.md (next steps). No code.
+
 ## 2026-10-27: the prettier gate runs one attempt at a time
 
 ### Decision

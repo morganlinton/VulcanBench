@@ -43,10 +43,13 @@ then NIGHT-STATUS.md and GATE-LOG.md.
 2. ~~**F5 floors**~~ Decided 2026-10-26: floor 8 is amended so a candidate
    meets it by a guarded fix (route a) or by combination coverage (route b);
    PLAN-v3.md section 2, with the measurement on five tasks. Black meets both
-   routes; pulldown-cmark and sqlparser-rs meet neither, so whether a
-   floor-8 miss that holds the gate may be admitted is PLAN-v3 decision (g').
+   routes; pulldown-cmark and sqlparser-rs meet neither. (g') decided
+   2026-10-30: a floor-8 miss may be gated and admitted on the gate alone,
+   with the miss recorded (DECISIONS.md).
 3. Still open from v1: (d) publishing channel, (f) gold location.
-4. **F2 shape** after comrak: DESIGN.md's revisit rule says the slot should
+4. ~~**F2 shape**~~ Decided 2026-10-30: B1 (the agent image cannot build or
+   run the reference), without the comrak-v2 diagnostic (DECISIONS.md).
+   Original question: DESIGN.md's revisit rule says the slot should
    take a larger subsystem, and the sandbox's C toolchain let both agents
    turn the shipped reference into an oracle. Decide whether F2 ships the
    reference in a form the sandbox cannot build, or accepts measuring
@@ -108,9 +111,12 @@ comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
 | F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | **rejected** 2026-10-28 (Astra 2 of 2, genuine; slot needs a new candidate) |
 | F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | not gated; built and validated 2026-10-28 |
 
-Next, on the owner's approval (it spends quota): the Astra half on
-cli11-toml-config-round-trip (a run worktree pinned to its commit, one
-attempt at a time by decision (e)). Wave 1 now has four admitted F5 slots
+Gate runs have a standing approval from 2026-10-30 to 2026-11-06
+(DECISIONS.md): each validated candidate's Astra half, then its Opus 5.5
+half if Astra holds, one attempt at a time from a pushed bench tag; top-ups
+and anything outside the gate are still asked first. Queued 2026-10-30: the
+Astra half on cli11-toml-config-round-trip (`bench/2026-10-30-cli11-astra-gate`),
+then the Opus 5.5 half on pulldown-cmark-html-block-scanning under (g'). Wave 1 now has four admitted F5 slots
 (python, javascript, java, and c from the first wave); rust waits on
 decision (g') and cpp on CLI11's gate. Boost.URL was solved
 twice by Astra with self-written RFC 3986 differential checks (GATE-LOG.md);

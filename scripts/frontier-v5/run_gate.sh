@@ -15,6 +15,9 @@
 #
 # Concurrency follows decision (e): Python and JavaScript tasks run two
 # attempts at a time, compiled and JVM tasks one (16 GiB hosts).
+# GATE_CONCURRENCY=1 overrides that for a task whose verifiers cannot share
+# the Docker VM (prettier, docs/DECISIONS.md 2026-10-27); the value is
+# printed on the === line.
 # Early exit: two solves by the reference end a task's gate as a reject, so
 # the Harbor job is stopped as soon as two trials have reward 1. Killing
 # `harbor run` does not stop the running trial's sandbox containers, which
@@ -139,6 +142,7 @@ for t in "$@"; do
   [ -f "$task/task.toml" ] || { echo "run_gate: no task $t" >&2; exit 2; }
   lang=$(sed -n 's/^vulcanbench_language = "\(.*\)"/\1/p' "$task/task.toml")
   case "$lang" in python|javascript) n=2 ;; *) n=1 ;; esac
+  case "${GATE_CONCURRENCY:-}" in "") ;; 1|2) n=$GATE_CONCURRENCY ;; *) echo "run_gate: GATE_CONCURRENCY must be 1 or 2" >&2; exit 2 ;; esac
   job="$ref-$t$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
   [ "$agent" = claude-code ] && usage_preflight

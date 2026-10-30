@@ -36,7 +36,7 @@ launcher.
 | treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
-| pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met, gated under (g')) | **0 of 3** (3.7, 4.4, 3.2) | Opus 5.5: **1 of 3** (13.4, 11.1, 8.6), n=5 top-up pending | pending the top-up (2026-10-30) |
+| pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met, gated under (g')) | **0 of 3** (3.7, 4.4, 3.2) | **Opus 5.5: 1 of 5** (13.4, 11.1, 8.6, 7.6, 5.4) after the n=5 top-up | **ADMIT** (F5-rust, 2026-10-30) under (g'): Opus 1 of 5, below the bar; floor-8 miss recorded |
 | prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
 | javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
@@ -648,7 +648,7 @@ rests on two edge behaviours next to the defects rather than on the defects
 themselves, and these are the fastest attempts on any candidate gated so far.
 The Opus 5.5 half decides; anyone reviewing the suite should read this note.
 
-### pulldown-cmark-html-block-scanning, Opus 5.5 half (2026-10-30): 1 of 3, top-up pending
+### pulldown-cmark-html-block-scanning, Opus 5.5 half (2026-10-30): 1 of 5 after the top-up, admitted
 
 Gated under decision (g') (DECISIONS.md 2026-10-30): floor 8 not met,
 Astra 0 of 3 on 2026-10-26. Job `opus-pulldown-cmark-html-block-scanning`,
@@ -675,6 +675,26 @@ inputs; tamper scan clean. The two failing attempts miss the same three
 checks as the closest Astra attempts. A prong at exactly 1 of 3 takes the
 n=5 top-up (two more attempts, admit only at 2 of 5 or fewer). The top-up
 is outside the standing approval and waits for the owner.
+
+Top-up, approved by the owner in chat: job
+`opus-pulldown-cmark-html-block-scanning-topup` (`GATE_ATTEMPTS=2
+GATE_JOB_SUFFIX=-topup`), launched 15:55 PDT from the same run worktree,
+usage pre-flight 0.11, sessions real (`claude-opus-5-5`, 33 and 44 tool
+calls), finished 16:11.
+
+| Trial | Agent minutes | Tool calls | Reward | Held-out failing (of 24) | Guards |
+| --- | --- | --- | --- | --- | --- |
+| ReECqVJ | 7.6 | 44 | 0 | 3 (r273, r274, r277) | hold |
+| qsghrbk | 5.4 | 33 | 0 | 6 (r259, r260, r261, r273, r274, r277) | hold |
+
+**Opus 5.5 1 of 5, Astra 0 of 3.** Every failing attempt in both halves
+misses r273, r274 and r277; the one solve is the genuine TYp9MfL above.
+
+**Verdict: ADMIT** (F5-rust, 2026-10-30) under decision (g'): the prong at
+1 of 3 finished at 1 of 5, below the 2 of 5 bar. Floors 1 to 7 met; floor 8
+(neither route) is not met, and that miss is part of this admission's
+record. With it, every F5 slot is admitted (c, python, javascript, java,
+cpp, rust).
 
 ### cli11-toml-config-round-trip, Opus 5.5 half (2026-10-30): admitted by the gate rule, flagged
 

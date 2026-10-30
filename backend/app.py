@@ -25,6 +25,9 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from backend import db
+from backend.runner.config import load_config as load_runner_config
+from backend.runner.routes import router as runner_router
+from backend.runner.supervisor import SERVICE as RUNNER_SERVICE
 from harness import __version__
 from harness.calibration import calibrate_tasks
 from harness.leaderboard import aggregate_by_model, filter_rows_by_repo_scale, scan_leaderboard
@@ -40,9 +43,14 @@ RUNS_DIR = Path(os.environ.get("VULCANBENCH_RUNS_DIR", "./runs"))
 @asynccontextmanager
 async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
     db.init_db()  # no-op unless DATABASE_URL is set
+    runner_cfg = load_runner_config()
+    if runner_cfg.enabled:
+        # Local run GUI: one supervisor per machine (flock), ticking on a daemon thread.
+        RUNNER_SERVICE.start(runner_cfg)
     try:
         yield
     finally:
+        RUNNER_SERVICE.stop()
         db.close_db()
 
 
@@ -59,6 +67,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Local run GUI (backend/runner): opt-in with VULCANBENCH_RUNNER=1, loopback only.
+app.include_router(runner_router)
 
 
 def _require_write_token(authorization: str | None = Header(default=None)) -> None:

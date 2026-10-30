@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Local run GUI** (`backend/runner/`, dashboard `/runs` and `/launch`,
+  `make gui`): a localhost page that lists every gate job and harness run
+  with its bench tag, attempts, rewards, containers, a live log tail and a
+  first-attempt check, and queues Frontier v5 gate runs through
+  `run_worktree.sh` and `run_gate.sh` with the exact command shown before a
+  confirm click, one job at a time, with a clean stop. `run_gate.sh` starts
+  harbor as an interruptible child, traps INT and TERM, writes
+  `<job>.status.json`, and gains `--refs` and `GATE_PREFLIGHT_ONLY=1`.
+
 ## [0.10.0] - 2026-10-30
 
 ### Added

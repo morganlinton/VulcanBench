@@ -216,6 +216,11 @@ Three grading modes, chosen per task via `metadata.grader`:
    changing one means a version bump and `make freeze-suite`. The full
    workflow, including how benchmark runs are launched, is in
    [docs/HOW_WE_WORK.md](docs/HOW_WE_WORK.md).
+7. A new execution harness needs a tool-call extractor in
+   `harness/agent/tool_calls.py` that reads what the adapter records (its
+   stream, session log or trace) into the shared schema, plus a fixture test.
+   `tests/test_tool_calls.py` fails for an adapter without one. See
+   [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md#tool-calls).
 
 ## Reporting Issues
 

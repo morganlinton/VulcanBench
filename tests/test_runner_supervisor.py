@@ -609,14 +609,15 @@ def test_stop_kills_the_agent_session_then_waits_for_the_harness(
     state.request_stop(job.id, "test")
     s.tick()  # SIGINT to vulcanbench
     assert state.get_job(job.id).status == "stopping"  # type: ignore[union-attr]
+    assert state.get_job(job.id).spec["agent_pgids_seen"] == [agent_pid]  # type: ignore[union-attr]
     clock.advance(sup.AGENT_KILL_AFTER_S + 1)
-    s.tick()  # the agent's own session is killed
-    assert killed and killed[0] == (agent_pid, signal.SIGKILL)
-    assert any("agent process group" in n for n in state.get_job(job.id).notes)  # type: ignore[union-attr]
-    wait_until(lambda: s.children[job.id].poll() is not None)
+    s.tick()  # the agent's own session is killed, whether or not the harness is still there
+    wait_until(lambda: job.id not in s.children or s.children[job.id].poll() is not None)
     s.tick()
     done = state.get_job(job.id)
     assert done is not None and done.status == "stopped" and done.exit_code == 130
+    assert (agent_pid, signal.SIGKILL) in killed
+    assert any("agent process group" in n for n in done.notes)
     assert (out_dir / "interrupted").read_text() == "sigint"
     wait_until(lambda: not _alive(agent_pid))
 

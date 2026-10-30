@@ -183,6 +183,10 @@ class Supervisor:
 
     def _finalize_suite(self, job: Job, code: int | None) -> None:  # noqa: PLR0911
         """A level of a model sweep ended; decide from the exit code and the output directory."""
+        if job.stop_requested_at:
+            # The harness may have exited before the agent-kill tick; its agent CLIs live in
+            # their own sessions and would otherwise outlive it.
+            job = self._kill_agents(job, None, final=True)
         prog = sweep.progress(job.spec, self.now())
         done = f"{prog['runs_done']} of {prog['total_runs']} runs have a result"
         if code in (130, 143) or (code is not None and code < 0):
@@ -328,6 +332,10 @@ class Supervisor:
             if table is None:
                 table = self._procs()
             if not job.stop_signalled_at:
+                spec = job.spec
+                if job.kind == "suite":
+                    # Remember the agent sessions now, while the harness is still their parent.
+                    spec = {**spec, "agent_pgids_seen": self._agent_groups(job, table)}
                 self._signal(job.pid, signal.SIGINT, pg=False)
                 if job.kind == "gate" and not job.spec.get("script_features", {}).get(
                     "status_file", True
@@ -336,7 +344,9 @@ class Supervisor:
                     harbor = procs.find_harbor_job(job.name, table)
                     if harbor is not None:
                         self._signal(harbor.pid, signal.SIGINT, pg=False)
-                self.state.update_job(job.id, status="stopping", stop_signalled_at=iso(now))
+                self.state.update_job(
+                    job.id, status="stopping", stop_signalled_at=iso(now), spec=spec
+                )
                 continue
             signalled = _dt(job.stop_signalled_at)
             escalated = _dt(job.stop_escalated_at)
@@ -359,20 +369,42 @@ class Supervisor:
                 self._signal(job.pgid or job.pid, signal.SIGKILL, pg=True)
                 self.state.add_note(job.id, "SIGKILL sent to the process group")
 
-    def _kill_agents(self, job: Job, table: list[procs.Proc]) -> None:
-        """SIGKILL the agent CLIs under a suite run: they live in their own sessions."""
-        assert job.pid is not None
+    def _agent_groups(self, job: Job, table: list[procs.Proc]) -> list[int]:
+        """Process groups under a suite run other than the job's own: the agent CLIs' sessions."""
+        if job.pid is None:
+            return []
         own = job.pgid or job.pid
-        groups = sorted({p.pgid for p in procs.descendants(job.pid, table) if p.pgid != own})
-        for pgid in groups:
+        return sorted({p.pgid for p in procs.descendants(job.pid, table) if p.pgid != own})
+
+    def _kill_agents(self, job: Job, table: list[procs.Proc] | None, *, final: bool = False) -> Job:
+        """SIGKILL the agent CLIs under a suite run: they live in their own sessions.
+
+        ``final``: the harness itself is gone; only the groups recorded at SIGINT time
+        can still be found, and the job is left alone when none is alive.
+        """
+        seen = [int(g) for g in job.spec.get("agent_pgids_seen") or []]
+        live = self._agent_groups(job, table) if table is not None else []
+        killed: list[int] = []
+        for pgid in sorted(set(seen) | set(live)):
+            try:
+                self.killpg(pgid, 0)
+            except ProcessLookupError:
+                continue
+            except PermissionError:
+                pass
             self._signal(pgid, signal.SIGKILL, pg=True)
-        self.state.update_job(
+            killed.append(pgid)
+        if final and not killed:
+            return job
+        note = (
+            f"killed {len(killed)} agent process group(s) the harness left behind"
+            if final
+            else f"killed {len(killed)} agent process group(s); waiting for the harness to grade and tear down"
+        )
+        return self.state.update_job(
             job.id,
-            spec={**job.spec, "agents_killed_at": iso(self.now()), "agent_pgids": groups},
-            notes=[
-                *job.notes,
-                f"killed {len(groups)} agent process group(s); waiting for the harness to grade and tear down",
-            ],
+            spec={**job.spec, "agents_killed_at": iso(self.now()), "agent_pgids": killed},
+            notes=[*job.notes, note],
         )
 
     def _signal(self, pid: int, sig: int, *, pg: bool) -> None:

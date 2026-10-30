@@ -31,7 +31,7 @@ def _daemon_down(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_version() -> None:
     result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
-    assert __version__ == "0.9.0"
+    assert __version__ == "0.10.0"
     assert __version__ in result.output
 
 

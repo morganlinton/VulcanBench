@@ -1,6 +1,6 @@
 [project]
 name = "vulcanbench"
-version = "0.8.0"
+version = "0.10.0"
 description = "VulcanBench v1 - open-source LLM benchmarking harness for realistic software engineering tasks"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -20,21 +20,17 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
+# Kept deliberately small: the CLI is argparse, the agent/tool models are
+# dataclasses, provider HTTP and retries are urllib plus a stdlib loop, and the
+# sandbox drives the ``docker`` CLI (no SDK). See CHANGELOG for the trim.
 dependencies = [
-  "typer[all]>=0.12.3",
-  "pydantic>=2.8.0,<3",
-  "pydantic-settings>=2.3.0",
-  "rich>=13.7.0",
   "pyyaml>=6.0.1",
-  "docker>=7.1.0",
-  "tenacity>=8.4.0",
   "websockets>=12.0",   # Voice Eval Suite: OpenAI Realtime + Gemini Live transports
   # audioop left the stdlib in 3.13 (PEP 594); harness/voice/audio.py imports it
   # at module scope, and harness/cli.py imports the voice CLI, so without this
   # EVERY vulcanbench command fails to start on 3.13+. audioop-lts is the
   # maintained extraction of the same C code.
   "audioop-lts>=0.2.1; python_version >= '3.13'",
-  "jsonschema>=4.22.0",
   "python-dotenv>=1.0.1",
   # Evaluator: quality (lint + complexity) and security analysis for Python.
   # JS/Go/Java analyzers shell out to external toolchains when present (optional).
@@ -52,7 +48,6 @@ dev = [
   "black>=24.4.0",
   "pre-commit>=3.7.0",
   "types-pyyaml>=6.0.12",
-  "types-docker>=7.0.0",
 ]
 test = [
   "pytest>=8.2.0",
@@ -75,7 +70,7 @@ reports = [
 ]
 
 [project.scripts]
-vulcanbench = "harness.cli:app"
+vulcanbench = "harness.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/morganlinton/VulcanBench"
@@ -133,6 +128,9 @@ exclude = [
   "harness/maintenance_review_v3262.py",
   "harness/maintenance_review_v3263.py",
   "harness/maintenance_review_v3264.py",
+  "harness/maintenance_review_v327.py",
+  "harness/maintenance_review_v328.py",
+  "harness/maintenance_review_v329.py",
 ]
 
 [tool.ruff.lint]
@@ -201,6 +199,9 @@ module = [
   "harness.maintenance_review_v3262",
   "harness.maintenance_review_v3263",
   "harness.maintenance_review_v3264",
+  "harness.maintenance_review_v327",
+  "harness.maintenance_review_v328",
+  "harness.maintenance_review_v329",
   "harness.maintenance_summary",
   "harness.panel_comparison",
   "harness.panel_receipts",
@@ -270,6 +271,9 @@ omit = [
   "harness/maintenance_review_v3262.py",
   "harness/maintenance_review_v3263.py",
   "harness/maintenance_review_v3264.py",
+  "harness/maintenance_review_v327.py",
+  "harness/maintenance_review_v328.py",
+  "harness/maintenance_review_v329.py",
   "harness/maintenance_review_v312.py",
   "harness/maintenance_review_v36.py",
   "harness/maintenance_review_v361.py",

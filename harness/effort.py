@@ -195,6 +195,14 @@ _PROVIDER_EFFORT_MAPS = {
     "pi": _PI_EFFORT_VALUES,
     # DeepSeek Harness's DeepSeek route takes off, low, high and max.
     "dsh": {"low": "low", "high": "high", "max": "max"},
+    # Mirror sends Beam's reasoning_effort: low, medium, high, xhigh, max (no none or minimal).
+    "mirror": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "extra-high": "xhigh",
+        "max": "max",
+    },
 }
 
 

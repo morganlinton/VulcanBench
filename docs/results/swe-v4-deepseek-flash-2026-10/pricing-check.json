@@ -1,0 +1,15 @@
+{
+  "checked": "2026-10-19",
+  "deepseek": {
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "aliases": {"deepseek-flash": "DeepSeek-V4.1-Flash-1017", "deepseek-v4-pro": "DeepSeek-V4-Pro-0813"},
+    "usd_per_million_off_peak": {
+      "deepseek-flash": {"input_cache_miss": 0.15, "input_cache_hit": 0.003, "output": 0.60},
+      "deepseek-v4-pro": {"input_cache_miss": 0.66, "input_cache_hit": 0.022, "output": 1.98}
+    },
+    "peak": "2x, 01:00 to 04:00 and 06:00 to 10:00 UTC, Monday to Friday",
+    "alias_rechecked_before_each_level": true,
+    "list_price_basis": "the board's cost uses the off-peak rate; billed cost (cli_reported_cost_usd) meters each call at its time"
+  },
+  "comparators": "Claude Opus 5.5 and GPT-6.1 Sol costs are their published rows in docs/results/swe-v4-gpt6-vs-gpt56-2026-09/gpt61sol-opus55-astra-efforts.csv, checked against list prices in docs/results/swe-v4-musewonder-full-2026-10/pricing-check.json (2026-10-15)"
+}

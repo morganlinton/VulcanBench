@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Literal
-
-from pydantic import BaseModel, Field, field_validator
 
 Category = Literal[
     "arithmetic",
@@ -31,7 +30,8 @@ CATEGORIES: tuple[str, ...] = (
 )
 
 
-class VoiceItem(BaseModel):
+@dataclass(kw_only=True)
+class VoiceItem:
     """One short-form question with an objectively checkable answer."""
 
     id: str
@@ -39,14 +39,35 @@ class VoiceItem(BaseModel):
     question: str
     answer: str
     #: Alternative surface forms accepted as correct verbatim (post-normalization).
-    accept: list[str] = Field(default_factory=list)
+    accept: list[str] = field(default_factory=list)
 
-    @field_validator("question", "answer")
+    def __post_init__(self) -> None:
+        for name in ("id", "category", "question", "answer"):
+            if not isinstance(getattr(self, name), str):
+                raise ValueError(f"{name} must be a string")
+        if self.category not in CATEGORIES:
+            raise ValueError(
+                f"category must be one of {', '.join(CATEGORIES)}, got {self.category!r}"
+            )
+        self.question = self.question.strip()
+        self.answer = self.answer.strip()
+        if not self.question:
+            raise ValueError("question must be non-empty")
+        if not self.answer:
+            raise ValueError("answer must be non-empty")
+        if not isinstance(self.accept, list) or not all(isinstance(a, str) for a in self.accept):
+            raise ValueError("accept must be a list of strings")
+
     @classmethod
-    def _non_empty(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("must be non-empty")
-        return v.strip()
+    def from_dict(cls, raw: object) -> VoiceItem:
+        """Validate one decoded ``questions.jsonl`` record (unknown keys are ignored)."""
+        if not isinstance(raw, dict):
+            raise ValueError("item must be a JSON object")
+        missing = [k for k in ("id", "category", "question", "answer") if k not in raw]
+        if missing:
+            raise ValueError(f"missing field(s): {', '.join(missing)}")
+        names = {f.name for f in fields(cls)}
+        return cls(**{k: v for k, v in raw.items() if k in names})
 
 
 def load_items(path: Path) -> list[VoiceItem]:
@@ -57,7 +78,7 @@ def load_items(path: Path) -> list[VoiceItem]:
         if not raw.strip():
             continue
         try:
-            item = VoiceItem.model_validate(json.loads(raw))
+            item = VoiceItem.from_dict(json.loads(raw))
         except (json.JSONDecodeError, ValueError) as exc:
             raise ValueError(f"{path}:{lineno}: invalid item: {exc}") from exc
         if item.id in seen:

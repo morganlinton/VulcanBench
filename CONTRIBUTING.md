@@ -64,29 +64,88 @@ next fix lands, run `make lint` (or full `make ci`) before any push.
 ## Versioning
 
 VulcanBench follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
-While the project is pre-1.0, treat **minor** bumps as the default for new
-user-facing features and **patch** bumps for bug fixes and docs-only changes.
+While the project is pre-1.0, a release with a new user-facing feature is a
+**minor** bump, and a release with only bug fixes or docs is a **patch** bump.
 
-**Bump the version in the same PR as the feature.** When you add a provider,
-CLI command, metric, or other user-visible capability:
+**Feature PRs add a changelog line; they do not bump the version.** When a PR
+changes something a harness user sees (a provider, harness, CLI command or
+flag, metric, run artifact, or a fix to any of these), add a line under
+`## [Unreleased]` in `CHANGELOG.md`, in its `### Added`, `### Changed` or
+`### Fixed` subsection. Results, task-authoring and docs-only PRs do not need
+one. Leave the version alone: parallel PRs that each bump it would conflict,
+and the version moves once per release, in the release PR.
 
-1. **`harness/__init__.py`**: update `__version__` (canonical runtime version;
-   used by `vulcanbench --version` and the backend API)
-2. **`pyproject.toml`**: set `version` to the same string (PyPI / packaging)
-3. **`CHANGELOG.md`**: add a dated entry under the new version (`### Added`,
-   `### Changed`, `### Fixed` as appropriate)
-4. **`README.md`**: update the version blurb near the top if it references the
-   release number
-5. **`tests/test_cli.py`**: update the `test_version` assertion to match
-6. **Tweet copy**: when finishing a user-facing release, include ready-to-post
-   tweet text in the PR description or chat reply (see [Release tweet](#release-tweet)
-   below). Agents working in this repo must do this whenever they bump the version.
+### Cutting a release
 
-`backend/app.py` imports `__version__` from `harness`: no separate edit needed
-there.
+The maintainer decides when the changes under `[Unreleased]` are worth a
+release; agents open a release PR only when asked. Releases are cut from
+`main`:
 
-Release tags use the `v` prefix (e.g. `v0.3.0`). Do not tag or publish from a
-feature PR unless explicitly requested; maintainers cut releases from `main`.
+1. **Open a release PR** on a branch from `main` (for example
+   `release/0.10.0`) that changes only:
+   - `harness/__init__.py`: `__version__`, the canonical runtime version used
+     by `vulcanbench --version` and the backend API (`backend/app.py` imports
+     it, so it needs no edit)
+   - `pyproject.toml`: `version`, set to the same string
+   - `uv.lock`: the `vulcanbench` package's `version` (`uv lock --check`
+     confirms the lockfile still matches)
+   - `tests/test_cli.py`: the `test_version` assertion
+   - `README.md`: the version blurb, if it names the release number
+   - `CHANGELOG.md`: rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`
+     and put a fresh, empty `## [Unreleased]` above it. Add a line for
+     anything merged since the last release that is missing one.
+
+   Put the [release post](#release-post) in the PR body.
+2. **Merge it** once CI passes.
+3. **Tag the release PR's merge commit** and push the tag:
+
+   ```bash
+   git fetch origin
+   git tag -a vX.Y.Z -m "VulcanBench X.Y.Z" <merge commit>
+   git push origin vX.Y.Z
+   ```
+
+   Tags use the `v` prefix. Never tag a feature branch or an unmerged commit:
+   every release is a commit on `main`.
+4. **CI creates the GitHub Release.** The tag starts
+   `.github/workflows/release.yml`, which publishes a release with install
+   steps and notes generated from the merged PRs. Publishing it also starts
+   `publish-pypi.yml`; until PyPI publishing is configured for this
+   repository, that run fails without uploading anything.
+5. **Announce it** with the release post and image, linking the release.
+
+### Release post
+
+Every release PR carries a ready-to-post X post in its body (or, for an
+agent, in the chat reply), so the maintainer can post it with light edits.
+
+**Format**
+
+- Lead with `VulcanBench vX.Y.Z` and one line on what it is (open-source LLM coding benchmark)
+- 2 to 4 concrete bullets as short phrases (new command, harness, suite or fix, not internal refactors)
+- Link: `https://github.com/morganlinton/VulcanBench`
+- Stay under 280 characters as X counts them (a link counts as 23); use a thread only if necessary
+- Tone: factual, excited but not hype-y; 0 to 2 relevant hashtags at most
+
+**Image.** Attach one clean 16:9 PNG (2400x1350): white background, the logo
+chip and wordmark as the brand section of [CLAUDE.md](CLAUDE.md) specifies,
+the version large in Chakra Petch SemiBold, one headline line, at most one
+supporting line in IBM Plex Mono, and the repository URL. No charts,
+screenshots or extra copy. The fonts are in `scripts/rankings-chart/` and the
+logo is `docs/assets/vulcanbench-logo.png`. The image is posted, not
+committed.
+
+**Example**
+
+```text
+VulcanBench v0.10.0 is out, open-source benchmark for LLMs on real coding tasks.
+
+• Every run now logs its tool calls, one schema across 11 harnesses
+• vulcanbench tool-calls backfills older runs
+• New Mirror harness for Reflection Beam, with full traces
+
+https://github.com/morganlinton/VulcanBench
+```
 
 ### Regenerating cost priors
 
@@ -114,29 +173,6 @@ make validate-tasks-docker
 Host validation (`make validate-tasks`) is faster but does not catch container-only
 issues (e.g. Go `GOCACHE` in non-root sandboxes). Rust tasks automatically use
 ``vulcanbench/sandbox:rust`` in Docker (build with ``make sandbox-image-rust``).
-
-### Release tweet
-lightly edit. Put it in the PR body or hand it to the user in chat.
-
-**Format**
-
-- Lead with `VulcanBench vX.Y.Z` and one-line what it is (open-source LLM coding benchmark)
-- 2–4 concrete bullets as short phrases (new command, fix, suite, not internal refactors)
-- Link: `https://github.com/morganlinton/VulcanBench`
-- Stay under ~280 characters when possible; use a thread only if necessary
-- Tone: factual, excited but not hype-y; no hashtag spam (0–2 relevant tags max)
-
-**Example**
-
-```text
-VulcanBench v0.3.0 is out, open-source benchmark for LLMs on real coding tasks.
-
-• vulcanbench estimate, see API spend before you run
-• v1-compare, 12-task head-to-head suite
-• Fixes Go scoring in Docker + GPT-5 temperature
-
-https://github.com/morganlinton/VulcanBench
-```
 
 ## Adding a New Task
 
@@ -216,6 +252,11 @@ Three grading modes, chosen per task via `metadata.grader`:
    changing one means a version bump and `make freeze-suite`. The full
    workflow, including how benchmark runs are launched, is in
    [docs/HOW_WE_WORK.md](docs/HOW_WE_WORK.md).
+7. A new execution harness needs a tool-call extractor in
+   `harness/agent/tool_calls.py` that reads what the adapter records (its
+   stream, session log or trace) into the shared schema, plus a fixture test.
+   `tests/test_tool_calls.py` fails for an adapter without one. See
+   [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md#tool-calls).
 
 ## Reporting Issues
 

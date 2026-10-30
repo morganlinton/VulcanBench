@@ -5,17 +5,19 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
 
 from harness import settings
 from harness.agent.loop import run_agent
-from harness.cli import app
+from harness.cli import main
 from harness.settings import (
+    RUNNER_DEFAULTS,
     BlockedEffortError,
     blocked_efforts,
     check_effort_allowed,
     load_settings,
+    runner_settings,
 )
+from tests.cli_runner import CliRunner
 
 
 def test_repository_settings_block_ultra() -> None:
@@ -58,12 +60,12 @@ def test_run_agent_refuses_blocked_effort_before_loading_anything(tmp_path: Path
 def test_cli_run_and_sweep_refuse_blocked_effort(tmp_path: Path) -> None:
     runner = CliRunner()
     result = runner.invoke(
-        app,
+        main,
         ["run", "--task", "x", "--model", "mock:model", "--effort", "ultra", "-o", str(tmp_path)],
     )
     assert result.exit_code == 1 and "blocked by vulcanbench.toml" in result.output
     result = runner.invoke(
-        app,
+        main,
         [
             "effort-sweep",
             "--suite",
@@ -77,3 +79,21 @@ def test_cli_run_and_sweep_refuse_blocked_effort(tmp_path: Path) -> None:
         ],
     )
     assert result.exit_code == 1 and "blocked by vulcanbench.toml" in result.output
+
+
+def test_runner_settings_defaults_and_validation(tmp_path: Path) -> None:
+    missing = tmp_path / "none.toml"
+    assert runner_settings(missing) == RUNNER_DEFAULTS
+
+    good = tmp_path / "good.toml"
+    good.write_text('[runner]\nhome = "/tmp/r"\nextra_run_roots = ["/a", "/b"]\n')
+    table = runner_settings(good)
+    assert table["home"] == "/tmp/r" and table["extra_run_roots"] == ["/a", "/b"]
+    assert table["gate_out"] == RUNNER_DEFAULTS["gate_out"]
+
+    bad = tmp_path / "bad.toml"
+    bad.write_text('[runner]\nfirst_check_after_s = "soon"\n')
+    load_settings.cache_clear()
+    with pytest.raises(ValueError, match="first_check_after_s"):
+        runner_settings(bad)
+    load_settings.cache_clear()

@@ -7,6 +7,312 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-29: run_gate.sh stops harbor for real; gate runs can be queued from the local GUI
+
+### Decision
+
+Owner, in chat, 2026-10-29. `scripts/frontier-v5/run_gate.sh` starts
+harbor as a direct, interruptible child and traps INT and TERM, so one
+signal to the script (from a terminal or from the local run GUI) cancels
+the running attempt through harbor's own path, removes the task's sandbox
+containers and records the outcome in `$GATE_OUT/<job>.status.json`. The
+GUI (docs/GUI.md) launches gate runs only through this script, from a
+`run_worktree.sh` worktree pinned to a bench tag, one job at a time, after a
+confirm click that shows the exact command; the usage pre-flight runs only
+on an explicit click because it spends one model turn.
+
+### Evidence
+
+- The early exit and the infrastructure stop never reached harbor. In bash
+  3.2 a backgrounded list runs with SIGINT ignored and `$!` is the subshell,
+  not harbor, so `kill -INT "$hpid"` hit a bash that ignored it and the plain
+  `kill` 20 s later removed the subshell while harbor kept running,
+  reparented, until `stop_sandboxes` pulled its containers away. Seen on the
+  live process tree of `opus-javaparser-member-resolution-scope` on
+  2026-10-29 (script 2071, subshell 2126, harbor 2128) and on the Boost.URL
+  early exit, whose third trial ended in a compose `RuntimeError` rather
+  than a cancel.
+- Harbor has no SIGTERM handler; only SIGINT runs its cancel path
+  (`docker compose down`, log copy), which took more than the old 20 s
+  grace in the comrak and Boost.URL stops. The new script waits 90 s before
+  escalating.
+- `tests/test_run_gate_script.py` drives the script with a fake harbor: a
+  SIGINT to the script ends harbor in well under a second, the status file
+  goes `preflight`, `running`, `stopping`, `stopped` with exit code 130, the
+  early reject and the infrastructure guard still fire, and every stdout
+  line the GATE-LOG workflow greps for is unchanged.
+
+### Revisit triggers
+
+- Harbor gains a SIGTERM handler or a cancel command: the python
+  signal-reset wrapper and the 90 s wait can go.
+- A stop that still leaves containers behind: the sweep runs by compose
+  project name, so a harbor release that renames projects needs a new
+  prefix.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh`, `backend/runner/`, the dashboard's Launch
+and Runs pages, `docs/GUI.md`.
+## 2026-10-29: every run logs its tool calls
+
+### Decision
+
+Owner request in chat, 2026-10-29: tool calls are part of every trace, for
+every harness. Each run directory now holds `tool-calls.jsonl`, one line per
+call in a shared schema (tool name and kind, call id, arguments, status, exit
+code, output length, start and end times), and `summary.json` carries a
+`tool_calls` count block. Public traces publish one `tool_call` event per call
+through `public_events()`: names, timing and outcomes, never inputs or
+outputs. A harness added without an extractor fails `tests/test_tool_calls.py`.
+Field list and commands: [REPRODUCIBILITY.md](REPRODUCIBILITY.md#tool-calls).
+
+### Evidence
+
+- Before this, only the native loop, Claude Code, Codex and Cursor wrote
+  per-tool events into `trace.jsonl`. The other seven harnesses kept tool
+  calls only in their stream or session archive, each in its own shape. No
+  harness recorded a call's start, end and outcome together, and each public
+  traces exporter picked its own fields (the Beam traces have no tool names).
+- A read-only pass of the new extractors over the local run folders on
+  2026-10-29: Claude Code 664 runs and 49,820 calls, Codex 513 and 13,170,
+  Muse Code 118 and 9,758, dsh 70 and 4,244, Pi 6 and 273, the native loop
+  127 and 381. Claude Code, Muse Code, dsh and Pi calls have both times.
+  Codex and native-loop runs made before this change have end times only
+  (Codex: 94% of calls; 60 legacy runs under `runs/` predate the current
+  Codex trace format). Mirror's 115 Beam runs return `unavailable`: that
+  adapter kept no tool names (the 2026-10-27 entry).
+
+### What changed
+
+- `harness/agent/tool_calls.py`: one extractor per harness, the schema, the
+  summary block and `public_events()`.
+- The loop writes the log when every run finishes. The native loop now
+  records `tool_call` before the tool runs and gives the observation the call
+  id and duration; the Codex adapter records a `tool_call` trace event when a
+  tool item starts and puts the item id on its observation. Both give start
+  times from now on.
+- `vulcanbench tool-calls <dir> [--write]` builds the log for older runs. It
+  adds only `tool-calls.jsonl`; it never rewrites `summary.json`, whose hash
+  frozen judging rounds pin.
+
+### Revisit triggers
+
+- Cursor, Grok Build, Z Code and Devin have no runs on this machine; their
+  extractors follow the adapters' own code and test fixtures. Check
+  `tool-calls.jsonl` on each one's next smoke run.
+
+## 2026-10-28: GPT-6.1 Terra is judged by Muse Spark 1.3 and Grok 4.6 (v3.29)
+
+### Decision
+
+GPT-6.1 Terra's Code quality is judged as v3.29 by Muse Spark 1.3 and Grok
+4.6, the panel behind the GPT-6.1 Sol (v3.18) and Claude Opus 5.5 (v3.15)
+columns, so the three can share a card without a panel caveat. Owner choice
+in chat, 2026-10-28, over Muse Spark 1.3 with GPT-6.1 Sol (the v3.27 and
+v3.28 pair; Sol is Terra's own lab) and Muse Spark 1.3 with Opus 5.5. The
+round runs from its own bench tag after the sweep, so no sweep overlaps the
+judging window. Results, the comparison card against GPT-6.1 Sol, Claude
+Opus 5.5 and GPT-6 Astra, and the redacted traces follow in a results PR.
+
+### Evidence
+
+- The sweep (`bench/2026-10-27-gpt61-terra-frontier-v4`) finished on
+  2026-10-27 at 16:16 PDT: 115 runs, no timeouts, no empty patches, every
+  run on Codex 0.159.0 from the clean tag. Every run's evidence
+  reconstructs through v2's own path, so v3.18's binary-fixture fallback is
+  not needed.
+- Grok 4.6 answered one-line probes on 2026-10-28 through both the current
+  Cursor (`2026.10.14-941492e`) and the pinned `2026.10.01-e373342`, whose
+  version-directory digest still equals v3.24's. The Cursor usage limit that
+  kept Grok out of v3.27 and v3.28 no longer applies.
+- A dry `prepare` into a scratch directory froze 115 submissions (23 per
+  level), 23 quirk keys, full evidence, largest prompt 77,081 characters.
+
+## 2026-10-27: Mirror runs keep full traces
+
+The owner requires every Mirror (Reflection Beam) run to keep a full trace from
+now on. The October 23 to 25 Beam sweep did not: the adapter decoded Mirror's
+conversation database only for token usage, so each run directory keeps the
+step skeleton (order, timestamps, tokens per model step) and the final patch,
+but no tool names, arguments, results or reasoning. On 2026-10-27 the owner
+chose to publish that sweep as a structure-only traces repository and to fix
+the adapter for future runs.
+
+What changed in `harness/agent/mirror_cli.py`:
+
+- Mirror's database is copied into the run directory as
+  `mirror-session/state.db` through SQLite's backup API (so a write-ahead log
+  is folded in), and its size and SHA-256 go into a `mirror_database` trace
+  event.
+- `cli-agent-stream.jsonl` now carries the decoded transcript, read with
+  Mirror 0.1.1's own protobuf schema: the task and system text; each assistant
+  step's text, reasoning (`reasoning_content`, plus `reasoning_details` when
+  present) and tool calls (`id`, `function.name`, `function.arguments`); each
+  tool result (`tool_call_id`, `name`, `content`, success) with its metadata
+  record (exit code, duration, touched paths); and the tool-approval, log,
+  task-result, context-window and extension records. Token accounting and its
+  fail-closed checks are unchanged.
+- A run that cannot archive its database fails closed, as a run without
+  auditable usage already does, and the adapter refuses to start without a
+  stream log path to archive into.
+
+Verified without API calls: the new decoder was run against a real Beam
+database from the October sweep (a Max run, 2,149 records: 537 assistant
+steps, all with reasoning and tool calls; 536 tool results). A test builds a
+database with the pinned schema and decodes it; CI skips it because the pinned
+install is not on the runner, and a second test covers archive, hashing and
+the stream rows without it.
+
+Found while doing this: the adapter never removes its per-run scratch folder,
+and the October sweep's 1,334 scratch folders (115 scored runs plus the
+infra-aborted attempts) were still in the system temp directory with their
+databases. They were copied outside the repository on 2026-10-27 before the OS
+could purge them. Matching them to scored runs and republishing full traces
+from them is a separate owner decision.
+
+## 2026-10-26: GPT-6.1 Terra runs on Frontier v4 on its release day, on the pinned Codex 0.159.0
+
+### Decision
+
+GPT-6.1 Terra (`gpt-6.1-terra`, released in the API and Codex on
+2026-10-26) is swept on VulcanBench Frontier v4 at Low, Medium, High,
+Extra-high and Max through Codex on the ChatGPT subscription
+(`scripts/run_gpt61_terra_v4.sh`, outputs `runs-effort-gpt61-terra/`). Owner
+request in chat, 2026-10-26. This is a new model, not the GPT-5.6 Terra
+already on the board (`docs/results/swe-v4-terra-2026-09/`). It runs one task
+at a time from a run worktree pinned to a bench tag, like every sweep.
+
+The column runs on Codex CLI 0.159.0 from its own prefix
+(`~/.local/share/vulcanbench/codex-0.159.0/`), the same pin GPT-6.1 Sol ran
+on. Every other Codex column keeps its version.
+
+### Evidence
+
+- OpenAI's Codex models page: "GPT-6.1 Terra requires Codex CLI 0.159.0 or
+  later." One-line probes on the ChatGPT login on 2026-10-26 ("Reply with
+  the single word OK.") answered on 0.159.0 at `low` and at `max`.
+- List prices, checked 2026-10-26 at developers.openai.com/api/docs/pricing
+  and the model page (USD per 1M tokens, standard, short context): $1.00
+  input, $0.05 cached input, $5.00 output. Prompts over 272K input tokens
+  bill the whole request at 2x input and cache, 1.5x output; that tier is
+  not inferred by `harness/pricing.py`. The API exposes effort `none`,
+  `low`, `medium`, `high`, `xhigh` and `max`; ultra is not an API level and
+  stays blocked (`vulcanbench.toml`).
+
+## 2026-10-24: Reflection Beam judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.28)
+
+Beam's Code quality is judged as v3.28 with the v3.27 panel. A one-word probe
+through the pinned Cursor 2026.10.01-e373342 on 2026-10-24 still returned
+"You're out of usage", so Grok 4.6 cannot take its usual seat. The owner agreed
+in chat to keep GPT-6.1 Sol in it, as for DeepSeek V4.1 Flash, so the two
+newest columns share a panel even though it differs from the Muse Spark 1.3 and
+Grok 4.6 pair behind most of the board.
+
+One harness interaction is disclosed with Beam's results. Task files are staged
+without execute bits (as for every published column); where a model meets
+"Permission denied" on the legacy binary, Mirror appends "[Sandbox note: The
+sandbox denied access to this resource.]". At Low, two of Beam's 23 final
+answers said the sandbox blocked the binary, which it does not; `chmod` works.
+The Mirror adapter archives model messages and usage but not tool calls, so
+how often Beam saw the note cannot be counted; the adapter gains tool-call
+archiving after the sweep.
+
+## 2026-10-23: Reflection Beam on Frontier v4 through Mirror CLI; DeepSeek V4 Pro stopped
+
+### Decision
+
+The owner stopped the DeepSeek V4 Pro sweep after one Low task (settlecore,
+functional 0.0, $0.43 at list price; the interrupted second task is kept in
+`runs-effort-deepseek-v4pro-dsh/stopped-interrupted/` and is not part of any
+cell) and asked to benchmark Reflection AI's Beam instead. Beam
+(`Beam-1.0-501B-A23B`, 501B total and 23B active parameters, Apache-2.0
+weights, released 2026-10-16) is served on Reflection's API at
+`https://api.reflection.ai/openai/v1` (OpenAI Chat Completions only).
+
+Owner choices in chat, 2026-10-23:
+
+- Harness: Mirror CLI, Reflection's own coding agent (`reflection-mirror` on
+  PyPI, Apache-2.0, early beta), version 0.1.1, in its one-shot `exec` mode.
+  Adapter `harness/agent/mirror_cli.py`, spec `mirror:Beam-1.0-501B-A23B`,
+  pinned by version and a content hash of the installed package (bytecode
+  caches excluded).
+- Levels: all five. Beam's `reasoning_effort` takes low, medium, high, xhigh
+  and max (default max, reasoning always on), so the board's Extra high is
+  `xhigh`. 115 runs, one task at a time, flat 3-hour bound.
+- Mirror's `exec` refuses to run until its usage notice is acknowledged and
+  the folder is trusted. The owner approved writing both into a private Mirror
+  home created for each run (never the user's own `~/.mirror`), trusting only
+  that run's workspace.
+
+Settings that follow the board's existing rules: usage analytics off
+(`"analytics": false`; Mirror's analytics carry no content); web tools absent
+(Mirror only exposes them with a search provider key, and the run environment
+carries none); automatic tool approval inside the macOS outer sandbox, since
+Mirror's own sandbox workspaces need a microsandbox VM; updates off
+(`MIRROR_SKIP_UPDATE=1`, `--no-update`).
+
+Usage is read from Mirror's conversation database (`--database`), decoded
+with Mirror's own pinned protobuf schema; each assistant record carries its
+call's prompt, completion, cached and cache-write tokens, and every recorded
+inference must name the requested model (identity `harness-recorded`).
+Reflection publishes no Beam price (the public beta is "free to start"), so
+runs are unpriced: the board shows tokens and minutes, and cost stays blank
+until a list price exists.
+
+Model id: the API's `/models` lists only `Beam-501B-A23B`, which Mirror's
+source calls "a Reflection API alias of the default Beam model"; Mirror's
+default for `--api reflection` is the versioned `Beam-1.0-501B-A23B`, and the
+API serves and echoes both (checked 2026-10-23). The adapter requests the
+versioned id, so a later Beam version behind the alias cannot slip in.
+
+Pilot evidence (2026-10-23, from the working checkout, not board data):
+hello-world at Low solved in 4 calls; `legacy-qlite-store-parity` at Low
+ended after 16 calls and 24 seconds with "Done." and functional 0.0. Its
+first probes met the legacy binary without an execute bit, which is how the
+harness has always staged task files (plain byte copies), so every published
+column had the same start; DeepSeek V4.1 Flash and Sonnet 5.5 ran `chmod`.
+No call was refused by the API.
+
+### Limits
+
+The API key (`REFLECTION_API_KEY`) is in the agent's environment and shell
+network is not isolated, so rotate it after the sweep. Mirror is an early beta;
+the pin prevents a CLI change mid-sweep, but not a Reflection-side change to
+what the model id serves.
+
+## 2026-10-23: DeepSeek V4.1 Flash judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.27)
+
+### Decision
+
+The Flash sweep finished on 2026-10-22: 69 runs, Low, High and Max, no
+timeouts, no overlapping jobs. The owner asked for its combined score before
+anything is published, so Code quality is judged as v3.27.
+
+The standard second judge, Grok 4.6, runs through Cursor, and the Cursor
+account was out of usage on 2026-10-23 ("You're out of usage"; a one-word probe
+through the pinned Cursor 2026.10.01-e373342 failed). Owner choice in chat: put
+GPT-6.1 Sol in the seat, as v3.20 did for Grok 4.7, rather than wait for
+Cursor. Muse Spark 1.3 keeps the other seat. Both answered a probe on
+2026-10-23 through their pinned binaries.
+
+Two run-condition notes carried into the protocol:
+
+- Muse Code's updater had deleted the v3.4 Muse binary from `~/.local/bin`.
+  Byte-identical backups (sha256 `4c0f9600...0577a7`) are in
+  `~/.vulcanbench/pinned/` and `~/.local/share/vulcanbench/muse-binaries/`;
+  the chain points `VULCANBENCH_MUSE_BINARY` at the first.
+- macOS went from 26 to 27.0.1 during the sweep's second pause (2026-10-22).
+  Re-grading the 13 Low runs finished before it, on 27.0.1, gave 13 identical
+  functional scores, and the pinned dsh install hash was unchanged.
+
+### Consequence
+
+Flash's combined score is a Muse Spark 1.3 and GPT-6.1 Sol mean, while the
+columns it will be compared with (Claude Opus 5.5, GPT-6.1 Sol) are Muse Spark
+1.3 and Grok 4.6 means. Cards and pages say so. GPT-6.1 Sol therefore judges a
+column it is shown beside; its own column was judged without it.
+
 ## 2026-10-19: DeepSeek V4.1 Flash and V4 Pro on Frontier v4 through DeepSeek Harness
 
 ### Decision

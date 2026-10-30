@@ -291,6 +291,19 @@ clean checkout of it, and the run's `source.tasks` block records that repo's
 commit next to VulcanBench's `source.harness`. Locks and the PR hygiene
 workflow are VulcanBench-only for now; port them when those repos need them.
 
+### Watching runs from the GUI
+
+`make gui` starts a localhost page (`http://127.0.0.1:3000/runs`) that lists
+every gate job and harness run under the configured roots with its bench tag,
+attempts, rewards, containers and a live log tail, plus a first-attempt check
+that flags sessions that never used the requested model or made no tool calls.
+Its Launch page queues Frontier v5 gate runs through the same
+`run_worktree.sh` and `run_gate.sh` paths described above: the worktree must
+be at the bench tag and clean, the exact command is shown before a confirm
+click, the queue runs one job at a time, and a stop goes through the
+script's own trap. Suite and task launches come in the next milestone. See
+[GUI.md](GUI.md).
+
 ## Results: what goes in git and what does not
 
 | Goes in git | Stays out of git |
@@ -307,6 +320,13 @@ folder or archive path it came from.
 Muse Spark 1.3 traces), attach a redacted bundle to a GitHub Release (assets
 can be up to 2 GB each, are versioned, and do not bloat the clone) and commit
 a short README under `traces/<name>/` pointing at it.
+
+**Public traces include tool calls.** Every redacted trace carries one
+`tool_call` event per call, built from the run's `tool-calls.jsonl` with
+`public_events()` in `harness/agent/tool_calls.py`: tool name, kind, status,
+exit code, output length and timing. Inputs and outputs stay withheld. For a
+sweep made before the log existed, run `vulcanbench tool-calls <sweep dir>
+--write` first ([REPRODUCIBILITY.md](REPRODUCIBILITY.md#tool-calls)).
 
 **The existing `traces/` folder** (about 550 MB, mostly the Muse Spark 1.3
 Frontier v4 traces) stays where it is so existing links keep working. Removing

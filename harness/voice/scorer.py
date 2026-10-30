@@ -17,9 +17,8 @@ from __future__ import annotations
 
 import json
 import re
+from dataclasses import dataclass
 from typing import Literal
-
-from pydantic import BaseModel
 
 from harness.agent.providers import LLMProvider, ProviderError
 from harness.voice.items import VoiceItem
@@ -99,7 +98,8 @@ def normalize(text: str) -> str:
     return " ".join(tokens)
 
 
-class ScoreResult(BaseModel):
+@dataclass(kw_only=True)
+class ScoreResult:
     correct: bool
     method: Literal["exact", "alias", "judge", "judge-error"]
     judge_raw: str | None = None

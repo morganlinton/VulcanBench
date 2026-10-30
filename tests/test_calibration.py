@@ -24,12 +24,12 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
 
 from harness.calibration import calibrate_tasks, calibration_to_markdown
-from harness.cli import app
+from harness.cli import main
 from harness.report import build_report, to_markdown
 from harness.tasks import load_task, task_hash
+from tests.cli_runner import CliRunner
 from tests.test_task_hash import _make_task
 
 
@@ -263,12 +263,12 @@ runner = CliRunner()
 
 
 def test_cli_table(tmp_path: Path) -> None:
-    result = runner.invoke(app, ["calibrate", "--tasks-root", str(tmp_path)])
+    result = runner.invoke(main, ["calibrate", "--tasks-root", str(tmp_path)])
     assert result.exit_code == 0
 
 
 def test_cli_json(tmp_path: Path) -> None:
-    result = runner.invoke(app, ["calibrate", "--format", "json", "--tasks-root", str(tmp_path)])
+    result = runner.invoke(main, ["calibrate", "--format", "json", "--tasks-root", str(tmp_path)])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert "tasks" in data
@@ -276,21 +276,21 @@ def test_cli_json(tmp_path: Path) -> None:
 
 def test_cli_bad_thresholds(tmp_path: Path) -> None:
     r = runner.invoke(
-        app,
+        main,
         ["calibrate", "--easy-min", "0.3", "--medium-min", "0.5", "--tasks-root", str(tmp_path)],
     )
     assert r.exit_code == 1
     assert "medium_min" in r.output or "easy_min" in r.output
 
-    r2 = runner.invoke(app, ["calibrate", "--min-attempts", "0", "--tasks-root", str(tmp_path)])
+    r2 = runner.invoke(main, ["calibrate", "--min-attempts", "0", "--tasks-root", str(tmp_path)])
     assert r2.exit_code == 1
 
-    r3 = runner.invoke(app, ["calibrate", "--min-models", "0", "--tasks-root", str(tmp_path)])
+    r3 = runner.invoke(main, ["calibrate", "--min-models", "0", "--tasks-root", str(tmp_path)])
     assert r3.exit_code == 1
 
 
 def test_cli_bad_format(tmp_path: Path) -> None:
-    r = runner.invoke(app, ["calibrate", "--format", "xml", "--tasks-root", str(tmp_path)])
+    r = runner.invoke(main, ["calibrate", "--format", "xml", "--tasks-root", str(tmp_path)])
     assert r.exit_code == 1
     assert "format must be" in r.output
 

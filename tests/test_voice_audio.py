@@ -49,7 +49,7 @@ def _tone(seconds: float = 0.5, rate: int = MASTER_RATE_HZ, freq: float = 440.0)
 
 
 def _item(item_id: str = "vq-ar-001", question: str = "What is two plus two?") -> VoiceItem:
-    return VoiceItem.model_validate(
+    return VoiceItem.from_dict(
         {"id": item_id, "category": "arithmetic", "question": question, "answer": "4"}
     )
 

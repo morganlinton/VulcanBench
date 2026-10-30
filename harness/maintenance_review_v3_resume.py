@@ -1051,17 +1051,22 @@ JSON_SYNTAX_ERRORS = (
 
 
 ESCAPES = {"\x00": "\\0", "\r": "\\r", "\n": "\\n", "\t": "\\t"}
+# A decoded NUL is tried as each spelling source code uses for it: v3.18 codeccore
+# wrote b"\0", v3.29 settlecore wrote b"\x00". The first keeps v3.18's order.
+NUL_SPELLINGS = ("\\0", "\\x00")
 
 
 def _escape_variants(excerpt: str) -> list[str]:
     """Spellings of an excerpt with decoded control characters written back as source escapes."""
     variants = []
-    for keep_newlines in (True, False):
-        out = "".join(
-            ch if (keep_newlines and ch == "\n") else ESCAPES.get(ch, ch) for ch in excerpt
-        )
-        if out != excerpt and out not in variants:
-            variants.append(out)
+    for nul in NUL_SPELLINGS:
+        escapes = {**ESCAPES, "\x00": nul}
+        for keep_newlines in (True, False):
+            out = "".join(
+                ch if (keep_newlines and ch == "\n") else escapes.get(ch, ch) for ch in excerpt
+            )
+            if out != excerpt and out not in variants:
+                variants.append(out)
     return variants
 
 

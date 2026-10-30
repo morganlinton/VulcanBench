@@ -12,6 +12,9 @@ host UID/GID so files created inside stay writable and owned by the host user
 (and never root). The container is detached and long-lived (``sleep infinity``);
 each tool call is a ``docker exec`` into it. Always ``close()`` it (the agent
 loop does so in a ``finally``).
+
+Everything goes through the ``docker`` CLI (``_run_docker``), the same binary
+the CLI-agent adapters already drive, so the harness needs no Docker SDK.
 """
 
 from __future__ import annotations
@@ -19,11 +22,10 @@ from __future__ import annotations
 import contextlib
 import os
 import shlex
+import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-
-import docker
 
 from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolProtocol
@@ -41,12 +43,23 @@ if TYPE_CHECKING:
 # seed-task toolchains used by in-container verification (Python, Go, Node).
 DEFAULT_IMAGE = os.environ.get("VULCANBENCH_SANDBOX_IMAGE", "vulcanbench/sandbox:base")
 
+#: The Docker CLI binary; override for hosts where it is not on PATH.
+DOCKER_BIN = os.environ.get("VULCANBENCH_DOCKER_BIN", "docker")
+
 _CONTAINER_WORKDIR = "/workspace"
 
 # Exit status of a SIGKILLed process (128 + 9): the signature of an OOM kill,
 # but also of any other KILL, so it is only classified together with the
 # cgroup's oom_kill counter.
 _SIGKILL_EXIT = 137
+
+# The docker CLI's own exit status when the daemon (not the contained command)
+# fails: "Error response from daemon", "Cannot connect to the Docker daemon".
+_DOCKER_CLI_ERROR_EXIT = 125
+
+# How long to wait on the daemon for lifecycle calls that must not hang a run.
+_PROBE_TIMEOUT_S = 30.0
+_LIFECYCLE_TIMEOUT_S = 60.0
 
 # Writable paths for non-root containers (host UID/GID). Without these, `go test`
 # fails trying to create ~/.cache/go-build under `/` when HOME is unset.
@@ -71,11 +84,12 @@ class ResourceSpec:
     ceiling is the hard kill threshold. A pinned single value makes transient
     spikes read as task failures; a band absorbs them while keeping pressure.
 
-    Floors are best-effort on Docker: ``mem_floor`` maps to ``mem_reservation``
-    (enforced only under host memory pressure) and ``cpu_floor`` to a
-    ``cpu_shares`` weight (a relative guarantee under contention, not an
-    absolute reservation). Ceilings are hard: ``mem_ceiling`` -> ``mem_limit``
-    (OOM kill), ``cpu_ceiling`` -> ``nano_cpus`` (throttling), ``pids_limit``.
+    Floors are best-effort on Docker: ``mem_floor`` maps to
+    ``--memory-reservation`` (enforced only under host memory pressure) and
+    ``cpu_floor`` to a ``--cpu-shares`` weight (a relative guarantee under
+    contention, not an absolute reservation). Ceilings are hard:
+    ``mem_ceiling`` -> ``--memory`` (OOM kill), ``cpu_ceiling`` -> ``--cpus``
+    (throttling), ``pids_limit`` -> ``--pids-limit``.
     """
 
     mem_floor: str | None = None
@@ -88,6 +102,26 @@ class ResourceSpec:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class DockerResult:
+    """Outcome of one ``docker`` CLI invocation."""
+
+    returncode: int
+    stdout: bytes
+    stderr: bytes
+
+
+def _run_docker(args: list[str], *, timeout: float | None = None) -> DockerResult:
+    """Run ``docker <args>`` and capture both streams.
+
+    Raises ``OSError`` when the binary is missing and
+    ``subprocess.TimeoutExpired`` when ``timeout`` elapses; callers decide what
+    each means. Tests replace this function to fake the daemon.
+    """
+    proc = subprocess.run([DOCKER_BIN, *args], capture_output=True, timeout=timeout, check=False)
+    return DockerResult(proc.returncode, proc.stdout, proc.stderr)
+
+
 def _decode(b: Any) -> str:
     """Decode a (possibly None) bytes chunk from a container exec stream."""
     if isinstance(b, (bytes, bytearray)):
@@ -95,14 +129,26 @@ def _decode(b: Any) -> str:
     return "" if b is None else str(b)
 
 
+def _probe_daemon() -> DockerResult:
+    """``docker version`` against the server: non-zero when the daemon is down."""
+    return _run_docker(["version", "--format", "{{.Server.Version}}"], timeout=_PROBE_TIMEOUT_S)
+
+
 def _docker_available() -> bool:
     """True if a Docker daemon is reachable. Used for ``auto`` mode and tests."""
     try:
-        client = docker.from_env()
-        client.ping()
-        return True
+        return _probe_daemon().returncode == 0
     except Exception:
         return False
+
+
+def _is_daemon_error(result: DockerResult) -> bool:
+    """A failure of docker itself (daemon gone, bad container) rather than of the
+    command it ran: the CLI exits 125 and explains on stderr."""
+    if result.returncode != _DOCKER_CLI_ERROR_EXIT:
+        return False
+    err = _decode(result.stderr)
+    return "Error response from daemon" in err or "Cannot connect to the Docker daemon" in err
 
 
 class DockerToolExecutor(ToolProtocol):
@@ -126,6 +172,7 @@ class DockerToolExecutor(ToolProtocol):
         self.image = image
         self.default_timeout = default_timeout
         self._closed = False
+        self._container_id: str | None = None
         # ``resources`` wins over the legacy single-value kwargs; the legacy
         # values become the ceiling of a floorless band, preserving behavior.
         self.resources = resources or ResourceSpec(
@@ -135,47 +182,69 @@ class DockerToolExecutor(ToolProtocol):
         self._oom_baseline: int | None = None
 
         try:
-            self._client = docker.from_env()
-            self._client.ping()
+            probe = _probe_daemon()
         except Exception as e:
             raise SandboxError(
                 f"could not connect to the Docker daemon ({e}). Is Docker running?"
             ) from e
+        if probe.returncode != 0:
+            detail = _decode(probe.stderr).strip() or f"docker exited {probe.returncode}"
+            raise SandboxError(
+                f"could not connect to the Docker daemon ({detail}). Is Docker running?"
+            )
 
+        argv = self._run_argv(image, network=network)
+        try:
+            started = _run_docker(argv)
+        except Exception as e:
+            raise SandboxError(f"failed to start sandbox container from {image!r}: {e}") from e
+        if started.returncode != 0:
+            detail = _decode(started.stderr).strip() or f"docker exited {started.returncode}"
+            raise SandboxError(f"failed to start sandbox container from {image!r}: {detail}")
+        self._container_id = _decode(started.stdout).strip().splitlines()[-1]
+
+    def _run_argv(self, image: str, *, network: bool) -> list[str]:
+        """The ``docker run`` argument vector for the long-lived sandbox container."""
+        spec = self.resources
+        argv = [
+            "run",
+            "--detach",
+            "--workdir",
+            _CONTAINER_WORKDIR,
+            "--volume",
+            f"{self.workspace}:{_CONTAINER_WORKDIR}:rw",
+            "--memory",
+            spec.mem_ceiling,
+            "--cpus",
+            str(float(spec.cpu_ceiling)),
+            "--pids-limit",
+            str(spec.pids_limit),
+            "--security-opt",
+            "no-new-privileges",
+            "--cap-drop",
+            "ALL",
+        ]
+        for key, value in _SANDBOX_ENV.items():
+            argv += ["--env", f"{key}={value}"]
+        if not network:
+            argv += ["--network", "none"]
         # Run the container as the host UID/GID so files written to the bind mount
         # stay owned by the host user, POSIX only. On Windows os.getuid is absent
         # and Docker Desktop maps bind-mount ownership itself, so we omit --user.
-        run_kwargs: dict[str, Any] = {}
         if hasattr(os, "getuid"):
-            run_kwargs["user"] = f"{os.getuid()}:{os.getgid()}"
-
-        spec = self.resources
+            argv += ["--user", f"{os.getuid()}:{os.getgid()}"]
         if spec.mem_floor is not None:
-            run_kwargs["mem_reservation"] = spec.mem_floor
+            argv += ["--memory-reservation", spec.mem_floor]
         if spec.cpu_floor is not None:
-            # cpu_shares is a relative weight (1024 == one default-weight
+            # cpu-shares is a relative weight (1024 == one default-weight
             # container's worth); a floor of N cpus gets N shares of weight.
-            run_kwargs["cpu_shares"] = max(2, int(spec.cpu_floor * 1024))
-        try:
-            self._container = self._client.containers.run(
-                image,
-                command=["sleep", "infinity"],
-                detach=True,
-                working_dir=_CONTAINER_WORKDIR,
-                volumes={str(self.workspace): {"bind": _CONTAINER_WORKDIR, "mode": "rw"}},
-                environment=_SANDBOX_ENV,
-                network_disabled=not network,
-                mem_limit=spec.mem_ceiling,
-                nano_cpus=int(spec.cpu_ceiling * 1_000_000_000),
-                pids_limit=spec.pids_limit,
-                security_opt=["no-new-privileges"],
-                cap_drop=["ALL"],
-                tty=False,
-                auto_remove=False,
-                **run_kwargs,
-            )
-        except Exception as e:
-            raise SandboxError(f"failed to start sandbox container from {image!r}: {e}") from e
+            argv += ["--cpu-shares", str(max(2, int(spec.cpu_floor * 1024)))]
+        argv += [image, "sleep", "infinity"]
+        return argv
+
+    @property
+    def container_id(self) -> str | None:
+        return self._container_id
 
     # --- file operations: delegate to the host-side executor ------------------
     def list_files(self, args: ListFilesArgs) -> Any:
@@ -215,21 +284,28 @@ class DockerToolExecutor(ToolProtocol):
     def run_build(self) -> dict[str, Any]:
         return {"ok": True}
 
-    def _exec(self, shell_cmd: str) -> dict[str, Any]:
+    def _docker_exec(self, cmd: list[str]) -> DockerResult:
+        """``docker exec`` ``cmd`` in the sandbox; daemon failures are SandboxError."""
+        if self._container_id is None:
+            raise SandboxError("sandbox container is not running")
         try:
-            result = self._container.exec_run(
-                ["sh", "-c", shell_cmd], workdir=_CONTAINER_WORKDIR, demux=True
+            result = _run_docker(
+                ["exec", "--workdir", _CONTAINER_WORKDIR, self._container_id, *cmd]
             )
         except Exception as e:
             raise SandboxError(f"container exec failed: {e}") from e
-        raw = result.output
-        out_b, err_b = raw if isinstance(raw, tuple) else (raw, None)
+        if _is_daemon_error(result):
+            raise SandboxError(f"container exec failed: {_decode(result.stderr).strip()}")
+        return result
+
+    def _exec(self, shell_cmd: str) -> dict[str, Any]:
+        result = self._docker_exec(["sh", "-c", shell_cmd])
         payload = {
-            "stdout": _decode(out_b),
-            "stderr": _decode(err_b),
-            "exit_code": result.exit_code,
+            "stdout": _decode(result.stdout),
+            "stderr": _decode(result.stderr),
+            "exit_code": result.returncode,
         }
-        if result.exit_code == _SIGKILL_EXIT:
+        if result.returncode == _SIGKILL_EXIT:
             # A 137 is only an OOM if the cgroup's kill counter moved; plain
             # SIGKILLs (e.g. `timeout -s KILL`) must not count as infra noise.
             new_kills = self._new_oom_kills()
@@ -241,20 +317,18 @@ class DockerToolExecutor(ToolProtocol):
     def _read_oom_kills(self) -> int:
         """Total OOM kills in the container's cgroup (v2 or v1), else 0."""
         try:
-            result = self._container.exec_run(
+            result = self._docker_exec(
                 [
                     "sh",
                     "-c",
                     "cat /sys/fs/cgroup/memory.events "
                     "/sys/fs/cgroup/memory/memory.oom_control 2>/dev/null || true",
-                ],
-                demux=True,
+                ]
             )
         except Exception:
             return 0
-        out_b = result.output[0] if isinstance(result.output, tuple) else result.output
         kills = 0
-        for line in _decode(out_b).splitlines():
+        for line in _decode(result.stdout).splitlines():
             parts = line.split()
             if len(parts) == 2 and parts[0] == "oom_kill" and parts[1].isdigit():
                 kills = max(kills, int(parts[1]))
@@ -274,14 +348,14 @@ class DockerToolExecutor(ToolProtocol):
         """Stop and remove the container. Safe to call more than once."""
         if getattr(self, "_closed", True):
             return
-        container = getattr(self, "_container", None)
+        container_id = getattr(self, "_container_id", None)
         self._closed = True
-        if container is None:
+        if container_id is None:
             return
         with contextlib.suppress(Exception):
-            container.stop(timeout=5)
+            _run_docker(["stop", "--time", "5", container_id], timeout=_LIFECYCLE_TIMEOUT_S)
         with contextlib.suppress(Exception):
-            container.remove(force=True)
+            _run_docker(["rm", "--force", container_id], timeout=_LIFECYCLE_TIMEOUT_S)
 
     def __enter__(self) -> DockerToolExecutor:
         return self

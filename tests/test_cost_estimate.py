@@ -6,11 +6,11 @@ import json
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
 
-from harness.cli import app
+from harness.cli import main
 from harness.cost_estimate import estimate_plan
 from harness.cost_priors import load_cost_priors, reset_cache
+from tests.cli_runner import CliRunner
 
 runner = CliRunner()
 _FIXTURE_PRIORS = Path(__file__).resolve().parent / "fixtures" / "cost_priors_min.json"
@@ -160,7 +160,7 @@ def test_bundled_priors_load() -> None:
 
 def test_cli_estimate_command() -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "estimate",
             "--task",
@@ -177,7 +177,7 @@ def test_cli_estimate_command() -> None:
 
 def test_cli_estimate_meta_uses_official_env_name() -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "estimate",
             "--task",
@@ -194,7 +194,7 @@ def test_cli_estimate_meta_uses_official_env_name() -> None:
 
 def test_run_dry_run_includes_estimate() -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",

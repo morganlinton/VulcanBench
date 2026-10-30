@@ -23,7 +23,7 @@ def _item(**kw: Any) -> VoiceItem:
         "answer": "88",
     }
     base.update(kw)
-    return VoiceItem.model_validate(base)
+    return VoiceItem.from_dict(base)
 
 
 class _FakeJudge(LLMProvider):

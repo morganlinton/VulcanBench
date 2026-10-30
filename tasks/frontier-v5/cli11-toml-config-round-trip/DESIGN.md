@@ -4,8 +4,11 @@ Status: F5 wave 1 replacement candidate for slot F5-cpp, after
 boosturl-path-compare-normalize was rejected at the gate on 2026-10-28
 (docs/frontier-v5/GATE-LOG.md). Drafted and validated 2026-10-28: base 0,
 gold 1, every probe 0, Harbor oracle 1 and nop 0; F5 floors 1 to 8 met,
-floor 8 by route (a), floor 3 only on its source branch (below). Not
-gated.
+floor 8 by route (a), floor 3 only on its source branch (below).
+**Admitted by the gate rule as F5-cpp on 2026-10-30** (GPT-6 Astra 0 of 3,
+Claude Opus 5.5 0 of 3), flagged for owner review: every attempt cleared all
+11 held-out defect checks and was held only by two of the held-out guards
+below (docs/frontier-v5/GATE-LOG.md).
 
 ## Why this candidate
 

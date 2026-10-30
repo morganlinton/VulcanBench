@@ -52,7 +52,9 @@ def list_processes(*, now: float | None = None) -> list[Proc]:
         return cached
     try:
         proc = subprocess.run(
-            ["ps", "-axo", "pid=,ppid=,pgid=,stat=,lstart=,command="],
+            # -ww: never truncate the command column (procps and macOS cut it at the
+            # terminal width otherwise, which drops the argv token the identity check needs).
+            ["ps", "-ax", "-ww", "-o", "pid=,ppid=,pgid=,stat=,lstart=,command="],
             capture_output=True,
             text=True,
             timeout=_TIMEOUT_S,

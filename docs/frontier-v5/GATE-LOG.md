@@ -40,7 +40,7 @@ launcher.
 | prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
 | javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
-| cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | Opus 5.5: queued | Astra prong passed (2026-10-30), held only by two held-out guards; Opus 5.5 half under the standing approval |
+| cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -675,3 +675,34 @@ inputs; tamper scan clean. The two failing attempts miss the same three
 checks as the closest Astra attempts. A prong at exactly 1 of 3 takes the
 n=5 top-up (two more attempts, admit only at 2 of 5 or fewer). The top-up
 is outside the standing approval and waits for the owner.
+
+### cli11-toml-config-round-trip, Opus 5.5 half (2026-10-30): admitted by the gate rule, flagged
+
+Job `opus-cli11-toml-config-round-trip`, launched 09:30 PDT under the owner's
+standing approval from the same run worktree as the Astra half (1b38a48b,
+tag `bench/2026-10-30-cli11-astra-gate`), wave-1 identifiers,
+`GATE_CONCURRENCY=1`. Usage pre-flight 0.16. Sessions real (every turn on
+`claude-opus-5-5`, 38 to 50 tool calls each); no auth or usage event; no
+containers left behind. Finished 10:02.
+
+| Trial | Agent minutes | Tool calls | Reward | Held-out (of 11) | Guards regressed |
+| --- | --- | --- | --- | --- | --- |
+| Kq2RTKs | 6.4 | 38 | 0 | 11, all cleared | 2: `TomlMultiLineStringBinary`, `TomlMultiLineStringTextAfterQuotes` |
+| muvjyaY | 9.1 | 40 | 0 | 11, all cleared | the same 2 |
+| nAn422p | 13.2 | 50 | 0 | 11, all cleared | 1: `TomlMultiLineStringBinary` |
+
+**0 of 3.** Every attempt is a genuine one-file fix (`Config_inl.hpp`, 140 to
+209 added lines) that clears every held-out defect check; every attempt
+breaks one or both of the two edge behaviours that also held Astra.
+
+**Verdict: ADMIT by the gate rule** (F5-cpp, 2026-10-30): GPT-6 Astra 0 of 3
+and Claude Opus 5.5 0 of 3. **Flagged for the owner:** across both halves,
+six of six attempts fixed all six named defects, in 2 to 13 minutes, and
+every reward of 0 comes from the same two pre-registered held-out guards
+(behaviours that work at base, which the instruction says must keep working
+and the visible suite does not exercise). No other admitted task was held
+only by guards. The task measures "fix six defects without disturbing two
+neighbouring edge behaviours", which is a legitimate skill but a narrow
+margin: one reference noticing either edge case would flip it. Whether a
+hold of this shape belongs in Frontier v5 is the owner's call before the
+freeze.

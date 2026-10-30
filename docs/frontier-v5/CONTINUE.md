@@ -105,11 +105,11 @@ comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
 | --- | --- | --- | --- |
 | F5-python | black-fmt-skip-region-handling | 1 to 8 | **admitted** (Astra 0 of 3, Opus 5.5 0 of 3) |
 | F5-javascript | prettier-comment-attachment-stability (`frontier-v5-prettier`) | 1 to 8, route (a) | **admitted** 2026-10-27 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time); tamper-scan fix for `@ts-expect-error` re-validated after the gate |
-| F5-rust | pulldown-cmark-html-block-scanning (`frontier-v5-pulldown-cmark`) | 1 to 7, floor 8 not met | Astra 0 of 3; Opus half not run; owner decision (g') |
+| F5-rust | pulldown-cmark-html-block-scanning (`frontier-v5-pulldown-cmark`) | 1 to 7, floor 8 not met; gated under (g') | Astra 0 of 3; Opus 5.5 1 of 3 (2026-10-30, genuine solve); n=5 top-up on the owner's approval |
 | F5-rust reserve | sqlparser-display-round-trip (`frontier-v5-sqlparser`) | 1 to 7, floor 8 not met | not gated |
 | F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | **admitted** 2026-10-29 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time) |
 | F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | **rejected** 2026-10-28 (Astra 2 of 2, genuine; slot needs a new candidate) |
-| F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | not gated; built and validated 2026-10-28 |
+| F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | **admitted by the gate rule** 2026-10-30 (Astra 0 of 3, Opus 5.5 0 of 3), flagged: held only by two held-out guards (GATE-LOG.md); owner review before the freeze |
 
 Gate runs have a standing approval from 2026-10-30 to 2026-11-06
 (DECISIONS.md): each validated candidate's Astra half, then its Opus 5.5

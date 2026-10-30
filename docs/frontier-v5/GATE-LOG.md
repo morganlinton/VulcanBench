@@ -40,6 +40,7 @@ launcher.
 | prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
 | javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
+| cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | Opus 5.5: queued | Astra prong passed (2026-10-30), held only by two held-out guards; Opus 5.5 half under the standing approval |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -617,3 +618,32 @@ plan") is not yet triggered, since Fable has not run, but the Astra half
 alone points the same way. A v3 floor along the lines of "upstream guard
 tests that a symptom-level fix breaks, shown by a naive-fix control" is the
 candidate change, for the owner to decide.
+
+### cli11-toml-config-round-trip, Astra half (2026-10-30): the Astra prong passed, narrowly
+
+Built and validated 2026-10-28 (its DESIGN.md); floors 1 to 8 met, floor 8
+by route (a), floor 3 by source coupling only. Job
+`astra-cli11-toml-config-round-trip`, launched 08:40 PDT under the owner's
+standing approval (DECISIONS.md 2026-10-30) from a run worktree pinned to
+1b38a48b (tag `bench/2026-10-30-cli11-astra-gate`: the task at 637faeb4
+plus `run_gate.sh` from a12619e2), wave-1 identifiers, `GATE_CONCURRENCY=1`.
+Sessions real (`gpt-6-astra`, 16 to 20 tool calls each, 3 to 5 test runs);
+no containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out (of 11) | Guards (1,098) |
+| --- | --- | --- | --- | --- |
+| 7eJpRUv | 2.4 | 0 | 11, all cleared | 2 regressed: `StringBased: TomlMultiLineStringBinary`, `StringBased: TomlMultiLineStringTextAfterQuotes` |
+| FQ8CPTC | 4.7 | 0 | 11, all cleared | the same 2 regressed |
+| rMgrvod | 3.4 | 0 | 11, all cleared | the same 2 regressed |
+
+**0 of 3, but only on guards.** Every attempt fixed all six named defects in
+one file (`Config_inl.hpp`, 57 to 95 added lines) in under five minutes, and
+every attempt broke the same two behaviours that work at base. Both are among
+the six pre-registered held-out guards (DESIGN.md, "added with the fix,
+already passing at base"): `'''a'''b'''` reads as `a'''b`, and a raw-binary
+`B"(...)"` literal inside `'''...'''` is decoded. The instruction states the
+rule ("everything that works today keeps working") and the visible suite
+exercises neither case. The hold is legitimate under the gate rule, but it
+rests on two edge behaviours next to the defects rather than on the defects
+themselves, and these are the fastest attempts on any candidate gated so far.
+The Opus 5.5 half decides; anyone reviewing the suite should read this note.

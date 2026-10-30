@@ -63,30 +63,66 @@ next fix lands, run `make lint` (or full `make ci`) before any push.
 
 ## Versioning
 
-VulcanBench follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
-While the project is pre-1.0, treat **minor** bumps as the default for new
-user-facing features and **patch** bumps for bug fixes and docs-only changes.
+VulcanBench follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`)
+for the `vulcanbench` Python package: what `pip install vulcanbench` and
+`make setup` deliver, which is `harness/` and `backend/`. The version number
+describes what a user of that package receives. It does not describe the state
+of the repository, and it does not change in the pull request that adds a
+feature: it changes when a release is cut.
 
-**Bump the version in the same PR as the feature.** When you add a provider,
-CLI command, metric, or other user-visible capability:
+### What moves the number
 
-1. **`harness/__init__.py`**: update `__version__` (canonical runtime version;
-   used by `vulcanbench --version` and the backend API)
-2. **`pyproject.toml`**: set `version` to the same string (PyPI / packaging)
-3. **`CHANGELOG.md`**: add a dated entry under the new version (`### Added`,
-   `### Changed`, `### Fixed` as appropriate)
-4. **`README.md`**: update the version blurb near the top if it references the
-   release number
-5. **`tests/test_cli.py`**: update the `test_version` assertion to match
-6. **Tweet copy**: when finishing a user-facing release, include ready-to-post
-   tweet text in the PR description or chat reply (see [Release tweet](#release-tweet)
-   below). Agents working in this repo must do this whenever they bump the version.
+While the project is pre-1.0:
+
+- **Minor** (`0.9.0` to `0.10.0`): new user-visible capability in the package.
+  A provider, a harness adapter, a CLI command or option, a metric, a suite
+  runner, a change to the shape of a recorded artifact (`summary.json`,
+  `trace.jsonl`), or a behaviour change that could alter a published number.
+- **Patch** (`0.9.0` to `0.9.1`): bug fixes only, with no new capability.
+- **Major**: reserved for 1.0, and for incompatible changes after it.
+
+Changes that do not alter what the package does for its users do not move the
+number: documentation, CI and workflow files, scripts outside the package,
+results and cards under `docs/results/`, task content under `tasks/` (suites
+carry their own `version` in `suite.json`; see
+[docs/HOW_WE_WORK.md](docs/HOW_WE_WORK.md)), and experiments that are not part
+of the wheel (for example `engine-rs/`). Note them in the changelog when they
+are worth knowing about; do not release for them. Other components keep their
+own numbers: the dashboard's `package.json`, the sandbox image tags, and any
+crate's `Cargo.toml`.
+
+### How a change is recorded
+
+Every pull request that changes the package in a way a user could notice adds
+a line under `## [Unreleased]` in `CHANGELOG.md`, in the same PR, under
+`### Added`, `### Changed`, `### Fixed` or `### Removed`. That section is what
+decides the next version: any `### Added` entry, or a `### Changed` entry that
+alters behaviour, makes the next release a minor; a section holding only fixes
+makes it a patch.
+
+### How a release is cut
+
+Maintainers cut releases from `main`; do not tag or publish from a feature PR
+unless explicitly asked. A release is one commit on `main` that:
+
+1. renames `[Unreleased]` in `CHANGELOG.md` to the new version with the date,
+   and opens a fresh, empty `[Unreleased]` section above it;
+2. sets `__version__` in `harness/__init__.py` (canonical: `vulcanbench
+   --version` and the backend API read it) and `version` in `pyproject.toml`
+   to the same string;
+3. updates the `test_version` assertion in `tests/test_cli.py` to match;
+4. is tagged `v<version>` (for example `v0.10.0`) and published as a GitHub
+   release, which triggers the PyPI publish workflow.
+
+Every version string that lands in `harness/__init__.py` therefore corresponds
+to a tagged release, so the history of the number is the history of releases.
+
+When finishing a user-facing release, include ready-to-post tweet text in the
+PR description or chat reply (see [Release tweet](#release-tweet) below). Agents
+working in this repo must do this whenever they cut a release.
 
 `backend/app.py` imports `__version__` from `harness`: no separate edit needed
 there.
-
-Release tags use the `v` prefix (e.g. `v0.3.0`). Do not tag or publish from a
-feature PR unless explicitly requested; maintainers cut releases from `main`.
 
 ### Regenerating cost priors
 
@@ -121,10 +157,10 @@ lightly edit. Put it in the PR body or hand it to the user in chat.
 **Format**
 
 - Lead with `VulcanBench vX.Y.Z` and one-line what it is (open-source LLM coding benchmark)
-- 2–4 concrete bullets as short phrases (new command, fix, suite, not internal refactors)
+- 2 to 4 concrete bullets as short phrases (new command, fix, suite, not internal refactors)
 - Link: `https://github.com/morganlinton/VulcanBench`
 - Stay under ~280 characters when possible; use a thread only if necessary
-- Tone: factual, excited but not hype-y; no hashtag spam (0–2 relevant tags max)
+- Tone: factual, excited but not hype-y; no hashtag spam (0 to 2 relevant tags max)
 
 **Example**
 

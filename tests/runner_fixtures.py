@@ -288,6 +288,7 @@ def harness_run(
 REPO = Path(__file__).resolve().parents[1]
 GATE_SCRIPT_SRC = REPO / "scripts" / "frontier-v5" / "run_gate.sh"
 WORKTREE_SCRIPT_SRC = REPO / "scripts" / "run_worktree.sh"
+TAG_SCRIPT_SRC = REPO / "scripts" / "cut_bench_tag.sh"
 
 
 def git(cwd: Path, *args: str) -> str:
@@ -313,6 +314,7 @@ def fake_repo(
     (repo / "scripts" / "frontier-v5").mkdir(parents=True)
     shutil.copy(GATE_SCRIPT_SRC, repo / "scripts" / "frontier-v5" / "run_gate.sh")
     shutil.copy(WORKTREE_SCRIPT_SRC, repo / "scripts" / "run_worktree.sh")
+    shutil.copy(TAG_SCRIPT_SRC, repo / "scripts" / "cut_bench_tag.sh")
     for name in tasks:
         d = repo / "tasks" / "frontier-v5" / name
         d.mkdir(parents=True)

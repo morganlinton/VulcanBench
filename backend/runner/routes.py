@@ -15,9 +15,10 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.runner import docker_ps, launch, procs, sweep
+from backend.runner import docker_ps, launch, maintenance, procs, stream, sweep
 from backend.runner.config import RunnerConfig, load_config
 from backend.runner.discovery import HARNESS_PREFIX, Discovery, job_summary, tail_text
 from backend.runner.redact import redact
@@ -98,6 +99,30 @@ def run_log(
         "redacted": True,
         "text": redact(text),
     }
+
+
+@router.get("/runs/{run_id:path}/log/stream")
+def run_log_stream(
+    run_id: str,
+    source: str = Query(..., min_length=1, max_length=200),
+    trial: str | None = Query(default=None, max_length=200),
+    lines: int = Query(default=300, ge=1, le=2000),
+    max_s: float = Query(default=600.0, ge=0.0, le=3600.0),
+) -> StreamingResponse:
+    """The same tail as ``/log``, then only appended bytes, as server-sent events."""
+    cfg = load_config()
+    disc = _discovery(cfg, _state(cfg))
+    run = disc.get(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail=f"run {run_id} not found")
+    path = disc.resolve_log(run, source, trial)
+    if path is None:
+        raise HTTPException(status_code=404, detail="no such log for this run")
+    return StreamingResponse(
+        stream.log_events(path, lines=lines, max_s=max_s),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/runs/{run_id:path}/check")
@@ -431,6 +456,49 @@ def stop_job(job_id: int, body: StopRequest | None = None) -> dict[str, Any]:
     if job is None:
         raise HTTPException(status_code=409, detail="job is not queued or running")
     return job_summary(job)
+
+
+# ----------------------------------------------------------- maintenance --
+
+
+class RemoveRequest(BaseModel):
+    ids: list[str] = Field(min_length=1, max_length=200)
+
+
+class TagRequest(BaseModel):
+    label: str = Field(min_length=1, max_length=60)
+    push: bool = False
+
+
+@router.get("/maintenance/orphans")
+def orphans() -> dict[str, Any]:
+    cfg = load_config()
+    return maintenance.orphan_containers(cfg, _state(cfg))
+
+
+@router.post("/maintenance/orphans/remove")
+def remove_orphans(body: RemoveRequest) -> dict[str, Any]:
+    """Remove only ids that are orphans at this moment; anything else is refused by id."""
+    cfg = load_config()
+    docker_ps.reset_cache()
+    current = maintenance.orphan_containers(cfg, _state(cfg))["containers"]
+    result = maintenance.remove_containers(body.ids, current)
+    docker_ps.reset_cache()
+    return result
+
+
+@router.get("/maintenance/tag")
+def tag_preflight() -> dict[str, Any]:
+    return maintenance.tag_preflight()
+
+
+@router.post("/maintenance/tag", status_code=201)
+def cut_tag(body: TagRequest) -> dict[str, Any]:
+    """``scripts/cut_bench_tag.sh <label> [--push]`` in the backend's checkout; its guards decide."""
+    result = maintenance.cut_bench_tag(body.label.strip(), push=body.push)
+    if not result["ok"]:
+        raise HTTPException(status_code=409, detail=result)
+    return result
 
 
 @router.delete("/jobs/{job_id}", status_code=204)

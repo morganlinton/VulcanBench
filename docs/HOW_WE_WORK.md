@@ -304,7 +304,8 @@ be at the bench tag and clean, the exact commands and the estimate are shown
 before a confirm click, the queue runs one job at a time, nothing retries on
 its own (a quota window may continue a level only when the plan says so,
 docs/DECISIONS.md 2026-10-30), and a stop goes through the script's own trap
-or the harness's own shutdown. See [GUI.md](GUI.md).
+or the harness's own shutdown. Cutting a bench tag from the GUI goes
+through `cut_bench_tag.sh` with the same refusals. See [GUI.md](GUI.md).
 
 ## Results: what goes in git and what does not
 

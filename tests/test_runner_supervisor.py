@@ -54,8 +54,22 @@ def no_validation(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(launch, "validate_before_launch", lambda _cfg, _spec: [])
 
 
+def _own_procs() -> list[Proc]:
+    """The real process table, limited to this test process and its descendants.
+
+    A harbor or vulcanbench run launched by hand on the machine running the tests
+    would otherwise hold the queue (that rule has its own test with an injected
+    table).
+    """
+    table = procs.list_processes()
+    me = os.getpid()
+    keep = {me} | {p.pid for p in procs.descendants(me, table)}
+    return [p for p in table if p.pid in keep]
+
+
 def make_sup(cfg: RunnerConfig, state: State, clock: Clock, **kw: Any) -> Supervisor:
     kw.setdefault("containers", lambda: [])
+    kw.setdefault("list_procs", _own_procs)
     return Supervisor(cfg, state, now=clock, **kw)
 
 
@@ -299,7 +313,7 @@ def test_one_at_a_time_and_outside_runs_hold_the_queue(
         )
     ]
     table: list[Proc] = list(outside)
-    s = make_sup(cfg, state, clock, list_procs=lambda: table + procs.list_processes())
+    s = make_sup(cfg, state, clock, list_procs=lambda: table + _own_procs())
     s.tick()
     assert state.get_job(a.id).status == "queued"  # type: ignore[union-attr]
     assert s.hold_reason and "99999" in s.hold_reason

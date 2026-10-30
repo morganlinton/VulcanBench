@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   confirm click, one job at a time, with a clean stop. `run_gate.sh` starts
   harbor as an interruptible child, traps INT and TERM, writes
   `<job>.status.json`, and gains `--refs` and `GATE_PREFLIGHT_ONLY=1`.
+- **Benchmark a model from the GUI**: the Launch page plans a suite run for a
+  model (harness, billing, suite, effort levels, bench tag) and queues one
+  `vulcanbench run` per level, after the worktree check, the harness doctor
+  and `estimate --json`, none of which spends quota. The Runs page shows
+  per-level progress. A level that ends with tasks missing is incomplete and
+  never retried; a plan may allow a capped continuation after a quota window
+  only. `vulcanbench run` gains `--max-infra-retries` (the GUI passes 0).
 
 ## [0.10.0] - 2026-10-30
 

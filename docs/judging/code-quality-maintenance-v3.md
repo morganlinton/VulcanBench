@@ -1462,6 +1462,13 @@ built by `scripts/cii-v4-board/build_gpt61terra_population.py`.
   against the level two steps up (wrapping), as in v3.24.
 - Comparability: a Terra score is a Muse Spark 1.3 and Grok 4.6 mean, the
   same panel as the GPT-6.1 Sol and Claude Opus 5.5 columns.
+- Recovery (owner decision, October 29): Muse's probe of max settlecore
+  (submission-011) quoted a byte-string line with its escapes decoded, the
+  JSON-escaping slip the v3.18 wrapper rule `recover_escaped_excerpts`
+  covers. The source spells NUL as backslash-x-00, which the rule did not
+  yet try, so the probe was first marked invalid. The rule now tries both
+  spellings, and the probe is recovered under it; details in
+  `maintenance-v3-operations.md`.
 
 ## Not yet done
 

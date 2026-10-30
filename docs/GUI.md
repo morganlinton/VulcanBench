@@ -59,9 +59,70 @@ For Claude Code the model comes from the stream itself; for Codex it comes
 from the `codex exec ... --model` line in `trial.log` and the command count
 from the JSON stream. The check only flags; it never stops a run.
 
-## Launch page and queue (milestone 2)
+## Benchmark a model (milestone 3)
 
-`http://127.0.0.1:3000/launch` plans a Frontier v5 gate run:
+The Launch page's main tab. A new model comes out; the operator types its id,
+picks the harness, the billing mode, the suite (VulcanBench Frontier v4 by
+default), the effort levels and the bench tag, and gets one queued job per
+level:
+
+    <worktree>/.venv/bin/vulcanbench run --suite <suite> --model <m> --harness <h>
+        --billing <b> --effort <level> --repeat <k> --sandbox <s> --no-judges
+        --max-concurrency 1 --max-infra-retries 0 --only-missing -o <runner home>/runs/<label>/<level>
+
+That is the command the hand-run sweep scripts under `scripts/cii-v4-board/`
+use, minus their retry loops. What happens before confirm, none of it a
+model call:
+
+1. The worktree for the tag must already exist and be clean. When it does
+   not, the page offers **Prepare the worktree**, a queue step that runs
+   `scripts/run_worktree.sh <tag>` and nothing else (make setup takes
+   minutes; watch it on the Runs page).
+2. **Build plan** runs `vulcanbench harness doctor <harness> --json` from the
+   worktree (CLI installed, logged in) and `vulcanbench estimate --json` for
+   the suite and model (list price, bundled priors). "No built-in pricing"
+   is the signal that the model is not onboarded at that tag: the plan warns,
+   because onboarding (the price entry in `harness/pricing.py`, a pinned CLI
+   when the vendor requires one, a decision entry) is a PR and a new tag,
+   not something the GUI does.
+3. The plan shows every level's command, the estimate per level and in all,
+   the longest possible wall time (runs times the 3-hour task timeout), the
+   sandbox default for the harness, and the quota rule chosen. Confirm is
+   disabled while the doctor says the harness is not ready.
+4. **Confirm** queues the levels. The supervisor runs them one at a time.
+
+Progress lives on the Runs page under **Model sweeps**: per level, runs done
+of total, passed and the pass rate, cost so far from the run summaries, the
+current task with how far into its 3-hour budget it is (and a warning when
+its trace has been quiet for 15 minutes), an ETA from the average run so far,
+and Stop. Each run is also a row of its own, owned by its level, with the
+first-attempt check and the log tail.
+
+A level that ends with tasks still missing is **incomplete** and stays that
+way; **Run the missing tasks** on the sweep card prefills a new plan for the
+same output directory with `--only-missing`, which needs its own confirm. The
+one continuation that happens without a click is the quota rule set on the
+plan: after a subscription window or rate limit the level **waits** 30
+minutes and runs `--only-missing` again, at most the number of times chosen
+(default zero). An expired login, a provider error, a sandbox error or a
+crash never continues (docs/DECISIONS.md 2026-10-30).
+
+Stop on a suite level: SIGINT to `vulcanbench` (finish the in-flight task),
+the agent CLI's own session is killed two seconds later, the harness grades
+what it has and tears down, and the job's process group is torn down if it is
+still there after ten minutes. The sweep afterwards touches only containers
+and scratch directories of this level's unfinished runs.
+
+The **Pinned CLI directory** field (under "advanced") prepends a directory to
+the child's PATH, for a model that needs a newer or pinned harness CLI
+(`CODEX_BIN_DIR` in the scripts). Login homes the harness reads
+(`CODEX_HOME`, `CLAUDE_CONFIG_DIR`, `GROK_HOME`, `ZCODE_*`) pass through
+when set; keys never do. Metered API keys reach the harness the way they do
+by hand: `load_dotenv()` on the worktree's `.env`.
+
+## Frontier v5 gate runs and the queue (milestone 2)
+
+The Launch page's second tab plans a Frontier v5 gate run:
 
 1. Pick the reference (`astra`, `fable`, `opus`, read from `run_gate.sh
    --refs`), the bench tag, the task at that tag, attempts (1 to 3),
@@ -125,7 +186,11 @@ final state from the script's status file.
   `VULCANBENCH_*` (so `VULCANBENCH_ALLOW_DIRTY` cannot leak in),
   `DATABASE_URL`, `*_API_KEY`, `*_TOKEN` and `*SECRET*` never pass.
 - Effort levels under `[effort].blocked` never appear as options and are
-  refused server-side. Gate runs are fixed at `medium` by the script.
+  refused server-side, at plan time and again at launch. Gate runs are fixed
+  at `medium` by the script.
+- A suite run never re-queues a unit on its own (`--max-infra-retries 0`),
+  and the GUI never retries a failed, incomplete, stopped or lost job. The
+  only continuation is the quota rule on the plan, off by default.
 - Nothing that spends model quota starts without the confirm click that
   shows the estimate and the exact command; there is no auto-start and no
   auto-retry.
@@ -190,6 +255,8 @@ the backend behaves exactly as the public deployment does.
 2. Queue and supervisor (one run at a time, survives a backend restart, clean
    stop), gate launches with the usage pre-flight and a confirm step, and the
    `run_gate.sh` hardening that makes a clean stop possible (this document).
-3. Harness launches with `vulcanbench estimate --json`, effort picker, and
-   `--only-missing` as an explicit resume.
+3. Benchmark a model: suite runs through `vulcanbench run`, one job per
+   effort level, the quota-free doctor and estimate, per-level progress, the
+   capped quota continuation, `--only-missing` as an explicit resume, and
+   `--max-infra-retries` on the CLI (this document).
 4. Polish: orphan-container cleanup, bench-tag cutting, streaming log tail.

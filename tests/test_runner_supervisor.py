@@ -13,14 +13,14 @@ from typing import Any
 
 import pytest
 
-from backend.runner import launch, procs
+from backend.runner import launch, procs, sweep
 from backend.runner import supervisor as sup
 from backend.runner.config import RunnerConfig
 from backend.runner.docker_ps import Container
 from backend.runner.procs import Proc
 from backend.runner.state import Job, State
 from backend.runner.supervisor import STOP_GRACE_S, Supervisor, SupervisorService
-from tests.runner_fixtures import make_config
+from tests.runner_fixtures import fake_repo, fake_worktree, make_config, set_fake_run
 
 
 class Clock:
@@ -471,3 +471,239 @@ def test_service_holds_one_lock_per_machine(cfg: RunnerConfig) -> None:
 def test_job_dataclass_roundtrip(state: State) -> None:
     job = state.create_job("gate", "n", {"a": 1})
     assert isinstance(job, Job) and job.to_dict()["spec"] == {"a": 1}
+
+
+# ------------------------------------------------------------ suite levels --
+
+
+def _suite_job(
+    cfg: RunnerConfig, state: State, repo_tmp: Path, *, mode: str, quota_max: int = 0
+) -> Any:
+    """A queued suite level whose child is the fake vulcanbench from the fixtures."""
+    repo = fake_repo(repo_tmp)
+    wt = fake_worktree(repo, cfg)
+    set_fake_run(wt, mode)
+    out_dir = cfg.harness_runs_dir / "demo-sweep" / "low"
+    cli = wt / ".venv" / "bin" / "vulcanbench"
+    spec: dict[str, Any] = {
+        "kind": "suite",
+        "job_name": "demo-sweep-low",
+        "sweep_id": "demo-sweep-abc",
+        "sweep_name": "demo-sweep",
+        "model": "gpt-6.1-terra",
+        "harness": "codex",
+        "suite": "demo-suite",
+        "task_ids": ["alpha-task", "beta-task"],
+        "n_tasks": 2,
+        "effort": "low",
+        "repeat": 1,
+        "only_missing": False,
+        "tag": "bench/2026-10-29-test",
+        "worktree": str(wt),
+        "needs_prep": False,
+        "argv": [
+            str(cli),
+            "run",
+            "--suite",
+            "demo-suite",
+            "--model",
+            "gpt-6.1-terra",
+            "--effort",
+            "low",
+            "-o",
+            str(out_dir),
+        ],
+        "argv_token": f"-o {out_dir}",
+        "cwd": str(wt),
+        "env": {},
+        "out_dir": str(out_dir),
+        "quota_continue": {"max": quota_max, "wait_s": sweep.QUOTA_WAIT_S, "used": 0},
+    }
+    return state.create_job("suite", "demo-sweep-low", spec), wt, out_dir
+
+
+def _run_to_end(s: Supervisor, state: State, job_id: int, timeout: float = 15.0) -> Job:
+    s.tick()
+    wait_until(
+        lambda: s.children.get(job_id) is None or s.children[job_id].poll() is not None, timeout
+    )
+    s.tick()
+    job = state.get_job(job_id)
+    assert job is not None
+    return job
+
+
+def test_suite_level_finishes_from_the_output_directory(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(launch, "REPO_ROOT", tmp_path / "repo")
+    job, _wt, out_dir = _suite_job(cfg, state, tmp_path, mode="finish")
+    s = make_sup(cfg, state, clock)
+    done = _run_to_end(s, state, job.id)
+    assert done.status == "finished" and done.exit_code == 0, done.notes
+    assert len(list(out_dir.glob("*/summary.json"))) == 2
+    argv = json.loads((out_dir / "argv.json").read_text())
+    assert "VULCANBENCH_ALLOW_DIRTY" not in argv["env"] and argv["argv"][0] == "run"
+
+
+def test_suite_level_with_missing_tasks_is_incomplete_not_retried(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(launch, "REPO_ROOT", tmp_path / "repo")
+    job, _wt, _out = _suite_job(cfg, state, tmp_path, mode="partial")
+    s = make_sup(cfg, state, clock)
+    done = _run_to_end(s, state, job.id)
+    assert done.status == "incomplete" and "1 of 2 runs" in done.notes[-1]
+    s.tick()
+    assert state.queued_jobs() == [] and state.waiting_jobs() == []
+
+
+def test_quota_window_waits_then_continues_only_as_often_as_allowed(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(launch, "REPO_ROOT", tmp_path / "repo")
+    job, _wt, out_dir = _suite_job(cfg, state, tmp_path, mode="quota", quota_max=1)
+    s = make_sup(cfg, state, clock)
+    waiting = _run_to_end(s, state, job.id)
+    assert waiting.status == "waiting" and waiting.exit_code == 2
+    assert waiting.spec["quota_continue"]["used"] == 1 and "--only-missing" in waiting.spec["argv"]
+    assert "continues with --only-missing" in waiting.notes[-1]
+    resume = waiting.spec["resume_at"]
+    s.tick()  # not due yet
+    assert state.get_job(job.id).status == "waiting"  # type: ignore[union-attr]
+    clock.advance(sweep.QUOTA_WAIT_S + 1)
+    again = _run_to_end(s, state, job.id)
+    # The second run hits the window too; no continuation is left, so the level ends incomplete.
+    assert again.status == "incomplete" and "all 1 continuations used" in again.notes[-1]
+    assert again.spec["resume_at"] == resume
+    assert (
+        len(list(out_dir.glob("*/summary.json"))) == 1
+    )  # the fake refuses the last task every time
+
+
+def test_auth_failure_ends_the_level(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(launch, "REPO_ROOT", tmp_path / "repo")
+    job, _wt, _out = _suite_job(cfg, state, tmp_path, mode="auth", quota_max=5)
+    s = make_sup(cfg, state, clock)
+    done = _run_to_end(s, state, job.id)
+    assert done.status == "failed" and "login expired" in done.notes[-1]
+
+
+def test_stop_kills_the_agent_session_then_waits_for_the_harness(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(launch, "REPO_ROOT", tmp_path / "repo")
+    job, _wt, out_dir = _suite_job(cfg, state, tmp_path, mode="hang")
+    killed: list[tuple[int, int]] = []
+
+    def killpg(pgid: int, sig: int) -> None:
+        killed.append((pgid, sig))
+        os.killpg(pgid, sig)
+
+    s = make_sup(cfg, state, clock, killpg=killpg)
+    s.tick()
+    wait_until((out_dir / "agent.pid").exists)
+    agent_pid = int((out_dir / "agent.pid").read_text())
+    state.request_stop(job.id, "test")
+    s.tick()  # SIGINT to vulcanbench
+    assert state.get_job(job.id).status == "stopping"  # type: ignore[union-attr]
+    clock.advance(sup.AGENT_KILL_AFTER_S + 1)
+    s.tick()  # the agent's own session is killed
+    assert killed and killed[0] == (agent_pid, signal.SIGKILL)
+    assert any("agent process group" in n for n in state.get_job(job.id).notes)  # type: ignore[union-attr]
+    wait_until(lambda: s.children[job.id].poll() is not None)
+    s.tick()
+    done = state.get_job(job.id)
+    assert done is not None and done.status == "stopped" and done.exit_code == 130
+    assert (out_dir / "interrupted").read_text() == "sigint"
+    wait_until(lambda: not _alive(agent_pid))
+
+
+def _alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    return True
+
+
+def test_prepare_only_job_finishes_after_the_worktree_step(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
+) -> None:
+    ok = script(tmp_path, "prep.sh", f'mkdir -p "{cfg.run_worktrees / "bench-t"}"\nexit 0\n')
+    spec = {
+        "kind": "prepare",
+        "job_name": "prepare-bench-t",
+        "tag": "bench/t",
+        "worktree": str(cfg.run_worktrees / "bench-t"),
+        "needs_prep": True,
+        "argv": None,
+        "prep_argv": ["bash", str(ok), "bench/t"],
+        "prep_env": {"RUN_WORKTREES": str(cfg.run_worktrees)},
+    }
+    job = state.create_job("prepare", "prepare-bench-t", spec)
+    s = make_sup(cfg, state, clock)
+    done = _run_to_end(s, state, job.id)
+    assert done.status == "finished" and "worktree ready" in done.notes[-1]
+    again = state.create_job("prepare", "prepare-bench-t", spec)
+    s.tick()
+    assert state.get_job(again.id).status == "finished"  # type: ignore[union-attr]
+    assert "already present" in state.get_job(again.id).notes[-1]  # type: ignore[union-attr]
+
+
+def test_suite_sweep_touches_only_unfinished_runs(
+    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    out_dir = cfg.harness_runs_dir / "sw" / "low"
+    (out_dir / "alpha-task-aaaaaaaa").mkdir(parents=True)
+    (out_dir / "alpha-task-aaaaaaaa" / "summary.json").write_text("{}")
+    (out_dir / "beta-task-bbbbbbbb").mkdir()
+    containers = [
+        Container(
+            id="c1",
+            name="x",
+            status="Up",
+            state="running",
+            image="i",
+            labels={"com.docker.compose.project": "vb-beta-task-bbbbbbbb"},
+        ),
+        Container(
+            id="c2",
+            name="y",
+            status="Up",
+            state="running",
+            image="i",
+            labels={"com.docker.compose.project": "vb-alpha-task-aaaaaaaa"},
+        ),
+        Container(
+            id="c3",
+            name="z",
+            status="Up",
+            state="running",
+            image="i",
+            mounts=f"{tmp_path}/vulcanbench-beta-task-bbbbbbbb-xyz/workspace",
+        ),
+    ]
+    calls: list[list[str]] = []
+
+    def fake_run(argv: list[str], **_: Any) -> Any:
+        calls.append(argv)
+
+        class R:
+            stdout = ""
+
+        return R()
+
+    monkeypatch.setattr(sup.subprocess, "run", fake_run)
+    monkeypatch.setattr(sup.tempfile, "gettempdir", lambda: str(tmp_path))
+    (tmp_path / "vulcanbench-beta-task-bbbbbbbb-xyz").mkdir()
+    (tmp_path / "vulcanbench-alpha-task-aaaaaaaa-q").mkdir()
+    job = state.create_job("suite", "sw-low", {"kind": "suite", "out_dir": str(out_dir)})
+    s = make_sup(cfg, state, clock, containers=lambda: containers)
+    s._sweep_suite(job)
+    rm = [c for c in calls if c[1:3] == ["rm", "-f"]]
+    assert len(rm) == 1 and sorted(rm[0][3:]) == ["c1", "c3"]
+    assert not (tmp_path / "vulcanbench-beta-task-bbbbbbbb-xyz").exists()
+    assert (tmp_path / "vulcanbench-alpha-task-aaaaaaaa-q").exists()

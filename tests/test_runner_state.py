@@ -38,7 +38,7 @@ def test_plan_confirm_creates_one_queued_job(state: State) -> None:
     with pytest.raises(PlanError) as bad:
         state.confirm_plan(plan.id, "0000000000000000")
     assert bad.value.status == 409
-    job = state.confirm_plan(plan.id, "abc123def456")
+    (job,) = state.confirm_plan(plan.id, "abc123def456")
     assert job.status == "queued" and job.name == "opus-demo" and job.plan_hash == "abc123def456"
     assert state.queued_jobs() == [job]
     again = state.get_plan(plan.id)

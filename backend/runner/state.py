@@ -23,8 +23,12 @@ from typing import Any
 
 SCHEMA_VERSION = 1
 PLAN_TTL_S = 600
-ACTIVE_STATUSES = ("queued", "preparing", "running", "stopping")
-FINAL_STATUSES = ("finished", "stopped", "failed", "infra_failed", "lost")
+# ``waiting``: a suite level that hit a quota window and continues on its own
+# after ``spec["resume_at"]`` (only when the plan allowed it, and only so many
+# times). ``incomplete``: a level that ended with tasks still missing.
+ACTIVE_STATUSES = ("queued", "waiting", "preparing", "running", "stopping")
+PENDING_STATUSES = ("queued", "waiting")
+FINAL_STATUSES = ("finished", "incomplete", "stopped", "failed", "infra_failed", "lost")
 
 
 class PlanError(Exception):
@@ -262,8 +266,11 @@ class State:
             return "plan expired; build it again"
         return None
 
-    def confirm_plan(self, plan_id: str, plan_hash: str) -> Job:
-        """Turn a live plan into a queued job. The hash must match what the page showed."""
+    def confirm_plan(self, plan_id: str, plan_hash: str) -> list[Job]:
+        """Turn a live plan into queued jobs (one per ``spec["jobs"]`` entry, else one).
+
+        The hash must match what the page showed.
+        """
         plan = self.get_plan(plan_id)
         if plan is None:
             raise PlanError(404, "plan not found")
@@ -275,31 +282,34 @@ class State:
         if reason:
             raise PlanError(409, reason)
         now = iso(self.now())
+        entries = [j for j in (plan.spec.get("jobs") or []) if isinstance(j, dict)] or [plan.spec]
+        ids: list[int] = []
         with self._connect() as con:
             con.execute("BEGIN IMMEDIATE")
             row = con.execute("SELECT confirmed_at FROM plan WHERE id = ?", (plan_id,)).fetchone()
             if row is None or row["confirmed_at"]:
                 con.execute("ROLLBACK")
                 raise PlanError(409, "plan already confirmed")
-            cur = con.execute(
-                "INSERT INTO job (kind, name, status, spec, plan_hash, created_at, notes) "
-                "VALUES (?, ?, 'queued', ?, ?, ?, '[]')",
-                (
-                    plan.kind,
-                    str(plan.spec.get("job_name") or plan.kind),
-                    json.dumps(plan.spec),
-                    plan.hash,
-                    now,
-                ),
-            )
-            job_id = int(cur.lastrowid or 0)
+            for entry in entries:
+                cur = con.execute(
+                    "INSERT INTO job (kind, name, status, spec, plan_hash, created_at, notes) "
+                    "VALUES (?, ?, 'queued', ?, ?, ?, '[]')",
+                    (
+                        str(entry.get("kind") or plan.kind),
+                        str(entry.get("job_name") or plan.kind),
+                        json.dumps({**entry, "plan_id": plan_id}),
+                        plan.hash,
+                        now,
+                    ),
+                )
+                ids.append(int(cur.lastrowid or 0))
             con.execute(
-                "UPDATE plan SET confirmed_at = ?, job_id = ? WHERE id = ?", (now, job_id, plan_id)
+                "UPDATE plan SET confirmed_at = ?, job_id = ? WHERE id = ?", (now, ids[0], plan_id)
             )
             con.execute("COMMIT")
-        job = self.get_job(job_id)
-        assert job is not None
-        return job
+        jobs = [self.get_job(i) for i in ids]
+        assert all(j is not None for j in jobs)
+        return [j for j in jobs if j is not None]
 
     # ----------------------------------------------------------------- jobs --
 
@@ -353,6 +363,21 @@ class State:
     def queued_jobs(self) -> list[Job]:
         return self.jobs_with_status("queued")
 
+    def waiting_jobs(self) -> list[Job]:
+        return self.jobs_with_status("waiting")
+
+    def due_waiting(self, now: datetime | None = None) -> list[Job]:
+        """Waiting jobs whose quota pause is over, oldest first."""
+        now = now or self.now()
+        out: list[Job] = []
+        for job in self.waiting_jobs():
+            resume = (
+                parse(str(job.spec.get("resume_at") or "")) if job.spec.get("resume_at") else None
+            )
+            if resume is None or now >= resume:
+                out.append(job)
+        return out
+
     def update_job(self, job_id: int, **fields: Any) -> Job:
         bad = set(fields) - _JOB_FIELDS - {"notes"}
         if bad or "id" in fields:
@@ -382,13 +407,18 @@ class State:
         job = self.get_job(job_id)
         if job is None or not job.active:
             return None
-        if job.status == "queued":
+        if job.status in PENDING_STATUSES:
+            note = (
+                "removed from the queue before it started"
+                if job.status == "queued"
+                else "stopped while waiting for the quota window; nothing continues"
+            )
             return self.update_job(
                 job_id,
                 status="stopped",
                 stop_reason=reason,
                 finished_at=iso(self.now()),
-                notes=[*job.notes, "removed from the queue before it started"],
+                notes=[*job.notes, note],
             )
         if job.stop_requested_at:
             return job
@@ -396,5 +426,7 @@ class State:
 
     def delete_queued(self, job_id: int) -> bool:
         with self._connect() as con:
-            cur = con.execute("DELETE FROM job WHERE id = ? AND status = 'queued'", (job_id,))
+            cur = con.execute(
+                "DELETE FROM job WHERE id = ? AND status IN ('queued', 'waiting')", (job_id,)
+            )
         return bool(cur.rowcount)

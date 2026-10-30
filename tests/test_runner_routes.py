@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -14,9 +15,17 @@ import json
 from fastapi.testclient import TestClient
 
 import backend.app as appmod
-from backend.runner import docker_ps, launch, procs
+from backend.runner import docker_ps, launch, procs, sweep
 from backend.runner import state as state_mod
-from tests.runner_fixtures import fake_repo, fake_worktree, gate_job, make_config
+from tests.runner_fixtures import (
+    SUITE_ID,
+    fake_repo,
+    fake_worktree,
+    gate_job,
+    git,
+    harness_run,
+    make_config,
+)
 
 
 @pytest.fixture
@@ -91,6 +100,7 @@ def launch_env(runner_env: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, P
     cfg = make_config(runner_env)
     repo = fake_repo(runner_env)
     monkeypatch.setattr(launch, "REPO_ROOT", repo)
+    monkeypatch.setattr(sweep, "REPO_ROOT", repo)
     launch._refs_cache.clear()
     wt = fake_worktree(repo, cfg)
     return {"repo": repo, "worktree": wt}
@@ -266,3 +276,136 @@ def test_queue_stop_and_remove(launch_env: dict[str, Path]) -> None:
     assert c.delete(f"/api/runner/jobs/{job2['id']}").status_code == 204
     assert c.get(f"/api/runner/jobs/{job2['id']}").status_code == 404
     assert c.get("/api/runner/jobs/999").status_code == 404
+
+
+# ------------------------------------------------------- benchmark a model --
+
+
+def _sweep_plan(c: TestClient, **over: object) -> dict[str, Any]:
+    body: dict[str, object] = {
+        "kind": "sweep",
+        "model": "gpt-6.1-terra",
+        "harness": "codex",
+        "suite": SUITE_ID,
+        "tag": "bench/2026-10-29-test",
+        "efforts": ["low", "max"],
+        "billing": "subscription",
+    }
+    body.update(over)
+    r = c.post("/api/runner/plans", json=body)
+    assert r.status_code == 201, r.text
+    data: dict[str, Any] = r.json()
+    return data
+
+
+def test_options_cover_the_model_sweep(launch_env: dict[str, Path]) -> None:
+    opts = _local().get("/api/runner/options").json()
+    assert opts["kinds"] == ["sweep", "gate", "prepare"]
+    assert [s["id"] for s in opts["suites"]] == [SUITE_ID] and opts["suites"][0]["n_tasks"] == 2
+    assert "ultra" not in opts["efforts"] and opts["efforts"][0] == "minimal"
+    assert "codex" in opts["harnesses"] and opts["sandbox_defaults"]["codex"] == "local"
+    assert opts["quota_wait_s"] == 1800
+
+
+def test_sweep_plan_confirm_queue_and_progress(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    plan = _sweep_plan(c)
+    spec = plan["spec"]
+    assert spec["kind"] == "sweep" and [j["effort"] for j in spec["jobs"]] == ["low", "max"]
+    assert spec["doctor"]["status"] == "ready" and spec["estimate"]["total_usd"] == 9.0
+    assert plan["usage_check_ok"] is True and plan["live_reason"] is None
+    r = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]})
+    assert r.status_code == 201, r.text
+    first = r.json()
+    assert first["kind"] == "suite" and [j["name"] for j in first["jobs"]] == [
+        f"{spec['name']}-low",
+        f"{spec['name']}-max",
+    ]
+    q = c.get("/api/runner/queue").json()
+    assert [j["status"] for j in q["jobs"]] == ["queued", "queued"]
+    # Progress from disk: nothing yet, the level rows show 0 of 2.
+    sweeps = c.get("/api/runner/sweeps").json()["sweeps"]
+    assert len(sweeps) == 1 and sweeps[0]["model"] == "gpt-6.1-terra"
+    levels = sweeps[0]["levels"]
+    assert [lv["job"]["spec"]["effort"] for lv in levels] == ["low", "max"]
+    assert levels[0]["progress"]["total_runs"] == 2 and sweeps[0]["totals"]["active"] is True
+    runs = c.get("/api/runner/runs").json()
+    rows = [r for r in runs if r["id"].startswith("job:")]
+    assert {r["effort"] for r in rows} == {"low", "max"} and rows[0]["attempts_total"] == 2
+    assert rows[0]["kind"] == "suite" and rows[0]["suite_or_task"] == SUITE_ID
+    # A finished run under the level's directory is owned and counted.
+    out_dir = Path(levels[0]["progress"]["out_dir"])
+    harness_run(
+        out_dir, "alpha-task-aaaaaaaa", task_id="alpha-task", functional=1.0, suite=SUITE_ID
+    )
+    harness_run(out_dir, "beta-task-bbbbbbbb", task_id="beta-task", finished=False)
+    sweeps = c.get("/api/runner/sweeps").json()["sweeps"]
+    prog = sweeps[0]["levels"][0]["progress"]
+    assert (
+        prog["runs_done"] == 1 and prog["passed"] == 1 and prog["current"]["task_id"] == "beta-task"
+    )
+    assert prog["current"]["run_id_href"].startswith("harness:0:")
+    run = c.get(f"/api/runner/runs/{prog['current']['run_id_href']}").json()
+    assert run["owned"] is True and run["job"]["id"] == levels[0]["job"]["id"]
+    # The job is queued, not running, so a trace without a summary is a stopped run.
+    assert run["status"] == "stopped"
+    # Removing a queued level and stopping the other.
+    ids = [lv["job"]["id"] for lv in levels]
+    assert c.delete(f"/api/runner/jobs/{ids[1]}").status_code == 204
+    assert c.post(f"/api/runner/jobs/{ids[0]}/stop").json()["status"] == "stopped"
+
+
+def test_sweep_plan_refusals_and_doctor_gate(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    r = c.post(
+        "/api/runner/plans",
+        json={
+            "kind": "sweep",
+            "model": "x",
+            "harness": "codex",
+            "suite": SUITE_ID,
+            "tag": "bench/2026-10-29-test",
+            "efforts": ["ultra"],
+        },
+    )
+    assert r.status_code == 422 and "blocked" in r.text
+    r = c.post(
+        "/api/runner/plans",
+        json={
+            "kind": "sweep",
+            "model": "x",
+            "harness": "codex",
+            "suite": SUITE_ID,
+            "tag": "bench/2026-10-29-test",
+            "efforts": ["low"],
+            "quota_continue": 999,
+        },
+    )
+    assert r.status_code == 422
+    (launch_env["worktree"] / ".fake-doctor-not-ready").write_text("")
+    plan = _sweep_plan(c, efforts=["low"])
+    assert plan["spec"]["doctor"]["status"] == "not_ready"
+    r = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]})
+    assert r.status_code == 409 and "harness not ready" in r.json()["detail"]
+
+
+def test_prepare_plan_is_a_quota_free_queue_step(launch_env: dict[str, Path]) -> None:
+    c = _local()
+    tag = "bench/2026-10-29-test"
+    r = c.post("/api/runner/plans", json={"kind": "prepare", "tag": tag})
+    assert r.status_code == 409 and "already exists" in r.json()["detail"]
+    git(launch_env["repo"], "tag", "bench/2026-10-30-new")
+    plan = c.post(
+        "/api/runner/plans", json={"kind": "prepare", "tag": "bench/2026-10-30-new"}
+    ).json()
+    spec = plan["spec"]
+    assert (
+        spec["kind"] == "prepare"
+        and spec["argv"] is None
+        and spec["prep_argv"][2] == "bench/2026-10-30-new"
+    )
+    assert "no model calls" in spec["estimate"]["billing"]
+    job = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]}).json()
+    assert job["kind"] == "prepare" and job["status"] == "queued"
+    row = next(r for r in c.get("/api/runner/runs").json() if r["id"] == f"job:{job['id']}")
+    assert row["kind"] == "prepare" and row["source_tag"] == "bench/2026-10-30-new"

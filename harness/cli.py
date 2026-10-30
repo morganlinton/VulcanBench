@@ -193,6 +193,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
     dry_run: bool = False,
     allow_dirty: bool = False,
     use_priors: bool = True,
+    max_infra_retries: int = 2,
 ) -> None:
     """Run an agent against a task or a whole suite, recording full traces."""
     try:
@@ -305,6 +306,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
                 max_concurrency,
                 max_cost,
                 only_missing,
+                max_infra_retries=max_infra_retries,
             )
         else:
             pass_at_1, n_incomplete = _run_single(
@@ -531,6 +533,7 @@ def _run_suite(
     max_concurrency: int,
     max_cost: float | None = None,
     only_missing: bool = False,
+    max_infra_retries: int = 2,
 ) -> tuple[float | None, int]:
     """Run a suite; returns (pass@1, n_incomplete) where n_incomplete counts
     errored + budget-skipped runs."""
@@ -547,6 +550,7 @@ def _run_suite(
         max_concurrency=max_concurrency,
         max_cost=max_cost,
         only_missing=only_missing,
+        max_infra_retries=max_infra_retries,
         **run_kwargs,
     )
     covered = result.get("covered_cached") or []
@@ -1336,6 +1340,13 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
         dest="only_missing",
         action="store_true",
         help="Suite runs: skip tasks that already have enough fresh cached runs for this model+effort, running only the gaps (resume a partial column)",
+    )
+    p.add_argument(
+        "--max-infra-retries",
+        dest="max_infra_retries",
+        type=int,
+        default=2,
+        help="Suite runs: how many times a unit whose failure was environmental (provider stall, sandbox) is re-queued before it counts as errored (default 2; 0 never retries)",
     )
     p.add_argument(
         "--timeout",

@@ -20,11 +20,16 @@ What a tick does, in order:
    container sweep scoped to the job's own compose projects.
 3. Start the oldest queued job when nothing owned is active and no outside
    ``harbor run`` or ``vulcanbench run`` is visible (one task at a time,
-   docs/DECISIONS.md), after re-validating its plan.
+   docs/DECISIONS.md), after re-validating its plan. A suite level that is
+   ``waiting`` out a quota window goes first once its pause is over.
 
-Nothing here retries a failed or stopped job. The child's environment is the
-allowlist from ``launch.child_env``; its output goes to a console log the
-parent opens, never through the app logger.
+Nothing here retries a failed or stopped job. The one continuation is the
+quota rule the operator set on the plan (docs/DECISIONS.md 2026-10-30): a
+suite level whose run ended on a subscription window or rate limit, with tasks
+still missing, waits and runs ``--only-missing`` again, at most the number of
+times the plan allowed; any other failure ends the level. The child's
+environment is the allowlist from ``launch.child_env``; its output goes to a
+console log the parent opens, never through the app logger.
 """
 
 from __future__ import annotations
@@ -35,14 +40,15 @@ import os
 import shutil
 import signal
 import subprocess
+import tempfile
 import threading
 import time
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import IO, Any
 
-from backend.runner import launch, procs
+from backend.runner import launch, procs, sweep
 from backend.runner.config import REPO_ROOT, RunnerConfig
 from backend.runner.discovery import read_json
 from backend.runner.docker_ps import Container, list_containers
@@ -50,6 +56,12 @@ from backend.runner.state import Job, State, iso
 
 STOP_GRACE_S = 150.0  # the script's own 90 s + 15 s escalation, with margin
 KILL_GRACE_S = 15.0
+# Suite runs: SIGINT asks the harness to finish the in-flight task; 2 s later
+# the agent CLIs (their own sessions, so a killpg on the job never reaches
+# them) are killed, which the harness's own watchdog also does, and the
+# verifier and teardown get this long before the job's group is torn down.
+AGENT_KILL_AFTER_S = 2.0
+SUITE_STOP_GRACE_S = 600.0
 LSTART_RETRIES = 10
 
 Launcher = Callable[..., "subprocess.Popen[bytes]"]
@@ -152,14 +164,113 @@ class Supervisor:
                     job, "stopped", code, "stop requested while the worktree was being prepared"
                 )
                 return
+            if not job.spec.get("argv"):
+                self._final(job, "finished", code, f"worktree ready at {job.spec.get('worktree')}")
+                return
             self.state.add_note(job.id, "worktree prepared")
             self._start_main(self.state.update_job(job.id, phase=None, pid=None))
             return
         self._final(job, "failed", code, f"run_worktree.sh exited {code}; see the console log")
 
     def _finalize(self, job: Job, code: int | None) -> None:
+        if job.kind == "suite":
+            self._finalize_suite(job, code)
+            return
         status, code, note = self._verdict(job, code)
         self._final(job, status, code, note)
+
+    # ----------------------------------------------------------- suites --
+
+    def _finalize_suite(self, job: Job, code: int | None) -> None:  # noqa: PLR0911
+        """A level of a model sweep ended; decide from the exit code and the output directory."""
+        prog = sweep.progress(job.spec, self.now())
+        done = f"{prog['runs_done']} of {prog['total_runs']} runs have a result"
+        if code in (130, 143) or (code is not None and code < 0):
+            note = (
+                "stopped on request"
+                if job.stop_requested_at
+                else "stopped by a signal from outside the GUI"
+            )
+            return self._final(job, "stopped", code, f"{note}; {done}")
+        if job.stop_requested_at:
+            return self._final(job, "stopped", code, f"ended after the stop request; {done}")
+        if prog["complete"]:
+            return self._final(job, "finished", code, done if code != 0 else None)
+        if code is None:
+            return self._final(
+                job,
+                "lost",
+                None,
+                f"process gone after a backend restart; {done}; final state unknown",
+            )
+        log = Path(job.console_log) if job.console_log else None
+        kind = sweep.classify_exit(job.spec, log, self.now())
+        if kind == "auth":
+            return self._final(
+                job,
+                "failed",
+                code,
+                f"the harness login expired or was refused; {done}. Log in again, then run the missing tasks",
+            )
+        if kind == "quota":
+            qc = dict(job.spec.get("quota_continue") or {})
+            used = int(qc.get("used") or 0)
+            limit = int(qc.get("max") or 0)
+            if used < limit:
+                wait_s = int(qc.get("wait_s") or sweep.QUOTA_WAIT_S)
+                resume = self.now() + timedelta(seconds=wait_s)
+                argv = [str(a) for a in job.spec["argv"]]
+                if "--only-missing" not in argv:
+                    argv.insert(argv.index("-o"), "--only-missing")
+                self.state.update_job(
+                    job.id,
+                    status="waiting",
+                    exit_code=code,
+                    pid=None,
+                    pgid=None,
+                    phase=None,
+                    spec={
+                        **job.spec,
+                        "argv": argv,
+                        "resume_at": iso(resume),
+                        "quota_continue": {**qc, "used": used + 1},
+                    },
+                    notes=[
+                        *job.notes,
+                        f"quota window or rate limit at {done}; continues with --only-missing at "
+                        f"{resume.strftime('%H:%M')} UTC ({used + 1} of {limit} continuations)",
+                    ],
+                )
+                return None
+            return self._final(
+                job,
+                "incomplete",
+                code,
+                f"quota window or rate limit at {done}"
+                + (
+                    "; the plan allowed no continuation"
+                    if not limit
+                    else f"; all {limit} continuations used"
+                )
+                + ". Run the missing tasks from the Launch page",
+            )
+        if code == 0:
+            return self._final(
+                job,
+                "incomplete",
+                code,
+                f"vulcanbench run ended with {done}; see the console log for the errored tasks",
+            )
+        if code == 2:
+            return self._final(job, "infra_failed", code, f"provider error (exit 2); {done}")
+        if code == 3:
+            return self._final(
+                job,
+                "infra_failed",
+                code,
+                f"sandbox or verifier infrastructure error (exit 3); {done}",
+            )
+        return self._final(job, "failed", code, f"exited {code}; {done}")
 
     def _verdict(self, job: Job, code: int | None) -> tuple[str, int | None, str | None]:  # noqa: PLR0911
         status_file = launch_status_file(self.cfg, job)
@@ -203,6 +314,8 @@ class Supervisor:
         )
         if job.kind == "gate" and status != "finished":
             self._sweep(job)
+        if job.kind == "suite" and status != "finished":
+            self._sweep_suite(job)
 
     # ---------------------------------------------------------------- stops --
 
@@ -228,10 +341,15 @@ class Supervisor:
             signalled = _dt(job.stop_signalled_at)
             escalated = _dt(job.stop_escalated_at)
             if (
-                escalated is None
+                job.kind == "suite"
                 and signalled
-                and (now - signalled).total_seconds() >= STOP_GRACE_S
+                and not job.spec.get("agents_killed_at")
+                and (now - signalled).total_seconds() >= AGENT_KILL_AFTER_S
             ):
+                self._kill_agents(job, table)
+                continue
+            grace = SUITE_STOP_GRACE_S if job.kind == "suite" else STOP_GRACE_S
+            if escalated is None and signalled and (now - signalled).total_seconds() >= grace:
                 self._signal(job.pgid or job.pid, signal.SIGTERM, pg=True)
                 self.state.update_job(job.id, stop_escalated_at=iso(now))
                 self.state.add_note(
@@ -240,6 +358,22 @@ class Supervisor:
             elif escalated and (now - escalated).total_seconds() >= KILL_GRACE_S:
                 self._signal(job.pgid or job.pid, signal.SIGKILL, pg=True)
                 self.state.add_note(job.id, "SIGKILL sent to the process group")
+
+    def _kill_agents(self, job: Job, table: list[procs.Proc]) -> None:
+        """SIGKILL the agent CLIs under a suite run: they live in their own sessions."""
+        assert job.pid is not None
+        own = job.pgid or job.pid
+        groups = sorted({p.pgid for p in procs.descendants(job.pid, table) if p.pgid != own})
+        for pgid in groups:
+            self._signal(pgid, signal.SIGKILL, pg=True)
+        self.state.update_job(
+            job.id,
+            spec={**job.spec, "agents_killed_at": iso(self.now()), "agent_pgids": groups},
+            notes=[
+                *job.notes,
+                f"killed {len(groups)} agent process group(s); waiting for the harness to grade and tear down",
+            ],
+        )
 
     def _signal(self, pid: int, sig: int, *, pg: bool) -> None:
         try:
@@ -299,13 +433,51 @@ class Supervisor:
             except (OSError, subprocess.TimeoutExpired):
                 pass
 
+    def _sweep_suite(self, job: Job) -> None:
+        """Containers and scratch of this level's unfinished runs only (compose project vb-<run id>)."""
+        out_dir = Path(str(job.spec.get("out_dir") or ""))
+        if not out_dir.is_dir():
+            return
+        run_ids = [
+            d.name
+            for d in out_dir.iterdir()
+            if d.is_dir() and not d.name.startswith("suite-") and not (d / "summary.json").exists()
+        ]
+        if not run_ids:
+            return
+        projects = {"vb-" + r.lower().replace("_", "-")[-40:] for r in run_ids}
+        needles = [f"vulcanbench-{r}-" for r in run_ids] + [str(out_dir / r) for r in run_ids]
+        docker = shutil.which("docker") or str(Path("~/.docker/bin/docker").expanduser())
+        ids = [
+            c.id
+            for c in self.containers()
+            if c.compose_project in projects or any(n in c.mounts for n in needles)
+        ]
+        if ids:
+            try:
+                subprocess.run(
+                    [docker, "rm", "-f", *ids], capture_output=True, timeout=60, check=False
+                )
+                self.state.add_note(job.id, f"removed {len(ids)} leftover sandbox container(s)")
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                self.state.add_note(job.id, f"container sweep failed: {exc}")
+        removed = 0
+        tmp = Path(tempfile.gettempdir())
+        for run_id in run_ids:
+            for scratch in tmp.glob(f"vulcanbench-{run_id}-*"):
+                if scratch.is_dir():
+                    shutil.rmtree(scratch, ignore_errors=True)
+                    removed += 1
+        if removed:
+            self.state.add_note(job.id, f"removed {removed} scratch workspace(s) under {tmp}")
+
     # --------------------------------------------------------------- launch --
 
     def _maybe_launch(self) -> None:
         if self.state.active_jobs():
             self.hold_reason = None
             return
-        queued = self.state.queued_jobs()
+        queued = self.state.due_waiting(self.now()) + self.state.queued_jobs()
         if not queued:
             self.hold_reason = None
             return
@@ -320,15 +492,18 @@ class Supervisor:
             return
         self.hold_reason = None
         job = queued[0]
-        problems = (
-            [] if job.spec.get("needs_prep") else launch.validate_before_launch(self.cfg, job.spec)
-        )
+        if job.status == "waiting":
+            self.state.add_note(job.id, "quota pause over; running the missing tasks")
+        problems = [] if job.spec.get("needs_prep") else sweep.validate_any(self.cfg, job.spec)
         if (
             job.spec.get("needs_prep")
             and launch.worktree_dir(self.cfg, str(job.spec["tag"])).is_dir()
         ):
+            if not job.spec.get("argv"):
+                self._final(job, "finished", None, "worktree already present; nothing to prepare")
+                return
             # Prepared since the plan was built (by hand or by an earlier job): validate like any other.
-            problems = launch.validate_before_launch(self.cfg, job.spec)
+            problems = sweep.validate_any(self.cfg, job.spec)
             if not problems:
                 job = self.state.update_job(job.id, spec={**job.spec, "needs_prep": False})
         if problems:
@@ -350,13 +525,18 @@ class Supervisor:
         self._spawn(job, argv, str(REPO_ROOT), env, token=str(job.spec["tag"]), phase="prepare")
 
     def _start_main(self, job: Job) -> None:
-        problems = launch.validate_before_launch(self.cfg, job.spec)
+        problems = sweep.validate_any(self.cfg, job.spec)
         if problems:
             self._final(job, "failed", None, "refused at launch: " + "; ".join(problems))
             return
         argv = [str(a) for a in job.spec["argv"]]
-        env = launch.child_env(dict(job.spec.get("env") or {}))
-        token = f"{Path(argv[1]).name} {argv[2]} {argv[3]}"
+        env = launch.child_env(
+            dict(job.spec.get("env") or {}), path_prepend=str(job.spec.get("path_prepend") or "")
+        )
+        token = str(job.spec.get("argv_token") or f"{Path(argv[1]).name} {argv[2]} {argv[3]}")
+        out_dir = job.spec.get("out_dir")
+        if out_dir:
+            Path(str(out_dir)).mkdir(parents=True, exist_ok=True)
         self._spawn(job, argv, str(job.spec["cwd"]), env, token=token, phase="main")
 
     def _spawn(

@@ -317,8 +317,24 @@ def fake_repo(
         d = repo / "tasks" / "frontier-v5" / name
         d.mkdir(parents=True)
         (d / "task.toml").write_text('[metadata]\nvulcanbench_language = "python"\n')
+    suite = repo / "tasks" / SUITE_ID
+    suite.mkdir(parents=True)
+    (suite / "suite.lock.json").write_text(
+        json.dumps(
+            {
+                "suite": SUITE_ID,
+                "version": "1.0.0",
+                "frozen_at": "2026-10-29",
+                "tasks": {t: {"task_hash": "x"} for t in SUITE_TASKS},
+            }
+        )
+    )
+    (suite / "suite.json").write_text(json.dumps({"display_name": "VulcanBench Demo v1 (demo)"}))
     (repo / "harness").mkdir()
     (repo / "harness" / "__init__.py").write_text("")
+    (repo / "harness" / "cli.py").write_text(
+        '# fake\ndef harness_doctor(): ...\n# "--max-infra-retries"\n'
+    )
     (repo / "vulcanbench.toml").write_text('[effort]\nblocked = ["ultra"]\n')
     git(repo, "init", "-q", "-b", "main")
     git(repo, "add", "-A")
@@ -328,10 +344,138 @@ def fake_repo(
 
 
 def fake_worktree(repo: Path, cfg: RunnerConfig, tag: str = "bench/2026-10-29-test") -> Path:
-    """What run_worktree.sh would leave behind: a detached checkout at the tag with a .venv marker."""
+    """What run_worktree.sh would leave behind: a detached checkout at the tag with a .venv
+    whose ``vulcanbench`` is a fake that answers doctor, estimate and run (see FAKE_CLI)."""
     wt = cfg.run_worktrees / tag.replace("/", "-")
     wt.parent.mkdir(parents=True, exist_ok=True)
     git(repo, "worktree", "add", "--detach", str(wt), tag)
-    (wt / ".venv" / "bin").mkdir(parents=True)
-    (wt / ".venv" / "bin" / "python").write_text("")
+    bin_dir = wt / ".venv" / "bin"
+    bin_dir.mkdir(parents=True)
+    (bin_dir / "python").write_text("")
+    (bin_dir / "vulcanbench.py").write_text(FAKE_CLI)
+    cli = bin_dir / "vulcanbench"
+    cli.write_text('#!/bin/bash\nexec python3 "$(dirname "$0")/vulcanbench.py" "$@"\n')
+    cli.chmod(0o755)
     return wt
+
+
+def set_fake_run(worktree: Path, mode: str) -> None:
+    """How the fake ``vulcanbench run`` behaves: finish | partial | quota | auth | hang | crash."""
+    (worktree / ".fake-run-mode").write_text(mode)
+
+
+SUITE_ID = "demo-suite"
+SUITE_TASKS = ("alpha-task", "beta-task")
+
+# The fake CLI. ``run`` reads <worktree>/.fake-run-mode (the child env is an
+# allowlist, so a file is the only channel) and writes the harness's on-disk
+# shapes into -o: <task>-<8hex>/summary.json for a finished task, a growing
+# trace.jsonl for one that is running.
+FAKE_CLI = r"""
+import json, os, signal, sys, time, uuid
+from pathlib import Path
+
+args = sys.argv[1:]
+here = Path(__file__).resolve().parents[2]  # the worktree
+mode = (here / ".fake-run-mode").read_text().strip() if (here / ".fake-run-mode").exists() else "finish"
+
+
+def opt(name, default=None):
+    return args[args.index(name) + 1] if name in args else default
+
+
+tasks = ["alpha-task", "beta-task"]
+lock = here / "tasks" / str(opt("--suite", "")) / "suite.lock.json"
+if lock.is_file():
+    tasks = sorted(json.loads(lock.read_text())["tasks"])
+
+
+if args[:2] == ["harness", "doctor"]:
+    ready = not (here / ".fake-doctor-not-ready").exists()
+    print(json.dumps([{"harness": args[2], "version": "9.9.9", "auth_mode": "subscription",
+                       "plan_name": "max", "ready": ready, "detail": "" if ready else "not logged in"}]))
+    sys.exit(0 if ready else 2)
+if args[:1] == ["estimate"]:
+    model = opt("--model", "")
+    if "nova" in model:
+        print(f"error no built-in pricing for model '{model}'; cannot estimate cost")
+        sys.exit(0)
+    print(json.dumps({"task_ids": tasks, "repeat": int(opt("--repeat", 1)), "judges": False,
+                      "low_usd": 1.0, "mid_usd": 2.0, "high_usd": 3.0, "recommended_usd": 4.5,
+                      "models": [{"model": model, "provider": model.split(":")[0], "env_var": "X",
+                                  "n_runs": len(tasks), "low_usd": 1.0, "mid_usd": 2.0, "high_usd": 3.0,
+                                  "recommended_usd": 4.5, "confidence": "low", "notes": ["defaults"],
+                                  "per_task": []}]}))
+    sys.exit(0)
+if args[:1] != ["run"]:
+    print("fake vulcanbench: unknown command", args, file=sys.stderr)
+    sys.exit(1)
+
+out = Path(opt("-o"))
+out.mkdir(parents=True, exist_ok=True)
+model = opt("--model")
+effort = opt("--effort")
+(out / "argv.json").write_text(json.dumps({"argv": args, "env": {k: v for k, v in os.environ.items()}}))
+print(f"running suite {opt('--suite')} with {model} ...", flush=True)
+done = {json.loads(p.read_text())["task_id"] for p in out.glob("*/summary.json")}
+missing = [t for t in tasks if t not in done] if "--only-missing" in args else list(tasks)
+
+
+def finish(task, functional=1.0):
+    d = out / f"{task}-{uuid.uuid4().hex[:8]}"
+    d.mkdir()
+    (d / "trace.jsonl").write_text(json.dumps({"ts": "2026-10-29T12:00:00Z", "task_id": task, "model": model}) + "\n")
+    (d / "summary.json").write_text(json.dumps({"run_id": d.name, "task_id": task, "model": model,
+        "scores": {"functional": functional}, "finished": True, "cost_usd": 0.5, "duration_s": 60,
+        "effort": {"requested": effort}, "suite": opt("--suite"),
+        "started_at": "2026-10-29T12:00:00Z", "finished_at": "2026-10-29T12:01:00Z"}))
+
+
+if mode == "finish":
+    for t in missing:
+        finish(t, 1.0 if t == tasks[0] else 0.0)
+    print("pass@1=0.5")
+    sys.exit(0)
+if mode == "partial":
+    if missing:
+        finish(missing[0])
+    print("1 run(s) errored")
+    sys.exit(0)
+if mode == "quota":
+    # One task finishes, the next one is refused by the subscription window.
+    if len(missing) > 1:
+        finish(missing[0])
+    if missing:
+        d = out / f"{missing[-1]}-{uuid.uuid4().hex[:8]}"
+        d.mkdir()
+        (d / "trace.jsonl").write_text(json.dumps({"ts": "2026-10-29T12:00:00Z", "task_id": missing[-1]}) + "\n")
+        (d / "cli-agent-stream.jsonl").write_text('{"type":"error","message":"You have hit your usage limit. limit reached"}\n')
+    print("provider error usage limit reached")
+    sys.exit(2)
+if mode == "auth":
+    print("provider error: refresh token has expired, please log out and sign in again")
+    sys.exit(2)
+if mode == "crash":
+    sys.exit(7)
+if mode == "hang":
+    d = out / f"{missing[0]}-{uuid.uuid4().hex[:8]}"
+    d.mkdir()
+    (d / "trace.jsonl").write_text(json.dumps({"ts": "2026-10-29T12:00:00Z", "task_id": missing[0]}) + "\n")
+    # An "agent" in its own session, the way the harness starts CLI agents.
+    agent = __import__("subprocess").Popen(["sleep", "300"], start_new_session=True)
+    (out / "agent.pid").write_text(str(agent.pid))
+
+    def on_int(*_):
+        (out / "interrupted").write_text("sigint")
+        time.sleep(0.3)
+        sys.exit(130)
+
+    signal.signal(signal.SIGINT, on_int)
+    for _ in range(3000):
+        time.sleep(0.1)
+        with (d / "trace.jsonl").open("a") as fh:
+            fh.write(json.dumps({"ts": "2026-10-29T12:00:01Z", "step": 1}) + "\n")
+    sys.exit(0)
+print("unknown mode", mode, file=sys.stderr)
+sys.exit(9)
+"""

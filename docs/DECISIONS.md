@@ -7,6 +7,70 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
+
+### Decision
+
+Owner, in chat, 2026-10-29 and 2026-10-30. The local run GUI's main flow is
+"benchmark a model": one suite, one harness, one `vulcanbench run` per effort
+level, queued one at a time from a run worktree pinned to a bench tag, with
+`--max-infra-retries 0` (new CLI option) so a launched suite never re-queues
+a unit on its own. Four rules fix what happens when a level ends early:
+
+- A level whose run ends with tasks still missing is **incomplete**, final.
+  It is never retried. "Run the missing tasks" on the Runs page builds a new
+  plan (same output directory, `--only-missing`) that needs a confirm click.
+- A level whose run ended on a subscription window or rate limit (the same
+  patterns the sweep scripts and the adapters match: usage limit, rate limit,
+  limit reached, quota, 429) **waits 30 minutes and continues with
+  `--only-missing`**, but only when the plan set "continue after a quota
+  window" above zero, and at most that many times. The default is zero. No
+  other failure continues: an expired login, a provider error, a sandbox
+  error or a crash ends the level.
+- Stop on a suite level sends SIGINT to `vulcanbench` (finish the in-flight
+  task, start no more), kills the agent CLI's own session two seconds later
+  (what the harness watchdog does; the harness then grades what it has and
+  tears down), and escalates to the job's process group after ten minutes.
+  The sweep afterwards removes only containers of this level's unfinished
+  runs (`vb-<run id>` compose projects, mounts under the run dir or its
+  `vulcanbench-<run id>-*` scratch) and those scratch directories.
+- The sandbox default per harness is what every sweep script under
+  `scripts/cii-v4-board/` passes: `local` for the CLI harnesses (the agent
+  runs the model's commands itself), `docker` for Vulcan's API loop. The
+  plan shows it and allows an override.
+
+### Evidence
+
+- `scripts/cii-v4-board/run_codex_effort_sweep.sh` and its siblings retry a
+  level up to 40 times, sleeping 1800 s on a quota pattern and 120 s on
+  anything else. That is how the GPT-6.1 Terra sweep (2026-10-26) and every
+  earlier multi-day sweep ran unattended, and it is what the hard rule "no
+  auto-retry of failed attempts" would have removed. The capped,
+  quota-only continuation keeps the unattended property for the one failure
+  that says nothing about the model, and nothing else.
+- `harness/suite.py` re-queued infrastructure errors twice (`max_infra_retries=2`,
+  not exposed on the CLI until now). Two of the three Frontier v5 gate
+  infrastructure failures looked like ordinary failed attempts (GATE-LOG);
+  a GUI-launched suite must not hide the same thing behind a silent retry.
+- Killing an agent CLI while the suite is still scheduling surfaces as
+  `ProviderError`, which the suite treats as infrastructure and would
+  re-queue; the two-second gap after SIGINT is what makes the stop clean.
+- `tests/test_runner_supervisor.py` drives all four rules with a fake
+  `vulcanbench` (finish, partial, quota, auth, hang modes).
+
+### Revisit triggers
+
+- A harness whose quota refusal does not match the patterns (the level would
+  end incomplete instead of waiting): add the pattern, with the log line.
+- The operator wants a level to continue after a provider error too. That
+  is a change to this rule, not a knob to add quietly.
+
+### What this touched
+
+`harness/cli.py` (`--max-infra-retries`), `backend/runner/sweep.py`,
+`backend/runner/supervisor.py`, `backend/runner/state.py` (`waiting` and
+`incomplete`), the Launch page and the Runs page's sweep panel.
+
 ## 2026-10-29: run_gate.sh stops harbor for real; gate runs can be queued from the local GUI
 
 ### Decision

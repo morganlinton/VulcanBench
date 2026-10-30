@@ -41,7 +41,21 @@ TASK_TIMEOUT_S = 3 * 3600  # docs/DECISIONS.md: every suite carries a flat 3-hou
 
 ENV_PASSTHROUGH = ("HOME", "PATH", "USER", "LANG", "TMPDIR")
 GATE_ENV_PASSTHROUGH = ("CLAUDE_GATE_ENV", "FABLE_AUTH")
+# Where the subscription CLIs keep their login when the operator moved it; the
+# harness reads these itself (harness/agent/cli_agents.py). Never the keys.
+SUITE_ENV_PASSTHROUGH = (
+    "CODEX_HOME",
+    "CLAUDE_CONFIG_DIR",
+    "GROK_HOME",
+    "ZCODE_HOME",
+    "ZCODE_STORAGE_DIR",
+    "ZCODE_DATA_BASE_DIR",
+)
 GATE_ENV_KNOBS = ("GATE_OUT", "GATE_ATTEMPTS", "GATE_CONCURRENCY", "GATE_JOB_SUFFIX")
+# Detached children start from the backend's PATH, which may lack the agent
+# CLIs (~/.local/bin) and node (~/.local/node/bin, which codex.js needs); the
+# sweep scripts prepend the same directories.
+PATH_EXTRAS = ("~/.local/bin", "~/.local/node/bin", "/opt/homebrew/bin", "/usr/local/bin")
 _FORBIDDEN_ENV = re.compile(r"^(VULCANBENCH_.*|DATABASE_URL|.*_API_KEY|.*_TOKEN|.*SECRET.*)$")
 
 _TAG_RE = re.compile(r"^bench/[A-Za-z0-9._-]+$")
@@ -73,10 +87,10 @@ def _git(cwd: Path, *args: str, timeout: float = 10) -> str | None:
 # ------------------------------------------------------------------ env --
 
 
-def child_env(overrides: dict[str, str] | None = None) -> dict[str, str]:
+def child_env(overrides: dict[str, str] | None = None, *, path_prepend: str = "") -> dict[str, str]:
     """The allowlisted environment a child gets. Never ``os.environ.copy()``."""
     env: dict[str, str] = {}
-    for name in (*ENV_PASSTHROUGH, *GATE_ENV_PASSTHROUGH):
+    for name in (*ENV_PASSTHROUGH, *GATE_ENV_PASSTHROUGH, *SUITE_ENV_PASSTHROUGH):
         value = os.environ.get(name)
         if value:
             env[name] = value
@@ -85,6 +99,14 @@ def child_env(overrides: dict[str, str] | None = None) -> dict[str, str]:
             raise LaunchError(422, f"{name} may not be set on a launched run")
         env[name] = str(value)
     env.setdefault("PATH", "/usr/local/bin:/usr/bin:/bin")
+    parts = env["PATH"].split(os.pathsep)
+    for extra in PATH_EXTRAS:
+        expanded = os.path.expanduser(extra)
+        if expanded not in parts and os.path.isdir(expanded):
+            parts.append(expanded)
+    if path_prepend:
+        parts = [path_prepend, *[p for p in parts if p != path_prepend]]
+    env["PATH"] = os.pathsep.join(parts)
     for name in list(env):
         if _FORBIDDEN_ENV.match(name):
             del env[name]
@@ -287,12 +309,61 @@ class GateForm:
     suffix: str = ""
 
 
+_HASHED_KEYS = ("kind", "argv", "cwd", "env", "path_prepend", "prep_argv", "prep_env", "job_name")
+
+
 def plan_hash(spec: dict[str, Any]) -> str:
     """Hash of what will actually run; the confirm click sends it back."""
-    material = {
-        k: spec.get(k) for k in ("kind", "argv", "cwd", "env", "prep_argv", "prep_env", "job_name")
-    }
+    material: dict[str, Any] = {k: spec.get(k) for k in _HASHED_KEYS}
+    material["jobs"] = [
+        {k: j.get(k) for k in _HASHED_KEYS} for j in (spec.get("jobs") or []) if isinstance(j, dict)
+    ]
     return hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def build_prepare_plan(cfg: RunnerConfig, tag: str) -> dict[str, Any]:
+    """A queue step that only runs ``run_worktree.sh <tag>``: no model calls, no quota."""
+    if not _TAG_RE.match(tag):
+        raise LaunchError(422, "tag must look like bench/<label>")
+    if tag_commit(tag) is None:
+        raise LaunchError(422, f"no tag {tag}")
+    wt_info = worktree_status(cfg, tag)
+    if wt_info["exists"]:
+        raise LaunchError(
+            409,
+            f"{wt_info['path']} already exists"
+            + (
+                "; it has problems: " + "; ".join(wt_info["problems"])
+                if wt_info["problems"]
+                else ""
+            ),
+        )
+    if wt_info["problems"]:
+        raise LaunchError(409, "; ".join(wt_info["problems"]))
+    spec: dict[str, Any] = {
+        "kind": "prepare",
+        "job_name": "prepare-" + tag.replace("/", "-"),
+        "tag": tag,
+        "tag_commit": wt_info["tag_commit"],
+        "worktree": wt_info["path"],
+        "needs_prep": True,
+        "argv": None,
+        "cwd": str(REPO_ROOT),
+        "env": {},
+        "env_passthrough": [n for n in ENV_PASSTHROUGH if os.environ.get(n)],
+        "prep_argv": ["bash", str(REPO_ROOT / WORKTREE_SCRIPT), tag],
+        "prep_env": {"RUN_WORKTREES": str(cfg.run_worktrees)},
+        "estimate": {
+            "billing": "none: git worktree add, make setup and the suite-lock check, no model calls",
+            "infra_retries": "none",
+        },
+        "usage_check_required": False,
+        "warnings": [
+            f"make setup takes minutes; the log lands in {wt_info['path']}/.venv-setup.log"
+        ],
+    }
+    spec["hash"] = plan_hash(spec)
+    return spec
 
 
 def build_gate_plan(cfg: RunnerConfig, form: GateForm) -> dict[str, Any]:  # noqa: PLR0912, PLR0915
@@ -418,6 +489,13 @@ def build_gate_plan(cfg: RunnerConfig, form: GateForm) -> dict[str, Any]:  # noq
 def validate_before_launch(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
     """Re-check a plan right before its child starts (confirm and launch time)."""
     problems: list[str] = []
+    if spec.get("kind") == "prepare":
+        tag = str(spec.get("tag") or "")
+        if not _TAG_RE.match(tag) or tag_commit(tag) is None:
+            problems.append(f"no tag {tag}")
+        if Path(str(spec.get("worktree"))) != worktree_dir(cfg, tag):
+            problems.append("worktree path does not match the tag")
+        return problems
     if spec.get("kind") != "gate":
         problems.append("unsupported kind")
     tag = str(spec.get("tag") or "")

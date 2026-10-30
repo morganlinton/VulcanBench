@@ -10,15 +10,16 @@ the job; the supervisor starts it.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 
-from backend.runner import docker_ps, launch, procs
+from backend.runner import docker_ps, launch, procs, sweep
 from backend.runner.config import RunnerConfig, load_config
-from backend.runner.discovery import Discovery, job_summary, tail_text
+from backend.runner.discovery import HARNESS_PREFIX, Discovery, job_summary, tail_text
 from backend.runner.redact import redact
 from backend.runner.state import PlanError, State, parse
 from backend.runner.supervisor import SERVICE
@@ -130,10 +131,14 @@ def get_run_view(run_id: str) -> dict[str, Any]:
 
 @router.get("/options")
 def launch_options(tag: str | None = Query(default=None, max_length=200)) -> dict[str, Any]:
-    return launch.options(load_config(), tag)
+    cfg = load_config()
+    opts = launch.options(cfg, tag)
+    opts["kinds"] = ["sweep", "gate", "prepare"]
+    opts.update(sweep.suite_options(cfg, opts.get("tag")))
+    return opts
 
 
-class PlanRequest(BaseModel):
+class GatePlanRequest(BaseModel):
     kind: Literal["gate"] = "gate"
     ref: str = Field(min_length=1, max_length=40)
     task: str = Field(min_length=1, max_length=120)
@@ -141,6 +146,36 @@ class PlanRequest(BaseModel):
     attempts: int = Field(default=3, ge=1, le=3)
     concurrency: int | None = Field(default=None, ge=1, le=2)
     suffix: str = Field(default="", max_length=40)
+
+
+class SweepPlanRequest(BaseModel):
+    """Benchmark a model: one suite, one harness, one job per effort level."""
+
+    kind: Literal["sweep"]
+    model: str = Field(min_length=1, max_length=120)
+    harness: str = Field(min_length=1, max_length=40)
+    suite: str = Field(min_length=1, max_length=120)
+    tag: str = Field(min_length=1, max_length=200)
+    efforts: list[str] = Field(min_length=1, max_length=7)
+    billing: str = Field(default="auto", max_length=20)
+    repeat: int = Field(default=1, ge=1, le=sweep.MAX_REPEAT)
+    only_missing: bool = True
+    sandbox: Literal["local", "docker"] | None = None
+    quota_continue: int = Field(default=0, ge=0, le=sweep.QUOTA_CONTINUE_MAX)
+    label: str = Field(default="", max_length=40)
+    cli_bin_dir: str = Field(default="", max_length=300)
+
+
+class PreparePlanRequest(BaseModel):
+    """A quota-free queue step: create the run worktree for a bench tag."""
+
+    kind: Literal["prepare"]
+    tag: str = Field(min_length=1, max_length=200)
+
+
+PlanRequest = Annotated[
+    GatePlanRequest | SweepPlanRequest | PreparePlanRequest, Field(discriminator="kind")
+]
 
 
 class ConfirmRequest(BaseModel):
@@ -181,20 +216,40 @@ def _usage_check_ok(
 @router.post("/plans", status_code=201)
 def create_plan(body: PlanRequest) -> dict[str, Any]:
     cfg = load_config()
-    form = launch.GateForm(
-        ref=body.ref,
-        task=body.task,
-        tag=body.tag,
-        attempts=body.attempts,
-        concurrency=body.concurrency,
-        suffix=body.suffix,
-    )
     try:
-        spec = launch.build_gate_plan(cfg, form)
+        if isinstance(body, SweepPlanRequest):
+            form = sweep.SuiteForm(
+                model=body.model.strip(),
+                harness=body.harness,
+                suite=body.suite,
+                tag=body.tag,
+                efforts=tuple(body.efforts),
+                billing=body.billing,
+                repeat=body.repeat,
+                only_missing=body.only_missing,
+                sandbox=body.sandbox,
+                quota_continue=body.quota_continue,
+                label=body.label.strip(),
+                cli_bin_dir=body.cli_bin_dir.strip(),
+            )
+            spec = sweep.build_suite_plan(cfg, form, today=datetime.now(UTC).strftime("%Y-%m-%d"))
+            spec["hash"] = launch.plan_hash(spec)
+        elif isinstance(body, PreparePlanRequest):
+            spec = launch.build_prepare_plan(cfg, body.tag)
+        else:
+            gate = launch.GateForm(
+                ref=body.ref,
+                task=body.task,
+                tag=body.tag,
+                attempts=body.attempts,
+                concurrency=body.concurrency,
+                suffix=body.suffix,
+            )
+            spec = launch.build_gate_plan(cfg, gate)
     except launch.LaunchError as exc:
         raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
     state = _state(cfg)
-    plan = state.create_plan("gate", spec, spec["hash"])
+    plan = state.create_plan(str(spec["kind"]), spec, spec["hash"])
     return _plan_dict(state, plan.id)
 
 
@@ -236,21 +291,42 @@ def confirm_plan(plan_id: str, body: ConfirmRequest) -> dict[str, Any]:
             status_code=409,
             detail="run the usage check first (it must be at most 10 minutes old and say the run would start)",
         )
-    if plan.spec.get("needs_prep"):
-        problems = launch.validate_worktree(cfg, str(plan.spec.get("tag")))
-        if launch.worktree_dir(cfg, str(plan.spec.get("tag"))).is_dir():
-            problems = launch.validate_before_launch(cfg, plan.spec)
-        elif Path(str(plan.spec.get("job_dir"))).exists():
-            problems.append("job directory already exists")
-    else:
-        problems = launch.validate_before_launch(cfg, plan.spec)
+    problems = _confirm_problems(cfg, plan.spec)
     if problems:
         raise HTTPException(status_code=409, detail="; ".join(problems))
     try:
-        job = state.confirm_plan(plan_id, body.hash)
+        jobs = state.confirm_plan(plan_id, body.hash)
     except PlanError as exc:
         raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
-    return job_summary(job)
+    out = job_summary(jobs[0])
+    out["jobs"] = [job_summary(j) for j in jobs]
+    return out
+
+
+def _confirm_problems(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
+    kind = spec.get("kind")
+    if kind == "sweep":
+        doctor = spec.get("doctor") or {}
+        problems: list[str] = []
+        if doctor.get("status") == "not_ready":
+            problems.append(f"harness not ready: {doctor.get('detail') or 'see the plan'}")
+        for entry in spec.get("jobs") or []:
+            problems.extend(sweep.validate_suite_launch(cfg, entry))
+            if Path(str(entry.get("out_dir"))).exists() and not entry.get("only_missing"):
+                problems.append(f"{entry.get('out_dir')} exists and --only-missing is off")
+        return sorted(set(problems))
+    if kind == "prepare":
+        if launch.worktree_dir(cfg, str(spec.get("tag"))).is_dir():
+            return ["the worktree already exists"]
+        return launch.validate_before_launch(cfg, spec)
+    if spec.get("needs_prep"):
+        problems = launch.validate_worktree(cfg, str(spec.get("tag")))
+        if launch.worktree_dir(cfg, str(spec.get("tag"))).is_dir():
+            problems = launch.validate_before_launch(cfg, spec)
+        elif Path(str(spec.get("job_dir"))).exists():
+            problems.append("job directory already exists")
+        return problems
+    return launch.validate_before_launch(cfg, spec)
 
 
 # ----------------------------------------------------------------- queue --
@@ -274,6 +350,63 @@ def queue() -> dict[str, Any]:
         "supervisor": SERVICE.describe(),
         "outside": outside,
     }
+
+
+@router.get("/sweeps")
+def sweeps(limit: int = Query(default=20, ge=1, le=100)) -> dict[str, Any]:
+    """Model sweeps the GUI launched, newest first, with per-level progress from disk."""
+    cfg = load_config()
+    state = _state(cfg)
+    now = datetime.now(UTC)
+    groups: dict[str, dict[str, Any]] = {}
+    for job in state.list_jobs(limit=500):
+        if job.kind != "suite":
+            continue
+        sid = str(job.spec.get("sweep_id") or job.name)
+        group = groups.setdefault(
+            sid,
+            {
+                "sweep_id": sid,
+                "name": job.spec.get("sweep_name") or job.name,
+                "model": job.spec.get("model"),
+                "harness": job.spec.get("harness"),
+                "suite": job.spec.get("suite"),
+                "suite_name": job.spec.get("suite_name"),
+                "tag": job.spec.get("tag"),
+                "tag_commit": job.spec.get("tag_commit"),
+                "created_at": job.created_at,
+                "levels": [],
+            },
+        )
+        prog = sweep.progress(job.spec, now)
+        current = prog.get("current")
+        if current and current.get("path"):
+            try:
+                rel = Path(str(current["path"])).relative_to(cfg.harness_runs_dir).as_posix()
+                current["run_id_href"] = f"{HARNESS_PREFIX}0:{rel}"
+            except ValueError:
+                current["run_id_href"] = None
+        group["levels"].append({"job": job_summary(job), "progress": prog})
+        group["created_at"] = min(group["created_at"], job.created_at)
+    out = sorted(groups.values(), key=lambda g: g["created_at"], reverse=True)[:limit]
+    for g in out:
+        g["levels"].sort(key=lambda lv: lv["job"]["id"])
+        levels = g["levels"]
+        g["totals"] = {
+            "runs_done": sum(lv["progress"]["runs_done"] for lv in levels),
+            "total_runs": sum(lv["progress"]["total_runs"] for lv in levels),
+            "passed": sum(lv["progress"]["passed"] for lv in levels),
+            "cost_usd": (
+                round(sum(lv["progress"]["cost_usd"] or 0 for lv in levels), 4)
+                if any(lv["progress"]["cost_usd"] is not None for lv in levels)
+                else None
+            ),
+            "active": any(
+                lv["job"]["status"] in {"queued", "waiting", "preparing", "running", "stopping"}
+                for lv in levels
+            ),
+        }
+    return {"sweeps": out}
 
 
 @router.get("/jobs/{job_id}")
@@ -304,5 +437,5 @@ def stop_job(job_id: int, body: StopRequest | None = None) -> dict[str, Any]:
 def delete_queued_job(job_id: int) -> Response:
     cfg = load_config()
     if not _state(cfg).delete_queued(job_id):
-        raise HTTPException(status_code=409, detail="only queued jobs can be removed")
+        raise HTTPException(status_code=409, detail="only queued or waiting jobs can be removed")
     return Response(status_code=204)

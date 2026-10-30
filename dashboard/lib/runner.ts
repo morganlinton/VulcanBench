@@ -140,6 +140,7 @@ export async function runnerGet<T>(path: string): Promise<T> {
 
 export const ACTIVE_STATUSES = new Set([
   "queued",
+  "waiting",
   "preparing",
   "running",
   "stopping",
@@ -240,12 +241,23 @@ export interface JobSpecSummary {
   argv: string[] | null;
   cwd: string | null;
   env: Record<string, string> | null;
+  path_prepend: string | null;
   prep_argv: string[] | null;
   needs_prep: boolean | null;
   tag: string | null;
   worktree: string | null;
-  estimate: GateEstimate | null;
+  estimate: GateEstimate | Record<string, unknown> | null;
   warnings: string[] | null;
+  sweep_id: string | null;
+  sweep_name: string | null;
+  model: string | null;
+  harness: string | null;
+  suite: string | null;
+  suite_name: string | null;
+  effort: string | null;
+  out_dir: string | null;
+  resume_at: string | null;
+  quota_continue: { max: number; wait_s: number; used?: number } | null;
 }
 
 export interface JobSummary {
@@ -268,6 +280,7 @@ export interface JobSummary {
   stop_escalated_at: string | null;
   console_log: string | null;
   notes: string[];
+  jobs?: JobSummary[]; // every job a confirm created (one per effort level for a sweep)
 }
 
 export interface SupervisorInfo {
@@ -310,6 +323,15 @@ export interface GateTask {
   default_concurrency: number;
 }
 
+export interface SuiteInfo {
+  id: string;
+  name: string;
+  version: string | null;
+  frozen_at: string | null;
+  task_ids: string[];
+  n_tasks: number;
+}
+
 export interface LaunchOptions {
   kinds: string[];
   refs: GateRef[];
@@ -323,6 +345,157 @@ export interface LaunchOptions {
   credentials: { codex_auth: boolean; claude_gate_env: boolean };
   gate_out: string;
   run_worktrees: string;
+  suites: SuiteInfo[];
+  harnesses: string[];
+  efforts: string[];
+  billing: string[];
+  sandboxes: string[];
+  sandbox_defaults: Record<string, string>;
+  quota_wait_s: number;
+  quota_continue_max: number;
+  max_repeat: number;
+  harness_runs_dir: string;
+}
+
+export interface DoctorResult {
+  status: "ready" | "not_ready" | "not_applicable" | "unavailable" | "error";
+  harness?: string | null;
+  version?: string | null;
+  auth_mode?: string | null;
+  plan_name?: string | null;
+  detail?: string | null;
+  note?: string | null;
+  exit_code?: number | null;
+}
+
+export interface SweepEstimate {
+  status: "ok" | "no_pricing" | "unavailable";
+  note: string | null;
+  confidence: string | null;
+  notes: string[];
+  per_level_usd: number | null;
+  per_level_low_usd: number | null;
+  per_level_high_usd: number | null;
+  total_usd: number | null;
+  levels: number;
+  runs_per_level: number;
+  total_runs: number;
+  task_timeout_s: number;
+  max_wall_s: number;
+  billing: string;
+  infra_retries: string;
+  quota: string;
+}
+
+export interface SweepJobSpec {
+  kind: "suite";
+  job_name: string;
+  effort: string;
+  argv: string[];
+  cwd: string;
+  env: Record<string, string>;
+  out_dir: string;
+  task_ids: string[];
+  n_tasks: number;
+}
+
+export interface SweepPlanSpec {
+  kind: "sweep";
+  name: string;
+  sweep_id: string;
+  model: string;
+  model_spec: string;
+  harness: string;
+  billing: string;
+  suite: string;
+  suite_name: string;
+  n_tasks: number;
+  efforts: string[];
+  repeat: number;
+  only_missing: boolean;
+  sandbox: string;
+  sandbox_default: string;
+  quota_continue: { max: number; wait_s: number };
+  tag: string;
+  tag_commit: string | null;
+  worktree: string;
+  cwd: string;
+  env: Record<string, string>;
+  path_prepend: string;
+  env_passthrough: string[];
+  out_root: string;
+  jobs: SweepJobSpec[];
+  doctor: DoctorResult;
+  estimate: SweepEstimate;
+  harness_features: { present: boolean; max_infra_retries: boolean; doctor: boolean };
+  usage_check_required: boolean;
+  warnings: string[];
+  hash: string;
+}
+
+export interface PreparePlanSpec {
+  kind: "prepare";
+  job_name: string;
+  tag: string;
+  tag_commit: string | null;
+  worktree: string;
+  prep_argv: string[];
+  prep_env: Record<string, string>;
+  env_passthrough: string[];
+  estimate: { billing: string; infra_retries: string };
+  warnings: string[];
+  hash: string;
+}
+
+export interface SweepProgress {
+  out_dir: string;
+  n_tasks: number;
+  repeat: number;
+  total_runs: number;
+  runs_done: number;
+  tasks_done: number;
+  passed: number;
+  pass_rate: number | null;
+  cost_usd: number | null;
+  avg_run_s: number | null;
+  eta_s: number | null;
+  current: {
+    run_id: string;
+    task_id: string;
+    started_at: string | null;
+    elapsed_s: number | null;
+    quiet_s: number | null;
+    path: string;
+    budget_fraction?: number;
+    run_id_href?: string | null;
+  } | null;
+  stalled: boolean;
+  unfinished: number;
+  missing: string[];
+  complete: boolean;
+}
+
+export interface SweepLevel {
+  job: JobSummary;
+  progress: SweepProgress;
+}
+
+export interface SweepView {
+  sweep_id: string;
+  name: string;
+  model: string | null;
+  harness: string | null;
+  suite: string | null;
+  suite_name: string | null;
+  tag: string | null;
+  tag_commit: string | null;
+  created_at: string;
+  levels: SweepLevel[];
+  totals: { runs_done: number; total_runs: number; passed: number; cost_usd: number | null; active: boolean };
+}
+
+export interface SweepsData {
+  sweeps: SweepView[];
 }
 
 export interface GateEstimate {
@@ -379,11 +552,13 @@ export interface GatePlanSpec {
   hash: string;
 }
 
-export interface LaunchPlan {
+export type AnyPlanSpec = GatePlanSpec | SweepPlanSpec | PreparePlanSpec;
+
+export interface LaunchPlan<S = AnyPlanSpec> {
   id: string;
   hash: string;
   kind: string;
-  spec: GatePlanSpec;
+  spec: S;
   created_at: string;
   expires_at: string;
   confirmed_at: string | null;

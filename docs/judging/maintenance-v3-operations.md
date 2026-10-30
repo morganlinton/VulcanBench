@@ -755,7 +755,7 @@ operational notes live here.
 - Cost for cards is `cli_reported_cost_usd`, because the vendor price page
   gives two Sonnet 5.5 cache-read prices.
 
-## v3.29, October 28 to 29, 2026: GPT-6.1 Terra on Frontier v4
+## v3.29, October 28 to 30, 2026: GPT-6.1 Terra on Frontier v4
 
 - From `bench/2026-10-28-gpt61-terra-judging-v329` (2850a0c5b), judged by
   Muse Spark 1.3 and Grok 4.6 (Cursor pinned to 2026.10.01-e373342). The
@@ -788,3 +788,12 @@ operational notes live here.
   the original excerpts, then the stage makes the one missing match call),
   and the summary is rebuilt. The pre-recovery round is kept in the private
   backup as `judging-v3.29`.
+- Recovery run (October 30, 15:57 to 15:58 PDT) from
+  `bench/2026-10-30-gpt61-terra-judging-v329-recovery` (802831b56, the
+  merge of harness PR #239): the rule selected attempt 1 and respelled its
+  one excerpt, and the stage made the one match call (Muse, 16 seconds). No
+  other judge call was made. The rebuilt summary publishes 115 of 115
+  submissions with `ready_for_publication` true. Max moves from 89.95 (n 22)
+  to 90.00 (n 23, se 0.39), Code quality from 76.42 to 76.59; the other four
+  levels are unchanged. The recovered round is in the private backup as
+  `judging-v3.29-recovered`.

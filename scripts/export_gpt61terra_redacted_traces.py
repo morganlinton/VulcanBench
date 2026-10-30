@@ -144,7 +144,7 @@ Frontier v4 tests whether an agent can discover a program's undocumented rules. 
 ## Notes on the results
 
 - **Scoring.** Tasks fully solved counts runs that passed every hidden test. The combined score is 50% functional correctness, 8.5% automated code quality, 8.5% security and 33% code quality as judged by two AI reviewers, out of 100. Terra was reviewed by Muse Spark 1.3 and Grok 4.6, the same pair as GPT-6.1 Sol and Claude Opus 5.5.
-- **One run not judged.** In the Max settlecore run, Muse Spark 1.3's follow-up check quoted a line of code that is not in the run, on both of its two tries. Under the review protocol that run gets no code quality score and no combined score, so Max has 22 judged runs. It still counts as fully solved.
+- **One judge answer repaired.** In the Max settlecore run, Muse Spark 1.3's follow-up check quoted a line of code with its escape sequences turned into the characters they stand for, so on both of its two tries the quote did not match the code. The review protocol's rule for this slip writes those characters back as the code spells them and checks the quote again. The rule did not yet know one of the spellings in that line, so the first version of this repository listed that run as not judged. The rule was extended on October 30, 2026, and every run is now judged.
 - **Cost.** These runs used a ChatGPT subscription. Cost is the API-equivalent at OpenAI's list price for `gpt-6.1-terra` ($1.00 per million input tokens, $0.05 cached, $5.00 output), from the token counts Codex reported.
 
 ## Using the data

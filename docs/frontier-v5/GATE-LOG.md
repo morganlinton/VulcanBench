@@ -36,7 +36,7 @@ launcher.
 | treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
-| pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met) | **0 of 3** (3.7, 4.4, 3.2) | not run | Astra prong passed (2026-10-26); a floor-8 test run on the owner's approval |
+| pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met, gated under (g')) | **0 of 3** (3.7, 4.4, 3.2) | Opus 5.5: **1 of 3** (13.4, 11.1, 8.6), n=5 top-up pending | pending the top-up (2026-10-30) |
 | prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
 | javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
@@ -647,3 +647,31 @@ exercises neither case. The hold is legitimate under the gate rule, but it
 rests on two edge behaviours next to the defects rather than on the defects
 themselves, and these are the fastest attempts on any candidate gated so far.
 The Opus 5.5 half decides; anyone reviewing the suite should read this note.
+
+### pulldown-cmark-html-block-scanning, Opus 5.5 half (2026-10-30): 1 of 3, top-up pending
+
+Gated under decision (g') (DECISIONS.md 2026-10-30): floor 8 not met,
+Astra 0 of 3 on 2026-10-26. Job `opus-pulldown-cmark-html-block-scanning`,
+launched 08:54 PDT under the owner's standing approval from a run worktree
+pinned to 428b10d4 (tag `bench/2026-10-30-pulldown-opus-gate`: the task at
+9fc86e09 as in the Astra half, plus `run_gate.sh` from a12619e2), wave-1
+identifiers, `GATE_CONCURRENCY=1`. Usage pre-flight 0.11. Sessions real
+(every turn on `claude-opus-5-5`, 54 to 76 tool calls each); no auth or usage
+event.
+
+| Trial | Agent minutes | Tool calls | Reward | Held-out failing (of 24) | Guards |
+| --- | --- | --- | --- | --- | --- |
+| c2AkrgH | 13.4 | 76 | 0 | 3 (r273, r274, r277) | hold |
+| TYp9MfL | 11.1 | 71 | **1** | none | hold |
+| ZtqPQc4 | 8.6 | 54 | 0 | 3 (r273, r274, r277) | hold |
+
+**1 of 3.** Diff review of TYp9MfL against the base (5b0ef8c0): a genuine
+fix in the three files the gold touches (`firstpass.rs`, `scanners.rs`,
+`parse.rs`; 265 added lines, of which about 90 are the agent's own unit
+tests in `parse.rs`), with case-insensitive end-tag matching for the
+type 1 HTML blocks and comment, processing-instruction, declaration and
+CDATA spans across lines inside containers. No special-casing of grading
+inputs; tamper scan clean. The two failing attempts miss the same three
+checks as the closest Astra attempts. A prong at exactly 1 of 3 takes the
+n=5 top-up (two more attempts, admit only at 2 of 5 or fewer). The top-up
+is outside the standing approval and waits for the owner.

@@ -7,6 +7,42 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-30: gate references run with provider-side web tools off
+
+### Decision
+
+Gate session, 2026-10-30. `scripts/frontier-v5/run_gate.sh` passes
+`--ak disable_web_search=true` to Harbor for every reference. Harbor 0.24.0
+turns that into `-c web_search=disabled` for Codex and
+`--disallowedTools WebSearch,WebFetch` for Claude Code. Every gate run from
+now on is made with it.
+
+### Evidence
+
+phonenumbers-parse-match-parity (F2-python), GPT-6 Astra half, trial
+vHcy4ej (reward 1): Codex's built-in `web__run` tool fetched
+`raw.githubusercontent.com/daviddrysdale/python-phonenumbers/.../phonenumberutil.py`
+(and the formatter and matcher) ten times, and the attempt restored the
+removed functions from it. The tool runs on OpenAI's side, so the task's
+network allowlist (model API hosts only) never saw the request. The same
+attempt and its sibling also tried `curl` and `pip download`, which the
+allowlist blocked. An audit of every gate trial on the Mac Studio (34 job
+directories) found no other provider-side web use; Claude Fable attempts on
+tree-sitter tried `curl` against upstream and were blocked. Web access can
+only add solves, so the gate's holds stand; a reject decided by a web-aided
+solve does not.
+
+### Revisit triggers
+
+- A new agent CLI version or harness: confirm its web tools are off before
+  its first gate run (check the session for web tool calls).
+- The first-wave rejects (2026-10-18, archived): audit their rollouts for
+  web tool use before any of them is reconsidered.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh`, `tests/test_run_gate_script.py`.
+
 ## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
 
 ### Decision

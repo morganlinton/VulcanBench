@@ -1,0 +1,1695 @@
+diff --git a/codegen/custom-scalars/plugin.ts b/codegen/custom-scalars/plugin.ts
+index aa2423509..2c7b2fa6a 100644
+--- a/codegen/custom-scalars/plugin.ts
++++ b/codegen/custom-scalars/plugin.ts
+@@ -24,7 +24,12 @@ import {
+ 
+ import type { CustomScalarsPluginConfig } from "./config.js";
+ 
+-type InputObjectMap = Map<string, Record<string, string>>;
++interface InputFieldType {
++  name: string;
++  type: string;
++}
++
++type InputObjectMap = Map<string, Record<string, InputFieldType>>;
+ type InputObjectsConfig = Record<string, { fields: Record<string, string> }>;
+ 
+ // Use a shim to avoid the need to add `@apollo/client` as a peer dependency
+@@ -66,13 +71,16 @@ export const plugin: PluginFunction<CustomScalarsPluginConfig, string> = async (
+     if (isCustomScalar(type, config)) {
+       customScalars.add(type.name);
+     } else if (isInputObjectType(type)) {
+-      const fields: Record<string, string> = {};
++      const fields: Record<string, InputFieldType> = {};
+ 
+       for (const [fieldName, field] of Object.entries(type.getFields())) {
+         const inputType = getNamedType(field.type);
+ 
+         if (isCustomScalar(inputType, config) || isInputObjectType(inputType)) {
+-          fields[fieldName] = inputType.name;
++          fields[fieldName] = {
++            name: inputType.name,
++            type: field.type.toString().replaceAll("!", ""),
++          };
+         }
+       }
+ 
+@@ -117,9 +125,12 @@ export const plugin: PluginFunction<CustomScalarsPluginConfig, string> = async (
+     const fields = inputObjects.get(name)!;
+     const fieldsConfig: Record<string, string> = {};
+ 
+-    for (const [fieldName, typeName] of Object.entries(fields)) {
+-      if (customScalars.has(typeName) || withCustomScalars.has(typeName)) {
+-        fieldsConfig[fieldName] = typeName;
++    for (const [fieldName, inputType] of Object.entries(fields)) {
++      if (
++        customScalars.has(inputType.name) ||
++        withCustomScalars.has(inputType.name)
++      ) {
++        fieldsConfig[fieldName] = inputType.type;
+       }
+     }
+ 
+@@ -147,7 +158,9 @@ export const plugin: PluginFunction<CustomScalarsPluginConfig, string> = async (
+       }
+ 
+       if (!usedFields || usedFields.get(type.name)?.has(fieldName)) {
+-        fieldPolicies[fieldName] = { scalar: typeName };
++        fieldPolicies[fieldName] = {
++          scalar: field.type.toString().replaceAll("!", ""),
++        };
+       }
+     }
+ 
+@@ -242,16 +255,16 @@ function getInputObjectsWithCustomScalars(
+   const queue: string[] = [];
+ 
+   for (const [name, fields] of inputObjects) {
+-    for (const typeName of Object.values(fields)) {
+-      if (customScalars.has(typeName)) {
++    for (const inputType of Object.values(fields)) {
++      if (customScalars.has(inputType.name)) {
+         if (!useful.has(name)) {
+           useful.add(name);
+           queue.push(name);
+         }
+-      } else if (inputObjects.has(typeName)) {
+-        let deps = dependents.get(typeName);
++      } else if (inputObjects.has(inputType.name)) {
++        let deps = dependents.get(inputType.name);
+         if (!deps) {
+-          dependents.set(typeName, (deps = []));
++          dependents.set(inputType.name, (deps = []));
+         }
+         deps.push(name);
+       }
+@@ -339,13 +352,13 @@ function getReachableInputObjects(
+   while (queue.length) {
+     const fields = reachable.get(queue.pop()!)!;
+ 
+-    for (const typeName of Object.values(fields)) {
+-      if (!reachable.has(typeName)) {
+-        const dependencyFields = inputObjects.get(typeName);
++    for (const inputType of Object.values(fields)) {
++      if (!reachable.has(inputType.name)) {
++        const dependencyFields = inputObjects.get(inputType.name);
+ 
+         if (dependencyFields) {
+-          reachable.set(typeName, dependencyFields);
+-          queue.push(typeName);
++          reachable.set(inputType.name, dependencyFields);
++          queue.push(inputType.name);
+         }
+       }
+     }
+diff --git a/src/cache/core/cache.ts b/src/cache/core/cache.ts
+index df361c0ff..4e477a4f5 100644
+--- a/src/cache/core/cache.ts
++++ b/src/cache/core/cache.ts
+@@ -5,6 +5,7 @@ import type {
+   DocumentNode,
+   FragmentDefinitionNode,
+   InlineFragmentNode,
++  OperationTypeNode,
+ } from "graphql";
+ import { wrap } from "optimism";
+ import {
+@@ -36,6 +37,7 @@ import type {
+ } from "@apollo/client/utilities/internal";
+ import {
+   bindCacheKey,
++  capitalize,
+   combineLatestBatched,
+   equalByQuery,
+   getApolloCacheMemoryInternals,
+@@ -46,7 +48,7 @@ import {
+ import { invariant } from "@apollo/client/utilities/invariant";
+ 
+ import { defaultCacheSizes } from "../../utilities/caching/sizes.js";
+-import type { DiffIncrementalInfo } from "../inmemory/types.js";
++import type { DiffIncrementalInfo, ScalarType } from "../inmemory/types.js";
+ 
+ import type { Scalar } from "./Scalar.js";
+ import type { Cache } from "./types/Cache.js";
+@@ -263,6 +265,15 @@ export abstract class ApolloCache {
+     return null;
+   }
+ 
++  /**
++   * Get the root typename value for an operation type.
++   *
++   * @defaultValue Query, Mutation, or Subscription
++   */
++  public getRootTypename(operation: OperationTypeNode): string {
++    return capitalize(operation);
++  }
++
+   // Custom scalars API
+ 
+   public getScalar<TKey extends keyof ApolloCache.Scalars>(
+@@ -271,6 +282,27 @@ export abstract class ApolloCache {
+     return;
+   }
+ 
++  /** Get the configured scalar type for a field */
++  public getScalarTypeForField(
++    typename: string,
++    fieldName: string
++  ): ScalarType | undefined {
++    return;
++  }
++
++  /**
++   * Determines whether the cache configures custom scalars or not. This allows
++   * Apollo Client to skip processing results unnecessarily when there is
++   * nothing to transform into a scalar value.
++   *
++   * @remarks
++   * 3rd party caches should override this method if they have the ability to
++   * configure scalar implementations.
++   */
++  public configuresScalars() {
++    return false;
++  }
++
+   /**
+    * Serializes scalar values in the variables object
+    */
+diff --git a/src/cache/index.ts b/src/cache/index.ts
+index 748aaccce..a7aa47b4a 100644
+--- a/src/cache/index.ts
++++ b/src/cache/index.ts
+@@ -63,6 +63,7 @@ export type {
+   OptimisticStoreItem,
+   ReadMergeModifyContext,
+   ReadQueryOptions,
++  ScalarType,
+   StoreObject,
+   StoreValue,
+ } from "./inmemory/types.js";
+diff --git a/src/cache/inmemory/entityStore.ts b/src/cache/inmemory/entityStore.ts
+index 3375cf158..e5e07388a 100644
+--- a/src/cache/inmemory/entityStore.ts
++++ b/src/cache/inmemory/entityStore.ts
+@@ -16,7 +16,9 @@ import {
+   isNonNullObject,
+   isPlainObject,
+   makeReference,
++  matchScalarList,
+   maybeDeepFreeze,
++  unwrapScalarType,
+ } from "@apollo/client/utilities/internal";
+ import { invariant } from "@apollo/client/utilities/invariant";
+ 
+@@ -36,7 +38,11 @@ import type {
+ 
+ import { fieldNameFromStoreName, hasOwn } from "./helpers.js";
+ import type { Policies, StorageType } from "./policies.js";
+-import type { NormalizedCache, NormalizedCacheObject } from "./types.js";
++import type {
++  NormalizedCache,
++  NormalizedCacheObject,
++  ScalarType,
++} from "./types.js";
+ 
+ const DELETE = {} as DeleteModifier;
+ const delModifier: Modifier<any> = () => DELETE;
+@@ -446,12 +452,18 @@ export abstract class EntityStore implements NormalizedCache {
+     let changed = false;
+ 
+     const entries = Object.entries(obj).map(([storeFieldName, value]) => {
+-      const scalar = this.policies.getScalarForField(
++      const fieldName = fieldNameFromStoreName(storeFieldName);
++      const scalarType = this.policies.getScalarTypeForField(
+         typename,
+-        fieldNameFromStoreName(storeFieldName)
++        fieldName
+       );
+ 
+-      const newValue = this.coerceValue(value, coerce, scalar);
++      const newValue = this.coerceValue(
++        value,
++        coerce,
++        scalarType,
++        `${typename}.${fieldName}`
++      );
+       changed ||= newValue !== value;
+ 
+       return [storeFieldName, newValue];
+@@ -463,18 +475,46 @@ export abstract class EntityStore implements NormalizedCache {
+   private coerceValue(
+     value: unknown,
+     coerce: (scalar: Scalar<any, any>, value: unknown) => unknown,
+-    scalar?: Scalar<any, any>
++    scalarType: ScalarType | undefined,
++    coordinate: string
+   ): unknown {
+     if (value == null) {
+       return value;
+     }
+ 
+-    if (Array.isArray(value)) {
+-      return value.map((item) => this.coerceValue(item, coerce, scalar));
++    if (scalarType) {
++      const match = matchScalarList(scalarType);
++
++      if (match) {
++        if (Array.isArray(value)) {
++          return value.map((item) =>
++            this.coerceValue(item, coerce, match[1], coordinate)
++          );
++        } else {
++          if (__DEV__) {
++            invariant.warn(
++              "The custom scalar configuration for '%s' uses list type '%s', but the value is not an array. The value was coerced as '%s' anyway.",
++              coordinate,
++              scalarType,
++              unwrapScalarType(scalarType)
++            );
++          }
++        }
++      }
++
++      const scalar = this.policies.cache.getScalar(
++        unwrapScalarType(scalarType)
++      );
++
++      if (scalar) {
++        return coerce(scalar, value);
++      }
+     }
+ 
+-    if (scalar) {
+-      return coerce(scalar, value);
++    if (Array.isArray(value)) {
++      return value.map((item) =>
++        this.coerceValue(item, coerce, scalarType, coordinate)
++      );
+     }
+ 
+     if (isPlainObject(value) && "__typename" in value) {
+diff --git a/src/cache/inmemory/helpers.ts b/src/cache/inmemory/helpers.ts
+index 5ed344937..8833afa38 100644
+--- a/src/cache/inmemory/helpers.ts
++++ b/src/cache/inmemory/helpers.ts
+@@ -2,7 +2,9 @@ import type {
+   DocumentNode,
+   FragmentDefinitionNode,
+   SelectionSetNode,
++  TypeNode,
+ } from "graphql";
++import { Kind } from "graphql";
+ 
+ import type {
+   Reference,
+@@ -44,12 +46,19 @@ export function defaultDataIdFromObject(
+         : void 0;
+     }
+ 
++    let keyField = "id";
++
+     // If there is no object.id, fall back to object._id.
+     if (id == null && _id != null) {
+       id = _id;
++      keyField = "_id";
+     }
+ 
+     if (id != null) {
++      if (context?.serializeKeyField) {
++        id = context.serializeKeyField(__typename, keyField, id) as typeof id;
++      }
++
+       return `${__typename}:${
+         typeof id === "number" || typeof id === "string" ?
+           id
+@@ -149,3 +158,14 @@ export function extractFragmentContext(
+     },
+   };
+ }
++
++export function getScalarTypeFromTypeNode(node: TypeNode): string {
++  switch (node.kind) {
++    case Kind.NAMED_TYPE:
++      return node.name.value;
++    case Kind.LIST_TYPE:
++      return `[${getScalarTypeFromTypeNode(node.type)}]`;
++    case Kind.NON_NULL_TYPE:
++      return getScalarTypeFromTypeNode(node.type);
++  }
++}
+diff --git a/src/cache/inmemory/inMemoryCache.ts b/src/cache/inmemory/inMemoryCache.ts
+index b3529b24d..020645905 100644
+--- a/src/cache/inmemory/inMemoryCache.ts
++++ b/src/cache/inmemory/inMemoryCache.ts
+@@ -3,6 +3,7 @@ import type {
+   DocumentNode,
+   FragmentDefinitionNode,
+   InlineFragmentNode,
++  OperationTypeNode,
+ } from "graphql";
+ import type { OptimisticWrapperFunction } from "optimism";
+ import { wrap } from "optimism";
+@@ -30,8 +31,9 @@ import type {
+ import {
+   getInMemoryCacheMemoryInternals,
+   getOperationDefinition,
+-  getUnwrappedType,
+   isPlainObject,
++  matchScalarList,
++  unwrapScalarType,
+ } from "@apollo/client/utilities/internal";
+ import { invariant } from "@apollo/client/utilities/invariant";
+ 
+@@ -41,7 +43,11 @@ import type { Scalar } from "../core/Scalar.js";
+ import type { Cache } from "../core/types/Cache.js";
+ 
+ import { EntityStore, supportsResultCaching } from "./entityStore.js";
+-import { hasOwn, normalizeConfig } from "./helpers.js";
++import {
++  getScalarTypeFromTypeNode,
++  hasOwn,
++  normalizeConfig,
++} from "./helpers.js";
+ import { Policies } from "./policies.js";
+ import { forgetCache, makeVar, recallCache } from "./reactiveVars.js";
+ import { StoreReader } from "./readFromStore.js";
+@@ -50,6 +56,7 @@ import type {
+   InMemoryCacheConfig,
+   KnownScalars,
+   NormalizedCacheObject,
++  ScalarType,
+ } from "./types.js";
+ import { StoreWriter } from "./writeToStore.js";
+ 
+@@ -181,7 +188,8 @@ export class InMemoryCache extends ApolloCache {
+           // currently using a data store that can track cache dependencies.
+           const store = c.optimistic ? this.optimisticData : this.data;
+           if (supportsResultCaching(store)) {
+-            const { optimistic, id, variables } = c;
++            const { optimistic, id } = c;
++            const variables = this.serializeVariables(c.query, c.variables);
+             return store.makeCacheKey(
+               c.query,
+               // Different watches can have the same query, optimistic
+@@ -206,6 +214,10 @@ export class InMemoryCache extends ApolloCache {
+     );
+   }
+ 
++  public getRootTypename(operation: OperationTypeNode): string {
++    return this.policies.rootTypenamesById[`ROOT_${operation.toUpperCase()}`];
++  }
++
+   public getScalar<TKey extends keyof ApolloCache.Scalars>(
+     key: TKey
+   ): ApolloCache.GetScalarType<TKey> extends (
+@@ -220,6 +232,18 @@ export class InMemoryCache extends ApolloCache {
+     return this.config.scalars?.[key as string] as any;
+   }
+ 
++  /** Get the configured scalar type for a field */
++  public getScalarTypeForField(
++    typename: string,
++    fieldName: string
++  ): ScalarType | undefined {
++    return this.policies.getScalarTypeForField(typename, fieldName);
++  }
++
++  public configuresScalars(): boolean {
++    return !!this.config.scalars;
++  }
++
+   /**
+    * {@inheritDoc @apollo/client/cache!ApolloCache#serializeVariables:member(1)}
+    */
+@@ -257,7 +281,7 @@ export class InMemoryCache extends ApolloCache {
+     const variableTypes = getOperationDefinition(
+       document
+     )?.variableDefinitions?.reduce<Record<string, string>>((memo, node) => {
+-      memo[node.variable.name.value] = getUnwrappedType(node.type);
++      memo[node.variable.name.value] = getScalarTypeFromTypeNode(node.type);
+ 
+       return memo;
+     }, {});
+@@ -272,18 +296,52 @@ export class InMemoryCache extends ApolloCache {
+   private serializeVariablesValue(
+     value: unknown,
+     variableTypes: Record<string, string>,
+-    scalar?: Scalar<any, any>
++    scalarType?: ScalarType,
++    coordinate?: string
+   ): unknown {
+-    if (Array.isArray(value)) {
+-      return this.serializeInputArray(value, variableTypes, scalar);
++    if (value == null) {
++      return value;
++    }
++
++    if (scalarType) {
++      const match = matchScalarList(scalarType);
++
++      if (match) {
++        if (Array.isArray(value)) {
++          return this.serializeInputArray(
++            value,
++            variableTypes,
++            match[1],
++            coordinate
++          );
++        } else if (__DEV__) {
++          invariant.warn(
++            "The variable '%s' has list type '%s', but the value is not an array. The value was coerced as '%s' anyway.",
++            coordinate,
++            scalarType,
++            unwrapScalarType(scalarType)
++          );
++        }
++      }
++
++      const scalar = this.getScalar(unwrapScalarType(scalarType));
++
++      if (scalar) {
++        return scalar.coerceToSerialized(value);
++      }
+     }
+ 
+-    if (scalar && value != null) {
+-      return scalar.coerceToSerialized(value);
++    if (Array.isArray(value)) {
++      return this.serializeInputArray(
++        value,
++        variableTypes,
++        undefined,
++        coordinate
++      );
+     }
+ 
+     if (isPlainObject(value)) {
+-      return this.serializeInputObject(value, variableTypes);
++      return this.serializeInputObject(value, variableTypes, coordinate);
+     }
+ 
+     return value;
+@@ -292,12 +350,18 @@ export class InMemoryCache extends ApolloCache {
+   private serializeInputArray(
+     value: unknown[],
+     variableTypes: Record<string, string>,
+-    scalar?: Scalar<any, any>
++    scalarType?: ScalarType,
++    coordinate?: string
+   ) {
+     let changed = false;
+ 
+     const newValue = value.map((item) => {
+-      const newItem = this.serializeVariablesValue(item, variableTypes, scalar);
++      const newItem = this.serializeVariablesValue(
++        item,
++        variableTypes,
++        scalarType,
++        coordinate
++      );
+       changed ||= newItem !== item;
+ 
+       return newItem;
+@@ -308,43 +372,42 @@ export class InMemoryCache extends ApolloCache {
+ 
+   private serializeInputObject(
+     value: Record<string, unknown>,
+-    variableTypes: Record<string, string>
++    variableTypes: Record<string, string>,
++    coordinate?: string
+   ) {
+     let changed = false;
+ 
+     const entries = Object.entries(value).map(([name, value]) => {
+       const type = variableTypes[name];
++      const fieldCoordinate = coordinate ? `${coordinate}.${name}` : name;
+ 
+       if (!type) {
+         return [name, value];
+       }
+ 
+-      const inputObject = this.config.inputObjects?.[type];
++      const inputObject = this.config.inputObjects?.[unwrapScalarType(type)];
+ 
+       if (inputObject) {
+         const newValue = this.serializeVariablesValue(
+           value,
+-          inputObject.fields
++          inputObject.fields,
++          undefined,
++          fieldCoordinate
+         );
+         changed ||= newValue !== value;
+ 
+         return [name, newValue];
+       }
+ 
+-      const scalar = this.getScalar(type);
+-
+-      if (scalar) {
+-        const newValue = this.serializeVariablesValue(
+-          value,
+-          variableTypes,
+-          scalar
+-        );
+-        changed ||= newValue !== value;
+-
+-        return [name, newValue];
+-      }
++      const newValue = this.serializeVariablesValue(
++        value,
++        variableTypes,
++        type,
++        fieldCoordinate
++      );
++      changed ||= newValue !== value;
+ 
+-      return [name, value];
++      return [name, newValue];
+     });
+ 
+     return changed ? Object.fromEntries(entries) : value;
+diff --git a/src/cache/inmemory/key-extractor.ts b/src/cache/inmemory/key-extractor.ts
+index 2944d7f42..56da6cc74 100644
+--- a/src/cache/inmemory/key-extractor.ts
++++ b/src/cache/inmemory/key-extractor.ts
+@@ -40,8 +40,25 @@ export function keyFieldsFnFromSpecifier(
+   return (
+     info.keyFieldsFn ||
+     (info.keyFieldsFn = (object, context) => {
+-      const extract: typeof extractKey = (from, key) =>
+-        context.readField(key, from);
++      const { serializeKeyField } = context;
++
++      const serialized = (read: typeof extractKey): typeof extractKey =>
++        serializeKeyField ?
++          (from, key) => {
++            const value = read(from, key);
++
++            const typename =
++              from === context.storeObject || from === object ?
++                context.typename
++              : read(from, "__typename");
++
++            return typeof typename === "string" ?
++                (serializeKeyField(typename, key, value) as typeof value)
++              : value;
++          }
++        : read;
++
++      const extract = serialized((from, key) => context.readField(key, from));
+ 
+       const keyObject = (context.keyObject = collectSpecifierPaths(
+         specifier,
+@@ -69,7 +86,11 @@ export function keyFieldsFnFromSpecifier(
+             // since it means these extra fields cannot be affected by field
+             // aliasing, which is why we can use extractKey instead of
+             // context.readField for this extraction.
+-            extracted = extractKeyPath(object, schemaKeyPath, extractKey);
++            extracted = extractKeyPath(
++              object,
++              schemaKeyPath,
++              serialized(extractKey)
++            );
+           }
+ 
+           invariant(
+diff --git a/src/cache/inmemory/policies.ts b/src/cache/inmemory/policies.ts
+index 6f475f30e..e1f1c569b 100644
+--- a/src/cache/inmemory/policies.ts
++++ b/src/cache/inmemory/policies.ts
+@@ -17,7 +17,11 @@ import type {
+ import { isReference } from "@apollo/client/utilities";
+ import { __DEV__ } from "@apollo/client/utilities/environment";
+ import type { FragmentMap } from "@apollo/client/utilities/internal";
+-import { streamInfoSymbol } from "@apollo/client/utilities/internal";
++import {
++  matchScalarList,
++  streamInfoSymbol,
++  unwrapScalarType,
++} from "@apollo/client/utilities/internal";
+ import {
+   argumentsObjectFromField,
+   getStoreKeyName,
+@@ -32,7 +36,6 @@ import {
+ } from "@apollo/client/utilities/invariant";
+ 
+ import type { ApolloCache } from "../core/cache.js";
+-import type { Scalar } from "../core/Scalar.js";
+ import type {
+   CanReadFunction,
+   FieldSpecifier,
+@@ -61,7 +64,7 @@ import type {
+   MergeInfo,
+   NormalizedCache,
+   ReadMergeModifyContext,
+-  ScalarNames,
++  ScalarType,
+ } from "./types.js";
+ import type { WriteContext } from "./writeToStore.js";
+ 
+@@ -106,6 +109,12 @@ export type KeyFieldsContext = {
+   // Internal. May be set by the KeyFieldsFunction to report fields that were
+   // involved in computing the ID. Never passed in by the caller.
+   keyObject?: Record<string, any>;
++
++  serializeKeyField?: (
++    typename: string,
++    fieldName: string,
++    value: unknown
++  ) => unknown;
+ };
+ 
+ export type KeyFieldsFunction = (
+@@ -176,7 +185,7 @@ export type FieldPolicy<
+   keyArgs?: KeySpecifier | KeyArgsFunction | false;
+   read?: FieldReadFunction<TExisting, TReadResult, TReadOptions>;
+   merge?: FieldMergeFunction<TExisting, TIncoming, TMergeOptions> | boolean;
+-  scalar?: ScalarNames;
++  scalar?: ScalarType;
+ };
+ 
+ export type StorageType = Record<string, any>;
+@@ -462,6 +471,15 @@ export class Policies {
+         }) satisfies ReadFieldFunction),
+     };
+ 
++    if (this.cache.configuresScalars()) {
++      context.serializeKeyField = (typename, fieldName, value) => {
++        return this.serializeScalarValue(
++          value,
++          this.getScalarTypeForField(typename, fieldName)
++        );
++      };
++    }
++
+     let id: KeyFieldsResult;
+ 
+     const policy = typename && this.getTypePolicy(typename);
+@@ -932,13 +950,29 @@ export class Policies {
+       : fieldName + ":" + storeFieldName;
+   }
+ 
+-  public getScalarForField(
++  public getScalarTypeForField(
+     typename: string,
+     fieldName: string
+-  ): Scalar<any, any> | undefined {
+-    const policy = this.getFieldPolicy(typename, fieldName);
++  ): ScalarType | undefined {
++    return this.getFieldPolicy(typename, fieldName)?.scalar;
++  }
++
++  private serializeScalarValue(
++    value: unknown,
++    scalarType: ScalarType | undefined
++  ): unknown {
++    if (value == null || !scalarType) {
++      return value;
++    }
++
++    const match = matchScalarList(scalarType);
++
++    if (match && Array.isArray(value)) {
++      return value.map((item) => this.serializeScalarValue(item, match[1]));
++    }
+ 
+-    return policy?.scalar ? this.cache.getScalar(policy.scalar) : undefined;
++    const scalar = this.cache.getScalar(unwrapScalarType(scalarType));
++    return scalar ? scalar.coerceToSerialized(value) : value;
+   }
+ 
+   public readField<V = StoreValue>(
+diff --git a/src/cache/inmemory/types.ts b/src/cache/inmemory/types.ts
+index 777016d64..163b1d6df 100644
+--- a/src/cache/inmemory/types.ts
++++ b/src/cache/inmemory/types.ts
+@@ -192,7 +192,17 @@ export interface ReadMergeModifyContext {
+   extensions?: ExtensionsWithStreamInfo;
+ }
+ 
++type ListOf<T extends string> = `[${T}]`;
++
++type NestedScalarName<T extends string> =
++  | T
++  | ListOf<T>
++  | ListOf<ListOf<T>>
++  | ListOf<ListOf<ListOf<T>>>
++  | ListOf<ListOf<ListOf<ListOf<T>>>>;
++
+ export type KnownScalars = RemoveIndexSignature<ApolloCache.Scalars>;
+-export type ScalarNames =
+-  | keyof KnownScalars
++
++export type ScalarType =
++  | NestedScalarName<keyof KnownScalars & string>
+   | (string extends keyof ApolloCache.Scalars ? string & {} : never);
+diff --git a/src/cache/inmemory/writeToStore.ts b/src/cache/inmemory/writeToStore.ts
+index aa7fe07ca..807b033fd 100644
+--- a/src/cache/inmemory/writeToStore.ts
++++ b/src/cache/inmemory/writeToStore.ts
+@@ -451,8 +451,9 @@ export class StoreWriter {
+       // Write any key fields that were used during identification, even if
+       // they were not mentioned in the original query.
+       if (keyObject) {
+-        // TODO Reverse the order of the arguments?
+-        incoming = context.merge(incoming, keyObject);
++        // Values in incoming take precedence over keyObject, which may contain
++        // serialized values used to compute the ID.
++        incoming = context.merge(keyObject, incoming);
+       }
+     } catch (e) {
+       // If dataId was provided, tolerate failure of policies.identify.
+diff --git a/src/core/ObservableQuery.ts b/src/core/ObservableQuery.ts
+index 8cd2c320b..405e77255 100644
+--- a/src/core/ObservableQuery.ts
++++ b/src/core/ObservableQuery.ts
+@@ -94,6 +94,30 @@ const empty: ObservableQuery.Result<any> = {
+   partial: true,
+ };
+ 
++const destructiveMethodCounts = new WeakMap<Cache.Implementation, number>();
++
++function wrapDestructiveCacheMethod(
++  cache: Cache.Implementation,
++  methodName: "evict" | "modify" | "reset"
++) {
++  const original = cache[methodName];
++  if (typeof original === "function") {
++    // @ts-expect-error this is just too generic to be typed correctly
++    cache[methodName] = function () {
++      destructiveMethodCounts.set(
++        cache,
++        // The %1e15 allows the count to wrap around to 0 safely every
++        // quadrillion evictions, so there's no risk of overflow. To be
++        // clear, this is more of a pedantic principle than something
++        // that matters in any conceivable practical scenario.
++        (destructiveMethodCounts.get(cache)! + 1) % 1e15
++      );
++      // @ts-expect-error this is just too generic to be typed correctly
++      return original.apply(this, arguments);
++    };
++  }
++}
++
+ const enum EmitBehavior {
+   /**
+    * Emit will be calculated by the normal rules. (`undefined` will be treated the same as this)
+@@ -309,8 +333,12 @@ export class ObservableQuery<
+   public readonly queryName?: string;
+   private variablesUnknown: boolean = false;
+ 
+-  /** @internal will be read and written from `QueryInfo` */
+-  public _lastWrite?: unknown;
++  private didWarnOnFeud = false;
++  private lastMissing?: {
++    missing: MissingTree | undefined;
++    variables: TVariables;
++    dmCount: number | undefined;
++  };
+ 
+   // The `query` computed property will always reflect the document transformed
+   // by the last run query. `this.options.query` will always reflect the raw
+@@ -382,6 +410,19 @@ export class ObservableQuery<
+   }) {
+     this.queryManager = queryManager;
+ 
++    // Track how often destructive cache methods are called, since we want
++    // eviction to override the feud-stopping logic in `shouldAutoRefetch`,
++    // by causing it to return true. Wrapping these cache methods is a bit of a
++    // hack, but it saves us from having to make eviction counting an official
++    // part of the ApolloCache API.
++    const { cache } = queryManager;
++    if (!destructiveMethodCounts.has(cache)) {
++      destructiveMethodCounts.set(cache, 0);
++      wrapDestructiveCacheMethod(cache, "evict");
++      wrapDestructiveCacheMethod(cache, "modify");
++      wrapDestructiveCacheMethod(cache, "reset");
++    }
++
+     // active state
+     this.waitForNetworkResult = options.fetchPolicy === "network-only";
+     this.isTornDown = false;
+@@ -819,7 +860,6 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+         this.getVariablesWithDefaults({ ...this.variables, ...variables });
+     }
+ 
+-    this._lastWrite = undefined;
+     return this._reobserve(reobserveOptions, {
+       newNetworkStatus: NetworkStatus.refetch,
+     });
+@@ -1485,7 +1525,6 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+           !isNetworkRequestInFlight(this.networkStatus) &&
+           !this.options.skipPollAttempt?.()
+         ) {
+-          this._lastWrite = undefined;
+           this._reobserve(
+             {
+               // Most fetchPolicy options don't make sense to use in a polling context, as
+@@ -1544,12 +1583,17 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+     newOptions?: Partial<ObservableQuery.Options<TData, TVariables>>,
+     internalOptions?: {
+       newNetworkStatus?: NetworkStatus;
++      keepLastMissing?: boolean;
+     }
+   ): ObservableQuery.ResultPromise<
+     ApolloClient.QueryResult<MaybeMasked<TData>>
+   > {
+     this.isTornDown = false;
+-    let { newNetworkStatus } = internalOptions || {};
++    let { newNetworkStatus, keepLastMissing } = internalOptions || {};
++
++    if (!keepLastMissing) {
++      this.lastMissing = undefined;
++    }
+ 
+     this.queryManager.obsQueries.add(this);
+ 
+@@ -1730,7 +1774,7 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+     this.queryManager.obsQueries.delete(this);
+     this.isTornDown = true;
+     this.abortActiveOperations();
+-    this._lastWrite = undefined;
++    this.lastMissing = undefined;
+   }
+ 
+   private transformDocument(document: DocumentNode) {
+@@ -1784,54 +1828,141 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+       }
+     }
+ 
+-    const { dirty } = this;
++    const { dirty, lastMissing } = this;
++    const { fetchPolicy } = this.options;
+     this.resetNotifications();
+ 
+     if (
+-      dirty &&
+-      (this.options.fetchPolicy === "cache-only" ||
+-        this.options.fetchPolicy === "cache-and-network" ||
+-        !this.activeOperations.size)
++      !dirty ||
++      (fetchPolicy !== "cache-only" &&
++        fetchPolicy !== "cache-and-network" &&
++        this.activeOperations.size)
+     ) {
+-      const diff = this.getCacheDiff();
+-      if (
+-        // `fromOptimisticTransaction` is not available through the `cache.diff`
+-        // code path, so we need to check it this way
+-        equal(diff.result, this.getCacheDiff({ optimistic: false }).result)
+-      ) {
+-        //If this diff did not come from an optimistic transaction
+-        // make the ObservableQuery "reobserve" the latest data
+-        // using a temporary fetch policy of "cache-first", so complete cache
+-        // results have a chance to be delivered without triggering additional
+-        // network requests, even when options.fetchPolicy is "network-only"
+-        // or "cache-and-network". All other fetch policies are preserved by
+-        // this method, and are handled by calling oq.reobserve(). If this
+-        // reobservation is spurious, distinctUntilChanged still has a
+-        // chance to catch it before delivery to ObservableQuery subscribers.
+-        this.reobserveCacheFirst();
+-      } else {
+-        // If this diff came from an optimistic transaction, deliver the
+-        // current cache data to the ObservableQuery, but don't perform a
+-        // reobservation, since oq.reobserveCacheFirst might make a network
+-        // request, and we never want to trigger network requests in the
+-        // middle of optimistic updates.
+-        this.input.next({
+-          kind: "N",
+-          value: {
+-            data: diff.result,
+-            dataState: diff.dataState,
+-            networkStatus: NetworkStatus.ready,
+-            loading: false,
+-            error: undefined,
+-            partial: !diff.complete,
+-          } as ObservableQuery.Result<TData>,
+-          source: "cache",
+-          query: this.query,
+-          variables: this.variables,
+-          meta: {},
+-        });
++      return;
++    }
++
++    const diff = this.getCacheDiff();
++    const current = this.getCurrentResult();
++    // `fromOptimisticTransaction` is not available through the `cache.diff`
++    // code path, so we need to check whether the cache result is an optimistic
++    // result this way.
++    const isOptimistic = !equal(
++      diff.result,
++      this.getCacheDiff({ optimistic: false }).result
++    );
++
++    if (
++      // When this diff came from an optimistic transaction, deliver the
++      // current cache data to the ObservableQuery, but don't perform a
++      // reobservation, since oq.reobserveCacheFirst might make a network
++      // request, and we never want to trigger network requests in the
++      // middle of optimistic updates.
++      isOptimistic ||
++      // If we get a cache update in the middle of streaming (possible with
++      // cache-and-network fetch policy), just deliver the cache value without
++      // going through the full reobserve which would otherwise trigger another
++      // request (deduplication should kick in, but doing so replays any
++      // previous emits from the link chain, which get rewritten into the cache
++      // and might clobber this cache update)
++      (!diff.complete && current.networkStatus === NetworkStatus.streaming)
++    ) {
++      this.deliverCacheDiff(diff);
++
++      return;
++    }
++
++    if (diff.complete) {
++      this.lastMissing = undefined;
++    } else if (
++      !lastMissing ||
++      // If a destructive cache method has been called since the last recorded
++      // incomplete result, there's a chance fetching this data again will
++      // restore what was evicted, even though the cache result looks the same
++      // as before.
++      lastMissing.dmCount !== destructiveMethodCounts.get(this.cache) ||
++      !equal(lastMissing.variables, this.variables) ||
++      !equal(lastMissing.missing, diff.missing?.missing)
++    ) {
++      this.didWarnOnFeud = false;
++      this.lastMissing = {
++        variables: this.variables,
++        missing: diff.missing?.missing,
++        dmCount: destructiveMethodCounts.get(this.cache),
++      };
++    } else if (
++      // reobserveCacheFirst with cache-only fetch policy only calls
++      // reobserve which never fetches from the network so we are ok
++      // allowing cache-only queries to fallthrough to reobserveCacheFirst.
++      // This also prevents the feud warning which would be confusing for a
++      // cache-only query anyways.
++      fetchPolicy !== "cache-only"
++    ) {
++      // If we've fallen through to this case, a cache emit has returned the
++      // same missing fields which means at least one value on the fields we've
++      // already delivered have changed. We are ok delivering the updated
++      // partial result in this case to keep the result as fresh as possible. We
++      // NEVER want to downgrade this query from a complete query to a partial
++      // query though, so we also make sure we only deliver if the previous
++      // result was also partial.
++      if (current.dataState === "partial") {
++        this.deliverCacheDiff(diff);
++      }
++      // If the (partial) result is the same as the last partial result
++      // we recorded from a previous broadcast (and the variables match
++      // too), avoid calling reobserveCacheFirst to refetch this query
++      // again. If we allow refetching anytime this result becomes partial,
++      // we risk feuds between queries competing to update the same data in
++      // incompatible ways, which can lead to an endless cycle of cache
++      // broadcasts and useless network requests. As with any
++      // feud, eventually one side must step back from the brink,
++      // letting the other side(s) have the last word(s). There may
++      // be other points where we could break this cycle, such as
++      // silencing the broadcast for cache.writeQuery (not a good
++      // idea, since it just delays the feud a bit) or somehow
++      // avoiding the network request that just happened (also bad,
++      // because the server could return useful new data). All
++      // options considered, returning early and stopping the
++      // reobserveCacheFirst cycle seems to be the least damaging place to
++      // break the cycle because it allows read functions/custom scalars to
++      // be applied to the feuding query while avoiding the endless cycle of
++      // requests.
++      if (__DEV__ && !this.didWarnOnFeud) {
++        this.didWarnOnFeud = true;
++        warnOnFeud(this.query, diff);
+       }
++      return;
+     }
++
++    //If this diff did not come from an optimistic transaction
++    // make the ObservableQuery "reobserve" the latest data
++    // using a temporary fetch policy of "cache-first", so complete cache
++    // results have a chance to be delivered without triggering additional
++    // network requests, even when options.fetchPolicy is "network-only"
++    // or "cache-and-network". All other fetch policies are preserved by
++    // this method, and are handled by calling oq.reobserve(). If this
++    // reobservation is spurious, distinctUntilChanged still has a
++    // chance to catch it before delivery to ObservableQuery subscribers.
++    this.reobserveCacheFirst();
++  }
++
++  private deliverCacheDiff(diff: Cache.InternalDiffResultWithDataState<TData>) {
++    const current = this.getCurrentResult();
++
++    this.input.next({
++      kind: "N",
++      value: {
++        data: diff.result,
++        dataState: diff.dataState,
++        networkStatus: current.networkStatus,
++        loading: current.loading,
++        error: undefined,
++        partial: !diff.complete,
++      } as ObservableQuery.Result<TData>,
++      source: "cache",
++      query: this.query,
++      variables: this.variables,
++      meta: {},
++    });
+   }
+ 
+   private activeOperations = new Set<TrackedOperation>();
+@@ -1909,6 +2040,7 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+     // exception for cache-only queries - we reset them into a "ready" state
+     // as we won't trigger a refetch for them
+     const resetToEmpty = this.options.fetchPolicy === "cache-only";
++    this.lastMissing = undefined;
+     this.setResult(resetToEmpty ? empty : uninitialized, {
+       shouldEmit: resetToEmpty ? EmitBehavior.force : EmitBehavior.never,
+     });
+@@ -2083,29 +2215,35 @@ Did you mean to call refetch(variables) instead of refetch({ variables })?`,
+     const { fetchPolicy, nextFetchPolicy } = this.options;
+ 
+     if (fetchPolicy === "cache-and-network" || fetchPolicy === "network-only") {
+-      this.reobserve({
+-        fetchPolicy: "cache-first",
+-        // Use a temporary nextFetchPolicy function that replaces itself with the
+-        // previous nextFetchPolicy value and returns the original fetchPolicy.
+-        nextFetchPolicy(
+-          this: ApolloClient.WatchQueryOptions<TData, TVariables>,
+-          currentFetchPolicy: WatchQueryFetchPolicy,
+-          context: NextFetchPolicyContext<TData, TVariables>
+-        ) {
+-          // Replace this nextFetchPolicy function in the options object with the
+-          // original this.options.nextFetchPolicy value.
+-          this.nextFetchPolicy = nextFetchPolicy;
+-          // If the original nextFetchPolicy value was a function, give it a
+-          // chance to decide what happens here.
+-          if (typeof this.nextFetchPolicy === "function") {
+-            return this.nextFetchPolicy(currentFetchPolicy, context);
+-          }
+-          // Otherwise go back to the original this.options.fetchPolicy.
+-          return fetchPolicy!;
++      // Preserve this.lastMissing so a cache update that triggers this
++      // reobserve doesn't reset feud detection. All user-initiated calls to
++      // reobserve (refetch/poll/reobserve, etc) should clear it.
++      this._reobserve(
++        {
++          fetchPolicy: "cache-first",
++          // Use a temporary nextFetchPolicy function that replaces itself with the
++          // previous nextFetchPolicy value and returns the original fetchPolicy.
++          nextFetchPolicy(
++            this: ApolloClient.WatchQueryOptions<TData, TVariables>,
++            currentFetchPolicy: WatchQueryFetchPolicy,
++            context: NextFetchPolicyContext<TData, TVariables>
++          ) {
++            // Replace this nextFetchPolicy function in the options object with the
++            // original this.options.nextFetchPolicy value.
++            this.nextFetchPolicy = nextFetchPolicy;
++            // If the original nextFetchPolicy value was a function, give it a
++            // chance to decide what happens here.
++            if (typeof this.nextFetchPolicy === "function") {
++              return this.nextFetchPolicy(currentFetchPolicy, context);
++            }
++            // Otherwise go back to the original this.options.fetchPolicy.
++            return fetchPolicy!;
++          },
+         },
+-      });
++        { keepLastMissing: true }
++      );
+     } else {
+-      this.reobserve();
++      this._reobserve(undefined, { keepLastMissing: true });
+     }
+   }
+ 
+@@ -2175,3 +2313,25 @@ function getTrackingOperatorPromise<TData>(
+     });
+   return { promise, operator };
+ }
++
++function warnOnFeud(query: DocumentNode, diff: Cache.DiffResult<any>) {
++  invariant.warn(
++    `Apollo Client stopped refetching '%s' because the same incomplete cache result was already refetched. Automatic refetching was halted to prevent an endless cycle of network requests.
++
++This often means another query is overwriting non-normalized data selected by this query. Common fixes:
++
++  * Select an \`id\` or \`_id\` field in each query that writes the object
++  * Set custom \`keyFields\` if the object uses a different identity
++  * Add a field \`merge\` function so partial writes combine instead of replace
++
++  missing fields: %o
++
++For more information about these options, please refer to the documentation:
++
++  * Ensuring entity objects have IDs: https://go.apollo.dev/c/generating-unique-identifiers
++  * Defining custom merge functions: https://go.apollo.dev/c/merging-non-normalized-objects
++`,
++    getOperationName(query, "(anonymous)"),
++    diff.missing?.missing
++  );
++}
+diff --git a/src/core/QueryInfo.ts b/src/core/QueryInfo.ts
+index efe66d3a6..678f187fe 100644
+--- a/src/core/QueryInfo.ts
++++ b/src/core/QueryInfo.ts
+@@ -1,9 +1,7 @@
+-import { equal } from "@wry/equality";
+ import { Trie } from "@wry/trie";
+ import type { DocumentNode, FormattedExecutionResult } from "graphql";
+ 
+ import type {
+-  ApolloCache,
+   Cache,
+   DiffIncrementalInfo,
+   IgnoreModifier,
+@@ -57,15 +55,6 @@ export const enum CacheWriteBehavior {
+   MERGE,
+ }
+ 
+-interface LastWrite {
+-  result: FormattedExecutionResult<any, ExtensionsWithStreamInfo>;
+-  variables: ApolloClient.WatchQueryOptions["variables"];
+-  dmCount: number | undefined;
+-  hasNext: boolean;
+-}
+-
+-const destructiveMethodCounts = new WeakMap<ApolloCache, number>();
+-
+ interface OperationInfo<
+   TData,
+   TVariables extends OperationVariables,
+@@ -83,28 +72,6 @@ interface MarkQueryResult<TData, TExtensions>
+   dataState: "empty" | "partial" | "streaming" | "complete";
+ }
+ 
+-function wrapDestructiveCacheMethod(
+-  cache: ApolloCache,
+-  methodName: "evict" | "modify" | "reset"
+-) {
+-  const original = cache[methodName];
+-  if (typeof original === "function") {
+-    // @ts-expect-error this is just too generic to be typed correctly
+-    cache[methodName] = function () {
+-      destructiveMethodCounts.set(
+-        cache,
+-        // The %1e15 allows the count to wrap around to 0 safely every
+-        // quadrillion evictions, so there's no risk of overflow. To be
+-        // clear, this is more of a pedantic principle than something
+-        // that matters in any conceivable practical scenario.
+-        (destructiveMethodCounts.get(cache)! + 1) % 1e15
+-      );
+-      // @ts-expect-error this is just too generic to be typed correctly
+-      return original.apply(this, arguments);
+-    };
+-  }
+-}
+-
+ const queryInfoIds = new WeakMap<QueryManager, number>();
+ 
+ // A QueryInfo object represents a single network request, either initiated
+@@ -137,67 +104,12 @@ export class QueryInfo<
+     queryManager: QueryManager,
+     observableQuery?: ObservableQuery<any, any>
+   ) {
+-    const cache = (this.cache = queryManager.cache as TCache);
++    this.cache = queryManager.cache as TCache;
+     const id = (queryInfoIds.get(queryManager) || 0) + 1;
+     queryInfoIds.set(queryManager, id);
+     this.id = id + "";
+     this.observableQuery = observableQuery;
+     this.queryManager = queryManager;
+-
+-    // Track how often cache.evict is called, since we want eviction to
+-    // override the write-skipping logic in `shouldWrite`, by causing it to
+-    // return true. Wrapping the cache.evict method is a bit of a hack, but it
+-    // saves us from having to make eviction counting an official part of the
+-    // ApolloCache API.
+-    if (!destructiveMethodCounts.has(cache)) {
+-      destructiveMethodCounts.set(cache, 0);
+-      wrapDestructiveCacheMethod(cache, "evict");
+-      wrapDestructiveCacheMethod(cache, "modify");
+-      wrapDestructiveCacheMethod(cache, "reset");
+-    }
+-  }
+-
+-  /**
+-   * @internal
+-   * Tracks the last result written to the cache so that `shouldWrite` can skip
+-   * an identical write. Since a `QueryInfo` only ever represents a single
+-   * network request, this is shared by all `QueryInfo` instances of an
+-   * `ObservableQuery`. A standalone `QueryInfo` keeps a local version.
+-   *
+-   * A network result that was explicitly asked for always takes precedence over
+-   * what is already cached, so `ObservableQuery.refetch` and polling clear this
+-   * value before starting their request.
+-   */
+-  public _lastWrite?: LastWrite;
+-  private get lastWrite(): LastWrite | undefined {
+-    return (this.observableQuery || this)._lastWrite as LastWrite | undefined;
+-  }
+-  private set lastWrite(value: LastWrite | undefined) {
+-    (this.observableQuery || this)._lastWrite = value;
+-  }
+-
+-  public resetLastWrite() {
+-    this.lastWrite = void 0;
+-  }
+-
+-  private shouldWrite(
+-    result: FormattedExecutionResult<any, ExtensionsWithStreamInfo>,
+-    variables: ApolloClient.WatchQueryOptions["variables"]
+-  ) {
+-    const { lastWrite } = this;
+-    return (
+-      !lastWrite ||
+-      // If cache.evict has been called since the last time we wrote this
+-      // data into the cache, there's a chance writing this result into
+-      // the cache will repair what was evicted.
+-      lastWrite.dmCount !== destructiveMethodCounts.get(this.cache) ||
+-      !equal(variables, lastWrite.variables) ||
+-      !equal(result.data, lastWrite.result.data) ||
+-      // We have to compare these values because its possible the final chunk
+-      // emitted in the incremental result is just `hasNext: false`. This
+-      // ensures we trigger a cache write when we get `isLastChunk: true`.
+-      lastWrite.hasNext !== this.hasNext
+-    );
+   }
+ 
+   get hasNext() {
+@@ -320,17 +232,10 @@ export class QueryInfo<
+       result.dataState = "streaming";
+     }
+ 
+-    if (skipCache) {
++    if (skipCache || !shouldWriteResult(result, errorPolicy)) {
+       return result;
+     }
+ 
+-    if (!shouldWriteResult(result, errorPolicy)) {
+-      this.lastWrite = void 0;
+-      return result;
+-    }
+-
+-    let written = false;
+-
+     // Using a transaction here so we have a chance to read the result
+     // back from the cache before the watch callback fires as a result
+     // of writeQuery, so we can store the new diff quietly and ignore
+@@ -348,57 +253,13 @@ export class QueryInfo<
+         }
+       },
+       update: (cache) => {
+-        const shouldWrite = this.shouldWrite(result, variables);
+-
+-        // If result is the same as the last result we received from
+-        // the network (and the variables match too), avoid writing
+-        // result into the cache again. The wisdom of skipping this
+-        // cache write is far from obvious, since any cache write
+-        // could be the one that puts the cache back into a desired
+-        // state, fixing corruption or missing data. However, if we
+-        // always write every network result into the cache, we enable
+-        // feuds between queries competing to update the same data in
+-        // incompatible ways, which can lead to an endless cycle of
+-        // cache broadcasts and useless network requests. As with any
+-        // feud, eventually one side must step back from the brink,
+-        // letting the other side(s) have the last word(s). There may
+-        // be other points where we could break this cycle, such as
+-        // silencing the broadcast for cache.writeQuery (not a good
+-        // idea, since it just delays the feud a bit) or somehow
+-        // avoiding the network request that just happened (also bad,
+-        // because the server could return useful new data). All
+-        // options considered, skipping this cache write seems to be
+-        // the least damaging place to break the cycle, because it
+-        // reflects the intuition that we recently wrote this exact
+-        // result into the cache, so the cache *should* already/still
+-        // contain this data. If some other query has clobbered that
+-        // data in the meantime, that's too bad, but there will be no
+-        // winners if every query blindly reverts to its own version
+-        // of the data. This approach also gives the network a chance
+-        // to return new data, which will be written into the cache as
+-        // usual, notifying only those queries that are directly
+-        // affected by the cache updates, as usual. In the future, an
+-        // even more sophisticated cache could perhaps prevent or
+-        // mitigate the clobbering somehow, but that would make this
+-        // particular cache write even less important, and thus
+-        // skipping it would be even safer than it is today.
+-        if (shouldWrite) {
+-          cache.writeQuery({
+-            query,
+-            data: result.data as Unmasked<any>,
+-            variables,
+-            overwrite: cacheWriteBehavior === CacheWriteBehavior.OVERWRITE,
+-            extensions: result.extensions,
+-          });
+-
+-          this.lastWrite = {
+-            result,
+-            variables,
+-            dmCount: destructiveMethodCounts.get(this.cache),
+-            hasNext: this.hasNext,
+-          };
+-          written = true;
+-        }
++        cache.writeQuery({
++          query,
++          data: result.data as Unmasked<any>,
++          variables,
++          overwrite: cacheWriteBehavior === CacheWriteBehavior.OVERWRITE,
++          extensions: result.extensions,
++        });
+ 
+         const { dataState, result: diffResult } = this.getDiff(
+           {
+@@ -415,12 +276,11 @@ export class QueryInfo<
+         if (
+           dataState === "complete" ||
+           dataState === "streaming" ||
+-          (returnPartialData && dataState === "partial" && shouldWrite)
++          (returnPartialData && dataState === "partial")
+         ) {
+           result = { ...result, data: diffResult, dataState };
+         } else if (
+           __DEV__ &&
+-          written &&
+           // A result that is still streaming is expected to read back
+           // incomplete until the remaining chunks arrive.
+           !this.hasNext
+diff --git a/src/core/QueryManager.ts b/src/core/QueryManager.ts
+index 7c4350daa..6415d94c0 100644
+--- a/src/core/QueryManager.ts
++++ b/src/core/QueryManager.ts
+@@ -51,6 +51,7 @@ import type { ExtensionsWithStreamInfo } from "@apollo/client/utilities/internal
+ import {
+   AutoCleanedWeakCache,
+   checkDocument,
++  coerceScalarFieldsToParsed,
+   extensionsSymbol,
+   filterMap,
+   getDefaultValues,
+@@ -1089,7 +1090,6 @@ export class QueryManager {
+         const hasErrors = graphQLResultHasError(result);
+ 
+         if (hasErrors && errorPolicy === "none") {
+-          queryInfo.resetLastWrite();
+           observableQuery?.["resetNotifications"]();
+           const error = new CombinedGraphQLErrors(
+             removeStreamDetailsFromExtensions(result)
+@@ -1134,7 +1134,6 @@ export class QueryManager {
+       }),
+       catchError((error) => {
+         if (errorPolicy === "none") {
+-          queryInfo.resetLastWrite();
+           observableQuery?.["resetNotifications"]();
+           throw error;
+         }
+@@ -1792,7 +1791,26 @@ export class QueryManager {
+         };
+ 
+       case "no-cache":
+-        return { fromLink: true, observable: resultsFromLink() };
++        return {
++          fromLink: true,
++          observable: resultsFromLink().pipe(
++            map((notification) => {
++              if (
++                notification.kind === "N" &&
++                notification.value.data != null &&
++                this.cache.configuresScalars()
++              ) {
++                notification.value.data = coerceScalarFieldsToParsed(
++                  notification.value.data,
++                  query,
++                  this.cache
++                ) as TData;
++              }
++
++              return notification;
++            })
++          ),
++        };
+ 
+       case "standby":
+         return { fromLink: false, observable: EMPTY };
+diff --git a/src/core/index.ts b/src/core/index.ts
+index 7c0129fef..86edb5789 100644
+--- a/src/core/index.ts
++++ b/src/core/index.ts
+@@ -90,6 +90,7 @@ export type {
+   ReactiveVar,
+   ReadMergeModifyContext,
+   ReadQueryOptions,
++  ScalarType,
+   StoreValue,
+   // All the exports (types) from ../cache, minus cacheSlot,
+   // which we want to keep semi-private.
+diff --git a/src/utilities/internal/capitalize.ts b/src/utilities/internal/capitalize.ts
+new file mode 100644
+index 000000000..7538371db
+--- /dev/null
++++ b/src/utilities/internal/capitalize.ts
+@@ -0,0 +1,4 @@
++/** @internal */
++export function capitalize(str: string) {
++  return str[0].toUpperCase() + str.slice(1);
++}
+diff --git a/src/utilities/internal/coerceScalarFieldsToParsed.ts b/src/utilities/internal/coerceScalarFieldsToParsed.ts
+new file mode 100644
+index 000000000..18f5a4aed
+--- /dev/null
++++ b/src/utilities/internal/coerceScalarFieldsToParsed.ts
+@@ -0,0 +1,142 @@
++import type { DocumentNode, FieldNode, SelectionSetNode } from "graphql";
++
++import type { ApolloCache, ScalarType } from "@apollo/client/cache";
++import { __DEV__ } from "@apollo/client/utilities/environment";
++import { invariant } from "@apollo/client/utilities/invariant";
++
++import { createFragmentMap } from "./createFragmentMap.js";
++import { getFragmentDefinitions } from "./getFragmentDefinitions.js";
++import { getFragmentFromSelection } from "./getFragmentFromSelection.js";
++import { getMainDefinition } from "./getMainDefinition.js";
++import { getOperationDefinition } from "./getOperationDefinition.js";
++import { isField } from "./isField.js";
++import { matchScalarList } from "./matchScalarList.js";
++import { resultKeyNameFromField } from "./resultKeyNameFromField.js";
++import { unwrapScalarType } from "./unwrapScalarType.js";
++
++/** @internal */
++export function coerceScalarFieldsToParsed(
++  result: Record<string, any>,
++  query: DocumentNode,
++  cache: ApolloCache
++): Record<string, any> {
++  const operationType = getOperationDefinition(query)?.operation;
++  const fragmentMap = createFragmentMap(getFragmentDefinitions(query));
++
++  invariant(
++    operationType,
++    "Document node must be a query, mutation, or subscription"
++  );
++
++  function coerceFieldArray(
++    field: FieldNode,
++    fieldValue: unknown[],
++    typename: string | undefined,
++    scalarType: ScalarType | undefined
++  ) {
++    let changed = false;
++
++    const items = fieldValue.map((item) => {
++      const coerced = coerceField(field, item, typename, scalarType);
++
++      changed ||= coerced !== item;
++      return coerced;
++    });
++
++    return changed ? items : fieldValue;
++  }
++
++  function coerceField(
++    field: FieldNode,
++    fieldValue: unknown,
++    typename: string | undefined,
++    scalarType: ScalarType | undefined
++  ): unknown {
++    if (Array.isArray(fieldValue) && !scalarType) {
++      return coerceFieldArray(field, fieldValue, typename, scalarType);
++    }
++
++    if (field.selectionSet) {
++      return coerceSelectionSet(field.selectionSet, fieldValue);
++    }
++
++    if (fieldValue === null || !typename) return fieldValue;
++
++    if (scalarType) {
++      const match = matchScalarList(scalarType);
++
++      if (match) {
++        if (Array.isArray(fieldValue)) {
++          return coerceFieldArray(field, fieldValue, typename, match[1]);
++        } else {
++          if (__DEV__) {
++            invariant.warn(
++              "The custom scalar configuration for '%s' uses list type '%s', but the value is not an array. The value was coerced as '%s' anyway.",
++              `${typename}.${field.name.value}`,
++              scalarType,
++              unwrapScalarType(scalarType)
++            );
++          }
++        }
++      }
++
++      const scalar = cache.getScalar(unwrapScalarType(scalarType));
++
++      if (scalar) {
++        return scalar.coerceToParsed(fieldValue);
++      }
++    }
++
++    return fieldValue;
++  }
++
++  function coerceSelectionSet(
++    selectionSet: SelectionSetNode,
++    data: any,
++    typename?: string
++  ): any {
++    if (data === null || typeof data !== "object") return data;
++
++    const result: Record<string, any> = { ...data };
++    let changed = false;
++
++    if (Object.hasOwn(data, "__typename")) {
++      typename = data.__typename;
++    }
++
++    const workSet = new Set(selectionSet.selections);
++    workSet.forEach((selection) => {
++      if (isField(selection)) {
++        const resultName = resultKeyNameFromField(selection);
++        if (!Object.hasOwn(data, resultName)) return;
++
++        const fieldValue = data[resultName];
++        const coerced = coerceField(
++          selection,
++          fieldValue,
++          typename,
++          typename ?
++            cache.getScalarTypeForField(typename, selection.name.value)
++          : undefined
++        );
++
++        changed ||= coerced !== fieldValue;
++        result[resultName] = coerced;
++      } else {
++        const fragment = getFragmentFromSelection(selection, fragmentMap);
++
++        if (fragment && typename && cache.fragmentMatches(fragment, typename)) {
++          fragment.selectionSet.selections.forEach((s) => workSet.add(s));
++        }
++      }
++    });
++
++    return changed ? result : data;
++  }
++
++  return coerceSelectionSet(
++    getMainDefinition(query).selectionSet,
++    result,
++    cache.getRootTypename(operationType)
++  );
++}
+diff --git a/src/utilities/internal/getUnwrappedType.ts b/src/utilities/internal/getUnwrappedType.ts
+deleted file mode 100644
+index 2ff2aee48..000000000
+--- a/src/utilities/internal/getUnwrappedType.ts
++++ /dev/null
+@@ -1,14 +0,0 @@
+-import type { TypeNode } from "graphql";
+-import { Kind } from "graphql";
+-
+-/** @internal */
+-export function getUnwrappedType(node: TypeNode) {
+-  switch (node.kind) {
+-    case Kind.NAMED_TYPE:
+-      return node.name.value;
+-    case Kind.LIST_TYPE:
+-      return getUnwrappedType(node.type);
+-    case Kind.NON_NULL_TYPE:
+-      return getUnwrappedType(node.type);
+-  }
+-}
+diff --git a/src/utilities/internal/index.ts b/src/utilities/internal/index.ts
+index bb03a3271..3b2f690aa 100644
+--- a/src/utilities/internal/index.ts
++++ b/src/utilities/internal/index.ts
+@@ -25,9 +25,11 @@ export type { OptionWithFallback } from "./types/OptionWithFallback.js";
+ 
+ export { addDeferFragmentLabels } from "./addDeferFragmentLabels.js";
+ export { argumentsObjectFromField } from "./argumentsObjectFromField.js";
++export { capitalize } from "./capitalize.js";
+ export { canUseDOM } from "./canUseDOM.js";
+ export { checkDocument } from "./checkDocument.js";
+ export { cloneDeep } from "./cloneDeep.js";
++export { coerceScalarFieldsToParsed } from "./coerceScalarFieldsToParsed.js";
+ export { combineLatestBatched } from "./combineLatestBatched.js";
+ export { compact } from "./compact.js";
+ export { createFragmentMap } from "./createFragmentMap.js";
+@@ -48,7 +50,6 @@ export { getOperationDefinition } from "./getOperationDefinition.js";
+ export { getOperationName } from "./getOperationName.js";
+ export { getQueryDefinition } from "./getQueryDefinition.js";
+ export { getStoreKeyName } from "./getStoreKeyName.js";
+-export { getUnwrappedType } from "./getUnwrappedType.js";
+ export { graphQLResultHasError } from "./graphQLResultHasError.js";
+ export { hasDirectives } from "./hasDirectives.js";
+ export { hasForcedResolvers } from "./hasForcedResolvers.js";
+@@ -64,6 +65,7 @@ export { isTypenameField } from "./isTypenameField.js";
+ export { makeStreamInfoTrie } from "./makeStreamInfoTrie.js";
+ export { makeReference } from "./makeReference.js";
+ export { makeUniqueId } from "./makeUniqueId.js";
++export { matchScalarList } from "./matchScalarList.js";
+ export { maybeDeepFreeze } from "./maybeDeepFreeze.js";
+ export { mergeDeep } from "./mergeDeep.js";
+ export { mergeDeepArray } from "./mergeDeepArray.js";
+@@ -79,6 +81,7 @@ export { StreamArrayState } from "./StreamArrayState.js";
+ export { stringifyForDisplay } from "./stringifyForDisplay.js";
+ export { toDiffWithDataState } from "./toDiffWithDataState.js";
+ export { toQueryResult } from "./toQueryResult.js";
++export { unwrapScalarType } from "./unwrapScalarType.js";
+ export { filterMap } from "./filterMap.js";
+ export { equalByQuery } from "./equalByQuery.js";
+ export { canonicalStringify } from "./canonicalStringify.js";
+diff --git a/src/utilities/internal/matchScalarList.ts b/src/utilities/internal/matchScalarList.ts
+new file mode 100644
+index 000000000..d3fba4ecb
+--- /dev/null
++++ b/src/utilities/internal/matchScalarList.ts
+@@ -0,0 +1,6 @@
++import type { ScalarType } from "@apollo/client/cache";
++
++/** @internal */
++export function matchScalarList(scalarType: ScalarType) {
++  return scalarType.match(/^\[(.*)\]$/);
++}
+diff --git a/src/utilities/internal/unwrapScalarType.ts b/src/utilities/internal/unwrapScalarType.ts
+new file mode 100644
+index 000000000..9924a044b
+--- /dev/null
++++ b/src/utilities/internal/unwrapScalarType.ts
+@@ -0,0 +1,13 @@
++import type { ApolloCache } from "@apollo/client";
++
++type UnwrapScalarType<TScalarName extends string> =
++  TScalarName extends `[${infer TName extends string}]` ?
++    UnwrapScalarType<TName>
++  : TScalarName & keyof ApolloCache.Scalars;
++
++/** @internal */
++export function unwrapScalarType<TScalarName extends string>(
++  scalarType: TScalarName
++): UnwrapScalarType<TScalarName> {
++  return scalarType.replace(/[[\]]/g, "") as UnwrapScalarType<TScalarName>;
++}

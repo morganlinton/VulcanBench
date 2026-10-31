@@ -1,0 +1,4048 @@
+diff --git a/codegen/custom-scalars/__tests__/plugin.test.ts b/codegen/custom-scalars/__tests__/plugin.test.ts
+index 5cf5cbdbd..ea0553af1 100644
+--- a/codegen/custom-scalars/__tests__/plugin.test.ts
++++ b/codegen/custom-scalars/__tests__/plugin.test.ts
+@@ -541,7 +541,7 @@ test("handles self-referencing input objects", async () => {
+   expect(inputObjects).toStrictEqual({
+     TaskFilter: {
+       fields: {
+-        and: "TaskFilter",
++        and: "[TaskFilter]",
+         not: "TaskFilter",
+         dueBefore: "DateTime",
+       },
+@@ -991,7 +991,7 @@ test("retains input objects used on only one of multiple fields", async () => {
+   });
+ });
+ 
+-test("unwraps list and non-null types for variable definitions and object fields", async () => {
++test("keeps list wrappers and strips non-null markers for input fields and object fields", async () => {
+   const schema = gql`
+     scalar DateTime
+ 
+@@ -1045,10 +1045,83 @@ test("unwraps list and non-null types for variable definitions and object fields
+           scalar: "DateTime",
+         },
+         meetingTimes: {
+-          scalar: "DateTime",
++          scalar: "[DateTime]",
+         },
+         availabilitySlots: {
+-          scalar: "DateTime",
++          scalar: "[[DateTime]]",
++        },
++      },
++    },
++  });
++});
++
++test("distinguishes array-shaped scalars from lists of scalars", async () => {
++  const schema = gql`
++    scalar DateTime
++    scalar DateTimeRange
++
++    input EventFilter {
++      dateRange: DateTimeRange
++      dates: [DateTime]
++      ranges: [DateTimeRange!]
++    }
++
++    type Query {
++      events(filter: EventFilter): [Event]
++    }
++
++    type Event {
++      id: ID!
++      dateRange: DateTimeRange
++      dates: [DateTime!]!
++      ranges: [DateTimeRange!]
++    }
++  `;
++
++  const documents = [
++    {
++      document: gql`
++        query Events(
++          $filter: EventFilter
++          $dateRange: DateTimeRange
++          $dates: [DateTime]
++        ) {
++          events(filter: $filter) {
++            id
++            dateRange
++            dates
++            ranges
++          }
++        }
++      `,
++    },
++  ];
++
++  const { inputObjects, scalarTypePolicies } = await generateConfig({
++    schema,
++    documents,
++  });
++
++  expect(inputObjects).toStrictEqual({
++    EventFilter: {
++      fields: {
++        dateRange: "DateTimeRange",
++        dates: "[DateTime]",
++        ranges: "[DateTimeRange]",
++      },
++    },
++  });
++  expect(scalarTypePolicies).toStrictEqual({
++    Event: {
++      fields: {
++        dateRange: {
++          scalar: "DateTimeRange",
++        },
++        dates: {
++          scalar: "[DateTime]",
++        },
++        ranges: {
++          scalar: "[DateTimeRange]",
+         },
+       },
+     },
+diff --git a/src/__tests__/__snapshots__/exports.ts.snap b/src/__tests__/__snapshots__/exports.ts.snap
+index 6d96c3219..dad0cc416 100644
+--- a/src/__tests__/__snapshots__/exports.ts.snap
++++ b/src/__tests__/__snapshots__/exports.ts.snap
+@@ -367,10 +367,12 @@ Array [
+   "actAsync",
+   "addDelayToMocks",
+   "asyncIterableSubject",
++  "bigIntScalar",
+   "createClientWrapper",
+   "createMockWrapper",
+   "createOperationWithDefaultContext",
+   "dateScalar",
++  "dateTimeRangeScalar",
+   "dateTimeScalar",
+   "enableFakeTimers",
+   "executeSchemaGraphQL17Alpha2",
+@@ -445,8 +447,10 @@ Array [
+   "bindCacheKey",
+   "canUseDOM",
+   "canonicalStringify",
++  "capitalize",
+   "checkDocument",
+   "cloneDeep",
++  "coerceScalarFieldsToParsed",
+   "combineLatestBatched",
+   "compact",
+   "createFragmentMap",
+@@ -472,7 +476,6 @@ Array [
+   "getOperationName",
+   "getQueryDefinition",
+   "getStoreKeyName",
+-  "getUnwrappedType",
+   "graphQLResultHasError",
+   "handleIncrementalSymbol",
+   "hasDirectives",
+@@ -490,6 +493,7 @@ Array [
+   "makeStreamInfoTrie",
+   "makeUniqueId",
+   "mapObservableFragmentMemoized",
++  "matchScalarList",
+   "maybeDeepFreeze",
+   "mergeDeep",
+   "mergeDeepArray",
+@@ -506,6 +510,7 @@ Array [
+   "stringifyForDisplay",
+   "toDiffWithDataState",
+   "toQueryResult",
++  "unwrapScalarType",
+   "variablesUnknownSymbol",
+ ]
+ `;
+diff --git a/src/cache/inmemory/__tests__/cache.readQuery/customScalars.test.ts b/src/cache/inmemory/__tests__/cache.readQuery/customScalars.test.ts
+index fbd346b6c..2fab45db2 100644
+--- a/src/cache/inmemory/__tests__/cache.readQuery/customScalars.test.ts
++++ b/src/cache/inmemory/__tests__/cache.readQuery/customScalars.test.ts
+@@ -97,6 +97,67 @@ test("serializes scalar variables used in directive arguments", () => {
+   });
+ });
+ 
++test("serializes scalar variables used in field arguments with keyArgs", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      Date: dateScalar,
++    },
++    typePolicies: {
++      Query: {
++        fields: {
++          event: {
++            keyArgs: ["date"],
++          },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query Event($date: Date!) {
++      event(date: $date) {
++        name
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    variables: {
++      date: "2026-01-01",
++    },
++    data: {
++      event: {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++  });
++
++  expect(
++    cache.readQuery({
++      query,
++      variables: {
++        date: new Date(2026, 0, 1),
++      },
++    })
++  ).toStrictEqualTyped({
++    event: {
++      __typename: "Event",
++      name: "GraphQL Summit",
++    },
++  });
++
++  expect(
++    cache.readQuery({
++      query,
++      variables: {
++        date: new Date(2026, 1, 2),
++      },
++    })
++  ).toBeNull();
++});
++
+ test("serializes scalar fields in input object variables", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+diff --git a/src/cache/inmemory/__tests__/cache.writeQuery/customScalars.test.ts b/src/cache/inmemory/__tests__/cache.writeQuery/customScalars.test.ts
+index 7791dfbaf..b93ef8e2e 100644
+--- a/src/cache/inmemory/__tests__/cache.writeQuery/customScalars.test.ts
++++ b/src/cache/inmemory/__tests__/cache.writeQuery/customScalars.test.ts
+@@ -1,6 +1,6 @@
+ import { gql } from "@apollo/client";
+ import { InMemoryCache } from "@apollo/client/cache";
+-import { dateScalar } from "@apollo/client/testing/internal";
++import { bigIntScalar, dateScalar } from "@apollo/client/testing/internal";
+ 
+ test("serializes scalar variables used in field arguments", () => {
+   const cache = new InMemoryCache({
+@@ -89,6 +89,54 @@ test("serializes scalar variables used in directive arguments", () => {
+   });
+ });
+ 
++test("serializes scalar variables used in field arguments with keyArgs", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      Date: dateScalar,
++    },
++    typePolicies: {
++      Query: {
++        fields: {
++          event: {
++            keyArgs: ["date"],
++          },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query Event($date: Date!) {
++      event(date: $date) {
++        name
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    variables: {
++      date: new Date(2026, 0, 1),
++    },
++    data: {
++      event: {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++  });
++
++  expect(cache.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'event:{"date":"2026-01-01"}': {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++  });
++});
++
+ test("serializes scalar fields in input object variables", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+@@ -136,3 +184,195 @@ test("serializes scalar fields in input object variables", () => {
+     },
+   });
+ });
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("identifies entities with parsed non-JSON-serializable scalar key fields", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Product: {
++        keyFields: ["id"],
++        fields: {
++          id: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query Product {
++      product {
++        id
++        name
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      product: { __typename: "Product", id: 5n, name: "GraphQL Hoodie" },
++    },
++  });
++
++  expect(cache.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      product: { __ref: 'Product:{"id":"5"}' },
++    },
++    'Product:{"id":"5"}': {
++      __typename: "Product",
++      id: "5",
++      name: "GraphQL Hoodie",
++    },
++  });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("identifies entities with a parsed non-JSON-serializable scalar default id field", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Product: {
++        fields: {
++          id: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query Product {
++      product {
++        id
++        name
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      product: { __typename: "Product", id: 5n, name: "GraphQL Hoodie" },
++    },
++  });
++
++  expect(cache.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      product: { __ref: "Product:5" },
++    },
++    "Product:5": {
++      __typename: "Product",
++      id: "5",
++      name: "GraphQL Hoodie",
++    },
++  });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("identifies entities with parsed nested non-JSON-serializable scalar key fields", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Order: {
++        keyFields: ["product", ["sku"]],
++      },
++      Product: {
++        fields: {
++          sku: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query Order {
++      order {
++        product {
++          sku
++        }
++        quantity
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      order: {
++        __typename: "Order",
++        product: { __typename: "Product", sku: 5n },
++        quantity: 2,
++      },
++    },
++  });
++
++  expect(cache.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      order: { __ref: 'Order:{"product":{"sku":"5"}}' },
++    },
++    'Order:{"product":{"sku":"5"}}': {
++      __typename: "Order",
++      product: { __typename: "Product", sku: "5" },
++      quantity: 2,
++    },
++  });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("serializes non-JSON-serializable scalar variables used in keyArgs", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Query: {
++        fields: {
++          products: {
++            keyArgs: ["ids", "$after"],
++          },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query Products($ids: [BigInt!]!, $after: BigInt) {
++      products(ids: $ids) {
++        name
++        reviews(after: $after) {
++          body
++        }
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    variables: { ids: [5n], after: 10n },
++    data: {
++      products: [
++        {
++          __typename: "Product",
++          name: "GraphQL Hoodie",
++          reviews: [{ __typename: "Review", body: "So comfy" }],
++        },
++      ],
++    },
++  });
++
++  expect(cache.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'products:{"ids":["5"],"$after":"10"}': [
++        {
++          __typename: "Product",
++          name: "GraphQL Hoodie",
++          'reviews({"after":"10"})': [
++            { __typename: "Review", body: "So comfy" },
++          ],
++        },
++      ],
++    },
++  });
++});
+diff --git a/src/cache/inmemory/__tests__/scalars.ts b/src/cache/inmemory/__tests__/scalars.ts
+index 8e8d7f898..67a26d06f 100644
+--- a/src/cache/inmemory/__tests__/scalars.ts
++++ b/src/cache/inmemory/__tests__/scalars.ts
+@@ -4,6 +4,9 @@ import type { TypedDocumentNode } from "@apollo/client";
+ import { gql } from "@apollo/client";
+ import { InMemoryCache, Scalar } from "@apollo/client/cache";
+ import {
++  bigIntScalar,
++  dateScalar,
++  dateTimeRangeScalar,
+   dateTimeScalar,
+   jsonObjectScalar,
+   ObservableStream,
+@@ -18,6 +21,8 @@ const WARNINGS = {
+     "The field policy for '%s' is configured with the '%s' scalar, so its '%s' function is ignored. Scalar configuration cannot be used with custom read or merge functions.",
+   NON_SCALAR_FIELD:
+     "The field policy for '%s' is configured with the '%s' scalar, but the field is not a scalar field because it contains a selection set. The field value remains unchanged.",
++  LIST_SCALAR_MISMATCH:
++    "The custom scalar configuration for '%s' uses list type '%s', but the value is not an array. The value was coerced as '%s' anyway.",
+ };
+ 
+ test("creates a scalar from a GraphQLScalarType", () => {
+@@ -560,7 +565,7 @@ test("stores each element as a parsed value when writing an array of scalar valu
+     typePolicies: {
+       Schedule: {
+         fields: {
+-          meetingTimes: { scalar: "DateTime" },
++          meetingTimes: { scalar: "[DateTime]" },
+         },
+       },
+     },
+@@ -607,7 +612,7 @@ test("parses each serialized element when writing an array of scalar values", ()
+     typePolicies: {
+       Schedule: {
+         fields: {
+-          meetingTimes: { scalar: "DateTime" },
++          meetingTimes: { scalar: "[DateTime]" },
+         },
+       },
+     },
+@@ -651,7 +656,7 @@ test("stores each leaf element as a parsed value when writing a 2D array of scal
+     typePolicies: {
+       Schedule: {
+         fields: {
+-          availabilitySlots: { scalar: "DateTime" },
++          availabilitySlots: { scalar: "[[DateTime]]" },
+         },
+       },
+     },
+@@ -698,6 +703,161 @@ test("stores each leaf element as a parsed value when writing a 2D array of scal
+   });
+ });
+ 
++test("passes an array-shaped scalar value to parse as a whole when scalar is defined without list syntax", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++    typePolicies: {
++      Event: {
++        fields: {
++          dateRange: { scalar: "DateTimeRange" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dateRange
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dateRange: ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++      },
++    },
++  });
++
++  expect(rawCacheData(cache)).toEqual({
++    ROOT_QUERY: { __typename: "Query", event: { __ref: "Event:1" } },
++    "Event:1": {
++      __typename: "Event",
++      id: "1",
++      dateRange: {
++        start: new Date("2026-01-01T00:00:00.000Z"),
++        end: new Date("2026-06-01T00:00:00.000Z"),
++      },
++    },
++  });
++});
++
++test("parses each array-shaped scalar when writing a list of array-shaped scalars", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++    typePolicies: {
++      Event: {
++        fields: {
++          dateRanges: { scalar: "[DateTimeRange]" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dateRanges
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dateRanges: [
++          ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++          ["2026-07-01T00:00:00.000Z", "2026-12-01T00:00:00.000Z"],
++        ],
++      },
++    },
++  });
++
++  expect(rawCacheData(cache)).toEqual({
++    ROOT_QUERY: { __typename: "Query", event: { __ref: "Event:1" } },
++    "Event:1": {
++      __typename: "Event",
++      id: "1",
++      dateRanges: [
++        {
++          start: new Date("2026-01-01T00:00:00.000Z"),
++          end: new Date("2026-06-01T00:00:00.000Z"),
++        },
++        {
++          start: new Date("2026-07-01T00:00:00.000Z"),
++          end: new Date("2026-12-01T00:00:00.000Z"),
++        },
++      ],
++    },
++  });
++});
++
++test("passes through a non-array value and warns when a list scalar receives an object", () => {
++  using _ = spyOnConsole("warn");
++
++  const cache = new InMemoryCache({
++    scalars: { DateTime: dateTimeScalar },
++    typePolicies: {
++      Event: {
++        fields: {
++          dates: { scalar: "[DateTime]" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dates
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dates: "2026-01-01T00:00:00.000Z",
++      },
++    },
++  });
++
++  expect(rawCacheData(cache)).toEqual({
++    ROOT_QUERY: { __typename: "Query", event: { __ref: "Event:1" } },
++    "Event:1": {
++      __typename: "Event",
++      id: "1",
++      dates: new Date("2026-01-01T00:00:00.000Z"),
++    },
++  });
++
++  expect(console.warn).toHaveBeenCalledTimes(1);
++  expect(console.warn).toHaveBeenCalledWith(
++    WARNINGS.LIST_SCALAR_MISMATCH,
++    "Event.dates",
++    "[DateTime]",
++    "DateTime"
++  );
++});
++
+ test("stores null as-is when null is written to a scalar field", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -998,7 +1158,7 @@ test("stores each element as a parsed value when writing an array of scalar valu
+       Schedule: {
+         fields: {
+           meetingTimes: {
+-            scalar: "DateTime",
++            scalar: "[DateTime]",
+             merge,
+           },
+         },
+@@ -1052,7 +1212,7 @@ test("stores each leaf element as a parsed value when writing a 2D array of scal
+       Schedule: {
+         fields: {
+           availabilitySlots: {
+-            scalar: "DateTime",
++            scalar: "[[DateTime]]",
+             merge,
+           },
+         },
+@@ -1122,12 +1282,12 @@ test("stores parsed scalar values across a complex nested write", () => {
+       },
+       Schedule: {
+         fields: {
+-          timeSlots: { scalar: "DateTime" },
++          timeSlots: { scalar: "[DateTime]" },
+         },
+       },
+       Speaker: {
+         fields: {
+-          availableTimes: { scalar: "DateTime" },
++          availableTimes: { scalar: "[DateTime]" },
+         },
+       },
+       Session: {
+@@ -1287,6 +1447,234 @@ test("stores parsed scalar values across a complex nested write", () => {
+   });
+ });
+ 
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies non-JSON-serializable scalar key fields in parsed or serialized form", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Product: {
++        keyFields: ["id"],
++        fields: {
++          id: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  expect(cache.identify({ __typename: "Product", id: "5" })).toBe(
++    'Product:{"id":"5"}'
++  );
++  expect(cache.identify({ __typename: "Product", id: 5n })).toBe(
++    'Product:{"id":"5"}'
++  );
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify ignores parsed scalar fields that are not key fields", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar, DateTime: dateTimeScalar },
++    typePolicies: {
++      Product: {
++        fields: {
++          id: { scalar: "BigInt" },
++          availableSince: { scalar: "DateTime" },
++        },
++      },
++    },
++  });
++
++  expect(
++    cache.identify({
++      __typename: "Product",
++      id: "5",
++      availableSince: new Date("2026-01-01T00:00:00.000Z"),
++    })
++  ).toBe("Product:5");
++  expect(
++    cache.identify({
++      __typename: "Product",
++      id: 5n,
++      availableSince: new Date("2026-01-01T00:00:00.000Z"),
++    })
++  ).toBe("Product:5");
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies nested non-JSON-serializable scalar key fields in parsed or serialized form", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Order: {
++        keyFields: ["product", ["sku"]],
++      },
++      Product: {
++        fields: {
++          sku: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  expect(
++    cache.identify({
++      __typename: "Order",
++      product: { __typename: "Product", sku: "5" },
++    })
++  ).toBe('Order:{"product":{"sku":"5"}}');
++  expect(
++    cache.identify({
++      __typename: "Order",
++      product: { __typename: "Product", sku: 5n },
++    })
++  ).toBe('Order:{"product":{"sku":"5"}}');
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify serializes only scalar key fields when there are multiple key fields", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Attribute: {
++        keyFields: ["name", "value"],
++        fields: {
++          value: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  expect(
++    cache.identify({ __typename: "Attribute", name: "weight", value: "5" })
++  ).toBe('Attribute:{"name":"weight","value":"5"}');
++  expect(
++    cache.identify({ __typename: "Attribute", name: "weight", value: 5n })
++  ).toBe('Attribute:{"name":"weight","value":"5"}');
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies list scalar key fields in parsed or serialized form", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Bundle: {
++        keyFields: ["productIds"],
++        fields: {
++          productIds: { scalar: "[BigInt]" },
++        },
++      },
++    },
++  });
++
++  expect(cache.identify({ __typename: "Bundle", productIds: ["5", "6"] })).toBe(
++    'Bundle:{"productIds":["5","6"]}'
++  );
++  expect(cache.identify({ __typename: "Bundle", productIds: [5n, 6n] })).toBe(
++    'Bundle:{"productIds":["5","6"]}'
++  );
++  expect(cache.identify({ __typename: "Bundle", productIds: [5n, "6"] })).toBe(
++    'Bundle:{"productIds":["5","6"]}'
++  );
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies JSON-serializable scalar key fields by their serialized value", () => {
++  const cache = new InMemoryCache({
++    scalars: { Date: dateScalar },
++    typePolicies: {
++      Holiday: {
++        keyFields: ["date"],
++        fields: {
++          date: { scalar: "Date" },
++        },
++      },
++    },
++  });
++
++  expect(cache.identify({ __typename: "Holiday", date: "2026-01-01" })).toBe(
++    'Holiday:{"date":"2026-01-01"}'
++  );
++  expect(
++    cache.identify({ __typename: "Holiday", date: new Date(2026, 0, 1) })
++  ).toBe('Holiday:{"date":"2026-01-01"}');
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies object scalar key fields by their serialized value", () => {
++  const cache = new InMemoryCache({
++    scalars: { JSONObject: jsonObjectScalar },
++    typePolicies: {
++      Setting: {
++        keyFields: ["scope"],
++        fields: {
++          scope: { scalar: "JSONObject" },
++        },
++      },
++    },
++  });
++
++  expect(
++    cache.identify({
++      __typename: "Setting",
++      scope: { team: "web", region: "us" },
++    })
++  ).toBe('Setting:{"scope":{"region":"us","team":"web"}}');
++  expect(
++    cache.identify({
++      __typename: "Setting",
++      scope: new Map([
++        ["team", "web"],
++        ["region", "us"],
++      ]),
++    })
++  ).toBe('Setting:{"scope":{"region":"us","team":"web"}}');
++  expect(
++    cache.identify({
++      __typename: "Setting",
++      scope: new Map([
++        ["team", "mobile"],
++        ["region", "eu"],
++      ]),
++    })
++  ).toBe('Setting:{"scope":{"region":"eu","team":"mobile"}}');
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies scalar key fields configured on a supertype", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    possibleTypes: {
++      Node: ["Product"],
++    },
++    typePolicies: {
++      Node: {
++        fields: {
++          id: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  expect(cache.identify({ __typename: "Product", id: "5" })).toBe("Product:5");
++  expect(cache.identify({ __typename: "Product", id: 5n })).toBe("Product:5");
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("cache.identify identifies scalar _id fields in parsed or serialized form", () => {
++  const cache = new InMemoryCache({
++    scalars: { BigInt: bigIntScalar },
++    typePolicies: {
++      Product: {
++        fields: {
++          _id: { scalar: "BigInt" },
++        },
++      },
++    },
++  });
++
++  expect(cache.identify({ __typename: "Product", _id: "5" })).toBe("Product:5");
++  expect(cache.identify({ __typename: "Product", _id: 5n })).toBe("Product:5");
++});
++
+ test("stores parsed scalar value in the cache when modifying via cache.modify", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -1385,6 +1773,85 @@ test("parses serialized scalar value when modifying via cache.modify", () => {
+   });
+ });
+ 
++test("cache.writeQuery stores the written instance of a parsed scalar key field", () => {
++  const cache = new InMemoryCache({
++    scalars: { Date: dateScalar },
++    typePolicies: {
++      Holiday: {
++        keyFields: ["date"],
++        fields: {
++          date: { scalar: "Date" },
++          observedOn: { scalar: "Date" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      holiday {
++        date
++        observedOn
++      }
++    }
++  `;
++
++  const date = new Date(2026, 0, 1);
++  const observedOn = new Date(2026, 0, 2);
++
++  cache.writeQuery({
++    query,
++    data: {
++      holiday: { __typename: "Holiday", date, observedOn },
++    },
++  });
++
++  const holiday = rawCacheData(cache)['Holiday:{"date":"2026-01-01"}']!;
++
++  expect(holiday.observedOn).toBe(observedOn);
++  expect(holiday.date).toBe(date);
++});
++
++test("cache.writeQuery does not lose data in a parsed scalar key field when the scalar serializes with less precision", () => {
++  const cache = new InMemoryCache({
++    scalars: { Date: dateScalar },
++    typePolicies: {
++      Holiday: {
++        keyFields: ["date"],
++        fields: {
++          date: { scalar: "Date" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      holiday {
++        date
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      holiday: { __typename: "Holiday", date: new Date(2026, 0, 1, 15, 30) },
++    },
++  });
++
++  expect(rawCacheData(cache)).toStrictEqual({
++    ROOT_QUERY: {
++      __typename: "Query",
++      holiday: { __ref: 'Holiday:{"date":"2026-01-01"}' },
++    },
++    'Holiday:{"date":"2026-01-01"}': {
++      __typename: "Holiday",
++      date: new Date(2026, 0, 1, 15, 30),
++    },
++  });
++});
++
+ test("cache.modify preserves referential identity for deeply equal parsed scalar values", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -1570,7 +2037,7 @@ test("stores each element as a parsed value when modifying an array of scalar va
+     typePolicies: {
+       Speaker: {
+         fields: {
+-          availableTimes: { scalar: "DateTime" },
++          availableTimes: { scalar: "[DateTime]" },
+         },
+       },
+     },
+@@ -1625,7 +2092,7 @@ test("stores each leaf element as a parsed value when modifying a 2D array of sc
+     typePolicies: {
+       Speaker: {
+         fields: {
+-          availabilitySlots: { scalar: "DateTime" },
++          availabilitySlots: { scalar: "[[DateTime]]" },
+         },
+       },
+     },
+@@ -1853,13 +2320,13 @@ test("cache.extract() serializes all stored parsed scalar values", () => {
+       },
+       Schedule: {
+         fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-          availabilitySlots: { scalar: "DateTime" },
++          meetingTimes: { scalar: "[DateTime]" },
++          availabilitySlots: { scalar: "[[DateTime]]" },
+         },
+       },
+       Speaker: {
+         fields: {
+-          availableTimes: { scalar: "DateTime" },
++          availableTimes: { scalar: "[DateTime]" },
+         },
+       },
+       Session: {
+@@ -2023,6 +2490,109 @@ test("cache.extract() serializes all stored parsed scalar values", () => {
+   });
+ });
+ 
++test("cache.extract() serializes an array-shaped scalar value as a whole", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++    typePolicies: {
++      Event: {
++        fields: {
++          dateRange: { scalar: "DateTimeRange" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dateRange
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dateRange: {
++          start: new Date("2026-01-01T00:00:00.000Z"),
++          end: new Date("2026-06-01T00:00:00.000Z"),
++        },
++      },
++    },
++  });
++
++  expect(cache.extract()).toEqual({
++    ROOT_QUERY: { __typename: "Query", event: { __ref: "Event:1" } },
++    "Event:1": {
++      __typename: "Event",
++      id: "1",
++      dateRange: ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++    },
++  });
++});
++
++test("cache.extract() serializes each array-shaped scalar in a list as a whole", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++    typePolicies: {
++      Event: {
++        fields: {
++          dateRanges: { scalar: "[DateTimeRange]" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dateRanges
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dateRanges: [
++          {
++            start: new Date("2026-01-01T00:00:00.000Z"),
++            end: new Date("2026-06-01T00:00:00.000Z"),
++          },
++          {
++            start: new Date("2026-07-01T00:00:00.000Z"),
++            end: new Date("2026-12-01T00:00:00.000Z"),
++          },
++        ],
++      },
++    },
++  });
++
++  expect(cache.extract()).toEqual({
++    ROOT_QUERY: { __typename: "Query", event: { __ref: "Event:1" } },
++    "Event:1": {
++      __typename: "Event",
++      id: "1",
++      dateRanges: [
++        ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++        ["2026-07-01T00:00:00.000Z", "2026-12-01T00:00:00.000Z"],
++      ],
++    },
++  });
++});
++
+ test("cache.restore() parses all serialized scalar values before storing them", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+@@ -2043,13 +2613,13 @@ test("cache.restore() parses all serialized scalar values before storing them",
+       },
+       Schedule: {
+         fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-          availabilitySlots: { scalar: "DateTime" },
++          meetingTimes: { scalar: "[DateTime]" },
++          availabilitySlots: { scalar: "[[DateTime]]" },
+         },
+       },
+       Speaker: {
+         fields: {
+-          availableTimes: { scalar: "DateTime" },
++          availableTimes: { scalar: "[DateTime]" },
+         },
+       },
+       Session: {
+@@ -2857,7 +3427,7 @@ test("parses each element when the scalar field contains an array of values", ()
+     typePolicies: {
+       Schedule: {
+         fields: {
+-          meetingTimes: { scalar: "DateTime" },
++          meetingTimes: { scalar: "[DateTime]" },
+         },
+       },
+     },
+@@ -2898,7 +3468,7 @@ test("parses each leaf element when the scalar field contains a 2D array", () =>
+     typePolicies: {
+       Schedule: {
+         fields: {
+-          availabilitySlots: { scalar: "DateTime" },
++          availabilitySlots: { scalar: "[[DateTime]]" },
+         },
+       },
+     },
+@@ -2939,6 +3509,103 @@ test("parses each leaf element when the scalar field contains a 2D array", () =>
+   });
+ });
+ 
++test("returns an array-shaped scalar value as a whole when reading", () => {
++  const cache = new InMemoryCache({
++    scalars: { DateTimeRange: dateTimeRangeScalar },
++    typePolicies: {
++      Event: {
++        fields: {
++          dateRange: { scalar: "DateTimeRange" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dateRange
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dateRange: ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++      },
++    },
++  });
++
++  expect(cache.readQuery({ query })).toEqual({
++    event: {
++      __typename: "Event",
++      id: "1",
++      dateRange: {
++        start: new Date("2026-01-01T00:00:00.000Z"),
++        end: new Date("2026-06-01T00:00:00.000Z"),
++      },
++    },
++  });
++});
++
++test("parses each array-shaped scalar when reading a list of array-shaped scalars", () => {
++  const cache = new InMemoryCache({
++    scalars: { DateTimeRange: dateTimeRangeScalar },
++    typePolicies: {
++      Event: {
++        fields: {
++          dateRanges: { scalar: "[DateTimeRange]" },
++        },
++      },
++    },
++  });
++
++  const query = gql`
++    query {
++      event {
++        id
++        dateRanges
++      }
++    }
++  `;
++
++  cache.writeQuery({
++    query,
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        dateRanges: [
++          ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++          ["2026-07-01T00:00:00.000Z", "2026-12-01T00:00:00.000Z"],
++        ],
++      },
++    },
++  });
++
++  expect(cache.readQuery({ query })).toEqual({
++    event: {
++      __typename: "Event",
++      id: "1",
++      dateRanges: [
++        {
++          start: new Date("2026-01-01T00:00:00.000Z"),
++          end: new Date("2026-06-01T00:00:00.000Z"),
++        },
++        {
++          start: new Date("2026-07-01T00:00:00.000Z"),
++          end: new Date("2026-12-01T00:00:00.000Z"),
++        },
++      ],
++    },
++  });
++});
++
+ test("returns null as-is when null is stored in a scalar field position", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -3487,12 +4154,12 @@ test("parses scalar values across a complex nested query", () => {
+       },
+       Schedule: {
+         fields: {
+-          timeSlots: { scalar: "DateTime" },
++          timeSlots: { scalar: "[[DateTime]]" },
+         },
+       },
+       Speaker: {
+         fields: {
+-          availableTimes: { scalar: "DateTime" },
++          availableTimes: { scalar: "[DateTime]" },
+         },
+       },
+       Session: {
+@@ -4484,12 +5151,12 @@ test("deep merges scalar option with policies.addTypePolicies", () => {
+     },
+     Schedule: {
+       fields: {
+-        timeSlots: { scalar: "DateTime" },
++        timeSlots: { scalar: "[[DateTime]]" },
+       },
+     },
+     Speaker: {
+       fields: {
+-        availableTimes: { scalar: "DateTime" },
++        availableTimes: { scalar: "[DateTime]" },
+       },
+     },
+     Session: {
+diff --git a/src/cache/inmemory/__tests__/variablesSerialization.ts b/src/cache/inmemory/__tests__/variablesSerialization.ts
+index ebf58214b..9d5145ae8 100644
+--- a/src/cache/inmemory/__tests__/variablesSerialization.ts
++++ b/src/cache/inmemory/__tests__/variablesSerialization.ts
+@@ -1,11 +1,18 @@
+ import { gql } from "@apollo/client";
+ import { InMemoryCache, Scalar } from "@apollo/client/cache";
+ import {
++  dateTimeRangeScalar,
+   dateTimeScalar,
+   jsonObjectScalar,
+   priceScalar,
++  spyOnConsole,
+ } from "@apollo/client/testing/internal";
+ 
++const WARNINGS = {
++  LIST_VARIABLE_MISMATCH:
++    "The variable '%s' has list type '%s', but the value is not an array. The value was coerced as '%s' anyway.",
++};
++
+ test("serializes a custom scalar variable", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+@@ -245,6 +252,126 @@ test("leaves lists and nested lists alone when variables are already serialized"
+   expect(result).toBe(variables);
+ });
+ 
++test("serializes an array-shaped scalar variable as a whole", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++  });
++
++  const mutation = gql`
++    mutation CreateEvent($dateRange: DateTimeRange) {
++      createEvent(dateRange: $dateRange) {
++        id
++      }
++    }
++  `;
++
++  expect(
++    cache.serializeVariables(mutation, {
++      dateRange: {
++        start: new Date("2026-01-01T00:00:00.000Z"),
++        end: new Date("2026-06-01T00:00:00.000Z"),
++      },
++    })
++  ).toStrictEqualTyped({
++    dateRange: ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++  });
++});
++
++test("serializes each item when the variable type is a list of scalars", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTime: dateTimeScalar,
++    },
++  });
++
++  const mutation = gql`
++    mutation CreateEvent($dateRange: [DateTime]) {
++      createEvent(dateRange: $dateRange) {
++        id
++      }
++    }
++  `;
++
++  expect(
++    cache.serializeVariables(mutation, {
++      dateRange: [
++        new Date("2026-01-01T00:00:00.000Z"),
++        new Date("2026-06-01T00:00:00.000Z"),
++      ],
++    })
++  ).toStrictEqualTyped({
++    dateRange: ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++  });
++});
++
++test("passes through a non-array variable and warns when the variable type is a list", () => {
++  using _ = spyOnConsole("warn");
++
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTime: dateTimeScalar,
++    },
++  });
++
++  const mutation = gql`
++    mutation CreateEvent($dates: [DateTime]) {
++      createEvent(dates: $dates) {
++        id
++      }
++    }
++  `;
++
++  const variables = { dates: new Date("2026-01-01T00:00:00.000Z") };
++  const result = cache.serializeVariables(mutation, variables);
++
++  expect(result).toStrictEqualTyped({ dates: "2026-01-01T00:00:00.000Z" });
++  expect(console.warn).toHaveBeenCalledTimes(1);
++  expect(console.warn).toHaveBeenCalledWith(
++    WARNINGS.LIST_VARIABLE_MISMATCH,
++    "dates",
++    "[DateTime]",
++    "DateTime"
++  );
++});
++
++test("serializes each array-shaped scalar in a list of array-shaped scalars", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++  });
++
++  const mutation = gql`
++    mutation CreateEvents($dateRanges: [DateTimeRange]) {
++      createEvents(dateRanges: $dateRanges) {
++        id
++      }
++    }
++  `;
++
++  expect(
++    cache.serializeVariables(mutation, {
++      dateRanges: [
++        {
++          start: new Date("2026-01-01T00:00:00.000Z"),
++          end: new Date("2026-06-01T00:00:00.000Z"),
++        },
++        {
++          start: new Date("2026-07-01T00:00:00.000Z"),
++          end: new Date("2026-12-01T00:00:00.000Z"),
++        },
++      ],
++    })
++  ).toStrictEqualTyped({
++    dateRanges: [
++      ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++      ["2026-07-01T00:00:00.000Z", "2026-12-01T00:00:00.000Z"],
++    ],
++  });
++});
++
+ test("serializes mixed parsed and serialized scalar object list values", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+@@ -379,7 +506,7 @@ test("serializes mixed scalar object list fields in a configured input object",
+     inputObjects: {
+       EventInput: {
+         fields: {
+-          metadata: "JSONObject",
++          metadata: "[JSONObject]",
+         },
+       },
+     },
+@@ -484,7 +611,7 @@ test("serializes lists of custom scalars in a configured input object", () => {
+     inputObjects: {
+       AvailabilityInput: {
+         fields: {
+-          dates: "DateTime",
++          dates: "[DateTime]",
+         },
+       },
+     },
+@@ -504,13 +631,136 @@ test("serializes lists of custom scalars in a configured input object", () => {
+         dates: [
+           new Date("2026-01-01T00:00:00.000Z"),
+           null,
++          new Date("2026-01-02T00:00:00.000Z"),
++        ],
++      },
++    })
++  ).toStrictEqualTyped({
++    input: {
++      dates: ["2026-01-01T00:00:00.000Z", null, "2026-01-02T00:00:00.000Z"],
++    },
++  });
++});
++
++test("serializes nested lists of custom scalars in a configured input object", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTime: dateTimeScalar,
++    },
++    inputObjects: {
++      AvailabilityInput: {
++        fields: {
++          dates: "[[DateTime]]",
++        },
++      },
++    },
++  });
++
++  const mutation = gql`
++    mutation SetAvailability($input: AvailabilityInput!) {
++      setAvailability(input: $input) {
++        id
++      }
++    }
++  `;
++
++  expect(
++    cache.serializeVariables(mutation, {
++      input: {
++        dates: [
++          [new Date("2026-01-01T00:00:00.000Z"), null],
+           [new Date("2026-01-02T00:00:00.000Z")],
+         ],
+       },
+     })
+   ).toStrictEqualTyped({
+     input: {
+-      dates: ["2026-01-01T00:00:00.000Z", null, ["2026-01-02T00:00:00.000Z"]],
++      dates: [["2026-01-01T00:00:00.000Z", null], ["2026-01-02T00:00:00.000Z"]],
++    },
++  });
++});
++
++test("serializes an array-shaped scalar field in a configured input object as a whole", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++    inputObjects: {
++      EventInput: {
++        fields: {
++          dateRange: "DateTimeRange",
++        },
++      },
++    },
++  });
++
++  const mutation = gql`
++    mutation CreateEvent($input: EventInput!) {
++      createEvent(input: $input) {
++        id
++      }
++    }
++  `;
++
++  expect(
++    cache.serializeVariables(mutation, {
++      input: {
++        dateRange: {
++          start: new Date("2026-01-01T00:00:00.000Z"),
++          end: new Date("2026-06-01T00:00:00.000Z"),
++        },
++      },
++    })
++  ).toStrictEqualTyped({
++    input: {
++      dateRange: ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++    },
++  });
++});
++
++test("serializes each array-shaped scalar field in a list on a configured input object", () => {
++  const cache = new InMemoryCache({
++    scalars: {
++      DateTimeRange: dateTimeRangeScalar,
++    },
++    inputObjects: {
++      EventInput: {
++        fields: {
++          dateRanges: "[DateTimeRange]",
++        },
++      },
++    },
++  });
++
++  const mutation = gql`
++    mutation CreateEvent($input: EventInput!) {
++      createEvent(input: $input) {
++        id
++      }
++    }
++  `;
++
++  expect(
++    cache.serializeVariables(mutation, {
++      input: {
++        dateRanges: [
++          {
++            start: new Date("2026-01-01T00:00:00.000Z"),
++            end: new Date("2026-06-01T00:00:00.000Z"),
++          },
++          {
++            start: new Date("2026-07-01T00:00:00.000Z"),
++            end: new Date("2026-12-01T00:00:00.000Z"),
++          },
++        ],
++      },
++    })
++  ).toStrictEqualTyped({
++    input: {
++      dateRanges: [
++        ["2026-01-01T00:00:00.000Z", "2026-06-01T00:00:00.000Z"],
++        ["2026-07-01T00:00:00.000Z", "2026-12-01T00:00:00.000Z"],
++      ],
+     },
+   });
+ });
+@@ -523,7 +773,7 @@ test("serializes lists and nested lists of configured input objects", () => {
+     inputObjects: {
+       ScheduleInput: {
+         fields: {
+-          sessions: "SessionInput",
++          sessions: "[SessionInput]",
+         },
+       },
+       SessionInput: {
+@@ -586,7 +836,7 @@ test("serializes recursive input objects", () => {
+       EventFilter: {
+         fields: {
+           startsAt: "DateTime",
+-          and: "EventFilter",
++          and: "[EventFilter]",
+         },
+       },
+     },
+diff --git a/src/core/__tests__/ApolloClient/general.test.ts b/src/core/__tests__/ApolloClient/general.test.ts
+index 73c9f911a..9b75faee4 100644
+--- a/src/core/__tests__/ApolloClient/general.test.ts
++++ b/src/core/__tests__/ApolloClient/general.test.ts
+@@ -2876,7 +2876,10 @@ describe("ApolloClient", () => {
+     });
+   });
+ 
+-  it("should not write unchanged network results to cache", async () => {
++  it("stops repeated refetches when queries feud over non-normalized data", async () => {
++    // Silence the feud-stop warning; warn content is covered in dedicated tests.
++    using _ = spyOnConsole("warn");
++
+     const cache = new InMemoryCache({
+       typePolicies: {
+         Query: {
+@@ -2978,6 +2981,8 @@ describe("ApolloClient", () => {
+       partial: false,
+     });
+ 
++    // B overwrites A's non-normalized data, so it refetches to fulfill its
++    // data requirements.
+     await expect(aStream).toEmitTypedValue({
+       loading: true,
+       networkStatus: NetworkStatus.loading,
+@@ -3000,11 +3005,129 @@ describe("ApolloClient", () => {
+       partial: false,
+     });
+ 
++    // A's refetch leaves B incomplete, so it refetches to fulfill its data
++    // requirements.
++    await expect(bStream).toEmitTypedValue({
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      data: {
++        info: {},
++      },
++      dataState: "partial",
++      partial: true,
++    });
++
++    await expect(bStream).toEmitTypedValue({
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      data: {
++        info: {
++          b: "bee",
++        },
++      },
++      dataState: "complete",
++      partial: false,
++    });
++
++    // B's refetch leaves A incomplete in exactly the way it already tried to
++    // fix with the initial refetch, so A stops rather than sending B back to
++    // the network again.
+     await expect(aStream).not.toEmitAnything();
+     await expect(bStream).not.toEmitAnything();
+   });
+ 
+-  it("should disable feud-stopping logic after evict or modify", async () => {
++  it("warns when feud-stopping skips a refetch", async () => {
++    using _ = spyOnConsole("warn");
++
++    const client = new ApolloClient({
++      cache: new InMemoryCache({
++        typePolicies: {
++          Query: {
++            fields: {
++              info: {
++                merge: false,
++              },
++            },
++          },
++        },
++      }),
++      link: new ApolloLink(
++        (operation) =>
++          new Observable((observer) => {
++            setTimeout(() => {
++              switch (operation.operationName) {
++                case "A":
++                  observer.next({ data: { info: { a: "ay" } } });
++                  break;
++                case "B":
++                  observer.next({ data: { info: { b: "bee" } } });
++                  break;
++              }
++              observer.complete!();
++            });
++          })
++      ),
++    });
++
++    const queryA = gql`
++      query A {
++        info {
++          a
++        }
++      }
++    `;
++    const queryB = gql`
++      query B {
++        info {
++          b
++        }
++      }
++    `;
++
++    using aStream = new ObservableStream(
++      client.watchQuery({
++        query: queryA,
++        returnPartialData: true,
++      })
++    );
++    using bStream = new ObservableStream(
++      client.watchQuery({
++        query: queryB,
++        returnPartialData: true,
++      })
++    );
++
++    // initial loading
++    await aStream.takeNext();
++    await bStream.takeNext();
++    // initial complete results
++    await aStream.takeNext();
++    await bStream.takeNext();
++    // A auto-refetches after B overwrites it
++    await aStream.takeNext();
++    await aStream.takeNext();
++    // B auto-refetches after A overwrites it
++    await bStream.takeNext();
++    await bStream.takeNext();
++    // A stops rather than restarting the feud
++    await expect(aStream).not.toEmitAnything();
++    await expect(bStream).not.toEmitAnything();
++
++    expect(console.warn).toHaveBeenCalledTimes(1);
++    expect(console.warn).toHaveBeenCalledWith(
++      expect.stringContaining("Apollo Client stopped refetching '%s'"),
++      "A",
++      {
++        info: {
++          a: expect.stringContaining("Can't find field 'a'"),
++        },
++      }
++    );
++  });
++
++  it("warns once until feud stopping is reset", async () => {
++    using consoleSpy = spyOnConsole("warn");
++
+     const cache = new InMemoryCache({
+       typePolicies: {
+         Query: {
+@@ -3020,104 +3143,765 @@ describe("ApolloClient", () => {
+     const client = new ApolloClient({
+       cache,
+       link: new ApolloLink(
+-        () =>
+-          new Observable((observer: Observer<ApolloLink.Result>) => {
++        (operation) =>
++          new Observable((observer) => {
+             setTimeout(() => {
+-              observer.next!({ data: { info: { c: "see" } } });
++              switch (operation.operationName) {
++                case "A":
++                  observer.next({ data: { info: { a: "ay" } } });
++                  break;
++                case "B":
++                  observer.next({ data: { info: { b: "bee" } } });
++                  break;
++              }
+               observer.complete!();
+             });
+           })
+       ),
+     });
+ 
+-    const query = gql`
+-      query {
++    const queryA = gql`
++      query A {
+         info {
+-          c
++          a
++        }
++      }
++    `;
++    const queryB = gql`
++      query B {
++        info {
++          b
+         }
+       }
+     `;
+ 
+-    const obs = client.watchQuery({
+-      query,
+-      returnPartialData: true,
+-    });
++    using aStream = new ObservableStream(
++      client.watchQuery({
++        query: queryA,
++        returnPartialData: true,
++      })
++    );
++    using bStream = new ObservableStream(
++      client.watchQuery({
++        query: queryB,
++        returnPartialData: true,
++      })
++    );
++
++    // Drive the feud until A stops auto-refetching.
++    await aStream.takeNext();
++    await bStream.takeNext();
++    await aStream.takeNext();
++    await bStream.takeNext();
++    await aStream.takeNext();
++    await aStream.takeNext();
++    await bStream.takeNext();
++    await bStream.takeNext();
++    await expect(aStream).not.toEmitAnything();
++    await expect(bStream).not.toEmitAnything();
+ 
+-    const stream = new ObservableStream(obs);
++    expect(console.warn).toHaveBeenCalledTimes(1);
++    consoleSpy.warn.mockClear();
+ 
+-    await expect(stream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
++    // Another overwrite that leaves A incomplete the same way shouldn't warn
++    // again
++    cache.writeQuery({
++      query: queryB,
++      data: { info: { b: "bee again" } },
+     });
+-
+-    await expect(stream).toEmitTypedValue({
++    await expect(aStream).not.toEmitAnything();
++    await expect(bStream).toEmitTypedValue({
+       loading: false,
+       networkStatus: NetworkStatus.ready,
+       data: {
+         info: {
+-          c: "see",
++          b: "bee again",
+         },
+       },
+       dataState: "complete",
+       partial: false,
+     });
+ 
+-    cache.evict({ fieldName: "info" });
++    expect(console.warn).not.toHaveBeenCalled();
++  });
++
++  it("fetches a clobbered value again after reading a complete result in between", async () => {
++    const query = gql`
++      query A {
++        info {
++          a
++        }
++      }
++    `;
++
++    const clobberQuery = gql`
++      query Clobber {
++        info {
++          b
++        }
++      }
++    `;
++
++    const client = new ApolloClient({
++      cache: new InMemoryCache({
++        typePolicies: {
++          Query: {
++            fields: {
++              info: {
++                merge: false,
++              },
++            },
++          },
++        },
++      }),
++      link: new MockLink([
++        {
++          request: { query },
++          result: { data: { info: { __typename: "Info", a: "ay" } } },
++          delay: 20,
++          maxUsageCount: Number.POSITIVE_INFINITY,
++        },
++      ]),
++    });
++
++    using stream = new ObservableStream(client.watchQuery({ query }));
+ 
+     await expect(stream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+       data: undefined,
+       dataState: "empty",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
+       partial: true,
+     });
+-
+     await expect(stream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "ay" } },
++      dataState: "complete",
+       loading: false,
+       networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          c: "see",
+-        },
+-      },
+-      dataState: "complete",
+       partial: false,
+     });
+ 
+-    cache.modify({
+-      fields: {
+-        info(_, { DELETE }) {
+-          return DELETE;
+-        },
+-      },
++    client.writeQuery({
++      query: clobberQuery,
++      data: { info: { __typename: "Info", b: "bee" } },
+     });
+ 
+     await expect(stream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "ay" } },
++      dataState: "complete",
+       loading: true,
+       networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
++      partial: false,
++    });
++    await expect(stream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "ay" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++
++    // Writing a complete result allows the query to refetch again when a future
++    // cache write causes the query to go incomplete
++    client.writeQuery({
++      query,
++      data: { info: { __typename: "Info", a: "restored" } },
+     });
+ 
+     await expect(stream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "restored" } },
++      dataState: "complete",
+       loading: false,
+       networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          c: "see",
+-        },
+-      },
++      partial: false,
++    });
++
++    client.writeQuery({
++      query: clobberQuery,
++      data: { info: { __typename: "Info", b: "bee" } },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "restored" } },
+       dataState: "complete",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: false,
++    });
++    await expect(stream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "ay" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
+       partial: false,
+     });
+ 
+     await expect(stream).not.toEmitAnything();
+   });
+ 
++  it("should deliver a cache-only result again after an optimistic update is rolled back", async () => {
++    const query = gql`
++      query {
++        config {
++          a
++          b
++        }
++      }
++    `;
++
++    const partialQuery = gql`
++      query {
++        config {
++          a
++        }
++      }
++    `;
++
++    const client = new ApolloClient({
++      cache: new InMemoryCache(),
++      link: ApolloLink.empty(),
++    });
++
++    client.writeQuery({
++      query: partialQuery,
++      data: { config: { __typename: "Config", a: "one" } },
++    });
++
++    using stream = new ObservableStream(
++      client.watchQuery({
++        query,
++        fetchPolicy: "cache-only",
++        // returnPartialData is needed to reproduce the behavior. Complete cache
++        // results are always delivered
++        returnPartialData: true,
++      })
++    );
++
++    await expect(stream).toEmitTypedValue({
++      data: { config: { __typename: "Config", a: "one" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    client.writeQuery({
++      query: partialQuery,
++      data: { config: { __typename: "Config", a: "two" } },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      data: { config: { __typename: "Config", a: "two" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    client.cache.recordOptimisticTransaction((cache) => {
++      cache.writeQuery({
++        query: partialQuery,
++        data: { config: { __typename: "Config", a: "optimistic" } },
++      });
++    }, "optimistic");
++
++    await expect(stream).toEmitTypedValue({
++      data: { config: { __typename: "Config", a: "optimistic" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    client.cache.removeOptimistic("optimistic");
++
++    await expect(stream).toEmitTypedValue({
++      data: { config: { __typename: "Config", a: "two" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++  });
++
++  it("should disable feud-stopping logic after evict or modify", async () => {
++    const cache = new InMemoryCache({
++      typePolicies: {
++        Query: {
++          fields: {
++            info: {
++              merge: false,
++            },
++          },
++        },
++      },
++    });
++
++    const client = new ApolloClient({
++      cache,
++      link: new ApolloLink(
++        () =>
++          new Observable((observer: Observer<ApolloLink.Result>) => {
++            setTimeout(() => {
++              observer.next!({ data: { info: { c: "see" } } });
++              observer.complete!();
++            });
++          })
++      ),
++    });
++
++    const query = gql`
++      query {
++        info {
++          c
++        }
++      }
++    `;
++
++    const obs = client.watchQuery({
++      query,
++      returnPartialData: true,
++    });
++
++    using stream = new ObservableStream(obs);
++
++    await expect(stream).toEmitTypedValue({
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      data: undefined,
++      dataState: "empty",
++      partial: true,
++    });
++
++    await expect(stream).toEmitTypedValue({
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      data: {
++        info: {
++          c: "see",
++        },
++      },
++      dataState: "complete",
++      partial: false,
++    });
++
++    cache.evict({ fieldName: "info" });
++
++    await expect(stream).toEmitTypedValue({
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      data: undefined,
++      dataState: "empty",
++      partial: true,
++    });
++
++    await expect(stream).toEmitTypedValue({
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      data: {
++        info: {
++          c: "see",
++        },
++      },
++      dataState: "complete",
++      partial: false,
++    });
++
++    cache.modify({
++      fields: {
++        info(_, { DELETE }) {
++          return DELETE;
++        },
++      },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      data: undefined,
++      dataState: "empty",
++      partial: true,
++    });
++
++    await expect(stream).toEmitTypedValue({
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      data: {
++        info: {
++          c: "see",
++        },
++      },
++      dataState: "complete",
++      partial: false,
++    });
++
++    await expect(stream).not.toEmitAnything();
++  });
++
++  it("applies read functions when feud-stopping skips refetches", async () => {
++    using _ = spyOnConsole("warn");
++
++    const queryA = gql`
++      query A {
++        info {
++          a
++        }
++      }
++    `;
++
++    const queryB = gql`
++      query B {
++        info {
++          b
++        }
++      }
++    `;
++
++    const client = new ApolloClient({
++      cache: new InMemoryCache({
++        typePolicies: {
++          Query: {
++            fields: {
++              info: {
++                merge: false,
++              },
++            },
++          },
++          Info: {
++            fields: {
++              a: {
++                read: (existing: string | undefined) => existing?.toUpperCase(),
++              },
++              b: {
++                read: (existing: string | undefined) => existing?.toUpperCase(),
++              },
++            },
++          },
++        },
++      }),
++      link: new MockLink([
++        {
++          request: { query: queryA },
++          result: { data: { info: { __typename: "Info", a: "ay" } } },
++          delay: 20,
++          maxUsageCount: Number.POSITIVE_INFINITY,
++        },
++        {
++          request: { query: queryB },
++          result: { data: { info: { __typename: "Info", b: "bee" } } },
++          delay: 20,
++          maxUsageCount: Number.POSITIVE_INFINITY,
++        },
++      ]),
++    });
++
++    const obsA = client.watchQuery({ query: queryA });
++    using aStream = new ObservableStream(obsA);
++
++    await expect(aStream).toEmitTypedValue({
++      data: undefined,
++      dataState: "empty",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: true,
++    });
++    await expect(aStream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "AY" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++
++    const obsB = client.watchQuery({ query: queryB });
++    using bStream = new ObservableStream(obsB);
++
++    await expect(bStream).toEmitTypedValue({
++      data: undefined,
++      dataState: "empty",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: true,
++    });
++    await expect(bStream).toEmitTypedValue({
++      data: { info: { __typename: "Info", b: "BEE" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++
++    expect(client.cache.extract()).toStrictEqualTyped({
++      ROOT_QUERY: {
++        __typename: "Query",
++        info: { __typename: "Info", b: "bee" },
++      },
++    });
++
++    await expect(aStream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "AY" } },
++      dataState: "complete",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: false,
++    });
++    await expect(aStream).toEmitTypedValue({
++      data: { info: { __typename: "Info", a: "AY" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++
++    expect(client.cache.extract()).toStrictEqualTyped({
++      ROOT_QUERY: {
++        __typename: "Query",
++        info: { __typename: "Info", a: "ay" },
++      },
++    });
++
++    await expect(bStream).toEmitTypedValue({
++      data: { info: { __typename: "Info", b: "BEE" } },
++      dataState: "complete",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: false,
++    });
++    await expect(bStream).toEmitTypedValue({
++      data: { info: { __typename: "Info", b: "BEE" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++
++    expect(client.cache.extract()).toStrictEqualTyped({
++      ROOT_QUERY: {
++        __typename: "Query",
++        info: { __typename: "Info", b: "bee" },
++      },
++    });
++
++    await expect(aStream).not.toEmitAnything();
++    await expect(bStream).not.toEmitAnything();
++
++    expect(obsA.getCurrentResult()).toStrictEqualTyped({
++      data: { info: { __typename: "Info", a: "AY" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++    expect(obsB.getCurrentResult()).toStrictEqualTyped({
++      data: { info: { __typename: "Info", b: "BEE" } },
++      dataState: "complete",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: false,
++    });
++  });
++
++  it("delivers repeated cache updates to a cache-only query kept partial by a read function", async () => {
++    const query = gql`
++      query A {
++        user {
++          id
++          name
++          age
++        }
++      }
++    `;
++
++    const fragment = gql`
++      fragment UserName on User {
++        name
++      }
++    `;
++
++    const client = new ApolloClient({
++      cache: new InMemoryCache({
++        typePolicies: {
++          User: {
++            fields: {
++              age: { read: () => undefined },
++            },
++          },
++        },
++      }),
++      link: ApolloLink.empty(),
++    });
++
++    client.writeQuery({
++      query,
++      data: { user: { __typename: "User", id: "1", name: "Alice", age: 30 } },
++    });
++
++    using stream = new ObservableStream(
++      client.watchQuery({
++        query,
++        fetchPolicy: "cache-only",
++        returnPartialData: true,
++      })
++    );
++
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    client.writeFragment({
++      fragment: fragment,
++      from: { __typename: "User", id: "1" },
++      data: { __typename: "User", id: "1", name: "Alice Smith" },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice Smith" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    // The same field changes a second time. `age` is still the only missing
++    // field, but the data this query can read changed again, so it still needs
++    // to deliver it.
++    client.writeFragment({
++      fragment: fragment,
++      from: { __typename: "User", id: "1" },
++      data: { __typename: "User", id: "1", name: "Alice Jones" },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice Jones" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    await expect(stream).not.toEmitAnything();
++  });
++
++  it("delivers repeated cache updates to a cache-first query kept partial by a read function", async () => {
++    using _ = spyOnConsole("warn");
++
++    const query = gql`
++      query A {
++        user {
++          id
++          name
++          age
++        }
++      }
++    `;
++
++    const fragment = gql`
++      fragment UserName on User {
++        name
++      }
++    `;
++
++    const client = new ApolloClient({
++      cache: new InMemoryCache({
++        typePolicies: {
++          User: {
++            fields: {
++              age: { read: () => undefined },
++            },
++          },
++        },
++      }),
++      link: new MockLink([
++        {
++          request: { query },
++          result: {
++            data: {
++              user: { __typename: "User", id: "1", name: "Alice", age: 30 },
++            },
++          },
++          delay: 20,
++        },
++        {
++          request: { query },
++          result: {
++            data: {
++              user: {
++                __typename: "User",
++                id: "1",
++                name: "Alice Smith",
++                age: 30,
++              },
++            },
++          },
++          delay: 20,
++        },
++      ]),
++    });
++
++    using stream = new ObservableStream(
++      client.watchQuery({ query, returnPartialData: true })
++    );
++
++    await expect(stream).toEmitTypedValue({
++      data: undefined,
++      dataState: "empty",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: true,
++    });
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    client.writeFragment({
++      fragment,
++      from: { __typename: "User", id: "1" },
++      data: { __typename: "User", id: "1", name: "Alice Smith" },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice Smith" } },
++      dataState: "partial",
++      loading: true,
++      networkStatus: NetworkStatus.loading,
++      partial: true,
++    });
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice Smith" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    // The same field changes a second time. `age` is still the only missing
++    // field, but the data this query can read changed again, so it still needs
++    // to deliver it.
++    client.writeFragment({
++      fragment,
++      from: { __typename: "User", id: "1" },
++      data: { __typename: "User", id: "1", name: "Alice Jones" },
++    });
++
++    await expect(stream).toEmitTypedValue({
++      data: { user: { __typename: "User", id: "1", name: "Alice Jones" } },
++      dataState: "partial",
++      loading: false,
++      networkStatus: NetworkStatus.ready,
++      partial: true,
++    });
++
++    await expect(stream).not.toEmitAnything();
++  });
++
+   it("writes the latest polled result over a clobbered cache value when polled result equals last polled result", async () => {
+     const query = gql`
+       query {
+diff --git a/src/core/__tests__/client.query/customScalars.test.ts b/src/core/__tests__/client.query/customScalars.test.ts
+index 07141c183..e266b27f7 100644
+--- a/src/core/__tests__/client.query/customScalars.test.ts
++++ b/src/core/__tests__/client.query/customScalars.test.ts
+@@ -397,57 +397,54 @@ test("parses network custom scalar fields with a network-only fetch policy", asy
+   });
+ });
+ 
+-test.failing(
+-  "parses custom scalar fields with a no-cache fetch policy",
+-  async () => {
+-    const query = gql`
+-      query Event {
+-        event {
+-          id
+-          startDate
+-        }
++test("parses custom scalar fields with a no-cache fetch policy", async () => {
++  const query = gql`
++    query Event {
++      event {
++        id
++        startDate
+       }
+-    `;
+-    const client = new ApolloClient({
+-      cache: new InMemoryCache({
+-        scalars: { Date: dateScalar },
+-        typePolicies: {
+-          Event: {
+-            fields: {
+-              startDate: { scalar: "Date" },
+-            },
++    }
++  `;
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: { Date: dateScalar },
++      typePolicies: {
++        Event: {
++          fields: {
++            startDate: { scalar: "Date" },
+           },
+         },
+-      }),
+-      link: new ApolloLink(() =>
+-        of({
+-          data: {
+-            event: {
+-              __typename: "Event",
+-              id: "1",
+-              startDate: "2026-01-01",
+-            },
++      },
++    }),
++    link: new ApolloLink(() =>
++      of({
++        data: {
++          event: {
++            __typename: "Event",
++            id: "1",
++            startDate: "2026-01-01",
+           },
+-        }).pipe(delay(20))
+-      ),
+-    });
+-
+-    await expect(
+-      client.query({
+-        query,
+-        fetchPolicy: "no-cache",
+-      })
+-    ).resolves.toStrictEqualTyped({
+-      data: {
+-        event: {
+-          __typename: "Event",
+-          id: "1",
+-          startDate: new Date(2026, 0, 1),
+         },
++      }).pipe(delay(20))
++    ),
++  });
++
++  await expect(
++    client.query({
++      query,
++      fetchPolicy: "no-cache",
++    })
++  ).resolves.toStrictEqualTyped({
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        startDate: new Date(2026, 0, 1),
+       },
+-    });
+-  }
+-);
++    },
++  });
++});
+ 
+ test("preserves referential identity when fetching identical serialized scalar values", async () => {
+   const query = gql`
+diff --git a/src/core/__tests__/client.watchQuery/customScalars.test.ts b/src/core/__tests__/client.watchQuery/customScalars.test.ts
+index 73eb08314..821d0fd86 100644
+--- a/src/core/__tests__/client.watchQuery/customScalars.test.ts
++++ b/src/core/__tests__/client.watchQuery/customScalars.test.ts
+@@ -13,12 +13,15 @@ import {
+   Defer20220824Handler,
+   GraphQL17Alpha9Handler,
+ } from "@apollo/client/incremental";
++import { MockLink } from "@apollo/client/testing";
+ import {
++  bigIntScalar,
+   dateScalar,
+   markAsStreaming,
+   mockDefer20220824,
+   mockDeferStreamGraphQL17Alpha9,
+   ObservableStream,
++  spyOnConsole,
+ } from "@apollo/client/testing/internal";
+ 
+ test("serializes scalar variables used in field arguments", async () => {
+@@ -74,6 +77,15 @@ test("serializes scalar variables used in field arguments", async () => {
+   await expect(stream).not.toEmitAnything();
+ 
+   expect(requestVariables).toStrictEqualTyped({ date: "2026-01-01" });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'event({"date":"2026-01-01"})': {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++  });
+ });
+ 
+ test("serializes scalar variables used in directive arguments", async () => {
+@@ -131,6 +143,79 @@ test("serializes scalar variables used in directive arguments", async () => {
+   expect(requestVariables).toStrictEqualTyped({ date: "2026-01-01" });
+ });
+ 
++test("serializes scalar variables used in field arguments with keyArgs", async () => {
++  let requestVariables!: OperationVariables;
++
++  const link = new ApolloLink((operation) => {
++    requestVariables = operation.variables;
++
++    return of({
++      data: { event: { __typename: "Event", name: "GraphQL Summit" } },
++    });
++  });
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: {
++        Date: dateScalar,
++      },
++      typePolicies: {
++        Query: {
++          fields: {
++            event: {
++              keyArgs: ["date"],
++            },
++          },
++        },
++      },
++    }),
++    link,
++  });
++
++  const query = gql`
++    query Event($date: Date!) {
++      event(date: $date) {
++        name
++      }
++    }
++  `;
++
++  using stream = new ObservableStream(
++    client.watchQuery({
++      query,
++      variables: {
++        date: new Date(2026, 0, 1),
++      },
++    })
++  );
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      event: {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(stream).not.toEmitAnything();
++
++  expect(requestVariables).toStrictEqualTyped({ date: "2026-01-01" });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'event:{"date":"2026-01-01"}': {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++  });
++});
++
+ test("serializes scalar fields in input object variables", async () => {
+   let requestVariables!: OperationVariables;
+ 
+@@ -197,6 +282,456 @@ test("serializes scalar fields in input object variables", async () => {
+       date: "2026-01-01",
+     },
+   });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'event({"filter":{"date":"2026-01-01"}})': {
++        __typename: "Event",
++        name: "GraphQL Summit",
++      },
++    },
++  });
++});
++
++test("serializes scalar fields in input object variables used in keyArgs", async () => {
++  let requestVariables!: OperationVariables;
++
++  const link = new ApolloLink((operation) => {
++    requestVariables = operation.variables;
++
++    return of({
++      data: { events: [{ __typename: "Event", name: "GraphQL Summit" }] },
++    });
++  });
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: {
++        Date: dateScalar,
++      },
++      inputObjects: {
++        EventFilter: {
++          fields: {
++            from: "Date",
++            to: "Date",
++          },
++        },
++      },
++      typePolicies: {
++        Query: {
++          fields: {
++            events: {
++              keyArgs: ["filter"],
++            },
++          },
++        },
++      },
++    }),
++    link,
++  });
++
++  const query = gql`
++    query Events($filter: EventFilter!) {
++      events(filter: $filter) {
++        name
++      }
++    }
++  `;
++
++  using stream = new ObservableStream(
++    client.watchQuery({
++      query,
++      variables: {
++        filter: {
++          from: new Date(2026, 0, 1),
++          to: new Date(2026, 0, 31),
++        },
++      },
++    })
++  );
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      events: [{ __typename: "Event", name: "GraphQL Summit" }],
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(stream).not.toEmitAnything();
++
++  expect(requestVariables).toStrictEqualTyped({
++    filter: {
++      from: "2026-01-01",
++      to: "2026-01-31",
++    },
++  });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'events:{"filter":{"from":"2026-01-01","to":"2026-01-31"}}': [
++        { __typename: "Event", name: "GraphQL Summit" },
++      ],
++    },
++  });
++});
++
++test("serializes nested scalar fields in input object variables used in keyArgs", async () => {
++  let requestVariables!: OperationVariables;
++
++  const link = new ApolloLink((operation) => {
++    requestVariables = operation.variables;
++
++    return of({
++      data: { events: [{ __typename: "Event", name: "GraphQL Summit" }] },
++    });
++  });
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: {
++        Date: dateScalar,
++      },
++      inputObjects: {
++        EventFilter: {
++          fields: {
++            from: "Date",
++            to: "Date",
++          },
++        },
++      },
++      typePolicies: {
++        Query: {
++          fields: {
++            events: {
++              keyArgs: ["filter", ["from"]],
++            },
++          },
++        },
++      },
++    }),
++    link,
++  });
++
++  const query = gql`
++    query Events($filter: EventFilter!) {
++      events(filter: $filter) {
++        name
++      }
++    }
++  `;
++
++  using stream = new ObservableStream(
++    client.watchQuery({
++      query,
++      variables: {
++        filter: {
++          from: new Date(2026, 0, 1),
++          to: new Date(2026, 0, 31),
++        },
++      },
++    })
++  );
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      events: [{ __typename: "Event", name: "GraphQL Summit" }],
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(stream).not.toEmitAnything();
++
++  expect(requestVariables).toStrictEqualTyped({
++    filter: {
++      from: "2026-01-01",
++      to: "2026-01-31",
++    },
++  });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'events:{"filter":{"from":"2026-01-01"}}': [
++        { __typename: "Event", name: "GraphQL Summit" },
++      ],
++    },
++  });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("serializes non-JSON-serializable scalar variables", async () => {
++  let requestVariables!: OperationVariables;
++
++  const link = new ApolloLink((operation) => {
++    requestVariables = operation.variables;
++
++    return of({
++      data: {
++        products: [{ __typename: "Product", name: "GraphQL Hoodie" }],
++      },
++    });
++  });
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: {
++        BigInt: bigIntScalar,
++      },
++    }),
++    link,
++  });
++
++  const query = gql`
++    query Products($ids: [BigInt!]!) {
++      products(ids: $ids) {
++        name
++      }
++    }
++  `;
++
++  using stream = new ObservableStream(
++    client.watchQuery({
++      query,
++      variables: {
++        ids: [5n],
++      },
++    })
++  );
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      products: [{ __typename: "Product", name: "GraphQL Hoodie" }],
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(stream).not.toEmitAnything();
++
++  expect(requestVariables).toStrictEqualTyped({ ids: ["5"] });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'products({"ids":["5"]})': [
++        { __typename: "Product", name: "GraphQL Hoodie" },
++      ],
++    },
++  });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("serializes non-JSON-serializable scalar variables used in keyArgs", async () => {
++  let requestVariables!: OperationVariables;
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: { BigInt: bigIntScalar },
++      typePolicies: {
++        Query: {
++          fields: {
++            products: {
++              keyArgs: ["ids", "$after"],
++            },
++          },
++        },
++      },
++    }),
++    link: new ApolloLink((operation) => {
++      requestVariables = operation.variables;
++
++      return of({
++        data: {
++          products: [
++            {
++              __typename: "Product",
++              name: "GraphQL Hoodie",
++              reviews: [{ __typename: "Review", body: "So comfy" }],
++            },
++          ],
++        },
++      });
++    }),
++  });
++
++  const query = gql`
++    query Products($ids: [BigInt!]!, $after: BigInt) {
++      products(ids: $ids) {
++        name
++        reviews(after: $after) {
++          body
++        }
++      }
++    }
++  `;
++
++  using stream = new ObservableStream(
++    client.watchQuery({ query, variables: { ids: [5n], after: 10n } })
++  );
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      products: [
++        {
++          __typename: "Product",
++          name: "GraphQL Hoodie",
++          reviews: [{ __typename: "Review", body: "So comfy" }],
++        },
++      ],
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(stream).not.toEmitAnything();
++
++  expect(requestVariables).toStrictEqualTyped({ ids: ["5"], after: "10" });
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      'products:{"ids":["5"],"$after":"10"}': [
++        {
++          __typename: "Product",
++          name: "GraphQL Hoodie",
++          'reviews({"after":"10"})': [
++            { __typename: "Review", body: "So comfy" },
++          ],
++        },
++      ],
++    },
++  });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("serializes non-JSON-serializable scalar variables passed to refetch", async () => {
++  let requestVariables!: OperationVariables;
++
++  const link = new ApolloLink((operation) => {
++    requestVariables = operation.variables;
++
++    return of({
++      data: {
++        products: operation.variables.ids.map((id: string) => ({
++          __typename: "Product",
++          name: `Product ${id}`,
++        })),
++      },
++    });
++  });
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({ scalars: { BigInt: bigIntScalar } }),
++    link,
++  });
++  const query = gql`
++    query Products($ids: [BigInt!]!) {
++      products(ids: $ids) {
++        name
++      }
++    }
++  `;
++  const observable = client.watchQuery({
++    query,
++    variables: { ids: ["1"] },
++    notifyOnNetworkStatusChange: false,
++  });
++  using stream = new ObservableStream(observable);
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      products: [{ __typename: "Product", name: "Product 1" }],
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(observable.refetch({ ids: [5n] })).resolves.toStrictEqualTyped({
++    data: {
++      products: [{ __typename: "Product", name: "Product 5" }],
++    },
++  });
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      products: [{ __typename: "Product", name: "Product 5" }],
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++  await expect(stream).not.toEmitAnything();
++
++  expect(requestVariables).toStrictEqualTyped({ ids: ["5"] });
++});
++
++// https://github.com/apollographql/apollo-client/issues/13494
++test("identifies entities with non-JSON-serializable scalar key fields", async () => {
++  const query = gql`
++    query Product {
++      product {
++        id
++        name
++      }
++    }
++  `;
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: { BigInt: bigIntScalar },
++      typePolicies: {
++        Product: {
++          keyFields: ["id"],
++          fields: {
++            id: { scalar: "BigInt" },
++          },
++        },
++      },
++    }),
++    link: new ApolloLink(() =>
++      of({
++        data: {
++          product: { __typename: "Product", id: "5", name: "GraphQL Hoodie" },
++        },
++      })
++    ),
++  });
++
++  using stream = new ObservableStream(client.watchQuery({ query }));
++
++  await expect(stream).toEmitTypedValue({
++    data: {
++      product: { __typename: "Product", id: 5n, name: "GraphQL Hoodie" },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  await expect(stream).not.toEmitAnything();
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      product: { __ref: 'Product:{"id":"5"}' },
++    },
++    'Product:{"id":"5"}': {
++      __typename: "Product",
++      id: "5",
++      name: "GraphQL Hoodie",
++    },
++  });
+ });
+ 
+ test("serializes scalar variables passed to refetch", async () => {
+@@ -872,70 +1407,67 @@ test("parses network custom scalar fields with a network-only fetch policy", asy
+   await expect(stream).not.toEmitAnything();
+ });
+ 
+-test.failing(
+-  "parses custom scalar fields with a no-cache fetch policy",
+-  async () => {
+-    const query = gql`
+-      query Event {
+-        event {
+-          id
+-          startDate
+-        }
++test("parses custom scalar fields with a no-cache fetch policy", async () => {
++  const query = gql`
++    query Event {
++      event {
++        id
++        startDate
+       }
+-    `;
+-    const client = new ApolloClient({
+-      cache: new InMemoryCache({
+-        scalars: { Date: dateScalar },
+-        typePolicies: {
+-          Event: {
+-            fields: {
+-              startDate: { scalar: "Date" },
+-            },
++    }
++  `;
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: { Date: dateScalar },
++      typePolicies: {
++        Event: {
++          fields: {
++            startDate: { scalar: "Date" },
+           },
+         },
+-      }),
+-      link: new ApolloLink(() =>
+-        of({
+-          data: {
+-            event: {
+-              __typename: "Event",
+-              id: "1",
+-              startDate: "2026-01-01",
+-            },
++      },
++    }),
++    link: new ApolloLink(() =>
++      of({
++        data: {
++          event: {
++            __typename: "Event",
++            id: "1",
++            startDate: "2026-01-01",
+           },
+-        }).pipe(delay(20))
+-      ),
+-    });
+-
+-    using stream = new ObservableStream(
+-      client.watchQuery({
+-        query,
+-        fetchPolicy: "no-cache",
+-      })
+-    );
+-
+-    await expect(stream).toEmitTypedValue({
+-      data: undefined,
+-      dataState: "empty",
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      partial: true,
+-    });
+-    await expect(stream).toEmitTypedValue({
+-      data: {
+-        event: {
+-          __typename: "Event",
+-          id: "1",
+-          startDate: new Date(2026, 0, 1),
+         },
++      }).pipe(delay(20))
++    ),
++  });
++
++  using stream = new ObservableStream(
++    client.watchQuery({
++      query,
++      fetchPolicy: "no-cache",
++    })
++  );
++
++  await expect(stream).toEmitTypedValue({
++    data: undefined,
++    dataState: "empty",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: true,
++  });
++  await expect(stream).toEmitTypedValue({
++    data: {
++      event: {
++        __typename: "Event",
++        id: "1",
++        startDate: new Date(2026, 0, 1),
+       },
+-      dataState: "complete",
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      partial: false,
+-    });
+-  }
+-);
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++});
+ 
+ test("preserves referential identity when refetching identical serialized scalar values", async () => {
+   const query = gql`
+@@ -1976,3 +2508,406 @@ test("parses custom scalar fields across `@stream` payloads (graphql17Alpha9)",
+ 
+   await expect(stream).not.toEmitAnything();
+ });
++
++test("parses custom scalar fields when feud-stopping skips refetches", async () => {
++  using _ = spyOnConsole("warn");
++
++  const createdAtQuery = gql`
++    query {
++      post {
++        createdAt
++      }
++    }
++  `;
++
++  const updatedAtQuery = gql`
++    query {
++      post {
++        updatedAt
++      }
++    }
++  `;
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: { Date: dateScalar },
++      typePolicies: {
++        Query: {
++          fields: {
++            post: {
++              merge: false,
++            },
++          },
++        },
++        Post: {
++          fields: {
++            createdAt: { scalar: "Date" },
++            updatedAt: { scalar: "Date" },
++          },
++        },
++      },
++    }),
++    link: new MockLink([
++      {
++        request: { query: createdAtQuery },
++        result: {
++          data: { post: { __typename: "Post", createdAt: "2026-01-01" } },
++        },
++        delay: 20,
++        maxUsageCount: Number.POSITIVE_INFINITY,
++      },
++      {
++        request: { query: updatedAtQuery },
++        result: {
++          data: { post: { __typename: "Post", updatedAt: "2026-02-02" } },
++        },
++        delay: 20,
++        maxUsageCount: Number.POSITIVE_INFINITY,
++      },
++    ]),
++  });
++
++  const createdAtObservable = client.watchQuery({ query: createdAtQuery });
++  using createdAtStream = new ObservableStream(createdAtObservable);
++
++  await expect(createdAtStream).toEmitTypedValue({
++    data: undefined,
++    dataState: "empty",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: true,
++  });
++  await expect(createdAtStream).toEmitTypedValue({
++    data: { post: { __typename: "Post", createdAt: new Date(2026, 0, 1) } },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  const updatedAtObservable = client.watchQuery({ query: updatedAtQuery });
++  using updatedAtStream = new ObservableStream(updatedAtObservable);
++
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: undefined,
++    dataState: "empty",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: true,
++  });
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: { post: { __typename: "Post", updatedAt: new Date(2026, 1, 2) } },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      post: { __typename: "Post", updatedAt: "2026-02-02" },
++    },
++  });
++
++  await expect(createdAtStream).toEmitTypedValue({
++    data: { post: { __typename: "Post", createdAt: new Date(2026, 0, 1) } },
++    dataState: "complete",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: false,
++  });
++  await expect(createdAtStream).toEmitTypedValue({
++    data: { post: { __typename: "Post", createdAt: new Date(2026, 0, 1) } },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      post: { __typename: "Post", createdAt: "2026-01-01" },
++    },
++  });
++
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: { post: { __typename: "Post", updatedAt: new Date(2026, 1, 2) } },
++    dataState: "complete",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: false,
++  });
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: { post: { __typename: "Post", updatedAt: new Date(2026, 1, 2) } },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      post: { __typename: "Post", updatedAt: "2026-02-02" },
++    },
++  });
++
++  await expect(createdAtStream).not.toEmitAnything();
++  await expect(updatedAtStream).not.toEmitAnything();
++
++  expect(createdAtObservable.getCurrentResult()).toStrictEqualTyped({
++    data: { post: { __typename: "Post", createdAt: new Date(2026, 0, 1) } },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++  expect(updatedAtObservable.getCurrentResult()).toStrictEqualTyped({
++    data: { post: { __typename: "Post", updatedAt: new Date(2026, 1, 2) } },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++});
++
++test("parses custom scalar fields when feud-stopping skips refetches with overlapping fields", async () => {
++  using _ = spyOnConsole("warn");
++
++  const updatedAtQuery = gql`
++    query UpdatedAtQuery {
++      post {
++        createdAt
++        updatedAt
++      }
++    }
++  `;
++
++  const publishedAtQuery = gql`
++    query PublishedAtQuery {
++      post {
++        createdAt
++        publishedAt
++      }
++    }
++  `;
++
++  const client = new ApolloClient({
++    cache: new InMemoryCache({
++      scalars: { Date: dateScalar },
++      typePolicies: {
++        Query: {
++          fields: {
++            post: {
++              merge: false,
++            },
++          },
++        },
++        Post: {
++          fields: {
++            createdAt: { scalar: "Date" },
++            updatedAt: { scalar: "Date" },
++            publishedAt: { scalar: "Date" },
++          },
++        },
++      },
++    }),
++    link: new MockLink([
++      {
++        request: { query: updatedAtQuery },
++        result: {
++          data: {
++            post: {
++              __typename: "Post",
++              createdAt: "2026-01-01",
++              updatedAt: "2026-02-02",
++            },
++          },
++        },
++        delay: 20,
++        maxUsageCount: Number.POSITIVE_INFINITY,
++      },
++      {
++        request: { query: publishedAtQuery },
++        result: {
++          data: {
++            post: {
++              __typename: "Post",
++              createdAt: "2026-01-01",
++              publishedAt: "2026-03-03",
++            },
++          },
++        },
++        delay: 20,
++        maxUsageCount: Number.POSITIVE_INFINITY,
++      },
++    ]),
++  });
++
++  const updatedAtObservable = client.watchQuery({ query: updatedAtQuery });
++  using updatedAtStream = new ObservableStream(updatedAtObservable);
++
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: undefined,
++    dataState: "empty",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: true,
++  });
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        updatedAt: new Date(2026, 1, 2),
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  const publishedAtObservable = client.watchQuery({ query: publishedAtQuery });
++  using publishedAtStream = new ObservableStream(publishedAtObservable);
++
++  await expect(publishedAtStream).toEmitTypedValue({
++    data: undefined,
++    dataState: "empty",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: true,
++  });
++  await expect(publishedAtStream).toEmitTypedValue({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        publishedAt: new Date(2026, 2, 3),
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      post: {
++        __typename: "Post",
++        createdAt: "2026-01-01",
++        publishedAt: "2026-03-03",
++      },
++    },
++  });
++
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        updatedAt: new Date(2026, 1, 2),
++      },
++    },
++    dataState: "complete",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: false,
++  });
++  await expect(updatedAtStream).toEmitTypedValue({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        updatedAt: new Date(2026, 1, 2),
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      post: {
++        __typename: "Post",
++        createdAt: "2026-01-01",
++        updatedAt: "2026-02-02",
++      },
++    },
++  });
++
++  await expect(publishedAtStream).toEmitTypedValue({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        publishedAt: new Date(2026, 2, 3),
++      },
++    },
++    dataState: "complete",
++    loading: true,
++    networkStatus: NetworkStatus.loading,
++    partial: false,
++  });
++  await expect(publishedAtStream).toEmitTypedValue({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        publishedAt: new Date(2026, 2, 3),
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++
++  expect(client.extract()).toStrictEqualTyped({
++    ROOT_QUERY: {
++      __typename: "Query",
++      post: {
++        __typename: "Post",
++        createdAt: "2026-01-01",
++        publishedAt: "2026-03-03",
++      },
++    },
++  });
++
++  await expect(updatedAtStream).not.toEmitAnything();
++  await expect(publishedAtStream).not.toEmitAnything();
++
++  expect(updatedAtObservable.getCurrentResult()).toStrictEqualTyped({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        updatedAt: new Date(2026, 1, 2),
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++  expect(publishedAtObservable.getCurrentResult()).toStrictEqualTyped({
++    data: {
++      post: {
++        __typename: "Post",
++        createdAt: new Date(2026, 0, 1),
++        publishedAt: new Date(2026, 2, 3),
++      },
++    },
++    dataState: "complete",
++    loading: false,
++    networkStatus: NetworkStatus.ready,
++    partial: false,
++  });
++});
+diff --git a/src/core/__tests__/client.watchQuery/defer20220824.test.ts b/src/core/__tests__/client.watchQuery/defer20220824.test.ts
+index 771d7313d..1519cdce0 100644
+--- a/src/core/__tests__/client.watchQuery/defer20220824.test.ts
++++ b/src/core/__tests__/client.watchQuery/defer20220824.test.ts
+@@ -529,16 +529,6 @@ test("delivers cache updates written while a deferred response is still streamin
+     data: { __typename: "Post", id: "1", title: "title from write 1" },
+   });
+ 
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 1" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+   await expect(stream).toEmitTypedValue({
+     data: markAsStreaming({
+       post: { __typename: "Post", id: "1", title: "title from write 1" },
+@@ -555,16 +545,6 @@ test("delivers cache updates written while a deferred response is still streamin
+     data: { __typename: "Post", id: "1", title: "title from write 2" },
+   });
+ 
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 2" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+   await expect(stream).toEmitTypedValue({
+     data: markAsStreaming({
+       post: { __typename: "Post", id: "1", title: "title from write 2" },
+diff --git a/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts b/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts
+index e5b083bb4..00a95d6ad 100644
+--- a/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts
++++ b/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts
+@@ -10492,22 +10492,12 @@ test("keeps dataState streaming for an optimistic cache write while a deferred r
+     }),
+     dataState: "streaming",
+     loading: true,
+-    networkStatus: NetworkStatus.loading,
++    networkStatus: NetworkStatus.streaming,
+     partial: true,
+   });
+ 
+   client.cache.removeOptimistic("optimistic");
+ 
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+   await expect(stream).toEmitTypedValue({
+     data: markAsStreaming({
+       post: { __typename: "Post", id: "1", title: "title from server" },
+@@ -10617,7 +10607,7 @@ test("delivers an optimistic cache write while a deferred response is still stre
+     }),
+     dataState: "streaming",
+     loading: true,
+-    networkStatus: NetworkStatus.loading,
++    networkStatus: NetworkStatus.streaming,
+     partial: true,
+   });
+ 
+@@ -10725,16 +10715,6 @@ test("delivers cache updates written while a deferred response is still streamin
+     data: { __typename: "Post", id: "1", title: "title from write 1" },
+   });
+ 
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 1" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+   await expect(stream).toEmitTypedValue({
+     data: markAsStreaming({
+       post: { __typename: "Post", id: "1", title: "title from write 1" },
+@@ -10751,16 +10731,6 @@ test("delivers cache updates written while a deferred response is still streamin
+     data: { __typename: "Post", id: "1", title: "title from write 2" },
+   });
+ 
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 2" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+   await expect(stream).toEmitTypedValue({
+     data: markAsStreaming({
+       post: { __typename: "Post", id: "1", title: "title from write 2" },
+diff --git a/src/core/__tests__/incompleteCacheReadWarning.test.ts b/src/core/__tests__/incompleteCacheReadWarning.test.ts
+index eeae90260..518a1101a 100644
+--- a/src/core/__tests__/incompleteCacheReadWarning.test.ts
++++ b/src/core/__tests__/incompleteCacheReadWarning.test.ts
+@@ -389,7 +389,7 @@ test("does not warn while a deferred result is still streaming", async () => {
+   expect(console.warn).not.toHaveBeenCalled();
+ });
+ 
+-test("does not warn again when the cache write is skipped because the identical result was already written", async () => {
++test("warns again when a refetched network result reads back from the cache as partial", async () => {
+   using _ = spyOnConsole("warn");
+ 
+   const query = gql`
+@@ -453,7 +453,7 @@ test("does not warn again when the cache write is skipped because the identical
+   // result
+   await stream.takeNext();
+ 
+-  expect(console.warn).toHaveBeenCalledTimes(1);
++  expect(console.warn).toHaveBeenCalledTimes(2);
+ });
+ 
+ // https://github.com/apollographql/apollo-client/issues/9293
+diff --git a/src/testing/internal/index.ts b/src/testing/internal/index.ts
+index 31e2d83f7..9a0d83bb6 100644
+--- a/src/testing/internal/index.ts
++++ b/src/testing/internal/index.ts
+@@ -44,7 +44,9 @@ export { friendListSchemaGraphQL17Alpha2 } from "./schemas/friendList.graphql17A
+ export { friendListSchemaGraphQL17Alpha9 } from "./schemas/friendList.graphql17Alpha9.js";
+ 
+ export {
++  bigIntScalar,
+   dateScalar,
++  dateTimeRangeScalar,
+   dateTimeScalar,
+   jsonObjectScalar,
+   priceScalar,
+diff --git a/src/testing/internal/scalars.ts b/src/testing/internal/scalars.ts
+index e247bae3b..f76d5c858 100644
+--- a/src/testing/internal/scalars.ts
++++ b/src/testing/internal/scalars.ts
+@@ -34,3 +34,23 @@ export const jsonObjectScalar = new Scalar<
+   parse: (value) => new Map(Object.entries(value)),
+   is: (value) => value instanceof Map,
+ });
++
++// Used to test scalar that is an array itself
++export const dateTimeRangeScalar = new Scalar<
++  [string, string],
++  { start: Date; end: Date }
++>({
++  serialize: (value) => [value.start.toISOString(), value.end.toISOString()],
++  parse: (value) => ({
++    start: new Date(value[0]),
++    end: new Date(value[1]),
++  }),
++  is: (value) => !Array.isArray(value),
++});
++
++// Used to test a scalar whose parsed value is not JSON-serializable
++export const bigIntScalar = new Scalar<string, bigint>({
++  serialize: (value) => value.toString(),
++  parse: (value) => BigInt(value),
++  is: (value) => typeof value === "bigint",
++});

@@ -1,0 +1,3091 @@
+diff --git a/codegen/custom-scalars/__tests__/plugin.test.ts b/codegen/custom-scalars/__tests__/plugin.test.ts
+index 5cf5cbdbd..948dc5380 100644
+--- a/codegen/custom-scalars/__tests__/plugin.test.ts
++++ b/codegen/custom-scalars/__tests__/plugin.test.ts
+@@ -500,64 +500,6 @@ test("omits fields on retained input objects that reference input objects withou
+   });
+ });
+ 
+-test("handles self-referencing input objects", async () => {
+-  const schema = gql`
+-    scalar DateTime
+-
+-    input TaskFilter {
+-      and: [TaskFilter!]
+-      not: TaskFilter
+-      dueBefore: DateTime
+-    }
+-
+-    type Query {
+-      tasks(filter: TaskFilter): [Task]
+-    }
+-
+-    type Task {
+-      id: ID!
+-      completedAt: DateTime
+-    }
+-  `;
+-
+-  const documents = [
+-    {
+-      document: gql`
+-        query Tasks($filter: TaskFilter) {
+-          tasks(filter: $filter) {
+-            id
+-            completedAt
+-          }
+-        }
+-      `,
+-    },
+-  ];
+-
+-  const { inputObjects, scalarTypePolicies } = await generateConfig({
+-    schema,
+-    documents,
+-  });
+-
+-  expect(inputObjects).toStrictEqual({
+-    TaskFilter: {
+-      fields: {
+-        and: "TaskFilter",
+-        not: "TaskFilter",
+-        dueBefore: "DateTime",
+-      },
+-    },
+-  });
+-  expect(scalarTypePolicies).toStrictEqual({
+-    Task: {
+-      fields: {
+-        completedAt: {
+-          scalar: "DateTime",
+-        },
+-      },
+-    },
+-  });
+-});
+-
+ test("omits input objects unused by documents while still emitting used object fields", async () => {
+   const schema = gql`
+     scalar DateTime
+@@ -991,70 +933,6 @@ test("retains input objects used on only one of multiple fields", async () => {
+   });
+ });
+ 
+-test("unwraps list and non-null types for variable definitions and object fields", async () => {
+-  const schema = gql`
+-    scalar DateTime
+-
+-    input EventFilter {
+-      startsAfter: DateTime
+-    }
+-
+-    type Query {
+-      events(filters: [EventFilter!]): [Schedule]
+-    }
+-
+-    type Schedule {
+-      id: ID!
+-      createdAt: DateTime!
+-      meetingTimes: [DateTime!]!
+-      availabilitySlots: [[DateTime!]!]
+-    }
+-  `;
+-
+-  const documents = [
+-    {
+-      document: gql`
+-        query Events($filters: [EventFilter!]!) {
+-          events(filters: $filters) {
+-            id
+-            createdAt
+-            meetingTimes
+-            availabilitySlots
+-          }
+-        }
+-      `,
+-    },
+-  ];
+-
+-  const { inputObjects, scalarTypePolicies } = await generateConfig({
+-    schema,
+-    documents,
+-  });
+-
+-  expect(inputObjects).toStrictEqual({
+-    EventFilter: {
+-      fields: {
+-        startsAfter: "DateTime",
+-      },
+-    },
+-  });
+-  expect(scalarTypePolicies).toStrictEqual({
+-    Schedule: {
+-      fields: {
+-        createdAt: {
+-          scalar: "DateTime",
+-        },
+-        meetingTimes: {
+-          scalar: "DateTime",
+-        },
+-        availabilitySlots: {
+-          scalar: "DateTime",
+-        },
+-      },
+-    },
+-  });
+-});
+-
+ test("retains input objects when mixed with scalar variable definitions", async () => {
+   const schema = gql`
+     scalar DateTime
+diff --git a/src/cache/inmemory/__tests__/scalars.ts b/src/cache/inmemory/__tests__/scalars.ts
+index 8e8d7f898..94cfdc80f 100644
+--- a/src/cache/inmemory/__tests__/scalars.ts
++++ b/src/cache/inmemory/__tests__/scalars.ts
+@@ -554,150 +554,6 @@ test("stores parsed scalar value in the cache when the field has arguments with
+   });
+ });
+ 
+-test("stores each element as a parsed value when writing an array of scalar values", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        meetingTimes
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-02T09:00:00.000Z"),
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-02T09:00:00.000Z"),
+-        ],
+-      },
+-    },
+-  });
+-});
+-
+-test("parses each serialized element when writing an array of scalar values", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        meetingTimes
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: ["2026-01-01T09:00:00.000Z", "2026-01-02T09:00:00.000Z"],
+-      },
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-02T09:00:00.000Z"),
+-        ],
+-      },
+-    },
+-  });
+-});
+-
+-test("stores each leaf element as a parsed value when writing a 2D array of scalar values", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          availabilitySlots: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        availabilitySlots
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        availabilitySlots: [
+-          [
+-            new Date("2026-01-01T09:00:00.000Z"),
+-            new Date("2026-01-01T10:00:00.000Z"),
+-          ],
+-          [new Date("2026-01-02T14:00:00.000Z")],
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      schedule: {
+-        __typename: "Schedule",
+-        availabilitySlots: [
+-          [
+-            new Date("2026-01-01T09:00:00.000Z"),
+-            new Date("2026-01-01T10:00:00.000Z"),
+-          ],
+-          [new Date("2026-01-02T14:00:00.000Z")],
+-        ],
+-      },
+-    },
+-  });
+-});
+-
+ test("stores null as-is when null is written to a scalar field", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -988,305 +844,6 @@ test("stores the parsed incoming value instead of the value returned by an ignor
+   });
+ });
+ 
+-test("stores each element as a parsed value when writing an array of scalar values with an ignored merge function", () => {
+-  using _ = spyOnConsole("warn");
+-  const merge = jest.fn((_existing: unknown, incoming: unknown) => incoming);
+-
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          meetingTimes: {
+-            scalar: "DateTime",
+-            merge,
+-          },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        meetingTimes
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-02T09:00:00.000Z"),
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(merge).not.toHaveBeenCalled();
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-02T09:00:00.000Z"),
+-        ],
+-      },
+-    },
+-  });
+-});
+-
+-test("stores each leaf element as a parsed value when writing a 2D array of scalar values with an ignored merge function", () => {
+-  using _ = spyOnConsole("warn");
+-  const merge = jest.fn((_existing: unknown, incoming: unknown) => incoming);
+-
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          availabilitySlots: {
+-            scalar: "DateTime",
+-            merge,
+-          },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        availabilitySlots
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        availabilitySlots: [
+-          [
+-            new Date("2026-01-01T09:00:00.000Z"),
+-            new Date("2026-01-01T10:00:00.000Z"),
+-          ],
+-          [new Date("2026-01-02T14:00:00.000Z")],
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(merge).not.toHaveBeenCalled();
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      schedule: {
+-        __typename: "Schedule",
+-        availabilitySlots: [
+-          [
+-            new Date("2026-01-01T09:00:00.000Z"),
+-            new Date("2026-01-01T10:00:00.000Z"),
+-          ],
+-          [new Date("2026-01-02T14:00:00.000Z")],
+-        ],
+-      },
+-    },
+-  });
+-});
+-
+-test("stores parsed scalar values across a complex nested write", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-      Price: priceScalar,
+-      JSONObject: jsonObjectScalar,
+-    },
+-    possibleTypes: {
+-      Schedulable: ["Session", "Workshop"],
+-    },
+-    typePolicies: {
+-      Conference: {
+-        fields: {
+-          startDate: { scalar: "DateTime" },
+-          endDate: { scalar: "DateTime" },
+-          ticketPrice: { scalar: "Price" },
+-        },
+-      },
+-      Schedule: {
+-        fields: {
+-          timeSlots: { scalar: "DateTime" },
+-        },
+-      },
+-      Speaker: {
+-        fields: {
+-          availableTimes: { scalar: "DateTime" },
+-        },
+-      },
+-      Session: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-      Workshop: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      conference {
+-        id
+-        name
+-        startDate
+-        endDate
+-        ticketPrice
+-        schedule {
+-          timeSlots
+-        }
+-        speakers {
+-          id
+-          name
+-          availableTimes
+-        }
+-        scheduledItems {
+-          __typename
+-          id
+-          startTime
+-          metadata
+-        }
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      conference: {
+-        __typename: "Conference",
+-        id: "conf-1",
+-        name: "GraphQL Summit",
+-        startDate: new Date("2026-09-15T09:00:00.000Z"),
+-        endDate: null,
+-        ticketPrice: "199.00",
+-        schedule: {
+-          __typename: "Schedule",
+-          timeSlots: [
+-            [
+-              new Date("2026-09-15T09:00:00.000Z"),
+-              new Date("2026-09-15T10:00:00.000Z"),
+-            ],
+-            [new Date("2026-09-15T14:00:00.000Z")],
+-          ],
+-        },
+-        speakers: [
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-1",
+-            name: "Alice",
+-            availableTimes: [
+-              new Date("2026-09-15T09:00:00.000Z"),
+-              new Date("2026-09-15T14:00:00.000Z"),
+-            ],
+-          },
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-2",
+-            name: "Bob",
+-            availableTimes: [new Date("2026-09-15T10:00:00.000Z"), null],
+-          },
+-        ],
+-        scheduledItems: [
+-          {
+-            __typename: "Session",
+-            id: "session-1",
+-            startTime: new Date("2026-09-15T09:00:00.000Z"),
+-            metadata: new Map([["dress", "casual"]]),
+-          },
+-          {
+-            __typename: "Workshop",
+-            id: "workshop-1",
+-            startTime: new Date("2026-09-15T14:00:00.000Z"),
+-            metadata: new Map([["venue", "The Workshop Building"]]),
+-          },
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      conference: { __ref: "Conference:conf-1" },
+-    },
+-    "Conference:conf-1": {
+-      __typename: "Conference",
+-      id: "conf-1",
+-      name: "GraphQL Summit",
+-      startDate: new Date("2026-09-15T09:00:00.000Z"),
+-      endDate: null,
+-      ticketPrice: "199.00",
+-      schedule: {
+-        __typename: "Schedule",
+-        timeSlots: [
+-          [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T10:00:00.000Z"),
+-          ],
+-          [new Date("2026-09-15T14:00:00.000Z")],
+-        ],
+-      },
+-      scheduledItems: [
+-        { __ref: "Session:session-1" },
+-        { __ref: "Workshop:workshop-1" },
+-      ],
+-      speakers: [
+-        { __ref: "Speaker:speaker-1" },
+-        { __ref: "Speaker:speaker-2" },
+-      ],
+-    },
+-    "Speaker:speaker-1": {
+-      __typename: "Speaker",
+-      id: "speaker-1",
+-      name: "Alice",
+-      availableTimes: [
+-        new Date("2026-09-15T09:00:00.000Z"),
+-        new Date("2026-09-15T14:00:00.000Z"),
+-      ],
+-    },
+-    "Speaker:speaker-2": {
+-      __typename: "Speaker",
+-      id: "speaker-2",
+-      name: "Bob",
+-      availableTimes: [new Date("2026-09-15T10:00:00.000Z"), null],
+-    },
+-    "Session:session-1": {
+-      __typename: "Session",
+-      id: "session-1",
+-      startTime: new Date("2026-09-15T09:00:00.000Z"),
+-      metadata: new Map([["dress", "casual"]]),
+-    },
+-    "Workshop:workshop-1": {
+-      __typename: "Workshop",
+-      id: "workshop-1",
+-      startTime: new Date("2026-09-15T14:00:00.000Z"),
+-      metadata: new Map([["venue", "The Workshop Building"]]),
+-    },
+-  });
+-});
+-
+ test("stores parsed scalar value in the cache when modifying via cache.modify", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -1336,55 +893,6 @@ test("stores parsed scalar value in the cache when modifying via cache.modify",
+   });
+ });
+ 
+-test("parses serialized scalar value when modifying via cache.modify", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Event: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      event {
+-        id
+-        startTime
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      event: {
+-        __typename: "Event",
+-        id: "1",
+-        startTime: "2026-01-01T00:00:00.000Z",
+-      },
+-    },
+-  });
+-
+-  cache.modify({
+-    id: cache.identify({ __typename: "Event", id: "1" }),
+-    fields: {
+-      startTime: () => "2026-06-15T14:30:00.000Z",
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: { __typename: "Query", event: { __ref: "Event:1" } },
+-    "Event:1": {
+-      __typename: "Event",
+-      id: "1",
+-      startTime: new Date("2026-06-15T14:30:00.000Z"),
+-    },
+-  });
+-});
+-
+ test("cache.modify preserves referential identity for deeply equal parsed scalar values", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -1564,122 +1072,6 @@ test("parses a scalar field on an implicit root type when modifying via cache.mo
+   });
+ });
+ 
+-test("stores each element as a parsed value when modifying an array of scalar values via cache.modify", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Speaker: {
+-        fields: {
+-          availableTimes: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      speaker {
+-        id
+-        availableTimes
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      speaker: {
+-        __typename: "Speaker",
+-        id: "1",
+-        availableTimes: ["2026-01-01T09:00:00.000Z"],
+-      },
+-    },
+-  });
+-
+-  cache.modify({
+-    id: cache.identify({ __typename: "Speaker", id: "1" }),
+-    fields: {
+-      availableTimes: () => [
+-        new Date("2026-01-01T09:00:00.000Z"),
+-        new Date("2026-01-02T09:00:00.000Z"),
+-      ],
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: { __typename: "Query", speaker: { __ref: "Speaker:1" } },
+-    "Speaker:1": {
+-      __typename: "Speaker",
+-      id: "1",
+-      availableTimes: [
+-        new Date("2026-01-01T09:00:00.000Z"),
+-        new Date("2026-01-02T09:00:00.000Z"),
+-      ],
+-    },
+-  });
+-});
+-
+-test("stores each leaf element as a parsed value when modifying a 2D array of scalar values via cache.modify", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Speaker: {
+-        fields: {
+-          availabilitySlots: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      speaker {
+-        id
+-        availabilitySlots
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      speaker: {
+-        __typename: "Speaker",
+-        id: "1",
+-        availabilitySlots: [["2026-01-01T09:00:00.000Z"]],
+-      },
+-    },
+-  });
+-
+-  cache.modify({
+-    id: cache.identify({ __typename: "Speaker", id: "1" }),
+-    fields: {
+-      availabilitySlots: () => [
+-        [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-01T10:00:00.000Z"),
+-        ],
+-        [new Date("2026-01-02T14:00:00.000Z")],
+-      ],
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: { __typename: "Query", speaker: { __ref: "Speaker:1" } },
+-    "Speaker:1": {
+-      __typename: "Speaker",
+-      id: "1",
+-      availabilitySlots: [
+-        [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-01T10:00:00.000Z"),
+-        ],
+-        [new Date("2026-01-02T14:00:00.000Z")],
+-      ],
+-    },
+-  });
+-});
+-
+ test("stores null as-is when null is returned by a modifier for a scalar field", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -1833,366 +1225,6 @@ test("stores object-based parsed scalar values when modifying via cache.modify",
+   });
+ });
+ 
+-test("cache.extract() serializes all stored parsed scalar values", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-      Price: priceScalar,
+-      JSONObject: jsonObjectScalar,
+-    },
+-    possibleTypes: {
+-      Schedulable: ["Session", "Workshop"],
+-    },
+-    typePolicies: {
+-      Conference: {
+-        fields: {
+-          startDate: { scalar: "DateTime" },
+-          endDate: { scalar: "DateTime" },
+-          ticketPrice: { scalar: "Price" },
+-        },
+-      },
+-      Schedule: {
+-        fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-          availabilitySlots: { scalar: "DateTime" },
+-        },
+-      },
+-      Speaker: {
+-        fields: {
+-          availableTimes: { scalar: "DateTime" },
+-        },
+-      },
+-      Session: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-      Workshop: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query ($timezone: String) {
+-      conference {
+-        id
+-        name
+-        startDate
+-        endDate
+-        ticketPrice
+-        schedule {
+-          meetingTimes
+-          availabilitySlots
+-        }
+-        speakers {
+-          id
+-          name
+-          availableTimes(timezone: "UTC")
+-        }
+-        scheduledItems {
+-          __typename
+-          id
+-          startTime(timezone: $timezone)
+-          metadata
+-        }
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    variables: { timezone: "UTC" },
+-    data: {
+-      conference: {
+-        __typename: "Conference",
+-        id: "conf-1",
+-        name: "GraphQL Summit",
+-        startDate: new Date("2026-09-15T09:00:00.000Z"),
+-        endDate: null,
+-        ticketPrice: "199.00",
+-        schedule: {
+-          __typename: "Schedule",
+-          meetingTimes: [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T14:00:00.000Z"),
+-          ],
+-          availabilitySlots: [
+-            [
+-              new Date("2026-09-15T09:00:00.000Z"),
+-              new Date("2026-09-15T10:00:00.000Z"),
+-            ],
+-            [new Date("2026-09-15T14:00:00.000Z")],
+-          ],
+-        },
+-        speakers: [
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-1",
+-            name: "Alice",
+-            availableTimes: [
+-              new Date("2026-09-15T09:00:00.000Z"),
+-              new Date("2026-09-15T14:00:00.000Z"),
+-            ],
+-          },
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-2",
+-            name: "Bob",
+-            availableTimes: [new Date("2026-09-15T10:00:00.000Z"), null],
+-          },
+-        ],
+-        scheduledItems: [
+-          {
+-            __typename: "Session",
+-            id: "session-1",
+-            startTime: new Date("2026-09-15T09:00:00.000Z"),
+-            metadata: new Map([["dress", "casual"]]),
+-          },
+-          {
+-            __typename: "Workshop",
+-            id: "workshop-1",
+-            startTime: new Date("2026-09-15T14:00:00.000Z"),
+-            metadata: new Map([["venue", "The Workshop Building"]]),
+-          },
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(cache.extract()).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      conference: { __ref: "Conference:conf-1" },
+-    },
+-    "Conference:conf-1": {
+-      __typename: "Conference",
+-      id: "conf-1",
+-      name: "GraphQL Summit",
+-      startDate: "2026-09-15T09:00:00.000Z",
+-      endDate: null,
+-      ticketPrice: 19900,
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: ["2026-09-15T09:00:00.000Z", "2026-09-15T14:00:00.000Z"],
+-        availabilitySlots: [
+-          ["2026-09-15T09:00:00.000Z", "2026-09-15T10:00:00.000Z"],
+-          ["2026-09-15T14:00:00.000Z"],
+-        ],
+-      },
+-      scheduledItems: [
+-        { __ref: "Session:session-1" },
+-        { __ref: "Workshop:workshop-1" },
+-      ],
+-      speakers: [
+-        { __ref: "Speaker:speaker-1" },
+-        { __ref: "Speaker:speaker-2" },
+-      ],
+-    },
+-    "Speaker:speaker-1": {
+-      __typename: "Speaker",
+-      id: "speaker-1",
+-      name: "Alice",
+-      'availableTimes({"timezone":"UTC"})': [
+-        "2026-09-15T09:00:00.000Z",
+-        "2026-09-15T14:00:00.000Z",
+-      ],
+-    },
+-    "Speaker:speaker-2": {
+-      __typename: "Speaker",
+-      id: "speaker-2",
+-      name: "Bob",
+-      'availableTimes({"timezone":"UTC"})': ["2026-09-15T10:00:00.000Z", null],
+-    },
+-    "Session:session-1": {
+-      __typename: "Session",
+-      id: "session-1",
+-      'startTime({"timezone":"UTC"})': "2026-09-15T09:00:00.000Z",
+-      metadata: { dress: "casual" },
+-    },
+-    "Workshop:workshop-1": {
+-      __typename: "Workshop",
+-      id: "workshop-1",
+-      'startTime({"timezone":"UTC"})': "2026-09-15T14:00:00.000Z",
+-      metadata: { venue: "The Workshop Building" },
+-    },
+-  });
+-});
+-
+-test("cache.restore() parses all serialized scalar values before storing them", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-      Price: priceScalar,
+-      JSONObject: jsonObjectScalar,
+-    },
+-    possibleTypes: {
+-      Schedulable: ["Session", "Workshop"],
+-    },
+-    typePolicies: {
+-      Conference: {
+-        fields: {
+-          startDate: { scalar: "DateTime" },
+-          endDate: { scalar: "DateTime" },
+-          ticketPrice: { scalar: "Price" },
+-        },
+-      },
+-      Schedule: {
+-        fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-          availabilitySlots: { scalar: "DateTime" },
+-        },
+-      },
+-      Speaker: {
+-        fields: {
+-          availableTimes: { scalar: "DateTime" },
+-        },
+-      },
+-      Session: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-      Workshop: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-    },
+-  });
+-
+-  cache.restore({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      conference: { __ref: "Conference:conf-1" },
+-    },
+-    "Conference:conf-1": {
+-      __typename: "Conference",
+-      id: "conf-1",
+-      name: "GraphQL Summit",
+-      startDate: "2026-09-15T09:00:00.000Z",
+-      endDate: null,
+-      ticketPrice: 19900,
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: ["2026-09-15T09:00:00.000Z", "2026-09-15T14:00:00.000Z"],
+-        availabilitySlots: [
+-          ["2026-09-15T09:00:00.000Z", "2026-09-15T10:00:00.000Z"],
+-          ["2026-09-15T14:00:00.000Z"],
+-        ],
+-      },
+-      scheduledItems: [
+-        { __ref: "Session:session-1" },
+-        { __ref: "Workshop:workshop-1" },
+-      ],
+-      speakers: [
+-        { __ref: "Speaker:speaker-1" },
+-        { __ref: "Speaker:speaker-2" },
+-      ],
+-    },
+-    "Speaker:speaker-1": {
+-      __typename: "Speaker",
+-      id: "speaker-1",
+-      name: "Alice",
+-      'availableTimes({"timezone":"UTC"})': [
+-        "2026-09-15T09:00:00.000Z",
+-        "2026-09-15T14:00:00.000Z",
+-      ],
+-    },
+-    "Speaker:speaker-2": {
+-      __typename: "Speaker",
+-      id: "speaker-2",
+-      name: "Bob",
+-      'availableTimes({"timezone":"UTC"})': ["2026-09-15T10:00:00.000Z", null],
+-    },
+-    "Session:session-1": {
+-      __typename: "Session",
+-      id: "session-1",
+-      'startTime({"timezone":"UTC"})': "2026-09-15T09:00:00.000Z",
+-      metadata: { dress: "casual" },
+-    },
+-    "Workshop:workshop-1": {
+-      __typename: "Workshop",
+-      id: "workshop-1",
+-      'startTime({"timezone":"UTC"})': "2026-09-15T14:00:00.000Z",
+-      metadata: { venue: "The Workshop Building" },
+-    },
+-  });
+-
+-  expect(rawCacheData(cache)).toEqual({
+-    ROOT_QUERY: {
+-      __typename: "Query",
+-      conference: { __ref: "Conference:conf-1" },
+-    },
+-    "Conference:conf-1": {
+-      __typename: "Conference",
+-      id: "conf-1",
+-      name: "GraphQL Summit",
+-      startDate: new Date("2026-09-15T09:00:00.000Z"),
+-      endDate: null,
+-      ticketPrice: "199.00",
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: [
+-          new Date("2026-09-15T09:00:00.000Z"),
+-          new Date("2026-09-15T14:00:00.000Z"),
+-        ],
+-        availabilitySlots: [
+-          [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T10:00:00.000Z"),
+-          ],
+-          [new Date("2026-09-15T14:00:00.000Z")],
+-        ],
+-      },
+-      scheduledItems: [
+-        { __ref: "Session:session-1" },
+-        { __ref: "Workshop:workshop-1" },
+-      ],
+-      speakers: [
+-        { __ref: "Speaker:speaker-1" },
+-        { __ref: "Speaker:speaker-2" },
+-      ],
+-    },
+-    "Speaker:speaker-1": {
+-      __typename: "Speaker",
+-      id: "speaker-1",
+-      name: "Alice",
+-      'availableTimes({"timezone":"UTC"})': [
+-        new Date("2026-09-15T09:00:00.000Z"),
+-        new Date("2026-09-15T14:00:00.000Z"),
+-      ],
+-    },
+-    "Speaker:speaker-2": {
+-      __typename: "Speaker",
+-      id: "speaker-2",
+-      name: "Bob",
+-      'availableTimes({"timezone":"UTC"})': [
+-        new Date("2026-09-15T10:00:00.000Z"),
+-        null,
+-      ],
+-    },
+-    "Session:session-1": {
+-      __typename: "Session",
+-      id: "session-1",
+-      'startTime({"timezone":"UTC"})': new Date("2026-09-15T09:00:00.000Z"),
+-      metadata: new Map([["dress", "casual"]]),
+-    },
+-    "Workshop:workshop-1": {
+-      __typename: "Workshop",
+-      id: "workshop-1",
+-      'startTime({"timezone":"UTC"})': new Date("2026-09-15T14:00:00.000Z"),
+-      metadata: new Map([["venue", "The Workshop Building"]]),
+-    },
+-  });
+-});
+-
+ test("cache.restore() preserves references when scalar values are already parsed", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -2851,94 +1883,6 @@ test("parses scalar value when the field has arguments with variables", () => {
+   });
+ });
+ 
+-test("parses each element when the scalar field contains an array of values", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          meetingTimes: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        meetingTimes
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        meetingTimes: ["2026-01-01T09:00:00.000Z", "2026-01-02T09:00:00.000Z"],
+-      },
+-    },
+-  });
+-
+-  expect(cache.readQuery({ query })).toEqual({
+-    schedule: {
+-      __typename: "Schedule",
+-      meetingTimes: [
+-        new Date("2026-01-01T09:00:00.000Z"),
+-        new Date("2026-01-02T09:00:00.000Z"),
+-      ],
+-    },
+-  });
+-});
+-
+-test("parses each leaf element when the scalar field contains a 2D array", () => {
+-  const cache = new InMemoryCache({
+-    scalars: { DateTime: dateTimeScalar },
+-    typePolicies: {
+-      Schedule: {
+-        fields: {
+-          availabilitySlots: { scalar: "DateTime" },
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      schedule {
+-        availabilitySlots
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      schedule: {
+-        __typename: "Schedule",
+-        availabilitySlots: [
+-          ["2026-01-01T09:00:00.000Z", "2026-01-01T10:00:00.000Z"],
+-          ["2026-01-02T14:00:00.000Z"],
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(cache.readQuery({ query })).toEqual({
+-    schedule: {
+-      __typename: "Schedule",
+-      availabilitySlots: [
+-        [
+-          new Date("2026-01-01T09:00:00.000Z"),
+-          new Date("2026-01-01T10:00:00.000Z"),
+-        ],
+-        [new Date("2026-01-02T14:00:00.000Z")],
+-      ],
+-    },
+-  });
+-});
+-
+ test("returns null as-is when null is stored in a scalar field position", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -3467,239 +2411,6 @@ test("parses scalars for fields with aliases", () => {
+   });
+ });
+ 
+-test("parses scalar values across a complex nested query", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-      Price: priceScalar,
+-      JSONObject: jsonObjectScalar,
+-    },
+-    possibleTypes: {
+-      Schedulable: ["Session", "Workshop"],
+-    },
+-    typePolicies: {
+-      Conference: {
+-        fields: {
+-          startDate: { scalar: "DateTime" },
+-          endDate: { scalar: "DateTime" },
+-          ticketPrice: { scalar: "Price" },
+-        },
+-      },
+-      Schedule: {
+-        fields: {
+-          timeSlots: { scalar: "DateTime" },
+-        },
+-      },
+-      Speaker: {
+-        fields: {
+-          availableTimes: { scalar: "DateTime" },
+-        },
+-      },
+-      Session: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-      Workshop: {
+-        fields: {
+-          startTime: { scalar: "DateTime" },
+-          metadata: { scalar: "JSONObject" },
+-        },
+-      },
+-      VirtualPresenter: {
+-        fields: { nextSession: { scalar: "DateTime" } },
+-      },
+-      InPersonPresenter: {
+-        fields: { arrivalTime: { scalar: "DateTime" } },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      conference {
+-        id
+-        name
+-        startDate
+-        endDate
+-        ticketPrice
+-        schedule {
+-          timeSlots
+-        }
+-        ...SpeakerListFields
+-        scheduledItems {
+-          __typename
+-          ...SchedulableFields
+-        }
+-        presenters {
+-          __typename
+-          ... on VirtualPresenter {
+-            id
+-            name
+-            nextSession
+-          }
+-          ... on InPersonPresenter {
+-            id
+-            name
+-            arrivalTime
+-          }
+-        }
+-      }
+-    }
+-
+-    fragment SpeakerListFields on Conference {
+-      speakers {
+-        id
+-        name
+-        availableTimes
+-      }
+-    }
+-
+-    fragment SchedulableFields on Schedulable {
+-      id
+-      startTime
+-      metadata
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      conference: {
+-        __typename: "Conference",
+-        id: "conf-1",
+-        name: "GraphQL Summit",
+-        startDate: "2026-09-15T09:00:00.000Z",
+-        endDate: null,
+-        ticketPrice: 19900,
+-        schedule: {
+-          __typename: "Schedule",
+-          timeSlots: [
+-            ["2026-09-15T09:00:00.000Z", "2026-09-15T10:00:00.000Z"],
+-            ["2026-09-15T14:00:00.000Z", "2026-09-15T15:00:00.000Z"],
+-          ],
+-        },
+-        speakers: [
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-1",
+-            name: "Alice",
+-            availableTimes: [
+-              "2026-09-15T09:00:00.000Z",
+-              "2026-09-15T14:00:00.000Z",
+-            ],
+-          },
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-2",
+-            name: "Bob",
+-            // null is valid in a scalar array
+-            availableTimes: ["2026-09-15T10:00:00.000Z", null],
+-          },
+-        ],
+-        scheduledItems: [
+-          {
+-            __typename: "Session",
+-            id: "session-1",
+-            startTime: "2026-09-15T09:00:00.000Z",
+-            metadata: { dress: "casual" },
+-          },
+-          {
+-            __typename: "Workshop",
+-            id: "workshop-1",
+-            startTime: "2026-09-15T14:00:00.000Z",
+-            metadata: { venue: "The Workshop Building" },
+-          },
+-        ],
+-        presenters: [
+-          {
+-            __typename: "VirtualPresenter",
+-            id: "vp-1",
+-            name: "Charlie",
+-            nextSession: "2026-09-15T09:00:00.000Z",
+-          },
+-          {
+-            __typename: "InPersonPresenter",
+-            id: "ip-1",
+-            name: "Diana",
+-            arrivalTime: "2026-09-14T18:00:00.000Z",
+-          },
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(cache.readQuery({ query })).toEqual({
+-    conference: {
+-      __typename: "Conference",
+-      id: "conf-1",
+-      name: "GraphQL Summit",
+-      startDate: new Date("2026-09-15T09:00:00.000Z"),
+-      endDate: null,
+-      ticketPrice: "199.00",
+-      schedule: {
+-        __typename: "Schedule",
+-        timeSlots: [
+-          [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T10:00:00.000Z"),
+-          ],
+-          [
+-            new Date("2026-09-15T14:00:00.000Z"),
+-            new Date("2026-09-15T15:00:00.000Z"),
+-          ],
+-        ],
+-      },
+-      speakers: [
+-        {
+-          __typename: "Speaker",
+-          id: "speaker-1",
+-          name: "Alice",
+-          availableTimes: [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T14:00:00.000Z"),
+-          ],
+-        },
+-        {
+-          __typename: "Speaker",
+-          id: "speaker-2",
+-          name: "Bob",
+-          availableTimes: [new Date("2026-09-15T10:00:00.000Z"), null],
+-        },
+-      ],
+-      scheduledItems: [
+-        {
+-          __typename: "Session",
+-          id: "session-1",
+-          startTime: new Date("2026-09-15T09:00:00.000Z"),
+-          metadata: new Map([["dress", "casual"]]),
+-        },
+-        {
+-          __typename: "Workshop",
+-          id: "workshop-1",
+-          startTime: new Date("2026-09-15T14:00:00.000Z"),
+-          metadata: new Map([["venue", "The Workshop Building"]]),
+-        },
+-      ],
+-      presenters: [
+-        {
+-          __typename: "VirtualPresenter",
+-          id: "vp-1",
+-          name: "Charlie",
+-          nextSession: new Date("2026-09-15T09:00:00.000Z"),
+-        },
+-        {
+-          __typename: "InPersonPresenter",
+-          id: "ip-1",
+-          name: "Diana",
+-          arrivalTime: new Date("2026-09-14T18:00:00.000Z"),
+-        },
+-      ],
+-    },
+-  });
+-});
+-
+ test("parses scalar values on each emit from cache.watchFragment", async () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+@@ -4443,194 +3154,6 @@ test("ignores a read function added by policies.addTypePolicies with the field p
+   );
+ });
+ 
+-test("deep merges scalar option with policies.addTypePolicies", () => {
+-  using _ = spyOnConsole("warn");
+-  const endDateMerge = jest.fn(
+-    (_existing: unknown, incoming: unknown) => incoming
+-  );
+-
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-      Price: priceScalar,
+-      JSONObject: jsonObjectScalar,
+-    },
+-    typePolicies: {
+-      Conference: {
+-        fields: {
+-          startDate: { scalar: "DateTime" },
+-          endDate: { merge: endDateMerge },
+-        },
+-      },
+-      Schedule: {
+-        fields: {
+-          timeSlots: { scalar: "Price" },
+-        },
+-      },
+-      Speaker: {
+-        fields: {
+-          availableTimes: { keyArgs: false },
+-        },
+-      },
+-    },
+-  });
+-
+-  cache.policies.addTypePolicies({
+-    Conference: {
+-      fields: {
+-        endDate: { scalar: "DateTime" },
+-        ticketPrice: { scalar: "Price" },
+-      },
+-    },
+-    Schedule: {
+-      fields: {
+-        timeSlots: { scalar: "DateTime" },
+-      },
+-    },
+-    Speaker: {
+-      fields: {
+-        availableTimes: { scalar: "DateTime" },
+-      },
+-    },
+-    Session: {
+-      fields: {
+-        startTime: { scalar: "DateTime" },
+-        metadata: { scalar: "JSONObject" },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query {
+-      conference {
+-        id
+-        name
+-        startDate
+-        endDate
+-        ticketPrice
+-        schedule {
+-          timeSlots
+-        }
+-        speakers {
+-          id
+-          name
+-          availableTimes
+-        }
+-        sessions {
+-          __typename
+-          id
+-          startTime
+-          metadata
+-        }
+-      }
+-    }
+-  `;
+-
+-  cache.writeQuery({
+-    query,
+-    data: {
+-      conference: {
+-        __typename: "Conference",
+-        id: "conf-1",
+-        name: "GraphQL Summit",
+-        startDate: "2026-09-15T09:00:00.000Z",
+-        endDate: "2026-09-15T11:00:00.000Z",
+-        ticketPrice: 19900,
+-        schedule: {
+-          __typename: "Schedule",
+-          timeSlots: [
+-            ["2026-09-15T09:00:00.000Z", "2026-09-15T10:00:00.000Z"],
+-            ["2026-09-15T14:00:00.000Z", "2026-09-15T15:00:00.000Z"],
+-          ],
+-        },
+-        speakers: [
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-1",
+-            name: "Alice",
+-            availableTimes: [
+-              "2026-09-15T09:00:00.000Z",
+-              "2026-09-15T14:00:00.000Z",
+-            ],
+-          },
+-          {
+-            __typename: "Speaker",
+-            id: "speaker-2",
+-            name: "Bob",
+-            availableTimes: ["2026-09-15T10:00:00.000Z", null],
+-          },
+-        ],
+-        sessions: [
+-          {
+-            __typename: "Session",
+-            id: "session-1",
+-            startTime: "2026-09-15T09:00:00.000Z",
+-            metadata: { dress: "casual" },
+-          },
+-        ],
+-      },
+-    },
+-  });
+-
+-  expect(cache.readQuery({ query })).toEqual({
+-    conference: {
+-      __typename: "Conference",
+-      id: "conf-1",
+-      name: "GraphQL Summit",
+-      startDate: new Date("2026-09-15T09:00:00.000Z"),
+-      endDate: new Date("2026-09-15T11:00:00.000Z"),
+-      ticketPrice: "199.00",
+-      schedule: {
+-        __typename: "Schedule",
+-        timeSlots: [
+-          [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T10:00:00.000Z"),
+-          ],
+-          [
+-            new Date("2026-09-15T14:00:00.000Z"),
+-            new Date("2026-09-15T15:00:00.000Z"),
+-          ],
+-        ],
+-      },
+-      speakers: [
+-        {
+-          __typename: "Speaker",
+-          id: "speaker-1",
+-          name: "Alice",
+-          availableTimes: [
+-            new Date("2026-09-15T09:00:00.000Z"),
+-            new Date("2026-09-15T14:00:00.000Z"),
+-          ],
+-        },
+-        {
+-          __typename: "Speaker",
+-          id: "speaker-2",
+-          name: "Bob",
+-          availableTimes: [new Date("2026-09-15T10:00:00.000Z"), null],
+-        },
+-      ],
+-      sessions: [
+-        {
+-          __typename: "Session",
+-          id: "session-1",
+-          startTime: new Date("2026-09-15T09:00:00.000Z"),
+-          metadata: new Map([["dress", "casual"]]),
+-        },
+-      ],
+-    },
+-  });
+-
+-  expect(endDateMerge).not.toHaveBeenCalled();
+-  expect(console.warn).toHaveBeenCalledTimes(1);
+-  expect(console.warn).toHaveBeenCalledWith(
+-    WARNINGS.SCALAR_FIELD_CONFIG,
+-    "Conference.endDate",
+-    "DateTime",
+-    "merge"
+-  );
+-});
+-
+ test("preserves an existing scalar option when policies.addTypePolicies updates another field option", () => {
+   const cache = new InMemoryCache({
+     scalars: { DateTime: dateTimeScalar },
+diff --git a/src/cache/inmemory/__tests__/variablesSerialization.ts b/src/cache/inmemory/__tests__/variablesSerialization.ts
+index ebf58214b..8c173fd21 100644
+--- a/src/cache/inmemory/__tests__/variablesSerialization.ts
++++ b/src/cache/inmemory/__tests__/variablesSerialization.ts
+@@ -371,62 +371,6 @@ test("serializes a scalar object field in a configured input object", () => {
+   });
+ });
+ 
+-test("serializes mixed scalar object list fields in a configured input object", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      JSONObject: jsonObjectScalar,
+-    },
+-    inputObjects: {
+-      EventInput: {
+-        fields: {
+-          metadata: "JSONObject",
+-        },
+-      },
+-    },
+-  });
+-
+-  const mutation = gql`
+-    mutation CreateEvent($input: EventInput!) {
+-      createEvent(input: $input) {
+-        id
+-      }
+-    }
+-  `;
+-  const serializedMetadata = {
+-    location: "Online",
+-  };
+-  const metadata = [
+-    new Map<string, unknown>([
+-      ["location", "Denver"],
+-      ["capacity", 500],
+-    ]),
+-    serializedMetadata,
+-  ];
+-  const variables = {
+-    input: {
+-      metadata,
+-    },
+-  };
+-
+-  const result = cache.serializeVariables(mutation, variables);
+-
+-  expect(result).toStrictEqualTyped({
+-    input: {
+-      metadata: [
+-        {
+-          location: "Denver",
+-          capacity: 500,
+-        },
+-        serializedMetadata,
+-      ],
+-    },
+-  });
+-  expect(result).not.toBe(variables);
+-  expect(result.input).not.toBe(variables.input);
+-  expect(result.input.metadata).not.toBe(metadata);
+-  expect(result.input.metadata[1]).toBe(serializedMetadata);
+-});
+-
+ test("serializes nested configured input objects", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+@@ -476,153 +420,6 @@ test("serializes nested configured input objects", () => {
+   });
+ });
+ 
+-test("serializes lists of custom scalars in a configured input object", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-    },
+-    inputObjects: {
+-      AvailabilityInput: {
+-        fields: {
+-          dates: "DateTime",
+-        },
+-      },
+-    },
+-  });
+-
+-  const mutation = gql`
+-    mutation SetAvailability($input: AvailabilityInput!) {
+-      setAvailability(input: $input) {
+-        id
+-      }
+-    }
+-  `;
+-
+-  expect(
+-    cache.serializeVariables(mutation, {
+-      input: {
+-        dates: [
+-          new Date("2026-01-01T00:00:00.000Z"),
+-          null,
+-          [new Date("2026-01-02T00:00:00.000Z")],
+-        ],
+-      },
+-    })
+-  ).toStrictEqualTyped({
+-    input: {
+-      dates: ["2026-01-01T00:00:00.000Z", null, ["2026-01-02T00:00:00.000Z"]],
+-    },
+-  });
+-});
+-
+-test("serializes lists and nested lists of configured input objects", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-    },
+-    inputObjects: {
+-      ScheduleInput: {
+-        fields: {
+-          sessions: "SessionInput",
+-        },
+-      },
+-      SessionInput: {
+-        fields: {
+-          startsAt: "DateTime",
+-        },
+-      },
+-    },
+-  });
+-
+-  const mutation = gql`
+-    mutation CreateSchedules($schedules: [[ScheduleInput!]!]!) {
+-      createSchedules(schedules: $schedules) {
+-        id
+-      }
+-    }
+-  `;
+-
+-  expect(
+-    cache.serializeVariables(mutation, {
+-      schedules: [
+-        [
+-          {
+-            name: "Day one",
+-            sessions: [
+-              {
+-                title: "Keynote",
+-                startsAt: new Date("2026-01-01T09:00:00.000Z"),
+-              },
+-              null,
+-            ],
+-          },
+-        ],
+-      ],
+-    })
+-  ).toStrictEqualTyped({
+-    schedules: [
+-      [
+-        {
+-          name: "Day one",
+-          sessions: [
+-            {
+-              title: "Keynote",
+-              startsAt: "2026-01-01T09:00:00.000Z",
+-            },
+-            null,
+-          ],
+-        },
+-      ],
+-    ],
+-  });
+-});
+-
+-test("serializes recursive input objects", () => {
+-  const cache = new InMemoryCache({
+-    scalars: {
+-      DateTime: dateTimeScalar,
+-    },
+-    inputObjects: {
+-      EventFilter: {
+-        fields: {
+-          startsAt: "DateTime",
+-          and: "EventFilter",
+-        },
+-      },
+-    },
+-  });
+-
+-  const query = gql`
+-    query Events($filter: EventFilter!) {
+-      events(filter: $filter) {
+-        id
+-      }
+-    }
+-  `;
+-
+-  expect(
+-    cache.serializeVariables(query, {
+-      filter: {
+-        startsAt: new Date("2026-01-01T00:00:00.000Z"),
+-        and: [
+-          {
+-            startsAt: new Date("2026-01-02T00:00:00.000Z"),
+-          },
+-        ],
+-      },
+-    })
+-  ).toStrictEqualTyped({
+-    filter: {
+-      startsAt: "2026-01-01T00:00:00.000Z",
+-      and: [
+-        {
+-          startsAt: "2026-01-02T00:00:00.000Z",
+-        },
+-      ],
+-    },
+-  });
+-});
+-
+ test("preserves null and omitted input object fields", () => {
+   const cache = new InMemoryCache({
+     scalars: {
+diff --git a/src/core/__tests__/ApolloClient/general.test.ts b/src/core/__tests__/ApolloClient/general.test.ts
+index 73c9f911a..b63ec1683 100644
+--- a/src/core/__tests__/ApolloClient/general.test.ts
++++ b/src/core/__tests__/ApolloClient/general.test.ts
+@@ -2876,248 +2876,6 @@ describe("ApolloClient", () => {
+     });
+   });
+ 
+-  it("should not write unchanged network results to cache", async () => {
+-    const cache = new InMemoryCache({
+-      typePolicies: {
+-        Query: {
+-          fields: {
+-            info: {
+-              merge: false,
+-            },
+-          },
+-        },
+-      },
+-    });
+-
+-    const client = new ApolloClient({
+-      cache,
+-      link: new ApolloLink(
+-        (operation) =>
+-          new Observable((observer) => {
+-            // Deliver the results async so we can observe the loading state
+-            setTimeout(() => {
+-              switch (operation.operationName) {
+-                case "A":
+-                  observer.next({ data: { info: { a: "ay" } } });
+-                  break;
+-                case "B":
+-                  observer.next({ data: { info: { b: "bee" } } });
+-                  break;
+-              }
+-              observer.complete!();
+-            });
+-          })
+-      ),
+-    });
+-
+-    const queryA = gql`
+-      query A {
+-        info {
+-          a
+-        }
+-      }
+-    `;
+-    const queryB = gql`
+-      query B {
+-        info {
+-          b
+-        }
+-      }
+-    `;
+-
+-    const obsA = client.watchQuery({
+-      query: queryA,
+-      returnPartialData: true,
+-    });
+-
+-    const obsB = client.watchQuery({
+-      query: queryB,
+-      returnPartialData: true,
+-    });
+-
+-    const aStream = new ObservableStream(obsA);
+-    const bStream = new ObservableStream(obsB);
+-
+-    await expect(aStream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
+-    });
+-
+-    await expect(bStream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
+-    });
+-
+-    await expect(aStream).toEmitTypedValue({
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          a: "ay",
+-        },
+-      },
+-      dataState: "complete",
+-      partial: false,
+-    });
+-
+-    await expect(bStream).toEmitTypedValue({
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          b: "bee",
+-        },
+-      },
+-      dataState: "complete",
+-      partial: false,
+-    });
+-
+-    await expect(aStream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: {
+-        info: {},
+-      },
+-      dataState: "partial",
+-      partial: true,
+-    });
+-
+-    await expect(aStream).toEmitTypedValue({
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          a: "ay",
+-        },
+-      },
+-      dataState: "complete",
+-      partial: false,
+-    });
+-
+-    await expect(aStream).not.toEmitAnything();
+-    await expect(bStream).not.toEmitAnything();
+-  });
+-
+-  it("should disable feud-stopping logic after evict or modify", async () => {
+-    const cache = new InMemoryCache({
+-      typePolicies: {
+-        Query: {
+-          fields: {
+-            info: {
+-              merge: false,
+-            },
+-          },
+-        },
+-      },
+-    });
+-
+-    const client = new ApolloClient({
+-      cache,
+-      link: new ApolloLink(
+-        () =>
+-          new Observable((observer: Observer<ApolloLink.Result>) => {
+-            setTimeout(() => {
+-              observer.next!({ data: { info: { c: "see" } } });
+-              observer.complete!();
+-            });
+-          })
+-      ),
+-    });
+-
+-    const query = gql`
+-      query {
+-        info {
+-          c
+-        }
+-      }
+-    `;
+-
+-    const obs = client.watchQuery({
+-      query,
+-      returnPartialData: true,
+-    });
+-
+-    const stream = new ObservableStream(obs);
+-
+-    await expect(stream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
+-    });
+-
+-    await expect(stream).toEmitTypedValue({
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          c: "see",
+-        },
+-      },
+-      dataState: "complete",
+-      partial: false,
+-    });
+-
+-    cache.evict({ fieldName: "info" });
+-
+-    await expect(stream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
+-    });
+-
+-    await expect(stream).toEmitTypedValue({
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          c: "see",
+-        },
+-      },
+-      dataState: "complete",
+-      partial: false,
+-    });
+-
+-    cache.modify({
+-      fields: {
+-        info(_, { DELETE }) {
+-          return DELETE;
+-        },
+-      },
+-    });
+-
+-    await expect(stream).toEmitTypedValue({
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      data: undefined,
+-      dataState: "empty",
+-      partial: true,
+-    });
+-
+-    await expect(stream).toEmitTypedValue({
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      data: {
+-        info: {
+-          c: "see",
+-        },
+-      },
+-      dataState: "complete",
+-      partial: false,
+-    });
+-
+-    await expect(stream).not.toEmitAnything();
+-  });
+-
+   it("writes the latest polled result over a clobbered cache value when polled result equals last polled result", async () => {
+     const query = gql`
+       query {
+diff --git a/src/core/__tests__/client.query/customScalars.test.ts b/src/core/__tests__/client.query/customScalars.test.ts
+index 07141c183..0f4914501 100644
+--- a/src/core/__tests__/client.query/customScalars.test.ts
++++ b/src/core/__tests__/client.query/customScalars.test.ts
+@@ -397,58 +397,6 @@ test("parses network custom scalar fields with a network-only fetch policy", asy
+   });
+ });
+ 
+-test.failing(
+-  "parses custom scalar fields with a no-cache fetch policy",
+-  async () => {
+-    const query = gql`
+-      query Event {
+-        event {
+-          id
+-          startDate
+-        }
+-      }
+-    `;
+-    const client = new ApolloClient({
+-      cache: new InMemoryCache({
+-        scalars: { Date: dateScalar },
+-        typePolicies: {
+-          Event: {
+-            fields: {
+-              startDate: { scalar: "Date" },
+-            },
+-          },
+-        },
+-      }),
+-      link: new ApolloLink(() =>
+-        of({
+-          data: {
+-            event: {
+-              __typename: "Event",
+-              id: "1",
+-              startDate: "2026-01-01",
+-            },
+-          },
+-        }).pipe(delay(20))
+-      ),
+-    });
+-
+-    await expect(
+-      client.query({
+-        query,
+-        fetchPolicy: "no-cache",
+-      })
+-    ).resolves.toStrictEqualTyped({
+-      data: {
+-        event: {
+-          __typename: "Event",
+-          id: "1",
+-          startDate: new Date(2026, 0, 1),
+-        },
+-      },
+-    });
+-  }
+-);
+-
+ test("preserves referential identity when fetching identical serialized scalar values", async () => {
+   const query = gql`
+     query Event {
+diff --git a/src/core/__tests__/client.watchQuery/customScalars.test.ts b/src/core/__tests__/client.watchQuery/customScalars.test.ts
+index 73eb08314..b6009fb2a 100644
+--- a/src/core/__tests__/client.watchQuery/customScalars.test.ts
++++ b/src/core/__tests__/client.watchQuery/customScalars.test.ts
+@@ -21,184 +21,6 @@ import {
+   ObservableStream,
+ } from "@apollo/client/testing/internal";
+ 
+-test("serializes scalar variables used in field arguments", async () => {
+-  let requestVariables!: OperationVariables;
+-
+-  const link = new ApolloLink((operation) => {
+-    requestVariables = operation.variables;
+-
+-    return of({
+-      data: { event: { __typename: "Event", name: "GraphQL Summit" } },
+-    });
+-  });
+-
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache({
+-      scalars: {
+-        Date: dateScalar,
+-      },
+-    }),
+-    link,
+-  });
+-
+-  const query = gql`
+-    query Event($date: Date!) {
+-      event(date: $date) {
+-        name
+-      }
+-    }
+-  `;
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({
+-      query,
+-      variables: {
+-        date: new Date(2026, 0, 1),
+-      },
+-    })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      event: {
+-        __typename: "Event",
+-        name: "GraphQL Summit",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-
+-  expect(requestVariables).toStrictEqualTyped({ date: "2026-01-01" });
+-});
+-
+-test("serializes scalar variables used in directive arguments", async () => {
+-  let requestVariables!: OperationVariables;
+-
+-  const link = new ApolloLink((operation) => {
+-    requestVariables = operation.variables;
+-
+-    return of({
+-      data: { event: { __typename: "Event", name: "GraphQL Summit" } },
+-    });
+-  });
+-
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache({
+-      scalars: {
+-        Date: dateScalar,
+-      },
+-    }),
+-    link,
+-  });
+-
+-  const query = gql`
+-    query Event($date: Date!) {
+-      event @on(date: $date) {
+-        name
+-      }
+-    }
+-  `;
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({
+-      query,
+-      variables: {
+-        date: new Date(2026, 0, 1),
+-      },
+-    })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      event: {
+-        __typename: "Event",
+-        name: "GraphQL Summit",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-
+-  expect(requestVariables).toStrictEqualTyped({ date: "2026-01-01" });
+-});
+-
+-test("serializes scalar fields in input object variables", async () => {
+-  let requestVariables!: OperationVariables;
+-
+-  const link = new ApolloLink((operation) => {
+-    requestVariables = operation.variables;
+-
+-    return of({
+-      data: { event: { __typename: "Event", name: "GraphQL Summit" } },
+-    });
+-  });
+-
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache({
+-      scalars: {
+-        Date: dateScalar,
+-      },
+-      inputObjects: {
+-        EventFilter: {
+-          fields: {
+-            date: "Date",
+-          },
+-        },
+-      },
+-    }),
+-    link,
+-  });
+-
+-  const query = gql`
+-    query Event($filter: EventFilter!) {
+-      event(filter: $filter) {
+-        name
+-      }
+-    }
+-  `;
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({
+-      query,
+-      variables: {
+-        filter: {
+-          date: new Date(2026, 0, 1),
+-        },
+-      },
+-    })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      event: {
+-        __typename: "Event",
+-        name: "GraphQL Summit",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-
+-  expect(requestVariables).toStrictEqualTyped({
+-    filter: {
+-      date: "2026-01-01",
+-    },
+-  });
+-});
+-
+ test("serializes scalar variables passed to refetch", async () => {
+   let requestVariables!: OperationVariables;
+ 
+@@ -872,71 +694,6 @@ test("parses network custom scalar fields with a network-only fetch policy", asy
+   await expect(stream).not.toEmitAnything();
+ });
+ 
+-test.failing(
+-  "parses custom scalar fields with a no-cache fetch policy",
+-  async () => {
+-    const query = gql`
+-      query Event {
+-        event {
+-          id
+-          startDate
+-        }
+-      }
+-    `;
+-    const client = new ApolloClient({
+-      cache: new InMemoryCache({
+-        scalars: { Date: dateScalar },
+-        typePolicies: {
+-          Event: {
+-            fields: {
+-              startDate: { scalar: "Date" },
+-            },
+-          },
+-        },
+-      }),
+-      link: new ApolloLink(() =>
+-        of({
+-          data: {
+-            event: {
+-              __typename: "Event",
+-              id: "1",
+-              startDate: "2026-01-01",
+-            },
+-          },
+-        }).pipe(delay(20))
+-      ),
+-    });
+-
+-    using stream = new ObservableStream(
+-      client.watchQuery({
+-        query,
+-        fetchPolicy: "no-cache",
+-      })
+-    );
+-
+-    await expect(stream).toEmitTypedValue({
+-      data: undefined,
+-      dataState: "empty",
+-      loading: true,
+-      networkStatus: NetworkStatus.loading,
+-      partial: true,
+-    });
+-    await expect(stream).toEmitTypedValue({
+-      data: {
+-        event: {
+-          __typename: "Event",
+-          id: "1",
+-          startDate: new Date(2026, 0, 1),
+-        },
+-      },
+-      dataState: "complete",
+-      loading: false,
+-      networkStatus: NetworkStatus.ready,
+-      partial: false,
+-    });
+-  }
+-);
+-
+ test("preserves referential identity when refetching identical serialized scalar values", async () => {
+   const query = gql`
+     query Event {
+diff --git a/src/core/__tests__/client.watchQuery/defer20220824.test.ts b/src/core/__tests__/client.watchQuery/defer20220824.test.ts
+index 771d7313d..498dcf2aa 100644
+--- a/src/core/__tests__/client.watchQuery/defer20220824.test.ts
++++ b/src/core/__tests__/client.watchQuery/defer20220824.test.ts
+@@ -462,139 +462,3 @@ test("delivers cache updates written while a deferred response is still streamin
+   expect(outgoingRequestSpy).toHaveBeenCalledTimes(1);
+ });
+ 
+-test("delivers cache updates written while a deferred response is still streaming with `returnPartialData: true`", async () => {
+-  const query = gql`
+-    query PostQuery {
+-      post {
+-        id
+-        title
+-        ... @defer {
+-          body
+-        }
+-      }
+-    }
+-  `;
+-
+-  const titleFragment = gql`
+-    fragment PostTitle on Post {
+-      title
+-    }
+-  `;
+-
+-  const outgoingRequestSpy = jest.fn(((operation, forward) =>
+-    forward(operation)) satisfies ApolloLink.RequestHandler);
+-
+-  const { httpLink, enqueueInitialChunk, enqueueSubsequentChunk } =
+-    mockDefer20220824();
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache(),
+-    link: ApolloLink.from([new ApolloLink(outgoingRequestSpy), httpLink]),
+-    incrementalHandler: new Defer20220824Handler(),
+-  });
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({
+-      query,
+-      fetchPolicy: "cache-and-network",
+-      returnPartialData: true,
+-    })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: undefined,
+-    dataState: "empty",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  enqueueInitialChunk({
+-    data: { post: { __typename: "Post", id: "1", title: "title from server" } },
+-    hasNext: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  client.writeFragment({
+-    fragment: titleFragment,
+-    from: { __typename: "Post", id: "1" },
+-    data: { __typename: "Post", id: "1", title: "title from write 1" },
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 1" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 1" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  client.writeFragment({
+-    fragment: titleFragment,
+-    from: { __typename: "Post", id: "1" },
+-    data: { __typename: "Post", id: "1", title: "title from write 2" },
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 2" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 2" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  enqueueSubsequentChunk({
+-    incremental: [{ data: { body: "body from server" }, path: ["post"] }],
+-    hasNext: false,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      post: {
+-        __typename: "Post",
+-        id: "1",
+-        title: "title from write 2",
+-        body: "body from server",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-  expect(outgoingRequestSpy).toHaveBeenCalledTimes(1);
+-});
+diff --git a/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts b/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts
+index e5b083bb4..27b7dd850 100644
+--- a/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts
++++ b/src/core/__tests__/client.watchQuery/deferGraphQL17Alpha9.test.ts
+@@ -10413,389 +10413,6 @@ test("delivers cache updates written while a deferred response is still streamin
+   expect(outgoingRequestSpy).toHaveBeenCalledTimes(1);
+ });
+ 
+-test("keeps dataState streaming for an optimistic cache write while a deferred response is still streaming", async () => {
+-  const query = gql`
+-    query PostQuery {
+-      post {
+-        id
+-        title
+-        ... @defer {
+-          body
+-        }
+-      }
+-    }
+-  `;
+-
+-  const { httpLink, enqueueInitialChunk, enqueueSubsequentChunk } =
+-    mockDeferStreamGraphQL17Alpha9();
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache(),
+-    link: httpLink,
+-    incrementalHandler: new GraphQL17Alpha9Handler(),
+-  });
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({
+-      query,
+-      fetchPolicy: "cache-and-network",
+-      returnPartialData: true,
+-    })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: undefined,
+-    dataState: "empty",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  enqueueInitialChunk({
+-    data: { post: { __typename: "Post", id: "1", title: "title from server" } },
+-    pending: [{ id: "0", path: ["post"] }],
+-    hasNext: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  {
+-    using _consoleSpy = spyOnConsole("error");
+-    client.cache.recordOptimisticTransaction((cache) => {
+-      cache.writeQuery({
+-        query,
+-        data: {
+-          post: {
+-            __typename: "Post",
+-            id: "1",
+-            title: "title from optimistic write",
+-          },
+-        },
+-      });
+-    }, "optimistic");
+-  }
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: {
+-        __typename: "Post",
+-        id: "1",
+-        title: "title from optimistic write",
+-      },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  client.cache.removeOptimistic("optimistic");
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  enqueueSubsequentChunk({
+-    incremental: [{ data: { body: "body from server" }, id: "0" }],
+-    completed: [{ id: "0" }],
+-    hasNext: false,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      post: {
+-        __typename: "Post",
+-        id: "1",
+-        title: "title from server",
+-        body: "body from server",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-});
+-
+-test("delivers an optimistic cache write while a deferred response is still streaming", async () => {
+-  const query = gql`
+-    query PostQuery {
+-      post {
+-        id
+-        title
+-        ... @defer {
+-          body
+-        }
+-      }
+-    }
+-  `;
+-
+-  const { httpLink, enqueueInitialChunk, enqueueSubsequentChunk } =
+-    mockDeferStreamGraphQL17Alpha9();
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache(),
+-    link: httpLink,
+-    incrementalHandler: new GraphQL17Alpha9Handler(),
+-  });
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({ query, fetchPolicy: "cache-and-network" })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: undefined,
+-    dataState: "empty",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  enqueueInitialChunk({
+-    data: { post: { __typename: "Post", id: "1", title: "title from server" } },
+-    pending: [{ id: "0", path: ["post"] }],
+-    hasNext: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  {
+-    using _consoleSpy = spyOnConsole("error");
+-    client.cache.recordOptimisticTransaction((cache) => {
+-      cache.writeQuery({
+-        query,
+-        data: {
+-          post: {
+-            __typename: "Post",
+-            id: "1",
+-            title: "title from optimistic write",
+-          },
+-        },
+-      });
+-    }, "optimistic");
+-  }
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: {
+-        __typename: "Post",
+-        id: "1",
+-        title: "title from optimistic write",
+-      },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  client.cache.removeOptimistic("optimistic");
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  enqueueSubsequentChunk({
+-    incremental: [{ data: { body: "body from server" }, id: "0" }],
+-    completed: [{ id: "0" }],
+-    hasNext: false,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      post: {
+-        __typename: "Post",
+-        id: "1",
+-        title: "title from server",
+-        body: "body from server",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-});
+-
+-test("delivers cache updates written while a deferred response is still streaming with `returnPartialData: true`", async () => {
+-  const query = gql`
+-    query PostQuery {
+-      post {
+-        id
+-        title
+-        ... @defer {
+-          body
+-        }
+-      }
+-    }
+-  `;
+-
+-  const titleFragment = gql`
+-    fragment PostTitle on Post {
+-      title
+-    }
+-  `;
+-
+-  const outgoingRequestSpy = jest.fn(((operation, forward) =>
+-    forward(operation)) satisfies ApolloLink.RequestHandler);
+-
+-  const { httpLink, enqueueInitialChunk, enqueueSubsequentChunk } =
+-    mockDeferStreamGraphQL17Alpha9();
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache(),
+-    link: new ApolloLink(outgoingRequestSpy).concat(httpLink),
+-    incrementalHandler: new GraphQL17Alpha9Handler(),
+-  });
+-
+-  using stream = new ObservableStream(
+-    client.watchQuery({
+-      query,
+-      fetchPolicy: "cache-and-network",
+-      returnPartialData: true,
+-    })
+-  );
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: undefined,
+-    dataState: "empty",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  enqueueInitialChunk({
+-    data: { post: { __typename: "Post", id: "1", title: "title from server" } },
+-    pending: [{ id: "0", path: ["post"] }],
+-    hasNext: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from server" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  client.writeFragment({
+-    fragment: titleFragment,
+-    from: { __typename: "Post", id: "1" },
+-    data: { __typename: "Post", id: "1", title: "title from write 1" },
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 1" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 1" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  client.writeFragment({
+-    fragment: titleFragment,
+-    from: { __typename: "Post", id: "1" },
+-    data: { __typename: "Post", id: "1", title: "title from write 2" },
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 2" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.loading,
+-    partial: true,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: markAsStreaming({
+-      post: { __typename: "Post", id: "1", title: "title from write 2" },
+-    }),
+-    dataState: "streaming",
+-    loading: true,
+-    networkStatus: NetworkStatus.streaming,
+-    partial: true,
+-  });
+-
+-  enqueueSubsequentChunk({
+-    incremental: [{ data: { body: "body from server" }, id: "0" }],
+-    completed: [{ id: "0" }],
+-    hasNext: false,
+-  });
+-
+-  await expect(stream).toEmitTypedValue({
+-    data: {
+-      post: {
+-        __typename: "Post",
+-        id: "1",
+-        title: "title from write 2",
+-        body: "body from server",
+-      },
+-    },
+-    dataState: "complete",
+-    loading: false,
+-    networkStatus: NetworkStatus.ready,
+-    partial: false,
+-  });
+-
+-  await expect(stream).not.toEmitAnything();
+-  expect(outgoingRequestSpy).toHaveBeenCalledTimes(1);
+-});
+-
+ // This results in an incorrect dataState reporting as "partial" instead of
+ // "streaming" when the hole is just the defer fragment. To fix requires more
+ // code than I think is worth at this point, especially because this is so niche
+diff --git a/src/core/__tests__/incompleteCacheReadWarning.test.ts b/src/core/__tests__/incompleteCacheReadWarning.test.ts
+index eeae90260..bd758829a 100644
+--- a/src/core/__tests__/incompleteCacheReadWarning.test.ts
++++ b/src/core/__tests__/incompleteCacheReadWarning.test.ts
+@@ -389,73 +389,6 @@ test("does not warn while a deferred result is still streaming", async () => {
+   expect(console.warn).not.toHaveBeenCalled();
+ });
+ 
+-test("does not warn again when the cache write is skipped because the identical result was already written", async () => {
+-  using _ = spyOnConsole("warn");
+-
+-  const query = gql`
+-    query UserQuery {
+-      user {
+-        name
+-        age
+-      }
+-    }
+-  `;
+-
+-  const client = new ApolloClient({
+-    cache: new InMemoryCache({
+-      typePolicies: {
+-        Query: {
+-          fields: {
+-            user: {
+-              merge: (_, incoming) => ({
+-                __typename: incoming.__typename,
+-                name: incoming.name,
+-              }),
+-            },
+-          },
+-        },
+-      },
+-    }),
+-    link: new MockLink([
+-      {
+-        request: { query },
+-        result: {
+-          data: { user: { __typename: "User", name: "Alice", age: 30 } },
+-        },
+-        maxUsageCount: Number.POSITIVE_INFINITY,
+-      },
+-    ]),
+-  });
+-
+-  const observable = client.watchQuery({ query });
+-  using stream = new ObservableStream(observable);
+-
+-  // loading
+-  await stream.takeNext();
+-  // result
+-  await stream.takeNext();
+-
+-  expect(console.warn).toHaveBeenCalledTimes(1);
+-
+-  client.writeQuery({
+-    query: gql`
+-      query {
+-        user {
+-          name
+-        }
+-      }
+-    `,
+-    data: { user: { __typename: "User", name: "Alice (updated)" } },
+-  });
+-
+-  // loading
+-  await stream.takeNext();
+-  // result
+-  await stream.takeNext();
+-
+-  expect(console.warn).toHaveBeenCalledTimes(1);
+-});
+-
+ // https://github.com/apollographql/apollo-client/issues/9293
+ test("warns when a pagination `merge` function concatenates a partial item into the list", async () => {
+   // The `cache.writeQuery` below writes a `Person` without `createdAt`, which

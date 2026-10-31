@@ -7,6 +7,43 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-31: Frontier v5 release 1, decisions (k) to (n)
+
+### Decision
+
+Owner, in chat, 2026-10-31, citing `docs/frontier-v5/FREEZE-v4.json`:
+
+- **(k)** Run tree-sitter's Claude Opus 5.5 prong (three attempts through
+  `run_gate.sh`), so all six release-1 tasks are gated against the same two
+  references. If Opus solves two or more, tree-sitter's admission is
+  reviewed before the release freeze.
+- **(l)** An F4 task that clears the gate by the end of 2026-11-04
+  (bothycore-booking-opaque-parity, ferrycore-crossing-opaque-parity 0.2.0)
+  joins release 1 on its own family line; one that does not moves to
+  release 2.
+- **(m)** Fund the confirmation runs this week: three fresh attempts per
+  task for GPT-6 Astra and Claude Opus 5.5 (36 runs for six tasks), from a
+  bench tag cut from main after the merges and the suite lock, separate from
+  every gate run.
+- **(n)** The owner creates a dedicated Codex login with no connected apps
+  (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`) before the
+  confirmation runs; `run_gate.sh` uses it when present.
+
+### Evidence
+
+PLAN-v4.md section 6. At decision time bothycore's first Astra attempt had
+solved it by targeted experiments within the query budget, so (l) may admit
+nothing.
+
+### Revisit triggers
+
+- (n) not in place when the confirmation runs are ready: ask the owner
+  before running them on the personal login.
+
+### What this touched
+
+Nothing yet; the runs follow.
+
 ## 2026-10-31: Frontier v5 release 1 is the F5 family (composition v4)
 
 ### Decision

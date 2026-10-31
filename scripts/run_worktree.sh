@@ -42,7 +42,22 @@ cd "$dir"
 if git lfs version >/dev/null 2>&1; then
   git lfs pull
 fi
-make setup >/dev/null
+# make setup builds the venv with python3; the harness needs 3.12. When the
+# shell's python3 is older, ask uv for one rather than fail inside pip.
+py=python3
+if ! "$py" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)' 2>/dev/null; then
+  py=$(uv python find 3.12 2>/dev/null) || {
+    echo "refusing: python3 on PATH is older than 3.12 and uv cannot find a 3.12" >&2
+    exit 1
+  }
+fi
+# Setup output goes to a log (gitignored) so a failure is readable afterwards
+# by whoever launched this, including the run GUI's console.
+if ! make setup PYTHON="$py" >"$dir/.venv-setup.log" 2>&1; then
+  echo "make setup failed in $dir; last lines of .venv-setup.log:" >&2
+  tail -20 "$dir/.venv-setup.log" >&2
+  exit 1
+fi
 .venv/bin/python -m harness.suite_lock check
 
 cat <<EOF

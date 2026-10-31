@@ -76,6 +76,282 @@ once, which does not fit the owner's goal of shipping this week.
 `docs/frontier-v5/PLAN-v4.md`, `plan-v4.json`, `FREEZE-v4.json`. No task or
 code.
 
+## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
+
+### Decision
+
+Owner, in chat, 2026-10-29 and 2026-10-30. The local run GUI's main flow is
+"benchmark a model": one suite, one harness, one `vulcanbench run` per effort
+level, queued one at a time from a run worktree pinned to a bench tag, with
+`--max-infra-retries 0` (new CLI option) so a launched suite never re-queues
+a unit on its own. Four rules fix what happens when a level ends early:
+
+- A level whose run ends with tasks still missing is **incomplete**, final.
+  It is never retried. "Run the missing tasks" on the Runs page builds a new
+  plan (same output directory, `--only-missing`) that needs a confirm click.
+- A level whose run ended on a subscription window or rate limit (the same
+  patterns the sweep scripts and the adapters match: usage limit, rate limit,
+  limit reached, quota, 429) **waits 30 minutes and continues with
+  `--only-missing`**, but only when the plan set "continue after a quota
+  window" above zero, and at most that many times. The default is zero. No
+  other failure continues: an expired login, a provider error, a sandbox
+  error or a crash ends the level.
+- Stop on a suite level sends SIGINT to `vulcanbench` (finish the in-flight
+  task, start no more), kills the agent CLI's own session two seconds later
+  (what the harness watchdog does; the harness then grades what it has and
+  tears down), and escalates to the job's process group after ten minutes.
+  The sweep afterwards removes only containers of this level's unfinished
+  runs (`vb-<run id>` compose projects, mounts under the run dir or its
+  `vulcanbench-<run id>-*` scratch) and those scratch directories.
+- The sandbox default per harness is what every sweep script under
+  `scripts/cii-v4-board/` passes: `local` for the CLI harnesses (the agent
+  runs the model's commands itself), `docker` for Vulcan's API loop. The
+  plan shows it and allows an override.
+
+### Evidence
+
+- `scripts/cii-v4-board/run_codex_effort_sweep.sh` and its siblings retry a
+  level up to 40 times, sleeping 1800 s on a quota pattern and 120 s on
+  anything else. That is how the GPT-6.1 Terra sweep (2026-10-26) and every
+  earlier multi-day sweep ran unattended, and it is what the hard rule "no
+  auto-retry of failed attempts" would have removed. The capped,
+  quota-only continuation keeps the unattended property for the one failure
+  that says nothing about the model, and nothing else.
+- `harness/suite.py` re-queued infrastructure errors twice (`max_infra_retries=2`,
+  not exposed on the CLI until now). Two of the three Frontier v5 gate
+  infrastructure failures looked like ordinary failed attempts (GATE-LOG);
+  a GUI-launched suite must not hide the same thing behind a silent retry.
+- Killing an agent CLI while the suite is still scheduling surfaces as
+  `ProviderError`, which the suite treats as infrastructure and would
+  re-queue; the two-second gap after SIGINT is what makes the stop clean.
+- `tests/test_runner_supervisor.py` drives all four rules with a fake
+  `vulcanbench` (finish, partial, quota, auth, hang modes).
+
+### Revisit triggers
+
+- A harness whose quota refusal does not match the patterns (the level would
+  end incomplete instead of waiting): add the pattern, with the log line.
+- The operator wants a level to continue after a provider error too. That
+  is a change to this rule, not a knob to add quietly.
+
+### What this touched
+
+`harness/cli.py` (`--max-infra-retries`), `backend/runner/sweep.py`,
+`backend/runner/supervisor.py`, `backend/runner/state.py` (`waiting` and
+`incomplete`), the Launch page and the Runs page's sweep panel.
+
+## 2026-10-29: run_gate.sh stops harbor for real; gate runs can be queued from the local GUI
+
+### Decision
+
+Owner, in chat, 2026-10-29. `scripts/frontier-v5/run_gate.sh` starts
+harbor as a direct, interruptible child and traps INT and TERM, so one
+signal to the script (from a terminal or from the local run GUI) cancels
+the running attempt through harbor's own path, removes the task's sandbox
+containers and records the outcome in `$GATE_OUT/<job>.status.json`. The
+GUI (docs/GUI.md) launches gate runs only through this script, from a
+`run_worktree.sh` worktree pinned to a bench tag, one job at a time, after a
+confirm click that shows the exact command; the usage pre-flight runs only
+on an explicit click because it spends one model turn.
+
+### Evidence
+
+- The early exit and the infrastructure stop never reached harbor. In bash
+  3.2 a backgrounded list runs with SIGINT ignored and `$!` is the subshell,
+  not harbor, so `kill -INT "$hpid"` hit a bash that ignored it and the plain
+  `kill` 20 s later removed the subshell while harbor kept running,
+  reparented, until `stop_sandboxes` pulled its containers away. Seen on the
+  live process tree of `opus-javaparser-member-resolution-scope` on
+  2026-10-29 (script 2071, subshell 2126, harbor 2128) and on the Boost.URL
+  early exit, whose third trial ended in a compose `RuntimeError` rather
+  than a cancel.
+- Harbor has no SIGTERM handler; only SIGINT runs its cancel path
+  (`docker compose down`, log copy), which took more than the old 20 s
+  grace in the comrak and Boost.URL stops. The new script waits 90 s before
+  escalating.
+- `tests/test_run_gate_script.py` drives the script with a fake harbor: a
+  SIGINT to the script ends harbor in well under a second, the status file
+  goes `preflight`, `running`, `stopping`, `stopped` with exit code 130, the
+  early reject and the infrastructure guard still fire, and every stdout
+  line the GATE-LOG workflow greps for is unchanged.
+
+### Revisit triggers
+
+- Harbor gains a SIGTERM handler or a cancel command: the python
+  signal-reset wrapper and the 90 s wait can go.
+- A stop that still leaves containers behind: the sweep runs by compose
+  project name, so a harbor release that renames projects needs a new
+  prefix.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh`, `backend/runner/`, the dashboard's Launch
+and Runs pages, `docs/GUI.md`.
+
+## 2026-10-29: every run logs its tool calls
+
+### Decision
+
+Owner request in chat, 2026-10-29: tool calls are part of every trace, for
+every harness. Each run directory now holds `tool-calls.jsonl`, one line per
+call in a shared schema (tool name and kind, call id, arguments, status, exit
+code, output length, start and end times), and `summary.json` carries a
+`tool_calls` count block. Public traces publish one `tool_call` event per call
+through `public_events()`: names, timing and outcomes, never inputs or
+outputs. A harness added without an extractor fails `tests/test_tool_calls.py`.
+Field list and commands: [REPRODUCIBILITY.md](REPRODUCIBILITY.md#tool-calls).
+
+### Evidence
+
+- Before this, only the native loop, Claude Code, Codex and Cursor wrote
+  per-tool events into `trace.jsonl`. The other seven harnesses kept tool
+  calls only in their stream or session archive, each in its own shape. No
+  harness recorded a call's start, end and outcome together, and each public
+  traces exporter picked its own fields (the Beam traces have no tool names).
+- A read-only pass of the new extractors over the local run folders on
+  2026-10-29: Claude Code 664 runs and 49,820 calls, Codex 513 and 13,170,
+  Muse Code 118 and 9,758, dsh 70 and 4,244, Pi 6 and 273, the native loop
+  127 and 381. Claude Code, Muse Code, dsh and Pi calls have both times.
+  Codex and native-loop runs made before this change have end times only
+  (Codex: 94% of calls; 60 legacy runs under `runs/` predate the current
+  Codex trace format). Mirror's 115 Beam runs return `unavailable`: that
+  adapter kept no tool names (the 2026-10-27 entry).
+
+### What changed
+
+- `harness/agent/tool_calls.py`: one extractor per harness, the schema, the
+  summary block and `public_events()`.
+- The loop writes the log when every run finishes. The native loop now
+  records `tool_call` before the tool runs and gives the observation the call
+  id and duration; the Codex adapter records a `tool_call` trace event when a
+  tool item starts and puts the item id on its observation. Both give start
+  times from now on.
+- `vulcanbench tool-calls <dir> [--write]` builds the log for older runs. It
+  adds only `tool-calls.jsonl`; it never rewrites `summary.json`, whose hash
+  frozen judging rounds pin.
+
+### Revisit triggers
+
+- Cursor, Grok Build, Z Code and Devin have no runs on this machine; their
+  extractors follow the adapters' own code and test fixtures. Check
+  `tool-calls.jsonl` on each one's next smoke run.
+
+## 2026-10-28: GPT-6.1 Terra is judged by Muse Spark 1.3 and Grok 4.6 (v3.29)
+
+### Decision
+
+GPT-6.1 Terra's Code quality is judged as v3.29 by Muse Spark 1.3 and Grok
+4.6, the panel behind the GPT-6.1 Sol (v3.18) and Claude Opus 5.5 (v3.15)
+columns, so the three can share a card without a panel caveat. Owner choice
+in chat, 2026-10-28, over Muse Spark 1.3 with GPT-6.1 Sol (the v3.27 and
+v3.28 pair; Sol is Terra's own lab) and Muse Spark 1.3 with Opus 5.5. The
+round runs from its own bench tag after the sweep, so no sweep overlaps the
+judging window. Results, the comparison card against GPT-6.1 Sol, Claude
+Opus 5.5 and GPT-6 Astra, and the redacted traces follow in a results PR.
+
+### Evidence
+
+- The sweep (`bench/2026-10-27-gpt61-terra-frontier-v4`) finished on
+  2026-10-27 at 16:16 PDT: 115 runs, no timeouts, no empty patches, every
+  run on Codex 0.159.0 from the clean tag. Every run's evidence
+  reconstructs through v2's own path, so v3.18's binary-fixture fallback is
+  not needed.
+- Grok 4.6 answered one-line probes on 2026-10-28 through both the current
+  Cursor (`2026.10.14-941492e`) and the pinned `2026.10.01-e373342`, whose
+  version-directory digest still equals v3.24's. The Cursor usage limit that
+  kept Grok out of v3.27 and v3.28 no longer applies.
+- A dry `prepare` into a scratch directory froze 115 submissions (23 per
+  level), 23 quirk keys, full evidence, largest prompt 77,081 characters.
+
+## 2026-10-27: Mirror runs keep full traces
+
+The owner requires every Mirror (Reflection Beam) run to keep a full trace from
+now on. The October 23 to 25 Beam sweep did not: the adapter decoded Mirror's
+conversation database only for token usage, so each run directory keeps the
+step skeleton (order, timestamps, tokens per model step) and the final patch,
+but no tool names, arguments, results or reasoning. On 2026-10-27 the owner
+chose to publish that sweep as a structure-only traces repository and to fix
+the adapter for future runs.
+
+What changed in `harness/agent/mirror_cli.py`:
+
+- Mirror's database is copied into the run directory as
+  `mirror-session/state.db` through SQLite's backup API (so a write-ahead log
+  is folded in), and its size and SHA-256 go into a `mirror_database` trace
+  event.
+- `cli-agent-stream.jsonl` now carries the decoded transcript, read with
+  Mirror 0.1.1's own protobuf schema: the task and system text; each assistant
+  step's text, reasoning (`reasoning_content`, plus `reasoning_details` when
+  present) and tool calls (`id`, `function.name`, `function.arguments`); each
+  tool result (`tool_call_id`, `name`, `content`, success) with its metadata
+  record (exit code, duration, touched paths); and the tool-approval, log,
+  task-result, context-window and extension records. Token accounting and its
+  fail-closed checks are unchanged.
+- A run that cannot archive its database fails closed, as a run without
+  auditable usage already does, and the adapter refuses to start without a
+  stream log path to archive into.
+
+Verified without API calls: the new decoder was run against a real Beam
+database from the October sweep (a Max run, 2,149 records: 537 assistant
+steps, all with reasoning and tool calls; 536 tool results). A test builds a
+database with the pinned schema and decodes it; CI skips it because the pinned
+install is not on the runner, and a second test covers archive, hashing and
+the stream rows without it.
+
+Found while doing this: the adapter never removes its per-run scratch folder,
+and the October sweep's 1,334 scratch folders (115 scored runs plus the
+infra-aborted attempts) were still in the system temp directory with their
+databases. They were copied outside the repository on 2026-10-27 before the OS
+could purge them. Matching them to scored runs and republishing full traces
+from them is a separate owner decision.
+
+## 2026-10-26: GPT-6.1 Terra runs on Frontier v4 on its release day, on the pinned Codex 0.159.0
+
+### Decision
+
+GPT-6.1 Terra (`gpt-6.1-terra`, released in the API and Codex on
+2026-10-26) is swept on VulcanBench Frontier v4 at Low, Medium, High,
+Extra-high and Max through Codex on the ChatGPT subscription
+(`scripts/run_gpt61_terra_v4.sh`, outputs `runs-effort-gpt61-terra/`). Owner
+request in chat, 2026-10-26. This is a new model, not the GPT-5.6 Terra
+already on the board (`docs/results/swe-v4-terra-2026-09/`). It runs one task
+at a time from a run worktree pinned to a bench tag, like every sweep.
+
+The column runs on Codex CLI 0.159.0 from its own prefix
+(`~/.local/share/vulcanbench/codex-0.159.0/`), the same pin GPT-6.1 Sol ran
+on. Every other Codex column keeps its version.
+
+### Evidence
+
+- OpenAI's Codex models page: "GPT-6.1 Terra requires Codex CLI 0.159.0 or
+  later." One-line probes on the ChatGPT login on 2026-10-26 ("Reply with
+  the single word OK.") answered on 0.159.0 at `low` and at `max`.
+- List prices, checked 2026-10-26 at developers.openai.com/api/docs/pricing
+  and the model page (USD per 1M tokens, standard, short context): $1.00
+  input, $0.05 cached input, $5.00 output. Prompts over 272K input tokens
+  bill the whole request at 2x input and cache, 1.5x output; that tier is
+  not inferred by `harness/pricing.py`. The API exposes effort `none`,
+  `low`, `medium`, `high`, `xhigh` and `max`; ultra is not an API level and
+  stays blocked (`vulcanbench.toml`).
+
+## 2026-10-24: Reflection Beam judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.28)
+
+Beam's Code quality is judged as v3.28 with the v3.27 panel. A one-word probe
+through the pinned Cursor 2026.10.01-e373342 on 2026-10-24 still returned
+"You're out of usage", so Grok 4.6 cannot take its usual seat. The owner agreed
+in chat to keep GPT-6.1 Sol in it, as for DeepSeek V4.1 Flash, so the two
+newest columns share a panel even though it differs from the Muse Spark 1.3 and
+Grok 4.6 pair behind most of the board.
+
+One harness interaction is disclosed with Beam's results. Task files are staged
+without execute bits (as for every published column); where a model meets
+"Permission denied" on the legacy binary, Mirror appends "[Sandbox note: The
+sandbox denied access to this resource.]". At Low, two of Beam's 23 final
+answers said the sandbox blocked the binary, which it does not; `chmod` works.
+The Mirror adapter archives model messages and usage but not tool calls, so
+how often Beam saw the note cannot be counted; the adapter gains tool-call
+archiving after the sweep.
+
 ## 2026-10-23: Reflection Beam on Frontier v4 through Mirror CLI; DeepSeek V4 Pro stopped
 
 ### Decision

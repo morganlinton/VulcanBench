@@ -7,6 +7,100 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Local run GUI** (`backend/runner/`, dashboard `/runs` and `/launch`,
+  `make gui`): a localhost page that lists every gate job and harness run
+  with its bench tag, attempts, rewards, containers, a live log tail and a
+  first-attempt check, and queues Frontier v5 gate runs through
+  `run_worktree.sh` and `run_gate.sh` with the exact command shown before a
+  confirm click, one job at a time, with a clean stop. `run_gate.sh` starts
+  harbor as an interruptible child, traps INT and TERM, writes
+  `<job>.status.json`, and gains `--refs` and `GATE_PREFLIGHT_ONLY=1`.
+- **Benchmark a model from the GUI**: the Launch page plans a suite run for a
+  model (harness, billing, suite, effort levels, bench tag) and queues one
+  `vulcanbench run` per level, after the worktree check, the harness doctor
+  and `estimate --json`, none of which spends quota. The Runs page shows
+  per-level progress. A level that ends with tasks missing is incomplete and
+  never retried; a plan may allow a capped continuation after a quota window
+  only. `vulcanbench run` gains `--max-infra-retries` (the GUI passes 0).
+- **GUI housekeeping**: orphaned sandbox containers listed and removed by id
+  only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
+  streaming log tail (server-sent events) on live run pages.
+
+## [0.10.0] - 2026-10-30
+
+### Added
+
+- **Every run logs its tool calls** (`harness/agent/tool_calls.py`). Each
+  harness records tool use in its own shape (the native loop's trace, a CLI's
+  event stream, or a session log the CLI leaves behind), and one extractor per
+  harness turns that record into `<run_dir>/tool-calls.jsonl`, one line per
+  call in a shared schema (`vulcanbench-tool-calls/1`): `seq`, `call_id`,
+  `tool`, `kind`, `agent`, `input`, `status`, `exit_code`, `output_chars`,
+  `started_at`, `ended_at`, `duration_ms`. Extractors cover the native loop,
+  Claude Code, Codex, Cursor, Grok Build, Z Code, Devin, Muse Code, dsh, Pi and
+  Mirror, and a test fails if a registered harness has none.
+  - `summary.json` gains a `tool_calls` block (schema, count, errors, counts by
+    tool and by kind, timed calls). Writing the log never fails a run; a
+    harness with nothing to log reports `capture: unavailable` with a reason.
+  - `vulcanbench tool-calls <dir> [--write] [--force]` builds the log for
+    older runs from the same sources. It only adds `tool-calls.jsonl` and never
+    rewrites `summary.json`, whose hash frozen judging rounds pin.
+  - `public_events()` is the published form for traces repositories: tool name,
+    kind, status, exit code, output length and timing. Inputs and outputs are
+    never published.
+  - Read-only over 1,613 local runs, the extractors recover 77,646 calls from
+    Claude Code, Codex, Muse Code, dsh, Pi and native-loop runs. Cursor, Grok
+    Build, Z Code and Devin are checked against fixtures only until their next
+    smoke run.
+
+- **Mirror CLI harness** (`--harness mirror`, `mirror:<model>` specs,
+  `harness/agent/mirror_cli.py`): runs a task in Reflection's Mirror CLI
+  (`mirror exec`, task on stdin), built for Reflection Beam
+  (`mirror:Beam-1.0-501B-A23B`). The CLI is pinned to reflection-mirror 0.1.1
+  by version and package tree hash and runs inside the macOS outer sandbox,
+  with a private Mirror home per run that trusts only that run's workspace,
+  analytics and updates off, no web search keys and automatic tool approval.
+  - Usage is decoded from Mirror's conversation database with Mirror's own
+    pinned protobuf schema; every recorded inference must name the requested
+    model, and a finished run with no usage fails closed.
+  - Full traces: the database is archived as `mirror-session/state.db` (size
+    and SHA-256 in a `mirror_database` trace event) and
+    `cli-agent-stream.jsonl` carries the decoded transcript, including
+    assistant reasoning, tool calls with arguments and tool results with exit
+    code and duration. The run fails closed if the database cannot be archived.
+  - Effort: `low`, `medium`, `high`, `xhigh` and `max`. Beam has no published
+    price, so `mirror:` runs are unpriced. Solver receipts read Mirror runs
+    from the summary token block.
+
+- **GPT-6.1 Terra list price** (`openai:gpt-6.1-terra`, also through the
+  `codex:` alias): $1.00 input, $0.05 cached input and $5.00 output per 1M
+  tokens (standard tier, short context), checked 2026-10-26. Frontier v4 sweep
+  launcher: `scripts/run_gpt61_terra_v4.sh` (Codex CLI 0.159.0, Low to Max).
+
+- **Code quality rounds v3.28 and v3.29**
+  (`harness/maintenance_review_v328.py`, `harness/maintenance_review_v329.py`)
+  with their population builders in `scripts/cii-v4-board/`: v3.28 judges
+  Reflection Beam (Muse Spark 1.3 and GPT-6.1 Sol), v3.29 judges GPT-6.1 Terra
+  (Muse Spark 1.3 and Grok 4.6). The protocol amendments are in
+  `docs/judging/code-quality-maintenance-v3.md`.
+
+- **Redacted traces exporters** for the public traces repositories:
+  `scripts/export_beam_redacted_traces.py` (structure and timing only, since
+  the Beam sweep ran before Mirror traces were archived) and
+  `scripts/export_gpt61terra_redacted_traces.py`. Both refuse per-level
+  figures that do not match the published card and fail if a path, username
+  or free text reaches the output.
+
+### Changed
+
+- **Tool-call start times are traced.** The native loop records `tool_call`
+  before the tool runs, and its observation carries the call id and
+  `duration_ms`. The Codex adapter records a `tool_call` event when a command,
+  file change, MCP call or web search item starts, and puts the item id on its
+  observation, so calls pair by id rather than by order.
+
 ## [0.9.0] - 2026-10-23
 
 ### Added

@@ -1395,6 +1395,81 @@ built by `scripts/cii-v4-board/build_deepseek_flash_population.py`.
   Claude Opus 5.5 and GPT-6.1 Sol's own columns are judged by Muse Spark 1.3
   and Grok 4.6, so any card placing them side by side says the panels differ.
 
+## Amendment v3.28, October 24, 2026: Reflection Beam, judged by Muse Spark 1.3 and GPT-6.1 Sol
+
+Everything is as in v3.27 except the population. Protocol id
+`code-quality-maintenance-v3.28`; run directory
+`runs-code-quality-maintenance-v3.28`; runner
+`harness/maintenance_review_v328.py`, derived from the v3.27 runner. Population
+record: `docs/results/swe-v4-beam-2026-10/comparison.json`, built by
+`scripts/cii-v4-board/build_beam_population.py`.
+
+- Population: the October 2026 Reflection Beam sweep of Frontier v4
+  (`Beam-1.0-501B-A23B`) through Mirror CLI 0.1.1 (solver
+  `mirror:Beam-1.0-501B-A23B`), Low to Max (Extra high is Beam's `xhigh`), one
+  attempt per task and level, 115 runs, from
+  `bench/2026-10-23-beam-mirror-frontier-v4`. Each run had a private Mirror
+  home with the usage notice acknowledged and only its workspace trusted
+  (owner approved), analytics off and no web search keys. The builder stops
+  on any run whose solver, requested effort, harness version or checkout
+  state differs from the sweep's record.
+- Exclusions: a run that ends with an empty patch has no code to review and is
+  not judged, as in v3.15 and v3.24; it counts as a failed task. Beam ends
+  some Low and Medium runs without changing any file, so those cells freeze
+  below 23 and the population record lists each exclusion with its reason.
+- Judges: Muse Spark 1.3 and GPT-6.1 Sol, as in v3.27. Grok 4.6's Cursor
+  account was out of usage again on October 24; the owner agreed to keep
+  GPT-6.1 Sol in the seat. Both are neutral for a Reflection submission and
+  retake the exam under v3.28.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the next level up (Max wraps to Low).
+- Comparability: as in v3.27; a Beam score is a Muse Spark 1.3 and GPT-6.1 Sol
+  mean, like DeepSeek V4.1 Flash's, and any card beside Muse Spark 1.3 and
+  Grok 4.6 columns says the panels differ.
+
+## Amendment v3.29, October 28, 2026: GPT-6.1 Terra, judged by Muse Spark 1.3 and Grok 4.6
+
+The v3.24 protocol on a new population, with the Cursor pin held to the
+version v3.24 used. Nothing in the rubric, controls, quirk keys, gates,
+repeats, seed, weights or judge settings changes. Protocol id
+`code-quality-maintenance-v3.29`; run directory
+`runs-code-quality-maintenance-v3.29`; runner
+`harness/maintenance_review_v329.py`, derived from the v3.24 runner.
+Population record: `docs/results/swe-v4-gpt61-terra-2026-10/comparison.json`,
+built by `scripts/cii-v4-board/build_gpt61terra_population.py`.
+
+- Population: the October 2026 GPT-6.1 Terra sweep of Frontier v4
+  (`gpt-6.1-terra`) through Codex CLI 0.159.0 on the ChatGPT subscription
+  (solver `codex:gpt-6.1-terra`), Low to Max (Extra high is Codex's `xhigh`),
+  one attempt per task and level, 115 runs, from
+  `bench/2026-10-27-gpt61-terra-frontier-v4`, so task hashes match the suite
+  lock and no bridge is used. No run timed out and none ended with an empty
+  patch, so every cell freezes at 23.
+- Judges: Muse Spark 1.3 and Grok 4.6, the pair that judged GPT-6.1 Sol
+  (v3.18) and Claude Opus 5.5 (v3.15). Both are neutral for an OpenAI
+  submission (owner choice in chat, October 28) and retake the exam under
+  v3.29 before any counted call. Settings are read from the recovered v3.3
+  and v3.4 protocols, each checked against its published sha256, as in v3.24.
+  GPT-6.1 Sol, the second seat in v3.27 and v3.28, is from Terra's own lab
+  and does not sit.
+- Cursor: pinned to `2026.10.01-e373342` and the digest v3.24 recorded, as in
+  v3.25. Cursor has since updated itself to `2026.10.14-941492e`; the round
+  judges through the pinned version's own launcher and re-checks its digest
+  before every stage. Cursor reports Grok 4.6's display name as "Grok 4.6
+  Medium" (frozen: "Cursor Grok 4.6 Medium"); `v3_resume` accepts that
+  rename and records it per call, as in v3.23 and v3.24.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the level two steps up (wrapping), as in v3.24.
+- Comparability: a Terra score is a Muse Spark 1.3 and Grok 4.6 mean, the
+  same panel as the GPT-6.1 Sol and Claude Opus 5.5 columns.
+- Recovery (owner decision, October 29): Muse's probe of max settlecore
+  (submission-011) quoted a byte-string line with its escapes decoded, the
+  JSON-escaping slip the v3.18 wrapper rule `recover_escaped_excerpts`
+  covers. The source spells NUL as backslash-x-00, which the rule did not
+  yet try, so the probe was first marked invalid. The rule now tries both
+  spellings, and the probe is recovered under it; details in
+  `maintenance-v3-operations.md`.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

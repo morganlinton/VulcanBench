@@ -754,3 +754,46 @@ operational notes live here.
   extra-high 90.20, max 92.02. Code quality 61.67 at low to 81.72 at max.
 - Cost for cards is `cli_reported_cost_usd`, because the vendor price page
   gives two Sonnet 5.5 cache-read prices.
+
+## v3.29, October 28 to 30, 2026: GPT-6.1 Terra on Frontier v4
+
+- From `bench/2026-10-28-gpt61-terra-judging-v329` (2850a0c5b), judged by
+  Muse Spark 1.3 and Grok 4.6 (Cursor pinned to 2026.10.01-e373342). The
+  Terra sweep finished on October 27 at 16:16 PDT, so no sweep overlaps the
+  window. Population frozen 06:57 PDT on October 28: 115 rows, none excluded
+  or missing. Judging window 06:57 to 16:26 PDT, one window, no stops.
+- Calibration: Muse passed with the one-gate allowance (g11 repeatability,
+  shortfall 0.26); Grok passed all 20 gates.
+- The wrapper accepted 440 display renames (Cursor reports "Grok 4.6 Medium"
+  for the pinned `cursor-grok-4.6-medium`); four of those responses then
+  failed the frozen validator and were re-filed as that failure, so the
+  protocol's retry applied. Second attempts under the frozen rule: Muse 12
+  (eight unsupported excerpts, two JSON syntax errors, two answer-key
+  matching errors), Grok 4 (three unsupported excerpts, one matching error).
+- Muse probe submission-011 (gpt61terra max settlecore, October 28, 08:48
+  PDT): both attempts quoted
+  `raw = chunk.split(b"\x00", 1)[0].split(b"\r", 1)[0].split(b"\n", 1)[0]`
+  with the escapes decoded into control characters. This is the slip
+  `recover_escaped_excerpts` was written for in v3.18 (codeccore), but that
+  rule wrote a decoded NUL back only as backslash-zero, and this source spells
+  it backslash-x-00, so no variant matched and `invalidate_unrecoverable_probe`
+  marked the call invalid. The summary (16:26 PDT) published 114 of 115
+  submissions, with max on 22.
+- Owner decision (October 29): recover it under the same rule. The rule now
+  tries a decoded NUL as backslash-zero first (v3.18's order, unchanged) and
+  then as backslash-x-00; both settlecore attempts become verbatim with the
+  second spelling. Recovery steps, as in v3.18: the invalidation marker is
+  kept as `operator-invalid.superseded.json`, the Muse probe stage is rerun
+  alone from a tag carrying the fix (the rule selects an attempt and records
+  the original excerpts, then the stage makes the one missing match call),
+  and the summary is rebuilt. The pre-recovery round is kept in the private
+  backup as `judging-v3.29`.
+- Recovery run (October 30, 15:57 to 15:58 PDT) from
+  `bench/2026-10-30-gpt61-terra-judging-v329-recovery` (802831b56, the
+  merge of harness PR #239): the rule selected attempt 1 and respelled its
+  one excerpt, and the stage made the one match call (Muse, 16 seconds). No
+  other judge call was made. The rebuilt summary publishes 115 of 115
+  submissions with `ready_for_publication` true. Max moves from 89.95 (n 22)
+  to 90.00 (n 23, se 0.39), Code quality from 76.42 to 76.59; the other four
+  levels are unchanged. The recovered round is in the private backup as
+  `judging-v3.29-recovered`.

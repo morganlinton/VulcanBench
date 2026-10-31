@@ -31,7 +31,7 @@ def _daemon_down(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_version() -> None:
     result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
-    assert __version__ == "0.9.0"
+    assert __version__ == "0.10.0"
     assert __version__ in result.output
 
 
@@ -309,6 +309,23 @@ def test_run_suite_end_to_end(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert "running suite" in result.output
     assert "pass@1" in result.output
+
+
+def test_run_suite_max_infra_retries_reaches_the_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The GUI passes 0 so a launched suite never re-queues a unit on its own."""
+    seen: list[int] = []
+
+    def fake_run_suite(name, model, **kwargs):  # type: ignore[no-untyped-def]
+        seen.append(kwargs["max_infra_retries"])
+        return {"suite": name, "model": model, "tasks": [], "errors": [], "aggregate": []}
+
+    monkeypatch.setattr(cli_mod, "run_suite", fake_run_suite)
+    base = ["run", "--suite", "v1", "--model", "mock:synthetic", "--no-judges", "-o", str(tmp_path)]
+    assert runner.invoke(main, base).exit_code == 0
+    assert runner.invoke(main, [*base, "--max-infra-retries", "0"]).exit_code == 0
+    assert seen == [2, 0]
 
 
 def test_run_task_repeat(tmp_path: Path) -> None:

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run the retired FerryCore engine (reference only; linux/amd64).
+here="$(cd "$(dirname "$0")" && pwd)"
+exec "$here/ferrycore-linux-amd64" "$@"

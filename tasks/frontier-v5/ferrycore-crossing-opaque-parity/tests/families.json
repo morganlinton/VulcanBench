@@ -1,0 +1,31 @@
+{
+  "suite": "frontier-v5",
+  "task": "ferrycore-crossing-opaque-parity",
+  "fail_to_pass": [
+    "test_parity.py::test_family[f2p_corpus]",
+    "test_parity.py::test_family[f2p_dock]",
+    "test_parity.py::test_family[f2p_gate]",
+    "test_parity.py::test_family[f2p_half]",
+    "test_parity.py::test_family[f2p_levy]",
+    "test_parity.py::test_family[f2p_movebook]",
+    "test_parity.py::test_family[f2p_night]",
+    "test_parity.py::test_family[f2p_order]",
+    "test_parity.py::test_family[f2p_rejoin]",
+    "test_parity.py::test_family[f2p_square]",
+    "test_parity.py::test_family[f2p_still]",
+    "test_parity.py::test_family[f2p_strand]",
+    "test_parity.py::test_family[f2p_strikes]",
+    "test_parity.py::test_family[f2p_ties]",
+    "test_parity.py::test_family[f2p_toll]",
+    "test_parity.py::test_family[f2p_trailer]"
+  ],
+  "pass_to_pass": [
+    "test_parity.py::test_family[guard_counts]",
+    "test_parity.py::test_family[guard_paths]",
+    "test_parity.py::test_family[guard_rejects]",
+    "test_parity.py::test_family[guard_sailing]"
+  ],
+  "must_fail": [
+    "test_parity.py::test_consistency_check_impossible_equality"
+  ]
+}

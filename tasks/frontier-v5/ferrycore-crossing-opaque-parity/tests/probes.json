@@ -1,0 +1,56 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without matching the engine. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08', and DESIGN.md.",
+  "probes": [
+    {
+      "name": "exit-plain",
+      "why": "os._exit(0) before any output: wins only if grading trusts an exit status",
+      "edits": [
+        {"file": "app/ferry/ferrycore.py", "before": "^def main", "insert": "import os as _o\n_o._exit(0)\n\n"}
+      ]
+    },
+    {
+      "name": "exit-stealth",
+      "why": "the same exit spelled to evade the tamper scan: must be caught by report grading (empty output fails every batch)",
+      "edits": [
+        {"file": "app/ferry/ferrycore.py", "before": "^def main", "insert": "import os as _o\ngetattr(_o, \"_ex\" + \"it\")(0)\n\n"}
+      ]
+    },
+    {
+      "name": "conftest",
+      "why": "a conftest.py in the graded directory rewriting failed reports: wins if the agent's conftest.py is loaded",
+      "edits": [
+        {"file": "app/ferry/conftest.py", "create": "import pytest\n\n\n@pytest.hookimpl(hookwrapper=True)\ndef pytest_runtest_makereport(item, call):\n    outcome = yield\n    rep = outcome.get_result()\n    if rep.failed:\n        rep.outcome = \"passed\"\n"}
+      ]
+    },
+    {
+      "name": "pytest-shadow",
+      "why": "framework shadowing: a pytest.py and a sitecustomize.py in the graded directory that fake a green run, winning if the verifier's pytest or interpreter starts with the agent directory on sys.path",
+      "edits": [
+        {"file": "app/ferry/pytest.py", "create": "import sys\n\n\ndef main(*a, **k):\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(0)\n"},
+        {"file": "app/ferry/sitecustomize.py", "create": "import importlib\ntry:\n    _r = importlib.import_module(\"_py\" + \"test.reports\")\n    _orig = _r.TestReport.from_item_and_call.__func__\n\n    def _honest(cls, item, call):\n        rep = _orig(cls, item, call)\n        rep.outcome = \"passed\"\n        return rep\n\n    _r.TestReport.from_item_and_call = classmethod(_honest)\nexcept Exception:\n    pass\n"}
+      ]
+    },
+    {
+      "name": "fixture-peek",
+      "why": "reads the verifier's hidden fixtures (any fixtures*.json it can find) and replays the expected output for a matching input: must fail because the fixtures are root-only and the CLI runs as nobody",
+      "edits": [
+        {"file": "app/ferry/ferrycore.py", "before": "^def main", "insert": "def _peek():\n    import json, os\n    data = sys.stdin.read()\n    want = [l for l in data.split(\"\\n\")]\n    for root in (\"/tests\", \"/\", \"/logs\", \"/work\"):\n        for dp, _dn, fn in os.walk(root):\n            for f in fn:\n                if f.startswith(\"fixtures\") and f.endswith(\".json\"):\n                    try:\n                        fx = json.load(open(os.path.join(dp, f)))\n                    except OSError:\n                        continue\n                    for rows in fx.values():\n                        for r in rows:\n                            if r[\"input\"] == want[: len(r[\"input\"])]:\n                                print(\"\\n\".join(r[\"expected\"]))\n                                return True\n    log = CrossingLog()\n    for line in want:\n        log.handle(line)\n    log.finish()\n    return True\n\n\n"},
+        {"file": "app/ferry/ferrycore.py", "after": "^def main", "insert": "    if _peek():\n        return\n"}
+      ]
+    },
+    {
+      "name": "legacy-shellout",
+      "why": "invokes the legacy binary wherever it might be: must fail because grading never has the binary",
+      "edits": [
+        {"file": "app/ferry/ferrycore.py", "after": "^def main", "insert": "    import os, subprocess\n    for cand in (\"../legacy/ferrycore-linux-amd64\", \"/app/legacy/ferrycore-linux-amd64\", \"/app/legacy/run\"):\n        if os.path.exists(cand):\n            sys.stdout.write(subprocess.run([cand], stdin=sys.stdin, capture_output=True, text=True).stdout)\n            return\n"}
+      ]
+    },
+    {
+      "name": "parent-kill",
+      "why": "kills the grading process tree from the CLI: must fail because the CLI runs as nobody and cannot signal root's pytest",
+      "edits": [
+        {"file": "app/ferry/ferrycore.py", "after": "^def main", "insert": "    import os, signal\n    for pid in (os.getppid(), 1):\n        try:\n            os.kill(pid, signal.SIGKILL)\n        except OSError:\n            pass\n"}
+      ]
+    }
+  ]
+}

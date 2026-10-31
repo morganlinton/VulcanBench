@@ -11,8 +11,9 @@ or a single file, for example
 `npm test -- src/cache/inmemory/__tests__/scalars.ts`. The suite passes as
 given, apart from a few environment-dependent upstream tests that fail or
 flake on this machine with or without any change (the `FinalizationRegistry`
-ponyfill tests, which depend on garbage-collection timing, and one
-`HttpLink` multipart case over whatwg stream bodies). Those are not graded.
+ponyfill tests, which depend on garbage-collection timing, one `HttpLink`
+multipart case over whatwg stream bodies, and two `PreloadedQueryRef`
+disposal tests that are timing-sensitive under load). Those are not graded.
 
 Apollo Client 4.3 introduced custom scalars: a `Scalar` with `parse`,
 `serialize` and `is`, registered with `new InMemoryCache({ scalars })` and

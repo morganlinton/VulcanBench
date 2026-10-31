@@ -41,6 +41,7 @@ launcher.
 | javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
 | cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
+| ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -727,3 +728,38 @@ margin: one reference noticing either edge case would flip it. Whether a
 hold of this shape belongs in Frontier v5 is the owner's call before the
 freeze. **Owner, in chat, 2026-10-30: accepted as F5-cpp, with this flag
 kept on the record.**
+
+### ferrycore-crossing-opaque-parity, Astra half (2026-10-30): REJECT
+
+The first F4 (opaque-component parity) candidate, F4-python, built and
+validated 2026-10-30 by the F4 building session (branch
+`claude/focused-lumiere-06a98a`, 443aa51c): base 0, gold 1, 7 probes 0, Harbor
+oracle 1 and nop 0, deep-family reachability 0 to 3 of 500 per seed. The
+reference is a prebuilt linux/amd64 binary (`legacy/ferrycore-linux-amd64`)
+run under emulation on the arm64 Mac; grading never executes it. Job
+`astra-ferrycore-crossing-opaque-parity`, launched 19:01 PDT under the owner's
+standing approval from a run worktree pinned to b83c0ddb (tag
+`bench/2026-10-30-ferrycore-astra-gate`), wave-1 identifiers,
+`GATE_CONCURRENCY=1`, behind the shared Docker lock. Sessions real
+(`gpt-6-astra`).
+
+| Trial | Agent minutes | Reward | How |
+| --- | --- | --- | --- |
+| bLEkkKU | 7.4 | **1** | disassembled the binary, reimplemented it (306 lines) |
+| prHDNuG | 23.2 | **1** | the same (307 lines) |
+| pHwxquJ | stopped by the early exit | none | not counted |
+
+**2 of 2, both genuine.** No disassembler was installed and the allowlist
+blocked `apt-get`, `pip` and `npm` (one attempt also tried an internal
+package index host, which the allowlist refused), so the solving attempt wrote
+its own x86-64 disassembler in Python, read the binary's main loop by
+address range, and wrote a Python reimplementation that never calls the
+binary. It then ran a 1,000-session differential fuzz against `legacy/run`
+and added its own tests. Every family passed, guards included.
+
+Lesson for F4: composite-only observability does not hold when the reference
+binary is small enough to read. paddockcore's v4 hold did not carry over to a
+binary of this size. Any further F4 candidate must show its reference resists
+reading in a session (size, structure) before it is gated.
+
+**Verdict: REJECT** (early exit, 2026-10-30). Fable or Opus half not run.

@@ -339,6 +339,10 @@ def fake_repo(
     )
     (repo / "vulcanbench.toml").write_text('[effort]\nblocked = ["ultra"]\n')
     git(repo, "init", "-q", "-b", "main")
+    # Scripts run through child_env() see no GIT_* variables and, on CI, no
+    # global identity either; annotated tags need one in the repo config.
+    git(repo, "config", "user.name", "t")
+    git(repo, "config", "user.email", "t@example.com")
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", "init")
     git(repo, "tag", tag)

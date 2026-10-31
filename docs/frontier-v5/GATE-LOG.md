@@ -45,6 +45,7 @@ launcher.
 | phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** (2026-10-31, owner confirmed): two genuine solves on the valid evidence |
 | apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
 | bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
+| ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | Opus 5.5: queued | Astra prong passed (2026-10-31); Opus 5.5 half under the standing approval |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -906,3 +907,34 @@ families' rarity argument has to hold against hypothesis-driven probing
 not against random sessions.
 
 **Verdict: REJECT** (2 solves, 2026-10-31). Opus half not run.
+
+### ferrycore-crossing-opaque-parity 0.2.0, Astra half (2026-10-31): the Astra prong passed
+
+F4-python 0.2.0, rebuilt by the F4 building session after the 0.1.0 reject
+(branch `claude/focused-lumiere-06a98a`, 0819bb24): the same query-only
+reference service as bothycore (no network, read-only, socket only; 400
+sessions and 20,000 commands per trial), and the deep families strand, levy
+and gate made rarer by a threshold sweep before any control run (blind
+fuzzing with a whole budget expects 0.08 deep hits, against 0.82 at the old
+thresholds). Validation: base 0, gold 1, 7 probes 0, 20 service checks,
+Harbor oracle 1 and nop 0. **This version was redesigned after its own gate
+result**, so its hold is partly the product of iterating against the
+reference; the owner's F4 decision (2026-10-30) covered the rebuild, and the
+note stays on this task's record.
+
+Job `astra-ferrycore-crossing-opaque-parity-v0.2.0`, launched 12:12 PDT under
+the owner's standing approval from the tag
+`bench/2026-10-31-f4-query-service-astra-gate` (web search and connected apps
+off), `GATE_CONCURRENCY=1`. Sessions real (`gpt-6-astra`); no MCP or web
+calls; tamper scan clean in every attempt.
+
+| Trial | Agent minutes | Reward | Deep families failing |
+| --- | --- | --- | --- |
+| xZdE8iV | 31.7 | 0 | levy, gate |
+| 6cZzwHW | 15.7 | 0 | strand, levy, gate |
+| VnbdXdR | 13.4 | 0 | strand, levy, gate (and the corpus family) |
+
+**0 of 3.** Every attempt matched the ordinary families and missed the
+deep ones the rebuild made rarer; the longest attempt checked its budget 23
+times and still missed levy and gate. The Opus 5.5 half runs next under the
+standing approval.

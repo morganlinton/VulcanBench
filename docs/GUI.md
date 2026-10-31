@@ -120,6 +120,25 @@ the child's PATH, for a model that needs a newer or pinned harness CLI
 when set; keys never do. Metered API keys reach the harness the way they do
 by hand: `load_dotenv()` on the worktree's `.env`.
 
+## Housekeeping and the live tail (milestone 4)
+
+- **Orphaned sandboxes** on the Runs page: containers that look like
+  benchmark sandboxes (harbor's `<task>__<trial>__env` compose projects, the
+  harness's `vb-<run id>` projects, `vb-agent-*` containers, `vulcanbench/*`
+  images) that no active run owns, each with the run it belonged to and why
+  it counts. **Remove the listed containers** re-checks the list at that
+  moment and removes only those ids (and their compose networks). Nothing is
+  removed by image or prefix while a run that could own it is alive.
+- **Cut a bench tag** on the Launch page wraps `scripts/cut_bench_tag.sh
+  <label> [--push]` in the backend's own checkout. The script's guards decide
+  (on main, clean, equal to origin/main); the card shows what they will say
+  before the click and the script's output after it, and the new tag becomes
+  the selected tag.
+- The log tail on a live run page streams server-sent events
+  (`GET /runs/{id}/log/stream`): the tail once, then only the bytes
+  appended, through the redactor. If the stream cannot be opened the page
+  polls every 3 seconds as before.
+
 ## Frontier v5 gate runs and the queue (milestone 2)
 
 The Launch page's second tab plans a Frontier v5 gate run:
@@ -259,4 +278,5 @@ the backend behaves exactly as the public deployment does.
    effort level, the quota-free doctor and estimate, per-level progress, the
    capped quota continuation, `--only-missing` as an explicit resume, and
    `--max-infra-retries` on the CLI (this document).
-4. Polish: orphan-container cleanup, bench-tag cutting, streaming log tail.
+4. Orphaned-sandbox cleanup, bench-tag cutting through the script, and the
+   streaming log tail (this document).

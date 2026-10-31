@@ -19,6 +19,7 @@ import {
 import { Countdown, Warnings, WorktreeCard, button, field, label } from "./launchShared";
 import { RunnerUnavailable } from "./RunnerUnavailable";
 import { SweepForm } from "./SweepForm";
+import { TagCard } from "./TagCard";
 import { usePolling } from "./usePolling";
 
 type Kind = "sweep" | "gate";
@@ -233,6 +234,9 @@ export function LaunchForm() {
       ) : (
         <GateForm opts={opts} tag={tag} onTag={setTagChoice} />
       )}
+      <div className="mt-6">
+        <TagCard onCut={(t) => { if (t) setTagChoice(t); refresh(); }} />
+      </div>
     </div>
   );
 }

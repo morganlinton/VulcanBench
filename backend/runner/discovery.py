@@ -23,9 +23,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from backend.runner import firstcheck
+from backend.runner import docker_ps, firstcheck
 from backend.runner.config import RunnerConfig
-from backend.runner.docker_ps import Container, list_containers
+from backend.runner.docker_ps import Container
 from backend.runner.models import ContainerView, RunView, TrialView
 from backend.runner.procs import Proc, find_harbor_job, find_vulcanbench_runs, list_processes
 from backend.runner.state import Job
@@ -166,7 +166,7 @@ class Discovery:
     ) -> None:
         self.cfg = cfg
         self.procs = procs if procs is not None else list_processes()
-        self.containers = containers if containers is not None else list_containers()
+        self.containers = containers if containers is not None else docker_ps.list_containers()
         self.now = now or datetime.now(UTC)
         self.source_info = source_info
         # The queue's records, newest last so the latest job for a name wins.

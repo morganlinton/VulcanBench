@@ -498,6 +498,48 @@ export interface SweepsData {
   sweeps: SweepView[];
 }
 
+export interface OrphanContainer {
+  id: string;
+  name: string;
+  status: string;
+  state: string;
+  image: string;
+  project: string | null;
+  run: string | null;
+  reason: string;
+}
+
+export interface OrphanData {
+  containers: OrphanContainer[];
+  live_runs: string[];
+  docker_available: boolean;
+}
+
+export interface TagPreflight {
+  checkout: string;
+  branch: string | null;
+  head: string | null;
+  origin_main: string | null;
+  clean: boolean;
+  problems: string[];
+  script: string;
+  argv_preview: string[];
+}
+
+export interface TagResult {
+  ok: boolean;
+  exit_code: number | null;
+  output: string;
+  tag: string | null;
+  argv: string[];
+}
+
+export function logStreamPath(runId: string, source: string, trial: string | null, lines = 300): string {
+  const qs = new URLSearchParams({ source, lines: String(lines) });
+  if (trial) qs.set("trial", trial);
+  return `${API_BASE}/api/runner/runs/${encodeURIComponent(runId)}/log/stream?${qs.toString()}`;
+}
+
 export interface GateEstimate {
   attempts: number;
   concurrency: number;

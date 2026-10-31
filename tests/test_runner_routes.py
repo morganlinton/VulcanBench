@@ -11,11 +11,14 @@ pytest.importorskip("fastapi")
 pytest.importorskip("httpx")
 
 import json
+import threading
+import time
 
 from fastapi.testclient import TestClient
 
 import backend.app as appmod
 from backend.runner import docker_ps, launch, procs, sweep
+from backend.runner import maintenance as maintenance_mod
 from backend.runner import state as state_mod
 from tests.runner_fixtures import (
     SUITE_ID,
@@ -409,3 +412,75 @@ def test_prepare_plan_is_a_quota_free_queue_step(launch_env: dict[str, Path]) ->
     assert job["kind"] == "prepare" and job["status"] == "queued"
     row = next(r for r in c.get("/api/runner/runs").json() if r["id"] == f"job:{job['id']}")
     assert row["kind"] == "prepare" and row["source_tag"] == "bench/2026-10-30-new"
+
+
+# ---------------------------------------------------- stream and housekeeping --
+
+
+def test_log_stream_sends_the_tail_then_appends(runner_env: Path) -> None:
+    c = _local()
+    log = runner_env / "gate" / "jobs" / "opus-t" / "t__a1" / "trial.log"
+    log.write_text("first line\n")
+    url = "/api/runner/runs/gate:opus-t/log/stream?source=trial.log&trial=a1&max_s=2.5"
+
+    def grow() -> None:
+        time.sleep(0.4)
+        with log.open("a") as fh:
+            fh.write("Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123456789\n")
+
+    writer = threading.Thread(target=grow)
+    writer.start()
+    with c.stream("GET", url) as r:
+        assert r.status_code == 200 and r.headers["content-type"].startswith("text/event-stream")
+        events = list(r.iter_lines())
+    writer.join()
+    text = "\n".join(events)
+    assert "event: init" in text and '"first line"' in text
+    assert "event: append" in text and "Bearer [REDACTED]" in text and "abcdefghij" not in text
+    assert "event: end" in text
+    assert (
+        c.get("/api/runner/runs/gate:opus-t/log/stream?source=agent/sessions/x").status_code == 404
+    )
+
+
+def test_orphans_and_tag_routes(
+    launch_env: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    c = _local()
+    containers = [
+        docker_ps.Container(
+            id="c1",
+            name="t__a1__env-main-1",
+            status="Up",
+            state="running",
+            image="i",
+            labels={"com.docker.compose.project": "t__a1__env"},
+        ),
+    ]
+    monkeypatch.setattr(docker_ps, "list_containers", lambda **_: containers)
+    out = c.get("/api/runner/maintenance/orphans").json()
+    assert [o["id"] for o in out["containers"]] == ["c1"] and out["containers"][0][
+        "run"
+    ] == "gate:opus-t"
+    calls: list[list[str]] = []
+
+    def fake_run(argv: list[str], **_: Any) -> Any:
+        calls.append(argv)
+
+        class R:
+            returncode = 0
+            stdout = "c1\n" if argv[1] == "rm" else ""
+            stderr = ""
+
+        return R()
+
+    with monkeypatch.context() as m:  # the fake docker must not answer for git below
+        m.setattr(maintenance_mod.subprocess, "run", fake_run)
+        r = c.post("/api/runner/maintenance/orphans/remove", json={"ids": ["c1", "zz"]}).json()
+    assert r["removed"] == ["c1"] and r["refused"] == ["zz"]
+    pre = c.get("/api/runner/maintenance/tag").json()
+    assert pre["script"].endswith("cut_bench_tag.sh") and isinstance(pre["problems"], list)
+    monkeypatch.setattr(maintenance_mod, "REPO_ROOT", launch_env["repo"])
+    r = c.post("/api/runner/maintenance/tag", json={"label": "x", "push": False})
+    assert r.status_code == 409, r.text  # no origin in the fake repo: the script refuses
+    assert "origin" in json.dumps(r.json()["detail"])

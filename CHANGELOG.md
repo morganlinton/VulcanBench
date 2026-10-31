@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   per-level progress. A level that ends with tasks missing is incomplete and
   never retried; a plan may allow a capped continuation after a quota window
   only. `vulcanbench run` gains `--max-infra-retries` (the GUI passes 0).
+- **GUI housekeeping**: orphaned sandbox containers listed and removed by id
+  only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
+  streaming log tail (server-sent events) on live run pages.
 
 ## [0.10.0] - 2026-10-30
 

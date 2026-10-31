@@ -26,7 +26,9 @@
 # keep the agent (and its quota use) alive until the task timeout (seen
 # 2026-10-22, comrak), so stop_sandboxes removes them after every stop.
 # Web tools are off for both references (`--ak disable_web_search=true`:
-# Codex `web_search=disabled`, Claude Code `--disallowedTools WebSearch,WebFetch`).
+# Codex `web_search=disabled`, Claude Code `--disallowedTools WebSearch,WebFetch`),
+# and Codex runs with scripts/frontier-v5/codex-gate.toml, which also turns
+# off the account's connected apps, plugins and browser tools.
 # They run on the provider's side, so the task's network allowlist never sees
 # them; on 2026-10-30 an Astra attempt downloaded the upstream source of the
 # code an F2 task had removed through Codex's `web__run` (docs/DECISIONS.md).
@@ -109,7 +111,12 @@ case "$ref" in
   astra)
     agent=codex; model=gpt-6-astra; version=0.159.0
     [ -f "$HOME/.codex/auth.json" ] || { echo "run_gate: ~/.codex/auth.json missing; run \`codex login\`" >&2; exit 2; }
-    auth_env=(CODEX_FORCE_AUTH_JSON=1); auth_args=() ;;
+    auth_env=(CODEX_FORCE_AUTH_JSON=1)
+    # Provider-side tools off: web search, the account's connected apps
+    # (codex_apps), plugins and browser tools (docs/DECISIONS.md 2026-10-31).
+    codex_cfg="$here/scripts/frontier-v5/codex-gate.toml"
+    [ -f "$codex_cfg" ] || { echo "run_gate: $codex_cfg missing" >&2; exit 2; }
+    auth_args=(--ak "config=$codex_cfg") ;;
   fable|opus)
     agent=claude-code; version=2.1.302
     case "$ref" in fable) model=claude-fable-5-1 ;; opus) model=claude-opus-5-5 ;; esac
@@ -122,7 +129,10 @@ esac
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit
 # message; kept narrow so ordinary output (code the agent reads) never matches.
-INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit'
+# The last three alternatives are a reference reaching a provider-side tool
+# (web search, the account's connected apps) that run_gate.sh turns off; such
+# a trial is not a gate result either (docs/DECISIONS.md 2026-10-31).
+INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]'
 
 # Per-task state the helpers below read; set in the task loop.
 job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""

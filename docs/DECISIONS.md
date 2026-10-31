@@ -7,6 +7,38 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-31: Frontier v5 release 1 is the F5 family (composition v4)
+
+### Decision
+
+Owner, in chat, 2026-10-31: adopt `docs/frontier-v5/PLAN-v4.md`, frozen by
+`docs/frontier-v5/FREEZE-v4.json` (decision (j)). VulcanBench Frontier v5
+release 1 is the six admitted F5 tasks at equal weight 1/6, one per
+language. F1, F2, F3 and any F4 slot the extension does not fill move to a
+later release with its own plan. Open: (k) tree-sitter's Opus 5.5 prong,
+(l) the F4 extension (bothycore and ferrycore 0.2.0, deadline 2026-11-04),
+(m) confirmation runs, (n) the dedicated Codex gate login.
+
+### Evidence
+
+GATE-LOG.md: six F5 admissions from 2026-10-22 to 2026-10-30; every non-F5
+candidate gated so far was rejected on the GPT-6 Astra half alone, in 5 to 25
+agent minutes (comrak and phonenumbers in F2, apollo in F3, ferrycore 0.1.0
+in F4). The 26-slot plan needs 20 more admits in shapes that have not held
+once, which does not fit the owner's goal of shipping this week.
+
+### Revisit triggers
+
+- A non-F5 shape holds both references: start the release-2 plan around it.
+- A confirmation run of release 1 in which either reference solves a task in
+  more than one of three attempts: review that task's admission before
+  publishing.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v4.md`, `plan-v4.json`, `FREEZE-v4.json`. No task or
+code.
+
 ## 2026-10-23: Reflection Beam on Frontier v4 through Mirror CLI; DeepSeek V4 Pro stopped
 
 ### Decision

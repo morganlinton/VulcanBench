@@ -1,14 +1,13 @@
-# VulcanBench Frontier v5: composition v4 proposal (release 1 is the F5 family)
+# VulcanBench Frontier v5: composition v4 (release 1 is the F5 family)
 
 Planning baseline: October 31, 2026, America/Los_Angeles.
-Status: **proposal for the owner's sign-off, not frozen.** The owner chose
-the direction in chat on 2026-10-31 ("ship a smaller v5"); this document is
-the composition that direction implies. If adopted, it is frozen by
-`docs/frontier-v5/FREEZE-v4.json` with a machine-readable `plan-v4.json`, and
-a dated `docs/DECISIONS.md` entry records the decision. `PLAN.md`,
+Status: **adopted by the owner in chat on 2026-10-31 and frozen** by
+`docs/frontier-v5/FREEZE-v4.json` with the machine-readable `plan-v4.json`;
+the decision is recorded in `docs/DECISIONS.md` (2026-10-31). `PLAN.md`,
 `PLAN-v2.md`, `PLAN-v3.md` and their freezes are not edited ("capacity,
-weights or slot changes require a new plan with its own freeze"). Until the
-owner signs off, nothing here governs a task, a gate run or a slot.
+weights or slot changes require a new plan with its own freeze"). Decisions
+(k) to (n) in section 6 stay open and are resolved by dated DECISIONS.md
+entries citing this freeze, never by editing this file.
 
 Scope. This document changes the composition only. The admission gate
 (PLAN.md section 3), the F5 floors (PLAN-v2.md section 2 and PLAN-v3.md
@@ -41,7 +40,7 @@ four families whose shapes have not held once. At the yield seen (6 admits
 from 17 candidates, all in one family) that is weeks of sourcing and on the
 order of 200 gate runs, well past the owner's target of finishing this week.
 
-## 2. Proposal: release 1 is the F5 family, release 2 carries F1 to F4
+## 2. Composition: release 1 is the F5 family, release 2 carries F1 to F4
 
 **Frontier v5 release 1** (this proposal):
 
@@ -125,8 +124,7 @@ has no missing slot.
 
 ## 6. Owner decisions
 
-(j) **Adopt this composition** for Frontier v5 release 1, or keep the
-    26-slot plan.
+(j) ~~**Adopt this composition**~~ Adopted by the owner, 2026-10-31.
 
 (k) **tree-sitter's Opus 5.5 prong.** Run it for comparability with the other
     five (it was admitted on Fable 5.1, before Opus 5.5 became the second

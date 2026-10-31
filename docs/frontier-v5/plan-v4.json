@@ -1,0 +1,92 @@
+{
+  "id": "frontier-v5-plan-v4",
+  "date": "2026-10-31",
+  "timezone": "America/Los_Angeles",
+  "supersedes": {
+    "plan": "frontier-v5-plan-v2",
+    "scope": "composition only; PLAN-v3.md (F5 floor 8 and the F2 reference shape) is a proposal whose decided parts are recorded in docs/DECISIONS.md; every other section of PLAN.md and PLAN-v2.md applies unchanged; earlier files are not edited"
+  },
+  "public_name": "VulcanBench Frontier v5",
+  "release": 1,
+  "suite_id": "frontier-v5",
+  "tasks_root": "tasks/frontier-v5",
+  "task_count": 6,
+  "task_weight": 0.166667,
+  "scoring": "every release-1 task weighs 1/6; with three confirmation attempts per task the headline is complete passes / 18. If the F4 extension (decision (l)) admits k tasks, the count becomes 6 + k at equal weight and F4 is reported on its own line.",
+  "families": {
+    "F5": {
+      "name": "Concentrated multi-bug correctness",
+      "slots": 6,
+      "weight": 1.0
+    }
+  },
+  "slots": [
+    {
+      "slot": "F5-c",
+      "task": "treesitter-query-anchor-matching",
+      "language": "c",
+      "admitted": "2026-10-22",
+      "record": "Astra 0 of 3; Fable 5.1 2 of 5 (at the bar); Opus 5.5 prong open, decision (k)"
+    },
+    {
+      "slot": "F5-python",
+      "task": "black-fmt-skip-region-handling",
+      "language": "python",
+      "admitted": "2026-10-25",
+      "record": "Astra 0 of 3; Opus 5.5 0 of 3"
+    },
+    {
+      "slot": "F5-javascript",
+      "task": "prettier-comment-attachment-stability",
+      "language": "javascript",
+      "admitted": "2026-10-27",
+      "record": "Astra 0 of 3; Opus 5.5 0 of 3"
+    },
+    {
+      "slot": "F5-java",
+      "task": "javaparser-member-resolution-scope",
+      "language": "java",
+      "admitted": "2026-10-29",
+      "record": "Astra 0 of 3; Opus 5.5 0 of 3"
+    },
+    {
+      "slot": "F5-cpp",
+      "task": "cli11-toml-config-round-trip",
+      "language": "cpp",
+      "admitted": "2026-10-30",
+      "record": "Astra 0 of 3; Opus 5.5 0 of 3; held only by two held-out guards, flag kept by the owner"
+    },
+    {
+      "slot": "F5-rust",
+      "task": "pulldown-cmark-html-block-scanning",
+      "language": "rust",
+      "admitted": "2026-10-30",
+      "record": "Astra 0 of 3; Opus 5.5 1 of 5; floor 8 not met, admitted under decision (g')"
+    }
+  ],
+  "language_view": "one task per language; reported per task, no per-language subscore",
+  "optional_extension": {
+    "family": "F4",
+    "candidates": [
+      "bothycore-booking-opaque-parity",
+      "ferrycore-crossing-opaque-parity@0.2.0"
+    ],
+    "deadline": "2026-11-04",
+    "decision": "l"
+  },
+  "deferred_to_release_2": [
+    "F1",
+    "F2",
+    "F3",
+    "F4 (slots not filled by the extension)"
+  ],
+  "gate_integrity": "from 2026-10-31 every gate run turns off provider-side web search, connected apps, plugins and browser tools (scripts/frontier-v5/codex-gate.toml, --ak disable_web_search=true); a trial that reaches such a tool is an infrastructure failure",
+  "open_decisions": [
+    "k",
+    "l",
+    "m",
+    "n",
+    "d",
+    "f"
+  ]
+}

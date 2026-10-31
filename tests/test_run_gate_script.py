@@ -224,6 +224,9 @@ def test_normal_run_writes_phases_and_keeps_stdout_shape(gate: Gate) -> None:
         "--effort" in argv["argv"] and argv["argv"][argv["argv"].index("--effort") + 1] == "medium"
     )
     assert argv["argv"][argv["argv"].index("-k") + 1] == "3"
+    # Provider-side web tools bypass the task's network allowlist, so they are off.
+    aks = [argv["argv"][i + 1] for i, a in enumerate(argv["argv"]) if a == "--ak"]
+    assert "disable_web_search=true" in aks
 
 
 def test_sigint_to_the_script_stops_harbor_within_seconds(gate: Gate) -> None:

@@ -25,6 +25,11 @@
 # `harbor run` does not stop the running trial's sandbox containers, which
 # keep the agent (and its quota use) alive until the task timeout (seen
 # 2026-10-22, comrak), so stop_sandboxes removes them after every stop.
+# Web tools are off for both references (`--ak disable_web_search=true`:
+# Codex `web_search=disabled`, Claude Code `--disallowedTools WebSearch,WebFetch`).
+# They run on the provider's side, so the task's network allowlist never sees
+# them; on 2026-10-30 an Astra attempt downloaded the upstream source of the
+# code an F2 task had removed through Codex's `web__run` (docs/DECISIONS.md).
 # Infrastructure guard: a finished trial whose agent log shows an auth,
 # model-id, usage-credit or usage-limit failure stops the whole run; such
 # trials are not gate results. Move their job directory aside (INFRA-*).
@@ -289,7 +294,7 @@ for t in "$@"; do
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
      env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
-     --ak version="$version" -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
+     --ak version="$version" --ak disable_web_search=true -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
      -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!
   write_status running

@@ -42,7 +42,7 @@ launcher.
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
 | cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
 | ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
-| phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** on the valid evidence (2026-10-31), pending the owner's confirmation |
+| phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** (2026-10-31, owner confirmed): two genuine solves on the valid evidence |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -828,4 +828,4 @@ half, queued behind this run, was stopped before it started.
 **Across both halves:** two genuine solves (JM2ysUP 7.4 and 3oqfYPv 5.4
 minutes), each ported from the Java reference, and two invalid ones. By the
 gate's two-solve rule, applied to valid attempts only, that is a reject.
-Recorded as **REJECT on the valid evidence, pending the owner's confirmation**.
+**Verdict: REJECT** (2026-10-31; owner, in chat, confirmed on the valid evidence).

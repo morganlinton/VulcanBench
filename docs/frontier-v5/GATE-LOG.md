@@ -42,7 +42,7 @@ launcher.
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
 | cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
 | ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
-| phonenumbers-parse-match-parity | F2-python (shape B1) | 1 genuine solve (7.4); a second (6.4) used Codex `web__run` and is not valid | not run | **not decided**: Astra re-run with web tools off on the owner's approval |
+| phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** on the valid evidence (2026-10-31), pending the owner's confirmation |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -800,3 +800,32 @@ minutes). The early exit fired on a contaminated second solve, so the half
 must be re-run with web tools off before it is decided. One more genuine
 solve rejects the task. The re-run is a re-run of a finished half, so it
 waits for the owner.
+
+### phonenumbers-parse-match-parity, Astra re-run with web search off (2026-10-31)
+
+Approved by the owner in chat. Job
+`astra-phonenumbers-parse-match-parity-noweb`, launched 06:20 PDT from a run
+worktree pinned to the tag `bench/2026-10-31-phonenumbers-astra-noweb-gate`
+(the task at 55b8e515 plus `run_gate.sh` from b978e579, with
+`--ak disable_web_search=true`), `GATE_CONCURRENCY=1`, behind the shared
+Docker lock.
+
+| Trial | Agent minutes | Reward | How |
+| --- | --- | --- | --- |
+| 3oqfYPv | 5.4 | **1** | genuine: no web or app tool calls; shares no more upstream lines than the stubs |
+| 7HxEtaq | 7.0 | **1** | **not valid**: listed its tools, found the `codex_apps` MCP server (the account's connectors) and fetched the upstream files through its Search Service `web_run` (15 calls); its matcher shares 719 of 787 lines with upstream |
+| YkBZBRj | stopped by the early exit | none | not counted |
+
+Turning web search off did not close the route: `codex_apps` exposes the
+ChatGPT account's connected apps (Gmail, Google Calendar, ChatGPT Spaces and
+a Search Service). An audit of every Codex rollout on the Mac Studio found no
+call to any of them except that Search Service. `run_gate.sh` now also passes
+`scripts/frontier-v5/codex-gate.toml` (apps, plugins and browser tools off)
+and treats a trial that reaches `codex_apps` or `web__run` as an
+infrastructure failure (DECISIONS.md 2026-10-31, PR #248). The apollo Astra
+half, queued behind this run, was stopped before it started.
+
+**Across both halves:** two genuine solves (JM2ysUP 7.4 and 3oqfYPv 5.4
+minutes), each ported from the Java reference, and two invalid ones. By the
+gate's two-solve rule, applied to valid attempts only, that is a reject.
+Recorded as **REJECT on the valid evidence, pending the owner's confirmation**.

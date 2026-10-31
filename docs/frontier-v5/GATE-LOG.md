@@ -44,6 +44,7 @@ launcher.
 | ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
 | phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** (2026-10-31, owner confirmed): two genuine solves on the valid evidence |
 | apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
+| bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -868,3 +869,40 @@ about 20 minutes. The family's hypothesis was that work volume beyond one
 sitting resists collapse; 1,042 lines is within one sitting.
 
 **Verdict: REJECT** (early exit, 2026-10-31). Opus half not run.
+
+### bothycore-booking-opaque-parity, Astra half (2026-10-31): REJECT
+
+F4-java, built by the F4 building session with the query-only reference
+service the owner chose on 2026-10-30 (branch `claude/focused-lumiere-06a98a`,
+cb98806a). The engine runs in a separate compose service with
+`network_mode: none`, read-only, reachable from the agent only through a
+Unix socket on a per-trial volume; the budget is 400 seasons and 20,000
+commands per trial; blind fuzzing with a whole budget is expected to reach
+the deep families 0.15 times. Validation: base 0, gold 1, 7 probes 0, 20
+service checks, Harbor oracle 1 and nop 0. Job
+`astra-bothycore-booking-opaque-parity`, launched 11:04 PDT under the owner's
+standing approval from a run worktree pinned to the tag
+`bench/2026-10-31-f4-query-service-astra-gate` (web search and connected apps
+off), `GATE_CONCURRENCY=1`. Sessions real (`gpt-6-astra`); no MCP, web or
+binary access in any attempt.
+
+| Trial | Agent minutes | Reward | Families failing |
+| --- | --- | --- | --- |
+| 6Hu6xVe | 20.1 | **1** | none |
+| VCW3z4U | 12.6 | 0 | dawn, lapse |
+| cXZ6FRv | 31.7 | **1** | none |
+
+**2 of 3, genuine.** The service held: no attempt reached the engine's
+binary. The solving attempts did not fuzz blindly. They designed targeted
+experiments (about 100 tool calls in 6Hu6xVe, each probing one rule with a
+few short seasons), kept a Python model of the engine, minimized the seasons
+where the model disagreed, checked the remaining budget 14 to 20 times, and
+then wrote the Java. Every deep family was reached within budget.
+
+Lesson for F4: a query budget sized against blind fuzzing does not bound a
+reference that reasons about which experiment to run next. The deep
+families' rarity argument has to hold against hypothesis-driven probing
+(for example, behaviour that depends on state no short season can reach),
+not against random sessions.
+
+**Verdict: REJECT** (2 solves, 2026-10-31). Opus half not run.

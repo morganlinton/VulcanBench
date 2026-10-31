@@ -56,7 +56,18 @@ from harness.redaction import sanitize
 from harness.sandbox.docker_executor import ResourceSpec
 
 CLI_AGENT_PROVIDERS = frozenset(
-    {"claude-code", "codex", "cursor", "grok-build", "zcode", "muse-code", "devin", "pi", "dsh"}
+    {
+        "claude-code",
+        "codex",
+        "cursor",
+        "grok-build",
+        "zcode",
+        "muse-code",
+        "devin",
+        "pi",
+        "dsh",
+        "mirror",
+    }
 )
 
 # Claude Code's headless result text when a subscription window is exhausted
@@ -2404,18 +2415,23 @@ def _codex_item_trace_data(item: dict[str, Any]) -> tuple[str, dict[str, Any]] |
     if item_type == "command_execution":
         return "tool_observation", {
             "tool": "command_execution",
+            "id": item.get("id"),
             "command": item.get("command"),
             "result": item.get("aggregated_output") or item.get("output"),
             "exit_code": item.get("exit_code"),
             "status": item.get("status"),
         }
-    if item_type in {"file_change", "mcp_tool_call", "web_search"}:
+    if item_type in _CODEX_TOOL_ITEMS:
         return "tool_observation", {
             "tool": item_type,
+            "id": item.get("id"),
             "result": item,
             "status": item.get("status"),
         }
     return None
+
+
+_CODEX_TOOL_ITEMS = frozenset({"command_execution", "file_change", "mcp_tool_call", "web_search"})
 
 
 def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
@@ -2599,6 +2615,11 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
                         "harness_version": outcome.harness_version,
                     },
                 )
+            elif event_type == "item.started":
+                # Codex's stream has no times; this trace event is the call's start.
+                item = event.get("item") or {}
+                if item.get("type") in _CODEX_TOOL_ITEMS:
+                    collector.record("tool_call", {"tool": item["type"], "id": item.get("id")})
             elif event_type == "item.completed":
                 translated = _codex_item_trace_data(event.get("item") or {})
                 if translated:
@@ -2791,6 +2812,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
         from harness.agent.pi_agent import PiAdapter  # noqa: PLC0415
 
         return PiAdapter()
+    if name == "mirror":
+        # Same lazy import: mirror_cli builds on this module's helpers.
+        from harness.agent.mirror_cli import MirrorAdapter  # noqa: PLC0415
+
+        return MirrorAdapter()
     if name == "dsh":
         # Same lazy import: deepseek_harness builds on this module's helpers.
         from harness.agent.deepseek_harness import DeepSeekHarnessAdapter  # noqa: PLC0415

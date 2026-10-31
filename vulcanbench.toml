@@ -10,3 +10,23 @@
 # board publishes Low to Max only. A request for a blocked level is refused
 # with an error before a run starts.
 blocked = ["ultra"]
+
+[runner]
+# The local run GUI (backend/runner, dashboard /runs and /launch). It is
+# opt-in: the backend serves these pages only with VULCANBENCH_RUNNER=1 and
+# only to loopback clients. Every key can be overridden with
+# VULCANBENCH_RUNNER_<KEY> (upper case), for example VULCANBENCH_RUNNER_HOME.
+#
+# home:            runner state (runner.db, supervisor.lock, jobs/<id>/console.log)
+#                  and the output root for harness runs the GUI launches (runs/).
+# gate_out:        GATE_OUT for Frontier v5 gate runs; <gate_out>/jobs is scanned.
+# run_worktrees:   where scripts/run_worktree.sh puts bench-tag worktrees
+#                  (relative paths resolve against this repository's root).
+# extra_run_roots: more harness output roots to show read-only on the Runs page.
+# first_check_after_s: how long after an agent starts the first-attempt check
+#                  expects to see tool calls on the requested model.
+home = "~/vulcanbench-runner"
+gate_out = "~/vulcanbench-gate"
+run_worktrees = "../VulcanBench-runs"
+extra_run_roots = []
+first_check_after_s = 180

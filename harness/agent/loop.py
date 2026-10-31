@@ -41,6 +41,7 @@ from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolCall, ToolProtocol, get_openai_tool_schemas
 from harness.agent.providers import LLMProvider, get_provider, parse_model_spec, route_manifest
 from harness.agent.run_audit import audit_run
+from harness.agent.tool_calls import write as write_tool_calls
 from harness.economics import api_receipt, subscription_receipt
 from harness.effort import effort_config
 from harness.environment import start_environment
@@ -392,6 +393,10 @@ def run_agent(  # noqa: PLR0915
                 if cli_outcome
                 else {}
             ),
+            # Every run's tool calls in one schema, whatever its harness recorded.
+            "tool_calls": write_tool_calls(
+                run_dir, cli_outcome.harness if cli_outcome else "native"
+            ),
             "verifier": verifier_payload,
             "replay_command": f"vulcanbench replay {run_id}",
         },
@@ -712,8 +717,8 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
             "llm_response",
             {
                 "content": resp.content,
-                "tool_calls": [tc.model_dump() for tc in resp.tool_calls],
-                "usage": resp.usage.model_dump(),
+                "tool_calls": [tc.to_dict() for tc in resp.tool_calls],
+                "usage": resp.usage.to_dict(),
             },
         )
         if not deadline.ensure_time(collector, "llm_response", step):
@@ -743,14 +748,19 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
         for tc in resp.tool_calls:
             if not deadline.ensure_time(collector, f"tool:{tc.name}", step):
                 break
-            observation = _execute_tool(executor, tc, run_id, step, deadline.remaining_s())
+            # tool_call is recorded before the tool runs so its timestamp is the
+            # start; the observation carries the id and duration (tool-calls.jsonl).
             collector.record("tool_call", {"tool": tc.name, "args": tc.arguments, "id": tc.id})
+            tool_started = time.monotonic()
+            observation = _execute_tool(executor, tc, run_id, step, deadline.remaining_s())
             collector.record(
                 "tool_observation",
                 {
                     "tool": tc.name,
+                    "id": tc.id,
                     "result": observation.get("result"),
                     "error": observation.get("error"),
+                    "duration_ms": round((time.monotonic() - tool_started) * 1000),
                 },
             )
             content = json.dumps(observation, default=str)

@@ -122,15 +122,16 @@ def solver_receipt(run, summary):
         }
     elif summary["model"].startswith("devin:"):
         result = devin_receipt(run, summary)
-    elif summary["model"].startswith("muse-code:"):
-        # Muse Code folds its per-request usage into the run summary's token block
-        # (prompt includes cache reads; completion includes reasoning output).
+    elif summary["model"].startswith(("muse-code:", "dsh:", "mirror:")):
+        # Muse Code and DeepSeek Harness fold their per-request usage into the run
+        # summary's token block (prompt includes cache reads; completion includes
+        # reasoning output).
         tokens = summary["tokens"]
         for key in ("prompt", "completion", "cached_input"):
             if type(tokens.get(key)) is not int or tokens[key] < 0:
-                raise ValueError("Invalid Muse token summary")
+                raise ValueError("Invalid token summary")
         if tokens["prompt"] + tokens["completion"] != summary["total_tokens"]:
-            raise ValueError("Muse token summary does not sum to its total")
+            raise ValueError("Token summary does not sum to its total")
         result = {
             "raw_tokens": tokens["prompt"] + tokens["completion"],
             "usage": {

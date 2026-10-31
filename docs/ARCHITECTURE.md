@@ -4,7 +4,7 @@
 
 ```
 VulcanBench/
-├── harness/          # Python CLI + engine (Typer, Pydantic v2, Docker)
+├── harness/          # Python CLI + engine (argparse, dataclasses, docker CLI)
 │   ├── cli.py
 │   ├── agent/        # Tool ABC + executors (Docker + Local)
 │   ├── sandbox/      # DockerToolExecutor (non-root, network-off)
@@ -45,6 +45,6 @@ See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) and [METRICS.md](METRICS.md) for de
 
 ## Non-Functional (enforced)
 
-- Strict typing (Pydantic + mypy), Ruff zero-warn, ≥80% coverage on harness core
+- Strict typing (dataclasses + mypy --strict), Ruff zero-warn, ≥80% coverage on harness core
 - Non-root containers, secret redaction on artifacts
 - Self-contained HTML replays

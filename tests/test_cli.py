@@ -8,21 +8,30 @@ import subprocess
 import sys
 from pathlib import Path
 
-import docker
 import pytest
-from typer.testing import CliRunner
 
 import harness.cli as cli_mod
 from harness import __version__
-from harness.cli import app
+from harness.cli import main
+from harness.sandbox import docker_executor
+from tests.cli_runner import CliRunner
 
 runner = CliRunner()
 
 
+def _daemon_down(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make every docker CLI call report an unreachable daemon."""
+
+    def no_daemon(args: list[str], *, timeout: float | None = None) -> docker_executor.DockerResult:
+        return docker_executor.DockerResult(1, b"", b"Cannot connect to the Docker daemon\n")
+
+    monkeypatch.setattr(docker_executor, "_run_docker", no_daemon)
+
+
 def test_version() -> None:
-    result = runner.invoke(app, ["--version"])
+    result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
-    assert __version__ == "0.8.0"
+    assert __version__ == "0.10.0"
     assert __version__ in result.output
 
 
@@ -48,14 +57,14 @@ def test_cli_import_loads_dotenv(tmp_path: Path) -> None:
 
 
 def test_help() -> None:
-    result = runner.invoke(app, ["--help"])
+    result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
     assert "vulcanbench" in result.output.lower()
     assert "run" in result.output
 
 
 def test_harness_list_json() -> None:
-    result = runner.invoke(app, ["harness", "list", "--json"])
+    result = runner.invoke(main, ["harness", "list", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert {row["harness"] for row in data} == {
@@ -65,6 +74,7 @@ def test_harness_list_json() -> None:
         "devin",
         "dsh",
         "grok-build",
+        "mirror",
         "muse-code",
         "pi",
         "zcode",
@@ -74,7 +84,7 @@ def test_harness_list_json() -> None:
 
 def test_run_harness_options_normalize_subscription_spec() -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -94,7 +104,7 @@ def test_run_harness_options_normalize_subscription_spec() -> None:
 
 def test_run_rejects_subscription_billing_without_subscription_harness() -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -110,14 +120,14 @@ def test_run_rejects_subscription_billing_without_subscription_harness() -> None
 
 
 def test_run_unknown_task() -> None:
-    result = runner.invoke(app, ["run", "--task", "does-not-exist", "--model", "mock:synthetic"])
+    result = runner.invoke(main, ["run", "--task", "does-not-exist", "--model", "mock:synthetic"])
     assert result.exit_code == 1
     assert "unknown task" in result.output
 
 
 def test_run_dry_run() -> None:
     result = runner.invoke(
-        app, ["run", "--task", "hello-world", "--model", "mock:synthetic", "--dry-run"]
+        main, ["run", "--task", "hello-world", "--model", "mock:synthetic", "--dry-run"]
     )
     assert result.exit_code == 0
     assert "dry-run" in result.output
@@ -125,7 +135,7 @@ def test_run_dry_run() -> None:
 
 def test_run_end_to_end(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -146,7 +156,7 @@ def test_run_end_to_end(tmp_path: Path) -> None:
 
 def test_run_no_judges(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -166,7 +176,7 @@ def test_run_no_judges(tmp_path: Path) -> None:
 
 def test_run_bad_model_spec(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         ["run", "--task", "hello-world", "--model", "garbage", "--output-dir", str(tmp_path)],
     )
     assert result.exit_code == 1
@@ -175,7 +185,7 @@ def test_run_bad_model_spec(tmp_path: Path) -> None:
 
 def test_run_invalid_sandbox(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -193,12 +203,9 @@ def test_run_invalid_sandbox(tmp_path: Path) -> None:
 
 
 def test_run_docker_daemon_down(tmp_path: Path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
-    def boom():  # type: ignore[no-untyped-def]
-        raise ConnectionError("no daemon")
-
-    monkeypatch.setattr(docker, "from_env", boom)
+    _daemon_down(monkeypatch)
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -218,13 +225,10 @@ def test_run_docker_daemon_down(tmp_path: Path, monkeypatch) -> None:  # type: i
 def test_run_auto_refuses_host_fallback_without_opt_in(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def boom():  # type: ignore[no-untyped-def]
-        raise ConnectionError("no daemon")
-
-    monkeypatch.setattr(docker, "from_env", boom)
+    _daemon_down(monkeypatch)
     monkeypatch.delenv("VULCANBENCH_ALLOW_HOST_EXEC", raising=False)
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -242,13 +246,10 @@ def test_run_auto_refuses_host_fallback_without_opt_in(
 
 
 def test_run_auto_falls_back_with_opt_in(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    def boom():  # type: ignore[no-untyped-def]
-        raise ConnectionError("no daemon")
-
-    monkeypatch.setattr(docker, "from_env", boom)
+    _daemon_down(monkeypatch)
     monkeypatch.setenv("VULCANBENCH_ALLOW_HOST_EXEC", "1")
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -268,12 +269,12 @@ def test_run_auto_falls_back_with_opt_in(tmp_path: Path, monkeypatch: pytest.Mon
 
 def test_run_requires_exactly_one_target(tmp_path: Path) -> None:
     # Neither --task nor --suite.
-    r1 = runner.invoke(app, ["run", "--model", "mock:synthetic", "--output-dir", str(tmp_path)])
+    r1 = runner.invoke(main, ["run", "--model", "mock:synthetic", "--output-dir", str(tmp_path)])
     assert r1.exit_code == 1
     assert "exactly one" in r1.output
     # Both --task and --suite.
     r2 = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -291,7 +292,7 @@ def test_run_requires_exactly_one_target(tmp_path: Path) -> None:
 
 def test_run_suite_end_to_end(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--suite",
@@ -310,9 +311,26 @@ def test_run_suite_end_to_end(tmp_path: Path) -> None:
     assert "pass@1" in result.output
 
 
+def test_run_suite_max_infra_retries_reaches_the_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The GUI passes 0 so a launched suite never re-queues a unit on its own."""
+    seen: list[int] = []
+
+    def fake_run_suite(name, model, **kwargs):  # type: ignore[no-untyped-def]
+        seen.append(kwargs["max_infra_retries"])
+        return {"suite": name, "model": model, "tasks": [], "errors": [], "aggregate": []}
+
+    monkeypatch.setattr(cli_mod, "run_suite", fake_run_suite)
+    base = ["run", "--suite", "v1", "--model", "mock:synthetic", "--no-judges", "-o", str(tmp_path)]
+    assert runner.invoke(main, base).exit_code == 0
+    assert runner.invoke(main, [*base, "--max-infra-retries", "0"]).exit_code == 0
+    assert seen == [2, 0]
+
+
 def test_run_task_repeat(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -355,7 +373,7 @@ def test_effort_sweep_writes_experiment(tmp_path: Path, monkeypatch: pytest.Monk
 
     monkeypatch.setattr(cli_mod, "run_suite", fake_run_suite)
     result = runner.invoke(
-        app,
+        main,
         [
             "effort-sweep",
             "--suite",
@@ -385,7 +403,7 @@ def test_effort_sweep_writes_experiment(tmp_path: Path, monkeypatch: pytest.Monk
 
 def test_run_repeat_zero_rejected(tmp_path: Path) -> None:
     result = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -405,7 +423,7 @@ def test_run_repeat_zero_rejected(tmp_path: Path) -> None:
 def test_report_writes_md_and_json(tmp_path: Path) -> None:
     runs = tmp_path / "runs"
     runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -420,33 +438,33 @@ def test_report_writes_md_and_json(tmp_path: Path) -> None:
         ],
     )
     md_path = tmp_path / "report.md"
-    r1 = runner.invoke(app, ["report", "--runs-dir", str(runs), "-o", str(md_path)])
+    r1 = runner.invoke(main, ["report", "--runs-dir", str(runs), "-o", str(md_path)])
     assert r1.exit_code == 0
     assert md_path.exists() and "# VulcanBench report" in md_path.read_text()
 
     json_path = tmp_path / "report.json"
     r2 = runner.invoke(
-        app, ["report", "--runs-dir", str(runs), "--format", "json", "-o", str(json_path)]
+        main, ["report", "--runs-dir", str(runs), "--format", "json", "-o", str(json_path)]
     )
     assert r2.exit_code == 0
     rep = json.loads(json_path.read_text())
     assert rep["totals"]["n_runs"] == 1
 
     # stdout path (no -o) prints the report.
-    r3 = runner.invoke(app, ["report", "--runs-dir", str(runs)])
+    r3 = runner.invoke(main, ["report", "--runs-dir", str(runs)])
     assert r3.exit_code == 0
     assert "## Models" in r3.output
 
 
 def test_report_bad_format(tmp_path: Path) -> None:
-    r = runner.invoke(app, ["report", "--runs-dir", str(tmp_path), "--format", "xml"])
+    r = runner.invoke(main, ["report", "--runs-dir", str(tmp_path), "--format", "xml"])
     assert r.exit_code == 1
     assert "format must be" in r.output
 
 
 def _run_fail_under(task: str, threshold: str, tmp_path: Path):  # type: ignore[no-untyped-def]
     return runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -516,7 +534,7 @@ def test_fail_under_fails_closed_on_suite_error(
 
     monkeypatch.setattr(cli_mod, "run_suite", fake_run_suite)
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--suite",
@@ -538,7 +556,7 @@ def test_fail_under_rejects_non_finite_and_out_of_range(tmp_path: Path) -> None:
     """nan/inf and values outside [0,1] are rejected before running (reviewer's P1)."""
     for bad in ("nan", "inf", "-0.1", "1.5"):
         r = runner.invoke(
-            app,
+            main,
             [
                 "run",
                 "--task",
@@ -558,7 +576,7 @@ def test_fail_under_rejects_non_finite_and_out_of_range(tmp_path: Path) -> None:
 
 def test_max_cost_requires_priced_model(tmp_path: Path) -> None:
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--suite",
@@ -579,7 +597,7 @@ def test_max_cost_unpriced_judge_is_named(tmp_path: Path) -> None:
     # Run model is priced (mock); only the judge model is unpriced -> the error
     # must name the judge, not the (priced) run model.
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--suite",
@@ -601,7 +619,7 @@ def test_max_cost_unpriced_judge_is_named(tmp_path: Path) -> None:
 
 def test_max_cost_requires_suite(tmp_path: Path) -> None:
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -620,7 +638,7 @@ def test_max_cost_requires_suite(tmp_path: Path) -> None:
 
 def test_max_cost_must_be_positive(tmp_path: Path) -> None:
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--suite",
@@ -666,7 +684,7 @@ def test_fail_under_fails_closed_on_budget_skip(
 
     monkeypatch.setattr(cli_mod, "run_suite", fake_run_suite)
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--suite",
@@ -686,7 +704,7 @@ def test_fail_under_fails_closed_on_budget_skip(
 
 def test_no_fail_under_exits_zero_even_when_unsolved(tmp_path: Path) -> None:
     r = runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -704,19 +722,19 @@ def test_no_fail_under_exits_zero_even_when_unsolved(tmp_path: Path) -> None:
 
 
 def test_leaderboard_by_model_and_run() -> None:
-    assert runner.invoke(app, ["leaderboard", "--by", "model"]).exit_code == 0
-    assert runner.invoke(app, ["leaderboard", "--by", "run"]).exit_code == 0
+    assert runner.invoke(main, ["leaderboard", "--by", "model"]).exit_code == 0
+    assert runner.invoke(main, ["leaderboard", "--by", "run"]).exit_code == 0
 
 
 def test_list_tasks() -> None:
-    result = runner.invoke(app, ["list-tasks"])
+    result = runner.invoke(main, ["list-tasks"])
     assert result.exit_code == 0
     assert "hello-world" in result.output
 
 
 def test_leaderboard_json(tmp_path: Path) -> None:
     runner.invoke(
-        app,
+        main,
         [
             "run",
             "--task",
@@ -729,5 +747,5 @@ def test_leaderboard_json(tmp_path: Path) -> None:
             str(tmp_path),
         ],
     )
-    result = runner.invoke(app, ["leaderboard", "--format", "json"])
+    result = runner.invoke(main, ["leaderboard", "--format", "json"])
     assert result.exit_code == 0

@@ -7,13 +7,13 @@ per-metric analyzers and the orchestrator can all depend on it without cycles.
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
 
-
-class MetricResult(BaseModel):
+@dataclass(kw_only=True)
+class MetricResult:
     """Result of one metric assessment.
 
     ``score`` is on a 0.0-1.0 scale, or ``None`` when the metric could not be
@@ -23,7 +23,11 @@ class MetricResult(BaseModel):
     """
 
     score: float | None = None
-    details: dict[str, Any] = Field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.score is not None:
+            self.score = float(self.score)
 
 
 # File extension -> canonical language name.

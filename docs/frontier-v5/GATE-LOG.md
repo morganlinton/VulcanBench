@@ -43,6 +43,7 @@ launcher.
 | cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
 | ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
 | phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** (2026-10-31, owner confirmed): two genuine solves on the valid evidence |
+| apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -829,3 +830,41 @@ half, queued behind this run, was stopped before it started.
 minutes), each ported from the Java reference, and two invalid ones. By the
 gate's two-solve rule, applied to valid attempts only, that is a reject.
 **Verdict: REJECT** (2026-10-31; owner, in chat, confirmed on the valid evidence).
+
+### apollo-custom-scalar-coherence, Astra half (2026-10-31): REJECT
+
+The F3 (long-horizon volume) pilot, F3-javascript, built and validated
+2026-10-30 by the F3 building session (branch `claude/epic-nash-3711f3`,
+0bcb45d2): four Apollo Client fixes (#13406, #13372, #13447, #13498) composed
+at their common base; gold 20 files and 1,042 changed lines; 54 fail-to-pass
+ids across `src/cache/inmemory`, `src/core` and `codegen/custom-scalars`;
+base 0, gold 1, 6 probes 0, Harbor oracle 1 and nop 0. Job
+`astra-apollo-custom-scalar-coherence`, launched 09:59 PDT under the owner's
+standing approval from a run worktree pinned to the tag
+`bench/2026-10-31-apollo-astra-gate-apps-off` (the task plus `run_gate.sh`
+and `codex-gate.toml` from 9b2bd579: web search and connected apps off),
+`GATE_CONCURRENCY=1`. An earlier tag without the apps fix
+(`bench/2026-10-31-apollo-astra-gate`) was cut but never run. Sessions real
+(`gpt-6-astra`, 82 tool calls in the first); no MCP or web tool calls, and
+`codex_apps` absent from the tool list.
+
+| Trial | Agent minutes | Reward | Tests seen |
+| --- | --- | --- | --- |
+| UGMMKyM | 21.8 | **1** | 11,869 |
+| DaMqANG | 21.4 | **1** | 11,869 |
+| HLuYGsh | stopped by the early exit | none | not counted |
+
+**2 of 2, genuine.** The first solve wrote its own contract tests for each
+symptom in the instruction (`src/cache/inmemory/__tests__/scalar-contract.ts`,
+plus additions to the codegen plugin tests), patched the cache key
+extraction, the policies and `ObservableQuery` directly, and ran the
+targeted suites about 30 times. It never tried to fetch upstream. Both
+verifiers re-ran one or two known flaky files once, as designed.
+
+Lesson for F3: the volume floor alone (12 files, 1,000 lines, 25 checks
+across three modules) does not hold the reference when the instruction
+names each symptom; Astra wrote one test per symptom and fixed each in
+about 20 minutes. The family's hypothesis was that work volume beyond one
+sitting resists collapse; 1,042 lines is within one sitting.
+
+**Verdict: REJECT** (early exit, 2026-10-31). Opus half not run.

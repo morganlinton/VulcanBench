@@ -52,9 +52,12 @@
 # harbor's result.json, which has no finished_at on a cancelled job.
 #
 # Authentication (never read or printed by this script):
-#   astra  the ChatGPT login in ~/.codex/auth.json (`codex login`); Harbor
-#          injects it because CODEX_FORCE_AUTH_JSON=1 is set in its own
-#          environment.
+#   astra  a dedicated ChatGPT login for gate runs, with no connected apps,
+#          in ~/.config/vulcanbench/codex-gate/auth.json
+#          (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`), or the
+#          file GATE_CODEX_AUTH names; without one, the personal login in
+#          ~/.codex/auth.json. Harbor injects the file CODEX_AUTH_JSON_PATH
+#          names, set in its own environment.
 #   fable, opus  either a Claude subscription token in a private env file
 #          (CLAUDE_GATE_ENV, default ~/.config/vulcanbench/claude-gate.env,
 #          one line CLAUDE_CODE_OAUTH_TOKEN=..., from `claude setup-token`),
@@ -110,8 +113,15 @@ command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/fron
 case "$ref" in
   astra)
     agent=codex; model=gpt-6-astra; version=0.159.0
-    [ -f "$HOME/.codex/auth.json" ] || { echo "run_gate: ~/.codex/auth.json missing; run \`codex login\`" >&2; exit 2; }
-    auth_env=(CODEX_FORCE_AUTH_JSON=1)
+    # A dedicated gate login (no connected apps) when it exists, else the
+    # personal one; Harbor reads the file named by CODEX_AUTH_JSON_PATH.
+    codex_auth="${GATE_CODEX_AUTH:-$HOME/.config/vulcanbench/codex-gate/auth.json}"
+    if [ ! -f "$codex_auth" ]; then
+      [ -n "${GATE_CODEX_AUTH:-}" ] && { echo "run_gate: GATE_CODEX_AUTH=$codex_auth missing" >&2; exit 2; }
+      codex_auth="$HOME/.codex/auth.json"
+    fi
+    [ -f "$codex_auth" ] || { echo "run_gate: $codex_auth missing; run \`codex login\`" >&2; exit 2; }
+    auth_env=(CODEX_AUTH_JSON_PATH="$codex_auth")
     # Provider-side tools off: web search, the account's connected apps
     # (codex_apps), plugins and browser tools (docs/DECISIONS.md 2026-10-31).
     codex_cfg="$here/scripts/frontier-v5/codex-gate.toml"

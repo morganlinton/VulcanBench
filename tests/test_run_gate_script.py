@@ -222,7 +222,7 @@ def test_normal_run_writes_phases_and_keeps_stdout_shape(gate: Gate) -> None:
         "ps -aq --filter name=^demo-task-with-a-fairly-long-nam__" in c for c in gate.docker_calls()
     )
     argv = json.loads((gate.out / "jobs" / job / "argv.json").read_text())
-    assert argv["env"] == {"CODEX_FORCE_AUTH_JSON": "1"}
+    assert argv["env"] == {"CODEX_AUTH_JSON_PATH": str(gate.home / ".codex" / "auth.json")}
     assert (
         "--effort" in argv["argv"] and argv["argv"][argv["argv"].index("--effort") + 1] == "medium"
     )
@@ -300,6 +300,16 @@ def test_provider_side_tool_use_is_an_infrastructure_failure(gate: Gate) -> None
     st = gate.status(f"astra-{gate.task}")
     assert st["phase"] == "infra_failed"
     assert str(st["stop_reason"]).startswith("infra:demo-task-with-a-fairly-long-nam__t0")
+
+
+def test_dedicated_gate_login_is_preferred(gate: Gate) -> None:
+    gate_auth = gate.home / ".config" / "vulcanbench" / "codex-gate" / "auth.json"
+    gate_auth.parent.mkdir(parents=True)
+    gate_auth.write_text("{}")
+    r = gate.run("astra", gate.task)
+    assert r.returncode == 0, r.stdout + r.stderr
+    argv = json.loads((gate.out / "jobs" / f"astra-{gate.task}" / "argv.json").read_text())
+    assert argv["env"] == {"CODEX_AUTH_JSON_PATH": str(gate_auth)}
 
 
 def test_refusals_before_harbor_starts(gate: Gate) -> None:

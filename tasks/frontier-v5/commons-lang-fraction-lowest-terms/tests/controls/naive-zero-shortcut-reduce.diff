@@ -1,0 +1,17 @@
+diff --git a/src/main/java/org/apache/commons/lang3/math/Fraction.java b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+index ac19734..35e5f51 100644
+--- a/src/main/java/org/apache/commons/lang3/math/Fraction.java
++++ b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+@@ -521,10 +521,10 @@ public final class Fraction extends Number implements Comparable<Fraction> {
+         Objects.requireNonNull(fraction, "fraction");
+         // zero is identity for addition.
+         if (numerator == 0) {
+-            return isAdd ? fraction : fraction.negate();
++            return isAdd ? fraction.reduce() : getReducedFraction(-fraction.numerator, fraction.denominator);
+         }
+         if (fraction.numerator == 0) {
+-            return this;
++            return reduce();
+         }
+         // if denominators are randomly distributed, d1 will be 1 about 61%
+         // of the time.

@@ -282,6 +282,48 @@ The Mirror adapter archives model messages and usage but not tool calls, so
 how often Beam saw the note cannot be counted; the adapter gains tool-call
 archiving after the sweep.
 
+## 2026-10-24: Rust engine spike, phase 2: system curl for HTTP, zero crates kept
+
+### Decision
+
+The Rust run-engine spike (`engine-rs/`, PR #224) reached byte-level parity
+with the Python engine on the mock hello-world run with no external crates.
+For phase 2 (a real provider, the Docker sandbox) the owner chose, in chat on
+2026-10-24: "Go with system curl for the Rust engine's HTTP layer, keeping zero
+crates." The alternative weighed was one audited TLS stack (rustls with
+`webpki-roots` or the platform verifier).
+
+### Reasoning
+
+- The engine already requires host binaries that it drives through their
+  CLIs: `git` for the patch, `docker` for the sandbox, the language
+  toolchains, and the venv's `ruff`, `bandit`, `radon` and `python` for
+  scoring. One more host binary is consistent with that design; a TLS crate
+  would be the first dependency of any kind.
+- rustls is not one crate. It brings `ring` or `aws-lc-rs`, `webpki`,
+  `pki-types` and `zeroize`, and the engine would still have to own an
+  HTTP/1.1 client (chunked encoding, keep-alive, server-sent events for the
+  streaming providers). curl already does all of that, plus proxies and HTTP/2,
+  and is maintained and patched by the host's package manager.
+- A process per model call costs milliseconds against round trips of seconds
+  to minutes.
+- The costs accepted: a dependency on the host's curl and CA bundle, which the
+  run manifest must record the way it records `git --version`; and secrets
+  must never reach argv. The implementation passes the URL, every header (the
+  API key included) and the body to curl as a config file on stdin
+  (`curl --config -`), so nothing sensitive appears in argv, the environment
+  or a file. curl reads a config line of at most 10 MiB, so bodies above
+  8 MiB are refused with a clear error.
+- The HTTP seam is one trait with one `post` method; a rustls client could
+  replace the curl one later without touching any provider.
+
+### Revisit when
+
+A provider needs streaming semantics curl cannot express through `--config`,
+the host inventory stops guaranteeing curl, or the port is promoted to engine
+of record and a single static binary becomes a requirement.
+
+
 ## 2026-10-23: Reflection Beam on Frontier v4 through Mirror CLI; DeepSeek V4 Pro stopped
 
 ### Decision

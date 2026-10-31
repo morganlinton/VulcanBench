@@ -1,19 +1,18 @@
-"""GPT-6.1 Terra, Claude Sonnet 5.5 and Muse Wonder Full on VulcanBench Frontier v4.
+"""GPT-6.1 Terra and Claude Sonnet 5.5 on VulcanBench Frontier v4.
 
 Owner request 2026-10-31. Same compact 16:9 layout as the Terra card in
 make_gpt61terra_vs_frontier_card.py: model as the title, combined score and
-cost per task at every effort level, a short footnote. The per-level table,
-minutes included, is written to the CSV beside the card.
+cost per task at every effort level, one footnote line. The per-level table,
+minutes included, is written to the CSV beside the card. Muse Wonder Full was
+on the first draft and was dropped by the owner: it ran in Contributor mode,
+which has no Max level.
 
 Source, nothing re-run or re-judged: the published leaderboard table
 (VulcanBenchCOM assets/data/swe-v4-board.csv), which carries each model's
-per-level rows (Terra v3.29, Sonnet v3.23, Muse Wonder Full v3.26). Its
-sha256 is recorded in the card's JSON.
+per-level rows (Terra v3.29, Sonnet v3.23, both judged by Muse Spark 1.3 and
+Grok 4.6). Its sha256 is recorded in the card's JSON.
 
-Muse Wonder Full ran in Muse Code's Contributor mode, which has no Max level,
-so its line stops at Extra high and its Max cost slot reads n/a.
-
-    python scripts/cii-v4-board/make_gpt61terra_vs_sonnet55_musewonder_card.py \
+    python scripts/cii-v4-board/make_gpt61terra_vs_sonnet55_card.py \
         --board <VulcanBenchCOM checkout>/assets/data/swe-v4-board.csv
 """
 
@@ -38,23 +37,16 @@ sys.path.insert(0, str(ROOT))
 from harness.retrospective_judging import LEVELS, digest, save  # noqa: E402
 
 OUTPUT = ROOT / "docs/results/swe-v4-gpt61-terra-2026-10"
-MODELS = ("gpt61terra", "sonnet55", "wonder")
-BOARD_NAMES = {
-    "gpt61terra": "GPT-6.1 Terra",
-    "sonnet55": "Sonnet 5.5",
-    "wonder": "Muse Wonder Full",
-}
-NAMES = {
-    "gpt61terra": "GPT-6.1 Terra",
-    "sonnet55": "Claude Sonnet 5.5",
-    "wonder": "Muse Wonder Full",
-}
-# Lab colors (OpenAI green, Anthropic clay, Meta blue); Terra's own card uses blue, which
-# would clash with Muse here. On the card paper the worst color-vision pair is clay and
-# green, so markers and direct labels carry identity as well as color.
-COLORS = {"gpt61terra": "#10A37F", "sonnet55": "#D97757", "wonder": "#0866FF"}
-MARKERS = {"gpt61terra": "o", "sonnet55": "D", "wonder": "s"}
+MODELS = ("gpt61terra", "sonnet55")
+BOARD_NAMES = {"gpt61terra": "GPT-6.1 Terra", "sonnet55": "Sonnet 5.5"}
+NAMES = {"gpt61terra": "GPT-6.1 Terra", "sonnet55": "Claude Sonnet 5.5"}
+# Lab colors (OpenAI green, Anthropic clay). On the card paper the pair sits in the
+# color-vision floor band (protan dE 6.8), so markers, direct labels and value labels
+# carry identity as well as color.
+COLORS = {"gpt61terra": "#10A37F", "sonnet55": "#D97757"}
+MARKERS = {"gpt61terra": "o", "sonnet55": "D"}
 PAPER, INK, RULE, MUTED = "#f7f5f0", "#171917", "#c6c5bc", "#6b6b66"
+STEM = "terra-vs-sonnet55"
 
 
 def require(condition, message):
@@ -78,23 +70,22 @@ def load(board: Path):
                         "passed": int(r["passed"]),
                         "usd": float(r["mean_usd"]),
                         "minutes": float(r["mean_minutes"]),
-                        "timeouts_zero": r["combined_timeouts_zero"] or "",
                         "protocol": r["protocol"],
                         "harness": r["harness"],
                     }
-    for m in MODELS:
-        have = [e for e in LEVELS if (m, e) in groups]
-        require(have == list(LEVELS[: len(have)]) and have, f"{m} levels are not a prefix: {have}")
+    require(set(groups) == {(m, e) for m in MODELS for e in LEVELS}, "a level is missing")
+    # The footnote states one judged count for every point, so every point must be complete.
+    require(len({(g["judged"], g["of"]) for g in groups.values()}) == 1, "judged counts differ")
+    require(all(g["judged"] == g["of"] for g in groups.values()), "a point is partial")
     return groups
 
 
-def main():  # noqa: PLR0912, PLR0915, one linear figure
+def main():  # noqa: PLR0915, one linear figure
     p = argparse.ArgumentParser()
     p.add_argument("--board", type=Path, required=True)
     p.add_argument("--out", type=Path, default=OUTPUT)
     args = p.parse_args()
     groups = load(args.board)
-    levels = {m: [e for e in LEVELS if (m, e) in groups] for m in MODELS}
 
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
@@ -145,7 +136,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             )
         )
         text(x + 0.016, 2.4, NAMES[m], 13, True)
-        x += {"gpt61terra": 0.15, "sonnet55": 0.175, "wonder": 0}[m]
+        x += 0.15
 
     def axis(x0, w, top, h):
         ax = fig.add_axes([x0, yf(top + h), w, h / H], facecolor=PAPER)
@@ -158,11 +149,11 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         ax.set_xticks(range(len(LEVELS)), [e.replace("-", " ").capitalize() for e in LEVELS])
         return ax
 
-    # Combined score: all three overlap, so one shared scale.
+    # Combined score: the two curves overlap, so one shared scale.
     text(left, 3.0, "Combined score", 20, True, heading=True)
     text(left, 3.32, "higher is better  ·  whiskers ±1 se", 12, color=MUTED)
     span_h = 3.9
-    pts = [groups[k] for k in groups]
+    pts = list(groups.values())
     lo = math.floor(min(g["mean"] - g["se"] for g in pts)) - 1
     hi = math.ceil(max(g["mean"] + g["se"] for g in pts)) + 1
     ax = axis(0.085, 0.40, 3.7, span_h)
@@ -170,20 +161,18 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     ax.set_ylim(lo, hi)
     step = 2 if hi - lo <= 16 else 5
     ax.set_yticks(range(lo + (-lo) % step, hi + 1, step))
-    # Lines that reach Max get end labels past the Max column; a line that stops short is
-    # labelled above its first segment instead, so its label never sits where it has no point.
-    full = [m for m in MODELS if len(levels[m]) == len(LEVELS)]
-    end = {m: groups[m, "max"]["mean"] for m in full}
+    # End labels past the Max column, spaced apart when the two Max points sit close.
+    end = {m: groups[m, "max"]["mean"] for m in MODELS}
     gap = 0.06 * (hi - lo)
     placed = {}
-    for m in sorted(full, key=end.get):
+    for m in sorted(MODELS, key=end.get):
         placed[m] = max(end[m], max(placed.values(), default=-math.inf) + gap)
     shift = statistics.mean(placed.values()) - statistics.mean(end.values())
-    dodge = {"gpt61terra": -0.06, "sonnet55": 0.0, "wonder": 0.06}
+    dodge = {"gpt61terra": -0.04, "sonnet55": 0.04}
     for m in MODELS:
-        xs = [LEVELS.index(e) + dodge[m] for e in levels[m]]
-        ys = [groups[m, e]["mean"] for e in levels[m]]
-        es = [groups[m, e]["se"] for e in levels[m]]
+        xs = [i + dodge[m] for i in range(len(LEVELS))]
+        ys = [groups[m, e]["mean"] for e in LEVELS]
+        es = [groups[m, e]["se"] for e in LEVELS]
         ax.plot(xs, ys, color=COLORS[m], lw=2, zorder=2)
         ax.errorbar(
             xs,
@@ -199,112 +188,56 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             capsize=3,
             zorder=3,
         )
-        if m in full:
-            ax.annotate(
-                NAMES[m].replace("Claude ", ""),
-                (xs[-1], ys[-1]),
-                xytext=(4.18, placed[m] - shift),
-                textcoords="data",
-                va="center",
-                fontsize=10.5,
-                color=INK,
-                fontfamily="Geist",
-                weight=700,
-                annotation_clip=False,
-            )
-        else:
-            ax.text(
-                xs[0] - 0.12,
-                max(y + e for y, e in zip(ys[:2], es[:2], strict=True)) + 0.4,
-                NAMES[m].replace("Claude ", ""),
-                ha="left",
-                va="center",
-                fontsize=10.5,
-                color=INK,
-                fontfamily="Geist",
-                weight=700,
-                zorder=4,
-                bbox={"facecolor": PAPER, "edgecolor": "none", "pad": 1.5},
-            )
+        ax.annotate(
+            NAMES[m].replace("Claude ", ""),
+            (xs[-1], ys[-1]),
+            xytext=(4.18, placed[m] - shift),
+            textcoords="data",
+            va="center",
+            fontsize=10.5,
+            color=INK,
+            fontfamily="Geist",
+            weight=700,
+            annotation_clip=False,
+        )
 
     # Cost per task.
     text(0.56, 3.0, "Cost per task", 20, True, heading=True)
     text(0.56, 3.32, "US dollars at list price  ·  lower is cheaper", 12, color=MUTED)
     ax = axis(0.585, 0.355, 3.7, span_h)
-    shifts = {"gpt61terra": -0.27, "sonnet55": 0.0, "wonder": 0.27}
-    top = max(g["usd"] for g in pts)
-    ax.set_ylim(0, top * 1.18)
+    shifts = {"gpt61terra": -0.17, "sonnet55": 0.17}
+    ax.set_ylim(0, max(g["usd"] for g in pts) * 1.18)
     ax.yaxis.set_major_formatter(lambda v, _pos: f"${v:.0f}")
     for m in MODELS:
-        idx = [LEVELS.index(e) for e in levels[m]]
-        ys = [groups[m, e]["usd"] for e in levels[m]]
-        ax.bar(
-            [i + shifts[m] for i in idx],
-            ys,
-            width=0.25,
-            color=COLORS[m],
-            edgecolor=INK,
-            linewidth=0.5,
-            zorder=2,
-        )
-        for i, y in zip(idx, ys, strict=True):
+        xs = [i + shifts[m] for i in range(len(LEVELS))]
+        ys = [groups[m, e]["usd"] for e in LEVELS]
+        ax.bar(xs, ys, width=0.3, color=COLORS[m], edgecolor=INK, linewidth=0.5, zorder=2)
+        for x_, y in zip(xs, ys, strict=True):
             ax.annotate(
                 f"{y:.2f}",
-                (i + shifts[m], y),
+                (x_, y),
                 xytext=(0, 3),
                 textcoords="offset points",
                 ha="center",
                 va="bottom",
-                fontsize=8,
+                fontsize=8.5,
                 fontfamily="IBM Plex Mono",
                 color=INK,
             )
-    for m in MODELS:
-        for e in LEVELS[len(levels[m]) :]:
-            ax.annotate(
-                "n/a",
-                (LEVELS.index(e) + shifts[m], 0),
-                xytext=(0, 4),
-                textcoords="offset points",
-                ha="center",
-                va="bottom",
-                fontsize=8,
-                fontfamily="IBM Plex Mono",
-                color=MUTED,
-            )
 
-    short = {m: NAMES[m].replace("Claude ", "") for m in MODELS}
-    partial = [
-        (m, e) for m in MODELS for e in levels[m] if groups[m, e]["judged"] < groups[m, e]["of"]
-    ]
-    require(
-        all(groups[k]["timeouts_zero"] for k in partial), "a partial point has no timeout figure"
+    judged = pts[0]["judged"]
+    footnote = (
+        f"{judged} judged runs per point. Code quality judges for both: Muse Spark 1.3 and "
+        "Grok 4.6. Harnesses: Codex for Terra, Claude Code for Sonnet."
     )
-    by_model = {}
-    for m, e in partial:
-        by_model.setdefault(m, []).append(e.replace("-", " ").capitalize())
-    notes = []
-    for m, es in by_model.items():
-        n = {groups[m, e]["judged"] for e in levels[m] if (m, e) in partial}
-        require(len(n) == 1, "mixed partial counts")
-        notes.append(f"{short[m]} {' and '.join(es)} {n.pop()} each (one timeout left out)")
-    missing = [short[m] for m in MODELS if len(levels[m]) < len(LEVELS)]
-    line1 = "Judged runs: 23 per point except " + "; ".join(notes) + "."
-    if missing:
-        line1 += f" {' and '.join(missing)} has no Max level in its mode."
-    line2 = (
-        "Code quality judges: Muse Spark 1.3 and Grok 4.6; for Muse Wonder Full, Claude Opus 5.5 "
-        "and GPT-6.1 Sol. Harnesses differ: Codex, Claude Code, Muse Code."
-    )
-    text(left, 8.3, line1, 11, color=MUTED)
-    text(left, 8.6, line2, 11, color=MUTED)
+    text(left, 8.45, footnote, 11, color=MUTED)
 
     args.out.mkdir(parents=True, exist_ok=True)
-    out = args.out / "terra-vs-sonnet55-musewonder-full.png"
+    out = args.out / f"{STEM}.png"
     fig.savefig(out, facecolor=PAPER)
     fig.savefig(out.with_suffix(".svg"), facecolor=PAPER)
     plt.close(fig)
-    table = args.out / "terra-vs-sonnet55-musewonder-full-efforts.csv"
+    table = args.out / f"{STEM}-efforts.csv"
     cols = [
         "model",
         "effort",
@@ -314,7 +247,6 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "of",
         "combined",
         "combined_se",
-        "combined_timeouts_zero",
         "code_quality",
         "passed",
         "usd_per_task",
@@ -324,7 +256,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         w = csv.writer(fh, lineterminator="\n")
         w.writerow(cols)
         for m in MODELS:
-            for e in levels[m]:
+            for e in LEVELS:
                 g = groups[m, e]
                 w.writerow(
                     [
@@ -336,7 +268,6 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                         g["of"],
                         f"{g['mean']:.4f}",
                         f"{g['se']:.4f}",
-                        g["timeouts_zero"],
                         f"{g['code_quality']:.4f}",
                         g["passed"],
                         f"{g['usd']:.4f}",
@@ -344,17 +275,17 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                     ]
                 )
     save(
-        args.out / "terra-vs-sonnet55-musewonder-full.json",
+        args.out / f"{STEM}.json",
         {
             "source": "VulcanBenchCOM assets/data/swe-v4-board.csv",
             "source_sha256": digest(args.board.read_bytes()),
             "png_sha256": digest(out.read_bytes()),
             "table": table.name,
-            "footnote": [line1, line2],
+            "footnote": footnote,
         },
     )
     print(out)
-    print(line1)
+    print(footnote)
 
 
 if __name__ == "__main__":

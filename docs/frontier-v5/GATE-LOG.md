@@ -33,7 +33,7 @@ launcher.
 | ioverlay-hole-binding-extraction | F5-rust | 2 of 2 solved (6.2, 7.3) | not run | **REJECT** (early exit) |
 | tseslint-type-params-mapped-types | F5-javascript | 2 of 2 solved (12.2, 10.8) | not run | **REJECT** (early exit) |
 | commons-lang-fraction-lowest-terms | F5-java | 2 of 2 solved (4.3, 4.4) | not run | **REJECT** (early exit) |
-| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
+| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2); **Opus 5.5: 0 of 3** (42.3, 21.1, 22.1; 2026-10-31) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar; Opus 5.5 0 of 3 |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
 | black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
 | pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met, gated under (g')) | **0 of 3** (3.7, 4.4, 3.2) | **Opus 5.5: 1 of 5** (13.4, 11.1, 8.6, 7.6, 5.4) after the n=5 top-up | **ADMIT** (F5-rust, 2026-10-30) under (g'): Opus 1 of 5, below the bar; floor-8 miss recorded |
@@ -938,3 +938,23 @@ calls; tamper scan clean in every attempt.
 deep ones the rebuild made rarer; the longest attempt checked its budget 23
 times and still missed levy and gate. The Opus 5.5 half runs next under the
 standing approval.
+
+### treesitter-query-anchor-matching, Opus 5.5 prong (2026-10-31): 0 of 3, admission confirmed
+
+Decision (k) (DECISIONS.md 2026-10-31): run tree-sitter against Claude Opus
+5.5, the second reference every other release-1 task was gated against. Job
+`opus-treesitter-query-anchor-matching`, launched 13:36 PDT from a run
+worktree pinned to the tag `bench/2026-10-31-treesitter-opus-gate` (main, the
+task unchanged since its Fable half, plus `run_gate.sh` from 9b2bd579 with
+web tools off), `GATE_CONCURRENCY=1`. Usage pre-flight 0.17. Sessions real
+(every turn on `claude-opus-5-5`); no WebSearch or WebFetch call.
+
+| Trial | Agent minutes | Reward | Failing |
+| --- | --- | --- | --- |
+| A5Z8Qtj | 42.3 | 0 | held-out `test_query_matches_with_leading_anchor_before_zero_quantifier`; guard `..._with_anchors_on_both_sides_of_zero_quantifier` regressed |
+| fj5vGo9 | 21.1 | 0 | the same held-out check |
+| vFDmuRf | 22.1 | 0 | the same held-out check |
+
+**0 of 3.** With Astra 0 of 3 and Fable 5.1 2 of 5, tree-sitter keeps F5-c
+and now meets the release-1 rule on the same two references as the other
+five tasks.

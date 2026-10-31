@@ -42,6 +42,7 @@ launcher.
 | boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
 | cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
 | ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
+| phonenumbers-parse-match-parity | F2-python (shape B1) | 1 genuine solve (7.4); a second (6.4) used Codex `web__run` and is not valid | not run | **not decided**: Astra re-run with web tools off on the owner's approval |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -763,3 +764,39 @@ binary of this size. Any further F4 candidate must show its reference resists
 reading in a session (size, structure) before it is gated.
 
 **Verdict: REJECT** (early exit, 2026-10-30). Fable or Opus half not run.
+
+### phonenumbers-parse-match-parity, Astra half (2026-10-30): not decided, one solve used a web tool
+
+The first F2 candidate under shape B1, F2-python, built and validated
+2026-10-30 by the F2 building session (branch
+`claude/practical-satoshi-f4d035`, 55b8e515): base 0, gold 1, 4 probes 0, the
+B1 check found no runnable route to the Java reference, Harbor oracle 1 and
+nop 0. Job `astra-phonenumbers-parse-match-parity`, launched 19:57 PDT under
+the owner's standing approval from a run worktree pinned to the tag
+`bench/2026-10-30-phonenumbers-astra-gate`, wave-1 identifiers,
+`GATE_CONCURRENCY=1`, behind the shared Docker lock. Sessions real
+(`gpt-6-astra`).
+
+| Trial | Agent minutes | Reward | How |
+| --- | --- | --- | --- |
+| JM2ysUP | 7.4 | **1** | genuine: ported from the Java reference; its `curl` and `pip download` were blocked |
+| vHcy4ej | 6.4 | **1** | **not valid**: fetched the upstream Python files ten times through Codex's `web__run` |
+| 5rohfSY | stopped by the early exit | none | not counted |
+
+Diff review against the upstream gold. The stubs alone already share 2,307
+lines of `phonenumberutil.py` with it. JM2ysUP adds almost nothing beyond
+that (2,330 shared lines; 13% of the formatter and 21% of the matcher), so
+it was written from the Java. vHcy4ej shares 2,667 lines of
+`phonenumberutil.py` and 705 of the matcher's 787 lines, which matches its
+web fetches.
+
+`web__run` runs on OpenAI's side, so the task's network allowlist never sees
+it. It is now off for both references (DECISIONS.md 2026-10-30,
+`run_gate.sh` with `--ak disable_web_search=true`). An audit of every
+gate trial on the Mac Studio found no other provider-side web use.
+
+**Verdict: not decided.** Valid results: 1 genuine solve (JM2ysUP, in 7.4
+minutes). The early exit fired on a contaminated second solve, so the half
+must be re-run with web tools off before it is decided. One more genuine
+solve rejects the task. The re-run is a re-run of a finished half, so it
+waits for the owner.

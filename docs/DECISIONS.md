@@ -7,6 +7,36 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-30: one Docker-heavy job at a time on the Mac Studio, by a shared lock
+
+### Decision
+
+Gate session, 2026-10-30, while the owner's Docker memory raise (to 24 GiB)
+is pending. Every session on the Mac Studio that builds task images or runs
+task containers (probe_verifier, run_controls, Harbor oracle and nop, gate
+runs) first takes `~/.vulcanbench/docker-lock.sh acquire <who>` and releases
+it when that step ends. The lock is a directory (mkdir is atomic); the holder
+and start time are in its `owner` file. This replaces the building sessions'
+earlier rule of waiting for a 20 GiB VM.
+
+### Evidence
+
+Docker Desktop's VM has 7.75 GiB and a task container declares up to 6 GiB
+(8 GiB for tseslint), so two at once can push a verifier out of memory, as
+on 2026-10-27 (prettier, two lost guard files). Three building sessions
+(F2, F3, F4) and the gate session share the VM.
+
+### Revisit triggers
+
+- Docker's VM at 16 GiB or more: two jobs at once are safe for 6 GiB tasks
+  (DECISIONS.md 2026-10-27); at 24 GiB the lock can go.
+- A holder that dies with the lock held: remove `~/.vulcanbench/docker.lock`
+  by hand after checking `docker ps` shows none of its containers.
+
+### What this touched
+
+`~/.vulcanbench/docker-lock.sh` (host-local, outside the repo). No repo code.
+
 ## 2026-10-30: Frontier v5 gate runs have a standing approval for one week; (g') and (h) decided
 
 ### Decision

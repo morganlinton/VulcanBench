@@ -45,7 +45,7 @@ launcher.
 | phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** (2026-10-31, owner confirmed): two genuine solves on the valid evidence |
 | apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
 | bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
-| ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | Opus 5.5: queued | Astra prong passed (2026-10-31); Opus 5.5 half under the standing approval |
+| ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | **Opus 5.5: 0 of 3** (52.1, 103.0, 49.3) | **ADMIT** (F4-python, 2026-10-31): both references 0 of 3; joins release 1 under (l) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -958,3 +958,29 @@ web tools off), `GATE_CONCURRENCY=1`. Usage pre-flight 0.17. Sessions real
 **0 of 3.** With Astra 0 of 3 and Fable 5.1 2 of 5, tree-sitter keeps F5-c
 and now meets the release-1 rule on the same two references as the other
 five tasks.
+
+### ferrycore-crossing-opaque-parity 0.2.0, Opus 5.5 half (2026-10-31): admitted
+
+Job `opus-ferrycore-crossing-opaque-parity-v0.2.0`, launched 15:10 PDT under
+the owner's standing approval from the same run worktree as the Astra half
+(tag `bench/2026-10-31-f4-query-service-astra-gate`, web tools off),
+`GATE_CONCURRENCY=1`. Usage pre-flight 0.19. Sessions real (every turn on
+`claude-opus-5-5`); no WebSearch or WebFetch call and no safety-classifier
+stop (the v4 paddockcore risk); tamper scan clean in every attempt. Finished
+18:38.
+
+| Trial | Agent minutes | Tool calls | Reward | Deep families failing |
+| --- | --- | --- | --- | --- |
+| crrmogd | 52.1 | 145 | 0 | levy, gate |
+| ZL5KXsR | 103.0 | 323 | 0 | levy, gate |
+| HYMVuEx | 49.3 | 138 | 0 | strand, levy |
+
+**0 of 3.** Across both halves, six of six attempts matched every ordinary
+family and missed at least two of the three deep families the 0.2.0 rebuild
+made rarer; levy was missed by all six.
+
+**Verdict: ADMIT** (F4-python, 2026-10-30 rule; 2026-10-31): GPT-6 Astra 0 of
+3 and Claude Opus 5.5 0 of 3. Under decision (l) it joins Frontier v5 release
+1 on its own family line. The record keeps two notes: 0.2.0 was redesigned
+after the 0.1.0 gate result, and its sibling bothycore, built the same way,
+fell to Astra's targeted probing 2 of 3.

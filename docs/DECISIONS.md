@@ -7,6 +7,39 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-31: decision (f), private task material lives in a private companion repo
+
+### Decision
+
+Owner, in chat, 2026-10-31 (open v1 decision (f), gold location). Frontier
+tasks whose value depends on material an agent must never find (hidden
+reference engines and their source, golds that exist nowhere else, hidden
+test data) live in the private repo `morganlinton/vulcanbench-frontier-private`,
+complete as gated. The public repo carries no file from those task
+directories, no tag or branch that contains them, and at most a name,
+version and content hash in a manifest. Tasks whose golds are already
+public upstream (the six F5 tasks of release 1) stay in the public repo.
+
+First contents (3984f32): ferrycore-crossing-opaque-parity 0.2.0 (admitted,
+release 1), bothycore-booking-opaque-parity (rejected, kept for release 2)
+and jsts-overlayng-coverage-parity (release-2 candidate).
+
+### Evidence
+
+The public repo is public. Run tags pushed on 2026-10-30 and 2026-10-31
+published the JSTS gold (removed the same day) and the F4 tasks' reference
+source and golds (`bench/2026-10-30-ferrycore-astra-gate`,
+`bench/2026-10-31-f4-query-service-astra-gate`; removal pending the owner).
+
+### Revisit triggers
+
+- A run or confirmation of a private task: its run commit and tag stay
+  local, and GATE-LOG records the private repo's commit.
+
+### What this touched
+
+New private repo. No public code.
+
 ## 2026-10-31: decision (l) resolved, ferrycore 0.2.0 joins Frontier v5 release 1
 
 ### Decision

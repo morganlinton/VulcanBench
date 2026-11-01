@@ -46,6 +46,7 @@ launcher.
 | apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
 | bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
 | ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | **Opus 5.5: 0 of 3** (52.1, 103.0, 49.3) | **ADMIT** (F4-python, 2026-10-31): both references 0 of 3; joins release 1 under (l) |
+| jsts-overlayng-coverage-parity | F2-javascript (B1; release-2 candidate) | **0 of 3** (20.2, 23.4, 24.7), closest 11,821 of 11,822 via a self-written Java-to-JS transpiler | Opus 5.5: running | Astra prong passed (2026-10-31) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -984,3 +985,31 @@ made rarer; levy was missed by all six.
 1 on its own family line. The record keeps two notes: 0.2.0 was redesigned
 after the 0.1.0 gate result, and its sibling bothycore, built the same way,
 fell to Astra's targeted probing 2 of 3.
+
+### jsts-overlayng-coverage-parity, Astra half (2026-10-31): the Astra prong passed, by one case
+
+A release-2 F2 candidate (F2-javascript, shape B1), built by the F2 building
+session after phonenumbers (local branch `claude/practical-satoshi-f4d035`,
+1850e8eb; not published, decision (f)). The agent gets the JTS Java source as
+the reference (no JVM, no other JTS port in the image) and a JavaScript JTS
+with 85 classes never ported and 115 drifted (about 9,000 Java logic lines
+in all); the completed port exists nowhere public. 11,822 graded cases, 332
+visible. Job `astra-jsts-overlayng-coverage-parity`, launched 18:38 PDT under
+the owner's standing approval from a local run worktree (the run tag was
+deleted from GitHub; the gold must stay unpublished), web search and
+connected apps off, `GATE_CONCURRENCY=1`.
+
+| Trial | Agent minutes | Reward | Cases matched | Tamper scan |
+| --- | --- | --- | --- | --- |
+| BMaqZd7 | 20.2 | 0 | 11,799 of 11,822 | clean |
+| cyArDmu | 23.4 | 0 | 11,821 of 11,822 | flagged, false positive (`expect` in its own runtime) |
+| pQdjQPf | 24.7 | 0 | 11,789 of 11,822 | flagged, false positive (`globalThis` in StrictMath.js) |
+
+**0 of 3, by a thread.** cyArDmu did not port by hand: it wrote a
+Java-to-JavaScript transpiler (a Java tokenizer and parser, a runtime that
+implements Java semantics in `org/locationtech/jts/reference/runtime.js`, and
+generated code) and ran the whole reference through it, ending one case short.
+B1 held (no Java was ever run), but the reference was mechanically
+translatable. Both tamper flags are false positives that did not change a
+reward; the F2 session narrows those rules after the Opus half. The Opus
+5.5 half runs next under the standing approval.

@@ -46,7 +46,7 @@ launcher.
 | apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
 | bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
 | ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | **Opus 5.5: 0 of 3** (52.1, 103.0, 49.3) | **ADMIT** (F4-python, 2026-10-31): both references 0 of 3; joins release 1 under (l) |
-| jsts-overlayng-coverage-parity | F2-javascript (B1; release-2 candidate) | **0 of 3** (20.2, 23.4, 24.7), closest 11,821 of 11,822 via a self-written Java-to-JS transpiler | Opus 5.5: running | Astra prong passed (2026-10-31) |
+| jsts-overlayng-coverage-parity | F2-javascript (B1; release-2 candidate) | **0 of 3** (20.2, 23.4, 24.7), closest 11,821 of 11,822 via a self-written Java-to-JS transpiler | Opus 5.5: **1 of 3 as graded, 3 of 3 by behaviour** (two tamper false positives) | REJECT recommended, owner to confirm (2026-11-01) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -1013,3 +1013,43 @@ B1 held (no Java was ever run), but the reference was mechanically
 translatable. Both tamper flags are false positives that did not change a
 reward; the F2 session narrows those rules after the Opus half. The Opus
 5.5 half runs next under the standing approval.
+
+### jsts-overlayng-coverage-parity, Opus 5.5 half (2026-11-01): solved in substance, REJECT recommended
+
+Job `opus-jsts-overlayng-coverage-parity`, launched 07:03 PST under the
+owner's standing approval from the same local run worktree as the Astra half
+(repo `e91bec53`, tag kept local), `GATE_CONCURRENCY=1`, under the shared
+Docker lock. Usage pre-flight 0.24. Sessions real (every turn on
+`claude-opus-5-5`); no WebSearch, WebFetch or MCP call; no attempt read the
+tests, the gold or the verifier's paths. Finished 11:41.
+
+| Trial | Agent minutes | Reward as graded | Cases matched | Tamper scan |
+| --- | --- | --- | --- | --- |
+| dxV6FY6 | 107.9 | 0 | 11,822 of 11,822 | flagged: `globalThis` symbol guard in `java/lang/NativeErrors.js` |
+| 7UNA6YF | 60.2 | **1** | 11,822 of 11,822 | clean |
+| QWuGJ7A | 78.4 | 0 | 11,822 of 11,822 | flagged, false positive: `globalThis.String` in its Java runtime shim `java/jrt.js` |
+
+**1 of 3 as graded, 3 of 3 by behaviour.** Every attempt matched every
+graded case. The two zeros come only from the same over-broad `globalThis`
+rule that flagged the Astra half; the F2 session's narrowed rule (b2d2a98c,
+`globalThis` must reach `process` or a framework global) clears both. QWuGJ7A's
+flag is plainly a false positive. dxV6FY6's is a grey area: its
+`NativeErrors.js` redefines `TypeError.prototype.constructor` and
+`RangeError.prototype.constructor` process-wide so that native JS errors
+report the Java exception class (NullPointerException, StackOverflowError,
+NegativeArraySizeException). That emulates JVM behaviour inside the port
+rather than touching the grader (sentinel intact), but it is a global patch.
+Even with dxV6FY6 set aside, Opus 5.5 solved 2 of 3 genuinely, so the result
+does not depend on that call.
+
+Like the Astra attempt that came within one case, the Opus attempts
+translated the reference mechanically (a Java runtime layer under `java/`
+plus translated sources). B1 keeps the reference unrunnable, but not
+untranslatable, and a translation of a complete reference is within reach of
+both references.
+
+**Verdict: REJECT recommended** (2026-11-01; owner to confirm). The graded
+tally of 1 of 3 would call for an n=5 top-up, but two of the zeros are
+verifier false positives, so the top-up would only spend quota to confirm a
+task that does not hold. Under decision (f) the task stays in the private
+repo either way.

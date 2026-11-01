@@ -7,6 +7,50 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-01: the local GUI launches suites only; gate runs go back to the terminal
+
+### Decision
+
+Owner, in chat, 2026-10-31. The Launch page offers one thing to run, a
+frozen suite (VulcanBench Frontier v4 today; custom suites built from the
+operator's own repository next), and the page's second slot goes to building
+such a suite. The Frontier v5 gate flow (reference picker, usage pre-flight,
+`run_gate.sh` knobs, the `gate` plan kind and its stop and verdict paths) is
+removed from the GUI. Gate runs are launched by hand with
+`scripts/frontier-v5/run_gate.sh` as before. The Runs page keeps listing
+`<gate_out>/jobs` read-only, the supervisor keeps holding the queue while an
+outside `harbor run` is alive, and orphan detection keeps attributing harbor
+containers to their gate job. This supersedes the GUI half of the 2026-10-29
+entry; the script hardening in that entry stands.
+
+### Evidence
+
+- Two launch paths shared one queue but little else: gate jobs needed their
+  own verdict (status file, exit 1 as infrastructure, exit 2 as refused),
+  their own stop path, their own environment knobs, a credential presence
+  check and a usage pre-flight. About half of `backend/runner/launch.py` and
+  a third of the Launch page served one hand-run admission procedure whose
+  results flow through the GATE-LOG workflow, not the GUI.
+- The usage pre-flight was the only click outside confirm that spent a model
+  turn. Removing the flow removes that exception to the quota rule.
+- Removing gate discovery as well was considered and rejected: without it a
+  live terminal-launched gate run's `<trial>__env` containers would be listed
+  as orphans and become removable from the housekeeping panel.
+
+### What this touched
+
+`backend/runner/{launch,routes,supervisor,state,sweep}.py`, the dashboard's
+`LaunchForm`, `launchShared`, `QueuePanel` and `lib/runner.ts`, the runner
+tests, `docs/GUI.md`. `run_gate.sh` keeps `--refs`, `GATE_PREFLIGHT_ONLY`
+and the status file for terminal use and for the Runs page.
+
+### Revisit triggers
+
+- Gate runs become routine again: add them as a suite kind through
+  `vulcanbench run`, not by wiring `run_gate.sh` back into the GUI.
+- Orphan attribution for harbor containers stops needing
+  `Discovery.gate_runs` (then the read-only gate code can go too).
+
 ## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
 
 ### Decision
@@ -84,6 +128,9 @@ GUI (docs/GUI.md) launches gate runs only through this script, from a
 `run_worktree.sh` worktree pinned to a bench tag, one job at a time, after a
 confirm click that shows the exact command; the usage pre-flight runs only
 on an explicit click because it spends one model turn.
+
+Superseded in part on 2026-11-01 (entry above): the GUI no longer launches
+gate runs. The script hardening and the read-only display of gate jobs stand.
 
 ### Evidence
 

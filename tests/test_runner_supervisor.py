@@ -51,7 +51,7 @@ def clock() -> Clock:
 
 @pytest.fixture
 def no_validation(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(launch, "validate_before_launch", lambda _cfg, _spec: [])
+    monkeypatch.setattr(sweep, "validate_any", lambda _cfg, _spec: [])
 
 
 def _own_procs() -> list[Proc]:
@@ -80,20 +80,17 @@ def script(tmp_path: Path, name: str, body: str) -> Path:
     return p
 
 
-def gate_spec(cfg: RunnerConfig, argv: list[str], **extra: Any) -> dict[str, Any]:
-    job = "astra-demo"
+def script_spec(cfg: RunnerConfig, argv: list[str], **extra: Any) -> dict[str, Any]:
+    """A test-only job kind: a plain script whose exit code is all the supervisor has."""
     spec: dict[str, Any] = {
-        "kind": "gate",
-        "job_name": job,
+        "kind": "script",
+        "job_name": "astra-demo",
         "tag": "bench/t",
         "worktree": str(cfg.run_worktrees / "bench-t"),
         "argv": argv,
         "cwd": str(cfg.home),
-        "env": {"GATE_OUT": str(cfg.gate_out), "GATE_ATTEMPTS": "3"},
+        "env": {},
         "needs_prep": False,
-        "job_dir": str(cfg.gate_jobs_dir / job),
-        "status_file": str(cfg.gate_out / f"{job}.status.json"),
-        "script_features": {"status_file": True, "preflight_only": True},
     }
     spec.update(extra)
     return spec
@@ -124,19 +121,22 @@ def test_queued_job_starts_with_an_allowlisted_env(
         "dump.sh",
         f'python3 -c \'import json,os; json.dump(dict(os.environ), open("{dump}","w"))\'\nexit 0\n',
     )
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
+    job = state.create_job(
+        "script", "astra-demo", script_spec(cfg, ["bash", str(sh), "astra", "demo"])
+    )
     s = make_sup(cfg, state, clock)
     s.tick()
     started = state.get_job(job.id)
     assert started is not None and started.status == "running" and started.pid
-    assert started.argv_token == "dump.sh astra demo" and started.proc_lstart and started.boot_time
+    assert started.argv_token == f"bash {sh} astra demo" and started.proc_lstart
+    assert started.boot_time
     assert started.console_log and Path(started.console_log).read_text().startswith(
         "=== 2026-10-29T12:00:00+00:00 main: bash "
     )
     wait_until(dump.exists)
     env = json.loads(dump.read_text())
     assert "VULCANBENCH_ALLOW_DIRTY" not in env and "SOME_API_KEY" not in env
-    assert env["GATE_OUT"] == str(cfg.gate_out) and env["GATE_ATTEMPTS"] == "3" and "HOME" in env
+    assert "HOME" in env and "PATH" in env
     wait_until(lambda: s.children[job.id].poll() is not None)
     s.tick()
     done = state.get_job(job.id)
@@ -149,13 +149,13 @@ def test_queued_job_starts_with_an_allowlisted_env(
 @pytest.mark.parametrize(
     ("code", "status", "note"),
     [
-        (2, "failed", "refused before harbor"),
-        (1, "infra_failed", "exited 1"),
+        (2, "failed", "exited 2"),
+        (1, "failed", "exited 1"),
         (7, "failed", "exited 7"),
         (130, "stopped", "outside the GUI"),
     ],
 )
-def test_exit_codes_without_a_status_file(
+def test_exit_codes_decide_plain_jobs(
     cfg: RunnerConfig,
     state: State,
     clock: Clock,
@@ -166,7 +166,9 @@ def test_exit_codes_without_a_status_file(
     note: str,
 ) -> None:
     sh = script(tmp_path, "exit.sh", f"exit {code}\n")
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
+    job = state.create_job(
+        "script", "astra-demo", script_spec(cfg, ["bash", str(sh), "astra", "demo"])
+    )
     s = make_sup(cfg, state, clock)
     s.tick()
     wait_until(lambda: s.children[job.id].poll() is not None)
@@ -176,29 +178,14 @@ def test_exit_codes_without_a_status_file(
     assert any(note in n for n in j.notes)
 
 
-def test_status_file_wins_over_the_exit_code(
-    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
-) -> None:
-    sh = script(tmp_path, "s.sh", "exit 0\n")
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
-    (cfg.gate_out / "astra-demo.status.json").write_text(
-        json.dumps({"phase": "infra_failed", "stop_reason": "infra:x", "exit_code": 130})
-    )
-    s = make_sup(cfg, state, clock)
-    s.tick()
-    wait_until(lambda: s.children[job.id].poll() is not None)
-    s.tick()
-    j = state.get_job(job.id)
-    assert j is not None and j.status == "infra_failed" and j.exit_code == 0
-    assert any("run_gate.sh stopped the run: infra:x" in n for n in j.notes)
-
-
 def test_stop_request_sends_sigint_once_then_escalates(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
 ) -> None:
     # Ignores SIGINT, so the cascade has to escalate to the process group.
     sh = script(tmp_path, "stubborn.sh", "trap '' INT\nsleep 30 & wait\n")
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
+    job = state.create_job(
+        "script", "astra-demo", script_spec(cfg, ["bash", str(sh), "astra", "demo"])
+    )
     sent: list[tuple[str, int, int]] = []
     real_kill, real_killpg = os.kill, os.killpg
 
@@ -236,7 +223,9 @@ def test_stop_request_on_a_cooperative_script(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
 ) -> None:
     sh = script(tmp_path, "nice.sh", "trap 'exit 130' INT\nwhile true; do sleep 0.1; done\n")
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
+    job = state.create_job(
+        "script", "astra-demo", script_spec(cfg, ["bash", str(sh), "astra", "demo"])
+    )
     s = make_sup(cfg, state, clock)
     s.tick()
     state.request_stop(job.id, "operator")
@@ -247,11 +236,13 @@ def test_stop_request_on_a_cooperative_script(
     assert j is not None and j.status == "stopped" and j.exit_code == 130
 
 
-def test_restart_adopts_a_live_job_and_finalizes_from_the_status_file(
+def test_restart_adopts_a_live_job_and_marks_an_unwatched_end_lost(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
 ) -> None:
     sh = script(tmp_path, "long.sh", "sleep 30\n")
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
+    job = state.create_job(
+        "script", "astra-demo", script_spec(cfg, ["bash", str(sh), "astra", "demo"])
+    )
     first = make_sup(cfg, state, clock)
     first.tick()
     child = first.children[job.id]
@@ -261,24 +252,24 @@ def test_restart_adopts_a_live_job_and_finalizes_from_the_status_file(
     j = state.get_job(job.id)
     assert j is not None and j.status == "running" and j.pid == child.pid
     assert second.children == {}
-    # The run ends while no backend is watching; the script's status file tells the story.
-    (cfg.gate_out / "astra-demo.status.json").write_text(
-        json.dumps({"phase": "done", "exit_code": 0, "stop_reason": None})
-    )
+    # The run ends while no backend is watching; a plain job leaves nothing to read.
     child.terminate()
     child.wait(timeout=10)
     second.tick()
     j = state.get_job(job.id)
-    assert j is not None and j.status == "finished" and j.exit_code == 0
+    assert j is not None and j.status == "lost" and j.exit_code is None
+    assert any("final state unknown" in n for n in j.notes)
     first.tick()  # the old instance notices too and does not resurrect it
-    assert state.get_job(job.id).status == "finished"  # type: ignore[union-attr]
+    assert state.get_job(job.id).status == "lost"  # type: ignore[union-attr]
 
 
 def test_restart_with_a_recycled_pid_marks_the_job_lost(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
 ) -> None:
     sh = script(tmp_path, "long.sh", "sleep 30\n")
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", str(sh), "astra", "demo"]))
+    job = state.create_job(
+        "script", "astra-demo", script_spec(cfg, ["bash", str(sh), "astra", "demo"])
+    )
     first = make_sup(cfg, state, clock)
     first.tick()
     pid = first.children[job.id].pid
@@ -297,10 +288,14 @@ def test_one_at_a_time_and_outside_runs_hold_the_queue(
 ) -> None:
     quick = script(tmp_path, "quick.sh", "exit 0\n")
     a = state.create_job(
-        "gate", "astra-a", gate_spec(cfg, ["bash", str(quick), "astra", "a"], job_name="astra-a")
+        "script",
+        "astra-a",
+        script_spec(cfg, ["bash", str(quick), "astra", "a"], job_name="astra-a"),
     )
     b = state.create_job(
-        "gate", "astra-b", gate_spec(cfg, ["bash", str(quick), "astra", "b"], job_name="astra-b")
+        "script",
+        "astra-b",
+        script_spec(cfg, ["bash", str(quick), "astra", "b"], job_name="astra-b"),
     )
     outside = [
         Proc(
@@ -333,13 +328,13 @@ def test_one_at_a_time_and_outside_runs_hold_the_queue(
     wait_until(b_done)
 
 
-def test_prepare_step_runs_first_then_the_gate_command(
+def test_prepare_step_runs_first_then_the_main_command(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
 ) -> None:
     wt = cfg.run_worktrees / "bench-t"
     prep = script(tmp_path, "prep.sh", f"mkdir -p {wt}\necho prepared\n")
     main = script(tmp_path, "main.sh", "echo main ran\nexit 0\n")
-    spec = gate_spec(
+    spec = script_spec(
         cfg,
         ["bash", str(main), "astra", "demo"],
         needs_prep=True,
@@ -347,7 +342,7 @@ def test_prepare_step_runs_first_then_the_gate_command(
         prep_env={"RUN_WORKTREES": str(cfg.run_worktrees)},
         tag="bench/t",
     )
-    job = state.create_job("gate", "astra-demo", spec)
+    job = state.create_job("script", "astra-demo", spec)
     s = make_sup(cfg, state, clock)
     s.tick()
     j = state.get_job(job.id)
@@ -383,14 +378,14 @@ def test_failed_prepare_fails_the_job(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, no_validation: None
 ) -> None:
     prep = script(tmp_path, "prep.sh", "echo refusing >&2\nexit 1\n")
-    spec = gate_spec(
+    spec = script_spec(
         cfg,
         ["bash", "x", "astra", "demo"],
         needs_prep=True,
         prep_argv=["bash", str(prep), "bench/t"],
         prep_env={},
     )
-    job = state.create_job("gate", "astra-demo", spec)
+    job = state.create_job("script", "astra-demo", spec)
     s = make_sup(cfg, state, clock)
     s.tick()
     wait_until(lambda: s.children[job.id].poll() is not None)
@@ -406,10 +401,8 @@ def test_failed_prepare_fails_the_job(
 def test_launch_revalidates_the_plan(
     cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(
-        launch, "validate_before_launch", lambda _cfg, _spec: ["HEAD is not at bench/t"]
-    )
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", "x", "astra", "demo"]))
+    monkeypatch.setattr(sweep, "validate_any", lambda _cfg, _spec: ["HEAD is not at bench/t"])
+    job = state.create_job("script", "astra-demo", script_spec(cfg, ["bash", "x", "astra", "demo"]))
     s = make_sup(cfg, state, clock)
     s.tick()
     j = state.get_job(job.id)
@@ -419,48 +412,6 @@ def test_launch_revalidates_the_plan(
         and j.notes == ["refused at launch: HEAD is not at bench/t"]
     )
     assert s.children == {}
-
-
-def test_sweep_removes_only_this_jobs_compose_projects(
-    cfg: RunnerConfig, state: State, clock: Clock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    job_dir = cfg.gate_jobs_dir / "astra-demo"
-    (job_dir / "demo__abc1234").mkdir(parents=True)
-    containers = [
-        Container(
-            id="c1",
-            name="demo__abc1234__env-main-1",
-            status="Up",
-            state="running",
-            image="i",
-            labels={"com.docker.compose.project": "demo__abc1234__env"},
-        ),
-        Container(
-            id="c2",
-            name="other__zzz__env-main-1",
-            status="Up",
-            state="running",
-            image="i",
-            labels={"com.docker.compose.project": "other__zzz__env"},
-        ),
-    ]
-    calls: list[list[str]] = []
-
-    def fake_run(argv: list[str], **_: Any) -> Any:
-        calls.append(argv)
-
-        class R:
-            stdout = ""
-
-        return R()
-
-    monkeypatch.setattr(sup.subprocess, "run", fake_run)
-    job = state.create_job("gate", "astra-demo", gate_spec(cfg, ["bash", "x", "astra", "demo"]))
-    s = make_sup(cfg, state, clock, containers=lambda: containers)
-    s._sweep(job)
-    rm = [c for c in calls if c[1:3] == ["rm", "-f"]]
-    assert len(rm) == 1 and rm[0][3:] == ["c1"]
-    assert any("removed 1 leftover" in n for n in state.get_job(job.id).notes)  # type: ignore[union-attr]
 
 
 def test_service_holds_one_lock_per_machine(cfg: RunnerConfig) -> None:
@@ -483,7 +434,7 @@ def test_service_holds_one_lock_per_machine(cfg: RunnerConfig) -> None:
 
 
 def test_job_dataclass_roundtrip(state: State) -> None:
-    job = state.create_job("gate", "n", {"a": 1})
+    job = state.create_job("script", "n", {"a": 1})
     assert isinstance(job, Job) and job.to_dict()["spec"] == {"a": 1}
 
 

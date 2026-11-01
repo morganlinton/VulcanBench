@@ -298,13 +298,14 @@ every gate job and harness run under the configured roots with its bench tag,
 attempts, rewards, containers and a live log tail, plus a first-attempt check
 that flags sessions that never used the requested model or made no tool calls.
 Its Launch page queues a model sweep (one `vulcanbench run` per effort
-level, `--max-infra-retries 0`) or a Frontier v5 gate run through the same
-`run_worktree.sh` and `run_gate.sh` paths described above: the worktree must
-be at the bench tag and clean, the exact commands and the estimate are shown
-before a confirm click, the queue runs one job at a time, nothing retries on
-its own (a quota window may continue a level only when the plan says so,
-docs/DECISIONS.md 2026-10-30), and a stop goes through the script's own trap
-or the harness's own shutdown. Cutting a bench tag from the GUI goes
+level, `--max-infra-retries 0`) through the `run_worktree.sh` path described
+above: the worktree must be at the bench tag and clean, the exact commands
+and the estimate are shown before a confirm click, the queue runs one job at
+a time, nothing retries on its own (a quota window may continue a level only
+when the plan says so, docs/DECISIONS.md 2026-10-30), and a stop goes
+through the harness's own shutdown. Frontier v5 gate runs are launched by
+hand with `run_gate.sh` and show up on the Runs page read-only
+(docs/DECISIONS.md 2026-11-01). Cutting a bench tag from the GUI goes
 through `cut_bench_tag.sh` with the same refusals. See [GUI.md](GUI.md).
 
 ## Results: what goes in git and what does not

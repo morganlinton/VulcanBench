@@ -16,9 +16,9 @@ export default function LaunchPage() {
           </div>
         </div>
         <p className="text-sm text-zinc-400 max-w-3xl">
-          Benchmark a model on a suite across effort levels, or run a Frontier v5 gate task. Build the
-          plan, read the exact commands and the estimate, then confirm. Jobs go to a queue that runs one
-          task at a time; nothing starts without the confirm click and nothing retries on its own.
+          Benchmark a model on VulcanBench Frontier v4 or any other frozen suite, across effort levels.
+          Build the plan, read the exact commands and the estimate, then confirm. Jobs go to a queue that
+          runs one task at a time; nothing starts without the confirm click and nothing retries on its own.
         </p>
         <Suspense fallback={<div className="mt-6 text-sm text-zinc-500">loading</div>}>
           <LaunchForm />

@@ -7,6 +7,36 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-31: decision (l) resolved, ferrycore 0.2.0 joins Frontier v5 release 1
+
+### Decision
+
+Under decision (l) (DECISIONS.md 2026-10-31, citing
+`docs/frontier-v5/FREEZE-v4.json`), ferrycore-crossing-opaque-parity 0.2.0
+cleared the gate on 2026-10-31, inside the 2026-11-04 deadline, and joins
+release 1 as F4-python on its own family line. Release 1 is seven tasks at
+equal weight 1/7; with three confirmation attempts per task the headline is
+complete passes divided by 21. bothycore-booking-opaque-parity was rejected
+(Astra 2 of 3) and moves to release 2 with the other F4 slot. Decision (m)'s
+confirmation runs become 7 tasks x 2 references x 3 attempts = 42.
+
+### Evidence
+
+GATE-LOG.md: ferrycore 0.2.0 Astra 0 of 3 (31.7, 15.7, 13.4 agent minutes)
+and Opus 5.5 0 of 3 (52.1, 103.0, 49.3), every attempt missing the deep
+families. Two notes stay on its record: 0.2.0 was redesigned after its 0.1.0
+gate result, and bothycore, built the same way, fell to targeted probing.
+
+### Revisit triggers
+
+- A confirmation attempt that solves ferrycore: review whether the query
+  budget, not the task, held the gate.
+
+### What this touched
+
+Nothing frozen; `plan-v4.json` and `FREEZE-v4.json` stay as frozen, and this
+entry resolves (l).
+
 ## 2026-10-31: Frontier v5 release 1, decisions (k) to (n)
 
 ### Decision

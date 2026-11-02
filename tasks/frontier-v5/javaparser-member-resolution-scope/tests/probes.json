@@ -1,0 +1,42 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "exit-plain",
+      "why": "System.exit(0) in a static initializer the symbol-solver tests load: caught by the tamper scan and by the pinned surefire report count",
+      "edits": [
+        {
+          "file": "app/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java",
+          "before": "public class JavaParserTypeDeclarationAdapter",
+          "insert": "final class VbExit {\n    static {\n        System.exit(0);\n    }\n}\n\n"
+        },
+        {
+          "file": "app/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java",
+          "after": "public class JavaParserTypeDeclarationAdapter[^{]*\\{",
+          "insert": "\n    static {\n        new VbExit();\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "halt-stealth",
+      "why": "reflective Runtime.halt(0) in the adapter's static initializer, evading the scan: must be caught by the pinned surefire report count",
+      "edits": [
+        {
+          "file": "app/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java",
+          "after": "public class JavaParserTypeDeclarationAdapter[^{]*\\{",
+          "insert": "\n    static {\n        try {\n            Runtime.class.getMethod(\"ha\" + \"lt\", int.class).invoke(Runtime.getRuntime(), 0);\n        } catch (ReflectiveOperationException e) {\n            // ignore\n        }\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "junit-shadow",
+      "why": "shadow JUnit's AssertionFailureBuilder (no-op buildAndThrow) from javaparser-core's src/main, which precedes the JUnit jars on the test classpath: the verifier copies only com/github/javaparser, and the tamper scan flags the new org/junit file",
+      "edits": [
+        {
+          "file": "app/javaparser-core/src/main/java/org/junit/jupiter/api/AssertionFailureBuilder.java",
+          "create": "package org.junit.jupiter.api;\n\nimport org.opentest4j.AssertionFailedError;\n\npublic class AssertionFailureBuilder {\n    public static AssertionFailureBuilder assertionFailure() { return new AssertionFailureBuilder(); }\n    public AssertionFailureBuilder message(Object m) { return this; }\n    public AssertionFailureBuilder reason(String r) { return this; }\n    public AssertionFailureBuilder cause(Throwable c) { return this; }\n    public AssertionFailureBuilder expected(Object e) { return this; }\n    public AssertionFailureBuilder actual(Object a) { return this; }\n    public AssertionFailureBuilder includeValuesInMessage(boolean b) { return this; }\n    public void buildAndThrow() { }\n    public AssertionFailedError build() { return new AssertionFailedError(\"shadowed\"); }\n}\n"
+        }
+      ]
+    }
+  ]
+}

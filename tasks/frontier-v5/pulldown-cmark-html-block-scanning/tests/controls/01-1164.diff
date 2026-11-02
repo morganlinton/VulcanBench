@@ -1,0 +1,45 @@
+diff --git a/pulldown-cmark/src/firstpass.rs b/pulldown-cmark/src/firstpass.rs
+index 5dd9957..84d906c 100644
+--- a/pulldown-cmark/src/firstpass.rs
++++ b/pulldown-cmark/src/firstpass.rs
+@@ -1411,8 +1411,11 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+             }
+ 
+             let next_line_ix = ix + line_start.bytes_scanned();
+-            if next_line_ix == self.text.len() {
+-                end_ix = next_line_ix;
++            // A last line without a line ending is a line of the block even when nothing is
++            // left of it after the container prefixes; only the end of the input itself ends
++            // the block without one.
++            if ix == self.text.len() {
++                end_ix = ix;
+                 break;
+             }
+             ix = next_line_ix;
+@@ -1540,6 +1543,12 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         });
+         self.tree.push();
+         loop {
++            // The end of the input closes the block. A last line of only spaces or tabs, with
++            // no line ending, is not the end of the input: it is a line of code.
++            if ix == bytes.len() {
++                self.pop(ix);
++                return ix;
++            }
+             let mut line_start = LineStart::new(&bytes[ix..]);
+             let n_containers = scan_containers(&self.tree, &mut line_start, self.options, false);
+             if n_containers < self.tree.spine_len() {
+diff --git a/pulldown-cmark/src/scanners.rs b/pulldown-cmark/src/scanners.rs
+index dd8b896..28dddbb 100644
+--- a/pulldown-cmark/src/scanners.rs
++++ b/pulldown-cmark/src/scanners.rs
+@@ -571,9 +571,6 @@ pub(crate) fn scan_closing_code_fence(
+     fence_char: u8,
+     n_fence_char: usize,
+ ) -> Option<usize> {
+-    if bytes.is_empty() {
+-        return Some(0);
+-    }
+     let mut i = 0;
+     let num_fence_chars_found = scan_ch_repeat(&bytes[i..], fence_char);
+     if num_fence_chars_found < n_fence_char {

@@ -1,0 +1,471 @@
+// Tests for HTML spec.
+#![cfg(feature = "html")]
+
+use pulldown_cmark::{html, BrokenLink, Options, Parser};
+
+#[test]
+fn html_test_1() {
+    let original = r##"Little header
+
+<script type="text/js">
+function some_func() {
+console.log("teeeest");
+}
+
+
+function another_func() {
+console.log("fooooo");
+}
+</script>"##;
+    let expected = r##"<p>Little header</p>
+<script type="text/js">
+function some_func() {
+console.log("teeeest");
+}
+
+
+function another_func() {
+console.log("fooooo");
+}
+</script>
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_2() {
+    let original = r##"Little header
+
+<script
+type="text/js">
+function some_func() {
+console.log("teeeest");
+}
+
+
+function another_func() {
+console.log("fooooo");
+}
+</script>"##;
+    let expected = r##"<p>Little header</p>
+<script
+type="text/js">
+function some_func() {
+console.log("teeeest");
+}
+
+
+function another_func() {
+console.log("fooooo");
+}
+</script>
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_3() {
+    let original = r##"Little header
+
+<?
+<div></div>
+<p>Useless</p>
+?>"##;
+    let expected = r##"<p>Little header</p>
+<?
+<div></div>
+<p>Useless</p>
+?>
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_4() {
+    let original = r##"Little header
+
+<!--
+<div></div>
+<p>Useless</p>
+-->"##;
+    let expected = r##"<p>Little header</p>
+<!--
+<div></div>
+<p>Useless</p>
+-->
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_5() {
+    let original = r##"Little header
+
+<![CDATA[
+<div></div>
+<p>Useless</p>
+]]>"##;
+    let expected = r##"<p>Little header</p>
+<![CDATA[
+<div></div>
+<p>Useless</p>
+]]>
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_6() {
+    let original = r##"Little header
+
+<!X
+Some things are here...
+>"##;
+    let expected = r##"<p>Little header</p>
+<!X
+Some things are here...
+>
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_7() {
+    let original = r##"Little header
+-----------
+
+<script>
+function some_func() {
+console.log("teeeest");
+}
+
+
+function another_func() {
+console.log("fooooo");
+}
+</script>"##;
+    let expected = r##"<h2>Little header</h2>
+<script>
+function some_func() {
+console.log("teeeest");
+}
+
+
+function another_func() {
+console.log("fooooo");
+}
+</script>
+"##;
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_8() {
+    let original = "A | B\n---|---\nfoo | bar";
+    let expected = r##"<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody>
+<tr><td>foo</td><td>bar</td></tr>
+</tbody></table>
+"##;
+
+    let mut s = String::new();
+    let mut opts = Options::empty();
+    opts.insert(Options::ENABLE_TABLES);
+    html::push_html(&mut s, Parser::new_ext(original, opts));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_9() {
+    let original = "---";
+    let expected = "<hr />\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_10() {
+    let original = "* * *";
+    let expected = "<hr />\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_11() {
+    let original = "hi ~~no~~";
+    let expected = "<p>hi ~~no~~</p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn html_test_broken_callback() {
+    let original = r##"[foo],
+[bar],
+[baz],
+
+   [baz]: https://example.org
+"##;
+
+    let expected = r##"<p><a href="https://replaced.example.org" title="some title">foo</a>,
+[bar],
+<a href="https://example.org">baz</a>,</p>
+"##;
+
+    use pulldown_cmark::{html, Options, Parser};
+
+    let mut s = String::new();
+
+    let mut callback = |broken_link: BrokenLink| {
+        if &*broken_link.reference == "foo" || &*broken_link.reference == "baz" {
+            Some(("https://replaced.example.org".into(), "some title".into()))
+        } else {
+            None
+        }
+    };
+
+    let p = Parser::new_with_broken_link_callback(original, Options::empty(), Some(&mut callback));
+    html::push_html(&mut s, p);
+
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn newline_in_code() {
+    // The leading space of a continuation line is stripped; a trailing one is kept.
+    let cases = [
+        ("`\n `x", "<p><code> </code>x</p>\n"),
+        ("` \n`x", "<p><code>  </code>x</p>\n"),
+    ];
+
+    for (original, expected) in cases {
+        let mut s = String::new();
+        html::push_html(&mut s, Parser::new(original));
+        assert_eq!(expected, s);
+    }
+}
+
+#[test]
+fn newline_start_end_of_code() {
+    let original = "`\nx\n`x";
+    let expected = "<p><code>x</code>x</p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+// Can't use regression.txt: the bug needs input without a final line ending, and every
+// regression.txt example ends with one (with it, these already pass on main).
+#[test]
+fn unclosed_fence_keeps_last_blank_line() {
+    // A last line of only spaces or tabs, with no line ending, is a line of the unclosed code
+    // block like any other: it isn't the end of the input.
+    let cases = [
+        ("```\na\n ", "<pre><code>a\n \n</code></pre>\n"),
+        ("```\n  ", "<pre><code>  \n</code></pre>\n"),
+        ("```\na\n \t ", "<pre><code>a\n \t \n</code></pre>\n"),
+        (
+            "> ```\n> a\n>",
+            "<blockquote>\n<pre><code>a\n\n</code></pre>\n</blockquote>\n",
+        ),
+        (
+            "- ```\n  a\n   ",
+            "<ul>\n<li>\n<pre><code>a\n \n</code></pre>\n</li>\n</ul>\n",
+        ),
+        // unchanged: the end of the input, and a closing fence
+        ("```\na\n", "<pre><code>a\n</code></pre>\n"),
+        ("```\na\n ```", "<pre><code>a\n</code></pre>\n"),
+    ];
+
+    for (original, expected) in cases {
+        let mut s = String::new();
+        html::push_html(&mut s, Parser::new(original));
+        assert_eq!(expected, s, "input {original:?}");
+    }
+}
+
+// Can't use regression.txt either, for the same reason: no final line ending.
+#[test]
+fn unclosed_html_block_keeps_last_blank_line() {
+    // The same for an HTML block that ends at an end tag, `-->`, `?>` etc. (types 1-5): a
+    // last line that is empty after its container prefixes is still a line of the block.
+    let cases = [
+        ("> <!-- x\n>", "<blockquote>\n<!-- x\n\n</blockquote>\n"),
+        ("- <pre\n  ", "<ul>\n<li><pre\n\n</li>\n</ul>\n"),
+        // unchanged: the end of the input
+        ("> <!-- x\n", "<blockquote>\n<!-- x\n</blockquote>\n"),
+    ];
+
+    for (original, expected) in cases {
+        let mut s = String::new();
+        html::push_html(&mut s, Parser::new(original));
+        assert_eq!(expected, s, "input {original:?}");
+    }
+}
+
+// https://github.com/raphlinus/pulldown-cmark/issues/715
+
+#[test]
+fn trim_space_and_tab_at_end_of_paragraph() {
+    let original = "one\ntwo \t";
+    let expected = "<p>one\ntwo</p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn newline_within_code() {
+    let originals = ["`\nx \ny\n`x", "`x \ny`x"];
+    let expected = "<p><code>x  y</code>x</p>\n";
+
+    for original in originals {
+        let mut s = String::new();
+        html::push_html(&mut s, Parser::new(original));
+        assert_eq!(expected, s);
+    }
+
+    // The leading space of a continuation line is stripped.
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new("`x\n y`x"));
+    assert_eq!("<p><code>x y</code>x</p>\n", s);
+}
+
+#[test]
+fn trim_space_tab_nl_at_end_of_paragraph() {
+    let original = "one\ntwo \t\n";
+    let expected = "<p>one\ntwo</p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn trim_space_nl_at_end_of_paragraph() {
+    let original = "one\ntwo \n";
+    let expected = "<p>one\ntwo</p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn trim_space_before_soft_break() {
+    let original = "one \ntwo";
+    let expected = "<p>one\ntwo</p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+    assert_eq!(expected, s);
+}
+
+// Can't easily use regression.txt due to newline normalization.
+#[test]
+fn issue_819() {
+    let original = [
+        "# \\",
+        "# \\\n",
+        "# \\\n\n",
+        "# \\\r\n",
+        "# \\\r\n\r\n",
+        "# \\\n\r\n",
+        "# \\\r\n\n",
+    ];
+    let expected = "<h1>\\</h1>";
+
+    for orig in original {
+        let mut s = String::new();
+        html::push_html(&mut s, Parser::new(orig));
+        // Trailing newline doesn't matter. Just the actual HTML.
+        assert_eq!(expected, s.trim_end_matches('\n'));
+    }
+
+    for orig in original {
+        let mut s = String::new();
+        let mut opts = Options::empty();
+        opts.insert(Options::ENABLE_HEADING_ATTRIBUTES);
+        html::push_html(&mut s, Parser::new_ext(orig, opts));
+        // Trailing newline doesn't matter. Just the actual HTML.
+        assert_eq!(expected, s.trim_end_matches('\n'));
+    }
+}
+
+// Can't easily use regression.txt due to newline normalization.
+#[test]
+fn issue_1056() {
+    let original = "```\rcode\rblock\r\n```\n";
+    let expected = "<pre><code>code\nblock\n</code></pre>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+
+    assert_eq!(expected, s);
+}
+
+// Can't easily use regression.txt due to newline normalization.
+#[test]
+fn issue_1131_crlf() {
+    let original = "` tag\r\n    *   x\r\n    *   `\r\n";
+    let expected = "<p><code>tag *   x *  </code></p>\n";
+
+    let mut s = String::new();
+    html::push_html(&mut s, Parser::new(original));
+
+    assert_eq!(expected, s);
+}
+
+// Can't easily use regression.txt with an invisible byte order mark.
+#[test]
+fn issue_1156() {
+    let cases = [
+        ("\u{feff}# Heading\n", "<h1>Heading</h1>\n"),
+        (
+            "\u{feff}[a]: /url\n\n[a]\n",
+            "<p><a href=\"/url\">a</a></p>\n",
+        ),
+        ("a\u{feff}b\n", "<p>a\u{feff}b</p>\n"),
+        ("a\n\n\u{feff}b\n", "<p>a</p>\n<p>\u{feff}b</p>\n"),
+    ];
+    for (original, expected) in cases {
+        let mut s = String::new();
+        html::push_html(&mut s, Parser::new(original));
+        assert_eq!(expected, s);
+    }
+
+    let (_, range) = Parser::new("\u{feff}# Heading\n")
+        .into_offset_iter()
+        .next()
+        .unwrap();
+    assert_eq!(3..13, range);
+}

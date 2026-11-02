@@ -1,0 +1,34 @@
+diff --git a/include/CLI/impl/Config_inl.hpp b/include/CLI/impl/Config_inl.hpp
+index ca49308..025df96 100644
+--- a/include/CLI/impl/Config_inl.hpp
++++ b/include/CLI/impl/Config_inl.hpp
+@@ -324,6 +345,29 @@ CLI11_INLINE std::vector<ConfigItem> ConfigBase::from_config(std::istream &input
+             }
+             continue;
+         }
++        // strip a trailing comment (quote aware) for section headers so that "[section] # comment"
++        // is recognized as a section; value lines handle their own trailing comments later
++        if(line.front() == '[' && line.back() != ']' && line.find_first_of(commentChar) != std::string::npos) {
++            std::size_t comment_search = 0;
++            while(comment_search < line.size()) {
++                auto test_char = line[comment_search];
++                if(test_char == '\"' || test_char == '\'' || test_char == '`') {
++                    comment_search = detail::close_sequence(line, comment_search, line[comment_search]);
++                    ++comment_search;
++                } else if(test_char == commentChar) {
++                    break;
++                } else {
++                    ++comment_search;
++                }
++            }
++            if(comment_search < line.size() && line[comment_search] == commentChar) {
++                line = detail::trim_copy(line.substr(0, comment_search));
++                len = line.length();
++                if(len < 3) {
++                    continue;
++                }
++            }
++        }
+         if(line.front() == '[' && line.back() == ']') {
+             if(currentSection != "default") {
+                 // insert a section end which is just an empty items_buffer

@@ -1,0 +1,11 @@
+--- a/include/CLI/impl/Config_inl.hpp
++++ b/include/CLI/impl/Config_inl.hpp
+@@ -709,6 +709,8 @@
+     auto subcommands = app->get_subcommands({});
+     for(const App *subcom : subcommands) {
+         if(subcom->get_name().empty()) {
++            // option groups are merged into their parent by get_options(), so writing them again duplicates options
++            continue;
+             if(!include_default_values && (subcom->count_all() == 0)) {
+                 continue;
+             }

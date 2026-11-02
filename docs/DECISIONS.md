@@ -7,6 +7,47 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-10-31: Codex gate runs turn off the account's connected apps
+
+### Decision
+
+Gate session, 2026-10-31. Turning off web search was not enough. For the
+`astra` reference, `run_gate.sh` now also passes
+`scripts/frontier-v5/codex-gate.toml` as Codex's native config. It sets
+`web_search = "disabled"` and turns off the features `apps`, `plugins`,
+`remote_plugin`, `browser_use`, `browser_use_external`, `in_app_browser` and
+`computer_use`. The infrastructure guard (`INFRA_RE`) also treats a trial
+that reached `codex_apps` or `web__run` as an infrastructure failure, so
+such a trial stops the run and is never a gate result. No gate run with
+Codex starts before this change is on the run commit.
+
+### Evidence
+
+The phonenumbers-parse-match-parity Astra re-run with web search off
+(2026-10-31), trial 7HxEtaq (reward 1), listed its tools and found the
+`codex_apps` MCP server. That server carries the ChatGPT account's
+connectors: Gmail, Google Calendar and ChatGPT Spaces, and a "Search
+Service" whose `web_run` fetched the upstream python-phonenumbers files the
+task had removed (15 calls). An audit of every Codex rollout on the Mac
+Studio found no call to any `codex_apps` tool other than that Search
+Service, and none to Gmail, Calendar or Spaces. With `features.apps=false`,
+`codex features list` reports `apps false` (Codex 0.163.0 on the host);
+Codex ignores feature names it does not know, so the file is safe for the
+pinned 0.159.0.
+
+### Revisit triggers
+
+- The gate's ChatGPT login still carries the owner's personal connectors.
+  A dedicated account for gate runs, with no connected apps, removes the
+  exposure rather than relying on a feature flag (open owner decision).
+- A Codex version bump: rerun `codex features list` and check the first
+  attempt's tool list before trusting the config.
+
+### What this touched
+
+`scripts/frontier-v5/codex-gate.toml` (new), `scripts/frontier-v5/run_gate.sh`,
+`tests/test_run_gate_script.py`.
+
 ## 2026-10-31: decision (f), private task material lives in a private companion repo
 
 ### Decision
@@ -138,6 +179,42 @@ once, which does not fit the owner's goal of shipping this week.
 
 `docs/frontier-v5/PLAN-v4.md`, `plan-v4.json`, `FREEZE-v4.json`. No task or
 code.
+
+## 2026-10-30: gate references run with provider-side web tools off
+
+### Decision
+
+Gate session, 2026-10-30. `scripts/frontier-v5/run_gate.sh` passes
+`--ak disable_web_search=true` to Harbor for every reference. Harbor 0.24.0
+turns that into `-c web_search=disabled` for Codex and
+`--disallowedTools WebSearch,WebFetch` for Claude Code. Every gate run from
+now on is made with it.
+
+### Evidence
+
+phonenumbers-parse-match-parity (F2-python), GPT-6 Astra half, trial
+vHcy4ej (reward 1): Codex's built-in `web__run` tool fetched
+`raw.githubusercontent.com/daviddrysdale/python-phonenumbers/.../phonenumberutil.py`
+(and the formatter and matcher) ten times, and the attempt restored the
+removed functions from it. The tool runs on OpenAI's side, so the task's
+network allowlist (model API hosts only) never saw the request. The same
+attempt and its sibling also tried `curl` and `pip download`, which the
+allowlist blocked. An audit of every gate trial on the Mac Studio (34 job
+directories) found no other provider-side web use; Claude Fable attempts on
+tree-sitter tried `curl` against upstream and were blocked. Web access can
+only add solves, so the gate's holds stand; a reject decided by a web-aided
+solve does not.
+
+### Revisit triggers
+
+- A new agent CLI version or harness: confirm its web tools are off before
+  its first gate run (check the session for web tool calls).
+- The first-wave rejects (2026-10-18, archived): audit their rollouts for
+  web tool use before any of them is reconsidered.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh`, `tests/test_run_gate_script.py`.
 
 ## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
 

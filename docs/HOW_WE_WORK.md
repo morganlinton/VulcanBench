@@ -121,7 +121,8 @@ counts, so if the check fails and you changed nothing, run
 worktrees are always clean.
 
 Frozen today: **VulcanBench Frontier v4** (`coding-intelligence-index-v4`,
-version 2.0.0). Retired suites in this repo (cii-v1, v1 to v4, hard-1,
+version 2.0.0) and **VulcanBench Frontier v5** release 1 (`frontier-v5`,
+version 1.0.0). Retired suites in this repo (cii-v1, v1 to v4, hard-1,
 python-1, voice-v1, vulcancyber-v1) are not swept and are not locked. Lock one
 if it ever comes back into use.
 
@@ -147,6 +148,21 @@ Develop it under `tasks/<new-suite>/` with no lock while it is in flux.
 Validate tasks the usual way (`scripts/validate_tasks.py`, the Task PR
 workflow). Freeze it the day it is first published, in the PR that declares
 it published.
+
+Harbor-native tasks (`task.toml` plus `instruction.md`, as in Frontier v5) are
+hashed differently. The hash covers the prompt, `task.toml` without its
+`[metadata]` table, and the `environment/`, `tests/` and `solution/` trees.
+The lock also records each task's version and determinism checklist. Status
+notes in `[metadata]` and `DESIGN.md` stay editable.
+
+A suite can name private tasks in its `suite.json` (`private_tasks`: repo and
+commit). Those directories live only in the private companion repo
+(decision (f), [DECISIONS.md](DECISIONS.md) 2026-10-31). The lock records their
+hash. Freezing needs the private checkout: pass `--private-root` or set
+`VULCANBENCH_PRIVATE_TASKS` to its `tasks/` directory. `check` verifies a
+private task only where that checkout is present, and CI reports it as not
+checked. A `suite.json` `pins` object (reference models, CLI versions, image
+ids) is copied into the lock and cannot change without a version bump.
 
 ## Running benchmarks
 

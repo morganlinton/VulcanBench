@@ -1,0 +1,37 @@
+{
+  "id": "frontier-v5-freeze-v4",
+  "date": "2026-10-31",
+  "timezone": "America/Los_Angeles",
+  "scope": "Composition v4 only: Frontier v5 release 1 is the F5 family, six admitted tasks at equal weight 1/6 (PLAN-v4.md, plan-v4.json), with an optional F4 extension decided by (l). F1, F2, F3 and unfilled F4 slots move to a later release with its own plan. Every other part of PLAN.md and PLAN-v2.md applies unchanged. A blueprint for the release, not the runnable suite lock (tasks/frontier-v5/suite.lock.json is written at release freeze).",
+  "confirmed_decisions": {
+    "j": "Adopt composition v4: Frontier v5 release 1 is the six admitted F5 tasks; F1 to F3 and unfilled F4 slots move to release 2. Confirmed by the owner in chat 2026-10-31."
+  },
+  "previous_freeze": {
+    "id": "frontier-v5-freeze-v2",
+    "file": "docs/frontier-v5/FREEZE-v2.json",
+    "files_sha256_verified_unchanged": {
+      "docs/frontier-v5/PLAN-v2.md": "3b604c653e72f355cd0fcb36a7246f04578cd792b401638a3654f36dd1ea0686",
+      "docs/frontier-v5/plan-v2.json": "6b3aea8106473404525df67ba1a45f87b3f969bb854dca75f3a1d1fe51a94c12"
+    }
+  },
+  "open_decisions": [
+    "k",
+    "l",
+    "m",
+    "n",
+    "d",
+    "f"
+  ],
+  "open_decisions_policy": "Resolved through dated docs/DECISIONS.md entries citing this freeze, never by editing frozen files. Further capacity, weight or slot changes require a new plan with its own freeze.",
+  "known_outcomes_available": "Six F5 tasks admitted at the gate (GATE-LOG.md, 2026-10-22 to 2026-10-30). Every non-F5 candidate gated so far was rejected on the GPT-6 Astra half (comrak, phonenumbers, apollo, ferrycore 0.1.0). bothycore and ferrycore 0.2.0 are in the gate at freeze time. No confirmation run has been made.",
+  "files_sha256": {
+    "docs/frontier-v5/PLAN-v4.md": "c38c08a2a662222f5f36ba860efc717337997ed7fedfdf55c9fb2db3a7d6c085",
+    "docs/frontier-v5/plan-v4.json": "5b031681384ac850d9421b9c96e1a1aeccdbfe22e10f1d111923275ad322d52d"
+  },
+  "related": {
+    "v2_plan": "docs/frontier-v5/PLAN-v2.md",
+    "v3_proposal": "docs/frontier-v5/PLAN-v3.md",
+    "gate_log": "docs/frontier-v5/GATE-LOG.md (branch frontier-v5-gate-black-record)",
+    "decisions_log": "docs/DECISIONS.md entry dated 2026-10-31"
+  }
+}

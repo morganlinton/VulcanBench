@@ -48,6 +48,138 @@ pinned 0.159.0.
 `scripts/frontier-v5/codex-gate.toml` (new), `scripts/frontier-v5/run_gate.sh`,
 `tests/test_run_gate_script.py`.
 
+## 2026-10-31: decision (f), private task material lives in a private companion repo
+
+### Decision
+
+Owner, in chat, 2026-10-31 (open v1 decision (f), gold location). Frontier
+tasks whose value depends on material an agent must never find (hidden
+reference engines and their source, golds that exist nowhere else, hidden
+test data) live in the private repo `morganlinton/vulcanbench-frontier-private`,
+complete as gated. The public repo carries no file from those task
+directories, no tag or branch that contains them, and at most a name,
+version and content hash in a manifest. Tasks whose golds are already
+public upstream (the six F5 tasks of release 1) stay in the public repo.
+
+First contents (3984f32): ferrycore-crossing-opaque-parity 0.2.0 (admitted,
+release 1), bothycore-booking-opaque-parity (rejected, kept for release 2)
+and jsts-overlayng-coverage-parity (release-2 candidate).
+
+### Evidence
+
+The public repo is public. Run tags pushed on 2026-10-30 and 2026-10-31
+published the JSTS gold (removed the same day) and the F4 tasks' reference
+source and golds (`bench/2026-10-30-ferrycore-astra-gate`,
+`bench/2026-10-31-f4-query-service-astra-gate`; removal pending the owner).
+
+### Revisit triggers
+
+- A run or confirmation of a private task: its run commit and tag stay
+  local, and GATE-LOG records the private repo's commit.
+
+### What this touched
+
+New private repo. No public code.
+
+## 2026-10-31: decision (l) resolved, ferrycore 0.2.0 joins Frontier v5 release 1
+
+### Decision
+
+Under decision (l) (DECISIONS.md 2026-10-31, citing
+`docs/frontier-v5/FREEZE-v4.json`), ferrycore-crossing-opaque-parity 0.2.0
+cleared the gate on 2026-10-31, inside the 2026-11-04 deadline, and joins
+release 1 as F4-python on its own family line. Release 1 is seven tasks at
+equal weight 1/7; with three confirmation attempts per task the headline is
+complete passes divided by 21. bothycore-booking-opaque-parity was rejected
+(Astra 2 of 3) and moves to release 2 with the other F4 slot. Decision (m)'s
+confirmation runs become 7 tasks x 2 references x 3 attempts = 42.
+
+### Evidence
+
+GATE-LOG.md: ferrycore 0.2.0 Astra 0 of 3 (31.7, 15.7, 13.4 agent minutes)
+and Opus 5.5 0 of 3 (52.1, 103.0, 49.3), every attempt missing the deep
+families. Two notes stay on its record: 0.2.0 was redesigned after its 0.1.0
+gate result, and bothycore, built the same way, fell to targeted probing.
+
+### Revisit triggers
+
+- A confirmation attempt that solves ferrycore: review whether the query
+  budget, not the task, held the gate.
+
+### What this touched
+
+Nothing frozen; `plan-v4.json` and `FREEZE-v4.json` stay as frozen, and this
+entry resolves (l).
+
+## 2026-10-31: Frontier v5 release 1, decisions (k) to (n)
+
+### Decision
+
+Owner, in chat, 2026-10-31, citing `docs/frontier-v5/FREEZE-v4.json`:
+
+- **(k)** Run tree-sitter's Claude Opus 5.5 prong (three attempts through
+  `run_gate.sh`), so all six release-1 tasks are gated against the same two
+  references. If Opus solves two or more, tree-sitter's admission is
+  reviewed before the release freeze.
+- **(l)** An F4 task that clears the gate by the end of 2026-11-04
+  (bothycore-booking-opaque-parity, ferrycore-crossing-opaque-parity 0.2.0)
+  joins release 1 on its own family line; one that does not moves to
+  release 2.
+- **(m)** Fund the confirmation runs this week: three fresh attempts per
+  task for GPT-6 Astra and Claude Opus 5.5 (36 runs for six tasks), from a
+  bench tag cut from main after the merges and the suite lock, separate from
+  every gate run.
+- **(n)** The owner creates a dedicated Codex login with no connected apps
+  (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`) before the
+  confirmation runs; `run_gate.sh` uses it when present.
+
+### Evidence
+
+PLAN-v4.md section 6. At decision time bothycore's first Astra attempt had
+solved it by targeted experiments within the query budget, so (l) may admit
+nothing.
+
+### Revisit triggers
+
+- (n) not in place when the confirmation runs are ready: ask the owner
+  before running them on the personal login.
+
+### What this touched
+
+Nothing yet; the runs follow.
+
+## 2026-10-31: Frontier v5 release 1 is the F5 family (composition v4)
+
+### Decision
+
+Owner, in chat, 2026-10-31: adopt `docs/frontier-v5/PLAN-v4.md`, frozen by
+`docs/frontier-v5/FREEZE-v4.json` (decision (j)). VulcanBench Frontier v5
+release 1 is the six admitted F5 tasks at equal weight 1/6, one per
+language. F1, F2, F3 and any F4 slot the extension does not fill move to a
+later release with its own plan. Open: (k) tree-sitter's Opus 5.5 prong,
+(l) the F4 extension (bothycore and ferrycore 0.2.0, deadline 2026-11-04),
+(m) confirmation runs, (n) the dedicated Codex gate login.
+
+### Evidence
+
+GATE-LOG.md: six F5 admissions from 2026-10-22 to 2026-10-30; every non-F5
+candidate gated so far was rejected on the GPT-6 Astra half alone, in 5 to 25
+agent minutes (comrak and phonenumbers in F2, apollo in F3, ferrycore 0.1.0
+in F4). The 26-slot plan needs 20 more admits in shapes that have not held
+once, which does not fit the owner's goal of shipping this week.
+
+### Revisit triggers
+
+- A non-F5 shape holds both references: start the release-2 plan around it.
+- A confirmation run of release 1 in which either reference solves a task in
+  more than one of three attempts: review that task's admission before
+  publishing.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v4.md`, `plan-v4.json`, `FREEZE-v4.json`. No task or
+code.
+
 ## 2026-10-30: gate references run with provider-side web tools off
 
 ### Decision

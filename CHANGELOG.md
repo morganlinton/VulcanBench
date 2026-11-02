@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Local run GUI** (`backend/runner/`, dashboard `/runs` and `/launch`,
   `make gui`): a localhost page that lists every gate job and harness run
   with its bench tag, attempts, rewards, containers, a live log tail and a
-  first-attempt check, and queues Frontier v5 gate runs through
-  `run_worktree.sh` and `run_gate.sh` with the exact command shown before a
-  confirm click, one job at a time, with a clean stop. `run_gate.sh` starts
-  harbor as an interruptible child, traps INT and TERM, writes
-  `<job>.status.json`, and gains `--refs` and `GATE_PREFLIGHT_ONLY=1`.
+  first-attempt check, and a queue that runs one job at a time from a
+  `run_worktree.sh` worktree, with the exact command shown before a confirm
+  click and a clean stop. `run_gate.sh` starts harbor as an interruptible
+  child, traps INT and TERM, writes `<job>.status.json`, and gains `--refs`
+  and `GATE_PREFLIGHT_ONLY=1`.
 - **Benchmark a model from the GUI**: the Launch page plans a suite run for a
   model (harness, billing, suite, effort levels, bench tag) and queues one
   `vulcanbench run` per level, after the worktree check, the harness doctor
@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GUI housekeeping**: orphaned sandbox containers listed and removed by id
   only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
   streaming log tail (server-sent events) on live run pages.
+
+### Changed
+
+- The GUI's Launch page no longer plans Frontier v5 gate runs; it launches
+  frozen suites only. Gate jobs under `~/vulcanbench-gate` stay on the Runs
+  page read-only (docs/DECISIONS.md 2026-11-01).
 
 ## [0.10.0] - 2026-10-30
 

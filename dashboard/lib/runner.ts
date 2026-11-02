@@ -246,7 +246,7 @@ export interface JobSpecSummary {
   needs_prep: boolean | null;
   tag: string | null;
   worktree: string | null;
-  estimate: GateEstimate | Record<string, unknown> | null;
+  estimate: Record<string, unknown> | null;
   warnings: string[] | null;
   sweep_id: string | null;
   sweep_name: string | null;
@@ -298,13 +298,6 @@ export interface QueueData {
   outside: { pid: number; command: string }[];
 }
 
-export interface GateRef {
-  name: string;
-  agent: string;
-  model: string;
-  version: string;
-}
-
 export interface WorktreeInfo {
   tag: string;
   path: string;
@@ -313,14 +306,7 @@ export interface WorktreeInfo {
   head: string | null;
   at_tag: boolean;
   dirty: string[];
-  script: { present: boolean; status_file: boolean; preflight_only: boolean; refs: boolean };
   problems: string[];
-}
-
-export interface GateTask {
-  name: string;
-  language: string | null;
-  default_concurrency: number;
 }
 
 export interface SuiteInfo {
@@ -334,16 +320,9 @@ export interface SuiteInfo {
 
 export interface LaunchOptions {
   kinds: string[];
-  refs: GateRef[];
   tags: string[];
   tag: string | null;
   worktree: WorktreeInfo | null;
-  tasks: GateTask[];
-  attempts: number[];
-  concurrency: number[];
-  gate_effort: string;
-  credentials: { codex_auth: boolean; claude_gate_env: boolean };
-  gate_out: string;
   run_worktrees: string;
   suites: SuiteInfo[];
   harnesses: string[];
@@ -540,61 +519,7 @@ export function logStreamPath(runId: string, source: string, trial: string | nul
   return `${API_BASE}/api/runner/runs/${encodeURIComponent(runId)}/log/stream?${qs.toString()}`;
 }
 
-export interface GateEstimate {
-  attempts: number;
-  concurrency: number;
-  task_timeout_s: number;
-  max_wall_s: number;
-  billing: string;
-  early_exit: string;
-  infra_retries: string;
-}
-
-export interface UsageCheck {
-  status: string;
-  would_start: boolean;
-  max_utilization?: number;
-  windows?: Record<string, number>;
-  max_allowed?: number;
-  note?: string;
-  exit_code?: number;
-  model?: string;
-}
-
-export interface GatePlanSpec {
-  kind: "gate";
-  job_name: string;
-  ref: string;
-  agent: string;
-  model: string;
-  harness_version: string;
-  effort: string;
-  task: string;
-  task_language: string | null;
-  tag: string;
-  tag_commit: string | null;
-  worktree: string;
-  needs_prep: boolean;
-  attempts: number;
-  concurrency: number;
-  concurrency_overridden: boolean;
-  suffix: string;
-  argv: string[];
-  cwd: string;
-  env: Record<string, string>;
-  env_passthrough: string[];
-  prep_argv: string[] | null;
-  prep_env: Record<string, string> | null;
-  job_dir: string;
-  status_file: string;
-  script_features: WorktreeInfo["script"];
-  estimate: GateEstimate;
-  usage_check_required: boolean;
-  warnings: string[];
-  hash: string;
-}
-
-export type AnyPlanSpec = GatePlanSpec | SweepPlanSpec | PreparePlanSpec;
+export type AnyPlanSpec = SweepPlanSpec | PreparePlanSpec;
 
 export interface LaunchPlan<S = AnyPlanSpec> {
   id: string;
@@ -605,10 +530,7 @@ export interface LaunchPlan<S = AnyPlanSpec> {
   expires_at: string;
   confirmed_at: string | null;
   job_id: number | null;
-  usage_check: UsageCheck | null;
-  usage_checked_at: string | null;
   live_reason: string | null;
-  usage_check_ok: boolean;
 }
 
 async function runnerSend<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -660,9 +582,4 @@ export function fmtDuration(s: number): string {
   const m = Math.round((s % 3600) / 60);
   if (h === 0) return `${m} min`;
   return m === 0 ? `${h} h` : `${h} h ${m} min`;
-}
-
-export function fmtPercent(v: number | undefined): string {
-  if (v === undefined || !Number.isFinite(v)) return "n/a";
-  return `${Math.round(v * 100)}%`;
 }

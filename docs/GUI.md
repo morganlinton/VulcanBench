@@ -139,58 +139,45 @@ by hand: `load_dotenv()` on the worktree's `.env`.
   appended, through the redactor. If the stream cannot be opened the page
   polls every 3 seconds as before.
 
-## Frontier v5 gate runs and the queue (milestone 2)
+## The queue (milestone 2)
 
-The Launch page's second tab plans a Frontier v5 gate run:
-
-1. Pick the reference (`astra`, `fable`, `opus`, read from `run_gate.sh
-   --refs`), the bench tag, the task at that tag, attempts (1 to 3),
-   concurrency (the task's default, or an override) and an optional job
-   suffix. Effort is `medium`, fixed by the script; blocked levels are never
-   offered anywhere.
-2. **Build plan** asks the backend for the exact command. The backend
-   validates the worktree (see the rules below), refuses an existing job
-   directory, and returns the argv, the working directory, the environment
-   variables the child gets, an estimate (attempts, task timeout, longest
-   wall time, which subscription pays, early exit, no retries), warnings, and
-   a hash of all of that. A plan expires after 10 minutes.
-3. **Check usage** (Claude references only) runs `GATE_PREFLIGHT_ONLY=1
-   run_gate.sh <ref>`: one one-turn call that reads the subscription windows.
-   It runs only on this click, because it spends quota. Confirm stays
-   disabled until a check from the last 10 minutes says the script would
-   start.
-4. **Confirm and queue this run** sends the plan's hash back. The backend
-   re-validates the worktree, then queues the job. Nothing else starts a run.
-
-The queue, shown at the top of the Runs page, runs one job at a time. The
-supervisor thread in the backend (one per machine, guarded by
+Every plan, whether a suite sweep or a worktree preparation, ends in the
+queue shown at the top of the Runs page. The queue runs one job at a time.
+The supervisor thread in the backend (one per machine, guarded by
 `<runner home>/supervisor.lock`) starts the oldest queued job when no owned
 job is active and no `harbor run` or `vulcanbench run` launched outside the
-GUI is visible, re-validating the plan right before the child starts. If the
-plan's worktree does not exist yet, the job first runs
-`scripts/run_worktree.sh <tag>` (shown as a separate step in the plan and
-as the **preparing** status), then the gate command. The worktree's
-`make setup` output lands in `<worktree>/.venv-setup.log`; when it fails, the
-job's console log shows the tail and the job ends as **failed**. A half-made
-worktree has to be removed by hand (`git worktree remove <dir>`) before the
-same tag can be planned again.
+GUI is visible, re-validating the plan right before the child starts.
+Preparing a worktree is its own queue step: it runs
+`scripts/run_worktree.sh <tag>` (status **preparing**) and finishes when the
+worktree exists. The worktree's `make setup` output lands in
+`<worktree>/.venv-setup.log`; when it fails, the job's console log shows the
+tail and the job ends as **failed**. A half-made worktree has to be removed
+by hand (`git worktree remove <dir>`) before the same tag can be planned
+again.
 
 **Stop** on a queue row or a run page persists a stop request. The supervisor
-sends SIGINT to the script; the script's trap cancels harbor (which runs
-`docker compose down`), waits up to 90 s, escalates to SIGTERM then SIGKILL,
-removes the task's sandbox containers and writes the status file. If the
-script is still there 150 s after the request, the supervisor sends SIGTERM
-and then SIGKILL to the job's process group and removes any containers whose
-compose project belongs to this job. **Remove** takes a queued job out of the
-queue before it starts. There is no retry button and no automatic retry: a
-failed, stopped or lost job stays that way until the operator plans a new
-run.
+sends SIGINT to the child. For a suite level it then kills the agent sessions
+after two seconds (they run in their own process groups, so the harness's
+watchdog would do the same), gives the verifier and teardown ten minutes, and
+only then sends SIGTERM and SIGKILL to the job's process group and removes
+the containers and scratch of that level's unfinished runs. A plain job gets
+SIGTERM after 150 s and SIGKILL 15 s later. **Remove** takes a queued job out
+of the queue before it starts. There is no retry button and no automatic
+retry: a failed, stopped or lost job stays that way until the operator plans
+a new run.
 
 The queue survives a backend restart. Jobs are recorded in
 `<runner home>/runner.db` (stdlib sqlite, outside every checkout) with the
 child's pid, start time, boot time and an argv token; on start the supervisor
 adopts jobs whose process is still the same one, and gives the others their
-final state from the script's status file.
+final state from what they left on disk (a suite level from its runs, a plain
+job from nothing, so it is **lost**).
+
+Frontier v5 gate runs are not planned from the GUI (they were, between
+2026-10-29 and 2026-10-31; docs/DECISIONS.md has the entry). They are
+launched by hand with `scripts/frontier-v5/run_gate.sh`, and the Runs page
+keeps showing them read-only: a running one holds the queue like any outside
+run, and its containers are attributed to it by the orphan check.
 
 ### Rules the GUI enforces (not just displays)
 
@@ -200,49 +187,50 @@ final state from the script's status file.
   `pyproject.toml` or `uv.lock`; never the backend's own checkout and never
   with `--allow-dirty` (the argv is checked for it at confirm and launch).
 - The child environment is an allowlist: `HOME`, `PATH`, `USER`, `LANG`,
-  `TMPDIR`, `CLAUDE_GATE_ENV`, `FABLE_AUTH` pass through; `GATE_OUT`,
-  `GATE_ATTEMPTS`, `GATE_CONCURRENCY`, `GATE_JOB_SUFFIX` come from the plan.
+  `TMPDIR` and the login homes of the subscription CLIs (`CODEX_HOME`,
+  `CLAUDE_CONFIG_DIR` and the like) pass through; nothing else does.
   `VULCANBENCH_*` (so `VULCANBENCH_ALLOW_DIRTY` cannot leak in),
-  `DATABASE_URL`, `*_API_KEY`, `*_TOKEN` and `*SECRET*` never pass.
+  `DATABASE_URL`, `*_API_KEY`, `*_TOKEN` and `*SECRET*` never pass, and a
+  plan may not set them.
 - Effort levels under `[effort].blocked` never appear as options and are
-  refused server-side, at plan time and again at launch. Gate runs are fixed
-  at `medium` by the script.
+  refused server-side, at plan time and again at launch.
 - A suite run never re-queues a unit on its own (`--max-infra-retries 0`),
   and the GUI never retries a failed, incomplete, stopped or lost job. The
   only continuation is the quota rule on the plan, off by default.
 - Nothing that spends model quota starts without the confirm click that
   shows the estimate and the exact command; there is no auto-start and no
-  auto-retry.
-- Gate runs go only through `scripts/frontier-v5/run_gate.sh`.
+  auto-retry. The harness doctor, the cost estimate and the worktree checks
+  that run before the confirm make no model call.
 - Credentials are never read, displayed, logged or sent to the browser. The
-  backend checks only whether `~/.codex/auth.json` and the `CLAUDE_GATE_ENV`
-  file exist; the script and harbor read them.
+  backend opens no credential file; the harness doctor reports whether a CLI
+  is logged in, and the harness reads its own login.
 - Loopback only; no auth system, no remote exposure. The runner routes exist
   only with `VULCANBENCH_RUNNER=1` and answer 403 to any other client address.
 
-### What run_gate.sh gained for this
+### Reading gate jobs
 
 `scripts/frontier-v5/run_gate.sh` keeps every stdout line the GATE-LOG
-workflow reads and adds: harbor as a direct child with SIGINT at its default
-disposition, traps on INT and TERM that stop the run cleanly (exit 130), an
-atomic `$GATE_OUT/<job>.status.json` with the phase (`preflight`, `running`,
-`stopping`, `done`, `infra_failed`, `stopped`), pids, solves, harbor's exit
-code and the stop reason, `--refs`, `GATE_PREFLIGHT_ONLY=1`, and
-`GATE_POLL_S` for its tests. Older bench tags carry the older script; the
-plan warns when that is the case, and a stop then signals harbor directly.
+workflow reads and, since 2026-10-29, runs harbor as a direct child with
+SIGINT at its default disposition, traps INT and TERM to stop the run cleanly
+(exit 130), and writes an atomic `$GATE_OUT/<job>.status.json` with the phase
+(`preflight`, `running`, `stopping`, `done`, `infra_failed`, `stopped`), pids,
+solves, harbor's exit code and the stop reason. The Runs page reads that
+status file to decide a gate job's state, falling back to the process table
+and the job's `result.json` for jobs from older tags. `--refs` and
+`GATE_PREFLIGHT_ONLY=1` remain in the script for terminal use.
 
 ## Dry run without spending quota
 
-The whole launch path can be exercised with a stub harbor. Start the backend
-with a scratch `HOME` whose `.local/bin/harbor` is a small script that writes
-the job layout and sleeps until SIGINT (`run_gate.sh` puts `$HOME/.local/bin`
-first on PATH), empty `~/.codex/auth.json` and `claude-gate.env` placeholders
-(they are only checked for existence), and `VULCANBENCH_RUNNER_HOME`,
-`VULCANBENCH_RUNNER_GATE_OUT` and `VULCANBENCH_RUNNER_RUN_WORKTREES` pointing
-at scratch directories; tag the commit under test as a local `bench/...` tag
-and plan a run from it. Do not click **Check usage** in that setup: it would
-call the real `claude` CLI. `tests/test_run_gate_script.py` and
-`tests/test_runner_supervisor.py` do the same with fakes, automatically.
+The whole launch path runs against the fake `vulcanbench` CLI in
+`tests/runner_fixtures.py`: it answers `harness doctor`, `estimate --json` and
+`run` with scripted outcomes (finish, partial, quota window, auth failure,
+crash, hang), so `tests/test_runner_routes.py` and
+`tests/test_runner_supervisor.py` exercise plan, confirm, queue, stop,
+continuation and restart adoption without a model call. For a dry run by
+hand, prepare a worktree for a local `bench/...` tag, replace its
+`.venv/bin/vulcanbench` with that fake, point `VULCANBENCH_RUNNER_HOME` and
+`VULCANBENCH_RUNNER_RUN_WORKTREES` at scratch directories, and plan a sweep
+from the Launch page.
 
 ## Starting it
 
@@ -272,8 +260,10 @@ the backend behaves exactly as the public deployment does.
 
 1. Read-only Runs page and first-attempt check.
 2. Queue and supervisor (one run at a time, survives a backend restart, clean
-   stop), gate launches with the usage pre-flight and a confirm step, and the
-   `run_gate.sh` hardening that makes a clean stop possible (this document).
+   stop), and the `run_gate.sh` hardening that made a clean stop possible
+   (this document). Gate launches from the GUI shipped with this milestone
+   and were removed on 2026-11-01 (docs/DECISIONS.md); gate jobs stay
+   visible read-only.
 3. Benchmark a model: suite runs through `vulcanbench run`, one job per
    effort level, the quota-free doctor and estimate, per-level progress, the
    capped quota continuation, `--only-missing` as an explicit resume, and

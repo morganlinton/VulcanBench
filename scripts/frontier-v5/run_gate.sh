@@ -77,7 +77,7 @@
 # infrastructure failures; the script's own tests set it low.
 #
 # --refs prints one JSON line per reference (name, agent, model, version)
-# and exits, so a launcher never has to parse this file.
+# and exits, so a caller never has to parse this file.
 #
 # Never pass flag values with --ae: Harbor treats --ae values as secrets and
 # scrubs them from every file it writes (a value of 1 replaced every "1" in

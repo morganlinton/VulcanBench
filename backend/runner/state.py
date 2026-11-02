@@ -65,6 +65,7 @@ class Plan:
     expires_at: str
     confirmed_at: str | None = None
     job_id: int | None = None
+    # Columns kept from the gate milestone (sqlite cannot drop them); unused.
     usage_check: dict[str, Any] | None = None
     usage_checked_at: str | None = None
 
@@ -78,8 +79,6 @@ class Plan:
             "expires_at": self.expires_at,
             "confirmed_at": self.confirmed_at,
             "job_id": self.job_id,
-            "usage_check": self.usage_check,
-            "usage_checked_at": self.usage_checked_at,
         }
 
 
@@ -245,17 +244,6 @@ class State:
         with self._connect() as con:
             row = con.execute("SELECT * FROM plan WHERE id = ?", (plan_id,)).fetchone()
         return _row_plan(row) if row else None
-
-    def set_usage_check(self, plan_id: str, data: dict[str, Any]) -> Plan:
-        with self._connect() as con:
-            con.execute(
-                "UPDATE plan SET usage_check = ?, usage_checked_at = ? WHERE id = ?",
-                (json.dumps(data), iso(self.now()), plan_id),
-            )
-        plan = self.get_plan(plan_id)
-        if plan is None:
-            raise PlanError(404, "plan not found")
-        return plan
 
     def plan_is_live(self, plan: Plan) -> str | None:
         """None if the plan can still be confirmed, else the reason it cannot."""

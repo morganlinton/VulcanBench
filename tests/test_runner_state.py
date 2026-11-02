@@ -33,7 +33,7 @@ def state(tmp_path: Path, clock: Clock) -> State:
 
 
 def test_plan_confirm_creates_one_queued_job(state: State) -> None:
-    plan = state.create_plan("gate", {"job_name": "opus-demo", "argv": ["bash"]}, "abc123def456")
+    plan = state.create_plan("sweep", {"job_name": "opus-demo", "argv": ["bash"]}, "abc123def456")
     assert state.get_plan(plan.id) is not None and state.plan_is_live(plan) is None
     with pytest.raises(PlanError) as bad:
         state.confirm_plan(plan.id, "0000000000000000")
@@ -49,7 +49,7 @@ def test_plan_confirm_creates_one_queued_job(state: State) -> None:
 
 
 def test_plan_expires(state: State, clock: Clock) -> None:
-    plan = state.create_plan("gate", {"job_name": "x"}, "h" * 16)
+    plan = state.create_plan("sweep", {"job_name": "x"}, "h" * 16)
     clock.advance(PLAN_TTL_S + 1)
     with pytest.raises(PlanError, match="expired"):
         state.confirm_plan(plan.id, "h" * 16)
@@ -59,15 +59,8 @@ def test_plan_expires(state: State, clock: Clock) -> None:
     assert nf.value.status == 404
 
 
-def test_usage_check_is_stored_on_the_plan(state: State) -> None:
-    plan = state.create_plan("gate", {"job_name": "x"}, "h" * 16)
-    plan = state.set_usage_check(plan.id, {"status": "allowed", "would_start": True})
-    assert plan.usage_check == {"status": "allowed", "would_start": True}
-    assert plan.usage_checked_at == "2026-10-29T12:00:00+00:00"
-
-
 def test_job_updates_notes_and_stop_requests(state: State, clock: Clock) -> None:
-    job = state.create_job("gate", "astra-demo", {"argv": ["bash"]})
+    job = state.create_job("suite", "astra-demo", {"argv": ["bash"]})
     job = state.update_job(
         job.id, status="running", pid=4242, proc_lstart="Thu Oct 29 12:00:00 2026"
     )
@@ -87,8 +80,8 @@ def test_job_updates_notes_and_stop_requests(state: State, clock: Clock) -> None
 
 
 def test_queued_job_stop_and_delete(state: State) -> None:
-    a = state.create_job("gate", "a", {})
-    b = state.create_job("gate", "b", {})
+    a = state.create_job("suite", "a", {})
+    b = state.create_job("suite", "b", {})
     gone = state.request_stop(a.id, "changed my mind")
     assert gone is not None and gone.status == "stopped" and gone.finished_at
     assert "removed from the queue" in gone.notes[0]

@@ -1,49 +1,71 @@
 {
-  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Each part is the upstream commit's diff of Fraction.java; the two Javadoc commits inside the range are comment-only glue. base + all parts is byte-identical to solution/gold_patch.diff (checked 2026-10-10).",
-  "artifact_root": "app",
-  "parts": [
-    {
-      "name": "#1769",
-      "patch": "tests/controls/01-1769.diff",
-      "upstream": "10f442145"
-    },
-    {
-      "name": "f021",
-      "patch": "tests/controls/02-f021.diff",
-      "upstream": "7f5bbbf0a"
-    },
-    {
-      "name": "#1784",
-      "patch": "tests/controls/03-1784.diff",
-      "upstream": "e213b85ce"
-    },
-    {
-      "name": "#1787",
-      "patch": "tests/controls/04-1787.diff",
-      "upstream": "284be5d6a"
-    },
-    {
-      "name": "docs-0915",
-      "patch": "tests/controls/05-docs-0915.diff",
-      "upstream": "0c96ced7d",
-      "glue": true
-    },
-    {
-      "name": "#1794",
-      "patch": "tests/controls/06-1794.diff",
-      "upstream": "e992a498d"
-    },
-    {
-      "name": "docs-0919",
-      "patch": "tests/controls/07-docs-0919.diff",
-      "upstream": "a1a3bd056",
-      "glue": true
-    }
-  ],
-  "coupled": [
-    [
-      "#1784",
-      "#1787"
-    ]
+ "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v2.md). Each part is the upstream commit's diff of Fraction.java; the two Javadoc commits inside the range are comment-only glue. base + all parts is byte-identical to solution/gold_patch.diff (checked 2026-10-10).",
+ "artifact_root": "app",
+ "parts": [
+  {
+   "name": "#1769",
+   "patch": "tests/controls/01-1769.diff",
+   "upstream": "10f442145"
+  },
+  {
+   "name": "f021",
+   "patch": "tests/controls/02-f021.diff",
+   "upstream": "7f5bbbf0a"
+  },
+  {
+   "name": "#1784",
+   "patch": "tests/controls/03-1784.diff",
+   "upstream": "e213b85ce"
+  },
+  {
+   "name": "#1787",
+   "patch": "tests/controls/04-1787.diff",
+   "upstream": "284be5d6a"
+  },
+  {
+   "name": "docs-0915",
+   "patch": "tests/controls/05-docs-0915.diff",
+   "upstream": "0c96ced7d",
+   "glue": true
+  },
+  {
+   "name": "#1794",
+   "patch": "tests/controls/06-1794.diff",
+   "upstream": "e992a498d"
+  },
+  {
+   "name": "docs-0919",
+   "patch": "tests/controls/07-docs-0919.diff",
+   "upstream": "a1a3bd056",
+   "glue": true
+  }
+ ],
+ "coupled": [
+  [
+   "#1784",
+   "#1787"
   ]
+ ],
+ "naive": [
+  {
+   "name": "reduce-multiply-only",
+   "patch": "tests/controls/naive-reduce-multiply-only.diff",
+   "note": "Reduce both operands at the top of multiplyBy and nothing else (the per-symptom patch for the multiply, divide and pow overflow; addSub untouched) (F5 floor-8 calibration, PLAN-v3.md; the shortcut this task's DESIGN.md predicted)"
+  },
+  {
+   "name": "widen-reduced-factory",
+   "patch": "tests/controls/naive-widen-reduced-factory.diff",
+   "note": "Rewrite getReducedFraction with long arithmetic and casts, so MIN_VALUE over an even or negative partner reduces but MIN_VALUE over -1 silently wraps instead of throwing (F5 floor-8 calibration, PLAN-v3.md; the shortcut this task's DESIGN.md predicted)"
+  },
+  {
+   "name": "zero-shortcut-reduce",
+   "patch": "tests/controls/naive-zero-shortcut-reduce.diff",
+   "note": "Return the reduced operand from the zero shortcuts of addSub, negating with a plain minus so Integer.MIN_VALUE wraps instead of throwing (F5 floor-8 calibration, PLAN-v3.md; the shortcut this task's DESIGN.md predicted)"
+  },
+  {
+   "name": "string-wrap",
+   "patch": "tests/controls/naive-string-wrap.diff",
+   "note": "Wrap the whole string factory in one try/catch that rethrows ArithmeticException as NumberFormatException with the cause attached (F5 floor-8 calibration, PLAN-v3.md; the shortcut this task's DESIGN.md predicted)"
+  }
+ ]
 }

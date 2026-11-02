@@ -1,0 +1,49 @@
+{
+  "display_name": "VulcanBench Frontier v5 (frontier-v5), release 1",
+  "version": "1.0.0",
+  "plan": "docs/frontier-v5/PLAN-v4.md (frozen by docs/frontier-v5/FREEZE-v4.json); ferrycore joins under decision (l), docs/DECISIONS.md 2026-10-31",
+  "tasks": [
+    "treesitter-query-anchor-matching",
+    "black-fmt-skip-region-handling",
+    "prettier-comment-attachment-stability",
+    "javaparser-member-resolution-scope",
+    "cli11-toml-config-round-trip",
+    "pulldown-cmark-html-block-scanning"
+  ],
+  "private_tasks": {
+    "ferrycore-crossing-opaque-parity": {
+      "repo": "morganlinton/vulcanbench-frontier-private",
+      "commit": "49c72d42dbdba3b23ec76c435f402dab2aeaa22f",
+      "family": "F4-python"
+    }
+  },
+  "pins": {
+    "harness": "harbor 0.24.0",
+    "effort": "medium",
+    "references": [
+      {
+        "name": "GPT-6 Astra",
+        "agent": "codex",
+        "model": "gpt-6-astra",
+        "cli_version": "0.159.0",
+        "agent_kwargs": ["disable_web_search=true", "config=scripts/frontier-v5/codex-gate.toml"]
+      },
+      {
+        "name": "Claude Opus 5.5",
+        "agent": "claude-code",
+        "model": "claude-opus-5-5",
+        "cli_version": "2.1.302",
+        "agent_kwargs": ["disable_web_search=true"]
+      }
+    ],
+    "images": {
+      "vulcanbench/sandbox:v5-base": "sha256:042e225b360b064a92818d94d39d5f7533d54f79125e3d4082eb4df5da498184",
+      "vulcanbench/sandbox:v5-cfamily": "sha256:914f9c54154778ee5b5fdc4e92eb5427f24f991f3acce18202fa869d11204156",
+      "vulcanbench/sandbox:v5-jvm": "sha256:ec1b76e610eb8b2496fa5254e2d31a3fc4940229dfb8368763d75752bad3d3e3",
+      "vulcanbench/sandbox:v5-rust": "sha256:b07979bcc2967d51b5a6873e5d8b0e7976f158013c7584c2f901bc72d7fe3b4c",
+      "vulcanbench/frontier-v5-ferrycore-oracle:0.2.0": "sha256:de80bbe30bb3e5798f80c1cc0b9fd48fada8117e23d5c494967cbed89b8965b3",
+      "vulcanbench/frontier-v5-ferrycore-env:0.2.0": "sha256:66f8416f8571a9b039ec06a9f32873f4aaccc468d35dea11f7ae3474e34784a3"
+    },
+    "images_note": "Local image ids on the gate machine at freeze (docker image inspect). The four v5 sandbox images were built 2026-10-22 between 08:36 and 08:40 UTC; the tree-sitter Astra gate half (2026-10-18) ran on an earlier build of them."
+  }
+}

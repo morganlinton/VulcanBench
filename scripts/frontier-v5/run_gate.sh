@@ -21,7 +21,9 @@
 # the Docker VM (prettier, docs/DECISIONS.md 2026-10-27); the value is
 # printed on the === line.
 # Early exit: two solves by the reference end a task's gate as a reject, so
-# the Harbor job is stopped as soon as two trials have reward 1. Killing
+# the Harbor job is stopped as soon as two trials have reward 1
+# (GATE_EARLY_EXIT=0 turns that off, for confirmation runs that score every
+# attempt, PLAN-v4.md section 4). Killing
 # `harbor run` does not stop the running trial's sandbox containers, which
 # keep the agent (and its quota use) alive until the task timeout (seen
 # 2026-10-22, comrak), so stop_sandboxes removes them after every stop.
@@ -107,6 +109,8 @@ export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew
 OUT="${GATE_OUT:-$HOME/vulcanbench-gate}"
 attempts="${GATE_ATTEMPTS:-3}"; suffix="${GATE_JOB_SUFFIX:-}"
 case "$attempts" in 1|2|3) ;; *) echo "run_gate: GATE_ATTEMPTS must be 1, 2 or 3 (got $attempts)" >&2; exit 2 ;; esac
+early_exit="${GATE_EARLY_EXIT:-1}"
+case "$early_exit" in 0|1) ;; *) echo "run_gate: GATE_EARLY_EXIT must be 0 or 1 (got $early_exit)" >&2; exit 2 ;; esac
 mkdir -p "$OUT/jobs"
 command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/frontier-v5/setup-host.sh installs it)" >&2; exit 2; }
 
@@ -307,6 +311,7 @@ for t in "$@"; do
     write_status stopped 130 "signal-$stop_flag"; exit 130
   fi
   echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+  [ "$early_exit" = 0 ] && echo "=== early exit off (GATE_EARLY_EXIT=0): every attempt runs to the end"
   # A background list runs with SIGINT ignored (bash 3.2 has no `trap - INT`
   # that survives the fork), so harbor is exec'd through a python one-liner
   # that restores the default disposition. $! is then harbor's own pid.
@@ -340,7 +345,7 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
       write_status infra_failed "$hcode" "infra:$bad"
       echo "!!! move $OUT/jobs/$job aside as INFRA-..., fix the cause, and rerun"; exit 1
     fi
-    if [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
+    if [ "$early_exit" = 1 ] && [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
       echo "--- $t: two solves, early reject; stopping the remaining attempt"
       write_status stopping "" early-reject
       stop_harbor; stopped=1

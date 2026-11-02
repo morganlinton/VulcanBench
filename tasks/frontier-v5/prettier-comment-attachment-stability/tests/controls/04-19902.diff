@@ -1,0 +1,14 @@
+diff --git a/src/language-js/comments/handle-comments.js b/src/language-js/comments/handle-comments.js
+index a98029ac9..a1199cc65 100644
+--- a/src/language-js/comments/handle-comments.js
++++ b/src/language-js/comments/handle-comments.js
+@@ -989,7 +989,8 @@ function handleCommentsInDestructuringPattern({
+   if (
+     (enclosingNode?.type === "ObjectPattern" ||
+       enclosingNode?.type === "ArrayPattern") &&
+-    followingNode?.type === "TSTypeAnnotation"
++    (followingNode?.type === "TSTypeAnnotation" ||
++      followingNode?.type === "TypeAnnotation")
+   ) {
+     if (precedingNode) {
+       addTrailingComment(precedingNode, comment);

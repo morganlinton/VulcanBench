@@ -1,0 +1,47 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v3.md). Each part is the upstream commit's src/main diff; base + all parts is the pin's src/main (#5147 is in the base, DESIGN.md) (solution/gold_patch.diff). #5141 applies only on top of #5139 and the 98c8b8c43 follow-up only on top of both, so the three are one repair unit.",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "#5139",
+      "patch": "tests/controls/01-5139.diff",
+      "upstream": "fdc458d562"
+    },
+    {
+      "name": "#5141",
+      "patch": "tests/controls/02-5141.diff",
+      "upstream": "554c6f7067"
+    },
+    {
+      "name": "98c8",
+      "patch": "tests/controls/03-glue-98c8.diff",
+      "upstream": "98c8b8c43"
+    },
+    {
+      "name": "#5145",
+      "patch": "tests/controls/04-5145.diff",
+      "upstream": "e44fd41812"
+    }
+  ],
+  "coupled": [
+    [
+      "#5139",
+      "#5141",
+      "98c8"
+    ]
+  ],
+  "naive": [
+    {
+      "name": "members-only-adapter",
+      "patch": "tests/controls/naive-members-only-adapter.diff"
+    },
+    {
+      "name": "declared-nested-only",
+      "patch": "tests/controls/naive-declared-nested-only.diff"
+    },
+    {
+      "name": "tolerate-all-ancestors",
+      "patch": "tests/controls/naive-tolerate-all-ancestors.diff"
+    }
+  ]
+}

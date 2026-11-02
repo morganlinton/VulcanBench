@@ -1,0 +1,16 @@
+diff --git a/src/black/linegen.py b/src/black/linegen.py
+index 66058cac..bc2c5b8f 100644
+--- a/src/black/linegen.py
++++ b/src/black/linegen.py
+@@ -196,7 +196,10 @@ def visit_test(self, node: Node) -> Iterator[Line]:
+             node.prev_sibling and node.prev_sibling.type == token.LPAR
+         )
+ 
+-        if not already_parenthesized:
++        first = node.children[0]
++        follows_hidden_code = isinstance(first, Leaf) and first.value in {"if", "else"}
++
++        if not already_parenthesized and not follows_hidden_code:
+             # Similar to logic in wrap_in_parentheses
+             lpar = Leaf(token.LPAR, "")
+             rpar = Leaf(token.RPAR, "")

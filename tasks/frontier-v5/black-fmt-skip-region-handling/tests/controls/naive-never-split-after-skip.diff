@@ -1,0 +1,13 @@
+diff --git a/src/black/linegen.py b/src/black/linegen.py
+index 66058cac..798ec951 100644
+--- a/src/black/linegen.py
++++ b/src/black/linegen.py
+@@ -1846,7 +1846,7 @@ def _force_standalone_comment_split(line: Line) -> Iterator[Line]:
+             and (leaf.type == STANDALONE_COMMENT or current_line.is_comment)
+             # Do not isolate the header colon onto its own line when a
+             # standalone comment (e.g. from `# fmt: skip`) ends with `)`.
+-            and not (current_line.is_comment and leaf.type == token.COLON)
++            and not current_line.is_fmt_pass_converted()
+         ):
+             yield current_line
+             current_line = Line(

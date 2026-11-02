@@ -7,7 +7,7 @@ export const field = "w-full rounded-md border border-white/10 bg-zinc-900 px-3 
 export const label = "block text-xs uppercase tracking-wider text-zinc-500 mb-1";
 export const button = "rounded-md px-4 py-2 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed";
 
-export function WorktreeCard({ wt, gate = false }: { wt: WorktreeInfo; gate?: boolean }) {
+export function WorktreeCard({ wt }: { wt: WorktreeInfo }) {
   return (
     <div className="rounded-xl border border-white/10 p-3 text-xs">
       <div className="text-zinc-400">run worktree</div>
@@ -18,13 +18,10 @@ export function WorktreeCard({ wt, gate = false }: { wt: WorktreeInfo; gate?: bo
             {wt.at_tag ? `detached at ${wt.tag} (${wt.head})` : `HEAD ${wt.head ?? "?"} is not at ${wt.tag} (${wt.tag_commit ?? "?"})`}
           </div>
           {wt.dirty.length > 0 && <div className="text-rose-300">uncommitted: {wt.dirty.join(", ")}</div>}
-          {gate && !wt.script.status_file && <div className="text-amber-300">this tag&apos;s run_gate.sh predates the status file and the stand-alone usage check</div>}
         </div>
       ) : (
         <div className="mt-1 text-amber-300">
-          {gate
-            ? `not created yet: the plan will run scripts/run_worktree.sh ${wt.tag} first (make setup takes minutes)`
-            : "not created yet: prepare it first (a queue step with no model calls), then build the plan"}
+          not created yet: prepare it first (a queue step with no model calls), then build the plan
         </div>
       )}
       {wt.problems.filter((p) => wt.exists || !p.includes("not a git")).map((p) => (

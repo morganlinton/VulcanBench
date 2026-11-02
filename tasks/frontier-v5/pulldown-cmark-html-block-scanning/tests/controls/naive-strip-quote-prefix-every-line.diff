@@ -1,0 +1,59 @@
+diff --git a/pulldown-cmark/src/parse.rs b/pulldown-cmark/src/parse.rs
+index a8b24cc..eca4a3e 100644
+--- a/pulldown-cmark/src/parse.rs
++++ b/pulldown-cmark/src/parse.rs
+@@ -1533,15 +1533,11 @@ impl<'input> ParserInner<'input> {
+     fn scan_inline_html(&mut self, bytes: &[u8], ix: usize) -> Option<(Vec<u8>, usize)> {
+         let c = *bytes.get(ix)?;
+         if c == b'!' {
+-            Some((
+-                vec![],
+-                scan_inline_html_comment(bytes, ix + 1, &mut self.html_scan_guard)?,
+-            ))
++            let end = scan_inline_html_comment(bytes, ix + 1, &mut self.html_scan_guard)?;
++            Some((strip_quote_prefixes(&bytes[ix - 1..end]), end))
+         } else if c == b'?' {
+-            Some((
+-                vec![],
+-                scan_inline_html_processing(bytes, ix + 1, &mut self.html_scan_guard)?,
+-            ))
++            let end = scan_inline_html_processing(bytes, ix + 1, &mut self.html_scan_guard)?;
++            Some((strip_quote_prefixes(&bytes[ix - 1..end]), end))
+         } else {
+             let (span, i) = scan_html_block_inner(
+                 // Subtract 1 to include the < character
+@@ -1553,6 +1549,34 @@ impl<'input> ParserInner<'input> {
+     }
+ }
+ 
++/// Removes a block quote marker (`>` and one optional space, after up to three spaces) from
++/// the start of every continuation line of an inline HTML span. Empty if nothing was removed.
++fn strip_quote_prefixes(span: &[u8]) -> Vec<u8> {
++    let mut out = Vec::with_capacity(span.len());
++    let mut changed = false;
++    let mut i = 0;
++    while i < span.len() {
++        out.push(span[i]);
++        if span[i] == b'\n' {
++            let mut j = i + 1;
++            while j < span.len() && j < i + 4 && span[j] == b' ' {
++                j += 1;
++            }
++            if span.get(j) == Some(&b'>') {
++                j += 1;
++                if span.get(j) == Some(&b' ') {
++                    j += 1;
++                }
++                changed = true;
++                i = j;
++                continue;
++            }
++        }
++        i += 1;
++    }
++    if changed { out } else { Vec::new() }
++}
++
+ /// Returns number of containers scanned.
+ pub(crate) fn scan_containers(
+     tree: &Tree<Item>,

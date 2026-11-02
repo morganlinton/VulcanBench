@@ -101,6 +101,23 @@ jobs:
       - name: Build dashboard
         run: cd dashboard && npm run build
 
+  desktop-test:
+    # The Mac app's helpers (desktop/lib) are plain node; the Electron binary
+    # is not needed for them, so its download is skipped.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: 'npm'
+          cache-dependency-path: desktop/package-lock.json
+      - name: Install desktop deps (no Electron download)
+        run: cd desktop && ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci --no-audit --no-fund
+      - name: Test desktop helpers
+        run: cd desktop && npm test
+
   docker-sandbox-build:
     runs-on: ubuntu-latest
     steps:

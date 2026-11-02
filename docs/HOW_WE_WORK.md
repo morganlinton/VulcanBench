@@ -121,7 +121,8 @@ counts, so if the check fails and you changed nothing, run
 worktrees are always clean.
 
 Frozen today: **VulcanBench Frontier v4** (`coding-intelligence-index-v4`,
-version 2.0.0). Retired suites in this repo (cii-v1, v1 to v4, hard-1,
+version 2.0.0) and **VulcanBench Frontier v5** release 1 (`frontier-v5`,
+version 1.0.0). Retired suites in this repo (cii-v1, v1 to v4, hard-1,
 python-1, voice-v1, vulcancyber-v1) are not swept and are not locked. Lock one
 if it ever comes back into use.
 
@@ -147,6 +148,21 @@ Develop it under `tasks/<new-suite>/` with no lock while it is in flux.
 Validate tasks the usual way (`scripts/validate_tasks.py`, the Task PR
 workflow). Freeze it the day it is first published, in the PR that declares
 it published.
+
+Harbor-native tasks (`task.toml` plus `instruction.md`, as in Frontier v5) are
+hashed differently. The hash covers the prompt, `task.toml` without its
+`[metadata]` table, and the `environment/`, `tests/` and `solution/` trees.
+The lock also records each task's version and determinism checklist. Status
+notes in `[metadata]` and `DESIGN.md` stay editable.
+
+A suite can name private tasks in its `suite.json` (`private_tasks`: repo and
+commit). Those directories live only in the private companion repo
+(decision (f), [DECISIONS.md](DECISIONS.md) 2026-10-31). The lock records their
+hash. Freezing needs the private checkout: pass `--private-root` or set
+`VULCANBENCH_PRIVATE_TASKS` to its `tasks/` directory. `check` verifies a
+private task only where that checkout is present, and CI reports it as not
+checked. A `suite.json` `pins` object (reference models, CLI versions, image
+ids) is copied into the lock and cannot change without a version bump.
 
 ## Running benchmarks
 
@@ -336,13 +352,14 @@ every gate job and harness run under the configured roots with its bench tag,
 attempts, rewards, containers and a live log tail, plus a first-attempt check
 that flags sessions that never used the requested model or made no tool calls.
 Its Launch page queues a model sweep (one `vulcanbench run` per effort
-level, `--max-infra-retries 0`) or a Frontier v5 gate run through the same
-`run_worktree.sh` and `run_gate.sh` paths described above: the worktree must
-be at the bench tag and clean, the exact commands and the estimate are shown
-before a confirm click, the queue runs one job at a time, nothing retries on
-its own (a quota window may continue a level only when the plan says so,
-docs/DECISIONS.md 2026-10-30), and a stop goes through the script's own trap
-or the harness's own shutdown. Cutting a bench tag from the GUI goes
+level, `--max-infra-retries 0`) through the `run_worktree.sh` path described
+above: the worktree must be at the bench tag and clean, the exact commands
+and the estimate are shown before a confirm click, the queue runs one job at
+a time, nothing retries on its own (a quota window may continue a level only
+when the plan says so, docs/DECISIONS.md 2026-10-30), and a stop goes
+through the harness's own shutdown. Frontier v5 gate runs are launched by
+hand with `run_gate.sh` and show up on the Runs page read-only
+(docs/DECISIONS.md 2026-11-01). Cutting a bench tag from the GUI goes
 through `cut_bench_tag.sh` with the same refusals. See [GUI.md](GUI.md).
 
 ## Results: what goes in git and what does not

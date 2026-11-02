@@ -1,0 +1,24 @@
+diff --git a/src/language-js/comments/handle-comments.js b/src/language-js/comments/handle-comments.js
+index 5c3467910..bd3e6af93 100644
+--- a/src/language-js/comments/handle-comments.js
++++ b/src/language-js/comments/handle-comments.js
+@@ -344,16 +344,9 @@ function handleClassComments({
+ 
+       for (const prop of ["implements", "extends", "mixins"]) {
+         if (enclosingNode[prop] && followingNode === enclosingNode[prop][0]) {
+-          if (
+-            precedingNode &&
+-            (precedingNode === enclosingNode.id ||
+-              precedingNode === enclosingNode.typeParameters ||
+-              precedingNode === superClass)
+-          ) {
+-            addTrailingComment(precedingNode, comment);
+-          } else {
+-            addDanglingComment(enclosingNode, comment, prop);
+-          }
++          // Keep the comment with the clause list so it prints after the
++          // keyword, where it was written.
++          addDanglingComment(enclosingNode, comment, prop);
+           return true;
+         }
+       }

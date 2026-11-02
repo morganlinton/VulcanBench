@@ -1,0 +1,13 @@
+diff --git a/src/black/comments.py b/src/black/comments.py
+index 987530bd..a9905ea9 100644
+--- a/src/black/comments.py
++++ b/src/black/comments.py
+@@ -523,8 +523,6 @@ def stringify_node(n: LN, next_node: LN | None = None) -> str:
+                                 and "\n" in n.value
+                             ):
+                                 result = _remove_preceding_newline_for_comment(result)
+-                            if not result.endswith("\n"):
+-                                result += "\n"
+                             return result
+                         return str(n)
+                     else:

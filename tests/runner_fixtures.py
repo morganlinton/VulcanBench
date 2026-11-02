@@ -286,7 +286,6 @@ def harness_run(
 # --------------------------------------------------------------- launches --
 
 REPO = Path(__file__).resolve().parents[1]
-GATE_SCRIPT_SRC = REPO / "scripts" / "frontier-v5" / "run_gate.sh"
 WORKTREE_SCRIPT_SRC = REPO / "scripts" / "run_worktree.sh"
 TAG_SCRIPT_SRC = REPO / "scripts" / "cut_bench_tag.sh"
 
@@ -306,19 +305,12 @@ def git(cwd: Path, *args: str) -> str:
     return out.stdout.strip()
 
 
-def fake_repo(
-    tmp_path: Path, *, tag: str = "bench/2026-10-29-test", tasks: tuple[str, ...] = ("demo-task",)
-) -> Path:
-    """A throwaway repository with run_gate.sh, run_worktree.sh and Frontier v5 tasks at ``tag``."""
+def fake_repo(tmp_path: Path, *, tag: str = "bench/2026-10-29-test") -> Path:
+    """A throwaway repository with run_worktree.sh, cut_bench_tag.sh and a frozen suite at ``tag``."""
     repo = tmp_path / "repo"
-    (repo / "scripts" / "frontier-v5").mkdir(parents=True)
-    shutil.copy(GATE_SCRIPT_SRC, repo / "scripts" / "frontier-v5" / "run_gate.sh")
+    (repo / "scripts").mkdir(parents=True)
     shutil.copy(WORKTREE_SCRIPT_SRC, repo / "scripts" / "run_worktree.sh")
     shutil.copy(TAG_SCRIPT_SRC, repo / "scripts" / "cut_bench_tag.sh")
-    for name in tasks:
-        d = repo / "tasks" / "frontier-v5" / name
-        d.mkdir(parents=True)
-        (d / "task.toml").write_text('[metadata]\nvulcanbench_language = "python"\n')
     suite = repo / "tasks" / SUITE_ID
     suite.mkdir(parents=True)
     (suite / "suite.lock.json").write_text(

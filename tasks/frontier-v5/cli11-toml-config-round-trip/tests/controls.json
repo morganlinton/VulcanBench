@@ -1,0 +1,47 @@
+{
+  "note": "Per-cause split of the gold for scripts/frontier-v5/run_controls.py (F5 floors, docs/frontier-v5/PLAN-v3.md). The four upstream fixes in order, applied on top of each other, end exactly at the pin's include/CLI/impl/Config_inl.hpp (solution/gold_patch.diff). #1369 (df42e6dd) is split by hunk into its three config causes; its writer hunks also carry the group-header commentChar and the clean_name_string move. p1451's upstream diff does not apply without writer-join (they share the group-header line); its rebased diff carries the same changed lines with that line left to writer-join.",
+  "artifact_root": "app",
+  "parts": [
+    {
+      "name": "p1361",
+      "patch": "tests/controls/01-p1361.diff",
+      "upstream": "45b99410"
+    },
+    {
+      "name": "header",
+      "patch": "tests/controls/02-header.diff",
+      "upstream": "df42e6dd (hunk 3)"
+    },
+    {
+      "name": "docstring",
+      "patch": "tests/controls/03-docstring.diff",
+      "upstream": "df42e6dd (hunk 2)"
+    },
+    {
+      "name": "writer-join",
+      "patch": "tests/controls/04-writer-join.diff",
+      "upstream": "df42e6dd (writer hunks)"
+    },
+    {
+      "name": "p1451",
+      "patch": "tests/controls/05-p1451.diff",
+      "upstream": "e7eff2f4",
+      "rebased": "tests/controls/05-p1451-rebased.diff"
+    },
+    {
+      "name": "p1463",
+      "patch": "tests/controls/06-p1463.diff",
+      "upstream": "e13f511a"
+    }
+  ],
+  "naive": [
+    {
+      "name": "no-quote-processing",
+      "patch": "tests/controls/naive-no-quote-processing.diff"
+    },
+    {
+      "name": "skip-nameless-groups",
+      "patch": "tests/controls/naive-skip-nameless-groups.diff"
+    }
+  ]
+}

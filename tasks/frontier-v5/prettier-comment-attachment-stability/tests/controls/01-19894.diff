@@ -1,0 +1,53 @@
+diff --git a/src/language-js/comments/handle-comments.js b/src/language-js/comments/handle-comments.js
+index 5c3467910..119319f48 100644
+--- a/src/language-js/comments/handle-comments.js
++++ b/src/language-js/comments/handle-comments.js
+@@ -93,6 +93,7 @@ function handleOwnLineComment(context) {
+     handleTSMappedTypeComments,
+     handleBinaryCastExpressionComment,
+     handleUnionTypeLeadingComments,
++    handleSequenceExpressionLeadingComment,
+   ].some((fn) => fn(context));
+ }
+ 
+@@ -127,6 +128,7 @@ function handleEndOfLineComment(context) {
+     handlePropertySignatureComments,
+     handleBinaryCastExpressionComment,
+     handleTaggedTemplateExpressionComments,
++    handleSequenceExpressionLeadingComment,
+   ].some((fn) => fn(context));
+ }
+ 
+@@ -154,6 +156,7 @@ function handleRemainingComment(context) {
+     handlePropertySignatureComments,
+     handleBinaryCastExpressionComment,
+     handleUnionTypeLeadingComments,
++    handleSequenceExpressionLeadingComment,
+   ].some((fn) => fn(context));
+ }
+ 
+@@ -1174,6 +1177,24 @@ function handleArrowExpressionComments({
+   return false;
+ }
+ 
++function handleSequenceExpressionLeadingComment({
++  comment,
++  enclosingNode,
++  precedingNode,
++  followingNode,
++}) {
++  if (
++    !precedingNode &&
++    enclosingNode?.type === "SequenceExpression" &&
++    followingNode === enclosingNode.expressions[0]
++  ) {
++    addLeadingComment(enclosingNode, comment);
++    return true;
++  }
++
++  return false;
++}
++
+ function handleParenthesizedExpressionTrailingComment({
+   comment,
+   enclosingNode,

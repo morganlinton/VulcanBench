@@ -21,10 +21,19 @@
 # the Docker VM (prettier, docs/DECISIONS.md 2026-10-27); the value is
 # printed on the === line.
 # Early exit: two solves by the reference end a task's gate as a reject, so
-# the Harbor job is stopped as soon as two trials have reward 1. Killing
+# the Harbor job is stopped as soon as two trials have reward 1
+# (GATE_EARLY_EXIT=0 turns that off, for confirmation runs that score every
+# attempt, PLAN-v4.md section 4). Killing
 # `harbor run` does not stop the running trial's sandbox containers, which
 # keep the agent (and its quota use) alive until the task timeout (seen
 # 2026-10-22, comrak), so stop_sandboxes removes them after every stop.
+# Web tools are off for both references (`--ak disable_web_search=true`:
+# Codex `web_search=disabled`, Claude Code `--disallowedTools WebSearch,WebFetch`),
+# and Codex runs with scripts/frontier-v5/codex-gate.toml, which also turns
+# off the account's connected apps, plugins and browser tools.
+# They run on the provider's side, so the task's network allowlist never sees
+# them; on 2026-10-30 an Astra attempt downloaded the upstream source of the
+# code an F2 task had removed through Codex's `web__run` (docs/DECISIONS.md).
 # Infrastructure guard: a finished trial whose agent log shows an auth,
 # model-id, usage-credit or usage-limit failure stops the whole run; such
 # trials are not gate results. Move their job directory aside (INFRA-*).
@@ -45,9 +54,12 @@
 # harbor's result.json, which has no finished_at on a cancelled job.
 #
 # Authentication (never read or printed by this script):
-#   astra  the ChatGPT login in ~/.codex/auth.json (`codex login`); Harbor
-#          injects it because CODEX_FORCE_AUTH_JSON=1 is set in its own
-#          environment.
+#   astra  a dedicated ChatGPT login for gate runs, with no connected apps,
+#          in ~/.config/vulcanbench/codex-gate/auth.json
+#          (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`), or the
+#          file GATE_CODEX_AUTH names; without one, the personal login in
+#          ~/.codex/auth.json. Harbor injects the file CODEX_AUTH_JSON_PATH
+#          names, set in its own environment.
 #   fable, opus  either a Claude subscription token in a private env file
 #          (CLAUDE_GATE_ENV, default ~/.config/vulcanbench/claude-gate.env,
 #          one line CLAUDE_CODE_OAUTH_TOKEN=..., from `claude setup-token`),
@@ -67,7 +79,7 @@
 # infrastructure failures; the script's own tests set it low.
 #
 # --refs prints one JSON line per reference (name, agent, model, version)
-# and exits, so a launcher never has to parse this file.
+# and exits, so a caller never has to parse this file.
 #
 # Never pass flag values with --ae: Harbor treats --ae values as secrets and
 # scrubs them from every file it writes (a value of 1 replaced every "1" in
@@ -97,14 +109,28 @@ export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew
 OUT="${GATE_OUT:-$HOME/vulcanbench-gate}"
 attempts="${GATE_ATTEMPTS:-3}"; suffix="${GATE_JOB_SUFFIX:-}"
 case "$attempts" in 1|2|3) ;; *) echo "run_gate: GATE_ATTEMPTS must be 1, 2 or 3 (got $attempts)" >&2; exit 2 ;; esac
+early_exit="${GATE_EARLY_EXIT:-1}"
+case "$early_exit" in 0|1) ;; *) echo "run_gate: GATE_EARLY_EXIT must be 0 or 1 (got $early_exit)" >&2; exit 2 ;; esac
 mkdir -p "$OUT/jobs"
 command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/frontier-v5/setup-host.sh installs it)" >&2; exit 2; }
 
 case "$ref" in
   astra)
     agent=codex; model=gpt-6-astra; version=0.159.0
-    [ -f "$HOME/.codex/auth.json" ] || { echo "run_gate: ~/.codex/auth.json missing; run \`codex login\`" >&2; exit 2; }
-    auth_env=(CODEX_FORCE_AUTH_JSON=1); auth_args=() ;;
+    # A dedicated gate login (no connected apps) when it exists, else the
+    # personal one; Harbor reads the file named by CODEX_AUTH_JSON_PATH.
+    codex_auth="${GATE_CODEX_AUTH:-$HOME/.config/vulcanbench/codex-gate/auth.json}"
+    if [ ! -f "$codex_auth" ]; then
+      [ -n "${GATE_CODEX_AUTH:-}" ] && { echo "run_gate: GATE_CODEX_AUTH=$codex_auth missing" >&2; exit 2; }
+      codex_auth="$HOME/.codex/auth.json"
+    fi
+    [ -f "$codex_auth" ] || { echo "run_gate: $codex_auth missing; run \`codex login\`" >&2; exit 2; }
+    auth_env=(CODEX_AUTH_JSON_PATH="$codex_auth")
+    # Provider-side tools off: web search, the account's connected apps
+    # (codex_apps), plugins and browser tools (docs/DECISIONS.md 2026-10-31).
+    codex_cfg="$here/scripts/frontier-v5/codex-gate.toml"
+    [ -f "$codex_cfg" ] || { echo "run_gate: $codex_cfg missing" >&2; exit 2; }
+    auth_args=(--ak "config=$codex_cfg") ;;
   fable|opus)
     agent=claude-code; version=2.1.302
     case "$ref" in fable) model=claude-fable-5-1 ;; opus) model=claude-opus-5-5 ;; esac
@@ -117,7 +143,10 @@ esac
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit
 # message; kept narrow so ordinary output (code the agent reads) never matches.
-INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit'
+# The last three alternatives are a reference reaching a provider-side tool
+# (web search, the account's connected apps) that run_gate.sh turns off; such
+# a trial is not a gate result either (docs/DECISIONS.md 2026-10-31).
+INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]'
 
 # Per-task state the helpers below read; set in the task loop.
 job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
@@ -282,6 +311,7 @@ for t in "$@"; do
     write_status stopped 130 "signal-$stop_flag"; exit 130
   fi
   echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+  [ "$early_exit" = 0 ] && echo "=== early exit off (GATE_EARLY_EXIT=0): every attempt runs to the end"
   # A background list runs with SIGINT ignored (bash 3.2 has no `trap - INT`
   # that survives the fork), so harbor is exec'd through a python one-liner
   # that restores the default disposition. $! is then harbor's own pid.
@@ -289,7 +319,7 @@ for t in "$@"; do
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
      env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
-     --ak version="$version" -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
+     --ak version="$version" --ak disable_web_search=true -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
      -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!
   write_status running
@@ -315,7 +345,7 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
       write_status infra_failed "$hcode" "infra:$bad"
       echo "!!! move $OUT/jobs/$job aside as INFRA-..., fix the cause, and rerun"; exit 1
     fi
-    if [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
+    if [ "$early_exit" = 1 ] && [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
       echo "--- $t: two solves, early reject; stopping the remaining attempt"
       write_status stopping "" early-reject
       stop_harbor; stopped=1

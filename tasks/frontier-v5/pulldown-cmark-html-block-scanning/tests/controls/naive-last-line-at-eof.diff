@@ -1,0 +1,15 @@
+diff --git a/pulldown-cmark/src/firstpass.rs b/pulldown-cmark/src/firstpass.rs
+index 5dd9957..0dcdd62 100644
+--- a/pulldown-cmark/src/firstpass.rs
++++ b/pulldown-cmark/src/firstpass.rs
+@@ -1411,8 +1411,8 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+             }
+ 
+             let next_line_ix = ix + line_start.bytes_scanned();
+-            if next_line_ix == self.text.len() {
+-                end_ix = next_line_ix;
++            if ix == self.text.len() {
++                end_ix = ix;
+                 break;
+             }
+             ix = next_line_ix;

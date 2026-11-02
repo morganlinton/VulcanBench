@@ -1,0 +1,513 @@
+diff --git a/pulldown-cmark/src/firstpass.rs b/pulldown-cmark/src/firstpass.rs
+index 5dd9957..e4cca40 100644
+--- a/pulldown-cmark/src/firstpass.rs
++++ b/pulldown-cmark/src/firstpass.rs
+@@ -401,6 +401,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+ 
+         // Save `remaining_space` here to avoid needing to backtrack `line_start` for HTML blocks
+         let remaining_space = line_start.remaining_space();
++        let indent_start_ix = start_ix + line_start.bytes_scanned();
+ 
+         let indent = line_start.scan_space_upto(4);
+         if indent == 4 {
+@@ -430,26 +431,25 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         if bytes[ix] == b'<' {
+             // Types 1-5 are all detected by one function and all end with the same
+             // pattern
+-            if let Some(html_end_tag) = get_html_end_tag(&bytes[(ix + 1)..]) {
++            if let Some(block_type) = get_html_block_type_1_through_5(&bytes[(ix + 1)..]) {
+                 self.finish_list(start_ix);
+                 return self.parse_html_block_type_1_to_5(
+-                    ix,
+-                    html_end_tag,
++                    indent_start_ix,
++                    block_type,
+                     remaining_space,
+-                    indent,
+                 );
+             }
+ 
+             // Detect type 6
+             if starts_html_block_type_6(&bytes[(ix + 1)..]) {
+                 self.finish_list(start_ix);
+-                return self.parse_html_block_type_6_or_7(ix, remaining_space, indent);
++                return self.parse_html_block_type_6_or_7(indent_start_ix, remaining_space);
+             }
+ 
+             // Detect type 7
+             if let Some(_html_bytes) = scan_html_type_7(&bytes[ix..]) {
+                 self.finish_list(start_ix);
+-                return self.parse_html_block_type_6_or_7(ix, remaining_space, indent);
++                return self.parse_html_block_type_6_or_7(indent_start_ix, remaining_space);
+             }
+         }
+ 
+@@ -1379,9 +1379,8 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+     fn parse_html_block_type_1_to_5(
+         &mut self,
+         start_ix: usize,
+-        html_end_tag: &str,
++        block_type: HtmlBlockType1Through5,
+         mut remaining_space: usize,
+-        mut indent: usize,
+     ) -> usize {
+         self.tree.append(Item {
+             start: start_ix,
+@@ -1396,7 +1395,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         loop {
+             let line_start_ix = ix;
+             ix += scan_nextline(&bytes[ix..]);
+-            self.append_html_line(remaining_space.max(indent), line_start_ix, ix);
++            self.append_html_line(remaining_space, line_start_ix, ix);
+ 
+             let mut line_start = LineStart::new(&bytes[ix..]);
+             let n_containers = scan_containers(&self.tree, &mut line_start, self.options, false);
+@@ -1405,19 +1404,21 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+                 break;
+             }
+ 
+-            if self.text[line_start_ix..ix].contains(html_end_tag) {
++            if ends_html_block(&bytes[line_start_ix..ix], block_type) {
+                 end_ix = ix;
+                 break;
+             }
+ 
+             let next_line_ix = ix + line_start.bytes_scanned();
+-            if next_line_ix == self.text.len() {
+-                end_ix = next_line_ix;
++            // A last line without a line ending is a line of the block even when nothing is
++            // left of it after the container prefixes; only the end of the input itself ends
++            // the block without one.
++            if ix == self.text.len() {
++                end_ix = ix;
+                 break;
+             }
+             ix = next_line_ix;
+             remaining_space = line_start.remaining_space();
+-            indent = 0;
+         }
+         self.pop(end_ix);
+         ix
+@@ -1430,7 +1431,6 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         &mut self,
+         start_ix: usize,
+         mut remaining_space: usize,
+-        mut indent: usize,
+     ) -> usize {
+         self.tree.append(Item {
+             start: start_ix,
+@@ -1445,7 +1445,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         loop {
+             let line_start_ix = ix;
+             ix += scan_nextline(&bytes[ix..]);
+-            self.append_html_line(remaining_space.max(indent), line_start_ix, ix);
++            self.append_html_line(remaining_space, line_start_ix, ix);
+ 
+             let mut line_start = LineStart::new(&bytes[ix..]);
+             let n_containers = scan_containers(&self.tree, &mut line_start, self.options, false);
+@@ -1462,7 +1462,6 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+             }
+             ix = next_line_ix;
+             remaining_space = line_start.remaining_space();
+-            indent = 0;
+         }
+         self.pop(end_ix);
+         ix
+@@ -1540,6 +1539,12 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+         });
+         self.tree.push();
+         loop {
++            // The end of the input closes the block. A last line of only spaces or tabs, with
++            // no line ending, is not the end of the input: it is a line of code.
++            if ix == bytes.len() {
++                self.pop(ix);
++                return ix;
++            }
+             let mut line_start = LineStart::new(&bytes[ix..]);
+             let n_containers = scan_containers(&self.tree, &mut line_start, self.options, false);
+             if n_containers < self.tree.spine_len() {
+@@ -1646,6 +1651,9 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+     }
+ 
+     /// Appends a line of HTML to the tree.
++    ///
++    /// `remaining_space` is the part of a tab left over from the container prefix,
++    /// which we must synthesize into spaces.
+     fn append_html_line(&mut self, remaining_space: usize, start: usize, end: usize) {
+         if remaining_space > 0 {
+             let cow_ix = self.allocs.allocate_cow("   "[..remaining_space].into());
+@@ -2377,7 +2385,8 @@ fn scan_paragraph_interrupt_no_table(
+                 && (scan_blank_line(&bytes[ix..]).is_none())
+         })
+         || bytes.starts_with(b"<")
+-            && (get_html_end_tag(&bytes[1..]).is_some() || starts_html_block_type_6(&bytes[1..]))
++            && (get_html_block_type_1_through_5(&bytes[1..]).is_some()
++                || starts_html_block_type_6(&bytes[1..]))
+         || definition_list
+             && ((current_container
+                 && tree.peek_up().map_or(false, |cur| {
+@@ -2398,15 +2407,66 @@ fn scan_paragraph_interrupt_no_table(
+                 .map_or(false, |(len, _)| bytes.get(2 + len) == Some(&b':')))
+ }
+ 
++const HTML_BLOCK_TYPE_1_END_TAGS: [&str; 4] = ["</pre>", "</style>", "</script>", "</textarea>"];
++
++/// Whether `line` meets the end condition of an HTML block whose start gave `html_end_tag`.
++/// For blocks started by `<pre`, `<script`, `<style` or `<textarea` (spec 4.6, type 1) any of
++/// their four end tags ends the block, case-insensitively: it "need not match the start tag".
++/// The other end conditions (`-->`, `?>`, `]]>`, `>`) have no letters.
++fn ends_html_block(line: &[u8], block_type: HtmlBlockType1Through5) -> bool {
++    let end_condition_without_gt: &[u8] = match block_type {
++        HtmlBlockType1Through5::Type1 => {
++            // Every type 1 end tag starts with `<`: try all four at each `<` in one pass.
++            return memchr::memchr_iter(b'<', line).any(|i| {
++                HTML_BLOCK_TYPE_1_END_TAGS.iter().any(|tag| {
++                    line.get(i..i + tag.len()).map_or(false, |candidate| {
++                        candidate.eq_ignore_ascii_case(tag.as_bytes())
++                    })
++                })
++            });
++        }
++        HtmlBlockType1Through5::Type2 => b"--",
++        HtmlBlockType1Through5::Type3 => b"?",
++        HtmlBlockType1Through5::Type4 => b"",
++        HtmlBlockType1Through5::Type5 => b"]]",
++    };
++    memchr::memchr_iter(b'>', line).any(|i| line[..i].ends_with(end_condition_without_gt))
++}
++
++/// <https://spec.commonmark.org/0.31.2/#html-blocks>
++#[derive(Clone, Copy)]
++pub(crate) enum HtmlBlockType1Through5 {
++    /// Start condition: line begins with the string <pre, <script, <style, or <textarea
++    /// (case-insensitive), followed by a space, a tab, the string >, or the end of the line.
++    ///
++    /// End condition: line contains an end tag </pre>, </script>, </style>, or </textarea>
++    /// (case-insensitive; it need not match the start tag).
++    Type1,
++    /// Start condition: line begins with the string <!--.
++    ///
++    /// End condition: line contains the string -->.
++    Type2,
++    /// Start condition: line begins with the string <?.
++    ///
++    /// End condition: line contains the string ?>.
++    Type3,
++    /// Start condition: line begins with the string <! followed by an ASCII letter.
++    ///
++    /// End condition: line contains the character >.
++    Type4,
++    /// Start condition: line begins with the string <![CDATA[.
++    ///
++    /// End condition: line contains the string ]]>.
++    Type5,
++}
++
+ /// Assumes `text_bytes` is preceded by `<`.
+-fn get_html_end_tag(text_bytes: &[u8]) -> Option<&'static str> {
++fn get_html_block_type_1_through_5(text_bytes: &[u8]) -> Option<HtmlBlockType1Through5> {
++    use HtmlBlockType1Through5::*;
+     static BEGIN_TAGS: &[&[u8]; 4] = &[b"pre", b"style", b"script", b"textarea"];
+     static ST_BEGIN_TAGS: &[&[u8]; 3] = &[b"!--", b"?", b"![CDATA["];
+ 
+-    for (beg_tag, end_tag) in BEGIN_TAGS
+-        .iter()
+-        .zip(["</pre>", "</style>", "</script>", "</textarea>"].iter())
+-    {
++    for beg_tag in BEGIN_TAGS {
+         let tag_len = beg_tag.len();
+ 
+         if text_bytes.len() < tag_len {
+@@ -2420,24 +2480,24 @@ fn get_html_end_tag(text_bytes: &[u8]) -> Option<&'static str> {
+ 
+         // Must either be the end of the line...
+         if text_bytes.len() == tag_len {
+-            return Some(end_tag);
++            return Some(Type1);
+         }
+ 
+         // ...or be followed by whitespace, newline, or '>'.
+         let s = text_bytes[tag_len];
+         if is_ascii_whitespace(s) || s == b'>' {
+-            return Some(end_tag);
++            return Some(Type1);
+         }
+     }
+ 
+-    for (beg_tag, end_tag) in ST_BEGIN_TAGS.iter().zip(["-->", "?>", "]]>"].iter()) {
++    for (beg_tag, block_type) in ST_BEGIN_TAGS.iter().zip([Type2, Type3, Type5].iter()) {
+         if text_bytes.starts_with(beg_tag) {
+-            return Some(end_tag);
++            return Some(*block_type);
+         }
+     }
+ 
+     if text_bytes.len() > 1 && text_bytes[0] == b'!' && text_bytes[1].is_ascii_alphabetic() {
+-        Some(">")
++        Some(Type4)
+     } else {
+         None
+     }
+diff --git a/pulldown-cmark/src/parse.rs b/pulldown-cmark/src/parse.rs
+index a8b24cc..4e451aa 100644
+--- a/pulldown-cmark/src/parse.rs
++++ b/pulldown-cmark/src/parse.rs
+@@ -492,22 +492,16 @@ impl<'input> ParserInner<'input> {
+                         continue;
+                     } else {
+                         let inline_html = next.and_then(|next_ix| {
+-                            self.scan_inline_html(
+-                                block_text.as_bytes(),
+-                                self.tree[next_ix].item.start,
+-                            )
++                            self.scan_inline_html(block_text, self.tree[next_ix].item.start)
+                         });
+-                        if let Some((span, ix)) = inline_html {
++                        if let Some((html, ix)) = inline_html {
+                             let node = scan_nodes_to_ix(&self.tree, next, ix);
+-                            self.tree[cur_ix].item.body = if !span.is_empty() {
+-                                let converted_string =
+-                                    String::from_utf8(span).expect("invalid utf8");
+-                                ItemBody::OwnedInlineHtml(
+-                                    self.allocs
+-                                        .allocate_cow(CowStr::from_replace_nuls(converted_string)),
+-                                )
+-                            } else {
+-                                ItemBody::InlineHtml
++                            self.tree[cur_ix].item.body = match html {
++                                // unchanged: rendered straight from the input
++                                CowStr::Borrowed(_) => ItemBody::InlineHtml,
++                                owned => ItemBody::OwnedInlineHtml(
++                                    self.allocs.allocate_cow(CowStr::from_replace_nuls(owned)),
++                                ),
+                             };
+                             self.tree[cur_ix].item.end = ix;
+                             self.tree[cur_ix].next = node;
+@@ -1527,28 +1521,72 @@ impl<'input> ParserInner<'input> {
+         }
+     }
+ 
+-    /// On success, returns a buffer containing the inline html and byte offset.
+-    /// When no bytes were skipped, the buffer will be empty and the html can be
+-    /// represented as a subslice of the input string.
+-    fn scan_inline_html(&mut self, bytes: &[u8], ix: usize) -> Option<(Vec<u8>, usize)> {
++    /// On success, returns the inline html and the byte offset after it. The html is borrowed
++    /// from `text` unless container prefixes had to be removed from its continuation lines.
++    fn scan_inline_html(
++        &mut self,
++        text: &'input str,
++        ix: usize,
++    ) -> Option<(CowStr<'input>, usize)> {
++        let bytes = text.as_bytes();
+         let c = *bytes.get(ix)?;
+         if c == b'!' {
+-            Some((
+-                vec![],
+-                scan_inline_html_comment(bytes, ix + 1, &mut self.html_scan_guard)?,
+-            ))
++            let tree = &self.tree;
++            let options = self.options;
++            let end = scan_inline_html_comment(bytes, ix + 1, &mut self.html_scan_guard, &|b| {
++                skip_container_prefixes(tree, b, options)
++            })?;
++            Some((self.strip_container_prefixes(&text[ix - 1..end]), end))
+         } else if c == b'?' {
+-            Some((
+-                vec![],
+-                scan_inline_html_processing(bytes, ix + 1, &mut self.html_scan_guard)?,
+-            ))
++            let end = scan_inline_html_processing(bytes, ix + 1, &mut self.html_scan_guard)?;
++            Some((self.strip_container_prefixes(&text[ix - 1..end]), end))
+         } else {
+             let (span, i) = scan_html_block_inner(
+                 // Subtract 1 to include the < character
+                 &bytes[(ix - 1)..],
+                 Some(&|bytes| skip_container_prefixes(&self.tree, bytes, self.options)),
+             )?;
+-            Some((span, i + ix - 1))
++            let end = i + ix - 1;
++            // `scan_html_block_inner` leaves its buffer empty when nothing was skipped.
++            let html = if span.is_empty() {
++                CowStr::Borrowed(&text[ix - 1..end])
++            } else {
++                String::from_utf8(span).expect("invalid utf8").into()
++            };
++            Some((html, end))
++        }
++    }
++
++    /// An inline HTML span that runs over several lines, without the container prefixes (`>`,
++    /// list indentation) at the start of its continuation lines. Borrowed if there are none.
++    /// Every cut is next to an ASCII byte (a line ending, or a prefix's space or `>`), so the
++    /// pieces stay on char boundaries.
++    fn strip_container_prefixes(&self, span: &'input str) -> CowStr<'input> {
++        let bytes = span.as_bytes();
++        let mut buffer = String::new();
++        let mut last = 0;
++        let mut i = 0;
++        while let Some(n) = memchr::memchr2(b'\n', b'\r', &bytes[i..]) {
++            i += n;
++            let skipped = if let Some(eol) = scan_eol(&bytes[i..]) {
++                i += eol;
++                skip_container_prefixes(&self.tree, &bytes[i..], self.options)
++            } else {
++                // not a line break
++                i += 1;
++                0
++            };
++            if skipped > 0 {
++                buffer.push_str(&span[last..i]);
++                i += skipped;
++                last = i;
++            }
++        }
++        if last == 0 {
++            CowStr::Borrowed(span)
++        } else {
++            buffer.push_str(&span[last..]);
++            buffer.into()
+         }
+     }
+ }
+diff --git a/pulldown-cmark/src/scanners.rs b/pulldown-cmark/src/scanners.rs
+index dd8b896..4c8de3a 100644
+--- a/pulldown-cmark/src/scanners.rs
++++ b/pulldown-cmark/src/scanners.rs
+@@ -23,7 +23,7 @@
+ use alloc::{string::String, vec::Vec};
+ use core::char;
+ 
+-use memchr::{memchr, memchr2};
++use memchr::{memchr, memchr2, memchr3};
+ 
+ pub(crate) use crate::puncttable::{is_ascii_punctuation, is_punctuation};
+ use crate::{
+@@ -461,10 +461,11 @@ fn is_digit(c: u8) -> bool {
+     c.is_ascii_digit()
+ }
+ 
++/// Not spaces, tabs, line endings, `"`, `'`, `=`, `<`, `>`, or `` ` `` (spec 6.6).
+ fn is_valid_unquoted_attr_value_char(c: u8) -> bool {
+     !matches!(
+         c,
+-        b'\'' | b'"' | b' ' | b'=' | b'>' | b'<' | b'`' | b'\n' | b'\r'
++        b'\'' | b'"' | b' ' | b'\t' | b'=' | b'>' | b'<' | b'`' | b'\n' | b'\r'
+     )
+ }
+ 
+@@ -571,9 +572,6 @@ pub(crate) fn scan_closing_code_fence(
+     fence_char: u8,
+     n_fence_char: usize,
+ ) -> Option<usize> {
+-    if bytes.is_empty() {
+-        return Some(0);
+-    }
+     let mut i = 0;
+     let num_fence_chars_found = scan_ch_repeat(&bytes[i..], fence_char);
+     if num_fence_chars_found < n_fence_char {
+@@ -1211,7 +1209,7 @@ fn scan_attribute_value(
+             }
+             return None;
+         }
+-        b' ' | b'=' | b'>' | b'<' | b'`' | b'\n' | b'\r' => {
++        b' ' | b'\t' | b'=' | b'>' | b'<' | b'`' | b'\n' | b'\r' => {
+             return None;
+         }
+         _ => {
+@@ -1397,6 +1395,17 @@ pub(crate) fn scan_html_block_inner(
+ 
+     if close_tag_bytes == 0 {
+         i += scan_ch(&data[i..], b'/');
++    } else if let Some(eol_bytes @ 1..) = scan_eol(&data[i..]) {
++        // A closing tag may have spaces, tabs and up to one line ending before its `>`.
++        let handler = newline_handler?;
++        i += eol_bytes;
++        let skipped_bytes = handler(&data[i..]);
++        if skipped_bytes > 0 {
++            buffer.extend(&data[last_buf_index..i]);
++            i += skipped_bytes;
++            last_buf_index = i;
++        }
++        i += scan_whitespace_no_nl(&data[i..]);
+     }
+ 
+     if data.get(i) != Some(&b'>') {
+@@ -1510,11 +1519,14 @@ fn scan_email(text: &str, start_ix: usize) -> Option<(usize, CowStr<'_>)> {
+ }
+ 
+ /// Scan comment, declaration, or CDATA section, with initial "<!" already consumed.
+-/// Returns byte offset on match.
++/// Returns byte offset on match. `skip_prefixes` gives the length of the container prefixes
++/// (`>`, indentation) at the start of a continuation line; a declaration must not end at the `>`
++/// of a block quote marker.
+ pub(crate) fn scan_inline_html_comment(
+     bytes: &[u8],
+     mut ix: usize,
+     scan_guard: &mut HtmlScanGuard,
++    skip_prefixes: &dyn Fn(&[u8]) -> usize,
+ ) -> Option<usize> {
+     let c = *bytes.get(ix)?;
+     ix += 1;
+@@ -1537,38 +1549,46 @@ pub(crate) fn scan_inline_html_comment(
+ 
+             while let Some(x) = memchr(b'-', &bytes[ix..]) {
+                 ix += x + 1;
+-                scan_guard.comment = ix;
+                 if bytes.get(ix) == Some(&b'-') && bytes.get(ix + 1) == Some(&b'>') {
+                     return Some(ix + 2);
+                 }
+             }
++            // No `-->` up to the end of the input: a later `<!--` can't close either.
++            scan_guard.comment = bytes.len();
+             None
+         }
+         // A CDATA section consists of the string `<![CDATA[`, a string of characters not
+         // including the string `]]>`, and the string `]]>`.
+         b'[' if bytes[ix..].starts_with(b"CDATA[") && ix > scan_guard.cdata => {
+             ix += b"CDATA[".len();
+-            ix = memchr(b']', &bytes[ix..]).map_or(bytes.len(), |x| ix + x);
+-            let close_brackets = scan_ch_repeat(&bytes[ix..], b']');
+-            ix += close_brackets;
+-
+-            if close_brackets == 0 || bytes.get(ix) != Some(&b'>') {
+-                scan_guard.cdata = ix;
+-                None
+-            } else {
+-                Some(ix + 1)
++            while let Some(x) = memchr(b']', &bytes[ix..]) {
++                ix += x + 1;
++                if bytes[ix..].starts_with(b"]>") {
++                    return Some(ix + 2);
++                }
+             }
++            // No `]]>` up to the end of the input: a later `<![CDATA[` can't close either.
++            scan_guard.cdata = bytes.len();
++            None
+         }
+         // A declaration consists of the string `<!`, an ASCII letter, zero or more characters not
+         // including the character >, and the character >.
+         _ if c.is_ascii_alphabetic() && ix > scan_guard.declaration => {
+-            ix = memchr(b'>', &bytes[ix..]).map_or(bytes.len(), |x| ix + x);
+-            if bytes.get(ix) != Some(&b'>') {
+-                scan_guard.declaration = ix;
+-                None
+-            } else {
+-                Some(ix + 1)
++            while let Some(x) = memchr3(b'>', b'\n', b'\r', &bytes[ix..]) {
++                ix += x;
++                if bytes[ix] == b'>' {
++                    return Some(ix + 1);
++                }
++                if let Some(eol) = scan_eol(&bytes[ix..]) {
++                    ix += eol;
++                    ix += skip_prefixes(&bytes[ix..]);
++                } else {
++                    // not a line break
++                    ix += 1;
++                }
+             }
++            scan_guard.declaration = bytes.len();
++            None
+         }
+         _ => None,
+     }

@@ -1,0 +1,22 @@
+diff --git a/src/language-js/comments/handle-comments.js b/src/language-js/comments/handle-comments.js
+index 5c3467910..6337b7e7e 100644
+--- a/src/language-js/comments/handle-comments.js
++++ b/src/language-js/comments/handle-comments.js
+@@ -1192,6 +1192,17 @@ function handleParenthesizedExpressionTrailingComment({
+     const isSequence = precedingNode.type === "SequenceExpression";
+     const isAssignment = precedingNode.type === "AssignmentExpression";
+ 
++    // `a = (b = c /* comment */);` drops the parentheses: keep the comment on
++    // the outer assignment so it stays before the semicolon.
++    if (
++      isAssignment &&
++      enclosingNode.type === "AssignmentExpression" &&
++      enclosingNode.right === precedingNode
++    ) {
++      addTrailingComment(enclosingNode, comment);
++      return true;
++    }
++
+     if (
+       (isSequence || isAssignment) &&
+       ((enclosingNode.type === "ArrowFunctionExpression" &&

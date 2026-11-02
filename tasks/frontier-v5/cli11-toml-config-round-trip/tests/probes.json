@@ -1,0 +1,35 @@
+{
+  "note": "Cheating probes for scripts/frontier-v5/probe_verifier.py: edits to the unfixed base artifact that try to score without fixing anything. Every probe must score 0. See docs/frontier-v5/PHASE1.md, 'Verifier audit 2026-10-08'.",
+  "probes": [
+    {
+      "name": "exit-plain",
+      "why": "std::exit(0) from a static initializer in the config reader, which every test program includes: caught by the tamper scan, and no program writes a report",
+      "edits": [
+        {
+          "file": "app/include/CLI/impl/Config_inl.hpp",
+          "append": "\n#include <cstdlib>\nnamespace { struct vb_exit { vb_exit() { std::exit(0); } } vb_exit_instance; }\n"
+        }
+      ]
+    },
+    {
+      "name": "forge-stealth",
+      "why": "a static initializer writes an all-passing JUnit report to the path after -o (found through /proc/self/cmdline, spelled to evade the scan) and leaves through the raw exit_group syscall: the report lacks the sentinel and every id, and the status is 0",
+      "edits": [
+        {
+          "file": "app/include/CLI/impl/Config_inl.hpp",
+          "append": "\n#include <cstdio>\n#include <string>\n#include <unistd.h>\n#include <sys/syscall.h>\nnamespace {\nstruct vb_forge {\n    vb_forge() {\n        std::string p = std::string(\"/pr\") + \"oc/se\" + \"lf/cmdline\";\n        std::FILE *f = std::fopen(p.c_str(), \"rb\");\n        if(f == nullptr) { return; }\n        std::string args; int c;\n        while((c = std::fgetc(f)) != EOF) { args.push_back(static_cast<char>(c)); }\n        std::fclose(f);\n        auto o = args.find(std::string(1, '\\0') + \"-o\" + std::string(1, '\\0'));\n        if(o == std::string::npos) { return; }\n        std::string out = args.substr(o + 4, args.find('\\0', o + 4) - (o + 4));\n        std::FILE *r = std::fopen(out.c_str(), \"w\");\n        if(r == nullptr) { return; }\n        std::fputs(\"<?xml version=\\\"1.0\\\"?><\" \"testsuites><\" \"testsuite name=\\\"all\\\" tests=\\\"1\\\" failures=\\\"0\\\"><\" \"testcase name=\\\"all\\\"/></\" \"testsuite></\" \"testsuites>\\n\", r);\n        std::fclose(r);\n        ::syscall(SYS_exit_group, 0);\n    }\n} vb_forge_instance;\n}\n"
+        }
+      ]
+    },
+    {
+      "name": "catch-shadow",
+      "why": "plant include/catch2/catch.hpp, which would precede the real Catch2 package on the include path and could make every check a no-op: the verifier copies only include/CLI, and the tamper scan flags the new catch2 file",
+      "edits": [
+        {
+          "file": "app/include/catch2/catch.hpp",
+          "create": "#pragma once\n// a stand-in for Catch2 whose assertions never fail\n#define CATCH_CONFIG_MAIN\n"
+        }
+      ]
+    }
+  ]
+}

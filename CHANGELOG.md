@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Local run GUI** (`backend/runner/`, dashboard `/runs` and `/launch`,
   `make gui`): a localhost page that lists every gate job and harness run
   with its bench tag, attempts, rewards, containers, a live log tail and a
-  first-attempt check, and queues Frontier v5 gate runs through
-  `run_worktree.sh` and `run_gate.sh` with the exact command shown before a
-  confirm click, one job at a time, with a clean stop. `run_gate.sh` starts
-  harbor as an interruptible child, traps INT and TERM, writes
-  `<job>.status.json`, and gains `--refs` and `GATE_PREFLIGHT_ONLY=1`.
+  first-attempt check, and a queue that runs one job at a time from a
+  `run_worktree.sh` worktree, with the exact command shown before a confirm
+  click and a clean stop. `run_gate.sh` starts harbor as an interruptible
+  child, traps INT and TERM, writes `<job>.status.json`, and gains `--refs`
+  and `GATE_PREFLIGHT_ONLY=1`.
 - **Benchmark a model from the GUI**: the Launch page plans a suite run for a
   model (harness, billing, suite, effort levels, bench tag) and queues one
   `vulcanbench run` per level, after the worktree check, the harness doctor
@@ -36,6 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `source.suite` with the lock digest; the run audit treats an external suite
   directory as benchmark data; `scripts/validate_tasks.py` gains `--json`.
   `estimate --suite` now prices the suite's own tasks root.
+- **Mac app** (`desktop/`, `make app`): an Electron window on the local run
+  GUI. It starts the backend from the checkout it was built from (or reuses
+  one already on port 8000) and the dashboard's standalone build with its own
+  node, waits for both, and opens the Runs page. Quitting stops the servers it
+  started and never signals a run.
+
+### Changed
+
+- The GUI's Launch page no longer plans Frontier v5 gate runs; it launches
+  frozen suites only. Gate jobs under `~/vulcanbench-gate` stay on the Runs
+  page read-only (docs/DECISIONS.md 2026-11-01).
 
 ## [0.10.0] - 2026-10-30
 

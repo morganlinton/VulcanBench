@@ -1,0 +1,13 @@
+diff --git a/pulldown-cmark/src/scanners.rs b/pulldown-cmark/src/scanners.rs
+index dd8b896..2470d37 100644
+--- a/pulldown-cmark/src/scanners.rs
++++ b/pulldown-cmark/src/scanners.rs
+@@ -464,7 +464,7 @@ fn is_digit(c: u8) -> bool {
+ fn is_valid_unquoted_attr_value_char(c: u8) -> bool {
+     !matches!(
+         c,
+-        b'\'' | b'"' | b' ' | b'=' | b'>' | b'<' | b'`' | b'\n' | b'\r'
++        b'\'' | b'"' | b' ' | b'\t' | b'=' | b'>' | b'<' | b'`' | b'\n' | b'\r'
+     )
+ }
+ 

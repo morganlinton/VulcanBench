@@ -1,0 +1,13 @@
+diff --git a/javaparser-core/src/main/java/com/github/javaparser/resolution/model/typesystem/ReferenceTypeImpl.java b/javaparser-core/src/main/java/com/github/javaparser/resolution/model/typesystem/ReferenceTypeImpl.java
+index db7826845..52796d079 100644
+--- a/javaparser-core/src/main/java/com/github/javaparser/resolution/model/typesystem/ReferenceTypeImpl.java
++++ b/javaparser-core/src/main/java/com/github/javaparser/resolution/model/typesystem/ReferenceTypeImpl.java
+@@ -243,7 +243,7 @@ public class ReferenceTypeImpl extends ResolvedReferenceType {
+     @Override
+     public List<ResolvedReferenceType> getDirectAncestors() {
+         // We need to go through the inheritance line and propagate the type parameters
+-        List<ResolvedReferenceType> ancestors = typeDeclaration.getAncestors();
++        List<ResolvedReferenceType> ancestors = typeDeclaration.getAncestors(true);
+         ancestors = ancestors.stream()
+                 .map(a -> typeParametersMap().replaceAll(a).asReferenceType())
+                 .collect(Collectors.toList());

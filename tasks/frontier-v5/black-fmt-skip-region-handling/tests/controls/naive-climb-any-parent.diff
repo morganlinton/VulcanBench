@@ -1,0 +1,17 @@
+diff --git a/src/black/comments.py b/src/black/comments.py
+index 987530bd..ec78fbc9 100644
+--- a/src/black/comments.py
++++ b/src/black/comments.py
+@@ -882,11 +882,7 @@ def _generate_ignored_nodes_from_fmt_skip(
+             ):
+                 break
+ 
+-            if (
+-                current_node.type in CLOSING_BRACKETS
+-                and current_node.parent
+-                and current_node.parent.type == syms.atom
+-            ):
++            if current_node.type in CLOSING_BRACKETS and current_node.parent:
+                 current_node = current_node.parent
+ 
+             if current_node.type in (token.NEWLINE, token.INDENT):

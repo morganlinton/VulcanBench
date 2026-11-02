@@ -600,10 +600,13 @@ def passthrough_names() -> tuple[str, ...]:
 
 
 def validate_any(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
-    """Re-validate a job of any kind right before confirm or launch."""
-    if spec.get("kind") == "suite":
+    """Re-validate a job of any kind right before confirm or launch (the one dispatcher)."""
+    kind = spec.get("kind")
+    if kind == "suite":
         return validate_suite_launch(cfg, spec)
-    return launch.validate_before_launch(cfg, spec)
+    if kind == "prepare":
+        return launch.validate_before_launch(cfg, spec)
+    return ["unsupported kind"]
 
 
 def validate_suite_launch(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:  # noqa: PLR0912

@@ -1,0 +1,19 @@
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java
+index b366cdf2f..a2ed5d404 100755
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/JavaParserTypeDeclarationAdapter.java
+@@ -315,14 +315,6 @@ public class JavaParserTypeDeclarationAdapter {
+         // This is relevant e.g. with nested classes.
+         // Note that we want to avoid infinite recursion when a class is using its own method - see issue #75
+         // We also want to avoid infinite recursion when handling static imports - see issue #4358
+-        if (candidateMethods.isEmpty() && !staticOnly) {
+-            SymbolReference<ResolvedMethodDeclaration> parentSolution = context.getParent()
+-                    .orElseThrow(() -> new RuntimeException("Parent context unexpectedly empty."))
+-                    .solveMethod(name, argumentsTypes, staticOnly);
+-            if (parentSolution.isSolved()) {
+-                candidateMethods.add(parentSolution.getCorrespondingDeclaration());
+-            }
+-        }
+ 
+         // if is interface and candidate method list is empty, we should check the Object Methods
+         if (candidateMethods.isEmpty() && typeDeclaration.isInterface()) {

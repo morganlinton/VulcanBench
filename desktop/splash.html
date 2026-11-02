@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VulcanBench</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    background: #0b0b0b; color: #f5f5f5;
+    font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-user-select: none; user-select: none;
+  }
+  .card { text-align: center; }
+  .mark {
+    width: 72px; height: 72px; margin: 0 auto 18px; border-radius: 16px;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+  }
+  .mark svg { width: 44px; height: 44px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 10px; }
+  p { margin: 0; font-size: 13px; color: #a3a3a3; min-height: 1.4em; }
+  .dots::after { content: ""; animation: dots 1.4s steps(4, end) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 100 100" fill="none" stroke="#0b0b0b" stroke-width="10" stroke-linejoin="miter">
+        <path d="M12 18 L50 86 L88 18"/>
+        <path d="M30 18 L50 54 L70 18"/>
+      </svg>
+    </div>
+    <h1>VulcanBench</h1>
+    <p id="status" class="dots">Starting</p>
+  </div>
+  <script>
+    const el = document.getElementById("status");
+    const show = (t) => { el.textContent = t; el.classList.toggle("dots", !/did not|missing|not usable/.test(t)); };
+    if (window.vulcanbench) {
+      window.vulcanbench.onStatus(show);
+      window.vulcanbench.status().then((t) => t && show(t));
+    }
+  </script>
+</body>
+</html>

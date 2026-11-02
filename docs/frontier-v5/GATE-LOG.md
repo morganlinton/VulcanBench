@@ -15,6 +15,7 @@ host.
 | --- | --- | --- | --- | --- |
 | GPT-6 Astra | `harbor run -a codex` | `gpt-6-astra` | Codex CLI 0.159.0 (`--ak version=0.159.0`) | medium |
 | Claude Fable 5.1 | `harbor run -a claude-code` | `claude-fable-5-1` | Claude Code 2.1.302 (`--ak version=2.1.302`) | medium |
+| Claude Opus 5.5 (second reference for wave 1 from 2026-10-25, DECISIONS.md) | `harbor run -a claude-code` | `claude-opus-5-5` | Claude Code 2.1.302 (`--ak version=2.1.302`) | medium |
 
 Harbor 0.24.0, `-k 3` attempts, no retries. Astra authenticates with the
 owner's ChatGPT login (`~/.codex/auth.json`, injected by Harbor when
@@ -32,8 +33,20 @@ launcher.
 | ioverlay-hole-binding-extraction | F5-rust | 2 of 2 solved (6.2, 7.3) | not run | **REJECT** (early exit) |
 | tseslint-type-params-mapped-types | F5-javascript | 2 of 2 solved (12.2, 10.8) | not run | **REJECT** (early exit) |
 | commons-lang-fraction-lowest-terms | F5-java | 2 of 2 solved (4.3, 4.4) | not run | **REJECT** (early exit) |
-| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar |
+| treesitter-query-anchor-matching | F5-c | **0 of 3** (9.9, 12.2, 7.6) | **2 of 5** (33.0, 27.3, 23.0, 79.6, 27.2); **Opus 5.5: 0 of 3** (42.3, 21.1, 22.1; 2026-10-31) | **ADMIT** (F5-c): Fable 2 of 5 after the n=5 top-up, at the bar; Opus 5.5 0 of 3 |
 | comrak-gfm-tables-autolinks-parity | F2-rust | 2 of 2 solved (11.1, 8.2) | not run | **REJECT** (early exit, 2026-10-22) |
+| black-fmt-skip-region-handling | F5-python (wave 1) | **0 of 3** (6.1, 5.6, 6.0) | Fable: stopped at 94% weekly usage, not an attempt; **Opus 5.5: 0 of 3** (13.1, 13.5, 37.6) | **ADMIT** (F5-python, 2026-10-25): both references 0 of 3 |
+| pulldown-cmark-html-block-scanning | F5-rust (wave 1; floor 8 not met, gated under (g')) | **0 of 3** (3.7, 4.4, 3.2) | **Opus 5.5: 1 of 5** (13.4, 11.1, 8.6, 7.6, 5.4) after the n=5 top-up | **ADMIT** (F5-rust, 2026-10-30) under (g'): Opus 1 of 5, below the bar; floor-8 miss recorded |
+| prettier-comment-attachment-stability | F5-javascript (wave 1) | **0 of 3** (15.0, 12.8, 22.9) | **Opus 5.5: 0 of 3** (32.5, 27.4, 25.6) | **ADMIT** (F5-javascript, 2026-10-27): both references 0 of 3; tamper-scan fix re-validated after the gate |
+| javaparser-member-resolution-scope | F5-java (wave 1) | **0 of 3** (9.8, 9.7, 7.7) | **Opus 5.5: 0 of 3** (20.9, 28.9, 21.3) | **ADMIT** (F5-java, 2026-10-29): both references 0 of 3 |
+| boosturl-path-compare-normalize | F5-cpp (wave 1) | 2 of 2 solved (17.7, 21.6) | not run | **REJECT** (early exit, 2026-10-28) |
+| cli11-toml-config-round-trip | F5-cpp (wave 1 replacement) | **0 of 3** (2.4, 4.7, 3.4) | **Opus 5.5: 0 of 3** (6.4, 9.1, 13.2) | **ADMIT** by the gate rule (F5-cpp, 2026-10-30), flagged: every attempt cleared all 11 defect checks and was held only by two held-out guards |
+| ferrycore-crossing-opaque-parity | F4-python | 2 of 2 solved (7.4, 23.2), both by disassembling the binary | not run | **REJECT** (early exit, 2026-10-30) |
+| phonenumbers-parse-match-parity | F2-python (shape B1) | 2 genuine solves across two halves (7.4, 5.4); two more used provider-side web tools and are not valid | not run | **REJECT** (2026-10-31, owner confirmed): two genuine solves on the valid evidence |
+| apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
+| bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
+| ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | **Opus 5.5: 0 of 3** (52.1, 103.0, 49.3) | **ADMIT** (F4-python, 2026-10-31): both references 0 of 3; joins release 1 under (l) |
+| jsts-overlayng-coverage-parity | F2-javascript (B1; release-2 candidate) | **0 of 3** (20.2, 23.4, 24.7), closest 11,821 of 11,822 via a self-written Java-to-JS transpiler | Opus 5.5: **1 of 3 as graded, 3 of 3 by behaviour** (two tamper false positives) | REJECT (owner confirmed 2026-11-01, no top-up) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -235,6 +248,321 @@ should take a larger subsystem"); the oracle route is a second lever for the
 owner: ship the reference in a form the sandbox cannot build or run, or
 accept that F2 measures porting speed against an oracle.
 
+### black-fmt-skip-region-handling, Astra half (2026-10-24): the Astra prong passed
+
+The first wave-1 candidate (WAVE1-F5.md), built under floor 8 and validated
+the same day (its DESIGN.md). Job `astra-black-fmt-skip-region-handling`,
+launched 15:54 PDT on the Mac Studio from a run worktree pinned to d75dd420
+(the task's commit), `run_gate.sh` at that commit (main's version, without
+the top-up knobs and the container cleanup of this branch), identifiers as in
+wave 1 (Codex CLI 0.159.0, `gpt-6-astra`, medium, `-k 3`), concurrency 2 per
+decision (e) for a Python task. Every session real: Harbor's invocation
+records `--model gpt-6-astra` and `model_reasoning_effort=medium`, 76 to 86
+command executions per trial, no auth, model-id or usage-limit event. No
+containers were left behind (no early exit fired).
+
+| Trial | Agent minutes | Reward | Held-out | Guards |
+| --- | --- | --- | --- | --- |
+| LBgCaAJ | 6.1 | 0 | 6 of 7 | hold (596 of 596) |
+| dRzhS4G | 6.0 | 0 | 6 of 7 | hold |
+| Qf6uoFa | 5.6 | 0 | 6 of 7 | hold |
+
+**0 of 3: the Astra prong passed.** All three attempts fail the same way:
+`fmtskip_opening_bracket_split` (the #5538 case, code after a hidden
+opening-bracket region on the same line when the hidden code ends in code)
+fails, and nothing else does. Each attempt changed `src/black/comments.py`
+(the walk and the serializer) and `src/blib2to3/pytree.py` (the `Leaf`
+class), about 100 to 130 lines added and 70 to 90 removed, and none touched
+`src/black/linegen.py`, where upstream's #5538 and #5586 live; the
+conditional case nonetheless passes under their changes. The tamper scans
+are clean and no added line touches the test runner. Each closing message
+reports the visible suite green ("598 passed, 3 skipped") plus 51 to 121
+self-generated combinations checked for AST equivalence and stability, and
+declares the work done at about six minutes.
+
+What held, and what did not. The floor-8 guard mechanism did not fire: no
+attempt took the `climb-any-parent` shortcut that the naive control showed
+would break `fmtskip_type_params`; all three widened the walk in a way the
+596 guards accept. What stopped them is the second mechanism recorded for
+tree-sitter and in this task's DESIGN.md: a held-out combination that the
+visible suite cannot reveal and that their own randomized checks did not
+reach. Astra's six-minute finish is the premature-completion pattern of the
+first wave (every visible signal green, then done), and here that signal was
+wrong by exactly one case.
+
+Next: the second prong (three attempts, admit iff at most 1 of 3, n=5
+top-up at exactly 1 of 3), on the owner's approval. Covariates: 6.1, 5.6 and
+6.0 agent minutes against the 3-hour budget; the run took 15 minutes end to
+end including both image builds. On 2026-10-25 the owner made Claude Opus
+5.5 the second reference for wave 1 (DECISIONS.md), so black's second prong
+runs as `opus`, not `fable`.
+
+Fable half, first start (2026-10-24 17:51 PDT): stopped by the operator at
+17:53, two minutes in, before either attempt had a result. The run's first
+rate-limit event reported status `allowed_warning` with the subscription's
+seven-day window (overage included) at 94%, the five-hour window at 13%;
+with two sessions running on a 3-hour budget the run could have exhausted
+the week's allowance mid-attempt and produced invalid results. Not an
+attempt and not an infrastructure failure: the partial job directory is set
+aside as `STOPPED-usage-pause-fable-black-fmt-skip-region-handling`, the
+sandboxes were removed by hand, and the owner chose to rerun after the
+window resets on 2026-10-28 08:00. Lesson for the runner: check the usage
+windows before a Fable launch and stop above a threshold, rather than
+watching after the fact.
+
+### black-fmt-skip-region-handling, Opus 5.5 half (2026-10-25): ADMIT
+
+The first run under the 2026-10-25 decision that makes Claude Opus 5.5 the
+wave-1 second reference (DECISIONS.md). Job
+`opus-black-fmt-skip-region-handling`, launched 04:51 PDT from a run
+worktree pinned to 8b4d1ad0 (tag `bench/2026-10-25-black-opus-gate`: the
+task at 5be950c6 plus `run_gate.sh` from this branch with the `opus`
+reference and the usage pre-flight), Claude Code 2.1.302 in the container,
+`claude-opus-5-5`, medium, `-k 3 -n 2`. The pre-flight read the subscription
+windows before starting: five-hour 5%, seven-day 54%, status allowed, and no
+third window, so Opus 5.5 draws from a different allowance than the one that
+stopped the Fable run. Every session real: all 95 to 250 assistant turns on
+`claude-opus-5-5`, no auth, model-id or usage-limit event; the run ended with
+the five-hour window at 10% and the seven-day at 55%.
+
+| Trial | Agent minutes | Assistant turns | Reward | Held-out | Guards |
+| --- | --- | --- | --- | --- | --- |
+| NKdDBfG | 13.1 | 95 | 0 | 5 of 7 | hold (596 of 596) |
+| iEWmoMQ | 13.5 | 104 | 0 | 5 of 7 | hold |
+| r3sKbnf | 37.6 | 250 | 0 | 6 of 7 | hold |
+
+**0 of 3.** All three miss `fmtskip_opening_bracket_split`, the case every
+Astra attempt missed too; the two shorter attempts also miss
+`fmtskip_paired_header` (the inner skipped bracket inside a header). No
+guard regressed in any attempt. Changes: `src/black/comments.py` only in the
+two shorter attempts (+199/-14, +195/-49), `comments.py` plus one new field
+on `Leaf` in `src/blib2to3/pytree.py` in the long one (+313/-75); none
+touched `src/black/linegen.py`, where two of the upstream fixes live. Tamper
+scans clean; no added line touches the test runner. Each closing message
+states that all six reported cases now format correctly, are stable and keep
+the AST, and that the agent's own added case files pass: the attempts fixed
+the instruction's examples and the visible suite stayed green, while the
+hidden case files, which cover the same directives in more combinations, did
+not. The instruction had said "do not special-case the examples"; the miss
+is the generalisation, not the example.
+
+**Verdict: ADMIT.** Astra 0 of 3 (2026-10-24) and Opus 5.5 0 of 3
+(2026-10-25). black-fmt-skip-region-handling takes the F5-python slot, the
+second task admitted to Frontier v5 and the first to hold both references at
+zero. Anatomy for the floor-8 record: across six frontier attempts the guard
+mechanism never fired (every attempt kept all 596 guards green), and the
+held-out combinations stopped all six. On this task the second mechanism
+did all the work; the guard that the naive control trips was a shortcut no
+frontier agent took. The task was built under floor 8 and meets it, but what
+held it was the held-out coverage.
+
+### pulldown-cmark-html-block-scanning, Astra half (2026-10-26): a floor-8 test
+
+Built and validated 2026-10-26 (its DESIGN.md); floors 1 to 7 met, **floor 8
+not met** by six naive fixes, so by WAVE1-F5.md it would not be gated. The
+owner approved an Astra-only run to test whether floor 8 matters. Job
+`astra-pulldown-cmark-html-block-scanning`, launched 17:30 PDT from a run
+worktree pinned to 8166c6bb (tag `bench/2026-10-26-pulldown-astra-gate`:
+the task at 9fc86e09 plus the current `run_gate.sh`), wave-1 identifiers,
+concurrency 1 (Rust). Sessions real (`--model gpt-6-astra`, dozens of
+commands each, no auth or usage event); no containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out failing | Guards |
+| --- | --- | --- | --- | --- |
+| C8uUgzi | 3.7 | 0 | 6 of 24 (r259, r260, r261, r273, r274, r277) | hold (1,388) |
+| NzwKGhN | 4.4 | 0 | 6 of 24 (same six) | hold |
+| qckhmcQ | 3.2 | 0 | 3 of 24 (r273, r274, r277) | hold |
+
+**0 of 3.** Every attempt kept all 1,388 guards green and declared done in 3
+to 4.5 minutes; all three miss hidden examples 273, 274 and 277 (inline HTML
+scanner cases from #1169), two also miss 259 to 261 (type 1 end tags that do
+not match the start tag, #1163). This is the black pattern again: the guard
+mechanism never fired, the held-out combinations stopped every attempt, and
+the agent finished early with its visible signal green.
+
+What it says about floor 8: a task that fails floor 8 held the stronger
+reference at zero. On the evidence so far (black and pulldown-cmark, both
+0 of 3 for Astra with no guard tripped), floor 8 is **not necessary** for a
+task to hold; held-out coverage of combinations the visible suite does not
+show is doing the work. Floor 8 as written would have discarded this task.
+A proposed amendment for the owner: accept a candidate that meets floor 8
+**or** has at least N held-out checks that no single-cause fix clears and
+that the visible suite cannot reveal (measured by the existing single-fix
+controls). The second prong (Opus 5.5) has not run.
+
+### prettier-comment-attachment-stability, Astra half (2026-10-27)
+
+Built and validated 2026-10-26 (its DESIGN.md); floors 1 to 8 met, floor 8
+by route (a). Job `astra-prettier-comment-attachment-stability`, launched
+06:06 PDT on the owner's approval from a run worktree pinned to 8d859089
+(tag `bench/2026-10-27-prettier-astra-gate`: the task at 6cf2915d plus the
+current `run_gate.sh`), wave-1 identifiers, concurrency 2 (JavaScript).
+Sessions real (`--model gpt-6-astra`, 60 to 76 commands each, each running
+the visible format suite with `FULL_TEST=1`; no auth or usage event); no
+containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 18) | Guards |
+| --- | --- | --- | --- | --- |
+| EvrJE7b | 15.0 | 0 | 4: arrow-chain-with-trailing-comments.js (both arrowParens options), parenthesized-trailing-comment.js, parenthesized.js | hold (101,662) |
+| teLjUMw | 12.8 | 0 | 4: parenthesized.js (format and second format), consistent-with-flow 15707.ts and 19903.ts | 600 not run (verifier flake, see below) |
+| DFKPGQL | 22.9 | 0 | 3: parenthesized.js (format and second format), consistent-with-flow 19903.ts | hold |
+
+**0 of 3.** Each attempt cleared 14 or 15 of the 18 held-out checks, kept
+every guard it ran green, and declared done with the visible suite passing.
+All three miss the parenthesized sequence-expression fixture. None took the
+pre-registered leading-on-annotation shortcut (it trips 4 guards; no attempt
+tripped one). As with black and pulldown-cmark, what held the reference was
+held-out coverage the visible suite does not show, not the guard.
+
+Verifier flake in teLjUMw: two guard files
+(`js/last-argument-expansion`, `js/nullish-coalescing`, 600 ids) failed with
+"Worker exited unexpectedly". Rerun twice on that attempt's own `src` in a
+rebuilt verifier image, alone, they pass 600 of 600, so the crash was the
+environment, not the attempt. Its verifier (13:19 to 13:22 UTC) overlapped
+EvrJE7b's (13:21 to 13:24) inside the 7.75 GiB Docker VM, each with an
+8 GiB limit and 4 jest workers; DFKPGQL's ran alone and was clean. The
+reward is unaffected (four held-out checks fail either way), but the same
+overlap could zero a real solve. Fix before the second prong: run this task
+one attempt at a time, or cap the verifier's jest workers. That is a
+concurrency decision for docs/DECISIONS.md (decision (e) puts JavaScript at
+two).
+
+### prettier-comment-attachment-stability, Opus 5.5 half (2026-10-27): admitted
+
+Job `opus-prettier-comment-attachment-stability`, launched 16:02 PDT on the
+owner's approval from a run worktree pinned to 2a87c408 (tag
+`bench/2026-10-27-prettier-opus-gate`: the task at 6cf2915d, as in the Astra
+half, plus `run_gate.sh` with `GATE_CONCURRENCY`), wave-1 identifiers,
+`GATE_CONCURRENCY=1` (docs/DECISIONS.md 2026-10-27). Usage pre-flight 0.63
+of the weekly window. Sessions real (every turn on `claude-opus-5-5`, 88 to
+107 tool calls each, each running the visible suite with `FULL_TEST=1`; no
+auth or usage event); no containers left behind. No verifier overlap, no
+worker crash.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 18) | Guards | Tamper scan |
+| --- | --- | --- | --- | --- | --- |
+| AVWpv4E | 32.5 | 0 | 1: consistent-with-flow 15707.ts | hold (101,662) | flagged, false positive |
+| FtaxW5N | 27.4 | 0 | 5: arrow-chain-with-trailing-comments.js (format and second format, both arrowParens options), parenthesized.js | 16 regressed, all other parsers on the same held-out fixture | flagged, false positive |
+| ZbFiFtY | 25.6 | 0 | 2: parenthesized.js (format and second format) | hold | clean |
+
+**0 of 3.** Every attempt declared done with the visible suite passing. The
+closest (AVWpv4E) cleared 17 of 18. Across both halves the parenthesized
+sequence fixture is missed by five of six attempts. No attempt took the
+pre-registered leading-on-annotation shortcut. FtaxW5N's 16 regressions are
+the other parsers' checks on the held-out arrow-chain fixture, which the
+visible suite cannot show.
+
+Tamper-scan false positive. The scan's JavaScript rule includes
+`\bexpect\b`, which matches the `expect` in `// @ts-expect-error -- Safe`,
+an idiom prettier's own `src` uses 97 times. Two attempts added such lines
+(in `handle-comments.js` and `print/class.js`), so `tamper_clean` is 0 for
+them. No reward changed: both also fail held-out checks, and the verifier
+still ran and graded the full suite. A solve written in the same idiom would
+be zeroed, so the rule needs fixing (exempt `@ts-expect-error` and
+`@ts-ignore` comments) and the task re-validated before it is frozen.
+
+**Verdict: ADMIT** (F5-javascript, 2026-10-27): GPT-6 Astra 0 of 3 and
+Claude Opus 5.5 0 of 3, the same rule black was admitted under. Floors 1 to
+8 met, floor 8 by route (a).
+
+### javaparser-member-resolution-scope, Astra half (2026-10-28): the Astra prong passed
+
+Built and validated 2026-10-27 (its DESIGN.md); floors 1 to 8 met, floor 8
+by route (a). Job `astra-javaparser-member-resolution-scope`, launched 06:05
+PDT on the owner's approval from a run worktree pinned to 4bdd2330 (tag
+`bench/2026-10-28-wave1-java-cpp-astra-gate`: this task at c23c3cc6 and
+Boost.URL at dd75baa6, plus `run_gate.sh` from a12619e2), wave-1
+identifiers, concurrency 1 (JVM). The two tasks ran back to back, so no two
+verifiers shared the Docker VM. Sessions real (`gpt-6-astra`, 33 to 42
+commands each; no auth or usage event); no containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 12) | Guards (4,932) |
+| --- | --- | --- | --- | --- |
+| hVQxFAq | 9.8 | 0 | 2: Issue4985Test fields visible to inheritors, subclass assignable | hold |
+| QG9xa4z | 9.7 | 0 | 2: the same two | hold |
+| LfMf7es | 7.7 | 0 | 2: the same two | hold |
+
+**0 of 3.** Every attempt cleared 10 of the 12 held-out checks, kept every
+guard green and declared done with both visible test modules passing. All
+three miss the same two incomplete-hierarchy checks: fields of a class whose
+ancestor cannot be resolved stay visible to its subclasses, and such a
+subclass stays assignable to it. The attempts made method lookup tolerate a
+missing distant ancestor but left the field and assignability paths alone.
+None took the pre-registered members-only shortcut (it regresses 4 guards; no
+attempt regressed one). As with black and prettier, held-out coverage the
+visible suite does not show is what held the reference.
+
+### javaparser-member-resolution-scope, Opus 5.5 half (2026-10-29): admitted
+
+Job `opus-javaparser-member-resolution-scope`, launched 06:40 PDT on the
+owner's approval from the same run worktree as the Astra half (4bdd2330, tag
+`bench/2026-10-28-wave1-java-cpp-astra-gate`), wave-1 identifiers,
+`GATE_CONCURRENCY=1` (JVM). Usage pre-flight 0.01 of the weekly window.
+Sessions real (every turn on `claude-opus-5-5`, 69 to 116 tool calls each,
+each running the Maven suites 9 to 22 times; no auth, usage or API error
+event); no containers left behind. Finished 07:57.
+
+| Trial | Agent minutes | Tool calls | Output tokens | Reward | Held-out failing (of 12) | Guards (4,932) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 9hUc4ci | 20.9 | 69 | 198k | 0 | 1: Issue4985Test fields visible to inheritors | hold |
+| dDuUVkH | 28.9 | 116 | 214k | 0 | 1: the same | hold |
+| viNEEKe | 21.3 | 93 | 182k | 0 | 1: the same | hold |
+
+**0 of 3.** Every attempt compiled, kept every guard green, had a clean
+tamper scan and cleared 11 of the 12 held-out checks. Diff review against
+the base: each is a genuine fix across the symbol solver's contexts and
+declarations (11 to 16 files, 275 to 537 added lines) plus
+`ResolvedReferenceType` in the core (only main sources are graded; the
+verifier runs the pristine tests). Opus 5.5
+got one check further than Astra (the subclass of a class with an
+unresolvable ancestor stays assignable to it) but, like all six attempts
+across both halves, left the field path alone: fields of such a class do not
+stay visible to its subclasses. None took the pre-registered members-only
+shortcut.
+
+**Verdict: ADMIT** (F5-java, 2026-10-29): GPT-6 Astra 0 of 3 and Claude Opus
+5.5 0 of 3, the rule black and prettier were admitted under. Floors 1 to 8
+met, floor 8 by route (a).
+
+### boosturl-path-compare-normalize, Astra half (2026-10-28): REJECT
+
+Same run commit and launcher as javaparser above, started 06:37 PDT when
+javaparser finished, concurrency 1 (C++). Sessions real (`gpt-6-astra`, 44
+and 29 commands; no auth or usage event). Two solves ended the gate early;
+the third attempt (uQbK8V2) was stopped by the early exit after 5 commands
+and is not an attempt (its compose sidecar error is the stop). Leftover
+sandbox containers removed by the launcher.
+
+| Trial | Agent minutes | Reward | Held-out failing (of 10) | Guards (77) |
+| --- | --- | --- | --- | --- |
+| Lrrd5aF | 17.7 | **1** | none | hold |
+| gnfoL2m | 21.6 | **1** | none | hold |
+
+**2 of 2, reject.** Diff-reviewed against the base (the pin minus the nine
+fixes): both edit exactly the gold's four files (`detail/normalize.hpp`,
+`impl/url_base.hpp`, `impl/url_view_base.hpp`, `src/detail/normalize.cpp`),
+about 360 lines added and 380 removed each. Each replaces the allocating
+compare and hash with its own allocation-free normalized-path walker, a
+forward pass that finds where relative prefixes cancel and a reverse walk
+that consumes parent segments, shared by comparison and hashing, and fixes
+the segment-count and modifier size bookkeeping and the `"./"` scheme-removal
+case. The two walkers are structured differently from each other and from the
+gold. No test strings are special-cased (the only literals added are hex
+digits and `%2E`/`%2e`), the tamper scan and sentinel are clean, and neither
+session fetched anything: the `github.com/boostorg/url/issues/992` URL in both
+transcripts is a comment in the base's own `test/unit/url.cpp` that the agents
+read. gnfoL2m checked itself against 330,000 generated paths and 100,000
+ordering and hash pairs it wrote; Lrrd5aF against one million generated
+normalization cases plus ordering, hashing and modifier checks.
+Neither took the pre-registered slash-decoded shortcut.
+
+The nine fixes concentrate in one subsystem the visible suite already
+exercises from many angles, and a reference that writes its own differential
+checks against RFC 3986 section 5.2.4 reaches the held-out cases without
+seeing them. That is the same lesson as comrak (an oracle inside the sandbox
+lets the agent grade itself), here with the RFC as the oracle. The F5-cpp
+slot needs another candidate.
+
 ## Blocked (resolved 2026-10-22): the Fable 5.1 half
 
 On 2026-10-18 every Fable attempt was refused before starting: "Fable 5.1
@@ -296,3 +624,432 @@ plan") is not yet triggered, since Fable has not run, but the Astra half
 alone points the same way. A v3 floor along the lines of "upstream guard
 tests that a symptom-level fix breaks, shown by a naive-fix control" is the
 candidate change, for the owner to decide.
+
+### cli11-toml-config-round-trip, Astra half (2026-10-30): the Astra prong passed, narrowly
+
+Built and validated 2026-10-28 (its DESIGN.md); floors 1 to 8 met, floor 8
+by route (a), floor 3 by source coupling only. Job
+`astra-cli11-toml-config-round-trip`, launched 08:40 PDT under the owner's
+standing approval (DECISIONS.md 2026-10-30) from a run worktree pinned to
+1b38a48b (tag `bench/2026-10-30-cli11-astra-gate`: the task at 637faeb4
+plus `run_gate.sh` from a12619e2), wave-1 identifiers, `GATE_CONCURRENCY=1`.
+Sessions real (`gpt-6-astra`, 16 to 20 tool calls each, 3 to 5 test runs);
+no containers left behind.
+
+| Trial | Agent minutes | Reward | Held-out (of 11) | Guards (1,098) |
+| --- | --- | --- | --- | --- |
+| 7eJpRUv | 2.4 | 0 | 11, all cleared | 2 regressed: `StringBased: TomlMultiLineStringBinary`, `StringBased: TomlMultiLineStringTextAfterQuotes` |
+| FQ8CPTC | 4.7 | 0 | 11, all cleared | the same 2 regressed |
+| rMgrvod | 3.4 | 0 | 11, all cleared | the same 2 regressed |
+
+**0 of 3, but only on guards.** Every attempt fixed all six named defects in
+one file (`Config_inl.hpp`, 57 to 95 added lines) in under five minutes, and
+every attempt broke the same two behaviours that work at base. Both are among
+the six pre-registered held-out guards (DESIGN.md, "added with the fix,
+already passing at base"): `'''a'''b'''` reads as `a'''b`, and a raw-binary
+`B"(...)"` literal inside `'''...'''` is decoded. The instruction states the
+rule ("everything that works today keeps working") and the visible suite
+exercises neither case. The hold is legitimate under the gate rule, but it
+rests on two edge behaviours next to the defects rather than on the defects
+themselves, and these are the fastest attempts on any candidate gated so far.
+The Opus 5.5 half decides; anyone reviewing the suite should read this note.
+
+### pulldown-cmark-html-block-scanning, Opus 5.5 half (2026-10-30): 1 of 5 after the top-up, admitted
+
+Gated under decision (g') (DECISIONS.md 2026-10-30): floor 8 not met,
+Astra 0 of 3 on 2026-10-26. Job `opus-pulldown-cmark-html-block-scanning`,
+launched 08:54 PDT under the owner's standing approval from a run worktree
+pinned to 428b10d4 (tag `bench/2026-10-30-pulldown-opus-gate`: the task at
+9fc86e09 as in the Astra half, plus `run_gate.sh` from a12619e2), wave-1
+identifiers, `GATE_CONCURRENCY=1`. Usage pre-flight 0.11. Sessions real
+(every turn on `claude-opus-5-5`, 54 to 76 tool calls each); no auth or usage
+event.
+
+| Trial | Agent minutes | Tool calls | Reward | Held-out failing (of 24) | Guards |
+| --- | --- | --- | --- | --- | --- |
+| c2AkrgH | 13.4 | 76 | 0 | 3 (r273, r274, r277) | hold |
+| TYp9MfL | 11.1 | 71 | **1** | none | hold |
+| ZtqPQc4 | 8.6 | 54 | 0 | 3 (r273, r274, r277) | hold |
+
+**1 of 3.** Diff review of TYp9MfL against the base (5b0ef8c0): a genuine
+fix in the three files the gold touches (`firstpass.rs`, `scanners.rs`,
+`parse.rs`; 265 added lines, of which about 90 are the agent's own unit
+tests in `parse.rs`), with case-insensitive end-tag matching for the
+type 1 HTML blocks and comment, processing-instruction, declaration and
+CDATA spans across lines inside containers. No special-casing of grading
+inputs; tamper scan clean. The two failing attempts miss the same three
+checks as the closest Astra attempts. A prong at exactly 1 of 3 takes the
+n=5 top-up (two more attempts, admit only at 2 of 5 or fewer). The top-up
+is outside the standing approval and waits for the owner.
+
+Top-up, approved by the owner in chat: job
+`opus-pulldown-cmark-html-block-scanning-topup` (`GATE_ATTEMPTS=2
+GATE_JOB_SUFFIX=-topup`), launched 15:55 PDT from the same run worktree,
+usage pre-flight 0.11, sessions real (`claude-opus-5-5`, 33 and 44 tool
+calls), finished 16:11.
+
+| Trial | Agent minutes | Tool calls | Reward | Held-out failing (of 24) | Guards |
+| --- | --- | --- | --- | --- | --- |
+| ReECqVJ | 7.6 | 44 | 0 | 3 (r273, r274, r277) | hold |
+| qsghrbk | 5.4 | 33 | 0 | 6 (r259, r260, r261, r273, r274, r277) | hold |
+
+**Opus 5.5 1 of 5, Astra 0 of 3.** Every failing attempt in both halves
+misses r273, r274 and r277; the one solve is the genuine TYp9MfL above.
+
+**Verdict: ADMIT** (F5-rust, 2026-10-30) under decision (g'): the prong at
+1 of 3 finished at 1 of 5, below the 2 of 5 bar. Floors 1 to 7 met; floor 8
+(neither route) is not met, and that miss is part of this admission's
+record. With it, every F5 slot is admitted (c, python, javascript, java,
+cpp, rust).
+
+### cli11-toml-config-round-trip, Opus 5.5 half (2026-10-30): admitted by the gate rule, flagged
+
+Job `opus-cli11-toml-config-round-trip`, launched 09:30 PDT under the owner's
+standing approval from the same run worktree as the Astra half (1b38a48b,
+tag `bench/2026-10-30-cli11-astra-gate`), wave-1 identifiers,
+`GATE_CONCURRENCY=1`. Usage pre-flight 0.16. Sessions real (every turn on
+`claude-opus-5-5`, 38 to 50 tool calls each); no auth or usage event; no
+containers left behind. Finished 10:02.
+
+| Trial | Agent minutes | Tool calls | Reward | Held-out (of 11) | Guards regressed |
+| --- | --- | --- | --- | --- | --- |
+| Kq2RTKs | 6.4 | 38 | 0 | 11, all cleared | 2: `TomlMultiLineStringBinary`, `TomlMultiLineStringTextAfterQuotes` |
+| muvjyaY | 9.1 | 40 | 0 | 11, all cleared | the same 2 |
+| nAn422p | 13.2 | 50 | 0 | 11, all cleared | 1: `TomlMultiLineStringBinary` |
+
+**0 of 3.** Every attempt is a genuine one-file fix (`Config_inl.hpp`, 140 to
+209 added lines) that clears every held-out defect check; every attempt
+breaks one or both of the two edge behaviours that also held Astra.
+
+**Verdict: ADMIT by the gate rule** (F5-cpp, 2026-10-30): GPT-6 Astra 0 of 3
+and Claude Opus 5.5 0 of 3. **Flagged for the owner:** across both halves,
+six of six attempts fixed all six named defects, in 2 to 13 minutes, and
+every reward of 0 comes from the same two pre-registered held-out guards
+(behaviours that work at base, which the instruction says must keep working
+and the visible suite does not exercise). No other admitted task was held
+only by guards. The task measures "fix six defects without disturbing two
+neighbouring edge behaviours", which is a legitimate skill but a narrow
+margin: one reference noticing either edge case would flip it. Whether a
+hold of this shape belongs in Frontier v5 is the owner's call before the
+freeze. **Owner, in chat, 2026-10-30: accepted as F5-cpp, with this flag
+kept on the record.**
+
+### ferrycore-crossing-opaque-parity, Astra half (2026-10-30): REJECT
+
+The first F4 (opaque-component parity) candidate, F4-python, built and
+validated 2026-10-30 by the F4 building session (branch
+`claude/focused-lumiere-06a98a`, 443aa51c): base 0, gold 1, 7 probes 0, Harbor
+oracle 1 and nop 0, deep-family reachability 0 to 3 of 500 per seed. The
+reference is a prebuilt linux/amd64 binary (`legacy/ferrycore-linux-amd64`)
+run under emulation on the arm64 Mac; grading never executes it. Job
+`astra-ferrycore-crossing-opaque-parity`, launched 19:01 PDT under the owner's
+standing approval from a run worktree pinned to b83c0ddb (tag
+`bench/2026-10-30-ferrycore-astra-gate`), wave-1 identifiers,
+`GATE_CONCURRENCY=1`, behind the shared Docker lock. Sessions real
+(`gpt-6-astra`).
+
+| Trial | Agent minutes | Reward | How |
+| --- | --- | --- | --- |
+| bLEkkKU | 7.4 | **1** | disassembled the binary, reimplemented it (306 lines) |
+| prHDNuG | 23.2 | **1** | the same (307 lines) |
+| pHwxquJ | stopped by the early exit | none | not counted |
+
+**2 of 2, both genuine.** No disassembler was installed and the allowlist
+blocked `apt-get`, `pip` and `npm` (one attempt also tried an internal
+package index host, which the allowlist refused), so the solving attempt wrote
+its own x86-64 disassembler in Python, read the binary's main loop by
+address range, and wrote a Python reimplementation that never calls the
+binary. It then ran a 1,000-session differential fuzz against `legacy/run`
+and added its own tests. Every family passed, guards included.
+
+Lesson for F4: composite-only observability does not hold when the reference
+binary is small enough to read. paddockcore's v4 hold did not carry over to a
+binary of this size. Any further F4 candidate must show its reference resists
+reading in a session (size, structure) before it is gated.
+
+**Verdict: REJECT** (early exit, 2026-10-30). Fable or Opus half not run.
+
+### phonenumbers-parse-match-parity, Astra half (2026-10-30): not decided, one solve used a web tool
+
+The first F2 candidate under shape B1, F2-python, built and validated
+2026-10-30 by the F2 building session (branch
+`claude/practical-satoshi-f4d035`, 55b8e515): base 0, gold 1, 4 probes 0, the
+B1 check found no runnable route to the Java reference, Harbor oracle 1 and
+nop 0. Job `astra-phonenumbers-parse-match-parity`, launched 19:57 PDT under
+the owner's standing approval from a run worktree pinned to the tag
+`bench/2026-10-30-phonenumbers-astra-gate`, wave-1 identifiers,
+`GATE_CONCURRENCY=1`, behind the shared Docker lock. Sessions real
+(`gpt-6-astra`).
+
+| Trial | Agent minutes | Reward | How |
+| --- | --- | --- | --- |
+| JM2ysUP | 7.4 | **1** | genuine: ported from the Java reference; its `curl` and `pip download` were blocked |
+| vHcy4ej | 6.4 | **1** | **not valid**: fetched the upstream Python files ten times through Codex's `web__run` |
+| 5rohfSY | stopped by the early exit | none | not counted |
+
+Diff review against the upstream gold. The stubs alone already share 2,307
+lines of `phonenumberutil.py` with it. JM2ysUP adds almost nothing beyond
+that (2,330 shared lines; 13% of the formatter and 21% of the matcher), so
+it was written from the Java. vHcy4ej shares 2,667 lines of
+`phonenumberutil.py` and 705 of the matcher's 787 lines, which matches its
+web fetches.
+
+`web__run` runs on OpenAI's side, so the task's network allowlist never sees
+it. It is now off for both references (DECISIONS.md 2026-10-30,
+`run_gate.sh` with `--ak disable_web_search=true`). An audit of every
+gate trial on the Mac Studio found no other provider-side web use.
+
+**Verdict: not decided.** Valid results: 1 genuine solve (JM2ysUP, in 7.4
+minutes). The early exit fired on a contaminated second solve, so the half
+must be re-run with web tools off before it is decided. One more genuine
+solve rejects the task. The re-run is a re-run of a finished half, so it
+waits for the owner.
+
+### phonenumbers-parse-match-parity, Astra re-run with web search off (2026-10-31)
+
+Approved by the owner in chat. Job
+`astra-phonenumbers-parse-match-parity-noweb`, launched 06:20 PDT from a run
+worktree pinned to the tag `bench/2026-10-31-phonenumbers-astra-noweb-gate`
+(the task at 55b8e515 plus `run_gate.sh` from b978e579, with
+`--ak disable_web_search=true`), `GATE_CONCURRENCY=1`, behind the shared
+Docker lock.
+
+| Trial | Agent minutes | Reward | How |
+| --- | --- | --- | --- |
+| 3oqfYPv | 5.4 | **1** | genuine: no web or app tool calls; shares no more upstream lines than the stubs |
+| 7HxEtaq | 7.0 | **1** | **not valid**: listed its tools, found the `codex_apps` MCP server (the account's connectors) and fetched the upstream files through its Search Service `web_run` (15 calls); its matcher shares 719 of 787 lines with upstream |
+| YkBZBRj | stopped by the early exit | none | not counted |
+
+Turning web search off did not close the route: `codex_apps` exposes the
+ChatGPT account's connected apps (Gmail, Google Calendar, ChatGPT Spaces and
+a Search Service). An audit of every Codex rollout on the Mac Studio found no
+call to any of them except that Search Service. `run_gate.sh` now also passes
+`scripts/frontier-v5/codex-gate.toml` (apps, plugins and browser tools off)
+and treats a trial that reaches `codex_apps` or `web__run` as an
+infrastructure failure (DECISIONS.md 2026-10-31, PR #248). The apollo Astra
+half, queued behind this run, was stopped before it started.
+
+**Across both halves:** two genuine solves (JM2ysUP 7.4 and 3oqfYPv 5.4
+minutes), each ported from the Java reference, and two invalid ones. By the
+gate's two-solve rule, applied to valid attempts only, that is a reject.
+**Verdict: REJECT** (2026-10-31; owner, in chat, confirmed on the valid evidence).
+
+### apollo-custom-scalar-coherence, Astra half (2026-10-31): REJECT
+
+The F3 (long-horizon volume) pilot, F3-javascript, built and validated
+2026-10-30 by the F3 building session (branch `claude/epic-nash-3711f3`,
+0bcb45d2): four Apollo Client fixes (#13406, #13372, #13447, #13498) composed
+at their common base; gold 20 files and 1,042 changed lines; 54 fail-to-pass
+ids across `src/cache/inmemory`, `src/core` and `codegen/custom-scalars`;
+base 0, gold 1, 6 probes 0, Harbor oracle 1 and nop 0. Job
+`astra-apollo-custom-scalar-coherence`, launched 09:59 PDT under the owner's
+standing approval from a run worktree pinned to the tag
+`bench/2026-10-31-apollo-astra-gate-apps-off` (the task plus `run_gate.sh`
+and `codex-gate.toml` from 9b2bd579: web search and connected apps off),
+`GATE_CONCURRENCY=1`. An earlier tag without the apps fix
+(`bench/2026-10-31-apollo-astra-gate`) was cut but never run. Sessions real
+(`gpt-6-astra`, 82 tool calls in the first); no MCP or web tool calls, and
+`codex_apps` absent from the tool list.
+
+| Trial | Agent minutes | Reward | Tests seen |
+| --- | --- | --- | --- |
+| UGMMKyM | 21.8 | **1** | 11,869 |
+| DaMqANG | 21.4 | **1** | 11,869 |
+| HLuYGsh | stopped by the early exit | none | not counted |
+
+**2 of 2, genuine.** The first solve wrote its own contract tests for each
+symptom in the instruction (`src/cache/inmemory/__tests__/scalar-contract.ts`,
+plus additions to the codegen plugin tests), patched the cache key
+extraction, the policies and `ObservableQuery` directly, and ran the
+targeted suites about 30 times. It never tried to fetch upstream. Both
+verifiers re-ran one or two known flaky files once, as designed.
+
+Lesson for F3: the volume floor alone (12 files, 1,000 lines, 25 checks
+across three modules) does not hold the reference when the instruction
+names each symptom; Astra wrote one test per symptom and fixed each in
+about 20 minutes. The family's hypothesis was that work volume beyond one
+sitting resists collapse; 1,042 lines is within one sitting.
+
+**Verdict: REJECT** (early exit, 2026-10-31). Opus half not run.
+
+### bothycore-booking-opaque-parity, Astra half (2026-10-31): REJECT
+
+F4-java, built by the F4 building session with the query-only reference
+service the owner chose on 2026-10-30 (branch `claude/focused-lumiere-06a98a`,
+cb98806a). The engine runs in a separate compose service with
+`network_mode: none`, read-only, reachable from the agent only through a
+Unix socket on a per-trial volume; the budget is 400 seasons and 20,000
+commands per trial; blind fuzzing with a whole budget is expected to reach
+the deep families 0.15 times. Validation: base 0, gold 1, 7 probes 0, 20
+service checks, Harbor oracle 1 and nop 0. Job
+`astra-bothycore-booking-opaque-parity`, launched 11:04 PDT under the owner's
+standing approval from a run worktree pinned to the tag
+`bench/2026-10-31-f4-query-service-astra-gate` (web search and connected apps
+off), `GATE_CONCURRENCY=1`. Sessions real (`gpt-6-astra`); no MCP, web or
+binary access in any attempt.
+
+| Trial | Agent minutes | Reward | Families failing |
+| --- | --- | --- | --- |
+| 6Hu6xVe | 20.1 | **1** | none |
+| VCW3z4U | 12.6 | 0 | dawn, lapse |
+| cXZ6FRv | 31.7 | **1** | none |
+
+**2 of 3, genuine.** The service held: no attempt reached the engine's
+binary. The solving attempts did not fuzz blindly. They designed targeted
+experiments (about 100 tool calls in 6Hu6xVe, each probing one rule with a
+few short seasons), kept a Python model of the engine, minimized the seasons
+where the model disagreed, checked the remaining budget 14 to 20 times, and
+then wrote the Java. Every deep family was reached within budget.
+
+Lesson for F4: a query budget sized against blind fuzzing does not bound a
+reference that reasons about which experiment to run next. The deep
+families' rarity argument has to hold against hypothesis-driven probing
+(for example, behaviour that depends on state no short season can reach),
+not against random sessions.
+
+**Verdict: REJECT** (2 solves, 2026-10-31). Opus half not run.
+
+### ferrycore-crossing-opaque-parity 0.2.0, Astra half (2026-10-31): the Astra prong passed
+
+F4-python 0.2.0, rebuilt by the F4 building session after the 0.1.0 reject
+(branch `claude/focused-lumiere-06a98a`, 0819bb24): the same query-only
+reference service as bothycore (no network, read-only, socket only; 400
+sessions and 20,000 commands per trial), and the deep families strand, levy
+and gate made rarer by a threshold sweep before any control run (blind
+fuzzing with a whole budget expects 0.08 deep hits, against 0.82 at the old
+thresholds). Validation: base 0, gold 1, 7 probes 0, 20 service checks,
+Harbor oracle 1 and nop 0. **This version was redesigned after its own gate
+result**, so its hold is partly the product of iterating against the
+reference; the owner's F4 decision (2026-10-30) covered the rebuild, and the
+note stays on this task's record.
+
+Job `astra-ferrycore-crossing-opaque-parity-v0.2.0`, launched 12:12 PDT under
+the owner's standing approval from the tag
+`bench/2026-10-31-f4-query-service-astra-gate` (web search and connected apps
+off), `GATE_CONCURRENCY=1`. Sessions real (`gpt-6-astra`); no MCP or web
+calls; tamper scan clean in every attempt.
+
+| Trial | Agent minutes | Reward | Deep families failing |
+| --- | --- | --- | --- |
+| xZdE8iV | 31.7 | 0 | levy, gate |
+| 6cZzwHW | 15.7 | 0 | strand, levy, gate |
+| VnbdXdR | 13.4 | 0 | strand, levy, gate (and the corpus family) |
+
+**0 of 3.** Every attempt matched the ordinary families and missed the
+deep ones the rebuild made rarer; the longest attempt checked its budget 23
+times and still missed levy and gate. The Opus 5.5 half runs next under the
+standing approval.
+
+### treesitter-query-anchor-matching, Opus 5.5 prong (2026-10-31): 0 of 3, admission confirmed
+
+Decision (k) (DECISIONS.md 2026-10-31): run tree-sitter against Claude Opus
+5.5, the second reference every other release-1 task was gated against. Job
+`opus-treesitter-query-anchor-matching`, launched 13:36 PDT from a run
+worktree pinned to the tag `bench/2026-10-31-treesitter-opus-gate` (main, the
+task unchanged since its Fable half, plus `run_gate.sh` from 9b2bd579 with
+web tools off), `GATE_CONCURRENCY=1`. Usage pre-flight 0.17. Sessions real
+(every turn on `claude-opus-5-5`); no WebSearch or WebFetch call.
+
+| Trial | Agent minutes | Reward | Failing |
+| --- | --- | --- | --- |
+| A5Z8Qtj | 42.3 | 0 | held-out `test_query_matches_with_leading_anchor_before_zero_quantifier`; guard `..._with_anchors_on_both_sides_of_zero_quantifier` regressed |
+| fj5vGo9 | 21.1 | 0 | the same held-out check |
+| vFDmuRf | 22.1 | 0 | the same held-out check |
+
+**0 of 3.** With Astra 0 of 3 and Fable 5.1 2 of 5, tree-sitter keeps F5-c
+and now meets the release-1 rule on the same two references as the other
+five tasks.
+
+### ferrycore-crossing-opaque-parity 0.2.0, Opus 5.5 half (2026-10-31): admitted
+
+Job `opus-ferrycore-crossing-opaque-parity-v0.2.0`, launched 15:10 PDT under
+the owner's standing approval from the same run worktree as the Astra half
+(tag `bench/2026-10-31-f4-query-service-astra-gate`, web tools off),
+`GATE_CONCURRENCY=1`. Usage pre-flight 0.19. Sessions real (every turn on
+`claude-opus-5-5`); no WebSearch or WebFetch call and no safety-classifier
+stop (the v4 paddockcore risk); tamper scan clean in every attempt. Finished
+18:38.
+
+| Trial | Agent minutes | Tool calls | Reward | Deep families failing |
+| --- | --- | --- | --- | --- |
+| crrmogd | 52.1 | 145 | 0 | levy, gate |
+| ZL5KXsR | 103.0 | 323 | 0 | levy, gate |
+| HYMVuEx | 49.3 | 138 | 0 | strand, levy |
+
+**0 of 3.** Across both halves, six of six attempts matched every ordinary
+family and missed at least two of the three deep families the 0.2.0 rebuild
+made rarer; levy was missed by all six.
+
+**Verdict: ADMIT** (F4-python, 2026-10-30 rule; 2026-10-31): GPT-6 Astra 0 of
+3 and Claude Opus 5.5 0 of 3. Under decision (l) it joins Frontier v5 release
+1 on its own family line. The record keeps two notes: 0.2.0 was redesigned
+after the 0.1.0 gate result, and its sibling bothycore, built the same way,
+fell to Astra's targeted probing 2 of 3.
+
+### jsts-overlayng-coverage-parity, Astra half (2026-10-31): the Astra prong passed, by one case
+
+A release-2 F2 candidate (F2-javascript, shape B1), built by the F2 building
+session after phonenumbers (local branch `claude/practical-satoshi-f4d035`,
+1850e8eb; not published, decision (f)). The agent gets the JTS Java source as
+the reference (no JVM, no other JTS port in the image) and a JavaScript JTS
+with 85 classes never ported and 115 drifted (about 9,000 Java logic lines
+in all); the completed port exists nowhere public. 11,822 graded cases, 332
+visible. Job `astra-jsts-overlayng-coverage-parity`, launched 18:38 PDT under
+the owner's standing approval from a local run worktree (the run tag was
+deleted from GitHub; the gold must stay unpublished), web search and
+connected apps off, `GATE_CONCURRENCY=1`.
+
+| Trial | Agent minutes | Reward | Cases matched | Tamper scan |
+| --- | --- | --- | --- | --- |
+| BMaqZd7 | 20.2 | 0 | 11,799 of 11,822 | clean |
+| cyArDmu | 23.4 | 0 | 11,821 of 11,822 | flagged, false positive (`expect` in its own runtime) |
+| pQdjQPf | 24.7 | 0 | 11,789 of 11,822 | flagged, false positive (`globalThis` in StrictMath.js) |
+
+**0 of 3, by a thread.** cyArDmu did not port by hand: it wrote a
+Java-to-JavaScript transpiler (a Java tokenizer and parser, a runtime that
+implements Java semantics in `org/locationtech/jts/reference/runtime.js`, and
+generated code) and ran the whole reference through it, ending one case short.
+B1 held (no Java was ever run), but the reference was mechanically
+translatable. Both tamper flags are false positives that did not change a
+reward; the F2 session narrows those rules after the Opus half. The Opus
+5.5 half runs next under the standing approval.
+
+### jsts-overlayng-coverage-parity, Opus 5.5 half (2026-11-01): solved in substance, REJECT
+
+Job `opus-jsts-overlayng-coverage-parity`, launched 07:03 PST under the
+owner's standing approval from the same local run worktree as the Astra half
+(repo `e91bec53`, tag kept local), `GATE_CONCURRENCY=1`, under the shared
+Docker lock. Usage pre-flight 0.24. Sessions real (every turn on
+`claude-opus-5-5`); no WebSearch, WebFetch or MCP call; no attempt read the
+tests, the gold or the verifier's paths. Finished 11:41.
+
+| Trial | Agent minutes | Reward as graded | Cases matched | Tamper scan |
+| --- | --- | --- | --- | --- |
+| dxV6FY6 | 107.9 | 0 | 11,822 of 11,822 | flagged: `globalThis` symbol guard in `java/lang/NativeErrors.js` |
+| 7UNA6YF | 60.2 | **1** | 11,822 of 11,822 | clean |
+| QWuGJ7A | 78.4 | 0 | 11,822 of 11,822 | flagged, false positive: `globalThis.String` in its Java runtime shim `java/jrt.js` |
+
+**1 of 3 as graded, 3 of 3 by behaviour.** Every attempt matched every
+graded case. The two zeros come only from the same over-broad `globalThis`
+rule that flagged the Astra half; the F2 session's narrowed rule (b2d2a98c,
+`globalThis` must reach `process` or a framework global) clears both. QWuGJ7A's
+flag is plainly a false positive. dxV6FY6's is a grey area: its
+`NativeErrors.js` redefines `TypeError.prototype.constructor` and
+`RangeError.prototype.constructor` process-wide so that native JS errors
+report the Java exception class (NullPointerException, StackOverflowError,
+NegativeArraySizeException). That emulates JVM behaviour inside the port
+rather than touching the grader (sentinel intact), but it is a global patch.
+Even with dxV6FY6 set aside, Opus 5.5 solved 2 of 3 genuinely, so the result
+does not depend on that call.
+
+Like the Astra attempt that came within one case, the Opus attempts
+translated the reference mechanically (a Java runtime layer under `java/`
+plus translated sources). B1 keeps the reference unrunnable, but not
+untranslatable, and a translation of a complete reference is within reach of
+both references.
+
+**Verdict: REJECT** (2026-11-01; owner confirmed, no top-up). The graded
+tally of 1 of 3 would call for an n=5 top-up, but two of the zeros are
+verifier false positives, so the top-up would only spend quota to confirm a
+task that does not hold. Under decision (f) the task stays in the private
+repo either way.

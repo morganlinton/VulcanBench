@@ -1,0 +1,22 @@
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java
+index 34215f626..aa24fc7da 100755
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java
+@@ -283,15 +283,11 @@ public class CompilationUnitContext extends AbstractJavaParserContext<Compilatio
+         if (outerMostRef != null
+                 && outerMostRef.isSolved()
+                 && outerMostRef.getCorrespondingDeclaration() instanceof JavaParserClassDeclaration) {
+-            ref = ((JavaParserClassDeclaration) outerMostRef.getCorrespondingDeclaration())
+-                    .getContext()
+-                    .solveType(remaining);
++            ref = ((JavaParserClassDeclaration) outerMostRef.getCorrespondingDeclaration()).solveType(remaining);
+         } else if (outerMostRef != null
+                 && outerMostRef.isSolved()
+                 && outerMostRef.getCorrespondingDeclaration() instanceof JavaParserInterfaceDeclaration) {
+-            ref = ((JavaParserInterfaceDeclaration) outerMostRef.getCorrespondingDeclaration())
+-                    .getContext()
+-                    .solveType(remaining);
++            ref = ((JavaParserInterfaceDeclaration) outerMostRef.getCorrespondingDeclaration()).solveType(remaining);
+         }
+         return ref;
+     }

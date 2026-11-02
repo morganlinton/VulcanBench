@@ -1,0 +1,14 @@
+diff --git a/include/CLI/impl/Config_inl.hpp b/include/CLI/impl/Config_inl.hpp
+index f7276f2..ca49308 100644
+--- a/include/CLI/impl/Config_inl.hpp
++++ b/include/CLI/impl/Config_inl.hpp
+@@ -391,7 +391,8 @@ CLI11_INLINE std::vector<ConfigItem> ConfigBase::from_config(std::istream &input
+             if(mlquote) {
+                 // multiline string
+                 auto keyChar = item.front();
+-                item = buffer.substr(delimiter_pos + 1, std::string::npos);
++                auto offset = buffer.find_first_not_of(" \t");
++                item = buffer.substr((offset == std::string::npos ? 0 : offset) + delimiter_pos + 1, std::string::npos);
+                 detail::ltrim(item);
+                 item.erase(0, 3);
+                 inMLineValue = true;

@@ -1,0 +1,21 @@
+# Codex settings for Frontier v5 gate runs (run_gate.sh passes this file to
+# Harbor as the agent's native config, `--ak config=...`).
+#
+# Everything here runs on OpenAI's side, so the task's network allowlist
+# cannot block it. On 2026-10-30 and 2026-10-31 Astra attempts used the
+# built-in web tool and then the account's connected apps ("codex_apps", whose
+# Search Service fetched the upstream source an F2 task had removed; the same
+# list exposed the account's Gmail, Calendar and Spaces connectors). See
+# docs/DECISIONS.md. Unknown feature names are ignored by Codex, so keys that a
+# pinned CLI version lacks are harmless.
+
+web_search = "disabled"
+
+[features]
+apps = false
+plugins = false
+remote_plugin = false
+browser_use = false
+browser_use_external = false
+in_app_browser = false
+computer_use = false

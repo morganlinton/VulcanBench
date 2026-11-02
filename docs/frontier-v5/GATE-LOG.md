@@ -46,7 +46,7 @@ launcher.
 | apollo-custom-scalar-coherence | F3-javascript (pilot) | 2 of 2 solved (21.8, 21.4), genuine, web and apps off | not run | **REJECT** (early exit, 2026-10-31) |
 | bothycore-booking-opaque-parity | F4-java (query-only service) | 2 of 3 solved (20.1, 12.6 miss, 31.7), genuine, by targeted experiments within budget | not run | **REJECT** (2026-10-31) |
 | ferrycore-crossing-opaque-parity 0.2.0 | F4-python (query-only service, redesigned after the 0.1.0 reject) | **0 of 3** (31.7, 15.7, 13.4) | **Opus 5.5: 0 of 3** (52.1, 103.0, 49.3) | **ADMIT** (F4-python, 2026-10-31): both references 0 of 3; joins release 1 under (l) |
-| jsts-overlayng-coverage-parity | F2-javascript (B1; release-2 candidate) | **0 of 3** (20.2, 23.4, 24.7), closest 11,821 of 11,822 via a self-written Java-to-JS transpiler | Opus 5.5: **1 of 3 as graded, 3 of 3 by behaviour** (two tamper false positives) | REJECT recommended, owner to confirm (2026-11-01) |
+| jsts-overlayng-coverage-parity | F2-javascript (B1; release-2 candidate) | **0 of 3** (20.2, 23.4, 24.7), closest 11,821 of 11,822 via a self-written Java-to-JS transpiler | Opus 5.5: **1 of 3 as graded, 3 of 3 by behaviour** (two tamper false positives) | REJECT (owner confirmed 2026-11-01, no top-up) |
 
 Astra runs 2026-10-18 on the M2 Pro Mac (16 GiB), one attempt at a time
 except nx-digraph (two). Once a candidate had two solves, an early-exit
@@ -1014,7 +1014,7 @@ translatable. Both tamper flags are false positives that did not change a
 reward; the F2 session narrows those rules after the Opus half. The Opus
 5.5 half runs next under the standing approval.
 
-### jsts-overlayng-coverage-parity, Opus 5.5 half (2026-11-01): solved in substance, REJECT recommended
+### jsts-overlayng-coverage-parity, Opus 5.5 half (2026-11-01): solved in substance, REJECT
 
 Job `opus-jsts-overlayng-coverage-parity`, launched 07:03 PST under the
 owner's standing approval from the same local run worktree as the Astra half
@@ -1048,7 +1048,7 @@ plus translated sources). B1 keeps the reference unrunnable, but not
 untranslatable, and a translation of a complete reference is within reach of
 both references.
 
-**Verdict: REJECT recommended** (2026-11-01; owner to confirm). The graded
+**Verdict: REJECT** (2026-11-01; owner confirmed, no top-up). The graded
 tally of 1 of 3 would call for an n=5 top-up, but two of the zeros are
 verifier false positives, so the top-up would only spend quota to confirm a
 task that does not hold. Under decision (f) the task stays in the private

@@ -22,11 +22,10 @@ from backend.runner import docker_ps, launch, maintenance, procs, stream, sweep
 from backend.runner.config import RunnerConfig, load_config
 from backend.runner.discovery import HARNESS_PREFIX, Discovery, job_summary, tail_text
 from backend.runner.redact import redact
-from backend.runner.state import PlanError, State, parse
+from backend.runner.state import PlanError, State
 from backend.runner.supervisor import SERVICE
 
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "::ffff:127.0.0.1"})
-USAGE_CHECK_MAX_AGE_S = 600
 
 
 def require_runner(request: Request) -> None:
@@ -158,19 +157,9 @@ def get_run_view(run_id: str) -> dict[str, Any]:
 def launch_options(tag: str | None = Query(default=None, max_length=200)) -> dict[str, Any]:
     cfg = load_config()
     opts = launch.options(cfg, tag)
-    opts["kinds"] = ["sweep", "gate", "prepare"]
+    opts["kinds"] = ["sweep", "prepare"]
     opts.update(sweep.suite_options(cfg, opts.get("tag")))
     return opts
-
-
-class GatePlanRequest(BaseModel):
-    kind: Literal["gate"] = "gate"
-    ref: str = Field(min_length=1, max_length=40)
-    task: str = Field(min_length=1, max_length=120)
-    tag: str = Field(min_length=1, max_length=200)
-    attempts: int = Field(default=3, ge=1, le=3)
-    concurrency: int | None = Field(default=None, ge=1, le=2)
-    suffix: str = Field(default="", max_length=40)
 
 
 class SweepPlanRequest(BaseModel):
@@ -198,9 +187,7 @@ class PreparePlanRequest(BaseModel):
     tag: str = Field(min_length=1, max_length=200)
 
 
-PlanRequest = Annotated[
-    GatePlanRequest | SweepPlanRequest | PreparePlanRequest, Field(discriminator="kind")
-]
+PlanRequest = Annotated[SweepPlanRequest | PreparePlanRequest, Field(discriminator="kind")]
 
 
 class ConfirmRequest(BaseModel):
@@ -217,25 +204,7 @@ def _plan_dict(state: State, plan_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="plan not found")
     d = plan.to_dict()
     d["live_reason"] = state.plan_is_live(plan)
-    d["usage_check_ok"] = _usage_check_ok(state, plan.spec, plan.usage_check, plan.usage_checked_at)
     return d
-
-
-def _usage_check_ok(
-    state: State, spec: dict[str, Any], check: dict[str, Any] | None, checked_at: str | None
-) -> bool:
-    if not spec.get("usage_check_required"):
-        return True
-    if not check or not checked_at:
-        return False
-    at = parse(checked_at)
-    if at is None or (state.now() - at).total_seconds() > USAGE_CHECK_MAX_AGE_S:
-        return False
-    return bool(check.get("would_start")) and check.get("status") in {
-        "allowed",
-        "unknown",
-        "unavailable",
-    }
 
 
 @router.post("/plans", status_code=201)
@@ -259,18 +228,8 @@ def create_plan(body: PlanRequest) -> dict[str, Any]:
             )
             spec = sweep.build_suite_plan(cfg, form, today=datetime.now(UTC).strftime("%Y-%m-%d"))
             spec["hash"] = launch.plan_hash(spec)
-        elif isinstance(body, PreparePlanRequest):
-            spec = launch.build_prepare_plan(cfg, body.tag)
         else:
-            gate = launch.GateForm(
-                ref=body.ref,
-                task=body.task,
-                tag=body.tag,
-                attempts=body.attempts,
-                concurrency=body.concurrency,
-                suffix=body.suffix,
-            )
-            spec = launch.build_gate_plan(cfg, gate)
+            spec = launch.build_prepare_plan(cfg, body.tag)
     except launch.LaunchError as exc:
         raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
     state = _state(cfg)
@@ -281,22 +240,6 @@ def create_plan(body: PlanRequest) -> dict[str, Any]:
 @router.get("/plans/{plan_id}")
 def get_plan(plan_id: str) -> dict[str, Any]:
     return _plan_dict(_state(load_config()), plan_id)
-
-
-@router.post("/plans/{plan_id}/usage")
-def check_usage(plan_id: str) -> dict[str, Any]:
-    """Run the gate script's usage pre-flight (one short model turn). Explicit click only."""
-    cfg = load_config()
-    state = _state(cfg)
-    plan = state.get_plan(plan_id)
-    if plan is None:
-        raise HTTPException(status_code=404, detail="plan not found")
-    reason = state.plan_is_live(plan)
-    if reason:
-        raise HTTPException(status_code=409, detail=reason)
-    result = launch.run_usage_preflight(cfg, plan.spec)
-    state.set_usage_check(plan_id, result)
-    return _plan_dict(state, plan_id)
 
 
 @router.post("/plans/{plan_id}/confirm", status_code=201)
@@ -311,11 +254,6 @@ def confirm_plan(plan_id: str, body: ConfirmRequest) -> dict[str, Any]:
     reason = state.plan_is_live(plan)
     if reason:
         raise HTTPException(status_code=409, detail=reason)
-    if not _usage_check_ok(state, plan.spec, plan.usage_check, plan.usage_checked_at):
-        raise HTTPException(
-            status_code=409,
-            detail="run the usage check first (it must be at most 10 minutes old and say the run would start)",
-        )
     problems = _confirm_problems(cfg, plan.spec)
     if problems:
         raise HTTPException(status_code=409, detail="; ".join(problems))
@@ -344,14 +282,7 @@ def _confirm_problems(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
         if launch.worktree_dir(cfg, str(spec.get("tag"))).is_dir():
             return ["the worktree already exists"]
         return launch.validate_before_launch(cfg, spec)
-    if spec.get("needs_prep"):
-        problems = launch.validate_worktree(cfg, str(spec.get("tag")))
-        if launch.worktree_dir(cfg, str(spec.get("tag"))).is_dir():
-            problems = launch.validate_before_launch(cfg, spec)
-        elif Path(str(spec.get("job_dir"))).exists():
-            problems.append("job directory already exists")
-        return problems
-    return launch.validate_before_launch(cfg, spec)
+    return sweep.validate_any(cfg, spec)
 
 
 # ----------------------------------------------------------------- queue --

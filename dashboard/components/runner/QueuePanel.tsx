@@ -98,7 +98,7 @@ function JobRow({ job, refresh }: { job: JobSummary; refresh: () => void }) {
       <td className="p-3 align-top">
         <Link href={runHref(`job:${job.id}`)} className="font-mono text-emerald-400 hover:underline">{job.name}</Link>
         <div className="text-xs text-zinc-500">
-          job {job.id}{job.kind !== "gate" ? `, ${job.kind}` : ""}{job.phase === "prepare" ? ", preparing the worktree" : ""}
+          job {job.id}, {job.kind}{job.phase === "prepare" ? ", preparing the worktree" : ""}
           {spec.model && spec.effort ? `, ${spec.model} at ${spec.effort}` : ""}
           {job.stop_requested_at && job.status !== "stopped" ? ", stop requested" : ""}
           {job.status === "waiting" && spec.resume_at ? `, continues ${fmtTime(spec.resume_at)}` : ""}

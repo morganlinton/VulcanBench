@@ -104,22 +104,25 @@ def launch_env(runner_env: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, P
     repo = fake_repo(runner_env)
     monkeypatch.setattr(launch, "REPO_ROOT", repo)
     monkeypatch.setattr(sweep, "REPO_ROOT", repo)
-    launch._refs_cache.clear()
     wt = fake_worktree(repo, cfg)
     return {"repo": repo, "worktree": wt}
 
 
-def _plan(c: TestClient, **over: object) -> dict[str, object]:
+def _plan(c: TestClient, **over: object) -> dict[str, Any]:
+    """A one-level sweep plan: the generic plan, confirm and queue tests run on it."""
     body: dict[str, object] = {
-        "kind": "gate",
-        "ref": "astra",
-        "task": "demo-task",
+        "kind": "sweep",
+        "model": "gpt-6.1-terra",
+        "harness": "codex",
+        "suite": SUITE_ID,
         "tag": "bench/2026-10-29-test",
+        "efforts": ["low"],
+        "billing": "subscription",
     }
     body.update(over)
     r = c.post("/api/runner/plans", json=body)
     assert r.status_code == 201, r.text
-    data: dict[str, object] = r.json()
+    data: dict[str, Any] = r.json()
     return data
 
 
@@ -127,16 +130,16 @@ def test_options_and_plan_shape(launch_env: dict[str, Path]) -> None:
     c = _local()
     opts = c.get("/api/runner/options").json()
     assert opts["tags"] == ["bench/2026-10-29-test"] and opts["worktree"]["exists"] is True
-    assert [t["name"] for t in opts["tasks"]] == ["demo-task"]
-    plan = _plan(c, attempts=2)
+    assert opts["kinds"] == ["sweep", "prepare"]
+    for gone in ("refs", "tasks", "attempts", "concurrency", "gate_effort", "credentials"):
+        assert gone not in opts
+    plan = _plan(c)
     spec = plan["spec"]
-    assert isinstance(spec, dict)
-    assert spec["argv"][0] == "bash" and spec["argv"][2:] == ["astra", "demo-task"]
-    assert spec["env"] == {
-        "GATE_OUT": str(make_config(launch_env["repo"].parent).gate_out),
-        "GATE_ATTEMPTS": "2",
-    }
-    assert plan["live_reason"] is None and plan["usage_check_ok"] is True
+    assert isinstance(spec, dict) and spec["kind"] == "sweep"
+    (job,) = spec["jobs"]
+    assert job["argv"][1:3] == ["run", "--suite"] and "--allow-dirty" not in job["argv"]
+    assert job["env"] == {}
+    assert plan["live_reason"] is None and "usage_check_ok" not in plan
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in r_text(plan)
 
 
@@ -146,9 +149,10 @@ def r_text(obj: object) -> str:
 
 def test_plan_refusals_are_http_errors(launch_env: dict[str, Path]) -> None:
     c = _local()
+    # The gate kind is gone from the GUI: an unknown discriminator is a validation error.
     r = c.post(
         "/api/runner/plans",
-        json={"kind": "gate", "ref": "ultra", "task": "demo-task", "tag": "bench/2026-10-29-test"},
+        json={"kind": "gate", "ref": "astra", "task": "demo-task", "tag": "bench/2026-10-29-test"},
     )
     assert r.status_code == 422
     r = c.post(
@@ -156,18 +160,10 @@ def test_plan_refusals_are_http_errors(launch_env: dict[str, Path]) -> None:
         json={"kind": "suite", "ref": "astra", "task": "demo-task", "tag": "bench/2026-10-29-test"},
     )
     assert r.status_code == 422
-    r = c.post(
-        "/api/runner/plans",
-        json={
-            "kind": "gate",
-            "ref": "astra",
-            "task": "demo-task",
-            "tag": "bench/2026-10-29-test",
-            "attempts": 9,
-        },
-    )
+    r = c.post("/api/runner/plans", json={"kind": "prepare", "tag": "main"})
     assert r.status_code == 422
     assert c.get("/api/runner/plans/nope").status_code == 404
+    assert c.post("/api/runner/plans/nope/usage").status_code in {404, 405}
 
 
 def test_confirm_needs_the_hash_and_a_live_plan(
@@ -180,11 +176,7 @@ def test_confirm_needs_the_hash_and_a_live_plan(
     r = c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]})
     assert r.status_code == 201, r.text
     job = r.json()
-    assert (
-        job["status"] == "queued"
-        and job["name"] == "astra-demo-task"
-        and job["spec"]["argv"][2:] == ["astra", "demo-task"]
-    )
+    assert job["status"] == "queued" and job["kind"] == "suite" and job["spec"]["effort"] == "low"
     assert (
         c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]}).status_code == 409
     )
@@ -206,55 +198,15 @@ def test_confirm_needs_the_hash_and_a_live_plan(
     assert full["job"]["id"] == job["id"] and full["trials"] == []
     # An expired plan cannot be confirmed.
     monkeypatch.setattr(state_mod, "PLAN_TTL_S", 0)
-    stale = _plan(c, suffix="-b")
+    stale = _plan(c, label="b")
     r = c.post(f"/api/runner/plans/{stale['id']}/confirm", json={"hash": stale["hash"]})
     assert r.status_code == 409 and "expired" in r.json()["detail"]
-
-
-def test_claude_refs_need_a_fresh_usage_check(
-    launch_env: dict[str, Path], monkeypatch: pytest.MonkeyPatch
-) -> None:
-    c = _local()
-    plan = _plan(c, ref="opus")
-    pid = str(plan["id"])
-    assert plan["usage_check_ok"] is False
-    r = c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]})
-    assert r.status_code == 409 and "usage check" in r.json()["detail"]
-    calls: list[str] = []
-
-    def fake_preflight(_cfg: object, spec: dict[str, object], **_: object) -> dict[str, object]:
-        calls.append(str(spec["ref"]))
-        return {"status": "allowed", "max_utilization": 0.3, "would_start": True}
-
-    monkeypatch.setattr(launch, "run_usage_preflight", fake_preflight)
-    checked = c.post(f"/api/runner/plans/{pid}/usage").json()
-    assert (
-        calls == ["opus"]
-        and checked["usage_check"]["would_start"] is True
-        and checked["usage_check_ok"] is True
-    )
-    r = c.post(f"/api/runner/plans/{pid}/confirm", json={"hash": plan["hash"]})
-    assert r.status_code == 201, r.text
-    # A refused pre-flight blocks confirm.
-    monkeypatch.setattr(
-        launch,
-        "run_usage_preflight",
-        lambda *_a, **_k: {"status": "allowed", "max_utilization": 0.9, "would_start": False},
-    )
-    plan2 = _plan(c, ref="opus", suffix="-b")
-    c.post(f"/api/runner/plans/{plan2['id']}/usage")
-    assert (
-        c.post(f"/api/runner/plans/{plan2['id']}/confirm", json={"hash": plan2["hash"]}).status_code
-        == 409
-    )
 
 
 def test_confirm_revalidates_the_worktree(launch_env: dict[str, Path]) -> None:
     c = _local()
     plan = _plan(c)
-    (launch_env["worktree"] / "tasks" / "frontier-v5" / "demo-task" / "task.toml").write_text(
-        "changed\n"
-    )
+    (launch_env["worktree"] / "harness" / "extra.py").write_text("changed\n")
     r = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]})
     assert r.status_code == 409 and "uncommitted changes" in r.json()["detail"]
 
@@ -262,7 +214,7 @@ def test_confirm_revalidates_the_worktree(launch_env: dict[str, Path]) -> None:
 def test_queue_stop_and_remove(launch_env: dict[str, Path]) -> None:
     c = _local()
     a = c.post(
-        f"/api/runner/plans/{_plan(c)['id']}/confirm", json={"hash": _plan(c, suffix="-x")["hash"]}
+        f"/api/runner/plans/{_plan(c)['id']}/confirm", json={"hash": _plan(c, label="x")["hash"]}
     )
     assert a.status_code == 409  # hash of a different plan
     plan = _plan(c)
@@ -274,7 +226,7 @@ def test_queue_stop_and_remove(launch_env: dict[str, Path]) -> None:
     assert stopped["status"] == "stopped" and stopped["stop_reason"] == "changed my mind"
     assert c.post(f"/api/runner/jobs/{jid}/stop").status_code == 409
     assert c.delete(f"/api/runner/jobs/{jid}").status_code == 409
-    plan2 = _plan(c, suffix="-again")
+    plan2 = _plan(c, label="again")
     job2 = c.post(f"/api/runner/plans/{plan2['id']}/confirm", json={"hash": plan2["hash"]}).json()
     assert c.delete(f"/api/runner/jobs/{job2['id']}").status_code == 204
     assert c.get(f"/api/runner/jobs/{job2['id']}").status_code == 404
@@ -303,7 +255,7 @@ def _sweep_plan(c: TestClient, **over: object) -> dict[str, Any]:
 
 def test_options_cover_the_model_sweep(launch_env: dict[str, Path]) -> None:
     opts = _local().get("/api/runner/options").json()
-    assert opts["kinds"] == ["sweep", "gate", "prepare"]
+    assert opts["kinds"] == ["sweep", "prepare"]
     assert [s["id"] for s in opts["suites"]] == [SUITE_ID] and opts["suites"][0]["n_tasks"] == 2
     assert "ultra" not in opts["efforts"] and opts["efforts"][0] == "minimal"
     assert "codex" in opts["harnesses"] and opts["sandbox_defaults"]["codex"] == "local"
@@ -316,7 +268,7 @@ def test_sweep_plan_confirm_queue_and_progress(launch_env: dict[str, Path]) -> N
     spec = plan["spec"]
     assert spec["kind"] == "sweep" and [j["effort"] for j in spec["jobs"]] == ["low", "max"]
     assert spec["doctor"]["status"] == "ready" and spec["estimate"]["total_usd"] == 9.0
-    assert plan["usage_check_ok"] is True and plan["live_reason"] is None
+    assert plan["live_reason"] is None
     r = c.post(f"/api/runner/plans/{plan['id']}/confirm", json={"hash": plan["hash"]})
     assert r.status_code == 201, r.text
     first = r.json()

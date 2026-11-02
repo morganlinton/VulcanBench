@@ -56,6 +56,9 @@ RUNNER_DEFAULTS: dict[str, Any] = {
     "home": "~/vulcanbench-runner",
     "gate_out": "~/vulcanbench-gate",
     "run_worktrees": "../VulcanBench-runs",
+    # Suites built outside the checkout: <suites_home>/<suite-id>/suite.json.
+    # Read by harness.suite.resolve_suites_home (env VULCANBENCH_RUNNER_SUITES_HOME wins).
+    "suites_home": "~/vulcanbench-suites",
     "extra_run_roots": [],
     "first_check_after_s": 180,
 }
@@ -68,7 +71,7 @@ def runner_settings(path: Path = SETTINGS_PATH) -> dict[str, Any]:
         raise ValueError(f"{path}: [runner] must be a table")
     merged: dict[str, Any] = dict(RUNNER_DEFAULTS)
     merged.update(table)
-    for key in ("home", "gate_out", "run_worktrees"):
+    for key in ("home", "gate_out", "run_worktrees", "suites_home"):
         if not isinstance(merged[key], str) or not merged[key]:
             raise ValueError(f"{path}: [runner].{key} must be a non-empty string")
     roots = merged["extra_run_roots"]

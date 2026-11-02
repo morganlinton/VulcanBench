@@ -163,6 +163,7 @@ def run_agent(  # noqa: PLR0915
     override_budgets: bool = False,
     resources: ResourceSpec | None = None,
     agent_container: bool = False,
+    suite_source: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one evaluation: agent solves ``task_id`` with ``model``.
 
@@ -172,8 +173,11 @@ def run_agent(  # noqa: PLR0915
     ensemble using ``judge_model`` (defaulting to ``model``). ``suite``/
     ``suite_id`` tag the run so the leaderboard can group it. ``max_run_cost``
     is a per-run USD ceiling on agent spend: the model loop stops once this run's
-    own cost crosses it, and the summary records ``cost_capped``. Returns a
-    summary dict (also persisted to ``<run_dir>/summary.json``).
+    own cost crosses it, and the summary records ``cost_capped``. ``suite_source``
+    is the suite's provenance block (:meth:`harness.suite.Suite.provenance`:
+    where it was loaded from and the lock digest it was frozen to), recorded as
+    ``source.suite`` when given. Returns a summary dict (also persisted to
+    ``<run_dir>/summary.json``).
     """
     check_effort_allowed(effort)  # vulcanbench.toml: levels that never run, checked before anything
     task = load_task(task_id, tasks_root)
@@ -358,7 +362,10 @@ def run_agent(  # noqa: PLR0915
             "cost_capped": cost_capped,
             "manifest": manifest,
             "task_hash": task_hash(task),
-            "source": source_provenance().as_summary(),
+            "source": {
+                **source_provenance().as_summary(),
+                **({"suite": suite_source} if suite_source is not None else {}),
+            },
             "suite": suite,
             "suite_id": suite_id,
             **({"effort": effort_meta.as_summary()} if effort_meta else {}),
@@ -384,10 +391,15 @@ def run_agent(  # noqa: PLR0915
                     # workspace/), not the inner dir: agents that discover
                     # their project root list the parent, and flagging our
                     # own perimeter as out_of_workspace buries real signals.
+                    # The task's own suite directory is an extra root to
+                    # watch: a suite outside the checkout has no ``tasks/``
+                    # in its path, and its gold patch is just as much the
+                    # answer key.
                     "integrity_audit": audit_run(
                         run_dir / "cli-agent-stream.jsonl",
                         task.metadata,
                         agent_tmp_root or workspace,
+                        extra_roots=(task.root.parent,),
                     )
                 }
                 if cli_outcome

@@ -209,14 +209,24 @@ def audit_filesystem(  # noqa: PLR0912, linear path-scan over one stream
     workspace: Path | None,
     task_id: str,
     repo_root: Path | None = None,
+    extra_roots: tuple[Path, ...] = (),
 ) -> dict[str, Any]:
     """Check that a CLI agent stayed inside its workspace.
 
     ``repo_root`` defaults to this checkout: the tree holding ``tasks/`` and
     ``runs/``, i.e. exactly the benchmark data an agent must never read.
+    ``extra_roots`` are more directories holding benchmark data, such as the
+    suite directory of a suite built outside the checkout (a suites home has
+    no ``/tasks/`` in its path): anything under one counts as benchmark data,
+    and this task's gold patch, hidden tests or metadata under one is
+    answer-key access, exactly as under ``tasks/``.
     """
     root = (repo_root or Path(__file__).resolve().parents[2]).resolve()
     ws = str(workspace.resolve()) if workspace else None
+    extra: set[str] = set()
+    for extra_root in extra_roots:
+        extra.add(str(Path(extra_root).absolute()))
+        extra.add(str(Path(extra_root).resolve()))
     # CLI-harness runs execute in a VulcanBench-created tmp perimeter
     # (``vulcanbench-<run_id>-XXXX/workspace``) that is gone by re-annotation
     # time; paths under it are inside the containment regardless of which
@@ -242,7 +252,8 @@ def audit_filesystem(  # noqa: PLR0912, linear path-scan over one stream
                     outside.add(raw)
                     in_tasks = "/tasks/" in raw and not _CLI_TASK_LOG_RE.match(raw)
                     in_runs = f"{root}/runs" in raw or ("/runs/" in raw and str(root) in raw)
-                    if not (in_tasks or in_runs):
+                    in_extra = any(raw == r or raw.startswith(r + "/") for r in extra)
+                    if not (in_tasks or in_runs or in_extra):
                         continue
                     benchmark.add(raw)
                     own = f"/{task_id}/" in raw or raw.endswith(f"/{task_id}")
@@ -271,10 +282,13 @@ def audit_run(
     metadata: dict[str, Any],
     workspace: Path | None = None,
     repo_root: Path | None = None,
+    extra_roots: tuple[Path, ...] = (),
 ) -> dict[str, Any]:
     """Combined integrity block for a CLI-harness run."""
     web = audit_stream(stream_path, metadata)
-    fs = audit_filesystem(stream_path, workspace, str(metadata.get("id") or ""), repo_root)
+    fs = audit_filesystem(
+        stream_path, workspace, str(metadata.get("id") or ""), repo_root, extra_roots=extra_roots
+    )
     return {
         "web": web,
         "filesystem": fs,

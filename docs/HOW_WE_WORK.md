@@ -265,6 +265,12 @@ Each run's `summary.json`, and each suite's `suite.json`, now carries a
   (`harness/`, `tasks/`, `sandbox/`, `vulcanbench.toml`, `pyproject.toml`,
   `uv.lock`), capped at 50.
 
+A suite run also records `source.suite`: the suite id, display name, `kind`
+(`in-tree` or `external`), the suites home and directory it was loaded from,
+and, for a frozen suite, the lock version, `frozen_at` and `lock_digest`. The
+digest is a sha256 over the lock's version and task hashes, so two summaries
+with the same digest were scored against the same task set.
+
 Provenance is read once per process, when the run starts. This sits alongside
 the existing `task_hash` and `manifest` fields
 ([REPRODUCIBILITY.md](REPRODUCIBILITY.md)).
@@ -290,6 +296,38 @@ lives in VulcanConduct. The same rules apply: tag the suite repo, run from a
 clean checkout of it, and the run's `source.tasks` block records that repo's
 commit next to VulcanBench's `source.harness`. Locks and the PR hygiene
 workflow are VulcanBench-only for now; port them when those repos need them.
+
+### Suites outside the checkout
+
+A suite built from your own repository lives in a suites home, never in this
+repo, so a slice of a private codebase stays private. The default home is
+`~/vulcanbench-suites` (`[runner].suites_home` in `vulcanbench.toml`,
+`VULCANBENCH_RUNNER_SUITES_HOME`, or `--suites-home` on any command). Each
+suite is one directory, `<suites_home>/<suite-id>/`, holding `suite.json`,
+`suite.lock.json` once frozen, and one directory per task in the Frontier v4
+task format. A task's `build/` folder holds the builder's working files,
+answer key included; it is outside `task_hash` and never reaches the agent's
+workspace.
+
+```
+vulcanbench suite init acme-slice --display-name "Acme slice" --repo acme/api
+vulcanbench suite validate acme-slice --task <task>
+vulcanbench suite add-task acme-slice --task <task>
+vulcanbench suite freeze acme-slice
+vulcanbench run --suite acme-slice --suites-home ~/vulcanbench-suites --model ...
+```
+
+Every `vulcanbench suite` command takes `--json` and then prints exactly one
+JSON document. `add-task` only admits a task whose last validation was PASS
+or WARN. A suite id that names a suite in `tasks/` is refused, and when a name
+exists in both places the in-tree suite wins.
+
+The dirty-checkout guard cannot see a directory outside the checkout, so an
+external suite is held to its lock instead. `vulcanbench run` refuses an
+external suite that has no `suite.lock.json`, or whose tasks no longer match
+it, before any model call. No flag bypasses that check. To change a frozen
+external suite, fix the task, bump `version` in its `suite.json`, and run
+`vulcanbench suite freeze` again.
 
 ### Watching runs from the GUI
 

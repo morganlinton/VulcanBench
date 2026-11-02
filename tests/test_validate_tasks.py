@@ -10,6 +10,7 @@ import pytest
 
 from harness import validate
 from harness.agent.loop import _executor_runner
+from harness.cli import main as cli_main
 from harness.tasks import Task
 from harness.verifier import host_runner
 
@@ -283,3 +284,54 @@ def test_validate_docker_ignores_missing_host_toolchain(
     res = validate.validate_task(task, validate.ValidateOptions(sandbox="docker"))
     assert res.status == validate.PASS
     assert "(docker)" in res.reasons[0]
+
+
+def test_main_json_mode_prints_one_document(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``--json``: one document on stdout, the human report on stderr, same exit code."""
+    _full_task(tmp_path, task_id="skipped")
+    broken = _full_task(tmp_path, task_id="broken")
+    meta = json.loads((broken / "metadata.json").read_text())
+    del meta["decontamination_notes"]
+    (broken / "metadata.json").write_text(json.dumps(meta))
+    monkeypatch.setattr(validate.shutil, "which", lambda name: None)
+
+    code = validate.main([str(tmp_path), "--json"])
+    out, err = capsys.readouterr()
+    assert code == 1
+    doc = json.loads(out)  # stdout holds exactly one JSON document
+    assert set(doc) == {"target", "sandbox", "image", "results", "counts"}
+    assert doc["target"] == str(tmp_path) and doc["sandbox"] == "local" and doc["image"] is None
+    assert {r["task_id"]: r["status"] for r in doc["results"]} == {
+        "broken": validate.FAIL,
+        "skipped": validate.SKIP,
+    }
+    assert all(set(r) == {"task_id", "status", "reasons"} for r in doc["results"])
+    assert doc["counts"] == {"pass": 0, "skip": 1, "warn": 0, "fail": 1}
+    assert "FAIL broken" in err and "1 failed" in err
+
+    # Without --json the report is on stdout, as before.
+    code = validate.main([str(tmp_path)])
+    out, _err = capsys.readouterr()
+    assert code == 1 and "FAIL broken" in out
+
+
+def test_main_json_mode_with_no_tasks(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert validate.main([str(empty), "--json"]) == 0
+    out, err = capsys.readouterr()
+    assert json.loads(out)["results"] == [] and "no tasks found" in err
+
+
+def test_cli_validate_task_json_passthrough(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _full_task(tmp_path, task_id="skipped")
+    monkeypatch.setattr(validate.shutil, "which", lambda name: None)
+    with pytest.raises(SystemExit) as info:
+        cli_main(["validate-task", str(tmp_path), "--json"])
+    assert info.value.code == 0
+    out, _err = capsys.readouterr()
+    assert json.loads(out)["counts"]["skip"] == 1

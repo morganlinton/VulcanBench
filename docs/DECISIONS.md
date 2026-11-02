@@ -7,6 +7,44 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-02: suites outside the checkout are verified by lock digest, not git cleanliness
+
+### Decision
+
+Owner, in chat, 2026-10-31 (the build-your-own-suite plan). A suite built from
+one of the owner's own repositories lives in a suites home outside this
+checkout (`[runner].suites_home`, default `~/vulcanbench-suites`) and is never
+committed here. `vulcanbench run --suite <id> --suites-home <dir>` runs it
+only when its `suite.lock.json` exists and every task still matches it; there
+is no flag or environment variable that skips this. Each run records the
+lock's digest in `source.suite.lock_digest`.
+
+### Evidence
+
+- The dirty-checkout guard (`check_clean_for_suite`) asks git about paths in
+  this checkout. A directory outside it has no git status to ask about, so an
+  edited external task would run silently.
+- The lock already hashes every scoring-relevant file of every task
+  (`task_hash`). Checking it at run start catches the same edits the guard
+  catches for in-tree suites, and the digest ties a published number to one
+  exact task set without a commit to point at.
+- Private repository slices cannot go into a public repo, so committing the
+  suite is not an option.
+
+### Revisit triggers
+
+- Custom suites start being shared between machines or people: then the
+  digest alone does not say where to fetch the task set, and the suite needs
+  a home with history (its own repo, tagged like the companion suite repos).
+- A suite is wanted that mixes in-tree and external tasks.
+
+### What this touched
+
+`harness/suite.py`, `harness/suite_lock.py`, `harness/suite_cli.py`,
+`harness/cli.py`, `harness/agent/loop.py`, `harness/agent/run_audit.py`,
+`harness/regrade.py`, `harness/compare.py`, `harness/validate.py`,
+`harness/settings.py`, `vulcanbench.toml`.
+
 ## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
 
 ### Decision

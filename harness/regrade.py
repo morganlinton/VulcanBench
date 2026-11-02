@@ -46,6 +46,32 @@ def resolve_tasks_root(task_id: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> P
     return None
 
 
+def resolve_run_tasks_root(
+    summary: dict[str, Any],
+    tasks_base: Path = DEFAULT_TASKS_BASE,
+    suites_home: Path | None = None,
+) -> Path | None:
+    """The task root for a recorded run: the suite it recorded first, then the scans.
+
+    A run made from a suite records ``source.suite.suite_dir`` (the directory
+    the suite was loaded from, in-tree or in a suites home). When that
+    directory still defines the task it wins, so a run of an external suite
+    regrades against its own suite and never against a same-named task under
+    ``tasks/``. Otherwise ``tasks_base`` is scanned, then ``suites_home``.
+    """
+    task_id = str(summary.get("task_id") or "")
+    source = summary.get("source") or {}
+    recorded = source.get("suite") if isinstance(source, dict) else None
+    if isinstance(recorded, dict) and recorded.get("suite_dir"):
+        suite_dir = Path(str(recorded["suite_dir"]))
+        if (suite_dir / task_id / "metadata.json").is_file():
+            return suite_dir
+    root = resolve_tasks_root(task_id, tasks_base)
+    if root is None and suites_home is not None:
+        root = resolve_tasks_root(task_id, suites_home)
+    return root
+
+
 def _git(args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     env_names = ("AUTHOR", "COMMITTER")
     env = {}
@@ -103,12 +129,15 @@ def regrade_run(
     sandbox: str = "docker",
     image: str | None = None,
     write: bool = True,
+    *,
+    suites_home: Path | None = None,
 ) -> dict[str, Any]:
     """Re-grade one run directory against the current task definition.
 
     Returns a record with old vs new functional score and per-test results.
     Writes ``regrade.json`` into ``run_dir`` when ``write`` is set. Never calls a
-    model provider.
+    model provider. The task is found through :func:`resolve_run_tasks_root`:
+    the suite directory the run recorded, then ``tasks_base``, then ``suites_home``.
     """
     summary_path = run_dir / "summary.json"
     if not summary_path.is_file():
@@ -117,7 +146,7 @@ def regrade_run(
     task_id = summary.get("task_id")
     old_functional = (summary.get("scores") or {}).get("functional")
 
-    root = resolve_tasks_root(task_id, tasks_base)
+    root = resolve_run_tasks_root(summary, tasks_base, suites_home)
     if root is None:
         return {"run_dir": str(run_dir), "task_id": task_id, "error": "task not found in tasks/"}
     task = load_task(task_id, root)

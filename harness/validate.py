@@ -17,6 +17,9 @@ Legacy/demo tasks (no declarative tests and no gold patch) are skipped, not fail
 
 Use ``--sandbox docker`` to run setup and verifiers inside the same container
 environment as ``vulcanbench run`` (recommended before large benchmark spend).
+``--json`` prints one machine-readable document to stdout (``target``,
+``sandbox``, ``image``, ``results`` and ``counts``) and keeps the human report
+on stderr; the exit codes do not change.
 """
 
 from __future__ import annotations
@@ -439,18 +442,32 @@ def _filter_roots_by_scale(roots: list[Path], tier: str, tasks_root: Path) -> li
     return [r for r in roots if r.name in allowed]
 
 
-def _docker_preflight(image: str | None) -> int | None:
+def _docker_preflight(image: str | None, out: Any = None) -> int | None:
     """Return an exit code when Docker mode cannot run, else ``None``."""
     from harness.sandbox.docker_executor import _docker_available  # noqa: PLC0415
 
+    out = out or sys.stdout
     if not _docker_available():
         print("error: --sandbox docker requires a running Docker daemon", file=sys.stderr)
         return 2
     if image:
-        print(f"Validating in Docker sandbox ({image}) ...")
+        print(f"Validating in Docker sandbox ({image}) ...", file=out)
     else:
-        print("Validating in Docker sandbox (per-task image selection) ...")
+        print("Validating in Docker sandbox (per-task image selection) ...", file=out)
     return None
+
+
+def result_to_dict(res: Result) -> dict[str, Any]:
+    return {"task_id": res.task_id, "status": res.status, "reasons": list(res.reasons)}
+
+
+def count_statuses(results: list[Result]) -> dict[str, int]:
+    return {
+        "pass": sum(r.status == PASS for r in results),
+        "skip": sum(r.status == SKIP for r in results),
+        "warn": sum(r.status == WARN for r in results),
+        "fail": sum(r.status == FAIL for r in results),
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -473,10 +490,18 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Docker sandbox image when --sandbox docker (default: vulcanbench/sandbox:base)",
     )
+    parser.add_argument(
+        "--json",
+        dest="json_output",
+        action="store_true",
+        help="print one JSON document to stdout (human report goes to stderr)",
+    )
     args = parser.parse_args(argv)
+    # With --json, stdout is reserved for the one document.
+    out = sys.stderr if args.json_output else sys.stdout
 
     if args.sandbox == "docker":
-        preflight = _docker_preflight(args.image)
+        preflight = _docker_preflight(args.image, out)
         if preflight is not None:
             return preflight
 
@@ -493,22 +518,32 @@ def main(argv: list[str] | None = None) -> int:
         if not (suite_root / "suite.json").exists() and target.parent.name == "v1":
             suite_root = target.parent
         roots = _filter_roots_by_scale(roots, args.filter_scale, suite_root)
-    if not roots:
-        print(f"no tasks found under {target}")
-        return 0
 
     results = [validate_task(r, opts) for r in roots]
+    counts = count_statuses(results)
+    if args.json_output:
+        document = {
+            "target": str(target),
+            "sandbox": args.sandbox,
+            "image": args.image,
+            "results": [result_to_dict(r) for r in results],
+            "counts": counts,
+        }
+        print(json.dumps(document, indent=2))
+    if not roots:
+        print(f"no tasks found under {target}", file=out)
+        return 0
+
     icon = {PASS: "✓", SKIP: "○", FAIL: "✗", WARN: "⚠"}
     for res in results:
         suffix = f", {'; '.join(res.reasons)}" if res.reasons else ""
-        print(f"  {icon[res.status]} {res.status:4} {res.task_id}{suffix}")
+        print(f"  {icon[res.status]} {res.status:4} {res.task_id}{suffix}", file=out)
 
-    n_pass = sum(r.status == PASS for r in results)
-    n_skip = sum(r.status == SKIP for r in results)
-    n_fail = sum(r.status == FAIL for r in results)
-    n_warn = sum(r.status == WARN for r in results)
-    summary = f"\n{n_pass} passed, {n_skip} skipped, {n_warn} warned, {n_fail} failed"
-    print(summary)
-    if n_warn:
-        print("  ⚠ warned tasks are functionally valid but may be under-specified")
-    return 1 if n_fail else 0
+    summary = (
+        f"\n{counts['pass']} passed, {counts['skip']} skipped, "
+        f"{counts['warn']} warned, {counts['fail']} failed"
+    )
+    print(summary, file=out)
+    if counts["warn"]:
+        print("  ⚠ warned tasks are functionally valid but may be under-specified", file=out)
+    return 1 if counts["fail"] else 0

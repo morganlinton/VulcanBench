@@ -44,14 +44,17 @@ def _scan_runs_recursive(runs_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def suite_version(suite: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> dict[str, Any]:
+def suite_version(
+    suite: str, tasks_base: Path = DEFAULT_TASKS_BASE, *, suites_home: Path | None = None
+) -> dict[str, Any]:
     """Return the frozen identity of a suite: its task set and a version hash.
 
     The version is a hash of the sorted ``(task_id, task_hash)`` pairs, so it
     changes exactly when the suite's task set or any task's scoring definition
     changes. Two runs sharing a suite version are directly comparable.
+    ``suites_home`` is where a suite outside the checkout is looked up.
     """
-    s = load_suite(suite, tasks_base)
+    s = load_suite(suite, tasks_base, suites_home=suites_home)
     hashes = current_task_hashes(s.tasks_root)
     pairs = sorted((tid, hashes.get(tid, "?")) for tid in s.task_ids)
     digest = hashlib.sha256("\n".join(f"{tid}:{h}" for tid, h in pairs).encode()).hexdigest()
@@ -103,6 +106,8 @@ def build_matrix(
     suite: str,
     runs_dir: Path = Path("./runs"),
     tasks_base: Path = DEFAULT_TASKS_BASE,
+    *,
+    suites_home: Path | None = None,
 ) -> dict[str, Any]:
     """Build the model x effort comparison for ``suite`` from cached runs.
 
@@ -112,9 +117,9 @@ def build_matrix(
     cell is ``complete`` when every suite task is covered. Incomplete cells list
     the tasks still to run, those, and only those, need new model calls.
     """
-    ver = suite_version(suite, tasks_base)
+    ver = suite_version(suite, tasks_base, suites_home=suites_home)
     suite_tasks = set(ver["task_ids"])
-    s = load_suite(suite, tasks_base)
+    s = load_suite(suite, tasks_base, suites_home=suites_home)
 
     rows = [r for r in _scan_runs_recursive(runs_dir) if r.get("task_id") in suite_tasks]
     mark_stale(rows, s.tasks_root)

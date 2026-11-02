@@ -1,14 +1,30 @@
 """Suite locks: a published suite's scoring-relevant content cannot drift.
 
-Freezing a suite writes ``tasks/<suite>/suite.lock.json``: the suite's version
-(from its ``suite.json``) and the ``task_hash`` of every task in it. ``check``
-fails if any locked suite no longer matches, so CI rejects a PR that edits a
-published task in place. Cosmetic metadata is outside ``task_hash`` and stays
-editable; the prompt, repo, tests, verifier, gold patch or the task set are not.
+Freezing a suite writes ``suite.lock.json`` next to its ``suite.json``: the
+suite's version (from the manifest) and the ``task_hash`` of every task in it.
+``check`` fails if a locked suite no longer matches, so CI rejects a PR that
+edits a published task in place. Cosmetic metadata is outside ``task_hash``
+and stays editable; the prompt, repo, tests, verifier, gold patch or the task
+set are not.
 
 Changing a frozen suite on purpose means bumping ``version`` in its suite.json
 and re-freezing, in the same PR. Results are comparable only within a version
 (tasks/coding-intelligence-index-v4/CHARTER.md). See docs/HOW_WE_WORK.md.
+
+Two forms of every operation exist. The *in-tree* form takes a suite name
+under ``tasks/`` (``freeze``, ``check_suite``, ``compute_lock``) and is what
+CI and ``make freeze-suite`` call. The *directory* form takes the suite
+directory itself (``freeze_dir``, ``check_dir``, ``compute_lock_dir``,
+``verify_lock``) and serves suites built outside the checkout
+(``vulcanbench suite ...``). Both write the same lock file shape.
+
+A suite outside the checkout has no git history to vouch for it, so its lock
+is the only thing that ties a result to a task set: ``lock_digest`` is a
+content digest of the lock (version plus the sorted task hashes, independent
+of file formatting) that every run summary records, and ``require_locked``
+refuses to run an external suite whose lock is missing or no longer matches
+the tasks on disk. There is deliberately no override flag and no environment
+escape hatch (docs/DECISIONS.md, 2026-11-01).
 
     python -m harness.suite_lock check
     python -m harness.suite_lock freeze coding-intelligence-index-v4
@@ -17,6 +33,7 @@ and re-freezing, in the same PR. Results are comparable only within a version
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from dataclasses import dataclass, field
@@ -24,10 +41,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from harness.suite import DEFAULT_TASKS_BASE, load_suite
+from harness.suite import DEFAULT_TASKS_BASE, Suite, load_suite, load_suite_dir
 from harness.tasks import load_task, task_hash
 
 LOCK_NAME = "suite.lock.json"
+
+
+class SuiteLockError(RuntimeError):
+    """An external suite was asked to run without a lock that matches its tasks."""
 
 
 def suite_version(tasks_root: Path) -> str | None:
@@ -38,17 +59,61 @@ def suite_version(tasks_root: Path) -> str | None:
     return str(version) if version is not None else None
 
 
-def compute_lock(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> dict[str, Any]:
-    suite = load_suite(name, tasks_base)
+def read_lock(suite_dir: Path) -> dict[str, Any] | None:
+    """The parsed ``suite.lock.json`` of ``suite_dir``, or ``None`` when there is none."""
+    path = suite_dir / LOCK_NAME
+    if not path.is_file():
+        return None
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else None
+
+
+def lock_digest(lock: dict[str, Any]) -> str:
+    """``sha256:<hex>`` over the lock's *content*: its version and sorted task hashes.
+
+    Computed from canonical JSON of ``{"version": ..., "tasks": {...sorted}}``,
+    never from the file's bytes, so re-serialising the lock (indentation, key
+    order, the ``frozen_at`` date or the note) leaves the digest unchanged
+    while any task hash or the version changes it.
+    """
+    tasks = lock.get("tasks") or {}
+    canonical = {
+        "version": lock.get("version"),
+        "tasks": {str(k): str(v) for k, v in sorted(tasks.items())},
+    }
+    payload = json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+
+def lock_for(suite: Suite) -> dict[str, Any]:
+    """The lock content for a loaded suite: ``{suite, version, tasks}``.
+
+    Raises ``FileNotFoundError`` naming the task when a listed task has no
+    directory on disk.
+    """
+    hashes: dict[str, str] = {}
+    for tid in suite.task_ids:
+        try:
+            hashes[tid] = task_hash(load_task(tid, suite.tasks_root))
+        except FileNotFoundError as exc:
+            raise FileNotFoundError(f"task missing: {tid} ({suite.tasks_root / tid})") from exc
     return {
         "suite": suite.name,
-        "version": suite_version(suite.tasks_root),
-        "tasks": {tid: task_hash(load_task(tid, suite.tasks_root)) for tid in suite.task_ids},
+        "version": suite.version if suite.version is not None else suite_version(suite.tasks_root),
+        "tasks": hashes,
     }
 
 
-def freeze(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Path:
-    lock = compute_lock(name, tasks_base)
+def compute_lock(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> dict[str, Any]:
+    return lock_for(load_suite(name, tasks_base))
+
+
+def compute_lock_dir(suite_dir: Path) -> dict[str, Any]:
+    """Directory form of :func:`compute_lock` for a suite outside the checkout."""
+    return lock_for(load_suite_dir(suite_dir, external=True))
+
+
+def _write_lock(suite: Suite, lock: dict[str, Any]) -> Path:
     out = {
         "suite": lock["suite"],
         "version": lock["version"],
@@ -60,9 +125,20 @@ def freeze(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Path:
         ),
         "tasks": lock["tasks"],
     }
-    path = tasks_base / str(lock["suite"]) / LOCK_NAME
+    path = suite.tasks_root / LOCK_NAME
     path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     return path
+
+
+def freeze(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Path:
+    suite = load_suite(name, tasks_base)
+    return _write_lock(suite, lock_for(suite))
+
+
+def freeze_dir(suite_dir: Path) -> Path:
+    """Directory form of :func:`freeze`: write ``suite.lock.json`` into ``suite_dir``."""
+    suite = load_suite_dir(suite_dir, external=True)
+    return _write_lock(suite, lock_for(suite))
 
 
 @dataclass
@@ -71,10 +147,13 @@ class LockDrift:
     problems: list[str] = field(default_factory=list)
 
 
-def check_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> LockDrift:
-    locked = json.loads((tasks_base / name / LOCK_NAME).read_text(encoding="utf-8"))
-    current = compute_lock(name, tasks_base)
-    drift = LockDrift(suite=name)
+def _drift(suite: Suite, locked: dict[str, Any]) -> LockDrift:
+    drift = LockDrift(suite=suite.name)
+    try:
+        current = lock_for(suite)
+    except FileNotFoundError as exc:
+        drift.problems.append(str(exc))
+        return drift
     if locked.get("version") != current["version"]:
         drift.problems.append(
             f"version is {current['version']!r} in suite.json but {locked.get('version')!r} "
@@ -91,6 +170,107 @@ def check_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> LockDrift:
         if old[tid] != new[tid]:
             drift.problems.append(f"task changed: {tid}")
     return drift
+
+
+def check_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> LockDrift:
+    suite = load_suite(name, tasks_base)
+    locked = json.loads((suite.tasks_root / LOCK_NAME).read_text(encoding="utf-8"))
+    return _drift(suite, locked)
+
+
+def check_dir(suite_dir: Path) -> LockDrift:
+    """Directory form of :func:`check_suite`; a missing lock is one problem, not a crash."""
+    suite = load_suite_dir(suite_dir, external=True)
+    locked = read_lock(suite_dir)
+    if locked is None:
+        return LockDrift(suite=suite.name, problems=[_missing_lock_problem(suite)])
+    return _drift(suite, locked)
+
+
+@dataclass
+class LockVerification:
+    """What :func:`verify_lock` found: the lock's identity and any drift."""
+
+    suite: str
+    version: str | None
+    frozen_at: str | None
+    lock_digest: str | None
+    n_tasks: int
+    problems: list[str] = field(default_factory=list)
+
+    @property
+    def ok(self) -> bool:
+        return not self.problems
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "suite": self.suite,
+            "version": self.version,
+            "frozen_at": self.frozen_at,
+            "lock_digest": self.lock_digest,
+            "n_tasks": self.n_tasks,
+            "ok": self.ok,
+            "problems": list(self.problems),
+        }
+
+
+def _missing_lock_problem(suite: Suite) -> str:
+    return (
+        f"no {LOCK_NAME} in {suite.tasks_root}: the suite is not frozen; "
+        f"run `vulcanbench suite freeze {suite.name}`"
+    )
+
+
+def _verify(suite: Suite) -> LockVerification:
+    locked = read_lock(suite.tasks_root)
+    if locked is None:
+        return LockVerification(
+            suite=suite.name,
+            version=suite.version,
+            frozen_at=None,
+            lock_digest=None,
+            n_tasks=len(suite.task_ids),
+            problems=[_missing_lock_problem(suite)],
+        )
+    drift = _drift(suite, locked)
+    raw_version = locked.get("version")
+    return LockVerification(
+        suite=suite.name,
+        version=None if raw_version is None else str(raw_version),
+        frozen_at=locked.get("frozen_at"),
+        lock_digest=lock_digest(locked),
+        n_tasks=len(locked.get("tasks") or {}),
+        problems=list(drift.problems),
+    )
+
+
+def verify_lock(suite_dir: Path) -> LockVerification:
+    """Verify the suite in ``suite_dir`` against its lock.
+
+    A missing lock is a problem (the message says to run
+    ``vulcanbench suite freeze <id>``); drift names the task that changed, was
+    added or was removed. ``lock_digest`` is the digest of the lock as it is on
+    disk, so a caller that sees ``ok`` can record it as the task set it ran.
+    """
+    return _verify(load_suite_dir(suite_dir, external=True))
+
+
+def require_locked(suite: Suite) -> LockVerification:
+    """Refuse to run an external suite whose lock is missing or does not match.
+
+    Raises :class:`SuiteLockError` listing every problem. No flag or
+    environment variable bypasses this: a result from a drifted suite would be
+    tied to a task set that no longer exists.
+    """
+    verification = _verify(suite)
+    if verification.ok:
+        return verification
+    shown = "\n  ".join(verification.problems)
+    raise SuiteLockError(
+        f"suite {suite.name!r} is not frozen to its tasks on disk:\n  {shown}\n"
+        "Fix the task set, then `vulcanbench suite freeze "
+        f"{suite.name}` (bump version in suite.json when a published task changed)."
+    )
 
 
 def locked_suites(tasks_base: Path = DEFAULT_TASKS_BASE) -> list[str]:

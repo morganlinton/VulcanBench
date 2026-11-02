@@ -1,0 +1,191 @@
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java
+index c8f54d8c0..4f6073f21 100755
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/contexts/CompilationUnitContext.java
+@@ -39,11 +39,8 @@ import com.github.javaparser.resolution.types.ResolvedType;
+ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+ import com.github.javaparser.symbolsolver.logic.MemberResolutionLogic;
+ import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
+-import java.util.HashSet;
+ import java.util.LinkedList;
+ import java.util.List;
+-import java.util.Set;
+-import java.util.function.Supplier;
+ import java.util.stream.Collectors;
+ 
+ /**
+@@ -53,36 +50,6 @@ public class CompilationUnitContext extends AbstractJavaParserContext<Compilatio
+ 
+     private static final String DEFAULT_PACKAGE = "java.lang";
+ 
+-    /** Names currently in flight as a member lookup, per thread. */
+-    private static final ThreadLocal<Set<String>> MEMBERS_IN_FLIGHT = new ThreadLocal<>();
+-
+-    /** Runs {@code supplier} with {@code name} marked in flight as a member lookup. */
+-    private static <T> T withMemberInFlight(String name, Supplier<T> supplier) {
+-        Set<String> inFlight = MEMBERS_IN_FLIGHT.get();
+-        if (inFlight == null) {
+-            inFlight = new HashSet<>();
+-            MEMBERS_IN_FLIGHT.set(inFlight);
+-        }
+-        // Remove only what this frame added, so a nested lookup cannot clear its caller's state.
+-        boolean added = inFlight.add(name);
+-        try {
+-            return supplier.get();
+-        } finally {
+-            if (added) {
+-                inFlight.remove(name);
+-            }
+-            if (inFlight.isEmpty()) {
+-                // Outermost frame: leave no entry behind for pooled threads.
+-                MEMBERS_IN_FLIGHT.remove();
+-            }
+-        }
+-    }
+-
+-    private static boolean isMemberInFlight(String name) {
+-        Set<String> inFlight = MEMBERS_IN_FLIGHT.get();
+-        return inFlight != null && inFlight.contains(name);
+-    }
+-
+     ///
+     /// Static methods
+     ///
+@@ -108,27 +75,19 @@ public class CompilationUnitContext extends AbstractJavaParserContext<Compilatio
+             String memberName = getMember(itName);
+             SymbolReference<ResolvedTypeDeclaration> type = this.solveType(typeName);
+             if (type.isSolved()) {
+-                return withMemberInFlight(memberName, () -> new SymbolSolver(typeSolver)
+-                        .solveSymbolInType(type.getCorrespondingDeclaration(), memberName));
++                return new SymbolSolver(typeSolver).solveSymbolInType(type.getCorrespondingDeclaration(), memberName);
+             }
+             itName = typeName;
+         }
+ 
+-        // Reached as the parent context of a type whose member is being resolved. Static imports are not
+-        // transitive (JLS 7.5.3, 7.5.4), so they do not apply to that lookup, and following them here is
+-        // what makes cyclic static imports recurse forever. See issues 4450 & 2720.
+-        if (isMemberInFlight(name)) {
+-            return SymbolReference.unsolved();
+-        }
+-
+         // Look among statically imported values
+         for (ImportDeclaration importDecl : wrappedNode.getImports()) {
+             if (importDecl.isStatic()) {
+                 if (importDecl.isAsterisk()) {
+                     String qName = importDecl.getNameAsString();
+                     ResolvedTypeDeclaration importedType = typeSolver.solveType(qName);
+-                    SymbolReference<? extends ResolvedValueDeclaration> ref = withMemberInFlight(
+-                            name, () -> new SymbolSolver(typeSolver).solveSymbolInType(importedType, name));
++                    SymbolReference<? extends ResolvedValueDeclaration> ref =
++                            new SymbolSolver(typeSolver).solveSymbolInType(importedType, name);
+                     if (ref.isSolved()) {
+                         return ref;
+                     }
+@@ -141,8 +100,7 @@ public class CompilationUnitContext extends AbstractJavaParserContext<Compilatio
+ 
+                     if (memberName.equals(name)) {
+                         ResolvedTypeDeclaration importedType = typeSolver.solveType(typeName);
+-                        return withMemberInFlight(memberName, () -> new SymbolSolver(typeSolver)
+-                                .solveSymbolInType(importedType, memberName));
++                        return new SymbolSolver(typeSolver).solveSymbolInType(importedType, memberName);
+                     }
+                 }
+             }
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserClassDeclaration.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserClassDeclaration.java
+index e1474ceed..e7e8955cd 100644
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserClassDeclaration.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserClassDeclaration.java
+@@ -336,7 +336,7 @@ public class JavaParserClassDeclaration extends AbstractClassDeclaration
+ 
+     @Override
+     public SymbolReference<? extends ResolvedValueDeclaration> solveSymbol(String name, TypeSolver typeSolver) {
+-        return getContext().solveSymbol(name);
++        return MemberResolutionLogic.solveSymbolInMembers(this, name);
+     }
+ 
+     @Override
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserEnumDeclaration.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserEnumDeclaration.java
+index 3bf62d519..4c51270a2 100644
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserEnumDeclaration.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserEnumDeclaration.java
+@@ -223,7 +223,7 @@ public class JavaParserEnumDeclaration extends AbstractTypeDeclaration
+ 
+     @Override
+     public SymbolReference<? extends ResolvedValueDeclaration> solveSymbol(String name, TypeSolver typeSolver) {
+-        return getContext().solveSymbol(name);
++        return MemberResolutionLogic.solveSymbolInMembers(this, name);
+     }
+ 
+     @Override
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserInterfaceDeclaration.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserInterfaceDeclaration.java
+index d6e93359a..68a531857 100644
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserInterfaceDeclaration.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserInterfaceDeclaration.java
+@@ -297,7 +297,7 @@ public class JavaParserInterfaceDeclaration extends AbstractTypeDeclaration
+ 
+     @Override
+     public SymbolReference<? extends ResolvedValueDeclaration> solveSymbol(String name, TypeSolver typeSolver) {
+-        return getContext().solveSymbol(name);
++        return MemberResolutionLogic.solveSymbolInMembers(this, name);
+     }
+ 
+     @Override
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserRecordDeclaration.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserRecordDeclaration.java
+index 358d16bee..1e9fc27bd 100644
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserRecordDeclaration.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/javaparsermodel/declarations/JavaParserRecordDeclaration.java
+@@ -400,7 +400,7 @@ public class JavaParserRecordDeclaration extends AbstractTypeDeclaration
+ 
+     @Override
+     public SymbolReference<? extends ResolvedValueDeclaration> solveSymbol(String name, TypeSolver typeSolver) {
+-        return getContext().solveSymbol(name);
++        return MemberResolutionLogic.solveSymbolInMembers(this, name);
+     }
+ 
+     @Override
+diff --git a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/logic/MemberResolutionLogic.java b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/logic/MemberResolutionLogic.java
+index 0d0726ba4..9aad5278d 100644
+--- a/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/logic/MemberResolutionLogic.java
++++ b/javaparser-symbol-solver-core/src/main/java/com/github/javaparser/symbolsolver/logic/MemberResolutionLogic.java
+@@ -26,9 +26,11 @@ import com.github.javaparser.resolution.Context;
+ import com.github.javaparser.resolution.MethodUsage;
+ import com.github.javaparser.resolution.TypeSolver;
+ import com.github.javaparser.resolution.declarations.HasAccessSpecifier;
++import com.github.javaparser.resolution.declarations.ResolvedEnumDeclaration;
+ import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+ import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+ import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
++import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
+ import com.github.javaparser.resolution.logic.MethodResolutionLogic;
+ import com.github.javaparser.resolution.model.SymbolReference;
+ import com.github.javaparser.resolution.types.ResolvedReferenceType;
+@@ -135,6 +137,28 @@ public class MemberResolutionLogic {
+         return SymbolReference.unsolved();
+     }
+ 
++    /**
++     * Solves a value among the members of {@code typeDeclaration}: its enum constants, then the fields it
++     * declares and the ones it inherits, and nothing else.
++     */
++    public static SymbolReference<? extends ResolvedValueDeclaration> solveSymbolInMembers(
++            ResolvedReferenceTypeDeclaration typeDeclaration, String name) {
++
++        if (typeDeclaration.isEnum()) {
++            // Enum constants are members of the enum, and no field declaration declares them.
++            ResolvedEnumDeclaration enumDeclaration = typeDeclaration.asEnum();
++            if (enumDeclaration.hasEnumConstant(name)) {
++                return SymbolReference.solved(enumDeclaration.getEnumConstant(name));
++            }
++        }
++
++        if (typeDeclaration.hasVisibleField(name)) {
++            return SymbolReference.solved(typeDeclaration.getVisibleField(name));
++        }
++
++        return SymbolReference.unsolved();
++    }
++
+     /**
+      * Collects the methods named {@code name} that {@code typeDeclaration} declares or inherits.
+      *

@@ -1,0 +1,30 @@
+# Packaging for the Mac app. Output: desktop/dist/mac-arm64/VulcanBench.app
+# (unsigned, for the machine it is built on). The dashboard's standalone
+# build and build-info.json are copied into Contents/Resources by the
+# afterPack hook (extraResources would drop its node_modules), outside the
+# asar so the app can run server.js with its own node.
+appId: com.vulcanbench.desktop
+productName: VulcanBench
+copyright: VulcanBench
+directories:
+  output: dist
+  buildResources: build
+files:
+  - main.cjs
+  - preload.cjs
+  - splash.html
+  - lib/**
+  - package.json
+afterPack: scripts/after-pack.cjs
+asar: true
+npmRebuild: false
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dir
+      arch: arm64
+  icon: build/icon.icns
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  darkModeSupport: true

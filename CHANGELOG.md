@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GUI housekeeping**: orphaned sandbox containers listed and removed by id
   only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
   streaming log tail (server-sent events) on live run pages.
+- **Mac app** (`desktop/`, `make app`): an Electron window on the local run
+  GUI. It starts the backend from the checkout it was built from (or reuses
+  one already on port 8000) and the dashboard's standalone build with its own
+  node, waits for both, and opens the Runs page. Quitting stops the servers it
+  started and never signals a run.
 
 ## [0.10.0] - 2026-10-30
 

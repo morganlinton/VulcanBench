@@ -255,6 +255,47 @@ needs `npm install` in `dashboard/` once). The runner routes answer only when
 `VULCANBENCH_RUNNER=1` is set and only to loopback clients; without the flag
 the backend behaves exactly as the public deployment does.
 
+## The Mac app
+
+`desktop/` wraps the same two servers in an Electron window, so the GUI opens
+from the Dock instead of two terminals.
+
+```bash
+make app                                        # needs node 22 (brew install node@22)
+open desktop/dist/mac-arm64/VulcanBench.app
+```
+
+What the app does at launch, in order:
+
+1. Finds the checkout: `VULCANBENCH_REPO` if set, else the path recorded in
+   `build-info.json` when the app was built (the checkout `make app` ran in),
+   else the repo above `desktop/` when run unpackaged with `npm start`. It
+   refuses with a dialog if that checkout has no `.venv` or
+   `scripts/gui_backend.sh`.
+2. Backend: if something already answers on `127.0.0.1:8000/api/health`
+   (`make gui`, or a copy of the app still shutting down) it is used as is.
+   Otherwise the app runs `scripts/gui_backend.sh 8000` from the checkout, with
+   the user's environment plus the directories a Finder launch lacks on PATH
+   (`~/.local/bin`, `~/.docker/bin`, `/opt/homebrew/bin`, `/usr/local/bin`).
+   The app reads no credential file and sets no secret; the backend and its
+   subprocesses get exactly what a terminal launch would.
+3. Dashboard: Next's standalone build, assembled into the app by
+   `desktop/scripts/build-dashboard.sh`, run with the app's own node
+   (`ELECTRON_RUN_AS_NODE`) on port 3000 or the next free port. The backend
+   address is baked into the dashboard at build time (`NEXT_PUBLIC_API_BASE`,
+   default `http://localhost:8000`), which is why the backend port is fixed.
+4. Opens the Runs page once both answer. Menu: Runs, Launch and Leaderboard
+   under View, Open in Browser, Show Logs in Finder.
+
+Quitting stops the dashboard and a backend the app itself started, with
+SIGTERM. That never signals a benchmark: the supervisor leaves running jobs
+alone and adopts them again on the next start, as with any backend restart.
+Logs land in `~/Library/Logs/VulcanBench/`. The `.app` is unsigned and built
+per machine; it is a launcher for one checkout, not an installer, because the
+Python venv, Docker, the run worktrees and the runner state all stay where
+they are. `cd desktop && npm test` covers the helpers (PATH, checkout lookup,
+port choice, server start and stop) without Electron.
+
 ## Configuration
 
 `[runner]` in `vulcanbench.toml`, every key overridable with

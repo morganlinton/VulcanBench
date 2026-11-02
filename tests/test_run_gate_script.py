@@ -52,13 +52,13 @@ def on_int(*_):
 signal.signal(signal.SIGINT, on_int)
 name = os.path.basename(task)[:32]
 
-def trial(i, reward, infra=False):
+def trial(i, reward, infra=False, agent_log=None):
     td = os.path.join(jd, "%s__t%d" % (name, i))
     os.makedirs(os.path.join(td, "verifier")); os.makedirs(os.path.join(td, "agent"))
     with open(os.path.join(td, "verifier", "reward.json"), "w") as fh:
         json.dump({"reward": reward}, fh)
     with open(os.path.join(td, "agent", "codex.txt"), "w") as fh:
-        fh.write("hit your usage limit\n" if infra else '{"type":"item.completed"}\n')
+        fh.write(agent_log or ("hit your usage limit\n" if infra else '{"type":"item.completed"}\n'))
     with open(os.path.join(td, "result.json"), "w") as fh:
         json.dump({"started_at": "2026-10-29T12:00:00", "finished_at": "2026-10-29T12:01:00"}, fh)
 
@@ -72,6 +72,8 @@ if mode == "solve2":
     trial(0, 1); trial(1, 1)
 elif mode == "infra":
     trial(0, 0, infra=True)
+elif mode == "apps":
+    trial(0, 1, agent_log='{"type":"item_completed","item":{"type":"McpToolCall","server":"codex_apps"}}\n')
 elif mode == "ignore-int":
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 time.sleep(600)
@@ -107,6 +109,7 @@ class Gate:
         (self.root / "scripts" / "frontier-v5").mkdir(parents=True)
         self.script = self.root / "scripts" / "frontier-v5" / "run_gate.sh"
         shutil.copy(SCRIPT, self.script)
+        shutil.copy(SCRIPT.parent / "codex-gate.toml", self.script.parent / "codex-gate.toml")
         self.task = "demo-task-with-a-fairly-long-name-indeed"
         task_dir = self.root / "tasks" / "frontier-v5" / self.task
         task_dir.mkdir(parents=True)
@@ -219,11 +222,18 @@ def test_normal_run_writes_phases_and_keeps_stdout_shape(gate: Gate) -> None:
         "ps -aq --filter name=^demo-task-with-a-fairly-long-nam__" in c for c in gate.docker_calls()
     )
     argv = json.loads((gate.out / "jobs" / job / "argv.json").read_text())
-    assert argv["env"] == {"CODEX_FORCE_AUTH_JSON": "1"}
+    assert argv["env"] == {"CODEX_AUTH_JSON_PATH": str(gate.home / ".codex" / "auth.json")}
     assert (
         "--effort" in argv["argv"] and argv["argv"][argv["argv"].index("--effort") + 1] == "medium"
     )
     assert argv["argv"][argv["argv"].index("-k") + 1] == "3"
+    # Provider-side web tools bypass the task's network allowlist, so they are off.
+    aks = [argv["argv"][i + 1] for i, a in enumerate(argv["argv"]) if a == "--ak"]
+    assert "disable_web_search=true" in aks
+    # Codex also gets the gate config that turns off connected apps and plugins.
+    cfg = [a.split("=", 1)[1] for a in aks if a.startswith("config=")]
+    assert cfg and Path(cfg[0]).name == "codex-gate.toml" and Path(cfg[0]).is_file()
+    assert "apps = false" in Path(cfg[0]).read_text()
 
 
 def test_sigint_to_the_script_stops_harbor_within_seconds(gate: Gate) -> None:
@@ -281,6 +291,25 @@ def test_infrastructure_failure_stops_the_run(gate: Gate) -> None:
     assert st["phase"] == "infra_failed"
     assert str(st["stop_reason"]).startswith("infra:demo-task-with-a-fairly-long-nam__t0")
     assert (gate.out / "jobs" / job / "cancelled").exists()
+
+
+def test_provider_side_tool_use_is_an_infrastructure_failure(gate: Gate) -> None:
+    # A solve that reached the account's connected apps is not a gate result.
+    r = gate.run("astra", gate.task, FAKE_HARBOR_MODE="apps")
+    assert r.returncode == 1, r.stdout + r.stderr
+    st = gate.status(f"astra-{gate.task}")
+    assert st["phase"] == "infra_failed"
+    assert str(st["stop_reason"]).startswith("infra:demo-task-with-a-fairly-long-nam__t0")
+
+
+def test_dedicated_gate_login_is_preferred(gate: Gate) -> None:
+    gate_auth = gate.home / ".config" / "vulcanbench" / "codex-gate" / "auth.json"
+    gate_auth.parent.mkdir(parents=True)
+    gate_auth.write_text("{}")
+    r = gate.run("astra", gate.task)
+    assert r.returncode == 0, r.stdout + r.stderr
+    argv = json.loads((gate.out / "jobs" / f"astra-{gate.task}" / "argv.json").read_text())
+    assert argv["env"] == {"CODEX_AUTH_JSON_PATH": str(gate_auth)}
 
 
 def test_refusals_before_harbor_starts(gate: Gate) -> None:

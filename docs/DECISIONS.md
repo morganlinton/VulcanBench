@@ -51,6 +51,215 @@ and the status file for terminal use and for the Runs page.
 - Orphan attribution for harbor containers stops needing
   `Discovery.gate_runs` (then the read-only gate code can go too).
 
+## 2026-10-31: Codex gate runs turn off the account's connected apps
+
+### Decision
+
+Gate session, 2026-10-31. Turning off web search was not enough. For the
+`astra` reference, `run_gate.sh` now also passes
+`scripts/frontier-v5/codex-gate.toml` as Codex's native config. It sets
+`web_search = "disabled"` and turns off the features `apps`, `plugins`,
+`remote_plugin`, `browser_use`, `browser_use_external`, `in_app_browser` and
+`computer_use`. The infrastructure guard (`INFRA_RE`) also treats a trial
+that reached `codex_apps` or `web__run` as an infrastructure failure, so
+such a trial stops the run and is never a gate result. No gate run with
+Codex starts before this change is on the run commit.
+
+### Evidence
+
+The phonenumbers-parse-match-parity Astra re-run with web search off
+(2026-10-31), trial 7HxEtaq (reward 1), listed its tools and found the
+`codex_apps` MCP server. That server carries the ChatGPT account's
+connectors: Gmail, Google Calendar and ChatGPT Spaces, and a "Search
+Service" whose `web_run` fetched the upstream python-phonenumbers files the
+task had removed (15 calls). An audit of every Codex rollout on the Mac
+Studio found no call to any `codex_apps` tool other than that Search
+Service, and none to Gmail, Calendar or Spaces. With `features.apps=false`,
+`codex features list` reports `apps false` (Codex 0.163.0 on the host);
+Codex ignores feature names it does not know, so the file is safe for the
+pinned 0.159.0.
+
+### Revisit triggers
+
+- The gate's ChatGPT login still carries the owner's personal connectors.
+  A dedicated account for gate runs, with no connected apps, removes the
+  exposure rather than relying on a feature flag (open owner decision).
+- A Codex version bump: rerun `codex features list` and check the first
+  attempt's tool list before trusting the config.
+
+### What this touched
+
+`scripts/frontier-v5/codex-gate.toml` (new), `scripts/frontier-v5/run_gate.sh`,
+`tests/test_run_gate_script.py`.
+
+## 2026-10-31: decision (f), private task material lives in a private companion repo
+
+### Decision
+
+Owner, in chat, 2026-10-31 (open v1 decision (f), gold location). Frontier
+tasks whose value depends on material an agent must never find (hidden
+reference engines and their source, golds that exist nowhere else, hidden
+test data) live in the private repo `morganlinton/vulcanbench-frontier-private`,
+complete as gated. The public repo carries no file from those task
+directories, no tag or branch that contains them, and at most a name,
+version and content hash in a manifest. Tasks whose golds are already
+public upstream (the six F5 tasks of release 1) stay in the public repo.
+
+First contents (3984f32): ferrycore-crossing-opaque-parity 0.2.0 (admitted,
+release 1), bothycore-booking-opaque-parity (rejected, kept for release 2)
+and jsts-overlayng-coverage-parity (release-2 candidate).
+
+### Evidence
+
+The public repo is public. Run tags pushed on 2026-10-30 and 2026-10-31
+published the JSTS gold (removed the same day) and the F4 tasks' reference
+source and golds (`bench/2026-10-30-ferrycore-astra-gate`,
+`bench/2026-10-31-f4-query-service-astra-gate`; removal pending the owner).
+
+### Revisit triggers
+
+- A run or confirmation of a private task: its run commit and tag stay
+  local, and GATE-LOG records the private repo's commit.
+
+### What this touched
+
+New private repo. No public code.
+
+## 2026-10-31: decision (l) resolved, ferrycore 0.2.0 joins Frontier v5 release 1
+
+### Decision
+
+Under decision (l) (DECISIONS.md 2026-10-31, citing
+`docs/frontier-v5/FREEZE-v4.json`), ferrycore-crossing-opaque-parity 0.2.0
+cleared the gate on 2026-10-31, inside the 2026-11-04 deadline, and joins
+release 1 as F4-python on its own family line. Release 1 is seven tasks at
+equal weight 1/7; with three confirmation attempts per task the headline is
+complete passes divided by 21. bothycore-booking-opaque-parity was rejected
+(Astra 2 of 3) and moves to release 2 with the other F4 slot. Decision (m)'s
+confirmation runs become 7 tasks x 2 references x 3 attempts = 42.
+
+### Evidence
+
+GATE-LOG.md: ferrycore 0.2.0 Astra 0 of 3 (31.7, 15.7, 13.4 agent minutes)
+and Opus 5.5 0 of 3 (52.1, 103.0, 49.3), every attempt missing the deep
+families. Two notes stay on its record: 0.2.0 was redesigned after its 0.1.0
+gate result, and bothycore, built the same way, fell to targeted probing.
+
+### Revisit triggers
+
+- A confirmation attempt that solves ferrycore: review whether the query
+  budget, not the task, held the gate.
+
+### What this touched
+
+Nothing frozen; `plan-v4.json` and `FREEZE-v4.json` stay as frozen, and this
+entry resolves (l).
+
+## 2026-10-31: Frontier v5 release 1, decisions (k) to (n)
+
+### Decision
+
+Owner, in chat, 2026-10-31, citing `docs/frontier-v5/FREEZE-v4.json`:
+
+- **(k)** Run tree-sitter's Claude Opus 5.5 prong (three attempts through
+  `run_gate.sh`), so all six release-1 tasks are gated against the same two
+  references. If Opus solves two or more, tree-sitter's admission is
+  reviewed before the release freeze.
+- **(l)** An F4 task that clears the gate by the end of 2026-11-04
+  (bothycore-booking-opaque-parity, ferrycore-crossing-opaque-parity 0.2.0)
+  joins release 1 on its own family line; one that does not moves to
+  release 2.
+- **(m)** Fund the confirmation runs this week: three fresh attempts per
+  task for GPT-6 Astra and Claude Opus 5.5 (36 runs for six tasks), from a
+  bench tag cut from main after the merges and the suite lock, separate from
+  every gate run.
+- **(n)** The owner creates a dedicated Codex login with no connected apps
+  (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`) before the
+  confirmation runs; `run_gate.sh` uses it when present.
+
+### Evidence
+
+PLAN-v4.md section 6. At decision time bothycore's first Astra attempt had
+solved it by targeted experiments within the query budget, so (l) may admit
+nothing.
+
+### Revisit triggers
+
+- (n) not in place when the confirmation runs are ready: ask the owner
+  before running them on the personal login.
+
+### What this touched
+
+Nothing yet; the runs follow.
+
+## 2026-10-31: Frontier v5 release 1 is the F5 family (composition v4)
+
+### Decision
+
+Owner, in chat, 2026-10-31: adopt `docs/frontier-v5/PLAN-v4.md`, frozen by
+`docs/frontier-v5/FREEZE-v4.json` (decision (j)). VulcanBench Frontier v5
+release 1 is the six admitted F5 tasks at equal weight 1/6, one per
+language. F1, F2, F3 and any F4 slot the extension does not fill move to a
+later release with its own plan. Open: (k) tree-sitter's Opus 5.5 prong,
+(l) the F4 extension (bothycore and ferrycore 0.2.0, deadline 2026-11-04),
+(m) confirmation runs, (n) the dedicated Codex gate login.
+
+### Evidence
+
+GATE-LOG.md: six F5 admissions from 2026-10-22 to 2026-10-30; every non-F5
+candidate gated so far was rejected on the GPT-6 Astra half alone, in 5 to 25
+agent minutes (comrak and phonenumbers in F2, apollo in F3, ferrycore 0.1.0
+in F4). The 26-slot plan needs 20 more admits in shapes that have not held
+once, which does not fit the owner's goal of shipping this week.
+
+### Revisit triggers
+
+- A non-F5 shape holds both references: start the release-2 plan around it.
+- A confirmation run of release 1 in which either reference solves a task in
+  more than one of three attempts: review that task's admission before
+  publishing.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v4.md`, `plan-v4.json`, `FREEZE-v4.json`. No task or
+code.
+
+## 2026-10-30: gate references run with provider-side web tools off
+
+### Decision
+
+Gate session, 2026-10-30. `scripts/frontier-v5/run_gate.sh` passes
+`--ak disable_web_search=true` to Harbor for every reference. Harbor 0.24.0
+turns that into `-c web_search=disabled` for Codex and
+`--disallowedTools WebSearch,WebFetch` for Claude Code. Every gate run from
+now on is made with it.
+
+### Evidence
+
+phonenumbers-parse-match-parity (F2-python), GPT-6 Astra half, trial
+vHcy4ej (reward 1): Codex's built-in `web__run` tool fetched
+`raw.githubusercontent.com/daviddrysdale/python-phonenumbers/.../phonenumberutil.py`
+(and the formatter and matcher) ten times, and the attempt restored the
+removed functions from it. The tool runs on OpenAI's side, so the task's
+network allowlist (model API hosts only) never saw the request. The same
+attempt and its sibling also tried `curl` and `pip download`, which the
+allowlist blocked. An audit of every gate trial on the Mac Studio (34 job
+directories) found no other provider-side web use; Claude Fable attempts on
+tree-sitter tried `curl` against upstream and were blocked. Web access can
+only add solves, so the gate's holds stand; a reject decided by a web-aided
+solve does not.
+
+### Revisit triggers
+
+- A new agent CLI version or harness: confirm its web tools are off before
+  its first gate run (check the session for web tool calls).
+- The first-wave rejects (2026-10-18, archived): audit their rollouts for
+  web tool use before any of them is reconsidered.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh`, `tests/test_run_gate_script.py`.
+
 ## 2026-10-30: model sweeps from the local GUI continue only after a quota window, and only on request
 
 ### Decision
@@ -115,6 +324,82 @@ a unit on its own. Four rules fix what happens when a level ends early:
 `backend/runner/supervisor.py`, `backend/runner/state.py` (`waiting` and
 `incomplete`), the Launch page and the Runs page's sweep panel.
 
+## 2026-10-30: one Docker-heavy job at a time on the Mac Studio, by a shared lock
+
+### Decision
+
+Gate session, 2026-10-30, while the owner's Docker memory raise (to 24 GiB)
+is pending. Every session on the Mac Studio that builds task images or runs
+task containers (probe_verifier, run_controls, Harbor oracle and nop, gate
+runs) first takes `~/.vulcanbench/docker-lock.sh acquire <who>` and releases
+it when that step ends. The lock is a directory (mkdir is atomic); the holder
+and start time are in its `owner` file. This replaces the building sessions'
+earlier rule of waiting for a 20 GiB VM.
+
+### Evidence
+
+Docker Desktop's VM has 7.75 GiB and a task container declares up to 6 GiB
+(8 GiB for tseslint), so two at once can push a verifier out of memory, as
+on 2026-10-27 (prettier, two lost guard files). Three building sessions
+(F2, F3, F4) and the gate session share the VM.
+
+### Revisit triggers
+
+- Docker's VM at 16 GiB or more: two jobs at once are safe for 6 GiB tasks
+  (DECISIONS.md 2026-10-27); at 24 GiB the lock can go.
+- A holder that dies with the lock held: remove `~/.vulcanbench/docker.lock`
+  by hand after checking `docker ps` shows none of its containers.
+
+### What this touched
+
+`~/.vulcanbench/docker-lock.sh` (host-local, outside the repo). No repo code.
+
+## 2026-10-30: Frontier v5 gate runs have a standing approval for one week; (g') and (h) decided
+
+### Decision
+
+Owner, in chat, 2026-10-30, with the goal of finishing Frontier v5 within
+the week. Three decisions:
+
+1. **Standing approval for gate runs, 2026-10-30 to 2026-11-06.** Each built
+   and validated candidate's gate runs without a per-run confirmation: the
+   GPT-6 Astra half, then the Claude Opus 5.5 half if Astra holds. Gate runs
+   still go only through `scripts/frontier-v5/run_gate.sh`, from a run
+   worktree pinned to a pushed `bench/...` tag, one attempt at a time
+   (`GATE_CONCURRENCY=1`), under the usage pre-flight's default cap
+   (`GATE_USAGE_MAX=0.85`). Every result is reported to the owner. Still
+   asked first: an n=5 top-up, a re-run of a finished half, any override of
+   the pre-flight, and any run outside the gate (sweeps, diagnostics such as
+   comrak-v2). The approval lapses at the end of 2026-11-06.
+2. **(g') A task that misses floor 8 and holds the gate.** Floor 8 is a
+   pre-gate screen; a candidate that misses it may be gated at the owner's
+   discretion and admitted on the gate alone, with the miss recorded in its
+   GATE-LOG verdict. Applied first to pulldown-cmark-html-block-scanning
+   (Astra 0 of 3 on 2026-10-26), whose Opus 5.5 half runs next. sqlparser
+   stays a reserve.
+3. **(h) F2 shape: B1, without the comrak-v2 diagnostic.** The agent image
+   cannot build or run the reference, verified at validation. Decided on the
+   comrak evidence alone (both Astra solves used the compiled C reference as
+   an oracle); (i) is therefore not funded.
+
+### Evidence
+
+Wave 1 so far (GATE-LOG.md): 4 of 26 slots admitted, every reject decided by
+the Astra half, and every gate run since 2026-10-22 approved one at a time
+with no change in protocol. The per-run wait is now the slowest step.
+
+### Revisit triggers
+
+- 2026-11-06: the standing approval lapses unless the owner renews it.
+- A gate run that hits an infrastructure failure (login, usage window,
+  Docker VM memory): stop the queue and ask before resuming.
+- An F2 candidate whose reference cannot be removed from the agent image
+  without breaking its build: bring it to the owner rather than relaxing B1.
+
+### What this touched
+
+docs/frontier-v5/CONTINUE.md (next steps). No code.
+
 ## 2026-10-29: run_gate.sh stops harbor for real; gate runs can be queued from the local GUI
 
 ### Decision
@@ -165,6 +450,7 @@ gate runs. The script hardening and the read-only display of gate jobs stand.
 
 `scripts/frontier-v5/run_gate.sh`, `backend/runner/`, the dashboard's Launch
 and Runs pages, `docs/GUI.md`.
+
 ## 2026-10-29: every run logs its tool calls
 
 ### Decision
@@ -282,6 +568,40 @@ databases. They were copied outside the repository on 2026-10-27 before the OS
 could purge them. Matching them to scored runs and republishing full traces
 from them is a separate owner decision.
 
+## 2026-10-27: the prettier gate runs one attempt at a time
+
+### Decision
+
+Owner, in chat, 2026-10-27. prettier-comment-attachment-stability's gate
+runs at concurrency 1, overriding decision (e)'s two for JavaScript tasks.
+`run_gate.sh` gains `GATE_CONCURRENCY` (1 or 2), printed on its `===` line;
+the Opus 5.5 half runs with `GATE_CONCURRENCY=1`. The task is unchanged:
+both halves grade against the same task commit (6cf2915d). The other
+alternative, capping the verifier's jest workers, was declined because it
+changes the verifier between the two halves and needs re-validation.
+
+### Evidence
+
+In the Astra half (2026-10-27, GATE-LOG.md), attempt teLjUMw's verifier lost
+two guard files (600 ids) to "Worker exited unexpectedly" while it overlapped
+attempt EvrJE7b's verifier from 13:21 to 13:22 UTC. Each verifier has an
+8 GiB limit and runs 4 jest workers over the full prettier suite with
+`FULL_TEST=1`; the Docker VM on the Mac Studio has 7.75 GiB. The attempt's
+own `src`, rerun alone on those two files twice, passed 600 of 600 both
+times, and the attempt whose verifier ran alone (DFKPGQL) was clean. That
+reward was 0 either way (four held-out checks fail), but the same overlap
+could zero a solve.
+
+### Revisit triggers
+
+- A host with a Docker VM of 16 GiB or more (two verifiers fit).
+- Another task with a verifier of 8 GiB or more: decide whether it runs at
+  one too.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh` (the override and its header note).
+
 ## 2026-10-26: GPT-6.1 Terra runs on Frontier v4 on its release day, on the pinned Codex 0.159.0
 
 ### Decision
@@ -310,6 +630,45 @@ on. Every other Codex column keeps its version.
   not inferred by `harness/pricing.py`. The API exposes effort `none`,
   `low`, `medium`, `high`, `xhigh` and `max`; ultra is not an API level and
   stays blocked (`vulcanbench.toml`).
+
+## 2026-10-25: Frontier v5 wave 1 takes Claude Opus 5.5 as the second gate reference
+
+### Decision
+
+Owner, in chat, 2026-10-25. For F5 wave 1 (docs/frontier-v5/WAVE1-F5.md),
+starting with black-fmt-skip-region-handling, the second reference of
+decision (b) (2026-10-06) is `claude-code:claude-opus-5-5` at medium effort,
+Claude Code 2.1.302 (the wave-1 CLI pin), in place of
+`claude-code:claude-fable-5-1`. GPT-6 Astra is unchanged. The gate rule is
+unchanged: admit iff each reference solves at most 1 of 3, n=5 top-up at
+exactly 1 of 3, early exit at two solves. `run_gate.sh` gains the `opus`
+reference and a usage pre-flight, and GATE-LOG.md's identifier table gains
+the row.
+
+Comparability. treesitter-query-anchor-matching was admitted on 2026-10-22
+with Fable 5.1 at 2 of 5; that record stands and no admission is revoked.
+Its second prong is to be re-run under Opus 5.5 when quota allows (three
+attempts, same rule) and both results recorded, so every wave-1 admit has an
+Opus 5.5 prong. Fable 5.1 results already in the log stay as covariates.
+
+### Evidence
+
+- The black Fable half had to be stopped by hand on 2026-10-24 two minutes
+  in: the subscription's weekly window (overage included) read 94% with
+  overage disabled at the organisation level, resetting 2026-10-28
+  (GATE-LOG.md, black section). Waiting would cost four days per candidate.
+- Terminal-Bench 4.0, October 2026: Claude Opus 5.5 leads at 64.8 to 66.4%
+  while Claude Fable 5.1 scores about 58% (docs/frontier-v5/TASK-SHAPE-STUDY.md),
+  so Opus 5.5 is at least as strong a reference on agentic coding. Decision
+  (b) chose Fable 5.1 as one of the two models that saturated Frontier v4;
+  Opus 5.5 was not measured on v4.
+
+### Cost and revisit
+
+One extra three-attempt prong (tree-sitter under Opus 5.5). Revisit if Opus
+5.5's own usage window binds the same way, when Fable 5.1 access is
+unconstrained again, or when the frontier moves (decision (b)'s re-gate
+rule).
 
 ## 2026-10-24: Reflection Beam judged by Muse Spark 1.3 and GPT-6.1 Sol (v3.28)
 

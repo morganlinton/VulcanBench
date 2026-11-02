@@ -1,0 +1,13 @@
+diff --git a/pulldown-cmark/src/firstpass.rs b/pulldown-cmark/src/firstpass.rs
+index 5dd9957..e95c5ea 100644
+--- a/pulldown-cmark/src/firstpass.rs
++++ b/pulldown-cmark/src/firstpass.rs
+@@ -1405,7 +1405,7 @@ impl<'a, 'b> FirstPass<'a, 'b> {
+                 break;
+             }
+ 
+-            if self.text[line_start_ix..ix].contains(html_end_tag) {
++            if (html_end_tag.len() > 3 && ["</pre>", "</style>", "</script>", "</textarea>"].iter().any(|t| self.text[line_start_ix..ix].to_ascii_lowercase().contains(t))) || self.text[line_start_ix..ix].contains(html_end_tag) {
+                 end_ix = ix;
+                 break;
+             }

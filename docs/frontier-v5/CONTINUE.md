@@ -15,19 +15,45 @@ then NIGHT-STATUS.md and GATE-LOG.md.
   commons-lang were each solved two of two in 4 to 12 minutes of agent time.
   Only treesitter-query-anchor-matching held (Astra 0 of 3). Every solve was
   diff-reviewed as genuine. Details: GATE-LOG.md.
-- The Fable 5.1 half has not run: the owner's Claude plan needs usage
-  credits for Fable 5.1.
+- The Fable 5.1 half ran on tree-sitter 2026-10-22 (Mac Studio): 1 of 3,
+  then 1 of 2 in the n=5 top-up, so Fable finished 2 of 5, at the admit bar.
+  Both solves diff-reviewed as genuine. **treesitter-query-anchor-matching is
+  admitted as F5-c**, the first admitted task of Frontier v5 (GATE-LOG.md).
+  The other five candidates are rejected on the Astra half; a Fable run on
+  them only decides Routine v1 recycling (PLAN.md section 3).
+- The first F2 candidate, comrak-gfm-tables-autolinks-parity (F2-rust), was
+  rejected on the Astra half 2026-10-22: 2 of 2 in 11 and 8 agent minutes,
+  every one of 5,410 parity cases matched, both solves genuine ports. Both
+  agents compiled the shipped C reference inside the sandbox and used it as
+  a differential oracle (GATE-LOG.md).
+- **black-fmt-skip-region-handling is admitted as F5-python (2026-10-25)**,
+  the first wave-1 task and the first to hold both references at 0 of 3:
+  Astra 6 minutes per attempt, Opus 5.5 13 to 38 minutes, every guard green,
+  every attempt missing the same held-out case. The Fable half was stopped at
+  94% of the weekly window and the owner made Claude Opus 5.5 the wave-1
+  second reference (DECISIONS.md 2026-10-25); `run_gate.sh opus` runs it and
+  a usage pre-flight refuses to start above GATE_USAGE_MAX. tree-sitter's
+  second prong is to be re-run under Opus 5.5 for comparability.
 
 ## Open decisions (owner)
 
-1. **Fable 5.1 access** for the gate's other half: usage credits on the
-   Claude plan, or an Anthropic API key (see "Running the gate").
-2. **F5 floors**: the first wave suggests the floors do not by themselves
-   make a task hard for Astra, and that upstream guard tests that a
-   symptom-level fix breaks are the discriminating property (tree-sitter).
-   Whether to add that as a floor in a v3 plan (PLAN-v2.md's freeze rule) is
-   the owner's call. It decides what to source next.
+1. ~~**Fable 5.1 access**~~ Resolved 2026-10-22: the owner's Claude
+   subscription runs Fable 5.1 with a `claude setup-token` token and no usage
+   credits (see "Running the gate").
+2. ~~**F5 floors**~~ Decided 2026-10-26: floor 8 is amended so a candidate
+   meets it by a guarded fix (route a) or by combination coverage (route b);
+   PLAN-v3.md section 2, with the measurement on five tasks. Black meets both
+   routes; pulldown-cmark and sqlparser-rs meet neither. (g') decided
+   2026-10-30: a floor-8 miss may be gated and admitted on the gate alone,
+   with the miss recorded (DECISIONS.md).
 3. Still open from v1: (d) publishing channel, (f) gold location.
+4. ~~**F2 shape**~~ Decided 2026-10-30: B1 (the agent image cannot build or
+   run the reference), without the comrak-v2 diagnostic (DECISIONS.md).
+   Original question: DESIGN.md's revisit rule says the slot should
+   take a larger subsystem, and the sandbox's C toolchain let both agents
+   turn the shipped reference into an oracle. Decide whether F2 ships the
+   reference in a form the sandbox cannot build, or accepts measuring
+   porting speed against an oracle, before sourcing the next F2 candidate.
 
 ## Setting up the host
 
@@ -38,8 +64,18 @@ then NIGHT-STATUS.md and GATE-LOG.md.
    architecture-neutral `vulcanbench/sandbox:v5-base`, `-cfamily`, `-jvm`,
    `-rust` tags for the host CPU).
 3. Tools the scripts expect: `uv` (Python 3.12 for probe_verifier.py and
-   run_controls.py), `gh`, git. Node and Rust are only needed inside images.
-4. Credentials, created by the owner on the new host, never copied through
+   run_controls.py), `gh`, git and git-lfs. Node and Rust are only needed
+   inside images. The global git config on these Macs sets
+   `filter.lfs.required`, so command-line git fails outright (`git status`
+   included) until `brew install git-lfs` has run (hit on the Mac Studio,
+   2026-10-22).
+4. Docker Desktop's VM memory must cover every task container that runs at
+   once: at least 8 GiB for a compiled or JVM task at concurrency 1 (they
+   declare 6 GiB), and at least 16 GiB before a Python or JavaScript task
+   runs two at a time under decision (e) (tseslint declares 8 GiB per
+   container). The Mac Studio came with 7.75 GiB allotted (2026-10-22); raise
+   it in Docker Desktop settings before any `-n 2` run.
+5. Credentials, created by the owner on the new host, never copied through
    the repo:
    - GPT-6 Astra: `codex login` (writes `~/.codex/auth.json`).
    - Fable 5.1: `claude setup-token`, saved to
@@ -55,14 +91,51 @@ then NIGHT-STATUS.md and GATE-LOG.md.
 reference on each task, three attempts, with the wave-1 identifiers,
 decision (e) concurrency, the early exit at two solves, and a stop on known
 infrastructure failures. Output goes to `~/vulcanbench-gate` (outside the
-repo). The next run is the Fable half, starting with the candidate that
-held:
+repo). `GATE_ATTEMPTS` (default 3) and `GATE_JOB_SUFFIX` (default empty)
+exist for the n=5 top-up, which runs two more attempts into a fresh job
+directory, for example:
 
-    scripts/frontier-v5/run_gate.sh fable treesitter-query-anchor-matching
+    GATE_ATTEMPTS=2 GATE_JOB_SUFFIX=-topup scripts/frontier-v5/run_gate.sh fable treesitter-query-anchor-matching
+
+Queued on the owner's approval: tree-sitter's second prong under Opus 5.5
+(`run_gate.sh opus treesitter-query-anchor-matching`, three attempts, for
+comparability with black). Wave 1 status (WAVE1-F5.md), every slot built:
+
+| Slot | Task (branch) | Floors | Gate |
+| --- | --- | --- | --- |
+| F5-python | black-fmt-skip-region-handling | 1 to 8 | **admitted** (Astra 0 of 3, Opus 5.5 0 of 3) |
+| F5-javascript | prettier-comment-attachment-stability (`frontier-v5-prettier`) | 1 to 8, route (a) | **admitted** 2026-10-27 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time); tamper-scan fix for `@ts-expect-error` re-validated after the gate |
+| F5-rust | pulldown-cmark-html-block-scanning (`frontier-v5-pulldown-cmark`) | 1 to 7, floor 8 not met; gated under (g') | **admitted** 2026-10-30 under (g') (Astra 0 of 3, Opus 5.5 1 of 5 after the top-up); floor-8 miss recorded |
+| F5-rust reserve | sqlparser-display-round-trip (`frontier-v5-sqlparser`) | 1 to 7, floor 8 not met | not gated |
+| F5-java | javaparser-member-resolution-scope (`frontier-v5-javaparser`) | 1 to 8, route (a) | **admitted** 2026-10-29 (Astra 0 of 3, Opus 5.5 0 of 3, one attempt at a time) |
+| F5-cpp | boosturl-path-compare-normalize (`frontier-v5-boosturl`) | 1 to 8, route (a) | **rejected** 2026-10-28 (Astra 2 of 2, genuine; slot needs a new candidate) |
+| F5-cpp replacement | cli11-toml-config-round-trip (`frontier-v5-cli11`) | 1 to 8, route (a); floor 3 by source coupling only | **admitted by the gate rule** 2026-10-30 (Astra 0 of 3, Opus 5.5 0 of 3), flagged: held only by two held-out guards (GATE-LOG.md); accepted by the owner 2026-10-30 with the flag kept |
+
+Gate runs have a standing approval from 2026-10-30 to 2026-11-06
+(DECISIONS.md): each validated candidate's Astra half, then its Opus 5.5
+half if Astra holds, one attempt at a time from a pushed bench tag; top-ups
+and anything outside the gate are still asked first. Queued 2026-10-30: the
+Astra half on cli11-toml-config-round-trip (`bench/2026-10-30-cli11-astra-gate`),
+then the Opus 5.5 half on pulldown-cmark-html-block-scanning under (g'). Wave 1 now has four admitted F5 slots
+(python, javascript, java, and c from the first wave); rust waits on
+decision (g') and cpp on CLI11's gate. Boost.URL was solved
+twice by Astra with self-written RFC 3986 differential checks (GATE-LOG.md);
+its replacement is CLI11's config reader and writer, chosen because its
+rules have no external specification or conformance data. The listed C++
+reserves were set aside on paper for the same reason (ada-url ships the WPT
+URLPattern data in its test binary; fkYAML and charconv have the YAML suite
+and libc printf). CLI11's six causes are independent, so it is the weakest
+F5 candidate on interaction; its DESIGN.md records that risk. javaparser dropped #5147 into the base (its
+held-out test passes at base in most runs; its DESIGN.md has the
+measurements). The Fable half on the five Astra-rejected candidates
+(Routine v1 recycling) stays optional.
 
 After each task: diff-review every solve against the task's base (PHASE1.md),
 then record the result in GATE-LOG.md. Back up the job directories to the
-private `vulcanbench-data-backup` repo the same way as the first wave.
+private `vulcanbench-data-backup` repo with its `tools/add-archive --stream
+suite-building --root ~/vulcanbench-gate` (one manifest per archive, so a
+sweep host backing up at the same time never conflicts; never edit that
+repo's README by hand).
 
 ## Evidence and history
 
@@ -70,6 +143,11 @@ private `vulcanbench-data-backup` repo the same way as the first wave.
   logs): private repo `morganlinton/vulcanbench-data-backup`,
   `archives/frontier-v5-gate-2026-10-18.tar.gz.part-*`, restore with
   `cat archives/<name>.tar.gz.part-* | tar -xzf - -C <destination>`.
+- Fable half raw evidence (both tree-sitter job directories, Harbor logs and
+  the run_gate.sh console logs, the whole `~/vulcanbench-gate` tree): same
+  repo, `archives/frontier-v5-gate-2026-10-22-fable.tar.gz.part-*`.
+- comrak Astra run: same repo,
+  `archives/frontier-v5-gate-2026-10-22-astra-comrak.tar.gz.part-*`.
 - Validation and control tooling: `scripts/frontier-v5/probe_verifier.py`
   (base 0, gold 1, cheating probes 0) and `scripts/frontier-v5/run_controls.py`
   (F5 single-fix and leave-one-out controls).

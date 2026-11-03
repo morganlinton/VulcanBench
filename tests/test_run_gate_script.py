@@ -68,6 +68,13 @@ if mode == "finish":
     with open(os.path.join(jd, "result.json"), "w") as fh:
         json.dump({"finished_at": "2026-10-29T12:03:00"}, fh)
     sys.exit(0)
+if mode == "solve3":
+    trial(0, 1); trial(1, 1)
+    time.sleep(1.0)
+    trial(2, 1)
+    with open(os.path.join(jd, "result.json"), "w") as fh:
+        json.dump({"finished_at": "2026-10-29T12:03:00"}, fh)
+    sys.exit(0)
 if mode == "solve2":
     trial(0, 1); trial(1, 1)
 elif mode == "infra":
@@ -283,6 +290,15 @@ def test_early_reject_after_two_solves(gate: Gate) -> None:
     assert (gate.out / "jobs" / job / "cancelled").exists()
 
 
+def test_early_exit_off_runs_every_attempt(gate: Gate) -> None:
+    r = gate.run("astra", gate.task, FAKE_HARBOR_MODE="solve3", GATE_EARLY_EXIT="0")
+    assert r.returncode == 0, r.stdout + r.stderr
+    st = gate.status(f"astra-{gate.task}")
+    assert st["phase"] == "done" and not st["stop_reason"] and st["solves"] == 3
+    assert "early exit off" in r.stdout and "early reject" not in r.stdout
+    assert not (gate.out / "jobs" / f"astra-{gate.task}" / "cancelled").exists()
+
+
 def test_infrastructure_failure_stops_the_run(gate: Gate) -> None:
     r = gate.run("astra", gate.task, FAKE_HARBOR_MODE="infra")
     assert r.returncode == 1, r.stdout + r.stderr
@@ -316,6 +332,7 @@ def test_refusals_before_harbor_starts(gate: Gate) -> None:
     assert gate.run("nope", gate.task).returncode == 2
     assert gate.run("astra", "missing-task").returncode == 2
     assert gate.run("astra", gate.task, GATE_ATTEMPTS="4").returncode == 2
+    assert gate.run("astra", gate.task, GATE_EARLY_EXIT="no").returncode == 2
     (gate.out / "jobs" / f"astra-{gate.task}").mkdir(parents=True)
     r = gate.run("astra", gate.task)
     assert r.returncode == 2 and "exists; move it aside" in r.stderr

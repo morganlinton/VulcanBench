@@ -63,6 +63,54 @@ reads no stdin), so it is visible in the host's process table during a run.
 Kimi Code records the model it requested, not the id in Moonshot's response, so
 model identity is `harness-recorded`.
 
+## 2026-11-02: Frontier v5 release 1 confirmation runs, run conditions
+
+### Decision
+
+Owner, in chat, 2026-11-02, answering the revisit trigger of decision (n)
+(2026-10-31 entry "decisions (k) to (n)"): no dedicated gate login. The GPT-6
+Astra confirmation runs use the personal Codex login (`~/.codex/auth.json`)
+with web search, connected apps, plugins and browser tools turned off by
+`run_gate.sh` and `scripts/frontier-v5/codex-gate.toml`, as every Astra gate
+run since 2026-10-31 did. Every Astra attempt's log is still checked for app
+or web calls before its result counts.
+
+The 42 confirmation runs (decision (m): 7 tasks, 2 references, 3 attempts)
+run under these conditions:
+
+- From a run worktree detached at a bench tag cut from main after the
+  release 1 lock (PR #258) and the runner change below, never from a gate
+  worktree. The suite lock is checked in that worktree before the first run.
+- Through `scripts/frontier-v5/run_gate.sh` at the gate settings (medium
+  effort, the pinned CLI versions, web tools off, usage pre-flight cap 0.85),
+  with `GATE_EARLY_EXIT=0` so every attempt runs to the end and counts
+  (the headline is complete passes over 21), `GATE_JOB_SUFFIX=-confirm`, and
+  `GATE_OUT=~/vulcanbench-confirm`, so no job directory mixes with a gate job.
+- One attempt at a time (`GATE_CONCURRENCY=1`) under the shared Docker lock.
+- ferrycore-crossing-opaque-parity runs from a local copy of the run worktree
+  with the task copied in from the private repo at the locked commit; that
+  copy's commit and any tag stay local (decision (f)).
+
+### Evidence
+
+The connected-apps exposure (2026-10-31 entry) is closed by configuration:
+an audit of every Codex gate rollout found no Gmail, Calendar or Spaces
+call, and the infrastructure guard stops a run on any `codex_apps` or
+`web__run` call. Without `GATE_EARLY_EXIT=0` the gate's two-solve early exit
+would cap a confirmation task at 2 of 3 and bias the headline down.
+
+### Revisit triggers
+
+- Any Astra attempt that reaches a connected app or provider-side web tool:
+  stop the runs and revisit the dedicated login.
+- A change to any pinned version or setting: that is a new suite version,
+  not a confirmation of this one.
+
+### What this touched
+
+`scripts/frontier-v5/run_gate.sh` (`GATE_EARLY_EXIT`, default unchanged) and
+its tests. No task, lock or result.
+
 ## 2026-11-01: the local GUI launches suites only; gate runs go back to the terminal
 
 ### Decision

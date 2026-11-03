@@ -10,7 +10,12 @@ from pathlib import Path
 
 import pytest
 
-from harness.regrade import find_run_dirs, regrade_run, resolve_tasks_root
+from harness.regrade import (
+    find_run_dirs,
+    regrade_run,
+    resolve_run_tasks_root,
+    resolve_tasks_root,
+)
 from harness.tasks import load_task, prepare_workspace
 
 pytestmark = pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
@@ -151,3 +156,55 @@ def test_regrade_missing_patch_is_reported(tmp_path: Path) -> None:
     )
     rec = regrade_run(run_dir, tasks_base=tmp_path, sandbox="local")
     assert "no final.patch" in rec["error"]
+
+
+def test_resolve_run_tasks_root_prefers_the_recorded_suite(tmp_path: Path) -> None:
+    in_tree = tmp_path / "tasks"
+    _make_task(in_tree, f2p_expected=2)
+    home = tmp_path / "home"
+    external = home / "acme-slice"
+    _make_task(external, f2p_expected=3)
+
+    recorded = {"task_id": "fix-f", "source": {"suite": {"suite_dir": str(external)}}}
+    assert resolve_run_tasks_root(recorded, tmp_path) == external
+    # A recorded suite that no longer defines the task falls back to the scan.
+    gone = {"task_id": "fix-f", "source": {"suite": {"suite_dir": str(tmp_path / "gone")}}}
+    assert resolve_run_tasks_root(gone, tmp_path) == in_tree
+    plain = {"task_id": "fix-f", "source": {"harness": None}}
+    assert resolve_run_tasks_root(plain, tmp_path) == in_tree
+    # Nothing in tasks/: the suites home is scanned last.
+    assert resolve_run_tasks_root(plain, tmp_path / "none", suites_home=home) == external
+    assert resolve_run_tasks_root(plain, tmp_path / "none") is None
+
+
+def test_regrade_uses_the_run_recorded_suite_dir(tmp_path: Path) -> None:
+    """A run of an external suite regrades against that suite, not a same-named
+    task under tasks/ (which here demands a different value)."""
+    in_tree = tmp_path / "tasks"
+    _make_task(in_tree, f2p_expected=3)
+    external = tmp_path / "home" / "acme-slice"
+    _make_task(external, f2p_expected=2)
+    patch = _patch_that_returns(external, tmp_path, value=2)
+
+    run_dir = tmp_path / "runs" / "fix-f-ext"
+    _make_run(run_dir, patch, old_functional=0.0)
+    summary = json.loads((run_dir / "summary.json").read_text())
+    summary["source"] = {"suite": {"kind": "external", "suite_dir": str(external)}}
+    (run_dir / "summary.json").write_text(json.dumps(summary))
+
+    rec = regrade_run(run_dir, tasks_base=tmp_path, sandbox="local", write=False)
+    assert rec["new_functional"] == 1.0  # external task wants 2; the in-tree one wants 3
+
+    # The suites home alone (no recorded suite) also finds the task.
+    summary.pop("source")
+    (run_dir / "summary.json").write_text(json.dumps(summary))
+    rec = regrade_run(
+        run_dir,
+        tasks_base=tmp_path / "none",
+        sandbox="local",
+        write=False,
+        suites_home=tmp_path / "home",
+    )
+    assert rec["new_functional"] == 1.0
+    rec = regrade_run(run_dir, tasks_base=tmp_path / "none", sandbox="local", write=False)
+    assert "not found" in rec["error"]

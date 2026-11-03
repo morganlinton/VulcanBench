@@ -307,3 +307,47 @@ def test_audit_run_combines_both_channels(tmp_path: Path) -> None:
     assert audit["filesystem"]["verdict"] == "answer_key_access"
     # A run clean on the web is still contaminated if it read the answer key.
     assert audit["contaminated"] is True
+
+
+def test_fs_extra_root_flags_answer_key_outside_tasks_tree(tmp_path: Path) -> None:
+    """A suite in a suites home has no ``/tasks/`` in its path; its gold patch is
+    still the answer key when the suite directory is passed as an extra root."""
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    home = tmp_path / "vulcanbench-suites"
+    suite_dir = home / "acme-slice"
+    gold = f"{suite_dir}/oss-task/gold_patch.diff"
+    p = _stream(tmp_path, [_read(gold)])
+
+    # Without the extra root the read is merely out of the workspace.
+    plain = audit_filesystem(p, ws, "oss-task", repo_root=tmp_path / "repo")
+    assert plain["verdict"] == "out_of_workspace" and plain["contaminated"] is False
+
+    flagged = audit_filesystem(
+        p, ws, "oss-task", repo_root=tmp_path / "repo", extra_roots=(suite_dir,)
+    )
+    assert flagged["verdict"] == "answer_key_access" and flagged["contaminated"] is True
+    assert flagged["answer_key_paths"] == [gold]
+
+    # Another task of the same external suite is benchmark data, not the answer key.
+    (tmp_path / "other").mkdir()
+    other = _stream(tmp_path / "other", [_shell(f"cat {suite_dir}/other-task/tests/t.py")])
+    audit = audit_filesystem(
+        other, ws, "oss-task", repo_root=tmp_path / "repo", extra_roots=(suite_dir,)
+    )
+    assert audit["verdict"] == "benchmark_data_access"
+
+    # audit_run forwards the roots; a relative root resolves against cwd.
+    combined = audit_run(
+        p, {"id": "oss-task"}, ws, repo_root=tmp_path / "repo", extra_roots=(suite_dir,)
+    )
+    assert (
+        combined["filesystem"]["verdict"] == "answer_key_access"
+        and combined["contaminated"] is True
+    )
+    assert (
+        audit_filesystem(p, ws, "oss-task", repo_root=tmp_path / "repo", extra_roots=(home,))[
+            "verdict"
+        ]
+        == "answer_key_access"
+    )

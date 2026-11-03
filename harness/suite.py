@@ -3,11 +3,19 @@
 A *suite* is a named set of tasks (e.g. ``v1`` → the tasks under ``tasks/v1/``).
 ``run_suite`` runs a model against every task in the suite, tags each run so the
 leaderboard can group it, and writes an aggregate ``suite.json``.
+
+Suites can also live *outside* the checkout, in a suites home
+(``~/vulcanbench-suites/<suite-id>/`` by default, ``[runner].suites_home`` in
+``vulcanbench.toml``). Those are built from a user's own repository with
+``vulcanbench suite ...`` and are never committed here. ``load_suite`` resolves
+an in-tree name first and the suites home second; an external suite only runs
+when its ``suite.lock.json`` matches the tasks on disk (``harness.suite_lock``).
 """
 
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -21,11 +29,15 @@ from harness.agent.providers import NonRetryableProviderError, ProviderError
 from harness.leaderboard import aggregate_by_model, scan_leaderboard
 from harness.provenance import source_provenance
 from harness.sandbox.docker_executor import SandboxError
+from harness.settings import runner_settings
 from harness.task_metadata import repo_scale
 from harness.tasks import list_task_ids, load_task
 from harness.verifier import VerifierInfrastructureError
 
 DEFAULT_TASKS_BASE = Path("tasks")
+#: Environment override for ``[runner].suites_home`` (the GUI's convention for
+#: every ``[runner]`` key).
+SUITES_HOME_ENV = "VULCANBENCH_RUNNER_SUITES_HOME"
 SUITE_ALIASES = {
     "v1-micro": "v1",
     "v1-large": "v1",
@@ -73,10 +85,106 @@ class Suite:
     #: Human-facing suite name from suite.json ``display_name`` (e.g. "VulcanBench
     #: Coding Intelligence Index"); falls back to ``name`` when the manifest has none.
     display_name: str = ""
+    #: True when the suite was loaded from a suites home rather than ``tasks/``.
+    external: bool = False
+    #: The suites home an external suite came from (None for in-tree suites).
+    suites_home: Path | None = None
+    #: ``version`` from suite.json, when the manifest has one.
+    version: str | None = None
 
     def __post_init__(self) -> None:
         if not self.display_name:
             self.display_name = self.name
+
+    @property
+    def suite_dir(self) -> Path:
+        """The directory holding ``suite.json`` and the task directories."""
+        return self.tasks_root
+
+    def provenance(self) -> dict[str, Any]:
+        """The ``source.suite`` block every run summary records.
+
+        Names the suite, where it was loaded from and, when it is frozen, the
+        lock it was frozen to: ``lock_digest`` is the content digest of
+        ``suite.lock.json`` (:func:`harness.suite_lock.lock_digest`), so two
+        summaries with the same digest were scored against the same task set.
+        Lock fields are ``None`` for a suite without a lock.
+        """
+        from harness.suite_lock import lock_digest, read_lock  # noqa: PLC0415, import cycle
+
+        lock = read_lock(self.tasks_root)
+        return {
+            "kind": "external" if self.external else "in-tree",
+            "id": self.name,
+            "display_name": self.display_name,
+            "suites_home": str(self.suites_home) if self.suites_home is not None else None,
+            "suite_dir": str(self.tasks_root),
+            "lock_version": None if lock is None else lock.get("version"),
+            "lock_digest": None if lock is None else lock_digest(lock),
+            "frozen_at": None if lock is None else lock.get("frozen_at"),
+            "n_tasks": len(self.task_ids),
+        }
+
+
+def resolve_suites_home(explicit: Path | str | None = None) -> Path:
+    """Where external suites live: the flag, else the environment, else the settings file.
+
+    ``explicit`` is a ``--suites-home`` value. Otherwise ``VULCANBENCH_RUNNER_SUITES_HOME``
+    wins over ``[runner].suites_home`` in ``vulcanbench.toml`` (default
+    ``~/vulcanbench-suites``). The result is ``~``-expanded and absolute.
+    """
+    value: str | None = None if explicit is None else str(explicit)
+    if not value:
+        value = os.environ.get(SUITES_HOME_ENV) or None
+    if not value:
+        value = str(runner_settings()["suites_home"])
+    return Path(value).expanduser().absolute()
+
+
+def load_suite_dir(
+    suite_dir: Path,
+    *,
+    name: str | None = None,
+    external: bool = False,
+    suites_home: Path | None = None,
+) -> Suite:
+    """Load the suite whose directory is ``suite_dir``: the one reader of ``suite.json``.
+
+    In-tree (``external=False``) the manifest is optional and pins a subset
+    (``full`` or ``tasks``); without one, every task directory is in. For an
+    external suite the manifest is required and its ``tasks`` list is the
+    suite: an empty list is an empty suite, never every subdirectory.
+    """
+    manifest = suite_dir / "suite.json"
+    data: dict[str, Any] = {}
+    if manifest.is_file():
+        raw = json.loads(manifest.read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            data = raw
+    elif external:
+        raise FileNotFoundError(f"external suite has no manifest: {manifest}")
+    elif not suite_dir.is_dir():
+        raise FileNotFoundError(f"suite directory not found: {suite_dir}")
+
+    if external:
+        task_ids = [str(t) for t in (data.get("tasks") or [])]
+    else:
+        task_ids = list(data.get("full") or data.get("tasks") or list_task_ids(suite_dir))
+    raw_display = data.get("display_name")
+    display_name = raw_display if isinstance(raw_display, str) else ""
+    raw_version = data.get("version")
+    version = None if raw_version is None else str(raw_version)
+    raw_id = data.get("id")
+    suite_name = name or (raw_id if isinstance(raw_id, str) and raw_id else suite_dir.name)
+    return Suite(
+        name=suite_name,
+        tasks_root=suite_dir,
+        task_ids=task_ids,
+        display_name=display_name,
+        external=external,
+        suites_home=suites_home,
+        version=version,
+    )
 
 
 def _scale_filter(tasks_root: Path, tier: str) -> list[str]:
@@ -103,7 +211,12 @@ def _language_filter(tasks_root: Path, language: str) -> list[str]:
     return out
 
 
-def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
+def load_suite(
+    name: str,
+    tasks_base: Path = DEFAULT_TASKS_BASE,
+    *,
+    suites_home: Path | None = None,
+) -> Suite:
     """Load a suite by name.
 
     The task set is every task directory under ``tasks/<name>/``, unless a
@@ -114,6 +227,10 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
     mergeability tiers (carbyne is the harder one, the naive solution is subtly
     wrong). Run them with a ``--judge-model`` different from the model under test
     to avoid self-grading.
+
+    Resolution order: an alias or ``tasks/<name>`` in the checkout first, then
+    ``<suites_home>/<name>/suite.json`` (see :func:`resolve_suites_home`). An
+    in-tree suite always wins over an external one of the same id.
     """
     if name in SUITE_ALIASES:
         tasks_root = tasks_base / SUITE_ALIASES[name]
@@ -139,19 +256,15 @@ def load_suite(name: str, tasks_base: Path = DEFAULT_TASKS_BASE) -> Suite:
 
     dir_name = SUITE_NAME_ALIASES.get(name, name)
     tasks_root = tasks_base / dir_name
-    if not tasks_root.is_dir():
-        raise FileNotFoundError(f"suite {name!r} not found under {tasks_base}")
-    manifest = tasks_root / "suite.json"
-    display_name = ""
-    if manifest.exists():
-        data = json.loads(manifest.read_text(encoding="utf-8"))
-        task_ids = list(data.get("full") or data.get("tasks") or list_task_ids(tasks_root))
-        raw_display = data.get("display_name")
-        if isinstance(raw_display, str):
-            display_name = raw_display
-    else:
-        task_ids = list_task_ids(tasks_root)
-    return Suite(name=dir_name, tasks_root=tasks_root, task_ids=task_ids, display_name=display_name)
+    if tasks_root.is_dir():
+        return load_suite_dir(tasks_root, name=dir_name)
+    home = resolve_suites_home(suites_home)
+    external_dir = home / name
+    if (external_dir / "suite.json").is_file():
+        return load_suite_dir(external_dir, name=name, external=True, suites_home=home)
+    raise FileNotFoundError(
+        f"suite {name!r} not found under {tasks_base} (in-tree) or {home} (suites home)"
+    )
 
 
 def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget loop + summary
@@ -165,6 +278,7 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
     only_missing: bool = False,
     *,
     max_infra_retries: int = 2,
+    suites_home: Path | None = None,
     **run_kwargs: Any,
 ) -> dict[str, Any]:
     """Run ``model`` against every task in the suite, ``repeat`` times each.
@@ -192,9 +306,17 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
     different task drops on each run. Retries obey the spend cap like any other
     unit and are counted in ``n_infra_retries``.
 
+    ``suites_home`` is where an external suite is looked up when ``name`` is
+    not in ``tasks/``. An external suite must be frozen and its lock must match
+    the tasks on disk (:func:`harness.suite_lock.require_locked`); otherwise
+    :class:`harness.suite_lock.SuiteLockError` is raised before any run starts.
+    There is no override: edit the suite, re-freeze, then run.
+
     Returns the suite summary (also written to ``<output_dir>/<suite_id>/suite.json``).
     Extra keyword args (judges, sandbox, image, network, max_steps, …) pass
-    through to :func:`run_agent`.
+    through to :func:`run_agent`, as does ``suite_source`` (the suite's
+    :meth:`Suite.provenance`), which every run summary records under
+    ``source.suite``.
     """
     if repeat < 1:
         raise ValueError("repeat must be >= 1")
@@ -202,7 +324,12 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
         raise ValueError("max_concurrency must be >= 1")
     if max_cost is not None and max_cost <= 0:
         raise ValueError("max_cost must be > 0")
-    suite = load_suite(name, tasks_base)
+    suite = load_suite(name, tasks_base, suites_home=suites_home)
+    if suite.external:
+        from harness.suite_lock import require_locked  # noqa: PLC0415, import cycle
+
+        require_locked(suite)
+    suite_source = suite.provenance()
     suite_id = f"suite-{uuid.uuid4().hex[:8]}"
     started_at = datetime.now(UTC)
 
@@ -237,6 +364,7 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
             tasks_root=suite.tasks_root,
             suite=suite.name,
             suite_id=suite_id,
+            suite_source=suite_source,
             **run_kwargs,
         )
         summary = res["summary"]
@@ -348,7 +476,7 @@ def run_suite(  # noqa: PLR0912, PLR0915, linear scheduler: validation + budget 
         "errors": errors,
         "skipped": skipped,
         "aggregate": aggregate,
-        "source": source_provenance().as_summary(),
+        "source": {**source_provenance().as_summary(), "suite": suite_source},
     }
     suite_dir = output_dir / suite_id
     suite_dir.mkdir(parents=True, exist_ok=True)

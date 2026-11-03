@@ -1,8 +1,12 @@
 """VulcanBench CLI entrypoint (argparse, stdlib only).
 
 Commands: run, estimate, effort-sweep, compare, regrade, leaderboard, report,
-calibrate, replay, validate-task, list-tasks, audit-runs, plus the ``harness``
-and ``voice`` command groups. See ``vulcanbench --help``.
+calibrate, replay, validate-task, list-tasks, audit-runs, plus the ``harness``,
+``suite`` and ``voice`` command groups. See ``vulcanbench --help``.
+
+Suites built outside the checkout (``vulcanbench suite ...``) are found through
+``--suites-home`` on the commands that take ``--suite``; without the flag the
+``[runner].suites_home`` setting applies (``harness.suite.resolve_suites_home``).
 """
 
 from __future__ import annotations
@@ -52,6 +56,8 @@ from harness.report import build_report, to_markdown
 from harness.sandbox.docker_executor import ResourceSpec, SandboxError
 from harness.settings import BlockedEffortError, check_effort_allowed
 from harness.suite import SUITE_ALIASES, load_suite, run_suite
+from harness.suite_cli import register_suite_commands
+from harness.suite_lock import SuiteLockError
 from harness.tasks import list_task_ids
 from harness.validate import main as validate_main
 from harness.verifier import VerifierInfrastructureError
@@ -194,8 +200,14 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
     allow_dirty: bool = False,
     use_priors: bool = True,
     max_infra_retries: int = 2,
+    suites_home: Path | None = None,
 ) -> None:
-    """Run an agent against a task or a whole suite, recording full traces."""
+    """Run an agent against a task or a whole suite, recording full traces.
+
+    A suite outside the checkout (``--suites-home``, default
+    ``[runner].suites_home``) runs only when its ``suite.lock.json`` matches
+    its tasks on disk; there is no override for that check.
+    """
     try:
         check_effort_allowed(effort)
     except BlockedEffortError as exc:
@@ -254,8 +266,11 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         echo(f"dry-run would run {target} model={model} sandbox={sandbox}{effort_note}")
         if is_priced(model):
             try:
+                plan_tasks_root: Path | None = None
                 if suite is not None:
-                    task_ids = load_suite(suite).task_ids
+                    loaded = load_suite(suite, suites_home=suites_home)
+                    task_ids = loaded.task_ids
+                    plan_tasks_root = loaded.tasks_root
                 else:
                     assert task is not None  # one of --task/--suite is required
                     task_ids = [task]
@@ -265,6 +280,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
                     repeat=repeat,
                     judges=judges,
                     runs_dir=output_dir,
+                    tasks_root=plan_tasks_root,
                     use_priors=use_priors,
                 )
                 _print_cost_estimate(plan)
@@ -307,6 +323,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
                 max_cost,
                 only_missing,
                 max_infra_retries=max_infra_retries,
+                suites_home=suites_home,
             )
         else:
             pass_at_1, n_incomplete = _run_single(
@@ -326,7 +343,9 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
     except VerifierInfrastructureError as e:
         echo(f"verifier infrastructure error {e}")
         raise SystemExit(3) from e
-    except (ValueError, FileNotFoundError) as e:
+    except (ValueError, FileNotFoundError, SuiteLockError) as e:
+        # SuiteLockError is the external-suite twin of DirtyTreeError: the
+        # task set is not what a result could be tied to, so nothing runs.
         echo(f"error {e}")
         raise SystemExit(1) from e
 
@@ -415,6 +434,7 @@ def estimate(
     runs_dir: Path = _RUNS_DIR,
     use_priors: bool = True,
     json_output: bool = False,
+    suites_home: Path | None = None,
 ) -> None:
     """Estimate API spend before running a benchmark."""
     if (task is None) == (suite is None):
@@ -428,8 +448,11 @@ def estimate(
         raise SystemExit(1)
 
     try:
+        tasks_root: Path | None = None
         if suite is not None:
-            task_ids = load_suite(suite).task_ids
+            loaded = load_suite(suite, suites_home=suites_home)
+            task_ids = loaded.task_ids
+            tasks_root = loaded.tasks_root
         else:
             assert task is not None  # one of --task/--suite is required
             task_ids = [task]
@@ -439,6 +462,7 @@ def estimate(
             repeat=repeat,
             judges=judges,
             runs_dir=runs_dir,
+            tasks_root=tasks_root,
             use_priors=use_priors,
         )
     except (ValueError, FileNotFoundError) as e:
@@ -534,6 +558,7 @@ def _run_suite(
     max_cost: float | None = None,
     only_missing: bool = False,
     max_infra_retries: int = 2,
+    suites_home: Path | None = None,
 ) -> tuple[float | None, int]:
     """Run a suite; returns (pass@1, n_incomplete) where n_incomplete counts
     errored + budget-skipped runs."""
@@ -551,6 +576,7 @@ def _run_suite(
         max_cost=max_cost,
         only_missing=only_missing,
         max_infra_retries=max_infra_retries,
+        suites_home=suites_home,
         **run_kwargs,
     )
     covered = result.get("covered_cached") or []
@@ -604,6 +630,7 @@ def effort_sweep(  # noqa: PLR0912, PLR0915, CLI entry: validation + per-effort 
     timeout: float | None = None,
     dry_run: bool = False,
     allow_dirty: bool = False,
+    suites_home: Path | None = None,
 ) -> None:
     """Run a suite across normalized reasoning-effort levels."""
     try:
@@ -665,6 +692,7 @@ def effort_sweep(  # noqa: PLR0912, PLR0915, CLI entry: validation + per-effort 
                     timeout_s=timeout,
                     max_run_cost=max_run_cost,
                     experiment_id=experiment_id,
+                    suites_home=suites_home,
                 )
             )
     except SandboxError as e:
@@ -676,7 +704,7 @@ def effort_sweep(  # noqa: PLR0912, PLR0915, CLI entry: validation + per-effort 
     except VerifierInfrastructureError as e:
         echo(f"verifier infrastructure error {e}")
         raise SystemExit(3) from e
-    except (ValueError, FileNotFoundError) as e:
+    except (ValueError, FileNotFoundError, SuiteLockError) as e:
         echo(f"error {e}")
         raise SystemExit(1) from e
 
@@ -961,6 +989,7 @@ def validate_task(
     path: Path,
     sandbox: str = "local",
     image: str | None = None,
+    json_output: bool = False,
 ) -> None:
     """Validate task(s): schema, gold-solves, fail-to-pass-real, determinism."""
     if sandbox not in {"local", "docker"}:
@@ -971,6 +1000,8 @@ def validate_task(
         argv.extend(["--sandbox", sandbox])
     if image is not None:
         argv.extend(["--image", image])
+    if json_output:
+        argv.append("--json")
     raise SystemExit(validate_main(argv))
 
 
@@ -996,6 +1027,7 @@ def regrade(
     image: str | None = None,
     write: bool = True,
     json_output: bool = False,
+    suites_home: Path | None = None,
 ) -> None:
     """Re-grade existing run(s) against the current task definition, at zero API cost.
 
@@ -1014,7 +1046,14 @@ def regrade(
 
     records = []
     for rd in run_dirs:
-        rec = regrade_run(rd, tasks_base=tasks_base, sandbox=sandbox, image=image, write=write)
+        rec = regrade_run(
+            rd,
+            tasks_base=tasks_base,
+            sandbox=sandbox,
+            image=image,
+            write=write,
+            suites_home=suites_home,
+        )
         records.append(rec)
 
     if json_output:
@@ -1057,6 +1096,7 @@ def compare(
     tasks_base: Path = _TASKS_BASE,
     incomplete: bool = False,
     json_output: bool = False,
+    suites_home: Path | None = None,
 ) -> None:
     """Build a model x effort comparison for a frozen suite from cached runs only.
 
@@ -1066,7 +1106,9 @@ def compare(
     the suite, then re-run ``compare``: the baselines are read from cache.
     """
     try:
-        matrix = build_matrix(suite, runs_dir=runs_dir, tasks_base=tasks_base)
+        matrix = build_matrix(
+            suite, runs_dir=runs_dir, tasks_base=tasks_base, suites_home=suites_home
+        )
     except FileNotFoundError as e:
         echo(f"error {e}")
         raise SystemExit(1) from e
@@ -1118,6 +1160,7 @@ def audit_runs(
     runs_dir: Path = _RUNS_DIR,
     tasks_base: Path = _TASKS_BASE,
     write: bool = True,
+    suites_home: Path | None = None,
 ) -> None:
     """Audit CLI-harness runs for web and filesystem leakage.
 
@@ -1132,10 +1175,16 @@ def audit_runs(
 
     meta_cache: dict[str, dict[str, Any]] = {}
 
-    def metadata_for(task_id: str) -> dict[str, Any]:
+    def metadata_for(task_id: str, suite_dir: Path | None) -> dict[str, Any]:
+        # The suite the run recorded first; then tasks/; then the suites home.
         if task_id not in meta_cache:
-            hits = list(tasks_base.glob(f"*/{task_id}/metadata.json"))
-            meta_cache[task_id] = json.loads(hits[0].read_text()) if hits else {}
+            candidates: list[Path] = []
+            if suite_dir is not None and (suite_dir / task_id / "metadata.json").is_file():
+                candidates.append(suite_dir / task_id / "metadata.json")
+            candidates.extend(tasks_base.glob(f"*/{task_id}/metadata.json"))
+            if suites_home is not None:
+                candidates.extend(suites_home.glob(f"*/{task_id}/metadata.json"))
+            meta_cache[task_id] = json.loads(candidates[0].read_text()) if candidates else {}
         return meta_cache[task_id]
 
     counts: dict[str, int] = {}
@@ -1148,10 +1197,14 @@ def audit_runs(
             continue
         if "cli_agent" not in summary:
             continue
+        recorded = (summary.get("source") or {}).get("suite") or {}
+        suite_dir = Path(str(recorded["suite_dir"])) if recorded.get("suite_dir") else None
+        extra_roots = tuple(p for p in (suite_dir, suites_home) if p is not None)
         audit = audit_run(
             sp.parent / "cli-agent-stream.jsonl",
-            metadata_for(summary["task_id"]),
+            metadata_for(summary["task_id"], suite_dir),
             sp.parent / "workspace",
+            extra_roots=extra_roots,
         )
         audited += 1
         for channel in ("web", "filesystem"):
@@ -1243,6 +1296,13 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
         type=Path,
         default=_TASKS_V1,
         help="Task definitions root for --task runs (suites derive their own)",
+    )
+    p.add_argument(  # GUI marker: run --suites-home
+        "--suites-home",
+        dest="suites_home",
+        type=Path,
+        default=None,
+        help="Where suites built outside the checkout live (default: [runner].suites_home in vulcanbench.toml, ~/vulcanbench-suites)",
     )
     p.add_argument(
         "--model",
@@ -1470,9 +1530,23 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
     p.add_argument(
         "--json", dest="json_output", action="store_true", help="Emit machine-readable JSON"
     )
+    p.add_argument(
+        "--suites-home",
+        dest="suites_home",
+        type=Path,
+        default=None,
+        help="Where suites built outside the checkout live (default: [runner].suites_home in vulcanbench.toml, ~/vulcanbench-suites)",
+    )
 
     p = add_command(commands, "effort-sweep", effort_sweep)
     p.add_argument("--suite", dest="suite", required=True, help="Suite to sweep, e.g. v1")
+    p.add_argument(
+        "--suites-home",
+        dest="suites_home",
+        type=Path,
+        default=None,
+        help="Where suites built outside the checkout live (default: [runner].suites_home in vulcanbench.toml, ~/vulcanbench-suites)",
+    )
     p.add_argument(
         "--model", "-m", dest="model", required=True, help="provider:model e.g. openai:gpt-5.1"
     )
@@ -1579,6 +1653,13 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
     p = add_command(commands, "compare", compare)
     p.add_argument("--suite", dest="suite", required=True, help="Suite to compare, e.g. v2")
     p.add_argument(
+        "--suites-home",
+        dest="suites_home",
+        type=Path,
+        default=None,
+        help="Where suites built outside the checkout live (default: [runner].suites_home in vulcanbench.toml, ~/vulcanbench-suites)",
+    )
+    p.add_argument(
         "--runs-dir",
         "-o",
         dest="runs_dir",
@@ -1639,6 +1720,13 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
     )
     p.add_argument(
         "--json", dest="json_output", action="store_true", help="Emit the records as JSON"
+    )
+    p.add_argument(
+        "--suites-home",
+        dest="suites_home",
+        type=Path,
+        default=None,
+        help="Where suites built outside the checkout live (default: [runner].suites_home in vulcanbench.toml, ~/vulcanbench-suites)",
     )
 
     p = add_command(commands, "leaderboard", leaderboard)
@@ -1728,6 +1816,12 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
     p.add_argument(
         "--image", dest="image", default=None, help="Docker sandbox image when --sandbox docker"
     )
+    p.add_argument(
+        "--json",
+        dest="json_output",
+        action="store_true",
+        help="One JSON document on stdout (human report on stderr)",
+    )
 
     p = add_command(commands, "list-tasks", list_tasks)
     p.add_argument("--category", dest="category", default=None, help="Filter category")
@@ -1756,6 +1850,13 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
         help="Persist web_audit into each run's summary.json",
     )
     g.add_argument("--dry-run", dest="write", action="store_false", help="opposite of --write")
+    p.add_argument(
+        "--suites-home",
+        dest="suites_home",
+        type=Path,
+        default=None,
+        help="Where suites built outside the checkout live (default: [runner].suites_home in vulcanbench.toml, ~/vulcanbench-suites)",
+    )
 
     p = add_command(commands, "tool-calls", record_tool_calls)
     p.add_argument(
@@ -1787,6 +1888,9 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
     p.add_argument(
         "--json", dest="json_output", action="store_true", help="Emit machine-readable JSON"
     )
+
+    sub = add_group(commands, "suite", "Build, freeze and check suites outside the checkout")
+    register_suite_commands(sub)  # GUI marker: suite command group
 
     register_voice_commands(
         add_group(commands, "voice", "Voice Eval Suite: text-vs-audio delta measurement")

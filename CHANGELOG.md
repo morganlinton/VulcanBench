@@ -27,6 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GUI housekeeping**: orphaned sandbox containers listed and removed by id
   only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
   streaming log tail (server-sent events) on live run pages.
+- **Suites outside the checkout**: `vulcanbench suite` (`init`, `list`, `show`,
+  `add-task`, `remove-task`, `validate`, `freeze`, `check`, all with `--json`)
+  builds and freezes a suite in a suites home (`[runner].suites_home`, default
+  `~/vulcanbench-suites`). `--suites-home` reaches `run`, `estimate`,
+  `effort-sweep`, `compare`, `regrade` and `audit-runs`; `run` refuses an
+  external suite whose lock is missing or drifted; every suite run records
+  `source.suite` with the lock digest; the run audit treats an external suite
+  directory as benchmark data; `scripts/validate_tasks.py` gains `--json`.
+  `estimate --suite` now prices the suite's own tasks root.
 - **Mac app** (`desktop/`, `make app`): an Electron window on the local run
   GUI. It starts the backend from the checkout it was built from (or reuses
   one already on port 8000) and the dashboard's standalone build with its own

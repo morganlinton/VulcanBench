@@ -35,3 +35,15 @@ run_worktrees = "../VulcanBench-runs"
 suites_home = "~/vulcanbench-suites"
 extra_run_roots = []
 first_check_after_s = 180
+
+[builder]
+# The suite builder (vulcanbench suite init, prs list, task scaffold, task
+# author, add-task, validate, freeze, and the GUI's Suites pages) is for
+# subscribers. Until accounts exist it is gated by a shared password:
+# password_hash is its scrypt hash, made with `vulcanbench suite
+# password-hash` (the password itself is never stored, logged or passed on a
+# command line). Empty means no password is set and the builder stays locked.
+# `vulcanbench suite unlock` asks for the password once per machine. This is
+# a placeholder gate, not DRM: the code is public and runs locally.
+# Env override: VULCANBENCH_BUILDER_PASSWORD_HASH.
+password_hash = ""

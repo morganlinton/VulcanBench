@@ -93,6 +93,10 @@ PRICES: dict[str, dict[str, float]] = {
     # Cache-hit input is $0.30/M; we bill all input at the cache-miss rate, so
     # kimi costs are a slight overestimate on long multi-turn runs.
     "kimi:kimi-k3": {"input": 3.00, "output": 15.00},
+    # Kimi K3.1 Pro list price, checked 2026-11-02 at platform.kimi.ai/docs/pricing/chat.
+    # 5-minute cache writes bill at the input rate ($2.00), so only cache reads
+    # take the cached price; 1-hour writes ($4.00) are never requested.
+    "kimi:kimi-k3.1-pro": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
     # OpenRouter, pinned to AkashML bf16 (see harness.agent.providers pins).
     "openrouter:qwen/qwen3.8-27b": {"input": 0.45, "cached_input": 0.05, "output": 3.20},
     # DashScope international list prices (≤256K / ≤32K tier as applicable).
@@ -162,6 +166,8 @@ _SPEC_ALIASES = {
     "pi:meta/": "meta:",
     # DeepSeek Harness runs DeepSeek's own API models.
     "dsh:": "deepseek:",
+    # Kimi Code CLI runs Moonshot's own API models.
+    "kimi-code:": "kimi:",
 }
 
 # Provider price multipliers by UTC time. DeepSeek bills 2x during peak hours,

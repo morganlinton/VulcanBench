@@ -7,6 +7,62 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-02: Kimi K3.1 Pro on Frontier v4 through Kimi Code CLI
+
+### Decision
+
+The owner asked for "Kimi 3.1 Pro" on VulcanBench Frontier v4, in Moonshot's own
+harness (the native-harness rule). Moonshot's `/models` lists `kimi-k3.1-pro`,
+`kimi-k3.1-pro-highspeed` (the same model served faster at twice the price) and
+`kimi-k3`. The benchmark runs `kimi-k3.1-pro`.
+
+- Harness: Kimi Code CLI (`@moonshot-ai/kimi-code`, MoonshotAI/kimi-code, MIT),
+  print mode (`kimi -p --output-format stream-json`), adapter
+  `harness/agent/kimi_code.py`, spec `kimi-code:kimi-k3.1-pro`. It replaced
+  `kimi-cli`, which Moonshot archived on 2026-09-23. Pinned to 2.4.1, npm's
+  `latest` on 2026-11-02, by exact version and a content hash of the whole
+  install tree. (PyPI's `kimi-code` is an alias of the archived CLI, not this.)
+- Billing is the Moonshot Platform API key (`MOONSHOT_API_KEY`), pay as you go,
+  against `https://api.moonshot.ai/v1` with the exact model id. The Kimi Code
+  subscription, its `kimi-for-coding` alias and its coding endpoint are not used.
+- Effort: Low, High and Max are the three levels Moonshot's API takes for this
+  model (no medium; thinking cannot be turned off; Max is the API default).
+  Owner choice 2026-11-02, to keep spend small: Low only (23 tasks, estimated
+  about $17), one task at a time with the flat 3-hour bound, from a tagged run
+  worktree. High and Max run only if the owner asks after seeing Low.
+  Kimi Code sends the level as `thinking.effort`; a probe with an invalid value
+  returned "invalid value for thinking effort level", so the API reads it.
+- Output is capped at 131,072 tokens per call, the API's own default. Unset,
+  Kimi Code asks for nearly the whole 1M context as `max_completion_tokens`,
+  which Moonshot counts against the account's rate limit.
+- Telemetry and the update check are off (`telemetry = false`,
+  `KIMI_DISABLE_TELEMETRY`, `KIMI_CODE_NO_AUTO_UPDATE`). The model never sees
+  either, so behaviour is unchanged; task content still reaches Moonshot in the
+  model requests, as with any API model.
+
+Settings that follow the board's existing rules, not new choices: web tools off
+(`WebSearch` and `FetchURL` disabled, as for every harness); Kimi Code's "Never
+Ask" permission mode inside the macOS outer sandbox dsh uses, since
+sandbox-exec cannot nest; a fresh `KIMI_CODE_HOME` per run; cron off; background
+tasks end with the main turn (`print_background_mode = "exit"`). No other Kimi
+Code default changes: subagents, goals, compaction and its built-in Bash
+timeouts stay as shipped.
+
+Prices (checked 2026-11-02 at platform.kimi.ai/docs/pricing/chat), per million
+tokens: $2.00 input, $0.20 cached input, $10.00 output, $2.00 for 5-minute cache
+writes (the input rate, so the table needs no separate write price). Usage
+comes from the `usage.record` event Kimi Code writes for every model call in
+each agent's `wire.jsonl`; tool calls come from the same log's `tool.call` and
+`tool.result` events.
+
+### Limits
+
+The key is in the agent's environment and shell network is not isolated, so
+rotate it after the sweep. The task prompt is passed as an argument (print mode
+reads no stdin), so it is visible in the host's process table during a run.
+Kimi Code records the model it requested, not the id in Moonshot's response, so
+model identity is `harness-recorded`.
+
 ## 2026-11-02: Frontier v5 release 1 confirmation runs, run conditions
 
 ### Decision

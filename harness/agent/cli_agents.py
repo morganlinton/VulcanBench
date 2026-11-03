@@ -67,6 +67,7 @@ CLI_AGENT_PROVIDERS = frozenset(
         "pi",
         "dsh",
         "mirror",
+        "kimi-code",
     }
 )
 
@@ -2799,7 +2800,7 @@ _CLI_AGENT_ADAPTERS: dict[str, CliAgentAdapter] = {
 }
 
 
-def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
+def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:  # noqa: PLR0911 - one lazy import per adapter
     """Resolve a harness name or ``harness:model`` spec to its adapter."""
     name = spec_or_name.partition(":")[0].strip().lower()
     if name == "muse-code":
@@ -2822,6 +2823,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:
         from harness.agent.deepseek_harness import DeepSeekHarnessAdapter  # noqa: PLC0415
 
         return DeepSeekHarnessAdapter()
+    if name == "kimi-code":
+        # Same lazy import: kimi_code builds on this module's helpers.
+        from harness.agent.kimi_code import KimiCodeAdapter  # noqa: PLC0415
+
+        return KimiCodeAdapter()
     if name == "devin":
         # Same lazy import: devin_cli builds on this module's helpers.
         from harness.agent.devin_cli import DevinAdapter  # noqa: PLC0415

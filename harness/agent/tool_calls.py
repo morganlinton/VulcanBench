@@ -640,6 +640,38 @@ def _mirror(run_dir: Path) -> list[dict[str, Any]]:
     return calls.order
 
 
+def _kimi_code(run_dir: Path) -> list[dict[str, Any]]:
+    """Kimi Code's wire logs: tool.call and tool.result loop events, one log per agent."""
+    logs = sorted(run_dir.glob("kimi-code-sessions/**/wire.jsonl"))
+    if not logs:
+        raise CaptureUnavailable("no Kimi Code wire log in kimi-code-sessions/")
+    calls = _Calls()
+    for path in logs:
+        for row in _jsonl(path):
+            if row.get("type") != "context.append_loop_event":
+                continue
+            event = _dict(row.get("event"))
+            agent = row.get("agentId")
+            if event.get("type") == "tool.call":
+                calls.get(
+                    event.get("toolCallId"),
+                    event.get("name"),
+                    agent=None if agent == "main" else agent,
+                    input=_args(event.get("args")),
+                    started_at=_epoch(row.get("time")),
+                )
+            elif event.get("type") == "tool.result":
+                result = _dict(event.get("result"))
+                calls.get(
+                    event.get("toolCallId"),
+                    ended_at=_epoch(row.get("time")),
+                    status="error" if result.get("isError") else "ok",
+                    duration_ms=result.get("durationMs"),
+                    output_chars=_chars(result.get("output")),
+                )
+    return calls.order
+
+
 EXTRACTORS: dict[str, Callable[[Path], list[dict[str, Any]]]] = {
     "native": _native,
     "claude-code": _claude_code,
@@ -652,6 +684,7 @@ EXTRACTORS: dict[str, Callable[[Path], list[dict[str, Any]]]] = {
     "dsh": _dsh,
     "pi": _pi,
     "mirror": _mirror,
+    "kimi-code": _kimi_code,
 }
 
 

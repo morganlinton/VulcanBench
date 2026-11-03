@@ -87,7 +87,7 @@ def _execution_spec(model: str, harness_name: str, billing: str) -> str:
         if billing == "subscription":
             raise ValueError(
                 "--billing subscription requires --harness "
-                "claude-code|codex|cursor|grok-build|zcode|muse-code|devin|pi|dsh|mirror"
+                "claude-code|codex|cursor|grok-build|zcode|muse-code|devin|pi|dsh|mirror|kimi-code"
             )
         return model
     if harness_name not in CLI_AGENT_PROVIDERS:
@@ -1309,13 +1309,13 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
         "-m",
         dest="model",
         required=True,
-        help="Model id. Use provider:model for Vulcan's API loop, or a bare model with --harness claude-code|codex|cursor|grok-build|zcode|muse-code|devin|pi|dsh|mirror.",
+        help="Model id. Use provider:model for Vulcan's API loop, or a bare model with --harness claude-code|codex|cursor|grok-build|zcode|muse-code|devin|pi|dsh|mirror|kimi-code.",
     )
     p.add_argument(
         "--harness",
         dest="harness_name",
         default="vulcan",
-        help="Execution harness: vulcan|claude-code|codex|cursor|grok-build|zcode|muse-code|devin|pi|dsh|mirror",
+        help="Execution harness: vulcan|claude-code|codex|cursor|grok-build|zcode|muse-code|devin|pi|dsh|mirror|kimi-code",
     )
     p.add_argument(
         "--billing",

@@ -122,7 +122,7 @@ def solver_receipt(run, summary):
         }
     elif summary["model"].startswith("devin:"):
         result = devin_receipt(run, summary)
-    elif summary["model"].startswith(("muse-code:", "dsh:", "mirror:")):
+    elif summary["model"].startswith(("muse-code:", "dsh:", "mirror:", "kimi-code:")):
         # Muse Code and DeepSeek Harness fold their per-request usage into the run
         # summary's token block (prompt includes cache reads; completion includes
         # reasoning output).

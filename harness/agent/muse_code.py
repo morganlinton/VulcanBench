@@ -49,6 +49,11 @@ CLI_MODELS: dict[str, tuple[str, str | None]] = {
 }
 MODELS = set(CLI_MODELS)
 API_BILLED = {"muse-wonder-1.0-api"}
+# Contributor specs that may run max. Meta documents max as Standard-only for
+# Spark 1.3 and does not document it for Wonder; a 2026-11-03 probe showed
+# Wonder Full Contributor reasoning 2.4x longer at max than at xhigh on the same
+# prompt (docs/DECISIONS.md), so only Wonder Full is allowed.
+CONTRIBUTOR_MAX_MODELS = {"muse-wonder-full-1.0-contributor"}
 # Environment variables that may hold the Model API key, in lookup order. Muse
 # Code reads META_API_KEY, which takes priority over the account login.
 API_KEY_ENVS = ("MUSE_API_KEY", "META_MUSE_SPARK_API", "MODEL_API_KEY")
@@ -315,9 +320,11 @@ class MuseCodeAdapter:
             )
         if model not in MODELS or effort not in EFFORTS:
             raise ProviderError("Muse requires a verified explicit model and effort")
-        if model.endswith("-contributor") and effort == "max":
-            # Documented for Spark 1.3 Contributor; Meta does not document max
-            # under Contributor for Wonder either, so it stays excluded.
+        if (
+            model.endswith("-contributor")
+            and effort == "max"
+            and model not in CONTRIBUTOR_MAX_MODELS
+        ):
             raise ProviderError("Meta documents max reasoning as Standard-only, not Contributor")
         cli_model, contributor_mode = CLI_MODELS[model]
         api_key = None

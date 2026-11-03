@@ -7,6 +7,62 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-03: Muse Wonder Full runs Max under Contributor
+
+### Decision
+
+Owner, in chat, 2026-11-03. Muse Wonder Full gets a fifth Frontier v4 level,
+Max, in the same Contributor mode as its other four levels, through the same
+pinned Muse Code 1.4.9 (`muse-bin-1.4.9-R6297.1`, SHA256 `2b856618...ff5e`)
+as High and Extra-high, with the skill reminder still off. This reverses the
+2026-10-12 exclusion for Wonder Full only: Spark 1.3 and Wonder 1.0
+Contributor still refuse Max in the adapter (`CONTRIBUTOR_MAX_MODELS`), and
+the sweep launcher accepts `--efforts max` only for `--model wonder-full`.
+
+Max runs in its own root, `runs-effort-musewonder-full-v2-149-max`, one task
+at a time with the 3-hour timeout. The 1.4.9 rules carry over: Spark 1.3
+reminder observers are recorded apart under `usage.auxiliary`, quota stops
+wait for the reset, and a Muse transport error ("error sending request", the
+Meta API unreachable after Muse's own retries) archives the unscored attempt
+to `infra-aborted/`, waits until the API answers and reruns the task; more
+than three in a row end the loop for review (owner, 2026-10-16, logged here
+for the first time).
+
+### Evidence
+
+- Meta still documents Max as Standard-only for Spark and says nothing about
+  Max for Wonder Contributor. Muse receipts do not echo the effective effort,
+  so CLI acceptance alone proves nothing (a Spark Contributor probe completed
+  at Max on 2026-09-06 with its effort unverified).
+- 2026-11-03 probe, pinned 1.4.9, Contributor on, the same no-tools
+  counting prompt at each level, one run each:
+
+  | Requested effort | Wonder Full reasoning tokens | Output tokens | Wall time | Answer |
+  | --- | ---: | ---: | ---: | --- |
+  | xhigh | 8,454 | 8,779 | 112 s | correct |
+  | max | 19,945 | 20,272 | 273 s | correct |
+
+  Both sessions record `muse-wonder-full-1.0-contributor`. Max reasoned 2.4
+  times as long, which a silently clamped request would not do. One run per
+  level is thin; the sweep's own per-task reasoning tokens against Extra-high
+  are the second check. Script, streams and session logs:
+  `logs/musewonder-full-max-probe-20261103/` (main checkout, not committed).
+- Meta's launcher in `~/.local/bin` auto-updated to 1.4.14 on 2026-11-03 when
+  it was run for `--version` and deleted the 1.4.9 binary there. The sweep
+  pins now point at the copies in `~/.local/share/vulcanbench/muse-binaries/`
+  (hashes in `SHA256SUMS` beside them), which the launcher never touches.
+
+### Revisit triggers
+
+- Max's per-task reasoning tokens do not exceed Extra-high's on the same
+  tasks: then Max is likely clamped and is not published as a separate level.
+- Meta documents Max for Wonder Contributor either way.
+
+### What this touched
+
+`harness/agent/muse_code.py`, `scripts/cii-v4-board/run_muse_wonder_sweep.py`,
+`tests/test_muse_code.py`, `tests/test_muse_wonder_sweep.py`.
+
 ## 2026-11-02: suites outside the checkout are verified by lock digest, not git cleanliness
 
 ### Decision

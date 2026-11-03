@@ -40,20 +40,52 @@ def test_cli_routes_each_model_to_its_own_root(tmp_path, monkeypatch):
     assert all(args[3:] == ("1.4.6", None) for args in called)
 
 
-def test_max_and_ultra_never_selectable(tmp_path):
+def test_max_only_for_wonder_full_and_ultra_never_selectable(tmp_path, monkeypatch):
     assert "max" not in sweep.LEVELS and "ultra" not in sweep.LEVELS
-    with pytest.raises(SystemExit):
-        sweep.main(
-            [
-                "--model",
-                "wonder",
-                "--out",
-                str(tmp_path),
-                "--efforts",
-                "max",
-                "--accept-contributor-training",
-            ]
-        )
+    called = []
+    monkeypatch.setattr(sweep, "run", lambda *args: called.append(args))
+    for model, effort in (("wonder", "max"), ("wonder-full", "ultra")):
+        with pytest.raises(SystemExit):
+            sweep.main(
+                [
+                    "--model",
+                    model,
+                    "--out",
+                    str(tmp_path),
+                    "--efforts",
+                    effort,
+                    "--accept-contributor-training",
+                ]
+            )
+    assert not called
+    sweep.main(
+        [
+            "--model",
+            "wonder-full",
+            "--out",
+            str(tmp_path),
+            "--efforts",
+            "max",
+            "--muse-version",
+            "1.4.9",
+            "--accept-contributor-training",
+        ]
+    )
+    assert called[0][2] == ["max"]
+
+
+def test_max_protocol_records_provenance_and_drops_the_exclusion():
+    args = (sweep.MODELS["wonder-full"], sweep.BINARY, sweep.BINARY_SHA256, sweep.VERSION)
+    default = sweep.build_protocol(*args, {"t": "h"}, {"t": 1})
+    assert "max" in default["excluded_efforts"] and "max_provenance" not in default
+    with_max = sweep.build_protocol(*args, {"t": "h"}, {"t": 1}, levels=["max"])
+    assert with_max["levels"] == ["max"] and "max" not in with_max["excluded_efforts"]
+    assert "ultra" in with_max["excluded_efforts"] and "19,945" in with_max["max_provenance"]
+    assert chr(0x2014) not in json.dumps(with_max)
+
+
+def test_pins_live_outside_the_auto_updating_launcher_dir():
+    assert all(".local/bin" not in str(binary) for binary, _, _ in sweep.PINS.values())
 
 
 @pytest.mark.parametrize(

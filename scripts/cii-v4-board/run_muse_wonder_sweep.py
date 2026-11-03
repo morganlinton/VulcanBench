@@ -2,9 +2,9 @@
 
 Runs one model (Wonder 1.0 or Wonder Full) in Contributor mode through a
 pinned Muse Code binary (1.4.6 by default, or 1.4.9 with --muse-version), one
-task at a time, low to extra-high. Max is
-excluded under Contributor and ultra is blocked board-wide (docs/DECISIONS.md,
-2026-10-12 and 2026-09-16). Each model gets its own run root and frozen
+task at a time, low to extra-high by default. Max runs only for Wonder Full,
+the one Contributor model with evidence that max is honored (2026-11-03); ultra
+is blocked board-wide (docs/DECISIONS.md, 2026-11-03 and 2026-09-16). Each model gets its own run root and frozen
 protocol; a changed protocol fails closed on resume.
 
 Run it from a bench-tag run worktree (docs/HOW_WE_WORK.md) with --out pointing
@@ -35,20 +35,25 @@ from harness.tasks import load_task, task_hash
 ROOT = Path(__file__).resolve().parents[2]
 SUITE = ROOT / "tasks/coding-intelligence-index-v4"
 LEVELS = ["low", "medium", "high", "extra-high"]
+# Max is opt-in (--efforts max) and only for the models listed here.
+MAX_MODELS = {"wonder-full"}
 MODELS = {
     "wonder": "muse-code:muse-wonder-1.0-contributor",
     "wonder-full": "muse-code:muse-wonder-full-1.0-contributor",
 }
 # Muse Code release -> (pinned binary, its SHA256, the version string preflight reports).
+# The copies live outside ~/.local/bin, where Meta's launcher deletes old binaries when it
+# auto-updates (it did on 2026-11-03); SHA256SUMS sits beside them.
+PINNED = Path.home() / ".local/share/vulcanbench/muse-binaries"
 PINS = {
     "1.4.6": (
-        Path.home() / ".local/bin/muse-bin-1.4.6-R6000.1",
+        PINNED / "muse-bin-1.4.6-R6000.1",
         "c713165a287d64afb8816f8351a240b457a23524f4ade06bca0e41dfde410460",
         "Muse Code 1.4.6 (1.4.6-R6000.1)",
     ),
     # Meta's muse-stable channel on 2026-10-16; SHA256 equals its release manifest's.
     "1.4.9": (
-        Path.home() / ".local/bin/muse-bin-1.4.9-R6297.1",
+        PINNED / "muse-bin-1.4.9-R6297.1",
         "2b856618ae3de3a63956e6d510b849ad707b16e5d2ed196299f3fe5ef2e3ff5e",
         "Muse Code 1.4.9 (1.4.9-R6297.1)",
     ),
@@ -130,16 +135,33 @@ def other_sweep_active():
 
 
 def build_protocol(
-    model, binary, digest, version, hashes, timeouts, continues=None, reminder_models=()
+    model,
+    binary,
+    digest,
+    version,
+    hashes,
+    timeouts,
+    continues=None,
+    reminder_models=(),
+    levels=LEVELS,
 ):
     spec = model.split(":", 1)[1]
     cli_model, contributor_mode = CLI_MODELS[spec]
+    excluded = {
+        "ultra": "Blocked board-wide by vulcanbench.toml [effort].blocked (2026-09-16)",
+    }
+    if "max" not in levels:
+        excluded = {
+            "max": "Meta documents max as Standard-only for Spark Contributor and does not "
+            "document it for Wonder Contributor",
+            **excluded,
+        }
     return {
         "model": model,
         "cli_model": cli_model,
         "contributor_mode": contributor_mode,
         "harness_version": version,
-        "levels": LEVELS,
+        "levels": list(levels),
         "binary": str(binary),
         "binary_sha256": digest,
         "pricing_tier": "contributor",
@@ -156,11 +178,17 @@ def build_protocol(
         "2026-10-12; Muse receipts do not echo the effective effort",
         "contributor_provenance": "Explicit --contributor-mode on; Muse receipts do not "
         "record the data mode",
-        "excluded_efforts": {
-            "max": "Meta documents max as Standard-only for Spark Contributor and does not "
-            "document it for Wonder Contributor",
-            "ultra": "Blocked board-wide by vulcanbench.toml [effort].blocked (2026-09-16)",
-        },
+        "excluded_efforts": excluded,
+        **(
+            {
+                "max_provenance": "Meta does not document max for Wonder Contributor. A "
+                "2026-11-03 probe on Muse Code 1.4.9, same no-tools prompt: 8,454 reasoning "
+                "tokens at xhigh, 19,945 at max (one run each, both correct); receipts do not "
+                "echo the effective effort (docs/DECISIONS.md)"
+            }
+            if "max" in levels
+            else {}
+        ),
         "price_source": "https://dev.meta.ai/docs/pricing-rate-limits/",
         "stream_idle_timeout_secs": STREAM_IDLE_TIMEOUT_SECS,
         "muse_settings_plugins": muse_settings()[0].get("plugins", {}),
@@ -232,6 +260,7 @@ def run(model, out, levels, release="1.4.6", continue_from=None):  # noqa: PLR09
         timeouts,
         continuation(continue_from, model, out),
         REMINDER_MODELS[release],
+        levels,
     )
     save_protocol(out / "protocol.json", protocol)
     status_path = out / "status.json"
@@ -307,7 +336,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=sorted(MODELS), required=True)
     parser.add_argument("--out", type=Path, required=True, help="Run root, one per model")
-    parser.add_argument("--efforts", nargs="+", choices=LEVELS, default=LEVELS)
+    parser.add_argument("--efforts", nargs="+", choices=[*LEVELS, "max"], default=LEVELS)
     parser.add_argument("--muse-version", choices=sorted(PINS), default="1.4.6")
     parser.add_argument(
         "--continue-from",
@@ -326,6 +355,8 @@ def main(argv=None):
             "Benchmark paused: Contributor permits training on submitted content; "
             "explicit approval is required"
         )
+    if "max" in args.efforts and args.model not in MAX_MODELS:
+        parser.error(f"max is allowed only for {', '.join(sorted(MAX_MODELS))}")
     out = args.out.resolve()
     try:
         run(

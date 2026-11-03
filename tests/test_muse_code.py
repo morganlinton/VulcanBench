@@ -441,6 +441,22 @@ def test_wonder_contributor_max_rejected_before_any_process():
         )
 
 
+def test_wonder_full_contributor_max_passes_the_guard():
+    # Only Wonder Full has probe evidence that Contributor honors max; it gets
+    # past the guard and stops at the next check (no wall-clock budget).
+    with pytest.raises(ProviderError, match="positive wall-clock timeout"):
+        MuseCodeAdapter().run_task(
+            workspace="unused",
+            prompt="unused",
+            model="muse-wonder-full-1.0-contributor",
+            priced_spec="unused",
+            max_turns=1,
+            collector=None,
+            effort="max",
+            timeout_s=0,
+        )
+
+
 def test_api_billed_wonder_passes_key_and_records_metered_billing(tmp_path, monkeypatch):
     monkeypatch.setenv("MUSE_API_KEY", "meta-api-test")
     rows = [receipt(record="1")]

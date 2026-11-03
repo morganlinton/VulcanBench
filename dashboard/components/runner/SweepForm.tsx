@@ -170,7 +170,9 @@ function SweepPlanCard({ plan, onQueued }: { plan: LaunchPlan<SweepPlanSpec>; on
         <div className="rounded-xl border border-white/10 p-4">
           <div className={label}>Source</div>
           <dl className="space-y-1 text-xs">
-            <Row k="suite" v={`${spec.suite_name} (${spec.suite})`} mono={false} />
+            <Row k="suite" v={`${spec.suite_name} (${spec.suite})${spec.suite_custom ? " (custom)" : ""}`} mono={false} />
+            {spec.suite_custom && <Row k="suites home" v={spec.suites_home ?? "?"} />}
+            {spec.suite_custom && <Row k="suite lock" v={spec.suite_lock_digest ?? "?"} />}
             <Row k="model" v={spec.model_spec} />
             <Row k="harness" v={`${spec.harness}${spec.doctor.version ? ` ${spec.doctor.version}` : ""}`} />
             <Row k="effort levels" v={spec.efforts.join(", ")} />
@@ -222,6 +224,8 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
   const harnessName = opts.harnesses.includes(harness) ? harness : opts.harnesses[0];
   const suite = suiteChoice && opts.suites.some((s) => s.id === suiteChoice) ? suiteChoice : (opts.suites.find((s) => s.id === "coding-intelligence-index-v4")?.id ?? opts.suites[0]?.id ?? "");
   const suiteInfo = opts.suites.find((s) => s.id === suite);
+  const builtinSuites = opts.suites.filter((s) => !s.custom);
+  const customSuites = opts.suites.filter((s) => s.custom);
   const chosenEfforts = opts.efforts.filter((e) => efforts.includes(e));
   const wt = opts.worktree;
   const wtReady = !!wt && wt.exists && wt.problems.length === 0;
@@ -303,10 +307,26 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
           <div>
             <label className={label} htmlFor="suite">Suite</label>
             <select id="suite" className={field} value={suite} onChange={(e) => { setSuiteChoice(e.target.value); reset(); }}>
-              {opts.suites.map((s) => <option key={s.id} value={s.id}>{publicSuiteName(s.id) ?? s.name} ({s.n_tasks} tasks, {s.id})</option>)}
+              {builtinSuites.length > 0 && (
+                <optgroup label="Built-in at this tag">
+                  {builtinSuites.map((s) => <option key={s.id} value={s.id}>{publicSuiteName(s.id) ?? s.name} ({s.n_tasks} tasks, {s.id})</option>)}
+                </optgroup>
+              )}
+              {customSuites.length > 0 && (
+                <optgroup label="Custom (suites home)">
+                  {customSuites.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.n_tasks} tasks, {s.id})</option>)}
+                </optgroup>
+              )}
             </select>
-            {opts.suites.length === 0 && <div className="mt-1 text-xs text-amber-300">No frozen suite (tasks/&lt;suite&gt;/suite.lock.json) at this tag.</div>}
-            {suiteInfo && <div className="mt-1 text-xs text-zinc-500">frozen {suiteInfo.frozen_at ?? "?"}, lock version {suiteInfo.version ?? "?"}</div>}
+            {opts.suites.length === 0 && <div className="mt-1 text-xs text-amber-300">No frozen suite (tasks/&lt;suite&gt;/suite.lock.json) at this tag, and none in {opts.suites_home}.</div>}
+            {suiteInfo && !suiteInfo.custom && <div className="mt-1 text-xs text-zinc-500">frozen {suiteInfo.frozen_at ?? "?"}, lock version {suiteInfo.version ?? "?"}</div>}
+            {suiteInfo?.custom && (
+              <div className="mt-1 space-y-0.5 text-xs text-zinc-500">
+                <div>custom suite{suiteInfo.repo?.owner && suiteInfo.repo?.name ? ` from ${suiteInfo.repo.owner}/${suiteInfo.repo.name}` : ""}, frozen {suiteInfo.frozen_at ?? "?"}, lock version {suiteInfo.version ?? "?"}</div>
+                <div className="font-mono break-all">{suiteInfo.path}</div>
+                <div className="font-mono">lock {suiteInfo.lock_digest?.slice(0, 19) ?? "?"}</div>
+              </div>
+            )}
           </div>
           <div>
             <label className={label} htmlFor="tag">Bench tag</label>

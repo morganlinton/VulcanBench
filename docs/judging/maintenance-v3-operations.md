@@ -817,7 +817,9 @@ operational notes live here.
   and probe stages resumed with identical inputs (09:11 to 09:33 PST).
 - Second attempts under the frozen rule: Claude 1 (an unsupported excerpt),
   Sol 5 (three matched quirks without a listed departure, one match list out
-  of order, one judge exit). No reviewer fallbacks.
+  of order, one judge exit). Two Sol match calls (max-002, max-013) were
+  published through the frozen recovery rule that moves one-based departure
+  indexes to zero-based, statuses untouched. No reviewer fallbacks.
 - Summary (09:33 PST): 23 of 23 published, both panels passing,
   `ready_for_publication` true. Combined score 88.36 (se 0.76); Code quality
   71.89; reviewed Code quality 57.2 from Claude and 75.4 from Sol.

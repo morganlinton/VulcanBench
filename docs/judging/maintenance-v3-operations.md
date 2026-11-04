@@ -797,3 +797,27 @@ operational notes live here.
   to 90.00 (n 23, se 0.39), Code quality from 76.42 to 76.59; the other four
   levels are unchanged. The recovered round is in the private backup as
   `judging-v3.29-recovered`.
+
+## v3.26.5, November 4, 2026: Muse Wonder Full at Max
+
+- From `bench/2026-11-04-musewonder-judging-v3265` (587964aff), judged by
+  Claude Opus 5.5 (pinned Claude Code 2.1.300) and GPT-6.1 Sol (pinned Codex
+  0.159.0), both gated by their earlier verdicts, so no new exam. The Max
+  sweep finished on November 3 at 23:55 PST, so no sweep overlaps the
+  window. Population frozen 07:45 PST: 23 rows from
+  `runs-effort-musewonder-full-v2-149-max`, none excluded or missing.
+- Sol finished its run (08:01) and probe (08:32) stages in the first window.
+- Claude stopped on its first call (primary max-001, 07:45): the pinned
+  Claude Code's sign-in had expired, so it answered with a synthetic "Failed
+  to authenticate" result, zero output tokens and no model response, and the
+  identity guard refused it. Nothing was judged. The quota-stop rule does not
+  match sign-in errors, so the operator handled it the same way by hand after
+  the owner signed in again: the attempt's four files moved to
+  `calls/claude/primary/max-001/auth-stops/` with a note, and the Claude run
+  and probe stages resumed with identical inputs (09:11 to 09:33 PST).
+- Second attempts under the frozen rule: Claude 1 (an unsupported excerpt),
+  Sol 5 (three matched quirks without a listed departure, one match list out
+  of order, one judge exit). No reviewer fallbacks.
+- Summary (09:33 PST): 23 of 23 published, both panels passing,
+  `ready_for_publication` true. Combined score 88.36 (se 0.76); Code quality
+  71.89; reviewed Code quality 57.2 from Claude and 75.4 from Sol.

@@ -32,6 +32,7 @@ def make_config(tmp_path: Path, **overrides: Any) -> RunnerConfig:
         run_worktrees=tmp_path / "worktrees",
         extra_run_roots=(),
         first_check_after_s=180,
+        suites_home=tmp_path / "suites",
     )
     for k, v in overrides.items():
         object.__setattr__(cfg, k, v)
@@ -364,6 +365,54 @@ def set_fake_run(worktree: Path, mode: str) -> None:
 
 SUITE_ID = "demo-suite"
 SUITE_TASKS = ("alpha-task", "beta-task")
+CUSTOM_SUITE_ID = "acme-slice"
+CUSTOM_TASKS = ("acme-fix-1", "acme-fix-2", "acme-fix-3")
+SUITES_HOME_TAG = "bench/2026-11-03-suites-home"
+
+
+def fake_custom_suite(
+    cfg: RunnerConfig,
+    suite_id: str = CUSTOM_SUITE_ID,
+    tasks: tuple[str, ...] = CUSTOM_TASKS,
+    *,
+    frozen: bool = True,
+) -> Path:
+    """A suite in the suites home the way ``vulcanbench suite freeze`` leaves it (JSON only)."""
+    d = cfg.suites_home / suite_id
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "suite.json").write_text(
+        json.dumps(
+            {
+                "id": suite_id,
+                "display_name": "Acme slice",
+                "version": "1.0.0",
+                "repo": {"host": "github.com", "owner": "acme", "name": "api"},
+                "tasks": list(tasks),
+            }
+        )
+    )
+    if frozen:
+        (d / "suite.lock.json").write_text(
+            json.dumps(
+                {
+                    "suite": suite_id,
+                    "version": "1.0.0",
+                    "frozen_at": "2026-11-03",
+                    "tasks": {t: f"hash-{t}" for t in tasks},
+                }
+            )
+        )
+    return d
+
+
+def tag_with_suites_home(repo: Path, tag: str = SUITES_HOME_TAG) -> str:
+    """A newer bench tag whose harness CLI knows ``--suites-home``."""
+    cli = repo / "harness" / "cli.py"
+    cli.write_text(cli.read_text() + '# "--suites-home"\n')
+    git(repo, "commit", "-q", "-am", "suites home")
+    git(repo, "tag", tag)
+    return tag
+
 
 # The fake CLI. ``run`` reads <worktree>/.fake-run-mode (the child env is an
 # allowlist, so a file is the only channel) and writes the harness's on-disk
@@ -384,6 +433,8 @@ def opt(name, default=None):
 
 tasks = ["alpha-task", "beta-task"]
 lock = here / "tasks" / str(opt("--suite", "")) / "suite.lock.json"
+if opt("--suites-home"):
+    lock = Path(opt("--suites-home")) / str(opt("--suite", "")) / "suite.lock.json"
 if lock.is_file():
     tasks = sorted(json.loads(lock.read_text())["tasks"])
 

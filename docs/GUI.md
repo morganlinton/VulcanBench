@@ -113,6 +113,27 @@ what it has and tears down, and the job's process group is torn down if it is
 still there after ten minutes. The sweep afterwards touches only containers
 and scratch directories of this level's unfinished runs.
 
+### Custom suites
+
+The suite picker has two groups. **Built-in at this tag** lists the frozen
+suites under `tasks/` at the chosen bench tag. **Custom (suites home)** lists
+every frozen suite in `[runner].suites_home` (default `~/vulcanbench-suites`),
+read from its `suite.lock.json` and `suite.json`; a draft suite with no lock
+is not offered, and a custom id that names a built-in suite at the tag is
+left out because the engine resolves in-tree names first. Picking one shows
+its directory, its repository, when it was frozen and its lock digest.
+
+A custom suite's plan adds `--suites-home <dir>` after `--suite <id>` in every
+level's command and in the estimate, and records the suites home and the lock
+digest on the plan. It needs a bench tag whose harness knows the flag; an
+older tag is refused with "pick a newer bench tag". At confirm and again at
+launch the GUI checks that the flag is there for a custom suite (and only
+for one), that it names the configured suites home, and that the lock's
+digest still equals the one the plan was built with; a suite re-frozen in
+between needs a new plan. The run itself then verifies the tasks against the
+lock before any model call (docs/HOW_WE_WORK.md, "Suites outside the
+checkout").
+
 The **Pinned CLI directory** field (under "advanced") prepends a directory to
 the child's PATH, for a model that needs a newer or pinned harness CLI
 (`CODEX_BIN_DIR` in the scripts). Login homes the harness reads
@@ -302,6 +323,7 @@ port choice, server start and stop) without Electron.
 | `run_worktrees` | `../VulcanBench-runs` | where `scripts/run_worktree.sh` puts bench-tag worktrees |
 | `extra_run_roots` | `[]` | more harness output roots to show read-only |
 | `first_check_after_s` | `180` | window for the first-attempt check |
+| `suites_home` | `~/vulcanbench-suites` | custom suites built outside the checkout, offered in the suite picker |
 
 ## Milestones
 
@@ -317,3 +339,6 @@ port choice, server start and stop) without Electron.
    `--max-infra-retries` on the CLI (this document).
 4. Orphaned-sandbox cleanup, bench-tag cutting through the script, and the
    streaming log tail (this document).
+5. Custom suites in the picker: frozen suites from the suites home run with
+   `--suites-home`, checked by lock digest at confirm and launch (this
+   document).

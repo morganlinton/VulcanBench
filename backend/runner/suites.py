@@ -274,6 +274,7 @@ def unlock(cfg: RunnerConfig, password: str, *, tag: str | None = None) -> dict[
                 {
                     "code": "too_many_attempts",
                     "message": f"too many wrong passwords; try again in {int(wait) + 1} s",
+                    "retry_after_s": int(wait) + 1,
                 },
             )
         res = run_suite_cli(

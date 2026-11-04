@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Row, button, field, label } from "@/components/runner/launchShared";
 import { usePolling } from "@/components/runner/usePolling";
 import { RunnerError, fmtDuration, runnerGet, runnerPost } from "@/lib/runner";
 import {
+  plural,
   suitePath,
   taskPath,
   type FreezeResult,
@@ -15,7 +16,8 @@ import {
   type TaskRow,
 } from "@/lib/suites";
 import { ErrorLine, useGate } from "./BuilderGate";
-import { BuildActions } from "./BuildPlan";
+import { BuildActions, lastAuthorChoice } from "./BuildPlan";
+import { ConfirmBar } from "./ConfirmBar";
 import { StageBadge, repoName } from "./SuitesList";
 
 export function SuiteDetail({ id }: { id: string }) {
@@ -254,17 +256,14 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
       else next.add(task);
       return next;
     });
-  const act = async (task: string, what: "accept" | "drop") => {
-    let body: unknown = undefined;
-    if (what === "drop") {
-      const reason = window.prompt(`Drop ${task}? Its folder stays in the suites home; it leaves the suite. Reason (optional):`, "");
-      if (reason === null) return;
-      body = { reason };
-    }
+  // Accept and drop ask first, in the row itself (no native dialogs).
+  const [asking, setAsking] = useState<{ task: string; what: "accept" | "drop" } | null>(null);
+  const act = async (task: string, what: "accept" | "drop", reason: string) => {
     setBusy(task);
     setError(null);
     try {
-      await runnerPost<TaskRow>(`${taskPath(id, task)}/${what}`, body);
+      await runnerPost<TaskRow>(`${taskPath(id, task)}/${what}`, what === "drop" ? { reason } : undefined);
+      setAsking(null);
       onChange();
     } catch (e) {
       setError(handle(e));
@@ -308,7 +307,8 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
             </thead>
             <tbody>
               {shown.map((t) => (
-                <tr key={t.id} className={`border-t border-white/5 align-top ${t.dropped ? "opacity-50" : ""}`}>
+                <Fragment key={t.id}>
+                <tr className={`border-t border-white/5 align-top ${t.dropped ? "opacity-50" : ""}`}>
                   <td className="px-3 py-2">
                     {selectable(t) && (
                       <input type="checkbox" checked={picked.has(t.id)} onChange={() => toggle(t.id)} aria-label={`select ${t.id}`} />
@@ -333,7 +333,7 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
                         <div>
                           {t.author.duration_s ? fmtDuration(t.author.duration_s) : ""}
                           {t.author.cost_usd != null ? `, $${t.author.cost_usd.toFixed(2)} reported` : ""}
-                          {t.author.rejected ? `, ${t.author.rejected} change(s) discarded` : ""}
+                          {t.author.rejected ? `, ${t.author.rejected} ${t.author.rejected === 1 ? "change" : "changes"} discarded` : ""}
                         </div>
                       </>
                     ) : "not yet"}
@@ -356,17 +356,34 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
                     {draft && !t.dropped && (
                       <div className="flex gap-2">
                         {!t.accepted && (
-                          <button type="button" onClick={() => act(t.id, "accept")} disabled={busy !== null || t.stage !== "validated"} className="rounded-full border border-emerald-500/40 px-3 py-0.5 text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-30">
+                          <button type="button" onClick={() => setAsking({ task: t.id, what: "accept" })} disabled={busy !== null || t.stage !== "validated"} className="rounded-full border border-emerald-500/40 px-3 py-0.5 text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-30">
                             Accept
                           </button>
                         )}
-                        <button type="button" onClick={() => act(t.id, "drop")} disabled={busy !== null || t.active_job !== null} className="rounded-full border border-white/15 px-3 py-0.5 text-zinc-300 hover:bg-white/5 disabled:opacity-30">
+                        <button type="button" onClick={() => setAsking({ task: t.id, what: "drop" })} disabled={busy !== null || t.active_job !== null} className="rounded-full border border-white/15 px-3 py-0.5 text-zinc-300 hover:bg-white/5 disabled:opacity-30">
                           Drop
                         </button>
                       </div>
                     )}
                   </td>
                 </tr>
+                {asking?.task === t.id && (
+                  <tr>
+                    <td colSpan={7} className="px-3 pb-3">
+                      <ConfirmBar
+                        message={asking.what === "accept"
+                          ? `Accept ${t.id} into the suite? It is frozen with the suite later.`
+                          : `Drop ${t.id}? It leaves the suite; its folder stays in the suites home.`}
+                        confirmLabel={asking.what === "accept" ? "Accept" : "Drop"}
+                        withReason={asking.what === "drop"}
+                        busy={busy === t.id}
+                        onConfirm={(reason) => act(t.id, asking.what, reason)}
+                        onCancel={() => setAsking(null)}
+                      />
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -390,6 +407,7 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
               tasks={action.tasks}
               options={data.options}
               kind={action.kind}
+              defaults={lastAuthorChoice(tasks.filter((t) => action.tasks.includes(t.id)).concat(tasks))}
               onDone={() => { setAction(null); setPicked(new Set()); onChange(); }}
             />
           )}
@@ -404,6 +422,7 @@ function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () =>
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<FreezeResult | null>(null);
+  const [asking, setAsking] = useState(false);
   const s = data.suite;
   const launchHref = `/launch?suite=${encodeURIComponent(s.id)}`;
   if (s.status === "frozen") {
@@ -424,12 +443,13 @@ function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () =>
       </section>
     );
   }
+  const leftOut = data.tasks.filter((t) => !t.accepted && !t.dropped).length;
   const freeze = async () => {
-    if (!window.confirm(`Freeze ${s.name} with ${s.n_accepted} accepted task(s)? The suite becomes read-only and can then be benchmarked.`)) return;
     setBusy(true);
     setError(null);
     try {
       setResult(await runnerPost<FreezeResult>(`${suitePath(s.id)}/freeze`));
+      setAsking(false);
       onFrozen();
     } catch (e) {
       setError(handle(e));
@@ -450,10 +470,20 @@ function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () =>
         </ul>
       )}
       {error && <div className="text-xs text-rose-300">{error}</div>}
-      {result && <div className="text-xs text-emerald-300">froze {result.n_tasks} task(s), lock {result.lock_digest}</div>}
-      <button type="button" onClick={freeze} disabled={!data.freeze_ready.ok || busy} className={`${button} border border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10`}>
-        {busy ? "Freezing" : "Freeze suite"}
-      </button>
+      {result && <div className="text-xs text-emerald-300">froze {plural(result.n_tasks ?? 0, "task")}, lock {result.lock_digest}</div>}
+      {asking ? (
+        <ConfirmBar
+          message={`Freeze ${s.name} with ${plural(s.n_accepted, "accepted task")}?${leftOut ? ` ${plural(leftOut, "task")} not accepted ${leftOut === 1 ? "is" : "are"} left out.` : ""} The suite becomes read-only and can then be benchmarked.`}
+          confirmLabel="Freeze"
+          busy={busy}
+          onConfirm={freeze}
+          onCancel={() => setAsking(false)}
+        />
+      ) : (
+        <button type="button" onClick={() => setAsking(true)} disabled={!data.freeze_ready.ok || busy} className={`${button} border border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10`}>
+          Freeze suite
+        </button>
+      )}
     </section>
   );
 }

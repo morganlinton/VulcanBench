@@ -166,6 +166,7 @@ def test_wrong_passwords_back_off(env: Env) -> None:
     n_calls = len(fake_suite_calls(env.wt))
     r = c.post(f"{API}/unlock", json={"password": FAKE_PASSWORD})
     assert r.status_code == 429 and r.json()["detail"]["code"] == "too_many_attempts"
+    assert 0 < r.json()["detail"]["retry_after_s"] <= suites.UNLOCK_COOLDOWN_S + 1
     assert len(fake_suite_calls(env.wt)) == n_calls  # refused before the CLI
 
 

@@ -900,6 +900,10 @@ if args[:2] == ["task", "author"]:
            "changed": {"accepted": ["issue.md", "tests/vb_test.py"] if status == "ok" else [], "rejected": ["repo/a.py"]},
            "cost": {"cli_reported_usd": 0.5}, "warnings": []}
     (t / "build" / "author.json").write_text(json.dumps(doc))
+    if status == "ok":  # what a real session leaves: a final issue and one hidden test
+        (t / "issue.md").write_text("Fix thing\n\nThe handler crashes on an empty header.\n")
+        (t / "tests").mkdir(exist_ok=True)
+        (t / "tests" / "vb_test.py").write_text("def test_empty_header():\n    assert True\n")
     if mode == "quota":
         print("provider error: You have hit your usage limit. limit reached", file=sys.stderr)
         out(doc, 1)

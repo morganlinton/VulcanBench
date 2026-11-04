@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { RunnerUnavailable } from "@/components/runner/RunnerUnavailable";
 import { button, field, label } from "@/components/runner/launchShared";
 import { usePolling } from "@/components/runner/usePolling";
 import { RunnerError } from "@/lib/runner";
 import { getAccess, isLocked, postLock, postUnlock, type AccessResponse } from "@/lib/suites";
+import { ConfirmBar } from "./ConfirmBar";
 
 interface Gate {
   /** Call after any request that came back 403 builder_locked: re-reads access. */
@@ -110,16 +111,31 @@ function NotConfigured({ tag }: { tag: string | null }) {
   );
 }
 
+/** Seconds left on a cooldown that ends at `until` (epoch ms), ticking once a second; 0 when none. */
+function useSecondsLeft(until: number | null): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (until === null) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [until]);
+  return until === null ? 0 : Math.max(0, Math.ceil((until - now) / 1000));
+}
+
 function UnlockForm({ onUnlocked }: { onUnlocked: () => void }) {
   // Uncontrolled on purpose: the value is read once in the submit handler and
   // the field is cleared at once, so the password never sits in React state.
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // After too many wrong passwords the backend refuses for a while; Unlock
+  // waits it out instead of throwing away whatever is typed next.
+  const [coolUntil, setCoolUntil] = useState<number | null>(null);
+  const wait = useSecondsLeft(coolUntil);
   const submit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     const el = input.current;
-    if (!el || !el.value) return;
+    if (!el || !el.value || wait > 0) return;
     const password = el.value;
     el.value = "";
     setBusy(true);
@@ -128,7 +144,13 @@ function UnlockForm({ onUnlocked }: { onUnlocked: () => void }) {
       await postUnlock(password);
       onUnlocked();
     } catch (e) {
-      setError(errorText(e));
+      const retry = e instanceof RunnerError && e.status === 429 ? Number(e.detail?.retry_after_s) : NaN;
+      if (Number.isFinite(retry) && retry > 0) {
+        setCoolUntil(Date.now() + retry * 1000);
+        setError("too many wrong passwords");
+      } else {
+        setError(errorText(e));
+      }
     } finally {
       setBusy(false);
       el.focus();
@@ -156,9 +178,14 @@ function UnlockForm({ onUnlocked }: { onUnlocked: () => void }) {
           className={field}
         />
       </div>
-      {error && <div className="text-xs text-rose-300">{error}</div>}
-      <button type="submit" disabled={busy} className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>
-        {busy ? "Checking" : "Unlock"}
+      {error && (
+        <div className="text-xs text-rose-300">
+          {error}
+          {wait > 0 ? `; Unlock works again in ${wait} s` : coolUntil !== null ? "; you can try again now" : ""}
+        </div>
+      )}
+      <button type="submit" disabled={busy || wait > 0} className={`${button} bg-emerald-500 text-black hover:bg-emerald-400 disabled:opacity-40`}>
+        {busy ? "Checking" : wait > 0 ? `Wait ${wait} s` : "Unlock"}
       </button>
       <p className="text-xs text-zinc-500">
         The password goes from this window to the VulcanBench backend on this Mac (127.0.0.1), and from there
@@ -171,8 +198,9 @@ function UnlockForm({ onUnlocked }: { onUnlocked: () => void }) {
 
 function LockBar({ data, onLocked }: { data: AccessResponse; onLocked: () => void }) {
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const since = data.access?.unlocked_at ? new Date(data.access.unlocked_at) : null;
   const lock = async () => {
-    if (!window.confirm("Lock the suite builder on this Mac? Unlocking again needs the password.")) return;
     setBusy(true);
     try {
       await postLock();
@@ -184,12 +212,22 @@ function LockBar({ data, onLocked }: { data: AccessResponse; onLocked: () => voi
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-400">
       <span>
-        Suite builder unlocked{data.access?.unlocked_at ? ` since ${data.access.unlocked_at}` : ""}. Commands run from{" "}
+        Suite builder unlocked{since && !Number.isNaN(since.getTime()) ? ` since ${since.toLocaleString()}` : ""}. Commands run from{" "}
         <span className="font-mono text-zinc-300">{data.tooling.tag}</span>.
       </span>
-      <button type="button" onClick={lock} disabled={busy} className="rounded-full border border-white/15 px-3 py-0.5 hover:bg-white/5">
-        Lock
-      </button>
+      {asking ? (
+        <ConfirmBar
+          message="Lock the suite builder on this Mac? Unlocking again needs the password."
+          confirmLabel="Lock"
+          busy={busy}
+          onConfirm={lock}
+          onCancel={() => setAsking(false)}
+        />
+      ) : (
+        <button type="button" onClick={() => setAsking(true)} disabled={busy} className="rounded-full border border-white/15 px-3 py-0.5 hover:bg-white/5">
+          Lock
+        </button>
+      )}
     </div>
   );
 }

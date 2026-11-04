@@ -8,6 +8,7 @@ import { usePolling } from "@/components/runner/usePolling";
 import { runnerGet, runnerPost } from "@/lib/runner";
 import {
   REPO_RE,
+  normalizeRepo,
   SUITE_ID_RE,
   SUITES_API,
   STAGE_LABEL,
@@ -115,13 +116,16 @@ export function NewSuiteForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const suiteId = idEdited ? id : slugify(name);
-  const ok = name.trim() && SUITE_ID_RE.test(suiteId) && REPO_RE.test(repo.trim());
+  const repoId = normalizeRepo(repo);
+  const repoOk = REPO_RE.test(repoId);
+  const ok = name.trim() && SUITE_ID_RE.test(suiteId) && repoOk;
+  const missing = !name.trim() ? "a name" : !SUITE_ID_RE.test(suiteId) ? "a valid id" : !repoOk ? "a repository" : null;
   const create = async (ev: React.FormEvent) => {
     ev.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const row = await runnerPost<SuiteRow>(SUITES_API, { id: suiteId, display_name: name.trim(), repo: repo.trim() });
+      const row = await runnerPost<SuiteRow>(SUITES_API, { id: suiteId, display_name: name.trim(), repo: repoId });
       router.push(`/suites/${encodeURIComponent(row.id)}`);
     } catch (e) {
       setError(handle(e));
@@ -151,16 +155,19 @@ export function NewSuiteForm() {
       </div>
       <div>
         <label className={label} htmlFor="suite-repo">GitHub repository</label>
-        <input id="suite-repo" className={`${field} font-mono`} value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="owner/name" />
+        <input id="suite-repo" className={`${field} font-mono`} value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="owner/name or a github.com link" />
         <div className="mt-1 text-xs text-zinc-500">
           Pull requests are read with this Mac&apos;s <code className="font-mono">gh</code> login, so a private repository
           works if you can read it. Its code stays in the suites home and is never committed to VulcanBench.
         </div>
+        {repo.trim() && !repoOk && <div className="mt-1 text-xs text-rose-300">use owner/name, for example acme/api</div>}
+        {repo.trim() && repoOk && repoId !== repo.trim() && <div className="mt-1 font-mono text-xs text-zinc-400">reads {repoId}</div>}
       </div>
       {error && <div className="text-xs text-rose-300">{error}</div>}
       <button type="submit" disabled={!ok || busy} className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>
         {busy ? "Creating" : "Create suite"}
       </button>
+      {missing && <span className="ml-3 text-xs text-zinc-500">needs {missing}</span>}
     </form>
   );
 }

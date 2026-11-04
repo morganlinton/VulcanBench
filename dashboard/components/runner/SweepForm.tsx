@@ -309,12 +309,12 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
             <select id="suite" className={field} value={suite} onChange={(e) => { setSuiteChoice(e.target.value); reset(); }}>
               {builtinSuites.length > 0 && (
                 <optgroup label="Built-in at this tag">
-                  {builtinSuites.map((s) => <option key={s.id} value={s.id}>{publicSuiteName(s.id) ?? s.name} ({s.n_tasks} tasks, {s.id})</option>)}
+                  {builtinSuites.map((s) => <option key={s.id} value={s.id}>{publicSuiteName(s.id) ?? s.name} ({s.n_tasks} {s.n_tasks === 1 ? "task" : "tasks"}, {s.id})</option>)}
                 </optgroup>
               )}
               {customSuites.length > 0 && (
                 <optgroup label="Custom (suites home)">
-                  {customSuites.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.n_tasks} tasks, {s.id})</option>)}
+                  {customSuites.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.n_tasks} {s.n_tasks === 1 ? "task" : "tasks"}, {s.id})</option>)}
                 </optgroup>
               )}
             </select>

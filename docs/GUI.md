@@ -241,7 +241,15 @@ The builder is for subscribers and is password-gated in the engine
    environment, never in a plan, job, console log or sqlite row.
 4. Anything the command prints is masked for the password before it reaches
    the browser, then redacted like every other log line.
-5. Five wrong passwords in ten minutes make the next try wait a minute.
+5. Five wrong passwords in ten minutes make the next try wait a minute. The
+   429 answer carries `retry_after_s`; the screen counts it down with Unlock
+   disabled, so a password typed during the wait stays in the field instead
+   of being sent and thrown away.
+
+The builder's irreversible steps (accept, drop, freeze, lock) ask in the page
+itself rather than through `window.confirm` or `window.prompt`: the desktop
+app is Electron, which has no `window.prompt`, so a native prompt would make
+Drop cancel itself there.
 
 Uvicorn's access log records only the method, path and status. The password
 does cross from the browser to the backend in the request body, which the

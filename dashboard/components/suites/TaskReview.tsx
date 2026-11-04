@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePolling } from "@/components/runner/usePolling";
-import { runnerGet, runnerPost } from "@/lib/runner";
+import { fmtDuration, runnerGet, runnerPost } from "@/lib/runner";
 import { taskPath, type TaskDetail, type TaskRow, type TextFile } from "@/lib/suites";
 import { LogTail } from "@/components/runner/LogTail";
 import { ErrorLine, useGate } from "./BuilderGate";
-import { BuildActions } from "./BuildPlan";
+import { BuildActions, lastAuthorChoice } from "./BuildPlan";
+import { ConfirmBar } from "./ConfirmBar";
 import { StageBadge } from "./SuitesList";
 
 const TABS = ["Issue", "Tests", "Gold patch", "Metadata", "Author", "Validate"] as const;
@@ -29,12 +30,96 @@ function Json({ value, empty }: { value: unknown; empty: string }) {
   return <pre className="max-h-[32rem] overflow-auto rounded-lg bg-zinc-900 p-3 font-mono text-xs text-zinc-200">{JSON.stringify(value, null, 2)}</pre>;
 }
 
+// What to do after each outcome, so a failed step never ends on a bare badge.
+const NEXT_STEP: Partial<Record<TaskRow["stage"], string>> = {
+  scaffolded: "Next: author it, which writes the issue and hidden tests (one model session).",
+  authored: "Next: validate it in Docker (no model calls), then read the issue and tests before accepting.",
+  validated: "Next: read the issue, tests and gold patch, then accept it.",
+  author_failed: "Author it again, or drop the task.",
+  validation_failed: "Author it again to rewrite the issue and tests, or drop the task.",
+};
+
+function LatestJob({ task, jobs }: { task: TaskRow; jobs: TaskDetail["jobs"] }) {
+  if (task.active_job) return null;
+  const last = jobs[0];
+  const next = task.accepted || task.dropped ? null : NEXT_STEP[task.stage];
+  if (!last && !next) return null;
+  const failed = task.stage === "author_failed" || task.stage === "validation_failed" || last?.status === "failed";
+  const tone = failed ? "border-rose-500/30 bg-rose-500/5 text-rose-200" : "border-white/10 text-zinc-300";
+  return (
+    <div className={`rounded-lg border px-3 py-2 text-xs space-y-1 ${tone}`}>
+      {last && (
+        <div>
+          Last job: {last.kind} {last.id} {last.status}
+          {last.finished_at ? ` at ${new Date(last.finished_at).toLocaleString()}` : ""}
+          {last.notes.length > 0 ? `: ${last.notes.join("; ")}` : ""}
+        </div>
+      )}
+      {next && <div className="text-zinc-400">{next}</div>}
+    </div>
+  );
+}
+
+function Fact({ k, v, tone }: { k: string; v: React.ReactNode; tone?: string }) {
+  return (
+    <div className="flex gap-3">
+      <dt className="w-28 shrink-0 text-zinc-500">{k}</dt>
+      <dd className={tone ?? "text-zinc-200"}>{v}</dd>
+    </div>
+  );
+}
+
+function AuthorSummary({ task }: { task: TaskRow }) {
+  const a = task.author;
+  if (!a) return null;
+  return (
+    <dl className="space-y-1 rounded-lg border border-white/10 p-3 text-xs">
+      <Fact k="result" v={a.status ?? "?"} tone={a.status === "ok" ? "text-emerald-300" : "text-rose-300"} />
+      <Fact k="model" v={`${a.harness ?? "?"}:${a.model ?? "?"}${a.effort ? ` at ${a.effort}` : ""}`} />
+      {a.finished_at && <Fact k="finished" v={new Date(a.finished_at).toLocaleString()} />}
+      {a.duration_s != null && <Fact k="took" v={fmtDuration(a.duration_s)} />}
+      {a.cost_usd != null && <Fact k="cost" v={`$${a.cost_usd.toFixed(2)} reported by the CLI`} />}
+      <Fact k="changes" v={`${a.accepted} kept, ${a.rejected} discarded (only the issue, hidden tests and allowed metadata are kept)`} />
+      {a.warnings.length > 0 && <Fact k="warnings" v={a.warnings.join("; ")} tone="text-amber-300" />}
+    </dl>
+  );
+}
+
+function ValidateSummary({ task, raw }: { task: TaskRow; raw: unknown }) {
+  const v = task.validate;
+  if (!v) {
+    return raw ? (
+      <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">
+        The validation record below is older than the last authoring session, so it no longer counts. Validate again.
+      </div>
+    ) : null;
+  }
+  const good = v.status === "PASS" || v.status === "WARN";
+  return (
+    <dl className="space-y-1 rounded-lg border border-white/10 p-3 text-xs">
+      <Fact k="verdict" v={v.status ?? "?"} tone={good ? "text-emerald-300" : "text-rose-300"} />
+      {v.reasons.length > 0 && <Fact k="why" v={v.reasons.join("; ")} tone={good ? "text-zinc-300" : "text-rose-200"} />}
+      {Object.entries(v.checks).map(([name, ok]) => (
+        <Fact
+          key={name}
+          k={name.replaceAll("_", " ")}
+          v={ok === null ? "not checked" : ok ? "yes" : "no"}
+          tone={ok === false ? "text-rose-300" : ok ? "text-emerald-300" : "text-zinc-500"}
+        />
+      ))}
+      {v.sandbox && <Fact k="sandbox" v={v.sandbox} />}
+      {v.finished_at && <Fact k="checked" v={new Date(v.finished_at).toLocaleString()} />}
+    </dl>
+  );
+}
+
 export function TaskReview({ suite, task }: { suite: string; task: string }) {
   const { handle } = useGate();
   const [tab, setTab] = useState<Tab>("Issue");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [build, setBuild] = useState<"author" | "validate" | null>(null);
+  const [asking, setAsking] = useState<"accept" | "drop" | null>(null);
   const { data, error, refresh } = usePolling<TaskDetail>(
     () => runnerGet<TaskDetail>(taskPath(suite, task)),
     5000,
@@ -45,18 +130,12 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
   const t = data.task;
   const editable = !data.frozen && !t.dropped;
 
-  const act = async (what: "accept" | "drop") => {
-    let body: unknown = undefined;
-    if (what === "accept" && !window.confirm(`Accept ${task} into the suite? It is frozen with the suite later.`)) return;
-    if (what === "drop") {
-      const reason = window.prompt(`Drop ${task}? Its folder stays in the suites home. Reason (optional):`, "");
-      if (reason === null) return;
-      body = { reason };
-    }
+  const act = async (what: "accept" | "drop", reason: string) => {
     setBusy(true);
     setActionError(null);
     try {
-      await runnerPost<TaskRow>(`${taskPath(suite, task)}/${what}`, body);
+      await runnerPost<TaskRow>(`${taskPath(suite, task)}/${what}`, what === "drop" ? { reason } : undefined);
+      setAsking(null);
       refresh();
     } catch (e) {
       setActionError(handle(e));
@@ -87,11 +166,11 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
       {editable && (
         <div className="flex flex-wrap items-center gap-3">
           {!t.accepted && (
-            <button type="button" onClick={() => act("accept")} disabled={busy || t.stage !== "validated"} className="rounded-full border border-emerald-500/40 px-4 py-1 text-sm text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-30">
+            <button type="button" onClick={() => setAsking("accept")} disabled={busy || asking !== null || t.stage !== "validated"} className="rounded-full border border-emerald-500/40 px-4 py-1 text-sm text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-30">
               Accept
             </button>
           )}
-          <button type="button" onClick={() => act("drop")} disabled={busy || t.active_job !== null} className="rounded-full border border-white/15 px-4 py-1 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-30">
+          <button type="button" onClick={() => setAsking("drop")} disabled={busy || asking !== null || t.active_job !== null} className="rounded-full border border-white/15 px-4 py-1 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-30">
             Drop
           </button>
           {t.stage !== "validated" && !t.accepted && (
@@ -100,6 +179,19 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
           {actionError && <span className="text-xs text-rose-300">{actionError}</span>}
         </div>
       )}
+      {editable && asking && (
+        <ConfirmBar
+          message={asking === "accept"
+            ? `Accept ${task} into the suite? It is frozen with the suite later.`
+            : `Drop ${task}? It leaves the suite; its folder stays in the suites home.`}
+          confirmLabel={asking === "accept" ? "Accept" : "Drop"}
+          withReason={asking === "drop"}
+          busy={busy}
+          onConfirm={(reason) => act(asking, reason)}
+          onCancel={() => setAsking(null)}
+        />
+      )}
+      <LatestJob task={t} jobs={data.jobs} />
       {editable && t.active_job === null && (
         <div className="space-y-3 rounded-xl border border-white/10 p-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -111,7 +203,7 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
             </button>
           </div>
           {build && (
-            <BuildActions key={build} suite={suite} tasks={[task]} options={data.options} kind={build} onDone={() => { setBuild(null); refresh(); }} />
+            <BuildActions key={build} suite={suite} tasks={[task]} options={data.options} kind={build} defaults={lastAuthorChoice([t])} closeOnQueued onDone={() => { setBuild(null); refresh(); }} />
           )}
         </div>
       )}
@@ -144,7 +236,11 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
         {tab === "Issue" && <Text file={data.issue_md} empty="no issue.md" />}
         {tab === "Tests" && (
           <div className="space-y-4">
-            {data.tests.length === 0 && <div className="text-sm text-zinc-500">No hidden tests yet: authoring writes them.</div>}
+            {data.tests.length === 0 && (
+              <div className="text-sm text-zinc-500">
+                {t.author?.status === "ok" ? "The last authoring session left no files under tests/." : "No hidden tests yet: authoring writes them."}
+              </div>
+            )}
             {data.tests.map((f) => (
               <div key={f.path}>
                 <div className="mb-1 font-mono text-xs text-zinc-400">{f.path}</div>
@@ -163,10 +259,18 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
                 <Text file={data.author_notes} empty="" />
               </div>
             )}
+            <AuthorSummary task={t} />
+            {data.author && <div className="text-xs text-zinc-500">raw record</div>}
             <Json value={data.author} empty="Not authored yet." />
           </div>
         )}
-        {tab === "Validate" && <Json value={data.validate} empty="Not validated yet." />}
+        {tab === "Validate" && (
+          <div className="space-y-3">
+            <ValidateSummary task={t} raw={data.validate} />
+            {data.validate && <div className="text-xs text-zinc-500">raw record</div>}
+            <Json value={data.validate} empty="Not validated yet." />
+          </div>
+        )}
       </div>
     </div>
   );

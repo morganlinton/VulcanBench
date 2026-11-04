@@ -72,6 +72,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Suite builder pages**, after a hands-on pass through the whole flow:
+  accept, drop, freeze and lock ask in the page instead of through native
+  dialogs (Drop used `window.prompt`, which Electron does not have); the task
+  page shows the last job's outcome note and the next step, and the Author
+  and Validate tabs open with a readable summary above the raw record; the
+  author form starts from the last session's harness, model and effort and
+  says when a model id is missing; the unlock cooldown counts down and keeps
+  what is typed; the new-suite form takes a github.com link; the Suites intro
+  shows on the unlock screen too.
 - **Local run GUI**: the runner routes refuse requests from browser pages not
   served from localhost (403 on a foreign or `null` `Origin`), so a website
   open in the operator's browser can no longer read the queue or post plans

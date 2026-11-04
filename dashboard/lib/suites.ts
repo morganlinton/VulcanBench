@@ -219,6 +219,23 @@ export function slugify(name: string): string {
     .slice(0, 64);
 }
 
+/** "1 task", "2 tasks". */
+export function plural(n: number, noun: string): string {
+  return `${n} ${noun}${n === 1 ? "" : "s"}`;
+}
+
+/**
+ * owner/name from what people paste: owner/name itself, a github.com URL
+ * (with or without a path after the repository, or .git), or a git@ remote.
+ */
+export function normalizeRepo(input: string): string {
+  let s = input.trim();
+  s = s.replace(/^git@github\.com:/i, "").replace(/^(https?:\/\/)?(www\.)?github\.com\//i, "");
+  const parts = s.split(/[/?#]/).filter(Boolean);
+  if (parts.length >= 2 && input.trim() !== s) s = `${parts[0]}/${parts[1]}`;
+  return s.replace(/\.git$/i, "").replace(/\/+$/, "");
+}
+
 export const SUITE_ID_RE = /^[a-z0-9][a-z0-9-]{2,63}$/;
 export const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 

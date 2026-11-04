@@ -11,7 +11,7 @@ import {
   type JobSummary,
   type LaunchPlan,
 } from "@/lib/runner";
-import type { SuiteDetail } from "@/lib/suites";
+import type { SuiteDetail, TaskRow } from "@/lib/suites";
 import { useGate } from "./BuilderGate";
 
 export interface BuildJob {
@@ -51,6 +51,22 @@ export interface BuildPlanSpec {
 
 type Kind = "author" | "validate";
 
+export interface AuthorChoice {
+  harness: string | null;
+  model: string | null;
+  effort: string | null;
+}
+
+/** The harness, model and effort of the newest authoring record among these tasks, to start the form from. */
+export function lastAuthorChoice(tasks: TaskRow[]): AuthorChoice | null {
+  let best: TaskRow["author"] = null;
+  for (const t of tasks) {
+    const a = t.author;
+    if (a?.model && (!best || (a.finished_at ?? "") > (best.finished_at ?? ""))) best = a;
+  }
+  return best ? { harness: best.harness, model: best.model, effort: best.effort } : null;
+}
+
 // Build an author or validate plan for some tasks, show exactly what would
 // run, and queue it only on the confirm click with the plan's hash. Nothing
 // here starts a session on its own, and nothing retries.
@@ -59,19 +75,30 @@ export function BuildActions({
   tasks,
   options,
   kind,
+  defaults = null,
+  closeOnQueued = false,
   onDone,
 }: {
   suite: string;
   tasks: string[];
   options: SuiteDetail["options"];
   kind: Kind;
+  /** Start the author form from an earlier session's choice (only values the options still offer). */
+  defaults?: AuthorChoice | null;
+  /** Hand back as soon as the jobs are queued, for pages that show the job themselves. */
+  closeOnQueued?: boolean;
   onDone: () => void;
 }) {
   const { handle } = useGate();
-  const [harness, setHarness] = useState(options.harnesses.includes("codex") ? "codex" : options.harnesses[0] ?? "");
-  const [model, setModel] = useState("");
+  const offered = (v: string | null | undefined, list: string[]) => (v && list.includes(v) ? v : null);
+  const [harness, setHarness] = useState(
+    offered(defaults?.harness, options.harnesses) ?? (options.harnesses.includes("codex") ? "codex" : options.harnesses[0] ?? ""),
+  );
+  const [model, setModel] = useState(defaults?.model ?? "");
   const [billing, setBilling] = useState(options.billing[0] ?? "auto");
-  const [effort, setEffort] = useState(options.efforts.includes("medium") ? "medium" : "");
+  const [effort, setEffort] = useState(
+    offered(defaults?.effort, options.efforts) ?? (options.efforts.includes("medium") ? "medium" : ""),
+  );
   const [plan, setPlan] = useState<LaunchPlan<BuildPlanSpec> | null>(null);
   const [building, setBuilding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,8 +136,8 @@ export function BuildActions({
             </Link>
           ))}
         </div>
-        <button type="button" onClick={() => { setQueued(null); setPlan(null); onDone(); }} className="text-xs text-zinc-400 hover:text-white">
-          done
+        <button type="button" onClick={() => { setQueued(null); setPlan(null); onDone(); }} className="rounded-full border border-white/15 px-3 py-0.5 text-xs text-zinc-300 hover:bg-white/5">
+          Dismiss
         </button>
       </div>
     );
@@ -128,7 +155,7 @@ export function BuildActions({
           </div>
           <div>
             <label className={label} htmlFor="author-model">Model</label>
-            <input id="author-model" className={`${field} font-mono`} value={model} onChange={(e) => setModel(e.target.value)} placeholder="gpt-6.1-terra" />
+            <input id="author-model" className={`${field} font-mono`} value={model} onChange={(e) => setModel(e.target.value)} placeholder="e.g. gpt-6.1-terra" />
           </div>
           <div>
             <label className={label} htmlFor="author-billing">Billing</label>
@@ -152,9 +179,12 @@ export function BuildActions({
         <span className="text-xs text-zinc-500">
           {tasks.length} task{tasks.length === 1 ? "" : "s"}: {tasks.join(", ") || "select some in the table"}
         </span>
+        {kind === "author" && tasks.length > 0 && !model.trim() && (
+          <span className="text-xs text-amber-300">Type the model id the harness CLI takes to build the plan.</span>
+        )}
       </div>
       {error && <div className="text-xs text-rose-300">{error}</div>}
-      {plan && <BuildPlanCard plan={plan} onQueued={setQueued} />}
+      {plan && <BuildPlanCard plan={plan} onQueued={(jobs) => (closeOnQueued ? onDone() : setQueued(jobs))} />}
     </div>
   );
 }

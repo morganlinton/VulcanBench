@@ -1470,6 +1470,29 @@ built by `scripts/cii-v4-board/build_gpt61terra_population.py`.
   spellings, and the probe is recovered under it; details in
   `maintenance-v3-operations.md`.
 
+## Amendment v3.26.5, November 4, 2026: Muse Wonder Full at Max
+
+Everything is as in v3.26.3, for the Max level. Protocol id
+`code-quality-maintenance-v3.26.5`; run directory
+`runs-code-quality-maintenance-v3.26.5`; runner
+`harness/maintenance_review_v3265.py`. Population record:
+`docs/results/swe-v4-musewonder-full-2026-10/comparison-max.json`, built by
+`build_musewonder_population.py --level max`.
+
+- Why: the owner allowed Max under Contributor for Muse Wonder Full on
+  November 3, 2026, after a probe showed Max reasoning longer than Extra-high
+  (DECISIONS.md, 2026-11-03). This reverses the "Max is excluded" note in
+  v3.26.3 for Wonder Full only.
+- Population: Muse Wonder Full's Max level, every run through Muse Code 1.4.9
+  in its own root, `runs-effort-musewonder-full-v2-149-max`, which continues
+  no earlier root. The builder refuses a Max root that runs another level or
+  continues one. Prepare also refuses any run already judged in v3.26 to
+  v3.26.3.
+- Judges: no new exam, as in v3.26.2 and v3.26.3: Opus 5.5 gated by its
+  v3.26 verdict, GPT-6.1 Sol by its v3.25 verdict.
+- Publication merges this directory with v3.26 to v3.26.3; no earlier record
+  is rewritten.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

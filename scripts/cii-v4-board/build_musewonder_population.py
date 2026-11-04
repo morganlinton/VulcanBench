@@ -35,6 +35,10 @@ continues the 1.4.6 root (docs/DECISIONS.md, 2026-10-16), so the top-up checks
 that root's conditions: the 1.4.9 binary and its recorded allowance for Spark 1.3
 on goal and verify reminder observers, whose usage each row records. It writes
 comparison-topup.json beside the main record, which it never touches.
+
+``--level max`` (v3.26.5) reads Max from its own root,
+runs-effort-musewonder-full-v2-149-max, which continues no earlier root: Max
+under Contributor was allowed for Wonder Full on 2026-11-03 (docs/DECISIONS.md).
 """
 
 from __future__ import annotations
@@ -61,6 +65,7 @@ TOPUP_OUTPUT = RESULTS / "comparison-topup.json"
 RUNS = "runs-effort-musewonder-full-v2"
 BASE_PROTOCOL = ROOT / "runs-code-quality-maintenance-v3.26/protocol.json"
 TOPUP_RUNS = "runs-effort-musewonder-full-v2-149"
+MAX_RUNS = "runs-effort-musewonder-full-v2-149-max"  # Max's own 1.4.9 root, continuing none
 TOPUP_SOLVER_CLI = "Muse Code 1.4.9 (1.4.9-R6297.1)"
 TOPUP_REMINDER_MODELS = ["muse-spark-1.3"]
 MODEL = "musewonderfull"
@@ -68,7 +73,8 @@ LEVELS = ("low", "medium")
 EXTENSION_LEVELS = (
     "high",
     "extra-high",
-)  # ran only on Muse Code 1.4.9 (docs/DECISIONS.md, 2026-10-16)
+    "max",
+)  # ran only on Muse Code 1.4.9 (docs/DECISIONS.md, 2026-10-16 and 2026-11-03)
 MODELS = {MODEL: (RUNS, LEVELS)}
 SWEEP_MODELS = {MODEL: "muse-code:muse-wonder-full-1.0-contributor"}
 SOLVER_CLI = "Muse Code 1.4.6 (1.4.6-R6000.1)"
@@ -89,7 +95,7 @@ KNOWN_GAPS = {
 
 
 def solver_conditions(
-    sweep_protocol: Path, solver_cli: str = SOLVER_CLI, top_up: bool = False
+    sweep_protocol: Path, solver_cli: str = SOLVER_CLI, top_up: bool = False, continues: bool = True
 ) -> dict:
     """The sweep's own frozen record of its run conditions, checked against this population."""
     raw = sweep_protocol.read_bytes()
@@ -106,13 +112,20 @@ def solver_conditions(
         if protocol.get(key) != value:
             raise ValueError(f"Sweep protocol {key} is {protocol.get(key)!r}, expected {value!r}")
     extra = {}
-    if top_up:
-        continues = protocol.get("continues") or {}
-        if Path(continues.get("root", "")).name != RUNS:
+    if top_up and continues:
+        root = protocol.get("continues") or {}
+        if Path(root.get("root", "")).name != RUNS:
             raise ValueError(f"Top-up sweep does not continue {RUNS}")
         extra = {
-            "continues": continues,
+            "continues": root,
             "reminder_observer_rule": protocol["reminder_observer_rule"],
+        }
+    elif top_up:
+        if protocol.get("continues") or protocol.get("levels") != ["max"]:
+            raise ValueError("The Max root must run Max alone and continue no earlier root")
+        extra = {
+            "reminder_observer_rule": protocol["reminder_observer_rule"],
+            "max_provenance": protocol["max_provenance"],
         }
     return {
         **expected,
@@ -192,6 +205,13 @@ def _evidence_rebuilds(run: Path, summary: dict, data: dict) -> bool:
     return True
 
 
+def _max_root(read_levels: tuple[str, ...]) -> bool:
+    """Whether these 1.4.9 levels are read from Max's own root (Max is only ever read alone)."""
+    if "max" in read_levels and read_levels != ("max",):
+        raise ValueError("Max is read alone, from its own root")
+    return read_levels == ("max",)
+
+
 def build(
     wanted: set[tuple[str, str, str]] | None = None,
     top_up: bool = False,
@@ -205,7 +225,8 @@ def build(
     lock = _lock_hashes()
     rows, excluded, missing, tags = [], [], [], set()
     solver_cli = TOPUP_SOLVER_CLI if top_up else SOLVER_CLI
-    models = {MODEL: (TOPUP_RUNS, read_levels)} if top_up else MODELS
+    max_root = top_up and _max_root(read_levels)
+    models = {MODEL: (MAX_RUNS if max_root else TOPUP_RUNS, read_levels)} if top_up else MODELS
     for model, (root, levels) in models.items():
         for level in levels:
             seen = set()
@@ -290,7 +311,9 @@ def build(
         "models": {MODEL: described},
         "levels": {m: list(v[1]) for m, v in models.items()},
         "solver": {
-            **solver_conditions(ROOT / models[MODEL][0] / "protocol.json", solver_cli, top_up),
+            **solver_conditions(
+                ROOT / models[MODEL][0] / "protocol.json", solver_cli, top_up, not max_root
+            ),
             "run_from": sorted(t for t in tags if t),
         },
         "cells": cells,
@@ -318,7 +341,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--level",
         choices=EXTENSION_LEVELS,
-        help="a whole level that ran on Muse Code 1.4.9 (v3.26.2 High, then Extra-high); "
+        help="a whole level that ran on Muse Code 1.4.9 (v3.26.2 High, v3.26.3 Extra-high, "
+        "v3.26.5 Max); "
         "writes comparison-<level>.json",
     )
     parser.add_argument(

@@ -10,15 +10,22 @@ import pytest
 
 from backend.runner import launch, sweep
 from backend.runner.config import RunnerConfig
+from backend.runner.discovery import job_summary
+from backend.runner.state import Job
 from harness.agent.cli_agents import CLI_AGENT_PROVIDERS
+from harness.suite_lock import lock_digest
 from tests.runner_fixtures import (
+    CUSTOM_SUITE_ID,
+    CUSTOM_TASKS,
     SUITE_ID,
     SUITE_TASKS,
+    fake_custom_suite,
     fake_repo,
     fake_worktree,
     git,
     harness_run,
     make_config,
+    tag_with_suites_home,
 )
 
 TAG = "bench/2026-10-29-test"
@@ -241,3 +248,113 @@ def test_child_env_prepends_a_cli_dir_and_keeps_login_homes(
     assert env["PATH"].split(":")[0] == str(tmp_path)
     assert env["CODEX_HOME"] == str(tmp_path / "codex") and "CODEX_API_KEY" not in env
     assert (NOW + timedelta(seconds=1)) > NOW  # keep the import honest for the helper above
+
+
+# --- custom suites from the suites home ---------------------------------------
+
+
+def test_custom_suites_are_listed_after_the_built_ins(repo: Path, cfg: RunnerConfig) -> None:
+    home_dir = fake_custom_suite(cfg)
+    fake_custom_suite(cfg, "draft-suite", frozen=False)  # no lock yet: not offered
+    fake_custom_suite(cfg, SUITE_ID)  # shadows a built-in: the engine would never run it
+    (cfg.suites_home / "Not_An_Id").mkdir()
+    suites = sweep.suites_at(cfg, TAG)
+    assert [(s["id"], s["custom"]) for s in suites] == [(SUITE_ID, False), (CUSTOM_SUITE_ID, True)]
+    custom = suites[1]
+    lock = json.loads((home_dir / "suite.lock.json").read_text())
+    assert custom["lock_digest"] == lock_digest(lock) and custom["lock_digest"].startswith(
+        "sha256:"
+    )
+    assert custom["path"] == str(home_dir) and custom["suites_home"] == str(cfg.suites_home)
+    assert custom["task_ids"] == sorted(CUSTOM_TASKS) and custom["name"] == "Acme slice"
+    assert custom["repo"] == {"host": "github.com", "owner": "acme", "name": "api"}
+    assert sweep.suite_options(cfg, TAG)["suites_home"] == str(cfg.suites_home)
+    # No suites home on disk is simply no custom suites.
+    gone = make_config(cfg.home.parent / "other", suites_home=cfg.home.parent / "nowhere")
+    assert sweep.custom_suites(gone) == []
+
+
+def test_a_custom_suite_needs_a_tag_that_knows_suites_home(repo: Path, cfg: RunnerConfig) -> None:
+    fake_custom_suite(cfg)
+    fake_worktree(repo, cfg)  # the old tag: its cli.py has no --suites-home
+    with pytest.raises(launch.LaunchError) as old:
+        sweep.build_suite_plan(cfg, form(suite=CUSTOM_SUITE_ID), today="2026-11-03")
+    assert old.value.status == 422 and "newer bench tag" in old.value.detail
+
+
+def test_custom_suite_plan_passes_the_suites_home(repo: Path, cfg: RunnerConfig) -> None:
+    home_dir = fake_custom_suite(cfg)
+    tag = tag_with_suites_home(repo)
+    wt = fake_worktree(repo, cfg, tag)
+    spec = sweep.build_suite_plan(
+        cfg, form(suite=CUSTOM_SUITE_ID, tag=tag, efforts=("low",)), today="2026-11-03"
+    )
+    job = spec["jobs"][0]
+    argv = job["argv"]
+    i = argv.index("--suite")
+    assert argv[i : i + 4] == ["--suite", CUSTOM_SUITE_ID, "--suites-home", str(cfg.suites_home)]
+    assert argv[0] == str(wt / ".venv" / "bin" / "vulcanbench") and "--allow-dirty" not in argv
+    digest = lock_digest(json.loads((home_dir / "suite.lock.json").read_text()))
+    for d in (spec, job):
+        assert d["suite_custom"] is True and d["suites_home"] == str(cfg.suites_home)
+        assert d["suite_lock_digest"] == digest and d["suite_path"] == str(home_dir)
+    assert job["task_ids"] == sorted(CUSTOM_TASKS) and spec["n_tasks"] == len(CUSTOM_TASKS)
+    # The estimate ran with the flag too: the fake reads the task list from that lock.
+    assert spec["estimate"]["status"] == "ok"
+    assert any("custom suite from" in w for w in spec["warnings"])
+    assert sweep.validate_any(cfg, job) == []
+    # A built-in suite at the same tag gets no flag and no custom fields.
+    built_in = sweep.build_suite_plan(cfg, form(tag=tag, efforts=("low",)), today="2026-11-03")
+    assert "--suites-home" not in built_in["jobs"][0]["argv"]
+    assert built_in["suite_custom"] is False and built_in["suite_lock_digest"] is None
+
+
+def test_custom_suite_launch_validation_catches_tampering(repo: Path, cfg: RunnerConfig) -> None:
+    home_dir = fake_custom_suite(cfg)
+    tag = tag_with_suites_home(repo)
+    fake_worktree(repo, cfg, tag)
+    spec = sweep.build_suite_plan(
+        cfg, form(suite=CUSTOM_SUITE_ID, tag=tag, efforts=("low",)), today="2026-11-03"
+    )
+    job = spec["jobs"][0]
+    argv = list(job["argv"])
+    i = argv.index("--suites-home")
+
+    elsewhere = [*argv[: i + 1], "/tmp/other-home", *argv[i + 2 :]]
+    assert any(
+        "not the configured suites home" in p
+        for p in sweep.validate_any(cfg, {**job, "argv": elsewhere})
+    )
+    dropped = argv[:i] + argv[i + 2 :]
+    assert any("no --suites-home" in p for p in sweep.validate_any(cfg, {**job, "argv": dropped}))
+    as_builtin = {**job, "suite_custom": False}
+    assert any("built-in suite" in p for p in sweep.validate_any(cfg, as_builtin))
+
+    # Re-freezing after the plan was built (a task changed) refuses the launch.
+    lock = json.loads((home_dir / "suite.lock.json").read_text())
+    lock["tasks"]["acme-fix-1"] = "changed"
+    (home_dir / "suite.lock.json").write_text(json.dumps(lock))
+    assert any("build a new plan" in p for p in sweep.validate_any(cfg, job))
+    (home_dir / "suite.lock.json").unlink()
+    assert any("has no suite.lock.json" in p for p in sweep.validate_any(cfg, job))
+
+
+def test_job_summary_shows_the_custom_suite_fields(repo: Path, cfg: RunnerConfig) -> None:
+    fake_custom_suite(cfg)
+    tag = tag_with_suites_home(repo)
+    fake_worktree(repo, cfg, tag)
+    spec = sweep.build_suite_plan(
+        cfg, form(suite=CUSTOM_SUITE_ID, tag=tag, efforts=("low",)), today="2026-11-03"
+    )
+    job = Job(
+        id=1,
+        kind="suite",
+        name="x",
+        status="queued",
+        spec=spec["jobs"][0],
+        plan_hash=None,
+        created_at="t",
+    )
+    shown = job_summary(job)["spec"]
+    assert shown["suite_custom"] is True and shown["suites_home"] == str(cfg.suites_home)
+    assert shown["suite_lock_digest"] == spec["suite_lock_digest"]

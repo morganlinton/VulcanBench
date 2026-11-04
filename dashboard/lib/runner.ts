@@ -316,6 +316,12 @@ export interface SuiteInfo {
   frozen_at: string | null;
   task_ids: string[];
   n_tasks: number;
+  /** True for a suite in the suites home, outside the checkout. */
+  custom: boolean;
+  path?: string;
+  suites_home?: string;
+  lock_digest?: string;
+  repo?: { host?: string; owner?: string; name?: string; url?: string } | null;
 }
 
 export interface LaunchOptions {
@@ -325,6 +331,7 @@ export interface LaunchOptions {
   worktree: WorktreeInfo | null;
   run_worktrees: string;
   suites: SuiteInfo[];
+  suites_home: string;
   harnesses: string[];
   efforts: string[];
   billing: string[];
@@ -388,6 +395,10 @@ export interface SweepPlanSpec {
   billing: string;
   suite: string;
   suite_name: string;
+  suite_custom?: boolean;
+  suites_home?: string | null;
+  suite_lock_digest?: string | null;
+  suite_path?: string | null;
   n_tasks: number;
   efforts: string[];
   repeat: number;

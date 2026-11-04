@@ -9,6 +9,7 @@ VulcanBench/
 │   ├── agent/        # Tool ABC + executors (Docker + Local)
 │   ├── sandbox/      # DockerToolExecutor (non-root, network-off)
 │   ├── evaluator/    # functional + quality + security + efficiency + human_like
+│   ├── suite_builder/ # build a suite from your own merged PRs (password-gated)
 │   └── tracer/       # JSONL + self-contained replay.html
 ├── tasks/v1/         # 52 gold-verified suite tasks (+ hello-world demo)
 ├── dashboard/        # Next.js App Router (leaderboard, trace viewer, submit)

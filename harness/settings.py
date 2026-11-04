@@ -82,3 +82,25 @@ def runner_settings(path: Path = SETTINGS_PATH) -> dict[str, Any]:
     ):
         raise ValueError(f"{path}: [runner].first_check_after_s must be an integer")
     return merged
+
+
+# ---------------------------------------------------------------------------
+# [builder]: the suite builder (vulcanbench suite ..., harness/suite_builder).
+# ``password_hash`` is an scrypt hash made by ``vulcanbench suite
+# password-hash``; empty means no password is set and the builder stays
+# locked. The env var VULCANBENCH_BUILDER_PASSWORD_HASH wins over the file.
+# ---------------------------------------------------------------------------
+
+BUILDER_DEFAULTS: dict[str, Any] = {"password_hash": ""}
+
+
+def builder_settings(path: Path = SETTINGS_PATH) -> dict[str, Any]:
+    """The ``[builder]`` table with defaults filled in and types checked."""
+    table = load_settings(path).get("builder", {})
+    if not isinstance(table, dict):
+        raise ValueError(f"{path}: [builder] must be a table")
+    merged: dict[str, Any] = dict(BUILDER_DEFAULTS)
+    merged.update(table)
+    if not isinstance(merged["password_hash"], str):
+        raise ValueError(f"{path}: [builder].password_hash must be a string")
+    return merged

@@ -320,8 +320,62 @@ def test_top_up_refuses_a_sweep_without_the_reminder_allowance(
 
 
 def test_level_mode_is_separate_from_top_up(builder: ModuleType) -> None:
-    assert builder.EXTENSION_LEVELS == ("high", "extra-high")
+    assert builder.EXTENSION_LEVELS == ("high", "extra-high", "max")
     with pytest.raises(SystemExit):
         builder.main(["--level", "high", "--top-up"])
     with pytest.raises(SystemExit):
-        builder.main(["--level", "max"])
+        builder.main(["--level", "ultra"])
+
+
+def _max_sweep(root: Path, builder: ModuleType, **protocol_changes: object) -> None:
+    sweep = root / builder.MAX_RUNS
+    run = sweep / "max" / f"{BLEND}-max0001"
+    run.mkdir(parents=True)
+    protocol = {
+        "model": builder.SWEEP_MODELS[builder.MODEL],
+        "cli_model": "muse-wonder-full-1.0",
+        "harness_version": builder.TOPUP_SOLVER_CLI,
+        "contributor_mode": "on",
+        "levels": ["max"],
+        "muse_settings_plugins": {"skill-reminder": {"enabled": False}},
+        "binary_sha256": "bin149",
+        "muse_settings_sha256": "settings",
+        "reminder_observer_models": ["muse-spark-1.3"],
+        "reminder_observer_rule": "goal and verify reminder observers may run on these models",
+        "max_provenance": "probe 2026-11-03",
+        **protocol_changes,
+    }
+    (sweep / "protocol.json").write_text(json.dumps(protocol))
+    old = add_run(root, "max", BLEND)  # a run of the right shape, moved under the Max root
+    summary = json.loads((old / "summary.json").read_text())
+    summary["cli_agent"]["harness_version"] = builder.TOPUP_SOLVER_CLI
+    summary["source"]["harness"]["describe"] = "bench/2026-11-03-musewonder-full-max"
+    (run / "summary.json").write_text(json.dumps(summary))
+    (run / "cli-agent-stream.jsonl").write_text('{"type": "stdout"}\n')
+    (run / "trace.jsonl").write_text(
+        json.dumps({"type": "muse_usage", "data": {"auxiliary": {}}}) + "\n"
+    )
+    for p in old.iterdir():
+        p.unlink()
+    old.rmdir()
+
+
+def test_max_reads_its_own_root_and_records_the_provenance(
+    builder: ModuleType, tmp_path: Path
+) -> None:
+    _max_sweep(tmp_path, builder)
+    record = builder.build(top_up=True, read_levels=("max",))
+    (row,) = record["rows"]
+    assert row["effort"] == "max" and f"/{builder.MAX_RUNS}/" in row["source_directory"]
+    assert record["solver"]["max_provenance"] == "probe 2026-11-03"
+    assert "continues" not in record["solver"]
+    assert record["solver"]["run_from"] == ["bench/2026-11-03-musewonder-full-max"]
+    assert sorted(x["task"] for x in record["missing"]) == [CELLAR, PADDOCK]
+    with pytest.raises(ValueError, match="read alone"):
+        builder.build(top_up=True, read_levels=("extra-high", "max"))
+
+
+def test_max_refuses_a_root_that_continues_another(builder: ModuleType, tmp_path: Path) -> None:
+    _max_sweep(tmp_path, builder, continues={"root": "elsewhere"})
+    with pytest.raises(ValueError, match="continue no earlier root"):
+        builder.build(top_up=True, read_levels=("max",))

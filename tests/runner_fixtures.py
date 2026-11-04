@@ -352,6 +352,8 @@ def fake_worktree(repo: Path, cfg: RunnerConfig, tag: str = "bench/2026-10-29-te
     bin_dir.mkdir(parents=True)
     (bin_dir / "python").write_text("")
     (bin_dir / "vulcanbench.py").write_text(FAKE_CLI)
+    (bin_dir / "fake_suite.py").write_text(FAKE_SUITE_CLI)
+    (wt / ".fake-suite-password").write_text(FAKE_PASSWORD)
     cli = bin_dir / "vulcanbench"
     cli.write_text('#!/bin/bash\nexec python3 "$(dirname "$0")/vulcanbench.py" "$@"\n')
     cli.chmod(0o755)
@@ -430,6 +432,11 @@ mode = (here / ".fake-run-mode").read_text().strip() if (here / ".fake-run-mode"
 def opt(name, default=None):
     return args[args.index(name) + 1] if name in args else default
 
+
+if args[:1] == ["suite"]:
+    import runpy
+    runpy.run_path(str(Path(__file__).with_name("fake_suite.py")), run_name="__main__")
+    sys.exit(0)
 
 tasks = ["alpha-task", "beta-task"]
 lock = here / "tasks" / str(opt("--suite", "")) / "suite.lock.json"
@@ -526,5 +533,309 @@ if mode == "hang":
             fh.write(json.dumps({"ts": "2026-10-29T12:00:01Z", "step": 1}) + "\n")
     sys.exit(0)
 print("unknown mode", mode, file=sys.stderr)
+sys.exit(9)
+"""
+
+
+# ----------------------------------------------------------- suite builder --
+
+BUILDER_TAG = "bench/2026-11-04-builder"
+FAKE_PASSWORD = "correct horse battery staple"
+
+
+def tag_with_builder(repo: Path, tag: str = BUILDER_TAG) -> str:
+    """A bench tag whose harness has the suite builder (``harness/suite_builder/access.py``)."""
+    cli = repo / "harness" / "cli.py"
+    if "--suites-home" not in cli.read_text():
+        cli.write_text(cli.read_text() + '# "--suites-home"\n')
+    sb = repo / "harness" / "suite_builder"
+    sb.mkdir(exist_ok=True)
+    (sb / "__init__.py").write_text("")
+    (sb / "access.py").write_text("# fake builder marker\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "suite builder")
+    git(repo, "tag", tag)
+    return tag
+
+
+def set_fake_suite(worktree: Path, name: str, value: str = "1") -> None:
+    """Steer the fake ``vulcanbench suite``: prs-mode, scaffold-mode, not-configured, unlocked."""
+    (worktree / f".fake-suite-{name}").write_text(value)
+
+
+def fake_suite_calls(worktree: Path) -> list[dict[str, Any]]:
+    path = worktree / ".fake-suite-calls.jsonl"
+    if not path.is_file():
+        return []
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def fake_builder_task(
+    cfg: RunnerConfig,
+    suite_id: str,
+    task: str,
+    *,
+    pr: int = 7,
+    author: str | None = None,
+    validate: str | None = None,
+    accepted: bool = False,
+) -> Path:
+    """A task in a draft suite the way scaffold (and optionally author, validate) left it."""
+    d = cfg.suites_home / suite_id
+    if not (d / "suite.json").is_file():
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "suite.json").write_text(
+            json.dumps(
+                {
+                    "id": suite_id,
+                    "display_name": "Acme draft",
+                    "version": "0.1.0",
+                    "repo": {"host": "github", "owner": "acme", "name": "api"},
+                    "tasks": [],
+                }
+            )
+        )
+    t = d / task
+    (t / "build").mkdir(parents=True)
+    (t / "repo").mkdir()
+    (t / "repo" / "main.py").write_text("print('base')\n")
+    (t / "tests").mkdir()
+    (t / "tests" / "vb_test_fix.py").write_text("# canary\ndef test_fix():\n    assert True\n")
+    (t / "issue.md").write_text("DRAFT\n\nThe fix is needed.\n")
+    (t / "gold_patch.diff").write_text("--- a/main.py\n+++ b/main.py\n@@ -1 +1 @@\n-x\n+y\n")
+    (t / "metadata.json").write_text(
+        json.dumps(
+            {
+                "id": task,
+                "tests": {"fail_to_pass": ["tests/vb_test_fix.py"], "pass_to_pass": []},
+                "image": "base",
+                "builder": {"repo": "acme/api", "pr": pr, "status": "scaffolded"},
+            }
+        )
+    )
+    (t / "build" / "pr.json").write_text(json.dumps({"number": pr, "title": f"Fix bug {pr}"}))
+    (t / "build" / "scaffold.json").write_text(
+        json.dumps(
+            {
+                "task_id": task,
+                "pr": pr,
+                "base_commit": "a" * 40,
+                "languages": ["python"],
+                "image": "base",
+                "gold_applies": True,
+                "warnings": [],
+                "scaffolded_at": "2026-11-04T10:00:00+00:00",
+            }
+        )
+    )
+    if author is not None:
+        (t / "build" / "author.json").write_text(
+            json.dumps(
+                {
+                    "task_id": task,
+                    "status": author,
+                    "harness": "codex",
+                    "model": "gpt-6.1-terra",
+                    "effort": "medium",
+                    "finished_at": "2026-11-04T11:00:00+00:00",
+                    "duration_s": 600,
+                    "cost": {"cli_reported_usd": 1.25},
+                    "changed": {"accepted": ["issue.md"], "rejected": []},
+                    "warnings": [],
+                }
+            )
+        )
+    if validate is not None:
+        (t / "build" / "validate.json").write_text(
+            json.dumps(
+                {
+                    "task_id": task,
+                    "status": validate,
+                    "reasons": [] if validate == "PASS" else ["gold does not solve"],
+                    "checks": {"gold_solves": validate == "PASS", "no_answer_in_repo": True},
+                    "sandbox": "docker",
+                    "checked_at": "2026-11-04T12:00:00+00:00",
+                }
+            )
+        )
+    if accepted:
+        manifest = json.loads((d / "suite.json").read_text())
+        manifest["tasks"] = [*manifest["tasks"], task]
+        (d / "suite.json").write_text(json.dumps(manifest))
+    return t
+
+
+# The fake ``vulcanbench suite``. Steered by <worktree>/.fake-suite-* files (the
+# child env is an allowlist). Every call is recorded with its argv and the
+# names of its environment variables, never stdin; unlock records only
+# whether stdin carried the expected password.
+FAKE_SUITE_CLI = r"""
+import json, os, re, sys, time
+from pathlib import Path
+
+args = sys.argv[1:]
+assert args[0] == "suite"
+args = args[1:]
+here = Path(__file__).resolve().parents[2]
+with (here / ".fake-suite-calls.jsonl").open("a") as fh:
+    fh.write(json.dumps({"argv": sys.argv[1:], "env": sorted(os.environ)}) + "\n")
+
+
+def flag(name):
+    p = here / f".fake-suite-{name}"
+    return p.read_text().strip() if p.exists() else None
+
+
+def opt(name, default=None):
+    return args[args.index(name) + 1] if name in args else default
+
+
+def out(doc, code=0):
+    print(json.dumps(doc))
+    sys.exit(code)
+
+
+def fail(code, message, exit_code, **extra):
+    print(json.dumps({"schema": "vulcanbench.suite.error.v1",
+                      "error": {"code": code, "message": message, **extra}}))
+    print(f"error {message}", file=sys.stderr)
+    sys.exit(exit_code)
+
+
+def access():
+    configured = flag("not-configured") is None
+    unlocked = configured and flag("unlocked") is not None
+    return {"schema": "vulcanbench.suite.access.v1", "configured": configured,
+            "unlocked": unlocked, "unlocked_at": "2026-11-04T09:00:00+00:00" if unlocked else None,
+            "unlock_file": "/home/x/.config/vulcanbench/suite-builder-unlock.json"}
+
+
+def gate():
+    st = access()
+    if not st["configured"]:
+        fail("builder_not_configured", "no suite builder password is set", 7)
+    if not st["unlocked"]:
+        fail("builder_locked", "the suite builder is for subscribers; unlock it", 7)
+
+
+home = Path(opt("--suites-home", str(here / "suites")))
+cmd = args[0]
+
+if cmd == "access":
+    out(access())
+if cmd == "unlock":
+    assert "--password-stdin" in args
+    line = sys.stdin.readline()
+    password = line[:-1] if line.endswith("\n") else line
+    expected = flag("password")  # set by the test; never a literal here
+    (here / ".fake-suite-stdin-ok").write_text("yes" if password == expected else "no")
+    if flag("not-configured") is not None:
+        fail("builder_not_configured", "no suite builder password is set", 7)
+    if flag("echo") is not None:  # a misbehaving CLI: the secret in its output, no JSON
+        print("debug: got " + password, file=sys.stderr)
+        print("password was " + password)
+        sys.exit(1)
+    if password != expected:
+        fail("wrong_password", "that is not the suite builder password", 7)
+    (here / ".fake-suite-unlocked").write_text("1")
+    out(access())
+if cmd == "lock":
+    (here / ".fake-suite-unlocked").unlink(missing_ok=True)
+    out(access())
+
+gate()
+
+if cmd == "init":
+    sid = args[1]
+    if not re.match(r"^[a-z0-9][a-z0-9-]{2,63}$", sid):
+        fail("invalid_id", "bad id", 2)
+    if sid == "demo-suite":
+        fail("id_collides", "suite id is a suite in the checkout", 2)
+    d = home / sid
+    if d.exists():
+        fail("exists", f"{d} already exists", 8, path=str(d))
+    d.mkdir(parents=True)
+    owner, name = opt("--repo").split("/", 1)
+    manifest = {"id": sid, "display_name": opt("--display-name"), "version": "0.1.0",
+                "repo": {"host": "github", "owner": owner, "name": name}, "tasks": [],
+                "updated_at": "2026-11-04T09:00:00+00:00"}
+    (d / "suite.json").write_text(json.dumps(manifest))
+    out({"schema": "vulcanbench.suite.init.v1", "id": sid, "path": str(d), "manifest": manifest})
+
+if cmd == "prs":
+    mode = flag("prs-mode") or "ok"
+    if mode == "gh_auth":
+        fail("gh_auth", "gh is not logged in", 3)
+    if mode == "network":
+        fail("gh_failed", "gh pr list failed: could not resolve host", 4)
+    if mode == "hang":
+        time.sleep(30)
+    n = int(opt("--limit", 50))
+    prs = [{"number": 40 + i, "title": f"Fix thing {i}", "url": f"https://github.com/acme/api/pull/{40 + i}",
+            "merged_at": "2026-10-01", "additions": 30, "deletions": 5, "changed_files": 3,
+            "test_files": ["tests/t.py"], "src_files": ["a.py"], "languages": ["python"],
+            "suitability": {"score": 90 - i, "reasons": ["has tests"], "flags": []}, "task_id": None}
+           for i in range(min(n, 3))]
+    out({"schema": "vulcanbench.suite.prs.v1", "repo": "acme/api", "since": opt("--since"), "prs": prs})
+
+if args[:2] == ["task", "scaffold"]:
+    sid = args[2]
+    pr = int(opt("--pr"))
+    if (flag("scaffold-mode") or "ok") == "network":
+        fail("gh_failed", "git clone failed", 4)
+    d = home / sid
+    tid = f"pr-{pr}-fix-thing"
+    t = d / tid
+    if t.exists():
+        fail("exists", f"{t} exists", 8)
+    (t / "build").mkdir(parents=True)
+    (t / "repo").mkdir()
+    (t / "repo" / "a.py").write_text("x = 1\n")
+    (t / "issue.md").write_text("<!-- DRAFT -->\nFix thing\n")
+    (t / "gold_patch.diff").write_text("--- a/a.py\n+++ b/a.py\n")
+    (t / "metadata.json").write_text(json.dumps({"id": tid, "tests": {"fail_to_pass": [], "pass_to_pass": []},
+                                                 "builder": {"repo": "acme/api", "pr": pr, "status": "scaffolded"}}))
+    (t / "build" / "pr.json").write_text(json.dumps({"number": pr, "title": "Fix thing"}))
+    report = {"schema": "vulcanbench.suite.scaffold.v1", "task_dir": str(t), "task_id": tid, "pr": pr,
+              "base_commit": "b" * 40, "languages": ["python"], "image": "base", "gold_applies": True,
+              "warnings": [], "scaffolded_at": "2026-11-04T10:00:00+00:00"}
+    (t / "build" / "scaffold.json").write_text(json.dumps(report))
+    out(report)
+
+if cmd in ("add-task", "remove-task"):
+    sid = args[1]
+    task = opt("--task")
+    d = home / sid
+    manifest = json.loads((d / "suite.json").read_text())
+    tasks = list(manifest.get("tasks") or [])
+    if cmd == "add-task":
+        v = d / task / "build" / "validate.json"
+        status = json.loads(v.read_text())["status"] if v.exists() else None
+        if status not in ("PASS", "WARN"):
+            fail("not_validated", f"task {task} is not validated", 1, validation_status=status)
+        if task not in tasks:
+            tasks.append(task)
+    else:
+        if task not in tasks:
+            fail("not_found", f"task {task} is not in suite", 5)
+        tasks = [t for t in tasks if t != task]
+    manifest["tasks"] = tasks
+    (d / "suite.json").write_text(json.dumps(manifest))
+    out({"schema": f"vulcanbench.suite.{cmd}.v1", "id": sid, "task_id": task, "tasks": tasks})
+
+if cmd == "freeze":
+    sid = args[1]
+    d = home / sid
+    manifest = json.loads((d / "suite.json").read_text())
+    tasks = list(manifest.get("tasks") or [])
+    if not tasks:
+        fail("empty_suite", "no admitted tasks", 2, problems=["tasks list is empty"])
+    lock = {"suite": sid, "version": manifest.get("version"), "frozen_at": "2026-11-04",
+            "tasks": {t: {"task_hash": "h-" + t} for t in tasks}}
+    (d / "suite.lock.json").write_text(json.dumps(lock))
+    out({"schema": "vulcanbench.suite.freeze.v1", "id": sid, "path": str(d / "suite.lock.json"),
+         "version": lock["version"], "lock_digest": "d" * 16, "n_tasks": len(tasks)})
+
+print("fake vulcanbench suite: unknown command", args, file=sys.stderr)
 sys.exit(9)
 """

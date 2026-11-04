@@ -269,8 +269,19 @@ def _venv_cli(worktree: Path) -> Path:
 
 
 def _run_cli(
-    worktree: Path, args: list[str], *, path_prepend: str = "", timeout: float = 90
+    worktree: Path,
+    args: list[str],
+    *,
+    path_prepend: str = "",
+    timeout: float = 90,
+    input_text: str | None = None,
 ) -> tuple[int | None, str, str]:
+    """Run the worktree's ``vulcanbench`` with the allowlisted env; ``(exit, stdout, stderr)``.
+
+    ``input_text`` is written to the child's stdin and then closed (the only way
+    a secret such as the suite builder password reaches a child: never argv,
+    never the environment). ``None`` leaves stdin as it was for older callers.
+    """
     cli = _venv_cli(worktree)
     if not cli.is_file():
         return None, "", f"{cli} is missing (run_worktree.sh did not finish)"
@@ -283,6 +294,7 @@ def _run_cli(
             check=False,
             cwd=str(worktree),
             env=child_env(path_prepend=path_prepend),
+            input=input_text,
         )
     except subprocess.TimeoutExpired:
         return None, "", f"{cli.name} {args[0]} timed out after {timeout:.0f} s"

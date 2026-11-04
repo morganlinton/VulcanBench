@@ -12,6 +12,7 @@ export default function LaunchPage() {
           <h1 className="text-4xl font-semibold tracking-tight">Launch</h1>
           <div className="flex gap-4 text-sm">
             <Link href="/runs" className="text-zinc-400 hover:text-white">runs</Link>
+            <Link href="/suites" className="text-zinc-400 hover:text-white">suites</Link>
             <Link href="/" className="text-zinc-400 hover:text-white">← home</Link>
           </div>
         </div>

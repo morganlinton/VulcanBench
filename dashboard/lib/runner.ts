@@ -110,12 +110,38 @@ export interface RunnerStatus {
   supervisor: string;
 }
 
+// A refusal from the runner. ``detail`` keeps the structured body when the
+// backend sent one (``{code, message, ...}``, as the Suites routes do), so a
+// page can react to ``code`` (``builder_locked``, ``gh_auth``) and not the text.
 export class RunnerError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  code: string | null;
+  detail: Record<string, unknown> | null;
+  constructor(status: number, message: string, detail: Record<string, unknown> | null = null) {
     super(message);
     this.status = status;
+    this.detail = detail;
+    this.code = detail && typeof detail.code === "string" ? detail.code : null;
   }
+}
+
+async function errorFrom(res: Response): Promise<RunnerError> {
+  let message = res.statusText;
+  let detail: Record<string, unknown> | null = null;
+  try {
+    const body = (await res.json()) as { detail?: unknown };
+    if (typeof body.detail === "string") {
+      message = body.detail;
+    } else if (body.detail && typeof body.detail === "object" && !Array.isArray(body.detail)) {
+      detail = body.detail as Record<string, unknown>;
+      message = typeof detail.message === "string" ? detail.message : JSON.stringify(detail);
+    } else if (body.detail) {
+      message = JSON.stringify(body.detail);
+    }
+  } catch {
+    // keep statusText
+  }
+  return new RunnerError(res.status, message, detail);
 }
 
 export async function runnerGet<T>(path: string): Promise<T> {
@@ -125,16 +151,7 @@ export async function runnerGet<T>(path: string): Promise<T> {
   } catch {
     throw new RunnerError(0, `backend unreachable at ${API_BASE}`);
   }
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const body = (await res.json()) as { detail?: string };
-      if (body.detail) detail = body.detail;
-    } catch {
-      // keep statusText
-    }
-    throw new RunnerError(res.status, detail);
-  }
+  if (!res.ok) throw await errorFrom(res);
   return (await res.json()) as T;
 }
 
@@ -556,17 +573,7 @@ async function runnerSend<T>(method: string, path: string, body?: unknown): Prom
   } catch {
     throw new RunnerError(0, `backend unreachable at ${API_BASE}`);
   }
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const data = (await res.json()) as { detail?: unknown };
-      if (typeof data.detail === "string") detail = data.detail;
-      else if (data.detail) detail = JSON.stringify(data.detail);
-    } catch {
-      // keep statusText
-    }
-    throw new RunnerError(res.status, detail);
-  }
+  if (!res.ok) throw await errorFrom(res);
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }

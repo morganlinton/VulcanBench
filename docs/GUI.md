@@ -141,6 +141,73 @@ the child's PATH, for a model that needs a newer or pinned harness CLI
 when set; keys never do. Metered API keys reach the harness the way they do
 by hand: `load_dotenv()` on the worktree's `.env`.
 
+## Build your own eval suite (milestone 6)
+
+The Suites pages (`/suites`, "Build your own suite" on the Launch page,
+View > Suites in the Mac app) turn merged pull requests from one of the
+operator's own GitHub repositories into a frozen suite that runs on the
+Launch page under Custom. The flow: create a suite for `owner/name`, load its
+merged pull requests (scored as task candidates), scaffold the ones worth
+keeping, have a model write each task's issue and hidden tests, validate,
+read and accept the tasks that pass, freeze.
+
+Every step that changes a suite is a `vulcanbench suite` command run from the
+*tooling worktree*: the newest prepared bench tag whose worktree has
+`harness/suite_builder/` and passes the same checks as a benchmark launch (at
+the tag, clean scoring paths, `.venv`). Without one the pages say to cut a tag
+and prepare it on the Launch page. Reads (the suite list, a suite's tasks, a
+task's files) come from disk as JSON and text.
+
+| Page action | Command | Notes |
+|---|---|---|
+| Unlock, Lock | `suite unlock --password-stdin`, `suite lock` | see below |
+| New suite | `suite init <id> --display-name N --repo owner/name` | 409 for an existing id or a built-in suite's id |
+| Load pull requests | `suite prs list --suite <id> [--since] --limit` | through the operator's `gh` login; cached 10 minutes; 409 with "gh auth login" when gh is not logged in |
+| Scaffold N selected | `suite task scaffold <id> --pr N` | one request per PR, one scaffold per suite at a time, up to 10 minutes each; no model call |
+| Accept | `suite add-task <id> --task T` | only with a PASS or WARN validation newer than the last authoring |
+| Drop | `suite remove-task` when accepted, then `build/dropped.json` | the task's folder stays |
+| Freeze suite | `suite freeze <id>` | needs one accepted task, every accepted task validated, no active job |
+
+Every command gets `--suites-home <[runner].suites_home>` and `--json`, and
+its stdin is a closed pipe so `gh` or `git` can never wait on a prompt. Exit
+7 (the builder is locked) is a 403 that brings back the unlock screen. A
+frozen suite is read-only here. A task's stage is derived from its `build/`
+files and the runner's jobs: scaffolded, authoring, authored, authoring
+failed, validating, validated, validation failed; a validation older than the
+latest authoring session no longer counts.
+
+### The unlock screen and the password
+
+The builder is for subscribers and is password-gated in the engine
+(docs/DECISIONS.md, 2026-11-03), so the pages show an unlock screen until
+`suite access --json` says this Mac is unlocked. The password's path:
+
+1. The field is an uncontrolled `type="password"` input; the submit handler
+   reads it once and clears it, so the value never sits in React state or in
+   browser storage.
+2. The browser posts `{"password": ...}` to `POST /api/runner/suites/unlock`
+   on the loopback backend. The runner routes refuse pages not served from
+   localhost, so another website open in the browser cannot post there.
+3. The route reads the body itself (FastAPI's 422 response echoes rejected
+   input), refuses an empty password, one over 1024 characters or one with a
+   line break without quoting it, and runs `vulcanbench suite unlock
+   --password-stdin --json` with the password plus a newline on the child's
+   stdin. It is never an argument (so never in `ps`), never in the child's
+   environment, never in a plan, job, console log or sqlite row.
+4. Anything the command prints is masked for the password before it reaches
+   the browser, then redacted like every other log line.
+5. Five wrong passwords in ten minutes make the next try wait a minute.
+
+Uvicorn's access log records only the method, path and status. The password
+does cross from the browser to the backend in the request body, which the
+screen says, and Python cannot wipe a string, so it sits briefly in the
+backend's memory. The engine keeps only a fingerprint of the configured hash
+in `~/.config/vulcanbench/suite-builder-unlock.json`.
+
+The hash is read from `vulcanbench.toml` in the tooling worktree (the child
+environment drops `VULCANBENCH_*`), so a newly set password takes effect in
+the GUI once it is committed and a bench tag containing it is prepared.
+
 ## Housekeeping and the live tail (milestone 4)
 
 - **Orphaned sandboxes** on the Runs page: containers that look like
@@ -299,8 +366,8 @@ What the app does at launch, in order:
    (`ELECTRON_RUN_AS_NODE`) on port 3000 or the next free port. The backend
    address is baked into the dashboard at build time (`NEXT_PUBLIC_API_BASE`,
    default `http://localhost:8000`), which is why the backend port is fixed.
-4. Opens the Runs page once both answer. Menu: Runs, Launch and Leaderboard
-   under View, Open in Browser, Show Logs in Finder.
+4. Opens the Runs page once both answer. Menu: Runs, Launch, Leaderboard and
+   Suites under View, Open in Browser, Show Logs in Finder.
 
 Quitting stops the dashboard and a backend the app itself started, with
 SIGTERM. That never signals a benchmark: the supervisor leaves running jobs
@@ -323,7 +390,7 @@ port choice, server start and stop) without Electron.
 | `run_worktrees` | `../VulcanBench-runs` | where `scripts/run_worktree.sh` puts bench-tag worktrees |
 | `extra_run_roots` | `[]` | more harness output roots to show read-only |
 | `first_check_after_s` | `180` | window for the first-attempt check |
-| `suites_home` | `~/vulcanbench-suites` | custom suites built outside the checkout, offered in the suite picker |
+| `suites_home` | `~/vulcanbench-suites` | custom suites built outside the checkout, offered in the suite picker and built on the Suites pages |
 
 ## Milestones
 
@@ -342,3 +409,6 @@ port choice, server start and stop) without Electron.
 5. Custom suites in the picker: frozen suites from the suites home run with
    `--suites-home`, checked by lock digest at confirm and launch (this
    document).
+6. Build your own eval suite: the Suites pages behind the builder's unlock
+   screen (create, pull requests, scaffold, review, accept, drop, freeze),
+   wrapping `vulcanbench suite` from the tooling worktree (this document).

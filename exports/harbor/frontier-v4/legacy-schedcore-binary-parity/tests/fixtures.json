@@ -1,0 +1,1831 @@
+{
+ "guard_order": [
+  {
+   "input": [
+    "J A1 50 0",
+    "J B1 70 0",
+    "J C1 60 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E B1",
+    "E C1",
+    "E A1",
+    "GEND 3 0",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 30 0",
+    "J B1 30 0",
+    "J C1 30 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E A1",
+    "E B1",
+    "E C1",
+    "GEND 3 0",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 10 0",
+    "J B1 99 A1",
+    "J C1 55 A1,B1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E A1",
+    "E B1",
+    "E C1",
+    "GEND 3 0",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 5 0",
+    "J B1 40 A1",
+    "J C1 60 A1",
+    "J D1 33 B1,C1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E A1",
+    "E C1",
+    "E B1",
+    "E D1",
+    "GEND 4 0",
+    "X 4 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "G",
+    "J B1 60 A1",
+    "G",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 2",
+    "E B1",
+    "GEND 1 0",
+    "GEND 0 0",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "G"
+   ],
+   "expected": [
+    "GEND 0 0",
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 99 0",
+    "J B1 1 0",
+    "G",
+    "J C1 45 B1",
+    "J D1 45 B1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E A1",
+    "E B1",
+    "GEND 2 0",
+    "OK 3",
+    "OK 4",
+    "E C1",
+    "E D1",
+    "GEND 2 0",
+    "X 4 4 0 0"
+   ]
+  }
+ ],
+ "guard_blocked": [
+  {
+   "input": [
+    "J A1 50 B1",
+    "J B1 60 A1",
+    "G",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "GEND 0 2",
+    "GEND 0 2",
+    "X 2 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 9 B1",
+    "J B1 9 C1",
+    "J C1 9 A1",
+    "J D1 1 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E D1",
+    "GEND 1 3",
+    "X 4 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 ZZ",
+    "G",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "GEND 0 1",
+    "GEND 0 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "J B1 60 QQ",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E A1",
+    "GEND 1 1",
+    "X 2 1 0 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "J A1 50"
+   ],
+   "expected": [
+    "R A1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J TOOLONG99 50 0"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A_1 50 0"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Z noise line"
+   ],
+   "expected": [
+    "R noise FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "JJ A1 50 0"
+   ],
+   "expected": [
+    "R A1 FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 0 0"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 100 0"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 007 0"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 5a 0"
+   ],
+   "expected": [
+    "R A1 PRIO",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 A1"
+   ],
+   "expected": [
+    "R A1 DEPS",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 B1,,C1"
+   ],
+   "expected": [
+    "R A1 DEPS",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 B$1"
+   ],
+   "expected": [
+    "R A1 DEPS",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 ,"
+   ],
+   "expected": [
+    "R A1 DEPS",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "J A1 60 0"
+   ],
+   "expected": [
+    "OK 1",
+    "R A1 DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "F A1"
+   ],
+   "expected": [
+    "R A1 STATE",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "F"
+   ],
+   "expected": [
+    "R ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "F A1"
+   ],
+   "expected": [
+    "OK 1",
+    "R A1 STATE",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "G",
+    "F B1"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "R B1 STATE",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "G",
+    "F A1",
+    "F A1"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "R A1 STATE",
+    "X 1 1 1 1"
+   ]
+  }
+ ],
+ "f2p_retry_tie": [
+  {
+   "input": [
+    "J A1 50 0",
+    "J B1 50 0",
+    "J C1 50 0",
+    "G",
+    "F A1",
+    "F B1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E A1",
+    "E B1",
+    "E C1",
+    "GEND 3 0",
+    "OK 1",
+    "OK 1",
+    "E B1",
+    "E A1",
+    "GEND 2 0",
+    "X 3 5 2 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 40 0",
+    "J B1 40 0",
+    "J C1 40 0",
+    "J D1 40 0",
+    "G",
+    "F B1",
+    "F D1",
+    "F A1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E A1",
+    "E B1",
+    "E C1",
+    "E D1",
+    "GEND 4 0",
+    "OK 1",
+    "OK 1",
+    "OK 1",
+    "E A1",
+    "E D1",
+    "E B1",
+    "GEND 3 0",
+    "X 4 7 3 0"
+   ]
+  },
+  {
+   "input": [
+    "J C1 30 0",
+    "J A1 30 0",
+    "J B1 30 A1",
+    "G",
+    "F C1",
+    "F A1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E C1",
+    "E A1",
+    "E B1",
+    "GEND 3 0",
+    "OK 1",
+    "OK 2",
+    "E A1",
+    "E B1",
+    "E C1",
+    "GEND 3 0",
+    "X 3 6 2 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "G",
+    "F A1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_double_penalty": [
+  {
+   "input": [
+    "J A1 50 0",
+    "G",
+    "F A1",
+    "G",
+    "F A1",
+    "J B1 48 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "OK 2",
+    "E B1",
+    "E A1",
+    "GEND 2 0",
+    "X 2 4 2 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 60 0",
+    "G",
+    "F A1",
+    "G",
+    "F A1",
+    "G",
+    "F A1",
+    "J B1 50 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "OK 2",
+    "E B1",
+    "E A1",
+    "GEND 2 0",
+    "X 2 5 3 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 0",
+    "G",
+    "F A1",
+    "J B1 48 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E A1",
+    "GEND 1 0",
+    "OK 1",
+    "OK 2",
+    "E A1",
+    "E B1",
+    "GEND 2 0",
+    "X 2 3 1 0"
+   ]
+  }
+ ],
+ "f2p_fanin_boost": [
+  {
+   "input": [
+    "J D1 20 0",
+    "J B1 30 0",
+    "J C1 30 0",
+    "J A1 20 B1,C1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E B1",
+    "E C1",
+    "E A1",
+    "E D1",
+    "GEND 4 0",
+    "X 4 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J D1 10 0",
+    "J B1 30 0",
+    "J C1 30 0",
+    "J A1 10 B1,C1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E B1",
+    "E C1",
+    "E A1",
+    "E D1",
+    "GEND 4 0",
+    "X 4 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J D1 21 0",
+    "J B1 30 0",
+    "J C1 30 0",
+    "J A1 21 B1,C1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E B1",
+    "E C1",
+    "E D1",
+    "E A1",
+    "GEND 4 0",
+    "X 4 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J D1 20 0",
+    "J B1 30 0",
+    "J A1 20 B1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E B1",
+    "E D1",
+    "E A1",
+    "GEND 3 0",
+    "X 3 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J B2 30 0",
+    "J C2 30 0",
+    "J D2 20 0",
+    "J A2 20 B2,C2",
+    "G",
+    "F C2",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E B2",
+    "E C2",
+    "E A2",
+    "E D2",
+    "GEND 4 0",
+    "OK 2",
+    "E C2",
+    "E A2",
+    "GEND 2 0",
+    "X 4 6 1 0"
+   ]
+  }
+ ],
+ "f2p_stale_dep": [
+  {
+   "input": [
+    "J A1 50 B1",
+    "G",
+    "J B1 60 0",
+    "G",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "GEND 0 1",
+    "OK 2",
+    "E B1",
+    "GEND 1 1",
+    "GEND 0 1",
+    "X 2 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 B1,C1",
+    "J C1 25 0",
+    "G",
+    "J B1 60 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E C1",
+    "GEND 1 1",
+    "OK 3",
+    "E B1",
+    "GEND 1 1",
+    "X 3 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 B1",
+    "J B1 60 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E B1",
+    "E A1",
+    "GEND 2 0",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "f2p_dup_deps": [
+  {
+   "input": [
+    "J A1 50 B1,B1",
+    "J B1 60 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E B1",
+    "E A1",
+    "GEND 2 0",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 20 B1,B1,C1",
+    "J B1 30 0",
+    "J C1 30 0",
+    "J D1 20 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E B1",
+    "E C1",
+    "E A1",
+    "E D1",
+    "GEND 4 0",
+    "X 4 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J A1 50 B1,C1",
+    "J B1 60 0",
+    "J C1 55 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "E B1",
+    "E C1",
+    "E A1",
+    "GEND 3 0",
+    "X 3 3 0 0"
+   ]
+  }
+ ],
+ "f2p_job_case": [
+  {
+   "input": [
+    "J Job1 50 0",
+    "J JOB1 40 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "R Job1 DUP",
+    "E Job1",
+    "GEND 1 0",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "J a1 50 0",
+    "J B2 40 A1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E a1",
+    "E B2",
+    "GEND 2 0",
+    "X 2 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J Job1 50 0",
+    "G",
+    "F JOB1",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E Job1",
+    "GEND 1 0",
+    "OK 1",
+    "E Job1",
+    "GEND 1 0",
+    "X 1 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "J aa 30 0",
+    "J bb 30 0",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "E aa",
+    "E bb",
+    "GEND 2 0",
+    "X 2 2 0 0"
+   ]
+  }
+ ],
+ "f2p_trailing": [
+  {
+   "input": [
+    "J T1 50 0 urgent",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E T1",
+    "GEND 1 0",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J T2 40 0",
+    "G now"
+   ],
+   "expected": [
+    "OK 1",
+    "E T2",
+    "GEND 1 0",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "J T3 30 0",
+    "G",
+    "F T3 oops",
+    "G"
+   ],
+   "expected": [
+    "OK 1",
+    "E T3",
+    "GEND 1 0",
+    "OK 1",
+    "E T3",
+    "GEND 1 0",
+    "X 1 2 1 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "J P3 50 0",
+    "J R0001 99 GHOST2",
+    "J WRK1 48 0",
+    "J JOBA 50 WRK1",
+    "G",
+    "F",
+    "J P2 9 joba,GHOST2,r0001",
+    "J joba 20 0",
+    "J MX 10 P3,P2,P2",
+    "J P1 30 0",
+    "G",
+    "J P3 99 P1,p2,joba,JOBA,JOBA",
+    "G",
+    "J DD 55 a,,b",
+    "J SHORTY 50",
+    "J deep99 43 0",
+    "J mx 30 0",
+    "G",
+    "F JobA",
+    "J JOBA 30 deep99,JOBA,GHOST",
+    "G",
+    "F p1",
+    "J JobA 7 p3,ghost2,mx,p2",
+    "J JOBA 9 0",
+    "J SELF 50 SELF",
+    "G",
+    "F deep99",
+    "G",
+    "G",
+    "J JobA 91 0",
+    "F deep99",
+    "G",
+    "J mx 85 GHOST2,deep99,GHOST,GHOST2",
+    "NOISE",
+    "J mx 1 deep99,R0001",
+    "J P1 43 P1,R0001,MX,P1",
+    "G",
+    "F P3",
+    "G",
+    "F WRK1",
+    "G",
+    "J wrk1 50 0",
+    "G",
+    "J WRK1 9 P3,GHOST,P2",
+    "J R0044 40 0",
+    "G",
+    "G",
+    "J P3 48 0",
+    "F P1",
+    "J deep99 30 0",
+    "J JobA 50 P3,GHOST2,JOBA,MX",
+    "F R0044",
+    "J JobA 20 R0044,P3",
+    "J P3 1 0",
+    "F",
+    "G please",
+    "J P3 48 R0001,R0044,R0001,ghost2,GHOST2",
+    "G",
+    "F JOBA",
+    "J P2 9 P1,MX,GHOST,GHOST",
+    "G",
+    "G",
+    "F p3",
+    "J R0063 7 P3",
+    "J P2 30 0",
+    "J wrk1 40 MX,R0063,P1,GHOST2",
+    "F JOBA",
+    "G",
+    "J P1 20 R0001,MX",
+    "G",
+    "J joba 48 GHOST,R0001,GHOST",
+    "F deep99",
+    "F R0063",
+    "G",
+    "J TOOLONG99 50 0",
+    "G",
+    "J wrk1 99 JOBA",
+    "J deep99 48 GHOST,MX,P2,P2",
+    "G",
+    "J P3 21 R0001,P1,P3",
+    "G",
+    "G",
+    "J BADP 5a 0",
+    "J JobA 40 joba,wrk1,ghost2,MX",
+    "F R0044",
+    "J TOOLONG99 50 0",
+    "F JOBA",
+    "F p3",
+    "J joba 20 GHOST2,r0044,R0063",
+    "J DD 55 a,,b",
+    "F deep99",
+    "G",
+    "J joba 48 JOBA,P2,P2",
+    "F R0044",
+    "G",
+    "G",
+    "J TOOLONG99 50 0",
+    "F mx",
+    "F P3",
+    "J JobA 1 WRK1,WRK1,GHOST2,P2",
+    "G",
+    "G",
+    "J wrk1 99 p2,R0001,p3",
+    "F JOBA",
+    "G",
+    "G",
+    "J P3 9 joba,r0044,JOBA",
+    "J P3 89 R0001,R0001",
+    "G",
+    "F deep99",
+    "J P2 50 0",
+    "J MX 7 0",
+    "F JOBA",
+    "G",
+    "F deep99",
+    "G",
+    "G",
+    "J JobA 43 GHOST,R0001,R0044",
+    "J WRK1 1 MX,R0063,R0044",
+    "G",
+    "J JobA 1 0",
+    "F P3",
+    "J P1 21 JOBA",
+    "F WRK1",
+    "J JOBA 9 0",
+    "J P3 21 R0063,P3",
+    "G",
+    "J P1 50 JOBA,WRK1,MX,P1",
+    "F NOSUCH",
+    "J wrk1 20 MX",
+    "G",
+    "J WRK1 30 WRK1,deep99",
+    "F deep99",
+    "F WRK1",
+    "J joba 40 0",
+    "F R0044",
+    "J deep99 50 MX,r0044,p3",
+    "J P1 20 0",
+    "J SELF 50 SELF",
+    "J P2 64 0",
+    "J P1 20 r0063,JOBA",
+    "F P3",
+    "G",
+    "F P3",
+    "J wrk1 43 P1,R0063,P2,P3",
+    "G",
+    "G",
+    "G",
+    "J wrk1 9 P3,R0001",
+    "J P1 9 R0044,MX,R0001,P3",
+    "J P1 86 0",
+    "J R0151 21 r0063,r0063",
+    "J P1 20 r0044",
+    "J joba 10 ghost2,r0001,DEEP99",
+    "F WRK1",
+    "G",
+    "J P2 48 GHOST",
+    "J deep99 1 0",
+    "F deep99",
+    "J joba 21 P2,GHOST2,R0001,R0001",
+    "J BADP 100 0",
+    "F",
+    "NOISE",
+    "J MX 20 JOBA,WRK1,R0044,WRK1",
+    "F R0044",
+    "G",
+    "F R0063",
+    "J mx 9 P3,GHOST",
+    "F P3",
+    "J joba 5 R0151,R0151",
+    "J mx 43 0",
+    "J MX 43 P2,P1,P1",
+    "J mx 21 R0063,P2,P2,R0151,P2",
+    "J BADP 100 0",
+    "J P2 10 MX,WRK1,P1",
+    "J BADP 5a 0",
+    "J MX 43 0",
+    "F R0044",
+    "J R0178 48 deep99,R0063,P2,P1,R0063",
+    "G",
+    "J wrk1 50 p3,DEEP99,GHOST2,DEEP99,P3",
+    "J SELF 50 SELF",
+    "G",
+    "G",
+    "G",
+    "G",
+    "J P1 20 R0044,WRK1",
+    "F P3",
+    "G",
+    "J BADP 100 0",
+    "G",
+    "G",
+    "F R0151",
+    "J P3 50 0",
+    "J wrk1 40 GHOST",
+    "J wrk1 85 WRK1,WRK1",
+    "F P3",
+    "F wrk1",
+    "G",
+    "J P3 10 deep99,deep99,R0178",
+    "G",
+    "J SHORTY 50"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "E P3",
+    "E WRK1",
+    "E JOBA",
+    "GEND 3 1",
+    "R ???????? FMT",
+    "OK 5",
+    "R JOBA DUP",
+    "OK 6",
+    "OK 7",
+    "E P1",
+    "GEND 1 3",
+    "R P3 DUP",
+    "GEND 0 3",
+    "R DD DEPS",
+    "R SHORTY FMT",
+    "OK 8",
+    "R MX DUP",
+    "E deep99",
+    "GEND 1 3",
+    "OK 1",
+    "R JOBA DEPS",
+    "E JOBA",
+    "GEND 1 3",
+    "OK 1",
+    "R JOBA DUP",
+    "R JOBA DUP",
+    "R SELF DEPS",
+    "E P1",
+    "GEND 1 3",
+    "OK 1",
+    "E deep99",
+    "GEND 1 3",
+    "GEND 0 3",
+    "R JOBA DUP",
+    "OK 1",
+    "E deep99",
+    "GEND 1 3",
+    "R MX DUP",
+    "R ???????? FMT",
+    "R MX DUP",
+    "R P1 DEPS",
+    "GEND 0 3",
+    "OK 1",
+    "E P3",
+    "GEND 1 3",
+    "OK 2",
+    "E WRK1",
+    "E JOBA",
+    "GEND 2 3",
+    "R WRK1 DUP",
+    "GEND 0 3",
+    "R WRK1 DUP",
+    "OK 9",
+    "E R0044",
+    "GEND 1 3",
+    "GEND 0 3",
+    "R P3 DUP",
+    "OK 1",
+    "R deep99 DUP",
+    "R JobA DEPS",
+    "OK 1",
+    "R JOBA DUP",
+    "R P3 DUP",
+    "R ???????? FMT",
+    "E R0044",
+    "E P1",
+    "GEND 2 3",
+    "R P3 DUP",
+    "GEND 0 3",
+    "OK 1",
+    "R P2 DUP",
+    "E JOBA",
+    "GEND 1 3",
+    "GEND 0 3",
+    "OK 1",
+    "OK 10",
+    "R P2 DUP",
+    "R WRK1 DUP",
+    "OK 1",
+    "E P3",
+    "E JOBA",
+    "E R0063",
+    "GEND 3 3",
+    "R P1 DUP",
+    "GEND 0 3",
+    "R JOBA DUP",
+    "OK 1",
+    "OK 1",
+    "E deep99",
+    "E R0063",
+    "GEND 2 3",
+    "R ???????? FMT",
+    "GEND 0 3",
+    "R WRK1 DUP",
+    "R deep99 DUP",
+    "GEND 0 3",
+    "R P3 DEPS",
+    "GEND 0 3",
+    "GEND 0 3",
+    "R BADP PRIO",
+    "R JobA DEPS",
+    "OK 1",
+    "R ???????? FMT",
+    "OK 1",
+    "OK 2",
+    "R JOBA DUP",
+    "R DD DEPS",
+    "OK 1",
+    "E P3",
+    "E R0044",
+    "E deep99",
+    "E JOBA",
+    "E R0063",
+    "GEND 5 3",
+    "R joba DEPS",
+    "OK 1",
+    "E R0044",
+    "GEND 1 3",
+    "GEND 0 3",
+    "R ???????? FMT",
+    "R MX STATE",
+    "OK 2",
+    "R JOBA DUP",
+    "E P3",
+    "E R0063",
+    "GEND 2 3",
+    "GEND 0 3",
+    "R WRK1 DUP",
+    "OK 1",
+    "E JOBA",
+    "GEND 1 3",
+    "GEND 0 3",
+    "R P3 DUP",
+    "R P3 DUP",
+    "GEND 0 3",
+    "OK 1",
+    "R P2 DUP",
+    "R MX DUP",
+    "OK 1",
+    "E deep99",
+    "E JOBA",
+    "GEND 2 3",
+    "OK 1",
+    "E deep99",
+    "GEND 1 3",
+    "GEND 0 3",
+    "R JOBA DUP",
+    "R WRK1 DUP",
+    "GEND 0 3",
+    "R JOBA DUP",
+    "OK 2",
+    "R P1 DUP",
+    "OK 2",
+    "R JOBA DUP",
+    "R P3 DEPS",
+    "E WRK1",
+    "E P3",
+    "E JOBA",
+    "E R0063",
+    "GEND 4 3",
+    "R P1 DEPS",
+    "R NOSUCH STATE",
+    "R WRK1 DUP",
+    "GEND 0 3",
+    "R WRK1 DEPS",
+    "OK 1",
+    "OK 2",
+    "R JOBA DUP",
+    "OK 1",
+    "R deep99 DUP",
+    "R P1 DUP",
+    "R SELF DEPS",
+    "R P2 DUP",
+    "R P1 DUP",
+    "OK 2",
+    "E WRK1",
+    "E R0044",
+    "E P3",
+    "E R0063",
+    "E JOBA",
+    "E deep99",
+    "GEND 6 3",
+    "OK 2",
+    "R WRK1 DUP",
+    "E P3",
+    "E R0063",
+    "GEND 2 3",
+    "GEND 0 3",
+    "GEND 0 3",
+    "R WRK1 DUP",
+    "R P1 DUP",
+    "R P1 DUP",
+    "OK 11",
+    "R P1 DUP",
+    "R JOBA DUP",
+    "OK 2",
+    "E WRK1",
+    "E R0151",
+    "E JOBA",
+    "GEND 3 3",
+    "R P2 DUP",
+    "R deep99 DUP",
+    "OK 1",
+    "R JOBA DUP",
+    "R BADP PRIO",
+    "R ???????? FMT",
+    "R ???????? FMT",
+    "R MX DUP",
+    "OK 1",
+    "E R0044",
+    "E deep99",
+    "GEND 2 3",
+    "OK 2",
+    "R MX DUP",
+    "OK 1",
+    "R JOBA DUP",
+    "R MX DUP",
+    "R MX DUP",
+    "R MX DUP",
+    "R BADP PRIO",
+    "R P2 DUP",
+    "R BADP PRIO",
+    "R MX DUP",
+    "OK 1",
+    "OK 12",
+    "E R0044",
+    "E P3",
+    "E R0063",
+    "E R0151",
+    "GEND 4 4",
+    "R WRK1 DUP",
+    "R SELF DEPS",
+    "GEND 0 4",
+    "GEND 0 4",
+    "GEND 0 4",
+    "GEND 0 4",
+    "R P1 DUP",
+    "OK 3",
+    "E P3",
+    "E R0063",
+    "E R0151",
+    "GEND 3 4",
+    "R BADP PRIO",
+    "GEND 0 4",
+    "GEND 0 4",
+    "OK 1",
+    "R P3 DUP",
+    "R WRK1 DUP",
+    "R wrk1 DEPS",
+    "OK 2",
+    "OK 2",
+    "E WRK1",
+    "E JOBA",
+    "E P3",
+    "E R0063",
+    "E R0151",
+    "GEND 5 4",
+    "R P3 DUP",
+    "GEND 0 4",
+    "R SHORTY FMT",
+    "X 12 62 40 94"
+   ]
+  },
+  {
+   "input": [
+    "F JobA",
+    "G",
+    "J MX 43 0",
+    "G please",
+    "F MX",
+    "G",
+    "F NOSUCH",
+    "J MX 48 GHOST",
+    "J P1 50 GHOST2",
+    "F MX",
+    "J R0010 40 MX",
+    "F JOBA",
+    "J MX 21 GHOST2,P1,GHOST",
+    "F mx",
+    "F deep99",
+    "G",
+    "F MX",
+    "J JOBA 20 MX,MX",
+    "J R0018 40 joba,r0010",
+    "F JOBA",
+    "F deep99",
+    "J mx 43 mx,ghost,R0010,R0018",
+    "J mx 21 GHOST,r0010,R0010,JOBA",
+    "J P2 99 mx,GHOST2,r0018",
+    "J P3 30 MX,mx",
+    "F",
+    "G",
+    "J WRK1 21 R0018,MX,GHOST,MX",
+    "F",
+    "J JobA 1 P2,P2",
+    "J BADP 100 0",
+    "J P1 7 GHOST2,P2",
+    "G",
+    "J R0033 99 R0018,MX",
+    "F R0010",
+    "J WRK1 9 GHOST,GHOST2,R0018",
+    "F P3",
+    "F mx",
+    "G",
+    "F r0018",
+    "J WRK1 40 R0010,MX,GHOST,R0033,MX",
+    "NOISE",
+    "J BADP 100 0",
+    "J deep99 1 WRK1,R0033",
+    "J mx 9 r0033",
+    "J JobA 30 0",
+    "G",
+    "F R0010",
+    "J P1 48 0",
+    "G",
+    "G",
+    "J deep99 10 0",
+    "J P3 10 0",
+    "G",
+    "F JOBA",
+    "J P3 40 GHOST2",
+    "J JOBA 21 0",
+    "J DD 55 a,,b",
+    "F P3",
+    "J WRK1 50 0",
+    "J JobA 10 0",
+    "G",
+    "J MX 48 MX,P1,P1,deep99",
+    "G",
+    "J P2 10 GHOST,GHOST",
+    "J JOBA 19 R0010,JOBA,R0010,R0010",
+    "J WRK1 30 P2,WRK1,JOBA,GHOST2",
+    "G",
+    "J R0068 99 WRK1,WRK1",
+    "J JobA 1 mx,wrk1,joba,ghost",
+    "F MX",
+    "J wrk1 50 R0018,P3,R0068,deep99",
+    "J JobA 20 r0018",
+    "F P2",
+    "F wrk1",
+    "G",
+    "G",
+    "J deep99 1 0",
+    "J deep99 1 mx,mx,R0068,R0018",
+    "J P1 30 0",
+    "J deep99 20 0",
+    "G",
+    "J R0082 50 R0010,R0068,R0033,R0010",
+    "F",
+    "F MX",
+    "J JOBA 40 R0068,R0010,P1,P2,R0010",
+    "G",
+    "G",
+    "J mx 63 0",
+    "J mx 99 0",
+    "J joba 10 JOBA,MX,R0033,R0033,JOBA",
+    "G",
+    "J JOBA 50 deep99",
+    "G",
+    "G",
+    "J WRK1 9 R0033,R0018,deep99,P3,P3",
+    "F P1",
+    "F JOBA",
+    "F joba",
+    "J P1 10 0",
+    "G",
+    "J mx 48 R0082,JOBA,deep99,P2,R0082",
+    "F R0018",
+    "F JobA",
+    "G",
+    "G",
+    "G",
+    "F P1",
+    "G",
+    "J JOBA 21 deep99",
+    "J mx 10 R0033,WRK1",
+    "J JobA 40 P3",
+    "J P1 48 MX,r0033,r0082,r0018,R0082",
+    "F P2",
+    "F r0010",
+    "G",
+    "J joba 9 p1,MX,r0082,GHOST",
+    "J JOBA 1 MX,GHOST,P1,R0010",
+    "J MX 10 R0082,R0010,GHOST,R0082",
+    "G",
+    "G",
+    "J joba 21 0",
+    "F JOBA",
+    "J JOBA 48 WRK1,WRK1,JOBA,JOBA",
+    "F P3",
+    "J wrk1 21 R0082,P2,GHOST",
+    "J R0126 20 GHOST,R0010,MX,MX",
+    "J R0127 7 P1,R0018,P3,R0018",
+    "J R0128 87 joba,ghost,ghost2",
+    "G",
+    "J joba 20 0",
+    "J P3 21 0",
+    "J BADP 100 0",
+    "F R0010",
+    "G",
+    "F JOBA",
+    "F r0010",
+    "J TOOLONG99 50 0",
+    "G",
+    "J wrk1 7 ghost,GHOST,ghost",
+    "J MX 50 R0033,deep99,MX,R0128",
+    "J joba 10 P3,R0033,R0128,WRK1,P3",
+    "F R0010",
+    "G please",
+    "J wrk1 48 P2,R0068",
+    "G",
+    "G",
+    "F R0018",
+    "J joba 40 ghost2,R0128",
+    "J WRK1 10 GHOST,R0033",
+    "J BADP 5a 0",
+    "F P3",
+    "J wrk1 19 R0010,R0082,JOBA,MX",
+    "G",
+    "J BADP 5a 0",
+    "F R0033",
+    "J P1 7 JOBA",
+    "G",
+    "J P3 40 GHOST2,P1,GHOST,R0127",
+    "J joba 7 0",
+    "G",
+    "J mx 7 WRK1",
+    "G",
+    "J JOBA 93 0",
+    "G",
+    "J P1 30 R0082",
+    "F r0018",
+    "F P3",
+    "J JOBA 10 0",
+    "J DD 55 a,,b",
+    "J R0170 32 P1,r0128,p1,P1",
+    "J mx 10 0",
+    "J MX 9 r0082,p1,ghost2,R0170",
+    "J mx 20 0",
+    "J wrk1 1 GHOST,R0126,deep99,R0018,deep99",
+    "G",
+    "F R0018",
+    "G",
+    "J P3 9 r0033,P2,R0128,r0033",
+    "G",
+    "F R0018",
+    "G",
+    "F mx",
+    "J TOOLONG99 50 0",
+    "G please",
+    "J deep99 21 R0127,R0068,P1,P3,R0127",
+    "J JOBA 1 R0018,R0068,R0018",
+    "G please"
+   ],
+   "expected": [
+    "R JobA STATE",
+    "GEND 0 0",
+    "OK 1",
+    "E MX",
+    "GEND 1 0",
+    "OK 1",
+    "E MX",
+    "GEND 1 0",
+    "R NOSUCH STATE",
+    "R MX DUP",
+    "OK 2",
+    "OK 1",
+    "OK 3",
+    "R JOBA STATE",
+    "R MX DUP",
+    "R MX STATE",
+    "R deep99 STATE",
+    "E MX",
+    "E R0010",
+    "GEND 2 1",
+    "OK 2",
+    "OK 4",
+    "OK 5",
+    "R JOBA STATE",
+    "R deep99 STATE",
+    "R mx DEPS",
+    "R MX DUP",
+    "OK 6",
+    "OK 7",
+    "R ???????? FMT",
+    "E MX",
+    "E R0010",
+    "E P3",
+    "E JOBA",
+    "E R0018",
+    "GEND 5 2",
+    "OK 8",
+    "R ???????? FMT",
+    "R JOBA DUP",
+    "R BADP PRIO",
+    "R P1 DUP",
+    "GEND 0 3",
+    "OK 9",
+    "OK 2",
+    "R WRK1 DUP",
+    "OK 1",
+    "OK 2",
+    "E MX",
+    "E R0010",
+    "E P3",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 6 3",
+    "OK 2",
+    "R WRK1 DUP",
+    "R ???????? FMT",
+    "R BADP PRIO",
+    "OK 10",
+    "R MX DUP",
+    "R JOBA DUP",
+    "E R0018",
+    "E R0033",
+    "GEND 2 4",
+    "OK 3",
+    "R P1 DUP",
+    "E R0010",
+    "E R0018",
+    "E R0033",
+    "GEND 3 4",
+    "GEND 0 4",
+    "R deep99 DUP",
+    "R P3 DUP",
+    "GEND 0 4",
+    "OK 3",
+    "R P3 DUP",
+    "R JOBA DUP",
+    "R DD DEPS",
+    "OK 1",
+    "R WRK1 DUP",
+    "R JOBA DUP",
+    "E P3",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 4 4",
+    "R MX DEPS",
+    "GEND 0 4",
+    "R P2 DUP",
+    "R JOBA DEPS",
+    "R WRK1 DEPS",
+    "GEND 0 4",
+    "OK 11",
+    "R JobA DEPS",
+    "OK 6",
+    "R WRK1 DUP",
+    "R JOBA DUP",
+    "R P2 STATE",
+    "R WRK1 STATE",
+    "E MX",
+    "E R0010",
+    "E P3",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 6 5",
+    "GEND 0 5",
+    "R deep99 DUP",
+    "R deep99 DUP",
+    "R P1 DUP",
+    "R deep99 DUP",
+    "GEND 0 5",
+    "OK 12",
+    "R ???????? FMT",
+    "OK 6",
+    "R JOBA DUP",
+    "E MX",
+    "E R0010",
+    "E P3",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 6 6",
+    "GEND 0 6",
+    "R MX DUP",
+    "R MX DUP",
+    "R joba DEPS",
+    "GEND 0 6",
+    "R JOBA DUP",
+    "GEND 0 6",
+    "GEND 0 6",
+    "R WRK1 DUP",
+    "R P1 STATE",
+    "OK 3",
+    "R JOBA STATE",
+    "R P1 DUP",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 3 6",
+    "R MX DUP",
+    "OK 2",
+    "OK 1",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 3 6",
+    "GEND 0 6",
+    "GEND 0 6",
+    "R P1 STATE",
+    "GEND 0 6",
+    "R JOBA DUP",
+    "R MX DUP",
+    "R JOBA DUP",
+    "R P1 DUP",
+    "R P2 STATE",
+    "OK 3",
+    "E R0010",
+    "E R0018",
+    "E R0033",
+    "GEND 3 6",
+    "R JOBA DUP",
+    "R JOBA DUP",
+    "R MX DUP",
+    "GEND 0 6",
+    "GEND 0 6",
+    "R JOBA DUP",
+    "OK 3",
+    "R JOBA DEPS",
+    "OK 1",
+    "R WRK1 DUP",
+    "OK 13",
+    "OK 14",
+    "OK 15",
+    "E P3",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 4 9",
+    "R JOBA DUP",
+    "R P3 DUP",
+    "R BADP PRIO",
+    "OK 3",
+    "E R0010",
+    "E R0018",
+    "E R0033",
+    "GEND 3 9",
+    "OK 3",
+    "OK 1",
+    "R ???????? FMT",
+    "E R0010",
+    "E JOBA",
+    "E R0018",
+    "E R0033",
+    "GEND 4 9",
+    "R WRK1 DUP",
+    "R MX DEPS",
+    "R JOBA DUP",
+    "OK 3",
+    "E R0010",
+    "E R0018",
+    "E R0033",
+    "GEND 3 9",
+    "R WRK1 DUP",
+    "GEND 0 9",
+    "GEND 0 9",
+    "OK 2",
+    "R JOBA DUP",
+    "R WRK1 DUP",
+    "R BADP PRIO",
+    "OK 1",
+    "R WRK1 DUP",
+    "E P3",
+    "E R0018",
+    "E R0033",
+    "GEND 3 9",
+    "R BADP PRIO",
+    "OK 1",
+    "R P1 DUP",
+    "E R0033",
+    "GEND 1 9",
+    "R P3 DUP",
+    "R JOBA DUP",
+    "GEND 0 9",
+    "R MX DUP",
+    "GEND 0 9",
+    "R JOBA DUP",
+    "GEND 0 9",
+    "R P1 DUP",
+    "OK 2",
+    "OK 1",
+    "R JOBA DUP",
+    "R DD DEPS",
+    "OK 16",
+    "R MX DUP",
+    "R MX DUP",
+    "R MX DUP",
+    "R WRK1 DUP",
+    "E P3",
+    "E R0018",
+    "E R0033",
+    "GEND 3 10",
+    "OK 2",
+    "E R0018",
+    "E R0033",
+    "GEND 2 10",
+    "R P3 DUP",
+    "GEND 0 10",
+    "OK 2",
+    "E R0018",
+    "E R0033",
+    "GEND 2 10",
+    "OK 6",
+    "R ???????? FMT",
+    "E MX",
+    "E P3",
+    "E JOBA",
+    "E R0010",
+    "E R0018",
+    "E R0033",
+    "GEND 6 10",
+    "R deep99 DUP",
+    "R JOBA DUP",
+    "GEND 0 10",
+    "X 16 76 30 95"
+   ]
+  }
+ ]
+}

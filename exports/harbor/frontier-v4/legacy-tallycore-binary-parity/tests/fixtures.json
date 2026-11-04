@@ -1,0 +1,2119 @@
+{
+ "guard_registration": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "C cx",
+    "C ax",
+    "C dx"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 3",
+    "OK 4",
+    "X 4 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C a1",
+    "V a1",
+    "C b1",
+    "W",
+    "C b1",
+    "V b1,a1",
+    "C c1"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD a1",
+    "N b1 LATE",
+    "WIN a1",
+    "OK 2",
+    "LEAD b1",
+    "N c1 LATE",
+    "X 2 2 1 2"
+   ]
+  },
+  {
+   "input": [
+    "C k",
+    "C m",
+    "C k",
+    "V k",
+    "C m"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 2",
+    "LEAD k",
+    "N m LATE",
+    "X 2 1 0 1"
+   ]
+  }
+ ],
+ "guard_single_round": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "C cx",
+    "V ax",
+    "V ax",
+    "V ax,bx",
+    "V bx,ax",
+    "V bx",
+    "V cx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "ELIM cx",
+    "ELIM bx",
+    "WIN ax",
+    "X 3 6 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C p1",
+    "C q1",
+    "C r1",
+    "V q1",
+    "V p1,q1",
+    "V p1",
+    "V p1",
+    "V q1,r1",
+    "V q1",
+    "V q1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD q1",
+    "LEAD p1",
+    "LEAD p1",
+    "LEAD p1",
+    "LEAD p1",
+    "LEAD p1",
+    "LEAD q1",
+    "ELIM r1",
+    "ELIM p1",
+    "WIN q1",
+    "X 3 7 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C aa",
+    "C bb",
+    "C cc",
+    "C dd",
+    "V aa,bb,cc",
+    "V aa",
+    "V aa,cc",
+    "V bb,aa,dd",
+    "V bb,cc,aa",
+    "V cc,bb,aa",
+    "V cc",
+    "V cc,aa",
+    "V dd,cc,aa",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "ELIM dd",
+    "ELIM bb",
+    "ELIM aa",
+    "WIN cc",
+    "X 4 9 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C solo",
+    "V solo",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD solo",
+    "WIN solo",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "W",
+    "V ax",
+    "W x",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "LEAD ax",
+    "N ???????? FMT",
+    "WIN ax",
+    "X 1 1 1 2"
+   ]
+  }
+ ],
+ "guard_two_rounds_low_tallies": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "C cx",
+    "V ax",
+    "V ax,bx",
+    "V bx",
+    "V bx,cx",
+    "V bx",
+    "W",
+    "V cx",
+    "V cx,ax",
+    "V cx",
+    "V ax,cx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD bx",
+    "ELIM cx",
+    "ELIM ax",
+    "WIN bx",
+    "LEAD cx",
+    "LEAD cx",
+    "LEAD cx",
+    "LEAD cx",
+    "ELIM bx",
+    "ELIM ax",
+    "WIN cx",
+    "X 3 9 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "C toolong99"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C a-b"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "V"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V "
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax,"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ,ax"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax,,bx"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V toolong99,ax"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V a-b"
+   ],
+   "expected": [
+    "OK 1",
+    "N ???????? FMT",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "V ax,bx,ax"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "N ax DUP",
+    "X 2 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax,ax"
+   ],
+   "expected": [
+    "OK 1",
+    "N ax DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax",
+    "W junk"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "N ???????? FMT",
+    "X 1 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "c ax"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "v ax"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "w"
+   ],
+   "expected": [
+    "N ???????? FMT",
+    "X 0 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax",
+    "C bx"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "N bx LATE",
+    "X 1 1 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax"
+   ],
+   "expected": [
+    "OK 1",
+    "X 1 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "C ax",
+    "",
+    "V ax"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "X 1 1 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "V ax",
+    "V bx",
+    "W",
+    "V ax",
+    "C toolong99",
+    "V cx",
+    "V ax,ax",
+    "W",
+    "Q junk",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD ax",
+    "LEAD ax",
+    "ELIM bx",
+    "WIN ax",
+    "LEAD ax",
+    "N ???????? FMT",
+    "N cx CAND",
+    "N ax DUP",
+    "ELIM bx",
+    "WIN ax",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "X 2 3 2 5"
+   ]
+  }
+ ],
+ "f2p_momentum": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "C cx",
+    "V ax",
+    "V ax",
+    "V ax",
+    "V ax",
+    "V ax",
+    "V ax,bx",
+    "V bx,ax",
+    "V bx",
+    "V cx,bx",
+    "V cx",
+    "W",
+    "V bx",
+    "V bx",
+    "V cx",
+    "V cx",
+    "V ax,cx",
+    "V bx,cx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "ELIM cx",
+    "ELIM bx",
+    "WIN ax",
+    "LEAD bx",
+    "LEAD bx",
+    "LEAD bx",
+    "LEAD bx",
+    "LEAD bx",
+    "LEAD bx",
+    "ELIM cx",
+    "ELIM ax",
+    "WIN bx",
+    "X 3 16 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C m1",
+    "C n1",
+    "C p1",
+    "V m1",
+    "V m1",
+    "V m1",
+    "V m1",
+    "V n1,m1",
+    "V n1",
+    "V p1",
+    "W",
+    "V n1",
+    "V n1",
+    "V n1",
+    "V p1,n1",
+    "V p1",
+    "V m1",
+    "W",
+    "V p1",
+    "V p1",
+    "V m1,p1",
+    "V n1",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD m1",
+    "LEAD m1",
+    "LEAD m1",
+    "LEAD m1",
+    "LEAD m1",
+    "LEAD m1",
+    "LEAD m1",
+    "ELIM p1",
+    "ELIM n1",
+    "WIN m1",
+    "LEAD n1",
+    "LEAD n1",
+    "LEAD n1",
+    "LEAD n1",
+    "LEAD n1",
+    "LEAD n1",
+    "ELIM p1",
+    "ELIM m1",
+    "WIN n1",
+    "LEAD p1",
+    "LEAD p1",
+    "LEAD p1",
+    "LEAD p1",
+    "ELIM n1",
+    "ELIM m1",
+    "WIN p1",
+    "X 3 17 3 0"
+   ]
+  },
+  {
+   "input": [
+    "C q",
+    "C r",
+    "C s",
+    "V q",
+    "V q",
+    "V q",
+    "V q",
+    "V r",
+    "V r",
+    "V r",
+    "V r",
+    "V r,q",
+    "V s",
+    "W",
+    "V s",
+    "V s",
+    "V q,s",
+    "V r",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD r",
+    "LEAD r",
+    "ELIM s",
+    "ELIM q",
+    "WIN r",
+    "LEAD s",
+    "LEAD s",
+    "LEAD s",
+    "LEAD s",
+    "ELIM s",
+    "ELIM r",
+    "WIN q",
+    "X 3 14 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C u",
+    "C v",
+    "V u",
+    "V u,v",
+    "V v",
+    "W",
+    "V v",
+    "V u",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD u",
+    "LEAD u",
+    "LEAD u",
+    "ELIM v",
+    "WIN u",
+    "LEAD v",
+    "LEAD u",
+    "ELIM v",
+    "WIN u",
+    "X 2 5 2 0"
+   ]
+  },
+  {
+   "input": [
+    "C aa",
+    "C bb",
+    "V aa",
+    "V aa",
+    "V aa",
+    "V aa",
+    "V bb,aa",
+    "V bb",
+    "W",
+    "C cc",
+    "V cc",
+    "V cc",
+    "V bb",
+    "V aa,cc",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "ELIM bb",
+    "WIN aa",
+    "OK 3",
+    "LEAD cc",
+    "LEAD cc",
+    "LEAD cc",
+    "LEAD cc",
+    "ELIM bb",
+    "ELIM cc",
+    "WIN aa",
+    "X 3 10 2 0"
+   ]
+  }
+ ],
+ "f2p_longid_tiebreak": [
+  {
+   "input": [
+    "C longname",
+    "C z",
+    "V longname",
+    "V z",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD longname",
+    "LEAD longname",
+    "ELIM longname",
+    "WIN z",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C a",
+    "C bcdefgh",
+    "C m",
+    "V a,m",
+    "V a",
+    "V bcdefgh,a",
+    "V bcdefgh",
+    "V m,a",
+    "V m",
+    "V m,bcdefgh",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD a",
+    "LEAD a",
+    "LEAD a",
+    "LEAD a",
+    "LEAD a",
+    "LEAD a",
+    "LEAD m",
+    "ELIM bcdefgh",
+    "ELIM a",
+    "WIN m",
+    "X 3 7 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C verylong",
+    "C aa",
+    "C bb",
+    "V verylong,aa",
+    "V aa",
+    "V bb,aa",
+    "V verylong",
+    "V aa,bb",
+    "V bb",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD verylong",
+    "LEAD verylong",
+    "LEAD verylong",
+    "LEAD verylong",
+    "LEAD verylong",
+    "LEAD verylong",
+    "ELIM verylong",
+    "ELIM bb",
+    "WIN aa",
+    "X 3 6 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C aa",
+    "C bb",
+    "C cc",
+    "V aa,bb",
+    "V bb",
+    "V cc,bb",
+    "V aa",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "LEAD aa",
+    "ELIM cc",
+    "ELIM bb",
+    "WIN aa",
+    "X 3 4 1 0"
+   ]
+  }
+ ],
+ "f2p_full_rank_bonus": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "C cx",
+    "V ax,bx,cx",
+    "V bx",
+    "V bx,ax",
+    "V cx,bx",
+    "V cx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD bx",
+    "LEAD bx",
+    "LEAD bx",
+    "ELIM cx",
+    "ELIM bx",
+    "WIN ax",
+    "X 3 5 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C p",
+    "C q",
+    "C r",
+    "V p,q,r",
+    "V q,r",
+    "V q",
+    "V r,p",
+    "V r,q,p",
+    "V r",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD p",
+    "LEAD p",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD r",
+    "ELIM q",
+    "ELIM p",
+    "WIN r",
+    "X 3 6 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C k1",
+    "C k2",
+    "C k3",
+    "V k1,k2,k3",
+    "V k2,k1",
+    "V k2",
+    "V k1,k3,k2",
+    "V k3,k2",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD k1",
+    "LEAD k1",
+    "LEAD k2",
+    "LEAD k1",
+    "LEAD k1",
+    "ELIM k3",
+    "ELIM k2",
+    "WIN k1",
+    "X 3 5 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C d",
+    "C e",
+    "C f",
+    "V d,e",
+    "V d",
+    "V e",
+    "V e,f",
+    "V f,d",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD d",
+    "LEAD d",
+    "LEAD d",
+    "LEAD d",
+    "LEAD d",
+    "ELIM f",
+    "ELIM e",
+    "WIN d",
+    "X 3 5 1 0"
+   ]
+  }
+ ],
+ "f2p_two_cand_exhaustion": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "C cx",
+    "V ax,bx",
+    "V ax,cx,bx",
+    "V bx",
+    "V bx,cx",
+    "V cx",
+    "V cx,ax",
+    "V bx,ax,cx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD bx",
+    "ELIM cx",
+    "ELIM ax",
+    "WIN bx",
+    "X 3 7 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C m",
+    "C n",
+    "C p",
+    "V m,n",
+    "V m,n,p",
+    "V n",
+    "V n,p",
+    "V p",
+    "V p,n",
+    "V p,m",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD m",
+    "LEAD m",
+    "LEAD m",
+    "LEAD m",
+    "LEAD m",
+    "LEAD m",
+    "LEAD p",
+    "ELIM n",
+    "ELIM p",
+    "WIN m",
+    "X 3 7 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C q",
+    "C r",
+    "C s",
+    "V q,s",
+    "V q",
+    "V q,r",
+    "V r",
+    "V r,q",
+    "V s,r",
+    "V r,s",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "LEAD q",
+    "ELIM s",
+    "ELIM r",
+    "WIN q",
+    "X 3 7 1 0"
+   ]
+  }
+ ],
+ "f2p_unknown_entry": [
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "V ax,zz,bx",
+    "V bx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD ax",
+    "LEAD ax",
+    "ELIM bx",
+    "WIN ax",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V zz,ax"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "V ax,bx",
+    "V bx,qq",
+    "V bx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD bx",
+    "ELIM bx",
+    "WIN ax",
+    "X 2 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V zz,yy"
+   ],
+   "expected": [
+    "OK 1",
+    "N zz CAND",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "V ax,zz,ax"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "N ax DUP",
+    "X 2 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "C bx",
+    "V ax,bx",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD ax",
+    "ELIM bx",
+    "WIN ax",
+    "X 2 1 1 0"
+   ]
+  }
+ ],
+ "f2p_case_fold": [
+  {
+   "input": [
+    "C Alpha",
+    "C ALPHA",
+    "C beta",
+    "V Alpha,beta",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 1",
+    "OK 2",
+    "LEAD Alpha",
+    "ELIM beta",
+    "WIN Alpha",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C Alpha",
+    "C beta",
+    "V ALPHA,beta",
+    "V beta",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "ELIM beta",
+    "WIN Alpha",
+    "X 2 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C Alpha",
+    "V Alpha,ALPHA"
+   ],
+   "expected": [
+    "OK 1",
+    "N ALPHA DUP",
+    "X 1 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "C Kilo",
+    "C juli",
+    "V KILO",
+    "V KILO,juli",
+    "V juli",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD Kilo",
+    "LEAD Kilo",
+    "LEAD Kilo",
+    "ELIM juli",
+    "WIN Kilo",
+    "X 2 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C kilo",
+    "C juli",
+    "V kilo",
+    "V juli,kilo",
+    "V kilo",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "ELIM juli",
+    "WIN kilo",
+    "X 2 3 1 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "C ax extra",
+    "V ax"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "X 1 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax tail junk",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "WIN ax",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "C bx trailing",
+    "V bx,ax more",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "LEAD bx",
+    "ELIM ax",
+    "WIN bx",
+    "X 2 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "WIN ax",
+    "X 1 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "C ax",
+    "V ax",
+    "W x"
+   ],
+   "expected": [
+    "OK 1",
+    "LEAD ax",
+    "N ???????? FMT",
+    "X 1 1 0 1"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "C beta",
+    "C kilo",
+    "C KILO",
+    "C bx",
+    "C ax",
+    "C m",
+    "V beta",
+    "W x",
+    "V KILO,ax,kilo,beta,m junk",
+    "V KILO",
+    "V KILO,ax,m,bx",
+    "V m,kilo,ax,beta",
+    "V beta,m,bx,ax,a-b",
+    "V kilo,beta,ax,KILO,m",
+    "V KILO,beta,bx",
+    "W",
+    "W",
+    "W",
+    "V m,ax,kilo",
+    "V kilo",
+    "V m,beta,bx junk",
+    "V bx,toolong99,kilo,ax",
+    "V bx,yy,kilo,beta",
+    "V bx,kilo,KILO",
+    "V",
+    "V beta,m,ax",
+    "V KILO,m,kilo,bx,beta",
+    "V m,kilo",
+    "c ax",
+    "V KILO,ax,kilo,m",
+    "V m,ax",
+    "V bx,m",
+    "W x",
+    "V bx,ax,beta,m,KILO junk",
+    "C kilo",
+    "V m",
+    "W x",
+    "V ax,kilo,bx,KILO,m",
+    "C",
+    "V kilo,beta,m,KILO,ax junk",
+    "V beta,yy,kilo,ax,m",
+    "V kilo,ax,bx junk",
+    "C",
+    "V beta,ax,KILO junk",
+    "C KILO",
+    "V KILO,bx,beta,ax",
+    "V m,ax,KILO,kilo",
+    "V beta,bx,bx",
+    "V m,beta,KILO,bx,ax",
+    "V beta,KILO,ax,bx,m",
+    "V bx",
+    "V kilo",
+    "C bx",
+    "X",
+    "W",
+    "V m,kilo,beta,ax",
+    "V ax,bx,KILO junk",
+    "V KILO,ax,bx,m",
+    "W",
+    "C bx",
+    "V beta,m",
+    "V KILO,m,beta,verylong,bx,kilo",
+    "V ax,bx,m",
+    "V kilo,bx,ax,m,beta",
+    "X",
+    "C a-b tail",
+    "V bx,yy",
+    "C a-b",
+    "W",
+    "V ax,kilo",
+    "c ax",
+    "W",
+    "V ax,bx,KILO,kilo,m",
+    "V m",
+    "V KILO,beta,m,kilo,ax",
+    "V KILO,beta,bx",
+    "W",
+    "V KILO,beta,bx,z,ax,kilo",
+    "C ALPHA tail",
+    "V m,KILO",
+    "V ax,bx,KILO",
+    "V m,KILO,kilo junk",
+    "W",
+    "V beta junk",
+    "W",
+    "V KILO,ax,beta,kilo,bx",
+    "V bx,KILO,m,m,ax,beta",
+    "W",
+    "V bx,ax,kilo",
+    "V ax,kilo,KILO,bx,beta",
+    "V m,KILO,a-b,beta",
+    "V ax,KILO,bx",
+    "V beta,ax,KILO",
+    "V bx,m",
+    "C m tail",
+    "V",
+    "W",
+    "C bx",
+    "V kilo junk",
+    "V m,kilo,KILO",
+    "V ax,kilo,beta,bx,m",
+    "V m,KILO,beta,kilo",
+    "V m,KILO,ax,kilo junk",
+    "V ax",
+    "V bx,beta,kilo,ax,m",
+    "W",
+    "V KILO junk",
+    "V ax,m,KILO",
+    "c ax",
+    "W",
+    "V ax,cx,m,kilo",
+    "V ax,beta,kilo",
+    "V beta,bx junk",
+    "V KILO",
+    "V ax,beta",
+    "V beta,ax",
+    "X",
+    "W",
+    "V",
+    "X",
+    "C",
+    "C Alpha",
+    "C",
+    "W",
+    "C verylong tail",
+    "V KILO,verylong,bx,Alpha",
+    "V Alpha,m",
+    "V bx",
+    "W",
+    "W",
+    "V bx,Alpha junk",
+    "V kilo,bx",
+    "Q hey",
+    "c ax",
+    "V kilo,beta,verylong",
+    "X",
+    "V beta,ax,bx",
+    "V verylong,kilo,ax,Alpha",
+    "V kilo,bx,ax,beta,m",
+    "V bx,kilo,Alpha",
+    "C",
+    "V kilo",
+    "V bx,kilo,m",
+    "V kilo",
+    "V Alpha,ax,bx,verylong,KILO",
+    "W",
+    "X",
+    "W x",
+    "W",
+    "V Alpha,m,beta,ax,kilo",
+    "V kilo junk",
+    "X",
+    "C a-b tail",
+    "V",
+    "V KILO,beta,Alpha junk",
+    "Q hey",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "LEAD beta",
+    "N ???????? FMT",
+    "N kilo DUP",
+    "LEAD beta",
+    "LEAD kilo",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "N KILO DUP",
+    "LEAD kilo",
+    "ELIM ax",
+    "ELIM bx",
+    "ELIM beta",
+    "ELIM m",
+    "WIN kilo",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD m",
+    "LEAD kilo",
+    "LEAD m",
+    "N ???????? FMT",
+    "LEAD m",
+    "N KILO DUP",
+    "N ???????? FMT",
+    "LEAD m",
+    "N kilo DUP",
+    "LEAD m",
+    "N ???????? FMT",
+    "N kilo DUP",
+    "LEAD m",
+    "LEAD m",
+    "N ???????? FMT",
+    "LEAD m",
+    "N kilo LATE",
+    "LEAD m",
+    "N ???????? FMT",
+    "N KILO DUP",
+    "N ???????? FMT",
+    "N KILO DUP",
+    "LEAD m",
+    "LEAD m",
+    "N ???????? FMT",
+    "LEAD m",
+    "N KILO LATE",
+    "LEAD m",
+    "N kilo DUP",
+    "N bx DUP",
+    "LEAD m",
+    "LEAD m",
+    "LEAD m",
+    "LEAD m",
+    "N bx LATE",
+    "N ???????? FMT",
+    "ELIM ax",
+    "ELIM kilo",
+    "ELIM beta",
+    "ELIM bx",
+    "WIN m",
+    "LEAD m",
+    "LEAD ax",
+    "LEAD kilo",
+    "ELIM beta",
+    "ELIM ax",
+    "ELIM kilo",
+    "ELIM m",
+    "WIN bx",
+    "OK 5",
+    "LEAD beta",
+    "N kilo DUP",
+    "LEAD beta",
+    "LEAD beta",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD beta",
+    "N ???????? FMT",
+    "ELIM m",
+    "ELIM beta",
+    "ELIM ax",
+    "ELIM kilo",
+    "WIN bx",
+    "LEAD ax",
+    "N ???????? FMT",
+    "ELIM kilo",
+    "ELIM beta",
+    "ELIM m",
+    "ELIM ax",
+    "WIN bx",
+    "N kilo DUP",
+    "LEAD m",
+    "N kilo DUP",
+    "LEAD kilo",
+    "ELIM beta",
+    "ELIM ax",
+    "ELIM bx",
+    "ELIM kilo",
+    "WIN m",
+    "N kilo DUP",
+    "OK 6",
+    "LEAD m",
+    "LEAD ax",
+    "N kilo DUP",
+    "ELIM ALPHA",
+    "ELIM kilo",
+    "ELIM beta",
+    "ELIM bx",
+    "ELIM ax",
+    "WIN m",
+    "LEAD beta",
+    "ELIM ALPHA",
+    "ELIM kilo",
+    "ELIM ax",
+    "ELIM bx",
+    "ELIM m",
+    "WIN beta",
+    "N kilo DUP",
+    "N m DUP",
+    "N ???????? FMT",
+    "LEAD bx",
+    "N KILO DUP",
+    "N ???????? FMT",
+    "LEAD bx",
+    "LEAD beta",
+    "LEAD bx",
+    "N m LATE",
+    "N ???????? FMT",
+    "ELIM ALPHA",
+    "ELIM kilo",
+    "ELIM m",
+    "ELIM beta",
+    "ELIM ax",
+    "WIN bx",
+    "OK 6",
+    "LEAD kilo",
+    "N KILO DUP",
+    "LEAD kilo",
+    "N kilo DUP",
+    "N kilo DUP",
+    "LEAD ax",
+    "LEAD ax",
+    "ELIM ALPHA",
+    "ELIM beta",
+    "ELIM m",
+    "ELIM kilo",
+    "ELIM bx",
+    "WIN ax",
+    "LEAD kilo",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "ELIM ALPHA",
+    "ELIM beta",
+    "ELIM bx",
+    "ELIM m",
+    "ELIM kilo",
+    "WIN ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "N ???????? FMT",
+    "ELIM ALPHA",
+    "ELIM bx",
+    "ELIM m",
+    "ELIM kilo",
+    "ELIM beta",
+    "WIN ax",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "OK 6",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "OK 7",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "ELIM verylong",
+    "ELIM beta",
+    "ELIM ax",
+    "ELIM m",
+    "ELIM ALPHA",
+    "ELIM kilo",
+    "WIN bx",
+    "N ???????? FMT",
+    "LEAD bx",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "ELIM ax",
+    "ELIM m",
+    "ELIM verylong",
+    "ELIM ALPHA",
+    "ELIM beta",
+    "ELIM bx",
+    "WIN kilo",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD ALPHA",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "ELIM verylong",
+    "ELIM beta",
+    "ELIM ax",
+    "ELIM m",
+    "ELIM ALPHA",
+    "ELIM bx",
+    "WIN kilo",
+    "X 7 69 15 62"
+   ]
+  },
+  {
+   "input": [
+    "C juli",
+    "C kilo",
+    "C ax",
+    "C Alpha",
+    "C verylong",
+    "C longname",
+    "V kilo,Alpha",
+    "W",
+    "V kilo,longname,juli,ax,verylong",
+    "V ax,juli,Alpha",
+    "V kilo,juli junk",
+    "V juli",
+    "X",
+    "V",
+    "Q hey",
+    "V Alpha,longname,verylong,kilo",
+    "V Alpha,juli,longname,kilo",
+    "V Alpha",
+    "V juli,Alpha,kilo,ax,longname",
+    "V longname,verylong junk",
+    "V juli,ax",
+    "V ax,longname,Alpha,kilo,juli",
+    "W",
+    "V verylong,ax,Alpha,longname",
+    "V Alpha,verylong junk",
+    "V Alpha,ax",
+    "V ax,longname junk",
+    "V Alpha,ax",
+    "W",
+    "V longname,Alpha,verylong,ax,kilo",
+    "V longname",
+    "V longname,Alpha,juli",
+    "V cx,juli",
+    "W",
+    "V longname,ax",
+    "V longname,Alpha,kilo,verylong,ax",
+    "W",
+    "V longname,verylong,juli",
+    "X",
+    "V verylong,longname,Alpha,kilo,ax",
+    "V ax,longname junk",
+    "W",
+    "C bx",
+    "V juli,kilo,longname junk",
+    "V ax,longname,juli,ax,Alpha,verylong",
+    "V longname,verylong,ax,Alpha,kilo",
+    "V juli,ax",
+    "V juli,Alpha,kilo junk",
+    "V bx,Alpha,verylong,longname,juli",
+    "C",
+    "V kilo,bx,juli,ax",
+    "V verylong,juli,ax,longname,bx",
+    "W",
+    "W",
+    "C verylong",
+    "V longname,juli,bx",
+    "V kilo,juli,longname",
+    "V kilo,Alpha,longname,bx,ax",
+    "W",
+    "V longname,juli,verylong junk",
+    "V kilo,ax,bx",
+    "V juli",
+    "V ax",
+    "V bx,longname,juli",
+    "V bx,ax",
+    "W",
+    "V KILO,juli,longname,ax,Alpha",
+    "C",
+    "W",
+    "V Alpha,bx,longname,ax",
+    "C",
+    "W",
+    "V bx",
+    "V juli,bx,ax,verylong,longname junk",
+    "V kilo,Alpha,verylong,longname,kilo",
+    "C bx tail",
+    "V juli,ax,Alpha,bx,verylong",
+    "V ax,bx,cx,juli,Alpha",
+    "V longname,ax,Alpha",
+    "V kilo,Alpha,bx,juli,ax",
+    "V longname,bx,juli",
+    "V verylong",
+    "C ALPHA",
+    "V longname,kilo",
+    "V longname,Alpha,verylong,ax,bx",
+    "W",
+    "V kilo,longname,Alpha,juli,ax",
+    "V verylong,verylong,Alpha",
+    "V bx,Alpha,yy",
+    "V longname,juli,kilo,verylong",
+    "V verylong",
+    "W",
+    "V Alpha,ax,longname,verylong,kilo",
+    "V verylong",
+    "C Alpha",
+    "c ax",
+    "V bx,longname,ax,Alpha,juli",
+    "V kilo,kilo,verylong",
+    "V ax,juli,longname,ALPHA,kilo,bx",
+    "V Alpha,juli,kilo",
+    "W",
+    "V longname junk",
+    "V ax",
+    "W",
+    "V bx,ax,longname,juli,kilo",
+    "V ax,verylong,bx",
+    "W",
+    "W",
+    "V Alpha,juli,longname,verylong,ax",
+    "V juli",
+    "C kilo",
+    "V KILO,juli",
+    "V juli,verylong,ax",
+    "V longname",
+    "X",
+    "V verylong,bx,juli,longname junk",
+    "C cx",
+    "V verylong,kilo,juli junk",
+    "V kilo,longname,verylong,juli",
+    "W",
+    "V bx,kilo,verylong junk",
+    "V ax,kilo,juli",
+    "V longname,bx,kilo,ax,juli,Alpha",
+    "V ax,Alpha,verylong,kilo,bx",
+    "X",
+    "W",
+    "V bx,ax",
+    "V juli",
+    "V ax,verylong,longname,bx",
+    "V kilo",
+    "V Alpha,bx,ax junk",
+    "C beta",
+    "W x",
+    "Q hey",
+    "W",
+    "X",
+    "V verylong,juli,toolong99,longname,ax,kilo junk",
+    "V m,juli,ax",
+    "V Alpha",
+    "V bx,juli,longname,kilo",
+    "W",
+    "W",
+    "W",
+    "V verylong",
+    "C m",
+    "V bx,ax,ax",
+    "V Alpha,verylong,kilo,ax,bx",
+    "V verylong,ax,bx,,Alpha",
+    "V bx,Alpha,verylong,Alpha",
+    "W",
+    "W",
+    "W"
+   ],
+   "expected": [
+    "OK 1",
+    "OK 2",
+    "OK 3",
+    "OK 4",
+    "OK 5",
+    "OK 6",
+    "LEAD kilo",
+    "ELIM longname",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM juli",
+    "ELIM ax",
+    "WIN kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "LEAD juli",
+    "LEAD juli",
+    "ELIM verylong",
+    "ELIM longname",
+    "ELIM kilo",
+    "ELIM ax",
+    "ELIM Alpha",
+    "WIN juli",
+    "LEAD verylong",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "ELIM longname",
+    "ELIM kilo",
+    "ELIM verylong",
+    "ELIM juli",
+    "ELIM ax",
+    "WIN Alpha",
+    "LEAD longname",
+    "LEAD longname",
+    "LEAD longname",
+    "LEAD longname",
+    "ELIM verylong",
+    "ELIM kilo",
+    "ELIM ax",
+    "ELIM Alpha",
+    "ELIM juli",
+    "WIN longname",
+    "LEAD longname",
+    "LEAD longname",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM ax",
+    "WIN longname",
+    "LEAD longname",
+    "N ???????? FMT",
+    "LEAD verylong",
+    "LEAD ax",
+    "ELIM Alpha",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM longname",
+    "ELIM ax",
+    "WIN verylong",
+    "OK 7",
+    "LEAD juli",
+    "N ax DUP",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "N ???????? FMT",
+    "LEAD juli",
+    "LEAD juli",
+    "ELIM Alpha",
+    "ELIM ax",
+    "ELIM longname",
+    "ELIM kilo",
+    "ELIM verylong",
+    "ELIM bx",
+    "WIN juli",
+    "N ???????? FMT",
+    "OK 7",
+    "LEAD longname",
+    "LEAD kilo",
+    "LEAD kilo",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM bx",
+    "ELIM ax",
+    "ELIM longname",
+    "ELIM kilo",
+    "WIN juli",
+    "LEAD longname",
+    "LEAD kilo",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD bx",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM longname",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM bx",
+    "WIN ax",
+    "LEAD kilo",
+    "N ???????? FMT",
+    "ELIM longname",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM juli",
+    "ELIM bx",
+    "ELIM ax",
+    "WIN kilo",
+    "LEAD Alpha",
+    "N ???????? FMT",
+    "ELIM longname",
+    "ELIM verylong",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM bx",
+    "ELIM ax",
+    "WIN Alpha",
+    "LEAD bx",
+    "LEAD juli",
+    "N kilo DUP",
+    "N bx LATE",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "N ALPHA LATE",
+    "LEAD longname",
+    "LEAD longname",
+    "ELIM Alpha",
+    "ELIM verylong",
+    "ELIM kilo",
+    "ELIM ax",
+    "ELIM juli",
+    "ELIM longname",
+    "WIN bx",
+    "LEAD kilo",
+    "N verylong DUP",
+    "LEAD kilo",
+    "LEAD kilo",
+    "LEAD kilo",
+    "ELIM Alpha",
+    "ELIM juli",
+    "ELIM ax",
+    "ELIM verylong",
+    "ELIM kilo",
+    "ELIM bx",
+    "WIN longname",
+    "LEAD Alpha",
+    "LEAD Alpha",
+    "N Alpha LATE",
+    "N ???????? FMT",
+    "LEAD Alpha",
+    "N kilo DUP",
+    "LEAD ax",
+    "LEAD Alpha",
+    "ELIM longname",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM verylong",
+    "ELIM bx",
+    "ELIM Alpha",
+    "WIN ax",
+    "LEAD longname",
+    "LEAD ax",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM bx",
+    "ELIM longname",
+    "WIN ax",
+    "LEAD bx",
+    "LEAD ax",
+    "ELIM longname",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM bx",
+    "WIN ax",
+    "N ???????? FMT",
+    "LEAD Alpha",
+    "LEAD juli",
+    "N kilo LATE",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "N ???????? FMT",
+    "LEAD juli",
+    "N cx LATE",
+    "LEAD juli",
+    "LEAD juli",
+    "ELIM bx",
+    "ELIM ax",
+    "ELIM longname",
+    "ELIM Alpha",
+    "ELIM verylong",
+    "ELIM kilo",
+    "WIN juli",
+    "LEAD bx",
+    "LEAD ax",
+    "LEAD ax",
+    "LEAD ax",
+    "N ???????? FMT",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM kilo",
+    "ELIM longname",
+    "ELIM juli",
+    "ELIM bx",
+    "WIN ax",
+    "LEAD bx",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "N beta LATE",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "ELIM longname",
+    "ELIM verylong",
+    "ELIM Alpha",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM ax",
+    "WIN bx",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD juli",
+    "LEAD juli",
+    "LEAD juli",
+    "ELIM longname",
+    "ELIM verylong",
+    "ELIM kilo",
+    "ELIM ax",
+    "ELIM Alpha",
+    "ELIM juli",
+    "WIN bx",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "LEAD verylong",
+    "N m LATE",
+    "N ax DUP",
+    "LEAD Alpha",
+    "N ???????? FMT",
+    "N Alpha DUP",
+    "ELIM longname",
+    "ELIM kilo",
+    "ELIM juli",
+    "ELIM bx",
+    "ELIM ax",
+    "ELIM verylong",
+    "WIN Alpha",
+    "N ???????? FMT",
+    "N ???????? FMT",
+    "X 7 89 21 34"
+   ]
+  }
+ ]
+}

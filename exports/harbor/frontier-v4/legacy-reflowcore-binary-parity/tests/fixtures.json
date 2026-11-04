@@ -1,0 +1,1644 @@
+{
+ "guard_pure_append": [
+  {
+   "input": [
+    "A hello",
+    "A world",
+    "A again",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 51",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 12",
+    "A alpha",
+    "A beta",
+    "A gamma",
+    "A delta",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 2",
+    "L 2",
+    "D 85",
+    "X 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 20",
+    "A one",
+    "A two",
+    "D",
+    "A three",
+    "D",
+    "A four",
+    "A five",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 21",
+    "L 1",
+    "D 39",
+    "L 1",
+    "L 2",
+    "D 74",
+    "X 5 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefghij",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "D 30",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "A x",
+    "A y",
+    "A z",
+    "D",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 15",
+    "D 15",
+    "X 3 0 0"
+   ]
+  }
+ ],
+ "guard_reflow_neutral": [
+  {
+   "input": [
+    "W 10",
+    "A abcdefgh",
+    "A ijklmnop",
+    "R",
+    "D",
+    "A qrstuvwx",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 2",
+    "L 2",
+    "D 64",
+    "L 3",
+    "L 3",
+    "D 88",
+    "X 3 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W 11",
+    "A abcdefghi",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 27",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefgh",
+    "R",
+    "W 12",
+    "D",
+    "A stuvwxyz",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "OK",
+    "D 24",
+    "L 2",
+    "D 64",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefghi",
+    "A jklmnopqr",
+    "A stuvwxyza",
+    "R",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 2",
+    "L 3",
+    "L 3",
+    "L 3",
+    "D 99",
+    "X 3 2 0"
+   ]
+  }
+ ],
+ "guard_rejects": [
+  {
+   "input": [
+    "W"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W 5"
+   ],
+   "expected": [
+    "E WIDTH",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W 09"
+   ],
+   "expected": [
+    "E WIDTH",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W 121"
+   ],
+   "expected": [
+    "E WIDTH",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W 1200"
+   ],
+   "expected": [
+    "E WIDTH",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W abc"
+   ],
+   "expected": [
+    "E WIDTH",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "A"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "A verylongword17aaa"
+   ],
+   "expected": [
+    "E WORD",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "A bad-word"
+   ],
+   "expected": [
+    "E WORD",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "Q what is this"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "X"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "w 40"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "a hi"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "r"
+   ],
+   "expected": [
+    "E FMT",
+    "X 0 0 1"
+   ]
+  },
+  {
+   "input": [
+    "A hi",
+    "A bad!",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "E WORD",
+    "D 6",
+    "X 1 0 1"
+   ]
+  },
+  {
+   "input": [
+    "W 12",
+    "W 999",
+    "A hello",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "E WIDTH",
+    "L 1",
+    "D 15",
+    "X 1 0 1"
+   ]
+  }
+ ],
+ "guard_empty": [
+  {
+   "input": [],
+   "expected": [
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "D"
+   ],
+   "expected": [
+    "D 0",
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "",
+    "D",
+    ""
+   ],
+   "expected": [
+    "D 0",
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 40",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "D 0",
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 99",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "D 0",
+    "X 0 0 0"
+   ]
+  }
+ ],
+ "guard_trailer": [
+  {
+   "input": [
+    "W 12",
+    "A alpha",
+    "A beta",
+    "A bad-",
+    "Q x",
+    "A gamma",
+    "D",
+    "W 5",
+    "A delta",
+    "R"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "E WORD",
+    "E FMT",
+    "L 2",
+    "D 55",
+    "E WIDTH",
+    "L 2",
+    "L 2",
+    "X 4 1 3"
+   ]
+  }
+ ],
+ "f2p_incr_vs_reflow": [
+  {
+   "input": [
+    "W 11",
+    "A abcde",
+    "A abcde",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 2",
+    "D 40",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 15",
+    "A abcd",
+    "A abcdefghij",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 2",
+    "D 62",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 11",
+    "A abcde",
+    "A abcde",
+    "A abcde",
+    "A abcde",
+    "R",
+    "D",
+    "A abcde",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 2",
+    "L 2",
+    "L 4",
+    "D 80",
+    "L 4",
+    "D 110",
+    "X 5 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 11",
+    "A abcde",
+    "A abcde",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 33",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 20",
+    "A abc",
+    "A defgh",
+    "R",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 24",
+    "X 2 2 0"
+   ]
+  }
+ ],
+ "f2p_width_rewrap": [
+  {
+   "input": [
+    "W 40",
+    "A alpha",
+    "A beta",
+    "A gamma",
+    "W 10",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "OK",
+    "D 55",
+    "X 3 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 40",
+    "A abcd",
+    "A abcd",
+    "A abcd",
+    "W 10",
+    "A ef",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "OK",
+    "L 2",
+    "D 62",
+    "X 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 30",
+    "A abcdef",
+    "A ghijkl",
+    "A mnopqr",
+    "W 15",
+    "D",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "OK",
+    "D 69",
+    "L 2",
+    "D 66",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 12",
+    "A abcde",
+    "A abc",
+    "R",
+    "W 12",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "OK",
+    "D 27",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abc",
+    "A def",
+    "A ghi",
+    "W 20",
+    "D",
+    "A jkl",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 2",
+    "OK",
+    "D 36",
+    "L 2",
+    "D 56",
+    "X 4 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 40",
+    "A solo",
+    "W 10",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "OK",
+    "D 12",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_overlong": [
+  {
+   "input": [
+    "W 10",
+    "A abcdefghijklmn",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "D 42",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefghijklmn",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 30",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 12",
+    "A hello",
+    "A abcdefghijklmnop",
+    "D",
+    "R",
+    "D",
+    "A ok",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 2",
+    "D 95",
+    "L 2",
+    "D 75",
+    "L 3",
+    "D 81",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefghijklmn",
+    "R",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 30",
+    "X 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefghij",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "D 30",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_digest_spaces": [
+  {
+   "input": [
+    "W 20",
+    "A abc",
+    "A defg",
+    "A hi",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 27",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 12",
+    "A abc",
+    "A def",
+    "A ghi",
+    "A jkl",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "L 2",
+    "L 2",
+    "D 42",
+    "X 4 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 20",
+    "A abc",
+    "A defg",
+    "R",
+    "D",
+    "A hi",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 21",
+    "L 1",
+    "D 30",
+    "X 3 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 20",
+    "A abc",
+    "A defg",
+    "A hi",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 33",
+    "X 3 0 0"
+   ]
+  }
+ ],
+ "f2p_empty_reflow": [
+  {
+   "input": [
+    "R"
+   ],
+   "expected": [
+    "L 1",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "D 0",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R",
+    "A hello",
+    "D",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "L 1",
+    "D 15",
+    "L 1",
+    "D 15",
+    "X 1 2 0"
+   ]
+  },
+  {
+   "input": [
+    "W 15",
+    "R"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "R",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "L 1",
+    "D 0",
+    "X 0 2 0"
+   ]
+  }
+ ],
+ "f2p_digit_words": [
+  {
+   "input": [
+    "W 10",
+    "A abcdefg",
+    "A xy123456",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 48",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 12",
+    "A abcdefg",
+    "A xy123456",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "L 1",
+    "D 45",
+    "X 2 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abcdefghi",
+    "A 12345",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 45",
+    "X 2 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A ab12cd34ef56gh78",
+    "D",
+    "R",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "D 48",
+    "L 1",
+    "D 48",
+    "X 1 1 0"
+   ]
+  },
+  {
+   "input": [
+    "W 10",
+    "A abc1",
+    "A def2",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "L 1",
+    "D 27",
+    "X 2 0 0"
+   ]
+  }
+ ],
+ "f2p_lenient_tokens": [
+  {
+   "input": [
+    "W 40 extra"
+   ],
+   "expected": [
+    "OK",
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "A hi there"
+   ],
+   "expected": [
+    "L 1",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "R now"
+   ],
+   "expected": [
+    "L 1",
+    "X 0 1 0"
+   ]
+  },
+  {
+   "input": [
+    "D please"
+   ],
+   "expected": [
+    "D 0",
+    "X 0 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 12 x",
+    "A word junk",
+    "D trailing junk"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "D 12",
+    "X 1 0 0"
+   ]
+  },
+  {
+   "input": [
+    "W 40",
+    "A hi",
+    "D"
+   ],
+   "expected": [
+    "OK",
+    "L 1",
+    "D 6",
+    "X 1 0 0"
+   ]
+  }
+ ],
+ "f2p_parity": [
+  {
+   "input": [
+    "R",
+    "r",
+    "Q hey",
+    "X",
+    "D",
+    "D",
+    "r",
+    "A mnopqr",
+    "A abcde",
+    "D please",
+    "R",
+    "W 40",
+    "A abcdefghijklmn",
+    "D",
+    "R",
+    "R now",
+    "D",
+    "A abcdefgh junk",
+    "W 20 tail",
+    "A abc junk",
+    "W 11",
+    "A bad-word",
+    "A bad-word junk",
+    "A abc",
+    "A abc1",
+    "A xy123456",
+    "D please",
+    "D",
+    "A bad-word",
+    "A abcdefghij",
+    "D",
+    "A 12345",
+    "R now",
+    "A xy123456",
+    "A 12345",
+    "A abcdefg",
+    "D",
+    "A ok",
+    "W 12",
+    "R",
+    "A",
+    "A x",
+    "A ab12cd34ef56gh78",
+    "A",
+    "A abcdefghij",
+    "W 10",
+    "R",
+    "D",
+    "R",
+    "A abcd",
+    "R",
+    "r",
+    "A bad-word",
+    "w 40",
+    "R now",
+    "A verylongword17aaa",
+    "A abcdefghijklmnop",
+    "A abcdefgh",
+    "D",
+    "A abcdefghijklmnop",
+    "A x",
+    "R now",
+    "R",
+    "W 12",
+    "Q hey",
+    "W 5",
+    "D please",
+    "A hi",
+    "Q hey",
+    "A x",
+    "R",
+    "D",
+    "R",
+    "A mnopqr",
+    "D",
+    "W 15",
+    "D please",
+    "A def2 junk",
+    "X",
+    "W 15",
+    "W 20 tail",
+    "D",
+    "d",
+    "A mnopqr",
+    "D",
+    "A abcde",
+    "W 11",
+    "A abcd",
+    "R",
+    "A abcdefghijklmnop",
+    "D",
+    "A 12345",
+    "A abcdefg",
+    "A def2 junk",
+    "A bad-word",
+    "R",
+    "W 20",
+    "W 121",
+    "W abc",
+    "D",
+    "A hi",
+    "R",
+    "Q hey",
+    "A abc1",
+    "R now",
+    "W abc",
+    "W 11",
+    "X",
+    "D",
+    "A abcdefgh junk",
+    "D",
+    "D",
+    "D",
+    "D",
+    "A mnopqr",
+    "A verylongword17aaa",
+    "R",
+    "D",
+    "A x junk",
+    "D",
+    "R now",
+    "D please",
+    "D",
+    "A xy123456",
+    "A 12345 junk",
+    "A abcdefgh",
+    "D",
+    "A def2",
+    "A abcd",
+    "A abcdefgh",
+    "A abcdefgh",
+    "W 15 tail",
+    "D please",
+    "A abcde",
+    "A bad-word",
+    "W",
+    "A abc",
+    "D",
+    "A abcdefgh",
+    "D",
+    "w 40",
+    "D",
+    "R",
+    "A xy123456",
+    "A abcdefghi",
+    "R",
+    "A bad-word",
+    "A ok",
+    "A 12345",
+    "D",
+    "Q hey",
+    "A abcdefgh",
+    "D",
+    "R",
+    "Q hey",
+    "A abcdefghijklmnop",
+    "R now",
+    "R",
+    "W 20",
+    "A abcdefg",
+    "A ok",
+    "D",
+    "A abcdefghijklmnop junk",
+    "D please",
+    "D"
+   ],
+   "expected": [
+    "L 1",
+    "E FMT",
+    "E FMT",
+    "E FMT",
+    "D 0",
+    "D 0",
+    "E FMT",
+    "L 1",
+    "L 1",
+    "D 36",
+    "L 1",
+    "OK",
+    "L 1",
+    "D 81",
+    "L 1",
+    "L 1",
+    "D 75",
+    "L 1",
+    "OK",
+    "L 3",
+    "OK",
+    "E WORD",
+    "E WORD",
+    "L 4",
+    "L 4",
+    "L 5",
+    "D 214",
+    "D 214",
+    "E WORD",
+    "L 6",
+    "D 264",
+    "L 6",
+    "L 8",
+    "L 8",
+    "L 8",
+    "L 9",
+    "D 345",
+    "L 9",
+    "OK",
+    "L 9",
+    "E FMT",
+    "L 9",
+    "L 10",
+    "E FMT",
+    "L 11",
+    "OK",
+    "L 12",
+    "D 445",
+    "L 12",
+    "L 13",
+    "L 13",
+    "E FMT",
+    "E WORD",
+    "E FMT",
+    "L 13",
+    "E WORD",
+    "L 14",
+    "L 15",
+    "D 561",
+    "L 16",
+    "L 17",
+    "L 17",
+    "L 17",
+    "OK",
+    "E FMT",
+    "E WIDTH",
+    "D 584",
+    "L 17",
+    "E FMT",
+    "L 17",
+    "L 16",
+    "D 587",
+    "L 16",
+    "L 17",
+    "D 605",
+    "OK",
+    "D 605",
+    "L 17",
+    "E FMT",
+    "OK",
+    "OK",
+    "D 620",
+    "E FMT",
+    "L 17",
+    "D 641",
+    "L 18",
+    "OK",
+    "L 18",
+    "L 19",
+    "L 20",
+    "D 760",
+    "L 21",
+    "L 21",
+    "L 22",
+    "E WORD",
+    "L 22",
+    "OK",
+    "E WIDTH",
+    "E WIDTH",
+    "D 791",
+    "L 22",
+    "L 12",
+    "E FMT",
+    "L 12",
+    "L 12",
+    "E WIDTH",
+    "OK",
+    "E FMT",
+    "D 855",
+    "L 14",
+    "D 895",
+    "D 895",
+    "D 895",
+    "D 895",
+    "L 15",
+    "E WORD",
+    "L 24",
+    "D 875",
+    "L 24",
+    "D 885",
+    "L 24",
+    "D 880",
+    "D 880",
+    "L 24",
+    "L 25",
+    "L 25",
+    "D 967",
+    "L 26",
+    "L 26",
+    "L 27",
+    "L 28",
+    "OK",
+    "D 1076",
+    "L 28",
+    "E WORD",
+    "E FMT",
+    "L 29",
+    "D 1115",
+    "L 29",
+    "D 1142",
+    "E FMT",
+    "D 1142",
+    "L 23",
+    "L 23",
+    "L 24",
+    "L 24",
+    "E WORD",
+    "L 24",
+    "L 25",
+    "D 1226",
+    "E FMT",
+    "L 25",
+    "D 1253",
+    "L 25",
+    "E FMT",
+    "L 26",
+    "L 26",
+    "L 26",
+    "OK",
+    "L 27",
+    "L 27",
+    "D 1346",
+    "L 28",
+    "D 1426",
+    "D 1426",
+    "X 57 25 31"
+   ]
+  },
+  {
+   "input": [
+    "A abcdefghij",
+    "D",
+    "R",
+    "D please",
+    "D",
+    "A mnopqr",
+    "W 12",
+    "W 09",
+    "R now",
+    "D please",
+    "A abcdefghijklmn",
+    "A abcdefghijklmn",
+    "A abcdefghij",
+    "A abc1",
+    "R",
+    "A abcdefghijklmnop",
+    "A abcdefgh",
+    "D",
+    "D",
+    "W 20",
+    "W 40",
+    "A abcdefghij",
+    "A abcdefghijklmnop",
+    "W 09",
+    "D",
+    "w 40",
+    "A hi junk",
+    "A ab12cd34ef56gh78",
+    "Q hey",
+    "W abc",
+    "A",
+    "D",
+    "W 11",
+    "W 15",
+    "A bad-word",
+    "X",
+    "W 09",
+    "W abc",
+    "W 20",
+    "A ab12cd34ef56gh78",
+    "D",
+    "A ab12cd34ef56gh78 junk",
+    "A ab12cd34ef56gh78",
+    "A x",
+    "A mnopqr",
+    "W abc",
+    "R",
+    "A abcd",
+    "A ok",
+    "W 40 tail",
+    "W 11",
+    "D",
+    "A def2",
+    "D",
+    "W 20",
+    "R",
+    "A abcdefg junk",
+    "W 40",
+    "W 12",
+    "A abcd",
+    "W 12 tail",
+    "W 20",
+    "A abcdefgh",
+    "R",
+    "A abcdefghi junk",
+    "A verylongword17aaa junk",
+    "X",
+    "D please",
+    "A abcdefg",
+    "A abcdefghi junk",
+    "D",
+    "D",
+    "R",
+    "A abcdefghijklmn",
+    "d",
+    "D",
+    "A abcdefg",
+    "A def2",
+    "A x",
+    "D",
+    "D",
+    "A hi",
+    "A mnopqr",
+    "A ok junk",
+    "X",
+    "W 20",
+    "D",
+    "A xy123456",
+    "W 12",
+    "D please",
+    "D",
+    "D please",
+    "R",
+    "R",
+    "D",
+    "W abc",
+    "A abcdefgh",
+    "R",
+    "W 121",
+    "D please",
+    "D",
+    "A abcde",
+    "W 5 tail",
+    "A abcdefghi",
+    "A abcdefghijklmn",
+    "D",
+    "R",
+    "A verylongword17aaa",
+    "A verylongword17aaa",
+    "D",
+    "W abc",
+    "D",
+    "A abcdefghijklmnop",
+    "D",
+    "D please",
+    "A mnopqr",
+    "W 15",
+    "A abc",
+    "A abcd junk",
+    "A abcd",
+    "R now",
+    "X",
+    "W abc",
+    "W 40 tail",
+    "D",
+    "D please",
+    "D",
+    "R",
+    "A abcdefgh",
+    "D",
+    "A abcdefghijklmnop",
+    "D",
+    "A hi",
+    "R",
+    "A 12345",
+    "D",
+    "A abcdefg",
+    "A hi",
+    "D",
+    "Q hey",
+    "W 121",
+    "X",
+    "A",
+    "Q hey",
+    "A ab12cd34ef56gh78",
+    "A xy123456",
+    "A abcdefghij",
+    "R",
+    "A verylongword17aaa",
+    "A abcdefghijklmn"
+   ],
+   "expected": [
+    "L 1",
+    "D 30",
+    "L 1",
+    "D 30",
+    "D 30",
+    "L 1",
+    "OK",
+    "E WIDTH",
+    "L 2",
+    "D 60",
+    "L 3",
+    "L 4",
+    "L 5",
+    "L 6",
+    "L 6",
+    "L 7",
+    "L 8",
+    "D 294",
+    "D 294",
+    "OK",
+    "OK",
+    "L 8",
+    "L 8",
+    "E WIDTH",
+    "D 434",
+    "E FMT",
+    "L 8",
+    "L 9",
+    "E FMT",
+    "E WIDTH",
+    "E FMT",
+    "D 497",
+    "OK",
+    "OK",
+    "E WORD",
+    "E FMT",
+    "E WIDTH",
+    "E WIDTH",
+    "OK",
+    "L 9",
+    "D 548",
+    "L 10",
+    "L 10",
+    "L 10",
+    "L 11",
+    "E WIDTH",
+    "L 10",
+    "L 10",
+    "L 10",
+    "OK",
+    "OK",
+    "D 726",
+    "L 11",
+    "D 741",
+    "OK",
+    "L 10",
+    "L 11",
+    "OK",
+    "OK",
+    "L 11",
+    "OK",
+    "OK",
+    "L 12",
+    "L 12",
+    "L 12",
+    "E WORD",
+    "E FMT",
+    "D 868",
+    "L 13",
+    "L 13",
+    "D 919",
+    "D 919",
+    "L 13",
+    "L 14",
+    "E FMT",
+    "D 981",
+    "L 15",
+    "L 15",
+    "L 15",
+    "D 1023",
+    "D 1023",
+    "L 15",
+    "L 16",
+    "L 16",
+    "E FMT",
+    "OK",
+    "D 1077",
+    "L 16",
+    "OK",
+    "D 1122",
+    "D 1122",
+    "D 1122",
+    "L 26",
+    "L 26",
+    "D 1043",
+    "E WIDTH",
+    "L 27",
+    "L 27",
+    "E WIDTH",
+    "D 1067",
+    "D 1067",
+    "L 28",
+    "E WIDTH",
+    "L 29",
+    "L 30",
+    "D 1189",
+    "L 30",
+    "E WORD",
+    "E WORD",
+    "D 1179",
+    "E WIDTH",
+    "D 1179",
+    "L 31",
+    "D 1227",
+    "D 1227",
+    "L 32",
+    "OK",
+    "L 32",
+    "L 32",
+    "L 33",
+    "L 29",
+    "E FMT",
+    "E WIDTH",
+    "OK",
+    "D 1302",
+    "D 1302",
+    "D 1302",
+    "L 10",
+    "L 10",
+    "D 1344",
+    "L 10",
+    "D 1429",
+    "L 10",
+    "L 10",
+    "L 10",
+    "D 1459",
+    "L 11",
+    "L 11",
+    "D 1489",
+    "E FMT",
+    "E WIDTH",
+    "E FMT",
+    "E FMT",
+    "E FMT",
+    "L 11",
+    "L 11",
+    "L 11",
+    "L 11",
+    "E WORD",
+    "L 12",
+    "X 53 15 29"
+   ]
+  }
+ ]
+}

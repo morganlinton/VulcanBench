@@ -44,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Local run GUI**: the runner routes refuse requests from browser pages not
+  served from localhost (403 on a foreign or `null` `Origin`), so a website
+  open in the operator's browser can no longer read the queue or post plans
+  through the loopback address. The public API's CORS policy is unchanged.
 - The GUI's Launch page no longer plans Frontier v5 gate runs; it launches
   frozen suites only. Gate jobs under `~/vulcanbench-gate` stay on the Runs
   page read-only (docs/DECISIONS.md 2026-11-01).

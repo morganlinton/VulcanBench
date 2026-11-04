@@ -13,6 +13,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any, Literal
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
@@ -26,15 +27,44 @@ from backend.runner.state import PlanError, State
 from backend.runner.supervisor import SERVICE
 
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "::ffff:127.0.0.1"})
+# Hostnames a page may be served from to use the runner routes. Any port: the
+# Mac app picks the dashboard's port at runtime (3000 or the next free one).
+LOOPBACK_ORIGIN_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+
+
+def origin_allowed(origin: str | None) -> bool:
+    """True for no Origin (curl, server-side fetches) or an http(s) page on loopback.
+
+    A loopback client is not enough on its own: every page open in the
+    operator's browser connects from 127.0.0.1, and the app's CORS policy is
+    ``*`` for the public leaderboard API. Browsers send ``Origin`` on every
+    cross-origin request and on every POST, so this refuses drive-by pages and
+    DNS-rebinding hosts while the dashboard (served from localhost) passes.
+    ``Origin: null`` (sandboxed frames, file pages) is refused.
+    """
+    if origin is None:
+        return True
+    try:
+        parts = urlsplit(origin)
+        hostname = parts.hostname
+        parts.port  # noqa: B018 (raises ValueError on a malformed port)
+    except ValueError:
+        return False
+    return parts.scheme in {"http", "https"} and hostname in LOOPBACK_ORIGIN_HOSTS
 
 
 def require_runner(request: Request) -> None:
-    """Refuse unless the runner is enabled and the client is on this machine."""
+    """Refuse unless the runner is enabled, the client is on this machine and
+    the calling page (if any) is served from this machine."""
     if not load_config().enabled:
         raise HTTPException(status_code=404, detail="runner disabled (set VULCANBENCH_RUNNER=1)")
     host = request.client.host if request.client else None
     if host not in LOOPBACK_HOSTS:
         raise HTTPException(status_code=403, detail="runner routes are served to localhost only")
+    if not origin_allowed(request.headers.get("origin")):
+        raise HTTPException(
+            status_code=403, detail="runner routes are served to pages on localhost only"
+        )
 
 
 router = APIRouter(prefix="/api/runner", tags=["runner"], dependencies=[Depends(require_runner)])

@@ -27,6 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GUI housekeeping**: orphaned sandbox containers listed and removed by id
   only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
   streaming log tail (server-sent events) on live run pages.
+- **Suite builder** (`harness/suite_builder/`, password-gated): `vulcanbench
+  suite prs list` scores a repository's merged pull requests as task
+  candidates through `gh`; `suite task scaffold` exports the repository at a
+  pull request's base commit with the fix as the gold patch, a draft issue
+  and a `build/` folder with a self-check script; `suite task author` runs
+  one CLI-harness session that writes the issue, hidden tests and test spec
+  and keeps only allowlisted changes; `suite validate` adds "no answer in
+  repo" and "gold applies" checks. `suite unlock`, `lock`, `access` and
+  `password-hash` manage the gate (`[builder].password_hash`).
 - **Suites outside the checkout**: `vulcanbench suite` (`init`, `list`, `show`,
   `add-task`, `remove-task`, `validate`, `freeze`, `check`, all with `--json`)
   builds and freezes a suite in a suites home (`[runner].suites_home`, default

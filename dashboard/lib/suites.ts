@@ -176,6 +176,7 @@ export interface TaskDetail {
     run_id: string;
   }[];
   log_run_id: string | null;
+  options: SuiteDetail["options"];
 }
 
 export interface FreezeResult {

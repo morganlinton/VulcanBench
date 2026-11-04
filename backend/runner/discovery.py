@@ -812,6 +812,11 @@ def job_summary(job: Job) -> dict[str, Any]:
             "out_dir",
             "resume_at",
             "quota_continue",
+            "task",
+            "task_dir",
+            "pr",
+            "batch_id",
+            "billing",
         )
     }
     return d

@@ -19,7 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.runner import docker_ps, launch, maintenance, procs, stream, sweep
+from backend.runner import docker_ps, launch, maintenance, procs, stream, suites, sweep
 from backend.runner.config import RunnerConfig, load_config
 from backend.runner.discovery import HARNESS_PREFIX, Discovery, job_summary, tail_text
 from backend.runner.redact import redact
@@ -187,7 +187,7 @@ def get_run_view(run_id: str) -> dict[str, Any]:
 def launch_options(tag: str | None = Query(default=None, max_length=200)) -> dict[str, Any]:
     cfg = load_config()
     opts = launch.options(cfg, tag)
-    opts["kinds"] = ["sweep", "prepare"]
+    opts["kinds"] = ["sweep", "prepare", "author", "validate"]
     opts.update(sweep.suite_options(cfg, opts.get("tag")))
     return opts
 
@@ -217,7 +217,33 @@ class PreparePlanRequest(BaseModel):
     tag: str = Field(min_length=1, max_length=200)
 
 
-PlanRequest = Annotated[SweepPlanRequest | PreparePlanRequest, Field(discriminator="kind")]
+class AuthorPlanRequest(BaseModel):
+    """Suite builder: one authoring session per task (spends model quota once each)."""
+
+    kind: Literal["author"]
+    suite: str = Field(min_length=3, max_length=64)
+    tasks: list[str] = Field(min_length=1, max_length=suites.MAX_TASKS_PER_PLAN)
+    harness: str = Field(min_length=1, max_length=40)
+    model: str = Field(min_length=1, max_length=120)
+    billing: str = Field(default="auto", max_length=20)
+    effort: str | None = Field(default=None, max_length=20)
+    tag: str | None = Field(default=None, max_length=200)
+    cli_bin_dir: str = Field(default="", max_length=300)
+
+
+class ValidatePlanRequest(BaseModel):
+    """Suite builder: validate tasks in Docker (no model calls)."""
+
+    kind: Literal["validate"]
+    suite: str = Field(min_length=3, max_length=64)
+    tasks: list[str] = Field(min_length=1, max_length=suites.MAX_TASKS_PER_PLAN)
+    tag: str | None = Field(default=None, max_length=200)
+
+
+PlanRequest = Annotated[
+    SweepPlanRequest | PreparePlanRequest | AuthorPlanRequest | ValidatePlanRequest,
+    Field(discriminator="kind"),
+]
 
 
 class ConfirmRequest(BaseModel):
@@ -235,6 +261,24 @@ def _plan_dict(state: State, plan_id: str) -> dict[str, Any]:
     d = plan.to_dict()
     d["live_reason"] = state.plan_is_live(plan)
     return d
+
+
+def _build_form(body: AuthorPlanRequest | ValidatePlanRequest) -> suites.BuildForm:
+    if isinstance(body, ValidatePlanRequest):
+        return suites.BuildForm(
+            kind="validate", suite=body.suite, tasks=tuple(body.tasks), tag=body.tag
+        )
+    return suites.BuildForm(
+        kind="author",
+        suite=body.suite,
+        tasks=tuple(body.tasks),
+        tag=body.tag,
+        harness=body.harness,
+        model=body.model.strip(),
+        billing=body.billing,
+        effort=body.effort or None,
+        cli_bin_dir=body.cli_bin_dir.strip(),
+    )
 
 
 @router.post("/plans", status_code=201)
@@ -258,9 +302,18 @@ def create_plan(body: PlanRequest) -> dict[str, Any]:
             )
             spec = sweep.build_suite_plan(cfg, form, today=datetime.now(UTC).strftime("%Y-%m-%d"))
             spec["hash"] = launch.plan_hash(spec)
+        elif isinstance(body, AuthorPlanRequest | ValidatePlanRequest):
+            builder_jobs = [
+                j for j in _state(cfg).list_jobs(limit=500) if j.kind in suites.BUILDER_KINDS
+            ]
+            spec = suites.build_job_plan(
+                cfg, _build_form(body), builder_jobs, docker_ok=docker_ps.docker_available()
+            )
         else:
             spec = launch.build_prepare_plan(cfg, body.tag)
     except launch.LaunchError as exc:
+        raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
+    except suites.SuitesError as exc:
         raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
     state = _state(cfg)
     plan = state.create_plan(str(spec["kind"]), spec, spec["hash"])
@@ -312,6 +365,15 @@ def _confirm_problems(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
         if launch.worktree_dir(cfg, str(spec.get("tag"))).is_dir():
             return ["the worktree already exists"]
         return launch.validate_before_launch(cfg, spec)
+    if kind in suites.BUILDER_KINDS:
+        problems = []
+        if (spec.get("doctor") or {}).get("status") == "not_ready":
+            problems.append(f"harness not ready: {spec['doctor'].get('detail') or 'see the plan'}")
+        if kind == "validate" and not docker_ps.docker_available():
+            problems.append("Docker is not running")
+        for entry in spec.get("jobs") or []:
+            problems.extend(suites.validate_build_launch(cfg, entry))
+        return sorted(set(problems))
     return sweep.validate_any(cfg, spec)
 
 

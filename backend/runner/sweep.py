@@ -711,6 +711,10 @@ def validate_any(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
         return validate_suite_launch(cfg, spec)
     if kind == "prepare":
         return launch.validate_before_launch(cfg, spec)
+    if kind in ("author", "validate"):
+        from backend.runner import suites  # noqa: PLC0415 (suites imports this module)
+
+        return suites.validate_build_launch(cfg, spec)
     return ["unsupported kind"]
 
 

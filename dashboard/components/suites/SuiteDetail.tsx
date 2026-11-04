@@ -15,6 +15,7 @@ import {
   type TaskRow,
 } from "@/lib/suites";
 import { ErrorLine, useGate } from "./BuilderGate";
+import { BuildActions } from "./BuildPlan";
 import { StageBadge, repoName } from "./SuitesList";
 
 export function SuiteDetail({ id }: { id: string }) {
@@ -51,7 +52,7 @@ export function SuiteDetail({ id }: { id: string }) {
         </div>
       )}
       {draft && <PrPicker id={id} onScaffolded={refresh} />}
-      <TaskTable id={id} tasks={data.tasks} draft={draft} onChange={refresh} />
+      <TaskTable id={id} data={data} draft={draft} onChange={refresh} />
       <FreezeCard data={data} onFrozen={refresh} />
     </div>
   );
@@ -232,11 +233,27 @@ function PrRow({ pr, suite, picked, onToggle, state, disabled }: {
   );
 }
 
-function TaskTable({ id, tasks, draft, onChange }: { id: string; tasks: TaskRow[]; draft: boolean; onChange: () => void }) {
+function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetailData; draft: boolean; onChange: () => void }) {
   const { handle } = useGate();
+  const tasks = data.tasks;
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showDropped, setShowDropped] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  // The tasks are fixed when the button is clicked, so the plan and the queued
+  // screen survive the table refreshing underneath them.
+  const [action, setAction] = useState<{ kind: "author" | "validate"; tasks: string[] } | null>(null);
+  const selectable = (t: TaskRow) => draft && !t.dropped && t.active_job === null;
+  const pickedTasks = tasks.filter((t) => picked.has(t.id) && selectable(t));
+  const authorable = pickedTasks.map((t) => t.id);
+  const validatable = pickedTasks.filter((t) => t.author?.status === "ok").map((t) => t.id);
+  const toggle = (task: string) =>
+    setPicked((s) => {
+      const next = new Set(s);
+      if (next.has(task)) next.delete(task);
+      else next.add(task);
+      return next;
+    });
   const act = async (task: string, what: "accept" | "drop") => {
     let body: unknown = undefined;
     if (what === "drop") {
@@ -280,6 +297,7 @@ function TaskTable({ id, tasks, draft, onChange }: { id: string; tasks: TaskRow[
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wider text-zinc-500">
               <tr>
+                <th className="px-3 py-2" />
                 <th className="px-3 py-2">Task</th>
                 <th className="px-3 py-2">Stage</th>
                 <th className="px-3 py-2">Authoring</th>
@@ -291,6 +309,11 @@ function TaskTable({ id, tasks, draft, onChange }: { id: string; tasks: TaskRow[
             <tbody>
               {shown.map((t) => (
                 <tr key={t.id} className={`border-t border-white/5 align-top ${t.dropped ? "opacity-50" : ""}`}>
+                  <td className="px-3 py-2">
+                    {selectable(t) && (
+                      <input type="checkbox" checked={picked.has(t.id)} onChange={() => toggle(t.id)} aria-label={`select ${t.id}`} />
+                    )}
+                  </td>
                   <td className="px-3 py-2">
                     <Link href={`/suites/${encodeURIComponent(id)}/tasks/${encodeURIComponent(t.id)}`} className="text-emerald-300 hover:underline">{t.id}</Link>
                     <div className="text-xs text-zinc-500">{t.pr ? `PR #${t.pr}` : ""}{t.title ? ` ${t.title}` : ""}</div>
@@ -347,6 +370,29 @@ function TaskTable({ id, tasks, draft, onChange }: { id: string; tasks: TaskRow[
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {draft && (
+        <div className="space-y-3 border-t border-white/10 pt-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setAction(action?.kind === "author" ? null : { kind: "author", tasks: authorable })} disabled={authorable.length === 0} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${action?.kind === "author" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
+              Author {authorable.length || ""} selected
+            </button>
+            <button type="button" onClick={() => setAction(action?.kind === "validate" ? null : { kind: "validate", tasks: validatable })} disabled={validatable.length === 0} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${action?.kind === "validate" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
+              Validate {validatable.length || ""} selected
+            </button>
+            <span className="text-xs text-zinc-500">Validation needs a successful authoring session first. Both build a plan to read before anything is queued.</span>
+          </div>
+          {action && (
+            <BuildActions
+              key={`${action.kind}:${action.tasks.join(",")}`}
+              suite={id}
+              tasks={action.tasks}
+              options={data.options}
+              kind={action.kind}
+              onDone={() => { setAction(null); setPicked(new Set()); onChange(); }}
+            />
+          )}
         </div>
       )}
     </section>

@@ -275,6 +275,12 @@ export interface JobSpecSummary {
   out_dir: string | null;
   resume_at: string | null;
   quota_continue: { max: number; wait_s: number; used?: number } | null;
+  // Suite builder jobs (kind author or validate).
+  task?: string | null;
+  task_dir?: string | null;
+  pr?: number | null;
+  batch_id?: string | null;
+  billing?: string | null;
 }
 
 export interface JobSummary {

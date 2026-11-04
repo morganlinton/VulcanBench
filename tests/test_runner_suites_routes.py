@@ -11,57 +11,36 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from backend import app as appmod
-from backend.runner import docker_ps, launch, procs, suites, sweep
-from backend.runner.config import RunnerConfig
+from backend.runner import launch, suites
 from backend.runner.state import State
 from tests.runner_fixtures import (
     BUILDER_TAG,
     FAKE_PASSWORD,
+    BuilderEnv,
+    builder_env,
     fake_builder_task,
     fake_repo,
     fake_suite_calls,
     fake_worktree,
     make_config,
     set_fake_suite,
-    tag_with_builder,
 )
 
 API = "/api/runner/suites"
 
 
-@dataclass
-class Env:
-    cfg: RunnerConfig
-    repo: Path
-    wt: Path
-    tmp: Path
+Env = BuilderEnv
 
 
 @pytest.fixture
 def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Env:
-    repo = fake_repo(tmp_path)
-    monkeypatch.setattr(launch, "REPO_ROOT", repo)
-    monkeypatch.setattr(sweep, "REPO_ROOT", repo)
-    cfg = make_config(tmp_path)
-    tag_with_builder(repo)
-    wt = fake_worktree(repo, cfg, BUILDER_TAG)
-    monkeypatch.setenv("VULCANBENCH_RUNNER", "1")
-    monkeypatch.setenv("VULCANBENCH_RUNNER_HOME", str(cfg.home))
-    monkeypatch.setenv("VULCANBENCH_RUNNER_GATE_OUT", str(cfg.gate_out))
-    monkeypatch.setenv("VULCANBENCH_RUNNER_RUN_WORKTREES", str(cfg.run_worktrees))
-    monkeypatch.setenv("VULCANBENCH_RUNNER_SUITES_HOME", str(cfg.suites_home))
-    monkeypatch.setattr(procs, "list_processes", lambda **_: [])
-    monkeypatch.setattr(docker_ps, "list_containers", lambda **_: [])
-    suites._unlock_failures.clear()
-    suites._prs_cache.clear()
-    return Env(cfg, repo, wt, tmp_path)
+    return builder_env(tmp_path, monkeypatch)
 
 
 def _client() -> TestClient:

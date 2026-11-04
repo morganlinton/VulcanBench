@@ -5,7 +5,9 @@ import { useState } from "react";
 import { usePolling } from "@/components/runner/usePolling";
 import { runnerGet, runnerPost } from "@/lib/runner";
 import { taskPath, type TaskDetail, type TaskRow, type TextFile } from "@/lib/suites";
+import { LogTail } from "@/components/runner/LogTail";
 import { ErrorLine, useGate } from "./BuilderGate";
+import { BuildActions } from "./BuildPlan";
 import { StageBadge } from "./SuitesList";
 
 const TABS = ["Issue", "Tests", "Gold patch", "Metadata", "Author", "Validate"] as const;
@@ -32,6 +34,7 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
   const [tab, setTab] = useState<Tab>("Issue");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [build, setBuild] = useState<"author" | "validate" | null>(null);
   const { data, error, refresh } = usePolling<TaskDetail>(
     () => runnerGet<TaskDetail>(taskPath(suite, task)),
     5000,
@@ -95,6 +98,29 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
             <span className="text-xs text-zinc-500">Accept needs a PASS or WARN validation newer than the last authoring.</span>
           )}
           {actionError && <span className="text-xs text-rose-300">{actionError}</span>}
+        </div>
+      )}
+      {editable && t.active_job === null && (
+        <div className="space-y-3 rounded-xl border border-white/10 p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setBuild(build === "author" ? null : "author")} className={`rounded-full border px-4 py-1 text-sm ${build === "author" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
+              {t.author ? "Author again" : "Author"}
+            </button>
+            <button type="button" onClick={() => setBuild(build === "validate" ? null : "validate")} disabled={t.author?.status !== "ok"} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${build === "validate" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
+              {t.validate ? "Validate again" : "Validate"}
+            </button>
+          </div>
+          {build && (
+            <BuildActions key={build} suite={suite} tasks={[task]} options={data.options} kind={build} onDone={() => { setBuild(null); refresh(); }} />
+          )}
+        </div>
+      )}
+      {t.active_job && (
+        <div>
+          <div className="mb-2 text-xs text-zinc-400">
+            {t.active_job.kind === "author" ? "authoring session" : "validation"} job {t.active_job.id} is {t.active_job.status}
+          </div>
+          <LogTail runId={t.active_job.run_id} choices={[{ key: "console", label: "console.log", source: "console.log", trial: null }]} live />
         </div>
       )}
       {data.jobs.length > 0 && (

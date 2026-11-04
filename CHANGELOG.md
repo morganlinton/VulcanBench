@@ -58,6 +58,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `vulcanbench suite` in the tooling worktree. An unlock screen pipes the
   subscriber password to `suite unlock --password-stdin`; it is never an
   argument, logged or stored.
+- **Suite builder jobs in the GUI**: the `author` and `validate` plan kinds
+  queue one `suite task author` session or one Docker `suite validate` per
+  task through the plan and confirm path, with the harness doctor, an
+  estimate and the exact commands; the supervisor ends them from their exit
+  code and `build/` record, never continues or retries them, and kills an
+  authoring session's agent CLI on stop.
 - **Mac app** (`desktop/`, `make app`): an Electron window on the local run
   GUI. It starts the backend from the checkout it was built from (or reuses
   one already on port 8000) and the dashboard's standalone build with its own

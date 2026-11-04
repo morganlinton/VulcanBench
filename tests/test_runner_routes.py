@@ -173,7 +173,7 @@ def test_options_and_plan_shape(launch_env: dict[str, Path]) -> None:
     c = _local()
     opts = c.get("/api/runner/options").json()
     assert opts["tags"] == ["bench/2026-10-29-test"] and opts["worktree"]["exists"] is True
-    assert opts["kinds"] == ["sweep", "prepare"]
+    assert opts["kinds"] == ["sweep", "prepare", "author", "validate"]
     for gone in ("refs", "tasks", "attempts", "concurrency", "gate_effort", "credentials"):
         assert gone not in opts
     plan = _plan(c)
@@ -298,7 +298,7 @@ def _sweep_plan(c: TestClient, **over: object) -> dict[str, Any]:
 
 def test_options_cover_the_model_sweep(launch_env: dict[str, Path]) -> None:
     opts = _local().get("/api/runner/options").json()
-    assert opts["kinds"] == ["sweep", "prepare"]
+    assert opts["kinds"] == ["sweep", "prepare", "author", "validate"]
     assert [s["id"] for s in opts["suites"]] == [SUITE_ID] and opts["suites"][0]["n_tasks"] == 2
     assert "ultra" not in opts["efforts"] and opts["efforts"][0] == "minimal"
     assert "codex" in opts["harnesses"] and opts["sandbox_defaults"]["codex"] == "local"

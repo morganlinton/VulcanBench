@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -558,6 +559,36 @@ def tag_with_builder(repo: Path, tag: str = BUILDER_TAG) -> str:
     return tag
 
 
+@dataclass
+class BuilderEnv:
+    cfg: RunnerConfig
+    repo: Path
+    wt: Path
+    tmp: Path
+
+
+def builder_env(tmp_path: Path, monkeypatch: Any) -> BuilderEnv:
+    """A fake repo with a suite-builder bench tag, its prepared worktree and runner env vars."""
+    from backend.runner import docker_ps, launch, procs, suites, sweep  # noqa: PLC0415
+
+    repo = fake_repo(tmp_path)
+    monkeypatch.setattr(launch, "REPO_ROOT", repo)
+    monkeypatch.setattr(sweep, "REPO_ROOT", repo)
+    cfg = make_config(tmp_path)
+    tag_with_builder(repo)
+    wt = fake_worktree(repo, cfg, BUILDER_TAG)
+    monkeypatch.setenv("VULCANBENCH_RUNNER", "1")
+    monkeypatch.setenv("VULCANBENCH_RUNNER_HOME", str(cfg.home))
+    monkeypatch.setenv("VULCANBENCH_RUNNER_GATE_OUT", str(cfg.gate_out))
+    monkeypatch.setenv("VULCANBENCH_RUNNER_RUN_WORKTREES", str(cfg.run_worktrees))
+    monkeypatch.setenv("VULCANBENCH_RUNNER_SUITES_HOME", str(cfg.suites_home))
+    monkeypatch.setattr(procs, "list_processes", lambda **_: [])
+    monkeypatch.setattr(docker_ps, "list_containers", lambda **_: [])
+    suites._unlock_failures.clear()
+    suites._prs_cache.clear()
+    return BuilderEnv(cfg, repo, wt, tmp_path)
+
+
 def set_fake_suite(worktree: Path, name: str, value: str = "1") -> None:
     """Steer the fake ``vulcanbench suite``: prs-mode, scaffold-mode, not-configured, unlocked."""
     (worktree / f".fake-suite-{name}").write_text(value)
@@ -835,6 +866,59 @@ if cmd == "freeze":
     (d / "suite.lock.json").write_text(json.dumps(lock))
     out({"schema": "vulcanbench.suite.freeze.v1", "id": sid, "path": str(d / "suite.lock.json"),
          "version": lock["version"], "lock_digest": "d" * 16, "n_tasks": len(tasks)})
+
+def now():
+    from datetime import UTC, datetime
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+if args[:2] == ["task", "author"]:
+    sid, task = args[2], opt("--task")
+    t = home / sid / task
+    mode = flag("author-mode") or "finish"
+    print(f"authoring {task} with {opt('--harness')}:{opt('--model')}", file=sys.stderr, flush=True)
+    if mode == "refuse":
+        fail("harness_not_ready", "codex is not ready: not logged in", 3)
+    if mode == "crash":
+        sys.exit(9)
+    if mode == "hang":
+        import signal, subprocess
+        agent = subprocess.Popen(["sleep", "300"], start_new_session=True)
+        (here / ".fake-suite-agent.pid").write_text(str(agent.pid))
+
+        def on_int(*_):
+            sys.exit(130)
+
+        signal.signal(signal.SIGINT, on_int)
+        for _ in range(3000):
+            time.sleep(0.1)
+        sys.exit(0)
+    status = "ok" if mode == "finish" else "failed"
+    doc = {"schema": "vulcanbench.suite.author.v1", "task_id": task, "harness": opt("--harness"),
+           "model": opt("--model"), "effort": opt("--effort"), "status": status,
+           "started_at": now(), "finished_at": now(), "duration_s": 1.0,
+           "changed": {"accepted": ["issue.md", "tests/vb_test.py"] if status == "ok" else [], "rejected": ["repo/a.py"]},
+           "cost": {"cli_reported_usd": 0.5}, "warnings": []}
+    (t / "build" / "author.json").write_text(json.dumps(doc))
+    if mode == "quota":
+        print("provider error: You have hit your usage limit. limit reached", file=sys.stderr)
+        out(doc, 1)
+    out(doc, 0 if status == "ok" else 6)
+
+if cmd == "validate":
+    sid, task = args[1], opt("--task")
+    assert opt("--sandbox") == "docker"
+    mode = flag("validate-mode") or "pass"
+    if mode == "infra":
+        fail("docker_unavailable", "--sandbox docker requires a running Docker daemon", 3)
+    status = {"pass": "PASS", "fail": "FAIL", "skip": "SKIP"}[mode]
+    rec = {"schema": "vulcanbench.suite.validate.v1", "task_id": task, "status": status,
+           "reasons": [] if status == "PASS" else ["base does not fail"],
+           "checks": {"no_answer_in_repo": True, "gold_applies": True}, "sandbox": "docker",
+           "checked_at": now()}
+    (home / sid / task / "build" / "validate.json").write_text(json.dumps(rec))
+    out({"schema": "vulcanbench.suite.validate-report.v1", "id": sid, "results": [rec]},
+        {"PASS": 0, "FAIL": 1, "SKIP": 4}[status])
 
 print("fake vulcanbench suite: unknown command", args, file=sys.stderr)
 sys.exit(9)

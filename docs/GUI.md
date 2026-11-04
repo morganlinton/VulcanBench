@@ -176,6 +176,51 @@ files and the runner's jobs: scaffolded, authoring, authored, authoring
 failed, validating, validated, validation failed; a validation older than the
 latest authoring session no longer counts.
 
+### Authoring and validation jobs
+
+Select tasks in the task table (or open one task) and pick **Author** or
+**Validate**. Both build a plan first, through `POST /api/runner/plans`
+like a benchmark sweep: the exact command per task, the harness doctor (for
+authoring), an estimate, the warnings, and a confirm button that queues one
+job per task. The supervisor runs them one at a time with everything else in
+the queue; nothing starts without the confirm click and nothing retries.
+
+- **Author** (`kind: author`) runs `vulcanbench suite task author <id> --task
+  T --harness H --model M --billing B [--effort E] --timeout 3600 --max-turns
+  200`. The harness picker offers the CLI harnesses only (not the `vulcan`
+  API loop), billing `auto` or `subscription`, and never a blocked effort.
+  The session runs on this Mac as the operator, in a scratch copy of the task
+  with network off, and the engine copies back only the issue, hidden tests,
+  gold patch and allowed metadata keys. It spends model quota once per task;
+  cost is open-ended (no price table covers authoring), so the plan says to
+  budget about one Frontier v4 task run per pull request. A doctor that says
+  the harness is not ready disables confirm.
+- **Validate** (`kind: validate`) runs `vulcanbench suite validate <id> --task
+  T --sandbox docker`; it needs a successful authoring session and a running
+  Docker, and makes no model call.
+
+How a job ends:
+
+| Kind | Exit | Job status | Note |
+|---|---|---|---|
+| author | 0 with a new `author.json` status ok | finished | accepted and discarded change counts |
+| author | 2, 3, 5 | infra_failed | refused before the session, with the engine's message |
+| author | 6 | failed | the session made no accepted change |
+| author | 1 | failed | provider error; a quota window or rate limit, or an expired login, is named; nothing retries |
+| validate | 0 or 1 | finished | `verdict: PASS` or `FAIL` with reasons (the verdict belongs to the task, not the job) |
+| validate | 3 | infra_failed | Docker is not running |
+| validate | 4 | failed | a toolchain is missing (SKIP) |
+| both | 7 | infra_failed | the builder was locked between confirm and launch |
+| both | 130, 143, a signal | stopped | an authoring session's agent CLI is killed like a suite run's |
+
+At confirm and again right before launch the job is re-checked: the tooling
+worktree is still at its tag and clean and has the builder, the argv is the
+worktree's `vulcanbench suite task author` or `suite validate` for the
+planned suite and task with the configured `--suites-home`, the suite is not
+frozen, the effort is not blocked, there is no `--allow-dirty`, and the env
+has no overrides. A job's console log streams on its task page while it runs
+and stays on the Runs page as `job:<id>`.
+
 ### The unlock screen and the password
 
 The builder is for subscribers and is password-gated in the engine
@@ -411,4 +456,5 @@ port choice, server start and stop) without Electron.
    document).
 6. Build your own eval suite: the Suites pages behind the builder's unlock
    screen (create, pull requests, scaffold, review, accept, drop, freeze),
-   wrapping `vulcanbench suite` from the tooling worktree (this document).
+   wrapping `vulcanbench suite` from the tooling worktree, and queued
+   authoring and validation jobs behind the confirm click (this document).

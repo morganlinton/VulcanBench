@@ -566,11 +566,16 @@ def suite_detail(cfg: RunnerConfig, suite_id: str, jobs: list[Job]) -> dict[str,
         "freeze_ready": freeze_ready(
             tasks, frozen=row["status"] == "frozen", active=row["active_job"] is not None
         ),
-        "options": {
-            "harnesses": list(sweep.CLI_HARNESSES),
-            "efforts": sweep.efforts_offered(),
-            "billing": list(AUTHOR_BILLING),
-        },
+        "options": _build_options(),
+    }
+
+
+def _build_options() -> dict[str, list[str]]:
+    """What the author form offers: CLI harnesses only, never a blocked effort."""
+    return {
+        "harnesses": list(sweep.CLI_HARNESSES),
+        "efforts": sweep.efforts_offered(),
+        "billing": list(AUTHOR_BILLING),
     }
 
 
@@ -648,6 +653,7 @@ def task_detail(cfg: RunnerConfig, suite_id: str, task: str, jobs: list[Job]) ->
             for j in own
         ],
         "log_run_id": f"job:{own[0].id}" if own else None,
+        "options": _build_options(),
     }
 
 
@@ -889,3 +895,316 @@ def freeze_suite(
         "n_tasks": res.doc.get("n_tasks"),
         "tooling": tooling,
     }
+
+
+# ------------------------------------------------- queued build jobs --
+#
+# Authoring (one model session per task, spends quota) and validation (Docker,
+# minutes per task) are queued jobs: built here as a plan, shown with the exact
+# commands, queued only by the confirm click with the plan's hash, re-checked
+# by ``validate_build_launch`` at confirm and again right before launch.
+
+AUTHOR_TIMEOUT_S = 3600
+AUTHOR_MAX_TURNS = 200
+MAX_TASKS_PER_PLAN = 20
+_MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$")
+
+
+@dataclass(frozen=True)
+class BuildForm:
+    kind: str  # author | validate
+    suite: str
+    tasks: tuple[str, ...]
+    tag: str | None = None
+    harness: str = ""
+    model: str = ""
+    billing: str = "auto"
+    effort: str | None = None
+    cli_bin_dir: str = ""
+
+
+def _check_build_form(form: BuildForm) -> None:  # noqa: PLR0912
+    if form.kind not in BUILDER_KINDS:
+        raise SuitesError(422, "kind must be author or validate")
+    if not 1 <= len(form.tasks) <= MAX_TASKS_PER_PLAN:
+        raise SuitesError(422, f"pick 1 to {MAX_TASKS_PER_PLAN} tasks")
+    if len(set(form.tasks)) != len(form.tasks):
+        raise SuitesError(422, "a task is listed twice")
+    for t in form.tasks:
+        check_task_id(t)
+    if form.kind == "validate":
+        return
+    if form.harness not in sweep.CLI_HARNESSES:
+        raise SuitesError(
+            422, f"authoring runs through a CLI harness: one of {', '.join(sweep.CLI_HARNESSES)}"
+        )
+    if not _MODEL_RE.match(form.model) or len(form.model) > 120 or ":" in form.model:
+        raise SuitesError(422, "give a bare model id for that harness")
+    if form.billing not in AUTHOR_BILLING:
+        raise SuitesError(422, f"billing must be one of {', '.join(AUTHOR_BILLING)}")
+    if form.effort is not None:
+        from harness.settings import blocked_efforts  # noqa: PLC0415
+
+        if form.effort in blocked_efforts():
+            raise SuitesError(
+                422, f"effort {form.effort!r} is blocked by vulcanbench.toml and never runs"
+            )
+        if form.effort not in sweep.efforts_offered():
+            raise SuitesError(422, f"unknown effort level {form.effort!r}")
+    if form.cli_bin_dir:
+        p = Path(form.cli_bin_dir).expanduser()
+        if not p.is_absolute() or not p.is_dir():
+            raise SuitesError(422, "CLI bin dir must be an existing absolute directory")
+
+
+def _cli(tooling: dict[str, Any]) -> str:
+    return str(Path(str(tooling["worktree"])) / ".venv" / "bin" / "vulcanbench")
+
+
+def author_argv(
+    cfg: RunnerConfig, tooling: dict[str, Any], form: BuildForm, task: str
+) -> list[str]:
+    argv = [
+        _cli(tooling),
+        "suite",
+        "task",
+        "author",
+        form.suite,
+        "--task",
+        task,
+        "--harness",
+        form.harness,
+        "--model",
+        form.model,
+        "--billing",
+        form.billing,
+    ]
+    if form.effort:
+        argv += ["--effort", form.effort]
+    argv += [
+        "--timeout",
+        str(AUTHOR_TIMEOUT_S),
+        "--max-turns",
+        str(AUTHOR_MAX_TURNS),
+        "--suites-home",
+        str(cfg.suites_home),
+        "--json",
+    ]
+    return argv
+
+
+def validate_argv(
+    cfg: RunnerConfig, tooling: dict[str, Any], form: BuildForm, task: str
+) -> list[str]:
+    return [
+        _cli(tooling),
+        "suite",
+        "validate",
+        form.suite,
+        "--task",
+        task,
+        "--sandbox",
+        "docker",
+        "--suites-home",
+        str(cfg.suites_home),
+        "--json",
+    ]
+
+
+def build_job_plan(
+    cfg: RunnerConfig, form: BuildForm, jobs: list[Job], *, docker_ok: bool
+) -> dict[str, Any]:
+    """An author or validate plan: one queued job per task, nothing started."""
+    _check_build_form(form)
+    d = suite_dir(cfg, form.suite)
+    _refuse_if_frozen(d)
+    manifest = _manifest(d)
+    rows: dict[str, dict[str, Any]] = {}
+    for t in form.tasks:
+        task_dir(cfg, form.suite, t)  # 404 for a task that is not there
+        row = task_row(d, t, manifest, jobs)
+        if row["dropped"]:
+            raise SuitesError(409, f"{t} is dropped")
+        if row["active_job"] is not None:
+            raise SuitesError(
+                409, f"{t} has job {row['active_job']['id']} {row['active_job']['status']}"
+            )
+        if form.kind == "validate" and (row["author"] or {}).get("status") != "ok":
+            raise SuitesError(409, f"{t} has no successful authoring session yet; author it first")
+        rows[t] = row
+    if form.kind == "validate" and not docker_ok:
+        raise SuitesError(409, "validation runs in Docker and Docker is not running")
+    tooling = require_tooling(cfg, form.tag)
+    require_unlocked(tooling)
+    wt = Path(str(tooling["worktree"]))
+    path_prepend = str(Path(form.cli_bin_dir).expanduser()) if form.cli_bin_dir else ""
+    common = {
+        "suite": form.suite,
+        "suite_name": manifest.get("display_name") or form.suite,
+        "tag": tooling["tag"],
+        "tag_commit": tooling["tag_commit"],
+        "worktree": str(wt),
+        "needs_prep": False,
+        "cwd": str(wt),
+        "env": {},
+        "path_prepend": path_prepend,
+        "suites_home": str(cfg.suites_home),
+    }
+    batch_id = f"{form.kind}-{form.suite}-{_now().strftime('%Y%m%d%H%M%S')}"
+    warnings: list[str] = []
+    entries: list[dict[str, Any]] = []
+    for t in form.tasks:
+        row = rows[t]
+        argv = (
+            author_argv(cfg, tooling, form, t)
+            if form.kind == "author"
+            else validate_argv(cfg, tooling, form, t)
+        )
+        entries.append(
+            {
+                "kind": form.kind,
+                "job_name": f"{form.kind}-{form.suite}-{t}"[:120],
+                "batch_id": batch_id,
+                **common,
+                "task": t,
+                "task_dir": str(d / t),
+                "pr": row["pr"],
+                "harness": form.harness or None,
+                "agent": form.harness or None,
+                "model": form.model or None,
+                "billing": form.billing if form.kind == "author" else None,
+                "effort": form.effort,
+                "argv": argv,
+                "argv_token": f"{form.suite} --task {t}",
+            }
+        )
+        if form.kind == "author" and row["author"] is not None:
+            warnings.append(
+                f"{t} was authored before: a new session starts from the current files and its "
+                "accepted changes replace them"
+            )
+        if form.kind == "validate" and row["validate"] is not None:
+            warnings.append(
+                f"{t} was validated before: the new verdict replaces build/validate.json"
+            )
+    n = len(entries)
+    if form.kind == "author":
+        doctor = sweep.run_doctor(wt, form.harness, path_prepend=path_prepend)
+        if doctor["status"] == "not_ready":
+            warnings.append(
+                f"harness doctor says {form.harness} is not ready: {doctor.get('detail')}"
+            )
+        elif doctor["status"] == "error":
+            warnings.append(f"harness doctor failed: {doctor.get('note')}")
+        warnings.append(
+            "each session runs on this Mac as you, through the harness CLI, in a scratch copy of the "
+            "task with network off; only the issue, hidden tests, gold patch and allowed metadata "
+            "keys are copied back"
+        )
+        estimate = {
+            "sessions": n,
+            "per_session_cap_s": AUTHOR_TIMEOUT_S,
+            "max_turns": AUTHOR_MAX_TURNS,
+            "max_wall_s": n * AUTHOR_TIMEOUT_S,
+            "billing": (
+                f"{form.harness} subscription login (no metered API)"
+                if form.billing == "subscription"
+                else "auto: the subscription login when the harness has one, else the API key"
+            ),
+            "cost": (
+                "open-ended: no price table covers authoring; budget about one Frontier v4 task "
+                f"run per pull request, {n} in this plan"
+            ),
+            "quota": "spends model quota once per task; nothing retries, a refused session stays failed",
+            "infra_retries": "none",
+        }
+    else:
+        doctor = {"status": "not_applicable", "note": "validation makes no model call"}
+        estimate = {
+            "sessions": 0,
+            "tasks": n,
+            "billing": "none: Docker runs the hidden tests at the base and after the gold patch, three times",
+            "cost": "no model calls",
+            "quota": "none",
+            "infra_retries": "none",
+            "max_wall_s": None,
+        }
+    spec: dict[str, Any] = {
+        "kind": form.kind,
+        "job_name": batch_id,
+        "batch_id": batch_id,
+        **common,
+        "tasks": list(form.tasks),
+        "harness": form.harness or None,
+        "model": form.model or None,
+        "billing": form.billing if form.kind == "author" else None,
+        "effort": form.effort,
+        "jobs": entries,
+        "doctor": doctor,
+        "estimate": estimate,
+        "tooling": tooling,
+        "warnings": warnings,
+        "usage_check_required": False,
+    }
+    spec["hash"] = launch.plan_hash(spec)
+    return spec
+
+
+def validate_build_launch(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:  # noqa: PLR0912
+    """Re-check one author or validate job right before confirm and before its child starts."""
+    problems: list[str] = []
+    kind = spec.get("kind")
+    tag = str(spec.get("tag") or "")
+    problems.extend(launch.validate_worktree(cfg, tag))
+    wt = Path(str(spec.get("worktree")))
+    if wt != launch.worktree_dir(cfg, tag):
+        problems.append("worktree path does not match the tag")
+    if not (wt / BUILDER_MARKER).is_file():
+        problems.append(f"{tag} has no suite builder")
+    argv = [str(a) for a in (spec.get("argv") or [])]
+    head = ["suite", "task", "author"] if kind == "author" else ["suite", "validate"]
+    if (
+        not argv
+        or Path(argv[0]) != wt / ".venv" / "bin" / "vulcanbench"
+        or argv[1 : 1 + len(head)] != head
+    ):
+        problems.append(f"argv is not the worktree's vulcanbench {' '.join(head)}")
+        return problems
+    suite_id = str(spec.get("suite") or "")
+    task = str(spec.get("task") or "")
+    if argv[1 + len(head)] != suite_id or not SUITE_ID_RE.match(suite_id):
+        problems.append("argv names a different suite")
+    if "--task" not in argv or argv[argv.index("--task") + 1] != task or not TASK_ID_RE.match(task):
+        problems.append("argv names a different task")
+    if (
+        "--suites-home" not in argv
+        or Path(argv[argv.index("--suites-home") + 1]) != cfg.suites_home
+    ):
+        problems.append("argv's --suites-home is not the configured suites home")
+    d = cfg.suites_home / suite_id
+    if not (d / task / "metadata.json").is_file() or Path(str(spec.get("task_dir"))) != d / task:
+        problems.append(f"task {task} is not in {d}")
+    if (d / "suite.lock.json").is_file():
+        problems.append(f"{suite_id} is frozen")
+    if "--allow-dirty" in argv:
+        problems.append("argv contains --allow-dirty")
+    if kind == "author":
+        from harness.settings import blocked_efforts  # noqa: PLC0415
+
+        if "--effort" in argv and argv[argv.index("--effort") + 1] in blocked_efforts():
+            problems.append("effort is blocked by vulcanbench.toml")
+        if "--harness" not in argv or argv[argv.index("--harness") + 1] not in sweep.CLI_HARNESSES:
+            problems.append("argv's harness is not a CLI harness")
+    elif "--sandbox" not in argv or argv[argv.index("--sandbox") + 1] != "docker":
+        problems.append("validation must run with --sandbox docker")
+    for name in spec.get("env") or {}:
+        problems.append(f"unexpected env override {name}")
+    prepend = str(spec.get("path_prepend") or "")
+    if prepend and not Path(prepend).is_dir():
+        problems.append(f"CLI bin dir {prepend} is gone")
+    return problems
+
+
+def read_build_record(spec: dict[str, Any], name: str) -> dict[str, Any] | None:
+    """``build/author.json`` or ``build/validate.json`` of the job's task (for the supervisor)."""
+    return read_json(Path(str(spec.get("task_dir") or "")) / "build" / name)

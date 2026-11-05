@@ -1,0 +1,89 @@
+{
+ "cells": {
+  "musewonderfull/extra-high": 1
+ },
+ "excluded": [],
+ "levels": {
+  "musewonderfull": [
+   "extra-high"
+  ]
+ },
+ "missing": [],
+ "models": {
+  "musewonderfull": "Muse Wonder Full through Muse Code 1.4.9 (Contributor mode, skill reminder off; goal and verify reminder observers on Muse Spark 1.3, recorded per row)"
+ },
+ "rows": [
+  {
+   "api_equivalent_cost_usd": null,
+   "duration_s": 6555.012,
+   "effort": "extra-high",
+   "fallback": false,
+   "finished_at": "2026-10-19T01:52:19.854790+00:00",
+   "functional": 1.0,
+   "model": "musewonderfull",
+   "quality": 0.6998,
+   "reminder_observer_usage": {
+    "muse-spark-1.3": {
+     "cached_tokens": 0,
+     "calls": 2,
+     "input_tokens": 44292,
+     "output_tokens": 1482,
+     "reasoning_tokens": 1185
+    }
+   },
+   "reported_tokens": 54226677,
+   "run_id": "legacy-depotcore-binary-parity-20fa8072",
+   "security": 0.95,
+   "solver_cli_version": "Muse Code 1.4.9 (1.4.9-R6297.1)",
+   "solver_receipt": {
+    "historical_summary_unit": "Raw input plus output; cached input included in input",
+    "raw_tokens": 54226677,
+    "result_receipts": null,
+    "stream_sha256": "2355533f943e90d394c8611b46debaea15e48561589629578d0953a002ca9027",
+    "usage": {
+     "cached_input_tokens": 53461540,
+     "input_tokens": 53934517,
+     "output_tokens": 292160,
+     "reasoning_output_tokens": 191294
+    }
+   },
+   "source_directory": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2-149/extra-high/legacy-depotcore-binary-parity-20fa8072",
+   "source_hashes": {
+    "issue": "8134fec39ae01cf5bed4c87d12b03b75f114d5b27d6468c278b48321b0401c12",
+    "patch": "d7e4b111ced414b8e062736144af3617b95408ed15051742fa69df296b8f2194",
+    "summary": "9ad43d9c76a863943614dd09e7dcdc996e9b60f3d03511c6edb4f48b6cdadb4f",
+    "task": "8c2f1526622b0a9b5543dcfd65592bbf3212a9a1b14a022f4de15079613ecd77"
+   },
+   "started_at": "2026-10-19T00:03:02.800080+00:00",
+   "task": "legacy-depotcore-binary-parity"
+  }
+ ],
+ "solver": {
+  "binary_sha256": "2b856618ae3de3a63956e6d510b849ad707b16e5d2ed196299f3fe5ef2e3ff5e",
+  "cli_model": "muse-wonder-full-1.0",
+  "continues": {
+   "harness_version": "Muse Code 1.4.6 (1.4.6-R6000.1)",
+   "protocol_sha256": "85cbf1c8f4201ae08276b7d052bc1593db5a1c8360cdf1279a26bd4fa0119603",
+   "root": "/Users/vulcanbench/dev/VulcanBench/runs-effort-musewonder-full-v2",
+   "rule": "at each level, tasks completed in that root are skipped here"
+  },
+  "contributor_mode": "on",
+  "harness_version": "Muse Code 1.4.9 (1.4.9-R6297.1)",
+  "model": "muse-code:muse-wonder-full-1.0-contributor",
+  "muse_settings_plugins": {
+   "skill-reminder": {
+    "enabled": false
+   }
+  },
+  "muse_settings_sha256": "47288435fd9c5e31c4c0ed92893f7f4ec7eec864b0e72d18999f4281b39736ee",
+  "reminder_observer_models": [
+   "muse-spark-1.3"
+  ],
+  "reminder_observer_rule": "goal and verify reminder observers may run on these models; their tokens are recorded apart under auxiliary and every other call must be the requested model (owner decision 2026-10-16)",
+  "run_from": [
+   "bench/2026-10-16-musewonder-full-149"
+  ],
+  "sweep_protocol_sha256": "f8fce838897f9403dc65f1c4d3e148c68c59908a2cc0c283c689df22d2a0a0f5"
+ },
+ "suite": "coding-intelligence-index-v4"
+}

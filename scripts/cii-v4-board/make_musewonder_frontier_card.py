@@ -87,11 +87,15 @@ HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.2"
 HIGH_PROTOCOL = "code-quality-maintenance-v3.26.2"
 EXTRA_HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.3"
 EXTRA_HIGH_PROTOCOL = "code-quality-maintenance-v3.26.3"
+XH_RERUN_JUDGING = (
+    ROOT / "runs-code-quality-maintenance-v3.26.4"
+)  # Extra-high depotcore, rerun alone
+XH_RERUN_PROTOCOL = "code-quality-maintenance-v3.26.4"
 MAX_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.5"
 MAX_PROTOCOL = "code-quality-maintenance-v3.26.5"
 TIMEOUT_S = 10800  # the flat 3-hour task bound (docs/DECISIONS.md 2026-09-13)
 PANELS = {
-    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26 to v3.26.3, v3.26.5)",
+    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26 to v3.26.5)",
     "opus55": "Muse Spark 1.3 and Grok 4.6 (v3.15)",
     "gpt61sol": "Muse Spark 1.3 and Grok 4.6 (v3.18)",
     "astra": "Muse Spark 1.3 and Grok 4.6 (v3.4)",
@@ -181,23 +185,11 @@ def reminder_usd(run_dir):
     return 0.0
 
 
-# The published Extra-high depotcore run (overlapped, 3-hour timeout). Its clean rerun
-# (20fa8072, 19 October) replaced it in extra-high/ but is not judged yet (v3.26.4 on hold),
-# so the card keeps the published run until that round is summarized.
-XH_PUBLISHED = WONDER_149 / "overlap-superseded/extra-high-legacy-depotcore-binary-parity-995c75a9"
-XH_RERUN = "legacy-depotcore-binary-parity-20fa8072"
-
-
 def wonder_summaries(level):
     """(run folder, summary) for every finished run at this level across the Muse Code roots."""
     dirs = [
         p.parent for root in WONDER_ROOTS for p in sorted((root / level).glob("*/summary.json"))
     ]
-    if (
-        level == "extra-high"
-        and not (ROOT / "runs-code-quality-maintenance-v3.26.4/summary.json").exists()
-    ):
-        dirs = [XH_PUBLISHED if d.name == XH_RERUN else d for d in dirs]
     return [(d, json.loads((d / "summary.json").read_text())) for d in dirs]
 
 
@@ -258,6 +250,7 @@ def load_wonder_judged(groups):
         (TOPUP, TOPUP_PROTOCOL),
         (HIGH_JUDGING, HIGH_PROTOCOL),
         (EXTRA_HIGH_JUDGING, EXTRA_HIGH_PROTOCOL),
+        (XH_RERUN_JUDGING, XH_RERUN_PROTOCOL),
         (MAX_JUDGING, MAX_PROTOCOL),
     ):
         if root != JUDGING and not (root / "summary.json").exists():
@@ -628,7 +621,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             else "\u2020 Muse Wonder Full Medium covers all 23 tasks: 21 ran on Muse Code 1.4.6 and 2 (cellarcore, paddockcore) on Muse Code "
             "1.4.9 after the quota reset, judged by the same panel in v3.26.1. Muse Code 1.4.9 runs its goal and verify reminder observers "
             "on Muse Spark 1.3, not Muse Wonder Full; their tokens are added to cost at Spark's list price ($1.25 input, $0.15 cached, "
-            "$4.25 output per million). High, Extra-high and Max ran entirely on Muse Code 1.4.9 (judged in v3.26.2, v3.26.3 and v3.26.5)."
+            "$4.25 output per million). High, Extra-high and Max ran entirely on Muse Code 1.4.9 (judged in v3.26.2, v3.26.3 and v3.26.5, with Extra-high depotcore's rerun in v3.26.4)."
             if "medium" in mixed
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
@@ -640,7 +633,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             if groups[m][lvl]["n_judged"] < groups[m][lvl]["n"]
         )
         + ", 23 everywhere else. Claude Opus 5.5's High depotcore run was stopped by a safety classifier. Muse Wonder Full's High "
-        "paddockcore and Extra-high depotcore runs hit the 3-hour task limit and left no finished code to judge; counting each "
+        "paddockcore run hit the 3-hour task limit and left no finished code to judge; counting it "
         "as 0 over all 23 runs gives "
         + ", ".join(
             f"{groups['wonder'][lvl]['combined_timeouts_zero']:.1f} at {lvl.capitalize()}"
@@ -676,9 +669,10 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "so its premium is likely small and is not applied.",
         "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 17 October 2026; Max on 3 November, "
         "after a probe showed Contributor honors Max, DECISIONS.md 2026-11-03); 9 of its 23 Medium tasks, 14 of its 23 High tasks and "
-        "5 of its 23 Extra-high tasks overlapped another local job for part of their run, which can lengthen minutes; Max ran alone. "
-        "Extra-high depotcore, which hit the 3-hour limit, overlapped for 145 of its 180 minutes; its clean rerun (19 October) is not "
-        "yet judged, so the card keeps the original run. Other models are their published Frontier v4 runs, not re-run. Harnesses differ.",
+        "4 of its 23 Extra-high tasks overlapped another local job for part of their run, which can lengthen minutes; Max ran alone. "
+        "Extra-high depotcore first overlapped for 145 of its 180 minutes and hit the 3-hour limit, so it was rerun alone on 19 October "
+        "(109 minutes, every hidden test passed); the card uses the rerun. Other models are their published Frontier v4 runs, not re-run. "
+        "Harnesses differ.",
     ]
     yy = y + 0.12
     for n_ in notes:

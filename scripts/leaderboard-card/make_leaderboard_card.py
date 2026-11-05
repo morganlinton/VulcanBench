@@ -1,6 +1,7 @@
 """The Frontier v4 leaderboard social card (1200 x 630) for vulcanbench.com/leaderboard.
 
-One row per model at its best effort level, ranked by combined score, drawn as a dot
+One row per model at the level the board tags as its best, in board rank order (the
+board ranks with unjudged timeouts counted as 0 where a column has them), drawn as a dot
 on a shared scale (dots, not bars, so a scale that starts above zero does not
 exaggerate gaps). Colors are the board's per-model colors, so the card matches the
 leaderboard table. Everything comes from the board data that
@@ -34,12 +35,12 @@ SHORT = {"low": "Low", "medium": "Medium", "high": "High", "extra-high": "XHigh"
 
 
 def best_per_model(columns: list[dict]) -> list[dict]:
-    """Each model's highest-scoring effort level, ranked by combined score."""
-    best: dict[str, dict] = {}
-    for c in columns:
-        if c["model"] not in best or c["combined"] > best[c["model"]]["combined"]:
-            best[c["model"]] = c
-    return sorted(best.values(), key=lambda c: -c["combined"])
+    """The column the board tags best for each model, in the board's rank order."""
+    best = sorted((c for c in columns if c["best"]), key=lambda c: c["rank"])
+    models = {c["model"] for c in columns}
+    if len(best) != len(models) or len({c["model"] for c in best}) != len(models):
+        raise SystemExit("the board must tag exactly one best level per model")
+    return best
 
 
 def main() -> None:
@@ -93,9 +94,9 @@ def main() -> None:
     )
 
     # Rows: rank, model, a dot on the shared scale, score and level.
-    top_y, bottom_y = 2.12, H - 0.42
+    top_y, bottom_y = 2.12, H - 0.62
     step = (bottom_y - top_y) / len(rows)
-    lo = math.floor(min(r["combined"] for r in rows) / 5) * 5
+    lo = math.floor(min(r["combined"] for r in rows) / 5) * 5  # the score shown is the board's
     hi = math.ceil(max(r["combined"] for r in rows) / 5) * 5
     x0, x1 = 3.35, right - 1.55  # the scale's span in inches
 
@@ -131,6 +132,13 @@ def main() -> None:
         text(sx(r["combined"]) + 0.16, y, f"{r['combined']:.1f}", 11, "IBM Plex Mono", 500)
         text(sx(r["combined"]) + 0.68, y, SHORT[r["effort"]], 10, "Geist", color=MUTED)
 
+    text(
+        left,
+        H - 0.22,
+        "Judges and run conditions differ by model; see the notes on the leaderboard.",
+        9.5,
+        color=MUTED,
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.out, facecolor=PAPER)
     plt.close(fig)

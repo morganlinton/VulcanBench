@@ -823,3 +823,29 @@ operational notes live here.
 - Summary (09:33 PST): 23 of 23 published, both panels passing,
   `ready_for_publication` true. Combined score 88.36 (se 0.76); Code quality
   71.89; reviewed Code quality 57.2 from Claude and 75.4 from Sol.
+
+## v3.26.4, October 19 and November 4, 2026: Muse Wonder Full Extra-high depotcore rerun
+
+- From `bench/2026-10-18-musewonder-judging-v3264` (844e44b70), judged by Claude Opus 5.5
+  and GPT-6.1 Sol, both gated by their earlier verdicts, so no new exam. One
+  submission: the Extra-high depotcore rerun (run 20fa8072, October 19, 109
+  minutes, functional 1.0, nothing else on the machine). The first run had
+  overlapped another job for 145 of its 180 minutes and hit the 3-hour limit.
+- Judging window October 19, 04:28 to 12:02 PDT. Claude finished its run and
+  probe stages; Sol finished its run stage.
+- Sol's probe stopped at 10:02 UTC: the Codex stream logged "Reconnecting...
+  2/5 (stream disconnected before completion: IO error: Connection reset by
+  peer)", and the frozen parser fails any call whose stream carries an error
+  event, even though the answer completed. The quota and transport rules match
+  only calls with no answer, so the call stopped for the operator. The owner
+  held the round on October 19.
+- Owner decision (November 4): one fresh attempt, the option recommended on
+  October 19. The failed attempt's files moved to
+  `calls/sol/probe/extra-high-topup-001/transport-stops/` with a note and were
+  not used, and the Sol probe stage reran that one call with identical inputs
+  (November 4, 20:14 to 20:17 PST, with its match call). No other judge call
+  was made.
+- Summary (20:17 PST): 1 of 1 published, both panels passing,
+  `ready_for_publication` true. Combined score 82.23; Code quality 55.19;
+  reviewed Code quality 45.8 from Claude and 58.3 from Sol. Extra-high over
+  all 23 runs moves from 87.59 (22 judged, the timeout unjudged) to 87.36.

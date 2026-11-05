@@ -1,0 +1,183 @@
+{
+  "display_name": "VulcanBench Router v1",
+  "version": "0.1.0",
+  "description": "Model-router eval: {python, rust} x {small, large} x {easy, hard}, two tasks per cell, public tasks only.",
+  "tasks": [
+    "oss-py-m2-00",
+    "oss-py-m3-00",
+    "py-bytecode-vm",
+    "py-txn-kvstore",
+    "oss-pygments-transparent-color",
+    "oss-packaging-interpreter-tag-identifier",
+    "oss-networkx-digraph-node-cuts",
+    "oss-pydantic-none-discriminator",
+    "rs-borrow-split",
+    "rs-feature-gate",
+    "rs-bytecode-vm",
+    "rs-txn-kvstore",
+    "oss-jiff-offset-subtraction",
+    "oss-bitflags-iter-equal-names",
+    "oss-regex-leftmost-suffix-candidate",
+    "oss-clap-mangen-override-usage"
+  ],
+  "python": [
+    "oss-py-m2-00",
+    "oss-py-m3-00",
+    "py-bytecode-vm",
+    "py-txn-kvstore",
+    "oss-pygments-transparent-color",
+    "oss-packaging-interpreter-tag-identifier",
+    "oss-networkx-digraph-node-cuts",
+    "oss-pydantic-none-discriminator"
+  ],
+  "small": [
+    "oss-py-m2-00",
+    "oss-py-m3-00",
+    "py-bytecode-vm",
+    "py-txn-kvstore",
+    "rs-borrow-split",
+    "rs-feature-gate",
+    "rs-bytecode-vm",
+    "rs-txn-kvstore"
+  ],
+  "easy": [
+    "oss-py-m2-00",
+    "oss-py-m3-00",
+    "oss-pygments-transparent-color",
+    "oss-packaging-interpreter-tag-identifier",
+    "rs-borrow-split",
+    "rs-feature-gate",
+    "oss-jiff-offset-subtraction",
+    "oss-bitflags-iter-equal-names"
+  ],
+  "hard": [
+    "py-bytecode-vm",
+    "py-txn-kvstore",
+    "oss-networkx-digraph-node-cuts",
+    "oss-pydantic-none-discriminator",
+    "rs-bytecode-vm",
+    "rs-txn-kvstore",
+    "oss-regex-leftmost-suffix-candidate",
+    "oss-clap-mangen-override-usage"
+  ],
+  "large": [
+    "oss-pygments-transparent-color",
+    "oss-packaging-interpreter-tag-identifier",
+    "oss-networkx-digraph-node-cuts",
+    "oss-pydantic-none-discriminator",
+    "oss-jiff-offset-subtraction",
+    "oss-bitflags-iter-equal-names",
+    "oss-regex-leftmost-suffix-candidate",
+    "oss-clap-mangen-override-usage"
+  ],
+  "rust": [
+    "rs-borrow-split",
+    "rs-feature-gate",
+    "rs-bytecode-vm",
+    "rs-txn-kvstore",
+    "oss-jiff-offset-subtraction",
+    "oss-bitflags-iter-equal-names",
+    "oss-regex-leftmost-suffix-candidate",
+    "oss-clap-mangen-override-usage"
+  ],
+  "cells": {
+    "oss-py-m2-00": {
+      "language": "python",
+      "scale": "small",
+      "difficulty": "easy"
+    },
+    "oss-py-m3-00": {
+      "language": "python",
+      "scale": "small",
+      "difficulty": "easy"
+    },
+    "py-bytecode-vm": {
+      "language": "python",
+      "scale": "small",
+      "difficulty": "hard"
+    },
+    "py-txn-kvstore": {
+      "language": "python",
+      "scale": "small",
+      "difficulty": "hard"
+    },
+    "oss-pygments-transparent-color": {
+      "language": "python",
+      "scale": "large",
+      "difficulty": "easy"
+    },
+    "oss-packaging-interpreter-tag-identifier": {
+      "language": "python",
+      "scale": "large",
+      "difficulty": "easy"
+    },
+    "oss-networkx-digraph-node-cuts": {
+      "language": "python",
+      "scale": "large",
+      "difficulty": "hard"
+    },
+    "oss-pydantic-none-discriminator": {
+      "language": "python",
+      "scale": "large",
+      "difficulty": "hard"
+    },
+    "rs-borrow-split": {
+      "language": "rust",
+      "scale": "small",
+      "difficulty": "easy"
+    },
+    "rs-feature-gate": {
+      "language": "rust",
+      "scale": "small",
+      "difficulty": "easy"
+    },
+    "rs-bytecode-vm": {
+      "language": "rust",
+      "scale": "small",
+      "difficulty": "hard"
+    },
+    "rs-txn-kvstore": {
+      "language": "rust",
+      "scale": "small",
+      "difficulty": "hard"
+    },
+    "oss-jiff-offset-subtraction": {
+      "language": "rust",
+      "scale": "large",
+      "difficulty": "easy"
+    },
+    "oss-bitflags-iter-equal-names": {
+      "language": "rust",
+      "scale": "large",
+      "difficulty": "easy"
+    },
+    "oss-regex-leftmost-suffix-candidate": {
+      "language": "rust",
+      "scale": "large",
+      "difficulty": "hard"
+    },
+    "oss-clap-mangen-override-usage": {
+      "language": "rust",
+      "scale": "large",
+      "difficulty": "hard"
+    }
+  },
+  "sources": {
+    "oss-py-m2-00": "v1",
+    "oss-py-m3-00": "v1",
+    "py-bytecode-vm": "v1",
+    "py-txn-kvstore": "v1",
+    "oss-pygments-transparent-color": "cii-v1",
+    "oss-packaging-interpreter-tag-identifier": "cii-v1",
+    "oss-networkx-digraph-node-cuts": "cii-v1",
+    "oss-pydantic-none-discriminator": "cii-v1",
+    "rs-borrow-split": "v1",
+    "rs-feature-gate": "v1",
+    "rs-bytecode-vm": "authored",
+    "rs-txn-kvstore": "authored",
+    "oss-jiff-offset-subtraction": "cii-v1",
+    "oss-bitflags-iter-equal-names": "cii-v1",
+    "oss-regex-leftmost-suffix-candidate": "v4",
+    "oss-clap-mangen-override-usage": "cii-v1"
+  }
+}

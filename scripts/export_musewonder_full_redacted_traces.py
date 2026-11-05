@@ -29,7 +29,7 @@ once per run record, as collect_usage does); reminder observer sessions are
 inlined where the main session links them, between subagent_start and
 subagent_end markers; scores come from the four v3.26 judging rounds in the
 repository root (v3.26 for Low and 21 Medium tasks, v3.26.1 for Medium's last
-two, v3.26.2 for High, v3.26.3 for Extra-high), and the two 3-hour timeouts
+two, v3.26.2 for High, v3.26.3 for Extra-high, v3.26.5 for Max), and the two 3-hour timeouts
 are not judged; cost is the card's estimate
 (scripts/cii-v4-board/make_musewonder_frontier_card.py), since Meta lists no
 API price for Muse Wonder Full. The export ends with a self-check that fails
@@ -57,18 +57,37 @@ if str(ROOT) not in sys.path:
 
 from harness.agent.muse_code import REMINDER_AGENTS, session_records  # noqa: E402
 
-RUN_ROOTS = (ROOT / "runs-effort-musewonder-full-v2", ROOT / "runs-effort-musewonder-full-v2-149")
+RUN_ROOTS = (
+    ROOT / "runs-effort-musewonder-full-v2",
+    ROOT / "runs-effort-musewonder-full-v2-149",
+    ROOT / "runs-effort-musewonder-full-v2-149-max",
+)
+# The published Extra-high depotcore run (overlapped, 3-hour timeout). Its clean rerun
+# (20fa8072, 19 October) replaced it in extra-high/ but is not judged yet (v3.26.4 on
+# hold), so the export keeps the published run, as the card does.
+XH_PUBLISHED = (
+    RUN_ROOTS[1] / "overlap-superseded/extra-high-legacy-depotcore-binary-parity-995c75a9"
+)
+XH_RERUN = "legacy-depotcore-binary-parity-20fa8072"
+
+
+def run_id(run: Path) -> str:
+    """The run id as published; the superseded folder carries an effort prefix."""
+    return "legacy-depotcore-binary-parity-995c75a9" if run == XH_PUBLISHED else run.name
+
+
 JUDGING = (
     ROOT / "runs-code-quality-maintenance-v3.26",
     ROOT / "runs-code-quality-maintenance-v3.26.1",
     ROOT / "runs-code-quality-maintenance-v3.26.2",
     ROOT / "runs-code-quality-maintenance-v3.26.3",
+    ROOT / "runs-code-quality-maintenance-v3.26.5",
 )
 MODEL = "muse-code:muse-wonder-full-1.0-contributor"
 WONDER, SPARK = "muse-wonder-full-1.0", "muse-spark-1.3"
 SERVING_MODELS = {WONDER, SPARK}
 SUITE = "VulcanBench Frontier v4 (coding-intelligence-index-v4)"
-EFFORTS = ("low", "medium", "high", "extra-high")
+EFFORTS = ("low", "medium", "high", "extra-high", "max")
 RUNS_PER_EFFORT = 23
 TIMEOUT_S = 10800  # the flat 3-hour task bound (docs/DECISIONS.md 2026-09-13)
 # Card cost method (make_musewonder_frontier_card.py): per million input, cached input, output.
@@ -427,7 +446,7 @@ def write_trace(dest: Path, head: dict, events: list[dict]) -> None:
 
 
 def load_scores() -> dict[str, dict]:
-    """Published Code quality rows by run id, from the four judging rounds."""
+    """Published Code quality rows by run id, from the five judging rounds."""
     scores: dict[str, dict] = {}
     for root in JUDGING:
         summary = json.loads((root / "summary.json").read_text())
@@ -453,6 +472,8 @@ def find_runs() -> list[tuple[str, Path]]:
         for root in RUN_ROOTS:
             # Only finished runs have a summary; quota-aborted/ and infra-aborted/ sit beside the levels.
             runs += [(effort, p.parent) for p in sorted((root / effort).glob("*/summary.json"))]
+    if not (ROOT / "runs-code-quality-maintenance-v3.26.4/summary.json").exists():
+        runs = [(e, XH_PUBLISHED if run.name == XH_RERUN else run) for e, run in runs]
     return runs
 
 
@@ -558,8 +579,8 @@ VulcanBench Frontier v4 has 23 tasks. Each one gives the agent a retired program
 ## How these runs were made
 
 - **Model and tool:** Muse Wonder Full (`muse-wonder-full-1.0`) through Meta's Muse Code command-line agent, from {start:%B} {start.day} to {end:%B} {end.day}, {end.year}.
-- **Contributor mode:** the runs used Muse Code's Contributor mode, under which Meta may use session content to improve its models. The Max effort level was not run in Contributor mode, so these traces cover Low, Medium, High and Extra-high.
-- **Muse Code versions:** Meta released Muse Code 1.4.9 during the benchmark. Low and 21 of the 23 Medium tasks ran on version 1.4.6; the last two Medium tasks (cellarcore and paddockcore), High and Extra-high ran on 1.4.9. Each trace records its version.
+- **Contributor mode:** the runs used Muse Code's Contributor mode, under which Meta may use session content to improve its models. Max was added on November 3, 2026, after a probe showed that Contributor mode honors the Max setting, so these traces cover all five effort levels.
+- **Muse Code versions:** Meta released Muse Code 1.4.9 during the benchmark. Low and 21 of the 23 Medium tasks ran on version 1.4.6; the last two Medium tasks (cellarcore and paddockcore), High, Extra-high and Max ran on 1.4.9. Each trace records its version.
 - **Settings:** Muse Code's skill-reminder plugin was turned off. Each task had a 3-hour time limit and ran in a local sandbox, one task at a time.
 - **End-of-session reminders:** when a session finishes, Muse Code briefly runs two small helper agents, a goal reminder and a verify reminder, that decide whether to nudge the main agent before it stops. On 1.4.6 they run on Muse Wonder Full. On 1.4.9 they run on Muse Spark 1.3, so those calls appear under `muse-spark-1.3` ({spark_calls} calls in all) and their tokens are counted separately.
 
@@ -587,7 +608,7 @@ Frontier v4 tests whether an agent can discover a program's undocumented rules. 
 
 - **Scoring.** Tasks fully solved counts runs that passed every hidden test. The combined score is 50% functional correctness, 8.5% automated code quality, 8.5% security and 33% code quality as judged by two AI reviewers, out of 100. Muse Wonder Full was reviewed by Claude Opus 5.5 and GPT-6.1 Sol. Most other models on VulcanBench are reviewed by Muse Spark 1.3 and Grok 4.6, but Muse Spark is also a Meta model, so it was not used here. Keep the different reviewer pairs in mind when comparing scores across models.
 - **Time limits.** {len(timeouts)} runs hit the 3-hour limit ({timeout_text}). They count as unsolved and have no code-quality review, so the combined score at those levels averages the judged runs only.
-- **Shared machine.** Some runs shared the machine with other benchmark jobs, which can make them slower. The Extra-high depotcore run did so for most of its time before it hit the limit (at High the same task finished in under two hours), so a clean rerun is planned and this repository will be updated with it.
+- **Shared machine.** Some runs shared the machine with other benchmark jobs, which can make them slower. The Extra-high depotcore run did so for most of its time before it hit the limit (at High the same task finished in under two hours). A clean rerun was made on October 19 but has not been judged yet, so this repository keeps the original run. Max ran with nothing else on the machine.
 - **Cost.** Meta does not publish an API price for Muse Wonder Full, and these runs used a subscription, so cost is an estimate: Muse Wonder Full's tokens at the Muse Wonder 1.0 list price ($4.00 input, $0.20 cached input and $20.00 output per million tokens), and the Muse Spark 1.3 reminder tokens at Spark's list price ($1.25, $0.15 and $4.25).
 
 ## Using the data
@@ -650,11 +671,11 @@ def main() -> None:
         task = summary["task_id"]
         dest = out / "traces" / effort / f"{task}.jsonl"
         assert all((r["effort"], r["task"]) != (effort, task) for r in manifest), (effort, task)
-        write_trace(dest, header(summary, effort, run.name), events)
-        pub = scores.get(run.name)
+        write_trace(dest, header(summary, effort, run_id(run)), events)
+        pub = scores.get(run_id(run))
         if pub is not None:
             assert (pub["effort"], pub["task"]) == (effort, task), run.name
-            used.add(run.name)
+            used.add(run_id(run))
         else:
             assert stats["timed_out"], f"{run.name} finished but has no published score"
         summaries.append(summary)
@@ -662,7 +683,7 @@ def main() -> None:
             {
                 "effort": effort,
                 "task": task,
-                "run_id": run.name,
+                "run_id": run_id(run),
                 "harness_version": summary["cli_agent"]["harness_version"],
                 "judged": pub is not None,
                 "functional": summary["scores"]["functional"],

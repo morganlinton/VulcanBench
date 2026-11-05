@@ -80,7 +80,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   author form starts from the last session's harness, model and effort and
   says when a model id is missing; the unlock cooldown counts down and keeps
   what is typed; the new-suite form takes a github.com link; the Suites intro
-  shows on the unlock screen too.
+  shows on the unlock screen too. A second pass added select-all to both
+  tables, kept the loaded pull requests across visits to a task, flagged a
+  validation that is older than the last authoring as out of date on the
+  suite page, and said plainly when a job failed without writing its record.
+- **Runs and Launch pages**, from a pass over a benchmark run end to end: a
+  sweep level's page lists the task runs it wrote (it said "No attempt has
+  started yet" for a finished level), and each task run links back to its
+  level; task runs from the GUI show their level's bench tag and commit,
+  since per-task summaries carry no source block; a level that ends short
+  shows why on the sweep card (quota window, login, exit code); "Run the
+  missing tasks" keeps the level's bench tag, so a resume cannot land on a
+  newer tag and mix results; the effort toggles report their state to
+  screen readers.
 - **Local run GUI**: the runner routes refuse requests from browser pages not
   served from localhost (403 on a foreign or `null` `Origin`), so a website
   open in the operator's browser can no longer read the queue or post plans

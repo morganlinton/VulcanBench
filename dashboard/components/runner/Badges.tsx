@@ -60,10 +60,13 @@ export function FirstCheckBadge({ check, compact = false }: { check: FirstCheck 
 // One dot per trial: solved, not solved, running, or something else.
 export function RewardDots({
   trials,
+  empty = "none yet",
 }: {
   trials: { id: string; status: string; reward: Record<string, number | string | null> | null }[];
+  /** What an empty list says (a queued job's results live in its task rows, not here). */
+  empty?: string;
 }) {
-  if (trials.length === 0) return <span className="text-zinc-600">none yet</span>;
+  if (trials.length === 0) return <span className="text-zinc-600">{empty}</span>;
   return (
     <span className="inline-flex items-center gap-1.5">
       {trials.map((t) => {

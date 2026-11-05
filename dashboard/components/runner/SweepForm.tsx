@@ -285,7 +285,7 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
         <div className="grid gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
             <label className={label} htmlFor="model">Model id</label>
-            <input id="model" className={field} placeholder={harnessName === "vulcan" ? "openai:gpt-6.1-terra" : "gpt-6.1-terra"} value={model} onChange={(e) => { setModel(e.target.value); reset(); }} />
+            <input id="model" className={field} placeholder={harnessName === "vulcan" ? "e.g. openai:gpt-6.1-terra" : "e.g. gpt-6.1-terra"} value={model} onChange={(e) => { setModel(e.target.value); reset(); }} />
             <div className="mt-1 text-xs text-zinc-500">{harnessName === "vulcan" ? "provider:model for Vulcan's API loop" : "the id the harness CLI takes; the harness is the provider"}</div>
           </div>
           <div>
@@ -344,7 +344,7 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
             {opts.efforts.map((e) => {
               const on = efforts.includes(e);
               return (
-                <button key={e} type="button" onClick={() => toggleEffort(e)} className={`rounded-full border px-3 py-1 text-sm ${on ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}>
+                <button key={e} type="button" aria-pressed={on} onClick={() => toggleEffort(e)} className={`rounded-full border px-3 py-1 text-sm ${on ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}>
                   {e}
                 </button>
               );

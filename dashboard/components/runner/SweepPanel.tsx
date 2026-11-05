@@ -57,7 +57,13 @@ function LevelRow({ lv, refresh }: { lv: SweepLevel; refresh: () => void }) {
         ) : job.status === "waiting" && resume ? (
           <span className="text-violet-300">quota window; continues {fmtTime(resume)}{job.spec.quota_continue ? ` (${job.spec.quota_continue.used ?? 0} of ${job.spec.quota_continue.max})` : ""}</span>
         ) : p.missing.length > 0 && !active && job.status !== "queued" ? (
-          <span className="text-zinc-500" title={p.missing.join(", ")}>{p.missing.length} task{p.missing.length > 1 ? "s" : ""} without a result</span>
+          <div>
+            <span className="text-zinc-500" title={p.missing.join(", ")}>{p.missing.length} task{p.missing.length > 1 ? "s" : ""} without a result</span>
+            {/* Why the level ended short: the supervisor's last note (quota window, login, exit code). */}
+            {job.status !== "finished" && job.notes.length > 0 && (
+              <div className={`mt-1 max-w-xs ${job.status === "incomplete" ? "text-amber-300" : "text-rose-300"}`}>{job.notes[job.notes.length - 1]}</div>
+            )}
+          </div>
         ) : (
           <span className="text-zinc-600">{job.status === "queued" ? "waiting for the slot" : "none"}</span>
         )}
@@ -74,7 +80,7 @@ function LevelRow({ lv, refresh }: { lv: SweepLevel; refresh: () => void }) {
 function SweepCard({ sw, refresh }: { sw: SweepView; refresh: () => void }) {
   const missingLevels = sw.levels.filter((lv) => !lv.progress.complete && !["queued", "waiting", "running", "stopping", "preparing"].includes(lv.job.status));
   const resumeHref = missingLevels.length > 0 && sw.model && sw.harness && sw.suite && sw.tag
-    ? `/launch?model=${encodeURIComponent(sw.model)}&harness=${encodeURIComponent(sw.harness)}&suite=${encodeURIComponent(sw.suite)}&efforts=${encodeURIComponent(missingLevels.map((lv) => lv.job.spec.effort ?? "").join(","))}&label=${encodeURIComponent(sw.name)}`
+    ? `/launch?model=${encodeURIComponent(sw.model)}&harness=${encodeURIComponent(sw.harness)}&suite=${encodeURIComponent(sw.suite)}&efforts=${encodeURIComponent(missingLevels.map((lv) => lv.job.spec.effort ?? "").join(","))}&label=${encodeURIComponent(sw.name)}&tag=${encodeURIComponent(sw.tag)}`
     : null;
   const t = sw.totals;
   return (

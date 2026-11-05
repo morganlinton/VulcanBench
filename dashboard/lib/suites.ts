@@ -110,6 +110,8 @@ export interface TaskRow {
     sandbox: string | null;
     finished_at: string | null;
   } | null;
+  /** A validation exists but is older than the last authoring session, so it no longer counts. */
+  validate_stale: boolean;
   active_job: JobRef | null;
   last_job_id: number | null;
 }

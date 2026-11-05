@@ -420,10 +420,11 @@ def task_row(d: Path, task: str, manifest: dict[str, Any], jobs: list[Job]) -> d
     own = _jobs_for(jobs, d.name, task)
     active = next((j for j in own if j.active), None)
     # A validation older than the latest authoring session says nothing about the task now.
+    stale = False
     if validate is not None and author is not None:
         checked, authored = _when(validate.get("checked_at")), _when(author.get("finished_at"))
         if checked and authored and checked < authored:
-            validate = None
+            validate, stale = None, True
     if not (tdir / "metadata.json").is_file():
         stage = "missing"
     elif active is not None:
@@ -481,6 +482,7 @@ def task_row(d: Path, task: str, manifest: dict[str, Any], jobs: list[Job]) -> d
             "sandbox": validate.get("sandbox"),
             "finished_at": validate.get("checked_at"),
         },
+        "validate_stale": stale,
         "active_job": _job_ref(active) if active else None,
         "last_job_id": own[0].id if own else None,
     }

@@ -77,11 +77,20 @@ function ninetyDaysAgo(): string {
 
 type RowState = "waiting" | "running" | "done" | string;
 
+// The last loaded list per suite, kept in memory for this window so opening a
+// task and coming back does not empty the table (a full reload starts over).
+const lastPrLists = new Map<string, { since: string; limit: number; list: PrList }>();
+
 function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }) {
   const { handle } = useGate();
-  const [since, setSince] = useState(ninetyDaysAgo);
-  const [limit, setLimit] = useState(50);
-  const [list, setList] = useState<PrList | null>(null);
+  const kept = lastPrLists.get(id);
+  const [since, setSince] = useState(() => kept?.since ?? ninetyDaysAgo());
+  const [limit, setLimit] = useState(kept?.limit ?? 50);
+  const [list, setListState] = useState<PrList | null>(kept?.list ?? null);
+  const setList = (l: PrList) => {
+    lastPrLists.set(id, { since, limit, list: l });
+    setListState(l);
+  };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<{ text: string; gh: boolean } | null>(null);
   const [picked, setPicked] = useState<Set<number>>(new Set());
@@ -132,6 +141,9 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
       else next.add(n);
       return next;
     });
+  // Pull requests that are not a task yet, the ones a checkbox can pick.
+  const open = (list?.prs ?? []).filter((pr) => !pr.task_id).map((pr) => pr.number);
+  const allOpenPicked = open.length > 0 && open.every((n) => picked.has(n));
 
   return (
     <section className="rounded-2xl border border-white/10 p-5 space-y-4">
@@ -174,7 +186,11 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-zinc-500">
                 <tr>
-                  <th className="px-3 py-2" />
+                  <th className="px-3 py-2">
+                    {open.length > 1 && (
+                      <input type="checkbox" checked={allOpenPicked} onChange={() => setPicked(allOpenPicked ? new Set() : new Set(open))} disabled={running} aria-label="select every pull request" />
+                    )}
+                  </th>
                   <th className="px-3 py-2">PR</th>
                   <th className="px-3 py-2">Score</th>
                   <th className="px-3 py-2">Change</th>
@@ -273,6 +289,8 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
   };
   const shown = tasks.filter((t) => showDropped || !t.dropped);
   const nDropped = tasks.length - tasks.filter((t) => !t.dropped).length;
+  const selectableIds = shown.filter(selectable).map((t) => t.id);
+  const allPicked = selectableIds.length > 0 && selectableIds.every((t) => picked.has(t));
   return (
     <section className="rounded-2xl border border-white/10 p-5 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -296,7 +314,11 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wider text-zinc-500">
               <tr>
-                <th className="px-3 py-2" />
+                <th className="px-3 py-2">
+                  {selectableIds.length > 1 && (
+                    <input type="checkbox" checked={allPicked} onChange={() => setPicked(allPicked ? new Set() : new Set(selectableIds))} aria-label="select every task" />
+                  )}
+                </th>
                 <th className="px-3 py-2">Task</th>
                 <th className="px-3 py-2">Stage</th>
                 <th className="px-3 py-2">Authoring</th>
@@ -347,6 +369,8 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
                         ))}
                         {t.validate.reasons.slice(0, 2).map((r) => <div key={r} className="text-zinc-500">{r}</div>)}
                       </>
+                    ) : t.validate_stale ? (
+                      <span className="text-amber-300">out of date: authored again since, validate again</span>
                     ) : <span className="text-zinc-500">not yet</span>}
                   </td>
                   <td className="px-3 py-2 text-xs">

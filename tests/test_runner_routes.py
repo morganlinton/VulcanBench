@@ -345,6 +345,10 @@ def test_sweep_plan_confirm_queue_and_progress(launch_env: dict[str, Path]) -> N
     assert prog["current"]["run_id_href"].startswith("harness:0:")
     run = c.get(f"/api/runner/runs/{prog['current']['run_id_href']}").json()
     assert run["owned"] is True and run["job"]["id"] == levels[0]["job"]["id"]
+    # Per-task summaries carry no source block: the level's job supplies the tag.
+    level_row = next(r for r in rows if r["id"] == f"job:{levels[0]['job']['id']}")
+    assert run["source_tag"] == level_row["source_tag"] and run["source_tag"].startswith("bench/")
+    assert run["source_commit"] == level_row["source_commit"] and run["source_commit"]
     # The job is queued, not running, so a trace without a summary is a stopped run.
     assert run["status"] == "stopped"
     # Removing a queued level and stopping the other.

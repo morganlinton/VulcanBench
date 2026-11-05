@@ -11,6 +11,7 @@ import {
   rewardValue,
   runnerGet,
   type FirstCheck,
+  type RunRow,
   type RunView,
   type TrialView,
 } from "@/lib/runner";
@@ -25,6 +26,37 @@ function Fact({ label, children, mono = false }: { label: string; children: Reac
     <div className="flex justify-between gap-4 py-1 border-b border-white/5 last:border-0">
       <span className="text-zinc-400">{label}</span>
       <span className={`text-right text-zinc-200 ${mono ? "font-mono text-xs" : ""}`}>{children}</span>
+    </div>
+  );
+}
+
+// A sweep level's attempts are the task runs it wrote, each a run of its own.
+function JobTaskRuns({ jobId, live }: { jobId: number; live: boolean }) {
+  const { data, error } = usePolling<RunRow[]>(() => runnerGet<RunRow[]>("/api/runner/runs"), live ? 4000 : 15000, `job-task-runs:${jobId}`);
+  const mine = (data ?? []).filter((r) => !r.id.startsWith("job:") && r.job && r.job.id === jobId);
+  if (!data) return <div className="text-sm text-zinc-500 border border-white/10 rounded-xl p-4">{error ? "could not load the task runs" : "loading the task runs"}</div>;
+  if (mine.length === 0) return <div className="text-sm text-zinc-500 border border-white/10 rounded-xl p-4">No task has started yet.</div>;
+  return (
+    <div className="overflow-x-auto border border-white/10 rounded-xl">
+      <table className="w-full text-sm">
+        <thead className="text-left text-xs uppercase tracking-wider text-zinc-500">
+          <tr><th className="p-3">Task run</th><th className="p-3">Status</th><th className="p-3">Result</th><th className="p-3">Elapsed</th><th className="p-3">Cost</th></tr>
+        </thead>
+        <tbody>
+          {mine.map((r) => {
+            const reward = r.trials[0]?.reward?.reward;
+            return (
+              <tr key={r.id} className="border-t border-white/5">
+                <td className="p-3"><Link href={`/runs/${encodeURIComponent(r.id)}`} className="font-mono text-emerald-400 hover:underline">{r.name}</Link></td>
+                <td className="p-3"><StatusBadge status={r.status} /></td>
+                <td className="p-3 text-xs">{typeof reward === "number" ? (reward >= 1 ? <span className="text-emerald-300">solved</span> : <span className="text-zinc-400">not solved</span>) : <span className="text-zinc-600">n/a</span>}</td>
+                <td className="p-3 font-mono text-xs text-zinc-300">{fmtElapsed(r.elapsed_s)}</td>
+                <td className="p-3 font-mono text-xs text-zinc-300">{r.cost_usd !== null ? fmtMoney(r.cost_usd) : "n/a"}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -178,7 +210,14 @@ export function RunDetail({ id }: { id: string }) {
       </div>
       {run.job && (
         <div className="mt-1 text-xs text-zinc-500">
-          job {String(run.job.id)}{run.job.phase === "prepare" ? ", preparing the worktree" : ""}
+          {run.id.startsWith("job:") ? (
+            <>job {String(run.job.id)}</>
+          ) : (
+            <Link href={`/runs/${encodeURIComponent(`job:${String(run.job.id)}`)}`} className="text-emerald-400 hover:underline">
+              part of job {String(run.job.id)}{run.job.name ? ` (${String(run.job.name)})` : ""}
+            </Link>
+          )}
+          {run.job.phase === "prepare" ? ", preparing the worktree" : ""}
           {run.job.stop_requested_at ? `, stop requested ${fmtTime(run.job.stop_requested_at as string)}` : ""}
           {run.job.exit_code !== null && run.job.exit_code !== undefined ? `, exit code ${String(run.job.exit_code)}` : ""}
         </div>
@@ -217,8 +256,12 @@ export function RunDetail({ id }: { id: string }) {
       </div>
 
       <h2 className="mt-8 text-sm uppercase tracking-[2px] text-zinc-500 mb-3">Attempts</h2>
-      {run.trials.length === 0 ? (
-        <div className="text-sm text-zinc-500 border border-white/10 rounded-xl p-4">No attempt has started yet.</div>
+      {run.trials.length === 0 && run.id.startsWith("job:") && run.kind === "suite" ? (
+        <JobTaskRuns jobId={run.job?.id as number} live={live} />
+      ) : run.trials.length === 0 ? (
+        <div className="text-sm text-zinc-500 border border-white/10 rounded-xl p-4">
+          {run.id.startsWith("job:") ? `A ${run.kind} job has no attempts of its own; what it did is in the console log below.` : "No attempt has started yet."}
+        </div>
       ) : (
         <div className="space-y-3">
           {run.trials.map((t, i) => <TrialCard key={t.id} trial={t} index={i} total={run.attempts_total} />)}

@@ -302,6 +302,9 @@ def test_stages_come_from_disk(env: Env) -> None:
     assert rows["t-accepted"]["accepted"] is True
     assert rows["t-authored"]["author"]["cost_usd"] == 1.25
     assert rows["t-failed"]["validate"]["reasons"] == ["gold does not solve"]
+    assert rows["t-stale"]["validate"] is None and rows["t-stale"]["validate_stale"] is True
+    assert rows["t-validated"]["validate_stale"] is False
+    assert rows["t-authored"]["validate_stale"] is False
     assert detail["freeze_ready"]["ok"] is True
     assert "ultra" not in detail["options"]["efforts"]
     assert "vulcan" not in detail["options"]["harnesses"]

@@ -387,7 +387,7 @@ class Supervisor:
                     },
                     notes=[
                         *job.notes,
-                        f"quota window or rate limit at {done}; continues with --only-missing at "
+                        f"quota window or rate limit; {done}; continues with --only-missing at "
                         f"{resume.strftime('%H:%M')} UTC ({used + 1} of {limit} continuations)",
                     ],
                 )
@@ -396,7 +396,7 @@ class Supervisor:
                 job,
                 "incomplete",
                 code,
-                f"quota window or rate limit at {done}"
+                f"quota window or rate limit; {done}"
                 + (
                     "; the plan allowed no continuation"
                     if not limit

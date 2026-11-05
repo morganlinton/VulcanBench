@@ -868,8 +868,8 @@ if cmd == "freeze":
          "version": lock["version"], "lock_digest": "d" * 16, "n_tasks": len(tasks)})
 
 def now():
-    from datetime import UTC, datetime
-    return datetime.now(UTC).isoformat(timespec="seconds")
+    from datetime import datetime, timezone  # the fake may run on an older system python3
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 if args[:2] == ["task", "author"]:

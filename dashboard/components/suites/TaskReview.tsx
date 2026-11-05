@@ -42,9 +42,17 @@ const NEXT_STEP: Partial<Record<TaskRow["stage"], string>> = {
 function LatestJob({ task, jobs }: { task: TaskRow; jobs: TaskDetail["jobs"] }) {
   if (task.active_job) return null;
   const last = jobs[0];
-  const next = task.accepted || task.dropped ? null : NEXT_STEP[task.stage];
+  const failedStage = task.stage === "author_failed" || task.stage === "validation_failed";
+  // A job that ended badly without writing its record leaves the task as it was;
+  // say so rather than pointing at the next step of the older record.
+  const broke = !!last && ["failed", "stopped", "lost", "infra_failed"].includes(last.status) && !failedStage;
+  const next = task.accepted || task.dropped
+    ? null
+    : broke
+      ? `This job wrote no new ${last.kind === "author" ? "authoring" : "validation"} record, so the task keeps its earlier state (${task.stage.replace("_", " ")}). Read the job's log for the cause, then run it again.`
+      : NEXT_STEP[task.stage];
   if (!last && !next) return null;
-  const failed = task.stage === "author_failed" || task.stage === "validation_failed" || last?.status === "failed";
+  const failed = failedStage || broke;
   const tone = failed ? "border-rose-500/30 bg-rose-500/5 text-rose-200" : "border-white/10 text-zinc-300";
   return (
     <div className={`rounded-lg border px-3 py-2 text-xs space-y-1 ${tone}`}>
@@ -53,6 +61,9 @@ function LatestJob({ task, jobs }: { task: TaskRow; jobs: TaskDetail["jobs"] }) 
           Last job: {last.kind} {last.id} {last.status}
           {last.finished_at ? ` at ${new Date(last.finished_at).toLocaleString()}` : ""}
           {last.notes.length > 0 ? `: ${last.notes.join("; ")}` : ""}
+          {failed && (
+            <Link href={`/runs/${encodeURIComponent(last.run_id)}`} className="ml-2 text-emerald-300 hover:underline">open its log</Link>
+          )}
         </div>
       )}
       {next && <div className="text-zinc-400">{next}</div>}
@@ -148,6 +159,10 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
     <div className="mt-4 space-y-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
+          <div className="text-xs text-zinc-500">
+            task in{" "}
+            <Link href={`/suites/${encodeURIComponent(data.suite.id)}`} className="text-zinc-300 hover:underline">{data.suite.name}</Link>
+          </div>
           <h1 className="text-2xl font-semibold tracking-tight font-mono">{t.id}</h1>
           <div className="mt-1 text-sm text-zinc-400">
             {t.pr ? `PR #${t.pr}` : ""}{t.title ? `: ${t.title}` : ""}

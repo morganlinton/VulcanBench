@@ -32,6 +32,14 @@ function SourceCell({ run }: { run: RunRow }) {
   );
 }
 
+// A queued job carries no trials of its own: a sweep level's results are its
+// task rows, and prepare, author and validate jobs have no reward at all.
+function jobRewardsLabel(run: RunRow): string | undefined {
+  if (!run.id.startsWith("job:")) return undefined;
+  if (run.kind !== "suite") return "n/a";
+  return run.attempts_done > 0 ? "in the task rows" : undefined;
+}
+
 function Row({ run }: { run: RunRow }) {
   const suite = publicSuiteName(run.suite_or_task);
   return (
@@ -55,7 +63,7 @@ function Row({ run }: { run: RunRow }) {
           <span className="ml-2 text-emerald-400">{run.solves} solved</span>
         )}
       </td>
-      <td className="p-3 align-top"><RewardDots trials={run.trials} /></td>
+      <td className="p-3 align-top"><RewardDots trials={run.trials} empty={jobRewardsLabel(run)} /></td>
       <td className="p-3 align-top font-mono text-zinc-300" title={`started ${fmtTime(run.started_at)}`}>
         {fmtElapsed(run.elapsed_s)}
       </td>

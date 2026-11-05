@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import {
+  builderTarget,
+  suiteLabel,
   fmtElapsed,
   fmtTime,
   isActive,
-  publicSuiteName,
   runHref,
   runnerGet,
   type RunRow,
@@ -41,7 +42,8 @@ function jobRewardsLabel(run: RunRow): string | undefined {
 }
 
 function Row({ run }: { run: RunRow }) {
-  const suite = publicSuiteName(run.suite_or_task);
+  const suite = suiteLabel(run);
+  const target = builderTarget(run);
   return (
     <tr className="hover:bg-white/5">
       <td className="p-3 align-top"><StatusBadge status={run.status} /></td>
@@ -50,15 +52,24 @@ function Row({ run }: { run: RunRow }) {
         <div className="text-xs text-zinc-500">{run.kind}{run.owned ? ", from the GUI" : ", external"}</div>
       </td>
       <td className="p-3 align-top">
-        <div className="text-zinc-200">{suite ?? run.suite_or_task ?? "n/a"}</div>
-        {suite && <div className="font-mono text-xs text-zinc-500">{run.suite_or_task}</div>}
+        {target ? (
+          <>
+            <Link href={`/suites/${encodeURIComponent(target.suite)}/tasks/${encodeURIComponent(target.task)}`} className="font-mono text-emerald-400 hover:underline">{target.task}</Link>
+            <div className="text-xs text-zinc-500">in {target.suiteName}</div>
+          </>
+        ) : (
+          <>
+            <div className="text-zinc-200">{suite ?? run.suite_or_task ?? "n/a"}</div>
+            {suite && <div className="font-mono text-xs text-zinc-500">{run.suite_or_task}</div>}
+          </>
+        )}
       </td>
       <td className="p-3 align-top font-mono text-xs text-zinc-300">{run.model ?? "n/a"}</td>
       <td className="p-3 align-top text-zinc-300">{run.harness ?? "n/a"}</td>
       <td className="p-3 align-top text-zinc-300">{run.effort ?? "n/a"}</td>
       <td className="p-3 align-top"><SourceCell run={run} /></td>
       <td className="p-3 align-top font-mono text-zinc-300">
-        {run.attempts_done}{run.attempts_total !== null ? ` of ${run.attempts_total}` : ""}
+        {run.id.startsWith("job:") && run.kind !== "suite" ? <span className="text-zinc-500">n/a</span> : <>{run.attempts_done}{run.attempts_total !== null ? ` of ${run.attempts_total}` : ""}</>}
         {run.solves !== null && run.solves > 0 && (
           <span className="ml-2 text-emerald-400">{run.solves} solved</span>
         )}

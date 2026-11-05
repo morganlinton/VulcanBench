@@ -55,6 +55,8 @@ class NewSuiteRequest(BaseModel):
 class ScaffoldRequest(BaseModel):
     pr: int = Field(ge=1, le=10_000_000)
     tag: str | None = Field(default=None, max_length=200)
+    # Terms for repo/NOTICE when the repository has no LICENSE file (a private repo, say).
+    license_note: str = Field(default="", max_length=suites.MAX_LICENSE_NOTE_CHARS)
 
 
 class TagOnly(BaseModel):
@@ -169,7 +171,9 @@ def get_prs(
 @router.post("/{suite_id}/tasks", status_code=201)
 def post_scaffold(suite_id: str, body: ScaffoldRequest) -> dict[str, Any]:
     try:
-        return suites.scaffold_task(load_config(), suite_id, pr=body.pr, tag=body.tag)
+        return suites.scaffold_task(
+            load_config(), suite_id, pr=body.pr, tag=body.tag, license_note=body.license_note
+        )
     except suites.SuitesError as exc:
         raise _http(exc) from exc
 

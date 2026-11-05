@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import {
+  builderTarget,
+  suiteLabel,
   fmtElapsed,
   fmtMoney,
   fmtTime,
   isActive,
-  publicSuiteName,
   rewardValue,
   runnerGet,
   type FirstCheck,
@@ -196,7 +197,8 @@ export function RunDetail({ id }: { id: string }) {
   }
   if (!run) return <div className="mt-6 text-sm text-zinc-500">{loading ? "loading" : "no data"}</div>;
 
-  const suite = publicSuiteName(run.suite_or_task);
+  const suite = suiteLabel(run);
+  const target = builderTarget(run);
 
   return (
     <div>
@@ -232,14 +234,21 @@ export function RunDetail({ id }: { id: string }) {
         <div className="border border-white/10 rounded-xl p-5">
           <div className="text-zinc-400 mb-2">Run</div>
           <Fact label="kind">{run.kind}{run.owned ? "" : " (launched outside the GUI)"}</Fact>
-          <Fact label={run.kind === "gate" ? "task" : "suite or task"}>
-            <span>{suite ?? run.suite_or_task ?? "n/a"}</span>
-            {suite && <span className="block font-mono text-xs text-zinc-500">{run.suite_or_task}</span>}
-          </Fact>
+          {target ? (
+            <Fact label="task">
+              <Link href={`/suites/${encodeURIComponent(target.suite)}/tasks/${encodeURIComponent(target.task)}`} className="font-mono text-emerald-400 hover:underline">{target.task}</Link>
+              <span className="block text-xs text-zinc-500">in <Link href={`/suites/${encodeURIComponent(target.suite)}`} className="hover:underline">{target.suiteName}</Link></span>
+            </Fact>
+          ) : (
+            <Fact label={run.kind === "gate" ? "task" : "suite or task"}>
+              <span>{suite ?? run.suite_or_task ?? "n/a"}</span>
+              {suite && <span className="block font-mono text-xs text-zinc-500">{run.suite_or_task}</span>}
+            </Fact>
+          )}
           <Fact label="model" mono>{run.model ?? "n/a"}</Fact>
           <Fact label="harness">{run.harness ?? "n/a"}</Fact>
           <Fact label="effort">{run.effort ?? "n/a"}</Fact>
-          <Fact label="attempts">{run.attempts_done}{run.attempts_total !== null ? ` of ${run.attempts_total}` : ""}{run.solves !== null ? `, ${run.solves} solved` : ""}</Fact>
+          <Fact label="attempts">{run.id.startsWith("job:") && run.kind !== "suite" ? "n/a" : <>{run.attempts_done}{run.attempts_total !== null ? ` of ${run.attempts_total}` : ""}{run.solves !== null ? `, ${run.solves} solved` : ""}</>}</Fact>
         </div>
         <div className="border border-white/10 rounded-xl p-5">
           <div className="text-zinc-400 mb-2">Source and timing</div>
@@ -260,7 +269,7 @@ export function RunDetail({ id }: { id: string }) {
         <JobTaskRuns jobId={run.job?.id as number} live={live} />
       ) : run.trials.length === 0 ? (
         <div className="text-sm text-zinc-500 border border-white/10 rounded-xl p-4">
-          {run.id.startsWith("job:") ? `A ${run.kind} job has no attempts of its own; what it did is in the console log below.` : "No attempt has started yet."}
+          {run.id.startsWith("job:") ? `${/^[aeiou]/i.test(run.kind) ? "An" : "A"} ${run.kind} job has no attempts of its own; what it did is in the console log below.` : "No attempt has started yet."}
         </div>
       ) : (
         <div className="space-y-3">

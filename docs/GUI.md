@@ -6,6 +6,53 @@ stops driving them by hand. It lives in the existing backend
 `dashboard/app/launch`), wraps the existing CLI and scripts as subprocesses,
 and reads what they write to disk. It never reimplements run logic.
 
+## First run
+
+1. Start it: `make app` and open the app, or `make gui` and go to
+   `http://127.0.0.1:3000`.
+2. Open Launch. The readiness card at the top checks, without starting
+   anything: the queue supervisor, a prepared bench tag, Docker, the `gh`
+   login and the suite builder. It stays collapsed to one green line when all
+   pass; anything amber or red says how to fix it. Each harness's own login is
+   checked by the harness doctor when a plan is built.
+3. Benchmark a model: on Launch, type the model id, pick the harness, the
+   suite (VulcanBench Frontier v4 or a custom suite), the bench tag and the
+   effort levels, then Build plan. Read the exact commands, the list-price
+   estimate and the warnings, then confirm. Nothing is queued before the
+   confirm click, and the plan expires after 10 minutes.
+4. Watch it on Runs: each sweep is a card with one row per effort level
+   (progress, the task running now against the 3-hour cap, cost, ETA, Stop).
+   A level that ends short says why (quota window, expired login, exit code)
+   and the card offers "Run the missing tasks", which opens Launch prefilled
+   with `--only-missing`.
+5. Build your own suite: on Suites, unlock with the subscriber password,
+   create a suite for `owner/name`, load its merged pull requests, scaffold
+   the good ones (fill in the terms note first if the repository has no
+   LICENSE), author them (one model session each, behind a plan and a confirm
+   click), validate them in Docker (no model calls), read each task's issue,
+   tests and gold patch, accept the ones that passed, and freeze. "Benchmark
+   this suite" opens Launch with the suite picked.
+
+Every step that spends model quota goes through a plan you read and a
+confirm click; nothing retries on its own.
+
+### The readiness check
+
+`GET /api/runner/readiness` runs five local, quota-free checks:
+
+| check | ok when | otherwise |
+|---|---|---|
+| Queue supervisor | it is active with no hold | red: restart the backend with `VULCANBENCH_RUNNER=1` |
+| Bench tag | some `bench/*` tag has a run worktree at its commit, with clean scoring paths | amber when none is prepared, red when the prepared one is dirty or off its tag |
+| Docker | the daemon answers | amber: local-sandbox runs still work; validation does not |
+| GitHub CLI | `gh auth status --hostname github.com` exits 0 | amber: run `gh auth login` |
+| Suite builder | a tooling worktree exists and a password is configured (locked counts as ok) | amber, with the step that is missing |
+
+`gh auth status` runs with only `HOME`, `PATH`, `USER` and `TMPDIR` in its
+environment, stdin closed, and its output discarded unread, because it can
+name the account and the token's scopes. Nothing in the check reads a
+credential file.
+
 ## Runs page (milestone 1)
 
 The Runs page at `http://127.0.0.1:3000/runs` lists every run under the
@@ -163,7 +210,7 @@ task's files) come from disk as JSON and text.
 | Unlock, Lock | `suite unlock --password-stdin`, `suite lock` | see below |
 | New suite | `suite init <id> --display-name N --repo owner/name` | 409 for an existing id or a built-in suite's id |
 | Load pull requests | `suite prs list --suite <id> [--since] --limit` | through the operator's `gh` login; cached 10 minutes; 409 with "gh auth login" when gh is not logged in |
-| Scaffold N selected | `suite task scaffold <id> --pr N` | one request per PR, one scaffold per suite at a time, up to 10 minutes each; no model call |
+| Scaffold N selected | `suite task scaffold <id> --pr N [--license-note TEXT]` | one request per PR, one scaffold per suite at a time, up to 10 minutes each; no model call; the terms note (below) adds `--license-note` |
 | Accept | `suite add-task <id> --task T` | only with a PASS or WARN validation newer than the last authoring |
 | Drop | `suite remove-task` when accepted, then `build/dropped.json` | the task's folder stays |
 | Freeze suite | `suite freeze <id>` | needs one accepted task, every accepted task validated, no active job |
@@ -175,6 +222,16 @@ frozen suite is read-only here. A task's stage is derived from its `build/`
 files and the runner's jobs: scaffolded, authoring, authored, authoring
 failed, validating, validated, validation failed; a validation older than the
 latest authoring session no longer counts.
+
+A repository with no LICENSE file, which is common for a private one, needs
+a terms note before scaffolding. Validation requires a LICENSE or NOTICE file
+in each task's `repo/` for provenance, so without one every task from that
+repository fails validation. The optional "Terms note" field above the
+Scaffold button is written to `repo/NOTICE` in each task scaffolded while it
+is filled in. When a scaffold reports `no_license`, the pull request's row
+says so right away; add a NOTICE file to that task's `repo/` folder by hand
+(scaffolding the same pull request again is refused, because the dropped
+task's folder stays).
 
 ### Authoring and validation jobs
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { LaunchForm } from "@/components/runner/LaunchForm";
+import { ReadinessCard } from "@/components/runner/ReadinessCard";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default function LaunchPage() {
           Build the plan, read the exact commands and the estimate, then confirm. Jobs go to a queue that
           runs one task at a time; nothing starts without the confirm click and nothing retries on its own.
         </p>
+        <ReadinessCard />
         <Suspense fallback={<div className="mt-6 text-sm text-zinc-500">loading</div>}>
           <LaunchForm />
         </Suspense>

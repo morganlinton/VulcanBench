@@ -664,7 +664,15 @@ def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[
             "note": estimate.get("note"),
             "confidence": estimate.get("confidence"),
             "notes": estimate.get("notes") or [],
+            # per_level_usd is the estimate's recommended credit buffer (above
+            # the high end on purpose); the expected list-price cost is the mid.
             "per_level_usd": per_level_usd,
+            "per_level_mid_usd": estimate.get("mid_usd"),
+            "total_mid_usd": (
+                round(estimate["mid_usd"] * n_levels, 2)
+                if isinstance(estimate.get("mid_usd"), (int, float))
+                else None
+            ),
             "per_level_low_usd": estimate.get("low_usd"),
             "per_level_high_usd": estimate.get("high_usd"),
             "total_usd": round(per_level_usd * n_levels, 2) if per_level_usd is not None else None,

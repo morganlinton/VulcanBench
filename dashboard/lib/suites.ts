@@ -76,6 +76,8 @@ export interface SuitesList {
 
 export interface TaskRow {
   id: string;
+  /** Only on the scaffold response: what the scaffold wants a reviewer to know (no_license, ...). */
+  scaffold_warnings?: string[];
   pr: number | null;
   title: string | null;
   stage: Stage;
@@ -157,7 +159,7 @@ export interface TextFile {
 }
 
 export interface TaskDetail {
-  suite: { id: string; name: string };
+  suite: { id: string; name: string; repo: RepoRef | null };
   frozen: boolean;
   task: TaskRow;
   issue_md: TextFile | null;
@@ -251,3 +253,10 @@ export const STAGE_LABEL: Record<Stage, string> = {
   validated: "validated",
   validation_failed: "validation failed",
 };
+
+/** The pull request's page on its host, or null without a repository or number. */
+export function prUrl(repo: RepoRef | null | undefined, pr: number | null | undefined): string | null {
+  if (!repo || !pr || !/^[\w.-]+$/.test(repo.owner) || !/^[\w.-]+$/.test(repo.name)) return null;
+  const host = repo.host && /^[\w.-]+$/.test(repo.host) ? repo.host : "github.com";
+  return `https://${host}/${repo.owner}/${repo.name}/pull/${pr}`;
+}

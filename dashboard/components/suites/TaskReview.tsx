@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePolling } from "@/components/runner/usePolling";
 import { fmtDuration, runnerGet, runnerPost } from "@/lib/runner";
-import { taskPath, type TaskDetail, type TaskRow, type TextFile } from "@/lib/suites";
+import { prUrl, taskPath, type TaskDetail, type TaskRow, type TextFile } from "@/lib/suites";
 import { LogTail } from "@/components/runner/LogTail";
 import { ErrorLine, useGate } from "./BuilderGate";
 import { BuildActions, lastAuthorChoice } from "./BuildPlan";
@@ -39,18 +39,20 @@ const NEXT_STEP: Partial<Record<TaskRow["stage"], string>> = {
   validation_failed: "Author it again to rewrite the issue and tests, or drop the task.",
 };
 
-function LatestJob({ task, jobs }: { task: TaskRow; jobs: TaskDetail["jobs"] }) {
+function LatestJob({ task, jobs, frozen }: { task: TaskRow; jobs: TaskDetail["jobs"]; frozen: boolean }) {
   if (task.active_job) return null;
   const last = jobs[0];
   const failedStage = task.stage === "author_failed" || task.stage === "validation_failed";
   // A job that ended badly without writing its record leaves the task as it was;
   // say so rather than pointing at the next step of the older record.
   const broke = !!last && ["failed", "stopped", "lost", "infra_failed"].includes(last.status) && !failedStage;
-  const next = task.accepted || task.dropped
+  const next = task.dropped || frozen
     ? null
-    : broke
-      ? `This job wrote no new ${last.kind === "author" ? "authoring" : "validation"} record, so the task keeps its earlier state (${task.stage.replace("_", " ")}). Read the job's log for the cause, then run it again.`
-      : NEXT_STEP[task.stage];
+    : task.accepted
+      ? "Accepted. Back on the suite page, review the other tasks, then freeze the suite to benchmark it."
+      : broke
+        ? `This job wrote no new ${last.kind === "author" ? "authoring" : "validation"} record, so the task keeps its earlier state (${task.stage.replace("_", " ")}). Read the job's log for the cause, then run it again.`
+        : NEXT_STEP[task.stage];
   if (!last && !next) return null;
   const failed = failedStage || broke;
   const tone = failed ? "border-rose-500/30 bg-rose-500/5 text-rose-200" : "border-white/10 text-zinc-300";
@@ -165,7 +167,10 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
           </div>
           <h1 className="text-2xl font-semibold tracking-tight font-mono">{t.id}</h1>
           <div className="mt-1 text-sm text-zinc-400">
-            {t.pr ? `PR #${t.pr}` : ""}{t.title ? `: ${t.title}` : ""}
+            {t.pr && prUrl(data.suite.repo, t.pr) ? (
+              <a href={prUrl(data.suite.repo, t.pr) ?? undefined} target="_blank" rel="noopener noreferrer" className="hover:underline">PR #{t.pr}</a>
+            ) : t.pr ? `PR #${t.pr}` : ""}
+            {t.title ? `: ${t.title}` : ""}
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -185,7 +190,7 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
               Accept
             </button>
           )}
-          <button type="button" onClick={() => setAsking("drop")} disabled={busy || asking !== null || t.active_job !== null} className="rounded-full border border-white/15 px-4 py-1 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-30">
+          <button type="button" onClick={() => setAsking("drop")} disabled={busy || asking !== null || t.active_job !== null} title={t.active_job !== null ? "A job is working on this task; stop it or let it finish first" : undefined} className="rounded-full border border-white/15 px-4 py-1 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-30">
             Drop
           </button>
           {t.stage !== "validated" && !t.accepted && (
@@ -206,14 +211,14 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
           onCancel={() => setAsking(null)}
         />
       )}
-      <LatestJob task={t} jobs={data.jobs} />
+      <LatestJob task={t} jobs={data.jobs} frozen={data.frozen} />
       {editable && t.active_job === null && (
         <div className="space-y-3 rounded-xl border border-white/10 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setBuild(build === "author" ? null : "author")} className={`rounded-full border px-4 py-1 text-sm ${build === "author" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
               {t.author ? "Author again" : "Author"}
             </button>
-            <button type="button" onClick={() => setBuild(build === "validate" ? null : "validate")} disabled={t.author?.status !== "ok"} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${build === "validate" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
+            <button type="button" onClick={() => setBuild(build === "validate" ? null : "validate")} disabled={t.author?.status !== "ok"} title={t.author?.status !== "ok" ? "Validation needs a successful authoring session first" : undefined} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${build === "validate" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
               {t.validate ? "Validate again" : "Validate"}
             </button>
           </div>

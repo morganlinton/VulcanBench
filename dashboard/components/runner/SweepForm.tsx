@@ -155,9 +155,16 @@ function SweepPlanCard({ plan, onQueued }: { plan: LaunchPlan<SweepPlanSpec>; on
           <div className={label}>Estimate (vulcanbench estimate --json at this tag)</div>
           <dl className="space-y-1 text-xs">
             <Row k="runs" v={`${est.runs_per_level} per level, ${est.total_runs} in all (${spec.n_tasks} tasks x ${spec.repeat})`} />
-            <Row k="list-price cost" v={est.status === "ok" ? `${fmtMoney(est.per_level_usd)} per level, ${fmtMoney(est.total_usd)} in all (${est.confidence} confidence)` : est.status === "no_pricing" ? "no pricing for this model at this tag" : (est.note ?? "unavailable")} mono={false} />
+            {est.status === "ok" && est.per_level_mid_usd != null ? (
+              <Row k="list-price cost" v={`about ${fmtMoney(est.per_level_mid_usd)} per level, ${fmtMoney(est.total_mid_usd ?? null)} in all (${est.confidence} confidence)`} mono={false} />
+            ) : (
+              <Row k="list-price cost" v={est.status === "ok" ? `${fmtMoney(est.per_level_usd)} per level, ${fmtMoney(est.total_usd)} in all (${est.confidence} confidence)` : est.status === "no_pricing" ? "no pricing for this model at this tag" : (est.note ?? "unavailable")} mono={false} />
+            )}
             {est.status === "ok" && est.per_level_low_usd !== null && (
               <Row k="range per level" v={`${fmtMoney(est.per_level_low_usd)} to ${fmtMoney(est.per_level_high_usd)}`} />
+            )}
+            {est.status === "ok" && est.per_level_mid_usd != null && est.per_level_usd !== null && (
+              <Row k="credit to have" v={`${fmtMoney(est.per_level_usd)} per level, ${fmtMoney(est.total_usd)} in all: a buffer above the high end, not a cap`} mono={false} />
             )}
             <Row k="task timeout" v={`${fmtDuration(est.task_timeout_s)} per run`} />
             <Row k="longest wall time" v={fmtDuration(est.max_wall_s)} />

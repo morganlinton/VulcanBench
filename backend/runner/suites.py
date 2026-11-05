@@ -47,6 +47,7 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 #: A bench tag whose worktree holds this file can run the builder's commands.
 BUILDER_MARKER = Path("harness") / "suite_builder" / "access.py"
 BUILDER_KINDS = ("author", "validate")
+MAX_LICENSE_NOTE_CHARS = 2000
 #: Billing the authoring session takes (``suite task author --billing``).
 AUTHOR_BILLING = ("auto", "subscription")
 ACCEPTED_STATUSES = ("PASS", "WARN")
@@ -618,7 +619,11 @@ def task_detail(cfg: RunnerConfig, suite_id: str, task: str, jobs: list[Job]) ->
             tests.append({"path": rel, **body})
     own = _jobs_for(jobs, suite_id, task)
     return {
-        "suite": {"id": suite_id, "name": manifest.get("display_name") or suite_id},
+        "suite": {
+            "id": suite_id,
+            "name": manifest.get("display_name") or suite_id,
+            "repo": manifest.get("repo") if isinstance(manifest.get("repo"), dict) else None,
+        },
         "frozen": (d / "suite.lock.json").is_file(),
         "task": task_row(d, task, manifest, jobs),
         "issue_md": _read_text(tdir / "issue.md", ISSUE_CAP),
@@ -761,12 +766,26 @@ def list_prs(
 
 
 def scaffold_task(
-    cfg: RunnerConfig, suite_id: str, *, pr: int, tag: str | None = None
+    cfg: RunnerConfig,
+    suite_id: str,
+    *,
+    pr: int,
+    tag: str | None = None,
+    license_note: str = "",
 ) -> dict[str, Any]:
     d = suite_dir(cfg, suite_id)
     _refuse_if_frozen(d)
     if pr < 1:
         raise SuitesError(422, {"code": "invalid_option", "message": "pr must be a PR number"})
+    note = license_note.strip()
+    if len(note) > MAX_LICENSE_NOTE_CHARS or any(ord(c) < 32 and c not in "\n\t" for c in note):
+        raise SuitesError(
+            422,
+            {
+                "code": "invalid_option",
+                "message": f"license note: plain text, at most {MAX_LICENSE_NOTE_CHARS} characters",
+            },
+        )
     existing = scaffolded_prs(d).get(pr)
     if existing:
         raise SuitesError(
@@ -781,7 +800,11 @@ def scaffold_task(
         tooling = require_tooling(cfg, tag)
         res = run_suite_cli(
             tooling,
-            _with_home(cfg, ["task", "scaffold", suite_id, "--pr", str(pr)]),
+            _with_home(
+                cfg,
+                ["task", "scaffold", suite_id, "--pr", str(pr)]
+                + (["--license-note", note] if note else []),
+            ),
             timeout=SCAFFOLD_TIMEOUT_S,
         )
     finally:
@@ -791,7 +814,12 @@ def scaffold_task(
     task = str(res.doc.get("task_id") or "")
     if not TASK_ID_RE.match(task):
         raise SuitesError(502, {"code": "bad_output", "message": "scaffold named no task"})
-    return task_row(d, task, _manifest(d), [])
+    row = task_row(d, task, _manifest(d), [])
+    warnings = res.doc.get("warnings")
+    row["scaffold_warnings"] = (
+        [str(w)[:300] for w in warnings][:20] if isinstance(warnings, list) else []
+    )
+    return row
 
 
 def _active_job_problem(jobs: list[Job], suite_id: str, task: str | None) -> str | None:

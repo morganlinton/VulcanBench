@@ -90,6 +90,9 @@ function SweepCard({ sw, refresh }: { sw: SweepView; refresh: () => void }) {
           <span className="font-mono text-sm text-zinc-100">{sw.model ?? sw.name}</span>
           <span className="ml-2 text-xs text-zinc-400">{sw.harness} on {publicSuiteName(sw.suite) ?? sw.suite_name ?? sw.suite}</span>
           <span className="ml-2 font-mono text-xs text-zinc-500">{sw.tag}{sw.tag_commit ? ` @ ${sw.tag_commit}` : ""}</span>
+          <div className="mt-0.5 text-xs text-zinc-500">
+            <span className="font-mono text-zinc-400">{sw.name}</span>, queued {fmtTime(sw.created_at)}
+          </div>
         </div>
         <div className="text-xs text-zinc-400">
           <span className="font-mono text-zinc-200">{t.runs_done} of {t.total_runs}</span> runs, {t.passed} passed{t.cost_usd !== null ? `, ${fmtMoney(t.cost_usd)}` : ""}

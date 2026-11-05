@@ -19,7 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.runner import docker_ps, launch, maintenance, procs, stream, suites, sweep
+from backend.runner import docker_ps, launch, maintenance, procs, readiness, stream, suites, sweep
 from backend.runner.config import RunnerConfig, load_config
 from backend.runner.discovery import HARNESS_PREFIX, Discovery, job_summary, tail_text
 from backend.runner.redact import redact
@@ -91,6 +91,12 @@ def runner_status() -> dict[str, Any]:
         "run_roots_present": [str(p) for p in cfg.run_roots if p.is_dir()],
         "supervisor": SERVICE.describe(),
     }
+
+
+@router.get("/readiness")
+def runner_readiness() -> dict[str, Any]:
+    """A read-only checklist: supervisor, bench tag, Docker, gh login, suite builder."""
+    return readiness.readiness(load_config(), SERVICE.describe())
 
 
 @router.get("/runs")

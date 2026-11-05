@@ -198,6 +198,30 @@ export function publicSuiteName(id: string | null): string | null {
   return SUITE_NAMES[id] ?? null;
 }
 
+// The suite's readable name: the public name of a VulcanBench suite, else the
+// display name a custom suite's job recorded, else null (show the id).
+export function suiteLabel(run: RunBase): string | null {
+  const pub = publicSuiteName(run.suite_or_task);
+  if (pub) return pub;
+  const spec = (run.job?.spec ?? {}) as Record<string, unknown>;
+  const name = typeof spec.suite_name === "string" ? spec.suite_name : "";
+  return name && spec.suite === run.suite_or_task && name !== run.suite_or_task ? name : null;
+}
+
+// Author and validate jobs work on one task of a custom suite: their spec
+// carries both ids, and the row names the suite as well as the task.
+export function builderTarget(run: RunBase): { suite: string; suiteName: string; task: string } | null {
+  if (!run.id.startsWith("job:") || !run.job) return null;
+  const kind = String(run.kind);
+  if (kind !== "author" && kind !== "validate") return null;
+  const spec = (run.job.spec ?? {}) as Record<string, unknown>;
+  const suite = typeof spec.suite === "string" ? spec.suite : "";
+  const task = typeof spec.task === "string" ? spec.task : "";
+  if (!suite || !task) return null;
+  const suiteName = typeof spec.suite_name === "string" && spec.suite_name ? spec.suite_name : suite;
+  return { suite, suiteName, task };
+}
+
 export function statusLabel(status: string): string {
   switch (status) {
     case "external_running":
@@ -383,6 +407,8 @@ export interface SweepEstimate {
   confidence: string | null;
   notes: string[];
   per_level_usd: number | null;
+  per_level_mid_usd?: number | null;
+  total_mid_usd?: number | null;
   per_level_low_usd: number | null;
   per_level_high_usd: number | null;
   total_usd: number | null;
@@ -604,6 +630,21 @@ export function commandLine(env: Record<string, string> | null | undefined, argv
 export function fmtDuration(s: number): string {
   const h = Math.floor(s / 3600);
   const m = Math.round((s % 3600) / 60);
+  if (h === 0 && s < 60) return `${Math.max(0, Math.round(s))} s`;
   if (h === 0) return `${m} min`;
   return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
+export interface ReadinessCheck {
+  id: string;
+  label: string;
+  status: "ok" | "warn" | "fail";
+  detail: string;
+  fix: string | null;
+  needed_for: string;
+}
+
+export interface Readiness {
+  status: "ok" | "warn" | "fail";
+  checks: ReadinessCheck[];
 }

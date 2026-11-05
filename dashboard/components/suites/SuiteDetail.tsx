@@ -79,6 +79,8 @@ type RowState = "waiting" | "running" | "done" | string;
 
 // The last loaded list per suite, kept in memory for this window so opening a
 // task and coming back does not empty the table (a full reload starts over).
+// The terms note typed for a suite, kept while the app stays open.
+const lastLicenseNotes = new Map<string, string>();
 const lastPrLists = new Map<string, { since: string; limit: number; list: PrList }>();
 
 function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }) {
@@ -95,6 +97,8 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
   const [error, setError] = useState<{ text: string; gh: boolean } | null>(null);
   const [picked, setPicked] = useState<Set<number>>(new Set());
   const [progress, setProgress] = useState<Record<number, RowState>>({});
+  const [warnings, setWarnings] = useState<Record<number, string[]>>({});
+  const [licenseNote, setLicenseNote] = useState(() => lastLicenseNotes.get(id) ?? "");
   const [running, setRunning] = useState(false);
 
   const load = async (refresh: boolean) => {
@@ -119,11 +123,14 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
     const prs = [...picked];
     setRunning(true);
     setProgress(Object.fromEntries(prs.map((n) => [n, "waiting"])));
+    setWarnings({});
+    lastLicenseNotes.set(id, licenseNote);
     for (const n of prs) {
       setProgress((p) => ({ ...p, [n]: "running" }));
       try {
-        await runnerPost<TaskRow>(`${suitePath(id)}/tasks`, { pr: n });
+        const row = await runnerPost<TaskRow>(`${suitePath(id)}/tasks`, { pr: n, license_note: licenseNote.trim() });
         setProgress((p) => ({ ...p, [n]: "done" }));
+        setWarnings((w) => ({ ...w, [n]: row.scaffold_warnings ?? [] }));
         onScaffolded();
       } catch (e) {
         setProgress((p) => ({ ...p, [n]: handle(e) }));
@@ -199,10 +206,27 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
               </thead>
               <tbody>
                 {list.prs.map((pr) => (
-                  <PrRow key={pr.number} pr={pr} suite={id} picked={picked.has(pr.number)} onToggle={() => toggle(pr.number)} state={progress[pr.number]} disabled={running} />
+                  <PrRow key={pr.number} pr={pr} suite={id} picked={picked.has(pr.number)} onToggle={() => toggle(pr.number)} state={progress[pr.number]} warnings={warnings[pr.number]} disabled={running} />
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="max-w-2xl">
+            <label className={label} htmlFor="license-note">Terms note (only if the repository has no LICENSE file)</label>
+            <textarea
+              id="license-note"
+              rows={2}
+              maxLength={2000}
+              value={licenseNote}
+              onChange={(e) => setLicenseNote(e.target.value)}
+              disabled={running}
+              placeholder="e.g. Internal code of Acme Inc., used only for Acme's own model evaluations."
+              className={`${field} w-full`}
+            />
+            <p className="mt-1 text-xs text-zinc-500">
+              Written to repo/NOTICE in each task scaffolded now. Validation requires a LICENSE or NOTICE, and a private
+              repository often has neither. Leave it empty when the repository has a LICENSE.
+            </p>
           </div>
           <button type="button" onClick={scaffold} disabled={picked.size === 0 || running} className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>
             {running ? "Scaffolding" : `Scaffold ${picked.size} selected`}
@@ -213,12 +237,13 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
   );
 }
 
-function PrRow({ pr, suite, picked, onToggle, state, disabled }: {
+function PrRow({ pr, suite, picked, onToggle, state, warnings, disabled }: {
   pr: PullRequest;
   suite: string;
   picked: boolean;
   onToggle: () => void;
   state: RowState | undefined;
+  warnings: string[] | undefined;
   disabled: boolean;
 }) {
   const s = pr.suitability;
@@ -238,10 +263,15 @@ function PrRow({ pr, suite, picked, onToggle, state, disabled }: {
             {state === "running" ? "scaffolding" : state}
           </div>
         )}
+        {warnings?.map((w) => (
+          <div key={w} className="text-xs text-amber-300">
+            {w.startsWith("no_license") ? `no LICENSE or NOTICE in the repository, so validation will fail on provenance: add a NOTICE file with the terms to ${pr.task_id ?? "the task"}/repo/ in the suites home, and fill in the terms note below before scaffolding more.` : w}
+          </div>
+        ))}
       </td>
       <td className="px-3 py-2"><ScoreBar score={s.score} /></td>
       <td className="px-3 py-2 text-xs text-zinc-400 whitespace-nowrap">
-        +{pr.additions} -{pr.deletions}, {pr.changed_files} files, {pr.test_files.length} test files
+        +{pr.additions} -{pr.deletions}, {pr.changed_files} {pr.changed_files === 1 ? "file" : "files"}, {pr.test_files.length} test {pr.test_files.length === 1 ? "file" : "files"}
       </td>
       <td className="px-3 py-2 text-xs">
         <div className="text-zinc-400">{s.reasons.join("; ")}</div>
@@ -380,11 +410,11 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
                     {draft && !t.dropped && (
                       <div className="flex gap-2">
                         {!t.accepted && (
-                          <button type="button" onClick={() => setAsking({ task: t.id, what: "accept" })} disabled={busy !== null || t.stage !== "validated"} className="rounded-full border border-emerald-500/40 px-3 py-0.5 text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-30">
+                          <button type="button" onClick={() => setAsking({ task: t.id, what: "accept" })} disabled={busy !== null || t.stage !== "validated"} title={t.stage !== "validated" ? "Only a task whose validation passed can be accepted" : undefined} className="rounded-full border border-emerald-500/40 px-3 py-0.5 text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-30">
                             Accept
                           </button>
                         )}
-                        <button type="button" onClick={() => setAsking({ task: t.id, what: "drop" })} disabled={busy !== null || t.active_job !== null} className="rounded-full border border-white/15 px-3 py-0.5 text-zinc-300 hover:bg-white/5 disabled:opacity-30">
+                        <button type="button" onClick={() => setAsking({ task: t.id, what: "drop" })} disabled={busy !== null || t.active_job !== null} title={t.active_job !== null ? "A job is working on this task; stop it or let it finish first" : undefined} className="rounded-full border border-white/15 px-3 py-0.5 text-zinc-300 hover:bg-white/5 disabled:opacity-30">
                           Drop
                         </button>
                       </div>
@@ -413,7 +443,7 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
           </table>
         </div>
       )}
-      {draft && (
+      {draft && shown.length > 0 && (
         <div className="space-y-3 border-t border-white/10 pt-4">
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setAction(action?.kind === "author" ? null : { kind: "author", tasks: authorable })} disabled={authorable.length === 0} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${action?.kind === "author" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>

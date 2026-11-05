@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ConfirmBar } from "@/components/suites/ConfirmBar";
 import { runnerGet, runnerPost, type TagPreflight, type TagResult } from "@/lib/runner";
 import { button, field, label } from "./launchShared";
 import { usePolling } from "./usePolling";
@@ -14,9 +15,10 @@ export function TagCard({ onCut }: { onCut: (tag: string | null) => void }) {
   const [result, setResult] = useState<TagResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const today = new Date().toISOString().slice(0, 10);
+  const [asking, setAsking] = useState(false);
+  const what = `Cut bench/${today}-${labelText}${push ? " and push it to origin" : ""}? This tags the backend's own checkout; the script refuses unless it is on main, clean and equal to origin/main.`;
   const cut = async () => {
-    const what = `Cut bench/${today}-${labelText}${push ? " and push it to origin" : ""}? This tags the backend's own checkout; the script refuses unless it is on main, clean and equal to origin/main.`;
-    if (!window.confirm(what)) return;
+    setAsking(false);
     setBusy(true);
     setError(null);
     setResult(null);
@@ -60,10 +62,11 @@ export function TagCard({ onCut }: { onCut: (tag: string | null) => void }) {
               <input type="checkbox" checked={push} onChange={(e) => setPush(e.target.checked)} />
               also push the tag to origin
             </label>
-            <button type="button" onClick={cut} disabled={busy || !labelText.trim()} className={`${button} border border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10`}>
+            <button type="button" onClick={() => setAsking(true)} disabled={busy || asking || !labelText.trim()} className={`${button} border border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10`}>
               {busy ? "running the script" : "Cut tag"}
             </button>
           </div>
+          {asking && <ConfirmBar message={what} confirmLabel="Cut tag" onConfirm={cut} onCancel={() => setAsking(false)} />}
           {result && (
             <pre className="rounded-lg bg-black/40 p-3 text-xs text-zinc-300 whitespace-pre-wrap break-all">{result.output}</pre>
           )}

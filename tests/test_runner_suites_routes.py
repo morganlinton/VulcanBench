@@ -273,6 +273,26 @@ def test_scaffold_then_refuse_duplicates_and_frozen(env: Env) -> None:
     assert frozen.status_code == 409 and frozen.json()["detail"]["code"] == "suite_frozen"
 
 
+def test_scaffold_license_note_and_warnings(env: Env) -> None:
+    c = _unlocked(env)
+    c.post(API, json={"id": "acme-api", "display_name": "Acme", "repo": "acme/api"})
+    set_fake_suite(env.wt, "no-license")
+    bare = c.post(f"{API}/acme-api/tasks", json={"pr": 41})
+    assert bare.status_code == 201
+    assert any("no_license" in w for w in bare.json()["scaffold_warnings"])
+    note = "Internal code of Acme; benchmark use by Acme staff only."
+    r = c.post(f"{API}/acme-api/tasks", json={"pr": 42, "license_note": f"  {note}\n"})
+    assert r.status_code == 201 and r.json()["scaffold_warnings"] == []
+    call = next(x for x in fake_suite_calls(env.wt) if "--pr" in x["argv"] and "42" in x["argv"])
+    assert call["argv"][call["argv"].index("--license-note") + 1] == note
+    notice = env.cfg.suites_home / "acme-api" / "pr-42-fix-thing" / "repo" / "NOTICE"
+    assert notice.read_text().strip() == note
+    plain = next(x for x in fake_suite_calls(env.wt) if "--pr" in x["argv"] and "41" in x["argv"])
+    assert "--license-note" not in plain["argv"]
+    bad = c.post(f"{API}/acme-api/tasks", json={"pr": 43, "license_note": "a\x00b"})
+    assert bad.status_code == 422
+
+
 def test_stages_come_from_disk(env: Env) -> None:
     cfg = env.cfg
     fake_builder_task(cfg, "acme-api", "t-scaffolded", pr=1)

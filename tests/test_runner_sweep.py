@@ -118,6 +118,7 @@ def test_plan_has_one_job_per_level_with_the_exact_argv(repo: Path, cfg: RunnerC
     assert spec["doctor"]["status"] == "ready" and spec["doctor"]["version"] == "9.9.9"
     est = spec["estimate"]
     assert est["status"] == "ok" and est["per_level_usd"] == 4.5 and est["total_usd"] == 9.0
+    assert est["per_level_mid_usd"] == 2.0 and est["total_mid_usd"] == 4.0
     assert est["total_runs"] == 4 and est["max_wall_s"] == 4 * 3 * 3600
     assert "--max-infra-retries 0" in est["infra_retries"]
     assert spec["usage_check_required"] is False

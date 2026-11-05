@@ -822,6 +822,10 @@ if args[:2] == ["task", "scaffold"]:
     (t / "build").mkdir(parents=True)
     (t / "repo").mkdir()
     (t / "repo" / "a.py").write_text("x = 1\n")
+    note = opt("--license-note")
+    if note:
+        (t / "repo" / "NOTICE").write_text(note + "\n")
+    no_license = flag("no-license") is not None and not note
     (t / "issue.md").write_text("<!-- DRAFT -->\nFix thing\n")
     (t / "gold_patch.diff").write_text("--- a/a.py\n+++ b/a.py\n")
     (t / "metadata.json").write_text(json.dumps({"id": tid, "tests": {"fail_to_pass": [], "pass_to_pass": []},
@@ -829,7 +833,8 @@ if args[:2] == ["task", "scaffold"]:
     (t / "build" / "pr.json").write_text(json.dumps({"number": pr, "title": "Fix thing"}))
     report = {"schema": "vulcanbench.suite.scaffold.v1", "task_dir": str(t), "task_id": tid, "pr": pr,
               "base_commit": "b" * 40, "languages": ["python"], "image": "base", "gold_applies": True,
-              "warnings": [], "scaffolded_at": "2026-11-04T10:00:00+00:00"}
+              "warnings": ["no_license: repo/ has no LICENSE or NOTICE; pass --license-note"] if no_license else [],
+              "scaffolded_at": "2026-11-04T10:00:00+00:00"}
     (t / "build" / "scaffold.json").write_text(json.dumps(report))
     out(report)
 

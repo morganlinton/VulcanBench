@@ -92,7 +92,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shows why on the sweep card (quota window, login, exit code); "Run the
   missing tasks" keeps the level's bench tag, so a resume cannot land on a
   newer tag and mix results; the effort toggles report their state to
-  screen readers.
+  screen readers. A third pass, building a suite from scratch and running it:
+  a readiness card on Launch checks the supervisor, a prepared bench tag,
+  Docker, the `gh` login and the suite builder (all local and quota-free;
+  `gh auth status` output is discarded unread); the scaffold step takes a
+  terms note for repositories with no LICENSE file (passed as
+  `--license-note`, written to `repo/NOTICE`), without which every task from
+  a private repository failed validation on provenance, and a `no_license`
+  scaffold warning shows on the pull request's row; the plan shows the mid
+  list-price estimate as the cost and the recommended credit buffer on its
+  own line (the buffer was labelled as the cost and sat above the stated
+  range); Stop, Remove, Cut tag and orphan removal ask in the page instead of
+  a native dialog; sweep cards show their label and queue time; author and
+  validate jobs on Runs name their suite and link to the task, custom suites
+  show their display name, and jobs without attempts say n/a; the task page
+  links the PR to GitHub and says what to do after accepting; disabled
+  Accept, Drop and Validate buttons say why; bench tags cut in the same
+  second sort by name.
 - **Local run GUI**: the runner routes refuse requests from browser pages not
   served from localhost (403 on a foreign or `null` `Origin`), so a website
   open in the operator's browser can no longer read the queue or post plans

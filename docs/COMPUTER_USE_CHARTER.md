@@ -111,7 +111,14 @@ under `pixels+zoom`. A thin adapter maps each provider's tool schema onto
 that set so the tasks never change per vendor. Agents measured, each
 recorded by product and version in the run metadata:
 
-- Anthropic computer-use tool via the API (model and tool version)
+- Anthropic computer-use tool via the API (model and tool version), through
+  Harbor's `computer-1` agent
+- Claude Code on the Claude subscription, acting only through the suite's
+  MCP computer tools (`sandbox/computer-use/vb_computer_mcp.py`: screenshot,
+  click, type, key, scroll, drag, zoom over the same desktop) with its own
+  tools disallowed. This is its own row, not a stand-in for the native tool:
+  screenshots reach the model as ordinary images and coordinates come back
+  as tool arguments
 - Claude in Chrome (web family only) and Claude Cowork
 - OpenAI computer-use agent via the API and through its product
 - Google Gemini computer-use via the API
@@ -216,13 +223,12 @@ ambiguous or cheatable. Re-measure when the frontier moves.
 
 ## Budgets
 
-Proposed: a flat per-task wall clock of 60 minutes and a step cap of 200
-actions, recorded in `suite.json` and stamped into each task. This departs
-from the 3-hour flat timeout the other suites carry, because a GUI task's
-gold path is minutes, not hours, and the clock on these runs is dominated
-by vision tokens rather than compute. Adopting any number here requires an
-entry in `docs/DECISIONS.md` with the evidence, per the project rule; until
-then the 3-hour default applies. Sweeps run one task at a time.
+Adopted 2026-11-06 (`docs/DECISIONS.md`): a flat per-task wall clock of 60
+minutes, recorded in `suite.json` under `pins.budget` and stamped into each
+task's `[agent].timeout_sec`, plus a 200-action cap for the computer-1
+reference. This departs from the 3-hour default the other suites carry
+because a GUI task's gold path is seconds and its cost is vision tokens, not
+compute; the evidence is in the decision entry. Sweeps run one task at a time.
 
 ## Metrics and reporting
 

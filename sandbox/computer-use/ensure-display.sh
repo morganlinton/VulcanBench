@@ -7,6 +7,7 @@
 # no-op. Paths and flags mirror that runtime on purpose.
 set -euo pipefail
 
+# VB_START_URL: the page Chromium opens when started here (default about:blank).
 W="${VB_DESKTOP_WIDTH:-1024}"
 H="${VB_DESKTOP_HEIGHT:-900}"
 RT=/tmp/computer_1_runtime
@@ -40,7 +41,7 @@ if ! cdp_up; then
     --disable-features=IsolateOrigins,site-per-process,AutomationControlled,HttpsUpgrades \
     --disable-infobars --disable-blink-features=AutomationControlled \
     --js-flags=--max-old-space-size=4096 --renderer-process-limit=4 --test-type --lang=en-US \
-    --remote-debugging-port=9222 about:blank >>"$RT/chromium.log" 2>&1 </dev/null &
+    --remote-debugging-port=9222 "${VB_START_URL:-about:blank}" >>"$RT/chromium.log" 2>&1 </dev/null &
   for _ in $(seq 1 240); do
     cdp_up && break
     sleep 0.5

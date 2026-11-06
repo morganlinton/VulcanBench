@@ -57,7 +57,8 @@ mode = os.environ.get("FAKE_HARBOR_MODE", "solve3")
 jd = os.path.join(out, job)
 os.makedirs(jd)
 with open(os.path.join(jd, "argv.json"), "w") as fh:
-    json.dump({"argv": args, "has_key": "ANTHROPIC_API_KEY" in os.environ}, fh)
+    json.dump({"argv": args, "has_key": "ANTHROPIC_API_KEY" in os.environ,
+               "env_names": sorted(k for k in os.environ if k.startswith(("CLAUDE_", "ANTHROPIC_")))}, fh)
 with open(os.path.join(jd, "config.json"), "w") as fh:
     json.dump({"job_name": job, "n_attempts": int(args[args.index("-k") + 1]),
                "agents": [{"name": args[args.index("-a") + 1], "model_name": args[args.index("-m") + 1]}],
@@ -93,6 +94,17 @@ FAKE_GIT = """#!/bin/sh
 echo abc1234
 """
 
+# What the one-turn usage probe prints: a rate_limit_event line among others.
+FAKE_CLAUDE = r"""#!/usr/bin/env python3
+import json, os
+u = float(os.environ.get("FAKE_UTIL", "0.5"))
+print(json.dumps({"type": "system", "subtype": "init"}))
+print(json.dumps({"type": "rate_limit_event", "rate_limit_info": {
+    "status": os.environ.get("FAKE_RL_STATUS", "allowed"),
+    "unifiedWindows": {"five_hour": {"utilization": u / 2}, "seven_day": {"utilization": u}}}}))
+print(json.dumps({"type": "result", "result": "ok"}))
+"""
+
 SUITE = {
     "id": "computer-use-v1",
     "tasks": ["demo-computer-task-with-a-fairly-long-name"],
@@ -103,7 +115,16 @@ SUITE = {
             "desktop_width": 1024,
             "start_url": "http://127.0.0.1:8000/",
         },
-        "references": [{"name": "claude", "agent": "computer-1", "model": "anthropic/test-model"}],
+        "references": [
+            {
+                "name": "claude-code",
+                "agent": "claude-code",
+                "model": "claude-test-model",
+                "version": "9.9.9",
+                "disallowed_tools": "Bash,Read,Edit",
+            },
+            {"name": "claude", "agent": "computer-1", "model": "anthropic/test-model"},
+        ],
     },
 }
 
@@ -127,13 +148,19 @@ class Gate:
         self.out = tmp_path / "gate"
         self.log = tmp_path / "fakelog"
         self.log.mkdir()
-        for name, body in (("harbor", FAKE_HARBOR), ("docker", FAKE_DOCKER), ("git", FAKE_GIT)):
+        for name, body in (
+            ("harbor", FAKE_HARBOR),
+            ("docker", FAKE_DOCKER),
+            ("git", FAKE_GIT),
+            ("claude", FAKE_CLAUDE),
+        ):
             p = self.bin / name
             p.write_text(body)
             p.chmod(0o755)
         self.envd = self.home / ".config" / "vulcanbench"
         self.envd.mkdir(parents=True)
         (self.envd / "computer-use-gate.env").write_text("ANTHROPIC_API_KEY=not-a-real-key\n")
+        (self.envd / "claude-gate.env").write_text("CLAUDE_CODE_OAUTH_TOKEN=not-a-real-token\n")
 
     def env(self, **extra: str) -> dict[str, str]:
         env = {
@@ -175,8 +202,8 @@ def test_refs_prints_the_claude_reference(gate: Gate) -> None:
     r = gate.run("--refs")
     assert r.returncode == 0, r.stderr
     refs = [json.loads(line) for line in r.stdout.splitlines()]
-    assert [x["name"] for x in refs] == ["claude"]
-    assert refs[0]["agent"] == "computer-1"
+    assert [x["name"] for x in refs] == ["claude-code", "claude"]
+    assert refs[0]["agent"] == "claude-code" and refs[1]["agent"] == "computer-1"
 
 
 def test_preflight_only_reports_and_launches_nothing(gate: Gate) -> None:
@@ -254,3 +281,47 @@ def test_infrastructure_failure_stops_the_run(gate: Gate) -> None:
     assert r.returncode == 1, r.stdout + r.stderr
     st = gate.status(f"cu-claude-{gate.task}")
     assert st["phase"] == "infra_failed" and str(st["stop_reason"]).startswith("infra:")
+
+
+def test_claude_code_run_uses_subscription_auth_and_mcp_only(gate: Gate) -> None:
+    r = gate.run("claude-code", gate.task)
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = f"cu-claude-code-{gate.task}"
+    rec = gate.argv(job)
+    argv = rec["argv"]
+    assert argv[argv.index("-a") + 1] == "claude-code"
+    assert argv[argv.index("-m") + 1] == "claude-test-model"
+    assert argv[argv.index("--effort") + 1] == "medium"
+    aks = [argv[i + 1] for i, a in enumerate(argv) if a == "--ak"]
+    assert aks == ["version=9.9.9", "disallowed_tools=Bash,Read,Edit", "disable_web_search=true"]
+    assert argv[argv.index("--env-file") + 1].endswith("claude-gate.env")
+    assert "--ae" not in argv and "not-a-real-token" not in " ".join(argv)
+    assert "CLAUDE_FORCE_OAUTH" in rec["env_names"] and rec["has_key"] is False
+    st = gate.status(job)
+    assert set(st) == EXPECTED_STATUS_KEYS
+    assert st["phase"] == "done" and st["effort"] == "medium" and st["agent"] == "claude-code"
+    assert any(
+        line.startswith("=== usage preflight claude-test-model") for line in r.stdout.splitlines()
+    )
+
+
+def test_claude_code_preflight_only_reports_usage(gate: Gate) -> None:
+    r = gate.run("claude-code", gate.task, GATE_PREFLIGHT_ONLY="1")
+    assert r.returncode == 0, r.stdout + r.stderr
+    line = json.loads(r.stdout.strip().splitlines()[0])
+    assert line["model"] == "claude-test-model" and line["would_start"] is True
+    assert line["max_utilization"] == 0.5
+    assert not (gate.out / "jobs").exists() or not list((gate.out / "jobs").iterdir())
+
+
+def test_claude_code_refuses_above_usage_max(gate: Gate) -> None:
+    r = gate.run("claude-code", gate.task, FAKE_UTIL="0.9")
+    assert r.returncode == 2, r.stdout + r.stderr
+    st = gate.status(f"cu-claude-code-{gate.task}")
+    assert st["phase"] == "infra_failed" and st["stop_reason"] == "usage"
+
+
+def test_claude_code_missing_oauth_env_is_refused(gate: Gate) -> None:
+    (gate.envd / "claude-gate.env").unlink()
+    r = gate.run("claude-code", gate.task)
+    assert r.returncode == 2 and "claude-gate.env" in r.stderr

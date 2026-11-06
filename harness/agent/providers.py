@@ -36,6 +36,7 @@ from __future__ import annotations
 import functools
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -86,6 +87,14 @@ class LLMResponse(Model):
     tool_calls: list[ToolInvocation] = field(default_factory=list)
     usage: TokenUsage = field(default_factory=TokenUsage)
     raw: dict[str, Any] = field(default_factory=dict)
+    #: The model the gateway says answered (``model`` in the response body).
+    #: Differs from the requested model behind a router or a server-side
+    #: fallback; ``None`` when the API does not echo one.
+    served_model: str | None = None
+    #: The provider's response id, for cross-checking a gateway's own ledger.
+    response_id: str | None = None
+    #: The gateway's own per-call bill (OpenRouter ``usage.cost``), when returned.
+    reported_cost_usd: float | None = None
 
     @property
     def wants_tools(self) -> bool:
@@ -628,6 +637,8 @@ class AnthropicProvider(LLMProvider):
                 completion_tokens=usage.get("output_tokens", 0),
             ),
             raw=body,
+            served_model=str(served) if served else None,
+            response_id=_response_id(body),
         )
 
 
@@ -651,6 +662,18 @@ class MockProvider(LLMProvider):
         effort: str | None = None,
     ) -> LLMResponse:
         del timeout_s, effort
+        resp = self._scripted(messages)
+        if self.model == "routed":
+            # ``mock:routed`` behaves like a gateway that routes each call:
+            # alternates two served models and bills a flat per-call cost, so
+            # the routing ledger and router economics are testable offline.
+            step = sum(1 for m in messages if m.get("role") == "tool")
+            resp.served_model = "mock/cheap" if step % 2 == 0 else "mock/frontier"
+            resp.response_id = f"mock-{step}"
+            resp.reported_cost_usd = 0.001
+        return resp
+
+    def _scripted(self, messages: list[dict[str, Any]]) -> LLMResponse:
         # Judge requests (human_like ensemble) carry a sentinel: answer with a
         # fixed JSON score so the metric is deterministic offline.
         if any("VULCANBENCH_JUDGE" in str(m.get("content", "")) for m in messages):
@@ -985,6 +1008,98 @@ class OpenRouterProvider(LLMProvider):
             raise
 
 
+#: ``router:<name>/<model>``: the router's name (upper-cased) selects its env
+#: pair, e.g. ``router:martian/auto`` reads ``ROUTER_MARTIAN_BASE_URL`` and
+#: ``ROUTER_MARTIAN_API_KEY``.
+_ROUTER_NAME = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+
+
+def parse_router_model(model: str) -> tuple[str, str]:
+    """Split ``<name>/<wire_model>``; the name must be a plain slug."""
+    name, sep, wire = model.partition("/")
+    if not sep or not wire or not _ROUTER_NAME.match(name):
+        raise ProviderError(
+            f"router model must be '<name>/<model>' (e.g. 'martian/auto'), got {model!r}"
+        )
+    return name, wire
+
+
+def router_env_names(name: str) -> tuple[str, str]:
+    slug = name.upper().replace("-", "_")
+    return f"ROUTER_{slug}_BASE_URL", f"ROUTER_{slug}_API_KEY"
+
+
+class RouterProvider(LLMProvider):
+    """A model router behind an OpenAI-compatible ``/chat/completions`` endpoint.
+
+    Routers (Martian, Not Diamond, Requesty, an OpenRouter-style ``auto``
+    model, or any gateway that picks the backend per request) all speak the
+    Chat Completions shape, so one provider covers them, parameterised by
+    name: ``router:<name>/<model>`` reads ``ROUTER_<NAME>_BASE_URL`` and
+    ``ROUTER_<NAME>_API_KEY``.
+
+    What makes a router different from a base-URL swap is what the run must
+    record: the served model and the gateway's own bill per call. Both come
+    back on the response (``model``, ``usage.cost``) and land in the routing
+    ledger (``harness/agent/routing.py``). ``usage: {include: true}`` is sent
+    by default so OpenRouter-compatible gateways return the cost; a gateway
+    that rejects unknown fields can turn it off with
+    ``ROUTER_<NAME>_USAGE_INCLUDE=0``.
+
+    Effort is never sent (the router decides the backend and its settings), so
+    every level is recorded-but-not-sent. Table pricing applies only through a
+    ``VULCANBENCH_PRICING`` entry for ``router:<name>/<model>`` or the
+    ``router:`` prefix; without one the run's cash cost is the gateway's own
+    reported total, or unpriced.
+    """
+
+    MAX_REQUEST_TIMEOUT_S = 900.0
+
+    @property
+    def name(self) -> str:
+        return "router"
+
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout_s: float | None = None,
+        effort: str | None = None,
+    ) -> LLMResponse:
+        del effort  # recorded-but-not-sent; the router owns the backend's settings
+        timeout = _http_timeout(timeout_s, self.MAX_REQUEST_TIMEOUT_S)
+        attempts = _budgeted_attempts(timeout_s, timeout)
+        return _call_with_retry(self._complete_once, attempts, messages, tools, timeout)
+
+    def _complete_once(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+    ) -> LLMResponse:
+        name, wire = parse_router_model(self.model)
+        base_var, key_var = router_env_names(name)
+        api_key = os.environ.get(key_var)
+        if not api_key:
+            raise ProviderError(f"{key_var} is not set")
+        base = os.environ.get(base_var, "").rstrip("/")
+        if not base:
+            raise ProviderError(f"{base_var} is not set")
+        extra: dict[str, Any] = {}
+        if os.environ.get(f"{base_var[: -len('_BASE_URL')]}_USAGE_INCLUDE", "1") != "0":
+            extra["usage"] = {"include": True}
+        return _chat_completions_complete(
+            base,
+            api_key,
+            wire,
+            messages,
+            tools,
+            timeout,
+            temperature=None,
+            extra_payload=extra or None,
+        )
+
+
 class QwenProvider(LLMProvider):
     """Alibaba Cloud DashScope (Qwen) OpenAI-compatible Chat Completions API.
 
@@ -1311,6 +1426,8 @@ def _parse_responses_body(body: dict[str, Any], cached_input_factor: float = 0.1
             completion_tokens=usage.get("output_tokens", usage.get("completion_tokens", 0)),
         ),
         raw=body,
+        served_model=_served_model(body),
+        response_id=_response_id(body),
     )
 
 
@@ -1368,7 +1485,33 @@ def _parse_chat_completions_response(
             completion_tokens=completion,
         ),
         raw=body,
+        served_model=_served_model(body),
+        response_id=_response_id(body),
+        reported_cost_usd=_reported_cost(usage),
     )
+
+
+def _served_model(body: dict[str, Any]) -> str | None:
+    model = body.get("model")
+    return str(model) if isinstance(model, str) and model else None
+
+
+def _response_id(body: dict[str, Any]) -> str | None:
+    rid = body.get("id")
+    return str(rid) if isinstance(rid, (str, int)) and rid != "" else None
+
+
+def _reported_cost(usage: dict[str, Any]) -> float | None:
+    """A gateway's own per-call bill, when it returns one.
+
+    OpenRouter puts it in ``usage.cost`` (asked for with ``usage.include``);
+    other OpenAI-compatible routers that follow that convention are read the
+    same way. Anything else leaves it ``None``: a missing bill is not zero.
+    """
+    cost = usage.get("cost")
+    if isinstance(cost, (int, float)) and not isinstance(cost, bool) and cost >= 0:
+        return float(cost)
+    return None
 
 
 def _openai_omits_chat_sampling(model: str) -> bool:
@@ -1430,6 +1573,7 @@ _PROVIDERS: dict[str, type[LLMProvider]] = {
     "meta": MetaProvider,
     "ollama": OllamaProvider,
     "openrouter": OpenRouterProvider,
+    "router": RouterProvider,
     "xai": XaiProvider,
     "mock": MockProvider,
 }
@@ -1471,6 +1615,52 @@ def get_provider(spec: str) -> LLMProvider:
     return _PROVIDERS[provider](model)
 
 
+def reports_live_cost(spec: str) -> bool:
+    """True when the gateway bills each call in its response (``usage.cost``).
+
+    Such a run can enforce ``--max-run-cost`` from the reported sum even with
+    no price-table entry; the loop records ``cost_cap_unenforceable`` if the
+    gateway then returns no cost after all.
+    """
+    try:
+        provider, _ = parse_model_spec(spec)
+    except ValueError:
+        return False
+    return provider in {"router", "openrouter"}
+
+
+def _openrouter_manifest(model: str) -> dict[str, Any]:
+    # OpenRouter always routes through an upstream; record the pin (or its
+    # absence) so a results directory mixing pinned and unpinned columns
+    # stays auditable, exactly as for the Meta route.
+    pin = _OPENROUTER_PINS.get(model)
+    base = os.environ.get("OPENROUTER_BASE_URL", _OPENROUTER_DEFAULT_BASE)
+    manifest: dict[str, Any] = {"via": "openrouter", "base_url": base, "wire_model": model}
+    if pin:
+        manifest["pinned_provider"] = pin.get("only")
+        manifest["pinned_quantization"] = pin.get("quantizations")
+        manifest["allow_fallbacks"] = pin.get("allow_fallbacks", True)
+    else:
+        manifest["pinned"] = False
+    return manifest
+
+
+def _router_manifest(model: str) -> dict[str, Any] | None:
+    """Manifest for ``router:<name>/<model>``: the gateway and its base URL."""
+    try:
+        name, wire = parse_router_model(model)
+    except ProviderError:
+        return None
+    base_var, _ = router_env_names(name)
+    return {
+        "via": "router",
+        "router": name,
+        "base_url": os.environ.get(base_var) or None,
+        "wire_model": wire,
+        "pinned": False,
+    }
+
+
 def route_manifest(spec: str) -> dict[str, Any] | None:
     """Describe a non-default API route for ``spec``, or ``None`` for the default.
 
@@ -1483,22 +1673,16 @@ def route_manifest(spec: str) -> dict[str, Any] | None:
         provider, model = parse_model_spec(spec)
     except ValueError:
         return None
-    if provider == "openrouter":
-        # OpenRouter always routes through an upstream; record the pin (or its
-        # absence) so a results directory mixing pinned and unpinned columns
-        # stays auditable, exactly as for the Meta route.
-        pin = _OPENROUTER_PINS.get(model)
-        base = os.environ.get("OPENROUTER_BASE_URL", _OPENROUTER_DEFAULT_BASE)
-        manifest: dict[str, Any] = {"via": "openrouter", "base_url": base, "wire_model": model}
-        if pin:
-            manifest["pinned_provider"] = pin.get("only")
-            manifest["pinned_quantization"] = pin.get("quantizations")
-            manifest["allow_fallbacks"] = pin.get("allow_fallbacks", True)
-        else:
-            manifest["pinned"] = False
-        return manifest
-    if provider != "meta":
-        return None
+    builders: dict[str, Callable[[str], dict[str, Any] | None]] = {
+        "openrouter": _openrouter_manifest,
+        "router": _router_manifest,
+        "meta": _meta_manifest,
+    }
+    builder = builders.get(provider)
+    return builder(model) if builder else None
+
+
+def _meta_manifest(model: str) -> dict[str, Any] | None:
     try:
         route = _resolve_meta_route(model)
     except ProviderError:
@@ -1506,7 +1690,7 @@ def route_manifest(spec: str) -> dict[str, Any] | None:
         return None
     if route.via == "meta":
         return None
-    manifest = {
+    manifest: dict[str, Any] = {
         "via": route.via,
         "base_url": route.base,
         "wire_model": route.wire_model,

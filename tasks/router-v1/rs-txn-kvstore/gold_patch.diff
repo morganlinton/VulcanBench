@@ -1,0 +1,135 @@
+diff --git a/src/journal.rs b/src/journal.rs
+index 6f878e0..f04cb4c 100644
+--- a/src/journal.rs
++++ b/src/journal.rs
+@@ -22,26 +22,34 @@ impl UndoJournal {
+ 
+     /// True if at least one frame is open.
+     pub fn in_transaction(&self) -> bool {
+-        todo!()
++        !self.frames.is_empty()
+     }
+ 
+     /// Open a new (nested) frame.
+     pub fn push(&mut self) {
+-        todo!()
++        self.frames.push(Vec::new());
+     }
+ 
+     /// Record an inverse into the current frame. With no frame open the
+     /// mutation is durable (autocommit) and the inverse is dropped.
+     pub fn record(&mut self, undo: Undo) {
+-        let _ = undo;
+-        todo!()
++        if let Some(frame) = self.frames.last_mut() {
++            frame.push(undo);
++        }
+     }
+ 
+     /// Undo the current frame: run its inverses against `data` in reverse
+     /// order, then drop the frame. Returns `false` if no frame is open.
+     pub fn rollback(&mut self, data: &mut Data) -> bool {
+-        let _ = data;
+-        todo!()
++        match self.frames.pop() {
++            Some(frame) => {
++                for undo in frame.into_iter().rev() {
++                    undo(data);
++                }
++                true
++            }
++            None => false,
++        }
+     }
+ 
+     /// Close the current frame. Its inverses are folded into the parent frame
+@@ -49,7 +57,15 @@ impl UndoJournal {
+     /// top level there is no parent, so the changes become durable. Returns
+     /// `false` if no frame is open.
+     pub fn commit(&mut self) -> bool {
+-        todo!()
++        match self.frames.pop() {
++            Some(frame) => {
++                if let Some(parent) = self.frames.last_mut() {
++                    parent.extend(frame);
++                }
++                true
++            }
++            None => false,
++        }
+     }
+ 
+     /// How many frames are open.
+diff --git a/src/store.rs b/src/store.rs
+index 4ed4c16..9d4d05c 100644
+--- a/src/store.rs
++++ b/src/store.rs
+@@ -44,14 +44,29 @@ impl Store {
+ 
+     /// Set `key` to `value`, recording how to undo it.
+     pub fn set(&mut self, key: &str, value: &str) {
+-        let _ = (key, value);
+-        todo!()
++        let k = key.to_string();
++        match self.data.get(key).cloned() {
++            Some(old) => self.journal.record(Box::new(move |d: &mut Data| {
++                d.insert(k, old);
++            })),
++            None => self.journal.record(Box::new(move |d: &mut Data| {
++                d.remove(&k);
++            })),
++        }
++        self.data.insert(key.to_string(), value.to_string());
+     }
+ 
+     /// Delete `key` (`MissingKey` if absent), recording how to undo it.
+     pub fn delete(&mut self, key: &str) -> Result<(), StoreError> {
+-        let _ = key;
+-        todo!()
++        let old = self
++            .data
++            .remove(key)
++            .ok_or_else(|| StoreError::MissingKey(key.to_string()))?;
++        let k = key.to_string();
++        self.journal.record(Box::new(move |d: &mut Data| {
++            d.insert(k, old);
++        }));
++        Ok(())
+     }
+ 
+     /// The current set of keys, sorted.
+@@ -61,22 +76,30 @@ impl Store {
+ 
+     /// Open a new transaction (transactions may nest).
+     pub fn begin(&mut self) {
+-        todo!()
++        self.journal.push();
+     }
+ 
+     /// Commit the innermost open transaction.
+     pub fn commit(&mut self) -> Result<(), StoreError> {
+-        todo!()
++        if self.journal.commit() {
++            Ok(())
++        } else {
++            Err(StoreError::NoTransaction)
++        }
+     }
+ 
+     /// Roll back the innermost open transaction, restoring the exact state
+     /// from just before its `begin()`.
+     pub fn rollback(&mut self) -> Result<(), StoreError> {
+-        todo!()
++        if self.journal.rollback(&mut self.data) {
++            Ok(())
++        } else {
++            Err(StoreError::NoTransaction)
++        }
+     }
+ 
+     /// Whether a transaction is open.
+     pub fn in_transaction(&self) -> bool {
+-        self.journal.depth() > 0
++        self.journal.in_transaction()
+     }
+ }

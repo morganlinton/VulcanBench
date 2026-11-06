@@ -73,6 +73,8 @@ def _env_var_for(spec: str, provider: str) -> str:
     route = route_manifest(spec)
     if route and route["via"] == "openrouter":
         return "OPENROUTER_API_KEY"
+    if route and route["via"] == "router":
+        return f"ROUTER_{str(route['router']).upper().replace('-', '_')}_API_KEY"
     return _PROVIDER_ENV.get(provider, f"{provider.upper()}_API_KEY")
 
 

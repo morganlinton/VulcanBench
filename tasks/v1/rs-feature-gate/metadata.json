@@ -25,5 +25,10 @@
     "entry_paths": ["lib/src/lib.rs", "lib/Cargo.toml", "Cargo.toml"]
   },
   "setup": [{"name": "build-tests", "cmd": "cargo build --tests"}],
-  "setup_timeout_s": 600
+  "setup_timeout_s": 600,
+  "router_cell": {
+    "language": "rust",
+    "scale": "small",
+    "difficulty": "easy"
+  }
 }

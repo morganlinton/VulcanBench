@@ -39,10 +39,17 @@ from harness.agent.cli_agents import (
 )
 from harness.agent.local_executor import LocalToolExecutor
 from harness.agent.protocol import RunCommandArgs, ToolCall, ToolProtocol, get_openai_tool_schemas
-from harness.agent.providers import LLMProvider, get_provider, parse_model_spec, route_manifest
+from harness.agent.providers import (
+    LLMProvider,
+    LLMResponse,
+    get_provider,
+    parse_model_spec,
+    route_manifest,
+)
+from harness.agent.routing import RoutingLedger
 from harness.agent.run_audit import audit_run
 from harness.agent.tool_calls import write as write_tool_calls
-from harness.economics import api_receipt, subscription_receipt
+from harness.economics import api_receipt, router_receipt, subscription_receipt
 from harness.effort import effort_config
 from harness.environment import start_environment
 from harness.evaluator.evaluate import evaluate_run
@@ -226,6 +233,7 @@ def run_agent(  # noqa: PLR0915
         {"role": "user", "content": f"# Issue\n\n{task.issue}"},
     ]
 
+    routing = RoutingLedger()
     try:
         prompt_tokens, completion_tokens, finished, cost_capped, actual_steps, cli_outcome = (
             _execute_agent(
@@ -245,6 +253,7 @@ def run_agent(  # noqa: PLR0915
                 effort_meta=effort_meta,
                 network=network,
                 max_run_cost=max_run_cost,
+                routing=routing,
                 agent_container_spec=(
                     AgentContainerSpec(
                         image=default_agent_image(cli_adapter.harness_id),
@@ -311,6 +320,20 @@ def run_agent(  # noqa: PLR0915
         cached_input_tokens=cached_input_tokens,
     )
     grading_uses_subscription = bool(cli_outcome and is_cli_agent_spec(judge_model or model))
+    routing_summary = (
+        {
+            "served_models": dict(cli_outcome.served_models or {}),
+            "served_model_switches": cli_outcome.served_model_switches,
+            "router_reported_cost_usd": None,
+            "router_cost_steps": 0,
+        }
+        if cli_outcome
+        else routing.as_summary()
+    )
+    if cli_outcome is None and routing.router_reported_cost_usd is not None:
+        # The gateway's own bill is the cash paid; the table estimate (if any)
+        # stays alongside as the list-price counterfactual.
+        cost = _apply_router_cost(cost, routing.router_reported_cost_usd)
     economics = (
         subscription_receipt(
             api_equivalent_cost_usd=cost["total"],
@@ -318,6 +341,7 @@ def run_agent(  # noqa: PLR0915
             grading_api_equivalent_usd=cost["judges"],
             plan_name=cli_outcome.plan_name,
             cli_reported_cost_usd=cli_outcome.cli_reported_cost_usd,
+            quota=cli_outcome.quota,
             api_equivalent_quality=(
                 # A harness that streams no usage (Cursor) has no token basis at
                 # all: let the receipt record "unavailable" instead of implying
@@ -332,6 +356,12 @@ def run_agent(  # noqa: PLR0915
             ),
         )
         if cli_outcome and cli_outcome.billing != "api"
+        else router_receipt(
+            reported_cost_usd=cost["agent"],
+            judges_cost_usd=cost["judges"],
+            api_equivalent_cost_usd=cost.get("agent_list_price_estimate"),
+        )
+        if cost.get("cost_basis") == "router-reported"
         else api_receipt(cost["total"], cost["judges"])
     )
     duration_s = round(time.monotonic() - started_mono, 3)
@@ -356,6 +386,7 @@ def run_agent(  # noqa: PLR0915
             "cost_usd": cost["total"],
             "cost_detail": cost,
             "economics": economics.as_summary(),
+            **routing_summary,
             "duration_s": duration_s,
             "started_at": started_at.isoformat(),
             "finished": finished,
@@ -491,6 +522,7 @@ def _execute_agent(
     network: bool,
     max_run_cost: float | None,
     agent_container_spec: AgentContainerSpec | None = None,
+    routing: RoutingLedger | None = None,
 ) -> tuple[int, int, bool, bool, int, CliAgentOutcome | None]:
     """Run the agent phase: the vendor CLI in the workspace, or the model loop."""
     if cli_adapter is not None:
@@ -532,8 +564,26 @@ def _execute_agent(
         effort_meta.as_summary() if effort_meta else None,
         model=model,
         max_run_cost=max_run_cost,
+        routing=routing,
     )
     return prompt_tokens, completion_tokens, finished, cost_capped, actual_steps, None
+
+
+def _apply_router_cost(cost: dict[str, Any], reported_usd: float) -> dict[str, Any]:
+    """Replace the table estimate of agent spend with the gateway's own bill.
+
+    The table figure is kept as ``agent_list_price_estimate`` (``None`` when
+    the router is unpriced) so the run still carries a list-price
+    counterfactual next to the cash it cost.
+    """
+    judges = cost["judges"]
+    return {
+        **cost,
+        "agent": reported_usd,
+        "agent_list_price_estimate": cost["agent"],
+        "total": round(reported_usd + judges, 6) if judges is not None else None,
+        "cost_basis": "router-reported",
+    }
 
 
 def _compute_cost(
@@ -689,6 +739,51 @@ def _budget_exceeded_scores(functional: float, total_tokens: int, steps: int) ->
     )
 
 
+def _run_cost_so_far(
+    routing: RoutingLedger,
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    max_run_cost: float,
+    collector: TraceCollector,
+    step: int,
+) -> float | None:
+    """Agent spend to date for the cost cap.
+
+    A gateway that bills every step is the authority on its own spend; the
+    price table only stands in when no bill came back. With neither, the cap
+    cannot bite: that is recorded once (``cost_cap_unenforceable``) rather
+    than running uncapped in silence.
+    """
+    reported = routing.router_reported_cost_usd
+    run_cost = (
+        reported if reported is not None else cost_usd(model, prompt_tokens, completion_tokens)
+    )
+    if run_cost is None and step == 1:
+        collector.record(
+            "cost_cap_unenforceable",
+            {"max_run_cost": max_run_cost, "model": model, "step": step},
+        )
+    return run_cost
+
+
+def _record_llm_response(collector: TraceCollector, resp: LLMResponse) -> None:
+    """One ``llm_response`` trace event; usage carries the gateway's routing facts."""
+    collector.record(
+        "llm_response",
+        {
+            "content": resp.content,
+            "tool_calls": [tc.to_dict() for tc in resp.tool_calls],
+            "usage": {
+                **resp.usage.to_dict(),
+                "served_model": resp.served_model,
+                "response_id": resp.response_id,
+                "reported_cost_usd": resp.reported_cost_usd,
+            },
+        },
+    )
+
+
 def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guards
     provider: LLMProvider,
     tools: list[dict[str, Any]],
@@ -701,12 +796,14 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
     effort: dict[str, Any] | None = None,
     model: str | None = None,
     max_run_cost: float | None = None,
+    routing: RoutingLedger | None = None,
 ) -> tuple[int, int, bool, bool, int]:
     prompt_tokens = 0
     completion_tokens = 0
     finished = False
     cost_capped = False
     actual_steps = 0
+    routing = routing if routing is not None else RoutingLedger()
 
     for step in range(1, max_steps + 1):
         if not deadline.ensure_time(collector, "llm_request", step):
@@ -725,14 +822,8 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
             raise
         prompt_tokens += resp.usage.prompt_tokens
         completion_tokens += resp.usage.completion_tokens
-        collector.record(
-            "llm_response",
-            {
-                "content": resp.content,
-                "tool_calls": [tc.to_dict() for tc in resp.tool_calls],
-                "usage": resp.usage.to_dict(),
-            },
-        )
+        routing.record(resp.served_model, resp.reported_cost_usd)
+        _record_llm_response(collector, resp)
         if not deadline.ensure_time(collector, "llm_response", step):
             break
 
@@ -741,7 +832,9 @@ def _run_model_loop(  # noqa: PLR0912, linear ReAct loop with budget + cost guar
         # is still verified and scored honestly, "hit the cap" is a real outcome,
         # not an error. Only enforceable when the model is priced.
         if max_run_cost is not None and model is not None:
-            run_cost = cost_usd(model, prompt_tokens, completion_tokens)
+            run_cost = _run_cost_so_far(
+                routing, model, prompt_tokens, completion_tokens, max_run_cost, collector, step
+            )
             if run_cost is not None and run_cost >= max_run_cost:
                 collector.record(
                     "cost_cap_exceeded",

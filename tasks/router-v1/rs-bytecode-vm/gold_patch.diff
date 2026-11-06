@@ -1,0 +1,161 @@
+diff --git a/src/compiler.rs b/src/compiler.rs
+index fff1462..2493a8a 100644
+--- a/src/compiler.rs
++++ b/src/compiler.rs
+@@ -6,10 +6,67 @@
+ //! the skipped code's length is known (backpatching). Targets must stay
+ //! correct when these forms nest.
+ 
+-use crate::isa::{Expr, Instr};
++use crate::isa::{BinOp, Expr, Instr};
+ 
+ /// Return a flat list of instructions that computes `expr` on the VM stack.
+ pub fn compile_expr(expr: &Expr) -> Vec<Instr> {
+-    let _ = expr;
+-    todo!("lower the AST to the instruction set in `isa`")
++    let mut code = Vec::new();
++    emit(expr, &mut code);
++    code
++}
++
++fn emit(expr: &Expr, code: &mut Vec<Instr>) {
++    match expr {
++        Expr::Lit(v) => code.push(Instr::Push(v.clone())),
++        Expr::Var(name) => code.push(Instr::Load(name.clone())),
++        Expr::Not(a) => {
++            emit(a, code);
++            code.push(Instr::Not);
++        }
++        Expr::Bin(op, a, b) => {
++            emit(a, code);
++            emit(b, code);
++            code.push(match op {
++                BinOp::Add => Instr::Add,
++                BinOp::Sub => Instr::Sub,
++                BinOp::Mul => Instr::Mul,
++                BinOp::Div => Instr::Div,
++                BinOp::Eq => Instr::Eq,
++                BinOp::Lt => Instr::Lt,
++                BinOp::Gt => Instr::Gt,
++            });
++        }
++        Expr::And(a, b) => {
++            emit(a, code);
++            code.push(Instr::Dup);
++            let jf = code.len();
++            code.push(Instr::JumpIfFalse(usize::MAX)); // left falsy: keep it, skip right
++            code.push(Instr::Pop);
++            emit(b, code);
++            code[jf] = Instr::JumpIfFalse(code.len());
++        }
++        Expr::Or(a, b) => {
++            emit(a, code);
++            code.push(Instr::Dup);
++            let jf = code.len();
++            code.push(Instr::JumpIfFalse(usize::MAX)); // left falsy: evaluate right
++            let j = code.len();
++            code.push(Instr::Jump(usize::MAX)); // left truthy: keep it, skip right
++            code[jf] = Instr::JumpIfFalse(code.len());
++            code.push(Instr::Pop);
++            emit(b, code);
++            code[j] = Instr::Jump(code.len());
++        }
++        Expr::If(c, t, e) => {
++            emit(c, code);
++            let jf = code.len();
++            code.push(Instr::JumpIfFalse(usize::MAX)); // to the else branch
++            emit(t, code);
++            let j = code.len();
++            code.push(Instr::Jump(usize::MAX)); // past the else branch
++            code[jf] = Instr::JumpIfFalse(code.len());
++            emit(e, code);
++            code[j] = Instr::Jump(code.len());
++        }
++    }
+ }
+diff --git a/src/vm.rs b/src/vm.rs
+index f499be9..3191b01 100644
+--- a/src/vm.rs
++++ b/src/vm.rs
+@@ -8,6 +8,79 @@ use crate::isa::{Env, Instr, Value, VmError};
+ 
+ /// Execute `code` against the bindings in `env` and return the result.
+ pub fn run(code: &[Instr], env: &Env) -> Result<Value, VmError> {
+-    let _ = (code, env);
+-    todo!("execute the instruction set in `isa` on a value stack")
++    let mut stack: Vec<Value> = Vec::new();
++    let mut pc = 0usize;
++    while pc < code.len() {
++        let instr = &code[pc];
++        pc += 1;
++        match instr {
++            Instr::Push(v) => stack.push(v.clone()),
++            Instr::Load(name) => match env.get(name) {
++                Some(v) => stack.push(v.clone()),
++                None => return Err(VmError::UnboundVariable(name.clone())),
++            },
++            Instr::Pop => {
++                pop(&mut stack)?;
++            }
++            Instr::Dup => {
++                let top = stack.last().cloned().ok_or(VmError::StackUnderflow)?;
++                stack.push(top);
++            }
++            Instr::Not => {
++                let a = pop(&mut stack)?;
++                stack.push(Value::Bool(!a.truthy()));
++            }
++            Instr::Eq => {
++                let b = pop(&mut stack)?;
++                let a = pop(&mut stack)?;
++                stack.push(Value::Bool(a == b));
++            }
++            Instr::Add | Instr::Sub | Instr::Mul | Instr::Div | Instr::Lt | Instr::Gt => {
++                let b = num(pop(&mut stack)?)?;
++                let a = num(pop(&mut stack)?)?;
++                stack.push(match instr {
++                    Instr::Add => Value::Num(a + b),
++                    Instr::Sub => Value::Num(a - b),
++                    Instr::Mul => Value::Num(a * b),
++                    Instr::Div => {
++                        if b == 0.0 {
++                            return Err(VmError::DivisionByZero);
++                        }
++                        Value::Num(a / b)
++                    }
++                    Instr::Lt => Value::Bool(a < b),
++                    Instr::Gt => Value::Bool(a > b),
++                    _ => unreachable!(),
++                });
++            }
++            Instr::Jump(target) => pc = jump(*target, code.len())?,
++            Instr::JumpIfFalse(target) => {
++                if !pop(&mut stack)?.truthy() {
++                    pc = jump(*target, code.len())?;
++                }
++            }
++        }
++    }
++    if stack.len() != 1 {
++        return Err(VmError::BadFinalStack(stack.len()));
++    }
++    Ok(stack.pop().unwrap())
++}
++
++fn pop(stack: &mut Vec<Value>) -> Result<Value, VmError> {
++    stack.pop().ok_or(VmError::StackUnderflow)
++}
++
++fn num(v: Value) -> Result<f64, VmError> {
++    match v {
++        Value::Num(n) => Ok(n),
++        _ => Err(VmError::TypeError("arithmetic and ordering need numbers")),
++    }
++}
++
++fn jump(target: usize, len: usize) -> Result<usize, VmError> {
++    if target > len {
++        return Err(VmError::BadJump(target));
++    }
++    Ok(target)
+ }

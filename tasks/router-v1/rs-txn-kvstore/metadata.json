@@ -1,0 +1,85 @@
+{
+  "id": "rs-txn-kvstore",
+  "category": "feature",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-11-05",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "repo_scale": "small",
+  "test_timeout_s": 600,
+  "setup": [
+    {
+      "name": "build-tests",
+      "cmd": "cargo build --offline --tests"
+    }
+  ],
+  "setup_timeout_s": 600,
+  "router_cell": {
+    "language": "rust",
+    "scale": "small",
+    "difficulty": "hard"
+  },
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-11-05 as the Rust counterpart of py-txn-kvstore: inverses as boxed FnOnce closures that receive the data map (so the journal never borrows the store), the fold-into-parent commit and the deep-nesting test are new and not derived from any existing repository, so they post-date all model training cutoffs.",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "autocommit_without_transaction",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact autocommit_without_transaction"
+      },
+      {
+        "name": "rollback_restores_prior_value_and_absence",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact rollback_restores_prior_value_and_absence"
+      },
+      {
+        "name": "rollback_restores_deleted_key",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact rollback_restores_deleted_key"
+      },
+      {
+        "name": "commit_keeps_changes",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact commit_keeps_changes"
+      },
+      {
+        "name": "nested_commit_then_outer_rollback_undoes_everything",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact nested_commit_then_outer_rollback_undoes_everything"
+      },
+      {
+        "name": "nested_inner_rollback_leaves_outer_intact",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact nested_inner_rollback_leaves_outer_intact"
+      },
+      {
+        "name": "rollback_replays_multiple_writes_in_reverse",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact rollback_replays_multiple_writes_in_reverse"
+      },
+      {
+        "name": "commit_without_transaction_errors",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact commit_without_transaction_errors"
+      },
+      {
+        "name": "keys_reflects_transaction_state",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact keys_reflects_transaction_state"
+      },
+      {
+        "name": "deep_nesting_folds_every_level",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact deep_nesting_folds_every_level"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "construct",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_txnkv -- --exact construct"
+      }
+    ]
+  },
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "suggested_timeout_s": 10800,
+    "entry_paths": [
+      "src/store.rs",
+      "src/journal.rs"
+    ]
+  }
+}

@@ -248,9 +248,8 @@ def _edits_for(node: ast.AST, src: _Source, allow_delete: bool) -> list[_Edit]: 
         edits += _slice_edits(node, src)
     elif isinstance(node, ast.Call):
         edits += _call_edits(node, src)
-    elif allow_delete and isinstance(node, ast.Expr):
-        if not isinstance(node.value, ast.Constant):
-            edits.append(_Edit("delete", *_pos(node), "pass"))
+    elif allow_delete and isinstance(node, ast.Expr) and not isinstance(node.value, ast.Constant):
+        edits.append(_Edit("delete", *_pos(node), "pass"))
     if allow_delete and isinstance(node, ast.AugAssign):
         edits.append(_Edit("delete", *_pos(node), "pass"))
     return edits

@@ -291,7 +291,7 @@ def effort_config(
     elif provider_name == "zai":
         # GLM 5.3+ exposes reasoning_effort; earlier GLMs are effort-less.
         effort_map = _ZAI_EFFORT_VALUES if zai_supports_effort(model) else None
-    elif provider_name in {"mock", "ollama", "openrouter"}:
+    elif provider_name in {"mock", "ollama", "openrouter", "router"}:
         effort_map = None
     else:
         raise EffortNotSupportedError(

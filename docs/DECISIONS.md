@@ -7,6 +7,76 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-05: router eval, a 16-task suite under $100 of cash
+
+### Decision
+
+Owner, in chat, 2026-11-05. VulcanBench gets a small suite,
+`tasks/router-v1` (VulcanBench Router v1), to answer two questions about
+model routers (products that pick a cheaper backend per request and charge
+API-plus pricing): whether the served model changes with language, repo size
+and difficulty at all, and what a router costs per task against the same
+tasks on a direct API at list price and on a flat subscription seat.
+
+- The suite is a factorial of {Python, Rust} x {small, large} x {easy, hard},
+  two tasks per cell, built only from public tasks already in this repo
+  (`v1`, `cii-v1`, `v4`) plus two authored Rust small-hard tasks, because
+  no public task fills that cell and a bench tag pushed from this public
+  repo publishes golds (so nothing from VulcanRoutine). Each task carries a
+  cosmetic `router_cell` label; the analysis also uses the measured pass
+  rate of the cheapest leg as the empirical difficulty axis.
+- First pass targets API routers only (`router:<name>/<model>`, and
+  `openrouter:openrouter/auto`); Cursor Auto and Factory Droid wait for a
+  later pass. Cash ceiling about $100: a single-request probe ladder (16
+  tasks x 8 repeats x 3 routers, plus a length-padded control), then one
+  agent run per task per router with `--max-run-cost 3`, then a second
+  repeat on the eight small tasks if cash remains.
+- Subscription legs run the same suite once each through Claude Code
+  (Claude Max), Codex (ChatGPT Pro) and Cursor, one leg at a time, each
+  approved by the owner before it starts (every quota-spending run needs
+  that approval). Their list-price receipts double as the direct-API
+  baseline, so no cash baseline leg is run.
+- The harness now records what a router tells it: per step the served
+  model, response id and the gateway's own cost (`usage.served_model`,
+  `usage.reported_cost_usd` in `trace.jsonl`), and per run
+  `served_models`, `served_model_switches` and `router_reported_cost_usd`
+  in `summary.json`. When every step carried a gateway bill the run's
+  `cost_usd` is that bill (`economics.cost_basis = "router-reported"`) and
+  the price-table figure stays beside it as the list-price counterfactual;
+  a partial bill is withheld rather than summed. Claude Code runs record the
+  subscription usage windows around each task under `economics.quota`
+  (first and last `rate_limit_event` of the stream, or a one-turn probe
+  before and after with `VULCANBENCH_QUOTA_PROBE=1`), which turns a flat
+  seat into a measurable per-task cost. Effort is never sent to a router.
+
+Runs go from a bench tag in a run worktree, one task at a time, under the
+flat 3-hour timeout, like every other suite.
+
+### Evidence
+
+- Routing has been unobservable so far: `OpenRouterProvider` already asked
+  for `usage.include` but `resp.raw` was never persisted, so the served
+  `model` and `usage.cost` never reached a run record; Claude Code runs kept
+  only the init model. `backend/runner/firstcheck.py` counted per-message
+  models for the GUI only.
+- Subscription receipts had `quota` fixed at "unavailable"
+  (`harness/economics.py`), while `scripts/frontier-v5/run_gate.sh` already
+  read `rate_limit_info.unifiedWindows[*].utilization` for its usage
+  preflight; the Frontier v5 gate log shows one three-attempt task moving
+  the five-hour window by tens of points, so a per-task delta is measurable.
+- Public task candidates per cell were taken from the suites' metadata
+  (`difficulty`, `repo_scale`); Rust has no task labelled hard with a small
+  repo anywhere in the repo.
+
+### Revisit triggers
+
+- A router that returns no `model` or no cost on its responses: it stays in
+  the probe ladder only and its column is marked unobservable.
+- Cash past $100 before the agent runs finish: stop at one repeat and say
+  so in the writeup rather than trimming cells.
+- Cursor Auto or Factory Droid becoming a target: that needs adapter work
+  (Cursor streams no tokens or cost; Droid has no adapter) and its own entry.
+
 ## 2026-11-03: Muse Wonder Full runs Max under Contributor
 
 ### Decision

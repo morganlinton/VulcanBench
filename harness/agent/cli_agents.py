@@ -39,6 +39,7 @@ import tempfile
 import threading
 import time
 import uuid
+from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -51,6 +52,7 @@ from harness.agent.providers import (
     ProviderError,
     TokenUsage,
 )
+from harness.agent.quota_probe import parse_rate_limit_info, probe_claude_usage, quota_block
 from harness.pricing import cost_usd
 from harness.redaction import sanitize
 from harness.sandbox.docker_executor import ResourceSpec
@@ -2091,6 +2093,12 @@ class CliAgentOutcome:
     cli_total_tokens: int | None = None
     reported_effort: str | None = None
     sandbox_profile: str | None = None
+    # Per-message model names the CLI streamed (Claude Code ``message.model``),
+    # so a fallback or routed turn is visible next to the init model.
+    served_models: dict[str, int] | None = None
+    served_model_switches: int = 0
+    # Subscription usage-window snapshot around the task (quota_probe.quota_block).
+    quota: dict[str, Any] | None = None
 
     def summary(self) -> dict[str, Any]:
         """Provenance block persisted into the run summary."""
@@ -2114,6 +2122,9 @@ class CliAgentOutcome:
             "cli_total_tokens": self.cli_total_tokens,
             "reported_effort": self.reported_effort,
             "sandbox_profile": self.sandbox_profile,
+            "served_models": self.served_models,
+            "served_model_switches": self.served_model_switches,
+            "quota": self.quota,
         }
 
 
@@ -2205,6 +2216,9 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
             + cmd
         )
 
+    probe_env = _subscription_env(env_overrides)
+    probe_quota = os.environ.get("VULCANBENCH_QUOTA_PROBE") == "1"
+    probe_before = probe_claude_usage(claude_bin, model, probe_env) if probe_quota else None
     collector.record(
         "cli_agent_start",
         {
@@ -2276,6 +2290,10 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
 
     usage_by_msg: dict[str, dict[str, Any]] = {}
     result_msg: dict[str, Any] | None = None
+    served: Counter[str] = Counter()
+    last_served: str | None = None
+    stream_first: dict[str, Any] | None = None
+    stream_last: dict[str, Any] | None = None
     stream_f = stream_log_path.open("w", encoding="utf-8") if stream_log_path else None
     try:
         assert proc.stdout is not None
@@ -2305,9 +2323,24 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
                         "harness_version": outcome.harness_version,
                     },
                 )
+            elif etype == "rate_limit_event":
+                snapshot = parse_rate_limit_info(event.get("rate_limit_info"))
+                if snapshot is not None:
+                    stream_first = stream_first or snapshot
+                    stream_last = snapshot
             elif etype == "assistant":
                 msg = event.get("message") or {}
                 usage = msg.get("usage")
+                msg_model = msg.get("model")
+                if isinstance(msg_model, str) and msg_model:
+                    # Count per message id, like usage: a re-emitted block
+                    # must not look like a second routed turn.
+                    msg_key = str(msg.get("id") or len(usage_by_msg))
+                    if msg_key not in usage_by_msg or not isinstance(usage, dict):
+                        if last_served is not None and msg_model != last_served:
+                            outcome.served_model_switches += 1
+                        last_served = msg_model
+                        served[msg_model] += 1
                 if isinstance(usage, dict):
                     # Keyed by message id: some CLI versions re-emit a message
                     # per content block; overwriting avoids double counting.
@@ -2351,6 +2384,16 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     proc.wait()
     stderr_thread.join(timeout=5)
     outcome.timed_out = killed["timeout"]
+    outcome.served_models = dict(served) or None
+    probe_after = probe_claude_usage(claude_bin, model, probe_env) if probe_quota else None
+    outcome.quota = quota_block(
+        stream_first=stream_first,
+        stream_last=stream_last,
+        probe_before=probe_before,
+        probe_after=probe_after,
+    )
+    if outcome.quota is not None:
+        collector.record("cli_agent_quota", outcome.quota)
 
     if result_msg is None:
         # Killed by the budget/cost watchdog (partial work still counts), or

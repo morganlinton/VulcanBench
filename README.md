@@ -107,6 +107,8 @@ its own setting, not a calibrated equivalent.
 | Moonshot Kimi | `kimi:<model>` | `MOONSHOT_API_KEY` | `extra-high` maps to `max`; others recorded only |
 | Z.ai | `zai:<model>` | `ZAI_API_KEY` | recorded only |
 | OpenRouter | `openrouter:<vendor>/<model>` | `OPENROUTER_API_KEY` | pinned to one upstream endpoint so a column stays one serving stack |
+| Model router | `router:<name>/<model>` | `ROUTER_<NAME>_BASE_URL`, `ROUTER_<NAME>_API_KEY` | any OpenAI-compatible router (Martian, Not Diamond, Requesty, an OpenRouter `auto` model); effort is never sent; the served model and the gateway's own per-call cost are recorded per step (`served_models`, `router_reported_cost_usd` in `summary.json`) |
+| Model router | `router:<name>/<model>` | `ROUTER_<NAME>_BASE_URL`, `ROUTER_<NAME>_API_KEY` | any OpenAI-compatible router (Martian, Not Diamond, Requesty, an OpenRouter `auto` model); effort is never sent; the served model and the gateway's own per-call cost are recorded per step (`served_models`, `router_reported_cost_usd` in `summary.json`) |
 | Ollama | `ollama:<model>` | none | local inference through any OpenAI-compatible server; cost records as $0 and duration measures your hardware |
 | Mock | `mock:synthetic` | none | deterministic, offline |
 

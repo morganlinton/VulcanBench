@@ -66,6 +66,38 @@ def api_receipt(total_cost_usd: float | None, grading_cost_usd: float | None) ->
     )
 
 
+def router_receipt(
+    *,
+    reported_cost_usd: float,
+    judges_cost_usd: float | None,
+    api_equivalent_cost_usd: float | None,
+) -> EconomicsReceipt:
+    """Receipt for a run billed by a model router's own per-call ledger.
+
+    The router's reported total is the cash paid (``marginal_cash_usd``);
+    the price-table figure for the same tokens, when the router is priced
+    at all, is kept as the list-price counterfactual so a router column can
+    be read against a direct-API column.
+    """
+    total = round(reported_cost_usd + judges_cost_usd, 6) if judges_cost_usd is not None else None
+    return EconomicsReceipt(
+        billing_mode="api-metered",
+        cost_basis="router-reported",
+        marginal_cash_usd=total,
+        grading_cash_usd=judges_cost_usd,
+        grading_api_equivalent_usd=judges_cost_usd,
+        api_equivalent_cost_usd=api_equivalent_cost_usd,
+        measurement_quality={
+            "marginal_cash_usd": "router-reported",
+            "api_equivalent_cost_usd": (
+                "estimated-from-reported-tokens"
+                if api_equivalent_cost_usd is not None
+                else "unavailable"
+            ),
+        },
+    )
+
+
 def subscription_receipt(
     *,
     api_equivalent_cost_usd: float | None,
@@ -74,16 +106,22 @@ def subscription_receipt(
     plan_name: str | None,
     cli_reported_cost_usd: float | None,
     api_equivalent_quality: str | None = None,
+    quota: dict[str, Any] | None = None,
 ) -> EconomicsReceipt:
     """Receipt for an included-usage subscription run.
 
     Marginal cash and plan allocation remain unknown until a product exposes an
     overage receipt or the operator supplies a billing-period allocation.  The
     API-equivalent value is a counterfactual, never presented as cash paid.
+    ``quota`` is the usage-window snapshot around the task (see
+    ``harness/agent/quota_probe.py``) when the CLI exposes one.
     """
     api_quality = api_equivalent_quality or (
         "estimated-from-reported-tokens" if api_equivalent_cost_usd is not None else "unavailable"
     )
+    quota_quality = "unavailable"
+    if quota:
+        quota_quality = "probe-windows" if quota.get("source") == "probe" else "in-stream-windows"
     return EconomicsReceipt(
         billing_mode="subscription-included",
         cost_basis="subscription-plus-api-equivalent",
@@ -92,6 +130,7 @@ def subscription_receipt(
         grading_cash_usd=grading_cash_usd,
         grading_api_equivalent_usd=grading_api_equivalent_usd,
         cli_reported_cost_usd=cli_reported_cost_usd,
+        quota=quota,
         measurement_quality={
             "marginal_cash_usd": "unavailable",
             "overage_cash_usd": "unavailable",
@@ -105,6 +144,6 @@ def subscription_receipt(
                 if grading_api_equivalent_usd is not None
                 else "unavailable"
             ),
-            "quota": "unavailable",
+            "quota": quota_quality,
         },
     )

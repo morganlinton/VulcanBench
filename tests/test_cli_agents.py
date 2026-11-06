@@ -64,8 +64,12 @@ elif "stream-json" in args:
             f.write('print("hello from vulcanbench")\\n')
     print(json.dumps({"type": "system", "subtype": "init", "session_id": "s1",
                       "model": "claude-opus-4-8", "api_key_present": api_key_present}))
+    print(json.dumps({"type": "rate_limit_event", "rate_limit_info": {
+        "status": "allowed", "isUsingOverage": False,
+        "unifiedWindows": {"five_hour": {"utilization": 0.10},
+                           "seven_day": {"utilization": 0.50}}}}))
     print(json.dumps({"type": "assistant", "message": {
-        "id": "m1",
+        "id": "m1", "model": "claude-opus-4-8",
         "content": [{"type": "text", "text": "Writing the file"},
                     {"type": "tool_use", "id": "t1", "name": "Write",
                      "input": {"file_path": "hello.py"}}],
@@ -73,6 +77,10 @@ elif "stream-json" in args:
                   "cache_read_input_tokens": 50, "cache_creation_input_tokens": 10}}}))
     print(json.dumps({"type": "user", "message": {"content": [
         {"type": "tool_result", "tool_use_id": "t1", "content": "ok"}]}}))
+    print(json.dumps({"type": "rate_limit_event", "rate_limit_info": {
+        "status": "allowed", "isUsingOverage": False,
+        "unifiedWindows": {"five_hour": {"utilization": 0.12},
+                           "seven_day": {"utilization": 0.504}}}}))
     if mode == "limit":
         print(json.dumps({"type": "result", "subtype": "error_during_execution",
                           "is_error": True, "result": "Claude AI usage limit reached|123",
@@ -312,6 +320,53 @@ def test_max_turns_is_a_scored_outcome_not_an_error(
     assert out.subtype == "error_max_turns"
     assert out.prompt_tokens == 168
     assert out.completion_tokens == 30
+
+
+def test_claude_code_records_served_models_and_stream_quota(
+    tmp_path: Path, fake_claude: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("VULCANBENCH_QUOTA_PROBE", raising=False)
+    collector = _Collector()
+    out = run_claude_code_task(
+        workspace=tmp_path,
+        prompt="p",
+        model="claude-opus-4-8",
+        priced_spec="claude-code:claude-opus-4-8",
+        max_turns=5,
+        collector=collector,
+    )
+    assert out.served_models == {"claude-opus-4-8": 1}
+    assert out.served_model_switches == 0
+    assert out.quota is not None
+    assert out.quota["source"] == "stream"
+    assert out.quota["before"] == {"five_hour": 0.10, "seven_day": 0.50}
+    assert out.quota["delta"] == {
+        "five_hour": pytest.approx(0.02),
+        "seven_day": pytest.approx(0.004),
+    }
+    assert any(etype == "cli_agent_quota" for etype, _ in collector.events)
+    assert out.summary()["quota"]["after"]["seven_day"] == 0.504
+
+
+def test_claude_code_quota_probe_brackets_the_run(
+    tmp_path: Path, fake_claude: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("VULCANBENCH_QUOTA_PROBE", "1")
+    # The fake CLI answers the one-turn probe with the same stream, so the
+    # probe snapshot is its last event (0.12 / 0.504) on both sides.
+    out = run_claude_code_task(
+        workspace=tmp_path,
+        prompt="p",
+        model="claude-opus-4-8",
+        priced_spec="claude-code:claude-opus-4-8",
+        max_turns=5,
+        collector=_Collector(),
+    )
+    assert out.quota is not None
+    assert out.quota["source"] == "probe"
+    assert out.quota["before"] == {"five_hour": 0.12, "seven_day": 0.504}
+    assert out.quota["delta"] == {"five_hour": 0.0, "seven_day": 0.0}
+    assert out.quota["stream"]["first"] == {"five_hour": 0.10, "seven_day": 0.50}
 
 
 def test_cost_cap_kills_run_and_keeps_partial_usage(tmp_path: Path, fake_claude: Path) -> None:

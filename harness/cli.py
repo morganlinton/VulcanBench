@@ -29,7 +29,7 @@ from harness.agent.cli_agents import (
     list_cli_agent_adapters,
 )
 from harness.agent.loop import run_agent
-from harness.agent.providers import ProviderError
+from harness.agent.providers import ProviderError, reports_live_cost
 from harness.calibration import calibrate_tasks, calibration_to_markdown
 from harness.compare import build_matrix
 from harness.console import (
@@ -247,7 +247,7 @@ def run(  # noqa: PLR0912, PLR0915, CLI entry: option declarations + linear guar
         if not (math.isfinite(max_run_cost) and max_run_cost > 0):
             echo(f"error --max-run-cost must be a finite number > 0, got {max_run_cost}")
             raise SystemExit(1)
-        if not is_priced(model):
+        if not is_priced(model) and not reports_live_cost(model):
             echo(f"error --max-run-cost needs a priced model; no price for {model}")
             raise SystemExit(1)
     if only_missing and suite is None:
@@ -657,7 +657,7 @@ def effort_sweep(  # noqa: PLR0912, PLR0915, CLI entry: validation + per-effort 
         if not (math.isfinite(max_run_cost) and max_run_cost > 0):
             echo(f"error --max-run-cost must be a finite number > 0, got {max_run_cost}")
             raise SystemExit(1)
-        if not is_priced(model):
+        if not is_priced(model) and not reports_live_cost(model):
             echo(f"error --max-run-cost needs a priced model; no price for {model}")
             raise SystemExit(1)
 

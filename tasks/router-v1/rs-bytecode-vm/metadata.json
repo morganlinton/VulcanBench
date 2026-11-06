@@ -1,0 +1,90 @@
+{
+  "id": "rs-bytecode-vm",
+  "category": "feature",
+  "languages": [
+    "rust"
+  ],
+  "difficulty": "hard",
+  "task_complexity": "multi_file",
+  "created": "2026-11-05",
+  "source": "hand-authored",
+  "decontaminated": true,
+  "repo_scale": "small",
+  "test_timeout_s": 600,
+  "setup": [
+    {
+      "name": "build-tests",
+      "cmd": "cargo build --offline --tests"
+    }
+  ],
+  "setup_timeout_s": 600,
+  "router_cell": {
+    "language": "rust",
+    "scale": "small",
+    "difficulty": "hard"
+  },
+  "decontamination_notes": "Original scenario written for VulcanBench on 2026-11-05 as the Rust counterpart of py-bytecode-vm: the shared `isa` module, the `Value`/`Expr`/`Instr` shapes, the error enum and the nested short-circuit-in-condition test are new and not derived from any existing repository, so they post-date all model training cutoffs.",
+  "tests": {
+    "fail_to_pass": [
+      {
+        "name": "arithmetic",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact arithmetic"
+      },
+      {
+        "name": "variables_and_compare",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact variables_and_compare"
+      },
+      {
+        "name": "unknown_variable_errors",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact unknown_variable_errors"
+      },
+      {
+        "name": "division_by_zero_errors",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact division_by_zero_errors"
+      },
+      {
+        "name": "not",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact not"
+      },
+      {
+        "name": "if_selects_branch_by_condition",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact if_selects_branch_by_condition"
+      },
+      {
+        "name": "nested_if_jump_targets",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact nested_if_jump_targets"
+      },
+      {
+        "name": "and_or_values",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact and_or_values"
+      },
+      {
+        "name": "short_circuit_skips_faulty_branch",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact short_circuit_skips_faulty_branch"
+      },
+      {
+        "name": "nested_short_circuit_in_condition",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact nested_short_circuit_in_condition"
+      },
+      {
+        "name": "flat_isa_with_forward_absolute_jumps",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact flat_isa_with_forward_absolute_jumps"
+      }
+    ],
+    "pass_to_pass": [
+      {
+        "name": "construct",
+        "cmd": "CARGO_BUILD_JOBS=2 cargo test --offline --quiet --test test_vmlang -- --exact construct"
+      }
+    ]
+  },
+  "agent_hints": {
+    "suggested_max_steps": 90,
+    "suggested_timeout_s": 10800,
+    "entry_paths": [
+      "src/compiler.rs",
+      "src/vm.rs",
+      "src/isa.rs"
+    ]
+  }
+}

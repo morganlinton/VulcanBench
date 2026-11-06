@@ -65,22 +65,42 @@
       },
       "extra-high": {
         "n": 23,
-        "functional": 93.16782608695652,
-        "functional_se": 4.506773950983732,
-        "passed": 19,
-        "usd": 5.081019567391304,
-        "minutes": 33.337392028985505,
-        "timeouts": 1,
+        "functional": 97.51565217391305,
+        "functional_se": 1.5457604682908712,
+        "passed": 20,
+        "usd": 4.857141076086957,
+        "minutes": 30.259781884057972,
+        "timeouts": 0,
         "versions": {
           "Muse Code 1.4.9 (1.4.9-R6297.1)": 23
         },
-        "n_judged": 22,
-        "combined": 87.58899923939697,
-        "combined_se": 0.964079486318422,
-        "combined_timeouts_zero": 83.78078188116231,
+        "n_judged": 23,
+        "combined": 87.35620964035964,
+        "combined_se": 0.9501676583268805,
+        "combined_timeouts_zero": null,
         "by_judge_l1": {
-          "claude": 57.765151515151516,
-          "sol": 74.90530303030303
+          "claude": 57.2463768115942,
+          "sol": 74.18478260869566
+        }
+      },
+      "max": {
+        "n": 23,
+        "functional": 99.03391304347826,
+        "functional_se": 0.9660869565217391,
+        "passed": 22,
+        "usd": 5.910995563043478,
+        "minutes": 40.93668623188406,
+        "timeouts": 0,
+        "versions": {
+          "Muse Code 1.4.9 (1.4.9-R6297.1)": 23
+        },
+        "n_judged": 23,
+        "combined": 88.36127541371671,
+        "combined_se": 0.7559472850525527,
+        "combined_timeouts_zero": null,
+        "by_judge_l1": {
+          "claude": 57.2463768115942,
+          "sol": 75.36231884057972
         }
       }
     },
@@ -293,6 +313,14 @@
       "code-quality-maintenance-v3.26.3": {
         "summary.json": "06e3dbbbb01663bdc3e6cfdebaecd111f1ff15fdb52eb91e3ea356215a7a011d",
         "protocol.json": "2271aa3dff46892901859999ad83c4ff12bc00e74710cb0f876da8fc4b96c721"
+      },
+      "code-quality-maintenance-v3.26.4": {
+        "summary.json": "944b49b336f87370a5a77d53d6a72c1dba9d12fdbe882aec16fe26d3e34a95f7",
+        "protocol.json": "a2f551fd34187b06865832193dab2634b1baec9b4590a0cf426d6ab1ee619779"
+      },
+      "code-quality-maintenance-v3.26.5": {
+        "summary.json": "bc24fc6cf3a604601360cac1fc5c1d07eaf785432801bdd7c0e6b6bf5f9715f9",
+        "protocol.json": "00f8519f6303ff27448064290221b144cc0845534249523d9119e397f6d2b532"
       }
     },
     "opus55_traces_repo": "https://github.com/morganlinton/vulcanbench-opus55-traces",
@@ -369,7 +397,7 @@
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-blendcore-binary-parity-c8ba8321": "a96fd830ef778f38d55bd98b31628cddce97106131196d43846f879bc085823a",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-cellarcore-binary-parity-7fac3835": "edc3b8e39e02657afa40b89663c4e55619aff94fa7429a557a3d21965f35ce80",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-codeccore-binary-parity-4c5d1af5": "3403dab969982f96e961304b479a971ec958a1e05ade9dce1ea527135e79d436",
-      "runs-effort-musewonder-full-v2-149/extra-high/legacy-depotcore-binary-parity-995c75a9": "17a6ee3534bc112fea50193478650b954839ff2639710b82572559f72bd8d476",
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-depotcore-binary-parity-20fa8072": "9ad43d9c76a863943614dd09e7dcdc996e9b60f3d03511c6edb4f48b6cdadb4f",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-freightcore-binary-parity-191804aa": "35648491f006d5441006d9f812c2a8a20230ee843307c71d1b1093821994a12f",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-granarycore-binary-parity-35f0c96a": "c883a07f1d3ac608a8b594921ef42b00f4200a1b82bd594d1211b78713dd6a2b",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-hedgecore-binary-parity-e2794f6a": "beb16e36eb2019ea2632dbdd43eb6c305cf27afb8a4f14e58873a927fb09c720",
@@ -388,9 +416,32 @@
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-snapcore-binary-parity-9b7ee3df": "86dbad662124cb24af54c433c025a36a149f09d4c065b0eefcd61535f3ad9647",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-stampcore-binary-parity-e9c6b6f4": "567926acb7443560a4b6e703fff5bfd3e2de28569efd85470cf9880215f80fcd",
       "runs-effort-musewonder-full-v2-149/extra-high/legacy-tallycore-binary-parity-4bc0f3e2": "b26494319a459fc831b1e22aa01e08b06e7dd4d08c44477be5121f4ef9b8c9c4",
-      "runs-effort-musewonder-full-v2-149/extra-high/legacy-vaultcore-binary-parity-7448aea9": "c34893a40d42788d40e3584b489da30fdcaa5a2c98a3d88c5434a193bf4df297"
+      "runs-effort-musewonder-full-v2-149/extra-high/legacy-vaultcore-binary-parity-7448aea9": "c34893a40d42788d40e3584b489da30fdcaa5a2c98a3d88c5434a193bf4df297",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-blendcore-binary-parity-4e00285d": "76c3fc6343cd310d6fbbad9a8a5f3c1acd2afa84ef76d26cc19288bd0151f8fc",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-cellarcore-binary-parity-af2e6b0e": "89126b6da00f15cc03583302fa4ce7020b7ccae96f308bdf56ee8d96ece92364",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-codeccore-binary-parity-8d433674": "a0d338118164b6ba0ce2b2cfc6c776cf8ceca88ba609b349ac4d175aa7a663a8",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-depotcore-binary-parity-4bf691a6": "1dc214ec769ddad207db8e11963fc2e52366c9404de62368da6cdf428f47192f",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-freightcore-binary-parity-be7fdeaf": "d74c522425111655b0c0814a9cd8001809916bd1ad9dc7c86e6dff4c872dd28c",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-granarycore-binary-parity-5c8966e5": "d456f88ef4d1f59cae04ec40cc69ba97205aa035c1aea8eac509f1cb5530ce1c",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-hedgecore-binary-parity-a2fa14a8": "d9a17a7e47e6934a380872dba0364ab795aa9a4efe7599527efbf719d9a78f30",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-lodgecore-binary-parity-2c16741e": "8cdcac1ac8e6933a87130b7a1c6a9961139dd5945fdfc87e57bb9f412e897267",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-matchcore-order-book-parity-bb3bc8fe": "e8fc62b95a335fcdc858591d926fbb2175779493dc204468e360bb2daf5f9296",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-metercore-binary-parity-39538d27": "3935bdd82cef85e0cf6fbf35de409c2698b9b03779fe1866f8d27ab325369cf2",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-pacecore-binary-parity-9fe45377": "4e898d93ac4cc5f24a1a65bf59f23afff0c08a1c0ed1f8d619c21474370dfafc",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-paddockcore-binary-parity-d015d2c1": "f649b4e118130403a7ebe9f0886a87b9a41414fcb9b893dfa0b74186c124940d",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-payrollcore-binary-parity-a48e922c": "877907fdf680be212089b1e6417ed1534dd917d0dd001a878cc3852bc5b9d6ce",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-qlite-store-parity-027537c2": "534f25953185afc5e8c0acb4dd1c15ec92d897c38d68835014bea4b99312db9f",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-queuecore-binary-parity-eb09716f": "a8dc113aa0ddfc9e57d1f11fe111c15e96adfaa9c24d33d50e9b6a7213737879",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-quotacore-binary-parity-32054be7": "bc5e079c3b962af1655fd2d754b08c3a20f93fcf6bbf625ac0345718f60f2a77",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-reflowcore-binary-parity-143d1164": "9ae7bb255e4301b362fdacae40fdae1a5e8939315a500187179abebc4dd37555",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-schedcore-binary-parity-28f13b19": "a1de1afadaff67db833f2f0cb4f5b0436599215275ed46d181bd0f8eea0378da",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-settlecore-binary-parity-8b1db06a": "1dafb8a99fa6ab74cb9f86d151b13ccdb8dc19e0ad38fa5181b330c3d9d91f26",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-snapcore-binary-parity-e7187c36": "498df95b98e4b673af20eb302c8b93651dc6221a68cf28af73bac057fe67353c",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-stampcore-binary-parity-f25053c4": "4a07970c6eeea56f47429c12a00a8c9021ea08f3e8a11a9a4a9d6726932b53dc",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-tallycore-binary-parity-e60560e1": "88358b82f61db6d48eff4690d82bfa59be620739e0f68222db1110f393f7971d",
+      "runs-effort-musewonder-full-v2-149-max/max/legacy-vaultcore-binary-parity-a420c420": "6c819b02fa3e287b477b1ded6928a2270663e55641ba4ecd19bd0a9542c3052e"
     }
   },
-  "png_sha256": "fbd9ed9221e51acae49af56ae420f0e6518ee6ddd6a7655e2d1adb13f684930e",
+  "png_sha256": "53f00a73be100b4c1882750c84b73760574e50a145d09a0b254ff643c6845350",
   "table": "musewonder-full-vs-frontier-efforts.csv"
 }

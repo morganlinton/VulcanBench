@@ -1,6 +1,6 @@
 """Muse Wonder Full beside Claude Opus 5.5, GPT-6.1 Sol and GPT-6 Astra.
 
-One card on VulcanBench Frontier v4 at Low and Medium: the combined score, time
+One card on VulcanBench Frontier v4 at all five effort levels: the combined score, time
 per task and cost per task, each as grouped bars labelled with their values. At the
 owner's request the bars carry no whiskers; the standard errors stay in the
 table and the CSV.
@@ -71,7 +71,8 @@ RESULTS = ROOT / "docs/results"
 OUTPUT = RESULTS / "swe-v4-musewonder-full-2026-10"
 WONDER = ROOT / "runs-effort-musewonder-full-v2"
 WONDER_149 = ROOT / "runs-effort-musewonder-full-v2-149"  # continues WONDER on Muse Code 1.4.9
-WONDER_ROOTS = (WONDER, WONDER_149)
+WONDER_MAX = ROOT / "runs-effort-musewonder-full-v2-149-max"  # Max, its own root on Muse Code 1.4.9
+WONDER_ROOTS = (WONDER, WONDER_149, WONDER_MAX)
 OPUS_SOL = RESULTS / "swe-v4-gpt6-vs-gpt56-2026-09/gpt61sol-opus55-astra-efforts.csv"
 ASTRA_FABLE = RESULTS / "swe-v4-astra-fable51-2026-09/astra-vs-fable51-v34-economics-efforts.csv"
 OPUS_MANIFEST = OUTPUT / "opus55-traces-manifest.csv"
@@ -86,15 +87,21 @@ HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.2"
 HIGH_PROTOCOL = "code-quality-maintenance-v3.26.2"
 EXTRA_HIGH_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.3"
 EXTRA_HIGH_PROTOCOL = "code-quality-maintenance-v3.26.3"
+XH_RERUN_JUDGING = (
+    ROOT / "runs-code-quality-maintenance-v3.26.4"
+)  # Extra-high depotcore, rerun alone
+XH_RERUN_PROTOCOL = "code-quality-maintenance-v3.26.4"
+MAX_JUDGING = ROOT / "runs-code-quality-maintenance-v3.26.5"
+MAX_PROTOCOL = "code-quality-maintenance-v3.26.5"
 TIMEOUT_S = 10800  # the flat 3-hour task bound (docs/DECISIONS.md 2026-09-13)
 PANELS = {
-    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26 to v3.26.3)",
+    "wonder": "Claude Opus 5.5 and GPT-6.1 Sol (v3.26 to v3.26.5)",
     "opus55": "Muse Spark 1.3 and Grok 4.6 (v3.15)",
     "gpt61sol": "Muse Spark 1.3 and Grok 4.6 (v3.18)",
     "astra": "Muse Spark 1.3 and Grok 4.6 (v3.4)",
 }
 LEVELS = ("low", "medium", "high", "extra-high", "max")
-TABLE_LEVELS = ("low", "medium", "high", "extra-high")
+TABLE_LEVELS = LEVELS  # Max joined on 2026-11-04 (v3.26.5)
 SUITE_TASKS = 23
 MODELS = ("wonder", "opus55", "gpt61sol", "astra")
 NAMES = {
@@ -179,12 +186,11 @@ def reminder_usd(run_dir):
 
 
 def wonder_summaries(level):
-    """(run folder, summary) for every finished run at this level across both Muse Code roots."""
-    return [
-        (p.parent, json.loads(p.read_text()))
-        for root in WONDER_ROOTS
-        for p in sorted((root / level).glob("*/summary.json"))
+    """(run folder, summary) for every finished run at this level across the Muse Code roots."""
+    dirs = [
+        p.parent for root in WONDER_ROOTS for p in sorted((root / level).glob("*/summary.json"))
     ]
+    return [(d, json.loads((d / "summary.json").read_text())) for d in dirs]
 
 
 def load_wonder():
@@ -244,6 +250,8 @@ def load_wonder_judged(groups):
         (TOPUP, TOPUP_PROTOCOL),
         (HIGH_JUDGING, HIGH_PROTOCOL),
         (EXTRA_HIGH_JUDGING, EXTRA_HIGH_PROTOCOL),
+        (XH_RERUN_JUDGING, XH_RERUN_PROTOCOL),
+        (MAX_JUDGING, MAX_PROTOCOL),
     ):
         if root != JUDGING and not (root / "summary.json").exists():
             continue
@@ -339,7 +347,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         "Muse Wonder Full levels must start at Low",
     )
     prelim = {lvl for lvl in wonder_levels if groups["wonder"][lvl]["n"] < SUITE_TASKS}
-    # Final once every level Contributor mode allows is run and judged (Max is excluded, DECISIONS 2026-10-12).
+    # Final once all five levels are run and judged (Max under Contributor: DECISIONS 2026-11-03).
     final = not prelim and tuple(wonder_levels) == TABLE_LEVELS
     mixed = {lvl for lvl in wonder_levels if len(groups["wonder"][lvl]["versions"]) > 1}
 
@@ -417,7 +425,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     )
     logo.axis("off")
     text(left + 0.038 * 16 / W, 0.65, "VulcanBench", 20, True, heading=True)
-    text(right, 0.65, "October 2026", 14, ha="right", color=MUTED)
+    text(right, 0.65, "November 2026", 14, ha="right", color=MUTED)
     line(left, right, 1.05, INK, 1.2)
 
     text(
@@ -468,7 +476,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         return ax
 
     def bars(ax, key, fmt, hatched):
-        """Grouped bars for Low and Medium, each labelled with its value; no whiskers."""
+        """Grouped bars per level, each labelled with its value; no whiskers."""
         for m in MODELS:
             bx = [i + offsets[m] for i in xs]
             ys = [groups[m][lvl][key] for lvl in chart_levels]
@@ -481,11 +489,12 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 ax.annotate(
                     fmt(y_),
                     (xx, y_),
-                    xytext=(0, 4),
+                    xytext=(0, 3),
                     textcoords="offset points",
                     ha="center",
                     va="bottom",
-                    fontsize=7.5,
+                    rotation=90,
+                    fontsize=8,
                     fontfamily="IBM Plex Mono",
                     color=INK,
                 )
@@ -503,7 +512,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                         color="#ffffff",
                     )
 
-    # Top row: combined score, time per task and cost per task, grouped bars at Low and Medium.
+    # Top row: combined score, time per task and cost per task, grouped bars per level.
     prelim_bar = lambda m, lvl: m == "wonder" and lvl in prelim  # noqa: E731
     panel_x = (left, 0.37, 0.68)
     panel_w = 0.24
@@ -517,18 +526,18 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     ax = panel(0, "Combined score", "higher is better  ·  focused scale" + hatch_note)
     lo = min(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
     hi = max(groups[m][lvl]["combined"] for m in MODELS for lvl in chart_levels)
-    ax.set_ylim(math.floor(lo / 2) * 2 - 2, math.ceil(hi / 2) * 2 + 1.5)
+    ax.set_ylim(math.floor(lo / 2) * 2 - 2, math.ceil(hi / 2) * 2 + 2)
     bars(ax, "combined", lambda v: f"{v:.1f}", prelim_bar)
 
     ax = panel(1, "Time per task", "minutes  ·  lower is faster" + hatch_note)
     top = max(groups[m][lvl]["minutes"] for m in MODELS for lvl in chart_levels)
-    ax.set_ylim(0, math.ceil(top * 1.15 / 5) * 5)
+    ax.set_ylim(0, math.ceil(top * 1.25 / 5) * 5)
     bars(ax, "minutes", lambda v: f"{v:.1f}", prelim_bar)
 
     ax = panel(2, "Cost per task", "USD at list prices  ·  log scale  ·  hatched = estimate")
     ax.set_yscale("log")
     vals = [groups[m][lvl]["usd"] for m in MODELS for lvl in chart_levels]
-    ax.set_ylim(min(vals) / 1.8, max(vals) * 2.2)
+    ax.set_ylim(min(vals) / 1.8, max(vals) * 3.2)
     ax.yaxis.set_major_locator(
         FixedLocator(
             [t for t in (0.25, 0.5, 1, 2, 4, 8) if ax.get_ylim()[0] <= t <= ax.get_ylim()[1]]
@@ -551,9 +560,10 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         14.5,
         heading=True,
     )
-    table_left, span = 0.355, (right - 0.355) / len(TABLE_LEVELS)
+    table_left = 0.285
+    span = (right - table_left) / len(TABLE_LEVELS)
     keys = ("f", "p", "usd", "min")
-    at = (0.36, 0.64, 0.82, 0.96)  # right edges within a level; the wide combined column leads
+    at = (0.34, 0.58, 0.80, 0.97)  # right edges within a level; the wide combined column leads
     cols = {
         (lvl, k): table_left + i * span + span * at[j]
         for i, lvl in enumerate(TABLE_LEVELS)
@@ -568,11 +578,11 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     for lvl in TABLE_LEVELS:
         for k, lab in (
             ("f", "Combined"),
-            ("p", "Functional"),
+            ("p", "Func."),
             ("usd", "$/task"),
             ("min", "Min"),
         ):
-            text(cols[lvl, k], ty + 0.86, lab, 10.5, True, ha="right", color=MUTED)
+            text(cols[lvl, k], ty + 0.86, lab, 10, True, ha="right", color=MUTED)
     line(left, right, ty + 1.04, INK, 0.6)
     y = ty + 1.32
     for m in MODELS:
@@ -591,13 +601,13 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
                 y,
                 f"{g['combined']:.1f} ±{g['combined_se']:.1f}"
                 + ("\u2021" if g.get("timeouts") else ""),
-                11.5,
+                10.5,
                 numeric=True,
                 ha="right",
             )
-            text(cols[lvl, "p"], y, f"{g['functional']:.1f}", 11.5, numeric=True, ha="right")
-            text(cols[lvl, "usd"], y, usd, 11.5, numeric=True, ha="right")
-            text(cols[lvl, "min"], y, f"{g['minutes']:.1f}", 11.5, numeric=True, ha="right")
+            text(cols[lvl, "p"], y, f"{g['functional']:.1f}", 10.5, numeric=True, ha="right")
+            text(cols[lvl, "usd"], y, usd, 10.5, numeric=True, ha="right")
+            text(cols[lvl, "min"], y, f"{g['minutes']:.1f}", 10.5, numeric=True, ha="right")
         y += 0.40
         line(left, right, y - 0.2, RULE, 0.6)
     line(left, right, y - 0.2, INK, 1.2)
@@ -611,7 +621,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             else "\u2020 Muse Wonder Full Medium covers all 23 tasks: 21 ran on Muse Code 1.4.6 and 2 (cellarcore, paddockcore) on Muse Code "
             "1.4.9 after the quota reset, judged by the same panel in v3.26.1. Muse Code 1.4.9 runs its goal and verify reminder observers "
             "on Muse Spark 1.3, not Muse Wonder Full; their tokens are added to cost at Spark's list price ($1.25 input, $0.15 cached, "
-            "$4.25 output per million). High and Extra-high ran entirely on Muse Code 1.4.9 (judged in v3.26.2 and v3.26.3)."
+            "$4.25 output per million). High, Extra-high and Max ran entirely on Muse Code 1.4.9 (judged in v3.26.2, v3.26.3 and v3.26.5, with Extra-high depotcore's rerun in v3.26.4)."
             if "medium" in mixed
             else "Muse Wonder Full levels cover all 23 tasks."
         ),
@@ -623,7 +633,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             if groups[m][lvl]["n_judged"] < groups[m][lvl]["n"]
         )
         + ", 23 everywhere else. Claude Opus 5.5's High depotcore run was stopped by a safety classifier. Muse Wonder Full's High "
-        "paddockcore and Extra-high depotcore runs hit the 3-hour task limit and left no finished code to judge; counting each "
+        "paddockcore run hit the 3-hour task limit and left no finished code to judge; counting it "
         "as 0 over all 23 runs gives "
         + ", ".join(
             f"{groups['wonder'][lvl]['combined_timeouts_zero']:.1f} at {lvl.capitalize()}"
@@ -657,11 +667,12 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
         )
         + "; Sol's calls average about 35K input tokens, "
         "so its premium is likely small and is not applied.",
-        "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 17 October 2026); 9 of its 23 Medium "
-        "tasks, 14 of its 23 High tasks and 5 of its 23 Extra-high tasks overlapped another local job for part of their run, which can "
-        "lengthen minutes; Extra-high depotcore, which hit the 3-hour limit, overlapped for 145 of its 180 minutes, and a clean rerun "
-        "is scheduled after the Muse quota reset (19 October). Other models are their published Frontier v4 runs, "
-        "not re-run. Harnesses differ.",
+        "Muse Wonder Full ran in Contributor mode with Muse Code's skill reminder off (13 to 17 October 2026; Max on 3 November, "
+        "after a probe showed Contributor honors Max, DECISIONS.md 2026-11-03); 9 of its 23 Medium tasks, 14 of its 23 High tasks and "
+        "4 of its 23 Extra-high tasks overlapped another local job for part of their run, which can lengthen minutes; Max ran alone. "
+        "Extra-high depotcore first overlapped for 145 of its 180 minutes and hit the 3-hour limit, so it was rerun alone on 19 October "
+        "(109 minutes, every hidden test passed); the card uses the rerun. Other models are their published Frontier v4 runs, not re-run. "
+        "Harnesses differ.",
     ]
     yy = y + 0.12
     for n_ in notes:

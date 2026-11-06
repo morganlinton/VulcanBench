@@ -53,13 +53,22 @@ _SECRET_ENV = (
 
 _BEARER = re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._-]{16,}")
 
+# Router keys are named per router (``ROUTER_<NAME>_API_KEY``), so the set is
+# read from the environment rather than listed.
+_ROUTER_KEY = re.compile(r"^ROUTER_[A-Z0-9_]+_API_KEY$")
+
+
+def _secret_env_names() -> tuple[str, ...]:
+    dynamic = tuple(sorted(k for k in os.environ if _ROUTER_KEY.match(k)))
+    return _SECRET_ENV + dynamic
+
 
 def redact(text: str) -> str:
     """Mask credential-shaped substrings and known secret env values in ``text``."""
     if not text:
         return text
     # Concrete env values first (most reliable signal).
-    for var in _SECRET_ENV:
+    for var in _secret_env_names():
         val = os.environ.get(var)
         if val and len(val) >= 8:
             text = text.replace(val, REDACTED)

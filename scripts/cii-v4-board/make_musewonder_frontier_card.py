@@ -534,7 +534,7 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
     ax.set_ylim(0, math.ceil(top * 1.25 / 5) * 5)
     bars(ax, "minutes", lambda v: f"{v:.1f}", prelim_bar)
 
-    ax = panel(2, "Cost per task", "USD at list prices  ·  log scale  ·  hatched = estimate")
+    ax = panel(2, "Cost per task", "USD at list prices  ·  log scale  ·  hatched = stand-in price")
     ax.set_yscale("log")
     vals = [groups[m][lvl]["usd"] for m in MODELS for lvl in chart_levels]
     ax.set_ylim(min(vals) / 1.8, max(vals) * 3.2)
@@ -653,8 +653,8 @@ def main():  # noqa: PLR0912, PLR0915, one linear figure
             for lvl in wonder_levels
         )
         + ", out of 100.",
-        f"Prices verified on {pricing['checked_at']} against each vendor's official pricing page. Muse Wonder Full ran on a Muse Code "
-        "subscription and Meta lists no API price for it, so its cost (~, hatched) is an estimate from its token use at the Muse Wonder 1.0 "
+        f"Prices verified on {pricing['checked_at']} against each vendor's official pricing page. Every cost is token use at list "
+        "prices. Meta lists no price for Muse Wonder Full, so its cost (~, hatched) uses a stand-in: the Muse Wonder 1.0 "
         "list price ($4.00 input, $0.20 cached, $20.00 output per million, no long-context premium). Claude Opus 5.5 is Claude Code's own "
         "total, which reprices exactly from its traces at today's list prices ($4.00 input, $0.20 cache hit, $8.00 one-hour cache write, "
         "$20.00 output; fallback turns at their own model's rate). GPT-6.1 Sol is its Codex token receipts at $2.00 / $0.10 / $10.00. "

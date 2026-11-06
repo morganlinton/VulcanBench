@@ -1,0 +1,42 @@
+{
+  "id": "computer-use-v1",
+  "display_name": "VulcanBench ComputerUse v1 (milestone 1, pipeline prover)",
+  "version": "0.1.0",
+  "plan": "docs/COMPUTER_USE_CHARTER.md",
+  "_charter": "tasks/computer-use-v1/CHARTER.md",
+  "_status": "Milestone 1: one web task proving the Harbor computer-1 path end to end. Nothing here is admitted or frozen; no suite.lock.json until the first admitted set.",
+  "tasks": [
+    "relaydesk-invoice-ticket-triage"
+  ],
+  "pins": {
+    "harness": "harbor 0.24.0 (installed with the harbor[computer-1] extra for the native Anthropic provider)",
+    "agent": "computer-1",
+    "condition": "pixels",
+    "budget": {
+      "timeout_sec": 10800,
+      "max_turns": 200,
+      "note": "timeout_sec is the flat 3-hour suite default (docs/DECISIONS.md 2026-10-03) until a ComputerUse v1 entry carries measured evidence; max_turns is the charter's proposed step cap and is passed to computer-1 by the gate script."
+    },
+    "agent_kwargs": {
+      "max_turns": 200,
+      "desktop_width": 1024,
+      "desktop_height": 900,
+      "window_width": 1024,
+      "window_height": 900,
+      "start_url": "http://127.0.0.1:8000/"
+    },
+    "references": [
+      {
+        "name": "claude",
+        "agent": "computer-1",
+        "model": "anthropic/claude-fable-5-1",
+        "tool": "computer_20251124 with beta computer-use-2025-11-24 (what harbor 0.24.0's anthropic provider sends for non-legacy models)",
+        "note": "Pinned provisionally; the first smoke run confirms the model accepts this tool version."
+      }
+    ],
+    "images": {
+      "vulcanbench/sandbox:cu-base": "sha256:5c7218e8af4772257bf707341b4500d5cc3865f89611d406109a312b9c9d711f"
+    },
+    "images_note": "Built by make sandbox-image-computer-use from sandbox/Dockerfile.computer-use (Debian bookworm packages are not byte-pinned; the image records dpkg-query output at /etc/vulcanbench-packages.txt)."
+  }
+}

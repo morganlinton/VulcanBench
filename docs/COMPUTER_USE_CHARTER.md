@@ -200,7 +200,7 @@ Every candidate passes all of these before it is measured against a model:
 7. **Budget**: the gold script finishes in under a quarter of the task's
    time budget and step cap.
 
-`scripts/validate_computer_use_tasks.py` (to be written) runs 1 to 7 and prints a
+`scripts/computer-use/validate_task.py` runs these checks through Harbor and prints a
 verdict per task; nothing enters `suite.lock.json` without it.
 
 ## Difficulty composition
@@ -268,8 +268,11 @@ survey of office labor.
 
 ## Open questions (resolve before the first candidate)
 
-1. Display stack: Xvfb plus a lightweight window manager inside the task
-   container, or a sidecar display container shared by app and adapter?
+1. Display stack: settled in milestone 1. Harbor's `computer-1` agent execs
+   Xvfb, a window manager and Chromium inside the task container itself, so
+   the suite's base image (`sandbox/Dockerfile.computer-use`) carries that
+   stack and `sandbox/computer-use/ensure-display.sh` brings it up for runs
+   with no agent (oracle, nop, cheat probes).
 2. Which web apps to fork first: the shortlist needs permissive licenses,
    SQLite or single-file state for cheap checkers, and a UI worth reskinning.
 3. Whether Claude in Chrome can be driven headlessly for a sweep, or whether

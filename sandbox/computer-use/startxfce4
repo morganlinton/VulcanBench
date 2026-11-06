@@ -1,0 +1,6 @@
+#!/bin/bash
+# Shim: harbor's computer-1 runtime starts the desktop with `startxfce4` and
+# then kills xfce4-panel. All it needs is an EWMH window manager that wmctrl
+# can talk to, so this runs xfwm4 alone (no session, panel or desktop icons)
+# with the compositor off: no shadows, no fade animations, smaller image.
+exec dbus-launch --exit-with-session xfwm4 --compositor=off --replace

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ConfirmBar } from "@/components/suites/ConfirmBar";
 import { runHref, runnerGet, runnerPost, type OrphanData } from "@/lib/runner";
 import { usePolling } from "./usePolling";
 
@@ -9,10 +10,11 @@ export function MaintenancePanel() {
   const { data, refresh } = usePolling<OrphanData>(() => runnerGet<OrphanData>("/api/runner/maintenance/orphans"), 15000, "orphans");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
   if (!data || data.containers.length === 0) return null;
+  const ids = data.containers.map((c) => c.id);
   const remove = async () => {
-    const ids = data.containers.map((c) => c.id);
-    if (!window.confirm(`Remove ${ids.length} orphaned sandbox container${ids.length > 1 ? "s" : ""}? Only the listed ones are touched; the list is re-checked first.`)) return;
+    setAsking(false);
     setBusy(true);
     setNote(null);
     try {
@@ -31,10 +33,20 @@ export function MaintenancePanel() {
         <h2 className="text-sm uppercase tracking-[2px] text-zinc-500">
           Orphaned sandboxes <span className="text-zinc-600">({data.containers.length})</span>
         </h2>
-        <button type="button" onClick={remove} disabled={busy} className="rounded-full border border-rose-500/40 px-4 py-1 text-xs text-rose-300 hover:bg-rose-500/10 disabled:opacity-50">
+        <button type="button" onClick={() => setAsking(true)} disabled={busy || asking} className="rounded-full border border-rose-500/40 px-4 py-1 text-xs text-rose-300 hover:bg-rose-500/10 disabled:opacity-50">
           {busy ? "removing" : "Remove the listed containers"}
         </button>
       </div>
+      {asking && (
+        <div className="mb-3">
+          <ConfirmBar
+            message={`Remove ${ids.length} orphaned sandbox container${ids.length > 1 ? "s" : ""}? Only the listed ones are touched; the list is re-checked first.`}
+            confirmLabel="Remove"
+            onConfirm={remove}
+            onCancel={() => setAsking(false)}
+          />
+        </div>
+      )}
       <div className="text-xs text-zinc-500 mb-2">
         Benchmark containers no active run owns. Nothing is removed by image or prefix while a run that could own it is alive.
         {data.live_runs.length > 0 && ` ${data.live_runs.length} run(s) are active; their containers are not listed.`}

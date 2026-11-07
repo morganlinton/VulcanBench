@@ -155,9 +155,16 @@ function SweepPlanCard({ plan, onQueued }: { plan: LaunchPlan<SweepPlanSpec>; on
           <div className={label}>Estimate (vulcanbench estimate --json at this tag)</div>
           <dl className="space-y-1 text-xs">
             <Row k="runs" v={`${est.runs_per_level} per level, ${est.total_runs} in all (${spec.n_tasks} tasks x ${spec.repeat})`} />
-            <Row k="list-price cost" v={est.status === "ok" ? `${fmtMoney(est.per_level_usd)} per level, ${fmtMoney(est.total_usd)} in all (${est.confidence} confidence)` : est.status === "no_pricing" ? "no pricing for this model at this tag" : (est.note ?? "unavailable")} mono={false} />
+            {est.status === "ok" && est.per_level_mid_usd != null ? (
+              <Row k="list-price cost" v={`about ${fmtMoney(est.per_level_mid_usd)} per level, ${fmtMoney(est.total_mid_usd ?? null)} in all (${est.confidence} confidence)`} mono={false} />
+            ) : (
+              <Row k="list-price cost" v={est.status === "ok" ? `${fmtMoney(est.per_level_usd)} per level, ${fmtMoney(est.total_usd)} in all (${est.confidence} confidence)` : est.status === "no_pricing" ? "no pricing for this model at this tag" : (est.note ?? "unavailable")} mono={false} />
+            )}
             {est.status === "ok" && est.per_level_low_usd !== null && (
               <Row k="range per level" v={`${fmtMoney(est.per_level_low_usd)} to ${fmtMoney(est.per_level_high_usd)}`} />
+            )}
+            {est.status === "ok" && est.per_level_mid_usd != null && est.per_level_usd !== null && (
+              <Row k="credit to have" v={`${fmtMoney(est.per_level_usd)} per level, ${fmtMoney(est.total_usd)} in all: a buffer above the high end, not a cap`} mono={false} />
             )}
             <Row k="task timeout" v={`${fmtDuration(est.task_timeout_s)} per run`} />
             <Row k="longest wall time" v={fmtDuration(est.max_wall_s)} />
@@ -170,7 +177,9 @@ function SweepPlanCard({ plan, onQueued }: { plan: LaunchPlan<SweepPlanSpec>; on
         <div className="rounded-xl border border-white/10 p-4">
           <div className={label}>Source</div>
           <dl className="space-y-1 text-xs">
-            <Row k="suite" v={`${spec.suite_name} (${spec.suite})`} mono={false} />
+            <Row k="suite" v={`${spec.suite_name} (${spec.suite})${spec.suite_custom ? " (custom)" : ""}`} mono={false} />
+            {spec.suite_custom && <Row k="suites home" v={spec.suites_home ?? "?"} />}
+            {spec.suite_custom && <Row k="suite lock" v={spec.suite_lock_digest ?? "?"} />}
             <Row k="model" v={spec.model_spec} />
             <Row k="harness" v={`${spec.harness}${spec.doctor.version ? ` ${spec.doctor.version}` : ""}`} />
             <Row k="effort levels" v={spec.efforts.join(", ")} />
@@ -222,6 +231,8 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
   const harnessName = opts.harnesses.includes(harness) ? harness : opts.harnesses[0];
   const suite = suiteChoice && opts.suites.some((s) => s.id === suiteChoice) ? suiteChoice : (opts.suites.find((s) => s.id === "coding-intelligence-index-v4")?.id ?? opts.suites[0]?.id ?? "");
   const suiteInfo = opts.suites.find((s) => s.id === suite);
+  const builtinSuites = opts.suites.filter((s) => !s.custom);
+  const customSuites = opts.suites.filter((s) => s.custom);
   const chosenEfforts = opts.efforts.filter((e) => efforts.includes(e));
   const wt = opts.worktree;
   const wtReady = !!wt && wt.exists && wt.problems.length === 0;
@@ -281,7 +292,7 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
         <div className="grid gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
             <label className={label} htmlFor="model">Model id</label>
-            <input id="model" className={field} placeholder={harnessName === "vulcan" ? "openai:gpt-6.1-terra" : "gpt-6.1-terra"} value={model} onChange={(e) => { setModel(e.target.value); reset(); }} />
+            <input id="model" className={field} placeholder={harnessName === "vulcan" ? "e.g. openai:gpt-6.1-terra" : "e.g. gpt-6.1-terra"} value={model} onChange={(e) => { setModel(e.target.value); reset(); }} />
             <div className="mt-1 text-xs text-zinc-500">{harnessName === "vulcan" ? "provider:model for Vulcan's API loop" : "the id the harness CLI takes; the harness is the provider"}</div>
           </div>
           <div>
@@ -303,10 +314,26 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
           <div>
             <label className={label} htmlFor="suite">Suite</label>
             <select id="suite" className={field} value={suite} onChange={(e) => { setSuiteChoice(e.target.value); reset(); }}>
-              {opts.suites.map((s) => <option key={s.id} value={s.id}>{publicSuiteName(s.id) ?? s.name} ({s.n_tasks} tasks, {s.id})</option>)}
+              {builtinSuites.length > 0 && (
+                <optgroup label="Built-in at this tag">
+                  {builtinSuites.map((s) => <option key={s.id} value={s.id}>{publicSuiteName(s.id) ?? s.name} ({s.n_tasks} {s.n_tasks === 1 ? "task" : "tasks"}, {s.id})</option>)}
+                </optgroup>
+              )}
+              {customSuites.length > 0 && (
+                <optgroup label="Custom (suites home)">
+                  {customSuites.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.n_tasks} {s.n_tasks === 1 ? "task" : "tasks"}, {s.id})</option>)}
+                </optgroup>
+              )}
             </select>
-            {opts.suites.length === 0 && <div className="mt-1 text-xs text-amber-300">No frozen suite (tasks/&lt;suite&gt;/suite.lock.json) at this tag.</div>}
-            {suiteInfo && <div className="mt-1 text-xs text-zinc-500">frozen {suiteInfo.frozen_at ?? "?"}, lock version {suiteInfo.version ?? "?"}</div>}
+            {opts.suites.length === 0 && <div className="mt-1 text-xs text-amber-300">No frozen suite (tasks/&lt;suite&gt;/suite.lock.json) at this tag, and none in {opts.suites_home}.</div>}
+            {suiteInfo && !suiteInfo.custom && <div className="mt-1 text-xs text-zinc-500">frozen {suiteInfo.frozen_at ?? "?"}, lock version {suiteInfo.version ?? "?"}</div>}
+            {suiteInfo?.custom && (
+              <div className="mt-1 space-y-0.5 text-xs text-zinc-500">
+                <div>custom suite{suiteInfo.repo?.owner && suiteInfo.repo?.name ? ` from ${suiteInfo.repo.owner}/${suiteInfo.repo.name}` : ""}, frozen {suiteInfo.frozen_at ?? "?"}, lock version {suiteInfo.version ?? "?"}</div>
+                <div className="font-mono break-all">{suiteInfo.path}</div>
+                <div className="font-mono">lock {suiteInfo.lock_digest?.slice(0, 19) ?? "?"}</div>
+              </div>
+            )}
           </div>
           <div>
             <label className={label} htmlFor="tag">Bench tag</label>
@@ -324,7 +351,7 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
             {opts.efforts.map((e) => {
               const on = efforts.includes(e);
               return (
-                <button key={e} type="button" onClick={() => toggleEffort(e)} className={`rounded-full border px-3 py-1 text-sm ${on ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}>
+                <button key={e} type="button" aria-pressed={on} onClick={() => toggleEffort(e)} className={`rounded-full border px-3 py-1 text-sm ${on ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/10 text-zinc-400 hover:bg-white/5"}`}>
                   {e}
                 </button>
               );

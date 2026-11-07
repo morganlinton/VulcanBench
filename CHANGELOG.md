@@ -27,6 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GUI housekeeping**: orphaned sandbox containers listed and removed by id
   only, bench tags cut through `cut_bench_tag.sh` from the Launch page, and a
   streaming log tail (server-sent events) on live run pages.
+- **Suite builder** (`harness/suite_builder/`, password-gated): `vulcanbench
+  suite prs list` scores a repository's merged pull requests as task
+  candidates through `gh`; `suite task scaffold` exports the repository at a
+  pull request's base commit with the fix as the gold patch, a draft issue
+  and a `build/` folder with a self-check script; `suite task author` runs
+  one CLI-harness session that writes the issue, hidden tests and test spec
+  and keeps only allowlisted changes; `suite validate` adds "no answer in
+  repo" and "gold applies" checks. `suite unlock`, `lock`, `access` and
+  `password-hash` manage the gate (`[builder].password_hash`).
 - **Suites outside the checkout**: `vulcanbench suite` (`init`, `list`, `show`,
   `add-task`, `remove-task`, `validate`, `freeze`, `check`, all with `--json`)
   builds and freezes a suite in a suites home (`[runner].suites_home`, default
@@ -36,6 +45,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `source.suite` with the lock digest; the run audit treats an external suite
   directory as benchmark data; `scripts/validate_tasks.py` gains `--json`.
   `estimate --suite` now prices the suite's own tasks root.
+- **Custom suites in the GUI**: the Launch page's suite picker lists frozen
+  suites from `[runner].suites_home` under "Custom (suites home)" next to the
+  built-in ones; their plans pass `--suites-home` to `run` and `estimate`,
+  record the lock digest, and are refused at confirm or launch if the lock
+  changed or the flag was altered.
+- **Build your own eval suite in the GUI**: `/suites` pages (and a "Build your
+  own suite" card on the Launch page, View > Suites in the Mac app) create a
+  suite for a GitHub repository, list and score its merged pull requests,
+  scaffold tasks, show each task's issue, hidden tests, gold patch and
+  verdicts, accept or drop tasks and freeze the suite, all through
+  `vulcanbench suite` in the tooling worktree. An unlock screen pipes the
+  subscriber password to `suite unlock --password-stdin`; it is never an
+  argument, logged or stored.
+- **Suite builder jobs in the GUI**: the `author` and `validate` plan kinds
+  queue one `suite task author` session or one Docker `suite validate` per
+  task through the plan and confirm path, with the harness doctor, an
+  estimate and the exact commands; the supervisor ends them from their exit
+  code and `build/` record, never continues or retries them, and kills an
+  authoring session's agent CLI on stop.
 - **Mac app** (`desktop/`, `make app`): an Electron window on the local run
   GUI. It starts the backend from the checkout it was built from (or reuses
   one already on port 8000) and the dashboard's standalone build with its own
@@ -44,6 +72,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Suite builder pages**, after a hands-on pass through the whole flow:
+  accept, drop, freeze and lock ask in the page instead of through native
+  dialogs (Drop used `window.prompt`, which Electron does not have); the task
+  page shows the last job's outcome note and the next step, and the Author
+  and Validate tabs open with a readable summary above the raw record; the
+  author form starts from the last session's harness, model and effort and
+  says when a model id is missing; the unlock cooldown counts down and keeps
+  what is typed; the new-suite form takes a github.com link; the Suites intro
+  shows on the unlock screen too. A second pass added select-all to both
+  tables, kept the loaded pull requests across visits to a task, flagged a
+  validation that is older than the last authoring as out of date on the
+  suite page, and said plainly when a job failed without writing its record.
+- **Runs and Launch pages**, from a pass over a benchmark run end to end: a
+  sweep level's page lists the task runs it wrote (it said "No attempt has
+  started yet" for a finished level), and each task run links back to its
+  level; task runs from the GUI show their level's bench tag and commit,
+  since per-task summaries carry no source block; a level that ends short
+  shows why on the sweep card (quota window, login, exit code); "Run the
+  missing tasks" keeps the level's bench tag, so a resume cannot land on a
+  newer tag and mix results; the effort toggles report their state to
+  screen readers. A third pass, building a suite from scratch and running it:
+  a readiness card on Launch checks the supervisor, a prepared bench tag,
+  Docker, the `gh` login and the suite builder (all local and quota-free;
+  `gh auth status` output is discarded unread); the scaffold step takes a
+  terms note for repositories with no LICENSE file (passed as
+  `--license-note`, written to `repo/NOTICE`), without which every task from
+  a private repository failed validation on provenance, and a `no_license`
+  scaffold warning shows on the pull request's row; the plan shows the mid
+  list-price estimate as the cost and the recommended credit buffer on its
+  own line (the buffer was labelled as the cost and sat above the stated
+  range); Stop, Remove, Cut tag and orphan removal ask in the page instead of
+  a native dialog; sweep cards show their label and queue time; author and
+  validate jobs on Runs name their suite and link to the task, custom suites
+  show their display name, and jobs without attempts say n/a; the task page
+  links the PR to GitHub and says what to do after accepting; disabled
+  Accept, Drop and Validate buttons say why; bench tags cut in the same
+  second sort by name.
+- **Local run GUI**: the runner routes refuse requests from browser pages not
+  served from localhost (403 on a foreign or `null` `Origin`), so a website
+  open in the operator's browser can no longer read the queue or post plans
+  through the loopback address. The public API's CORS policy is unchanged.
 - The GUI's Launch page no longer plans Frontier v5 gate runs; it launches
   frozen suites only. Gate jobs under `~/vulcanbench-gate` stay on the Runs
   page read-only (docs/DECISIONS.md 2026-11-01).

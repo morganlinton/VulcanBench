@@ -77,6 +77,52 @@ flat 3-hour timeout, like every other suite.
 - Cursor Auto or Factory Droid becoming a target: that needs adapter work
   (Cursor streams no tokens or cost; Droid has no adapter) and its own entry.
 
+## 2026-11-03: the suite builder is password-gated, and authoring runs where benchmark sessions run
+
+### Decision
+
+Owner, in chat, 2026-11-03: the suite builder is for paying subscribers, and
+"for now, let's just have it blocked by a password". Every `vulcanbench suite`
+command that creates or changes a suite requires `vulcanbench suite unlock`
+on the machine first, checked against an scrypt hash in
+`[builder].password_hash`. Reading suites and running a frozen one stay open,
+so a suite someone was given can still be benchmarked.
+
+The builder's one quota-spending step, `suite task author`, runs a single
+session through the same CLI harness adapters as benchmark runs, on the
+host, in a scratch copy of the task with network off, and copies back only an
+allowlist of files and metadata keys.
+
+### Evidence
+
+- The gate sits in the engine, not the GUI, so the command line and the GUI's
+  Suites pages hit the same check. The password is never an argument (it
+  would show in `ps` and shell history), never logged, never stored; the
+  unlock record holds a fingerprint of the hash, so a new password relocks
+  everyone.
+- VulcanBench is public and runs locally: anyone can delete the check. It is
+  a placeholder for subscriber accounts, which need a server-side license
+  check.
+- The authoring session cannot run VulcanBench (its environment has no API
+  keys and no path to this checkout), so the scaffold writes a stdlib
+  `build/selfcheck.py` that mirrors the verifier. Its edits to `repo/`, to
+  provenance keys or to the builder's inputs are discarded, so the starting
+  state and the record of where a task came from stay what the scaffold
+  wrote.
+
+### Revisit triggers
+
+- Subscriber accounts exist: replace the shared password with a per-user
+  license check, and keep the engine call site (`require_unlocked`).
+- A harness gains a container mode that suits authoring: offer it as an
+  option, as benchmark runs do with `--agent-container`.
+
+### What this touched
+
+`harness/suite_builder/` (new), `harness/suite_cli.py` (the gate on init,
+add-task, remove-task, validate, freeze; the builder checks in validate),
+`harness/settings.py` and `vulcanbench.toml` (`[builder]`).
+
 ## 2026-11-03: Muse Wonder Full runs Max under Contributor
 
 ### Decision

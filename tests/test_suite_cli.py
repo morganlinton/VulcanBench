@@ -15,12 +15,19 @@ from harness.cli import main
 from harness.sandbox import docker_executor
 from harness.suite_lock import lock_digest
 from harness.tasks import load_task, task_hash
+from tests.builder_fixtures import configure_builder
 from tests.cli_runner import CliRunner
 from tests.test_suite import _make_task
 from tests.test_validate_tasks import _SOLVING_GOLD, _full_task
 
 runner = CliRunner()
 _PYTEST = pytest.mark.skipif(shutil.which("pytest") is None, reason="pytest not on PATH")
+
+
+@pytest.fixture(autouse=True)
+def _builder_unlocked(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """The suite-changing commands are password-gated; these tests run unlocked."""
+    configure_builder(monkeypatch, tmp_path, unlocked=True)
 
 
 def _json(capsys: pytest.CaptureFixture[str], args: list[str]) -> tuple[int, dict[str, Any]]:
@@ -472,7 +479,9 @@ def test_validate_json_writes_build_record(
         "image",
         "task_hash",
         "checked_at",
+        "checks",
     }
+    assert record["checks"] == {"no_answer_in_repo": True, "gold_applies": True}
     assert record["schema"] == "vulcanbench.suite.validate.v1"
     assert record["task_id"] == "fix-f" and record["status"] == "PASS"
     on_disk = json.loads((task_dir / "build" / "validate.json").read_text())

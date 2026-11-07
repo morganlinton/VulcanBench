@@ -47,9 +47,10 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import IO, Any
 
-from backend.runner import launch, procs, sweep
+from backend.runner import launch, procs, suites, sweep
 from backend.runner.config import REPO_ROOT, RunnerConfig
 from backend.runner.docker_ps import Container, list_containers
+from backend.runner.redact import redact
 from backend.runner.state import Job, State, iso
 
 STOP_GRACE_S = 150.0  # plain jobs: SIGINT, then SIGTERM to the group after this long
@@ -61,6 +62,9 @@ KILL_GRACE_S = 15.0
 AGENT_KILL_AFTER_S = 2.0
 SUITE_STOP_GRACE_S = 600.0
 LSTART_RETRIES = 10
+# Kinds whose child starts an agent CLI in its own session (a killpg on the job
+# never reaches it): suite levels and the suite builder's authoring sessions.
+AGENT_KINDS = frozenset({"suite", "author"})
 
 Launcher = Callable[..., "subprocess.Popen[bytes]"]
 
@@ -174,7 +178,134 @@ class Supervisor:
         if job.kind == "suite":
             self._finalize_suite(job, code)
             return
+        if job.kind == "author":
+            self._finalize_author(job, code)
+            return
+        if job.kind == "validate":
+            self._finalize_validate(job, code)
+            return
         self._finalize_plain(job, code)
+
+    # --------------------------------------------------------- suite builder --
+
+    def _stopped(self, job: Job, code: int | None) -> bool:
+        if code in (130, 143) or (code is not None and code < 0) or job.stop_requested_at:
+            note = (
+                "stopped on request"
+                if job.stop_requested_at
+                else "stopped by a signal from outside the GUI"
+            )
+            self._final(job, "stopped", code, note)
+            return True
+        return False
+
+    def _record_is_new(self, job: Job, record: dict[str, Any] | None, key: str) -> bool:
+        """The task's build record was written by this job (not left by an earlier one)."""
+        if record is None:
+            return False
+        written = _dt(str(record.get(key) or ""))
+        started = _dt(job.started_at)
+        return bool(written and started and written >= started.replace(microsecond=0))
+
+    def _finalize_author(self, job: Job, code: int | None) -> None:  # noqa: PLR0911
+        """One authoring session ended (``suite task author``); never continued or retried."""
+        if job.stop_requested_at:
+            job = self._kill_agents(job, None, final=True)
+        if self._stopped(job, code):
+            return
+        record = suites.read_build_record(job.spec, "author.json")
+        fresh = self._record_is_new(job, record, "finished_at")
+        if code is None:
+            if fresh and (record or {}).get("status") == "ok":
+                return self._final(job, "finished", None, self._author_note(record))
+            return self._final(
+                job, "lost", None, "process gone after a backend restart; final state unknown"
+            )
+        if code == 0:
+            if fresh and (record or {}).get("status") == "ok":
+                return self._final(job, "finished", code, self._author_note(record))
+            return self._final(job, "failed", code, "exited 0 without a successful author.json")
+        if code in (2, 3, 5):
+            return self._final(
+                job,
+                "infra_failed",
+                code,
+                f"refused before the session (exit {code}): {self._last_error(job)}",
+            )
+        if code == 7:
+            return self._final(
+                job, "infra_failed", code, "refused: the suite builder is locked on this Mac"
+            )
+        if code == 6:
+            return self._final(
+                job, "failed", code, "the session made no accepted change; nothing retries"
+            )
+        log = Path(job.console_log) if job.console_log else None
+        kind = sweep.classify_exit(job.spec, log, self.now())
+        if kind == "quota":
+            return self._final(
+                job,
+                "failed",
+                code,
+                "quota window or rate limit during the session; nothing retries. Author it again "
+                "after the window",
+            )
+        if kind == "auth":
+            return self._final(job, "failed", code, "the harness login expired or was refused")
+        if code == 1:
+            return self._final(job, "failed", code, f"provider error: {self._last_error(job)}")
+        return self._final(job, "failed", code, f"exited {code}")
+
+    def _author_note(self, record: dict[str, Any] | None) -> str:
+        changed = (record or {}).get("changed") or {}
+        return (
+            f"authored: {len(changed.get('accepted') or [])} accepted, "
+            f"{len(changed.get('rejected') or [])} discarded change(s)"
+        )
+
+    def _finalize_validate(self, job: Job, code: int | None) -> None:  # noqa: PLR0911
+        """``suite validate --task T --sandbox docker`` ended; the verdict belongs to the task."""
+        if self._stopped(job, code):
+            return
+        record = suites.read_build_record(job.spec, "validate.json")
+        fresh = self._record_is_new(job, record, "checked_at")
+        verdict = str((record or {}).get("status") or "?")
+        reasons = "; ".join(str(r) for r in ((record or {}).get("reasons") or [])[:3])
+        note = f"verdict: {verdict}" + (f" ({reasons})" if reasons else "")
+        if code in (0, 1) or (code is None and fresh):
+            if not fresh:
+                return self._final(job, "failed", code, "exited without writing validate.json")
+            return self._final(job, "finished", code, note)
+        if code is None:
+            return self._final(
+                job, "lost", None, "process gone after a backend restart; final state unknown"
+            )
+        if code == 3:
+            return self._final(job, "infra_failed", code, "Docker is not running")
+        if code == 4:
+            return self._final(
+                job, "failed", code, f"{note}: a toolchain is missing, validate in Docker"
+            )
+        if code == 7:
+            return self._final(
+                job, "infra_failed", code, "refused: the suite builder is locked on this Mac"
+            )
+        if code in (2, 5):
+            return self._final(
+                job, "infra_failed", code, f"refused (exit {code}): {self._last_error(job)}"
+            )
+        return self._final(job, "failed", code, f"exited {code}")
+
+    def _last_error(self, job: Job) -> str:
+        """The engine's error message from the console log's JSON, else its last line."""
+        if not job.console_log:
+            return "see the console log"
+        text = sweep._tail(Path(job.console_log), 16_000)
+        for line in reversed(text.splitlines()):
+            if line.startswith("error "):
+                return redact(line[6:].strip())[:300]
+        lines = [ln for ln in text.splitlines() if ln.strip() and not ln.startswith("===")]
+        return redact(lines[-1])[:300] if lines else "see the console log"
 
     def _finalize_plain(self, job: Job, code: int | None) -> None:
         """Exit code only: for kinds with no result files of their own."""
@@ -256,7 +387,7 @@ class Supervisor:
                     },
                     notes=[
                         *job.notes,
-                        f"quota window or rate limit at {done}; continues with --only-missing at "
+                        f"quota window or rate limit; {done}; continues with --only-missing at "
                         f"{resume.strftime('%H:%M')} UTC ({used + 1} of {limit} continuations)",
                     ],
                 )
@@ -265,7 +396,7 @@ class Supervisor:
                 job,
                 "incomplete",
                 code,
-                f"quota window or rate limit at {done}"
+                f"quota window or rate limit; {done}"
                 + (
                     "; the plan allowed no continuation"
                     if not limit
@@ -316,7 +447,7 @@ class Supervisor:
                 table = self._procs()
             if not job.stop_signalled_at:
                 spec = job.spec
-                if job.kind == "suite":
+                if job.kind in AGENT_KINDS:
                     # Remember the agent sessions now, while the harness is still their parent.
                     spec = {**spec, "agent_pgids_seen": self._agent_groups(job, table)}
                 self._signal(job.pid, signal.SIGINT, pg=False)
@@ -327,7 +458,7 @@ class Supervisor:
             signalled = _dt(job.stop_signalled_at)
             escalated = _dt(job.stop_escalated_at)
             if (
-                job.kind == "suite"
+                job.kind in AGENT_KINDS
                 and signalled
                 and not job.spec.get("agents_killed_at")
                 and (now - signalled).total_seconds() >= AGENT_KILL_AFTER_S

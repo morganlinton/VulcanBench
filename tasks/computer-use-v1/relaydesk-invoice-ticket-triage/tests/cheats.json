@@ -1,0 +1,11 @@
+{
+  "note": "Shortcuts to the end state that skip the UI. Every entry must score reward 0, and the named sub-metric must be the one that catches it, so a checker regression is attributed. Run by scripts/computer-use/validate_task.py, which installs each script as the oracle solution in a fresh environment (never by scripts/frontier-v5/probe_verifier.py: these are live commands, not artifact edits).",
+  "cheats": [
+    {"name": "sqlite-direct", "script": "cheats/sqlite-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "sqlite-forged-audit", "script": "cheats/sqlite-forged-audit.sh", "expect": {"reward": 0, "audit_consistent": 0}},
+    {"name": "api-curl", "script": "cheats/api-curl.sh", "expect": {"reward": 0, "target_project": 0}},
+    {"name": "api-curl-scraped-token", "script": "cheats/api-curl-scraped-token.sh", "expect": {"reward": 0, "target_project": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "app_not_restarted": 0}},
+    {"name": "guard-violation", "solution": "gold", "env": {"VB_ALSO_TOUCH": "1011"}, "expect": {"reward": 0, "guards": 0}}
+  ]
+}

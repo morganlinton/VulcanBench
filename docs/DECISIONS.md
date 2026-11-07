@@ -7,6 +7,40 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-06: ComputerUse v1 tasks run under a 60-minute wall clock; computer-1 is capped at 200 turns
+
+### Decision
+Owner, in chat, 2026-11-06 (milestone 1 build approved; the number comes from
+its measurements). Every task in `tasks/computer-use-v1` carries
+`[agent].timeout_sec = 3600`, recorded in `suite.json` under `pins.budget` and
+asserted equal by `tests/test_computer_use_suite.py`. The computer-1 reference
+also passes `max_turns=200`; the claude-code reference has no turn cap (Claude
+Code stops when the model stops, and the wall clock bounds it). This replaces
+the flat 3-hour default of 2026-10-03 for this suite only; the other suites
+keep it.
+
+### Evidence
+- Gold through the UI: 22 s per trial, three identical runs; nop and the six
+  cheat probes 19 to 23 s (`scripts/computer-use/validate_task.py`, 2026-11-06).
+- First reference run, claude-code with Opus 5.5 at medium on the subscription,
+  acting only through the MCP computer tools: reward 1 in 11 turns and 31 s of
+  agent time, 2 min of trial wall clock including the Claude Code install,
+  191k input tokens (176k from cache), 0.18 USD API-equivalent.
+- The six-turn smoke run ended at the cap having only found the ticket, so a
+  turn cap below about 20 measures the cap, not the model.
+- A GUI task is seconds to minutes of actions and its cost is vision tokens,
+  not compute. 60 minutes is about 100 times the observed solve and stops a
+  runaway loop from draining the weekly subscription window.
+
+### Revisit triggers
+- A known-good reference run cut off by the clock or by `max_turns`.
+- Gold slower than a quarter of the budget (the validator warns).
+- Family C (cross-app) tasks, once authored: longer horizons may need more.
+
+### What this touched
+`tasks/computer-use-v1/relaydesk-invoice-ticket-triage/task.toml`,
+`tasks/computer-use-v1/suite.json`, `docs/COMPUTER_USE_CHARTER.md` (budget).
+
 ## 2026-11-05: router eval, a 16-task suite under $100 of cash
 
 ### Decision

@@ -1,0 +1,58 @@
+{
+  "id": "computer-use-v1",
+  "display_name": "VulcanBench ComputerUse v1 (milestone 1, pipeline prover)",
+  "version": "0.1.0",
+  "plan": "docs/COMPUTER_USE_CHARTER.md",
+  "_charter": "tasks/computer-use-v1/CHARTER.md",
+  "_status": "Milestone 1: one web task proving the Harbor computer-1 path end to end. Nothing here is admitted or frozen; no suite.lock.json until the first admitted set.",
+  "tasks": [
+    "relaydesk-invoice-ticket-triage"
+  ],
+  "pins": {
+    "harness": "harbor 0.24.0 (harbor[computer-1] extra installed for the native Anthropic provider; claude-code needs no extra)",
+    "agent": "computer-1 (API key) or claude-code with MCP computer tools (subscription); see agent_rows",
+    "condition": "pixels",
+    "budget": {
+      "timeout_sec": 3600,
+      "max_turns": 200,
+      "note": "docs/DECISIONS.md 2026-11-06: 60-minute wall clock for every task in this suite (replaces the 3-hour suite default here); max_turns applies to the computer-1 reference only."
+    },
+    "agent_kwargs": {
+      "max_turns": 200,
+      "desktop_width": 1024,
+      "desktop_height": 900,
+      "window_width": 1024,
+      "window_height": 900,
+      "start_url": "http://127.0.0.1:8000/"
+    },
+    "references": [
+      {
+        "name": "claude-code",
+        "agent": "claude-code",
+        "model": "claude-opus-5-5",
+        "version": "2.1.302",
+        "effort": "medium",
+        "auth": "subscription: CLAUDE_FORCE_OAUTH=1 with ~/.config/vulcanbench/claude-gate.env (CLAUDE_GATE_ENV overrides), as scripts/frontier-v5/run_gate.sh",
+        "tools": "mcp__computer__* only",
+        "disallowed_tools": "Bash,BashOutput,KillShell,Read,Edit,MultiEdit,Write,NotebookEdit,NotebookRead,Glob,Grep,LS,WebFetch,WebSearch,Task,Agent,TodoWrite,TodoRead,ExitPlanMode,EnterPlanMode",
+        "note": "First reference to run. Opus 5.5 is the subscription model that runs without usage credits (the 2026-11-06 probe: Fable 5.1 answered 'requires usage credits'); same CLI version as the Frontier v5 references. CU_GATE_MODEL=claude-fable-5-1 runs Fable once credits exist."
+      },
+      {
+        "name": "claude",
+        "agent": "computer-1",
+        "model": "anthropic/claude-fable-5-1",
+        "tool": "computer_20251124 with beta computer-use-2025-11-24 (what harbor 0.24.0's anthropic provider sends for non-legacy models)",
+        "auth": "ANTHROPIC_API_KEY in ~/.config/vulcanbench/computer-use-gate.env (CU_GATE_ENV overrides)",
+        "note": "Pinned provisionally; a smoke run must confirm the model accepts this tool version. Needs an API key the gate host does not have."
+      }
+    ],
+    "images": {
+      "vulcanbench/sandbox:cu-base": "sha256:5c7218e8af4772257bf707341b4500d5cc3865f89611d406109a312b9c9d711f"
+    },
+    "images_note": "Built by make sandbox-image-computer-use from sandbox/Dockerfile.computer-use (Debian bookworm packages are not byte-pinned; the image records dpkg-query output at /etc/vulcanbench-packages.txt).",
+    "agent_rows": {
+      "computer-1": "Harbor's computer-1 agent with Anthropic's native computer-use tool, called from the host with an API key. Not run yet: no key on the gate host.",
+      "claude-code": "Harbor's claude-code agent on the Claude subscription (the Frontier gate's OAuth env file), acting only through mcp__computer__* tools from sandbox/computer-use/vb_computer_mcp.py with Claude Code's own tools disallowed. A distinct row from the native tool: screenshots arrive as ordinary images and coordinates are emitted as tool arguments."
+    }
+  }
+}

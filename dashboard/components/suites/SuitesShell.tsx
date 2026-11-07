@@ -12,7 +12,7 @@ export function SuitesShell({ back, intro, children }: { back?: { href: string; 
           {back ? (
             <Link href={back.href} className="text-sm text-zinc-400 hover:text-white">← {back.label}</Link>
           ) : (
-            <h1 className="text-4xl font-semibold tracking-tight">Suites</h1>
+            <h1 className="text-4xl font-semibold tracking-tight">Eval suites</h1>
           )}
           <div className="flex gap-4 text-sm">
             <Link href="/launch" className="text-zinc-400 hover:text-white">launch</Link>

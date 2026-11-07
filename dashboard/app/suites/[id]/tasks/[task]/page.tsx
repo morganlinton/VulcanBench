@@ -19,7 +19,7 @@ export default async function TaskPage({ params }: Props) {
   const { id, task } = await params;
   const suite = decode(id);
   return (
-    <SuitesShell back={{ href: `/suites/${encodeURIComponent(suite)}`, label: "suite" }}>
+    <SuitesShell back={{ href: `/suites/${encodeURIComponent(suite)}`, label: "eval suite" }}>
       <TaskReview suite={suite} task={decode(task)} />
     </SuitesShell>
   );

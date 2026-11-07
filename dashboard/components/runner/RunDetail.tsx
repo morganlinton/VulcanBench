@@ -240,7 +240,7 @@ export function RunDetail({ id }: { id: string }) {
               <span className="block text-xs text-zinc-500">in <Link href={`/suites/${encodeURIComponent(target.suite)}`} className="hover:underline">{target.suiteName}</Link></span>
             </Fact>
           ) : (
-            <Fact label={run.kind === "gate" ? "task" : "suite or task"}>
+            <Fact label={run.kind === "gate" ? "task" : "eval suite or task"}>
               <span>{suite ?? run.suite_or_task ?? "n/a"}</span>
               {suite && <span className="block font-mono text-xs text-zinc-500">{run.suite_or_task}</span>}
             </Fact>

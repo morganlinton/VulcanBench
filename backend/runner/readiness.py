@@ -128,7 +128,7 @@ def gh_check() -> dict[str, Any]:
             WARN,
             "gh is not installed",
             "Install it (brew install gh), then run gh auth login in a terminal.",
-            needed_for="building suites",
+            needed_for="building eval suites",
         )
     env = {k: v for k, v in os.environ.items() if k in ("HOME", "PATH", "USER", "TMPDIR")}
     env["GH_PROMPT_DISABLED"] = "1"
@@ -150,11 +150,11 @@ def gh_check() -> dict[str, Any]:
             WARN,
             "gh auth status did not answer",
             "Run gh auth status in a terminal to see why.",
-            needed_for="building suites",
+            needed_for="building eval suites",
         )
     if res.returncode == 0:
         return _check(
-            "gh", "GitHub CLI", OK, "logged in to github.com", needed_for="building suites"
+            "gh", "GitHub CLI", OK, "logged in to github.com", needed_for="building eval suites"
         )
     return _check(
         "gh",
@@ -162,7 +162,7 @@ def gh_check() -> dict[str, Any]:
         WARN,
         "not logged in to github.com",
         "Run gh auth login in a terminal on this Mac.",
-        needed_for="building suites",
+        needed_for="building eval suites",
     )
 
 
@@ -173,47 +173,47 @@ def builder_check(cfg: RunnerConfig) -> dict[str, Any]:
         msg = exc.detail.get("message") if isinstance(exc.detail, dict) else str(exc.detail)
         return _check(
             "builder",
-            "Suite builder",
+            "Eval suite builder",
             WARN,
             f"suite access failed: {msg}",
             "Open the Suites page for details.",
-            needed_for="building suites",
+            needed_for="building eval suites",
         )
     tooling, access = res["tooling"], res["access"]
     if not tooling["ready"] or access is None:
         return _check(
             "builder",
-            "Suite builder",
+            "Eval suite builder",
             WARN,
             "; ".join(str(p) for p in tooling["problems"]) or "no tooling worktree",
-            "Cut a bench tag that contains the suite builder and prepare it.",
-            needed_for="building suites",
+            "Cut a bench tag that contains the eval suite builder and prepare it.",
+            needed_for="building eval suites",
         )
     if not access["configured"]:
         return _check(
             "builder",
-            "Suite builder",
+            "Eval suite builder",
             WARN,
             f"no password is set at {tooling['tag']}",
             "Run .venv/bin/vulcanbench suite password-hash, put the hash in [builder].password_hash "
             "in vulcanbench.toml, commit it, cut a tag and prepare it.",
-            needed_for="building suites",
+            needed_for="building eval suites",
         )
     if not access["unlocked"]:
         # Locked is the normal resting state, not a problem: say how to open it.
         return _check(
             "builder",
-            "Suite builder",
+            "Eval suite builder",
             OK,
-            f"locked; unlock it on the Suites page to build a suite (runs from {tooling['tag']})",
-            needed_for="building suites",
+            f"locked; unlock it on the Eval suites page to build one (runs from {tooling['tag']})",
+            needed_for="building eval suites",
         )
     return _check(
         "builder",
-        "Suite builder",
+        "Eval suite builder",
         OK,
         f"unlocked; commands run from {tooling['tag']}",
-        needed_for="building suites",
+        needed_for="building eval suites",
     )
 
 

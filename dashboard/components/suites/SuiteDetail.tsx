@@ -447,7 +447,7 @@ function TaskTable({ id, data, draft, state, onChange }: { id: string; data: Sui
           <dt className="text-zinc-200">Validate</dt>
           <dd>Checks the tests fail before the fix and pass after it. Free. Required before Accept.</dd>
           <dt className="text-zinc-200">Accept, Drop</dt>
-          <dd>Open the task to read what was written, then keep it in the suite or leave it out.</dd>
+          <dd>Open the task to read what was written, then keep it in the eval suite or leave it out.</dd>
         </dl>
       }
     >
@@ -470,7 +470,7 @@ function TaskTable({ id, data, draft, state, onChange }: { id: string; data: Sui
                 <th className="px-3 py-2">Stage</th>
                 <th className="px-3 py-2">Author</th>
                 <th className="px-3 py-2">Validate</th>
-                <th className="px-3 py-2">In suite</th>
+                <th className="px-3 py-2">Accepted</th>
                 <th className="px-3 py-2" />
               </tr>
             </thead>
@@ -543,8 +543,8 @@ function TaskTable({ id, data, draft, state, onChange }: { id: string; data: Sui
                     <td colSpan={7} className="px-3 pb-3">
                       <ConfirmBar
                         message={asking.what === "accept"
-                          ? `Accept ${t.id} into the suite? It is frozen with the suite later.`
-                          : `Drop ${t.id}? It leaves the suite; its folder stays in the suites home.`}
+                          ? `Accept ${t.id} into the eval suite? It is frozen with the suite later.`
+                          : `Drop ${t.id}? It leaves the eval suite; its folder stays in the suites home.`}
                         confirmLabel={asking.what === "accept" ? "Accept" : "Drop"}
                         withReason={asking.what === "drop"}
                         busy={busy === t.id}
@@ -609,7 +609,7 @@ function FreezeCard({ data, state, onFrozen }: { data: SuiteDetailData; state: S
               {plural(s.n_accepted, "task")}, version {s.version ?? "?"}, frozen {s.frozen_at?.slice(0, 10) ?? "?"}, lock <span className="font-mono">{s.lock_digest?.slice(0, 19) ?? "?"}</span>
             </div>
           </div>
-          <Link href={launchHref} className={`${button} inline-block bg-emerald-500 text-black hover:bg-emerald-400`}>Benchmark this suite</Link>
+          <Link href={launchHref} className={`${button} inline-block bg-emerald-500 text-black hover:bg-emerald-400`}>Benchmark this eval suite</Link>
         </div>
       </section>
     );
@@ -634,11 +634,11 @@ function FreezeCard({ data, state, onFrozen }: { data: SuiteDetailData; state: S
       id="freeze"
       state={state}
       title="Freeze"
-      summary="Lock the accepted tasks. The suite then appears on the Launch page."
+      summary="Lock the accepted tasks. The eval suite then appears on the Launch page."
       help={
         <>
-          A frozen suite cannot change, so every run scores the same thing and results compare across models and
-          over time. Tasks not accepted are left out. For more tasks later, start a new suite.
+          A frozen eval suite cannot change, so every run scores the same thing and results compare across models and
+          over time. Tasks not accepted are left out. For more tasks later, start a new eval suite.
         </>
       }
     >
@@ -651,7 +651,7 @@ function FreezeCard({ data, state, onFrozen }: { data: SuiteDetailData; state: S
       {result && <div className="text-xs text-emerald-300">froze {plural(result.n_tasks ?? 0, "task")}, lock {result.lock_digest}</div>}
       {asking ? (
         <ConfirmBar
-          message={`Freeze ${s.name} with ${plural(s.n_accepted, "accepted task")}?${leftOut ? ` ${plural(leftOut, "task")} not accepted ${leftOut === 1 ? "is" : "are"} left out.` : ""} The suite becomes read-only and can then be benchmarked.`}
+          message={`Freeze ${s.name} with ${plural(s.n_accepted, "accepted task")}?${leftOut ? ` ${plural(leftOut, "task")} not accepted ${leftOut === 1 ? "is" : "are"} left out.` : ""} The eval suite becomes read-only and can then be benchmarked.`}
           confirmLabel="Freeze"
           busy={busy}
           onConfirm={freeze}
@@ -659,7 +659,7 @@ function FreezeCard({ data, state, onFrozen }: { data: SuiteDetailData; state: S
         />
       ) : (
         <button type="button" onClick={() => setAsking(true)} disabled={!data.freeze_ready.ok || busy} className={`${button} border border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10`}>
-          Freeze suite
+          Freeze eval suite
         </button>
       )}
     </Section>

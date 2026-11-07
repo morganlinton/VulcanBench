@@ -27,7 +27,7 @@ export function ReadinessCard() {
           <span className={`inline-block h-2 w-2 rounded-full ${DOT[data.status]}`} />
           <span className="text-zinc-200">
             {problems.length === 0
-              ? "This Mac is ready for runs and suite building"
+              ? "This Mac is ready for runs and eval suite building"
               : `This Mac needs ${problems.length} thing${problems.length > 1 ? "s" : ""} before everything works`}
           </span>
         </div>

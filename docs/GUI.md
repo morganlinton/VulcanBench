@@ -25,7 +25,7 @@ and reads what they write to disk. It never reimplements run logic.
    A level that ends short says why (quota window, expired login, exit code)
    and the card offers "Run the missing tasks", which opens Launch prefilled
    with `--only-missing`.
-5. Build your own suite: on Suites, unlock with the subscriber password,
+5. Build your own eval suite: on Eval suites, unlock with the subscriber password,
    create a suite for `owner/name`, load its merged pull requests, scaffold
    the good ones (fill in the terms note first if the repository has no
    LICENSE), author them (one model session each, behind a plan and a confirm
@@ -46,7 +46,7 @@ confirm click; nothing retries on its own.
 | Bench tag | some `bench/*` tag has a run worktree at its commit, with clean scoring paths | amber when none is prepared, red when the prepared one is dirty or off its tag |
 | Docker | the daemon answers | amber: local-sandbox runs still work; validation does not |
 | GitHub CLI | `gh auth status --hostname github.com` exits 0 | amber: run `gh auth login` |
-| Suite builder | a tooling worktree exists and a password is configured (locked counts as ok) | amber, with the step that is missing |
+| Eval suite builder | a tooling worktree exists and a password is configured (locked counts as ok) | amber, with the step that is missing |
 
 `gh auth status` runs with only `HOME`, `PATH`, `USER` and `TMPDIR` in its
 environment, stdin closed, and its output discarded unread, because it can
@@ -190,7 +190,7 @@ by hand: `load_dotenv()` on the worktree's `.env`.
 
 ## Build your own eval suite (milestone 6)
 
-The Suites pages (`/suites`, "Build your own suite" on the Launch page,
+The Eval suites pages (`/suites`, "Build your own eval suite" on the Launch page,
 View > Suites in the Mac app) turn merged pull requests from one of the
 operator's own GitHub repositories into a frozen suite that runs on the
 Launch page under Custom. The flow: create a suite for `owner/name`, load its
@@ -208,12 +208,12 @@ task's files) come from disk as JSON and text.
 | Page action | Command | Notes |
 |---|---|---|
 | Unlock, Lock | `suite unlock --password-stdin`, `suite lock` | see below |
-| New suite | `suite init <id> --display-name N --repo owner/name` | 409 for an existing id or a built-in suite's id |
+| New eval suite | `suite init <id> --display-name N --repo owner/name` | 409 for an existing id or a built-in suite's id |
 | Load pull requests | `suite prs list --suite <id> [--since] --limit` | through the operator's `gh` login; cached 10 minutes; 409 with "gh auth login" when gh is not logged in |
 | Scaffold N selected | `suite task scaffold <id> --pr N [--license-note TEXT]` | one request per PR, one scaffold per suite at a time, up to 10 minutes each; no model call; the terms note (below) adds `--license-note` |
 | Accept | `suite add-task <id> --task T` | only with a PASS or WARN validation newer than the last authoring |
 | Drop | `suite remove-task` when accepted, then `build/dropped.json` | the task's folder stays |
-| Freeze suite | `suite freeze <id>` | needs one accepted task, every accepted task validated, no active job |
+| Freeze eval suite | `suite freeze <id>` | needs one accepted task, every accepted task validated, no active job |
 
 Every command gets `--suites-home <[runner].suites_home>` and `--json`, and
 its stdin is a closed pipe so `gh` or `git` can never wait on a prompt. Exit
@@ -519,7 +519,7 @@ port choice, server start and stop) without Electron.
 5. Custom suites in the picker: frozen suites from the suites home run with
    `--suites-home`, checked by lock digest at confirm and launch (this
    document).
-6. Build your own eval suite: the Suites pages behind the builder's unlock
+6. Build your own eval suite: the Eval suites pages behind the builder's unlock
    screen (create, pull requests, scaffold, review, accept, drop, freeze),
    wrapping `vulcanbench suite` from the tooling worktree, and queued
    authoring and validation jobs behind the confirm click (this document).

@@ -177,9 +177,9 @@ function SweepPlanCard({ plan, onQueued }: { plan: LaunchPlan<SweepPlanSpec>; on
         <div className="rounded-xl border border-white/10 p-4">
           <div className={label}>Source</div>
           <dl className="space-y-1 text-xs">
-            <Row k="suite" v={`${spec.suite_name} (${spec.suite})${spec.suite_custom ? " (custom)" : ""}`} mono={false} />
+            <Row k="eval suite" v={`${spec.suite_name} (${spec.suite})${spec.suite_custom ? " (custom)" : ""}`} mono={false} />
             {spec.suite_custom && <Row k="suites home" v={spec.suites_home ?? "?"} />}
-            {spec.suite_custom && <Row k="suite lock" v={spec.suite_lock_digest ?? "?"} />}
+            {spec.suite_custom && <Row k="eval suite lock" v={spec.suite_lock_digest ?? "?"} />}
             <Row k="model" v={spec.model_spec} />
             <Row k="harness" v={`${spec.harness}${spec.doctor.version ? ` ${spec.doctor.version}` : ""}`} />
             <Row k="effort levels" v={spec.efforts.join(", ")} />
@@ -312,7 +312,7 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className={label} htmlFor="suite">Suite</label>
+            <label className={label} htmlFor="suite">Eval suite</label>
             <select id="suite" className={field} value={suite} onChange={(e) => { setSuiteChoice(e.target.value); reset(); }}>
               {builtinSuites.length > 0 && (
                 <optgroup label="Built-in at this tag">
@@ -320,7 +320,7 @@ export function SweepForm({ opts, tag, onTag, refreshOptions }: Props) {
                 </optgroup>
               )}
               {customSuites.length > 0 && (
-                <optgroup label="Custom (suites home)">
+                <optgroup label="Your eval suites (suites home)">
                   {customSuites.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.n_tasks} {s.n_tasks === 1 ? "task" : "tasks"}, {s.id})</option>)}
                 </optgroup>
               )}

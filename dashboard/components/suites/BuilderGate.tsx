@@ -40,7 +40,7 @@ export function errorText(e: unknown): string {
 export function BuilderGate({ children }: { children: React.ReactNode }) {
   const { data, error, refresh } = usePolling<AccessResponse>(getAccess, 0, "access");
   if (error && !data) return <RunnerUnavailable error={error} />;
-  if (!data) return <div className="mt-6 text-sm text-zinc-500">checking the suite builder</div>;
+  if (!data) return <div className="mt-6 text-sm text-zinc-500">checking the eval suite builder</div>;
   if (!data.tooling.ready || !data.access) return <NoTooling data={data} />;
   if (!data.access.configured) return <NotConfigured tag={data.tooling.tag} />;
   if (!data.access.unlocked) return <UnlockForm onUnlocked={refresh} />;
@@ -78,10 +78,10 @@ export function ErrorLine({ error }: { error: unknown }) {
 function NoTooling({ data }: { data: AccessResponse }) {
   return (
     <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-sm text-amber-200 space-y-2">
-      <div className="font-medium">The suite builder needs a prepared bench tag</div>
+      <div className="font-medium">The eval suite builder needs a prepared bench tag</div>
       <p className="text-amber-200/80">
         Its commands run from a run worktree pinned to a bench tag, like every benchmark run. Cut a tag from
-        main that contains the suite builder, then prepare its worktree on the Launch page (no model calls).
+        main that contains the eval suite builder, then prepare its worktree on the Launch page (no model calls).
       </p>
       <ul className="list-disc pl-5 text-xs text-amber-200/80">
         {data.tooling.problems.map((p) => <li key={p}>{p}</li>)}
@@ -96,9 +96,9 @@ function NoTooling({ data }: { data: AccessResponse }) {
 function NotConfigured({ tag }: { tag: string | null }) {
   return (
     <div className="mt-6 rounded-xl border border-white/10 p-5 text-sm text-zinc-300 space-y-3 max-w-2xl">
-      <div className="text-lg font-medium text-white">The suite builder is for subscribers</div>
+      <div className="text-lg font-medium text-white">The eval suite builder is for subscribers</div>
       <p>
-        No suite builder password is set at {tag ?? "this bench tag"}, so the builder stays locked. The owner
+        No eval suite builder password is set at {tag ?? "this bench tag"}, so the builder stays locked. The owner
         sets one in a terminal on this Mac:
       </p>
       <pre className="rounded-md bg-zinc-900 p-3 font-mono text-xs text-zinc-200">.venv/bin/vulcanbench suite password-hash</pre>
@@ -159,7 +159,7 @@ function UnlockForm({ onUnlocked }: { onUnlocked: () => void }) {
   return (
     <form onSubmit={submit} className="mt-6 max-w-md rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] p-5 space-y-4">
       <div>
-        <div className="text-lg font-medium">Unlock the suite builder</div>
+        <div className="text-lg font-medium">Unlock the eval suite builder</div>
         <p className="mt-1 text-sm text-zinc-400">
           Building your own eval suite is for subscribers. Enter the subscriber password once; this Mac stays
           unlocked until you lock it again or the password changes.
@@ -212,12 +212,12 @@ function LockBar({ data, onLocked }: { data: AccessResponse; onLocked: () => voi
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-400">
       <span>
-        Suite builder unlocked{since && !Number.isNaN(since.getTime()) ? ` since ${since.toLocaleString()}` : ""}. Commands run from{" "}
+        Eval suite builder unlocked{since && !Number.isNaN(since.getTime()) ? ` since ${since.toLocaleString()}` : ""}. Commands run from{" "}
         <span className="font-mono text-zinc-300">{data.tooling.tag}</span>.
       </span>
       {asking ? (
         <ConfirmBar
-          message="Lock the suite builder on this Mac? Unlocking again needs the password."
+          message="Lock the eval suite builder on this Mac? Unlocking again needs the password."
           confirmLabel="Lock"
           busy={busy}
           onConfirm={lock}

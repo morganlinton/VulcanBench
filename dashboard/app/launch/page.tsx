@@ -13,12 +13,12 @@ export default function LaunchPage() {
           <h1 className="text-4xl font-semibold tracking-tight">Launch</h1>
           <div className="flex gap-4 text-sm">
             <Link href="/runs" className="text-zinc-400 hover:text-white">runs</Link>
-            <Link href="/suites" className="text-zinc-400 hover:text-white">suites</Link>
+            <Link href="/suites" className="text-zinc-400 hover:text-white">eval suites</Link>
             <Link href="/" className="text-zinc-400 hover:text-white">← home</Link>
           </div>
         </div>
         <p className="text-sm text-zinc-400 max-w-3xl">
-          Benchmark a model on VulcanBench Frontier v4 or any other frozen suite, across effort levels.
+          Benchmark a model on VulcanBench Frontier v4 or any other frozen eval suite, across effort levels.
           Build the plan, read the exact commands and the estimate, then confirm. Jobs go to a queue that
           runs one task at a time; nothing starts without the confirm click and nothing retries on its own.
         </p>

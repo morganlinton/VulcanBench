@@ -47,25 +47,25 @@ export function repoName(r: SuiteRow["repo"]): string {
 export function SuitesList() {
   const { data, error } = usePolling<SuitesListData>(() => runnerGet<SuitesListData>(SUITES_API), 5000, "suites");
   if (error && !data) return <ErrorLine error={error} />;
-  if (!data) return <div className="mt-6 text-sm text-zinc-500">loading suites</div>;
+  if (!data) return <div className="mt-6 text-sm text-zinc-500">loading eval suites</div>;
   return (
     <div className="mt-6 space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="text-xs text-zinc-500">
           suites home <span className="font-mono text-zinc-300">{data.suites_home}</span>
         </div>
-        <Link href="/suites/new" className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>New suite</Link>
+        <Link href="/suites/new" className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>New eval suite</Link>
       </div>
       {data.suites.length === 0 ? (
         <div className="rounded-xl border border-white/10 p-6 text-sm text-zinc-400">
-          No suites yet. Start one from a GitHub repository you can read with this Mac&apos;s <code className="font-mono">gh</code> login.
+          No eval suites yet. Start one from a GitHub repository you can read with this Mac&apos;s <code className="font-mono">gh</code> login.
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wider text-zinc-500">
               <tr>
-                <th className="px-3 py-2">Suite</th>
+                <th className="px-3 py-2">Eval suite</th>
                 <th className="px-3 py-2">Repository</th>
                 <th className="px-3 py-2">Status</th>
                 <th className="px-3 py-2">Tasks</th>
@@ -165,7 +165,7 @@ export function NewSuiteForm() {
       </div>
       {error && <div className="text-xs text-rose-300">{error}</div>}
       <button type="submit" disabled={!ok || busy} className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>
-        {busy ? "Creating" : "Create suite"}
+        {busy ? "Creating" : "Create eval suite"}
       </button>
       {missing && <span className="ml-3 text-xs text-zinc-500">needs {missing}</span>}
     </form>

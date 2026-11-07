@@ -10,7 +10,7 @@ export default function RunsPage() {
         <div className="flex justify-between items-baseline mb-2">
           <h1 className="text-4xl font-semibold tracking-tight">Runs</h1>
           <div className="flex gap-4 text-sm">
-            <Link href="/suites" className="text-zinc-400 hover:text-white">suites</Link>
+            <Link href="/suites" className="text-zinc-400 hover:text-white">eval suites</Link>
             <Link href="/" className="text-zinc-400 hover:text-white">← home</Link>
           </div>
         </div>

@@ -49,7 +49,7 @@ function LatestJob({ task, jobs, frozen }: { task: TaskRow; jobs: TaskDetail["jo
   const next = task.dropped || frozen
     ? null
     : task.accepted
-      ? "Accepted. Back on the suite page, review the other tasks, then freeze the suite to benchmark it."
+      ? "Accepted. Back on the eval suite page, review the other tasks, then freeze it to benchmark it."
       : broke
         ? `This job wrote no new ${last.kind === "author" ? "authoring" : "validation"} record, so the task keeps its earlier state (${task.stage.replace("_", " ")}). Read the job's log for the cause, then run it again.`
         : NEXT_STEP[task.stage];
@@ -202,8 +202,8 @@ export function TaskReview({ suite, task }: { suite: string; task: string }) {
       {editable && asking && (
         <ConfirmBar
           message={asking === "accept"
-            ? `Accept ${task} into the suite? It is frozen with the suite later.`
-            : `Drop ${task}? It leaves the suite; its folder stays in the suites home.`}
+            ? `Accept ${task} into the eval suite? It is frozen with the suite later.`
+            : `Drop ${task}? It leaves the eval suite; its folder stays in the suites home.`}
           confirmLabel={asking === "accept" ? "Accept" : "Drop"}
           withReason={asking === "drop"}
           busy={busy}

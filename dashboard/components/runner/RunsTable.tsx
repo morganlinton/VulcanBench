@@ -94,7 +94,7 @@ function Section({ title, runs, empty }: { title: string; runs: RunRow[]; empty:
           <table className="w-full text-sm">
             <thead className="bg-white/5 text-left">
               <tr>
-                {["Status", "Run", "Suite or task", "Model", "Harness", "Effort", "Source", "Attempts", "Rewards", "Elapsed", "First attempt"].map((h) => (
+                {["Status", "Run", "Eval suite or task", "Model", "Harness", "Effort", "Source", "Attempts", "Rewards", "Elapsed", "First attempt"].map((h) => (
                   <th key={h} className="p-3 font-normal text-zinc-400 whitespace-nowrap">{h}</th>
                 ))}
               </tr>

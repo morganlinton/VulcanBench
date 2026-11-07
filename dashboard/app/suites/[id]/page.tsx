@@ -18,7 +18,7 @@ function decode(v: string): string {
 export default async function SuitePage({ params }: Props) {
   const { id } = await params;
   return (
-    <SuitesShell back={{ href: "/suites", label: "suites" }}>
+    <SuitesShell back={{ href: "/suites", label: "eval suites" }}>
       <SuiteDetail id={decode(id)} />
     </SuitesShell>
   );

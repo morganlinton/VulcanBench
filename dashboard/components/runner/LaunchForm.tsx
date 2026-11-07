@@ -29,14 +29,14 @@ export function LaunchForm() {
         <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/[0.04] p-4">
           <div className="font-medium">Benchmark a model</div>
           <div className="mt-1 text-xs text-zinc-400">
-            Run a frozen suite (VulcanBench Frontier v4 or one you built) for one model across effort levels. The form is below.
+            Run a frozen eval suite (VulcanBench Frontier v4 or one you built) for one model across effort levels. The form is below.
           </div>
         </div>
         <Link href="/suites" className="rounded-xl border border-white/10 p-4 hover:border-emerald-500/40 hover:bg-white/[0.02]">
-          <div className="font-medium">Build your own suite</div>
+          <div className="font-medium">Build your own eval suite</div>
           <div className="mt-1 text-xs text-zinc-400">
             Turn merged pull requests from your own GitHub repository into benchmark tasks, for subscribers.
-            {custom.length > 0 ? ` ${custom.length} custom suite${custom.length > 1 ? "s" : ""} frozen.` : ""}
+            {custom.length > 0 ? ` ${custom.length} of your own frozen.` : ""}
           </div>
         </Link>
       </div>

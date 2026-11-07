@@ -1,0 +1,38 @@
+diff --git a/src/main/java/org/apache/commons/lang3/math/Fraction.java b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+index ac19734..9e8cb04 100644
+--- a/src/main/java/org/apache/commons/lang3/math/Fraction.java
++++ b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+@@ -311,23 +311,16 @@ public final class Fraction extends Number implements Comparable<Fraction> {
+         if (numerator == 0) {
+             return ZERO; // normalize zero.
+         }
+-        // allow 2^k/-2^31 as a valid fraction (where k>0)
+-        if (denominator == Integer.MIN_VALUE && (numerator & 1) == 0) {
+-            numerator /= 2;
+-            denominator /= 2;
+-        }
+-        if (denominator < 0) {
+-            if (numerator == Integer.MIN_VALUE || denominator == Integer.MIN_VALUE) {
+-                throw new ArithmeticException("overflow: can't negate");
+-            }
+-            numerator = -numerator;
+-            denominator = -denominator;
+-        }
+-        // simplify fraction.
+-        final int gcd = greatestCommonDivisor(numerator, denominator);
+-        numerator /= gcd;
+-        denominator /= gcd;
+-        return new Fraction(numerator, denominator);
++        // widen to long so that Integer.MIN_VALUE can be negated and reduced
++        // like any other value.
++        long num = numerator;
++        long den = denominator;
++        if (den < 0) {
++            num = -num;
++            den = -den;
++        }
++        final long gcd = BigInteger.valueOf(Math.abs(num)).gcd(BigInteger.valueOf(den)).longValue();
++        return new Fraction((int) (num / gcd), (int) (den / gcd));
+     }
+ 
+     /**

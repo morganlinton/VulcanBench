@@ -1,0 +1,23 @@
+diff --git a/src/main/java/org/apache/commons/lang3/math/Fraction.java b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+index ac19734..66c31cb 100644
+--- a/src/main/java/org/apache/commons/lang3/math/Fraction.java
++++ b/src/main/java/org/apache/commons/lang3/math/Fraction.java
+@@ -764,11 +764,15 @@ public final class Fraction extends Number implements Comparable<Fraction> {
+         if (numerator == 0 || fraction.numerator == 0) {
+             return ZERO;
+         }
++        // reduce the operands first so a factor shared inside one of them
++        // cannot overflow the cross products.
++        final Fraction a = reduce();
++        final Fraction b = fraction.reduce();
+         // knuth 4.5.1
+         // make sure we don't overflow unless the result *must* overflow.
+-        final int d1 = greatestCommonDivisor(numerator, fraction.denominator);
+-        final int d2 = greatestCommonDivisor(fraction.numerator, denominator);
+-        return getReducedFraction(mulAndCheck(numerator / d1, fraction.numerator / d2), mulPosAndCheck(denominator / d2, fraction.denominator / d1));
++        final int d1 = greatestCommonDivisor(a.numerator, b.denominator);
++        final int d2 = greatestCommonDivisor(b.numerator, a.denominator);
++        return getReducedFraction(mulAndCheck(a.numerator / d1, b.numerator / d2), mulPosAndCheck(a.denominator / d2, b.denominator / d1));
+     }
+ 
+     /**

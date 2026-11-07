@@ -1,0 +1,455 @@
+diff --git a/lib/src/query.c b/lib/src/query.c
+index 4adf9f0..b72f1cc 100644
+--- a/lib/src/query.c
++++ b/lib/src/query.c
+@@ -62,8 +62,8 @@ typedef struct {
+  * which forbids additional child nodes:
+  * - `is_immediate` - Indicates that the node matching this step cannot be preceded
+  *    by other sibling nodes that weren't specified in the pattern.
+- * - `is_last_child` - Indicates that the node matching this step cannot have any
+- *    subsequent named siblings.
++ * Anchor operand boundaries are stored separately in `TSQuery.anchors`, so
++ * that assertions can distinguish an empty operand from a matched operand.
+  *
+  * For simple patterns, steps are matched in sequential order. But in order to
+  * handle alternative/repeated/optional sub-patterns, query steps are not always
+@@ -105,9 +105,11 @@ typedef struct {
+   uint16_t depth;
+   uint16_t alternative_index;
+   uint16_t negated_field_list_id;
++  // Repetition copies retain their lexical position for anchor operands.
++  uint16_t original_step_index;
++  bool has_anchors: 1;
+   bool is_named: 1;
+   bool is_immediate: 1;
+-  bool is_last_child: 1;
+   bool is_pass_through: 1;
+   bool is_dead_end: 1;
+   bool is_inside_alternation: 1;
+@@ -199,6 +201,9 @@ typedef struct {
+  *    it is clear that there can be no other alternative match with more captures.
+  */
+ typedef struct {
++  // The last consumed step and node, including uncaptured operands.
++  TSNode last_node;
++  uint16_t last_step_index;
+   uint32_t id;
+   uint32_t capture_list_id;
+   uint32_t heap_insert_order;
+@@ -301,7 +306,14 @@ typedef struct {
+  * itself is immutable. The mutable state used in the process of executing the
+  * query is stored in a `TSQueryCursor`.
+  */
++// An anchor relates two syntactic operands, either of which may be empty.
++// An empty right interval denotes a last-child assertion.
++typedef struct {
++  uint16_t left_start, right_start, end, depth;
++} QueryAnchor;
++
+ struct TSQuery {
++  Array(QueryAnchor) anchors;
+   SymbolTable captures;
+   SymbolTable predicate_values;
+   Array(CaptureQuantifiers) capture_quantifiers;
+@@ -970,6 +982,7 @@ static QueryStep query_step__new(
+     .symbol = symbol,
+     .depth = depth,
+     .alternative_index = NONE,
++    .original_step_index = NONE,
+     .is_immediate = is_immediate,
+   };
+   for (unsigned i = 0; i < MAX_STEP_CAPTURE_COUNT; i++) {
+@@ -1630,7 +1643,6 @@ static void ts_query__dump_steps(const TSQuery *self, const char *label) {
+     if (s->is_immediate) printf(" IMM");
+     if (s->is_pass_through) printf(" PASS");
+     if (s->is_dead_end) printf(" DEAD");
+-    if (s->is_last_child) printf(" LAST");
+     if (s->is_named) printf(" NAMED");
+     if (s->is_missing) printf(" MISSING");
+     if (s->is_inside_alternation) printf(" INALT");
+@@ -2485,13 +2497,17 @@ static TSQueryError ts_query__parse_pattern(
+     // If this parenthesis is followed by a node, then it represents a grouped sequence.
+     if (stream->next == '(' || stream->next == '"' || stream->next == '[') {
+       bool child_is_immediate = is_immediate;
++      uint16_t previous_start = self->steps.size;
++      const char *anchor_position = NULL;
+       CaptureQuantifiers child_capture_quantifiers = capture_quantifiers_new();
+       for (;;) {
+         if (stream->next == '.') {
++          anchor_position = stream->input;
+           child_is_immediate = true;
+           stream_advance(stream);
+           stream_skip_whitespace(stream);
+         }
++        uint16_t child_start = self->steps.size;
+         TSQueryError e = ts_query__parse_pattern(
+           self,
+           stream,
+@@ -2501,6 +2517,11 @@ static TSQueryError ts_query__parse_pattern(
+           &child_capture_quantifiers
+         );
+         if (e == PARENT_DONE) {
++          if (anchor_position) {
++            stream_reset(stream, anchor_position);
++            capture_quantifiers_delete(&child_capture_quantifiers);
++            return TSQueryErrorSyntax;
++          }
+           if (stream->next == ')') {
+             stream_advance(stream);
+             break;
+@@ -2512,6 +2533,13 @@ static TSQueryError ts_query__parse_pattern(
+           return e;
+         }
+ 
++        if (anchor_position && self->steps.size > child_start) {
++          array_push(&self->anchors, ((QueryAnchor) {previous_start, child_start, self->steps.size, depth}));
++        }
++        if (self->steps.size > child_start) {
++          previous_start = child_start;
++          anchor_position = NULL;
++        }
+         capture_quantifiers_add_all(capture_quantifiers, &child_capture_quantifiers);
+         capture_quantifiers_clear(&child_capture_quantifiers);
+         child_is_immediate = false;
+@@ -2522,7 +2550,13 @@ static TSQueryError ts_query__parse_pattern(
+ 
+     // A dot/pound character indicates the start of a predicate.
+     else if (stream->next == '.' || stream->next == '#') {
++      const char *predicate_start = stream->input;
++      bool starts_with_dot = stream->next == '.';
+       stream_advance(stream);
++      if (starts_with_dot && !stream_is_ident_start(stream)) {
++        stream_reset(stream, predicate_start);
++        return TSQueryErrorSyntax;
++      }
+       return ts_query__parse_predicate(self, stream);
+     }
+ 
+@@ -2540,7 +2574,7 @@ static TSQueryError ts_query__parse_pattern(
+         // Parse the wildcard symbol
+         if (length == 1 && node_name[0] == '_') {
+           symbol = WILDCARD_SYMBOL;
+-        } else if (!strncmp(node_name, "MISSING", length)) {
++        } else if (length == 7 && !memcmp(node_name, "MISSING", 7)) {
+           is_missing = true;
+           stream_skip_whitespace(stream);
+ 
+@@ -2686,6 +2720,7 @@ static TSQueryError ts_query__parse_pattern(
+       // Parse the child patterns
+       bool child_is_immediate = false;
+       uint16_t last_child_step_index = 0;
++      uint16_t children_start = self->steps.size;
+       uint16_t negated_field_count = 0;
+       TSFieldId negated_field_ids[MAX_NEGATED_FIELD_COUNT];
+       CaptureQuantifiers child_capture_quantifiers = capture_quantifiers_new();
+@@ -2739,9 +2774,6 @@ static TSQueryError ts_query__parse_pattern(
+           is_inside_alternation,
+           &child_capture_quantifiers
+         );
+-        // In the event we only parsed a predicate, meaning no new steps were added,
+-        // then subtract one so we're not indexing past the end of the array
+-        if (step_index == self->steps.size) step_index--;
+         if (e == PARENT_DONE) {
+           if (stream->next == ')') {
+             if (child_is_immediate) {
+@@ -2749,23 +2781,9 @@ static TSQueryError ts_query__parse_pattern(
+                 capture_quantifiers_delete(&child_capture_quantifiers);
+                 return TSQueryErrorSyntax;
+               }
+-              // Mark this step *and* its alternatives as the last child of the parent.
+-              QueryStep *last_child_step = array_get(&self->steps, last_child_step_index);
+-              last_child_step->is_last_child = true;
+-              if (
+-                last_child_step->alternative_index != NONE &&
+-                last_child_step->alternative_index < self->steps.size
+-              ) {
+-                QueryStep *alternative_step = array_get(&self->steps, last_child_step->alternative_index);
+-                alternative_step->is_last_child = true;
+-                while (
+-                  alternative_step->alternative_index != NONE &&
+-                  alternative_step->alternative_index < self->steps.size
+-                ) {
+-                  alternative_step = array_get(&self->steps, alternative_step->alternative_index);
+-                  alternative_step->is_last_child = true;
+-                }
+-              }
++              array_push(&self->anchors, ((QueryAnchor) {
++                children_start, self->steps.size, self->steps.size, depth + 1
++              }));
+             }
+ 
+             if (negated_field_count) {
+@@ -2789,8 +2807,16 @@ static TSQueryError ts_query__parse_pattern(
+ 
+         capture_quantifiers_add_all(capture_quantifiers, &child_capture_quantifiers);
+ 
+-        last_child_step_index = step_index;
+-        child_is_immediate = false;
++        if (child_is_immediate && self->steps.size > step_index) {
++          array_push(&self->anchors, ((QueryAnchor) {
++            last_child_step_index ? last_child_step_index : step_index,
++            step_index, self->steps.size, depth + 1
++          }));
++        }
++        if (self->steps.size > step_index) {
++          last_child_step_index = step_index;
++          child_is_immediate = false;
++        }
+         capture_quantifiers_clear(&child_capture_quantifiers);
+       }
+       capture_quantifiers_delete(&child_capture_quantifiers);
+@@ -3158,6 +3184,7 @@ TSQuery *ts_query_new(
+         uint32_t copy_idx = self->steps.size;
+         QueryStep copy = *target;
+         copy.alternative_index = NONE;
++        copy.original_step_index = target_idx;
+         uint16_t target_depth = target->depth;
+         array_push(&self->steps, copy);
+ 
+@@ -3186,6 +3213,32 @@ TSQuery *ts_query_new(
+     return NULL;
+   }
+ 
++  // Grammar analysis does not account for anchor assertions.
++  for (unsigned i = 0; i < self->patterns.size; i++) {
++    QueryPattern *pattern = array_get(&self->patterns, i);
++    unsigned start = pattern->steps.offset, end = start + pattern->steps.length;
++    bool anchored = false;
++    for (unsigned j = 0; j < self->anchors.size; j++) {
++      unsigned index = array_get(&self->anchors, j)->right_start;
++      if (index >= start && index < end) anchored = true;
++    }
++    if (anchored) {
++      for (unsigned j = start; j < end; j++) {
++        QueryStep *step = array_get(&self->steps, j);
++        step->has_anchors = true;
++        if (step->depth != PATTERN_DONE_MARKER) step->root_pattern_guaranteed = false;
++      }
++    }
++  }
++
++  for (unsigned i = 0; i < self->steps.size; i++) {
++    QueryStep *step = array_get(&self->steps, i);
++    if (step->original_step_index != NONE) {
++      step->has_anchors = array_get(&self->steps, step->original_step_index)->has_anchors;
++      if (step->has_anchors) step->root_pattern_guaranteed = false;
++    }
++  }
++
+   #ifdef DEBUG_DUMP_STEPS
+     ts_query__dump_steps(self, "post-analysis");
+   #endif
+@@ -3196,6 +3249,7 @@ TSQuery *ts_query_new(
+ 
+ void ts_query_delete(TSQuery *self) {
+   if (self) {
++    array_delete(&self->anchors);
+     array_delete(&self->steps);
+     array_delete(&self->pattern_map);
+     array_delete(&self->predicate_steps);
+@@ -3225,6 +3279,7 @@ TSQuery *ts_query_copy(const TSQuery *self) {
+     .wildcard_root_pattern_count = self->wildcard_root_pattern_count,
+   };
+ 
++  array_assign(&copy->anchors, &self->anchors);
+   array_assign(&copy->steps, &self->steps);
+   array_assign(&copy->pattern_map, &self->pattern_map);
+   array_assign(&copy->predicate_steps, &self->predicate_steps);
+@@ -3757,6 +3812,79 @@ static void ts_query_cursor__sort_states_by_capture(TSQueryCursor *self) {
+   }
+ }
+ 
++// Recover the last matched node at an operand's depth. Descending into a
++// matched node does not change which sibling participated in an anchor.
++static uint16_t ts_query_cursor__last_at_depth(
++  const TSQuery *query, const QueryState *state, uint16_t depth, TSNode *node
++) {
++  uint16_t index = state->last_step_index;
++  *node = state->last_node;
++  if (index == NONE) return NONE;
++  while (array_get(&query->steps, index)->depth > depth) {
++    uint16_t old_depth = array_get(&query->steps, index)->depth;
++    do {
++      if (!index) return NONE;
++      index--;
++    } while (array_get(&query->steps, index)->depth >= old_depth);
++    *node = ts_node_parent(*node);
++  }
++  return array_get(&query->steps, index)->depth == depth ? index : NONE;
++}
++
++static bool ts_query_cursor__anchor_matches(
++  const TSQuery *query, const QueryState *state, TSNode node,
++  bool *later_sibling_can_match
++) {
++  const QueryStep *step = array_get(&query->steps, state->step_index);
++  uint16_t index = step->original_step_index == NONE ? state->step_index : step->original_step_index;
++  for (unsigned i = 0; i < query->anchors.size; i++) {
++    const QueryAnchor *anchor = array_get(&query->anchors, i);
++    if (
++      anchor->right_start == anchor->end ||
++      index < anchor->right_start || index >= anchor->end ||
++      step->depth != anchor->depth
++    ) continue;
++    TSNode previous;
++    uint16_t previous_index = ts_query_cursor__last_at_depth(query, state, anchor->depth, &previous);
++    if (anchor->left_start == anchor->right_start) {
++      if (previous_index >= anchor->right_start && previous_index < anchor->end) continue;
++      if (ts_node_is_named(node)) *later_sibling_can_match = false;
++      if (!ts_node_is_null(ts_node_prev_named_sibling(node))) return false;
++    } else if (previous_index >= anchor->left_start && previous_index < anchor->right_start) {
++      const QueryStep *previous_step = array_get(&query->steps, previous_index);
++      bool match_anonymous = previous_step->symbol == WILDCARD_SYMBOL && !previous_step->is_named;
++      if (match_anonymous || ts_node_is_named(node)) *later_sibling_can_match = false;
++      TSNode next = match_anonymous ? ts_node_next_sibling(previous) : ts_node_next_named_sibling(previous);
++      // Anonymous nodes may themselves be explicitly matched by an anchor.
++      if (
++        !ts_node_eq(next, node) &&
++        (match_anonymous || ts_node_is_named(node) ||
++         (!ts_node_is_null(next) && ts_node_start_byte(next) < ts_node_start_byte(node)))
++      ) return false;
++    }
++  }
++  return true;
++}
++
++static bool ts_query_cursor__last_child_matches(const TSQuery *query, const QueryState *state) {
++  const QueryStep *step = array_get(&query->steps, state->step_index);
++  uint16_t index = step->original_step_index == NONE ? state->step_index : step->original_step_index;
++  for (unsigned i = 0; i < query->anchors.size; i++) {
++    const QueryAnchor *anchor = array_get(&query->anchors, i);
++    if (
++      anchor->right_start != anchor->end ||
++      (index >= anchor->left_start && index < anchor->end)
++    ) continue;
++    TSNode previous;
++    uint16_t previous_index = ts_query_cursor__last_at_depth(query, state, anchor->depth, &previous);
++    if (
++      previous_index >= anchor->left_start && previous_index < anchor->end &&
++      !ts_node_is_null(ts_node_next_named_sibling(previous))
++    ) return false;
++  }
++  return true;
++}
++
+ static void ts_query_cursor__add_state(
+   TSQueryCursor *self,
+   const PatternEntry *pattern
+@@ -3792,7 +3920,8 @@ static void ts_query_cursor__add_state(
+       // immediately pruned by the longest-match criteria.
+       if (
+         prev_state->pattern_index == pattern->pattern_index &&
+-        prev_state->step_index == pattern->step_index
++        prev_state->step_index == pattern->step_index &&
++        (!step->has_anchors || prev_state->last_step_index == NONE)
+       ) return;
+       if (prev_state->pattern_index <= pattern->pattern_index) break;
+     }
+@@ -3805,6 +3934,7 @@ static void ts_query_cursor__add_state(
+     pattern->step_index
+   );
+   array_insert(&self->states, index, ((QueryState) {
++    .last_step_index = NONE,
+     .id = UINT32_MAX,
+     .capture_list_id = CAPTURE_LIST_NONE,
+     .heap_insert_order = UINT32_MAX,
+@@ -4254,10 +4384,10 @@ static inline bool ts_query_cursor__advance(
+             node_does_match = symbol == step->symbol && (!step->is_missing || is_missing);
+           }
+           bool later_sibling_can_match = has_later_siblings;
+-          if ((step->is_immediate && is_named) || state->seeking_immediate_match) {
++          if (state->seeking_immediate_match) {
+             later_sibling_can_match = false;
+           }
+-          if (step->is_last_child && has_later_named_siblings) {
++          if (!ts_query_cursor__anchor_matches(self->query, state, node, &later_sibling_can_match)) {
+             node_does_match = false;
+           }
+           if (step->supertype_symbol) {
+@@ -4320,6 +4450,7 @@ static inline bool ts_query_cursor__advance(
+           // split into two states: one that matches this node, and one which skips over
+           // this node, to preserve the possibility of matching later siblings.
+           if (later_sibling_can_match && (
++            step->has_anchors ||
+             step->contains_captures ||
+             ts_query__step_is_fallible(self->query, state->step_index)
+           )) {
+@@ -4374,6 +4505,9 @@ static inline bool ts_query_cursor__advance(
+             continue;
+           }
+ 
++          state->last_node = node;
++          state->last_step_index = step->original_step_index == NONE ? state->step_index : step->original_step_index;
++
+           // Advance this state to the next step of its pattern.
+           state->step_index++;
+           LOG(
+@@ -4384,19 +4518,7 @@ static inline bool ts_query_cursor__advance(
+ 
+           QueryStep *next_step = array_get(&self->query->steps, state->step_index);
+ 
+-          // For a given step, if the current symbol is the wildcard symbol, `_`, and it is **not**
+-          // named, meaning it should capture anonymous nodes, **and** the next step is immediate,
+-          // we reuse the `seeking_immediate_match` flag to indicate that we are looking for an
+-          // immediate match due to an unnamed wildcard symbol.
+-          //
+-          // The reason for this is that typically, anchors will not consider anonymous nodes,
+-          // but we're special casing the wildcard symbol to allow for any immediate matches,
+-          // regardless of whether they are named or not.
+-          if (step->symbol == WILDCARD_SYMBOL && !step->is_named && next_step->is_immediate) {
+-              state->seeking_immediate_match = true;
+-          } else {
+-              state->seeking_immediate_match = false;
+-          }
++          state->seeking_immediate_match = false;
+ 
+           if (stop_on_definite_step && next_step->root_pattern_guaranteed) did_match = true;
+ 
+@@ -4443,6 +4565,13 @@ static inline bool ts_query_cursor__advance(
+                 }
+               }
+             }
++            if (child_step->is_pass_through) continue;
++            child_state = array_get(&self->states, k);
++            if (!ts_query_cursor__last_child_matches(self->query, child_state)) {
++              capture_list_pool_release(&self->capture_list_pool, child_state->capture_list_id);
++              child_state->capture_list_id = CAPTURE_LIST_NONE;
++              child_state->dead = true;
++            }
+           }
+         }
+ 
+@@ -4496,6 +4625,17 @@ static inline bool ts_query_cursor__advance(
+               break;
+             }
+ 
++            // Equal capture lists need not imply equal anchor operands. Keep
++            // distinct histories until the remaining assertions have run.
++            QueryStep *pending_step = array_get(&self->query->steps, state->step_index);
++            if (
++              pending_step->depth != PATTERN_DONE_MARKER &&
++              pending_step->has_anchors &&
++              state->step_index == other_state->step_index &&
++              (state->last_step_index != other_state->last_step_index ||
++               !ts_node_eq(state->last_node, other_state->last_node))
++            ) continue;
++
+             bool left_contains_right, right_contains_left;
+             ts_query_cursor__compare_captures(
+               self,
+diff --git a/lib/src/tree_cursor.c b/lib/src/tree_cursor.c
+index ed79ef7..8843fd8 100644
+--- a/lib/src/tree_cursor.c
++++ b/lib/src/tree_cursor.c
+@@ -557,8 +557,9 @@ void ts_tree_cursor_current_status(
+       (*supertype_count)++;
+     }
+ 
+-    // Determine if the current node has later siblings.
+-    if (!*has_later_siblings) {
++    // Keep looking through hidden ancestors until a named sibling is found;
++    // finding an anonymous sibling only answers the first of these questions.
++    if (!*has_later_named_siblings) {
+       unsigned sibling_count = parent_entry->subtree->ptr->child_count;
+       unsigned structural_child_index = entry->structural_child_index;
+       if (!ts_subtree_extra(*entry->subtree)) structural_child_index++;

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useState } from "react";
-import { Row, button, field, label } from "@/components/runner/launchShared";
+import { Fragment, useState, type ReactNode } from "react";
+import { button, field, label } from "@/components/runner/launchShared";
 import { usePolling } from "@/components/runner/usePolling";
 import { RunnerError, fmtDuration, runnerGet, runnerPost } from "@/lib/runner";
 import {
@@ -30,6 +30,7 @@ export function SuiteDetail({ id }: { id: string }) {
   if (!data) return <div className="mt-6 text-sm text-zinc-500">loading suite</div>;
   const s = data.suite;
   const draft = s.status === "draft";
+  const cur = currentStep(data);
   return (
     <div className="mt-4 space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -53,10 +54,10 @@ export function SuiteDetail({ id }: { id: string }) {
           {data.tooling.problems.join("; ")}
         </div>
       )}
-      <Steps data={data} />
-      {draft && <PrPicker id={id} onScaffolded={refresh} />}
-      <TaskTable id={id} data={data} draft={draft} onChange={refresh} />
-      <FreezeCard data={data} onFrozen={refresh} />
+      <Stepper data={data} />
+      {draft && <PrPicker id={id} state={stepState(1, cur)} onScaffolded={refresh} />}
+      <TaskTable id={id} data={data} draft={draft} state={stepState(2, cur)} onChange={refresh} />
+      <FreezeCard data={data} state={stepState(3, cur)} onFrozen={refresh} />
     </div>
   );
 }
@@ -64,56 +65,100 @@ export function SuiteDetail({ id }: { id: string }) {
 // Where the suite is on the way from pull requests to a frozen, benchmarkable
 // suite. The first step whose condition is not met yet is the current one.
 function currentStep(data: SuiteDetailData): number {
-  if (data.suite.status === "frozen") return 5;
+  if (data.suite.status === "frozen") return 4;
   const live = data.tasks.filter((t) => !t.dropped);
   if (live.length === 0) return 1;
-  if (!live.some((t) => t.stage === "validated" || t.accepted)) return 2;
-  if (!live.some((t) => t.accepted)) return 3;
-  return 4;
+  if (!live.some((t) => t.accepted)) return 2;
+  return 3;
 }
 
 const STEPS = [
-  { n: 1, title: "Pick pull requests", text: "Choose merged pull requests from your repository. Each becomes one task." },
-  { n: 2, title: "Build the tasks", text: "A model writes an issue and hidden tests for each task, then a check confirms the task works." },
-  { n: 3, title: "Review and accept", text: "Read each task, keep the good ones, drop the rest." },
-  { n: 4, title: "Freeze", text: "Lock the accepted tasks so every benchmark run uses the same suite." },
+  { n: 1, title: "Pick pull requests", id: "pick" },
+  { n: 2, title: "Build and review tasks", id: "tasks" },
+  { n: 3, title: "Freeze", id: "freeze" },
+  { n: 4, title: "Benchmark", id: "freeze" },
 ];
 
-function Steps({ data }: { data: SuiteDetailData }) {
+type StepState = "done" | "now" | "later";
+
+function stepState(n: number, cur: number): StepState {
+  return n < cur ? "done" : n === cur ? "now" : "later";
+}
+
+function StepDot({ n, state, size = "h-6 w-6 text-xs" }: { n: number; state: StepState; size?: string }) {
+  const cls = state === "done"
+    ? "border-emerald-500 bg-emerald-500/15 text-emerald-300"
+    : state === "now"
+      ? "border-emerald-400 bg-emerald-500 text-black font-semibold shadow-[0_0_0_4px_rgba(16,185,129,0.15)]"
+      : "border-white/15 text-zinc-500";
+  return (
+    <span className={`inline-flex shrink-0 items-center justify-center rounded-full border ${size} ${cls}`}>
+      {state === "done" ? "✓" : n}
+    </span>
+  );
+}
+
+// One line across the top: the four steps, joined by a bar that fills up to
+// the current one. Each step scrolls to its section.
+function Stepper({ data }: { data: SuiteDetailData }) {
   const cur = currentStep(data);
   return (
-    <section className="rounded-2xl border border-white/10 p-5">
-      <p className="text-sm text-zinc-300">
-        An eval suite is a set of tasks a model is scored on. Each task here comes from one merged pull request in{" "}
-        <span className="font-mono">{repoName(data.suite.repo)}</span>: the model gets the code as it was before that
-        change and an issue describing the problem, and passes if its fix makes the hidden tests pass.
-        Building one takes four steps, in order down this page.
-      </p>
-      <ol className="mt-4 grid gap-3 md:grid-cols-4">
-        {STEPS.map((s) => {
-          const state = s.n < cur ? "done" : s.n === cur ? "now" : "later";
-          const cls = state === "done"
-            ? "border-emerald-500/30 text-zinc-400"
-            : state === "now"
-              ? "border-emerald-500/60 bg-emerald-500/[0.06] text-zinc-100"
-              : "border-white/10 text-zinc-500";
+    <nav aria-label="steps" className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4">
+      <ol className="flex items-center">
+        {STEPS.map((s, i) => {
+          const state = stepState(s.n, cur);
           return (
-            <li key={s.n} className={`rounded-xl border p-3 ${cls}`}>
-              <div className="flex items-center gap-2 text-sm">
-                <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs ${state === "done" ? "border-emerald-500/50 text-emerald-300" : state === "now" ? "border-emerald-400 bg-emerald-500 text-black" : "border-white/20"}`}>
-                  {state === "done" ? "✓" : s.n}
-                </span>
-                <span className={state === "now" ? "font-medium" : ""}>{s.title}</span>
-              </div>
-              {state === "now" && <div className="mt-1 text-[10px] uppercase tracking-wider text-emerald-300">you are here</div>}
-              <div className="mt-1.5 text-xs leading-relaxed">{s.text}</div>
-            </li>
+            <Fragment key={s.n}>
+              {i > 0 && <li aria-hidden className={`mx-3 h-px flex-1 ${state === "later" ? "bg-white/10" : "bg-emerald-500/60"}`} />}
+              <li>
+                <a href={`#${s.id}`} className="flex items-center gap-2 text-sm">
+                  <StepDot n={s.n} state={state} />
+                  <span className={state === "now" ? "text-zinc-100 font-medium" : state === "done" ? "text-zinc-300" : "text-zinc-500"}>{s.title}</span>
+                </a>
+              </li>
+            </Fragment>
           );
         })}
       </ol>
-      {cur === 5 && (
-        <p className="mt-3 text-xs text-emerald-300">All four steps are done. This suite is frozen and ready to benchmark from the Launch page.</p>
-      )}
+      <p className="mt-3 text-xs text-zinc-500">
+        Each pull request becomes a task: a model must fix the issue without seeing the original change.
+      </p>
+    </nav>
+  );
+}
+
+// A numbered section: title, one-line summary, and a "how it works" note that
+// stays folded until asked for.
+function Section({ n, id, title, summary, help, state, children, aside }: {
+  n: number;
+  id: string;
+  title: string;
+  summary: string;
+  help: ReactNode;
+  state: StepState;
+  children: ReactNode;
+  aside?: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section id={id} className={`scroll-mt-4 rounded-2xl border p-5 space-y-4 ${state === "now" ? "border-emerald-500/30" : "border-white/10"}`}>
+      <div className="flex flex-wrap items-start gap-3">
+        <StepDot n={n} state={state} size="h-7 w-7 text-sm" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h2 className="text-lg font-medium leading-7">{title}</h2>
+            <span className="text-sm text-zinc-500">{summary}</span>
+          </div>
+          {open && <div className="mt-2 max-w-2xl rounded-lg bg-white/[0.03] p-3 text-xs leading-relaxed text-zinc-400">{help}</div>}
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          {aside}
+          <button type="button" onClick={() => setOpen((v) => !v)} className="text-zinc-400 hover:text-white">
+            {open ? "hide" : "how it works"}
+          </button>
+        </div>
+      </div>
+      {children}
     </section>
   );
 }
@@ -141,7 +186,7 @@ type RowState = "waiting" | "running" | "done" | string;
 const lastLicenseNotes = new Map<string, string>();
 const lastPrLists = new Map<string, { since: string; limit: number; list: PrList }>();
 
-function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }) {
+function PrPicker({ id, state, onScaffolded }: { id: string; state: StepState; onScaffolded: () => void }) {
   const { handle } = useGate();
   const kept = lastPrLists.get(id);
   const [since, setSince] = useState(() => kept?.since ?? ninetyDaysAgo());
@@ -211,16 +256,20 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
   const allOpenPicked = open.length > 0 && open.every((n) => picked.has(n));
 
   return (
-    <section className="rounded-2xl border border-white/10 p-5 space-y-4">
-      <div>
-        <h2 className="text-lg font-medium"><span className="mr-2 text-zinc-500">1</span>Pick pull requests</h2>
-        <p className="mt-1 text-xs text-zinc-400 max-w-3xl">
-          Every task starts from a merged pull request. The best ones fix one thing, are small enough to review,
-          and come with tests: the score below rates each on those points, and the Why column says what it found.
-          Tick the ones you want and click Scaffold. That copies the repository as it was before each fix and keeps
-          the fix itself as the answer key. It makes no model call and spends nothing.
-        </p>
-      </div>
+    <Section
+      n={1}
+      id="pick"
+      state={state}
+      title="Pick pull requests"
+      summary="Load merged pull requests, tick the good ones, scaffold."
+      help={
+        <>
+          Good candidates fix one thing, are small enough to review, and include tests; the score rates each on
+          those points. Scaffold copies the repository from before each fix and keeps the fix as the answer key.
+          No model call, nothing spent.
+        </>
+      }
+    >
       <div className="flex flex-wrap items-end gap-3">
         <div>
           <label className={label} htmlFor="pr-since">Merged since</label>
@@ -283,17 +332,15 @@ function PrPicker({ id, onScaffolded }: { id: string; onScaffolded: () => void }
               className={`${field} w-full`}
             />
             <p className="mt-1 text-xs text-zinc-500">
-              Written to repo/NOTICE in each task scaffolded now. Validation requires a LICENSE or NOTICE, and a private
-              repository often has neither. Leave it empty when the repository has a LICENSE.
+              Saved as repo/NOTICE in each task. Validation needs a LICENSE or NOTICE file.
             </p>
           </div>
           <button type="button" onClick={scaffold} disabled={picked.size === 0 || running} className={`${button} bg-emerald-500 text-black hover:bg-emerald-400`}>
             {running ? "Scaffolding" : `Scaffold ${picked.size} selected`}
           </button>
-          <span className="ml-3 text-xs text-zinc-500">Each scaffolded pull request shows up as a task in step 2.</span>
         </>
       )}
-    </section>
+    </Section>
   );
 }
 
@@ -341,7 +388,7 @@ function PrRow({ pr, suite, picked, onToggle, state, warnings, disabled }: {
   );
 }
 
-function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetailData; draft: boolean; onChange: () => void }) {
+function TaskTable({ id, data, draft, state, onChange }: { id: string; data: SuiteDetailData; draft: boolean; state: StepState; onChange: () => void }) {
   const { handle } = useGate();
   const tasks = data.tasks;
   const [busy, setBusy] = useState<string | null>(null);
@@ -382,30 +429,33 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
   const selectableIds = shown.filter(selectable).map((t) => t.id);
   const allPicked = selectableIds.length > 0 && selectableIds.every((t) => picked.has(t));
   return (
-    <section className="rounded-2xl border border-white/10 p-5 space-y-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-medium"><span className="mr-2 text-zinc-500">2 and 3</span>Build and review the tasks</h2>
-        {nDropped > 0 && (
-          <button type="button" onClick={() => setShowDropped((v) => !v)} className="text-xs text-zinc-400 hover:text-white">
-            {showDropped ? "hide" : "show"} {nDropped} dropped
-          </button>
-        )}
-      </div>
-      <div className="text-xs text-zinc-400 max-w-3xl space-y-1.5">
-        <p>
-          A task is one pull request turned into a test for a model: the code before the fix, an issue that
-          describes the problem, hidden tests that pass only once it is fixed, and the original fix as the answer key.
-          Each task goes through two steps, then you decide whether it belongs in the suite:
-        </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li><span className="text-zinc-200">Author</span>: a model reads the fix and writes the issue and the hidden tests. This is the one step that spends model quota, one session per task, and it starts only after you confirm a plan that shows the cost.</li>
-          <li><span className="text-zinc-200">Validate</span>: a check that the tests fail before the fix, pass after it, and give the same answer every time. No model call. A task must pass before it can be accepted.</li>
-          <li><span className="text-zinc-200">Accept or Drop</span>: open a task to read what the model wrote. Accept the ones you want in the suite; drop the rest with a note on why.</li>
-        </ul>
-      </div>
+    <Section
+      n={2}
+      id="tasks"
+      state={state}
+      title="Build and review tasks"
+      summary="Author, validate, then accept or drop each task."
+      aside={nDropped > 0 && (
+        <button type="button" onClick={() => setShowDropped((v) => !v)} className="text-zinc-400 hover:text-white">
+          {showDropped ? "hide" : "show"} {nDropped} dropped
+        </button>
+      )}
+      help={
+        <dl className="grid gap-x-4 gap-y-1.5 sm:grid-cols-[auto_1fr]">
+          <dt className="text-zinc-200">Author</dt>
+          <dd>A model writes the issue and hidden tests. The only step that spends quota, and only after you confirm its plan.</dd>
+          <dt className="text-zinc-200">Validate</dt>
+          <dd>Checks the tests fail before the fix and pass after it. Free. Required before Accept.</dd>
+          <dt className="text-zinc-200">Accept, Drop</dt>
+          <dd>Open the task to read what was written, then keep it in the suite or leave it out.</dd>
+        </dl>
+      }
+    >
       {error && <div className="text-xs text-rose-300">{error}</div>}
       {shown.length === 0 ? (
-        <div className="text-sm text-zinc-500">No tasks yet{draft ? ". Pick pull requests in step 1 and scaffold them; each one becomes a task here." : "."}</div>
+        <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-500">
+          {draft ? "No tasks yet. Scaffold pull requests in step 1 and they appear here." : "No tasks."}
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full text-sm">
@@ -471,7 +521,7 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
                     ) : <span className="text-zinc-500">not yet</span>}
                   </td>
                   <td className="px-3 py-2 text-xs">
-                    {t.dropped ? <span className="text-zinc-500">dropped{t.dropped_reason ? `: ${t.dropped_reason}` : ""}</span> : t.accepted ? <span className="text-emerald-300">accepted</span> : <span className="text-zinc-500">no</span>}
+                    {t.dropped ? <span className="text-zinc-500">dropped{t.dropped_reason ? `: ${t.dropped_reason}` : ""}</span> : t.accepted ? <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 px-2 py-0.5 text-emerald-300">✓ accepted</span> : <span className="text-zinc-600">not yet</span>}
                   </td>
                   <td className="px-3 py-2 text-xs whitespace-nowrap">
                     {draft && !t.dropped && (
@@ -519,7 +569,9 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
             <button type="button" onClick={() => setAction(action?.kind === "validate" ? null : { kind: "validate", tasks: validatable })} disabled={validatable.length === 0} className={`rounded-full border px-4 py-1 text-sm disabled:opacity-30 ${action?.kind === "validate" ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-200" : "border-white/15 text-zinc-300 hover:bg-white/5"}`}>
               Validate {validatable.length || ""} selected
             </button>
-            <span className="text-xs text-zinc-500">Tick tasks in the table first. Author comes before Validate. Either shows a plan to read before anything is queued; only Author spends quota.</span>
+            <span className="text-xs text-zinc-500">
+              {pickedTasks.length === 0 ? "Tick tasks to act on them." : "Both show a plan first. Only Author spends quota."}
+            </span>
           </div>
           {action && (
             <BuildActions
@@ -534,11 +586,11 @@ function TaskTable({ id, data, draft, onChange }: { id: string; data: SuiteDetai
           )}
         </div>
       )}
-    </section>
+    </Section>
   );
 }
 
-function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () => void }) {
+function FreezeCard({ data, state, onFrozen }: { data: SuiteDetailData; state: StepState; onFrozen: () => void }) {
   const { handle } = useGate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -548,19 +600,17 @@ function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () =>
   const launchHref = `/launch?suite=${encodeURIComponent(s.id)}`;
   if (s.status === "frozen") {
     return (
-      <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] p-5 space-y-3">
-        <h2 className="text-lg font-medium">Frozen</h2>
-        <dl className="text-xs space-y-1 max-w-xl">
-          <Row k="version" v={s.version ?? "?"} />
-          <Row k="frozen" v={s.frozen_at ?? "?"} />
-          <Row k="lock digest" v={s.lock_digest ?? "?"} />
-          <Row k="tasks" v={String(s.n_accepted)} />
-        </dl>
-        <p className="text-xs text-zinc-400 max-w-3xl">
-          This suite is locked: its tasks cannot change, so every run scores the same thing. Each run checks the
-          tasks against this lock digest before any model call and records it in its results.
-        </p>
-        <Link href={launchHref} className={`${button} inline-block bg-emerald-500 text-black hover:bg-emerald-400`}>Benchmark this suite</Link>
+      <section id="freeze" className="scroll-mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] p-5">
+        <div className="flex flex-wrap items-center gap-4">
+          <StepDot n={4} state="done" size="h-7 w-7 text-sm" />
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-medium leading-7">Frozen, ready to benchmark</h2>
+            <div className="mt-0.5 text-xs text-zinc-500">
+              {plural(s.n_accepted, "task")}, version {s.version ?? "?"}, frozen {s.frozen_at?.slice(0, 10) ?? "?"}, lock <span className="font-mono">{s.lock_digest?.slice(0, 19) ?? "?"}</span>
+            </div>
+          </div>
+          <Link href={launchHref} className={`${button} inline-block bg-emerald-500 text-black hover:bg-emerald-400`}>Benchmark this suite</Link>
+        </div>
       </section>
     );
   }
@@ -579,18 +629,23 @@ function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () =>
     }
   };
   return (
-    <section className="rounded-2xl border border-white/10 p-5 space-y-3">
-      <h2 className="text-lg font-medium"><span className="mr-2 text-zinc-500">4</span>Freeze the suite</h2>
-      <p className="text-xs text-zinc-400 max-w-3xl">
-        Freezing locks in the accepted tasks and gives the suite a checksum, so every benchmark run uses exactly the
-        same tasks and results can be compared across models and over time. Tasks that are not accepted are left
-        out. After this the suite is read-only and appears on the Launch page under Custom, ready to benchmark.
-        For more tasks later, start a new suite.
-      </p>
+    <Section
+      n={3}
+      id="freeze"
+      state={state}
+      title="Freeze"
+      summary="Lock the accepted tasks. The suite then appears on the Launch page."
+      help={
+        <>
+          A frozen suite cannot change, so every run scores the same thing and results compare across models and
+          over time. Tasks not accepted are left out. For more tasks later, start a new suite.
+        </>
+      }
+    >
       {data.freeze_ready.problems.length > 0 && (
-        <ul className="list-disc pl-5 text-xs text-amber-300">
-          {data.freeze_ready.problems.map((p) => <li key={p}>{p}</li>)}
-        </ul>
+        <div className="text-xs text-amber-300">
+          {data.freeze_ready.problems.map((p) => <div key={p}>{p}</div>)}
+        </div>
       )}
       {error && <div className="text-xs text-rose-300">{error}</div>}
       {result && <div className="text-xs text-emerald-300">froze {plural(result.n_tasks ?? 0, "task")}, lock {result.lock_digest}</div>}
@@ -607,6 +662,6 @@ function FreezeCard({ data, onFrozen }: { data: SuiteDetailData; onFrozen: () =>
           Freeze suite
         </button>
       )}
-    </section>
+    </Section>
   );
 }

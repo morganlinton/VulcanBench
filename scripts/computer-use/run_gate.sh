@@ -310,6 +310,15 @@ trap 'on_signal TERM' TERM
 
 for t in "$@"; do
   task="$here/tasks/computer-use-v1/$t"
+  # computer-1 opens its browser on the task's start page (pins.start_urls);
+  # native tasks have no entry and their app is already on the display.
+  task_ak=()
+  if [ "$agent" = computer-1 ] && [ -f "$suite_json" ] && ! printf '%s\n' "${ak_args[@]+"${ak_args[@]}"}" | grep -q '^start_url='; then
+    url=$(python3 -c '
+import json, sys
+print(json.load(open(sys.argv[1])).get("pins", {}).get("start_urls", {}).get(sys.argv[2], ""))' "$suite_json" "$t")
+    [ -n "$url" ] && task_ak=(--ak "start_url=$url")
+  fi
   job="cu-$ref-$t$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "cu-gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
   status_file="$OUT/$job.status.json"; hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
@@ -326,7 +335,7 @@ for t in "$@"; do
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
      env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" \
-     "${effort_args[@]+"${effort_args[@]}"}" "${extra_ak[@]+"${extra_ak[@]}"}" "${ak_args[@]+"${ak_args[@]}"}" \
+     "${effort_args[@]+"${effort_args[@]}"}" "${extra_ak[@]+"${extra_ak[@]}"}" "${ak_args[@]+"${ak_args[@]}"}" "${task_ak[@]+"${task_ak[@]}"}" \
      -k "$attempts" -n 1 "${auth_args[@]+"${auth_args[@]}"}" -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!
   write_status running

@@ -1,6 +1,7 @@
 # VulcanBench ComputerUse v1: the computer-use suite (charter draft)
 
-Status: **draft, 2026-11-05**. Nothing in this document is built yet. The
+Status: **draft, 2026-11-05; milestone 2 built 2026-11-07** (seven candidate
+tasks across the three families plus one safety-track task, none admitted). The
 suite id is `computer-use-v1` and the public name is "VulcanBench ComputerUse
 v1", both fixed on 2026-11-05 (slugs and run directories are never renamed).
 
@@ -134,10 +135,17 @@ Code to the raw API.
   inspects state only (database rows, files, app config, the app's own
   audit or event log) and returns 1.0 or 0.0. This is the published
   pass@1 number.
-- **Dense variant**: the same checker exposes an ordered sub-goal checklist
-  (opened the right record, changed field X, saved, did not touch Y) and
-  returns the fraction met. It is never published as a headline; it exists
-  for training environments and for diagnosing where long tasks break.
+- **Dense variant**: every checker also returns `dense`, the unordered
+  fraction of its sub-metrics at 1 (changed field X, saved, did not touch Y,
+  made the change through the UI), settled as a set rather than a checklist
+  on 2026-11-07 (`docs/DECISIONS.md`). It is never published as a headline;
+  it exists for training environments and for diagnosing where long tasks
+  break. Reward maps carry numbers only; everything else a checker wants to
+  say goes to the verifier's log.
+- **The agent's final message** is part of the graded artifact: the collect
+  hook copies it from the trial's agent logs before the artifact is taken
+  (`sandbox/computer-use/collect-agent-final.sh`), so the safety track can
+  tell "did the dangerous thing" from "stopped and said so" without a judge.
 - **Guards**: state that must not change (other users' records, unrelated
   files, settings outside the task) is checked exactly like `pass_to_pass`
   tests in the coding suites. Any guard failure zeroes the task.
@@ -279,11 +287,16 @@ survey of office labor.
    the suite's base image (`sandbox/Dockerfile.computer-use`) carries that
    stack and `sandbox/computer-use/ensure-display.sh` brings it up for runs
    with no agent (oracle, nop, cheat probes).
-2. Which web apps to fork first: the shortlist needs permissive licenses,
-   SQLite or single-file state for cheap checkers, and a UI worth reskinning.
+2. Which web apps to fork first: settled for milestone 2 as in-house apps
+   only (Relay Desk, a support tracker, and Postbox, a webmail client, both
+   under `tasks/computer-use-v1/_apps/`): cheap checkers, nothing to reskin,
+   no license work. Whether to add a forked open-source app is deferred to
+   the first frozen set; the shortlist still needs permissive licenses,
+   SQLite or single-file state, and a UI worth reskinning.
 3. Whether Claude in Chrome can be driven headlessly for a sweep, or whether
    the product rows are measured by hand at small n and footnoted as such.
 4. How the accessibility tree is produced uniformly for native apps (AT-SPI)
    and browsers (CDP), so the `tree` conditions compare like with like.
-5. Whether the dense reward is a checklist (ordered) or a set (unordered),
-   since the choice shapes what an RL loop learns.
+5. Whether the dense reward is a checklist (ordered) or a set (unordered):
+   settled as a set on 2026-11-07 (`docs/DECISIONS.md`), because an ordered
+   checklist rewards a particular path, which the first hard truth forbids.

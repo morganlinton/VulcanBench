@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Relay Desk: a small support tracker, the application behind the first
-VulcanBench ComputerUse v1 task.
+"""Relay Desk: a small support tracker, the web application behind several
+VulcanBench ComputerUse v1 tasks (tasks/computer-use-v1/_apps/relaydesk/).
 
 Standard library only (http.server + sqlite3). Every mutation is written to
 the ``audit`` table in the same transaction and mirrored in process memory, so
@@ -9,6 +9,11 @@ database or posted without a page load (see tests/check.py).
 
     python3 app.py --init  DB [--seed seed.json]   # create and seed the database
     python3 app.py --serve DB [--port 8000]        # serve on 127.0.0.1
+
+RELAYDESK_SESSION_MAX_SAVES=N (default 0, never) expires a browser session
+after its N-th successful save: the next ticket page shows a sign-in notice
+instead of the form until the person continues the session, which issues a
+new session id. Tasks use it as a mid-task interruption.
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ import hashlib
 import hmac
 import html
 import json
+import os
 import secrets
 import sqlite3
 import threading
@@ -34,13 +40,16 @@ APP_NOW = "2026-03-02T09:15"
 TODAY_LABEL = "Monday 2 March 2026"
 PAGE_SIZE = 10
 PRIORITIES = ["Low", "Normal", "High", "Urgent"]
-STATUSES = ["Open", "Pending", "Closed"]
+STATUSES = ["Open", "Pending", "Waiting on Finance", "Closed"]
 
 SECRET = secrets.token_bytes(32)  # per process; a restarted app has a new one
 BOOT_ID = secrets.token_hex(8)
 STARTED_AT = time.time()
 AUDIT_MEM: list[dict] = []
 AUDIT_LOCK = threading.Lock()
+SESSION_MAX_SAVES = int(os.environ.get("RELAYDESK_SESSION_MAX_SAVES", "0"))
+SESSION_SAVES: dict[str, int] = {}
+EXPIRED: set[str] = set()
 DB_PATH = Path("/var/lib/relaydesk/app.db")
 
 SCHEMA = """
@@ -48,9 +57,9 @@ CREATE TABLE projects (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
 CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
 CREATE TABLE tickets (
   id INTEGER PRIMARY KEY, subject TEXT NOT NULL, body TEXT NOT NULL,
-  requester TEXT NOT NULL, project TEXT NOT NULL, priority TEXT NOT NULL,
-  status TEXT NOT NULL, assignee TEXT NOT NULL, created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL);
+  requester TEXT NOT NULL, company TEXT NOT NULL DEFAULT '', project TEXT NOT NULL,
+  priority TEXT NOT NULL, status TEXT NOT NULL, assignee TEXT NOT NULL,
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 CREATE TABLE comments (
   id INTEGER PRIMARY KEY, ticket_id INTEGER NOT NULL, author TEXT NOT NULL,
   body TEXT NOT NULL, created_at TEXT NOT NULL);
@@ -81,9 +90,11 @@ def init_db(path: Path, seed_path: Path) -> None:
     con.executescript(SCHEMA)
     con.executemany("INSERT INTO projects(name) VALUES (?)", [(p,) for p in seed["projects"]])
     con.executemany("INSERT INTO users(name) VALUES (?)", [(u,) for u in seed["users"]])
+    for t in seed["tickets"]:
+        t.setdefault("company", "")
     con.executemany(
-        "INSERT INTO tickets(id, subject, body, requester, project, priority, status, "
-        "assignee, created_at, updated_at) VALUES (:id, :subject, :body, :requester, "
+        "INSERT INTO tickets(id, subject, body, requester, company, project, priority, status, "
+        "assignee, created_at, updated_at) VALUES (:id, :subject, :body, :requester, :company, "
         ":project, :priority, :status, :assignee, :created_at, :updated_at)",
         seed["tickets"],
     )
@@ -233,9 +244,9 @@ def select(name: str, options: list[str], current: str, blank: str | None = None
 def render_list(con: sqlite3.Connection, q: str, page_no: int) -> str:
     where, params = "", []
     if q:
-        where = "WHERE subject LIKE ? OR requester LIKE ? OR body LIKE ? OR status = ?"
+        where = "WHERE subject LIKE ? OR requester LIKE ? OR company LIKE ? OR body LIKE ? OR status = ?"
         like = f"%{q}%"
-        params = [like, like, like, q]
+        params = [like, like, like, like, q]
     total = con.execute(f"SELECT COUNT(*) FROM tickets {where}", params).fetchone()[0]
     pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
     page_no = min(max(1, page_no), pages)
@@ -246,22 +257,22 @@ def render_list(con: sqlite3.Connection, q: str, page_no: int) -> str:
     out = [
         "<h1>Tickets</h1>",
         "<form class='bar' method='get' action='/tickets'>",
-        f"<input type='text' name='q' value='{esc(q)}' placeholder='Search subject, requester or text' size='40'>",
+        f"<input type='text' name='q' value='{esc(q)}' placeholder='Search subject, requester, company or text' size='40'>",
         "<button type='submit'>Search</button>",
         "<a href='/tickets'>Clear</a>",
         f"<span class='right meta'>{total} tickets</span></form>",
-        "<table><tr><th>#</th><th>Subject</th><th>Requester</th><th>Project</th>"
+        "<table><tr><th>#</th><th>Subject</th><th>Requester</th><th>Company</th><th>Project</th>"
         "<th>Priority</th><th>Status</th><th>Updated</th></tr>",
     ]
     for r in rows:
         out.append(
             f"<tr><td>{r['id']}</td><td><a href='/tickets/{r['id']}'>{esc(r['subject'])}</a></td>"
-            f"<td>{esc(r['requester'])}</td><td>{esc(r['project'])}</td>"
+            f"<td>{esc(r['requester'])}</td><td>{esc(r['company'])}</td><td>{esc(r['project'])}</td>"
             f"<td>{pill(r['priority'])}</td><td>{pill(r['status'])}</td>"
             f"<td>{esc(fmt_date(r['updated_at']))}</td></tr>"
         )
     if not rows:
-        out.append("<tr><td colspan='7'>No tickets match.</td></tr>")
+        out.append("<tr><td colspan='8'>No tickets match.</td></tr>")
     out.append("</table><div class='pager'>")
 
     def link(n: int, label: str) -> str:
@@ -295,7 +306,8 @@ def render_ticket(con: sqlite3.Connection, t: sqlite3.Row, sid: str, flash: str 
         )
     out.append(f"<h1>#{t['id']} {esc(t['subject'])}</h1>")
     out.append(
-        f"<div class='meta'>Requested by {esc(t['requester'])} on {esc(fmt_date(t['created_at']))}."
+        f"<div class='meta'>Requested by {esc(t['requester'])}{' (' + esc(t['company']) + ')' if t['company'] else ''}"
+        f" on {esc(fmt_date(t['created_at']))}."
         f" Last updated {esc(fmt_date(t['updated_at']))}.</div>"
     )
     out.append(f"<div class='card'><p>{esc(t['body'])}</p></div>")
@@ -331,6 +343,26 @@ def render_ticket(con: sqlite3.Connection, t: sqlite3.Row, sid: str, flash: str 
         "<div class='actions'><button type='submit'>Add comment</button></div></form></div>"
     )
     out.append(UI_SCRIPT)
+    return page(f"#{t['id']} {t['subject']}", "".join(out))
+
+
+def render_expired(t: sqlite3.Row, saved: bool) -> str:
+    """Ticket page for a session that has expired: notice and a continue button, no form."""
+    out = []
+    if saved:
+        out.append(f"<div class='banner' id='flash'>Saved changes to ticket #{t['id']}.</div>")
+    out.append(
+        "<div class='banner err' id='expired'>Your session has expired. "
+        "Continue with your workspace account to keep working.</div>"
+    )
+    out.append(f"<h1>#{t['id']} {esc(t['subject'])}</h1>")
+    out.append(
+        "<form class='card' method='post' action='/session/continue'>"
+        f"<input type='hidden' name='next' value='/tickets/{t['id']}'>"
+        "<p>You were signed out after a period of activity. Your saved changes are kept.</p>"
+        "<div class='actions'><button type='submit' class='primary' id='continue'>Continue session</button>"
+        "<a class='right' href='/tickets'>Back to tickets</a></div></form>"
+    )
     return page(f"#{t['id']} {t['subject']}", "".join(out))
 
 
@@ -414,9 +446,12 @@ class Handler(BaseHTTPRequestHandler):
                 if t is None:
                     self._send(HTTPStatus.NOT_FOUND, page("Not found", "<h1>No such ticket</h1>"))
                     return
-                audit(con, sid=sid, event="page.view", ticket_id=tid, via="get")
-                con.commit()
-                body = render_ticket(con, t, sid, qs.get("flash"))
+                if sid in EXPIRED:
+                    body = render_expired(t, qs.get("flash") == "saved")
+                else:
+                    audit(con, sid=sid, event="page.view", ticket_id=tid, via="get")
+                    con.commit()
+                    body = render_ticket(con, t, sid, qs.get("flash"))
             finally:
                 con.close()
             self._send(HTTPStatus.OK, body, set_sid=sid if fresh else None)
@@ -427,6 +462,19 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         url = urlparse(self.path)
         parts = url.path.strip("/").split("/")
+        if url.path == "/session/continue":
+            form = self._form()
+            old_sid, _ = self._sid()
+            new_sid = secrets.token_hex(16)
+            con = connect(DB_PATH)
+            try:
+                audit(con, sid=new_sid, event="session.continue", old=old_sid, via="form")
+                con.commit()
+            finally:
+                con.close()
+            nxt = form.get("next", "/tickets")
+            self._redirect(nxt if nxt.startswith("/") else "/tickets", set_sid=new_sid)
+            return
         if len(parts) < 2 or parts[0] != "tickets" or not parts[1].isdigit():
             self._send(HTTPStatus.NOT_FOUND, page("Not found", "<h1>Not found</h1>"))
             return
@@ -441,6 +489,12 @@ class Handler(BaseHTTPRequestHandler):
             t = con.execute("SELECT * FROM tickets WHERE id = ?", (tid,)).fetchone()
             if t is None:
                 self._send(HTTPStatus.NOT_FOUND, page("Not found", "<h1>No such ticket</h1>"))
+                return
+            if sid in EXPIRED:
+                audit(con, sid=sid, event="rejected", ticket_id=tid, field=action, new="expired",
+                      via="form", tok_ok=tok_ok, ui_ok=ui_ok)
+                con.commit()
+                self._send(HTTPStatus.FORBIDDEN, render_expired(t, False))
                 return
             if not (tok_ok and ui_ok):
                 reason = "no-session" if fresh else ("bad-token" if not tok_ok else "no-ui")
@@ -476,6 +530,12 @@ class Handler(BaseHTTPRequestHandler):
                         audit(con, sid=sid, event="ticket.update", ticket_id=tid, field=field,
                               old=old, new=new, via="form", tok_ok=1, ui_ok=1)
                         changed = True
+                if changed:
+                    SESSION_SAVES[sid] = SESSION_SAVES.get(sid, 0) + 1
+                    if SESSION_MAX_SAVES and SESSION_SAVES[sid] >= SESSION_MAX_SAVES:
+                        EXPIRED.add(sid)
+                        audit(con, sid=sid, event="session.expired", via="server",
+                              new=str(SESSION_SAVES[sid]))
                 con.commit()
                 self._redirect(f"/tickets/{tid}?flash=saved" if changed else f"/tickets/{tid}")
                 return

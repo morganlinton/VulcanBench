@@ -2,6 +2,7 @@
 """Admission checks for a ComputerUse v1 task, run through Harbor.
 
     python scripts/computer-use/validate_task.py tasks/computer-use-v1/<task> [options]
+    python scripts/computer-use/validate_task.py tasks/computer-use-v1            # every task in suite.json
 
 Every check is a real `harbor run` against the task, so the collect hook,
 artifact copy and separate verifier are exercised exactly as a gate run
@@ -322,6 +323,31 @@ class Session:
             self.record(label, r, ok)
 
 
+def validate_suite(suite: Path, args: argparse.Namespace) -> int:
+    """Suite mode: every task listed in suite.json, one verdict line each.
+
+    Exit code is the worst verdict (INFRA > FAIL > PASS). Pass the suite
+    directory instead of a task directory to get here.
+    """
+    tasks = json.loads((suite / "suite.json").read_text())["tasks"]
+    verdicts: dict[str, int] = {}
+    for name in tasks:
+        say(f"===== {name}")
+        argv = [str(suite / name), "--gold-runs", str(args.gold_runs), "--only", args.only]
+        if args.jobs:
+            argv += ["--jobs", str(args.jobs / name)]
+        if args.keep:
+            argv.append("--keep")
+        verdicts[name] = main(argv)
+    say("===== suite summary")
+    names = {EXIT_PASS: "PASS", EXIT_FAIL: "FAIL", EXIT_REFUSED: "REFUSED", EXIT_INFRA: "INFRA"}
+    for name, rc in verdicts.items():
+        say(f"{names.get(rc, rc):8} {name}")
+    worst = max(verdicts.values(), default=EXIT_REFUSED)
+    say(f"validate_task: suite {suite.name}: {names.get(worst, worst)} ({len(verdicts)} tasks)")
+    return worst
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     ap.add_argument("task", type=Path)
@@ -339,6 +365,8 @@ def main(argv: list[str] | None = None) -> int:
     if not task.is_dir():
         say(f"validate_task: {args.task}: not a directory")
         return EXIT_REFUSED
+    if (task / "suite.json").is_file():
+        return validate_suite(task, args)
     problems = preflight_host() + preflight_task(task) + preflight_cheats(task)
     for p in problems:
         say(f"FAIL preflight: {p}")

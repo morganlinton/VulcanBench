@@ -1,0 +1,4 @@
+# Same toolchain CI uses for Rust task validation (.github/workflows/ci.yml).
+[toolchain]
+channel = "1.87.0"
+components = ["clippy", "rustfmt"]

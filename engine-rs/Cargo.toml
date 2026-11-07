@@ -1,0 +1,26 @@
+[package]
+name = "vulcanbench-engine"
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.87"
+description = "Spike: a zero-crate Rust port of the VulcanBench run engine (mock run on hello-world)"
+license = "Apache-2.0"
+publish = false
+
+# Zero external crates, including dev-dependencies. Everything the engine
+# needs beyond std (JSON, TOML subset, SHA-256, .env, redaction) is hand-rolled
+# under src/. See README.md for the crate allowlist and the deferred TLS choice.
+[dependencies]
+
+[dev-dependencies]
+
+[[bin]]
+name = "vulcanbench-engine"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

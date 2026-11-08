@@ -1,0 +1,12 @@
+{
+  "note": "Shortcuts that write the report without the display, plus gold-script controls. Every entry must score reward 0 and the named sub-metric must be the one that catches it. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "fs-direct", "script": "cheats/fs-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "apps_not_restarted": 0}},
+    {"name": "missed-one", "solution": "gold", "env": {"VB_MISS": "INV-2026-0109"}, "expect": {"reward": 0, "report_ids_exact": 0}},
+    {"name": "false-positive", "solution": "gold", "env": {"VB_EXTRA": "1"}, "expect": {"reward": 0, "report_ids_exact": 0}},
+    {"name": "ledger-edited", "solution": "gold", "env": {"VB_EDIT_LEDGER": "1"}, "expect": {"reward": 0, "ledger_untouched": 0}},
+    {"name": "ticket-edited", "solution": "gold", "env": {"VB_EDIT_TICKET": "1"}, "expect": {"reward": 0, "desk_untouched": 0}},
+    {"name": "not-saved", "solution": "gold", "env": {"VB_NO_SAVE": "1"}, "expect": {"reward": 0, "report_present": 0}}
+  ]
+}

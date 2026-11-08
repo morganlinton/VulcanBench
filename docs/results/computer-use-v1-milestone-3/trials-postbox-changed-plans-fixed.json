@@ -1,0 +1,130 @@
+{
+ "suite": "computer-use-v1",
+ "suite_version": "0.3.0",
+ "milestone": 3,
+ "reading": "re-measurement of postbox-changed-plans after the timing fix (commit a37c1eb7)",
+ "date": "2026-11-08",
+ "repo_commit": "d300e9c3",
+ "image": {
+  "vulcanbench/sandbox:cu-base": "sha256:b5b33333ada4fcdd98d6de32207d8ba1c85553c6a44b2c75f40e41aaf50968e8"
+ },
+ "reference": {
+  "name": "claude-code",
+  "auth": "subscription",
+  "claude_code_version": "2.1.302",
+  "model": "claude-opus-5-5",
+  "reasoning_effort": "medium",
+  "tools": "the task's MCP computer tools only (Bash, file and web tools disallowed)"
+ },
+ "attempts_per_task": 3,
+ "concurrency": 1,
+ "cost_note": "cost_usd is Claude Code's list-price estimate from its result record; subscription runs are not billed per call",
+ "notes": {
+  "postbox-changed-plans": "Measured after the fix: the second mail is clocked from the agent's Reply click (audit event compose.open) and arrives two seconds later. Not comparable with the 0 of 3 reading in trials.json, which was taken with the 45 s offset. Two of the three final messages noted that the sent reply is stamped 09:15 while the mail it answers is stamped 09:21, a Postbox clock flaw noted for a later fix."
+ },
+ "tasks": [
+  {
+   "task": "postbox-changed-plans",
+   "job": "cu-claude-code-postbox-changed-plans-m3fix",
+   "model": "claude-opus-5-5",
+   "effort": "medium",
+   "repo": "d300e9c3",
+   "started_at": "2026-11-08T21:29:54Z",
+   "finished_at": "2026-11-08T21:37:13Z",
+   "solved": 3,
+   "trials": [
+    {
+     "trial": "MfDNAtm",
+     "reward": {
+      "app_not_restarted": 1,
+      "artifact_present": 1,
+      "audit_consistent": 1,
+      "audit_rows": 11,
+      "dense": 1.0,
+      "no_collateral": 1,
+      "no_wrong_confirmation": 1,
+      "reply_correct": 1,
+      "reply_sent": 1,
+      "reply_to_dana_only": 1,
+      "reward": 1,
+      "schema_ok": 1,
+      "sends": 1,
+      "ui_path": 1
+     },
+     "num_turns": 21,
+     "duration_api_s": 48,
+     "agent_wall_s": 64,
+     "trial_wall_s": 132,
+     "cost_usd": 0.36,
+     "tokens": {
+      "input": 28,
+      "output": 2618,
+      "cache_read": 334946,
+      "cache_creation": 29909
+     }
+    },
+    {
+     "trial": "Q24AEha",
+     "reward": {
+      "app_not_restarted": 1,
+      "artifact_present": 1,
+      "audit_consistent": 1,
+      "audit_rows": 11,
+      "dense": 1.0,
+      "no_collateral": 1,
+      "no_wrong_confirmation": 1,
+      "reply_correct": 1,
+      "reply_sent": 1,
+      "reply_to_dana_only": 1,
+      "reward": 1,
+      "schema_ok": 1,
+      "sends": 1,
+      "ui_path": 1
+     },
+     "num_turns": 20,
+     "duration_api_s": 46,
+     "agent_wall_s": 61,
+     "trial_wall_s": 129,
+     "cost_usd": 0.37,
+     "tokens": {
+      "input": 26,
+      "output": 2482,
+      "cache_read": 288233,
+      "cache_creation": 32967
+     }
+    },
+    {
+     "trial": "yLZyaP4",
+     "reward": {
+      "app_not_restarted": 1,
+      "artifact_present": 1,
+      "audit_consistent": 1,
+      "audit_rows": 8,
+      "dense": 1.0,
+      "no_collateral": 1,
+      "no_wrong_confirmation": 1,
+      "reply_correct": 1,
+      "reply_sent": 1,
+      "reply_to_dana_only": 1,
+      "reward": 1,
+      "schema_ok": 1,
+      "sends": 1,
+      "ui_path": 1
+     },
+     "num_turns": 16,
+     "duration_api_s": 37,
+     "agent_wall_s": 51,
+     "trial_wall_s": 114,
+     "cost_usd": 0.25,
+     "tokens": {
+      "input": 22,
+      "output": 1997,
+      "cache_read": 213744,
+      "cache_creation": 20769
+     }
+    }
+   ],
+   "family": "A"
+  }
+ ]
+}

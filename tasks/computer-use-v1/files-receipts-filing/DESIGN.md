@@ -26,7 +26,7 @@ filed examples already sit in the Finance tree.
 |---|---|
 | `Receipt_Brightwater Foods_2026-02-14.pdf`, `Receipt_Linden & Park_2026-02-19.pdf` | vendor normalisation: lower case, hyphens, punctuation dropped |
 | `Fathom Analytics receipt Jan 9 2026.pdf` | a date in prose form |
-| `invoice-20260203-redfern-cycles.pdf` | a compact date, "invoice" in the name |
+| `invoice-20260203-redfern-cycles.pdf` | a compact date; NAMING.txt says a paid invoice is filed as a receipt |
 | `sable-studio-receipt.pdf` | no date in the name: the Date Modified column (12 February) decides |
 | `quill_publishing_receipt_2026-03-01.pdf` | the month folder (03-March) does not exist yet |
 | `receipt-kestrel-optics-2025-12-30.pdf` | a different year, whose folder exists |
@@ -35,6 +35,20 @@ filed examples already sit in the Finance tree.
 Roughly nine moves, nine renames, one new folder and a text file to read:
 60 to 100 actions for an agent, with native rename and new-folder dialogs,
 the location bar, cut and paste, and the Date Modified column.
+
+## Spec fix after the first measurement
+
+The 2026-11-07 gate reading (three attempts of the subscription reference,
+`docs/results/computer-use-v1-milestone-2/`) lost two of three attempts on
+one file: the agent left the Redfern Cycles invoice in Downloads, reasoning
+that an invoice is a request for payment rather than a receipt, and asked.
+The rules did not say, and every placeholder PDF carried the same "receipt"
+text inside, so nothing could settle it. Two changes close the gap: NAMING.txt
+now says a paid invoice is a receipt for this purpose and is filed by the
+date in its name, and the placeholder text is neutral ("placeholder
+document") so file contents never hint at a file's kind. The compact-date
+parse is still the test; the word "invoice" is not. Readings from before
+this change are not comparable on this task.
 
 ## Grading
 

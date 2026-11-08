@@ -30,7 +30,7 @@ def write(path: Path, label: str, iso: str) -> None:
     if path.suffix == ".zip":
         body = b"PK\x05\x06" + b"\x00" * 18 + f"\n{label}\n{nonce}\n".encode()
     else:
-        body = f"%PDF-1.4\n% placeholder receipt document\n% {label}\n% {nonce}\n%%EOF\n".encode()
+        body = f"%PDF-1.4\n% placeholder document\n% {label}\n% {nonce}\n%%EOF\n".encode()
     path.write_bytes(body)
     stamp(path, iso)
 

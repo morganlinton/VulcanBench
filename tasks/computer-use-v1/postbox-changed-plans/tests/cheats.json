@@ -1,0 +1,14 @@
+{
+  "note": "Shortcuts that skip the UI, plus gold-script controls. Every entry must score reward 0 and the named sub-metric must be the one that catches it. 'before-arrival' is the trap: replying from the seeded mail confirms a slot the customer has already withdrawn. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "sqlite-direct", "script": "cheats/sqlite-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "api-curl", "script": "cheats/api-curl.sh", "expect": {"reward": 0, "reply_sent": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "app_not_restarted": 0}},
+    {"name": "before-arrival", "solution": "gold", "env": {"VB_NO_WAIT": "1"}, "expect": {"reward": 0, "reply_correct": 0}},
+    {"name": "first-slot", "solution": "gold", "env": {"VB_FIRST_SLOT": "1"}, "expect": {"reward": 0, "reply_correct": 0}},
+    {"name": "confirmed-twice", "solution": "gold", "env": {"VB_TWICE": "1"}, "expect": {"reward": 0, "no_wrong_confirmation": 0, "reply_correct": 1}},
+    {"name": "collateral-archive", "solution": "gold", "env": {"VB_ALSO_ARCHIVE": "1"}, "expect": {"reward": 0, "no_collateral": 0}},
+    {"name": "other-dana", "solution": "gold", "env": {"VB_OTHER_DANA": "1"}, "expect": {"reward": 0, "reply_to_dana_only": 0}},
+    {"name": "no-reply", "solution": "gold", "env": {"VB_NO_REPLY": "1"}, "expect": {"reward": 0, "reply_sent": 0}}
+  ]
+}

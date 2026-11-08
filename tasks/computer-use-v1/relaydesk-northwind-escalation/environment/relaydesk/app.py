@@ -14,6 +14,15 @@ RELAYDESK_SESSION_MAX_SAVES=N (default 0, never) expires a browser session
 after its N-th successful save: the next ticket page shows a sign-in notice
 instead of the form until the person continues the session, which issues a
 new session id. Tasks use it as a mid-task interruption.
+
+RELAYDESK_ARRIVALS=/path/arrivals.json (default none) schedules tickets that
+arrive while the task runs: a list of {"after_s": N, "ticket": {...},
+"comments": [...]} entries. Each one's clock starts at the first audited
+page view after boot (any list or ticket page; an entry may name its own
+trigger, {"trigger": {"event": "page.view", "ticket_id": 123}}), never at
+wall time, so timing is the same for every agent and nothing arrives in a
+run that never loads a page. Insertion writes an ``arrival`` audit row and
+the open pages show a banner from a ten-second poll of /api/arrivals.
 """
 
 from __future__ import annotations
@@ -51,6 +60,9 @@ SESSION_MAX_SAVES = int(os.environ.get("RELAYDESK_SESSION_MAX_SAVES", "0"))
 SESSION_SAVES: dict[str, int] = {}
 EXPIRED: set[str] = set()
 DB_PATH = Path("/var/lib/relaydesk/app.db")
+ARRIVALS: list[dict] = []  # loaded from RELAYDESK_ARRIVALS at --serve
+ARRIVALS_LOCK = threading.Lock()
+ARRIVALS_POLL_MS = 10000
 
 SCHEMA = """
 CREATE TABLE projects (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
@@ -133,6 +145,102 @@ def audit(con: sqlite3.Connection, **row: object) -> None:
 
 
 # ---------------------------------------------------------------------------
+# arrivals: records that appear while the task runs, clocked from the first
+# audited page view (see the module docstring)
+# ---------------------------------------------------------------------------
+
+
+def arrivals_load(path: str | None) -> None:
+    ARRIVALS.clear()
+    if not path:
+        return
+    for entry in json.loads(Path(path).read_text()):
+        ARRIVALS.append({
+            "after_s": float(entry["after_s"]),
+            "trigger": entry.get("trigger") or {},
+            "ticket": dict(entry["ticket"]),
+            "comments": [dict(c) for c in entry.get("comments", [])],
+            "t0": None,
+            "inserted_at": None,
+        })
+
+
+def arrivals_note(event: str, ticket_id: int | None) -> None:
+    """A page was viewed: start the clock of every arrival whose trigger matches."""
+    if not ARRIVALS:
+        return
+    now = time.time()
+    with ARRIVALS_LOCK:
+        for a in ARRIVALS:
+            if a["t0"] is not None:
+                continue
+            trig = a["trigger"]
+            if trig.get("event", event) != event:
+                continue
+            if "ticket_id" in trig and trig["ticket_id"] != ticket_id:
+                continue
+            a["t0"] = now
+
+
+def arrivals_due() -> list[dict]:
+    now = time.time()
+    with ARRIVALS_LOCK:
+        return [a for a in ARRIVALS
+                if a["inserted_at"] is None and not a.get("failed")
+                and a["t0"] is not None and now - a["t0"] >= a["after_s"]]
+
+
+def arrivals_insert(a: dict) -> None:
+    t = dict(a["ticket"])
+    t.setdefault("company", "")
+    con = connect(DB_PATH)
+    try:
+        con.execute(
+            "INSERT INTO tickets(id, subject, body, requester, company, project, priority, status, "
+            "assignee, created_at, updated_at) VALUES (:id, :subject, :body, :requester, :company, "
+            ":project, :priority, :status, :assignee, :created_at, :updated_at)",
+            t,
+        )
+        for c in a["comments"]:
+            con.execute(
+                "INSERT INTO comments(id, ticket_id, author, body, created_at) VALUES "
+                "(:id, :ticket_id, :author, :body, :created_at)",
+                c,
+            )
+        audit(con, event="arrival", ticket_id=int(t["id"]), field="ticket", new=str(t["subject"])[:80],
+              via="server")
+        con.commit()
+    finally:
+        con.close()
+    with ARRIVALS_LOCK:
+        a["inserted_at"] = time.time()
+
+
+def arrivals_thread() -> None:
+    while True:
+        for a in arrivals_due():
+            try:
+                arrivals_insert(a)
+            except sqlite3.IntegrityError as e:  # a seed clash: give up on this one
+                with ARRIVALS_LOCK:
+                    a["failed"] = str(e)
+                print(f"arrival {a['ticket'].get('id')} failed: {e}", flush=True)
+            except sqlite3.Error as e:  # pragma: no cover - a busy database: retried next tick
+                print(f"arrival {a['ticket'].get('id')} deferred: {e}", flush=True)
+        time.sleep(1.0)
+
+
+def arrivals_state() -> dict:
+    with ARRIVALS_LOCK:
+        items = [
+            {"id": int(a["ticket"]["id"]), "after_s": a["after_s"], "t0": a["t0"], "inserted_at": a["inserted_at"]}
+            for a in ARRIVALS
+        ]
+    arrived = [i for i in items if i["inserted_at"] is not None]
+    return {"count": len(arrived), "items": [{"id": i["id"]} for i in arrived], "scheduled": items}
+
+
+# ---------------------------------------------------------------------------
 # tokens: the form carries a session-bound token and a value only the page's
 # script can produce, so a POST without a page load is rejected
 # ---------------------------------------------------------------------------
@@ -196,6 +304,7 @@ tr:last-child td{border-bottom:none}
 .meta{font-size:13px;color:#4b5563;margin-bottom:10px}
 .banner{background:#dcebdd;border:1px solid #9fcaa4;color:#1e5b2a;padding:8px 12px;margin-bottom:12px}
 .banner.err{background:#fde2e1;border-color:#e4a09b;color:#8a1c12}
+.banner.arrivals{background:#fff4d6;border-color:#e6c36a;color:#6b4e00}
 .actions{display:flex;gap:10px;margin-top:14px}
 .right{margin-left:auto}
 .comment{border-top:1px solid #e6e9ec;padding:8px 0}
@@ -209,6 +318,21 @@ def esc(value: object) -> str:
     return html.escape("" if value is None else str(value), quote=True)
 
 
+def arrivals_html() -> str:
+    """Hidden banner plus the poll that fills it; empty when no arrivals are scheduled."""
+    if not ARRIVALS:
+        return ""
+    n0 = arrivals_state()["count"]
+    return (
+        "<div class='banner arrivals' id='arrivals' hidden></div>"
+        f"<script>(function(){{var n0={n0};function poll(){{fetch('/api/arrivals',{{cache:'no-store'}})"
+        ".then(function(r){return r.json()}).then(function(d){if(d.count>n0){var b=document.getElementById('arrivals');"
+        "var k=d.count-n0;b.textContent=k+(k===1?' new ticket has':' new tickets have')+' arrived. ';"
+        "var a=document.createElement('a');a.href='/tickets';a.textContent='Show the list';b.appendChild(a);b.hidden=false;}})"
+        f".catch(function(){{}});}}setInterval(poll,{ARRIVALS_POLL_MS});}})();</script>"
+    )
+
+
 def page(title: str, body: str) -> str:
     return (
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
@@ -217,7 +341,7 @@ def page(title: str, body: str) -> str:
         "<div class='top'><span class='brand'>Relay Desk</span>"
         "<span class='nav'><a href='/tickets'>Tickets</a><a href='/tickets?q=Open'>Open queue</a></span>"
         f"<span class='today'>Today: {TODAY_LABEL}</span></div>"
-        f"<div class='wrap'>{body}</div></body></html>"
+        f"<div class='wrap'>{arrivals_html()}{body}</div></body></html>"
     )
 
 
@@ -420,17 +544,27 @@ class Handler(BaseHTTPRequestHandler):
             with AUDIT_LOCK:
                 rows = list(AUDIT_MEM)
             body = json.dumps(
-                {"boot_id": BOOT_ID, "started_at": STARTED_AT, "audit_count": len(rows), "audit": rows}
+                {"boot_id": BOOT_ID, "started_at": STARTED_AT, "audit_count": len(rows), "audit": rows,
+                 "arrivals": arrivals_state()["scheduled"]}
             )
             self._send(HTTPStatus.OK, body, ctype="application/json")
             return
+        if url.path == "/api/arrivals":
+            st = arrivals_state()
+            self._send(HTTPStatus.OK, json.dumps({"count": st["count"], "items": st["items"]}),
+                       ctype="application/json")
+            return
         if url.path in ("/", "/tickets"):
+            sid, fresh = self._sid()
+            q, page_no = qs.get("q", "").strip(), int(qs.get("page", "1") or 1)
             con = connect(DB_PATH)
             try:
-                body = render_list(con, qs.get("q", "").strip(), int(qs.get("page", "1") or 1))
+                audit(con, sid=sid, event="page.list", field=q or None, new=str(page_no), via="get")
+                con.commit()
+                arrivals_note("page.list", None)
+                body = render_list(con, q, page_no)
             finally:
                 con.close()
-            sid, fresh = self._sid()
             self._send(HTTPStatus.OK, body, set_sid=sid if fresh else None)
             return
         if url.path.startswith("/tickets/"):
@@ -451,6 +585,7 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     audit(con, sid=sid, event="page.view", ticket_id=tid, via="get")
                     con.commit()
+                    arrivals_note("page.view", tid)
                     body = render_ticket(con, t, sid, qs.get("flash"))
             finally:
                 con.close()
@@ -588,8 +723,12 @@ def main() -> None:
     if args.serve:
         global DB_PATH
         DB_PATH = Path(args.serve)
+        arrivals_load(os.environ.get("RELAYDESK_ARRIVALS"))
+        if ARRIVALS:
+            threading.Thread(target=arrivals_thread, name="arrivals", daemon=True).start()
         srv = ThreadingHTTPServer((args.host, args.port), Handler)
-        print(f"relaydesk serving {DB_PATH} on http://{args.host}:{args.port} boot={BOOT_ID}", flush=True)
+        print(f"relaydesk serving {DB_PATH} on http://{args.host}:{args.port} boot={BOOT_ID} "
+              f"arrivals={len(ARRIVALS)}", flush=True)
         srv.serve_forever()
         return
     ap.error("use --init DB or --serve DB")

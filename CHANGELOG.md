@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `source.suite` with the lock digest; the run audit treats an external suite
   directory as benchmark data; `scripts/validate_tasks.py` gains `--json`.
   `estimate --suite` now prices the suite's own tasks root.
+- **Custom suites in the GUI**: the Launch page's suite picker lists frozen
+  suites from `[runner].suites_home` under "Custom (suites home)" next to the
+  built-in ones; their plans pass `--suites-home` to `run` and `estimate`,
+  record the lock digest, and are refused at confirm or launch if the lock
+  changed or the flag was altered.
 - **Mac app** (`desktop/`, `make app`): an Electron window on the local run
   GUI. It starts the backend from the checkout it was built from (or reuses
   one already on port 8000) and the dashboard's standalone build with its own

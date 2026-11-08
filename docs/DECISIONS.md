@@ -7,6 +7,49 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-08: ComputerUse v1 mid-task events are clocked from the agent's first page view, never wall time
+
+### Decision
+Owner, in chat, 2026-11-08 (milestone 3 plan approved). A ComputerUse v1
+task that changes the world while the agent works (a ticket or mail that
+arrives) schedules the change in the app itself
+(`tasks/computer-use-v1/_apps/{relaydesk,postbox}/app.py`, `RELAYDESK_ARRIVALS`
+and `POSTBOX_ARRIVALS`), and each arrival's clock starts at the first
+audited page view that matches its trigger (by default any list or record
+page; optionally a named record or conversation), never at container boot
+or wall time. The app writes an `arrival` audit row when it inserts the
+record and shows a banner on open pages from a ten-second poll; nothing
+reloads by itself. Checkers treat the expected state as the seed plus the
+arrivals the server recorded, and the UI-path sub-metric requires a page
+view after the arrival (`cu_check.arrivals_seen`).
+
+### Evidence
+- Agents differ in boot-to-first-look latency by tens of seconds (Claude
+  Code installs itself at setup; computer-1 starts its own desktop; the
+  oracle starts at once). A wall-clock schedule would land the event at a
+  different point in each agent's trajectory and make the task a different
+  task per row.
+- A run that never loads a page (nop, the direct-database cheats) must stay
+  deterministic: with the clock tied to page views nothing arrives, the
+  arrival ticket is simply absent, and the guards treat its absence as the
+  expected state. An arrival record present without its audit row is a
+  direct insert and fails the guards.
+- First use: `relaydesk-live-queue` (+60 s a target, +150 s a near-miss) and
+  `postbox-changed-plans` (+30 s a newsletter, +45 s after the conversation
+  is opened the mail that changes the answer).
+
+### Revisit triggers
+- A task that needs an event independent of the agent's attention (a timer
+  the person set earlier): then add a boot-clocked mode and say so in the
+  task's design note.
+- The accessibility-tree conditions, if a tree refresh should count as a
+  "look" for the clock.
+
+### What this touched
+`tasks/computer-use-v1/_apps/relaydesk/app.py`, `_apps/postbox/app.py`,
+`sandbox/computer-use/cu_check.py` (`arrived_ids`, `arrivals_seen`),
+`tests/test_computer_use_suite.py`, `docs/COMPUTER_USE_CHARTER.md` (realism bar).
+
 ## 2026-11-07: ComputerUse v1 dense reward is an unordered fraction of sub-metrics, never a headline
 
 ### Decision

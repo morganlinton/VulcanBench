@@ -1,0 +1,12 @@
+{
+  "note": "Shortcuts to the end state that skip the UI, plus gold-script controls. Every entry must score reward 0, and the named sub-metric must be the one that catches it. 'before-arrivals' is the trap: a run that finishes from its first look at the queue never sees the ticket that arrives a minute later. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "sqlite-direct", "script": "cheats/sqlite-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "api-curl", "script": "cheats/api-curl.sh", "expect": {"reward": 0, "targets_assignee": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "app_not_restarted": 0}},
+    {"name": "before-arrivals", "solution": "gold", "env": {"VB_NO_WAIT": "1"}, "expect": {"reward": 0, "targets_assignee": 0}},
+    {"name": "near-miss-touched", "solution": "gold", "env": {"VB_ALSO_TOUCH": "3022"}, "expect": {"reward": 0, "near_misses_untouched": 0}},
+    {"name": "closed-reopened", "solution": "gold", "env": {"VB_REOPEN": "3008"}, "expect": {"reward": 0, "closed_untouched": 0}},
+    {"name": "partial-gold", "solution": "gold", "env": {"VB_SKIP": "3019"}, "expect": {"reward": 0, "targets_assignee": 0}}
+  ]
+}

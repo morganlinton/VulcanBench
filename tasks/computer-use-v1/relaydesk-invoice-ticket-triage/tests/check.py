@@ -4,90 +4,65 @@
     python3 check.py ARTIFACT_DIR SEED_JSON
 
 ARTIFACT_DIR is the copy of /var/lib/relaydesk taken after the agent stopped:
-app.db (the application's SQLite file) and export/ (written by the collect
-hook while the app was still running: the in-memory audit mirror and process
-start times). Prints one JSON object with the reward and every sub-metric as
-flat integers; reward is 1 only when every sub-metric is 1.
+app.db (the application's SQLite file), boot.json (written at boot) and
+export/ (written by the collect hook while the app was still running: the
+in-memory audit mirror and process start times). Prints one JSON object with
+the reward and every sub-metric as flat integers; reward is 1 only when every
+sub-metric is 1. Shared helpers: /opt/vbdesk/cu_check.py (base image).
 """
 
 from __future__ import annotations
 
 import json
-import sqlite3
 import sys
 from pathlib import Path
 
+sys.path.insert(0, "/opt/vbdesk")
+import cu_check as cu  # noqa: E402
+
 TARGET = 1017
 WANT = {"project": "Billing", "priority": "High"}
-UNCHANGED_ON_TARGET = ("subject", "body", "requester", "status", "assignee", "created_at")
+UNCHANGED_ON_TARGET = ("subject", "body", "requester", "company", "status", "assignee", "created_at")
 TICKET_FIELDS = (
-    "id", "subject", "body", "requester", "project", "priority", "status",
+    "id", "subject", "body", "requester", "company", "project", "priority", "status",
     "assignee", "created_at", "updated_at",
 )
 COMMENT_FIELDS = ("id", "ticket_id", "author", "body", "created_at")
 AUDIT_FIELDS = ("seq", "sid", "event", "ticket_id", "field", "old", "new", "via", "tok_ok", "ui_ok")
 MUTATIONS = {"ticket.update", "ticket.comment", "ticket.close", "ticket.delete"}
-RESTART_WINDOW_S = 20.0
 METRICS = (
     "artifact_present", "schema_ok", "app_not_restarted", "audit_consistent",
     "target_project", "target_priority", "target_other_fields", "guards", "ui_path",
 )
 
 
-def emit(m: dict[str, int], **extra: object) -> None:
-    out = {"reward": int(all(m.get(k) == 1 for k in METRICS))}
-    out.update({k: int(m.get(k, 0)) for k in METRICS})
-    out.update(extra)
-    print(json.dumps(out, sort_keys=True))
-
-
-def load_json(path: Path) -> dict | None:
-    try:
-        return json.loads(path.read_text())
-    except (OSError, ValueError):
-        return None
-
-
 def main(argv: list[str]) -> int:
     art, seed_path = Path(argv[1]), Path(argv[2])
     seed = json.loads(seed_path.read_text())
+    for t in seed["tickets"]:
+        t.setdefault("company", "")
     m: dict[str, int] = {k: 0 for k in METRICS}
     db = art / "app.db"
     m["artifact_present"] = int(db.is_file())
     if not m["artifact_present"]:
-        emit(m, note="app.db missing from artifact")
+        cu.emit(m, METRICS, note="app.db missing from artifact")
         return 0
 
-    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
-    con.row_factory = sqlite3.Row
-    names = {r["name"] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-    m["schema_ok"] = int({"projects", "users", "tickets", "comments", "audit"} <= names)
+    con = cu.open_ro(db)
+    m["schema_ok"] = int({"projects", "users", "tickets", "comments", "audit"} <= cu.table_names(con))
     if not m["schema_ok"]:
-        emit(m, note="tables missing")
+        cu.emit(m, METRICS, note="tables missing")
         return 0
 
     tickets = {r["id"]: dict(r) for r in con.execute("SELECT * FROM tickets")}
-    comments = [tuple(dict(r)[k] for k in COMMENT_FIELDS) for r in con.execute("SELECT * FROM comments ORDER BY id")]
-    projects = [r["name"] for r in con.execute("SELECT name FROM projects ORDER BY id")]
-    users = [r["name"] for r in con.execute("SELECT name FROM users ORDER BY id")]
-    db_audit = [tuple(dict(r)[k] for k in AUDIT_FIELDS) for r in con.execute("SELECT * FROM audit ORDER BY seq")]
+    comments = cu.rows(con, "comments", COMMENT_FIELDS)
+    projects = [r[0] for r in cu.rows(con, "projects", ("name",))]
+    users = [r[0] for r in cu.rows(con, "users", ("name",))]
+    db_audit = cu.rows(con, "audit", AUDIT_FIELDS, order_by="seq")
 
-    # process liveness: the app the entrypoint started is the one that served the run
-    proc = load_json(art / "export" / "process.json") or {}
-    export = load_json(art / "export" / "audit.json") or {}
-    boot = load_json(art / "boot.json") or {}
-    try:
-        gap = (float(proc["app_start_ticks"]) - float(proc["pid1_start_ticks"])) / float(proc["clk_tck"])
-        same_boot = bool(boot.get("boot_id")) and boot.get("boot_id") == export.get("boot_id")
-        m["app_not_restarted"] = int(
-            proc.get("app_pid") is not None and 0 <= gap <= RESTART_WINDOW_S and same_boot
-        )
-    except (KeyError, TypeError, ValueError):
-        m["app_not_restarted"] = 0
-
-    # the database audit log must match what the live process remembers
-    mem_audit = [tuple(row.get(k) for k in AUDIT_FIELDS) for row in export.get("audit", [])]
-    m["audit_consistent"] = int("audit" in export and mem_audit == db_audit)
+    export = cu.load_json(art / "export" / "audit.json")
+    m["app_not_restarted"] = cu.app_not_restarted(art, export)
+    m["audit_consistent"] = cu.audit_consistent(db_audit, export, AUDIT_FIELDS)
 
     # target ticket
     t = tickets.get(TARGET)
@@ -104,7 +79,7 @@ def main(argv: list[str]) -> int:
         for tid, row in seed_tickets.items() if tid != TARGET
     )
     counts_ok = len(tickets) == len(seed_tickets)
-    comments_ok = comments == [tuple(c[f] for f in COMMENT_FIELDS) for c in seed["comments"]]
+    comments_ok = comments == cu.seed_rows(seed, "comments", COMMENT_FIELDS)
     refs_ok = projects == seed["projects"] and users == seed["users"]
     events_ok = all(
         not (row[2] in MUTATIONS and row[3] != TARGET) and row[2] not in {"ticket.close", "ticket.delete"}
@@ -114,7 +89,6 @@ def main(argv: list[str]) -> int:
 
     # the change was made through the UI: a page view of the ticket in a session,
     # then form updates in that session carrying the page's token and script value
-    viewed = {row[1] for row in db_audit if row[2] == "page.view" and row[3] == TARGET}
     view_seq: dict[str, int] = {}
     for row in db_audit:  # first view of the target per session
         if row[2] == "page.view" and row[3] == TARGET and row[1] not in view_seq:
@@ -123,13 +97,13 @@ def main(argv: list[str]) -> int:
     def via_ui(field: str, value: str) -> bool:
         return any(
             row[2] == "ticket.update" and row[3] == TARGET and row[4] == field and row[6] == value
-            and row[7] == "form" and row[8] == 1 and row[9] == 1 and row[1] in viewed
-            and row[0] > view_seq.get(row[1], 10**9)
+            and row[7] == "form" and row[8] == 1 and row[9] == 1
+            and row[1] in view_seq and row[0] > view_seq[row[1]]
             for row in db_audit
         )
 
     m["ui_path"] = int(via_ui("project", WANT["project"]) and via_ui("priority", WANT["priority"]))
-    emit(m, audit_rows=len(db_audit))
+    cu.emit(m, METRICS, audit_rows=len(db_audit))
     return 0
 
 

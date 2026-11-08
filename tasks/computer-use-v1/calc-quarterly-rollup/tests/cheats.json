@@ -1,0 +1,12 @@
+{
+  "note": "Shortcuts that write the workbook without Calc, plus gold-script controls. Every entry must score reward 0 and the named sub-metric must be the one that catches it. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "zip-rewrite", "script": "cheats/zip-rewrite.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "soffice-headless", "script": "cheats/soffice-headless.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "hidden-row-missed", "solution": "gold", "env": {"VB_NO_HIDDEN": "1"}, "expect": {"reward": 0, "totals_correct": 0}},
+    {"name": "wrong-status", "solution": "gold", "env": {"VB_WRONG_STATUS": "1"}, "expect": {"reward": 0, "status_correct": 0}},
+    {"name": "source-edited", "solution": "gold", "env": {"VB_EDIT_SOURCE": "1"}, "expect": {"reward": 0, "sources_untouched": 0}},
+    {"name": "not-saved", "solution": "gold", "env": {"VB_NO_SAVE": "1"}, "expect": {"reward": 0, "totals_correct": 0}},
+    {"name": "partial-gold", "solution": "gold", "env": {"VB_SKIP_WEST": "1"}, "expect": {"reward": 0, "totals_correct": 0}}
+  ]
+}

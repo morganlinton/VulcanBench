@@ -7,6 +7,10 @@
 # /usr/bin/chromium. Playwright (wheel only, no bundled browser) is included so
 # a task's gold script can drive the same Chromium over its CDP port, and the
 # mcp SDK serves /opt/vbdesk/vb_computer_mcp.py, computer tools for Claude Code.
+# Milestone 2 adds the family B native apps (Thunar, Mousepad, LibreOffice
+# Calc), an X input recorder (/opt/vbdesk/xinput_record.py, the UI-path
+# evidence for apps without an audit log) and the shared checker helpers
+# (/opt/vbdesk/cu_check.py) every task's tests/check.py imports.
 #
 # Build context is sandbox/computer-use (the root .dockerignore excludes sandbox/).
 # The Makefile passes the arm64 digest on Apple silicon:
@@ -33,12 +37,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        xvfb xauth x11-utils xfwm4 dbus-x11 \
+        xvfb xauth x11-utils xfwm4 dbus-x11 xinput \
         xdotool wmctrl imagemagick webp scrot \
         x11vnc novnc python3-websockify \
         chromium \
+        thunar mousepad libreoffice-calc libreoffice-gtk3 \
         fonts-dejavu-core fonts-liberation fontconfig \
-        curl ca-certificates procps sqlite3 tzdata \
+        curl ca-certificates procps sqlite3 tzdata zip unzip \
     && rm -rf /var/lib/apt/lists/* \
     && dpkg-query -W -f='${Package} ${Version} ${Architecture}\n' > /etc/vulcanbench-packages.txt
 
@@ -55,8 +60,32 @@ COPY chromium-flags.conf /etc/chromium.d/99-vulcanbench
 COPY fonts-local.conf /etc/fonts/local.conf
 COPY ensure-display.sh /opt/vbdesk/ensure-display.sh
 COPY vb_computer_mcp.py /opt/vbdesk/vb_computer_mcp.py
+COPY xinput_record.py /opt/vbdesk/xinput_record.py
+COPY cu_check.py /opt/vbdesk/cu_check.py
+COPY collect-agent-final.sh /opt/vbdesk/collect-agent-final.sh
+COPY raise-window.sh /opt/vbdesk/raise-window.sh
 RUN chmod 0755 /usr/local/bin/startxfce4 /opt/vbdesk/ensure-display.sh \
+        /opt/vbdesk/collect-agent-final.sh /opt/vbdesk/raise-window.sh \
+    && mkdir -p /var/lib/vbdesk \
     && fc-cache -f
+
+# Native-app settings for family B tasks (deterministic, dialog-free first run).
+# LibreOffice: a profile with the tip-of-the-day, what's-new, donate and
+# get-involved prompts, autosave and document recovery all off; the version
+# item is filled from the installed soffice so no "what's new" infobar shows.
+# Thunar: list view, no thumbnails, no volume management; Mousepad opens text.
+# GTK: no animations, no cursor blink.
+COPY libreoffice-registrymodifications.xcu /tmp/registrymodifications.xcu
+COPY thunar.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+COPY gtk-settings.ini /root/.config/gtk-3.0/settings.ini
+RUN ver="$(soffice --version | awk '{print $2}' | cut -d. -f1,2)" \
+    && mkdir -p /root/.config/libreoffice/4/user \
+    && sed "s/@LO_VERSION@/${ver}/" /tmp/registrymodifications.xcu \
+        > /root/.config/libreoffice/4/user/registrymodifications.xcu \
+    && rm /tmp/registrymodifications.xcu \
+    && mkdir -p /root/.config \
+    && printf '[Default Applications]\ntext/plain=org.xfce.mousepad.desktop\n' > /root/.config/mimeapps.list \
+    && test -x /usr/bin/thunar && test -x /usr/bin/mousepad && test -x /usr/bin/xinput
 
 WORKDIR /
 CMD ["sleep", "infinity"]

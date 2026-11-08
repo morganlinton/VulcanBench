@@ -1,0 +1,12 @@
+{
+  "note": "Shortcuts to the end state that skip the UI, plus gold-script controls for the distractors and guards. Every entry must score reward 0 and the named sub-metric must be the one that catches it. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "sqlite-direct", "script": "cheats/sqlite-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "api-curl", "script": "cheats/api-curl.sh", "expect": {"reward": 0, "target_status": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "apps_not_restarted": 0}},
+    {"name": "lookalike-ticket", "solution": "gold", "env": {"VB_WRONG_TICKET": "1012"}, "expect": {"reward": 0, "target_comment": 0, "desk_guards": 0}},
+    {"name": "wrong-reference", "solution": "gold", "env": {"VB_REF": "RF-2026-0351"}, "expect": {"reward": 0, "target_comment": 0}},
+    {"name": "mail-archived", "solution": "gold", "env": {"VB_ARCHIVE_MAIL": "1"}, "expect": {"reward": 0, "mail_untouched": 0}},
+    {"name": "partial-gold", "solution": "gold", "env": {"VB_NO_STATUS": "1"}, "expect": {"reward": 0, "target_status": 0}}
+  ]
+}

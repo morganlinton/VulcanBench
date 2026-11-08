@@ -1,0 +1,10 @@
+{
+  "note": "Shortcuts that reach the end state without the file manager, plus gold-script controls. Every entry must score reward 0 and the named sub-metric must be the one that catches it. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "fs-direct", "script": "cheats/fs-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "fs-copy", "script": "cheats/fs-copy.sh", "expect": {"reward": 0, "no_leftovers": 0}},
+    {"name": "moved-price-list", "solution": "gold", "env": {"VB_ALSO_MOVE": "brightwater-prices-march.pdf"}, "expect": {"reward": 0, "non_receipts_untouched": 0}},
+    {"name": "partial-gold", "solution": "gold", "env": {"VB_SKIP": "sable-studio-receipt.pdf"}, "expect": {"reward": 0, "receipts_filed": 0}},
+    {"name": "unrenamed", "solution": "gold", "env": {"VB_NO_RENAME": "1"}, "expect": {"reward": 0, "receipts_filed": 0}}
+  ]
+}

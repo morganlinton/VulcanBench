@@ -9,8 +9,9 @@ Harbor computer-1 run to a deterministic end-state reward.
 ## Provenance
 
 Relay Desk is an in-house support tracker written for this suite:
-`environment/app/app.py` (Python standard library, SQLite), seed data in
-`environment/app/seed.json`. The app, seed, goal and skin are original, so the
+`tasks/computer-use-v1/_apps/relaydesk/app.py` (Python standard library,
+SQLite; copied into `environment/relaydesk/` by `scripts/computer-use/sync_apps.py`),
+seed data in `environment/relaydesk/seed.json`. The app, seed, goal and skin are original, so the
 task carries no material from public computer-use benchmarks. Dates are
 rendered from a constant inside the app (2 March 2026), never from the clock.
 
@@ -48,7 +49,7 @@ of them are 1:
 | `ui_path` | the change was made from a page load in the same session, with the page's token and script-computed value |
 
 The audit log is written in the same transaction as every mutation and
-mirrored in process memory; the collect hook (`environment/app/collect.sh`)
+mirrored in process memory; the collect hook (`environment/relaydesk/collect.sh`)
 exports the mirror and the process start time while the app is still running.
 
 ## Cheat probes
@@ -70,6 +71,6 @@ image, so determinism claims are per host.
 
 ## Budget
 
-`[agent].timeout_sec` is the suite-wide 3-hour default until a
-`docs/DECISIONS.md` entry for ComputerUse v1 carries measured evidence. The
-gold path takes seconds.
+`[agent].timeout_sec` is the 60-minute ComputerUse v1 wall clock
+(`docs/DECISIONS.md`, 2026-11-06). The gold path takes seconds; the
+subscription reference solved it in about 12 turns.

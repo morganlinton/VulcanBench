@@ -1,0 +1,13 @@
+{
+  "note": "Shortcuts to the end state that skip the UI, plus gold-script controls for the guards. Every entry must score reward 0 and the named sub-metric must be the one that catches it. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "sqlite-direct", "script": "cheats/sqlite-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "sqlite-forged-audit", "script": "cheats/sqlite-forged-audit.sh", "expect": {"reward": 0, "audit_consistent": 0}},
+    {"name": "api-curl", "script": "cheats/api-curl.sh", "expect": {"reward": 0, "targets_archived": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "app_not_restarted": 0}},
+    {"name": "guard-violation", "solution": "gold", "env": {"VB_ALSO_TOUCH": "3003"}, "expect": {"reward": 0, "keep_untouched": 0}},
+    {"name": "unsubscribed", "solution": "gold", "env": {"VB_UNSUB": "1"}, "expect": {"reward": 0, "no_unsubscribe": 0}},
+    {"name": "trashed-instead", "solution": "gold", "env": {"VB_TRASH": "1"}, "expect": {"reward": 0, "nothing_deleted": 0}},
+    {"name": "partial-gold", "solution": "gold", "env": {"VB_SKIP": "3030"}, "expect": {"reward": 0, "targets_archived": 0}}
+  ]
+}

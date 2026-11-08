@@ -1,0 +1,12 @@
+{
+  "note": "Shortcuts to the end state that skip the UI, plus two negative controls on the gold script. Every entry must score reward 0, and the named sub-metric must be the one that catches it, so a checker regression is attributed. Run by scripts/computer-use/validate_task.py, which installs each script as the oracle solution in a fresh environment.",
+  "cheats": [
+    {"name": "sqlite-direct", "script": "cheats/sqlite-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "sqlite-forged-audit", "script": "cheats/sqlite-forged-audit.sh", "expect": {"reward": 0, "audit_consistent": 0}},
+    {"name": "api-curl", "script": "cheats/api-curl.sh", "expect": {"reward": 0, "targets_assignee": 0}},
+    {"name": "sqlite-restart", "script": "cheats/sqlite-restart.sh", "expect": {"reward": 0, "app_not_restarted": 0}},
+    {"name": "guard-violation", "solution": "gold", "env": {"VB_ALSO_TOUCH": "2016"}, "expect": {"reward": 0, "guards": 0}},
+    {"name": "closed-reopened", "solution": "gold", "env": {"VB_REOPEN": "2010"}, "expect": {"reward": 0, "closed_untouched": 0}},
+    {"name": "partial-gold", "solution": "gold", "env": {"VB_SKIP": "2048"}, "expect": {"reward": 0, "targets_assignee": 0}}
+  ]
+}

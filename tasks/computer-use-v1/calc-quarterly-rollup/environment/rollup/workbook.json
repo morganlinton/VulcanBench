@@ -1,0 +1,49 @@
+{
+  "file": "Q3-rollup.ods",
+  "summary": {
+    "headers": ["Region", "Q3 Total", "Target", "Status"],
+    "rows": [
+      {"region": "North", "target": 41500},
+      {"region": "South", "target": 28000},
+      {"region": "West", "target": "see Targets sheet"}
+    ]
+  },
+  "targets": {"North": 41500, "South": 28000, "West": 22500},
+  "months": {
+    "July": [
+      ["North", "Kestrel Optics", 6200],
+      ["South", "Orchard Dental", 3150],
+      ["North", "Brightwater Foods", 7840],
+      ["West", "Tidewater Marine", 5300],
+      ["South", "Pinecrest Clinic", 2900],
+      ["West", "Sable Studio", 2750],
+      ["North", "Quill Publishing", 1980],
+      ["South", "Redfern Cycles", 3425]
+    ],
+    "August": [
+      ["North", "Kestrel Optics", 6450],
+      ["South", "Orchard Dental", 2875],
+      ["West", "Tidewater Marine", 4900],
+      ["North", "Linden & Park", 5120],
+      {"hidden": true, "row": ["West", "Vantage Retail", 4850]},
+      ["South", "Pinecrest Clinic", 3010],
+      ["North", "Brightwater Foods", 7210],
+      ["South", "Holm Logistics", 2240]
+    ],
+    "September": [
+      ["North", "Kestrel Optics", 6600],
+      ["West", "Sable Studio", 2600],
+      ["South", "Orchard Dental", 3300],
+      ["North", "Brightwater Foods", 7995],
+      ["West", "Tidewater Marine", 2500],
+      ["South", "Redfern Cycles", 3180],
+      ["North", "Quill Publishing", 2105],
+      ["South", "Pinecrest Clinic", 2780]
+    ]
+  },
+  "expected": {
+    "totals": {"North": 51500, "South": 26860, "West": 22900},
+    "status": {"North": "OK", "South": "Below target", "West": "OK"},
+    "west_total_without_hidden_row": 18050
+  }
+}

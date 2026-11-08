@@ -51,6 +51,7 @@ under `--max-run-cost 3`) and the same cash ceiling.
 - OpenRouter Auto returns the resolved model in `model` and its own cost
   with `usage: {include: true}`, which `OpenRouterProvider` already sends;
   it is the reference router the others are compared against.
+
 ## 2026-11-08: ComputerUse v1 mid-task events are clocked from the agent's own actions, never wall time
 
 ### Decision

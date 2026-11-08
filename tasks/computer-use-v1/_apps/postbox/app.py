@@ -13,6 +13,15 @@ without a page load.
 
     python3 app.py --init  DB [--seed seed.json]   # create and seed the database
     python3 app.py --serve DB [--port 8010]        # serve on 127.0.0.1
+
+POSTBOX_ARRIVALS=/path/arrivals.json (default none) schedules messages that
+arrive while the task runs: a list of {"after_s": N, "message": {...}}
+entries, each clocked from the first audited page view after boot (any
+folder, search or message page; an entry may name its own trigger,
+{"trigger": {"event": "page.view", "message_id": 4204}}), never from wall
+time. Insertion writes an ``arrival`` audit row; open pages show a banner
+from a ten-second poll of /api/arrivals, worded for the conversation on
+screen when the new message belongs to it.
 """
 
 from __future__ import annotations
@@ -22,6 +31,7 @@ import hashlib
 import hmac
 import html
 import json
+import os
 import secrets
 import sqlite3
 import threading
@@ -45,6 +55,9 @@ STARTED_AT = time.time()
 AUDIT_MEM: list[dict] = []
 AUDIT_LOCK = threading.Lock()
 DB_PATH = Path("/var/lib/postbox/app.db")
+ARRIVALS: list[dict] = []  # loaded from POSTBOX_ARRIVALS at --serve
+ARRIVALS_LOCK = threading.Lock()
+ARRIVALS_POLL_MS = 10000
 
 SCHEMA = """
 CREATE TABLE messages (
@@ -119,6 +132,129 @@ def audit(con: sqlite3.Connection, **row: object) -> None:
 
 
 # ---------------------------------------------------------------------------
+# arrivals: messages that appear while the task runs, clocked from the first
+# audited page view (same design as Relay Desk's; see the module docstring)
+# ---------------------------------------------------------------------------
+
+
+def arrivals_load(path: str | None) -> None:
+    ARRIVALS.clear()
+    if not path:
+        return
+    for entry in json.loads(Path(path).read_text()):
+        msg = dict(entry["message"])
+        msg.setdefault("to_addr", ME)
+        msg.setdefault("unread", 1)
+        msg.setdefault("attachment", "")
+        msg.setdefault("newsletter", 0)
+        ARRIVALS.append({
+            "after_s": float(entry["after_s"]),
+            "trigger": entry.get("trigger") or {},
+            "message": msg,
+            "t0": None,
+            "inserted_at": None,
+        })
+
+
+def arrivals_note(event: str, message_id: int | None, thread_id: int | None = None) -> None:
+    """A page was viewed: start the clock of every arrival whose trigger matches.
+
+    A trigger may name an event, a message id or a thread id (any message of
+    the conversation, since the message page shows the whole thread).
+    """
+    if not ARRIVALS:
+        return
+    now = time.time()
+    with ARRIVALS_LOCK:
+        for a in ARRIVALS:
+            if a["t0"] is not None:
+                continue
+            trig = a["trigger"]
+            if trig.get("event", event) != event:
+                continue
+            if "message_id" in trig and trig["message_id"] != message_id:
+                continue
+            if "thread_id" in trig and trig["thread_id"] != thread_id:
+                continue
+            a["t0"] = now
+
+
+def arrivals_due() -> list[dict]:
+    now = time.time()
+    with ARRIVALS_LOCK:
+        return [a for a in ARRIVALS
+                if a["inserted_at"] is None and not a.get("failed")
+                and a["t0"] is not None and now - a["t0"] >= a["after_s"]]
+
+
+def arrivals_insert(a: dict) -> None:
+    msg = a["message"]
+    con = connect(DB_PATH)
+    try:
+        con.execute(
+            "INSERT INTO messages(id, thread_id, folder, from_name, from_email, to_addr, subject, body, "
+            "received_at, unread, attachment, newsletter) VALUES (:id, :thread_id, :folder, :from_name, "
+            ":from_email, :to_addr, :subject, :body, :received_at, :unread, :attachment, :newsletter)",
+            msg,
+        )
+        audit(con, event="arrival", message_id=int(msg["id"]), field="message",
+              new=str(msg["subject"])[:80], via="server")
+        con.commit()
+    finally:
+        con.close()
+    with ARRIVALS_LOCK:
+        a["inserted_at"] = time.time()
+
+
+def arrivals_thread() -> None:
+    while True:
+        for a in arrivals_due():
+            try:
+                arrivals_insert(a)
+            except sqlite3.IntegrityError as e:  # a seed clash: give up on this one
+                with ARRIVALS_LOCK:
+                    a["failed"] = str(e)
+                print(f"arrival {a['message'].get('id')} failed: {e}", flush=True)
+            except sqlite3.Error as e:  # pragma: no cover - a busy database: retried next tick
+                print(f"arrival {a['message'].get('id')} deferred: {e}", flush=True)
+        time.sleep(1.0)
+
+
+def arrivals_state() -> dict:
+    with ARRIVALS_LOCK:
+        items = [
+            {"id": int(a["message"]["id"]), "thread_id": int(a["message"]["thread_id"]),
+             "after_s": a["after_s"], "t0": a["t0"], "inserted_at": a["inserted_at"]}
+            for a in ARRIVALS
+        ]
+    arrived = [i for i in items if i["inserted_at"] is not None]
+    return {
+        "count": len(arrived),
+        "items": [{"id": i["id"], "thread_id": i["thread_id"]} for i in arrived],
+        "scheduled": items,
+    }
+
+
+def arrivals_html(thread_id: int | None) -> str:
+    """Hidden banner plus the poll that fills it; empty when no arrivals are scheduled."""
+    if not ARRIVALS:
+        return ""
+    n0 = arrivals_state()["count"]
+    th = int(thread_id) if thread_id is not None else 0
+    return (
+        "<div class='banner arrivals' id='arrivals' hidden></div>"
+        f"<script>(function(){{var n0={n0},th={th};function poll(){{fetch('/api/arrivals',{{cache:'no-store'}})"
+        ".then(function(r){return r.json()}).then(function(d){if(d.count>n0){var b=document.getElementById('arrivals');"
+        "var fresh=d.items.slice(n0);var mine=fresh.filter(function(i){return i.thread_id===th}).length;"
+        "var k=mine||fresh.length;var what=mine?(k===1?' new message in this conversation. ':' new messages in this conversation. ')"
+        ":(k===1?' new message has arrived. ':' new messages have arrived. ');b.textContent=k+what;"
+        "var a=document.createElement('a');a.href=mine?(location.pathname+location.search):'/mail/Inbox';"
+        "a.textContent=mine?'Refresh':'Open Inbox';b.appendChild(a);b.hidden=false;}})"
+        f".catch(function(){{}});}}setInterval(poll,{ARRIVALS_POLL_MS});}})();</script>"
+    )
+
+
+# ---------------------------------------------------------------------------
 # tokens (same scheme as Relay Desk)
 # ---------------------------------------------------------------------------
 
@@ -186,6 +322,7 @@ pre.body{font:inherit;white-space:pre-wrap;margin:0}
 .att{display:inline-block;background:#eef1f0;border:1px solid #d9dee3;padding:3px 8px;border-radius:3px;font-size:13px;margin-top:8px}
 .banner{background:#d6ece6;border:1px solid #9fcab9;color:#0f4a3f;padding:8px 12px;margin-bottom:12px}
 .banner.err{background:#fde2e1;border-color:#e4a09b;color:#8a1c12}
+.banner.arrivals{background:#fff4d6;border-color:#e6c36a;color:#6b4e00}
 .actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
 .right{margin-left:auto}
 .grid{display:grid;grid-template-columns:90px 1fr;row-gap:8px;column-gap:10px;align-items:center}
@@ -211,7 +348,8 @@ def folder_counts(con: sqlite3.Connection) -> dict[str, tuple[int, int]]:
     return out
 
 
-def page(con: sqlite3.Connection, title: str, body: str, current: str | None = None) -> str:
+def page(con: sqlite3.Connection, title: str, body: str, current: str | None = None,
+         thread_id: int | None = None) -> str:
     counts = folder_counts(con)
     side = ["<div class='side'>"]
     for f in FOLDERS:
@@ -228,7 +366,8 @@ def page(con: sqlite3.Connection, title: str, body: str, current: str | None = N
         "<form method='get' action='/search' style='margin:0'>"
         "<input type='text' name='q' placeholder='Search mail' size='34'> <button type='submit'>Search</button></form>"
         f"<span class='me'>{esc(ME_NAME)} &lt;{esc(ME)}&gt; &middot; {TODAY_LABEL}</span></div>"
-        f"<div class='layout'>{''.join(side)}<div class='main'>{body}</div></div></body></html>"
+        f"<div class='layout'>{''.join(side)}<div class='main'>{arrivals_html(thread_id)}{body}</div></div>"
+        "</body></html>"
     )
 
 
@@ -355,7 +494,7 @@ def render_message(con: sqlite3.Connection, m: sqlite3.Row, sid: str, flash: str
             )
         out.append("</div>")
     out.append(UI_SCRIPT)
-    return page(con, m["subject"], "".join(out), m["folder"])
+    return page(con, m["subject"], "".join(out), m["folder"], thread_id=int(m["thread_id"]))
 
 
 def quote(m: sqlite3.Row) -> str:
@@ -481,8 +620,14 @@ class Handler(BaseHTTPRequestHandler):
             with AUDIT_LOCK:
                 rows = list(AUDIT_MEM)
             self._send(HTTPStatus.OK, json.dumps(
-                {"boot_id": BOOT_ID, "started_at": STARTED_AT, "audit_count": len(rows), "audit": rows}
+                {"boot_id": BOOT_ID, "started_at": STARTED_AT, "audit_count": len(rows), "audit": rows,
+                 "arrivals": arrivals_state()["scheduled"]}
             ), ctype="application/json")
+            return
+        if url.path == "/api/arrivals":
+            st = arrivals_state()
+            self._send(HTTPStatus.OK, json.dumps({"count": st["count"], "items": st["items"]}),
+                       ctype="application/json")
             return
         sid, fresh = self._sid()
         set_sid = sid if fresh else None
@@ -495,6 +640,7 @@ class Handler(BaseHTTPRequestHandler):
             if parts[0] == "mail" and len(parts) == 2 and parts[1] in FOLDERS:
                 audit(con, sid=sid, event="page.list", field=parts[1], new=qs.get("page", "1"), via="get")
                 con.commit()
+                arrivals_note("page.list", None)
                 body = render_list(con, sid, parts[1], "", int(qs.get("page", "1") or 1), qs.get("flash"))
                 self._send(HTTPStatus.OK, body, set_sid=set_sid)
                 return
@@ -505,6 +651,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 audit(con, sid=sid, event="page.list", field="search", new=q[:80], via="get")
                 con.commit()
+                arrivals_note("page.list", None)
                 body = render_list(con, sid, None, q, int(qs.get("page", "1") or 1), qs.get("flash"))
                 self._send(HTTPStatus.OK, body, set_sid=set_sid)
                 return
@@ -529,6 +676,7 @@ class Handler(BaseHTTPRequestHandler):
                     con.execute("UPDATE messages SET unread = 0 WHERE id = ?", (m["id"],))
                 audit(con, sid=sid, event="page.view", message_id=m["id"], via="get")
                 con.commit()
+                arrivals_note("page.view", int(m["id"]), int(m["thread_id"]))
                 m = con.execute("SELECT * FROM messages WHERE id = ?", (m["id"],)).fetchone()
                 self._send(HTTPStatus.OK, render_message(con, m, sid, qs.get("flash")), set_sid=set_sid)
                 return
@@ -705,8 +853,12 @@ def main() -> None:
     if args.serve:
         global DB_PATH
         DB_PATH = Path(args.serve)
+        arrivals_load(os.environ.get("POSTBOX_ARRIVALS"))
+        if ARRIVALS:
+            threading.Thread(target=arrivals_thread, name="arrivals", daemon=True).start()
         srv = ThreadingHTTPServer((args.host, args.port), Handler)
-        print(f"postbox serving {DB_PATH} on http://{args.host}:{args.port} boot={BOOT_ID}", flush=True)
+        print(f"postbox serving {DB_PATH} on http://{args.host}:{args.port} boot={BOOT_ID} "
+              f"arrivals={len(ARRIVALS)}", flush=True)
         srv.serve_forever()
         return
     ap.error("use --init DB or --serve DB")

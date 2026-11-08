@@ -9,14 +9,14 @@ artifacts = [{ source = "/var/lib/postbox" }, { source = "/var/lib/vbdesk" }]
 [task]
 name = "vulcanbench/postbox-changed-plans"
 version = "0.1.0"
-description = "VulcanBench ComputerUse v1 task (web app in a browser): reply to a customer confirming a delivery slot when, shortly after the conversation is opened, a new mail from her arrives replacing the slot; the reply must confirm the final slot, with no other mail sent and nothing else changed."
+description = "VulcanBench ComputerUse v1 task (web app in a browser): reply to a customer confirming a delivery slot when, as the reply is being written, a new mail from her arrives replacing the slot; the reply must confirm the final slot, with no other mail sent and nothing else changed."
 authors = [{ name = "VulcanBench", email = "morgan@vulcanbench.com" }]
 keywords = ["computer-use", "web", "webmail", "mid-task-event", "state-tracking", "end-state"]
 
 [metadata]
 vulcanbench_suite = "computer-use-v1"
 vulcanbench_family = "A"
-vulcanbench_family_note = "Web app in a browser. A short task whose answer changes under the agent: the mail that settles the slot arrives 45 seconds after the conversation is first opened, with an unrelated newsletter arriving earlier as noise. The app shows a banner on arrival; the agent has to read what arrived before sending."
+vulcanbench_family_note = "Web app in a browser. A short task whose answer changes under the agent: the mail that settles the slot arrives two seconds after Reply is first clicked on the conversation, with an unrelated newsletter arriving ten seconds after the first page view as noise. The app shows a banner on arrival (on the compose form it links back to the conversation); the agent has to read what arrived before sending."
 vulcanbench_mechanisms = ["mid-task-arrivals"]
 vulcanbench_condition = "pixels"
 vulcanbench_apps = ["postbox"]

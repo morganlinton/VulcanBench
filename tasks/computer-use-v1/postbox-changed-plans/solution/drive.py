@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Gold trajectory for postbox-changed-plans, through the UI.
 
-Opens Dana Holm's conversation, which starts the clock on her next mail,
-waits for the "new message in this conversation" banner, reloads, reads the
-new slot and replies confirming it. Leaves a fixed final message (the oracle
+Opens Dana Holm's conversation and clicks Reply, which starts the clock on
+her next mail, waits for the "new message in this conversation" banner on
+the compose form, follows it back to the conversation, reads the new slot
+and replies confirming it. Leaves a fixed final message (the oracle
 has no model). Controls for the validator:
 
 VB_NO_WAIT=1       reply at once with the slot in the seeded mail (the trap)
@@ -46,12 +47,22 @@ def arrivals_count() -> int:
         return int(json.load(r)["count"])
 
 
+def wait_for_arrival(mid: int, timeout_s: float) -> bool:
+    t_end = time.time() + timeout_s
+    while time.time() < t_end:
+        with urllib.request.urlopen(f"{BASE}/api/arrivals", timeout=5) as r:  # noqa: S310 - loopback
+            if any(int(i["id"]) == mid for i in json.load(r)["items"]):
+                return True
+        time.sleep(1.0)
+    return False
+
+
 def wait_for_arrivals(n: int, timeout_s: float) -> bool:
     t_end = time.time() + timeout_s
     while time.time() < t_end:
         if arrivals_count() >= n:
             return True
-        time.sleep(2.0)
+        time.sleep(1.0)
     return False
 
 
@@ -83,12 +94,18 @@ def main() -> None:
             reply(page, SEEDED_LATEST, REPLY_OLD)
         else:
             if env.get("VB_TWICE"):
-                reply(page, SEEDED_LATEST, REPLY_OLD)
-            # both arrivals: the newsletter at 30 s, Dana's new mail at 45 s
-            wait_for_arrivals(2, 150)
-            page.goto(f"{BASE}/message/{SEEDED_LATEST}")  # look again: the new mail is in the thread
-            page.wait_for_selector(f"#m{ARRIVED}")
+                reply(page, SEEDED_LATEST, REPLY_OLD)  # clicking Reply starts the clock
+                wait_for_arrival(ARRIVED, 60)  # the Sent page's banner points at the Inbox: go back by hand
+                page.goto(f"{BASE}/message/{SEEDED_LATEST}")
+            else:
+                page.click("#reply")  # the clock starts here
+                page.wait_for_selector("#compose")
+                # the banner on the compose form: "1 new message in this conversation. Open conversation"
+                page.wait_for_selector("#arrivals a", state="visible", timeout=60_000)
+                page.click("#arrivals a")
+            page.wait_for_selector(f"#m{ARRIVED}")  # the new mail is in the thread
             reply(page, ARRIVED, REPLY_OLD if env.get("VB_FIRST_SLOT") else REPLY_NEW)
+            wait_for_arrivals(2, 60)  # the newsletter too, so the Sent page's badges are fixed
         if env.get("VB_OTHER_DANA"):
             reply(page, LOOKALIKE, "Hi Dana,\n\nWednesday 09:00 to 11:00 is fine for the pallet collection.\n\nAlex")
         page.goto(f"{BASE}/mail/Sent")

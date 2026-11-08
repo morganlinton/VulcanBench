@@ -61,7 +61,7 @@ exposed edge. The instruction says all three are open.
 |---|---|
 | `report_present` | no report, or an empty one |
 | `report_ids_exact` | a missed discrepancy or a false positive (the set of invoice numbers in the file must equal the four) |
-| `report_details` | lines that do not say what is wrong (the amount line needs one of the two figures or a word such as amount; the double entry needs twice or duplicate; the one-sided ones need missing, no ticket, not in, only, or the like); prose is otherwise free |
+| `report_details` | lines that do not say what is wrong (the amount line needs one of the two figures or a word such as amount; the double entry needs twice or duplicate; the one-sided ones need missing, no ticket, no Billing ticket, no ledger row, not in, only, or the like); prose is otherwise free |
 | `ledger_untouched` | any change to the workbook |
 | `desk_untouched` | any ticket changed, comment added, or mutation event in the tracker |
 | `apps_not_restarted`, `audit_consistent` | the tracker replaced or its audit forged |
@@ -73,6 +73,18 @@ exposed edge. The instruction says all three are open.
 restarted, and gold-script controls: a discrepancy left out, a false
 positive added, a ledger cell edited and saved, a ticket edited, the report
 typed but not saved.
+
+## Checker fix after the first measurement
+
+The 2026-11-08 gate reading (`docs/results/computer-use-v1-milestone-3/`)
+scored one of three attempts 0 on `report_details` although its report was
+right: its line for the ledger-only invoice said "no Billing ticket in
+Relay Desk", and the one-sided wording list matched "no ticket" only as
+adjacent words. The list now accepts a qualifier or two between "no" and
+the noun (ticket, row, entry, record, posting, match), "but no", and "not
+found/present/posted/recorded". Invoice-set exactness is still the test;
+the wording check only asks that each line say which side is short. The
+reading is reported as measured.
 
 ## Determinism notes
 

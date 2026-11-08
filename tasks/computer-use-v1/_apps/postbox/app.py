@@ -57,7 +57,7 @@ AUDIT_LOCK = threading.Lock()
 DB_PATH = Path("/var/lib/postbox/app.db")
 ARRIVALS: list[dict] = []  # loaded from POSTBOX_ARRIVALS at --serve
 ARRIVALS_LOCK = threading.Lock()
-ARRIVALS_POLL_MS = 10000
+ARRIVALS_POLL_MS = 4000
 
 SCHEMA = """
 CREATE TABLE messages (
@@ -235,12 +235,18 @@ def arrivals_state() -> dict:
     }
 
 
-def arrivals_html(thread_id: int | None) -> str:
-    """Hidden banner plus the poll that fills it; empty when no arrivals are scheduled."""
+def arrivals_html(thread_id: int | None, back: str | None = None) -> str:
+    """Hidden banner plus the poll that fills it; empty when no arrivals are scheduled.
+
+    ``back`` is where a "new message in this conversation" banner should lead
+    when the current page cannot show the conversation (the compose form).
+    """
     if not ARRIVALS:
         return ""
     n0 = arrivals_state()["count"]
     th = int(thread_id) if thread_id is not None else 0
+    back_js = repr(back) if back else "(location.pathname+location.search)"
+    back_label = "Open conversation" if back else "Refresh"
     return (
         "<div class='banner arrivals' id='arrivals' hidden></div>"
         f"<script>(function(){{var n0={n0},th={th};function poll(){{fetch('/api/arrivals',{{cache:'no-store'}})"
@@ -248,8 +254,8 @@ def arrivals_html(thread_id: int | None) -> str:
         "var fresh=d.items.slice(n0);var mine=fresh.filter(function(i){return i.thread_id===th}).length;"
         "var k=mine||fresh.length;var what=mine?(k===1?' new message in this conversation. ':' new messages in this conversation. ')"
         ":(k===1?' new message has arrived. ':' new messages have arrived. ');b.textContent=k+what;"
-        "var a=document.createElement('a');a.href=mine?(location.pathname+location.search):'/mail/Inbox';"
-        "a.textContent=mine?'Refresh':'Open Inbox';b.appendChild(a);b.hidden=false;}})"
+        f"var a=document.createElement('a');a.href=mine?{back_js}:'/mail/Inbox';"
+        f"a.textContent=mine?'{back_label}':'Open Inbox';b.appendChild(a);b.hidden=false;}}}})"
         f".catch(function(){{}});}}setInterval(poll,{ARRIVALS_POLL_MS});}})();</script>"
     )
 
@@ -349,7 +355,7 @@ def folder_counts(con: sqlite3.Connection) -> dict[str, tuple[int, int]]:
 
 
 def page(con: sqlite3.Connection, title: str, body: str, current: str | None = None,
-         thread_id: int | None = None) -> str:
+         thread_id: int | None = None, arrivals_back: str | None = None) -> str:
     counts = folder_counts(con)
     side = ["<div class='side'>"]
     for f in FOLDERS:
@@ -366,7 +372,7 @@ def page(con: sqlite3.Connection, title: str, body: str, current: str | None = N
         "<form method='get' action='/search' style='margin:0'>"
         "<input type='text' name='q' placeholder='Search mail' size='34'> <button type='submit'>Search</button></form>"
         f"<span class='me'>{esc(ME_NAME)} &lt;{esc(ME)}&gt; &middot; {TODAY_LABEL}</span></div>"
-        f"<div class='layout'>{''.join(side)}<div class='main'>{arrivals_html(thread_id)}{body}</div></div>"
+        f"<div class='layout'>{''.join(side)}<div class='main'>{arrivals_html(thread_id, arrivals_back)}{body}</div></div>"
         "</body></html>"
     )
 
@@ -542,7 +548,11 @@ def render_compose(con: sqlite3.Connection, sid: str, kind: str, src: sqlite3.Ro
         "<a href='/mail/Inbox' class='right'>Discard</a></div></form>"
     )
     out.append(UI_SCRIPT)
-    return page(con, "Compose", "".join(out), None)
+    return page(
+        con, "Compose", "".join(out), None,
+        thread_id=int(src["thread_id"]) if src is not None else None,
+        arrivals_back=f"/message/{src['id']}" if src is not None else None,
+    )
 
 
 def render_unsubscribe(con: sqlite3.Connection, m: sqlite3.Row, sid: str) -> str:
@@ -689,6 +699,8 @@ class Handler(BaseHTTPRequestHandler):
                 audit(con, sid=sid, event="compose.open", message_id=src["id"] if src is not None else None,
                       field=kind, via="get")
                 con.commit()
+                arrivals_note("compose.open", src["id"] if src is not None else None,
+                              int(src["thread_id"]) if src is not None else None)
                 self._send(HTTPStatus.OK, render_compose(con, sid, kind, src), set_sid=set_sid)
                 return
             self._not_found(con)

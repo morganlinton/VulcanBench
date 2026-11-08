@@ -6,9 +6,9 @@
 Writes environment/postbox/seed.json, environment/postbox/arrivals.json and
 their copies under tests/. Twenty-eight messages. Dana Holm (Holm Logistics)
 is rescheduling the Leith depot delivery; her latest seeded mail proposes
-Thursday 12 March 08:00 to 10:00. Forty-five seconds after the agent first
-opens that conversation a new mail from her arrives replacing the slot with
-Wednesday 11 March 13:00 to 15:00. An unrelated newsletter arrives thirty
+Thursday 12 March 08:00 to 10:00. Two seconds after the agent clicks Reply
+on that conversation a new mail from her arrives replacing the slot with
+Wednesday 11 March 13:00 to 15:00. An unrelated newsletter arrives ten
 seconds after the agent's first page view, so "new mail" is not by itself
 the signal. A look-alike sender (Dana Holmberg, Holmberg Freight) asks a
 similar question.
@@ -332,8 +332,8 @@ MESSAGES: list[dict] = [
 
 ARRIVALS: list[dict] = [
     {
-        # unrelated: arrives 30 s after the agent's first look at anything
-        "after_s": 30,
+        # unrelated: arrives 10 s after the agent's first look at anything
+        "after_s": 10,
         "message": msg(
             4290,
             4290,
@@ -347,9 +347,9 @@ ARRIVALS: list[dict] = [
         ),
     },
     {
-        # the change of plans: 45 s after the agent first opens the conversation
-        "after_s": 45,
-        "trigger": {"event": "page.view", "thread_id": THREAD},
+        # the change of plans: 2 s after the agent clicks Reply on the conversation
+        "after_s": 2,
+        "trigger": {"event": "compose.open", "thread_id": THREAD},
         "message": msg(
             4204,
             THREAD,

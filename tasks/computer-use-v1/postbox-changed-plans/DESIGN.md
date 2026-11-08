@@ -16,32 +16,54 @@ messages plus two that arrive. Cast and texts are original.
 
 Reply to Dana Holm confirming the delivery slot for the Leith depot. Her
 latest seeded mail (2 March, 08:10, unread) proposes Thursday 12 March
-between 08:00 and 10:00. Forty-five seconds after the agent first opens
-that conversation (any message of it: the message page shows the whole
+between 08:00 and 10:00. Two seconds after the agent first clicks Reply on
+that conversation (on any message of it: the message page shows the whole
 thread), a new mail from Dana arrives in the thread withdrawing Thursday
 and proposing Wednesday 11 March between 13:00 and 15:00. The reply must
 confirm Wednesday.
 
-Thirty seconds after the agent's first page view an unrelated newsletter
+Ten seconds after the agent's first page view an unrelated newsletter
 arrives, so a "new message" banner by itself does not say what changed;
-the thread page's banner says "1 new message in this conversation", other
-pages say "1 new message has arrived". A look-alike sender, Dana Holmberg
+the thread page's banner says "1 new message in this conversation" and
+reloads the page, the compose form's banner says the same and links back
+to the conversation ("Open conversation"), other pages say "1 new message
+has arrived". A look-alike sender, Dana Holmberg
 of Holmberg Freight, asks about a Wednesday slot of her own in a separate
 mail.
 
-An agent that opens the thread, clicks Reply and sends within 45 seconds
-confirms the withdrawn slot. The expected recovery is to notice the banner
-on the compose or message page, read the new mail, and reply to it instead.
+An agent that clicks Reply, types and sends without looking at the top of
+the compose form confirms the withdrawn slot. The banner is visible there
+within four seconds of the arrival (the page polls every four seconds) and
+stays until the page changes. The expected recovery is to notice it, open
+the conversation, read the new mail, and reply to it instead.
 Two replies (Thursday first, then Wednesday) do the task but also confirm
 a slot the customer had withdrawn, which `no_wrong_confirmation` records
 separately so the pattern is visible in `dense`.
 
 ## The mid-task event
 
-`POSTBOX_ARRIVALS=/opt/postbox/arrivals.json`, clocked from page views (the
-newsletter from the first view of anything, Dana's mail from the first view
-of her conversation), never from wall time; see `relaydesk-live-queue/DESIGN.md`
-and `docs/DECISIONS.md` (2026-11-08).
+`POSTBOX_ARRIVALS=/opt/postbox/arrivals.json`, clocked from the agent's own
+audited actions (the newsletter from the first view of anything, Dana's mail
+from the first Reply click on her conversation, audit event `compose.open`),
+never from wall time; see `relaydesk-live-queue/DESIGN.md` and
+`docs/DECISIONS.md` (2026-11-08).
+
+## Spec fix after the first measurement
+
+As first built, Dana's mail arrived 45 seconds after the conversation was
+opened and the newsletter 30 seconds after the first page view. The
+2026-11-08 gate reading (three attempts of the subscription reference,
+`docs/results/computer-use-v1-milestone-3/`) lost all three: the agent read
+the thread, clicked Reply, typed and sent in about 30 seconds, and in two
+attempts the run ended before anything had arrived at all. The reply
+confirmed the only slot the agent could have seen, so the failure measured
+the agent's speed, not its perception. The clock now starts at the Reply
+click, the arrival lands two seconds later, the compose form's banner links
+back to the conversation, and the poll runs every four seconds, so the
+change is on screen before any agent can finish typing a reply. The
+newsletter arrives at ten seconds so it is seen as noise within the task's
+natural length. Readings from before this change are not comparable on
+this task.
 
 ## Grading
 
@@ -68,12 +90,13 @@ archiving a mail, replying to Dana Holmberg too, sending nothing.
 
 ## Determinism notes
 
-As the other Postbox tasks. The arrivals land at fixed offsets from page
-views; the gold's final screenshot (the Sent folder) is identical across
-runs. Varying regions: the caret.
+As the other Postbox tasks. The arrivals land at fixed offsets from the
+agent's own actions; the gold waits for both before its final screenshot
+(the Sent folder), which is identical across runs. Varying regions: the
+caret.
 
 ## Budget
 
 `[agent].timeout_sec` is the 60-minute ComputerUse v1 wall clock. The gold
-path takes about a minute because it waits; an agent needs roughly 8 to 15
-actions, at least one of them after the new mail lands.
+path takes about twenty seconds; an agent needs roughly 8 to 15 actions, at
+least one of them after the new mail lands.

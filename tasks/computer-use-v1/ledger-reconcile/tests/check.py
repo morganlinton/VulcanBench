@@ -41,7 +41,8 @@ TICKET_FIELDS = (
 AUDIT_FIELDS = ("seq", "sid", "event", "ticket_id", "field", "old", "new", "via", "tok_ok", "ui_ok")
 MUTATIONS = {"ticket.update", "ticket.comment", "ticket.close", "ticket.delete"}
 ONE_SIDED = re.compile(
-    r"missing|no ticket|not in|only in|absent|without|no (matching|corresponding)|isn.t in|is not|does not|doesn.t|never",
+    r"missing|no (\w+[ -]){0,2}(ticket|row|entry|record|posting|match)|not in|only in|absent|without"
+    r"|no (matching|corresponding)|isn.t in|is not|does not|doesn.t|never|but no\b|not (found|present|posted|recorded)",
     re.I,
 )
 TWICE = re.compile(r"twice|duplicat|two (rows|entries|times)|double|repeated|entered 2", re.I)

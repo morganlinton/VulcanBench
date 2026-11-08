@@ -7,7 +7,7 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
-## 2026-11-08: ComputerUse v1 mid-task events are clocked from the agent's first page view, never wall time
+## 2026-11-08: ComputerUse v1 mid-task events are clocked from the agent's own actions, never wall time
 
 ### Decision
 Owner, in chat, 2026-11-08 (milestone 3 plan approved). A ComputerUse v1
@@ -15,11 +15,12 @@ task that changes the world while the agent works (a ticket or mail that
 arrives) schedules the change in the app itself
 (`tasks/computer-use-v1/_apps/{relaydesk,postbox}/app.py`, `RELAYDESK_ARRIVALS`
 and `POSTBOX_ARRIVALS`), and each arrival's clock starts at the first
-audited page view that matches its trigger (by default any list or record
-page; optionally a named record or conversation), never at container boot
-or wall time. The app writes an `arrival` audit row when it inserts the
-record and shows a banner on open pages from a ten-second poll; nothing
-reloads by itself. Checkers treat the expected state as the seed plus the
+audited agent action that matches its trigger (by default any list or
+record page view; optionally a named record or conversation, or another
+audited event such as opening the reply form), never at container boot or
+wall time. The app writes an `arrival` audit row when it inserts the record
+and shows a banner on open pages from a short poll (ten seconds in Relay
+Desk, four in Postbox); nothing reloads by itself. Checkers treat the expected state as the seed plus the
 arrivals the server recorded, and the UI-path sub-metric requires a page
 view after the arrival (`cu_check.arrivals_seen`).
 
@@ -35,8 +36,15 @@ view after the arrival (`cu_check.arrivals_seen`).
   expected state. An arrival record present without its audit row is a
   direct insert and fails the guards.
 - First use: `relaydesk-live-queue` (+60 s a target, +150 s a near-miss) and
-  `postbox-changed-plans` (+30 s a newsletter, +45 s after the conversation
-  is opened the mail that changes the answer).
+  `postbox-changed-plans` (+10 s a newsletter; the mail that changes the
+  answer 2 s after Reply is first clicked on the conversation).
+- Amended the same day after the first measurement: `postbox-changed-plans`
+  first clocked its arrival 45 s after the conversation was opened, and the
+  reference finished the whole task in about 30 s, so in two of three
+  attempts nothing had arrived when the run ended. An event the agent cannot
+  see before its natural finishing point measures speed, not perception; the
+  offset has to be set from the agent's action that the event should
+  interrupt, here the Reply click. See the task's DESIGN.md.
 
 ### Revisit triggers
 - A task that needs an event independent of the agent's attention (a timer

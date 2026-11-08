@@ -78,9 +78,10 @@ Roughly balanced across (A) and (B), with (C) as the long-horizon tail.
   with a similar name, a stale draft, a disabled button, a notification that
   arrives mid-task.
 - Mid-task events (a ticket or mail that arrives while the agent works) are
-  clocked from the agent's first page view of the app, never from wall time,
-  so every agent meets them at the same point relative to its own first look
-  and a run that never opens the app never sees them. The app shows a banner;
+  clocked from the agent's own actions in the app (its first page view, or
+  the click the event should interrupt), never from wall time, so every
+  agent meets them at the same point in its own trajectory, before it can
+  naturally finish, and a run that never opens the app never sees them. The app shows a banner;
   nothing reloads by itself (`docs/DECISIONS.md`, 2026-11-08).
 - Irreversible controls are present (Send, Delete, Pay, Empty trash) whether
   or not the task touches them. Their presence is part of the realism, and

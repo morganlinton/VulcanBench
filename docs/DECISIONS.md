@@ -7,6 +7,51 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-08: router eval wave one is Ramp Router and OpenRouter Auto; Factory waits
+
+### Decision
+
+Owner, in chat, 2026-11-08. The first routers run through `tasks/router-v1`
+are Ramp Router (`router:ramp/<strategy>`) and OpenRouter Auto
+(`openrouter:openrouter/auto`). Factory Router is deferred to a second wave.
+Both wave-one legs follow the 2026-11-05 run plan (probe, ladder, agent runs
+under `--max-run-cost 3`) and the same cash ceiling.
+
+- Ramp Router is addressed over its Responses API
+  (`ROUTER_RAMP_API=responses`, base `https://api.router.com/v1`), because
+  that is the only surface on which it returns its per-call `usage.cost`;
+  its `/chat/completions` reports the served `model` but no cost, which
+  would leave every Ramp run unpriced. The router provider and the probe
+  ladder gained a Responses mode for this; the chat mode stays the default.
+- Ramp's routing strategies are account settings, not model ids: Switchyard
+  (a frontier/efficient pair the account owner picks, switched per turn on
+  conversation signals) appears in the picker as `switchyard`, Jev Auto
+  Routing (two to six models with owner-written descriptions) as
+  `auto-jev-routing`. The eval runs Switchyard, since it is the strategy
+  where the router, not the customer, decides, and records the pair the
+  owner configured in the run notes. A one-turn ladder prompt gives
+  Switchyard few signals, so ladder results for Ramp are read as a
+  cold-start baseline and the agent runs carry the routing question.
+
+### Evidence
+
+- Ramp docs (`docs.router.com/api/responses-and-messages`, read
+  2026-11-08): on `/chat/completions` "the response `model` is the model
+  that actually served the request", and "Router-only fields such as
+  `models` fallback lists, timeouts, and `usage.cost` aren't available on
+  this endpoint". Routing fees are waived through 2026 and tokens bill at
+  list price, with $26 of starter credit; accounts need a business email
+  and are US-only for now.
+- Factory Router (`factory.com/news/factory-router`) is a private research
+  preview inside the Droid CLI and desktop app, enabled per organization on
+  request, with no API endpoint. Testing it needs a Droid CLI adapter (none
+  exists in `harness/agent/cli_agents.py`) and a Droid plan, and compares a
+  subscription against a subscription, so it is its own engine PR and run
+  plan rather than a wave-one leg.
+- OpenRouter Auto returns the resolved model in `model` and its own cost
+  with `usage: {include: true}`, which `OpenRouterProvider` already sends;
+  it is the reference router the others are compared against.
+
 ## 2026-11-07: ComputerUse v1 dense reward is an unordered fraction of sub-metrics, never a headline
 
 ### Decision

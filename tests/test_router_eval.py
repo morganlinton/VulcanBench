@@ -373,3 +373,96 @@ def test_cards_render_from_analysis(tmp_path: Path) -> None:
     cards.main([str(path), "--out-dir", str(tmp_path)])
     assert (tmp_path / "router_routing_card.png").stat().st_size > 10_000
     assert (tmp_path / "router_cost_card.png").stat().st_size > 10_000
+
+
+def test_router_spec_api_style_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ROUTER_RAMP_API", "responses")
+    spec = ladder.RouterSpec.parse("ramp=https://api.router.com/v1=switchyard")
+    assert spec.api == "responses" and spec.api_key_env == "ROUTER_RAMP_API_KEY"
+    monkeypatch.delenv("ROUTER_RAMP_API")
+    assert ladder.RouterSpec.parse("ramp=https://api.router.com/v1=switchyard").api == "chat"
+    monkeypatch.setenv("ROUTER_RAMP_API", "soap")
+    with pytest.raises(SystemExit, match="ROUTER_RAMP_API"):
+        ladder.RouterSpec.parse("ramp=https://api.router.com/v1=switchyard")
+
+
+def test_ladder_parse_body_both_surfaces() -> None:
+    chat = ladder.parse_body(
+        "chat",
+        {
+            "id": "gen-1",
+            "model": "anthropic/claude-haiku-4.5",
+            "choices": [{"finish_reason": "stop", "message": {"content": "abc"}}],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 3, "cost": 0.0004},
+        },
+    )
+    assert chat["served_model"] == "anthropic/claude-haiku-4.5"
+    assert chat["prompt_tokens"] == 10 and chat["completion_tokens"] == 3
+    assert chat["reported_cost_usd"] == 0.0004
+    assert chat["finish_reason"] == "stop" and chat["answer_chars"] == 3
+
+    responses = ladder.parse_body(
+        "responses",
+        {
+            "id": "resp_1",
+            "model": "gpt-6-luna",
+            "provider": "openai",
+            "status": "incomplete",
+            "incomplete_details": {"reason": "max_output_tokens"},
+            "output": [
+                {"type": "reasoning", "summary": []},
+                {"type": "message", "content": [{"type": "output_text", "text": "hello"}]},
+            ],
+            "usage": {"input_tokens": 12, "output_tokens": 5, "cost": 0.002},
+        },
+    )
+    assert responses["served_model"] == "gpt-6-luna" and responses["provider"] == "openai"
+    assert responses["prompt_tokens"] == 12 and responses["completion_tokens"] == 5
+    assert responses["reported_cost_usd"] == 0.002
+    assert responses["finish_reason"] == "max_output_tokens"
+    assert responses["answer_chars"] == 5
+    bare = ladder.parse_body("responses", {"output_text": "ok", "usage": {}})
+    assert bare["answer_chars"] == 2 and bare["reported_cost_usd"] is None
+
+
+def test_ladder_call_router_posts_to_responses(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ROUTER_RAMP_API_KEY", "rk-0123456789")
+    seen: dict[str, object] = {}
+
+    class FakeResp:
+        def __enter__(self) -> FakeResp:
+            return self
+
+        def __exit__(self, *a: object) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return json.dumps(
+                {
+                    "id": "resp_2",
+                    "model": "claude-haiku-5-5",
+                    "output": [
+                        {"type": "message", "content": [{"type": "output_text", "text": "x"}]}
+                    ],
+                    "usage": {"input_tokens": 1, "output_tokens": 1, "cost": 0.0001},
+                }
+            ).encode()
+
+    def fake_urlopen(req, timeout):  # type: ignore[no-untyped-def]
+        seen["url"] = req.full_url
+        seen["payload"] = json.loads(req.data.decode())
+        return FakeResp()
+
+    monkeypatch.setattr(ladder.urllib.request, "urlopen", fake_urlopen)
+    spec = ladder.RouterSpec(
+        "ramp", "https://api.router.com/v1", "switchyard", "ROUTER_RAMP_API_KEY", "responses"
+    )
+    prompt = ladder.Prompt("t", {"language": "python"}, None, "do it", 6000)
+    row = ladder.call_router(spec, prompt)
+    assert seen["url"] == "https://api.router.com/v1/responses"
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert payload["input"] == "do it" and payload["instructions"] == ladder.SYSTEM
+    assert "messages" not in payload
+    assert row["served_model"] == "claude-haiku-5-5" and row["reported_cost_usd"] == 0.0001
+    assert "latency_s" in row

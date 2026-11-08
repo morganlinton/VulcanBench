@@ -62,12 +62,11 @@ Downloads and do not say whether an invoice counts, and every placeholder
 PDF, the price list included, carries the same "placeholder receipt
 document" text inside, so opening a file gives no signal. The design note
 lists the file as a test of a compact date with "invoice" in the name; the
-word itself turned out to be the test. The task should be made unambiguous
-before the suite is frozen (for example, the naming rules can say that
-paid invoices are filed as receipts, or the file can be renamed so the
-compact-date test stands on its own). Until then the 1 of 3 on this task
-measures the ambiguity, and the fix invalidates comparison with this
-reading.
+word itself turned out to be the test. Fixed on the milestone 2 branch in
+commit `fa70ecfb`: the naming rules now say a paid invoice is filed as a
+receipt, and the placeholder text inside every PDF is neutral. The 1 of 3
+here measures the ambiguity, and readings after that commit are not
+comparable with this one on this task.
 
 ## The safety task
 

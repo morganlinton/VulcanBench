@@ -7,6 +7,92 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-08: ComputerUse v1 perception conditions are a gate-run setting of the MCP computer tools, and every reading so far was pixels+zoom
+
+### Decision
+Made by the agent during the milestone 4 build on the evening of 2026-11-08,
+for the owner to confirm in the morning. The charter's perception-condition
+table had nothing behind it, and the one condition the suite had run was not
+the one `suite.json` named: `sandbox/computer-use/vb_computer_mcp.py` has
+offered a `zoom` tool since milestone 1 and Anthropic's native computer-use
+tool has one too, so the milestone 2 and 3 readings were taken under what
+the table calls `pixels+zoom`, not `pixels`. From milestone 4 the condition
+is explicit and switchable per run: the MCP server takes `--condition`
+(`pixels+zoom`, the default; `pixels`, the same screenshots with no zoom
+tool; `pixels-lowres`, screenshots scaled to 0.75 with coordinates taken in
+the scaled image and no zoom tool), `scripts/computer-use/run_gate.sh`
+takes `CU_GATE_CONDITION` and records it in the job name and status file,
+and `summarize_gate.py` carries it into trials.json. `suite.json`
+`pins.condition` now says `pixels+zoom` and `pins.conditions` lists the
+three. A result is comparable only within one condition.
+
+### Evidence
+- Harbor forwards only its own declared environment variables to the
+  claude-code agent process (`harbor/agents/installed/base.py`,
+  `_resolve_env_values`), so a condition cannot ride on `--ae`; the gate
+  therefore runs harbor on a copy of the task whose MCP server args carry
+  the flag, the mechanism `validate_task.py` already uses to install a cheat
+  probe. The copy is recorded as `task_dir` in the status file.
+- `pixels` (zoom removed, nothing else changed) isolates what the zoom tool
+  contributes on the dense tasks; `pixels-lowres` at 0.75 is the gentlest
+  step below standard resolution that still changes text size materially
+  (10 pt body text drops from about 13 to about 10 screen pixels). Both
+  were exercised in the base image: image sizes, coordinate mapping and
+  the tool set change as intended.
+- The native computer-1 row brings its own tool, which the suite does not
+  modify, so the gate refuses a non-default condition for it.
+
+### Revisit triggers
+- The accessibility-tree conditions (`pixels+tree`, `tree`), which need a
+  tree producer for native apps and browsers alike (charter open question 4).
+- A provider whose minimum accepted image size differs enough that 0.75 is
+  the wrong `pixels-lowres` factor: then the factor becomes a pin per
+  reference row.
+
+### What this touched
+`sandbox/computer-use/vb_computer_mcp.py`, `scripts/computer-use/run_gate.sh`,
+`scripts/computer-use/summarize_gate.py`, `tasks/computer-use-v1/suite.json`,
+`tests/test_computer_use_gate_script.py`, `docs/COMPUTER_USE_CHARTER.md`.
+
+## 2026-11-08: Evince is ComputerUse v1's fourth native app, not a terminal
+
+### Decision
+Made by the agent during the milestone 4 build on the evening of 2026-11-08,
+for the owner to confirm. The charter asked milestone 4 for a new native app
+to rebalance family B and named a PDF viewer or a terminal. The base image
+now carries Evince 43 (Debian bookworm `evince`, 23 packages), with
+`application/pdf` mapped to it in `/root/.config/mimeapps.list` so a PDF
+opened from Thunar lands in it, and a GSettings keyfile
+(`sandbox/computer-use/evince-gsettings.keyfile`: no sidebar, fit to width,
+no recent files) that a task entrypoint selects with
+`GSETTINGS_BACKEND=keyfile`. Task PDFs are written on the host by
+`scripts/computer-use/seeds/pdf.py` (standard Helvetica, text, rules and
+tables; no library, byte-identical output).
+
+### Evidence
+- A terminal emulator hands the agent a shell inside the sandbox, which
+  dissolves the UI-path evidence for everything else on that desktop (a
+  file move or a workbook edit from the shell is indistinguishable from
+  one made in Thunar or Calc by the input recorder alone). It is the wrong
+  next app for a suite whose third hard truth is reward hacking.
+- Of the bookworm PDF viewers: Atril pulls in WebKitGTK (67 packages),
+  zathura and mupdf have no toolbar and look nothing like office software;
+  Evince is the stock GNOME viewer with a toolbar, page controls and zoom.
+- Tested in the image on 2026-11-08: starts under Xvfb without a session
+  bus (one AT-SPI warning, harmless), renders 10 to 12 pt Helvetica legibly
+  at 100 percent in a 1024x900 window, and the keyfile settings apply.
+
+### Revisit triggers
+- A task that needs a PDF with embedded fonts or images: extend `pdf.py` or
+  accept a library dependency on the host, and record it here.
+- The accessibility-tree conditions: Evince exposes AT-SPI, which a tree
+  producer could read; a terminal would not have helped there either.
+
+### What this touched
+`sandbox/Dockerfile.computer-use`, `sandbox/computer-use/evince-gsettings.keyfile`,
+`scripts/computer-use/seeds/pdf.py`, `tasks/computer-use-v1/suite.json`
+(`pins.apps`, `pins.images`), first used by `tasks/computer-use-v1/files-invoice-entry`.
+
 ## 2026-11-08: ComputerUse v1 mid-task events are clocked from the agent's own actions, never wall time
 
 ### Decision

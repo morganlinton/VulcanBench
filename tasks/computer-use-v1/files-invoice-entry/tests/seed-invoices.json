@@ -1,0 +1,246 @@
+{
+ "ledger_file": "Payables.ods",
+ "sheet": "Payables",
+ "headers": [
+  "Invoice",
+  "Supplier",
+  "Date",
+  "Amount"
+ ],
+ "ledger_rows": [
+  [
+   "BF-1988",
+   "Brightwater Foods",
+   "2026-01-08",
+   1140.2
+  ],
+  [
+   "KO-INV-00291",
+   "Kestrel Optics",
+   "2026-01-12",
+   2160.0
+  ],
+  [
+   "TM/2026/097",
+   "Tidewater Marine",
+   "2026-01-14",
+   695.75
+  ],
+  [
+   "OD-4410",
+   "Orchard Dental",
+   "2026-01-16",
+   388.0
+  ],
+  [
+   "QP-5502",
+   "Quill Publishing",
+   "2026-01-21",
+   412.5
+  ],
+  [
+   "RC-20260123",
+   "Redfern Cycles",
+   "2026-01-23",
+   1530.0
+  ],
+  [
+   "VR-77012",
+   "Vantage Retail",
+   "2026-01-28",
+   264.9
+  ],
+  [
+   "SS-0904",
+   "Sable Studio",
+   "2026-01-30",
+   2975.0
+  ],
+  [
+   "BF-2012",
+   "Brightwater Foods",
+   "2026-02-04",
+   1312.4
+  ],
+  [
+   "KO-INV-00305",
+   "Kestrel Optics",
+   "2026-02-09",
+   1845.0
+  ],
+  [
+   "OD-4437",
+   "Orchard Dental",
+   "2026-02-11",
+   402.0
+  ],
+  [
+   "TM/2026/108",
+   "Tidewater Marine",
+   "2026-02-13",
+   720.0
+  ],
+  [
+   "RC-20260217",
+   "Redfern Cycles",
+   "2026-02-17",
+   1610.0
+  ],
+  [
+   "LP-2026-031",
+   "Linden & Park",
+   "2026-02-20",
+   1975.25
+  ]
+ ],
+ "expected_new_rows": [
+  [
+   "BF-2041",
+   "Brightwater Foods",
+   "2026-02-23",
+   1284.6
+  ],
+  [
+   "KO-INV-00318",
+   "Kestrel Optics",
+   "2026-02-24",
+   2310.0
+  ],
+  [
+   "TM/2026/114",
+   "Tidewater Marine",
+   "2026-02-19",
+   760.5
+  ],
+  [
+   "QP-5587",
+   "Quill Publishing",
+   "2026-02-25",
+   418.0
+  ],
+  [
+   "SS-0931",
+   "Sable Studio",
+   "2026-02-26",
+   3150.0
+  ]
+ ],
+ "files": [
+  {
+   "folder": "incoming",
+   "file": "brightwater-foods-BF-2041.pdf",
+   "kind": "invoice",
+   "number": "BF-2041",
+   "supplier": "Brightwater Foods",
+   "date": "2026-02-23",
+   "amount": 1284.6,
+   "sha256": "59582e8123365cca8620ce292596e75fa8e8fb432fe7acdbec5135d0103ed343"
+  },
+  {
+   "folder": "incoming",
+   "file": "KO-INV-00318.pdf",
+   "kind": "invoice",
+   "number": "KO-INV-00318",
+   "supplier": "Kestrel Optics",
+   "date": "2026-02-24",
+   "amount": 2310.0,
+   "sha256": "36c95b03f847bce247aed854f57dbd1cc2bfbd116d6aa1e897a8ccfd91e12071"
+  },
+  {
+   "folder": "incoming",
+   "file": "tidewater-marine-statement-TM-2026-114.pdf",
+   "kind": "invoice",
+   "number": "TM/2026/114",
+   "supplier": "Tidewater Marine",
+   "date": "2026-02-19",
+   "amount": 760.5,
+   "sha256": "41cc5756573ad5ccade541314f94c8e32668b07c564ed9b04d012b52bf043b5c"
+  },
+  {
+   "folder": "incoming",
+   "file": "quill-publishing-QP-5587.pdf",
+   "kind": "invoice",
+   "number": "QP-5587",
+   "supplier": "Quill Publishing",
+   "date": "2026-02-25",
+   "amount": 418.0,
+   "sha256": "5eef4006222704872bf045b946f4d12ea7ec773360227043d750359cf9c13b75"
+  },
+  {
+   "folder": "incoming",
+   "file": "KO-INV-00318 (resend).pdf",
+   "kind": "duplicate",
+   "number": "KO-INV-00318",
+   "supplier": "Kestrel Optics",
+   "date": "2026-02-24",
+   "amount": 2310.0,
+   "sha256": "b0d7f295c2160d51e11e1e2abdfefb0d447c88245d7e4845e41bf3632df15c30"
+  },
+  {
+   "folder": "incoming",
+   "file": "sable-studio-SS-0931.pdf",
+   "kind": "invoice",
+   "number": "SS-0931",
+   "supplier": "Sable Studio",
+   "date": "2026-02-26",
+   "amount": 3150.0,
+   "sha256": "e1f8dbe03022bafc62c9116d6c80bde0c016158d03eb1e31af5ae98f867930de"
+  },
+  {
+   "folder": "incoming",
+   "file": "linden-park-LP-2026-031.pdf",
+   "kind": "entered",
+   "number": "LP-2026-031",
+   "supplier": "Linden & Park",
+   "date": "2026-02-20",
+   "amount": 1975.25,
+   "sha256": "f60a613139edc2adcfb2ce1c4039934c804cd813dee97a2300366a3faafe7436"
+  },
+  {
+   "folder": "incoming",
+   "file": "brightwater-foods-CN-0199.pdf",
+   "kind": "credit-note",
+   "number": "CN-0199",
+   "supplier": "Brightwater Foods",
+   "date": "2026-02-26",
+   "amount": -312.4,
+   "sha256": "af198ba11c85a95240425198dd7f45d5da8c97976ab6dda0431b73f064345991"
+  },
+  {
+   "folder": "entered",
+   "file": "brightwater-foods-BF-1988.pdf",
+   "kind": "entered",
+   "number": "BF-1988",
+   "supplier": "Brightwater Foods",
+   "date": "2026-01-08",
+   "amount": 1140.2,
+   "sha256": "d2222c86ec19271342d343bcaf7a00bc9d9e3b3c77402d5b224c96df7368d815"
+  },
+  {
+   "folder": "entered",
+   "file": "KO-INV-00291.pdf",
+   "kind": "entered",
+   "number": "KO-INV-00291",
+   "supplier": "Kestrel Optics",
+   "date": "2026-01-12",
+   "amount": 2160.0,
+   "sha256": "5a32893c48e055e5ade82117e4a28cd23564f74f0efcb6f894a404a09c495d72"
+  }
+ ],
+ "credit_notes": [
+  "brightwater-foods-CN-0199.pdf"
+ ],
+ "to_move": [
+  "KO-INV-00318 (resend).pdf",
+  "KO-INV-00318.pdf",
+  "brightwater-foods-BF-2041.pdf",
+  "linden-park-LP-2026-031.pdf",
+  "quill-publishing-QP-5587.pdf",
+  "sable-studio-SS-0931.pdf",
+  "tidewater-marine-statement-TM-2026-114.pdf"
+ ],
+ "already_entered": [
+  "KO-INV-00291.pdf",
+  "brightwater-foods-BF-1988.pdf"
+ ]
+}

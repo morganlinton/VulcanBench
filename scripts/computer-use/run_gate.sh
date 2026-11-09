@@ -52,7 +52,19 @@
 #
 # GATE_ATTEMPTS (default 3, 1 to 3) is harbor's -k. GATE_POLL_S (default 60)
 # is the monitor interval. GATE_JOB_SUFFIX names a second job directory next
-# to the first. Output: $GATE_OUT (default ~/vulcanbench-gate)/jobs/cu-<ref>-<task><suffix>.
+# to the first. Output: $GATE_OUT (default ~/vulcanbench-gate)/jobs/cu-<ref>-<task>[-<condition>]<suffix>.
+#
+# CU_GATE_CONDITION (default pixels+zoom) is the perception condition of the
+# charter's table, applied by the MCP computer tools: pixels+zoom (what every
+# reading before milestone 4 was taken under), pixels (no zoom tool) or
+# pixels-lowres (screenshots scaled to 0.75, no zoom). Harbor forwards no
+# arbitrary environment to the agent, so for a non-default condition the
+# task is copied to $GATE_OUT/task-copies/<job>/<task> with "--condition"
+# added to the MCP server's args in task.toml, and harbor runs that copy (as
+# scripts/computer-use/validate_task.py installs a cheat probe). The copy is
+# recorded in the status file (task_dir) and the condition in the job name
+# and in the status file (condition). The claude-code reference only:
+# computer-1 brings its own tool, which the suite does not change.
 # Exit codes: 0 done, 1 infrastructure failure, 2 refused before harbor
 # started, 130 stopped on a signal.
 set -u
@@ -69,6 +81,9 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
 OUT="${GATE_OUT:-$HOME/vulcanbench-gate}"
 attempts="${GATE_ATTEMPTS:-3}"; suffix="${GATE_JOB_SUFFIX:-}"
 case "$attempts" in 1|2|3) ;; *) echo "cu-gate: GATE_ATTEMPTS must be 1, 2 or 3 (got $attempts)" >&2; exit 2 ;; esac
+condition="${CU_GATE_CONDITION:-pixels+zoom}"
+case "$condition" in pixels+zoom|pixels|pixels-lowres) ;;
+  *) echo "cu-gate: CU_GATE_CONDITION must be pixels+zoom, pixels or pixels-lowres (got $condition)" >&2; exit 2 ;; esac
 mkdir -p "$OUT/jobs"
 suite_json="$here/tasks/computer-use-v1/suite.json"
 HARBOR_VERSION=0.24.0
@@ -111,6 +126,10 @@ case "$ref" in
     set -a; . "$envf"; set +a ;;
   *) echo "cu-gate: reference must be claude-code or claude" >&2; exit 2 ;;
 esac
+
+if [ "$condition" != pixels+zoom ] && [ "$agent" != claude-code ]; then
+  echo "cu-gate: CU_GATE_CONDITION=$condition applies to the claude-code reference only (computer-1 brings its own tool)" >&2; exit 2
+fi
 
 # computer-1 kwargs: CU_GATE_AGENT_KWARGS (space-separated key=value) wins,
 # else suite.json pins.agent_kwargs, else the charter defaults.
@@ -199,8 +218,9 @@ if [ "$preflight_only" = 1 ]; then
   python3 -c '
 import json, sys
 print(json.dumps({"ref": sys.argv[1], "agent": sys.argv[2], "model": sys.argv[3], "status": "ready",
-                  "would_start": True, "attempts": int(sys.argv[4]), "agent_kwargs": sys.argv[5].split()}))' \
-    "$ref" "$agent" "$model" "$attempts" "$kwargs"
+                  "would_start": True, "attempts": int(sys.argv[4]), "agent_kwargs": sys.argv[5].split(),
+                  "condition": sys.argv[6]}))' \
+    "$ref" "$agent" "$model" "$attempts" "$kwargs" "$condition"
   exit 0
 fi
 
@@ -212,16 +232,17 @@ fi
 INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model'
 
 # --- copied from scripts/frontier-v5/run_gate.sh (status file, solves, sweep, stop, signals) ---
-job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
+job=""; t=""; task=""; status_file=""; hpid=""; hcode=""; started_at=""
 stop_flag=""; spid=""
 
 write_status() { # phase [exit_code] [stop_reason] -> atomic rewrite of $status_file
   [ -n "$status_file" ] || return 0
   python3 - "$status_file" "$1" "${2:-}" "${3:-}" "$job" "$t" "$ref" "$agent" "$model" \
-    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort_label" <<'PY'
+    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort_label" \
+    "$condition" "$task" <<'PY'
 import glob, json, os, sys, time
 (path, phase, code, reason, job, task, ref, agent, model,
- pid, hpid, started, repo, job_dir, effort) = sys.argv[1:16]
+ pid, hpid, started, repo, job_dir, effort, condition, task_dir) = sys.argv[1:18]
 solves = 0
 for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
     try:
@@ -235,6 +256,7 @@ d = {
     "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     "exit_code": int(code) if code else None, "stop_reason": reason or None,
     "repo": repo or None, "job_dir": job_dir,
+    "condition": condition, "task_dir": task_dir or None,
 }
 tmp = path + ".tmp"
 with open(tmp, "w") as fh:
@@ -320,7 +342,29 @@ print(json.load(open(sys.argv[1])).get("pins", {}).get("start_urls", {}).get(sys
     [ -n "$url" ] && task_ak=(--ak "start_url=$url")
   fi
   job="cu-$ref-$t$suffix"
+  [ "$condition" != pixels+zoom ] && job="cu-$ref-$t-$condition$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "cu-gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
+  if [ "$condition" != pixels+zoom ]; then
+    # harbor runs a copy of the task whose MCP computer tools start under the condition
+    task=$(python3 - "$task" "$OUT/task-copies/$job" "$condition" <<'PYCOPY'
+import re, shutil, sys
+from pathlib import Path
+src, dest_root, condition = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+copy = dest_root / src.name
+if dest_root.exists():
+    shutil.rmtree(dest_root)
+shutil.copytree(src, copy, ignore=shutil.ignore_patterns("__pycache__"))
+toml = copy / "task.toml"
+text = toml.read_text()
+if "mcp_servers" in text:
+    text, n = re.subn(r'("/opt/vbdesk/vb_computer_mcp.py")', r'\1, "--condition", "%s"' % condition, text, count=1)
+    if n != 1:
+        sys.exit("cu-gate: %s has mcp_servers but no vb_computer_mcp.py args to extend" % toml)
+toml.write_text(text)
+print(copy)
+PYCOPY
+) || exit 2
+  fi
   status_file="$OUT/$job.status.json"; hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   write_status preflight
   [ "$agent" = claude-code ] && usage_preflight
@@ -328,7 +372,7 @@ print(json.load(open(sys.argv[1])).get("pins", {}).get("start_urls", {}).get(sys
     echo "!!! $t: stop requested (SIG$stop_flag) before harbor started"
     write_status stopped 130 "signal-$stop_flag"; exit 130
   fi
-  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model effort=$effort_label attempts=$attempts concurrency=1 kwargs=[$kwargs] harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model effort=$effort_label condition=$condition attempts=$attempts concurrency=1 kwargs=[$kwargs] harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
   # harbor is exec'd through a python one-liner that restores SIGINT's default
   # disposition (a background list ignores it in bash 3.2), so $! is harbor's pid.
   (cd "$here" && exec python3 -c 'import os, signal, sys

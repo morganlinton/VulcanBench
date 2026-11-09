@@ -127,7 +127,12 @@ def test_task_config_shape(task: Path) -> None:
     meta = cfg["metadata"]
     assert meta["vulcanbench_suite"] == "computer-use-v1"
     assert meta["vulcanbench_family"] in {"A", "B", "C"}
-    assert meta["vulcanbench_condition"] == "pixels"
+    assert meta["vulcanbench_condition"] == _suite()["pins"]["condition"], (
+        f"{task.name}: vulcanbench_condition must be the suite's primary condition (pins.condition)"
+    )
+    pinned_apps = _suite()["pins"]["apps"]
+    for app in meta["vulcanbench_apps"]:
+        assert app in pinned_apps, f"{task.name}: app {app} is not described in pins.apps"
     assert meta["vulcanbench_apps"], f"{task.name}: vulcanbench_apps must list the app(s)"
     assert meta.get("vulcanbench_track", "capability") in {"capability", "safety"}
     assert cfg["verifier"]["environment_mode"] == "separate"
@@ -290,3 +295,39 @@ def test_safety_tasks_are_flagged_in_suite_json() -> None:
 def test_no_em_dashes_in_suite_prose() -> None:
     offenders = [p for p in SUITE.rglob("*.md") if "—" in p.read_text()]
     assert not offenders, f"em-dash in {[str(p.relative_to(SUITE)) for p in offenders]}"
+
+
+def test_perception_conditions_match_the_mcp_tools() -> None:
+    """suite.json pins.conditions names exactly the conditions the MCP computer
+    tools implement, and pins.condition (the primary one) is among them."""
+    mcp = (SUITE.parents[1] / "sandbox" / "computer-use" / "vb_computer_mcp.py").read_text()
+    m = re.search(r"^CONDITIONS = \((.*?)\)$", mcp, re.M)
+    assert m, "vb_computer_mcp.py must define CONDITIONS"
+    implemented = set(re.findall(r'"([^"]+)"', m.group(1)))
+    pins = _suite()["pins"]
+    listed = {k for k in pins["conditions"] if k != "note"}
+    assert listed == implemented, f"pins.conditions {listed} vs MCP {implemented}"
+    assert pins["condition"] in implemented
+    gate = (SUITE.parents[1] / "scripts" / "computer-use" / "run_gate.sh").read_text()
+    for name in implemented:
+        assert name in gate, f"run_gate.sh does not accept condition {name}"
+
+
+def test_native_apps_in_use_are_in_the_base_image() -> None:
+    dockerfile = (SUITE.parents[1] / "sandbox" / "Dockerfile.computer-use").read_text()
+    packages = {
+        "thunar": "thunar",
+        "mousepad": "mousepad",
+        "libreoffice-calc": "libreoffice-calc",
+        "evince": "evince",
+    }
+    used = {app for task in _task_dirs() for app in _config(task)["metadata"]["vulcanbench_apps"]}
+    for app in used - set(_web_apps_all()):
+        assert app in packages, f"unknown native app {app}: add it to the base image and this map"
+        assert packages[app] in dockerfile, (
+            f"{app} is used by a task but not installed by the base image"
+        )
+
+
+def _web_apps_all() -> set[str]:
+    return {p.name for p in APPS.iterdir() if p.is_dir()}

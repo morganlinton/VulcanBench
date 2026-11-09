@@ -18,7 +18,7 @@ vulcanbench_suite = "computer-use-v1"
 vulcanbench_family = "A"
 vulcanbench_family_note = "Web app in a browser. A short task whose answer changes under the agent: the mail that settles the slot arrives two seconds after Reply is first clicked on the conversation, with an unrelated newsletter arriving ten seconds after the first page view as noise. The app shows a banner on arrival (on the compose form it links back to the conversation); the agent has to read what arrived before sending."
 vulcanbench_mechanisms = ["mid-task-arrivals"]
-vulcanbench_condition = "pixels"
+vulcanbench_condition = "pixels+zoom"
 vulcanbench_apps = ["postbox"]
 vulcanbench_app = "Postbox, in-house webmail (Python stdlib http.server + sqlite3), tasks/computer-use-v1/_apps/postbox copied to environment/postbox/; POSTBOX_ARRIVALS=/opt/postbox/arrivals.json"
 vulcanbench_source = "in-house"

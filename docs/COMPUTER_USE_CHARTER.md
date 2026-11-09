@@ -1,10 +1,12 @@
 # VulcanBench ComputerUse v1: the computer-use suite (charter draft)
 
-Status: **draft, 2026-11-05; milestone 3 built 2026-11-08** (twelve candidate
-tasks across the three families, three of them on the safety track, none
-admitted; family B is light at three tasks and milestone 4 should add native
-tasks and a new native app). The suite id is `computer-use-v1` and the public
-name is "VulcanBench ComputerUse v1", both fixed on 2026-11-05 (slugs and run
+Status: **draft, 2026-11-05; milestone 4 built 2026-11-08** (fourteen
+candidate tasks across the three families, three of them on the safety
+track, none admitted; milestone 4 added two long-horizon tasks as the hard
+tail attempt, Evince as the fourth native app, and the perception conditions
+as a gate-run setting; the milestone 4 tasks are built and validated but not
+yet measured). The suite id is `computer-use-v1` and the public name is
+"VulcanBench ComputerUse v1", both fixed on 2026-11-05 (slugs and run
 directories are never renamed).
 
 ## Goal
@@ -111,6 +113,15 @@ tree.
 
 A suite result is only comparable within one condition. Reports show
 `pixels` as the primary column and the others as ablations.
+
+Implemented so far (milestone 4, `docs/DECISIONS.md` 2026-11-08): the MCP
+computer tools take `--condition`, and the gate selects it per run with
+`CU_GATE_CONDITION`. Three rows exist: `pixels+zoom` (full-size screenshots
+plus the zoom tool), `pixels` (no zoom tool) and `pixels-lowres`
+(screenshots scaled to 0.75, no zoom tool). Every reading taken before
+milestone 4 was `pixels+zoom`, because the MCP tools and the native tool
+both carry zoom; those readings are labelled so. The tree conditions wait on
+open question 4.
 
 ## Action space and agents under test
 

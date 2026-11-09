@@ -43,6 +43,8 @@ EXPECTED_STATUS_KEYS = {
     "stop_reason",
     "repo",
     "job_dir",
+    "condition",
+    "task_dir",
 }
 
 FAKE_HARBOR = r"""#!/usr/bin/env python3
@@ -142,7 +144,10 @@ class Gate:
         suite_dir = self.root / "tasks" / "computer-use-v1"
         (suite_dir / self.task).mkdir(parents=True)
         (suite_dir / self.task / "task.toml").write_text(
-            '[metadata]\nvulcanbench_suite = "computer-use-v1"\n'
+            '[metadata]\nvulcanbench_suite = "computer-use-v1"\n\n'
+            '[[environment.mcp_servers]]\nname = "computer"\ntransport = "stdio"\n'
+            'command = "python3"\n'
+            'args = ["/opt/vbdesk/vb_computer_mcp.py", "--start-url", "http://127.0.0.1:8000/"]\n'
         )
         (suite_dir / "suite.json").write_text(json.dumps(SUITE))
         self.out = tmp_path / "gate"
@@ -253,6 +258,7 @@ def test_normal_run_composes_harbor_argv_and_status(gate: Gate) -> None:
     assert set(st) == EXPECTED_STATUS_KEYS
     assert st["phase"] == "done" and st["exit_code"] == 0 and st["stop_reason"] is None
     assert st["solves"] == 3 and st["agent"] == "computer-1" and st["effort"] == "n/a"
+    assert st["condition"] == "pixels+zoom" and st["task_dir"] == argv[2]
     assert st["repo"] == "abc1234" and isinstance(st["harbor_pid"], int)
     lines = r.stdout.splitlines()
     assert lines[0].startswith(f"=== {gate.task} ") and "concurrency=1" in lines[0]
@@ -325,3 +331,37 @@ def test_claude_code_missing_oauth_env_is_refused(gate: Gate) -> None:
     (gate.envd / "claude-gate.env").unlink()
     r = gate.run("claude-code", gate.task)
     assert r.returncode == 2 and "claude-gate.env" in r.stderr
+
+
+def test_condition_runs_a_patched_task_copy_for_claude_code(gate: Gate) -> None:
+    r = gate.run("claude-code", gate.task, CU_GATE_CONDITION="pixels-lowres", GATE_JOB_SUFFIX="-m4")
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = f"cu-claude-code-{gate.task}-pixels-lowres-m4"
+    argv = gate.argv(job)["argv"]
+    copy = Path(argv[argv.index("-p") + 1])
+    assert copy == gate.out / "task-copies" / job / gate.task
+    original = gate.root / "tasks" / "computer-use-v1" / gate.task / "task.toml"
+    assert "--condition" not in original.read_text()
+    patched = (copy / "task.toml").read_text()
+    assert (
+        '"/opt/vbdesk/vb_computer_mcp.py", "--condition", "pixels-lowres", "--start-url"' in patched
+    )
+    st = gate.status(job)
+    assert st["condition"] == "pixels-lowres" and st["task_dir"] == str(copy)
+    assert "condition=pixels-lowres" in r.stdout.splitlines()[1]
+
+
+def test_condition_is_refused_for_computer_1_and_unknown_names(gate: Gate) -> None:
+    r = gate.run("claude", gate.task, CU_GATE_CONDITION="pixels")
+    assert r.returncode == 2 and "claude-code reference only" in r.stderr
+    r = gate.run("claude-code", gate.task, CU_GATE_CONDITION="tree")
+    assert r.returncode == 2 and "CU_GATE_CONDITION must be" in r.stderr
+    assert not (gate.out / "jobs").exists() or not list((gate.out / "jobs").iterdir())
+
+
+def test_default_condition_runs_the_task_in_place(gate: Gate) -> None:
+    r = gate.run("claude-code", gate.task)
+    assert r.returncode == 0, r.stdout + r.stderr
+    argv = gate.argv(f"cu-claude-code-{gate.task}")["argv"]
+    assert argv[argv.index("-p") + 1] == str(gate.root / "tasks" / "computer-use-v1" / gate.task)
+    assert not (gate.out / "task-copies").exists()

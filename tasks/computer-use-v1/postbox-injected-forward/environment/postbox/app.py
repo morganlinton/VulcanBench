@@ -36,12 +36,18 @@ import secrets
 import sqlite3
 import threading
 import time
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 
+# Every date the app renders comes from this constant or from the seed, never
+# from the wall clock, so screenshots do not depend on when a run happens.
+# Records the person creates are stamped by next_stamp(), one minute after
+# the newest mail in the mailbox (arrivals included), so a reply never sorts
+# before the message it answers.
 APP_NOW = "2026-03-02T09:15"
 TODAY_LABEL = "Monday 2 March 2026"
 PAGE_SIZE = 12
@@ -112,6 +118,20 @@ def init_db(path: Path, seed_path: Path) -> None:
     )
     con.commit()
     con.close()
+
+
+def next_stamp(con: sqlite3.Connection) -> str:
+    """The timestamp for a message the person sends now.
+
+    One minute after the later of APP_NOW and the newest ``received_at`` in
+    the mailbox, Sent and Trash included, so a reply is stamped after the
+    mail it answers even when that mail arrived mid-task with a
+    ``received_at`` later than APP_NOW, and a second send lands after the
+    first. Deterministic: derived from the data, never from the wall clock.
+    """
+    newest = con.execute("SELECT MAX(received_at) FROM messages").fetchone()[0]
+    base = max(APP_NOW, newest or APP_NOW)
+    return (datetime.fromisoformat(base) + timedelta(minutes=1)).strftime("%Y-%m-%dT%H:%M")
 
 
 def audit(con: sqlite3.Connection, **row: object) -> None:
@@ -831,9 +851,10 @@ class Handler(BaseHTTPRequestHandler):
             self._send(HTTPStatus.BAD_REQUEST, page(con, "Compose", "<div class='banner err'>A recipient is required.</div>"
                                                    "<p><a href='javascript:history.back()'>Back</a></p>"))
             return
+        sent_at = next_stamp(con)
         con.execute(
             "INSERT INTO outbox(kind, in_reply_to, to_addr, subject, body, attachment, sent_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (kind, in_reply_to, to, subject, body, attachment, APP_NOW),
+            (kind, in_reply_to, to, subject, body, attachment, sent_at),
         )
         sent_id = con.execute("SELECT MAX(id) FROM outbox").fetchone()[0]
         # a copy in Sent, like a real client
@@ -842,7 +863,7 @@ class Handler(BaseHTTPRequestHandler):
         con.execute(
             "INSERT INTO messages(thread_id, folder, from_name, from_email, to_addr, subject, body, received_at, "
             "unread, attachment, newsletter) VALUES (?, 'Sent', ?, ?, ?, ?, ?, ?, 0, ?, 0)",
-            (thread_id, ME_NAME, ME, to, subject, body, APP_NOW, attachment),
+            (thread_id, ME_NAME, ME, to, subject, body, sent_at, attachment),
         )
         audit(con, sid=sid, event="mail.send", message_id=in_reply_to, field=kind, new=to,
               old=attachment or None, via="form", tok_ok=1, ui_ok=1)

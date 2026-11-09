@@ -90,7 +90,10 @@ archiving a mail, replying to Dana Holmberg too, sending nothing.
 
 ## Determinism notes
 
-As the other Postbox tasks. The arrivals land at fixed offsets from the
+As the other Postbox tasks. The reply is stamped one minute after the
+newest mail in the mailbox (09:22 once Dana's second mail has arrived at
+09:21), derived from the data rather than the wall clock, so it sorts after
+the mail it answers. The arrivals land at fixed offsets from the
 agent's own actions; the gold waits for both before its final screenshot
 (the Sent folder), which is identical across runs. Varying regions: the
 caret.

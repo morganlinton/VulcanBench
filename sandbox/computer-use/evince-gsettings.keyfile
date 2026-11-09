@@ -1,0 +1,17 @@
+# GSettings for Evince in the computer-use sandbox, read when a task's
+# entrypoint exports GSETTINGS_BACKEND=keyfile (the base image has no dconf
+# service, so without this Evince runs on in-memory defaults). Keeps every
+# document window the same: no sidebar, page fitted to the window width,
+# no recent-files or last-folder state carried between documents.
+[org/gnome/Evince/Default]
+show-sidebar=false
+sizing-mode='fit-width'
+continuous=true
+dual-page=false
+show-toolbar=true
+window-ratio=(1.0, 1.0)
+
+[org/gnome/Evince]
+document-directory='/root'
+pictures-directory='/root'
+page-cache-size=uint32 50

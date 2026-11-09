@@ -53,8 +53,12 @@ def secs(block: dict | None) -> int | None:
 
 
 def summarise(jobs: Path, gate_root: Path, suffix: str, task: str) -> dict:
+    # ``task`` is the job stem after ``cu-claude-code-``: the task name, or
+    # ``<task>-<condition>`` for a run under a non-default perception condition
+    # (run_gate.sh names those jobs that way). The status file carries the task.
     job = jobs / f"cu-claude-code-{task}{suffix}"
     status = json.loads((gate_root / f"cu-claude-code-{task}{suffix}.status.json").read_text())
+    task = status.get("task", task)
     entry = {
         "task": task,
         "job": status["job"],

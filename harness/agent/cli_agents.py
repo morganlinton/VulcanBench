@@ -2128,6 +2128,29 @@ class CliAgentOutcome:
         }
 
 
+#: Claude Code's ``--thinking-display`` values. Headless runs default to
+#: progress notes only; an operator can ask for API-side thinking summaries.
+CLAUDE_THINKING_DISPLAYS = frozenset({"summarized", "updates", "omitted"})
+
+
+def claude_thinking_display() -> str | None:
+    """Operator-chosen ``--thinking-display`` for Claude Code solver runs.
+
+    Read from ``VULCANBENCH_CLAUDE_THINKING_DISPLAY``; unset keeps the CLI's
+    default, so earlier columns' run conditions are unchanged. An unknown
+    value fails the run before any model call rather than being ignored.
+    """
+    value = os.environ.get("VULCANBENCH_CLAUDE_THINKING_DISPLAY", "").strip()
+    if not value:
+        return None
+    if value not in CLAUDE_THINKING_DISPLAYS:
+        raise ProviderError(
+            f"VULCANBENCH_CLAUDE_THINKING_DISPLAY={value!r} is not one of "
+            f"{sorted(CLAUDE_THINKING_DISPLAYS)}"
+        )
+    return value
+
+
 def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     *,
     workspace: Path,
@@ -2190,6 +2213,12 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     ]
     if effort:
         cmd += ["--effort", effort]
+    thinking_display = claude_thinking_display()
+    if thinking_display:
+        # Visibility only: the API thinks and bills the same under every
+        # display; "summarized" returns readable summaries of the reasoning
+        # into the stream (docs/DECISIONS.md 2026-11-09).
+        cmd += ["--thinking-display", thinking_display]
     if not network:
         cmd += ["--disallowedTools", _WEB_TOOLS]
 

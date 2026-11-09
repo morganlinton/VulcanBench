@@ -1239,3 +1239,37 @@ def test_sync_claude_code_auth_back_file_source(
     (staged / ".credentials.json").write_text('{"claudeAiOauth": {"v": 2}}')
     _sync_claude_code_auth_back(staged, original)
     assert (config_home / ".credentials.json").read_text() == '{"claudeAiOauth": {"v": 2}}'
+
+
+def test_claude_code_thinking_display_is_opt_in(
+    tmp_path: Path, fake_claude: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def argv_for() -> list[str]:
+        collector = _Collector()
+        run_claude_code_task(
+            workspace=tmp_path,
+            prompt="p",
+            model="claude-fable-5-2",
+            priced_spec="claude-code:claude-fable-5-2",
+            max_turns=5,
+            collector=collector,
+        )
+        return next(d for t, d in collector.events if t == "cli_agent_start")["argv"]
+
+    monkeypatch.delenv("VULCANBENCH_CLAUDE_THINKING_DISPLAY", raising=False)
+    assert "--thinking-display" not in argv_for()
+
+    monkeypatch.setenv("VULCANBENCH_CLAUDE_THINKING_DISPLAY", "summarized")
+    argv = argv_for()
+    assert argv[argv.index("--thinking-display") + 1] == "summarized"
+
+    monkeypatch.setenv("VULCANBENCH_CLAUDE_THINKING_DISPLAY", "verbose")
+    with pytest.raises(ProviderError, match="THINKING_DISPLAY"):
+        argv_for()
+
+
+def test_fable_52_prices_cache_hits_at_0025x() -> None:
+    assert cost_usd("claude-code:claude-fable-5-2", 1_000_000, 1_000_000) == pytest.approx(48.0)
+    assert cost_usd(
+        "claude-code:claude-fable-5-2", 1_000_000, 0, cached_input_tokens=1_000_000
+    ) == pytest.approx(0.20)

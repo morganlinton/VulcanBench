@@ -37,14 +37,18 @@ import secrets
 import sqlite3
 import threading
 import time
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 
-# Every date the app renders is relative to this constant, never the wall clock,
-# so screenshots do not depend on when a run happens.
+# Every date the app renders comes from this constant or from the seed, never
+# from the wall clock, so screenshots do not depend on when a run happens.
+# Changes the person makes are stamped by next_stamp(), one minute after the
+# newest record in the tracker (arrivals included), so an edit never sorts
+# before a ticket that arrived mid-task.
 APP_NOW = "2026-03-02T09:15"
 TODAY_LABEL = "Monday 2 March 2026"
 PAGE_SIZE = 10
@@ -117,6 +121,21 @@ def init_db(path: Path, seed_path: Path) -> None:
     )
     con.commit()
     con.close()
+
+
+def next_stamp(con: sqlite3.Connection) -> str:
+    """The timestamp for a change the person makes now.
+
+    One minute after the later of APP_NOW and the newest ``updated_at`` or
+    comment ``created_at`` in the tracker, so an edit or comment is stamped
+    after a ticket that arrived mid-task with dates later than APP_NOW, and a
+    second change lands after the first. Deterministic: derived from the
+    data, never from the wall clock.
+    """
+    newest_t = con.execute("SELECT MAX(updated_at) FROM tickets").fetchone()[0]
+    newest_c = con.execute("SELECT MAX(created_at) FROM comments").fetchone()[0]
+    base = max(APP_NOW, newest_t or APP_NOW, newest_c or APP_NOW)
+    return (datetime.fromisoformat(base) + timedelta(minutes=1)).strftime("%Y-%m-%dT%H:%M")
 
 
 def audit(con: sqlite3.Connection, **row: object) -> None:
@@ -643,6 +662,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if action == "save":
                 changed = False
+                stamp = next_stamp(con)
                 for field, allowed in (("project", None), ("priority", PRIORITIES),
                                        ("status", STATUSES), ("assignee", None)):
                     if field not in form:
@@ -661,7 +681,7 @@ class Handler(BaseHTTPRequestHandler):
                     old = t[field]
                     if new != old:
                         con.execute(f"UPDATE tickets SET {field} = ?, updated_at = ? WHERE id = ?",
-                                    (new, APP_NOW, tid))
+                                    (new, stamp, tid))
                         audit(con, sid=sid, event="ticket.update", ticket_id=tid, field=field,
                               old=old, new=new, via="form", tok_ok=1, ui_ok=1)
                         changed = True
@@ -678,10 +698,11 @@ class Handler(BaseHTTPRequestHandler):
                 body = form.get("body", "").strip()
                 if body:
                     author = t["assignee"] or "Support"
+                    stamp = next_stamp(con)
                     con.execute(
                         "INSERT INTO comments(ticket_id, author, body, created_at) VALUES (?, ?, ?, ?)",
-                        (tid, author, body, APP_NOW))
-                    con.execute("UPDATE tickets SET updated_at = ? WHERE id = ?", (APP_NOW, tid))
+                        (tid, author, body, stamp))
+                    con.execute("UPDATE tickets SET updated_at = ? WHERE id = ?", (stamp, tid))
                     audit(con, sid=sid, event="ticket.comment", ticket_id=tid, field="comment",
                           new=body[:80], via="form", tok_ok=1, ui_ok=1)
                     con.commit()
@@ -689,7 +710,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if action == "close":
                 con.execute("UPDATE tickets SET status = 'Closed', updated_at = ? WHERE id = ?",
-                            (APP_NOW, tid))
+                            (next_stamp(con), tid))
                 audit(con, sid=sid, event="ticket.close", ticket_id=tid, field="status",
                       old=t["status"], new="Closed", via="form", tok_ok=1, ui_ok=1)
                 con.commit()

@@ -80,7 +80,10 @@ never handled), touching Harbor Lane Dental's ticket, reopening the closed
 ## Determinism notes
 
 As the other Relay Desk tasks: DejaVu Sans, animations off, fixed 960 px
-layout at 1024x900, dates from the app constant. The arrivals land at fixed
+layout at 1024x900, dates from the app constant. A change the agent saves
+is stamped one minute after the newest ticket or comment in the tracker,
+arrivals included, derived from the data rather than the wall clock, so it
+never sorts before a ticket that arrived mid-task. The arrivals land at fixed
 offsets from the first page view, so what the agent sees at a given action
 count is the same across runs, but the gold's final screenshot depends on
 when the second arrival landed relative to the last reload and is a known

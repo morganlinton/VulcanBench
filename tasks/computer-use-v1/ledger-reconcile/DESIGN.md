@@ -89,7 +89,9 @@ reading is reported as measured.
 ## Determinism notes
 
 Fixed modification times, Calc profile pinned, Mousepad with default
-settings on an empty file, tracker dates from the app constant. The gold's
+settings on an empty file, tracker dates from the app constant (a change
+saved in the tracker would be stamped one minute after its newest record,
+24 March on this seed). The gold's
 final screenshot shows the editor; the Calc and Mousepad title bars and the
 caret are the varying regions, and the order in which the three windows
 were last raised depends on the agent.

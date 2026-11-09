@@ -14,6 +14,8 @@ SQLite; copied into `environment/relaydesk/` by `scripts/computer-use/sync_apps.
 seed data in `environment/relaydesk/seed.json`. The app, seed, goal and skin are original, so the
 task carries no material from public computer-use benchmarks. Dates are
 rendered from a constant inside the app (2 March 2026), never from the clock.
+A change the agent saves is stamped one minute after the newest record in
+the tracker (09:16 on this seed).
 
 ## The goal and its distractors
 

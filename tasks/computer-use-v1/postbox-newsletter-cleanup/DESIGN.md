@@ -69,8 +69,9 @@ that runs the page's JavaScript is indistinguishable from the UI server-side.
 ## Determinism notes
 
 As the other web tasks: DejaVu Sans, animations off, fixed 980 px layout at
-1024x900, dates from the app constant. The browser confirm dialog is drawn by
-Chromium and is identical across runs. Varying regions: the text caret in a
+1024x900, dates from the app constant; a reply the agent sends is stamped
+one minute after the newest mail in the mailbox (09:16 on this seed). The
+browser confirm dialog is drawn by Chromium and is identical across runs. Varying regions: the text caret in a
 focused field.
 
 ## Budget

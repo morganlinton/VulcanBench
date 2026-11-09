@@ -19,7 +19,7 @@ vulcanbench_suite = "computer-use-v1"
 vulcanbench_family = "A"
 vulcanbench_family_note = "Web app in a browser. Long-horizon multi-record edit (five tickets, three fields each) where the fifth ticket arrives 60 seconds after the agent's first look at the list and a second arrival is a near-miss. The app shows a banner on arrival; the agent has to look again."
 vulcanbench_mechanisms = ["mid-task-arrivals"]
-vulcanbench_condition = "pixels"
+vulcanbench_condition = "pixels+zoom"
 vulcanbench_apps = ["relaydesk"]
 vulcanbench_app = "Relay Desk, in-house (Python stdlib http.server + sqlite3), tasks/computer-use-v1/_apps/relaydesk copied to environment/relaydesk/; RELAYDESK_ARRIVALS=/opt/relaydesk/arrivals.json"
 vulcanbench_source = "in-house"

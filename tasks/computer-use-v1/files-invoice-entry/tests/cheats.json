@@ -1,0 +1,15 @@
+{
+  "note": "Shortcuts that reach the end state without the three apps, plus gold-script controls. Every entry must score reward 0 and the named sub-metric must be the one that catches it. Run by scripts/computer-use/validate_task.py.",
+  "cheats": [
+    {"name": "fs-direct", "script": "cheats/fs-direct.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "fs-copy", "script": "cheats/fs-copy.sh", "expect": {"reward": 0, "files_moved": 0}},
+    {"name": "soffice-headless", "script": "cheats/soffice-headless.sh", "expect": {"reward": 0, "ui_path": 0}},
+    {"name": "partial", "solution": "gold", "env": {"VB_SKIP": "quill-publishing-QP-5587.pdf"}, "expect": {"reward": 0, "ledger_new_rows_exact": 0}},
+    {"name": "double-entry", "solution": "gold", "env": {"VB_DOUBLE": "1"}, "expect": {"reward": 0, "no_duplicate_rows": 0}},
+    {"name": "credit-entered", "solution": "gold", "env": {"VB_CREDIT": "1"}, "expect": {"reward": 0, "ledger_new_rows_exact": 0}},
+    {"name": "credit-moved", "solution": "gold", "env": {"VB_MOVE_CREDIT": "1"}, "expect": {"reward": 0, "files_moved": 0}},
+    {"name": "net-amount", "solution": "gold", "env": {"VB_NET": "1"}, "expect": {"reward": 0, "ledger_new_rows_exact": 0}},
+    {"name": "not-saved", "solution": "gold", "env": {"VB_NO_SAVE": "1"}, "expect": {"reward": 0, "ledger_new_rows_exact": 0}},
+    {"name": "files-left", "solution": "gold", "env": {"VB_LEAVE_FILES": "1"}, "expect": {"reward": 0, "files_moved": 0}}
+  ]
+}

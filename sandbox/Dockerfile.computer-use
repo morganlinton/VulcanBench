@@ -10,7 +10,10 @@
 # Milestone 2 adds the family B native apps (Thunar, Mousepad, LibreOffice
 # Calc), an X input recorder (/opt/vbdesk/xinput_record.py, the UI-path
 # evidence for apps without an audit log) and the shared checker helpers
-# (/opt/vbdesk/cu_check.py) every task's tests/check.py imports.
+# (/opt/vbdesk/cu_check.py) every task's tests/check.py imports. Milestone 4 adds
+# Evince (the family B PDF viewer, opened from Thunar for application/pdf) with
+# a keyfile of GSettings that task entrypoints select with
+# GSETTINGS_BACKEND=keyfile: no sidebar, fit-width, no recent files.
 #
 # Build context is sandbox/computer-use (the root .dockerignore excludes sandbox/).
 # The Makefile passes the arm64 digest on Apple silicon:
@@ -41,7 +44,7 @@ RUN apt-get update \
         xdotool wmctrl imagemagick webp scrot \
         x11vnc novnc python3-websockify \
         chromium \
-        thunar mousepad libreoffice-calc libreoffice-gtk3 \
+        thunar mousepad libreoffice-calc libreoffice-gtk3 evince \
         fonts-dejavu-core fonts-liberation fontconfig \
         curl ca-certificates procps sqlite3 tzdata zip unzip \
     && rm -rf /var/lib/apt/lists/* \
@@ -74,18 +77,20 @@ RUN chmod 0755 /usr/local/bin/startxfce4 /opt/vbdesk/ensure-display.sh \
 # get-involved prompts, autosave and document recovery all off; the version
 # item is filled from the installed soffice so no "what's new" infobar shows.
 # Thunar: list view, no thumbnails, no volume management; Mousepad opens text.
+# Evince: keyfile GSettings (selected per task with GSETTINGS_BACKEND=keyfile).
 # GTK: no animations, no cursor blink.
 COPY libreoffice-registrymodifications.xcu /tmp/registrymodifications.xcu
 COPY thunar.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
 COPY gtk-settings.ini /root/.config/gtk-3.0/settings.ini
+COPY evince-gsettings.keyfile /root/.config/glib-2.0/settings/keyfile
 RUN ver="$(soffice --version | awk '{print $2}' | cut -d. -f1,2)" \
     && mkdir -p /root/.config/libreoffice/4/user \
     && sed "s/@LO_VERSION@/${ver}/" /tmp/registrymodifications.xcu \
         > /root/.config/libreoffice/4/user/registrymodifications.xcu \
     && rm /tmp/registrymodifications.xcu \
     && mkdir -p /root/.config \
-    && printf '[Default Applications]\ntext/plain=org.xfce.mousepad.desktop\n' > /root/.config/mimeapps.list \
-    && test -x /usr/bin/thunar && test -x /usr/bin/mousepad && test -x /usr/bin/xinput
+    && printf '[Default Applications]\ntext/plain=org.xfce.mousepad.desktop\napplication/pdf=org.gnome.Evince.desktop\n' > /root/.config/mimeapps.list \
+    && test -x /usr/bin/thunar && test -x /usr/bin/mousepad && test -x /usr/bin/xinput && test -x /usr/bin/evince
 
 WORKDIR /
 CMD ["sleep", "infinity"]

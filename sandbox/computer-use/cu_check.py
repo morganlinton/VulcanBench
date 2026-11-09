@@ -260,8 +260,10 @@ def ui_path_fs(
 # --------------------------------------------------------------- ODS -------
 # Saved LibreOffice Calc workbooks are read straight from content.xml so the
 # verifier needs no office suite. A cell is ("float", 12.5), ("string",
-# "text") or ("empty", None); repeats are capped so a re-saved sheet with
-# thousands of trailing empty cells stays small.
+# "text"), ("date", "2026-02-23") or ("empty", None); repeats are capped so a
+# re-saved sheet with thousands of trailing empty cells stays small. Calc
+# stores a typed ISO date as a date cell, so a seed string "2026-02-23" and a
+# date cell with that value compare equal in ods_same_cell.
 
 ODS_MIME = b"application/vnd.oasis.opendocument.spreadsheet"
 _T = "{urn:oasis:names:tc:opendocument:xmlns:table:1.0}"
@@ -295,6 +297,8 @@ def ods_sheets(path: Path) -> dict[str, list[list[Cell]]]:
                 text = "".join(p.text or "" for p in tc.iter(f"{_X}p")).strip()
                 if vt in ("float", "currency", "percentage"):
                     c: Cell = ("float", float(tc.get(f"{_O}value", "nan")))
+                elif vt == "date":
+                    c = ("date", (tc.get(f"{_O}date-value") or "")[:10])
                 elif text:
                     c = ("string", text)
                 else:
@@ -331,7 +335,7 @@ def ods_value(v: object) -> Cell:
 def ods_same_cell(a: Cell, b: Cell, tol: float = 0.005) -> bool:
     if a[0] == "float" and b[0] == "float":
         return abs(float(a[1]) - float(b[1])) < tol
-    if a[0] == "string" and b[0] == "string":
+    if a[0] in ("string", "date") and b[0] in ("string", "date"):
         return str(a[1]).strip() == str(b[1]).strip()
     return a[0] == b[0] == "empty"
 

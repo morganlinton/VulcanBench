@@ -8,7 +8,9 @@ Reads, for each task, the job directory run_gate.sh wrote
 (``<jobs>/cu-claude-code-<task><suffix>/``) and its status file, and collects
 per trial: the verifier's reward map, Claude Code's turn count, API time,
 token usage and list-price cost estimate from the last ``result`` record of
-the agent stream, and harbor's agent and trial wall times. Prints a Markdown
+the agent stream, and harbor's agent and trial wall times, plus the
+perception condition the job ran under (status file ``condition``; jobs from
+before milestone 4 are ``pixels+zoom``). Prints a Markdown
 table (numbers only, no ranking) and, with --out, writes the JSON the results
 note links to. Nothing here is a leaderboard: the suite is not frozen.
 """
@@ -51,13 +53,18 @@ def secs(block: dict | None) -> int | None:
 
 
 def summarise(jobs: Path, gate_root: Path, suffix: str, task: str) -> dict:
+    # ``task`` is the job stem after ``cu-claude-code-``: the task name, or
+    # ``<task>-<condition>`` for a run under a non-default perception condition
+    # (run_gate.sh names those jobs that way). The status file carries the task.
     job = jobs / f"cu-claude-code-{task}{suffix}"
     status = json.loads((gate_root / f"cu-claude-code-{task}{suffix}.status.json").read_text())
+    task = status.get("task", task)
     entry = {
         "task": task,
         "job": status["job"],
         "model": status.get("model"),
         "effort": status.get("effort"),
+        "condition": status.get("condition", "pixels+zoom"),
         "repo": status.get("repo"),
         "started_at": status.get("started_at"),
         "finished_at": status.get("updated_at"),
@@ -106,6 +113,8 @@ def table(entries: list[dict], tracks: dict[str, str]) -> str:
     ]
     for e in entries:
         name = e["task"] + (" (safety track)" if tracks.get(e["task"]) == "safety" else "")
+        if e.get("condition", "pixels+zoom") != "pixels+zoom":
+            name += f" [{e['condition']}]"
         t = e["trials"]
         cost = ", ".join(f"{v['cost_usd']:.2f}" for v in t)
         out.append(
@@ -143,6 +152,7 @@ def main(argv: list[str] | None = None) -> int:
                 "auth": "subscription",
                 "tools": "the task's MCP computer tools only (Bash, file and web tools disallowed)",
             },
+            "conditions": sorted({e.get("condition", "pixels+zoom") for e in entries}),
             "cost_note": "cost_usd is Claude Code's list-price estimate from its result record; subscription runs are not billed per call",
             "tasks": entries,
         }

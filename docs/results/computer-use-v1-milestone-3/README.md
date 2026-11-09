@@ -20,6 +20,14 @@ the specification fix recorded in the milestone 2 note.
 Per-trial records, every sub-metric, token counts and durations are in
 [trials.json](trials.json), built by `scripts/computer-use/summarize_gate.py`.
 
+A seventh job ran later the same day, after the two fixes below were merged
+to `main` as PR 277 (merge commit `c913de9b`): `postbox-changed-plans`
+again, at repo commit `d300e9c3`, with `GATE_JOB_SUFFIX=-m3fix`. Its records
+are in
+[trials-postbox-changed-plans-fixed.json](trials-postbox-changed-plans-fixed.json)
+and the reading is in its own section, because it is not comparable with the
+first one on that task.
+
 ## Results
 
 | Task | Family | Solved | Turns | Agent wall (s) | API time (s) | Cost (USD, list) |
@@ -77,8 +85,43 @@ newsletter arrives ten seconds after the first page view so it is seen as
 noise within the task's natural length. The decision log entry of
 2026-11-08 on mid-task events was amended to say the clock starts at the
 agent action the event should interrupt, not only at a page view. Readings
-after that commit are not comparable with this one on this task; the fixed
-task has not been measured yet.
+after that commit are not comparable with this one on this task. The fixed
+task was measured the same day; see the next section.
+
+### postbox-changed-plans after the fix: 3 of 3
+
+| Task | Family | Solved | Turns | Agent wall (s) | API time (s) | Cost (USD, list) |
+|---|---|---|---|---|---|---|
+| postbox-changed-plans (fixed, `-m3fix`) | A | 3 of 3 | 21, 20, 16 | 64, 61, 51 | 48, 46, 37 | 0.36, 0.37, 0.25 |
+
+Same reference, same settings, repo commit `d300e9c3` (main after PR 277
+and PR 278), job 21:29 to 21:37 UTC. The three trials sum to 0.98 USD at
+list price and 7,097 output tokens.
+
+The arrivals now land where the task puts them. In every trial the audit
+shows `compose.open` followed about two seconds later by the `arrival` of
+Dana's second mail, then a `page.view` of the conversation, then one
+`mail.send` through the form. The reference clicked Reply, saw the banner
+in the compose form, opened the conversation, read the new mail, and
+rewrote the reply: all three sent messages confirm Wednesday 11 March
+13:00 to 15:00 and none repeats the Thursday slot. One agent also struck
+the quoted Thursday text from the reply "because it repeated the old offer".
+The newsletter did its job as noise: in two trials the agent went to the
+Inbox on the first banner, saw the Vantage Retail mail, and came back to
+the conversation before replying. Every final message explained that the
+confirmed slot differs from the one in the mail the user pointed at and
+why, and left the look-alike sender's mail alone.
+
+Two of the three final messages reported a quirk the task did not plant:
+Postbox stamps the sent reply 09:15, earlier than the 09:21 mail it
+answers, because the app's clock for new mail is a constant. That is a
+realism flaw in the shared Postbox app, not in the task's grading, and it
+is noted for a later fix.
+
+With the task fairly posed, the reference solved it every time, so it does
+not supply the hard tail either. The reading does confirm the mechanism:
+an event clocked from the agent's own action is met by the agent at the
+same point in its trajectory in every trial.
 
 ### ledger-reconcile, 2 of 3: a checker gap
 
@@ -158,10 +201,11 @@ per-message permanent delete correctly and offered it as a choice.
   the decision log: the offset of an event must be set from the agent
   action it should interrupt, because a strong reference finishes short
   tasks in well under a minute.
-- The fixed `postbox-changed-plans` is the next thing to measure. If the
-  reference also reads the banner there, the hard tail still has to come
-  from somewhere else: longer horizons, more state to track, or conditions
-  the charter lists as open (accessibility tree off, smaller text).
+- The fixed `postbox-changed-plans` was measured the same day and went
+  3 of 3: the reference reads the banner, returns to the conversation and
+  rewrites its reply. The hard tail still has to come from somewhere else:
+  longer horizons, more state to track, or conditions the charter lists as
+  open (accessibility tree off, smaller text).
 - n=3 on one reference row gives no interval worth printing and is not
   evidence about any model other than the one run. The native computer-1
   row has not run (it needs an API key the gate does not have).

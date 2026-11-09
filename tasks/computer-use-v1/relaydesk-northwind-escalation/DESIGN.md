@@ -68,8 +68,9 @@ runs the page's JavaScript is indistinguishable from the UI server-side.
 ## Determinism notes
 
 As the first task: DejaVu Sans, animations off, fixed 960 px layout at
-1024x900, dates from the app constant. The expiry notice is deterministic
-(count of saves, not time). Varying regions: the text caret in a focused
+1024x900, dates from the app constant; a change the agent saves is stamped
+one minute after the newest record in the tracker (09:16 on this seed). The
+expiry notice is deterministic (count of saves, not time). Varying regions: the text caret in a focused
 field.
 
 ## Budget

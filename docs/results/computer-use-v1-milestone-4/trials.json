@@ -1,0 +1,428 @@
+{
+ "suite": "computer-use-v1",
+ "suite_version": "0.4.0",
+ "milestone": 4,
+ "date": "2026-11-09",
+ "repo_commit": "51b9d010",
+ "image": {
+  "vulcanbench/sandbox:cu-base": "sha256:5457616784e6c9845ed4a77749a3519d36ee303876efe10401853ddfbe3ed737"
+ },
+ "reference": {
+  "name": "claude-code",
+  "auth": "subscription",
+  "claude_code_version": "2.1.302",
+  "model": "claude-opus-5-5",
+  "reasoning_effort": "medium",
+  "tools": "the task's MCP computer tools only (Bash, file and web tools disallowed)"
+ },
+ "attempts_per_task": 3,
+ "concurrency": 1,
+ "conditions": [
+  "pixels",
+  "pixels+zoom",
+  "pixels-lowres"
+ ],
+ "condition_note": "pixels+zoom is the condition every reading before milestone 4 was taken under (the MCP computer tools carried the zoom tool from milestone 1). pixels removes the zoom tool; pixels-lowres also scales screenshots to 0.75 (768x675) and maps coordinates back. Set per job with CU_GATE_CONDITION; the job name and the status file record it.",
+ "cost_note": "cost_usd is Claude Code's list-price estimate from its result record; subscription runs are not billed per call",
+ "notes": {
+  "relaydesk-sla-sweep": "In the failed trial all seven breached tickets were commented and set to Urgent (targets_comment 1, targets_priority 1, new_comments 7) but the mail to Priya listed six ids, omitting 5026, the ticket the agent had escalated first (comment at 09:19). The final message also said six. mail_ids_exact 0; capability failure, no task or checker defect found.",
+  "ledger-reconcile": "Milestone 4 readings of this task are under the two non-default conditions only. The pixels+zoom reading is the milestone 3 note (2 of 3 as measured, the lost trial a checker wording gap fixed before this run), at suite 0.3.0 and repo 8a5399fc, so the rows are not a controlled comparison."
+ },
+ "tasks": [
+  {
+   "task": "files-invoice-entry",
+   "family": "B",
+   "condition": "pixels+zoom",
+   "job": "cu-claude-code-files-invoice-entry-m4",
+   "started_at": "2026-11-09T14:09:02Z",
+   "finished_at": "2026-11-09T14:19:58Z",
+   "solved": 3,
+   "trials": [
+    {
+     "trial": "2KkDVXs",
+     "reward": {
+      "artifact_present": 1,
+      "dense": 1.0,
+      "file_is_ods": 1,
+      "files_moved": 1,
+      "ledger_existing_untouched": 1,
+      "ledger_new_rows_exact": 1,
+      "no_duplicate_rows": 1,
+      "presses": 659,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 91,
+     "duration_api_s": 117,
+     "agent_wall_s": 165,
+     "trial_wall_s": 233,
+     "cost_usd": 1.85,
+     "tokens": {
+      "input": 92,
+      "output": 9396,
+      "cache_read": 3168712,
+      "cache_creation": 128449
+     }
+    },
+    {
+     "trial": "NcDENHR",
+     "reward": {
+      "artifact_present": 1,
+      "dense": 1.0,
+      "file_is_ods": 1,
+      "files_moved": 1,
+      "ledger_existing_untouched": 1,
+      "ledger_new_rows_exact": 1,
+      "no_duplicate_rows": 1,
+      "presses": 600,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 64,
+     "duration_api_s": 93,
+     "agent_wall_s": 128,
+     "trial_wall_s": 196,
+     "cost_usd": 1.3,
+     "tokens": {
+      "input": 80,
+      "output": 7885,
+      "cache_read": 2082479,
+      "cache_creation": 90280
+     }
+    },
+    {
+     "trial": "W6iCeYf",
+     "reward": {
+      "artifact_present": 1,
+      "dense": 1.0,
+      "file_is_ods": 1,
+      "files_moved": 1,
+      "ledger_existing_untouched": 1,
+      "ledger_new_rows_exact": 1,
+      "no_duplicate_rows": 1,
+      "presses": 607,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 63,
+     "duration_api_s": 82,
+     "agent_wall_s": 114,
+     "trial_wall_s": 186,
+     "cost_usd": 1.19,
+     "tokens": {
+      "input": 64,
+      "output": 7220,
+      "cache_read": 1495383,
+      "cache_creation": 92964
+     }
+    }
+   ]
+  },
+  {
+   "task": "relaydesk-sla-sweep",
+   "family": "C",
+   "condition": "pixels+zoom",
+   "job": "cu-claude-code-relaydesk-sla-sweep-m4",
+   "started_at": "2026-11-09T14:19:59Z",
+   "finished_at": "2026-11-09T14:40:19Z",
+   "solved": 2,
+   "trials": [
+    {
+     "trial": "EowfJiX",
+     "reward": {
+      "apps_not_restarted": 1,
+      "artifacts_present": 1,
+      "audits_consistent": 1,
+      "dense": 0.9231,
+      "desk_audit_rows": 52,
+      "desk_guards": 1,
+      "mail_audit_rows": 5,
+      "mail_guards": 1,
+      "mail_ids_exact": 0,
+      "mail_sent": 1,
+      "near_misses_untouched": 1,
+      "new_comments": 7,
+      "outbox": 1,
+      "reward": 0,
+      "schema_ok": 1,
+      "targets_comment": 1,
+      "targets_other_fields": 1,
+      "targets_priority": 1,
+      "ui_path": 1
+     },
+     "num_turns": 90,
+     "duration_api_s": 152,
+     "agent_wall_s": 307,
+     "trial_wall_s": 372,
+     "cost_usd": 1.97,
+     "tokens": {
+      "input": 102,
+      "output": 8040,
+      "cache_read": 3711596,
+      "cache_creation": 133474
+     }
+    },
+    {
+     "trial": "asrJULQ",
+     "reward": {
+      "apps_not_restarted": 1,
+      "artifacts_present": 1,
+      "audits_consistent": 1,
+      "dense": 1.0,
+      "desk_audit_rows": 52,
+      "desk_guards": 1,
+      "mail_audit_rows": 5,
+      "mail_guards": 1,
+      "mail_ids_exact": 1,
+      "mail_sent": 1,
+      "near_misses_untouched": 1,
+      "new_comments": 7,
+      "outbox": 1,
+      "reward": 1,
+      "schema_ok": 1,
+      "targets_comment": 1,
+      "targets_other_fields": 1,
+      "targets_priority": 1,
+      "ui_path": 1
+     },
+     "num_turns": 90,
+     "duration_api_s": 129,
+     "agent_wall_s": 287,
+     "trial_wall_s": 351,
+     "cost_usd": 1.93,
+     "tokens": {
+      "input": 104,
+      "output": 7994,
+      "cache_read": 3780030,
+      "cache_creation": 127091
+     }
+    },
+    {
+     "trial": "bWFhN5B",
+     "reward": {
+      "apps_not_restarted": 1,
+      "artifacts_present": 1,
+      "audits_consistent": 1,
+      "dense": 1.0,
+      "desk_audit_rows": 58,
+      "desk_guards": 1,
+      "mail_audit_rows": 5,
+      "mail_guards": 1,
+      "mail_ids_exact": 1,
+      "mail_sent": 1,
+      "near_misses_untouched": 1,
+      "new_comments": 7,
+      "outbox": 1,
+      "reward": 1,
+      "schema_ok": 1,
+      "targets_comment": 1,
+      "targets_other_fields": 1,
+      "targets_priority": 1,
+      "ui_path": 1
+     },
+     "num_turns": 102,
+     "duration_api_s": 139,
+     "agent_wall_s": 398,
+     "trial_wall_s": 470,
+     "cost_usd": 2.12,
+     "tokens": {
+      "input": 102,
+      "output": 8947,
+      "cache_read": 3871764,
+      "cache_creation": 145476
+     }
+    }
+   ]
+  },
+  {
+   "task": "ledger-reconcile",
+   "family": "C",
+   "condition": "pixels",
+   "job": "cu-claude-code-ledger-reconcile-pixels-m4",
+   "started_at": "2026-11-09T14:40:20Z",
+   "finished_at": "2026-11-09T14:49:45Z",
+   "solved": 3,
+   "trials": [
+    {
+     "trial": "icT94dv",
+     "reward": {
+      "apps_not_restarted": 1,
+      "audit_consistent": 1,
+      "dense": 1.0,
+      "desk_untouched": 1,
+      "ledger_untouched": 1,
+      "list_views": 5,
+      "presses": 984,
+      "report_details": 1,
+      "report_ids_exact": 1,
+      "report_present": 1,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 38,
+     "duration_api_s": 58,
+     "agent_wall_s": 85,
+     "trial_wall_s": 154,
+     "cost_usd": 0.71,
+     "tokens": {
+      "input": 42,
+      "output": 5511,
+      "cache_read": 629466,
+      "cache_creation": 58760
+     }
+    },
+    {
+     "trial": "rReZa94",
+     "reward": {
+      "apps_not_restarted": 1,
+      "audit_consistent": 1,
+      "dense": 1.0,
+      "desk_untouched": 1,
+      "ledger_untouched": 1,
+      "list_views": 5,
+      "presses": 910,
+      "report_details": 1,
+      "report_ids_exact": 1,
+      "report_present": 1,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 34,
+     "duration_api_s": 52,
+     "agent_wall_s": 96,
+     "trial_wall_s": 162,
+     "cost_usd": 0.62,
+     "tokens": {
+      "input": 40,
+      "output": 5204,
+      "cache_read": 568795,
+      "cache_creation": 49656
+     }
+    },
+    {
+     "trial": "sC8XcFs",
+     "reward": {
+      "apps_not_restarted": 1,
+      "audit_consistent": 1,
+      "dense": 1.0,
+      "desk_untouched": 1,
+      "ledger_untouched": 1,
+      "list_views": 7,
+      "presses": 1005,
+      "report_details": 1,
+      "report_ids_exact": 1,
+      "report_present": 1,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 39,
+     "duration_api_s": 62,
+     "agent_wall_s": 126,
+     "trial_wall_s": 195,
+     "cost_usd": 0.72,
+     "tokens": {
+      "input": 46,
+      "output": 5775,
+      "cache_read": 738481,
+      "cache_creation": 56848
+     }
+    }
+   ]
+  },
+  {
+   "task": "ledger-reconcile",
+   "family": "C",
+   "condition": "pixels-lowres",
+   "job": "cu-claude-code-ledger-reconcile-pixels-lowres-m4",
+   "started_at": "2026-11-09T14:49:46Z",
+   "finished_at": "2026-11-09T15:00:08Z",
+   "solved": 3,
+   "trials": [
+    {
+     "trial": "84gkaYZ",
+     "reward": {
+      "apps_not_restarted": 1,
+      "audit_consistent": 1,
+      "dense": 1.0,
+      "desk_untouched": 1,
+      "ledger_untouched": 1,
+      "list_views": 5,
+      "presses": 1154,
+      "report_details": 1,
+      "report_ids_exact": 1,
+      "report_present": 1,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 39,
+     "duration_api_s": 80,
+     "agent_wall_s": 110,
+     "trial_wall_s": 172,
+     "cost_usd": 0.56,
+     "tokens": {
+      "input": 48,
+      "output": 6221,
+      "cache_read": 622841,
+      "cache_creation": 38239
+     }
+    },
+    {
+     "trial": "TrQMWJr",
+     "reward": {
+      "apps_not_restarted": 1,
+      "audit_consistent": 1,
+      "dense": 1.0,
+      "desk_untouched": 1,
+      "ledger_untouched": 1,
+      "list_views": 6,
+      "presses": 1118,
+      "report_details": 1,
+      "report_ids_exact": 1,
+      "report_present": 1,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 36,
+     "duration_api_s": 75,
+     "agent_wall_s": 121,
+     "trial_wall_s": 187,
+     "cost_usd": 0.5,
+     "tokens": {
+      "input": 42,
+      "output": 5851,
+      "cache_read": 512708,
+      "cache_creation": 35368
+     }
+    },
+    {
+     "trial": "zTUmRgm",
+     "reward": {
+      "apps_not_restarted": 1,
+      "audit_consistent": 1,
+      "dense": 1.0,
+      "desk_untouched": 1,
+      "ledger_untouched": 1,
+      "list_views": 5,
+      "presses": 1209,
+      "report_details": 1,
+      "report_ids_exact": 1,
+      "report_present": 1,
+      "reward": 1,
+      "ui_path": 1
+     },
+     "num_turns": 44,
+     "duration_api_s": 94,
+     "agent_wall_s": 143,
+     "trial_wall_s": 212,
+     "cost_usd": 0.66,
+     "tokens": {
+      "input": 52,
+      "output": 7097,
+      "cache_read": 750606,
+      "cache_creation": 46486
+     }
+    }
+   ]
+  }
+ ]
+}

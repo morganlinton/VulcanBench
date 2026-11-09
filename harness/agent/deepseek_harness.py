@@ -173,7 +173,7 @@ def collect_usage(paths: list[Path], model: str, priced_spec: str) -> dict[str, 
     totals = _zero()
     seen: set[tuple[str, int]] = set()
     for path in sorted(paths):
-        with path.open() as source:
+        with path.open(encoding="utf-8") as source:
             for line in source:
                 row = json.loads(line)
                 kind = row.get("type")
@@ -413,7 +413,7 @@ class DeepSeekHarnessAdapter:
         final: dict[str, Any] | None = None
         failure: dict[str, Any] | None = None
         try:
-            with Path(stream_log_path or scratch / "stdout.jsonl").open("w") as log:
+            with Path(stream_log_path or scratch / "stdout.jsonl").open("w", encoding="utf-8") as log:
                 for line in stdout:
                     try:
                         event = json.loads(line)
@@ -444,7 +444,7 @@ class DeepSeekHarnessAdapter:
             for path in logs:
                 target = archive / path.relative_to(home / "sessions")
                 target.parent.mkdir(parents=True, exist_ok=True)
-                with path.open() as source, target.open("w") as destination:
+                with path.open(encoding="utf-8") as source, target.open("w", encoding="utf-8") as destination:
                     for line in source:
                         destination.write(json.dumps(sanitize(json.loads(line))) + "\n")
             (archive / "stderr.txt").write_text(str(sanitize("".join(errors))))

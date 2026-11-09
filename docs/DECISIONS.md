@@ -7,6 +7,73 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-09: Fable 5.2 on Frontier v4 runs on Claude Code 2.1.321 with thinking summaries recorded
+
+### Decision
+
+Owner request in chat, 2026-11-09: benchmark Claude Fable 5.2
+(`claude-fable-5-2`) on Frontier v4, keep full traces including tool calls,
+and analyze how it reasons differently from Fable 5.1.
+
+- **Claude Code is pinned to 2.1.321** (`scripts/run_fable52_v4.sh`, binary
+  at `~/.local/share/vulcanbench/claude-2.1.321/claude`, sha256
+  `abc9feee...f7cd3c`, self-update off). It is the first release that knows
+  the model. As on 2026-09-22, the bump goes to the minimum version and no
+  further, it applies to the Fable 5.2 column only, and incumbent Claude
+  columns are not re-baselined.
+- **Thinking summaries are recorded.** The launcher sets
+  `VULCANBENCH_CLAUDE_THINKING_DISPLAY=summarized`, which passes Claude
+  Code's `--thinking-display summarized`. Headless runs otherwise keep only
+  the short progress notes between tool calls, which is all every earlier
+  Claude column has. The variable is unset by default, so other columns'
+  run conditions do not change. Cards disclose it.
+- **Refusal fallback stays on** (Claude Code's default), counted and
+  disclosed, under the 2026-09-24 convention.
+- **Low runs first.** Fable on the owner's Claude plan has needed usage
+  credits before (the Frontier v5 gate's Fable half, 2026-10-18). The
+  launcher defaults to `LEVELS=low`; Medium to Max start only after the
+  owner reviews Low's quota and credit use.
+- **No Fable 5.1 rerun.** The Fable 5.1 Frontier v4 raw streams
+  (`runs-effort/`, Claude Code 2.1.259 to 2.1.261) were on the erased host
+  and were never in `vulcanbench-data-backup`; only the committed per-run
+  tables in `docs/results/swe-v4-astra-fable51-2026-09/` and the v3.4
+  judging records survive. The owner chose to compare from those numbers
+  rather than rerun Fable 5.1, so the reasoning analysis describes Fable
+  5.2's traces against Fable 5.1's surviving aggregates (time, tokens,
+  passes, scores, patches), not trace against trace.
+
+### Evidence
+
+- Claude Code 2.1.307 (the installed CLI) served a one-line Fable 5.2
+  request but logged `[claude-code:unrecognized_model]` and reported
+  `costBasis: "unknown"`. 2.1.321 reports `costBasis: "list"` and
+  `canonicalModel: "claude-fable-5-2"`. Searching the darwin-arm64 binaries
+  for the model id: 2.1.307, 2.1.314, 2.1.318 and 2.1.319 have none,
+  2.1.321 (published 2026-11-09 19:02 UTC) has it.
+- `--thinking-display summarized` in a headless `-p` stream returned a
+  readable thinking summary with 248 thinking tokens on a counting puzzle.
+  The same request with `--settings '{"showThinkingSummaries":true}'` or
+  with no setting returned an empty thinking block (231 and 189 thinking
+  tokens). Anthropic's API docs: display "controls visibility only -
+  thinking happens and is billed the same under every setting".
+- Vendor prices checked 2026-11-09 on platform.claude.com/docs/en/about-claude/pricing:
+  $8 base input, $10 5m cache write, $16 1h cache write, $0.20 cache hits
+  (0.025x), $40 output per MTok; no long-context tier. API default effort
+  high, as for Fable 5.1.
+
+### What this touched
+
+- `harness/agent/cli_agents.py`: `claude_thinking_display()` and the
+  `--thinking-display` argument, validated before any model call.
+- `harness/pricing.py`, `harness/api_equivalent_costs.py`: Fable 5.2 rows.
+- `scripts/run_fable52_v4.sh`: pinned-CLI launcher.
+
+### Revisit triggers
+
+- Any sign the summaries change solver behavior (time per step or tokens
+  out of line with the docs' claim): rerun a sample with the default display.
+- A Claude column that needs a CLI newer than 2.1.321.
+
 ## 2026-11-08: ComputerUse v1 perception conditions are a gate-run setting of the MCP computer tools, and every reading so far was pixels+zoom
 
 ### Decision

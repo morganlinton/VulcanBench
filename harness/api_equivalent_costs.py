@@ -28,6 +28,7 @@ SOURCES = {
 # USD per million tokens: uncached input, cache read, 5m write, 1h write, output.
 CLAUDE_RATES = {
     "claude-fable-5-1": (10, 0.25, 12.5, 20, 50),
+    "claude-fable-5-2": (8, 0.2, 10, 16, 40),
     "claude-opus-5-5": (4, 0.2, 5, 8, 20),
     "claude-opus-5": (5, 0.5, 6.25, 10, 25),
     "claude-opus-4-8": (5, 0.5, 6.25, 10, 25),

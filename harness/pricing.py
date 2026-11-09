@@ -61,6 +61,9 @@ PRICES: dict[str, dict[str, float]] = {
     # (75% below Fable 5), which this table does not model, so api-equivalent
     # costs for cache-heavy agent runs are an upper bound.
     "anthropic:claude-fable-5-1": {"input": 10.00, "output": 50.00},
+    # Fable 5.2 (verified 2026-11-09 on platform.claude.com): cache hits are
+    # 0.025x base input ($0.20/M), stated explicitly rather than defaulted.
+    "anthropic:claude-fable-5-2": {"input": 8.00, "cached_input": 0.20, "output": 40.00},
     # Opus 5.5 cache hits are 0.05x base input ($0.20/M), not the standard
     # 0.1x, so cached_input is stated explicitly rather than defaulted.
     "anthropic:claude-opus-5-5": {"input": 4.00, "cached_input": 0.20, "output": 20.00},

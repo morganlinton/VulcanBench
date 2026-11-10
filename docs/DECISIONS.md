@@ -7,6 +7,45 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-10: Fable 5.2 Low to Extra high is judged by Muse Spark 1.3 and Grok 4.6 (v3.30) while Max waits
+
+### Decision
+
+- Claude Fable 5.2's Code quality for Low to Extra high is judged now as
+  v3.30, by Muse Spark 1.3 and Grok 4.6, the panel behind the Claude Opus
+  5.5 column (v3.15), so the two can share a card without a panel caveat.
+  Owner request in chat, 2026-11-10. Both judges are neutral for an
+  Anthropic submission and retake the exam.
+- Max is judged in a later round once its 23 runs finish, built with
+  `build_fable52_population.py --level max`.
+- No sweep overlaps the judging window. The Max relaunch waits for the
+  weekly Fable limit to reset (2026-11-10, 23:00 PST) and for the v3.30
+  chain to exit, whichever is later.
+- Solver receipts for Fable 5.2 sum every `result` event in the stream and
+  record thinking tokens. The run summary keeps only the last result and
+  records no thinking tokens; the adapter fix and a summary backfill follow
+  in their own PR after the sweep.
+
+### Evidence
+
+- The sweep (`bench/2026-11-09-fable52-frontier-v4`) finished Low,
+  Medium, High and Extra high by 2026-11-10 03:33 PST: 92 runs, every one
+  solved, no timeouts, no empty patches, no fallback replies, every run on
+  Claude Code 2.1.321 from the clean tag.
+- Max's first attempts on 2026-11-10 returned "You've reached your Fable
+  limit" (rate-limit window `seven_day_overage_included` at 1.0; overage
+  disabled at the org level, so no usage credits were drawn). The 69
+  unscored attempts moved to `runs-effort-fable52/infra-aborted/max/`.
+- Grok 4.6 answered a one-line probe through the pinned Cursor
+  `2026.10.01-e373342`, whose digest still equals v3.24's; Muse Spark 1.3
+  answered through the pinned binary. Both on 2026-11-10.
+- A dry `prepare` froze 92 submissions (23 per level), 23 quirk keys, full
+  evidence, largest prompt 60,904 characters.
+- Two streams carry two `result` events (Low matchcore, Extra high
+  reflowcore): a background task's notification re-entered the session
+  after the model stopped. For Low matchcore the summary holds only the
+  12-second tail (2 turns, 982 output tokens of 13,636).
+
 ## 2026-11-09: Fable 5.2 on Frontier v4 runs on Claude Code 2.1.321 with thinking summaries recorded
 
 ### Decision

@@ -52,12 +52,12 @@ def on_int(*_):
 signal.signal(signal.SIGINT, on_int)
 name = os.path.basename(task)[:32]
 
-def trial(i, reward, infra=False, agent_log=None):
+def trial(i, reward, infra=False, agent_log=None, log_name="codex.txt"):
     td = os.path.join(jd, "%s__t%d" % (name, i))
     os.makedirs(os.path.join(td, "verifier")); os.makedirs(os.path.join(td, "agent"))
     with open(os.path.join(td, "verifier", "reward.json"), "w") as fh:
         json.dump({"reward": reward}, fh)
-    with open(os.path.join(td, "agent", "codex.txt"), "w") as fh:
+    with open(os.path.join(td, "agent", log_name), "w") as fh:
         fh.write(agent_log or ("hit your usage limit\n" if infra else '{"type":"item.completed"}\n'))
     with open(os.path.join(td, "result.json"), "w") as fh:
         json.dump({"started_at": "2026-10-29T12:00:00", "finished_at": "2026-10-29T12:01:00"}, fh)
@@ -65,6 +65,12 @@ def trial(i, reward, infra=False, agent_log=None):
 if mode == "finish":
     for i in range(3):
         trial(i, 0)
+    with open(os.path.join(jd, "result.json"), "w") as fh:
+        json.dump({"finished_at": "2026-10-29T12:03:00"}, fh)
+    sys.exit(0)
+if mode == "agent-log":
+    trial(0, 0, agent_log=os.environ["FAKE_AGENT_LOG"], log_name="claude-code.txt")
+    trial(1, 0); trial(2, 0)
     with open(os.path.join(jd, "result.json"), "w") as fh:
         json.dump({"finished_at": "2026-10-29T12:03:00"}, fh)
     sys.exit(0)
@@ -96,15 +102,38 @@ echo abc1234
 """
 
 # Prints what the one-turn probe prints: a rate_limit_event line among others.
+# FAKE_PROBE=no-event leaves the event out (what the 2026-11-03 probe saw);
+# FAKE_PROBE=disabled prints Claude Code's organization-disabled failure.
 FAKE_CLAUDE = r"""#!/usr/bin/env python3
 import json, os
 u = float(os.environ.get("FAKE_UTIL", "0.5"))
+probe = os.environ.get("FAKE_PROBE", "ok")
 print(json.dumps({"type": "system", "subtype": "init"}))
-print(json.dumps({"type": "rate_limit_event", "rate_limit_info": {
-    "status": os.environ.get("FAKE_RL_STATUS", "allowed"),
-    "unifiedWindows": {"five_hour": {"utilization": u / 2}, "seven_day": {"utilization": u}}}}))
-print(json.dumps({"type": "result", "result": "ok"}))
+if probe == "disabled":
+    print(json.dumps({"type": "assistant", "error": "oauth_org_not_allowed", "message": {
+        "model": "<synthetic>", "content": [{"type": "text", "text": "Your organization has disabled"
+        " Claude subscription access for Claude Code"}]}}))
+    print(json.dumps({"type": "result", "subtype": "success", "is_error": True, "api_error_status": 403,
+        "api_error_code": "oauth_not_allowed_for_organization",
+        "result": "Your organization has disabled Claude subscription access for Claude Code"}))
+    raise SystemExit(1)
+if probe != "no-event":
+    print(json.dumps({"type": "rate_limit_event", "rate_limit_info": {
+        "status": os.environ.get("FAKE_RL_STATUS", "allowed"),
+        "unifiedWindows": {"five_hour": {"utilization": u / 2}, "seven_day": {"utilization": u}}}}))
+print(json.dumps({"type": "result", "is_error": False, "result": "ok"}))
 """
+
+# The agent log of a 2026-11-03 attempt, trimmed to the fields the guard reads.
+DISABLED_AGENT_LOG = (
+    '{"type":"system","subtype":"init","model":"claude-opus-5-5"}\n'
+    '{"type":"assistant","message":{"model":"<synthetic>","content":[{"type":"text","text":'
+    '"Your organization has disabled Claude subscription access for Claude Code \u00b7 Use an'
+    ' Anthropic API key instead"}]},"error":"oauth_org_not_allowed"}\n'
+    '{"type":"result","is_error":true,"num_turns":1,"api_error_status":403,'
+    '"api_error_code":"oauth_not_allowed_for_organization","result":"Your organization has'
+    ' disabled Claude subscription access for Claude Code"}\n'
+)
 
 
 class Gate:
@@ -370,3 +399,107 @@ def test_usage_refusal_writes_infra_failed_status(gate: Gate) -> None:
     st = gate.status(f"opus-{gate.task}")
     assert st["phase"] == "infra_failed" and st["stop_reason"] == "usage" and st["exit_code"] == 2
     assert not (gate.out / "jobs" / f"opus-{gate.task}").exists()
+
+
+def test_preflight_only_fails_closed_without_a_rate_limit_event(gate: Gate) -> None:
+    # 2026-11-03: the probe saw no event and the old pre-flight said would_start true.
+    r = gate.run("opus", GATE_PREFLIGHT_ONLY="1", FAKE_PROBE="no-event")
+    assert r.returncode == 2, r.stdout + r.stderr
+    d = json.loads(r.stdout.strip())
+    assert d["status"] == "unknown" and d["would_start"] is False
+    assert d["note"] == "no rate-limit event in the probe"
+
+    r = gate.run("opus", GATE_PREFLIGHT_ONLY="1", FAKE_PROBE="no-event", GATE_USAGE_OVERRIDE="1")
+    assert r.returncode == 0, r.stdout + r.stderr
+    d = json.loads(r.stdout.strip())
+    assert d["status"] == "unknown" and d["would_start"] is True
+
+
+def test_preflight_only_refuses_a_failed_probe_even_with_the_override(gate: Gate) -> None:
+    for extra in ({}, {"GATE_USAGE_OVERRIDE": "1"}):
+        r = gate.run("opus", GATE_PREFLIGHT_ONLY="1", FAKE_PROBE="disabled", **extra)
+        assert r.returncode == 2, r.stdout + r.stderr
+        d = json.loads(r.stdout.strip())
+        assert d["status"] == "probe_error" and d["would_start"] is False
+        assert "403" in d["note"] and "disabled Claude subscription access" in d["note"]
+
+
+def test_run_without_a_rate_limit_event_is_refused_before_harbor(gate: Gate) -> None:
+    job = f"opus-{gate.task}"
+    r = gate.run("opus", gate.task, FAKE_PROBE="no-event")
+    assert r.returncode == 2, r.stdout + r.stderr
+    assert "no rate-limit event in the probe; not starting" in r.stderr
+    st = gate.status(job)
+    assert st["phase"] == "infra_failed" and st["stop_reason"] == "usage-unknown"
+    assert st["exit_code"] == 2 and st["harbor_pid"] is None
+    assert not (gate.out / "jobs" / job).exists()
+
+
+def test_run_without_a_rate_limit_event_starts_with_the_override(gate: Gate) -> None:
+    r = gate.run("opus", gate.task, FAKE_PROBE="no-event", GATE_USAGE_OVERRIDE="1")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "starting anyway (GATE_USAGE_OVERRIDE=1)" in r.stderr
+    assert gate.status(f"opus-{gate.task}")["phase"] == "done"
+
+
+def test_run_with_a_failed_probe_is_refused_even_with_the_override(gate: Gate) -> None:
+    job = f"opus-{gate.task}"
+    r = gate.run("opus", gate.task, FAKE_PROBE="disabled", GATE_USAGE_OVERRIDE="1")
+    assert r.returncode == 2, r.stdout + r.stderr
+    assert "the probe call failed" in r.stderr
+    st = gate.status(job)
+    assert st["phase"] == "infra_failed" and st["stop_reason"] == "probe-error"
+    assert not (gate.out / "jobs" / job).exists()
+
+
+@pytest.mark.skipif(
+    any(Path(d, "claude").exists() for d in ("/usr/local/bin", "/opt/homebrew/bin")),
+    reason="the script puts these directories on PATH, so a real claude CLI would be found",
+)
+def test_no_claude_cli_fails_closed(gate: Gate) -> None:
+    (gate.bin / "claude").unlink()
+    r = gate.run("opus", GATE_PREFLIGHT_ONLY="1")
+    assert r.returncode == 2
+    assert json.loads(r.stdout.strip()) == {
+        "model": "claude-opus-5-5",
+        "status": "unknown",
+        "would_start": False,
+        "note": "no claude CLI on PATH",
+    }
+
+
+AUTH_FAILURE_LOGS = {
+    "org-disabled-2026-11-03": DISABLED_AGENT_LOG,
+    "authentication_failed": '{"type":"assistant","error":"authentication_failed"}\n',
+    "billing_error": '{"type":"assistant","error":"billing_error"}\n',
+    "rate_limit": '{"type":"assistant","error":"rate_limit"}\n',
+    "status-401": '{"type":"result","is_error":true,"api_error_status":401}\n',
+    "invalid-api-key": '{"type":"result","result":"Invalid API key \u00b7 Please run /login"}\n',
+    "invalid-api-key-escaped": '{"type":"result","result":"Invalid API key \\u00b7 Please run /login"}\n',
+    "expired-token": '{"type":"result","result":"OAuth token has expired. Please obtain a new'
+    ' token or refresh your existing token."}\n',
+    "low-credit": '{"type":"result","result":"Credit balance is too low"}\n',
+}
+
+
+@pytest.mark.parametrize("log", AUTH_FAILURE_LOGS.values(), ids=AUTH_FAILURE_LOGS.keys())
+def test_claude_code_auth_failures_are_infrastructure(gate: Gate, log: str) -> None:
+    r = gate.run("opus", gate.task, FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log)
+    assert r.returncode == 1, r.stdout + r.stderr
+    st = gate.status(f"opus-{gate.task}")
+    assert st["phase"] == "infra_failed"
+    assert str(st["stop_reason"]).startswith("infra:demo-task-with-a-fairly-long-nam__t0")
+
+
+def test_auth_error_text_inside_a_tool_result_is_not_infrastructure(gate: Gate) -> None:
+    # Code the agent reads arrives JSON-escaped inside a tool result, so the
+    # structured patterns must not match it.
+    log = (
+        '{"type":"user","message":{"content":[{"type":"tool_result","content":'
+        '"raise Err({\\"error\\":\\"authentication_failed\\",'
+        '\\"api_error_status\\":401})"}]}}\n'
+        '{"type":"result","is_error":false,"num_turns":40}\n'
+    )
+    r = gate.run("opus", gate.task, FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert gate.status(f"opus-{gate.task}")["phase"] == "done"

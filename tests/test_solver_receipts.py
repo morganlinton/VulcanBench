@@ -1,6 +1,8 @@
+import json
+
 import pytest
 
-from harness.solver_receipts import claude_receipts
+from harness.solver_receipts import claude_receipts, solver_receipt
 
 
 def receipt(ident, cost, output=10):
@@ -37,3 +39,21 @@ def test_duplicate_receipt_rejected():
 def test_decreasing_cumulative_cost_rejected():
     with pytest.raises(ValueError, match="cumulative"):
         claude_receipts([receipt("a", 3), receipt("b", 2)])
+
+
+def test_fable_52_sums_every_result_and_its_thinking_tokens(tmp_path):
+    first, second = receipt("a", 1.26, output=12654), receipt("b", 1.34, output=982)
+    first["usage"]["output_tokens_details"] = {"thinking_tokens": 7000}
+    second["usage"]["output_tokens_details"] = {"thinking_tokens": 0}
+    lines = [
+        {"type": "system", "subtype": "init"},
+        {"type": "result", **first},
+        {"type": "system", "subtype": "init"},
+        {"type": "result", **second},
+    ]
+    (tmp_path / "cli-agent-stream.jsonl").write_text("".join(json.dumps(e) + "\n" for e in lines))
+    result = solver_receipt(tmp_path, {"model": "claude-code:claude-fable-5-2"})
+    assert result["result_receipts"] == 2
+    assert result["usage"]["output_tokens"] == 13636
+    assert result["thinking_tokens"] == 7000
+    assert result["cli_api_equivalent_estimate_usd"] == 1.34

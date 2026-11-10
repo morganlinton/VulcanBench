@@ -1470,6 +1470,44 @@ built by `scripts/cii-v4-board/build_gpt61terra_population.py`.
   spellings, and the probe is recovered under it; details in
   `maintenance-v3-operations.md`.
 
+## Amendment v3.30, November 10, 2026: Claude Fable 5.2, Low to Extra high, judged by Muse Spark 1.3 and Grok 4.6
+
+The v3.29 protocol on a new population. Nothing in the rubric, controls,
+quirk keys, gates, repeats, seed, weights, judge settings or Cursor pin
+changes. Protocol id `code-quality-maintenance-v3.30`; run directory
+`runs-code-quality-maintenance-v3.30`; runner
+`harness/maintenance_review_v330.py`, derived from the v3.29 runner.
+Population record: `docs/results/swe-v4-fable52-2026-11/comparison.json`,
+built by `scripts/cii-v4-board/build_fable52_population.py`.
+
+- Population: the November 2026 Claude Fable 5.2 sweep of Frontier v4
+  (`claude-fable-5-2`) through Claude Code 2.1.321 on the claude.ai
+  subscription (solver `claude-code:claude-fable-5-2`), with the refusal
+  fallback on and thinking summaries recorded, Low to Extra high, one attempt
+  per task and level, 92 runs, from `bench/2026-11-09-fable52-frontier-v4`,
+  so task hashes match the suite lock and no bridge is used. No run timed
+  out, none ended with an empty patch and no reply came from a fallback
+  model, so every cell freezes at 23.
+- Why four levels: Max reached the weekly Fable limit at its first task and
+  waits for the reset. The owner asked for Low to Extra high to be judged in
+  the meantime (chat, November 10). Max follows in its own round, built with
+  `build_fable52_population.py --level max`, as Muse Wonder Full's Max
+  followed in v3.26.5.
+- Judges: Muse Spark 1.3 and Grok 4.6, the pair behind the Claude Opus 5.5
+  (v3.15), GPT-6.1 Sol (v3.18) and GPT-6.1 Terra (v3.29) columns. Both are
+  neutral for an Anthropic submission and retake the exam under v3.30 before
+  any counted call.
+- Cursor: pinned to `2026.10.01-e373342` and the digest v3.24 recorded, as in
+  v3.29. Cursor has since updated its shared launcher to `2026.10.22-27dcf5f`;
+  the round judges through the pinned version's own launcher and re-checks
+  its digest before every stage.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the level two steps up, wrapping over the four levels.
+- Comparability: a Fable 5.2 score is a Muse Spark 1.3 and Grok 4.6 mean, the
+  same panel as the Claude Opus 5.5 column. GPT-6 Astra and Fable 5.1 were
+  judged in v3.4 by a different panel, so cards against them carry a panel
+  note.
+
 ## Amendment v3.26.5, November 4, 2026: Muse Wonder Full at Max
 
 Everything is as in v3.26.3, for the Max level. Protocol id

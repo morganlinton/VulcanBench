@@ -86,6 +86,30 @@ def devin_receipt(run, summary):
     return result
 
 
+def fable52_receipt(events):
+    """Every result receipt in a Claude Code 2.1.321 stream, with thinking tokens.
+
+    Claude Code 2.1.321 can end a stream with two result events when a
+    background task's notification re-enters the session after the model
+    stops. Each result carries that segment's usage and the session's
+    cumulative cost, so the receipts are summed; the run summary keeps only
+    the last one and folds cache tokens.
+    """
+    results = [e for e in events if e.get("type") == "result"]
+    result = claude_receipts(results)
+    thinking = 0
+    for event in results:
+        value = (event["usage"].get("output_tokens_details") or {}).get("thinking_tokens", 0)
+        if type(value) is not int or value < 0:
+            raise ValueError("Invalid thinking token receipt")
+        thinking += value
+    result["thinking_tokens"] = thinking
+    result["historical_summary_unit"] = (
+        "Raw tokens summed over every result receipt; thinking tokens are part of output"
+    )
+    return result
+
+
 def solver_receipt(run, summary):
     path = run / "cli-agent-stream.jsonl"
     events = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
@@ -106,6 +130,8 @@ def solver_receipt(run, summary):
         result["historical_summary_unit"] = (
             "Cache-price-weighted units from last result, not raw tokens"
         )
+    elif summary["model"] == "claude-code:claude-fable-5-2":
+        result = fable52_receipt(events)
     elif summary["model"].startswith("codex:"):
         receipts = [e["usage"] for e in events if e.get("type") == "turn.completed"]
         if len(receipts) != 1:

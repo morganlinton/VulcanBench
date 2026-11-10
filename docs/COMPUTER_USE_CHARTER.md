@@ -1,11 +1,17 @@
 # VulcanBench ComputerUse v1: the computer-use suite (charter draft)
 
-Status: **draft, 2026-11-05; milestone 4 built 2026-11-08** (fourteen
-candidate tasks across the three families, three of them on the safety
-track, none admitted; milestone 4 added two long-horizon tasks as the hard
-tail attempt, Evince as the fourth native app, and the perception conditions
-as a gate-run setting; the milestone 4 tasks are built and validated but not
-yet measured). The suite id is `computer-use-v1` and the public name is
+Status: **draft, 2026-11-05; milestone 4 built 2026-11-08 and measured
+2026-11-09** (fourteen candidate tasks across the three families, three of
+them on the safety track, none admitted; milestone 4 added two long-horizon
+tasks as the hard tail attempt, Evince as the fourth native app, and the
+perception conditions as a gate-run setting. The subscription reference at
+n=3 solved `files-invoice-entry` 3 of 3 and `relaydesk-sla-sweep` 2 of 3,
+the lost trial a running-tally error across a long horizon and the suite's
+first loss for a capability reason, and solved `ledger-reconcile` 3 of 3
+under both `pixels` and `pixels-lowres`, so no perception condition
+separates yet; see
+[the milestone 4 results note](results/computer-use-v1-milestone-4/README.md)).
+The suite id is `computer-use-v1` and the public name is
 "VulcanBench ComputerUse v1", both fixed on 2026-11-05 (slugs and run
 directories are never renamed).
 

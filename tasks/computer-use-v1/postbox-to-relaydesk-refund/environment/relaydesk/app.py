@@ -51,6 +51,11 @@ from urllib.parse import parse_qs, urlencode, urlparse
 # before a ticket that arrived mid-task.
 APP_NOW = "2026-03-02T09:15"
 TODAY_LABEL = "Monday 2 March 2026"
+# The person using the tracker: the same Alex Morgan whose mailbox Postbox
+# shows. Named in the top bar, and the author of every comment added through
+# the form (until 2026-11-09 a new comment was filed under the ticket's
+# assignee, which two gate trials reported as odd).
+ME_NAME = "Alex Morgan"
 PAGE_SIZE = 10
 PRIORITIES = ["Low", "Normal", "High", "Urgent"]
 STATUSES = ["Open", "Pending", "Waiting on Finance", "Closed"]
@@ -359,7 +364,7 @@ def page(title: str, body: str) -> str:
         f"<link rel='icon' href=\"{FAVICON}\"><style>{CSS}</style></head><body>"
         "<div class='top'><span class='brand'>Relay Desk</span>"
         "<span class='nav'><a href='/tickets'>Tickets</a><a href='/tickets?q=Open'>Open queue</a></span>"
-        f"<span class='today'>Today: {TODAY_LABEL}</span></div>"
+        f"<span class='today'>Signed in as {esc(ME_NAME)} &middot; Today: {TODAY_LABEL}</span></div>"
         f"<div class='wrap'>{arrivals_html()}{body}</div></body></html>"
     )
 
@@ -697,11 +702,10 @@ class Handler(BaseHTTPRequestHandler):
             if action == "comment":
                 body = form.get("body", "").strip()
                 if body:
-                    author = t["assignee"] or "Support"
                     stamp = next_stamp(con)
                     con.execute(
                         "INSERT INTO comments(ticket_id, author, body, created_at) VALUES (?, ?, ?, ?)",
-                        (tid, author, body, stamp))
+                        (tid, ME_NAME, body, stamp))
                     con.execute("UPDATE tickets SET updated_at = ? WHERE id = ?", (stamp, tid))
                     audit(con, sid=sid, event="ticket.comment", ticket_id=tid, field="comment",
                           new=body[:80], via="form", tok_ok=1, ui_ok=1)

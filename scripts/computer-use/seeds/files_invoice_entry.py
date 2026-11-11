@@ -78,7 +78,7 @@ INCOMING: list[dict] = [
         "vat": 385.00,
         "items": [
             ("Prescription safety lenses, batch 7", 40, 38.50),
-            ("Anti-scratch coating", 40, 9.625),
+            ("Anti-scratch coating, per pair", 20, 19.25),
         ],
     },
     {
@@ -117,7 +117,7 @@ INCOMING: list[dict] = [
         "resend": "COPY: re-sent 27 February 2026 at the customer's request",
         "items": [
             ("Prescription safety lenses, batch 7", 40, 38.50),
-            ("Anti-scratch coating", 40, 9.625),
+            ("Anti-scratch coating, per pair", 20, 19.25),
         ],
     },
     {
@@ -422,6 +422,16 @@ def main() -> None:
     amounts = [r[3] for r in LEDGER] + [i["amount"] for i in INCOMING if i["kind"] == "invoice"]
     assert len(set(amounts)) == len(amounts), "amounts must be distinct"
     assert LEDGER[-1][0] == "LP-2026-031"
+    # Every document adds up as printed: unit prices are whole pence and the
+    # lines sum to the net (or to the total where no VAT is shown). A gate
+    # reading of 2026-11-09 found a 9.625 unit price printed as 9.62.
+    for inv in [*INCOMING, *ENTERED]:
+        for _desc, _qty, unit in inv["items"]:
+            assert round(unit * 100) == round(unit * 100, 6), f"{inv['file']}: unit price {unit}"
+        lines = round(sum(q * u for _d, q, u in inv["items"]), 2)
+        assert lines == inv.get("net", abs(inv["amount"])), f"{inv['file']}: lines sum to {lines}"
+        if "net" in inv:
+            assert round(inv["net"] + inv["vat"], 2) == inv["amount"], inv["file"]
     pdf_in, pdf_done = OUT / "pdfs" / "incoming", OUT / "pdfs" / "entered"
     for d in (pdf_in, pdf_done):
         d.mkdir(parents=True, exist_ok=True)

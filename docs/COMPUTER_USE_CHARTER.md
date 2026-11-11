@@ -145,6 +145,12 @@ recorded by product and version in the run metadata:
   tools disallowed. This is its own row, not a stand-in for the native tool:
   screenshots reach the model as ordinary images and coordinates come back
   as tool arguments
+- Codex on the ChatGPT subscription, acting only through the same MCP
+  computer tools with Codex's own tools turned off (shell, file editing,
+  web, subagents; `scripts/computer-use/codex-gate.toml` and a locked
+  one-model catalog, `docs/DECISIONS.md` 2026-11-10). Its own row: Codex
+  runs GPT-6.1 Sol in code mode, so one model call can run several computer
+  actions from a short script
 - Claude in Chrome (web family only) and Claude Cowork
 - OpenAI computer-use agent via the API and through its product
 - Google Gemini computer-use via the API

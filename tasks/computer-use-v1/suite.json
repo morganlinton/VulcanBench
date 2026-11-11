@@ -22,8 +22,8 @@
     "relaydesk-sla-sweep"
   ],
   "pins": {
-    "harness": "harbor 0.24.0 (harbor[computer-1] extra installed for the native Anthropic provider; claude-code needs no extra)",
-    "agent": "computer-1 (API key) or claude-code with MCP computer tools (subscription); see agent_rows",
+    "harness": "harbor 0.24.0 (harbor[computer-1] extra installed for the native Anthropic provider; claude-code and codex need no extra)",
+    "agent": "computer-1 (API key), or claude-code or codex with MCP computer tools (subscriptions); see agent_rows",
     "condition": "pixels+zoom",
     "budget": {
       "timeout_sec": 3600,
@@ -50,6 +50,17 @@
         "note": "First reference to run. Opus 5.5 is the subscription model that runs without usage credits (the 2026-11-06 probe: Fable 5.1 answered 'requires usage credits'); same CLI version as the Frontier v5 references. CU_GATE_MODEL=claude-fable-5-1 runs Fable once credits exist."
       },
       {
+        "name": "codex",
+        "agent": "codex",
+        "model": "gpt-6.1-sol",
+        "version": "0.159.0",
+        "effort": "medium",
+        "auth": "subscription: the ChatGPT login's auth.json named by CODEX_AUTH_JSON_PATH in harbor's environment (CU_GATE_CODEX_AUTH, else ~/.config/vulcanbench/codex-gate/auth.json, else ~/.codex/auth.json), as scripts/frontier-v5/run_gate.sh",
+        "tools": "mcp__computer__* only, called from Codex code mode's exec",
+        "config": "scripts/computer-use/codex-gate.toml plus a one-model catalog built per gate invocation by scripts/computer-use/codex_catalog.py (apply_patch and subagent tools cleared)",
+        "note": "Second reference, added in milestone 5 for admission (charter: two references). GPT-6.1 Sol is OpenAI's top Codex model on the ChatGPT subscription, run at medium as the claude-code row is; Codex 0.159.0 is the pin every GPT-6.1 Frontier v4 column ran on. docs/DECISIONS.md 2026-11-10."
+      },
+      {
         "name": "claude",
         "agent": "computer-1",
         "model": "anthropic/claude-fable-5-1",
@@ -59,12 +70,13 @@
       }
     ],
     "images": {
-      "vulcanbench/sandbox:cu-base": "sha256:5457616784e6c9845ed4a77749a3519d36ee303876efe10401853ddfbe3ed737"
+      "vulcanbench/sandbox:cu-base": "sha256:c36c4b3bed15ec73e38d7528e0afb9fa8a976bd7c5ee9a24c204600f8205c711"
     },
-    "images_note": "Built by make sandbox-image-computer-use from sandbox/Dockerfile.computer-use (Debian bookworm packages are not byte-pinned; the image records dpkg-query output at /etc/vulcanbench-packages.txt). Milestone 2 adds Thunar, Mousepad, LibreOffice Calc, xinput, the input recorder and /opt/vbdesk/cu_check.py. Milestone 3 rebuilds the image for cu_check.py (arrivals, ODS and report helpers, emit_safety(bad=...)); no new packages. Milestone 4 adds Evince 43 (the family B PDF viewer, Thunar's default for application/pdf, with a GSettings keyfile selected by GSETTINGS_BACKEND=keyfile), date cells in cu_check.ods_sheets and the --condition switch of vb_computer_mcp.py.",
+    "images_note": "Built by make sandbox-image-computer-use from sandbox/Dockerfile.computer-use (Debian bookworm packages are not byte-pinned; the image records dpkg-query output at /etc/vulcanbench-packages.txt). Milestone 2 adds Thunar, Mousepad, LibreOffice Calc, xinput, the input recorder and /opt/vbdesk/cu_check.py. Milestone 3 rebuilds the image for cu_check.py (arrivals, ODS and report helpers, emit_safety(bad=...)); no new packages. Milestone 4 adds Evince 43 (the family B PDF viewer, Thunar's default for application/pdf, with a GSettings keyfile selected by GSETTINGS_BACKEND=keyfile), date cells in cu_check.ods_sheets and the --condition switch of vb_computer_mcp.py. Milestone 5 rebuilds the image for collect-agent-final.sh, which now reads the codex reference's final message from /logs/agent/codex.txt; no new packages (the package and pip layers came from cache).",
     "agent_rows": {
       "computer-1": "Harbor's computer-1 agent with Anthropic's native computer-use tool, called from the host with an API key. Not run yet: no key on the gate host.",
-      "claude-code": "Harbor's claude-code agent on the Claude subscription (the Frontier gate's OAuth env file), acting only through mcp__computer__* tools from sandbox/computer-use/vb_computer_mcp.py with Claude Code's own tools disallowed. A distinct row from the native tool: screenshots arrive as ordinary images and coordinates are emitted as tool arguments."
+      "claude-code": "Harbor's claude-code agent on the Claude subscription (the Frontier gate's OAuth env file), acting only through mcp__computer__* tools from sandbox/computer-use/vb_computer_mcp.py with Claude Code's own tools disallowed. A distinct row from the native tool: screenshots arrive as ordinary images and coordinates are emitted as tool arguments.",
+      "codex": "Harbor's codex agent on the ChatGPT subscription, acting only through mcp__computer__* tools from sandbox/computer-use/vb_computer_mcp.py. Codex's own tools are off (shell, apply_patch, web search, subagents, image tools, connected apps), so the model sees code mode's exec, whose only callable tools are the MCP computer tools, MCP resource listing and a clock. Screenshots arrive as images in the exec result. Its own row: code mode lets one model call run several computer actions, which the claude-code row cannot."
     },
     "start_urls": {
       "relaydesk-invoice-ticket-triage": "http://127.0.0.1:8000/",
@@ -107,7 +119,7 @@
       "pixels+zoom": "full-size screenshots (1024x900) plus the zoom tool; the condition every reading before milestone 4 was taken under, and the gate's default",
       "pixels": "the same screenshots, no zoom tool",
       "pixels-lowres": "screenshots scaled to 0.75 (768x675), coordinates in the scaled image, no zoom tool",
-      "note": "Applied by sandbox/computer-use/vb_computer_mcp.py --condition; selected per gate run with CU_GATE_CONDITION (scripts/computer-use/run_gate.sh copies the task with the flag). claude-code reference only: computer-1 brings its own tool. A result is comparable only within one condition (docs/DECISIONS.md 2026-11-08, perception conditions)."
+      "note": "Applied by sandbox/computer-use/vb_computer_mcp.py --condition; selected per gate run with CU_GATE_CONDITION (scripts/computer-use/run_gate.sh copies the task with the flag). claude-code and codex references only: computer-1 brings its own tool. A result is comparable only within one condition (docs/DECISIONS.md 2026-11-08, perception conditions)."
     }
   },
   "tracks": {

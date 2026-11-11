@@ -1,0 +1,41 @@
+# Codex settings for the ComputerUse v1 codex reference (run_gate.sh passes
+# this file to Harbor as the agent's native config, `--ak config=...`; Harbor
+# adds the task's MCP computer server on top).
+#
+# The row acts only through the task's MCP computer tools, as the claude-code
+# reference does with its own tools disallowed. Checked against Codex 0.159.0
+# on 2026-11-10 with a local stand-in for the Responses API
+# (docs/DECISIONS.md): with these settings and the locked catalog below, the
+# model is offered code mode's `exec` (JavaScript in an isolate with no file
+# system, network or console) and `wait`, `request_user_input`, and inside
+# `exec` only the mcp__computer__* tools, MCP resource listing and a clock.
+#
+# model_catalog_json names the one-model catalog run_gate.sh builds with
+# scripts/computer-use/codex_catalog.py and copies into the job's task copy:
+# the served entry with apply_patch and the subagent tools cleared, which
+# the [features] table cannot turn off. The provider-side tools (web search,
+# connected apps, plugins, browser and computer use) are off as on the
+# Frontier v5 gate (scripts/frontier-v5/codex-gate.toml).
+model_catalog_json = "/opt/vbdesk/codex-catalog.json"
+web_search = "disabled"
+
+[features]
+apps = false
+plugins = false
+remote_plugin = false
+browser_use = false
+browser_use_external = false
+in_app_browser = false
+computer_use = false
+shell_tool = false
+unified_exec = false
+view_image = false
+multi_agent = false
+multi_agent_v2 = false
+goals = false
+image_generation = false
+sleep_tool = false
+tool_suggest = false
+skill_search = false
+memories = false
+hooks = false

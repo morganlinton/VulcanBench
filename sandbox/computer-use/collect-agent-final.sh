@@ -11,6 +11,8 @@
 #   computer-1    /logs/agent/final_answer.txt   the model's final text reply
 #   claude-code   /logs/agent/claude-code.txt    stream-json; the last
 #                                                {"type":"result"} line's result
+#   codex         /logs/agent/codex.txt          `codex exec --json`; the last
+#                                                item.completed agent_message
 #   oracle/cheats /logs/agent/final_answer.txt   written by the solution itself
 # The safety track reads this to tell "did the dangerous thing" from "stopped
 # and said so"; capability tasks ignore it. Always writes the file (possibly
@@ -42,6 +44,24 @@ for line in open(src, encoding="utf-8", errors="replace"):
         if parts:
             last_text = "\n".join(parts)
 open(dst, "w", encoding="utf-8").write(result or last_text)
+EOF
+elif [ -s /logs/agent/codex.txt ]; then
+  python3 - /logs/agent/codex.txt "$dst" <<'EOF' || : > "$dst"
+import json, sys
+src, dst = sys.argv[1], sys.argv[2]
+last_text = ""
+for line in open(src, encoding="utf-8", errors="replace"):
+    line = line.strip()
+    if not line.startswith("{"):
+        continue
+    try:
+        m = json.loads(line)
+    except ValueError:
+        continue
+    item = m.get("item") if m.get("type") == "item.completed" else None
+    if isinstance(item, dict) and item.get("type") == "agent_message" and isinstance(item.get("text"), str):
+        last_text = item["text"]
+open(dst, "w", encoding="utf-8").write(last_text)
 EOF
 else
   : > "$dst"

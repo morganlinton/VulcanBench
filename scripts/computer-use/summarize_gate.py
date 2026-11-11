@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Summarise ComputerUse v1 gate jobs into a trials.json and a Markdown table.
 
-    python scripts/computer-use/summarize_gate.py --suffix=-m3 TASK [TASK ...] \
+    python scripts/computer-use/summarize_gate.py [--ref codex] --suffix=-m3 TASK [TASK ...] \
         [--out docs/results/<dir>/trials.json] [--jobs ~/vulcanbench-gate/jobs]
 
 Reads, for each task, the job directory run_gate.sh wrote
-(``<jobs>/cu-claude-code-<task><suffix>/``) and its status file, and collects
-per trial: the verifier's reward map, Claude Code's turn count, API time,
-token usage and list-price cost estimate from the last ``result`` record of
-the agent stream, and harbor's agent and trial wall times, plus the
-perception condition the job ran under (status file ``condition``; jobs from
-before milestone 4 are ``pixels+zoom``). Prints a Markdown
+(``<jobs>/cu-<ref>-<task><suffix>/``, ref claude-code by default) and its
+status file, and collects per trial: the verifier's reward map, the turn
+count, API time, token usage and list-price cost estimate, and harbor's agent
+and trial wall times, plus the perception condition the job ran under (status
+file ``condition``; jobs from before milestone 4 are ``pixels+zoom``). For
+claude-code the agent numbers come from the last ``result`` record of the
+agent stream; for codex from harbor's ATIF trajectory (``agent/trajectory.json``:
+turns are agent steps, one per model call) with the cost computed from its
+token counts at harness/pricing.py list prices, and the MCP tool calls counted
+from ``agent/codex.txt``; Codex reports no API time. Prints a Markdown
 table (numbers only, no ranking) and, with --out, writes the JSON the results
 note links to. Nothing here is a leaderboard: the suite is not frozen.
 """
@@ -22,6 +26,12 @@ import datetime as dt
 import json
 import sys
 from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+
+from harness.pricing import cost_usd  # noqa: E402  (the repo root is on sys.path only now)
 
 
 def last_result(stream: Path) -> dict:
@@ -43,6 +53,48 @@ def last_result(stream: Path) -> dict:
     return res
 
 
+def codex_numbers(trial: Path, model: str | None) -> dict:
+    """Turns, tokens, list-price cost and MCP tool calls of one codex trial."""
+    try:
+        traj = json.loads((trial / "agent" / "trajectory.json").read_text())
+    except (OSError, ValueError):
+        traj = {}
+    steps = traj.get("steps") or []
+    fm = traj.get("final_metrics") or {}
+    prompt = fm.get("total_prompt_tokens")
+    completion = fm.get("total_completion_tokens")
+    cached = fm.get("total_cached_tokens") or 0
+    cost = None
+    if model and prompt is not None and completion is not None:
+        cost = cost_usd(f"openai:{model}", prompt, completion, cached_input_tokens=cached)
+    calls = 0
+    try:
+        for raw in (trial / "agent" / "codex.txt").read_text(errors="replace").splitlines():
+            line = raw.strip()
+            if not line.startswith("{"):
+                continue
+            try:
+                obj = json.loads(line)
+            except ValueError:
+                continue
+            item = obj.get("item") if obj.get("type") == "item.completed" else None
+            calls += isinstance(item, dict) and item.get("type") == "mcp_tool_call"
+    except OSError:
+        pass
+    return {
+        "num_turns": sum(1 for st in steps if st.get("source") == "agent") or None,
+        "duration_api_s": None,
+        "cost_usd": round(cost, 2) if cost is not None else None,
+        "tool_calls": calls,
+        "tokens": {
+            "input": None if prompt is None else prompt - cached,
+            "output": completion,
+            "cache_read": cached,
+            "cache_creation": None,
+        },
+    }
+
+
 def secs(block: dict | None) -> int | None:
     try:
         a = dt.datetime.fromisoformat(block["started_at"].replace("Z", "+00:00"))
@@ -52,15 +104,18 @@ def secs(block: dict | None) -> int | None:
     return round((b - a).total_seconds())
 
 
-def summarise(jobs: Path, gate_root: Path, suffix: str, task: str) -> dict:
-    # ``task`` is the job stem after ``cu-claude-code-``: the task name, or
+def summarise(
+    jobs: Path, gate_root: Path, suffix: str, task: str, ref: str = "claude-code"
+) -> dict:
+    # ``task`` is the job stem after ``cu-<ref>-``: the task name, or
     # ``<task>-<condition>`` for a run under a non-default perception condition
     # (run_gate.sh names those jobs that way). The status file carries the task.
-    job = jobs / f"cu-claude-code-{task}{suffix}"
-    status = json.loads((gate_root / f"cu-claude-code-{task}{suffix}.status.json").read_text())
+    job = jobs / f"cu-{ref}-{task}{suffix}"
+    status = json.loads((gate_root / f"cu-{ref}-{task}{suffix}.status.json").read_text())
     task = status.get("task", task)
     entry = {
         "task": task,
+        "ref": ref,
         "job": status["job"],
         "model": status.get("model"),
         "effort": status.get("effort"),
@@ -79,17 +134,14 @@ def summarise(jobs: Path, gate_root: Path, suffix: str, task: str) -> dict:
             if (trial / "result.json").is_file()
             else {}
         )
-        res = last_result(trial / "agent" / "claude-code.txt")
-        usage = res.get("usage") or {}
-        entry["solved"] += int(reward.get("reward") == 1)
-        entry["trials"].append(
-            {
-                "trial": trial.name.split("__", 1)[1],
-                "reward": reward,
+        if ref == "codex":
+            numbers = codex_numbers(trial, status.get("model"))
+        else:
+            res = last_result(trial / "agent" / "claude-code.txt")
+            usage = res.get("usage") or {}
+            numbers = {
                 "num_turns": res.get("num_turns"),
                 "duration_api_s": round((res.get("duration_api_ms") or 0) / 1000),
-                "agent_wall_s": secs(result.get("agent_execution")),
-                "trial_wall_s": secs(result),
                 "cost_usd": round(res.get("total_cost_usd") or 0, 2),
                 "tokens": {
                     "input": usage.get("input_tokens"),
@@ -98,8 +150,38 @@ def summarise(jobs: Path, gate_root: Path, suffix: str, task: str) -> dict:
                     "cache_creation": usage.get("cache_creation_input_tokens"),
                 },
             }
+        entry["solved"] += int(reward.get("reward") == 1)
+        entry["trials"].append(
+            {
+                "trial": trial.name.split("__", 1)[1],
+                "reward": reward,
+                "agent_wall_s": secs(result.get("agent_execution")),
+                "trial_wall_s": secs(result),
+                **numbers,
+            }
         )
     return entry
+
+
+REFERENCES = {
+    "claude-code": {
+        "name": "claude-code",
+        "auth": "subscription",
+        "tools": "the task's MCP computer tools only (Bash, file and web tools disallowed)",
+    },
+    "codex": {
+        "name": "codex",
+        "auth": "subscription",
+        "tools": "the task's MCP computer tools only, called from Codex code mode's exec (shell, apply_patch, "
+        "web, subagent and image tools off: scripts/computer-use/codex-gate.toml and the locked catalog)",
+    },
+}
+COST_NOTES = {
+    "claude-code": "cost_usd is Claude Code's list-price estimate from its result record; "
+    "subscription runs are not billed per call",
+    "codex": "cost_usd is computed from the trajectory's token counts at harness/pricing.py list prices "
+    "(cached input at the cached rate); subscription runs are not billed per call",
+}
 
 
 def fmt(values: list, key: str) -> str:
@@ -116,7 +198,7 @@ def table(entries: list[dict], tracks: dict[str, str]) -> str:
         if e.get("condition", "pixels+zoom") != "pixels+zoom":
             name += f" [{e['condition']}]"
         t = e["trials"]
-        cost = ", ".join(f"{v['cost_usd']:.2f}" for v in t)
+        cost = ", ".join("?" if v["cost_usd"] is None else f"{v['cost_usd']:.2f}" for v in t)
         out.append(
             f"| {name} | {e['solved']} of {len(t)} | {fmt(t, 'num_turns')} | {fmt(t, 'agent_wall_s')} "
             f"| {fmt(t, 'duration_api_s')} | {cost} |"
@@ -128,15 +210,16 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     ap.add_argument("tasks", nargs="+")
     ap.add_argument("--suffix", default="", help="GATE_JOB_SUFFIX the jobs were launched with")
+    ap.add_argument("--ref", default="claude-code", choices=["claude-code", "codex"])
     ap.add_argument("--jobs", default=str(Path.home() / "vulcanbench-gate" / "jobs"))
     ap.add_argument("--out", help="write trials.json here")
     ap.add_argument("--suite", default="tasks/computer-use-v1/suite.json")
     args = ap.parse_args(argv)
     jobs = Path(args.jobs).expanduser()
     suite = json.loads(Path(args.suite).read_text()) if Path(args.suite).is_file() else {}
-    entries = [summarise(jobs, jobs.parent, args.suffix, t) for t in args.tasks]
+    entries = [summarise(jobs, jobs.parent, args.suffix, t, args.ref) for t in args.tasks]
     print(table(entries, suite.get("tracks", {})))
-    total_cost = round(sum(tr["cost_usd"] for e in entries for tr in e["trials"]), 2)
+    total_cost = round(sum(tr["cost_usd"] or 0 for e in entries for tr in e["trials"]), 2)
     total_out = sum(tr["tokens"]["output"] or 0 for e in entries for tr in e["trials"])
     print(
         f"\n{sum(len(e['trials']) for e in entries)} trials; list-price cost estimate {total_cost} USD; "
@@ -147,13 +230,9 @@ def main(argv: list[str] | None = None) -> int:
             "suite": suite.get("id", "computer-use-v1"),
             "suite_version": suite.get("version"),
             "image": suite.get("pins", {}).get("images"),
-            "reference": {
-                "name": "claude-code",
-                "auth": "subscription",
-                "tools": "the task's MCP computer tools only (Bash, file and web tools disallowed)",
-            },
+            "reference": REFERENCES[args.ref],
             "conditions": sorted({e.get("condition", "pixels+zoom") for e in entries}),
-            "cost_note": "cost_usd is Claude Code's list-price estimate from its result record; subscription runs are not billed per call",
+            "cost_note": COST_NOTES[args.ref],
             "tasks": entries,
         }
         out = Path(args.out)

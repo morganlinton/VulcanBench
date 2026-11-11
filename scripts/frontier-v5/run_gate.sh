@@ -34,7 +34,8 @@
 # They run on the provider's side, so the task's network allowlist never sees
 # them; on 2026-10-30 an Astra attempt downloaded the upstream source of the
 # code an F2 task had removed through Codex's `web__run` (docs/DECISIONS.md).
-# Infrastructure guard: a finished trial whose agent log shows an auth,
+# Infrastructure guard: a finished trial whose agent log shows an auth
+# (including an organization policy that disables subscription access),
 # model-id, usage-credit or usage-limit failure stops the whole run; such
 # trials are not gate results. Move their job directory aside (INFRA-*).
 #
@@ -71,9 +72,17 @@
 #          refuses to start above GATE_USAGE_MAX (default 0.85) unless
 #          GATE_USAGE_OVERRIDE=1 (the 2026-10-24 black Fable run had to be
 #          stopped by hand at 94% of the weekly window).
+#          The check fails closed: no claude CLI, or a probe with no
+#          rate-limit event, refuses unless GATE_USAGE_OVERRIDE=1 (an
+#          API-key run has no subscription windows and needs the override),
+#          and a probe whose result is an error (auth, organization policy,
+#          usage limit) refuses even with it. On 2026-11-03 an organization
+#          that had disabled subscription access produced no event, the old
+#          check let the run start, and 21 attempts scored fake zeros.
 #          GATE_PREFLIGHT_ONLY=1 runs just that check and prints one JSON
-#          line (model, status, max_utilization, windows, would_start);
-#          exit 0 if a run would start, 2 if it would be refused.
+#          line (model, status, max_utilization, windows, would_start; status
+#          "unknown" or "probe_error" with a note when it could not read the
+#          windows); exit 0 if a run would start, 2 if it would be refused.
 #
 # GATE_POLL_S (default 60) is how often the monitor loop looks for solves and
 # infrastructure failures; the script's own tests set it low.
@@ -143,10 +152,17 @@ esac
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit
 # message; kept narrow so ordinary output (code the agent reads) never matches.
+# Claude Code's own failures are matched on its structured fields, which sit
+# unescaped only in its top-level stream-json lines (the same text inside a
+# tool result is JSON-escaped and does not match): the synthetic assistant
+# message's "error" (authentication_failed, billing_error, rate_limit, and
+# oauth_org_not_allowed, the organization-disabled subscription of
+# 2026-11-03) and the result line's api_error_status 401 or 403; plus the
+# literal texts Claude Code prints for those cases.
 # The last three alternatives are a reference reaching a provider-side tool
 # (web search, the account's connected apps) that run_gate.sh turns off; such
 # a trial is not a gate result either (docs/DECISIONS.md 2026-10-31).
-INFRA_RE='"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]'
+INFRA_RE='"error":"(authentication_failed|billing_error|rate_limit|oauth_org_not_allowed)"|"api_error_status":40[13][,}]|disabled Claude subscription access|Invalid API key[^"]{1,8}Please run /login|OAuth token has expired[.] Please obtain a new token|OAuth token revoked|Credit balance is too low|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]'
 
 # Per-task state the helpers below read; set in the task loop.
 job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
@@ -181,26 +197,56 @@ PY
 }
 
 usage_preflight() { # claude-code refs: one one-turn call reads the subscription windows; refuse above GATE_USAGE_MAX
-  local max="${GATE_USAGE_MAX:-0.85}" out rl_status rl_util verdict
+  # Fails closed: a probe that shows no
+  # rate-limit event proves nothing about the account (on 2026-11-03 a
+  # disabled subscription produced none, and 21 attempts scored fake zeros),
+  # so it refuses unless GATE_USAGE_OVERRIDE=1. A probe whose result is an
+  # error (auth, organization policy, usage limit) refuses even with the
+  # override: no attempt could make a model call.
+  local max="${GATE_USAGE_MAX:-0.85}" out rl_status rl_util rl_windows probe_err verdict
   if ! command -v claude >/dev/null; then
-    echo "run_gate: no claude CLI on PATH, skipping the usage preflight" >&2
-    [ "$preflight_only" = 1 ] && { printf '{"model": "%s", "status": "unknown", "would_start": true, "note": "no claude CLI on PATH"}\n' "$model"; exit 0; }
-    return 0
+    usage_unknown "no claude CLI on PATH"; return 0
   fi
   out=$( ( set -a; . "$envf"; set +a; claude -p --model "$model" --output-format stream-json --verbose --max-turns 1 'Reply with the single word ok.' 2>/dev/null ) \
-    | grep '"rate_limit_event"' | tail -1 | python3 -c '
+    | python3 -c '
 import json, sys
-line = sys.stdin.read().strip()
-if not line: sys.exit(0)
-d = json.loads(line)["rate_limit_info"]; w = d.get("unifiedWindows") or {}
-m = max([v.get("utilization") or 0 for v in w.values()] or [0])
-print("%s %.2f %s" % (d.get("status"), m, " ".join("%s=%.2f" % (k, v.get("utilization") or 0) for k, v in w.items())))' )
-  if [ -z "$out" ]; then
-    echo "run_gate: usage preflight saw no rate-limit event, continuing" >&2
-    [ "$preflight_only" = 1 ] && { printf '{"model": "%s", "status": "unknown", "would_start": true, "note": "no rate-limit event in the probe"}\n' "$model"; exit 0; }
-    return 0
+rl = None; err = ""
+for line in sys.stdin:
+    try:
+        d = json.loads(line)
+    except ValueError:
+        continue
+    if not isinstance(d, dict):
+        continue
+    if d.get("type") == "rate_limit_event":
+        rl = d.get("rate_limit_info") or {}
+    elif d.get("type") == "assistant" and d.get("error") and not err:
+        err = str(d["error"])
+    elif d.get("type") == "result" and d.get("is_error"):
+        err = " ".join(str(x) for x in (d.get("api_error_status"), d.get("api_error_code"), d.get("result")) if x)
+err = " ".join(err.replace("|", "/").split())[:300]
+if rl is None:
+    print("|||" + err)
+else:
+    w = rl.get("unifiedWindows") or {}
+    m = max([v.get("utilization") or 0 for v in w.values()] or [0])
+    print("%s|%.2f|%s|%s" % (rl.get("status"), m, " ".join("%s=%.2f" % (k, v.get("utilization") or 0) for k, v in w.items()), err))' )
+  IFS='|' read -r rl_status rl_util rl_windows probe_err <<EOF
+$out
+EOF
+  if [ -n "$probe_err" ]; then
+    if [ "$preflight_only" = 1 ]; then
+      python3 -c 'import json, sys; print(json.dumps({"model": sys.argv[1], "status": "probe_error", "would_start": False, "note": sys.argv[2]}))' "$model" "$probe_err"
+      exit 2
+    fi
+    echo "!!! usage preflight $model: the probe call failed ($probe_err); not starting. GATE_USAGE_OVERRIDE does not cover this: fix the credential." >&2
+    write_status infra_failed 2 probe-error
+    exit 2
   fi
-  rl_status=${out%% *}; rl_util=$(printf '%s' "$out" | awk '{print $2}')
+  if [ -z "$rl_status" ]; then
+    usage_unknown "no rate-limit event in the probe"; return 0
+  fi
+  out="$rl_status $rl_util $rl_windows"
   verdict=start
   if [ "${GATE_USAGE_OVERRIDE:-0}" != 1 ] && { [ "$rl_status" != allowed ] || awk -v u="$rl_util" -v m="$max" 'BEGIN{exit !(u > m)}'; }; then
     verdict=refuse
@@ -224,6 +270,22 @@ print(json.dumps({"model": sys.argv[2], "status": words[0], "max_utilization": f
     write_status infra_failed 2 usage
     exit 2
   fi
+}
+
+usage_unknown() { # note -> the probe could not read the usage windows: refuse unless GATE_USAGE_OVERRIDE=1
+  local start=false
+  [ "${GATE_USAGE_OVERRIDE:-0}" = 1 ] && start=true
+  if [ "$preflight_only" = 1 ]; then
+    printf '{"model": "%s", "status": "unknown", "would_start": %s, "note": "%s"}\n' "$model" "$start" "$1"
+    [ "$start" = true ] && exit 0 || exit 2
+  fi
+  if [ "$start" = true ]; then
+    echo "run_gate: usage preflight: $1; starting anyway (GATE_USAGE_OVERRIDE=1)" >&2
+    return 0
+  fi
+  echo "!!! usage preflight $model: $1; not starting. Check the credential, or set GATE_USAGE_OVERRIDE=1 to run anyway." >&2
+  write_status infra_failed 2 usage-unknown
+  exit 2
 }
 
 if [ "$preflight_only" = 1 ]; then

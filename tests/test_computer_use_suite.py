@@ -70,6 +70,9 @@ def test_suite_pins_name_the_gate_inputs() -> None:
     pins = _suite()["pins"]
     refs = {r["name"]: r for r in pins["references"]}
     assert refs["claude-code"]["agent"] == "claude-code" and refs["claude-code"]["disallowed_tools"]
+    assert refs["codex"]["agent"] == "codex" and refs["codex"]["version"]
+    assert (SUITE.parents[1] / "scripts" / "computer-use" / "codex-gate.toml").is_file()
+    assert set(pins["agent_rows"]) == {r["agent"] for r in pins["references"]}
     assert refs["claude"]["agent"] == "computer-1" and refs["claude"]["model"].startswith(
         "anthropic/"
     )
@@ -138,8 +141,10 @@ def test_task_config_shape(task: Path) -> None:
     assert cfg["verifier"]["environment_mode"] == "separate"
     assert cfg["verifier"]["network_mode"] == "no-network"
     assert cfg["verifier"]["collect"], f"{task.name}: a [[verifier.collect]] hook is required"
-    # Setup may use the network (Claude Code installs itself); the run may not,
-    # beyond the API host the subscription reference talks to.
+    # Setup may use the network (Claude Code and Codex install themselves); the
+    # run may not, beyond the API host the claude-code reference talks to. The
+    # codex reference's hosts are added per run by run_gate.sh
+    # (--allow-agent-host), not written into the tasks.
     assert cfg["environment"]["network_mode"] in {"no-network", "public"}
     if cfg["environment"]["network_mode"] == "public":
         assert cfg["agent"]["network_mode"] == "allowlist"

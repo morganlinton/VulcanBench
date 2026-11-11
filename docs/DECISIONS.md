@@ -7,6 +7,91 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-10: ComputerUse v1's second reference is Codex with GPT-6.1 Sol on the ChatGPT subscription, through the same MCP computer tools
+
+### Decision
+The owner chose the milestone 5 scope in chat on 2026-11-10: add a Codex
+row on the ChatGPT subscription driving the suite's MCP computer tools,
+measure all 14 candidates at n=3 under `pixels` on both subscription rows,
+compose the admitted set and write the first `suite.lock.json`. The design
+calls below were made by the agent while building the row, for the owner to
+review (owner instruction of 2026-11-10: make reversible design calls, log
+them here, keep going).
+
+- **Model and pins.** `gpt-6.1-sol` at `medium` on Codex CLI 0.159.0
+  (`pins.references[codex]`). GPT-6.1 Sol is the top OpenAI model in Codex
+  on the subscription; `medium` matches the claude-code row; 0.159.0 is the
+  pin every GPT-6.1 column on Frontier v4 ran on.
+- **Tools.** The row acts only through `mcp__computer__*`, as the claude-code
+  row does with its own tools disallowed. Two layers do this.
+  `scripts/computer-use/codex-gate.toml` turns off Codex's shell, view_image,
+  goals, image, sleep, subagent, web, connected-app, plugin, browser and
+  computer-use features. A one-model catalog
+  (`scripts/computer-use/codex_catalog.py`, built from `codex debug models`
+  on the gate host for each gate invocation, never committed) clears the two
+  catalog keys that add tools whatever the features say:
+  `apply_patch_tool_type` (the file editor) and `multi_agent_version` (the
+  subagent tools). The rest of the served entry (instructions, code-mode tool
+  mode, reasoning levels) is kept as served.
+- **Delivery.** Harbor uploads only config.toml, so `run_gate.sh` always runs
+  the codex row on a task copy (the mechanism the perception conditions
+  use) whose Dockerfile gains one `COPY` of the catalog to
+  `/opt/vbdesk/codex-catalog.json`. A copy of the catalog is kept next to the
+  status file as `<job>.codex-catalog.json`.
+- **Network.** `chatgpt.com`, `auth.openai.com` and `api.openai.com` are
+  added per run with `--allow-agent-host`; the tasks keep their
+  `api.anthropic.com` allowlist.
+- **Guard.** A trial whose `codex.txt` shows a shell command, file change,
+  web search, subagent or image generation stops the run as
+  `tool-surface:<trial>`; such trials are not results.
+- **Final message.** `collect-agent-final.sh` reads Codex's last
+  `agent_message` so the safety track can tell "stopped and asked" from
+  "did it". The base image was rebuilt for this; package and pip layers came
+  from cache (`pins.images`).
+
+### Evidence
+- Probed on 2026-11-10 with no quota spent: Codex 0.159.0 in the task image
+  against a local stand-in for the Responses API that logs each request's
+  tool list, with a stub of the computer MCP server. With default settings
+  the model is offered `exec_command`, `write_stdin`, `view_image`, the
+  subagent tools and the goal tools next to the MCP tools. With the features
+  off and the real GPT-6.1 Sol catalog entry, Codex runs in code mode: the
+  model gets `exec` (JavaScript in an isolate with no file system, network or
+  console), `wait` and `request_user_input`, and `exec` can call
+  `apply_patch` and spawn subagents because the catalog entry asks for them.
+  With the locked catalog the tools `exec` can call are the
+  `mcp__computer__*` tools, MCP resource listing and a clock, and a
+  screenshot taken through `exec` reaches the model as an `input_image`.
+- `include_apply_patch_tool = false` did not remove `apply_patch` for a model
+  whose catalog entry sets it (gpt-5.5's bundled entry, same probe).
+- An OpenAI API row (OpenAI's native computer-use tool, or computer-1 with an
+  OpenAI provider) needs an API key the gate host does not have, as the
+  Anthropic computer-1 row does.
+
+### What differs from the claude-code row
+Code mode lets one model call run a short JavaScript program that takes
+several screenshots and actions in sequence; the claude-code row makes one
+tool call per action. That is how Codex ships for this model, so it is
+measured as is and reported as a separate row, never pooled with
+claude-code. Not verified offline: whether Codex 0.159.0 refetches the
+remote catalog over the configured one when talking to the real backend
+(the stand-in showed the local catalog in effect and no catalog request).
+The tool-surface guard is the backstop.
+
+### Revisit triggers
+- A tool-surface stop on any trial: fix the config or catalog before any
+  codex number is used.
+- A newer Codex pin, or a GPT model newer than GPT-6.1 Sol, before the
+  first freeze.
+- An OpenAI API key on the gate host: the charter's API row then runs too.
+
+### What this touched
+`scripts/computer-use/run_gate.sh`, `scripts/computer-use/codex-gate.toml`,
+`scripts/computer-use/codex_catalog.py`, `scripts/computer-use/summarize_gate.py`
+(`--ref codex`), `sandbox/computer-use/collect-agent-final.sh`,
+`tasks/computer-use-v1/suite.json` (`pins.references`, `pins.agent_rows`,
+`pins.images`), tests, `docs/COMPUTER_USE_CHARTER.md`.
+
 ## 2026-11-10: Fable 5.2 Low to Extra high is judged by Muse Spark 1.3 and Grok 4.6 (v3.30) while Max waits
 
 ### Decision

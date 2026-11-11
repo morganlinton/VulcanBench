@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ComputerUse v1 reference-model gate runner (docs/COMPUTER_USE_CHARTER.md).
 #
-# usage: scripts/computer-use/run_gate.sh <claude-code|claude> <task> [<task> ...]
+# usage: scripts/computer-use/run_gate.sh <claude-code|codex|claude> <task> [<task> ...]
 #        scripts/computer-use/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/computer-use/run_gate.sh <ref> [<task>]
 #
-# Sibling of scripts/frontier-v5/run_gate.sh for tasks/computer-use-v1. Two
-# references, two agent rows (suite.json pins.agent_rows):
+# Sibling of scripts/frontier-v5/run_gate.sh for tasks/computer-use-v1. Three
+# references, three agent rows (suite.json pins.agent_rows):
 #
 #   claude-code  harbor -a claude-code -m <pins.references[claude-code].model>
 #                --effort <CU_GATE_EFFORT, default medium>, Claude Code on the
@@ -19,6 +19,26 @@
 #                CLAUDE_CODE_OAUTH_TOKEN=...), or FABLE_AUTH=api for an
 #                ANTHROPIC_API_KEY line in that file. The same one-turn usage
 #                preflight runs first and refuses above GATE_USAGE_MAX.
+#   codex        harbor -a codex -m <pins.references[codex].model> --effort
+#                <CU_GATE_EFFORT, default medium>, Codex CLI
+#                <pins.references[codex].version> on the ChatGPT subscription,
+#                acting only through the task's MCP computer tools. Auth as
+#                the Frontier v5 gate: Harbor injects the auth.json that
+#                CODEX_AUTH_JSON_PATH (set in harbor's environment, never
+#                --ae) names: CU_GATE_CODEX_AUTH, else a dedicated gate login
+#                at ~/.config/vulcanbench/codex-gate/auth.json, else
+#                ~/.codex/auth.json. chatgpt.com, auth.openai.com and
+#                api.openai.com are added to the task's agent allowlist with
+#                --allow-agent-host. Codex's own tools are turned off by
+#                scripts/computer-use/codex-gate.toml (--ak config=...) and by
+#                a one-model catalog that clears apply_patch and the
+#                subagent tools, built once per gate invocation by
+#                scripts/computer-use/codex_catalog.py from `codex debug
+#                models` on this host (CU_GATE_CODEX_CATALOG_SOURCE names a
+#                file instead) and copied into every job's task copy (see
+#                the condition note below; the codex row always runs a
+#                copy, whose Dockerfile gains one COPY of the catalog) and
+#                next to the status file as <job>.codex-catalog.json.
 #   claude       harbor -a computer-1 -m <pins.references[claude].model>,
 #                Anthropic's native computer-use tool called from this host,
 #                so the only credential is ANTHROPIC_API_KEY= in CU_GATE_ENV
@@ -26,7 +46,7 @@
 #                sourced into this script's environment so harbor inherits
 #                it. computer-1 kwargs come from pins.agent_kwargs.
 #
-# CU_GATE_MODEL overrides either model; CU_GATE_AGENT_KWARGS (space-separated
+# CU_GATE_MODEL overrides any model; CU_GATE_AGENT_KWARGS (space-separated
 # key=value) overrides the computer-1 kwargs. Credentials are never passed
 # with --ae, never put in the container by this script, never printed. Every
 # attempt runs to the end: there is no early exit, and one trial runs at a
@@ -37,11 +57,17 @@
 # vulcanbench/sandbox:cu-base image present, the task directory, a resolved
 # model, the reference's credential file; for claude the anthropic SDK in
 # harbor's own python (the harbor[computer-1] extra), for claude-code the
-# usage preflight.
+# usage preflight, for codex the codex CLI on this host (for the catalog).
 #
 # Infrastructure guard: an auth, quota, rate-limit, missing-SDK or desktop
 # bring-up failure in a trial's agent logs, trial log or the job log stops
 # the whole run; such trials are not gate results.
+#
+# Tool-surface guard (codex): an event in a trial's codex.txt for a tool the
+# row must not have (a shell command, a file change, a web search, a
+# subagent, an image generation) stops the run with stop_reason
+# tool-surface:<trial>; such trials are not gate results either, and the
+# settings that let the tool through are a defect to fix before rerunning.
 #
 # The status file, solve counting, sandbox sweep, harbor stop and signal
 # handling are copied from scripts/frontier-v5/run_gate.sh so that
@@ -63,18 +89,20 @@
 # added to the MCP server's args in task.toml, and harbor runs that copy (as
 # scripts/computer-use/validate_task.py installs a cheat probe). The copy is
 # recorded in the status file (task_dir) and the condition in the job name
-# and in the status file (condition). The claude-code reference only:
-# computer-1 brings its own tool, which the suite does not change.
+# and in the status file (condition). The claude-code and codex references
+# only (both use the suite's MCP computer tools): computer-1 brings its own
+# tool, which the suite does not change.
 # Exit codes: 0 done, 1 infrastructure failure, 2 refused before harbor
 # started, 130 stopped on a signal.
 set -u
 if [ "${1:-}" = --refs ]; then
   echo '{"name": "claude-code", "agent": "claude-code", "auth": "subscription", "model": "pins.references[claude-code].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
+  echo '{"name": "codex", "agent": "codex", "auth": "subscription", "model": "pins.references[codex].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
   echo '{"name": "claude", "agent": "computer-1", "auth": "api-key", "model": "pins.references[claude].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
-ref="${1:?usage: run_gate.sh <claude-code|claude> <task> [<task> ...]}"; shift
+ref="${1:?usage: run_gate.sh <claude-code|codex|claude> <task> [<task> ...]}"; shift
 [ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "cu-gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 export PATH="$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -116,6 +144,30 @@ case "$ref" in
     [ -f "$envf" ] || { echo "cu-gate: $envf missing (one line CLAUDE_CODE_OAUTH_TOKEN=... from \`claude setup-token\`)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
+  codex)
+    agent=codex
+    model="${CU_GATE_MODEL:-$(pin codex model)}"
+    version="${CU_GATE_CODEX_VERSION:-$(pin codex version)}"
+    [ -n "$model" ] || { echo "cu-gate: no model: set CU_GATE_MODEL or pins.references[codex].model in $suite_json" >&2; exit 2; }
+    [ -n "$version" ] || { echo "cu-gate: no Codex version: pins.references[codex].version in $suite_json" >&2; exit 2; }
+    codex_cfg="$here/scripts/computer-use/codex-gate.toml"
+    [ -f "$codex_cfg" ] || { echo "cu-gate: $codex_cfg missing" >&2; exit 2; }
+    effort_label="${CU_GATE_EFFORT:-medium}"
+    effort_args=(--effort "$effort_label")
+    extra_ak=(--ak "version=$version" --ak "config=$codex_cfg")
+    # The ChatGPT backend and its token refresh, on top of each task's agent
+    # allowlist (which names only the claude-code reference's API host); the
+    # Frontier v5 tasks allow the same three.
+    for h in chatgpt.com auth.openai.com api.openai.com; do extra_ak+=(--allow-agent-host "$h"); done
+    # A dedicated gate login when it exists, else the personal one (as the
+    # Frontier v5 gate); harbor reads the file CODEX_AUTH_JSON_PATH names.
+    codex_auth="${CU_GATE_CODEX_AUTH:-$HOME/.config/vulcanbench/codex-gate/auth.json}"
+    if [ ! -f "$codex_auth" ]; then
+      [ -n "${CU_GATE_CODEX_AUTH:-}" ] && { echo "cu-gate: CU_GATE_CODEX_AUTH=$codex_auth missing" >&2; exit 2; }
+      codex_auth="$HOME/.codex/auth.json"
+    fi
+    [ -f "$codex_auth" ] || { echo "cu-gate: $codex_auth missing; run \`codex login\`" >&2; exit 2; }
+    auth_env=(CODEX_AUTH_JSON_PATH="$codex_auth") ;;
   claude)
     agent=computer-1
     model="${CU_GATE_MODEL:-$(pin claude model)}"
@@ -124,11 +176,11 @@ case "$ref" in
     [ -f "$envf" ] || { echo "cu-gate: $envf missing (one line ANTHROPIC_API_KEY=...)" >&2; exit 2; }
     grep -q '^ANTHROPIC_API_KEY=.' "$envf" || { echo "cu-gate: $envf has no ANTHROPIC_API_KEY= line" >&2; exit 2; }
     set -a; . "$envf"; set +a ;;
-  *) echo "cu-gate: reference must be claude-code or claude" >&2; exit 2 ;;
+  *) echo "cu-gate: reference must be claude-code, codex or claude" >&2; exit 2 ;;
 esac
 
-if [ "$condition" != pixels+zoom ] && [ "$agent" != claude-code ]; then
-  echo "cu-gate: CU_GATE_CONDITION=$condition applies to the claude-code reference only (computer-1 brings its own tool)" >&2; exit 2
+if [ "$condition" != pixels+zoom ] && [ "$agent" = computer-1 ]; then
+  echo "cu-gate: CU_GATE_CONDITION=$condition applies to the claude-code and codex references only (computer-1 brings its own tool)" >&2; exit 2
 fi
 
 # computer-1 kwargs: CU_GATE_AGENT_KWARGS (space-separated key=value) wins,
@@ -144,6 +196,8 @@ fi
 [ -n "$kwargs" ] || kwargs="max_turns=200 desktop_width=1024 desktop_height=900 window_width=1024 window_height=900 start_url=http://127.0.0.1:8000/"
 if [ "$agent" = computer-1 ]; then
   for kv in $kwargs; do ak_args+=(--ak "$kv"); done
+elif [ "$agent" = codex ]; then
+  kwargs="(codex: tools from the task's MCP server; config=$(basename "$codex_cfg"); version=$version)"
 else
   kwargs="(claude-code: tools from the task's MCP server; disallowed=$disallowed)"
 fi
@@ -159,6 +213,9 @@ preflight() { # host checks; prints one problem per line, returns 1 on any
     "$hpy" -c 'import anthropic' 2>/dev/null || { echo "cu-gate: harbor's python cannot import anthropic; run scripts/computer-use/setup-host.sh" >&2; rc=1; }
   fi
   docker image inspect "$IMAGE" >/dev/null 2>&1 || { echo "cu-gate: $IMAGE not built (make sandbox-image-computer-use)" >&2; rc=1; }
+  if [ "$agent" = codex ] && [ -z "${CU_GATE_CODEX_CATALOG_SOURCE:-}" ]; then
+    command -v codex >/dev/null || { echo "cu-gate: no codex CLI on PATH (needed for \`codex debug models\`; or set CU_GATE_CODEX_CATALOG_SOURCE)" >&2; rc=1; }
+  fi
   return $rc
 }
 
@@ -224,12 +281,25 @@ print(json.dumps({"ref": sys.argv[1], "agent": sys.argv[2], "model": sys.argv[3]
   exit 0
 fi
 
+# codex: one locked catalog for the whole invocation, copied into each job.
+codex_catalog=""
+if [ "$agent" = codex ]; then
+  codex_catalog="$OUT/codex-catalog-$(date -u '+%Y%m%dT%H%M%SZ')-$$.json"
+  catalog_line=$(python3 "$here/scripts/computer-use/codex_catalog.py" --model "$model" --out "$codex_catalog" \
+    ${CU_GATE_CODEX_CATALOG_SOURCE:+--source "$CU_GATE_CODEX_CATALOG_SOURCE"}) \
+    || { echo "cu-gate: could not build the codex catalog for $model" >&2; exit 2; }
+  echo "=== codex catalog: $catalog_line"
+fi
+
 # Exact failure texts: vendor auth and quota errors and the missing provider
 # SDK (computer-1); the Claude Code auth, model and usage messages the
 # Frontier gate matches; computer-1's desktop bring-up timeouts and the MCP
 # server's display failure (harbor/agents/computer_1/runtime.py,
 # sandbox/computer-use/ensure-display.sh).
-INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model'
+INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model|refresh_token_reused|Your access token could not be refreshed|unexpected status 401|usage_limit_reached'
+# Codex exec --json item types for tools the codex row must not have (the
+# tool-surface guard; codex.txt only).
+SURFACE_RE='"type": ?"(command_execution|file_change|web_search|collab_tool_call|image_generation)"'
 
 # --- copied from scripts/frontier-v5/run_gate.sh (status file, solves, sweep, stop, signals) ---
 job=""; t=""; task=""; status_file=""; hpid=""; hcode=""; started_at=""
@@ -288,6 +358,15 @@ stop_sandboxes() { # task name -> remove this task's leftover sandbox containers
   return 0
 }
 
+surface_hit() { # job dir -> prints the first trial whose codex log shows a tool the row must not have
+  local tr
+  [ "$agent" = codex ] || return 0
+  for tr in "$1"/*__*; do
+    [ -f "$tr/agent/codex.txt" ] || continue
+    if grep -qE "$SURFACE_RE" "$tr/agent/codex.txt" 2>/dev/null; then basename "$tr"; return; fi
+  done
+}
+
 infra_hit() { # job dir -> prints the first trial (or "job-log") with an infrastructure failure
   local tr
   for tr in "$1"/*__*; do
@@ -344,26 +423,38 @@ print(json.load(open(sys.argv[1])).get("pins", {}).get("start_urls", {}).get(sys
   job="cu-$ref-$t$suffix"
   [ "$condition" != pixels+zoom ] && job="cu-$ref-$t-$condition$suffix"
   [ -e "$OUT/jobs/$job" ] && { echo "cu-gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
-  if [ "$condition" != pixels+zoom ]; then
-    # harbor runs a copy of the task whose MCP computer tools start under the condition
-    task=$(python3 - "$task" "$OUT/task-copies/$job" "$condition" <<'PYCOPY'
+  if [ "$condition" != pixels+zoom ] || [ -n "$codex_catalog" ]; then
+    # harbor runs a copy of the task: its MCP computer tools start under the
+    # condition, and for codex its image carries the locked catalog
+    task=$(python3 - "$task" "$OUT/task-copies/$job" "$condition" "$codex_catalog" <<'PYCOPY'
 import re, shutil, sys
 from pathlib import Path
-src, dest_root, condition = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+src, dest_root, condition, catalog = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3], sys.argv[4]
 copy = dest_root / src.name
 if dest_root.exists():
     shutil.rmtree(dest_root)
 shutil.copytree(src, copy, ignore=shutil.ignore_patterns("__pycache__"))
 toml = copy / "task.toml"
 text = toml.read_text()
-if "mcp_servers" in text:
+if condition != "pixels+zoom" and "mcp_servers" in text:
     text, n = re.subn(r'("/opt/vbdesk/vb_computer_mcp.py")', r'\1, "--condition", "%s"' % condition, text, count=1)
     if n != 1:
         sys.exit("cu-gate: %s has mcp_servers but no vb_computer_mcp.py args to extend" % toml)
 toml.write_text(text)
+if catalog:
+    env = copy / "environment"
+    shutil.copy(catalog, env / "codex-catalog.json")
+    dockerfile = env / "Dockerfile"
+    dockerfile.write_text(
+        dockerfile.read_text().rstrip("\n")
+        + "\n\n# Added by scripts/computer-use/run_gate.sh for the codex reference: the locked\n"
+        + "# one-model catalog scripts/computer-use/codex-gate.toml names.\n"
+        + "COPY codex-catalog.json /opt/vbdesk/codex-catalog.json\n"
+    )
 print(copy)
 PYCOPY
 ) || exit 2
+    [ -n "$codex_catalog" ] && cp "$codex_catalog" "$OUT/$job.codex-catalog.json"
   fi
   status_file="$OUT/$job.status.json"; hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   write_status preflight
@@ -396,6 +487,14 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
       write_status stopped "$hcode" "signal-$stop_flag"
       exit 130
     fi
+    bad=$(surface_hit "$OUT/jobs/$job")
+    if [ -n "$bad" ]; then
+      echo "!!! $t: tool-surface breach in $bad (codex.txt matches: $SURFACE_RE); stopping the run"
+      write_status stopping "" "tool-surface:$bad"
+      stop_harbor
+      write_status infra_failed "$hcode" "tool-surface:$bad"
+      echo "!!! move $OUT/jobs/$job aside as INFRA-..., fix scripts/computer-use/codex-gate.toml or the catalog, and rerun"; exit 1
+    fi
     bad=$(infra_hit "$OUT/jobs/$job")
     if [ -n "$bad" ]; then
       echo "!!! $t: infrastructure failure in $bad (matches: $INFRA_RE); stopping the run"
@@ -407,6 +506,8 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
   done
   if [ -z "$hcode" ]; then wait "$hpid" 2>/dev/null; hcode=$?; fi
   stop_sandboxes "$t"
+  bad=$(surface_hit "$OUT/jobs/$job")
+  [ -n "$bad" ] && { echo "!!! $t: tool-surface breach in $bad; not a gate result"; write_status infra_failed "$hcode" "tool-surface:$bad"; exit 1; }
   bad=$(infra_hit "$OUT/jobs/$job")
   [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; write_status infra_failed "$hcode" "infra:$bad"; exit 1; }
   print_trials "$OUT/jobs/$job"

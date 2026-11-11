@@ -1,5 +1,8 @@
 # Frontier v5: continuing on another host
 
+For the release 1 confirmation runs as of 2026-11-10 (moved to Codex), read
+[HANDOFF-r1-confirmation.md](HANDOFF-r1-confirmation.md) first.
+
 State and setup for picking Frontier v5 up on a fresh machine (written
 2026-10-21 when moving from the M2 Pro Mac to the Mac Studio). Read this,
 then NIGHT-STATUS.md and GATE-LOG.md.

@@ -503,7 +503,7 @@ _SKIP_DESTS = {
 }  # fmt: skip
 
 
-def rtf_paragraphs(path: Path) -> list[Para]:
+def rtf_paragraphs(path: Path) -> list[Para]:  # noqa: PLR0912, PLR0915 - one tokenizer loop
     """The paragraphs of an RTF file as TextEdit writes it, with per-paragraph
     bold, point sizes and list membership. Enough of RTF for that: groups,
     \\b, \\fs, \\pard, \\lsN, \\par (or a backslash before a newline),

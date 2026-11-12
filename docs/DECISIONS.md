@@ -7,6 +7,44 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-10: VulcanBench Frontier v5 release 1 closes with GPT-6 Astra as its sole confirmation reference
+
+### Decision
+
+The owner amended decision (m) for release 1. Publish the three GPT-6 Astra
+attempts on each of the seven frozen tasks. Record Claude Opus 5.5 as
+**not run** because the owner declined the cost of the 21 Opus attempts.
+This closes the release 1 confirmation. The version 1.0.0 lock names both
+references and records the original pins.
+
+### Evidence
+
+- All seven Astra jobs at `bench/2026-11-02-frontier-v5-r1-confirmation`
+  completed with three scored attempts apiece. The result was 0 complete
+  passes in 21 attempts.
+- On 2026-11-03 the Claude account's organization had disabled subscription
+  access for Claude Code. The usage probe received no rate-limit event and
+  allowed the launch. The infrastructure guard missed the
+  `oauth_org_not_allowed` error. All 21 trial records carried a zero even
+  though every trial stopped before its first model call. All 21 are void.
+  The local evidence is in `~/vulcanbench-confirm/jobs/INFRA-2026-11-03-*`
+  and the matching logs under `~/vulcanbench-confirm/`.
+- PR #288 (`87d23f69`) fixed both checks. A missing usage event now blocks
+  the launch unless explicitly overridden. A probe error blocks it even
+  with the override. The updated guard matched all 21 voided trial logs and
+  none of the earlier gate trials reviewed.
+
+### Revisit triggers
+
+A later Opus measurement requires a new funding decision and explicit
+approval for that run. Record its actual account conditions and bench tag
+alongside the Astra conditions if it is added.
+
+### What this touched
+
+This entry and the [release 1 confirmation results](results/frontier-v5-r1-astra-2026-11.md).
+PR #288 delivered the runner fix separately.
+
 ## 2026-11-10: Fable 5.2 Low to Extra high is judged by Muse Spark 1.3 and Grok 4.6 (v3.30) while Max waits
 
 ### Decision

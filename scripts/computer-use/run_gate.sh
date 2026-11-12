@@ -368,9 +368,11 @@ stop_sandboxes() { # task name -> remove this task's leftover sandbox containers
   for n in $(docker network ls -q --filter "name=^${prefix}__" 2>/dev/null); do docker network rm "$n" >/dev/null 2>&1; done
   if [ "$macos" = 1 ]; then
     # A trial VM the environment could not delete (harbor stopped mid-run).
-    # Sweeps run one trial at a time, so a stopped trial VM is a leftover.
+    # Sweeps run one trial at a time, so a stopped trial VM of this task is a
+    # leftover; other tasks' VMs (a validation running beside the sweep, its
+    # VM stopped while the disk is read) are left alone.
     local vm
-    for vm in $(tart list 2>/dev/null | awk '$2 ~ /^vbmac-trial-/ && $NF == "stopped" {print $2}'); do
+    for vm in $(tart list 2>/dev/null | awk -v p="vbmac-trial-$1-" '$NF == "stopped" && index($2, p) == 1 {print $2}'); do
       echo "--- $1: deleting leftover VM $vm"; tart delete "$vm" >/dev/null 2>&1
     done
   fi

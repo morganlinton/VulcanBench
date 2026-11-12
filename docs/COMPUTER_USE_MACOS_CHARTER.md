@@ -2,7 +2,8 @@
 
 Status: **draft, 2026-11-11; milestone 1 (infrastructure) built; milestone 2
 built four validated pilot tasks and ran the pilot on 2026-11-12 (results in
-docs/results/computer-use-macos-v1-pilot/).** The owner asked for a computer-use suite focused
+docs/results/computer-use-macos-v1-pilot/); milestone 3 (approved
+2026-11-12) adds harder candidates and n=3 admission.** The owner asked for a computer-use suite focused
 on macOS after the Linux suite (`tasks/computer-use-v1`, see
 [COMPUTER_USE_CHARTER.md](COMPUTER_USE_CHARTER.md)) saturated: both reference
 rows solved every capability task at n=1 (PR 293). The Linux suite stays as
@@ -52,7 +53,9 @@ from day one: every capability task carries a reason a strong agent can fail.
 - **Grading** reads the stopped VM's disk: the collect hook shuts the guest
   down through System Events (apps quit and save), mounts the disk read-only
   on the host and copies the paths the task names. Checkers use
-  `sandbox/computer-use/mac_state.py`.
+  `sandbox/computer-use/mac_state.py`. State the host cannot read from the
+  disk (a root-only directory record) comes from read-only guest probes
+  run just before shutdown.
 - **Images are a recipe**, not a published artifact:
   `scripts/computer-use-macos/build_base.py` (guest agent, Automation grants
   for seeding, a deterministic desktop, an ordinary identity, a password the
@@ -62,7 +65,9 @@ from day one: every capability task carries a reason a strong agent can fail.
 ## What the agent can and cannot do
 
 - It sees the screen and acts with screenshot, click, double and triple
-  click, drag, scroll, type and key. Typed text is US-keyboard ASCII (the VNC
+  click, drag, scroll, type and key. Click and drag take held modifier keys
+  (Command-click selection, Option-drag, a hot corner chosen with Command
+  held). Typed text is US-keyboard ASCII (the VNC
   server maps key codes); tasks do not require other characters. The VZ VNC
   server carries no scroll-wheel events, so scrolling is posted inside the
   guest (`vbscroll`, through the environment's per-trial endpoint); the

@@ -172,6 +172,10 @@ class Reminder:
     all_day: bool
     completed: bool
     deleted: bool
+    pk: int = 0
+    parent: int | None = None  # Z_PK of the reminder this is a subtask of
+    flagged: bool = False
+    priority: int = 0  # 0 none, 1 high, 5 medium, 9 low
 
     @property
     def due_date(self) -> date | None:
@@ -190,16 +194,20 @@ def reminders(root: Path) -> list[Reminder]:
     for db in stores:
         con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
         try:
+            cols = _cols(con, "ZREMCDREMINDER")
+            opt = ", ".join(
+                f"r.{c}" if c in cols else "NULL" for c in ("ZPARENTREMINDER", "ZFLAGGED", "ZPRIORITY")
+            )
             rows = con.execute(
-                """SELECT r.ZTITLE, r.ZNOTES, l.ZNAME, r.ZDUEDATE, r.ZALLDAY, r.ZCOMPLETED,
-                          r.ZMARKEDFORDELETION, l.ZMARKEDFORDELETION
+                f"""SELECT r.ZTITLE, r.ZNOTES, l.ZNAME, r.ZDUEDATE, r.ZALLDAY, r.ZCOMPLETED,
+                          r.ZMARKEDFORDELETION, l.ZMARKEDFORDELETION, r.Z_PK, {opt}
                    FROM ZREMCDREMINDER r LEFT JOIN ZREMCDBASELIST l ON l.Z_PK = r.ZLIST"""
             ).fetchall()
         except sqlite3.DatabaseError:
             rows = []
         finally:
             con.close()
-        for title, notes_, lname, due, allday, done, gone, list_gone in rows:
+        for title, notes_, lname, due, allday, done, gone, list_gone, pk, parent, flag, prio in rows:
             out.append(
                 Reminder(
                     title=title or "",
@@ -209,6 +217,10 @@ def reminders(root: Path) -> list[Reminder]:
                     all_day=bool(allday),
                     completed=bool(done),
                     deleted=bool(gone) or bool(list_gone),
+                    pk=pk,
+                    parent=parent,
+                    flagged=bool(flag),
+                    priority=int(prio or 0),
                 )
             )
     return out
@@ -473,6 +485,124 @@ def saved_searches(root: Path) -> dict[str, dict]:  # type: ignore[type-arg]
     if not d.is_dir():
         return {}
     return {p.stem: read_plist(p) for p in sorted(d.glob("*.savedSearch"))}
+
+
+# -- RTF (TextEdit) -----------------------------------------------------------
+@dataclass
+class Para:
+    text: str
+    bold: bool  # every visible character is bold
+    sizes: set[float]  # point sizes of the visible characters
+    in_list: bool  # a list item (\lsN, as TextEdit's lists write)
+
+
+_RTF_TOKEN = None
+_SKIP_DESTS = {
+    "fonttbl", "colortbl", "expandedcolortbl", "stylesheet", "info", "listtable",
+    "listoverridetable", "pict", "header", "footer", "themedata", "colorschememapping",
+}  # fmt: skip
+
+
+def rtf_paragraphs(path: Path) -> list[Para]:
+    """The paragraphs of an RTF file as TextEdit writes it, with per-paragraph
+    bold, point sizes and list membership. Enough of RTF for that: groups,
+    \\b, \\fs, \\pard, \\lsN, \\par (or a backslash before a newline),
+    \\'hh and \\uN escapes; destinations (font and color tables, list
+    tables, \\* groups) and list markers ({\\listtext ...}) are skipped."""
+    import re  # noqa: PLC0415
+
+    global _RTF_TOKEN  # noqa: PLW0603
+    if _RTF_TOKEN is None:
+        _RTF_TOKEN = re.compile(
+            r"\\([a-zA-Z]+)(-?\d+)? ?|\\'([0-9a-fA-F]{2})|\\([^a-zA-Z])|([{}])|([^\\{}\r\n]+)|[\r\n]"
+        )
+    data = Path(path).read_bytes().decode("latin-1")
+    paras: list[Para] = []
+    chars: list[tuple[str, bool, float]] = []
+    in_list = False
+    stack: list[dict] = []  # type: ignore[type-arg]
+    st = {"b": False, "fs": 24, "skip": False, "uc": 1}
+    pending_skip = 0
+    first_in_group = False
+
+    def end_para() -> None:
+        nonlocal chars, in_list
+        text = "".join(c for c, _, _ in chars)
+        vis = [(c, b, s) for c, b, s in chars if not c.isspace()]
+        paras.append(
+            Para(
+                text=text.strip(),
+                bold=bool(vis) and all(b for _, b, _ in vis),
+                sizes={s for _, _, s in vis},
+                in_list=in_list,
+            )
+        )
+        chars = []
+
+    def emit(s: str) -> None:
+        nonlocal pending_skip
+        if st["skip"]:
+            return
+        for ch in s:
+            if pending_skip:
+                pending_skip -= 1
+                continue
+            chars.append((ch, st["b"], st["fs"] / 2))
+
+    for mt in _RTF_TOKEN.finditer(data):
+        word, num, hexd, sym, brace, text = mt.groups()
+        if brace == "{":
+            stack.append(dict(st))
+            first_in_group = True
+            continue
+        if brace == "}":
+            if stack:
+                st = stack.pop()
+            first_in_group = False
+            continue
+        was_first, first_in_group = first_in_group, False
+        if word is not None:
+            if was_first and (word in _SKIP_DESTS or word == "listtext"):
+                st["skip"] = True
+                if word == "listtext":
+                    in_list = True
+                continue
+            if word == "b":
+                st["b"] = num != "0"
+            elif word == "fs" and num:
+                st["fs"] = int(num)
+            elif word == "pard":
+                in_list = False
+            elif word == "ls":
+                in_list = True
+            elif word == "par" and not st["skip"]:
+                end_para()
+            elif word == "uc" and num:
+                st["uc"] = int(num)
+            elif word == "u" and num:
+                emit(chr(int(num) % 65536))
+                pending_skip = st["uc"]
+            elif word == "tab":
+                emit("\t")
+            continue
+        if sym is not None:
+            if sym == "*" and was_first:
+                st["skip"] = True
+            elif sym in "\n\r" and not st["skip"]:
+                end_para()
+            elif sym in "\\{}":
+                emit(sym)
+            elif sym == "~":
+                emit(" ")
+            continue
+        if hexd is not None:
+            emit(bytes([int(hexd, 16)]).decode("cp1252", errors="replace"))
+            continue
+        if text:
+            emit(text)
+    if chars:
+        end_para()
+    return [p for p in paras if p.text or p.in_list]
 
 
 # -- generic ----------------------------------------------------------------

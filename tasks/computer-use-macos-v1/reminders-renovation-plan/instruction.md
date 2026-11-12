@@ -1,0 +1,1 @@
+Organize my Kitchen renovation reminders: move the three "Order" reminders into a new list called "Ordering", flag "Choose a contractor" and "Book electrician for new outlets", give "Get three contractor quotes" high priority, and mark "Pick paint color" done, we chose it. Don't change anything else.

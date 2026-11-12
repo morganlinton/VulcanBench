@@ -45,7 +45,7 @@ if os.environ.get("VB_NO_GROUP") != "1":
     names = " or ".join(f'(first name is "{p[0]}" and last name is "{p[1]}")' for p in PEOPLE)
     G.run(
         "osascript -e 'tell application \"Contacts\"' -e 'set g to make new group with properties {name:\"Vendors\"}'"
-        f" -e 'repeat with p in (every person whose {names})' -e 'add p to g' -e 'end repeat'"
+        f" -e 'repeat with p in (every person whose {names})' -e 'add (contents of p) to g' -e 'end repeat'"
         " -e 'save' -e 'end tell'",
         wait=3,
     )

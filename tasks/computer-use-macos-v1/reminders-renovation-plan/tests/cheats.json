@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "two-of-three-moved", "solution": "gold", "env": {"VB_MOVE_TWO": "1"}, "expect": {"reward": 0, "moved_to_list": 0}},
+    {"name": "paint-deleted-not-completed", "solution": "gold", "env": {"VB_DELETE_PAINT": "1"}, "expect": {"reward": 0, "paint_done": 0}},
+    {"name": "medium-priority", "solution": "gold", "env": {"VB_PRIORITY": "5"}, "expect": {"reward": 0, "priority_high": 0}}
+  ]
+}

@@ -18,27 +18,27 @@ tell application "Calendar"
   make new calendar with properties {name:"Personal"}
   make new event at end of events of calendar "Work" with properties {summary:"Team standup", start date:(date "Monday, March 2, 2026 at 9:30:00 AM"), end date:(date "Monday, March 2, 2026 at 9:45:00 AM"), recurrence:"FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR"}
 end tell
-set mo to "Monday, March 16, 2026"
-set tu to "Tuesday, March 17, 2026"
-set we to "Wednesday, March 18, 2026"
-set th to "Thursday, March 19, 2026"
-set fr to "Friday, March 20, 2026"
-ev("Work", "Quarterly kickoff", mo, "10:00:00 AM", "11:30:00 AM")
-ev("Work", "Board prep", mo, "1:00:00 PM", "3:00:00 PM")
-ev("Work", "Customer visit: Northwind", mo, "3:30:00 PM", "5:00:00 PM")
-ev("Work", "Vendor call", tu, "10:30:00 AM", "11:00:00 AM")
-ev("Work", "Offsite planning", tu, "1:30:00 PM", "4:30:00 PM")
-ev("Personal", "School pickup", tu, "4:30:00 PM", "5:00:00 PM")
-ev("Work", "Interview: backend candidate", we, "11:15:00 AM", "12:00:00 PM")
-ev("Work", "Security review", we, "2:00:00 PM", "4:00:00 PM")
-ev("Work", "Roadmap review", th, "10:00:00 AM", "11:00:00 AM")
-ev("Work", "Design sync", th, "1:00:00 PM", "2:00:00 PM")
-ev("Work", "Hiring panel", th, "3:00:00 PM", "5:00:00 PM")
-ev("Personal", "Breakfast with Sam", fr, "8:30:00 AM", "9:30:00 AM")
-ev("Work", "Quarterly planning", fr, "9:45:00 AM", "12:00:00 PM")
-ev("Work", "Customer workshop", fr, "1:00:00 PM", "4:00:00 PM")
-ev("Personal", "Pharmacy pickup", fr, "4:00:00 PM", "4:30:00 PM")
-ev("Personal", "Dinner with Alex", th, "7:00:00 PM", "9:00:00 PM")
+set dMon to "Monday, March 16, 2026"
+set dTue to "Tuesday, March 17, 2026"
+set dWed to "Wednesday, March 18, 2026"
+set dThu to "Thursday, March 19, 2026"
+set dFri to "Friday, March 20, 2026"
+ev("Work", "Quarterly kickoff", dMon, "10:00:00 AM", "11:30:00 AM")
+ev("Work", "Board prep", dMon, "1:00:00 PM", "3:00:00 PM")
+ev("Work", "Customer visit: Northwind", dMon, "3:30:00 PM", "5:00:00 PM")
+ev("Work", "Vendor call", dTue, "10:30:00 AM", "11:00:00 AM")
+ev("Work", "Offsite planning", dTue, "1:30:00 PM", "4:30:00 PM")
+ev("Personal", "School pickup", dTue, "4:30:00 PM", "5:00:00 PM")
+ev("Work", "Interview: backend candidate", dWed, "11:15:00 AM", "12:00:00 PM")
+ev("Work", "Security review", dWed, "2:00:00 PM", "4:00:00 PM")
+ev("Work", "Roadmap review", dThu, "10:00:00 AM", "11:00:00 AM")
+ev("Work", "Design sync", dThu, "1:00:00 PM", "2:00:00 PM")
+ev("Work", "Hiring panel", dThu, "3:00:00 PM", "5:00:00 PM")
+ev("Personal", "Breakfast with Sam", dFri, "8:30:00 AM", "9:30:00 AM")
+ev("Work", "Quarterly planning", dFri, "9:45:00 AM", "12:00:00 PM")
+ev("Work", "Customer workshop", dFri, "1:00:00 PM", "4:00:00 PM")
+ev("Personal", "Pharmacy pickup", dFri, "4:00:00 PM", "4:30:00 PM")
+ev("Personal", "Dinner with Alex", dThu, "7:00:00 PM", "9:00:00 PM")
 tell application "Calendar" to quit
 OSA
 echo seeded-calendar

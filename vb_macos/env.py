@@ -111,7 +111,10 @@ class TartEnvironment(DockerEnvironment):
         self.vm_spec: dict[str, Any] | None = (
             json.loads(spec_path.read_text()) if spec_path.is_file() else None
         )
-        self.vm_name = f"vbmac-trial-{uuid.uuid4().hex[:10]}"
+        # vbmac-trial-<task>-<id>: the gate deletes leftover stopped trial VMs of
+        # its own task only, so a validation running beside a sweep keeps its VM.
+        slug = str((self.vm_spec or {}).get("image", "vbmac-task-x")).removeprefix("vbmac-task-")
+        self.vm_name = f"vbmac-trial-{slug}-{uuid.uuid4().hex[:10]}"
         self.vm_logs = Path(self.trial_paths.trial_dir) / "vm"
         self.vm: V.VM | None = None
         self.scroll: ScrollProxy | None = None

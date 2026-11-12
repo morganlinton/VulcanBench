@@ -6,8 +6,9 @@ sidebar list copied from the stopped VM.
 
 A Finder smart folder is a .savedSearch property list. Its RawQuery is the
 Spotlight query (Kind is PDF writes `_kMDItemGroupId = 11`; Name contains
-"invoice" writes `kMDItemDisplayName = "*invoice*"cdw`), and its search
-scope is in RawQueryDict.SearchScopes. The sidebar's favorites are bookmarks
+"invoice" writes `kMDItemDisplayName = "*invoice*"cd`), and its search
+scope is in RawQueryDict.SearchScopes (the Data volume path of
+~/Documents for a search scoped there). The sidebar's favorites are bookmarks
 in com.apple.LSSharedFileList.FavoriteItems.sfl*, whose path components
 include the saved search's file name.
 
@@ -44,7 +45,21 @@ METRICS = (
 )
 NAME = "Client invoices"
 SFL = f"{M.HOME}/Library/Application Support/com.apple.sharedfilelist"
-DOCS = {"/Users/admin/Documents", "/Users/admin/Documents/", "~/Documents"}
+DOCS_SUFFIX = "/Users/admin/Documents"
+
+
+def flat(xs: object) -> list[str]:
+    """SearchScopes is a list, sometimes of lists (Finder writes
+    [["/System/Volumes/Data/Users/admin/Documents"]])."""
+    if isinstance(xs, (list, tuple)):
+        return [y for x in xs for y in flat(x)]
+    return [str(xs)]
+
+
+def is_documents(path: str) -> bool:
+    p = path.rstrip("/")
+    return p == "~/Documents" or p.endswith(DOCS_SUFFIX)
+
 KIND_ATTRS = {"_kMDItemGroupId", "kMDItemContentType", "kMDItemContentTypeTree", "kMDItemKind"}
 NAME_ATTRS = {"kMDItemDisplayName", "kMDItemFSName"}
 PDF_TERMS = (
@@ -75,9 +90,9 @@ def main(argv: list[str]) -> int:
         extra["raw_query"] = raw
         m["pdf_only"] = int(any(p.search(raw) for p in PDF_TERMS))
         m["name_invoice"] = int(bool(NAME_TERM.search(raw)))
-        scopes = list((s.get("RawQueryDict") or {}).get("SearchScopes") or [])
+        scopes = flat((s.get("RawQueryDict") or {}).get("SearchScopes") or [])
         extra["scopes"] = scopes
-        m["documents_scope"] = int(bool(scopes) and all(str(x) in DOCS for x in scopes))
+        m["documents_scope"] = int(bool(scopes) and all(is_documents(x) for x in scopes))
         attrs = set(re.findall(r"\b(_?kMDItem\w+)", raw))
         extra["attributes"] = sorted(attrs)
         m["no_extra_criteria"] = int(bool(attrs) and attrs <= KIND_ATTRS | NAME_ATTRS)

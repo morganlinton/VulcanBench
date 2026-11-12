@@ -1,14 +1,14 @@
-"""settings-corners-shortcuts gold: System Settings only.
+"""settings-corners-shortcuts gold: System Settings, opened once from Terminal.
 
 Desktop & Dock: Minimized window animation -> Scale Effect; Hot Corners...:
 bottom-right -> Lock Screen, top-left -> Mission Control chosen with Command
 held (the menu is scrolled up first by hovering its top arrow). Each corner
 is set from a freshly opened Hot Corners sheet, closed with Escape: after a
 pick the sheet's Done button stopped responding in testing, while Escape
-closes it and keeps the choice. Keyboard (from the View menu: the settings
-search finds nothing without a Spotlight index): Keyboard Shortcuts... >
+closes it and keeps the choice. Keyboard: Keyboard Shortcuts... >
 App Shortcuts > + (Notes, "Checklist", Control-Command-L), then Text
-Replacements... > + ("addr;").
+Replacements... > + ("addr;"). Settings is reopened on the Keyboard pane
+from Terminal (`open x-apple.systempreferences:...`).
 
 Layout facts (1280x800 points, the task image's start state) are the
 coordinates below. Cheat variants: VB_NO_CMD=1 picks Mission Control
@@ -84,10 +84,13 @@ if os.environ.get("VB_TR_LOCK") == "1":
     B.key("escape")
     time.sleep(1.5)
 
-B.click(237, 14, "left", 1)  # View menu
-time.sleep(1.5)
-B.click(265, 406, "left", 1)  # Keyboard
+# Reopen Settings straight into Keyboard: switching panes in place left the
+# previous pane's content on screen for several seconds in testing.
+B.key("cmd+q")
 time.sleep(3)
+G.open_terminal()
+G.run('open "x-apple.systempreferences:com.apple.Keyboard-Settings.extension"', wait=10)
+G.shot("keyboard-pane")
 B.click(901, 352, "left", 1)  # Keyboard Shortcuts...
 time.sleep(2.5)
 B.click(392, 521, "left", 1)  # App Shortcuts

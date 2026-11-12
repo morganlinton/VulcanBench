@@ -43,6 +43,30 @@ macOS tasks, then n=3 admission on both reference rows, then the first
   session first, as trials already did.
 - **The pilot tasks stay as candidates.** They are easy for both rows at
   n=1; admission at n=3 decides whether any stays as a deliberate anchor.
+  Their pilot trial counts as the first attempt, so each pilot task gets
+  two more per row (16 trials) rather than three.
+- **Some golds work through Terminal.** A gold proves that the checker
+  accepts a correct end state and that every scripted shortcut fails; it
+  does not have to take the agent's route. Where the end state is the same
+  either way (an event made through Calendar's AppleScript, files renamed
+  with `mv`, a PDF assembled with PDFKit, which Preview uses, an RTF written
+  by AppKit's own writer through `textutil`), the gold types the commands
+  into Terminal and answers the macOS privacy and Automation prompts that
+  raises (`scripts/computer-use-macos/goldlib.py`). Golds whose difficulty
+  is the UI itself (hot corners with a held modifier, Contacts' Merge
+  Selected Cards, the smart folder's criteria rows) drive the UI. An agent
+  may use Terminal too: that is operating the Mac, and checkers grade the
+  end state an app reads, not the route (text replacements are read from
+  the store the keyboard services use, not from the preferences mirror a
+  `defaults write` would fake).
+- **Guest probes for state the host cannot read.** The collect step can run
+  read-only commands a task names in `vm.json` ("probes") as the logged-in
+  user before shutdown; the installer task reads the account's failed
+  authentication count with `dscl` (the directory record is root-only on
+  the mounted disk). Probes never change guest state.
+- **One sweep at a time, second VM for building.** Admission trials run one
+  at a time as before; Apple's two-VM limit leaves the second slot for
+  image builds and validation while a sweep runs.
 
 ### Status
 

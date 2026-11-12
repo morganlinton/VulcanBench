@@ -300,6 +300,181 @@ def events(root: Path) -> list[Event]:
     ]
 
 
+# -- Contacts ---------------------------------------------------------------
+CONTACTS_DB = f"{HOME}/Library/Application Support/AddressBook/AddressBook-v22.abcddb"
+_ENT_CONTACT, _ENT_GROUP = "ABCDContact", "ABCDGroup"
+
+
+def _label(raw: str | None) -> str:
+    """'_$!<Mobile>!$_' (a built-in label) or 'mobile' -> 'mobile'."""
+    s = (raw or "").strip()
+    if s.startswith("_$!<") and s.endswith(">!$_"):
+        s = s[4:-4]
+    return s.lower()
+
+
+def phone_key(number: str) -> str:
+    """A phone number compared by its last ten digits."""
+    digits = "".join(ch for ch in number if ch.isdigit())
+    return digits[-10:]
+
+
+@dataclass
+class Contact:
+    pk: int
+    first: str
+    last: str
+    org: str
+    title: str
+    nickname: str
+    phones: list[tuple[str, str]]  # (label, number)
+    emails: list[tuple[str, str]]  # (label, address)
+    addresses: list[dict]  # type: ignore[type-arg]
+    note: str
+    groups: list[str]
+
+    @property
+    def name(self) -> str:
+        return " ".join(p for p in (self.first, self.last) if p).strip()
+
+    @property
+    def phone_keys(self) -> set[str]:
+        return {phone_key(n) for _, n in self.phones if phone_key(n)}
+
+    @property
+    def email_keys(self) -> set[str]:
+        return {a.strip().lower() for _, a in self.emails if a.strip()}
+
+
+def _ents(con: sqlite3.Connection) -> dict[str, int]:
+    return {name: ent for ent, name in con.execute("SELECT Z_ENT, Z_NAME FROM Z_PRIMARYKEY")}
+
+
+def contacts(root: Path) -> list[Contact]:
+    """Every person card in the local Contacts store ("On My Mac")."""
+    db = Path(root) / CONTACTS_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        ents = _ents(con)
+        pe, ge = ents.get(_ENT_CONTACT, 22), ents.get(_ENT_GROUP, 19)
+        nick = "ZNICKNAME" if "ZNICKNAME" in _cols(con, "ZABCDRECORD") else "NULL"
+        people = con.execute(
+            f"""SELECT Z_PK, ZFIRSTNAME, ZLASTNAME, ZORGANIZATION, ZJOBTITLE, {nick}
+                FROM ZABCDRECORD WHERE Z_ENT = ?""",
+            (pe,),
+        ).fetchall()
+        groups = dict(con.execute("SELECT Z_PK, ZNAME FROM ZABCDRECORD WHERE Z_ENT = ?", (ge,)))
+        membership: dict[int, list[str]] = {}
+        table = f"Z_{pe}PARENTGROUPS"
+        mcols = _cols(con, table)
+        if mcols:
+            ccol = next(c for c in mcols if c.endswith("CONTACTS"))
+            gcol = next(c for c in mcols if "PARENTGROUPS" in c)
+            for cpk, gpk in con.execute(f"SELECT {ccol}, {gcol} FROM {table}"):
+                if gpk in groups:
+                    membership.setdefault(cpk, []).append(groups[gpk])
+        phones: dict[int, list[tuple[str, str]]] = {}
+        for owner, label, num in con.execute(
+            "SELECT ZOWNER, ZLABEL, ZFULLNUMBER FROM ZABCDPHONENUMBER ORDER BY ZOWNER, Z_PK"
+        ):
+            phones.setdefault(owner, []).append((_label(label), num or ""))
+        emails: dict[int, list[tuple[str, str]]] = {}
+        for owner, label, addr in con.execute(
+            "SELECT ZOWNER, ZLABEL, ZADDRESS FROM ZABCDEMAILADDRESS ORDER BY ZOWNER, Z_PK"
+        ):
+            emails.setdefault(owner, []).append((_label(label), addr or ""))
+        addrs: dict[int, list[dict]] = {}  # type: ignore[type-arg]
+        for owner, label, street, city, state, zipc in con.execute(
+            "SELECT ZOWNER, ZLABEL, ZSTREET, ZCITY, ZSTATE, ZZIPCODE FROM ZABCDPOSTALADDRESS"
+        ):
+            addrs.setdefault(owner, []).append(
+                {
+                    "label": _label(label),
+                    "street": street or "",
+                    "city": city or "",
+                    "state": state or "",
+                    "zip": zipc or "",
+                }
+            )
+        notes_ = {
+            owner: text or ""
+            for owner, text in con.execute("SELECT ZCONTACT, ZTEXT FROM ZABCDNOTE")
+            if owner is not None
+        }
+    finally:
+        con.close()
+    return [
+        Contact(
+            pk=pk,
+            first=(first or "").strip(),
+            last=(last or "").strip(),
+            org=(org or "").strip(),
+            title=(title or "").strip(),
+            nickname=(nk or "").strip(),
+            phones=phones.get(pk, []),
+            emails=emails.get(pk, []),
+            addresses=addrs.get(pk, []),
+            note=notes_.get(pk, ""),
+            groups=sorted(membership.get(pk, [])),
+        )
+        for pk, first, last, org, title, nk in people
+    ]
+
+
+def contact_groups(root: Path) -> list[str]:
+    db = Path(root) / CONTACTS_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        ge = _ents(con).get(_ENT_GROUP, 19)
+        return [r[0] for r in con.execute("SELECT ZNAME FROM ZABCDRECORD WHERE Z_ENT = ?", (ge,))]
+    finally:
+        con.close()
+
+
+# -- preferences --------------------------------------------------------------
+GLOBAL_PREFS = f"{HOME}/Library/Preferences/.GlobalPreferences.plist"
+SAVED_SEARCHES = f"{HOME}/Library/Saved Searches"
+TEXT_REPLACEMENTS_DB = f"{HOME}/Library/KeyboardServices/TextReplacements.db"
+
+
+def text_replacements(root: Path) -> dict[str, str]:
+    """Settings > Keyboard > Text Replacements: {shortcut: phrase}, from the
+    store the keyboard services read (KeyboardServices/TextReplacements.db).
+    The copy System Settings mirrors into the global domain
+    (NSUserDictionaryReplacementItems) is not what makes a replacement work,
+    so it is not read."""
+    db = Path(root) / TEXT_REPLACEMENTS_DB
+    if not db.is_file():
+        return {}
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        rows = con.execute(
+            "SELECT ZSHORTCUT, ZPHRASE FROM ZTEXTREPLACEMENTENTRY "
+            "WHERE ZWASDELETED IS NULL OR ZWASDELETED = 0 ORDER BY ZTIMESTAMP"
+        ).fetchall()
+    except sqlite3.DatabaseError:
+        rows = []
+    finally:
+        con.close()
+    return {str(k or ""): str(v or "") for k, v in rows}
+
+
+def app_shortcuts(root: Path, domain: str) -> dict[str, str]:
+    """App Shortcuts for one app (its NSUserKeyEquivalents): {menu title:
+    key equivalent}, where '@' is Command, '^' Control, '~' Option, '$' Shift."""
+    name = ".GlobalPreferences" if domain == "NSGlobalDomain" else domain
+    p = Path(root) / HOME / "Library" / "Preferences" / f"{name}.plist"
+    return dict(read_plist(p).get("NSUserKeyEquivalents", {})) if p.is_file() else {}
+
+
+def saved_searches(root: Path) -> dict[str, dict]:  # type: ignore[type-arg]
+    """Finder smart folders saved in ~/Library/Saved Searches: {name: plist}."""
+    d = Path(root) / SAVED_SEARCHES
+    if not d.is_dir():
+        return {}
+    return {p.stem: read_plist(p) for p in sorted(d.glob("*.savedSearch"))}
+
+
 # -- generic ----------------------------------------------------------------
 def read_plist(path: Path) -> dict:  # type: ignore[type-arg]
     with Path(path).open("rb") as f:

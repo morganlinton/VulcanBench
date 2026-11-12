@@ -1,0 +1,1 @@
+My contacts have collected duplicates over the years. Clean them up so that each person has exactly one card that keeps all of their phone numbers, email addresses and notes. Some people share a name but are not the same person, so check the details before you merge anything.

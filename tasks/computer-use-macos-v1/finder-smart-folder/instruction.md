@@ -1,0 +1,1 @@
+Make me a smart folder called "Client invoices" that shows every PDF with "invoice" in its name anywhere in my Documents folder, including its subfolders. Add it to the Finder sidebar so I can get to it quickly.

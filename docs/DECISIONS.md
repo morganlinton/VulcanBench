@@ -7,6 +7,47 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-12: ComputerUse macOS milestone 3 build calls (harder candidates, held modifiers, admission)
+
+Made by the agent under the owner's 2026-11-10 instruction to decide
+reversible calls and log them; marked for the owner's review. The owner
+approved milestone 3 in chat on 2026-11-12 ("Approve milestone 3": harder
+macOS tasks, then n=3 admission on both reference rows, then the first
+`suite.lock.json`).
+
+### Decision
+
+- **Harder candidates, built around specific failure points.** The pilot
+  saturated (both rows 4 of 4), so each new capability task is built on at
+  least one place a careful agent can still go wrong, chosen from what the
+  Linux and pilot trials did not exercise: a fact that must be inferred
+  rather than read (New York is on daylight time a week when London and
+  Lisbon are not; a UK folio is dated day first; Tokyo's morning is the
+  previous evening in New York), a tempting built-in shortcut that is wrong
+  here (Contacts' Look for Duplicates also offers to merge two different
+  people with the same name), duplicates no tool finds (Bob and Robert
+  Alvarez share only an email address), and controls that need a modifier
+  held while choosing (a hot corner that works only with Command).
+- **The macOS click and drag tools take held modifiers.** `click` and
+  `drag` in VNC mode accept `modifiers` ("cmd", "shift", "option", "ctrl",
+  combinations with "+"): the keys are pressed, the click or drag is made,
+  and they are released. Without it Command-click selection, Option-drag
+  and modifier hot corners cannot be done from the screen at all. This
+  matches the held-key argument of common computer-use tool APIs. The
+  Linux suite's tool surface is unchanged (the X11 path registers the old
+  signatures), so its results stay comparable.
+- **Builds wait for the guest session before connecting VNC.** A client
+  connecting to the VZ VNC server early in boot crashed the VM twice on
+  2026-11-12 (the same `_VZVNCServer` assertion as before); the image build
+  and the development tools now wait for the guest agent to see the
+  session first, as trials already did.
+- **The pilot tasks stay as candidates.** They are easy for both rows at
+  n=1; admission at n=3 decides whether any stays as a deliberate anchor.
+
+### Status
+
+Building; this entry is updated as the candidates are built and admitted.
+
 ## 2026-11-11: ComputerUse macOS milestone 1 and 2 build calls (Tart environment, scroll helper, seeding, sandboxing)
 
 Made by the agent overnight under the owner's 2026-11-10 instruction to

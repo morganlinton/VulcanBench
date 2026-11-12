@@ -1,0 +1,1 @@
+My Notes folder is a mess. Move every recipe into the Recipes folder, every travel note into Travel, and every work note into Work, and delete the empty notes. Anything that isn't one of those three stays where it is.

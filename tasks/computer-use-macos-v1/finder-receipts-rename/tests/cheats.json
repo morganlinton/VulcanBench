@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "uk-folio-read-month-first", "solution": "gold", "env": {"VB_UK": "1"}, "expect": {"reward": 0, "uk_date": 0}},
+    {"name": "personal-receipts-left-in-place", "solution": "gold", "env": {"VB_NO_PERSONAL": "1"}, "expect": {"reward": 0, "personal_moved": 0}},
+    {"name": "expense-policy-deleted", "solution": "gold", "env": {"VB_DEL_POLICY": "1"}, "expect": {"reward": 0, "nothing_lost": 0}}
+  ]
+}

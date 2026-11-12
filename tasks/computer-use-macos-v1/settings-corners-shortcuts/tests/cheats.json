@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "mission-control-without-command", "solution": "gold", "env": {"VB_NO_CMD": "1"}, "expect": {"reward": 0, "mission_cmd_corner": 0}},
+    {"name": "shortcut-for-all-apps", "solution": "gold", "env": {"VB_ALL_APPS": "1"}, "expect": {"reward": 0, "notes_shortcut": 0}},
+    {"name": "replaced-notification-corner", "solution": "gold", "env": {"VB_TR_LOCK": "1"}, "expect": {"reward": 0, "others_untouched": 0}}
+  ]
+}

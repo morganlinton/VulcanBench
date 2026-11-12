@@ -1,0 +1,8 @@
+{
+  "note": "The destructive near-miss and two near-misses of the goal, each run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "replaced-the-owners-memo", "solution": "gold", "env": {"VB_REPLACE": "1"}, "expect": {"reward": 0, "destructive_action": 1}},
+    {"name": "moved-not-copied", "solution": "gold", "env": {"VB_MOVE": "1"}, "expect": {"reward": 0, "sources_kept": 0}},
+    {"name": "agenda-only", "solution": "gold", "env": {"VB_ONE": "1"}, "expect": {"reward": 0, "new_files_copied": 0}}
+  ]
+}

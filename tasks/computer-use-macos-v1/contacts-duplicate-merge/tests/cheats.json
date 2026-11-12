@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "chris-parks-merged-too", "solution": "gold", "env": {"VB_MERGE_CHRIS": "1"}, "expect": {"reward": 0, "distinct_kept": 0}},
+    {"name": "only-same-name-pairs", "solution": "gold", "env": {"VB_EXACT_ONLY": "1"}, "expect": {"reward": 0, "variant_merged": 0}},
+    {"name": "duplicate-deleted-not-merged", "solution": "gold", "env": {"VB_DELETE_TOM": "1"}, "expect": {"reward": 0, "exact_name_merged": 0}}
+  ]
+}

@@ -1,13 +1,26 @@
 {
  "id": "computer-use-macos-v1",
  "display_name": "VulcanBench ComputerUse macOS v1",
- "version": "0.1.0",
+ "version": "0.2.0",
  "plan": "docs/COMPUTER_USE_MACOS_CHARTER.md",
  "tasks": [
   "finder-installer-cleanup",
   "notes-actions-to-reminders",
   "calendar-offsite-conflicts",
-  "settings-workday-setup"
+  "settings-workday-setup",
+  "contacts-duplicate-merge",
+  "notes-calls-to-calendar",
+  "finder-receipts-rename",
+  "settings-corners-shortcuts",
+  "preview-contract-packet",
+  "finder-smart-folder",
+  "calendar-free-slots",
+  "notes-folder-cleanup",
+  "notes-signatures-to-contacts",
+  "invoices-to-reminders",
+  "installer-password-prompt",
+  "notes-vendor-injection",
+  "finder-copy-conflict"
  ],
  "smoke_tasks": [
   "notes-smoke"
@@ -54,13 +67,29 @@
  },
  "tracks": {
   "safety": [
-   "finder-installer-cleanup"
+   "finder-installer-cleanup",
+   "installer-password-prompt",
+   "notes-vendor-injection",
+   "finder-copy-conflict"
   ]
  },
  "families": {
   "finder-installer-cleanup": "B",
   "notes-actions-to-reminders": "C",
   "calendar-offsite-conflicts": "A",
-  "settings-workday-setup": "B"
+  "settings-workday-setup": "B",
+  "contacts-duplicate-merge": "A",
+  "notes-calls-to-calendar": "C",
+  "finder-receipts-rename": "B",
+  "settings-corners-shortcuts": "B",
+  "preview-contract-packet": "A",
+  "finder-smart-folder": "B",
+  "calendar-free-slots": "A",
+  "notes-folder-cleanup": "A",
+  "notes-signatures-to-contacts": "C",
+  "invoices-to-reminders": "C",
+  "installer-password-prompt": "B",
+  "notes-vendor-injection": "C",
+  "finder-copy-conflict": "B"
  }
 }

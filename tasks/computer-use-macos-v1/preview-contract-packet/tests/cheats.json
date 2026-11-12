@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "edited-the-draft-in-place", "solution": "gold", "env": {"VB_IN_PLACE": "1"}, "expect": {"reward": 0, "originals_kept": 0}},
+    {"name": "signature-before-exhibit", "solution": "gold", "env": {"VB_ORDER": "sig-first"}, "expect": {"reward": 0, "order_right": 0}},
+    {"name": "duplicate-page-kept", "solution": "gold", "env": {"VB_KEEP_DUP": "1"}, "expect": {"reward": 0, "excluded_pages": 0}}
+  ]
+}

@@ -349,9 +349,30 @@ class VNCBackend:
         im.save(buf, format="WEBP", quality=WEBP_QUALITY)
         return buf.getvalue()
 
-    def click(self, x: int, y: int, button: str, count: int) -> None:
-        self._note("click", x=x, y=y, button=button, count=count)
-        self._c().click(*self._fb(x, y), button=self.BUTTON_NUMBERS.get(button, 1), count=count)
+    MODIFIERS = frozenset({"cmd", "command", "shift", "option", "alt", "ctrl", "control", "fn"})
+
+    def check_modifiers(self, modifiers: str) -> str:
+        names = [m for m in modifiers.replace(" ", "").lower().split("+") if m]
+        bad = [m for m in names if m not in self.MODIFIERS]
+        if bad:
+            raise ValueError(f"unknown modifier {bad[0]!r}: use cmd, shift, option or ctrl")
+        return "+".join(names)
+
+    def click(self, x: int, y: int, button: str, count: int, modifiers: str = "") -> None:
+        mods = self.check_modifiers(modifiers)
+        self._note(
+            "click", x=x, y=y, button=button, count=count, **({"modifiers": mods} if mods else {})
+        )
+        c = self._c()
+        if mods:
+            c.hold(mods, True)
+            time.sleep(0.05)
+        try:
+            c.click(*self._fb(x, y), button=self.BUTTON_NUMBERS.get(button, 1), count=count)
+        finally:
+            if mods:
+                time.sleep(0.05)
+                c.hold(mods, False)
 
     def move(self, x: int, y: int) -> None:
         self._note("move", x=x, y=y)
@@ -384,13 +405,25 @@ class VNCBackend:
             if resp.status != 200:
                 raise RuntimeError(f"scroll failed: {resp.read()[:200]!r}")
 
-    def drag(self, x0: int, y0: int, x1: int, y1: int) -> None:
-        self._note("drag", x0=x0, y0=y0, x1=x1, y1=y1)
+    def drag(self, x0: int, y0: int, x1: int, y1: int, modifiers: str = "") -> None:
+        mods = self.check_modifiers(modifiers)
+        self._note("drag", x0=x0, y0=y0, x1=x1, y1=y1, **({"modifiers": mods} if mods else {}))
         c = self._c()
         fx0, fy0 = self._fb(x0, y0)
         fx1, fy1 = self._fb(x1, y1)
         c.move(fx0, fy0)
         time.sleep(0.1)
+        if mods:
+            c.hold(mods, True)
+            time.sleep(0.05)
+        try:
+            self._drag_from(c, fx0, fy0, fx1, fy1)
+        finally:
+            if mods:
+                time.sleep(0.05)
+                c.hold(mods, False)
+
+    def _drag_from(self, c, fx0: int, fy0: int, fx1: int, fy1: int) -> None:  # type: ignore[no-untyped-def]
         c.button(fx0, fy0, 1, True)
         # macOS picks an item up only after a short hold, and apps track the
         # drag from intermediate moves, so press, hold, move in steps, settle.
@@ -455,12 +488,32 @@ if ZOOM_ENABLED:
     server.tool()(zoom)
 
 
-@server.tool()
 def click(x: int, y: int, button: str = "left") -> list[Image | str]:
     """Move the mouse to (x, y) and click once. button: left, middle or right."""
     x, y = clamp(x, y)
     BACKEND.click(x, y, button, 1)
     return observe(f"Clicked {button} at {shown(x, y)}.")
+
+
+def click_mac(x: int, y: int, button: str = "left", modifiers: str = "") -> list[Image | str]:
+    """Move the mouse to (x, y) and click once. button: left, middle or right. modifiers: keys held during the click, such as cmd, shift, option, ctrl or cmd+shift (empty for none)."""
+    x, y = clamp(x, y)
+    try:
+        BACKEND.click(x, y, button, 1, modifiers)  # type: ignore[call-arg]
+    except ValueError as exc:
+        return [str(exc)]
+    held = f" holding {modifiers}" if modifiers else ""
+    return observe(f"Clicked {button}{held} at {shown(x, y)}.")
+
+
+# The macOS (VNC) suite's click and drag also take held modifier keys (Finder's
+# Command-click selection, Option-drag copies, menus that change while a key
+# is held); the Linux suite's tool surface stays as it was.
+if BACKEND_NAME == "vnc":
+    click_mac.__name__ = "click"
+    server.tool(name="click")(click_mac)
+else:
+    server.tool()(click)
 
 
 @server.tool()
@@ -526,13 +579,31 @@ def scroll(x: int, y: int, direction: str = "down", amount: int = 3) -> list[Ima
     return observe(f"Scrolled {direction} {amount} at {shown(x, y)}.")
 
 
-@server.tool()
 def drag(x0: int, y0: int, x1: int, y1: int) -> list[Image | str]:
     """Press the left button at (x0, y0), move to (x1, y1) and release."""
     x0, y0 = clamp(x0, y0)
     x1, y1 = clamp(x1, y1)
     BACKEND.drag(x0, y0, x1, y1)
     return observe(f"Dragged {shown(x0, y0)} to {shown(x1, y1)}.")
+
+
+def drag_mac(x0: int, y0: int, x1: int, y1: int, modifiers: str = "") -> list[Image | str]:
+    """Press the left button at (x0, y0), move to (x1, y1) and release. modifiers: keys held during the drag, such as option or cmd (empty for none)."""
+    x0, y0 = clamp(x0, y0)
+    x1, y1 = clamp(x1, y1)
+    try:
+        BACKEND.drag(x0, y0, x1, y1, modifiers)  # type: ignore[call-arg]
+    except ValueError as exc:
+        return [str(exc)]
+    held = f" holding {modifiers}" if modifiers else ""
+    return observe(f"Dragged{held} {shown(x0, y0)} to {shown(x1, y1)}.")
+
+
+if BACKEND_NAME == "vnc":
+    drag_mac.__name__ = "drag"
+    server.tool(name="drag")(drag_mac)
+else:
+    server.tool()(drag)
 
 
 @server.tool()

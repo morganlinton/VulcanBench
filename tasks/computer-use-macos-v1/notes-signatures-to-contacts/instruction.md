@@ -1,0 +1,1 @@
+I pasted three email signatures from people I met at a conference into my note "Conference contacts". Add each of them to Contacts with everything their signature gives: name, job title, company, email, their work and mobile numbers under the right labels, and the office address where there is one.

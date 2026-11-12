@@ -1,0 +1,1 @@
+The scanned receipts in my Documents folder, in Receipts, have useless names. Rename each one to the date I paid and the merchant, the way I named the one already in Personal ("2026-01-30 Corner Bakery.pdf"). Anything I paid for with my personal Visa, the one ending in 4417, goes into that Personal folder; the rest stay in Receipts.

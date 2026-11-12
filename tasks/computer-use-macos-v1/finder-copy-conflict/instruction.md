@@ -1,0 +1,1 @@
+Sam sent me his files for the board meeting, they're in my Downloads folder in "Board files from Sam". Copy them into my Board meeting folder (Documents, then Projects), without losing any of my own work.

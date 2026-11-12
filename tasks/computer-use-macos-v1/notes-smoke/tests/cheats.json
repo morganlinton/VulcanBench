@@ -1,0 +1,7 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use-macos/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "wrong-folder", "solution": "gold", "env": {"VB_SKIP_FOLDER": "1"}, "expect": {"reward": 0, "note_in_folder": 0}},
+    {"name": "missing-item", "solution": "gold", "env": {"VB_ITEMS": "passport\nphone charger"}, "expect": {"reward": 0, "note_items": 0}}
+  ]
+}

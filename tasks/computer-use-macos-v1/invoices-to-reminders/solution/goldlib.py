@@ -112,9 +112,16 @@ def authorize(app: str, data_prompt: bool) -> None:
         "Calendar": "count calendars",
         "Reminders": "count lists",
     }.get(app, "count windows")  # touches the app's data
-    run(f"osascript -e 'tell application \"{app}\" to {probe}'", wait=8)
+    run(f"osascript -e 'tell application \"{app}\" to {probe}'", wait=12)
+    # An app's first launch in a trial is slow and the prompt can come late;
+    # a second click on Allow's spot is harmless when no prompt is up (it
+    # lands in the Terminal window).
     allow_prompt(*AUTOMATION_ALLOW, name=f"automation-{app}")
+    time.sleep(4)
+    allow_prompt(*AUTOMATION_ALLOW, name=f"automation2-{app}")
     time.sleep(3)
     if data_prompt:
         allow_prompt(*DATA_ALLOW, name=f"data-{app}")
+        time.sleep(4)
+        allow_prompt(*DATA_ALLOW, name=f"data2-{app}")
         time.sleep(3)

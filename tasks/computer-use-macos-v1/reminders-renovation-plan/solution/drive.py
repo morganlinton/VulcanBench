@@ -35,11 +35,7 @@ lines += [
 
 G.start()
 G.open_terminal()
-G.run("osascript -e 'tell application \"Reminders\" to count lists'", wait=4)
-G.allow_prompt(*G.AUTOMATION_ALLOW, name="automation-prompt")
-time.sleep(3)
-G.allow_prompt(*G.DATA_ALLOW, name="reminders-data-prompt")
-time.sleep(3)
+G.authorize("Reminders", data_prompt=True)
 G.run("osascript " + " ".join(f"-e '{x}'" for x in lines), wait=5)
 G.run("osascript -e 'tell application \"Reminders\" to get name of reminders of list \"Ordering\"'", wait=3)
 G.shot("final")

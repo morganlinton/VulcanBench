@@ -14,7 +14,7 @@ VULCANBENCH := $(VENV_BIN)/vulcanbench
 # the venv. This makes `make ci` behave the same from any shell.
 export PATH := $(abspath $(VENV_BIN)):$(PATH)
 
-.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci check-suites freeze-suite bench-tag run-worktree gui gui-backend gui-dashboard app docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-computer-use sandbox-image-all agent-image-codex
+.PHONY: help setup clean install dev test lint no-emdash typecheck fmt ci check-suites freeze-suite bench-tag run-worktree gui gui-backend gui-dashboard app docker-up docker-down validate-tasks sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 sandbox-image-computer-use sandbox-image-computer-use-macos sandbox-image-all agent-image-codex
 .DEFAULT_GOAL := help
 
 help: ## Show this help
@@ -99,6 +99,9 @@ sandbox-image-go-1.26: sandbox-image ## Build Go 1.26 sandbox image (for repos w
 
 sandbox-image-computer-use: ## Build the computer-use sandbox image (Xvfb, Chromium, xdotool; tasks/computer-use-v1)
 	docker build -t vulcanbench/sandbox:cu-base -f sandbox/Dockerfile.computer-use $(if $(filter arm64 aarch64,$(shell uname -m)),--build-arg PYTHON_IMAGE=python:3.12-slim-bookworm@sha256:739ba32ae445e8d58f3d90feb85f83bebc8346f8dd280fa1eb5848f4ff1ed163,) sandbox/computer-use
+
+sandbox-image-computer-use-macos: ## Build the macOS computer-use agent image (MCP tools over VNC; tasks/computer-use-macos-v1)
+	docker build -t vulcanbench/sandbox:cu-mac -f sandbox/Dockerfile.computer-use-macos $(if $(filter arm64 aarch64,$(shell uname -m)),--build-arg PYTHON_IMAGE=python:3.12-slim-bookworm@sha256:739ba32ae445e8d58f3d90feb85f83bebc8346f8dd280fa1eb5848f4ff1ed163,) sandbox/computer-use
 
 sandbox-image-all: sandbox-image sandbox-image-rust sandbox-image-rust-2024 sandbox-image-node-ts sandbox-image-go-1.26 ## Build base + Rust + Node/TS + Go-1.26 sandbox images
 

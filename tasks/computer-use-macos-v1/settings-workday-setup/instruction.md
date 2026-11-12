@@ -1,0 +1,1 @@
+Set this Mac up the way I like it: the Dock on the left side of the screen, hiding automatically, and not showing suggested or recent apps; the clock in 24-hour time; and clicking the wallpaper should only reveal the desktop when I'm in Stage Manager. Don't change anything else.

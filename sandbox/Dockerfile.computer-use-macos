@@ -1,0 +1,32 @@
+# VulcanBench macOS computer-use agent image (vulcanbench/sandbox:cu-mac).
+#
+# The macOS suite (tasks/computer-use-macos-v1) runs the desktop in a Tart VM
+# on the host; this container only holds the agent harbor installs (Claude
+# Code or Codex) and the suite's MCP computer tools in their VNC mode
+# (/opt/vbdesk/vb_computer_mcp.py --backend vnc, with rfb.py), which reach the
+# VM's own VNC server at host.docker.internal. The harbor environment
+# vb_macos.env:TartEnvironment writes the vnc:// URL to /var/lib/vbmac/vnc.url
+# after the VM boots. Pillow encodes screenshots (WebP); cryptography does the
+# DES step of VNC authentication.
+#
+# Build context is sandbox/computer-use:
+#   make sandbox-image-computer-use-macos
+#
+# Same pinned python:3.12-slim-bookworm as the Linux computer-use image.
+ARG PYTHON_IMAGE=python:3.12-slim-bookworm@sha256:4181eb0137487812d8b84ee677de85e5c9f7e08b7c3e16fc564b077cff4907a8
+FROM ${PYTHON_IMAGE}
+
+ARG MCP_VERSION=2.3.0
+ARG PILLOW_VERSION=13.0.0
+ARG CRYPTOGRAPHY_VERSION=50.0.2
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl procps \
+    && rm -rf /var/lib/apt/lists/*
+RUN python -m pip install --root-user-action=ignore --no-cache-dir \
+        "mcp==${MCP_VERSION}" "pillow==${PILLOW_VERSION}" "cryptography==${CRYPTOGRAPHY_VERSION}"
+
+COPY vb_computer_mcp.py rfb.py mac_state.py collect-agent-final.sh cu_check.py /opt/vbdesk/
+RUN chmod 0755 /opt/vbdesk/vb_computer_mcp.py /opt/vbdesk/collect-agent-final.sh \
+    && mkdir -p /var/lib/vbmac \
+    && python -c "import sys; sys.path.insert(0, '/opt/vbdesk'); import rfb, mac_state, cu_check, PIL, cryptography, mcp"

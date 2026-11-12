@@ -1,0 +1,1 @@
+Today's meeting notes are in the Meetings folder in Notes. For each action item assigned to me (I'm Jordan), add a reminder to a new Reminders list called "Follow-ups", with the due date the note gives. Only my own items.

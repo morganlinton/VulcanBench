@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "dock-right", "solution": "gold", "env": {"VB_POSITION": "Right"}, "expect": {"reward": 0, "dock_left": 0}},
+    {"name": "magnification-too", "solution": "gold", "env": {"VB_MAGNIFY": "1"}, "expect": {"reward": 0, "neighbours_unchanged": 0}},
+    {"name": "stage-manager-instead", "solution": "gold", "env": {"VB_STAGE": "1"}, "expect": {"reward": 0, "wallpaper_click": 0}}
+  ]
+}

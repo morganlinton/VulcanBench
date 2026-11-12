@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "colleagues-item-too", "solution": "gold", "env": {"VB_EXTRA": "1"}, "expect": {"reward": 0, "only_mine": 0}},
+    {"name": "thursday-misread", "solution": "gold", "env": {"VB_THURSDAY": "3/5/26"}, "expect": {"reward": 0, "due_dates": 0}},
+    {"name": "default-list", "solution": "gold", "env": {"VB_NO_LIST": "1"}, "expect": {"reward": 0, "list_created": 0}}
+  ]
+}

@@ -22,6 +22,9 @@ sys.argv = [sys.argv[0], "--backend", "vnc"]
 sys.path.insert(0, "/opt/vbdesk")
 from vb_computer_mcp import BACKEND as B  # noqa: E402
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import goldlib  # noqa: E402, F401 - paced sleeps (VB_GOLD_PACE)
+
 
 def shot(name: str) -> None:
     try:

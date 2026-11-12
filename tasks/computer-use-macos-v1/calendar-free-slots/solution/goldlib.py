@@ -27,6 +27,20 @@ from vb_computer_mcp import BACKEND as B  # noqa: E402
 
 TERMINAL_DOCK = (1080, 762)
 
+# Golds wait fixed times for the guest to react. With a sweep running in the
+# other VM the guest is slower and those waits were too short (a Settings
+# pane not yet open when the gold clicked into it), so every sleep in a gold,
+# drive.py's own included, is stretched by VB_GOLD_PACE (default 1.8).
+_PACE = float(os.environ.get("VB_GOLD_PACE", "1.8"))
+_sleep = time.sleep
+
+
+def _paced_sleep(seconds: float) -> None:
+    _sleep(seconds * _PACE)
+
+
+time.sleep = _paced_sleep  # the time module is shared, so drive.py's sleeps stretch too
+
 
 def shot(name: str) -> None:
     """Keep a screenshot of a step with the oracle's logs, for diagnosis."""

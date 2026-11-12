@@ -7,6 +7,91 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-11: A macOS computer-use suite runs in Tart macOS VMs, is driven through the VM's own VNC server, and is graded from the stopped VM's disk
+
+The owner asked on 2026-11-11 for a computer-use suite focused on macOS and
+approved a feasibility spike, including installing Tart from OpenAI's
+`openai/tools` Homebrew tap. The design calls below are the agent's,
+made under the owner's 2026-11-10 instruction to decide reversible calls
+and log them; marked for the owner's review.
+
+### Decision
+
+- **VMs**: each trial runs in a fresh copy-on-write clone of a pinned macOS
+  image under Tart (2.41.1, FSL-1.1-ALv2; the project moved from Cirrus
+  Labs to OpenAI, `github.com/openai/tart`). Apple's license allows two
+  macOS VMs per Mac on Apple hardware; sweeps already run one task at a
+  time. The base for now is Cirrus Labs' `macos-golden-gate-vanilla`
+  (macOS 27.2, digest `sha256:b35695ce...`); the suite will build its own
+  image from a recipe and publish the recipe, not the image.
+- **Screen and input**: from the host, through Virtualization.framework's
+  VNC server (`tart run --vnc-experimental`). The agent's clicks and keys
+  arrive in the guest as hardware input and screenshots are read from the
+  VM's framebuffer, so nothing in the guest needs Screen Recording or
+  Accessibility permission. The suite's MCP computer tools get a VNC
+  backend in place of X11; the Claude Code and Codex rows stay as they are.
+- **Grading**: after the trial the guest is shut down cleanly through the
+  OS, its disk image is attached read-only on the host, and the checker
+  reads app state (SQLite and plist files) directly. The guest's privacy
+  protections do not apply to a host reading a mounted volume, and no
+  network path into the guest is needed.
+- **Setup and shutdown channel**: Tart's guest agent (`tart-guest-agent`,
+  over a virtio socket) baked into the suite's image, for seeding and for
+  a clean shutdown without driving the menu bar. Not yet tested.
+- The VM layer comes from one of the two labs whose agents the suite
+  compares. It is infrastructure (boot, display, input), not grading, and
+  the charter will say so.
+
+### Evidence (spike, 2026-11-11, Mac Studio M1 Max, 32 GB, macOS 27.0.1)
+
+- Pull: 29.9 GB compressed, about 38 minutes; 35 GB on disk. A clone is
+  instant and adds a few GB as it runs (552 GB free after the spike, from
+  582).
+- Boot: the clone came up logged in to the macOS 27 desktop with no setup
+  screens. VNC to a drawn desktop took about 2.5 minutes on the second
+  boot. A clean shutdown took 6 seconds; attach, mount, copy and detach
+  of the disk took 2 seconds.
+- Screen: a 1280 by 800 display gives a 2560 by 1600 framebuffer (Retina
+  2x). Screenshots must be scaled for the agent and its coordinates mapped
+  back, as `pixels-lowres` already does on Linux.
+- Input, all through VNC: clicks (Dock, buttons, menu items, a dialog),
+  plain typing and key presses work. The server maps key codes, not
+  keysyms: an uppercase or shifted character needs a held Shift, the
+  keysym `Alt_L` arrives as Command, `Meta_L` as Option, and `Super_L` is
+  ignored. Modifiers must be held down with real gaps between events.
+- Toy task, end to end: the driver opened Notes from the Dock, dismissed
+  its welcome sheet, created a note with a title and a body line, quit
+  Notes with Command-Q and shut the guest down from the Apple menu. The
+  checker read `NoteStore.sqlite` from the mounted Data volume (not
+  FileVault-encrypted) and found the note: reward 1.
+- A first attempt that powered the VM off with `tart stop` lost the
+  note's last edits: Notes had not saved them, and the WAL did not hold
+  them. Every trial has to end with apps quit and a clean guest shutdown.
+- Host to guest networking failed from the agent's shell (`No route to
+  host` to 192.168.64.2) although the VM had its address; the likely
+  cause is macOS's Local Network privacy permission for the app that
+  launched the shell. Nothing in the design above depends on that path.
+- `vncdotool` 1.2 is not dependable against this server: `disconnect()`
+  and `refreshScreen()` hang. The suite needs its own small RFB client.
+
+### Golden-image work the spike found
+
+The vanilla image is not yet a deterministic screen. The recipe must:
+dismiss each app's first-run sheet (Notes showed "Welcome to Notes"), turn
+off window restoration (Notes reopened after the hard stop), remove the
+desktop widgets and the Finder window the template leaves open, freeze the
+clock and pin the time zone (the image is on GMT, live time), turn off
+software update, notifications and Siri, and relabel the
+"Log Out Managed via Tart" menu item that reveals the environment.
+
+### Revisit
+
+- If the guest agent cannot be baked in, or a clean shutdown through it is
+  unreliable, the fallback is the menu-bar shutdown the spike used.
+- If boot time stays near 2.5 minutes, try suspending a booted golden VM
+  (`tart suspend`) and resuming clones of it.
+- If Apple's license terms or Tart's change.
+
 ## 2026-11-10: VulcanBench Frontier v5 release 1 closes with GPT-6 Astra as its sole confirmation reference
 
 ### Decision

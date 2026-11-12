@@ -21,34 +21,48 @@ sys.path.insert(0, "/opt/vbdesk")
 from vb_computer_mcp import BACKEND as B  # noqa: E402
 
 COL = {"tue": 586, "wed": 741, "thu": 896, "fri": 1051}
+
+
+def shot(name: str) -> None:
+    """Keep a screenshot of each step with the oracle's logs, for diagnosis."""
+    try:
+        with open(f"/logs/agent/gold-{name}.webp", "wb") as f:
+            f.write(B.grab())
+    except OSError:
+        pass
+
+
 B.start(None)
-B.key("cmd+space")
-time.sleep(1.2)
-B.type_text("Calendar")
-time.sleep(1.8)
-B.key("return")
-time.sleep(4)
+B.click(539, 762, "left", 1)  # Calendar in the Dock (Spotlight may still be indexing)
+time.sleep(6)
 B.click(680, 56, "left", 1)  # Week
-time.sleep(1.5)
+time.sleep(2.5)
 B.click(1254, 110, "left", 1)  # next week: 15 to 21 March
-time.sleep(1.5)
+time.sleep(2.5)
 B.move(741, 450)
+time.sleep(0.5)
 B.scroll(741, 450, "up", 20)
-B.scroll(741, 450, "up", 20)  # 1200 points up: the top, midnight at y=228
 time.sleep(1)
+B.scroll(741, 450, "up", 20)  # 1200 points up: the top, midnight at y=228
+time.sleep(2.5)
+shot("week-top")
 
 # Alex, Tuesday 10:00 (drawn at y about 590 with the grid at the top).
 alex_to = COL[os.environ.get("VB_ALEX_DAY", "thu")]
 B.drag(COL["tue"] - 40, 590, alex_to - 40, 590)
-time.sleep(1.5)
+time.sleep(2)
+shot("alex-dialog")
 B.click(710, 400 if os.environ.get("VB_FUTURE") == "1" else 366, "left", 1)
-time.sleep(1.5)
+time.sleep(2)
 
 if os.environ.get("VB_SKIP_PRIYA") != "1":
     B.scroll(741, 450, "down", 7)  # 210 points: 14:00 moves from 719 to 509
-    time.sleep(1)
+    time.sleep(2.5)
+    shot("priya-before")
     B.drag(COL["wed"] - 20, 518, COL["thu"] - 20, 518)
-    time.sleep(1.5)
+    time.sleep(2)
+    shot("priya-dialog")
     B.click(710, 366, "left", 1)  # Only This Event
-    time.sleep(1.5)
+    time.sleep(2)
+shot("final")
 print("gold done")

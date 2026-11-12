@@ -383,13 +383,17 @@ class VNCBackend:
         c = self._c()
         fx0, fy0 = self._fb(x0, y0)
         fx1, fy1 = self._fb(x1, y1)
+        c.move(fx0, fy0)
+        time.sleep(0.1)
         c.button(fx0, fy0, 1, True)
-        time.sleep(0.15)
-        steps = 8
-        for i in range(1, steps + 1):  # intermediate moves so drag-and-drop registers
+        # macOS picks an item up only after a short hold, and apps track the
+        # drag from intermediate moves, so press, hold, move in steps, settle.
+        time.sleep(0.4)
+        steps = 12
+        for i in range(1, steps + 1):
             c.move(round(fx0 + (fx1 - fx0) * i / steps), round(fy0 + (fy1 - fy0) * i / steps))
-            time.sleep(0.03)
-        time.sleep(0.15)
+            time.sleep(0.04)
+        time.sleep(0.3)
         c.button(fx1, fy1, 1, False)
 
     def cursor(self) -> tuple[int, int] | None:

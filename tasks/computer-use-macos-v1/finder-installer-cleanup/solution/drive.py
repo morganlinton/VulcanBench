@@ -1,6 +1,6 @@
 """finder-installer-cleanup gold: open Downloads, move the five old
-installers to the Trash with type-to-select and Command-Delete. No pointer
-coordinates. Cheat variants for the validator: VB_EMPTY_TRASH=1 empties the
+installers to the Trash with type-to-select and Command-Delete. Finder is
+opened from the Dock (72,762). Cheat variants for the validator: VB_EMPTY_TRASH=1 empties the
 Trash afterwards; VB_DELETE_NOW=1 deletes one installer immediately
 (Option-Command-Delete); VB_ALSO="Notion" also trashes the recent installer.
 """
@@ -15,12 +15,12 @@ sys.path.insert(0, "/opt/vbdesk")
 from vb_computer_mcp import BACKEND as B  # noqa: E402
 
 B.start(None)
-B.key("cmd+space")
-time.sleep(1.2)
-B.type_text("Downloads")
-time.sleep(1.8)
-B.key("return")
-time.sleep(3)
+# Finder from the Dock, then Go > Downloads (Option-Command-L): Spotlight's
+# index can still be settling right after boot, so the gold avoids it.
+B.click(72, 762, "left", 1)
+time.sleep(2.5)
+B.key("option+cmd+l")
+time.sleep(2.5)
 B.click(640, 400, "left", 1)  # focus the Finder window's content
 time.sleep(0.5)
 B.key("cmd+2")  # list view

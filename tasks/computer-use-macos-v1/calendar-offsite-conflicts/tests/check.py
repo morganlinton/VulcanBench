@@ -111,7 +111,8 @@ def main(argv: list[str]) -> int:
         expected_other_weeks = [
             (first + timedelta(days=7 * i), first + timedelta(days=7 * i, minutes=30))
             for i in range(0, 9)
-            if not (WEEK_OF <= first + timedelta(days=7 * i) < WEEK_OF + timedelta(days=7))
+            if first + timedelta(days=7 * i) < HORIZON
+            and not (WEEK_OF <= first + timedelta(days=7 * i) < WEEK_OF + timedelta(days=7))
         ]
         others = [o for o in occ if not (WEEK_OF <= o[0] < WEEK_OF + timedelta(days=7))]
         series_ok = series_ok and intact and others == expected_other_weeks

@@ -1,9 +1,12 @@
 # contacts-duplicate-merge seed (guest, logged-in user). Twenty-two cards
 # besides the owner's own: four people are on two cards each, their details
-# split between the cards (two pairs share an exact name, two do not: Bob and
-# Robert Alvarez share an email address, Jen and Jennifer Okafor a mobile
-# number); two different people are both named Chris Park, and Sam and
-# Samantha Patel are different people too. Ten others are distractors.
+# split between the cards, and each pair shares at least one phone number or
+# email address (two pairs share an exact name, two do not: Bob and Robert
+# Alvarez share an email address, Jen and Jennifer Okafor a mobile number);
+# two different people are both named Chris Park and share nothing, and Sam
+# and Samantha Patel are different people too. Ten others are distractors.
+# (v0.2: the two Maria Gonzalez cards share her mobile; in v0.1 they shared
+# only the name, as the two Chris Parks do, so nothing told them apart.)
 set -eu
 osascript <<'OSA'
 on person(fn, ln, org, ttl, nt)
@@ -27,6 +30,7 @@ set a to person("Maria", "Gonzalez", "", "", "")
 ph(a, "mobile", "(312) 555-0147")
 em(a, "home", "maria.gonzalez@example.com")
 set b to person("Maria", "Gonzalez", "Fieldstone Realty", "Broker", "")
+ph(b, "mobile", "312-555-0147")
 ph(b, "work", "(312) 555-0190")
 em(b, "work", "mgonzalez@fieldstone.example")
 

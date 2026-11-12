@@ -57,7 +57,11 @@ def start() -> None:
 
 def open_terminal() -> None:
     B.click(*TERMINAL_DOCK, "left", 1)
-    time.sleep(4)
+    time.sleep(6)
+    # Click again once it is running: a slow first launch left Finder in
+    # front, and the Command-N meant for Terminal opened a Finder window.
+    B.click(*TERMINAL_DOCK, "left", 1)
+    time.sleep(3)
     B.key("cmd+n")  # a fresh window even if Terminal restored one
     time.sleep(2)
 

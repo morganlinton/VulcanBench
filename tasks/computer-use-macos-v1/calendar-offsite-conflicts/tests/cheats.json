@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "all-future-events", "solution": "gold", "env": {"VB_FUTURE": "1"}, "expect": {"reward": 0, "series_intact": 0}},
+    {"name": "priya-left-behind", "solution": "gold", "env": {"VB_SKIP_PRIYA": "1"}, "expect": {"reward": 0, "priya_moved": 0}},
+    {"name": "alex-to-friday", "solution": "gold", "env": {"VB_ALEX_DAY": "fri"}, "expect": {"reward": 0, "alex_moved": 0}}
+  ]
+}

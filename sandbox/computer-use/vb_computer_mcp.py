@@ -43,6 +43,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 from typing import ClassVar
 
@@ -359,8 +360,23 @@ class VNCBackend:
         self._c().key(name)
 
     def scroll(self, x: int, y: int, direction: str, amount: int) -> None:
+        """The VZ VNC server carries no wheel events, so the pointer is moved
+        over VNC and the wheel is turned in the guest through the
+        environment's scroll endpoint (vbscroll). One wheel click is three
+        lines (30 points), about what a mouse wheel moves."""
         self._note("scroll", x=x, y=y, direction=direction, amount=amount)
-        self._c().scroll(*self._fb(x, y), direction, amount)
+        self._c().move(*self._fb(x, y))
+        time.sleep(0.15)
+        lines = 3 * amount
+        dy = lines if direction == "up" else -lines if direction == "down" else 0
+        dx = lines if direction == "left" else -lines if direction == "right" else 0
+        url_file = Path(os.environ.get("VB_SCROLL_URL_FILE", "/run/vbmac/scroll.url"))
+        if not url_file.is_file():
+            raise RuntimeError("scrolling is unavailable: no scroll endpoint for this VM")
+        url = url_file.read_text().strip() + f"&dy={dy}&dx={dx}"
+        with urllib.request.urlopen(url, timeout=40) as resp:
+            if resp.status != 200:
+                raise RuntimeError(f"scroll failed: {resp.read()[:200]!r}")
 
     def drag(self, x0: int, y0: int, x1: int, y1: int) -> None:
         self._note("drag", x0=x0, y0=y0, x1=x1, y1=y1)

@@ -18,6 +18,10 @@ Steps, all from the host (docs/DECISIONS.md, 2026-11-11):
     user's TCC database; SIP stays on.
  4. Run base-config.sh in the guest (identity, time, updates, deterministic
     UI, a password the agent is never told, the vb-clock boot daemon).
+ 4b. Scroll-wheel input: the VZ VNC server carries none, so vbscroll
+    (sandbox/computer-use/macos/vbscroll.c, compiled here) goes to
+    /usr/local/bin and the guest agent is given Device Control (the
+    Accessibility list) in System Settings, entering the new password.
  5. Dismiss each app's first-run sheets and iCloud prompts, clear
     notifications and the update badge, quit everything.
  6. Shut down through System Events (apps quit and save), so the image boots
@@ -31,6 +35,7 @@ if missing, mode 600) and is never printed. Screenshots of every step land in
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import secrets
 import string
@@ -101,6 +106,16 @@ class Builder:
     def click(self, x: int, y: int) -> None:
         self.vm.client.click(x * 2, y * 2)
         time.sleep(1.5)
+
+    def clear_notifications(self, rounds: int = 4) -> None:
+        """Persistent banners sit over the top right of the screen (and over
+        System Settings' switches): hover each and click its close button."""
+        for _ in range(rounds):
+            self.vm.client.move(1090 * 2, 90 * 2)
+            time.sleep(1.2)
+            self.click(924, 48)
+        self.vm.client.move(640 * 2, 400 * 2)
+        time.sleep(0.5)
 
     def osa(
         self, *lines: str, timeout: float = 60, check: bool = False
@@ -186,6 +201,50 @@ class Builder:
             raise SystemExit(f"base-config.sh failed: {r.stderr.strip()[-600:]}")
         print("base-config ok", flush=True)
 
+    # 4b -----------------------------------------------------------------
+    def scroll_helper(self) -> None:
+        src = REPO / "sandbox" / "computer-use" / "macos" / "vbscroll.c"
+        binary = self.out / "vbscroll"
+        subprocess.run(
+            [
+                "clang",
+                "-O2",
+                "-Wall",
+                "-framework",
+                "ApplicationServices",
+                str(src),
+                "-o",
+                str(binary),
+            ],
+            check=True,
+            capture_output=True,
+            timeout=120,
+        )
+        b64 = base64.b64encode(binary.read_bytes()).decode()
+        self.vm.exec(
+            f"echo {b64} | base64 -D > /tmp/vbscroll && "
+            "sudo -n install -m 755 /tmp/vbscroll /usr/local/bin/vbscroll && rm /tmp/vbscroll"
+        )
+        self.vm.exec("/usr/local/bin/vbscroll --prompt", check=False)
+        time.sleep(2.5)
+        self.shot("devicecontrol-prompt")
+        self.click(703, 308)  # "would like to control this Mac": Open System Settings
+        time.sleep(4)
+        self.clear_notifications()
+        self.shot("devicecontrol-pane")
+        self.click(961, 217)  # tart-guest-agent: switch on
+        time.sleep(2.5)
+        self.shot("devicecontrol-password")
+        self.vm.client.type_text(password())
+        self.vm.client.key("return")
+        time.sleep(3)
+        ok = self.vm.exec("/usr/local/bin/vbscroll --check", check=False).returncode == 0
+        self.shot("devicecontrol-done")
+        self.osa('tell application "System Settings" to quit')
+        if not ok:
+            raise SystemExit("the guest agent did not get Device Control; see the screenshots")
+        print("scroll helper ok", flush=True)
+
     # 5 ------------------------------------------------------------------
     def first_runs(self) -> None:
         self.osa(
@@ -229,12 +288,7 @@ class Builder:
             check=False,
         )
         time.sleep(3)
-        for _ in range(4):  # persistent notification banners: hover, close
-            self.vm.client.move(1090 * 2, 90 * 2)
-            time.sleep(1.2)
-            self.click(924, 48)
-        self.vm.client.move(640 * 2, 400 * 2)
-        time.sleep(1)
+        self.clear_notifications()
         self.shot("clean-desktop")
 
     # 6 ------------------------------------------------------------------
@@ -264,6 +318,8 @@ def main() -> int:
         b.grant()
         b.configure()
         b.first_runs()
+        b.scroll_helper()
+        b.clear_notifications()
         how = b.finish()
     except BaseException:
         b.vm.stop()
@@ -271,6 +327,7 @@ def main() -> int:
     recipe = hashlib.sha256(
         Path(__file__).read_bytes()
         + (REPO / "scripts" / "computer-use-macos" / "base-config.sh").read_bytes()
+        + (REPO / "sandbox" / "computer-use" / "macos" / "vbscroll.c").read_bytes()
     ).hexdigest()[:16]
     (out / "manifest.txt").write_text(
         f"vm={args.name}\nsource={args.source}\nrecipe_sha256_16={recipe}\nshutdown={how}\n"

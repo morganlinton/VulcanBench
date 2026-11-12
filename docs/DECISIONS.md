@@ -7,6 +7,68 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-11: ComputerUse macOS milestone 1 and 2 build calls (Tart environment, scroll helper, seeding, sandboxing)
+
+Made by the agent overnight under the owner's 2026-11-10 instruction to
+decide reversible calls and log them; marked for the owner's review. The
+plan they implement was approved by the owner in chat on 2026-11-11.
+
+### Decision
+
+- **Harbor, not a separate runner.** `vb_macos.env:TartEnvironment`
+  subclasses harbor's Docker environment: the agent and the MCP computer
+  tools run in harbor's container as on Linux; the environment boots one
+  Tart VM per trial and hands the container its VNC URL. A collect hook
+  (`vbmac-collect PATH...`) shuts the guest down and copies the task's paths
+  off the read-only mounted disk.
+- **One VNC connection per trial.** The VZ VNC server answers one
+  non-incremental frame request per connection and has crashed the VM
+  (an assertion in `_VZVNCServer`) when a client connected while a macOS
+  security prompt was on screen. `rfb.py` is a viewer: one connection,
+  incremental updates, a local framebuffer.
+- **Scroll through the guest.** The VZ VNC server delivers no wheel events
+  (tried press/release, held buttons, all wheel bits, trackpad-only).
+  `vbscroll` (C, compiled on the host) posts wheel events in the guest;
+  the base image grants the guest agent Device Control (the Accessibility
+  list) for it; the MCP `scroll` tool moves the pointer over VNC and calls
+  a per-trial, token-guarded endpoint the environment serves on the host
+  loopback, which runs `vbscroll` through `tart exec`. One wheel click is
+  three lines (30 points).
+- **Files are seeded from the host.** The guest agent touching `~/Downloads`
+  raises a privacy prompt and blocks, so `environment/seed_fs.py` writes
+  files onto the stopped VM's Data volume mounted read-write (owner uid 501
+  matches the guest user); Finder's Date Added is set to each file's date
+  with `setattrlist`. App data (notes, reminders, events) is still seeded
+  by AppleScript in the guest.
+- **What the agent cannot do.** Task images remove passwordless sudo and
+  the password is never given; the guest's network service is off. The
+  agent container keeps harbor's allowlist: the model API plus
+  `host.docker.internal` and Docker Desktop's host address `192.168.65.254`
+  (VNC carries no hostname for the egress proxy to sniff).
+- **Clean shutdown is judged by the VM stopping.** Scriptable apps are quit
+  one by one, then System Events shuts down; a shutdown counts as clean
+  when the VM stops on its own (osascript often errors as the guest goes
+  down). Only a host-side stop is "forced"; a screenshot is kept.
+- **First-run sheets that appear on a later launch stay.** Reminders shows
+  "Never Miss a Reminder" on its second launch; every trial of a task sees
+  the same sheet from its image, so it is deterministic friction, not noise.
+
+### Evidence
+
+- notes-smoke: validator PASS (nop 0, gold 1 three times, both cheats
+  caught), 101 to 123 s per trial.
+- finder-installer-cleanup: gold 1 three times, empty-trash and
+  recent-installer cheats caught; the delete-immediately probe pressed
+  Return on a dialog with no default button and was fixed to click Delete.
+- A boot of a task image reports the frozen clock (2026-03-09 09:15), no
+  network and no sudo.
+
+### Revisit
+
+- If a later Tart or macOS adds wheel events to the VZ VNC server, drop
+  the scroll helper.
+- If the egress proxy learns raw TCP by hostname, drop the IP entry.
+
 ## 2026-11-10: ComputerUse v1's second reference is Codex with GPT-6.1 Sol on the ChatGPT subscription, through the same MCP computer tools
 
 ### Decision

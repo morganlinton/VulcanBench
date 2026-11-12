@@ -113,9 +113,17 @@ condition="${CU_GATE_CONDITION:-pixels+zoom}"
 case "$condition" in pixels+zoom|pixels|pixels-lowres) ;;
   *) echo "cu-gate: CU_GATE_CONDITION must be pixels+zoom, pixels or pixels-lowres (got $condition)" >&2; exit 2 ;; esac
 mkdir -p "$OUT/jobs"
-suite_json="$here/tasks/computer-use-v1/suite.json"
+# CU_GATE_SUITE picks the suite: computer-use-v1 (Linux, default) or
+# computer-use-macos-v1, whose tasks run under the Tart environment (a macOS
+# VM per trial; docs/COMPUTER_USE_MACOS_CHARTER.md).
+gate_suite="${CU_GATE_SUITE:-computer-use-v1}"
+suite_json="$here/tasks/$gate_suite/suite.json"
 HARBOR_VERSION=0.24.0
 IMAGE=vulcanbench/sandbox:cu-base
+macos=0
+if [ "$gate_suite" = computer-use-macos-v1 ]; then
+  macos=1; IMAGE=vulcanbench/sandbox:cu-mac
+fi
 
 pin() { # <ref> <field> -> pins.references[name==ref].field from suite.json, or empty
   [ -f "$suite_json" ] || return 0
@@ -212,7 +220,10 @@ preflight() { # host checks; prints one problem per line, returns 1 on any
   if [ "$agent" = computer-1 ] && [ -x "$hpy" ]; then
     "$hpy" -c 'import anthropic' 2>/dev/null || { echo "cu-gate: harbor's python cannot import anthropic; run scripts/computer-use/setup-host.sh" >&2; rc=1; }
   fi
-  docker image inspect "$IMAGE" >/dev/null 2>&1 || { echo "cu-gate: $IMAGE not built (make sandbox-image-computer-use)" >&2; rc=1; }
+  docker image inspect "$IMAGE" >/dev/null 2>&1 || { echo "cu-gate: $IMAGE not built (make sandbox-image-computer-use$( [ "$macos" = 1 ] && echo -macos))" >&2; rc=1; }
+  if [ "$macos" = 1 ]; then
+    command -v tart >/dev/null || { echo "cu-gate: tart not found (brew install openai/tools/tart)" >&2; rc=1; }
+  fi
   if [ "$agent" = codex ] && [ -z "${CU_GATE_CODEX_CATALOG_SOURCE:-}" ]; then
     command -v codex >/dev/null || { echo "cu-gate: no codex CLI on PATH (needed for \`codex debug models\`; or set CU_GATE_CODEX_CATALOG_SOURCE)" >&2; rc=1; }
   fi
@@ -355,6 +366,14 @@ stop_sandboxes() { # task name -> remove this task's leftover sandbox containers
   ids=$(docker ps -aq --filter "name=^${prefix}__" 2>/dev/null)
   [ -n "$ids" ] && { echo "--- $1: removing leftover sandbox containers"; docker rm -f $ids >/dev/null 2>&1; }
   for n in $(docker network ls -q --filter "name=^${prefix}__" 2>/dev/null); do docker network rm "$n" >/dev/null 2>&1; done
+  if [ "$macos" = 1 ]; then
+    # A trial VM the environment could not delete (harbor stopped mid-run).
+    # Sweeps run one trial at a time, so a stopped trial VM is a leftover.
+    local vm
+    for vm in $(tart list 2>/dev/null | awk '$2 ~ /^vbmac-trial-/ && $NF == "stopped" {print $2}'); do
+      echo "--- $1: deleting leftover VM $vm"; tart delete "$vm" >/dev/null 2>&1
+    done
+  fi
   return 0
 }
 
@@ -410,7 +429,13 @@ trap 'on_signal TERM' TERM
 # --- end of the copied helpers ---
 
 for t in "$@"; do
-  task="$here/tasks/computer-use-v1/$t"
+  task="$here/tasks/$gate_suite/$t"
+  env_args=(); env_path=()
+  if [ "$macos" = 1 ]; then
+    vm_image=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["image"])' "$task/environment/vm.json") || exit 2
+    tart list 2>/dev/null | grep -qw "$vm_image" || { echo "cu-gate: VM image $vm_image missing (scripts/computer-use-macos/build_task_image.py)" >&2; exit 2; }
+    env_args=(--env vb_macos.env:TartEnvironment); env_path=("PYTHONPATH=$here")
+  fi
   # computer-1 opens its browser on the task's start page (pins.start_urls);
   # native tasks have no entry and their app is already on the display.
   task_ak=()
@@ -469,7 +494,7 @@ PYCOPY
   (cd "$here" && exec python3 -c 'import os, signal, sys
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
-     env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" \
+     env "${auth_env[@]+"${auth_env[@]}"}" "${env_path[@]+"${env_path[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" "${env_args[@]+"${env_args[@]}"}" \
      "${effort_args[@]+"${effort_args[@]}"}" "${extra_ak[@]+"${extra_ak[@]}"}" "${ak_args[@]+"${ak_args[@]}"}" "${task_ak[@]+"${task_ak[@]}"}" \
      -k "$attempts" -n 1 "${auth_args[@]+"${auth_args[@]}"}" -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!

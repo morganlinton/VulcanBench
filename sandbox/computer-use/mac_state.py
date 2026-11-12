@@ -11,8 +11,18 @@ Stores (macOS 27):
   Titles and folders are columns of ZICCLOUDSYNCINGOBJECT; a body is a
   gzipped protobuf in ZICNOTEDATA.ZDATA whose text is
   document(2) -> note(3) -> text(2).
-- Reminders, Calendar and Contacts readers follow the same pattern and are
-  added with the tasks that need them.
+- Reminders: ~/Library/Group Containers/group.com.apple.reminders/
+  Container_v1/Stores/Data-*.sqlite (one file per account; the local one
+  holds the rows). ZREMCDREMINDER has ZTITLE, ZNOTES, ZDUEDATE (seconds
+  from 2001-01-01, UTC; an all-day date is midnight UTC), ZALLDAY,
+  ZCOMPLETED, ZMARKEDFORDELETION and ZLIST -> ZREMCDBASELIST.ZNAME.
+- Calendar: ~/Library/Group Containers/group.com.apple.calendar/
+  Calendar.sqlitedb. CalendarItem rows carry summary, start_date and
+  end_date (seconds from 2001-01-01, UTC), all_day, calendar_id ->
+  Calendar.title and has_recurrences; a series is one master row, and an
+  occurrence edited on its own becomes a detached row whose orig_item_id is
+  the master and orig_date its original start. Recurrence (owner_id) holds
+  the rule and ExceptionDate (owner_id) the occurrences removed from a series.
 """
 
 from __future__ import annotations
@@ -22,11 +32,16 @@ import json
 import plistlib
 import sqlite3
 from dataclasses import dataclass
+from datetime import UTC, date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 HOME = "Users/admin"
 NOTES_DB = f"{HOME}/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite"
+CALENDAR_DB = f"{HOME}/Library/Group Containers/group.com.apple.calendar/Calendar.sqlitedb"
+REMINDERS_STORES = f"{HOME}/Library/Group Containers/group.com.apple.reminders/Container_v1/Stores"
 APPLE_EPOCH = 978307200  # 2001-01-01 in Unix time
+GUEST_TZ = ZoneInfo("America/New_York")  # base-config.sh
 
 
 # -- protobuf (just enough for Notes) ---------------------------------------
@@ -145,6 +160,144 @@ def notes(root: Path) -> list[Note]:
 
 def live_notes(root: Path) -> list[Note]:
     return [n for n in notes(root) if not n.deleted]
+
+
+# -- Reminders --------------------------------------------------------------
+@dataclass
+class Reminder:
+    title: str
+    notes: str
+    list: str | None
+    due: float | None  # Unix time
+    all_day: bool
+    completed: bool
+    deleted: bool
+
+    @property
+    def due_date(self) -> date | None:
+        """The calendar day it is due, as the guest shows it."""
+        if self.due is None:
+            return None
+        if self.all_day:  # stored as midnight UTC of that day
+            return datetime.fromtimestamp(self.due, UTC).date()
+        return datetime.fromtimestamp(self.due, GUEST_TZ).date()
+
+
+def reminders(root: Path) -> list[Reminder]:
+    """Every reminder in every local Reminders store, deleted ones flagged."""
+    out: list[Reminder] = []
+    stores = sorted((Path(root) / REMINDERS_STORES).glob("Data-*.sqlite"))
+    for db in stores:
+        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+        try:
+            rows = con.execute(
+                """SELECT r.ZTITLE, r.ZNOTES, l.ZNAME, r.ZDUEDATE, r.ZALLDAY, r.ZCOMPLETED,
+                          r.ZMARKEDFORDELETION, l.ZMARKEDFORDELETION
+                   FROM ZREMCDREMINDER r LEFT JOIN ZREMCDBASELIST l ON l.Z_PK = r.ZLIST"""
+            ).fetchall()
+        except sqlite3.DatabaseError:
+            rows = []
+        finally:
+            con.close()
+        for title, notes_, lname, due, allday, done, gone, list_gone in rows:
+            out.append(
+                Reminder(
+                    title=title or "",
+                    notes=notes_ or "",
+                    list=lname,
+                    due=due + APPLE_EPOCH if due is not None else None,
+                    all_day=bool(allday),
+                    completed=bool(done),
+                    deleted=bool(gone) or bool(list_gone),
+                )
+            )
+    return out
+
+
+def reminder_lists(root: Path) -> list[str]:
+    names: list[str] = []
+    for db in sorted((Path(root) / REMINDERS_STORES).glob("Data-*.sqlite")):
+        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+        try:
+            names += [
+                r[0]
+                for r in con.execute(
+                    "SELECT ZNAME FROM ZREMCDBASELIST WHERE ZNAME IS NOT NULL "
+                    "AND (ZMARKEDFORDELETION IS NULL OR ZMARKEDFORDELETION = 0)"
+                )
+            ]
+        except sqlite3.DatabaseError:
+            pass
+        finally:
+            con.close()
+    return names
+
+
+# -- Calendar ---------------------------------------------------------------
+@dataclass
+class Event:
+    rowid: int
+    summary: str
+    calendar: str | None
+    start: float | None  # Unix time
+    end: float | None
+    all_day: bool
+    recurring: bool
+    orig_item: int  # master ROWID for a detached occurrence, else 0
+    orig_start: float | None  # a detached occurrence's original start
+    rule: tuple[int, int, str, float | None, int] | None  # (freq, interval, specifier, end, count)
+    exceptions: list[float]
+
+    def local(self, t: float | None) -> datetime | None:
+        return datetime.fromtimestamp(t, GUEST_TZ) if t is not None else None
+
+    @property
+    def start_local(self) -> datetime | None:
+        return self.local(self.start)
+
+
+def _apple(t: float | None) -> float | None:
+    return t + APPLE_EPOCH if t is not None else None
+
+
+def events(root: Path) -> list[Event]:
+    db = Path(root) / CALENDAR_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        rules = {
+            r[0]: (r[1], r[2], r[3] or "", _apple(r[4]), r[5] or 0)
+            for r in con.execute(
+                "SELECT owner_id, frequency, interval, specifier, end_date, count FROM Recurrence"
+            )
+        }
+        exc: dict[int, list[float]] = {}
+        for owner, d in con.execute("SELECT owner_id, date FROM ExceptionDate"):
+            if d is not None:
+                exc.setdefault(owner, []).append(d + APPLE_EPOCH)
+        rows = con.execute(
+            """SELECT ci.ROWID, ci.summary, c.title, ci.start_date, ci.end_date, ci.all_day,
+                      ci.has_recurrences, ci.orig_item_id, ci.orig_date
+               FROM CalendarItem ci LEFT JOIN Calendar c ON c.ROWID = ci.calendar_id
+               WHERE ci.entity_type IS NULL OR ci.entity_type = 2 OR ci.entity_type = 0"""
+        ).fetchall()
+    finally:
+        con.close()
+    return [
+        Event(
+            rowid=rid,
+            summary=summ or "",
+            calendar=cal,
+            start=_apple(sd),
+            end=_apple(ed),
+            all_day=bool(ad),
+            recurring=bool(hr),
+            orig_item=oi or 0,
+            orig_start=_apple(od) if oi else None,
+            rule=rules.get(rid),
+            exceptions=sorted(exc.get(rid, [])),
+        )
+        for rid, summ, cal, sd, ed, ad, hr, oi, od in rows
+    ]
 
 
 # -- generic ----------------------------------------------------------------

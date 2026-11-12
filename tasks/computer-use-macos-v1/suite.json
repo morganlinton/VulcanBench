@@ -1,0 +1,64 @@
+{
+ "id": "computer-use-macos-v1",
+ "display_name": "VulcanBench ComputerUse macOS v1",
+ "version": "0.1.0",
+ "plan": "docs/COMPUTER_USE_MACOS_CHARTER.md",
+ "tasks": [
+  "finder-installer-cleanup",
+  "notes-actions-to-reminders",
+  "calendar-offsite-conflicts"
+ ],
+ "smoke_tasks": [
+  "notes-smoke"
+ ],
+ "pins": {
+  "harness": "harbor 0.24.0 with the vb_macos.env:TartEnvironment environment (PYTHONPATH=<repo>)",
+  "agent_image": "vulcanbench/sandbox:cu-mac",
+  "vm": {
+   "tool": "tart 2.41.1 (openai/tools)",
+   "source": "ghcr.io/cirruslabs/macos-golden-gate-vanilla@sha256:b35695ce30453bcc1db961a476740be72a44c2a2e464b73ece1ff0fcac12a873",
+   "macos": "27.2",
+   "display": "1280x800 points (2560x1600 framebuffer)",
+   "base": "vbmac-base, scripts/computer-use-macos/build_base.py",
+   "task_images": "vbmac-task-<slug>, scripts/computer-use-macos/build_task_image.py"
+  },
+  "condition": "pixels",
+  "budget": {
+   "timeout_sec": 3600
+  },
+  "references": [
+   {
+    "name": "claude-code",
+    "agent": "claude-code",
+    "model": "claude-opus-5-5",
+    "version": "2.1.302",
+    "effort": "medium",
+    "auth": "subscription: CLAUDE_FORCE_OAUTH=1 with ~/.config/vulcanbench/claude-gate.env (CLAUDE_GATE_ENV overrides), as scripts/frontier-v5/run_gate.sh",
+    "tools": "mcp__computer__* only",
+    "disallowed_tools": "Bash,BashOutput,KillShell,Read,Edit,MultiEdit,Write,NotebookEdit,NotebookRead,Glob,Grep,LS,WebFetch,WebSearch,Task,Agent,TodoWrite,TodoRead,ExitPlanMode,EnterPlanMode",
+    "note": "Same subscription reference and tool restrictions as the Linux suite; the MCP computer tools run with --backend vnc against the trial's macOS VM."
+   },
+   {
+    "name": "codex",
+    "agent": "codex",
+    "model": "gpt-6.1-sol",
+    "version": "0.159.0",
+    "effort": "medium",
+    "auth": "subscription: the ChatGPT login's auth.json named by CODEX_AUTH_JSON_PATH in harbor's environment (CU_GATE_CODEX_AUTH, else ~/.config/vulcanbench/codex-gate/auth.json, else ~/.codex/auth.json), as scripts/frontier-v5/run_gate.sh",
+    "tools": "mcp__computer__* only, called from Codex code mode's exec",
+    "config": "scripts/computer-use/codex-gate.toml plus a one-model catalog built per gate invocation by scripts/computer-use/codex_catalog.py (apply_patch and subagent tools cleared)",
+    "note": "Same subscription reference, config and locked catalog as the Linux suite; the MCP computer tools run with --backend vnc against the trial's macOS VM."
+   }
+  ]
+ },
+ "tracks": {
+  "safety": [
+   "finder-installer-cleanup"
+  ]
+ },
+ "families": {
+  "finder-installer-cleanup": "B",
+  "notes-actions-to-reminders": "C",
+  "calendar-offsite-conflicts": "A"
+ }
+}

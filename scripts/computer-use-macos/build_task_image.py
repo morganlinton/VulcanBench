@@ -13,9 +13,13 @@ and seeding is paid once. Steps:
     MMDDhhmmCCYY) to /Library/VulcanBench/clock, where the vb-clock boot
     daemon reads it, and set the date now, so everything seeded carries
     timestamps from the task's frozen day.
- 3. Run environment/seed.sh in the guest as the logged-in user (AppleScript
-    through the guest agent, which the base image granted Automation of the
-    apps in scope; file drops from the share).
+ 3. Seed. Files first, from the host: environment/seed_fs.py (if present)
+    runs against the clone's Data volume mounted read-write before the first
+    boot, so files land with the guest user's uid and no guest privacy prompt
+    is raised (the guest agent touching ~/Downloads asks for permission and
+    blocks). Then app data in the guest: environment/seed.sh (if present)
+    runs as the logged-in user through the guest agent, with AppleScript for
+    the apps the base image granted it Automation of.
  4. Finalize: quit every app, remove passwordless sudo (the agent must not be
     able to become root through Terminal), turn the guest's network service
     off (no task needs the internet; the guest agent uses a virtio socket),
@@ -33,6 +37,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -63,7 +68,7 @@ def digest(paths: list[Path]) -> str:
     return h.hexdigest()[:16]
 
 
-def main() -> int:
+def main() -> int:  # noqa: PLR0915 - one linear build script
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     ap.add_argument("task", type=Path)
     ap.add_argument("--base", default="vbmac-base")
@@ -85,11 +90,27 @@ def main() -> int:
     out = args.out / name
     out.mkdir(parents=True, exist_ok=True)
     seed_dir = env / "seed"
-    inputs = [env / "seed.sh", env / "clock", env / "vm.json", *seed_dir.rglob("*")] if seed_dir.is_dir() else [env / "seed.sh", env / "clock", env / "vm.json"]
+    inputs = [env / "seed.sh", env / "seed_fs.py", env / "clock", env / "vm.json"]
+    if seed_dir.is_dir():
+        inputs += list(seed_dir.rglob("*"))
     t0 = time.time()
 
     vm = V.VM(name, out)
     vm.clone_from(args.base)
+    seed_fs = env / "seed_fs.py"
+    if seed_fs.is_file():
+        with V.mounted_data(vm.disk_path(), out / "mnt", readonly=False) as root:
+            r = subprocess.run(
+                [sys.executable, str(seed_fs), str(root)],
+                capture_output=True,
+                text=True,
+                timeout=600,
+                check=False,
+            )
+        (out / "seed_fs.log").write_text(r.stdout + "\n--- stderr ---\n" + r.stderr)
+        if r.returncode != 0:
+            raise SystemExit(f"seed_fs.py failed ({r.returncode}); see {out / 'seed_fs.log'}")
+        print("seeded files from the host", flush=True)
     extra = (f"--dir=seed:{seed_dir}:ro",) if seed_dir.is_dir() else ()
     vm.start(display=spec.get("display", "1280x800"), extra=extra)
     try:
@@ -100,12 +121,13 @@ def main() -> int:
         vm.exec(
             f"echo {clock} | sudo -n tee /Library/VulcanBench/clock >/dev/null && sudo -n date {clock} >/dev/null && date"
         )
-        seed = (env / "seed.sh").read_text()
-        r = vm.exec(f"export VB_SEED={_q(SHARE)}; {seed}", timeout=900, check=False)
-        (out / "seed.log").write_text(r.stdout + "\n--- stderr ---\n" + r.stderr)
-        if r.returncode != 0:
-            raise SystemExit(f"seed.sh failed ({r.returncode}); see {out / 'seed.log'}")
-        print("seeded", flush=True)
+        if (env / "seed.sh").is_file():
+            seed = (env / "seed.sh").read_text()
+            r = vm.exec(f"export VB_SEED={_q(SHARE)}; {seed}", timeout=900, check=False)
+            (out / "seed.log").write_text(r.stdout + "\n--- stderr ---\n" + r.stderr)
+            if r.returncode != 0:
+                raise SystemExit(f"seed.sh failed ({r.returncode}); see {out / 'seed.log'}")
+            print("seeded apps in the guest", flush=True)
         r = vm.exec(FINALIZE, timeout=120, check=False)
         if "finalize-ok" not in r.stdout:
             raise SystemExit(f"finalize failed: {r.stdout} {r.stderr}")

@@ -28,12 +28,16 @@ build_task_image.py; trials never modify it.
 from __future__ import annotations
 
 import asyncio
+import http.server
 import json
+import secrets
 import shlex
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
+import urllib.parse
 import uuid
 from pathlib import Path
 from typing import Any
@@ -45,6 +49,56 @@ from vb_macos import vm as V
 SENTINEL = "vbmac-collect"
 GUEST_HOME = "Users/admin"
 EXPORT = "/var/lib/vbmac/export"
+
+
+class ScrollProxy:
+    """Scroll-wheel input for the VM, which its VNC server does not carry.
+
+    The agent's MCP server (in the container) asks this host-side endpoint to
+    scroll; it runs vbscroll in the guest through Tart's guest agent, which
+    posts the wheel events at the pointer (sandbox/computer-use/macos/
+    vbscroll.c). Bound to the host's loopback, reached from the container at
+    host.docker.internal, guarded by a per-trial token.
+    """
+
+    def __init__(self, vm_name: str) -> None:
+        token = secrets.token_hex(16)
+        name = vm_name
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self) -> None:
+                q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                try:
+                    if q.get("t", [""])[0] != token:
+                        raise PermissionError("bad token")
+                    dy = max(-300, min(300, int(q.get("dy", ["0"])[0])))
+                    dx = max(-300, min(300, int(q.get("dx", ["0"])[0])))
+                    r = subprocess.run(
+                        [V.TART, "exec", name, "/usr/local/bin/vbscroll", str(dy), str(dx)],
+                        capture_output=True,
+                        text=True,
+                        timeout=30,
+                        check=False,
+                    )
+                    code, body = (200, "ok") if r.returncode == 0 else (500, r.stderr[-300:])
+                except (PermissionError, ValueError, subprocess.TimeoutExpired) as exc:
+                    code, body = 400, str(exc)
+                self.send_response(code)
+                self.send_header("Content-Type", "text/plain")
+                self.end_headers()
+                self.wfile.write(body.encode())
+
+            def log_message(self, *args: Any) -> None:
+                return
+
+        self.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        port = self.server.server_address[1]
+        self.url = f"http://host.docker.internal:{port}/scroll?t={token}"
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def close(self) -> None:
+        self.server.shutdown()
+        self.server.server_close()
 
 
 class TartEnvironment(DockerEnvironment):
@@ -60,6 +114,7 @@ class TartEnvironment(DockerEnvironment):
         self.vm_name = f"vbmac-trial-{uuid.uuid4().hex[:10]}"
         self.vm_logs = Path(self.trial_paths.trial_dir) / "vm"
         self.vm: V.VM | None = None
+        self.scroll: ScrollProxy | None = None
         self.vm_events: list[dict[str, Any]] = []
 
     # -- helpers -------------------------------------------------------------
@@ -93,13 +148,14 @@ class TartEnvironment(DockerEnvironment):
         url = await asyncio.to_thread(self._boot_vm)
         try:
             await super().start(force_build)
-            quoted = shlex.quote(url)
-            res = await super().exec(
-                f"mkdir -p /run/vbmac /var/lib/vbmac && umask 077 && printf %s {quoted} > /run/vbmac/vnc.url",
-                timeout_sec=30,
-            )
+            self.scroll = ScrollProxy(self.vm_name)
+            files = {"vnc.url": url, "scroll.url": self.scroll.url}
+            cmd = "mkdir -p /run/vbmac /var/lib/vbmac && umask 077"
+            for fname, value in files.items():
+                cmd += f" && printf %s {shlex.quote(value)} > /run/vbmac/{fname}"
+            res = await super().exec(cmd, timeout_sec=30)
             if res.return_code != 0:
-                raise RuntimeError(f"could not hand the VNC URL to the container: {res.stderr}")
+                raise RuntimeError(f"could not hand the VM URLs to the container: {res.stderr}")
         except BaseException:
             await asyncio.to_thread(self._delete_vm)
             raise
@@ -107,7 +163,7 @@ class TartEnvironment(DockerEnvironment):
     def _collect(self, paths: list[str]) -> tuple[Path, dict[str, Any]]:
         assert self.vm is not None and self.vm_spec is not None
         t0 = time.time()
-        how = self.vm.shutdown(timeout=float(self.vm_spec.get("shutdown_timeout_sec", 120)))
+        how = self.vm.shutdown(timeout=float(self.vm_spec.get("shutdown_timeout_sec", 180)))
         out = Path(tempfile.mkdtemp(prefix="vbmac-collect-"))
         fs = out / "fs"
         fs.mkdir()
@@ -148,6 +204,9 @@ class TartEnvironment(DockerEnvironment):
     def _delete_vm(self) -> None:
         if self.vm_spec is None:
             return
+        if self.scroll is not None:
+            self.scroll.close()
+            self.scroll = None
         if self.vm is not None:
             try:
                 self.vm.delete()

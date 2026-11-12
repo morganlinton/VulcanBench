@@ -1,0 +1,1 @@
+A two-day leadership offsite was just added to my Work calendar. Any of my weekly 1:1s that fall on the offsite days need to move to the same time on the Thursday of that week. Just those meetings: every other week of each 1:1 stays as it is.

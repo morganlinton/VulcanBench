@@ -32,6 +32,16 @@ import rfb  # noqa: E402
 
 TART = os.environ.get("TART") or shutil.which("tart") or "/opt/homebrew/bin/tart"
 VNC_RE = re.compile(r"vnc://[^\s]+")
+# Apps the base image grants the guest agent Automation of (build_base.py).
+SCRIPTABLE = ("Notes", "Reminders", "Calendar", "Contacts", "Preview", "TextEdit")
+QUIT_APPS = (
+    "; ".join(
+        f"osascript -e 'with timeout of 15 seconds' -e 'if application \"{a}\" is running then "
+        f"tell application \"{a}\" to quit' -e 'end timeout' >/dev/null 2>&1"
+        for a in SCRIPTABLE
+    )
+    + "; sleep 2; true"
+)
 
 
 def tart(*args: str, timeout: float = 600, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -178,46 +188,61 @@ class VM:
             time.sleep(2)
         return False
 
-    def shutdown(self, timeout: float = 120) -> str:
-        """A normal macOS shutdown (apps quit and save), then wait for the VM to stop.
-        Returns how it went down: "loginwindow", "sudo" or "forced"."""
-        how = "forced"
+    def shutdown(self, timeout: float = 180) -> str:
+        """A normal macOS shutdown (apps quit and save), then wait for the VM
+        to stop. Returns how it went down: "system-events" or "loginwindow"
+        when the guest stopped by itself after that request, "forced" when
+        it had to be stopped from the host (unsaved app state may be lost).
+
+        osascript often returns an error when the guest goes down under it,
+        so the result is judged by whether the VM stops, not by exit codes.
+        """
+        requested = None
         if self.agent_ready(timeout=20):
-            # System Events quits every app gracefully (they save) with no
-            # confirmation dialog; the base image grants the guest agent
-            # Automation of System Events. loginwindow's shutdown event works
-            # too but waits out its 60 s "Are you sure" countdown.
-            r = self.exec(
+            # First quit the apps the base image lets the guest agent script,
+            # one at a time with a timeout, so each saves before shutdown.
+            self.exec(QUIT_APPS, timeout=90, check=False)
+            self.exec(
                 "osascript -e 'tell application \"System Events\" to shut down'",
                 timeout=60,
                 check=False,
             )
-            how = "system-events" if r.returncode == 0 else how
-            if how == "forced":
-                r = self.exec(
+            requested = "system-events"
+            if not self._wait_stopped(30):
+                self.exec(
                     "osascript -e 'tell application \"loginwindow\" to «event aevtrsdn»'",
                     timeout=30,
                     check=False,
                 )
-                how = "loginwindow" if r.returncode == 0 else how
-            if how == "forced":
-                r = self.exec("sudo -n shutdown -h now", timeout=30, check=False)
-                how = "sudo" if r.returncode == 0 else how
-        deadline = time.time() + timeout
-        while time.time() < deadline:
-            if self.proc is not None and self.proc.poll() is not None:
-                break
-            if self.proc is None and vm_state(self.name) in ("stopped", "False"):
-                break
-            time.sleep(1)
-        else:
-            how = "forced"
-        if self.proc is not None and self.proc.poll() is None:
-            tart("stop", self.name, check=False)
-            self.proc.wait(timeout=60)
-            how = "forced"
+                requested = "loginwindow"  # its dialog proceeds after 60 s
+        if requested and self._wait_stopped(timeout):
+            self.close_client()
+            return requested
+        # Record what held the shutdown up before forcing it. A new VNC
+        # connection can crash the VZ server if a security prompt is up,
+        # which costs nothing here: the VM is about to be stopped anyway.
+        try:
+            self.close_client()
+            self.screenshot(self.log_dir / f"{self.name}-shutdown-stuck.png")
+        except Exception as exc:
+            (self.log_dir / f"{self.name}-shutdown-stuck.txt").write_text(repr(exc))
+        tart("stop", self.name, check=False)
+        if self.proc is not None:
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                self.proc.wait(timeout=60)
         self.close_client()
-        return how
+        return "forced"
+
+    def _wait_stopped(self, seconds: float) -> bool:
+        deadline = time.time() + seconds
+        while time.time() < deadline:
+            if self.proc is not None:
+                if self.proc.poll() is not None:
+                    return True
+            elif vm_state(self.name) in ("stopped", "False"):
+                return True
+            time.sleep(1)
+        return False
 
     def stop(self) -> None:
         tart("stop", self.name, check=False)

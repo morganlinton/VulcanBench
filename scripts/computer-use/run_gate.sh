@@ -307,7 +307,7 @@ fi
 # Frontier gate matches; computer-1's desktop bring-up timeouts and the MCP
 # server's display failure (harbor/agents/computer_1/runtime.py,
 # sandbox/computer-use/ensure-display.sh).
-INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model|refresh_token_reused|Your access token could not be refreshed|unexpected status 401|usage_limit_reached'
+INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model|refresh_token_reused|Your access token could not be refreshed|unexpected status 401|usage_limit_reached|NetworkConnectionError|Download failed|the trial.s VM exited|guest session not up|the VM exited while booting'
 # Codex exec --json item types for tools the codex row must not have (the
 # tool-surface guard; codex.txt only).
 SURFACE_RE='"type": ?"(command_execution|file_change|web_search|collab_tool_call|image_generation)"'
@@ -390,7 +390,7 @@ infra_hit() { # job dir -> prints the first trial (or "job-log") with an infrast
   local tr
   for tr in "$1"/*__*; do
     [ -d "$tr" ] || continue
-    if grep -rqE "$INFRA_RE" "$tr/agent" "$tr/trial.log" 2>/dev/null; then basename "$tr"; return; fi
+    if grep -rqE "$INFRA_RE" "$tr/agent" "$tr/trial.log" "$tr/result.json" 2>/dev/null; then basename "$tr"; return; fi
   done
   if grep -qE "$INFRA_RE" "$OUT/$job.log" 2>/dev/null; then echo "job-log"; fi
 }

@@ -52,14 +52,35 @@ plan they implement was approved by the owner in chat on 2026-11-11.
 - **First-run sheets that appear on a later launch stay.** Reminders shows
   "Never Miss a Reminder" on its second launch; every trial of a task sees
   the same sheet from its image, so it is deterministic friction, not noise.
+- **One VNC client per trial, connected late.** The environment waits for
+  the guest session through the guest agent (Dock, Finder, SystemUIServer,
+  then 25 s), not over VNC: a VM crashed when the agent's client connected
+  seconds after the environment's disconnected. The MCP server answers at
+  once and connects to the VM in the background (Codex dropped a server
+  that was slow to start and ran with no computer tools). After a display
+  resize, or on an all-black capture, the client rebuilds from a fresh
+  connection, because the VZ server ignores a second full-frame request
+  (one Codex trial saw only black). A VM that dies mid-trial fails
+  collection as an infrastructure error.
+- **The fifth pilot task is settings-workday-setup, not settings-focus-work.**
+  Focus configuration's storage was unmapped; the replacement is the same
+  kind of task (System Settings, several panes, neighbours that must not
+  change) and is graded from user-owned preference files.
+- **Golds open apps from the Dock.** Spotlight's index can still be settling
+  right after boot, so a gold that searched "Downloads" sometimes opened a
+  Finder search instead. Agents keep Spotlight as it is.
 
 ### Evidence
 
 - notes-smoke: validator PASS (nop 0, gold 1 three times, both cheats
   caught), 101 to 123 s per trial.
-- finder-installer-cleanup: gold 1 three times, empty-trash and
-  recent-installer cheats caught; the delete-immediately probe pressed
-  Return on a dialog with no default button and was fixed to click Delete.
+- Validator PASS (nop 0, gold 1 three times, every cheat caught by its
+  named sub-metric) for finder-installer-cleanup, notes-actions-to-reminders,
+  calendar-offsite-conflicts and settings-workday-setup. On the way: the
+  delete-immediately probe pressed Return on a dialog with no default button
+  (fixed to click Delete); a Finder gold typed into the sidebar (now focuses
+  the file list first); the calendar checker dropped a Wednesday series'
+  last week at its horizon (fixed).
 - A boot of a task image reports the frozen clock (2026-03-09 09:15), no
   network and no sudo.
 

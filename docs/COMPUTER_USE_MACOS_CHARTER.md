@@ -1,7 +1,8 @@
 # VulcanBench ComputerUse macOS v1: the macOS computer-use suite (charter draft)
 
-Status: **draft, 2026-11-11; milestone 1 (infrastructure) built, milestone 2
-(pilot tasks) in progress.** The owner asked for a computer-use suite focused
+Status: **draft, 2026-11-11; milestone 1 (infrastructure) built; milestone 2
+built four validated pilot tasks and ran the pilot on 2026-11-12 (results in
+docs/results/computer-use-macos-v1-pilot/).** The owner asked for a computer-use suite focused
 on macOS after the Linux suite (`tasks/computer-use-v1`, see
 [COMPUTER_USE_CHARTER.md](COMPUTER_USE_CHARTER.md)) saturated: both reference
 rows solved every capability task at n=1 (PR 293). The Linux suite stays as
@@ -62,7 +63,10 @@ from day one: every capability task carries a reason a strong agent can fail.
 
 - It sees the screen and acts with screenshot, click, double and triple
   click, drag, scroll, type and key. Typed text is US-keyboard ASCII (the VNC
-  server maps key codes); tasks do not require other characters.
+  server maps key codes); tasks do not require other characters. The VZ VNC
+  server carries no scroll-wheel events, so scrolling is posted inside the
+  guest (`vbscroll`, through the environment's per-trial endpoint); the
+  agent sees no difference.
 - The guest has no network. Safari opens but loads nothing remote.
 - Terminal is part of macOS and stays installed. The agent cannot become
   root (no passwordless sudo, an unknown password), and a checker requires
@@ -106,6 +110,8 @@ desktop agent running inside the VM) are a later row.
 - Boot to a drawn desktop takes 30 to 50 seconds per trial; suspending a
   booted image and resuming clones may cut it.
 - The VZ VNC server has crashed the VM when a client connected while a
-  macOS security prompt was on screen; the tools hold one connection per
-  trial, which has avoided it so far. A task that raises such a prompt is
-  watched for this in validation.
+  macOS security prompt was on screen, or seconds after another client
+  disconnected. Trials now have one VNC client, connected once; a VM that
+  dies mid-trial is an infrastructure failure, retried, never a result.
+- Desktop widgets flash as placeholders for a few seconds at some boots
+  although the base image hides them; agents connect after a 25 s settle.

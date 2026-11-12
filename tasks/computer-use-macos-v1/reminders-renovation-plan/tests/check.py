@@ -11,8 +11,7 @@ Sub-metrics (reward is 1 only when all are 1):
   moved_to_list     Order cabinets, Order countertop and Order sink and faucet
                     are in a list named Ordering, and nothing else is
   due_dates         Choose a contractor is due Friday 13 March and Book
-                    electrician for new outlets Tuesday 17 March (today is
-                    Monday 9 March)
+                    electrician for new outlets Tuesday 17 March
   priority_high     Get three contractor quotes has high priority
   paint_done        Pick paint color is completed (not deleted)
   others_untouched  every other reminder has no due date, no priority

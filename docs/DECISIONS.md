@@ -72,6 +72,13 @@ macOS tasks, then n=3 admission on both reference rows, then the first
   Gonzalez cards shared only a name, as the two different Chris Parks do,
   so "check the details before you merge" could not separate them, and all
   four trials of both rows left Maria unmerged with everything else right.
+  calendar-free-slots 0.2.0 is the second: its instruction said "next
+  week" while the agent's own session reports the real date (November
+  2026) and the guest's clock is frozen at 9 March 2026; Codex stopped
+  both times to ask which week was meant. Instructions now name the dates
+  where a task would otherwise depend on "today" (the free-slots week, the
+  Reminders due dates); dates inside seeded content (a note's "by
+  Thursday" under its meeting date) stay, since the content dates itself.
   Reminders lost its subtasks and flags before admission: local
   (non-iCloud) lists support neither, so that task moves reminders to a new
   list and sets due dates instead.

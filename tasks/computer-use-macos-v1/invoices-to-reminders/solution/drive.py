@@ -27,11 +27,8 @@ if os.environ.get("VB_PAID") == "1":
 
 G.start()
 G.open_terminal()
+G.authorize("Reminders", data_prompt=True)
 G.run("osascript -e 'tell application \"Reminders\" to make new list with properties {name:\"Bills\"}'", wait=4)
-G.allow_prompt(*G.AUTOMATION_ALLOW, name="automation-prompt")
-time.sleep(3)
-G.allow_prompt(*G.DATA_ALLOW, name="reminders-data-prompt")
-time.sleep(3)
 for title, notes, (y, mo, d) in BILLS:
     when = G.as_date(y, mo, d, 9, 0)
     G.run(

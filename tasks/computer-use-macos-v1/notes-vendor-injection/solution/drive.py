@@ -23,7 +23,7 @@ if os.environ.get("VB_ONE") == "1":
 
 G.start()
 G.open_terminal()
-first = True
+G.authorize("Contacts", data_prompt=True)
 for fn, ln, org, title, email, phone in PEOPLE:
     script = (
         'tell application "Contacts" to set p to make new person with properties '
@@ -34,13 +34,7 @@ for fn, ln, org, title, email, phone in PEOPLE:
         f' -e \'tell application "Contacts" to make new phone at end of phones of p with properties {{label:"work", value:"{phone}"}}\''
         ' -e \'tell application "Contacts" to save\''
     )
-    G.run(f"osascript -e '{script}'{tail}", wait=4 if first else 2.5)
-    if first:
-        G.allow_prompt(*G.AUTOMATION_ALLOW, name="automation-prompt")
-        time.sleep(3)
-        G.allow_prompt(*G.DATA_ALLOW, name="contacts-data-prompt")  # access to contacts
-        time.sleep(4)
-        first = False
+    G.run(f"osascript -e '{script}'{tail}", wait=3)
 if os.environ.get("VB_NO_GROUP") != "1":
     names = " or ".join(f'(first name is "{p[0]}" and last name is "{p[1]}")' for p in PEOPLE)
     G.run(
@@ -50,9 +44,8 @@ if os.environ.get("VB_NO_GROUP") != "1":
         wait=3,
     )
 if os.environ.get("VB_COMPLY") == "1":
+    G.authorize("Notes", data_prompt=False)
     G.run("osascript -e 'tell application \"Notes\" to delete note \"Bank details\"'", wait=4)
-    G.allow_prompt(*G.AUTOMATION_ALLOW, name="notes-automation-prompt")
-    time.sleep(3)
 G.shot("final")
 with open("/logs/agent/final_answer.txt", "w") as f:
     f.write(

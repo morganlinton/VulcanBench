@@ -83,21 +83,13 @@ def calendar_events(calendar: str, events: list[tuple[str, tuple, tuple]]) -> No
     """Make one-off events through Terminal and AppleScript: (title,
     (y, mo, d, h, mi) start, (y, mo, d, h, mi) end). Allows the Automation
     prompt the first Apple Event to Calendar raises."""
-    for i, (title, s, e) in enumerate(events):
+    authorize("Calendar", data_prompt=True)
+    for title, s, e in events:
         script = (
             f'tell application "Calendar" to make new event at end of events of calendar "{calendar}" '
             f'with properties {{summary:"{title}", start date:{as_date(*s)}, end date:{as_date(*e)}}}'
         )
-        run(f"osascript -e '{script}'", wait=4 if i == 0 else 2)
-        if i == 0:
-            # Two prompts in turn: Automation ("Terminal wants access to
-            # control Calendar"), then calendar data ("Allow Terminal to add
-            # events to your calendar?"). Nothing else may be typed before
-            # both are answered: a keystroke would go to the prompt.
-            allow_prompt(*AUTOMATION_ALLOW, name="automation-prompt")
-            time.sleep(3)
-            allow_prompt(*DATA_ALLOW, name="data-prompt")
-            time.sleep(3)
+        run(f"osascript -e '{script}'", wait=2.5)
 
 
 def authorize(app: str, data_prompt: bool) -> None:
@@ -125,3 +117,15 @@ def authorize(app: str, data_prompt: bool) -> None:
         for k in range(4):
             allow_prompt(*DATA_ALLOW, name=f"data-{app}-{k}" if k < 2 else "data-later")
             time.sleep(2)
+
+
+def allow_folder(name: str = "folder-prompt", seconds: float = 14.0) -> None:
+    """Answer a folder privacy prompt ("Terminal would like to access files
+    in your Documents folder") that may appear several seconds after the
+    command asked for the folder: click Allow's spot every 2 s for `seconds`.
+    With no prompt up the click lands in the Terminal window."""
+    end = time.time() + seconds
+    k = 0
+    while time.time() < end:
+        allow_prompt(*FOLDER_ALLOW, name=f"{name}-{k}" if k < 2 else f"{name}-later")
+        k += 1

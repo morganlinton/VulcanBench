@@ -35,7 +35,7 @@ MOVES = [
 G.start()
 G.open_terminal()
 G.run("cd ~/Documents/Receipts && ls", wait=3)
-G.allow_prompt(*ALLOW, name="documents-prompt")
+G.allow_folder("documents-prompt")
 G.run("ls", wait=2)
 for src, dst in MOVES:
     G.run(f'mv -n "{src}" "{dst}"', wait=0.8)

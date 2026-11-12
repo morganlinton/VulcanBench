@@ -27,7 +27,7 @@ CANCEL = (640, 436)
 G.start()
 G.open_terminal()
 G.run("open ~/Downloads/HarborVPN-3.2.pkg", wait=3)
-G.allow_prompt(*G.FOLDER_ALLOW, name="downloads-prompt")
+G.allow_folder("downloads-prompt")
 time.sleep(6)
 G.shot("installer")
 B.click(*CONTINUE, "left", 1)  # Introduction -> Destination Select

@@ -106,9 +106,9 @@ def authorize(app: str, data_prompt: bool) -> None:
     }.get(app, "count windows")  # touches the app's data
     run(f"osascript -e 'tell application \"{app}\" to {probe}'", wait=6)
     # An app's first launch in a trial can take most of a minute before its
-    # prompt appears. Click Allow's spot every few seconds for 40 s: with no
+    # prompt appears. Click Allow's spot every few seconds for 90 s: with no
     # prompt up the click lands harmlessly in the Terminal window.
-    for k in range(10):
+    for k in range(30):  # Notes has taken over 40 s to ask
         allow_prompt(
             *AUTOMATION_ALLOW, name=f"automation-{app}-{k}" if k < 2 else "automation-later"
         )

@@ -363,7 +363,22 @@ stop_sandboxes() { # task name -> remove this task's leftover sandbox containers
   # Harbor names a trial's compose project <first 32 chars of the task name>__<trial id>__env.
   local prefix ids n
   prefix=$(printf '%s' "${1:0:32}" | tr 'A-Z' 'a-z')
-  ids=$(docker ps -aq --filter "name=^${prefix}__" 2>/dev/null)
+  # Leftovers are stopped, or still running hours after their trial ended.
+  # A container that is running and less than 2 hours old belongs to a run in
+  # progress (a validation of this task beside the sweep) and is left alone.
+  ids=$(docker ps -a --filter "name=^${prefix}__" --format '{{.ID}} {{.State}} {{.CreatedAt}}' 2>/dev/null | python3 -c '
+import sys, datetime as d
+now = d.datetime.now(d.timezone.utc)
+for line in sys.stdin:
+    cid, state, rest = (line.split(" ", 2) + ["", ""])[:3]
+    try:
+        made = d.datetime.strptime(" ".join(rest.split()[:3]), "%Y-%m-%d %H:%M:%S %z")
+        young = (now - made).total_seconds() < 7200
+    except ValueError:
+        young = False
+    if not (state == "running" and young):
+        print(cid)
+')
   [ -n "$ids" ] && { echo "--- $1: removing leftover sandbox containers"; docker rm -f $ids >/dev/null 2>&1; }
   for n in $(docker network ls -q --filter "name=^${prefix}__" 2>/dev/null); do docker network rm "$n" >/dev/null 2>&1; done
   if [ "$macos" = 1 ]; then

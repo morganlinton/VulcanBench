@@ -81,7 +81,7 @@ def _pb_len(field: int, payload: bytes) -> bytes:
 
 
 def test_note_text_reads_the_body_protobuf() -> None:
-    body = "Packing list\npassport".encode()
+    body = b"Packing list\npassport"
     blob = gzip.compress(_pb_len(2, _pb_len(3, _pb_len(2, body))))
     assert M.note_text(blob) == "Packing list\npassport"
     assert M.note_text(None) == ""
@@ -100,7 +100,9 @@ def _reminders_store(root: Path) -> None:
     # 2026-03-12 21:00 UTC is 17:00 in New York (EDT); all-day is midnight UTC.
     timed = 1773349200 - APPLE
     allday = 1774915200 - APPLE  # 2026-03-31 00:00 UTC
-    con.execute("INSERT INTO ZREMCDREMINDER VALUES (1, 'Send numbers', '', 1, ?, 0, 0, 0)", (timed,))
+    con.execute(
+        "INSERT INTO ZREMCDREMINDER VALUES (1, 'Send numbers', '', 1, ?, 0, 0, 0)", (timed,)
+    )
     con.execute("INSERT INTO ZREMCDREMINDER VALUES (2, 'Pay rent', '', 1, ?, 1, 0, 0)", (allday,))
     con.execute("INSERT INTO ZREMCDREMINDER VALUES (3, 'Gone', '', 1, NULL, 0, 0, 1)")
     con.commit()
@@ -168,7 +170,7 @@ def test_scroll_proxy_refuses_a_wrong_token() -> None:
         url = proxy.url.replace("host.docker.internal", "127.0.0.1")
         bad = url.split("?t=")[0] + "?t=wrong&dy=3"
         with pytest.raises(urllib.error.HTTPError) as err:
-            urllib.request.urlopen(bad, timeout=5)  # noqa: S310
+            urllib.request.urlopen(bad, timeout=5)
         assert err.value.code == 400
     finally:
         proxy.close()
@@ -186,7 +188,9 @@ def test_task_is_wired_for_the_tart_environment(slug: str) -> None:
     vm = json.loads((task / "environment" / "vm.json").read_text())
     assert vm["image"] == f"vbmac-task-{slug}"
     assert (task / "environment" / "clock").read_text().strip().isdigit()
-    assert (task / "environment" / "seed.sh").is_file() or (task / "environment" / "seed_fs.py").is_file()
+    assert (task / "environment" / "seed.sh").is_file() or (
+        task / "environment" / "seed_fs.py"
+    ).is_file()
     text = (task / "task.toml").read_text()
     assert "canary GUID" in text.splitlines()[0]
     cfg = tomllib.loads(text)

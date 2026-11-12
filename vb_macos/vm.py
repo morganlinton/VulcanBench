@@ -160,7 +160,7 @@ class VM:
             time.sleep(2)
         raise RuntimeError(f"desktop not ready within {timeout} s")
 
-    def wait_session(self, timeout: float = 300, settle: float = 10.0) -> float:
+    def wait_session(self, timeout: float = 300, settle: float = 25.0) -> float:
         """Until the logged-in session is up, judged through the guest agent
         (Dock, Finder and SystemUIServer running), then `settle` seconds.
         Uses no VNC connection: the VZ VNC server has crashed the VM when a

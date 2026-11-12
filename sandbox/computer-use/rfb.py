@@ -201,6 +201,7 @@ class RFBClient:
         self.first_frame = threading.Event()
         self.reader: threading.Thread | None = None
         self.reader_error: BaseException | None = None
+        self.stale = False
         self._stop = threading.Event()
 
     # -- connection -------------------------------------------------------
@@ -232,6 +233,7 @@ class RFBClient:
                 raise
             sock.settimeout(None)  # the reader blocks until the server sends
             self._stop.clear()
+            self.stale = False
             self.first_frame.clear()
             self.reader_error = None
             self.reader = threading.Thread(target=self._read_loop, name="rfb-reader", daemon=True)
@@ -337,7 +339,12 @@ class RFBClient:
                     self.updates += 1
                     self.last_update = time.monotonic()
                     self.first_frame.set()
-                    self._request(incremental=not resized)
+                    if resized:
+                        # The server ignores a second full-frame request on a
+                        # connection, so after a resize the framebuffer can
+                        # only be rebuilt on a new one; capture() reconnects.
+                        self.stale = True
+                    self._request(incremental=True)
                 elif kind == 1:  # SetColourMapEntries
                     _first, n = struct.unpack(">xHH", self._recv(5))
                     self._recv(n * 6)
@@ -367,7 +374,18 @@ class RFBClient:
             with self.fblock:
                 return self.width, self.height, bytes(self.fb)
 
-        return self._retry(go)
+        with self.lock:
+            w, h, data = self._retry(go)
+            if self.stale or _all_black(data):
+                # A resize, or a first frame taken while the guest was still
+                # dark: rebuild from a fresh connection, after a pause (a
+                # connect right after a disconnect has crashed the VZ server).
+                self.close()
+                time.sleep(3)
+                self.connect()
+                time.sleep(quiet)
+                w, h, data = self._retry(go)
+            return w, h, data
 
     # -- input ------------------------------------------------------------
     def _pointer(self, x: int, y: int, buttons: int) -> None:
@@ -425,6 +443,12 @@ class RFBClient:
 
     def type_text(self, text: str) -> None:
         self.send_keys(self.mapper.text(text))
+
+
+def _all_black(bgrx: bytes) -> bool:
+    """True when a sample of the frame is entirely black (no guest picture)."""
+    sample = bgrx[:: 4 * 1009]
+    return bool(sample) and max(sample) == 0
 
 
 def png_bytes(width: int, height: int, bgrx: bytes, step: int = 1) -> bytes:

@@ -42,6 +42,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
 from pathlib import Path
@@ -278,6 +279,7 @@ class VNCBackend:
         self.client = None  # rfb.RFBClient, after start()
         self.k = 2.0
         self.t0 = time.time()
+        self.ready = threading.Event()
 
     def _note(self, kind: str, **args: object) -> None:
         try:
@@ -314,9 +316,13 @@ class VNCBackend:
         if self.client.width:
             self.k = self.client.width / WIDTH
         log(f"VNC framebuffer {self.client.width}x{self.client.height}, scale {self.k:g}")
+        self.ready.set()
 
     def _c(self):  # type: ignore[no-untyped-def]
-        if self.client is None:
+        # The connection is made in the background (main()), so a tool call
+        # that comes first waits for it.
+        self.ready.wait(timeout=180)
+        if self.client is None or not self.client.width:
             raise RuntimeError("the VM display is not connected")
         return self.client
 
@@ -564,7 +570,13 @@ def main() -> None:
         f"backend {BACKEND_NAME}, condition {CONDITION}: screenshots {IMG_W}x{IMG_H}, "
         f"zoom {'on' if ZOOM_ENABLED else 'off'}"
     )
-    BACKEND.start(args.start_url)
+    if BACKEND_NAME == "vnc":
+        # Answer MCP at once and reach the VM in the background: an agent CLI
+        # drops a server that is slow to start (Codex did, while the VNC
+        # connection was still being made), losing every computer tool.
+        threading.Thread(target=BACKEND.start, args=(args.start_url,), daemon=True).start()
+    else:
+        BACKEND.start(args.start_url)
     server.run(transport="stdio")
 
 

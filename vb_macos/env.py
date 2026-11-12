@@ -130,11 +130,7 @@ class TartEnvironment(DockerEnvironment):
         t0 = time.time()
         self.vm.clone_from(image)
         url = self.vm.start(display=self.vm_spec.get("display", "1280x800"))
-        ready = self.vm.wait_desktop(timeout=float(self.vm_spec.get("boot_timeout_sec", 300)))
-        self.vm.screenshot(self.vm_logs / "start.png")
-        # Free the VNC connection for the agent's MCP server: one client at a
-        # time keeps the VZ server away from its connect-time crash.
-        self.vm.close_client()
+        ready = self.vm.wait_session(timeout=float(self.vm_spec.get("boot_timeout_sec", 300)))
         self._event(
             "booted", image=image, seconds=round(time.time() - t0, 1), desktop_s=round(ready, 1)
         )
@@ -162,6 +158,11 @@ class TartEnvironment(DockerEnvironment):
 
     def _collect(self, paths: list[str]) -> tuple[Path, dict[str, Any]]:
         assert self.vm is not None and self.vm_spec is not None
+        if not self.vm.alive():
+            # The VM died during the trial (a VZ VNC server crash has done
+            # this): an infrastructure failure, not a result to grade.
+            self._event("vm-died")
+            raise RuntimeError("the trial's VM exited before collection")
         t0 = time.time()
         how = self.vm.shutdown(timeout=float(self.vm_spec.get("shutdown_timeout_sec", 180)))
         out = Path(tempfile.mkdtemp(prefix="vbmac-collect-"))

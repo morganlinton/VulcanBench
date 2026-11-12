@@ -160,6 +160,34 @@ class VM:
             time.sleep(2)
         raise RuntimeError(f"desktop not ready within {timeout} s")
 
+    def wait_session(self, timeout: float = 300, settle: float = 10.0) -> float:
+        """Until the logged-in session is up, judged through the guest agent
+        (Dock, Finder and SystemUIServer running), then `settle` seconds.
+        Uses no VNC connection: the VZ VNC server has crashed the VM when a
+        client connected seconds after another disconnected, so in a trial
+        the agent's tools are the only VNC client."""
+        t0 = time.time()
+        while time.time() - t0 < timeout:
+            try:
+                r = self.exec(
+                    "pgrep -x Dock >/dev/null && pgrep -x Finder >/dev/null && "
+                    "pgrep -x SystemUIServer >/dev/null",
+                    timeout=15,
+                    check=False,
+                )
+                if r.returncode == 0:
+                    time.sleep(settle)
+                    return time.time() - t0
+            except subprocess.TimeoutExpired:
+                pass
+            if self.proc is not None and self.proc.poll() is not None:
+                raise RuntimeError("the VM exited while booting")
+            time.sleep(2)
+        raise RuntimeError(f"guest session not up within {timeout} s")
+
+    def alive(self) -> bool:
+        return self.proc is None or self.proc.poll() is None
+
     def exec(
         self, cmd: str, timeout: float = 120, check: bool = True
     ) -> subprocess.CompletedProcess[str]:

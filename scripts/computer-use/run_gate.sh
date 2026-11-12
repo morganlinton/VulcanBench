@@ -279,7 +279,7 @@ print(json.dumps({"model": sys.argv[2], "status": words[0], "max_utilization": f
 
 preflight || { echo "cu-gate: preflight failed" >&2; exit 2; }
 for t in "$@"; do
-  [ -f "$here/tasks/computer-use-v1/$t/task.toml" ] || { echo "cu-gate: no task $t under tasks/computer-use-v1" >&2; exit 2; }
+  [ -f "$here/tasks/$gate_suite/$t/task.toml" ] || { echo "cu-gate: no task $t under tasks/$gate_suite" >&2; exit 2; }
 done
 if [ "$preflight_only" = 1 ]; then
   [ "$agent" = claude-code ] && usage_preflight

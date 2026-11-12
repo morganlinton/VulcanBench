@@ -54,6 +54,14 @@ osascript -e 'tell application "System Events" to set procs to name of every pro
 osascript -e 'tell application "Finder" to close every window' >/dev/null 2>&1 || true
 svc=$(networksetup -listallnetworkservices 2>/dev/null | sed 1d | grep -v '^\*' | head -1)
 [ -n "$svc" ] && sudo -n networksetup -setnetworkserviceenabled "$svc" off
+# The base had network while it was built, so Software Update may have found
+# an update since; clear its badge now that the network is off for good.
+sudo -n defaults delete /Library/Preferences/com.apple.SoftwareUpdate RecommendedUpdates 2>/dev/null
+sudo -n defaults write /Library/Preferences/com.apple.SoftwareUpdate LastRecommendedUpdatesAvailable -int 0
+sudo -n defaults write /Library/Preferences/com.apple.SoftwareUpdate LastUpdatesAvailable -int 0
+defaults write com.apple.systempreferences AttentionPrefBundleIDs -dict
+sudo -n softwareupdate --clear-catalog >/dev/null 2>&1
+killall Dock 2>/dev/null
 sudo -n rm -f /etc/sudoers.d/admin-nopasswd
 sudo -n true 2>/dev/null && echo SUDO-STILL-OPEN || echo finalize-ok
 """

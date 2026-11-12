@@ -326,14 +326,25 @@ class VNCBackend:
             raise RuntimeError("the VM display is not connected")
         return self.client
 
+    def _scale(self) -> float:
+        """Framebuffer pixels per screen point, from the framebuffer's size
+        now: the VM's display can change size after the connection is made
+        (a 1280-wide framebuffer at connect that became 2560 wide put every
+        click at half its coordinates in one trial)."""
+        if self.client is not None and self.client.width:
+            self.k = self.client.width / WIDTH
+        return self.k
+
     def _fb(self, x: int, y: int) -> tuple[int, int]:
-        return round(x * self.k), round(y * self.k)
+        k = self._scale()
+        return round(x * k), round(y * k)
 
     def grab(self, region: tuple[int, int, int, int] | None = None, scale: float = 1) -> bytes:
         import rfb  # noqa: PLC0415
         from PIL import Image as PILImage  # noqa: PLC0415 - only the macOS image has Pillow
 
         w, h, data = self._c().capture()
+        self._scale()
         im = rfb.to_image(w, h, data)
         if region:
             x0, y0, x1, y1 = region
@@ -439,7 +450,8 @@ class VNCBackend:
         if self.client is None:
             return None
         px, py = self.client.pointer
-        return round(px / self.k), round(py / self.k)
+        k = self._scale()
+        return round(px / k), round(py / k)
 
 
 BACKEND = VNCBackend() if BACKEND_NAME == "vnc" else X11Backend()

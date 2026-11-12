@@ -196,7 +196,8 @@ def reminders(root: Path) -> list[Reminder]:
         try:
             cols = _cols(con, "ZREMCDREMINDER")
             opt = ", ".join(
-                f"r.{c}" if c in cols else "NULL" for c in ("ZPARENTREMINDER", "ZFLAGGED", "ZPRIORITY")
+                f"r.{c}" if c in cols else "NULL"
+                for c in ("ZPARENTREMINDER", "ZFLAGGED", "ZPRIORITY")
             )
             rows = con.execute(
                 f"""SELECT r.ZTITLE, r.ZNOTES, l.ZNAME, r.ZDUEDATE, r.ZALLDAY, r.ZCOMPLETED,
@@ -207,7 +208,20 @@ def reminders(root: Path) -> list[Reminder]:
             rows = []
         finally:
             con.close()
-        for title, notes_, lname, due, allday, done, gone, list_gone, pk, parent, flag, prio in rows:
+        for (
+            title,
+            notes_,
+            lname,
+            due,
+            allday,
+            done,
+            gone,
+            list_gone,
+            pk,
+            parent,
+            flag,
+            prio,
+        ) in rows:
             out.append(
                 Reminder(
                     title=title or "",

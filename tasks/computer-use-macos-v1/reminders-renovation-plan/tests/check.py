@@ -10,12 +10,13 @@ Sub-metrics (reward is 1 only when all are 1):
   artifact_present  the Reminders store was collected
   moved_to_list     Order cabinets, Order countertop and Order sink and faucet
                     are in a list named Ordering, and nothing else is
-  flags             Choose a contractor and Book electrician for new outlets
-                    are flagged
+  due_dates         Choose a contractor is due Friday 13 March and Book
+                    electrician for new outlets Tuesday 17 March (today is
+                    Monday 9 March)
   priority_high     Get three contractor quotes has high priority
   paint_done        Pick paint color is completed (not deleted)
-  others_untouched  every other reminder in the list is unflagged, without
-                    priority and not completed; all nine are still there once,
+  others_untouched  every other reminder has no due date, no priority
+                    and is not completed; all nine are still there once,
                     the six others in Kitchen renovation; Personal is unchanged
   ui_path           the MCP server logged pointer input
 """
@@ -23,6 +24,7 @@ Sub-metrics (reward is 1 only when all are 1):
 from __future__ import annotations
 
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, "/opt/vbdesk")
@@ -32,7 +34,7 @@ import mac_state as M  # noqa: E402
 METRICS = (
     "artifact_present",
     "moved_to_list",
-    "flags",
+    "due_dates",
     "priority_high",
     "paint_done",
     "others_untouched",
@@ -45,7 +47,7 @@ TITLES = [
     "Schedule final inspection", "Clear out the pantry",
 ]  # fmt: skip
 ORDERS = ("Order cabinets", "Order countertop", "Order sink and faucet")
-FLAGS = ("Choose a contractor", "Book electrician for new outlets")
+DUE = {"Choose a contractor": date(2026, 3, 13), "Book electrician for new outlets": date(2026, 3, 17)}
 
 
 def main(argv: list[str]) -> int:
@@ -61,7 +63,7 @@ def main(argv: list[str]) -> int:
     allr = [r for r in M.reminders(fs) if not r.deleted]
     by = {t: [r for r in allr if r.title.strip() == t] for t in TITLES}
     extra["state"] = {
-        r.title: {"list": r.list, "flag": r.flagged, "prio": r.priority, "done": r.completed}
+        r.title: {"list": r.list, "due": str(r.due_date), "prio": r.priority, "done": r.completed}
         for r in allr
         if r.list in (LIST, "Ordering")
     }
@@ -69,19 +71,19 @@ def main(argv: list[str]) -> int:
         one = {t: v[0] for t, v in by.items()}
         in_ordering = sorted(r.title for r in allr if r.list == "Ordering")
         m["moved_to_list"] = int(in_ordering == sorted(ORDERS))
-        m["flags"] = int(all(one[t].flagged for t in FLAGS))
+        m["due_dates"] = int(all(one[t].due_date == d for t, d in DUE.items()))
         m["priority_high"] = int(one["Get three contractor quotes"].priority == 1)
         m["paint_done"] = int(one["Pick paint color"].completed)
-        changed = {"Get three contractor quotes": "prio", "Pick paint color": "done", **dict.fromkeys(FLAGS, "flag")}
+        changed = {"Get three contractor quotes": "prio", "Pick paint color": "done", **dict.fromkeys(DUE, "due")}
         ok = all(one[t].list == LIST for t in TITLES if t not in ORDERS)
         for t, r in one.items():
             what = changed.get(t)
-            ok = ok and (r.flagged == (what == "flag"))
+            ok = ok and ((r.due_date is not None) == (what == "due"))
             ok = ok and ((r.priority == 1) if what == "prio" else r.priority == 0)
             ok = ok and (r.completed == (what == "done"))
         personal = {r.title: r for r in allr if r.list == "Personal"}
         ok = ok and len(personal) == 2
-        ok = ok and personal.get("Renew passport") is not None and personal["Renew passport"].flagged
+        ok = ok and personal.get("Renew passport") is not None and personal["Renew passport"].priority == 9
         ok = ok and personal.get("Call the dentist") is not None and personal["Call the dentist"].priority == 5
         m["others_untouched"] = int(ok)
     events_log = M.input_events(root / "input.log")

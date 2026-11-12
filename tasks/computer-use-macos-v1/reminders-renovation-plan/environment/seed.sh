@@ -1,7 +1,8 @@
 # reminders-renovation-plan seed (guest, logged-in user). A Kitchen
 # renovation list of nine reminders and a Personal list that must not
 # change. (Local, non-iCloud Reminders lists cannot hold subtasks, so the
-# task moves reminders to a new list instead.)
+# task moves reminders to a new list instead; flags do not persist on them
+# either, so it sets due dates.)
 set -eu
 osascript <<'OSA'
 tell application "Reminders"
@@ -10,7 +11,7 @@ tell application "Reminders"
     make new reminder at end of K with properties {name:(contents of t)}
   end repeat
   set P to make new list with properties {name:"Personal"}
-  make new reminder at end of P with properties {name:"Renew passport", flagged:true}
+  make new reminder at end of P with properties {name:"Renew passport", priority:9}
   make new reminder at end of P with properties {name:"Call the dentist", priority:5}
   quit
 end tell

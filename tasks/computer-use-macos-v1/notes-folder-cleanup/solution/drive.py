@@ -34,17 +34,13 @@ def notes(lines: list[str], wait: float = 3) -> None:
 
 G.start()
 G.open_terminal()
-first = True
+G.authorize("Notes", data_prompt=False)
 for folder, titles in MOVES.items():
     lines = []
     for t in titles:
         sel = f'name is "{t}"' if "'" not in t else f'name begins with "{t.split(chr(39))[0]}"'
         lines.append(f'move (first note of folder "Notes" whose {sel}) to folder "{folder}"')
-    notes([ln.replace("'", "") for ln in lines], wait=4 if first else 3)
-    if first:
-        G.allow_prompt(*G.AUTOMATION_ALLOW, name="automation-prompt")
-        time.sleep(4)
-        first = False
+    notes([ln.replace("'", "") for ln in lines], wait=4)
 if os.environ.get("VB_KEEP_EMPTY") != "1":
     notes(['repeat with n in (every note of folder "Notes" whose plaintext is "")', "delete n", "end repeat"], wait=4)
 G.run("osascript -e 'tell application \"Notes\" to get name of every note of folder \"Notes\"'", wait=3)

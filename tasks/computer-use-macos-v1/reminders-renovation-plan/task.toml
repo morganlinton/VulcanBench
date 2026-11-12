@@ -9,14 +9,14 @@ artifacts = [{ source = "/var/lib/vbmac" }]
 [task]
 name = "vulcanbench/reminders-renovation-plan"
 version = "0.1.0"
-description = "VulcanBench ComputerUse macOS task (Reminders): restructure a renovation list: three reminders move to a new list, two are flagged, one gets high priority and one is completed, nothing else changes."
+description = "VulcanBench ComputerUse macOS task (Reminders): restructure a renovation list: three reminders move to a new list, two get due dates, one gets high priority and one is completed, nothing else changes."
 authors = [{ name = "VulcanBench", email = "morgan@vulcanbench.com" }]
 keywords = ["computer-use", "macos", "reminders", "lists", "drag-and-drop", "info-panel"]
 
 [metadata]
 vulcanbench_suite = "computer-use-macos-v1"
 vulcanbench_family = "A"
-vulcanbench_family_note = "One native app in depth (Reminders): a new list and reminders moved into it (drag to the sidebar or the List menu), flags, a priority set in the info panel or menu, and completing one item, with the rest unchanged."
+vulcanbench_family_note = "One native app in depth (Reminders): a new list and reminders moved into it (drag to the sidebar or the List menu), due dates from relative phrases, a priority set in the info panel or menu, and completing one item, with the rest unchanged."
 vulcanbench_condition = "pixels"
 vulcanbench_apps = ["reminders"]
 vulcanbench_source = "in-house"

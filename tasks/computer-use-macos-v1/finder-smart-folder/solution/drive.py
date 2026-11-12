@@ -48,9 +48,14 @@ G.start()
 B.click(72, 762, "left", 1)  # Finder in the Dock
 time.sleep(4)
 B.key("cmd+shift+o")  # Documents
-time.sleep(2.5)
-B.click(124, 14, "left", 1)  # File
+time.sleep(4)
+# Focus the Finder window first: a click meant for the File menu that lands
+# on the desktop can hit a widget (one run opened Weather).
+B.click(640, 118, "left", 1)  # the Documents window's title bar
 time.sleep(1)
+G.shot("documents")
+B.click(124, 14, "left", 1)  # File
+time.sleep(1.5)
 B.click(169, 120, "left", 1)  # New Smart Folder
 time.sleep(3)
 if os.environ.get("VB_SCOPE") != "mac":

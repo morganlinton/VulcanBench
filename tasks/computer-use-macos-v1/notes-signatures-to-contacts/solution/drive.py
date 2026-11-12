@@ -28,7 +28,7 @@ PEOPLE = [
 
 G.start()
 G.open_terminal()
-first = True
+G.authorize("Contacts", data_prompt=True)
 for fn, ln, title, org, email, phones, addr in PEOPLE:
     lines = [
         'tell application "Contacts"',
@@ -45,12 +45,6 @@ for fn, ln, title, org, email, phones, addr in PEOPLE:
             f'make new address at end of addresses of p with properties {{label:"work", street:"{st}", city:"{city}", state:"{state}", zip:"{z}"}}'
         )
     lines += ["save", "end tell"]
-    G.run("osascript " + " ".join(f"-e '{x}'" for x in lines), wait=4 if first else 2.5)
-    if first:
-        G.allow_prompt(*G.AUTOMATION_ALLOW, name="automation-prompt")
-        time.sleep(3)
-        G.allow_prompt(*G.DATA_ALLOW, name="contacts-data-prompt")
-        time.sleep(4)
-        first = False
+    G.run("osascript " + " ".join(f"-e '{x}'" for x in lines), wait=3)
 G.shot("final")
 print("gold done")

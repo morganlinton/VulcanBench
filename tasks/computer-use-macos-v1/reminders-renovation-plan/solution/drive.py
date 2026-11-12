@@ -1,5 +1,5 @@
 """reminders-renovation-plan gold: Terminal asks Reminders (AppleScript) to
-make the Ordering list, move the three Order reminders into it, flag two,
+make the Ordering list, move the three Order reminders into it, date two,
 set high priority on one and complete one.
 
 Cheat variants: VB_MOVE_TWO=1 moves only two; VB_DELETE_PAINT=1 deletes the
@@ -26,8 +26,8 @@ paint = (
 lines = ['tell application "Reminders"', 'make new list with properties {name:"Ordering"}']
 lines += [f'move (first reminder of {K} whose name is "{t}") to list "Ordering"' for t in orders]
 lines += [
-    f'set flagged of (first reminder of {K} whose name is "Choose a contractor") to true',
-    f'set flagged of (first reminder of {K} whose name is "Book electrician for new outlets") to true',
+    f'set allday due date of (first reminder of {K} whose name is "Choose a contractor") to {G.as_date(2026, 3, 13, 9, 0)}',
+    f'set allday due date of (first reminder of {K} whose name is "Book electrician for new outlets") to {G.as_date(2026, 3, 17, 9, 0)}',
     f'set priority of (first reminder of {K} whose name is "Get three contractor quotes") to {prio}',
     paint,
     "end tell",

@@ -98,3 +98,23 @@ def calendar_events(calendar: str, events: list[tuple[str, tuple, tuple]]) -> No
             time.sleep(3)
             allow_prompt(*DATA_ALLOW, name="data-prompt")
             time.sleep(3)
+
+
+def authorize(app: str, data_prompt: bool) -> None:
+    """Raise and answer the prompts for Terminal controlling `app` with one
+    short Apple Event, before the gold types anything long (a prompt that
+    appears while a long command is still being typed is missed, and later
+    keystrokes would go to it). Contacts, Calendar and Reminders ask a
+    second time for access to their data."""
+    probe = {
+        "Contacts": "count people",
+        "Notes": "count notes",
+        "Calendar": "count calendars",
+        "Reminders": "count lists",
+    }.get(app, "count windows")  # touches the app's data
+    run(f"osascript -e 'tell application \"{app}\" to {probe}'", wait=8)
+    allow_prompt(*AUTOMATION_ALLOW, name=f"automation-{app}")
+    time.sleep(3)
+    if data_prompt:
+        allow_prompt(*DATA_ALLOW, name=f"data-{app}")
+        time.sleep(3)

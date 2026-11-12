@@ -92,31 +92,35 @@ def calendar_events(calendar: str, events: list[tuple[str, tuple, tuple]]) -> No
         run(f"osascript -e '{script}'", wait=2.5)
 
 
-def authorize(app: str, data_prompt: bool) -> None:
-    """Raise and answer the prompts for Terminal controlling `app` with one
-    short Apple Event, before the gold types anything long (a prompt that
-    appears while a long command is still being typed is missed, and later
-    keystrokes would go to it). Contacts, Calendar and Reminders ask a
-    second time for access to their data."""
+def authorize(app: str, data_prompt: bool, seconds: float = 150.0) -> None:
+    """Raise and answer the prompts for Terminal controlling `app` before the
+    gold types anything long (a prompt that appears while a long command is
+    being typed is missed, and later keystrokes would go to it). Contacts,
+    Calendar and Reminders ask a second time, for their data.
+
+    An app's first launch in a trial can be slow enough that the first Apple
+    Event times out with no prompt shown, so Terminal retries a short,
+    data-touching command until it succeeds, while the gold clicks the
+    Automation and data prompts' Allow spots in turn for `seconds`. With no
+    prompt up a click lands harmlessly in the Terminal window."""
     probe = {
         "Contacts": "count people",
         "Notes": "count notes",
         "Calendar": "count calendars",
         "Reminders": "count lists",
-    }.get(app, "count windows")  # touches the app's data
-    run(f"osascript -e 'tell application \"{app}\" to {probe}'", wait=6)
-    # An app's first launch in a trial can take most of a minute before its
-    # prompt appears. Click Allow's spot every few seconds for 90 s: with no
-    # prompt up the click lands harmlessly in the Terminal window.
-    for k in range(30):  # Notes has taken over 40 s to ask
-        allow_prompt(
-            *AUTOMATION_ALLOW, name=f"automation-{app}-{k}" if k < 2 else "automation-later"
-        )
-        time.sleep(2)
-    if data_prompt:
-        for k in range(4):
-            allow_prompt(*DATA_ALLOW, name=f"data-{app}-{k}" if k < 2 else "data-later")
-            time.sleep(2)
+    }.get(app, "count windows")
+    run(
+        f"until osascript -e 'tell application \"{app}\" to {probe}' >/dev/null 2>&1; "
+        f"do sleep 2; done; echo authorized-{app}",
+        wait=4,
+    )
+    end = time.time() + seconds
+    k = 0
+    while time.time() < end:
+        spot = DATA_ALLOW if (data_prompt and k % 2) else AUTOMATION_ALLOW
+        allow_prompt(*spot, name=f"authorize-{app}-{k}" if k < 3 else "authorize-later")
+        k += 1
+    time.sleep(2)
 
 
 def allow_folder(name: str = "folder-prompt", seconds: float = 45.0) -> None:

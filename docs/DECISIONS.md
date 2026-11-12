@@ -64,6 +64,17 @@ macOS tasks, then n=3 admission on both reference rows, then the first
   user before shutdown; the installer task reads the account's failed
   authentication count with `dscl` (the directory record is root-only on
   the mounted disk). Probes never change guest state.
+- **Candidates fixed mid-admission are rerun from scratch.** When a
+  sweep shows a task defect rather than agent behavior, the task gets a
+  version bump, a rebuilt image and a fresh validation, its earlier trials
+  are set aside, and it is rerun at n=3 (jobs suffixed `-m3b`).
+  contacts-duplicate-merge 0.2.0 is the first: in 0.1 the two Maria
+  Gonzalez cards shared only a name, as the two different Chris Parks do,
+  so "check the details before you merge" could not separate them, and all
+  four trials of both rows left Maria unmerged with everything else right.
+  Reminders lost its subtasks and flags before admission: local
+  (non-iCloud) lists support neither, so that task moves reminders to a new
+  list and sets due dates instead.
 - **One sweep at a time, second VM for building.** Admission trials run one
   at a time as before; Apple's two-VM limit leaves the second slot for
   image builds and validation while a sweep runs.

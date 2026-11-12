@@ -119,7 +119,7 @@ def authorize(app: str, data_prompt: bool) -> None:
             time.sleep(2)
 
 
-def allow_folder(name: str = "folder-prompt", seconds: float = 14.0) -> None:
+def allow_folder(name: str = "folder-prompt", seconds: float = 45.0) -> None:
     """Answer a folder privacy prompt ("Terminal would like to access files
     in your Documents folder") that may appear several seconds after the
     command asked for the folder: click Allow's spot every 2 s for `seconds`.

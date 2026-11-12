@@ -74,8 +74,10 @@ else:
     name_contains(256, 256)
 G.shot("criteria")
 B.click(1060, 192, "left", 1)  # Save
-time.sleep(2)
+time.sleep(3)  # the sheet slides in; keys typed earlier are lost
+B.key("cmd+a")
 B.type_text("Client invoices")
+time.sleep(0.5)
 if os.environ.get("VB_NO_SIDEBAR") == "1":
     B.click(619, 408, "left", 1)
     time.sleep(0.5)

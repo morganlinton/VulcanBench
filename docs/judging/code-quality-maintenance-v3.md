@@ -1594,6 +1594,51 @@ Protocol id `code-quality-maintenance-v3.30.3`; run directory
 - Publication merges v3.30.2 (Low to Extra high) and v3.30.3 (Max); no earlier
   record is rewritten.
 
+## Amendment v3.30.4, November 12, 2026: GPT-6.1 Sol reviews Claude Fable 5.1, for a matched panel
+
+Protocol id `code-quality-maintenance-v3.30.4`; run directory
+`runs-code-quality-maintenance-v3.30.4`; runner
+`harness/maintenance_review_v3304.py`.
+
+- Why: Claude Fable 5.2 is published from Muse Spark 1.3 and GPT-6.1 Sol
+  (v3.30.2, v3.30.3); Claude Fable 5.1 from Muse Spark 1.3 and Grok 4.6 (v3.4).
+  Sol scores higher than Grok, so the columns did not share a panel. The owner
+  asked for Sol on the earlier columns on November 12.
+- A comparison record only: v3.4 is not amended, and Fable 5.1's published
+  board scores stay the Muse and Grok means.
+- Population: the Claude Fable 5.1 rows of the v3.4 freeze, byte for byte.
+  GPT-6 Astra's rows are dropped because Sol is an OpenAI model, and so is
+  every v3.4 diagnostic pair, since each sets an Astra submission against a
+  Fable one; the repeats keep the Fable cells. The v3.4 manifest, signals and
+  selection are checked against the v3.4 protocol before the subset is
+  derived, and each copied evidence file against its recorded hash.
+- Judges: no new exam. Every frozen field Sol was examined under in v3.30.2
+  equals v3.4's, so Sol is gated by its v3.30.2 verdict with the same settings
+  and Codex pins; Muse's v3.4 reviews and probes are scored from the v3.4
+  directory, gated by its v3.4 verdict.
+- Source runs: v3.4 was frozen on the earlier host, and Fable 5.1's source runs
+  did not survive the move. The frozen check's re-read of each source run is
+  skipped for this round; the evidence every judge reads is still checked
+  against its frozen hash before every stage.
+- Astra keeps its published Muse and Grok means; cards footnote it.
+
+## Amendment v3.30.5, November 12, 2026: GPT-6.1 Sol reviews Claude Opus 5.5, for a matched panel
+
+Protocol id `code-quality-maintenance-v3.30.5`; run directory
+`runs-code-quality-maintenance-v3.30.5`; runner
+`harness/maintenance_review_v3305.py`.
+
+- The second half of the owner's request: Claude Opus 5.5 is published from
+  Muse Spark 1.3 and Grok 4.6 (v3.15). A comparison record only; v3.15 is not
+  amended.
+- Population: the v3.15 freeze, byte for byte, copied and checked as v3.30.2
+  copies v3.30.
+- Judges: as v3.30.4, with Muse's v3.15 reviews and probes as the scored
+  sibling, gated by its v3.15 verdict.
+- Source runs: restored from the private backup (`runs-effort-opus55`) and
+  re-read before every stage, with the earlier host's recorded prefix moved
+  to the repository root.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

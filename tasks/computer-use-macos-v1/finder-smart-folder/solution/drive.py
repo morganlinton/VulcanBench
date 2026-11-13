@@ -45,10 +45,17 @@ def name_contains(row_y: int, menu_checked_y: int) -> None:
 
 
 G.start()
+# A slow guest can leave Finder behind the desktop after the first Dock
+# click (one validation run never got a window), so click it twice and send
+# Shift-Command-O twice: a second one just points the open window at Documents.
 B.click(72, 762, "left", 1)  # Finder in the Dock
 time.sleep(4)
+B.click(72, 762, "left", 1)
+time.sleep(3)
 B.key("cmd+shift+o")  # Documents
 time.sleep(4)
+B.key("cmd+shift+o")
+time.sleep(3)
 # Focus the Finder window first: a click meant for the File menu that lands
 # on the desktop can hit a widget (one run opened Weather).
 B.click(640, 118, "left", 1)  # the Documents window's title bar

@@ -1,4 +1,4 @@
-"""settings-corners-shortcuts gold: System Settings, opened once from Terminal.
+"""settings-corners-shortcuts gold: System Settings, opened from the Dock.
 
 Desktop & Dock: Minimized window animation -> Scale Effect; Hot Corners...:
 bottom-right -> Lock Screen, top-left -> Mission Control chosen with Command
@@ -44,6 +44,10 @@ def hot_corners() -> None:
 G.start()
 B.click(1005, 762, "left", 1)  # System Settings in the Dock
 time.sleep(12)
+# A slow guest can launch Settings without bringing it forward (one
+# validation run showed only the desktop); a second Dock click activates it.
+B.click(1005, 762, "left", 1)
+time.sleep(4)
 B.move(640, 400)
 time.sleep(1)
 B.click(365, 507, "left", 1)  # Desktop & Dock

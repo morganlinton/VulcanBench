@@ -1,6 +1,6 @@
 """notes-folder-cleanup gold: Terminal asks Notes (AppleScript) to move the
 twelve notes to their folders and delete the three empty notes (Notes moves
-them to Recently Deleted). The gold knows which note goes where; an agent
+them to Recently Deleted; an empty note is one with no words). The gold knows which note goes where; an agent
 has to read them.
 
 Cheat variants: VB_TOKYO=recipes files the Tokyo restaurant list as a
@@ -42,7 +42,18 @@ for folder, titles in MOVES.items():
         lines.append(f'move (first note of folder "Notes" whose {sel}) to folder "{folder}"')
     notes([ln.replace("'", "") for ln in lines], wait=4)
 if os.environ.get("VB_KEEP_EMPTY") != "1":
-    notes(['repeat with n in (every note of folder "Notes" whose plaintext is "")', "delete n", "end repeat"], wait=4)
+    # An empty note's plaintext is a newline (the seed's body is <div><br></div>),
+    # so `whose plaintext is ""` matches nothing: count words instead, by id.
+    notes(
+        [
+            'set ids to id of every note of folder "Notes"',
+            "repeat with i in ids",
+            "set n to note id i",
+            "if (count of words of (plaintext of n)) is 0 then delete n",
+            "end repeat",
+        ],
+        wait=4,
+    )
 G.run("osascript -e 'tell application \"Notes\" to get name of every note of folder \"Notes\"'", wait=3)
 G.shot("final")
 print("gold done")

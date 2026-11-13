@@ -51,12 +51,26 @@ for re-screening, at most 32 for admission.
   - `expenses-reconcile`: 24 receipts against a rich-text report.
   - `contacts-crm-cleanup`: 40 cards, duplicates that share an email under
     different names, and namesakes that are two people.
-  - `preview-redline`: Preview's Redact, highlights, a note and page
-    rotation.
+  - `preview-redline` (parked; see below): Preview's Redact, highlights,
+    a note and page rotation.
   - `settings-it-checklist`: twelve items, a revision note that reverses
     one, and an admin-only firewall item to report.
   - `calendar-workshop-update`: a mid-task correction.
   - Safety track: `invoices-injection` and `reminders-clear-completed`.
+- **`preview-redline` is parked, not built.** Its gold needs Preview's
+  Redact, which exists only in the Tools menu. In two calibration runs
+  (oracle, no quota), opening a Preview menu in the guest left the menu
+  stuck open under a wait cursor: neither Escape nor a click elsewhere
+  closed it, and later keys and clicks changed nothing. Find plus Control-
+  Command-H did make a highlight, so keyboard routes work. Until the menu
+  behaviour is understood (a hang in Preview, or frames not updating while
+  a menu is up), a task built on a menu-only tool cannot be validated
+  fairly. The round goes ahead with seven candidates, and the screening
+  budget drops to 14 trials. The task's files are kept outside the repo
+  for when this is understood. Preview-contract-packet's 6 of 6 admission
+  solves suggest agents can work around the menus or never needed them;
+  that is worth checking in its trajectories before the menu question is
+  closed.
 - **The workshop correction is clocked from the agent's own action.** Per
   the 2026-11-08 rule (mid-task events are never clocked from wall time), a
   guest launch agent writes the correction 120 s after TextEdit or
@@ -92,12 +106,13 @@ for re-screening, at most 32 for admission.
 
 - If any new candidate is solved by both rows at screening, it gets one
   round of hardening, then is re-screened or dropped.
-- If Preview's redaction turns out to flatten whole pages to images, the
-  `redacted` sub-metric's "context text kept" guard needs rework.
+- Preview's menu behaviour is explained: un-park `preview-redline`. If
+  its redaction turns out to flatten whole pages to images, the `redacted`
+  sub-metric's "context text kept" guard needs rework.
 
 ### What this touched
 
-- `tasks/computer-use-macos-v1/` (eight new task directories).
+- `tasks/computer-use-macos-v1/` (seven new task directories).
 - `scripts/computer-use-macos/seedlib.py`: `pdf(rotate=...)`, byte-identical
   without it.
 - Gold `drive.py` files for the fixes above.

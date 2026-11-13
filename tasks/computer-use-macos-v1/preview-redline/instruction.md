@@ -1,1 +1,0 @@
-Dana left legal comments on the Northwind contract: they're in "Legal comments.txt" in my Documents, in the Contracts folder, next to the draft. Make those changes to the contract in Preview and save it the way the comments say.

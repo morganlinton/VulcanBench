@@ -7,6 +7,102 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-13: ComputerUse macOS harder round, click-bug re-runs, card rules
+
+Made by the agent under the owner's 2026-11-10 instruction to decide
+reversible calls and log them; marked for the owner's review. The owner
+chose "plan harder tasks" over freezing the saturated milestone 3 set on
+2026-11-13 and approved the plan in chat. The approval covers at most 56
+subscription trials for the new round: 16 for screening at n=1, at most 8
+for re-screening, at most 32 for admission.
+
+### Decision
+
+- **Four pre-fix Claude Code trials are re-run as infrastructure faults.**
+  The half-scale click bug (a framebuffer 1280 wide at connect that became
+  2560 put every click at half its coordinates) was fixed in d07d1486, and
+  the `cu-mac` image was rebuilt at 2026-11-12 22:21Z. Four Claude Code
+  admission trials ran before that and show the bug's signature: every
+  click fails while every keystroke works. In three of them, Claude Code
+  clicked exactly on a privacy prompt's Allow button and saw nothing
+  happen. The four are invoices-to-reminders attempt 1,
+  finder-receipts-rename attempt 1, installer-password-prompt attempt 1
+  and preview-contract-packet attempt 2. Their jobs are kept as
+  `INFRA-scale-*`; each was re-run once, at 266ee62d, on the same image as
+  every post-fix trial. A calibration oracle confirmed that one click
+  through the agent's own click tool answers a folder privacy prompt.
+  Pre-fix trials that succeeded stand: the bug can only cost a trial, not
+  win one. Codex's one pre-fix failure (TextEdit attempt 1) does not show
+  the signature and stands.
+- **Reference-script fixes found in re-validation.**
+  - The Notes Automation prompt's Allow button sits at y=347, not 366.
+  - Smart-folder and settings golds click their app in the Dock twice,
+    because a slow guest can leave the app behind after one click.
+  - The Notes-cleanup gold finds empty notes by word count. An empty
+    note's plaintext is a newline, and `words of` must run on a local
+    string inside a Notes tell block.
+  - The vendor-injection gold adds each vendor to the group in its own
+    statement.
+
+  No task's grading changed.
+- **The harder round: eight candidates, each on a named lever.**
+  - `calendar-trip-timezones`: three time zones across the daylight-saving
+    gap (Lisbon 4 hours ahead of Boston that week).
+  - `expenses-reconcile`: 24 receipts against a rich-text report.
+  - `contacts-crm-cleanup`: 40 cards, duplicates that share an email under
+    different names, and namesakes that are two people.
+  - `preview-redline`: Preview's Redact, highlights, a note and page
+    rotation.
+  - `settings-it-checklist`: twelve items, a revision note that reverses
+    one, and an admin-only firewall item to report.
+  - `calendar-workshop-update`: a mid-task correction.
+  - Safety track: `invoices-injection` and `reminders-clear-completed`.
+- **The workshop correction is clocked from the agent's own action.** Per
+  the 2026-11-08 rule (mid-task events are never clocked from wall time), a
+  guest launch agent writes the correction 120 s after TextEdit or
+  Calendar first runs. The seed writes the launch agent last, after its
+  own Calendar session has quit, so neither the seed boot nor the build's
+  check boot can set it off. A nop run never gets the correction. The
+  instruction tells the agent a correction is coming, so waiting for it is
+  part of the task, not a test of speed.
+- **Settings preference keys are the documented ones.** The keys are
+  `AppleInterfaceStyle`, `AppleShowScrollBars`, `mineffect`,
+  `AppleICUForce24HourTime`, `AppleShowAllExtensions` and
+  `AppleFirstWeekday`. The gold writes them with `defaults`, so validation
+  does not prove that System Settings' own controls write the same keys on
+  macOS 27.2. Revisit trigger: a screening trial whose screenshots show a
+  setting made in the UI while the checker reads it unset.
+- **Card aggregation.** The X cards
+  (`scripts/rankings-chart/make_computer_use_macos_cards.py`) compute:
+  - pass@1 per row as the mean of per-task solve rates over capability
+    tasks;
+  - the whisker as the sample standard deviation of those rates over the
+    square root of the number of tasks;
+  - the safety track reported apart, as unsafe actions and safe finishes,
+    never folded into pass@1.
+
+  A task with fewer than three finished attempts is marked with an
+  asterisk, and the card is a draft until admission ends.
+- **Reconstructed status files.** On 2026-11-12, all 18 attempt-3 status
+  files were deleted by mistake. They were rebuilt from the admission log
+  and each job's `reward.json`, and carry a `reconstructed` field. Solve
+  counts were checked against the rewards.
+
+### Revisit triggers
+
+- If any new candidate is solved by both rows at screening, it gets one
+  round of hardening, then is re-screened or dropped.
+- If Preview's redaction turns out to flatten whole pages to images, the
+  `redacted` sub-metric's "context text kept" guard needs rework.
+
+### What this touched
+
+- `tasks/computer-use-macos-v1/` (eight new task directories).
+- `scripts/computer-use-macos/seedlib.py`: `pdf(rotate=...)`, byte-identical
+  without it.
+- Gold `drive.py` files for the fixes above.
+- `scripts/rankings-chart/make_computer_use_macos_cards.py`.
+
 ## 2026-11-12: ComputerUse macOS milestone 3 build calls (harder candidates, held modifiers, admission)
 
 Made by the agent under the owner's 2026-11-10 instruction to decide

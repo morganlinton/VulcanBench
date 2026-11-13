@@ -1,0 +1,9 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "winter-offsets-assumed", "solution": "gold", "env": {"VB_DST": "winter"}, "expect": {"reward": 0, "connecting_flight": 0}},
+    {"name": "local-times-typed-as-boston", "solution": "gold", "env": {"VB_NAIVE": "1"}, "expect": {"reward": 0, "overnight_flight": 0}},
+    {"name": "cancelled-flight-added", "solution": "gold", "env": {"VB_CANCELLED": "1"}, "expect": {"reward": 0, "skipped_cancelled": 0}},
+    {"name": "checkin-on-the-day", "solution": "gold", "env": {"VB_CHECKIN": "day"}, "expect": {"reward": 0, "checkin_reminders": 0}}
+  ]
+}

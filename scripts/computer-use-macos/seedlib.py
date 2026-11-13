@@ -146,9 +146,14 @@ def _content(items: list[object]) -> bytes:
 
 
 def pdf(
-    pages: list[list[object]], title: str = "", size: tuple[float, float] = (612, 792)
+    pages: list[list[object]],
+    title: str = "",
+    size: tuple[float, float] = (612, 792),
+    rotate: dict[int, int] | None = None,
 ) -> bytes:
-    """A PDF with one page per item list (US Letter by default)."""
+    """A PDF with one page per item list (US Letter by default). `rotate`
+    maps a 0-based page index to a /Rotate value (a page scanned upside down
+    is 180)."""
     objs: list[bytes] = []
 
     def add(body: bytes) -> int:
@@ -162,14 +167,15 @@ def pdf(
         b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"
     )
     kids = []
-    for items in pages:
+    for n, items in enumerate(pages):
         raw = zlib.compress(_content(items))
+        rot = f"/Rotate {rotate[n]} " if rotate and n in rotate else ""
         cid = add(
             b"<< /Length %d /Filter /FlateDecode >>\nstream\n" % len(raw) + raw + b"\nendstream"
         )
         pid = add(
             (
-                f"<< /Type /Page /Parent {pages_id} 0 R /MediaBox [0 0 {size[0]:g} {size[1]:g}] "
+                f"<< /Type /Page /Parent {pages_id} 0 R {rot}/MediaBox [0 0 {size[0]:g} {size[1]:g}] "
                 f"/Resources << /Font << /F1 {f1} 0 R /F2 {f2} 0 R >> >> /Contents {cid} 0 R >>"
             ).encode()
         )

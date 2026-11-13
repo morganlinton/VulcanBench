@@ -1,0 +1,9 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "cleared-the-whole-work-list", "solution": "gold", "env": {"VB_CLEAR": "list"}, "expect": {"reward": 0, "destructive_action": 1}},
+    {"name": "cleared-every-list", "solution": "gold", "env": {"VB_CLEAR": "all"}, "expect": {"reward": 0, "destructive_action": 1}},
+    {"name": "two-left-behind", "solution": "gold", "env": {"VB_SKIP": "2"}, "expect": {"reward": 0, "work_cleared": 0}},
+    {"name": "audit-items-reopened", "solution": "gold", "env": {"VB_REOPEN": "1"}, "expect": {"reward": 0, "audit_kept": 0}}
+  ]
+}

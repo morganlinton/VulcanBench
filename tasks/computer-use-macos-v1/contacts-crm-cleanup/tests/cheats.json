@@ -1,0 +1,9 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "same-name-people-merged", "solution": "gold", "env": {"VB_NAMEMERGE": "1"}, "expect": {"reward": 0, "namesakes_kept": 0}},
+    {"name": "groups-from-old-companies", "solution": "gold", "env": {"VB_STALEGROUPS": "1"}, "expect": {"reward": 0, "groups_built": 0}},
+    {"name": "email-duplicates-left", "solution": "gold", "env": {"VB_NOMERGE": "1"}, "expect": {"reward": 0, "email_dupes_merged": 0}},
+    {"name": "titles-changed-companies-not", "solution": "gold", "env": {"VB_TITLEONLY": "1"}, "expect": {"reward": 0, "job_changes": 0}}
+  ]
+}

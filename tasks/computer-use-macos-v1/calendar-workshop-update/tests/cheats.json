@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "did-not-wait-for-the-correction", "solution": "gold", "env": {"VB_STALE": "1"}, "expect": {"reward": 0, "corrected_times": 0}},
+    {"name": "times-fixed-session-not-moved", "solution": "gold", "env": {"VB_NOMOVE": "1"}, "expect": {"reward": 0, "session3_moved": 0}},
+    {"name": "draft-events-left-beside-corrected", "solution": "gold", "env": {"VB_DUP": "1"}, "expect": {"reward": 0, "four_sessions": 0}}
+  ]
+}

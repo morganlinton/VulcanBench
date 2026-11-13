@@ -44,6 +44,20 @@ APPLE_EPOCH = 978307200  # 2001-01-01 in Unix time
 GUEST_TZ = ZoneInfo("America/New_York")  # base-config.sh
 
 
+def _from_ts(t: float | None, tz) -> datetime | None:
+    """datetime for a Unix time, or None when absent or out of range.
+
+    A store can hold an absurd date (an agent typed year 22026, say); a
+    checker must score that as wrong, not crash on it.
+    """
+    if t is None:
+        return None
+    try:
+        return datetime.fromtimestamp(t, tz)
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
 # -- protobuf (just enough for Notes) ---------------------------------------
 def _varint(buf: bytes, i: int) -> tuple[int, int]:
     shift = val = 0
@@ -182,9 +196,8 @@ class Reminder:
         """The calendar day it is due, as the guest shows it."""
         if self.due is None:
             return None
-        if self.all_day:  # stored as midnight UTC of that day
-            return datetime.fromtimestamp(self.due, UTC).date()
-        return datetime.fromtimestamp(self.due, GUEST_TZ).date()
+        d = _from_ts(self.due, UTC if self.all_day else GUEST_TZ)  # all-day: midnight UTC
+        return d.date() if d else None
 
 
 def reminders(root: Path) -> list[Reminder]:
@@ -275,7 +288,7 @@ class Event:
     exceptions: list[float]
 
     def local(self, t: float | None) -> datetime | None:
-        return datetime.fromtimestamp(t, GUEST_TZ) if t is not None else None
+        return _from_ts(t, GUEST_TZ)
 
     @property
     def start_local(self) -> datetime | None:

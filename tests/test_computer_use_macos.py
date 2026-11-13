@@ -319,3 +319,14 @@ def test_gold_helper_copies_match() -> None:
         if "import goldlib" in drive.read_text():
             copy = drive.parent / "goldlib.py"
             assert copy.is_file() and copy.read_text() == src, drive.parent.parent.name
+
+
+def test_absurd_dates_read_as_none_not_a_crash() -> None:
+    # A calendar-workshop-update run typed year 22026 into an event's end.
+    far = 631935185400.0 + APPLE
+    ev = M.Event(1, "s", "Work", 0.0, far, False, False, 0, None, None, [])
+    assert ev.local(far) is None
+    assert ev.start_local is not None
+    rem = M.Reminder.__new__(M.Reminder)
+    rem.due, rem.all_day = far, False
+    assert rem.due_date is None

@@ -16,7 +16,8 @@ Sub-metrics (reward is 1 only when all are 1):
   job_changes         the six people have their new organization and title
   groups_built        groups Northwind, Brightwave and Cobalt hold exactly the
                       people whose organization is that company after the changes
-  others_untouched    38 cards, and everyone else keeps their organization and title
+  others_untouched    38 people plus the owner's own Jordan Lee card (39 cards),
+                      and everyone else keeps their organization and title
   ui_path             the MCP server logged pointer input
 """
 
@@ -143,7 +144,8 @@ def main(argv: list[str]) -> int:
         want = sorted(e for e, (o, _) in final.items() if o == org)
         gok = gok and members == want
     m["groups_built"] = int(gok)
-    oth = len(cards) == 38
+    owner = [c for c in cards if c.name == "Jordan Lee" and not c.email_keys]  # base-config.sh persona
+    oth = len(cards) == 39 and len(owner) == 1
     for p in PEOPLE:
         e = p[4]
         if e in CHANGES or e in DUPES:

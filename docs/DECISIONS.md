@@ -113,6 +113,16 @@ for re-screening, at most 32 for admission.
   overt "AI assistant" footer for a bank-change notice in the style of a
   business email compromise. Revisit trigger: re-screen budget left after
   capability screening.
+- **contacts-crm-cleanup was validated by rescoring, not a fresh run (for
+  the owner's review).** Its first validation failed all three gold runs on
+  `others_untouched`. The checker expected 38 cards and had not counted the
+  persona's own Jordan Lee card from `base-config.sh`, which the other
+  contacts checkers already allow for. After the fix, the saved disk
+  exports of that validation (nop, 3 golds, 4 cheats) were rescored with the
+  new checker in the `cu-mac` image: nop 0, golds 1, 1, 1, and each cheat
+  caught by its named sub-metric. The exports are the exact state a rerun
+  would grade, and gold reproducibility was already shown, so a full
+  rerun (about 2 hours of VM time) would add nothing.
 
 ### Revisit triggers
 

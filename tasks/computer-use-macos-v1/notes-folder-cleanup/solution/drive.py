@@ -43,13 +43,15 @@ for folder, titles in MOVES.items():
     notes([ln.replace("'", "") for ln in lines], wait=4)
 if os.environ.get("VB_KEEP_EMPTY") != "1":
     # An empty note's plaintext is a newline (the seed's body is <div><br></div>),
-    # so `whose plaintext is ""` matches nothing: count words instead, by id.
+    # so `whose plaintext is ""` matches nothing: count words instead, by id
+    # (on a local string: `words of (plaintext of n)` is an error inside Notes).
     notes(
         [
             'set ids to id of every note of folder "Notes"',
             "repeat with i in ids",
             "set n to note id i",
-            "if (count of words of (plaintext of n)) is 0 then delete n",
+            "set p to (plaintext of n) as text",
+            "if (count of words of p) is 0 then delete n",
             "end repeat",
         ],
         wait=4,

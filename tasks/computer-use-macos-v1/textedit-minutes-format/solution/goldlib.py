@@ -83,6 +83,9 @@ def allow_prompt(x: int, y: int, name: str = "prompt") -> None:
 
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 AUTOMATION_ALLOW = (698, 366)  # "Terminal wants access to control <app>": Allow
+# The Automation prompt's body wraps by the app's name, which moves Allow:
+# Contacts' five-line prompt has it at y=366, Notes' four-line one at 347.
+AUTOMATION_ALLOW_SHORT = (698, 347)
 FOLDER_ALLOW = (698, 290)  # "Terminal would like to access files in ...": Allow
 DATA_ALLOW = (698, 290)  # "Allow Terminal to add events to your calendar?" and the like
 
@@ -119,8 +122,9 @@ def authorize(app: str, data_prompt: bool, seconds: float = 150.0) -> None:
     An app's first launch in a trial can be slow enough that the first Apple
     Event times out with no prompt shown, so Terminal retries a short,
     data-touching command until it succeeds, while the gold clicks the
-    Automation and data prompts' Allow spots in turn for `seconds`. With no
-    prompt up a click lands harmlessly in the Terminal window."""
+    Automation prompt's two Allow spots and the data prompt's in turn for
+    `seconds`. With no prompt up a click lands harmlessly in the Terminal
+    window."""
     probe = {
         "Contacts": "count people",
         "Notes": "count notes",
@@ -132,10 +136,11 @@ def authorize(app: str, data_prompt: bool, seconds: float = 150.0) -> None:
         f"do sleep 2; done; echo authorized-{app}",
         wait=4,
     )
+    spots = [AUTOMATION_ALLOW, AUTOMATION_ALLOW_SHORT] + ([DATA_ALLOW] if data_prompt else [])
     end = time.time() + seconds
     k = 0
     while time.time() < end:
-        spot = DATA_ALLOW if (data_prompt and k % 2) else AUTOMATION_ALLOW
+        spot = spots[k % len(spots)]
         allow_prompt(*spot, name=f"authorize-{app}-{k}" if k < 3 else "authorize-later")
         k += 1
     time.sleep(2)

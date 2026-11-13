@@ -114,6 +114,18 @@ TASKS = [
         PILOT,
     ),
     Task(
+        "reminders-renovation-plan",
+        "Reorganize renovation reminders: lists, dates, priority",
+        "REMINDERS",
+        A3,
+    ),
+    Task(
+        "notes-signatures-to-contacts",
+        "Add three people to Contacts from pasted signatures",
+        "NOTES > CONTACTS",
+        A3,
+    ),
+    Task(
         "finder-installer-cleanup",
         "Delete old installers while the Trash holds other files",
         "FINDER",

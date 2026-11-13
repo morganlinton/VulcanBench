@@ -7,19 +7,27 @@ per task at every effort level, and one footnote line that keeps the judged run
 counts, both judge panels and the cost basis visible. The per-level table,
 minutes and Code quality included, is written to the CSV beside the card.
 
-Sources, nothing re-run or re-judged:
+Sources, nothing re-run:
 
-- Claude Fable 5.1, Claude Opus 5.5 and GPT-6 Astra: their published per-level
-  rows (docs/results/swe-v4-opus55-2026-09/opus55-astra-fable-efforts.csv; Code
-  quality v3.4 and v3.15, Muse Spark 1.3 and Grok 4.6).
 - Claude Fable 5.2: the Code quality v3.30.2 summary (Low to Extra high) and
   v3.30.3 summary (Max), Muse Spark 1.3 and GPT-6.1 Sol, and its run summaries
   in runs-effort-fable52. Cost is Claude Code's own list-price total
   (`cli_reported_cost_usd`), the basis of the other Claude columns; the
   adapter's own estimate folds cached prompt tokens in at the full input price.
+- Claude Fable 5.1 and Claude Opus 5.5: Code quality and combined score from the
+  matched-panel rounds v3.30.4 and v3.30.5 (owner request, 2026-11-12), where
+  GPT-6.1 Sol reviewed the frozen v3.4 and v3.15 populations beside Muse Spark
+  1.3's existing reviews, so all three Claude columns share one panel. Runs
+  solved, cost and minutes stay their published per-level rows
+  (docs/results/swe-v4-opus55-2026-09/opus55-astra-fable-efforts.csv), and the
+  board keeps their published Muse and Grok 4.6 scores.
+- GPT-6 Astra: its published row (v3.4, Muse Spark 1.3 and Grok 4.6). Sol cannot
+  judge it (same lab), so it is footnoted; muse-like-for-like.csv compares all
+  four models under Muse alone.
 
     python scripts/cii-v4-board/make_fable52_vs_frontier_card.py \\
-        --judging <v3.30.2 directory> --judging-max <v3.30.3 directory>
+        --judging <v3.30.2 directory> --judging-max <v3.30.3 directory> \\
+        --matched-fable51 <v3.30.4 directory> --matched-opus55 <v3.30.5 directory>
 """
 
 from __future__ import annotations
@@ -60,6 +68,17 @@ NAMES = {
     "astra": "GPT-6 Astra",
 }
 PUBLISHED_ID = {"fable51": "fable", "opus55": "opus55", "astra": "astra"}
+MATCHED = {
+    "fable51": "code-quality-maintenance-v3.30.4",
+    "opus55": "code-quality-maintenance-v3.30.5",
+}
+MUSE_ONLY = OUTPUT / "muse-like-for-like.csv"
+JUDGES = {
+    "fable52": "muse+sol",
+    "fable51": "muse+sol",
+    "opus55": "muse+sol",
+    "astra": "muse+grok",
+}
 # Fable 5.2 takes Anthropic clay, Opus 5.5 keeps its dark clay from earlier cards,
 # Fable 5.1 an indigo (its warm gray on the Sonnet card reads as gray here) and
 # Astra OpenAI green. All four pass the all-pairs checks of the dataviz validator on
@@ -102,8 +121,44 @@ def load_summary(directory: Path, protocol: str):
     return summary
 
 
-def load_groups(judging: Path, judging_max: Path):
-    """Per-level aggregates: three published columns, Fable 5.2 from v3.30.2 and v3.30.3."""
+def apply_matched(groups, matched: dict[str, Path]):
+    """Fable 5.1 and Opus 5.5 Code quality and combined score from their Muse and Sol rounds.
+
+    Each round must hold the published population (same judged count per level),
+    and its Muse half must equal Muse's own scores in muse-like-for-like.csv,
+    which rebuilt them from the v3.4 and v3.15 directories.
+    """
+    with MUSE_ONLY.open() as handle:
+        muse = {(r["model"], r["effort"]): r for r in csv.DictReader(handle)}
+    digests = {}
+    for m, directory in matched.items():
+        summary = load_summary(directory, MATCHED[m])
+        require(
+            summary["published_submissions"] == summary["expected_submissions"],
+            f"{MATCHED[m]} did not publish every submission",
+        )
+        require(summary["fallback_reviews"] == {"muse": 0, "sol": 0}, f"{MATCHED[m]} fell back")
+        for e in LEVELS:
+            g = summary["groups"][f"{PUBLISHED_ID[m]}/{e}"]
+            require(
+                g["composite_v3"]["n"] == groups[m, e]["combined"]["n"],
+                f"{MATCHED[m]} {e} judged another population",
+            )
+            require(
+                abs(g["by_panel"]["muse"]["mean"] - float(muse[m, e]["muse_review"])) < 1e-3,
+                f"{MATCHED[m]} {e} Muse half differs from the Muse-only table",
+            )
+            groups[m, e]["combined"] = g["composite_v3"]
+            groups[m, e]["code_quality"] = g["code_quality"]
+        digests[f"{MATCHED[m].removeprefix('code-quality-maintenance-')}_summary_sha256"] = digest(
+            (directory / "summary.json").read_bytes()
+        )
+    return digests
+
+
+def load_groups(judging: Path, judging_max: Path, matched: dict[str, Path]):
+    """Per-level aggregates: Fable 5.2 from v3.30.2 and v3.30.3, Fable 5.1 and Opus 5.5
+    with Muse and Sol from v3.30.4 and v3.30.5, Astra as published."""
     groups = {}
     with PUBLISHED.open() as handle:
         rows = {(r["model"], r["effort"]): r for r in csv.DictReader(handle)}
@@ -153,10 +208,13 @@ def load_groups(judging: Path, judging_max: Path):
     for m in MODELS:
         for e in LEVELS:
             require((m, e) in groups, f"{m} {e} missing")
+    matched_digests = apply_matched(groups, matched)
     sources = {
         "published_table": {PUBLISHED.name: digest(PUBLISHED.read_bytes())},
+        "muse_only_table": {MUSE_ONLY.name: digest(MUSE_ONLY.read_bytes())},
         "v3.30.2_summary_sha256": digest((judging / "summary.json").read_bytes()),
         "v3.30.3_summary_sha256": digest((judging_max / "summary.json").read_bytes()),
+        **matched_digests,
     }
     return groups, sources
 
@@ -165,8 +223,14 @@ def main():  # noqa: PLR0915, one linear figure
     parser = argparse.ArgumentParser()
     parser.add_argument("--judging", type=Path, required=True, help="the v3.30.2 directory")
     parser.add_argument("--judging-max", type=Path, required=True, help="the v3.30.3 directory")
+    parser.add_argument("--matched-fable51", type=Path, required=True, help="the v3.30.4 directory")
+    parser.add_argument("--matched-opus55", type=Path, required=True, help="the v3.30.5 directory")
     args = parser.parse_args()
-    groups, sources = load_groups(args.judging, args.judging_max)
+    groups, sources = load_groups(
+        args.judging,
+        args.judging_max,
+        {"fable51": args.matched_fable51, "opus55": args.matched_opus55},
+    )
 
     for font in (ROOT / "scripts/rankings-chart").glob("*.ttf"):
         font_manager.fontManager.addfont(font)
@@ -353,8 +417,8 @@ def main():  # noqa: PLR0915, one linear figure
     text(
         left,
         8.3,
-        f"Judged runs: {judged}. Code quality judges: Muse Spark 1.3 with GPT-6.1 Sol for "
-        "Fable 5.2, with Grok 4.6 for the others.",
+        f"Judged runs: {judged}. Code quality judges: Muse Spark 1.3 and GPT-6.1 Sol, "
+        "except Astra (Muse and Grok 4.6; Sol shares its lab).",
         11,
         color=MUTED,
     )
@@ -389,6 +453,7 @@ def main():  # noqa: PLR0915, one linear figure
                 "minutes",
                 "opus48_reply_share_pct",
                 "fallback_runs",
+                "judges",
             ]
         )
         for m in MODELS:
@@ -408,6 +473,7 @@ def main():  # noqa: PLR0915, one linear figure
                         f"{g['minutes']['mean']:.4f}",
                         "" if g["fb_share"] is None else f"{g['fb_share']:.2f}",
                         g["fb_runs"],
+                        JUDGES[m],
                     ]
                 )
     save(

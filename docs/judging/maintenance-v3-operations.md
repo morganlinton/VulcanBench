@@ -902,3 +902,30 @@ operational notes live here.
   against 82.25), so a Fable 5.2 score is not panel-matched with columns
   judged by Muse and Grok; the like-for-like Muse figures are in
   `docs/results/swe-v4-fable52-2026-11/muse-like-for-like.csv`.
+
+## v3.30.4 and v3.30.5, November 13, 2026: GPT-6.1 Sol on Claude Fable 5.1 and Claude Opus 5.5
+
+- From `bench/2026-11-12-fable52-sol-matched` (4cdabb0cc, the merge of PR
+  #299), one chain from 06:22 to 13:52 PST, no stops and no solver run active.
+  These are comparison rounds for the Fable 5.2 card (owner, chat, November
+  12: "Yes, run Sol"; "Keep Astra, footnoted"). Neither amends v3.4 or v3.15,
+  and the board keeps those rounds' Muse and Grok scores.
+- The run worktree held copies of the v3.4, v3.15 and v3.30.2 directories and
+  `runs-effort-opus55`, restored from the private backup. Fable 5.1's solver
+  runs did not survive the September host reset, so v3.30.4's frozen-input
+  check uses the source hashes v3.4 recorded. v3.30.5 re-read all 114 Opus
+  5.5 runs.
+- v3.30.4 (06:22 to 10:07): the Fable 5.1 rows of the v3.4 freeze, 115
+  submissions; Astra's rows were dropped because Sol shares its lab. Sol was
+  gated by its v3.30.2 verdict, with no exam, and made 350 calls. Second
+  attempts: 34 matches, all "matched quirk must cite a listed departure"; 21
+  were published through the frozen one-based departure index rule.
+- v3.30.5 (10:07 to 13:52): the v3.15 freeze, 114 submissions, gated the same
+  way; Sol made 357 calls. Second attempts: 13 matches (8 published through
+  the same rule) and 1 primary review (unsupported excerpt).
+- No operator-invalid markers and no reviewer fallbacks. Both summaries:
+  every submission published, Muse and Sol passing, `ready_for_publication`
+  true. Combined score, Low to Max: Fable 5.1 90.04, 91.07, 90.89, 91.52,
+  92.69; Opus 5.5 87.85, 92.16, 91.96, 91.65, 91.24. The Muse halves equal
+  `muse-like-for-like.csv`. Sol reviewed Fable 5.1 3.1 to 5.5 points above
+  Muse and Opus 5.5 5.8 to 10.1 points above, against 6.7 to 8.1 for Fable 5.2.

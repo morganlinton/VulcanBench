@@ -31,23 +31,60 @@ Best level for each model, from the card's table
 | Model | Best level | Combined | Solved, all levels | Cost per task at best |
 |---|---|---|---|---|
 | Claude Fable 5.2 | Max | 93.85 | 115 of 115 | $10.88 |
-| Claude Fable 5.1 | Max | 91.84 | 104 of 115 | $9.06 |
-| Claude Opus 5.5 | High | 91.11 | 105 of 115 | $3.27 |
+| Claude Fable 5.1 | Max | 92.69 | 104 of 115 | $9.06 |
+| Claude Opus 5.5 | Medium | 92.16 | 105 of 115 | $2.84 |
 | GPT-6 Astra | Max | 89.30 | 114 of 115 | $2.57 |
 
-Fable 5.2 leads at every effort level. On the published scores its Low
-level (91.92 for $1.72 a task) is already above every other model's best
-level, though by Muse alone (below) Fable 5.1 at Max stays ahead of Fable 5.2
-at Low (92.19 against 91.09).
+The three Claude columns share one judge panel, Muse Spark 1.3 and GPT-6.1
+Sol (below). Astra keeps its published Muse Spark 1.3 and Grok 4.6 scores,
+because Sol, an OpenAI model, cannot judge another OpenAI model.
 
-### Like for like: Muse Spark 1.3 alone
+Fable 5.2 leads at every effort level, though only narrowly at Medium, where
+it is 0.08 ahead of Opus 5.5, well inside the standard error of the difference
+(0.72). Its Low level (91.92 for $1.72 a task) is above every Astra level and
+0.24 below Opus 5.5's best. Fable 5.1 at Max (92.69) stays ahead of it.
 
-The published columns do not share a judge panel. Fable 5.2 was judged by
-Muse Spark 1.3 and GPT-6.1 Sol; the other three by Muse Spark 1.3 and Grok
-4.6. Sol reviewed Fable 5.2 about 7 points higher than Muse did at every
-level, so part of Fable 5.2's Code quality lead on the card comes from the
-panel. Muse sat on every one of these rounds with the same pinned binary,
-rubric and weights, so its scores alone compare like for like
+### Matched panel: Muse Spark 1.3 and GPT-6.1 Sol
+
+Fable 5.1 and Opus 5.5 were first published from Muse Spark 1.3 and Grok
+4.6. Grok failed its exam for Fable 5.2, so Sol took that seat. For the card,
+Sol then reviewed the frozen Fable 5.1 and Opus 5.5 patches as well, beside
+Muse's existing reviews (rounds v3.30.4 and v3.30.5; see [Judging](#judging)).
+The board keeps Fable 5.1's and Opus 5.5's published Muse and Grok scores.
+These figures are for this comparison.
+
+Code quality, Muse and Sol:
+
+| Effort | Fable 5.2 | Fable 5.1 | Opus 5.5 |
+|---|---|---|---|
+| Low | 80.63 | 81.15 | 77.03 |
+| Medium | 81.49 | 82.99 | 81.26 |
+| High | 82.95 | 83.35 | 80.56 |
+| Extra-high | 84.25 | 84.26 | 82.94 |
+| Max | 86.02 | 85.01 | 82.87 |
+
+Combined score, Muse and Sol:
+
+| Effort | Fable 5.2 | Fable 5.1 | Opus 5.5 |
+|---|---|---|---|
+| Low | 91.92 | 90.04 | 87.85 |
+| Medium | 92.25 | 91.07 | 92.16 |
+| High | 92.76 | 90.89 | 91.96 |
+| Extra-high | 93.25 | 91.52 | 91.65 |
+| Max | 93.85 | 92.69 | 91.24 |
+
+Sol reviews every model higher than Muse does. The lift is larger for
+Fable 5.2 (6.7 to 8.1 points) than for Fable 5.1 (3.1 to 5.5), and is 5.8 to
+10.1 for Opus 5.5. Under the matched panel, Fable 5.2's Code quality is within
+1.5 points of Fable 5.1's at every level: below it from Low to Extra-high and
+1.0 above it at Max. Every gap is inside the standard error of the difference
+(1.6 to 2.1).
+
+### Like for like with Astra: Muse Spark 1.3 alone
+
+Muse sat on every one of these rounds, including Astra's, with the same pinned
+binary, rubric and weights. Its scores alone are therefore the only like for
+like comparison that includes all four models
 ([muse-like-for-like.csv](muse-like-for-like.csv)):
 
 Code quality, Muse alone:
@@ -74,7 +111,8 @@ Judged by Muse alone, Fable 5.2's code is slightly below Fable 5.1's at every
 level, by 0.7 to 2.0 points, each smaller than the standard error of the
 difference (1.8 to 2.6 points).
 It still leads on combined score at every level, because it solves every
-task: its lead comes from correctness, speed and cost, not from code quality.
+task. Under both panels its lead comes from correctness, speed and cost, not
+from code quality.
 
 ## How Fable 5.2 works differently from Fable 5.1
 
@@ -183,7 +221,7 @@ run, so we checked whether it was reciting answers
 
 ## Judging
 
-Code quality protocol rounds v3.30, v3.30.1, v3.30.2 and v3.30.3 (operations
+Code quality protocol rounds v3.30 to v3.30.5 (operations
 log: [maintenance-v3-operations.md](../../judging/maintenance-v3-operations.md);
 decision: [DECISIONS.md](../../DECISIONS.md), November 11):
 
@@ -197,13 +235,23 @@ decision: [DECISIONS.md](../../DECISIONS.md), November 11):
   departures from one rather than zero and were published through the
   protocol's frozen rule for that slip, which leaves every score unchanged.
 - Published: 115 of 115 runs, both panels passing, no reviewer fallbacks.
+- v3.30.4 and v3.30.5, comparison rounds for the card (owner's request,
+  November 12): Sol reviewed the frozen Fable 5.1 population of v3.4 (its
+  Astra rows dropped, since Sol shares Astra's lab) and the frozen Opus 5.5
+  population of v3.15. Sol was gated by its v3.30.2 verdict, with the same
+  settings and Codex pins, and Muse's existing reviews were scored beside it.
+  All 115 and 114 submissions were published, both panels passing, with no
+  reviewer fallbacks. 29 Sol match answers numbered from one and went through
+  the same frozen rule. Fable 5.1's solver runs did not survive the September
+  host reset, so the frozen-input check rests on the hashes v3.4 recorded.
+  Opus 5.5's runs were restored from the private backup and re-read in full.
 
 ## Files
 
 | File | What it is |
 |---|---|
 | `comparison.json`, `comparison-max.json` | Population records the judging froze (Low to Extra-high, Max) |
-| `fable52-vs-frontier.png`, `.svg`, `.json`, `-efforts.csv` | Comparison card and its per-level table |
+| `fable52-vs-frontier.png`, `.svg`, `.json`, `-efforts.csv` | Comparison card and its per-level table (`judges` column names each row's panel) |
 | `muse-like-for-like.csv`, `.json` | Code quality and combined score from Muse Spark 1.3 alone, four models |
 | `fable52-vs-fable51-runs.csv`, `-levels.csv` | Per-run and per-level behaviour measures, both Fable models |
 | `fable52-vs-fable51-effort.png`, `.svg` | Output and time per task by effort |
@@ -217,7 +265,9 @@ The judging directories are in the run worktrees and the private backup
 
 ```bash
 python scripts/cii-v4-board/make_fable52_vs_frontier_card.py \
-    --judging runs-code-quality-maintenance-v3.30.2 --judging-max runs-code-quality-maintenance-v3.30.3
+    --judging runs-code-quality-maintenance-v3.30.2 --judging-max runs-code-quality-maintenance-v3.30.3 \
+    --matched-fable51 runs-code-quality-maintenance-v3.30.4 \
+    --matched-opus55 runs-code-quality-maintenance-v3.30.5
 python scripts/cii-v4-board/fable52_muse_like_for_like.py --v34 <v3.4> --v315 <v3.15> \
     --v3302 runs-code-quality-maintenance-v3.30.2 --v3303 runs-code-quality-maintenance-v3.30.3
 python scripts/cii-v4-board/fable52_vs_fable51_behaviour.py --v34 <v3.4> \

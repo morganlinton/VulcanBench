@@ -65,6 +65,49 @@ def test_non_loopback_clients_are_refused(runner_env: Path) -> None:
     assert default.get("/api/runner/runs").status_code == 403
 
 
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "https://evil.example",
+        "http://localhost.evil.example:8000",  # DNS rebinding lands on a foreign hostname
+        "http://127.0.0.1.nip.io:3000",
+        "null",
+        "file://",
+        "ftp://localhost",
+        "http://localhost:notaport",
+        "",
+    ],
+)
+def test_pages_not_on_localhost_are_refused(runner_env: Path, origin: str) -> None:
+    c = _local()
+    r = c.get("/api/runner/status", headers={"Origin": origin})
+    assert r.status_code == 403
+    assert "pages on localhost" in r.json()["detail"]
+    post = c.post("/api/runner/plans", json={"kind": "prepare"}, headers={"Origin": origin})
+    assert post.status_code == 403
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        None,
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:53111",  # the Mac app's dashboard on a runtime port
+        "http://[::1]:3000",
+        "https://localhost",
+    ],
+)
+def test_pages_on_localhost_and_plain_clients_pass(runner_env: Path, origin: str | None) -> None:
+    headers = {"Origin": origin} if origin is not None else {}
+    assert _local().get("/api/runner/status", headers=headers).status_code == 200
+
+
+def test_origin_guard_leaves_the_public_api_alone(runner_env: Path) -> None:
+    r = _local().get("/api/health", headers={"Origin": "https://evil.example"})
+    assert r.status_code == 200
+
+
 def test_list_get_check_and_status(runner_env: Path) -> None:
     c = _local()
     status = c.get("/api/runner/status").json()

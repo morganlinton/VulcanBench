@@ -275,8 +275,9 @@ and analyze how it reasons differently from Fable 5.1.
 ## 2026-11-08: ComputerUse v1 perception conditions are a gate-run setting of the MCP computer tools, and every reading so far was pixels+zoom
 
 ### Decision
-Made by the agent during the milestone 4 build on the evening of 2026-11-08,
-for the owner to confirm in the morning. The charter's perception-condition
+Made by the agent during the milestone 4 build on the evening of 2026-11-08;
+approved by the owner in chat on 2026-11-10, including the `pixels+zoom`
+relabel of the milestone 2 and 3 readings. The charter's perception-condition
 table had nothing behind it, and the one condition the suite had run was not
 the one `suite.json` named: `sandbox/computer-use/vb_computer_mcp.py` has
 offered a `zoom` tool since milestone 1 and Anthropic's native computer-use
@@ -322,8 +323,8 @@ three. A result is comparable only within one condition.
 ## 2026-11-08: Evince is ComputerUse v1's fourth native app, not a terminal
 
 ### Decision
-Made by the agent during the milestone 4 build on the evening of 2026-11-08,
-for the owner to confirm. The charter asked milestone 4 for a new native app
+Made by the agent during the milestone 4 build on the evening of 2026-11-08;
+approved by the owner in chat on 2026-11-10. The charter asked milestone 4 for a new native app
 to rebalance family B and named a PDF viewer or a terminal. The base image
 now carries Evince 43 (Debian bookworm `evince`, 23 packages), with
 `application/pdf` mapped to it in `/root/.config/mimeapps.list` so a PDF

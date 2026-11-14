@@ -137,6 +137,21 @@ for re-screening, at most 32 for admission.
   `reward.original.json`, and its status file carries a `rescored` note. The
   earlier validation exports still give gold 1, 1, 1, nop 0, and every cheat
   caught. Revisit trigger: an agent builds a compound Smart List rule.
+- **expenses-reconcile accepts either reading of the airport coffee (for
+  the owner's review).** At screening, both rows took the solo O'Hare coffee
+  (6.40) out as a personal meal: no line, receipt moved to Personal, Total
+  1,955.24. The gold kept it. The seeded policy reimburses meals "with
+  clients, candidates or the team" and excludes "personal meals", so the
+  rows' reading is a fair one, and arguably the more literal. Rewording the
+  policy after seeing the results would be writing the task against them.
+  So the checker now accepts both consistent states: kept (line, receipt in
+  Receipts, Total 1,961.64) or excluded (no line, receipt in Personal, Total
+  1,955.24). Whether the coffee has a report line decides which state the
+  rest is held to, so a mix (left out of the report but its receipt left in
+  Receipts) still fails. Both screening trials were rescored to reward 1
+  from their saved exports, with the originals kept as
+  `reward.original.json`. The validation exports still give gold 1, 1, 1,
+  nop 0, and every cheat caught by its named sub-metric.
 
 ### Revisit triggers
 

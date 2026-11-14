@@ -9,16 +9,25 @@ paragraph with a date (03 Feb 2026, 3 February 2026, Feb 3, 2026,
 it matches a receipt by date and amount. The 22 business receipts total
 1,961.64.
 
+The policy reimburses meals "with clients, candidates or the team" and
+excludes "personal meals", so the solo O'Hare airport coffee (6.40) can be
+read either way. Both consistent readings pass: kept (a report line, the
+receipt stays in Receipts, Total 1,961.64) or excluded (no line, the receipt
+in Personal, Total 1,955.24). Whether the coffee has a report line decides
+which reading the rest of the report and the folders are held to.
+
 Sub-metrics (reward is 1 only when all are 1):
   artifact_present  the report was collected and parses
   amounts_fixed     the five mis-typed lines now carry their receipts' amounts
-  missing_added     O'Hare Coffee, Daybreak Diner and Bloom & Stem have lines
+  missing_added     Daybreak Diner and Bloom & Stem have lines (and O'Hare Coffee
+                    when it is kept)
   personal_out      no line for the Rosewood dinner or the Peak Fitness membership
-  exact_lines       exactly 22 expense lines, one per business receipt
+  exact_lines       exactly one line per reimbursable receipt (22, or 21)
   date_order        the expense lines are in date order
-  total_right       a Total line carries 1,961.64
+  total_right       a Total line carries 1,961.64 (or 1,955.24 without the coffee)
   receipts_filed    Expenses/Personal holds exactly the Rosewood and Peak Fitness
-                    receipts, and the 22 others are still in Receipts
+                    receipts (plus the coffee when excluded), and the others are
+                    still in Receipts
   ui_path           the MCP server logged pointer input
 """
 
@@ -59,7 +68,8 @@ BUSINESS = [
 ]  # fmt: skip
 PERSONAL = [("2026-02-14", 186.50, "2026-02-14 Rosewood.pdf"), ("2026-02-21", 49.00, "2026-02-21 Peak Fitness.pdf")]
 FIXED = [("2026-02-03", 412.80), ("2026-02-03", 128.45), ("2026-02-12", 299.00), ("2026-02-20", 41.60), ("2026-02-25", 112.40)]
-ADDED = [("2026-02-05", 6.40), ("2026-02-17", 87.25), ("2026-02-23", 58.00)]
+COFFEE = ("2026-02-05", 6.40, "2026-02-05 OHare Coffee.pdf")
+ADDED = [("2026-02-17", 87.25), ("2026-02-23", 58.00)]
 TOTAL = 1961.64
 REPORT = "Users/admin/Documents/Expenses/February expense report.rtf"
 EXP = "Users/admin/Documents/Expenses"
@@ -130,19 +140,24 @@ def main(argv: list[str]) -> int:
     extra["lines"] = lines
     extra["total_line"] = total_line
     have = list(lines)
+    kept = COFFEE[:2] in have
+    extra["coffee"] = "kept" if kept else "excluded"
+    business = BUSINESS if kept else [b for b in BUSINESS if b != COFFEE]
+    personal = PERSONAL if kept else [*PERSONAL, COFFEE]
+    total = TOTAL if kept else round(TOTAL - COFFEE[1], 2)
     m["amounts_fixed"] = int(all(x in have for x in FIXED))
     m["missing_added"] = int(all(x in have for x in ADDED))
     m["personal_out"] = int(not any((d, a) in have for d, a, _ in PERSONAL))
-    want = sorted((d, a) for d, a, _ in BUSINESS)
+    want = sorted((d, a) for d, a, _ in business)
     m["exact_lines"] = int(sorted(have) == want)
     m["date_order"] = int(len(have) > 1 and [d for d, _ in have] == sorted(d for d, _ in have))
-    m["total_right"] = int(total_line is not None and abs(total_line - TOTAL) < 0.005)
+    m["total_right"] = int(total_line is not None and abs(total_line - total) < 0.005)
     rec = fs / EXP / "Receipts"
     per = fs / EXP / "Personal"
     in_rec = {p.name for p in rec.iterdir() if p.is_file() and not p.name.startswith(".")} if rec.is_dir() else set()
     in_per = {p.name for p in per.iterdir() if p.is_file() and not p.name.startswith(".")} if per.is_dir() else set()
     extra["personal_folder"] = sorted(in_per)
-    m["receipts_filed"] = int(in_per == {f for _, _, f in PERSONAL} and in_rec == {f for _, _, f in BUSINESS})
+    m["receipts_filed"] = int(in_per == {f for _, _, f in personal} and in_rec == {f for _, _, f in business})
     events_log = M.input_events(root / "input.log")
     m["ui_path"] = int(bool({e.get("kind") for e in events_log} & {"click", "drag"}))
     extra["input_events"] = len(events_log)

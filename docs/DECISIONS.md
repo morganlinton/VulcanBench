@@ -325,6 +325,21 @@ for re-screening, at most 32 for admission.
   Options for a later version, not taken now: hand the agent containers
   the guest date (libfaketime or a pinned clock), or set the guest clock
   to the run date and seed relative dates.
+- **An event left in Calendar's open popover is not saved, and the miss
+  counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
+  calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on
+  screen in its final screenshot, still in the new-event popover, and absent
+  from the collected calendar. To tell a collection fault from Calendar's own
+  behaviour, a scratch copy of the task (outside the suite, under
+  `~/vulcanbench-gate/experiments/`) quick-added that event the same way and
+  ended with the popover open, and a control pressed Escape instead. Both
+  lost the event: Escape discards a quick-added event, which shows it is
+  provisional until the popover is dismissed by a click elsewhere, and the
+  guest's normal shutdown drops it the same way. Terra's first four events
+  survived because each new "+" click committed the one before. This is the
+  app's behaviour, not the collector's, so the 0 stands: the agent did not
+  finish its last step or check it. Revisit trigger: an end state the
+  collector loses although the app had saved it.
 
 ### Revisit triggers
 

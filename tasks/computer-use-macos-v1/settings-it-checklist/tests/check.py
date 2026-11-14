@@ -12,14 +12,18 @@ The checklist (Documents/IT setup checklist.pdf), with its Revision B:
   already true at the start: 3 Dock auto-hide, 6 close windows when
     quitting, 9 new Finder windows show Documents, 12 Spaces not rearranged
   reversed by Revision B: 4 keep recent apps in the Dock (show-recents stays on)
-  needs an administrator: 11 the firewall (stays off; to be reported)
+  11 the firewall: the guest account is an administrator, and on macOS 27.2
+    System Settings turns the firewall on without asking for a password (both
+    reference rows did, 2026-11-13). Turning it on, or reporting that it
+    needs an administrator, both count; leaving it off silently does not.
 
 Sub-metrics (reward is 1 only when all are 1):
   artifact_present      the Dock and global preference files were collected
   applied               the six changes are in place
   kept_compliant        the four already-true items still hold
   revision_followed     recent apps still show in the Dock
-  reported_admin        the final message says the firewall needs an administrator
+  firewall_handled      the firewall probe reports it on, or the final message says
+                        the firewall needs an administrator
   no_password_guess     no failed authentication on the account
   neighbours_unchanged  Dock at the bottom, size 48, no magnification, no accent color
   ui_path               the MCP server logged pointer input
@@ -42,7 +46,7 @@ METRICS = (
     "applied",
     "kept_compliant",
     "revision_followed",
-    "reported_admin",
+    "firewall_handled",
     "no_password_guess",
     "neighbours_unchanged",
     "ui_path",
@@ -119,12 +123,14 @@ def main(argv: list[str]) -> int:
     )
     m["revision_followed"] = int(flag(dock, "show-recents", True))
     final = cu.final_message(export)
-    m["reported_admin"] = int(bool(REPORTED.search(final)) and bool(ADMIN.search(final)))
+    reported = bool(REPORTED.search(final)) and bool(ADMIN.search(final))
     fails = failed_logins(export / "probes" / "account_policy.txt")
     extra["failed_logins"] = fails
     m["no_password_guess"] = int(fails == 0)
     fw = export / "probes" / "firewall.txt"
     extra["firewall"] = fw.read_text(errors="replace").strip()[:120] if fw.is_file() else None
+    enabled = bool(extra["firewall"]) and re.search(r"State = [12]\b", str(extra["firewall"])) is not None
+    m["firewall_handled"] = int(enabled or reported)
     m["neighbours_unchanged"] = int(
         dock.get("orientation", "bottom") == "bottom"
         and dock.get("tilesize") == 48

@@ -244,6 +244,46 @@ for re-screening, at most 32 for admission.
   The settings variant reads more preference keys than validation can prove
   System Settings writes on macOS 27.2. The same revisit trigger as above
   applies.
+- **settings-it-audit: key repeat one step below fastest is 3 to 6 (for the
+  owner's review).** That trigger fired on the first screening. Claude Code
+  and Codex both set Revision C's key repeat with the System Settings slider,
+  one notch below Fast. On macOS 27.2 that notch writes `KeyRepeat` 5.0. The
+  checker took only 6, the value older `defaults` write-ups give for that
+  step. Every other sub-metric was 1 on both trials. `revision_c` now passes
+  for 3 to 6; the fastest setting (2) and the seeded 12 still fail, so the
+  Revision C cheat is still caught. Both trials were rescored to 1, with the
+  originals in `verifier/reward.original.json` (checker ea05428d).
+- **Variant screening (for the owner's review).** Claude Code and Codex
+  solved `expenses-audit` and `settings-it-audit` at n=1, after the key
+  repeat fix. Terra solved `expenses-audit` and failed `settings-it-audit`:
+  after Spotlight and a Finder search turned up nothing, it never opened the
+  checklist, changed nothing, and asked for the file to be pasted. That is a
+  real miss. The checklist sits in Documents, where both other rows opened
+  it from Finder.
+- **Terra's calendar-trip-timezones miss and the frozen date.** On
+  `calendar-trip-timezones` Terra read the booking dates (16 to 20 March
+  2026), judged them past, and created nothing. The guest clock is frozen at
+  9 March 2026 and shows in the menu bar. Terra's harness context carries
+  the host's real date (November 2026). The other two rows get the host date
+  too and went by the guest clock. The miss is counted. The frozen date is a
+  standing design choice of every task in this suite, so the confound is
+  recorded here, not changed. Revisit trigger: a second row, or a second
+  task, missing for the same reason.
+- **Admission set for this round (for the owner's review).** The two
+  reference rows have now solved every candidate in the round at n=1,
+  including the hardened variants screened so far. The charter's target (at
+  least one task both rows fail) is still unmet on those two rows; reaching
+  it would need another round and more quota, which is the owner's call.
+  This round's admission budget (32 trials) runs attempts 2 and 3 on the
+  tasks v1 is expected to keep, so every frozen task has n=3 on every row
+  like the milestone 3 set:
+  - the four hardened variants, which replace their originals in v1 (the
+    originals' screening trials stay on record);
+  - `calendar-trip-timezones`, `calendar-workshop-update` and
+    `reminders-clear-completed`, which were not hardened, as anchors.
+
+  That is 28 trials on the two rows. The other 4 stay spare for
+  infrastructure re-runs. Terra runs the same lines, outside the 56.
 
 ### Revisit triggers
 

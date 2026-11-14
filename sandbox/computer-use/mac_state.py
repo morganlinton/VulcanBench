@@ -460,6 +460,89 @@ def contacts(root: Path) -> list[Contact]:
     ]
 
 
+# Smart Lists (ABCDSmartGroup): a name plus an archived ABSearchElement rule.
+# Only simple rules on a card's text fields are evaluated; anything else
+# (compound rules, dates, unknown properties) matches nobody, so a checker
+# that accepts smart groups fails safe.
+_SEARCH_FIELDS = {"Organization": "org", "JobTitle": "title", "First": "first", "Last": "last"}
+
+
+def _search_match(comparison: int, have: str, want: str) -> bool | None:
+    h, w = have.casefold(), want.casefold()
+    table = {  # ABSearchComparison values (ABTypedefs.h)
+        0: have == want,
+        6: h == w,
+        7: want in have,
+        8: w in h,
+        9: have.startswith(want),
+        10: h.startswith(w),
+        15: have.endswith(want),
+        16: h.endswith(w),
+    }
+    return table.get(comparison)
+
+
+@dataclass
+class SmartGroup:
+    name: str
+    field: str | None  # Contact attribute the rule tests, None if unsupported
+    comparison: int
+    value: str
+
+    def matches(self, c: Contact) -> bool:
+        if self.field is None:
+            return False
+        return bool(_search_match(self.comparison, getattr(c, self.field), self.value))
+
+
+def _unarchive(blob: bytes) -> dict | None:  # type: ignore[type-arg]
+    """The root object of an NSKeyedArchiver plist, one level resolved."""
+    try:
+        p = plistlib.loads(blob)
+        objs = p["$objects"]
+        root = objs[p["$top"]["root"].data]
+    except (
+        plistlib.InvalidFileException,
+        KeyError,
+        IndexError,
+        TypeError,
+        ValueError,
+        AttributeError,
+    ):
+        return None
+    if not isinstance(root, dict):
+        return None
+    return {k: (objs[v.data] if isinstance(v, plistlib.UID) else v) for k, v in root.items()}
+
+
+def smart_groups(root: Path) -> dict[str, SmartGroup]:
+    db = Path(root) / CONTACTS_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        se = _ents(con).get("ABCDSmartGroup")
+        if se is None or "ZSEARCHELEMENTDATA" not in _cols(con, "ZABCDRECORD"):
+            return {}
+        rows = con.execute(
+            "SELECT ZNAME, ZSEARCHELEMENTDATA FROM ZABCDRECORD WHERE Z_ENT = ?", (se,)
+        ).fetchall()
+    finally:
+        con.close()
+    out: dict[str, SmartGroup] = {}
+    for name, blob in rows:
+        el = _unarchive(blob) if blob else None
+        prop = el.get("ABSearchProperty") if el else None
+        value = el.get("ABSearchValue") if el else None
+        comp = el.get("ABSearchComparison") if el else None
+        simple = isinstance(prop, str) and isinstance(value, str) and isinstance(comp, int)
+        out[name or ""] = SmartGroup(
+            name=name or "",
+            field=_SEARCH_FIELDS.get(prop) if simple else None,  # type: ignore[arg-type]
+            comparison=comp if simple else -1,  # type: ignore[arg-type]
+            value=value if simple else "",  # type: ignore[arg-type]
+        )
+    return out
+
+
 def contact_groups(root: Path) -> list[str]:
     db = Path(root) / CONTACTS_DB
     con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)

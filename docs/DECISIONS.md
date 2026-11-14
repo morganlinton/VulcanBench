@@ -123,6 +123,20 @@ for re-screening, at most 32 for admission.
   caught by its named sub-metric. The exports are the exact state a rerun
   would grade, and gold reproducibility was already shown, so a full
   rerun (about 2 hours of VM time) would add nothing.
+- **A Smart List counts as a group in contacts-crm-cleanup (for the
+  owner's review).** At screening, Codex built the three groups as Smart
+  Lists ("Organization contains Northwind Traders", and likewise for the
+  other two). The checker read only ordinary group membership, so it scored
+  `groups_built` 0. The instruction asks for groups "each with everyone who
+  works at that company now", and those rules select exactly those people.
+  A user would accept that, so the checker now does. `mac_state.smart_groups`
+  decodes simple rules on text fields (organization, job title, first and
+  last name; equal, contains, prefix, suffix). Anything else matches nobody,
+  so the check fails safe. Codex's trial was rescored from its saved export
+  to reward 1. The original reward is kept beside it as
+  `reward.original.json`, and its status file carries a `rescored` note. The
+  earlier validation exports still give gold 1, 1, 1, nop 0, and every cheat
+  caught. Revisit trigger: an agent builds a compound Smart List rule.
 
 ### Revisit triggers
 

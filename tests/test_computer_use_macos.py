@@ -330,3 +330,50 @@ def test_absurd_dates_read_as_none_not_a_crash() -> None:
     rem = M.Reminder.__new__(M.Reminder)
     rem.due, rem.all_day = far, False
     assert rem.due_date is None
+
+
+def _search_blob(prop: str, value: str, comparison: int) -> bytes:
+    """A Smart List rule archived the way Contacts stores it (macOS 27.2)."""
+    import plistlib  # noqa: PLC0415
+
+    uid = plistlib.UID
+    el = {
+        "ABSearchProperty": uid(3),
+        "ABSearchValue": uid(2),
+        "ABSearchLabel": uid(0),
+        "ABSearchKey": uid(0),
+        "ABSearchPeople": True,
+        "ABSearchVersion": 1,
+        "ABSearchComparison": comparison,
+        "$class": uid(4),
+    }
+    objs = ["$null", el, value, prop, {"$classname": "ABSearchElement"}]
+    top = {"$version": 100000, "$archiver": "NSKeyedArchiver", "$top": {"root": uid(1)}}
+    return plistlib.dumps({**top, "$objects": objs}, fmt=plistlib.FMT_BINARY)
+
+
+def test_smart_groups_reader_evaluates_simple_rules(tmp_path: Path) -> None:
+    db = tmp_path / M.CONTACTS_DB
+    db.parent.mkdir(parents=True)
+    con = sqlite3.connect(db)
+    con.executescript(
+        """CREATE TABLE Z_PRIMARYKEY (Z_ENT INTEGER, Z_NAME TEXT);
+           CREATE TABLE ZABCDRECORD (Z_PK INTEGER PRIMARY KEY, Z_ENT INTEGER, ZNAME TEXT,
+             ZSEARCHELEMENTDATA BLOB);
+           INSERT INTO Z_PRIMARYKEY VALUES (21, 'ABCDSmartGroup');"""
+    )
+    rows = [
+        (1, "Northwind", _search_blob("Organization", "northwind traders", 8)),
+        (2, "Exact", _search_blob("Organization", "northwind traders", 0)),
+        (3, "Odd", _search_blob("Birthday", "x", 8)),
+        (4, "Broken", b"not a plist"),
+    ]
+    con.executemany("INSERT INTO ZABCDRECORD VALUES (?, 21, ?, ?)", rows)
+    con.commit()
+    con.close()
+    sg = M.smart_groups(tmp_path)
+    card = M.Contact(1, "Mei", "Chen", "Northwind Traders", "COO", "", [], [], [], "", [])
+    other = M.Contact(2, "Ivy", "Walsh", "Brightwave Printing", "", "", [], [], [], "", [])
+    assert sg["Northwind"].matches(card) and not sg["Northwind"].matches(other)
+    assert not sg["Exact"].matches(card)  # case-sensitive equal
+    assert not sg["Odd"].matches(card) and not sg["Broken"].matches(card)  # fail safe

@@ -15,7 +15,8 @@ Sub-metrics (reward is 1 only when all are 1):
                       Chris Hale are still separate cards
   job_changes         the six people have their new organization and title
   groups_built        groups Northwind, Brightwave and Cobalt hold exactly the
-                      people whose organization is that company after the changes
+                      people whose organization is that company after the changes;
+                      a Smart List of that name counts when its rule selects them
   others_untouched    38 people plus the owner's own Jordan Lee card (39 cards),
                       and everyone else keeps their organization and title
   ui_path             the MCP server logged pointer input
@@ -138,10 +139,14 @@ def main(argv: list[str]) -> int:
     m["job_changes"] = int(all(got[e] is not None and (got[e].org, got[e].title) == want for e, want in CHANGES.items()))
     gok = True
     extra["groups"] = {}
+    smart = M.smart_groups(fs)
     for g, org in GROUPS.items():
-        members = sorted(e for c in cards if g in c.groups for e in c.email_keys)
-        extra["groups"][g] = members
         want = sorted(e for e, (o, _) in final.items() if o == org)
+        members = sorted(e for c in cards if g in c.groups for e in c.email_keys)
+        if members != want and g in smart:  # a Smart List meets "everyone who works there now"
+            members = sorted(e for c in cards if smart[g].matches(c) for e in c.email_keys)
+            extra.setdefault("smart_groups", {})[g] = f"{smart[g].field} {smart[g].comparison} {smart[g].value!r}"
+        extra["groups"][g] = members
         gok = gok and members == want
     m["groups_built"] = int(gok)
     owner = [c for c in cards if c.name == "Jordan Lee" and not c.email_keys]  # base-config.sh persona

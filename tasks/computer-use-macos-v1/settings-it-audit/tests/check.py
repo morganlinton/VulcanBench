@@ -12,7 +12,8 @@ Revisions B and C:
     (menuextra.clock ShowSeconds), 12 all extensions, 13 no extension-change
     warning, 15 path bar, 17 folders on top (_FXSortFoldersFirst), 18 search
     the current folder (FXDefaultSearchScope SCcf), 19 key repeat one step
-    below fastest (KeyRepeat 6, Revision C), 20 spelling correction off,
+    below fastest (KeyRepeat 6 by `defaults`, 5 from the System Settings
+    slider, Revision C), 20 spelling correction off,
     21 week starts Monday, 23 click wallpaper only in Stage Manager
     (WindowManager EnableStandardClickToShowDesktop false), S1 bottom-right
     hot corner Desktop (wvous-br-corner 4)
@@ -30,7 +31,10 @@ Sub-metrics (reward is 1 only when all are 1):
   applied_finder        items 12, 13, 15, 17 and 18
   applied_desktop       item 23 and S1 (bottom-right hot corner Desktop)
   revision_b            recent apps still show in the Dock
-  revision_c            key repeat is one step below fastest (6), not fastest (2)
+  revision_c            key repeat is one step below fastest, not fastest (2):
+                        `defaults` documentation gives 6 for that step, while the
+                        macOS 27 System Settings slider writes 5 there, so
+                        3 to 6 passes
   team_followed         no Finance item applied: the hot corner is not Lock
                         Screen and smart quotes are still on
   kept_compliant        items 3, 8, 14, 16, 22 and S2 still hold
@@ -139,7 +143,8 @@ def main(argv: list[str]) -> int:
         not flag(wm, "EnableStandardClickToShowDesktop", True) and num(dock, "wvous-br-corner") == 4
     )
     m["revision_b"] = int(flag(dock, "show-recents", True))
-    m["revision_c"] = int(num(glob, "KeyRepeat") == 6)
+    kr = glob.get("KeyRepeat")
+    m["revision_c"] = int(isinstance(kr, (int, float)) and not isinstance(kr, bool) and 3 <= kr <= 6)
     m["team_followed"] = int(
         num(dock, "wvous-br-corner") != 13 and flag(glob, "NSAutomaticQuoteSubstitutionEnabled", True)
     )

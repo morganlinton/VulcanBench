@@ -1,0 +1,95 @@
+{
+  "final": false,
+  "tasks": [
+    "legacy-blendcore-binary-parity",
+    "legacy-codeccore-binary-parity",
+    "legacy-freightcore-binary-parity",
+    "legacy-granarycore-binary-parity",
+    "legacy-hedgecore-binary-parity",
+    "legacy-matchcore-order-book-parity",
+    "legacy-metercore-binary-parity",
+    "legacy-pacecore-binary-parity",
+    "legacy-payrollcore-binary-parity",
+    "legacy-qlite-store-parity",
+    "legacy-queuecore-binary-parity",
+    "legacy-quotacore-binary-parity",
+    "legacy-reflowcore-binary-parity",
+    "legacy-schedcore-binary-parity",
+    "legacy-settlecore-binary-parity",
+    "legacy-snapcore-binary-parity",
+    "legacy-stampcore-binary-parity",
+    "legacy-tallycore-binary-parity",
+    "legacy-vaultcore-binary-parity"
+  ],
+  "stats": {
+    "wonder": {
+      "eff_mean": 724164.6315789474,
+      "eff_se": 73329.1699127769,
+      "eff_median": 637879.0,
+      "eff_total": 13759128.0,
+      "raw_mean": 5012725.263157895,
+      "cached_share": 0.9505941615118911,
+      "functional": 0.9330842105263157,
+      "passed": 16,
+      "minutes": 18.4834
+    },
+    "gpt61sol": {
+      "eff_mean": 111906.55789473685,
+      "eff_se": 21721.738882605878,
+      "eff_median": 95159.0,
+      "eff_total": 2126224.6,
+      "raw_mean": 641959.947368421,
+      "cached_share": 0.9174220493670739,
+      "functional": 0.9657894736842105,
+      "passed": 16,
+      "minutes": 4.939611403508772
+    },
+    "opus55": {
+      "eff_mean": 205330.47368421053,
+      "eff_se": 30697.475839177576,
+      "eff_median": 165658,
+      "eff_total": 3901279,
+      "raw_mean": null,
+      "cached_share": null,
+      "functional": 0.9336263157894736,
+      "passed": 14,
+      "minutes": 9.001990350877193
+    }
+  },
+  "wonder_ratio": {
+    "wonder": 1.0,
+    "gpt61sol": 6.471154552534101,
+    "opus55": 3.526824920750349
+  },
+  "wonder_heaviest_tasks": 18,
+  "unit": "effective tokens: uncached input + 0.1 x cache reads + 1.25 x cache writes + output",
+  "sources": {
+    "wonder_summaries": {
+      "legacy-blendcore-binary-parity-034e912f": "d5d663212868a4eddcb72365c88a9139bdb0938b71926f45bcf2e7e20865a24f",
+      "legacy-codeccore-binary-parity-42d371fc": "0e949aa0eabbef047b2aeb9100030d294da0bbbfe92118bd8777799cb33badef",
+      "legacy-freightcore-binary-parity-6e15421a": "1e075d72e69ae350ce0ff73713817bec111d4ed9233458f63c3fa08675aa32a0",
+      "legacy-granarycore-binary-parity-b67181fa": "bca80c5d8c5dc9b8f15a74b31930932d3d5f552affb0986180219323921a9a4b",
+      "legacy-hedgecore-binary-parity-0472135d": "4cc4df6672c99dac585bb37d988428dfc0c8487609f46f6dff8db42ff8dfa92c",
+      "legacy-matchcore-order-book-parity-508485b4": "c469ac209a21a1afa06cbae2d074349ddf9c3c57355b17a5b5a1a28bda966529",
+      "legacy-metercore-binary-parity-4cf3d408": "e210ceb9dd9507d2d3d465a3981d4a48cc87c9537a5e529986f2f3dd34354926",
+      "legacy-pacecore-binary-parity-9ead53f2": "73c322e5f8f6069a3966bea59eb14660990d40db092d812b2d546fc7b8796a23",
+      "legacy-payrollcore-binary-parity-d9e836ca": "345bb4ca0d995cb66806737c811a5a389b54c097603eec5f153f338c7ff37e47",
+      "legacy-qlite-store-parity-a3e5857a": "0483ae81a6d83a22ee174cae7b2570838de7faa2fb6090554a46a860e79ddafb",
+      "legacy-queuecore-binary-parity-2b15678d": "b1b4dde7b66c2887ff77575af5b1447c6652e77cad6b9c657b620ff5096b8e52",
+      "legacy-quotacore-binary-parity-140c6360": "6fdbd7e8cea4b98256b42bbb9f416e6c27bf495e9849757c579a274d6d38cc72",
+      "legacy-reflowcore-binary-parity-a6d373e9": "76f62edd6e32fa1c3261a1ab5d4987d019203c0066e95db0f0a729f550bacb63",
+      "legacy-schedcore-binary-parity-b747f9fe": "b0bd171d14433952da07434a84e836f451c75ade456bf7133b6ac31d97ff08fb",
+      "legacy-settlecore-binary-parity-47fb97c4": "41fcf8e0898732ea86a1849399981d066880720e1524a25bfc37ece32eb146e2",
+      "legacy-snapcore-binary-parity-b2081064": "d2f5e1d9346358c713d8267d6953a814c7bbc87e3054f6edbd081ed4fff53b65",
+      "legacy-stampcore-binary-parity-1b0b16d8": "8e70c2f9f033ea6792cedfc1fd1cd893ef10c3104def70314a318eab08abd429",
+      "legacy-tallycore-binary-parity-de9a43bf": "4e62b6d9526e3d4d176896ba986f69de51deed60d43c9d864c5abc4cd9c8cbe0",
+      "legacy-vaultcore-binary-parity-fcef4bcf": "6c370364d8958e251e00c20f93540be078a050d1beec2cca5bfe08b13eeafb79"
+    },
+    "published": {
+      "docs/results/swe-v4-gpt61-sol-2026-09/comparison.json": "7359debe2d78a801b894037ca63c599a44e3588927e5209221a3fc8c5ba1d64f",
+      "docs/results/swe-v4-opus55-2026-09/comparison.json": "7b79a443c1c336be5118ef1473fb4164fe4ece75975b050044ff8cdef2b614d2"
+    }
+  },
+  "png_sha256": "1adbf51f8ff19add77383793e944ffcdaee75038e6f4930742fd139f20752d41",
+  "table": "musewonder-full-low-tokens-preliminary-tasks.csv"
+}

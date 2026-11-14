@@ -344,6 +344,25 @@ for re-screening, at most 32 for admission.
   event ("1:1 with Priya", Friday 4:30 PM, Work) was still in its open
   popover in the last screenshot and is missing from the calendar, while
   the other two were placed correctly. Counted the same way.
+- **The guest menu hang cost a Claude Code trial; it is re-run as
+  infrastructure (for the owner's review).** Claude Code's
+  `expenses-audit` attempt 3 read all 41 receipts and filed the four
+  personal ones, then tried to edit the report. TextEdit stopped
+  responding each time a menu was opened (Claude Code's own words:
+  "TextEdit freezes whenever the menu bar is used"), its typed lines never
+  arrived, it force-quit TextEdit once, and the guest's shutdown had to be
+  forced, so the report was never saved. That is the menu defect found in
+  the `preview-redline` calibration (a menu stuck open under a wait
+  cursor, later input ignored), which a real Mac does not have. Scoring it
+  0 would charge the agent for the VM, so the trial is set aside as
+  `INFRA-1` (with an `INFRA-REASON.txt`) and re-run from the round's four
+  spare trials. A scan of every milestone 3 and round trial for forced
+  shutdowns (26 of 175) found no other 0 the hang explains: the forced
+  shutdowns that scored 0 were each explained earlier (the installer give-up,
+  the free-slots ambiguity, the typed-over heading). The defect stays open
+  and is the main validity risk before v1 publishes: until it is
+  understood, an agent that reaches for a menu can be stalled by the VM.
+  Revisit trigger: another trial stalled by a menu, or the cause found.
 
 ### Revisit triggers
 

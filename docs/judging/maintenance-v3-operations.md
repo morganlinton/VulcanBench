@@ -849,3 +849,83 @@ operational notes live here.
   `ready_for_publication` true. Combined score 82.23; Code quality 55.19;
   reviewed Code quality 45.8 from Claude and 58.3 from Sol. Extra-high over
   all 23 runs moves from 87.59 (22 judged, the timeout unjudged) to 87.36.
+
+## v3.30, November 10, 2026: Claude Fable 5.2, Low to Extra-high
+
+- From `bench/2026-11-10-fable52-judging-v330` (5ebd9a0b4), the panel that
+  judged Claude Opus 5.5: Muse Spark 1.3 and Grok 4.6 (Cursor pinned to
+  2026.10.01-e373342). Population frozen 07:49 PST: 92 rows, Low to
+  Extra-high, none excluded or missing. Max was still waiting for the Fable
+  usage limit to reset; its sweep loop made only refused attempts during this
+  window, and the judges do not use the Claude subscription.
+- Calibration: Muse passed all 20 gates. Grok failed g14_pair_2_1 (pair 2
+  against 1 scored 100 one way round and 50 the other), a boolean gate the
+  one-gate allowance cannot excuse. The wrapper accepted all 80 Grok display
+  renames ("Grok 4.6 Medium"). Under the single-panel rule Grok made no
+  counted call. The chain stopped at 09:21 PST, and a Muse-only chain ran
+  the run and probe stages from 09:24 to 14:03 PST.
+- Second attempts under the frozen rule: Muse 9 (seven unsupported excerpts,
+  two JSON syntax errors). One Muse probe (submission-088) was published
+  through the frozen excerpt recovery rule after both attempts failed.
+- Summary (14:03 PST): 92 of 92 published from Muse alone,
+  `ready_for_publication` true. Code quality 78.13 at Low, 78.18 Medium,
+  79.23 High, 80.85 Extra-high.
+
+## v3.30.1 to v3.30.3, November 11 to 12, 2026: Claude Fable 5.2, Max, and GPT-6.1 Sol's seat
+
+- From `bench/2026-11-11-fable52-judging-v3301` (4b90d6fcb, the merge of
+  PR #294), one chain from 20:12 PST on November 11 to 01:58 PST on November
+  12, no stops. The Max sweep finished at 13:28 PST on November 11, so no
+  sweep overlaps the window. Owner decisions (chat, November 11): Muse alone
+  judges Max, then GPT-6.1 Sol (Codex CLI 0.159.0, pinned as in v3.27) takes
+  Grok's seat on every level.
+- v3.30.1 (20:12 to 21:19): population frozen with 23 Max rows, none
+  excluded or missing; Muse, gated by its v3.30 verdict, made 70 calls. Second
+  attempts: 2 (unsupported excerpts). Code quality 82.80.
+- v3.30.2 (21:19 to 01:11): the v3.30 freeze copied byte for byte and every
+  hash checked. Sol's exam ran 21:19 to 21:49: all 20 gates passed, allowance
+  unused. Sol then judged Low to Extra-high (368 calls); Muse's v3.30 calls
+  are scored from the v3.30 directory as a scored sibling. Second attempts:
+  Sol 11, all "matched quirk must cite a listed departure"; for 8 of them
+  both attempts failed and the match was published through the frozen rule
+  that moves one-based departure indexes to zero-based (statuses
+  untouched).
+- v3.30.3 (01:11 to 01:58): the v3.30.1 freeze copied and checked; Sol,
+  gated by its v3.30.2 verdict, made 70 calls. Second attempts: 5, of which 4
+  were published through the same one-based index rule.
+- No operator-invalid markers and no reviewer fallbacks in any of the three
+  rounds. Summaries: 92 of 92 (v3.30.2) and 23 of 23 (v3.30.3) published,
+  both panels passing, `ready_for_publication` true. Combined score by
+  level: Low 91.92, Medium 92.25, High 92.76, Extra-high 93.25, Max 93.85.
+  Code quality 80.63, 81.49, 82.95, 84.25, 86.02. Sol reviewed about 7
+  points higher than Muse at every level (Low 83.06 against 76.36, Max 89.58
+  against 82.25), so a Fable 5.2 score is not panel-matched with columns
+  judged by Muse and Grok; the like-for-like Muse figures are in
+  `docs/results/swe-v4-fable52-2026-11/muse-like-for-like.csv`.
+
+## v3.30.4 and v3.30.5, November 13, 2026: GPT-6.1 Sol on Claude Fable 5.1 and Claude Opus 5.5
+
+- From `bench/2026-11-12-fable52-sol-matched` (4cdabb0cc, the merge of PR
+  #299), one chain from 06:22 to 13:52 PST, no stops and no solver run active.
+  These are comparison rounds for the Fable 5.2 card (owner, chat, November
+  12: "Yes, run Sol"; "Keep Astra, footnoted"). Neither amends v3.4 or v3.15,
+  and the board keeps those rounds' Muse and Grok scores.
+- The run worktree held copies of the v3.4, v3.15 and v3.30.2 directories and
+  `runs-effort-opus55`, restored from the private backup. Fable 5.1's solver
+  runs did not survive the September host reset, so v3.30.4's frozen-input
+  check uses the source hashes v3.4 recorded. v3.30.5 re-read all 114 Opus
+  5.5 runs.
+- v3.30.4 (06:22 to 10:07): the Fable 5.1 rows of the v3.4 freeze, 115
+  submissions; Astra's rows were dropped because Sol shares its lab. Sol was
+  gated by its v3.30.2 verdict, with no exam, and made 350 calls. Second
+  attempts: 34 matches, all "matched quirk must cite a listed departure"; 21
+  were published through the frozen one-based departure index rule.
+- v3.30.5 (10:07 to 13:52): the v3.15 freeze, 114 submissions, gated the same
+  way; Sol made 357 calls. Second attempts: 13 matches (8 published through
+  the same rule) and 1 primary review (unsupported excerpt).
+- No operator-invalid markers and no reviewer fallbacks. Both summaries:
+  every submission published, Muse and Sol passing, `ready_for_publication`
+  true. Combined score, Low to Max: Fable 5.1 90.04, 91.07, 90.89, 91.52,
+  92.69; Opus 5.5 87.85, 92.16, 91.96, 91.65, 91.24. The Muse halves equal
+  `muse-like-for-like.csv`. Sol reviewed Fable 5.1 3.1 to 5.5 points above
+  Muse and Opus 5.5 5.8 to 10.1 points above, against 6.7 to 8.1 for Fable 5.2.

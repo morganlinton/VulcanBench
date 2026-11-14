@@ -1,0 +1,98 @@
+{
+  "copying": {
+    "Claude Fable 5.2": {
+      "solved_runs": 115,
+      "lines_pct": 5.595700409231029,
+      "lines_se": 0.5070048449643755,
+      "lines_max": 25.641025641025642,
+      "identifiers_pct": 13.863905341392428,
+      "identifiers_se": 0.7829811604080997
+    },
+    "Claude Opus 5": {
+      "solved_runs": 147,
+      "lines_pct": 5.279048446875393,
+      "lines_se": 0.49545723777531253,
+      "lines_max": 25.0,
+      "identifiers_pct": 14.564815551665685,
+      "identifiers_se": 0.8657714956484187
+    },
+    "Claude Sonnet 5.5": {
+      "solved_runs": 97,
+      "lines_pct": 5.195500197370477,
+      "lines_se": 0.5295871774308749,
+      "lines_max": 23.076923076923077,
+      "identifiers_pct": 9.636643717664603,
+      "identifiers_se": 0.9705494782996922
+    },
+    "Claude Haiku 5.5": {
+      "solved_runs": 87,
+      "lines_pct": 5.650241541066747,
+      "lines_se": 0.6009306065101843,
+      "lines_max": 23.076923076923077,
+      "identifiers_pct": 12.161589760304535,
+      "identifiers_se": 0.858076818807094
+    },
+    "GPT-6.1 Sol": {
+      "solved_runs": 111,
+      "lines_pct": 4.389846303812348,
+      "lines_se": 0.38027720789837804,
+      "lines_max": 16.216216216216218,
+      "identifiers_pct": 8.86314460756293,
+      "identifiers_se": 0.5679712267455179
+    },
+    "GPT-6.1 Terra": {
+      "solved_runs": 79,
+      "lines_pct": 4.4380570331453,
+      "lines_se": 0.36618118054891674,
+      "lines_max": 13.88888888888889,
+      "identifiers_pct": 7.900977401826433,
+      "identifiers_se": 0.7460691888106842
+    },
+    "DeepSeek V4.1 Flash": {
+      "solved_runs": 61,
+      "lines_pct": 4.859217474744625,
+      "lines_se": 0.6343432930354859,
+      "lines_max": 25.641025641025642,
+      "identifiers_pct": 9.055415522531224,
+      "identifiers_se": 1.1599576388839739
+    }
+  },
+  "inspecting": {
+    "Claude Fable 5.2": {
+      "runs": 115,
+      "inspected_first": 115,
+      "pct": 100.0,
+      "se": 0.0
+    },
+    "Claude Opus 5": {
+      "runs": 193,
+      "inspected_first": 83,
+      "pct": 43.005181347150256,
+      "se": 3.563685953503865
+    },
+    "Claude Sonnet 5.5": {
+      "runs": 115,
+      "inspected_first": 53,
+      "pct": 46.08695652173913,
+      "se": 4.648223681979507
+    },
+    "Claude Haiku 5.5": {
+      "runs": 115,
+      "inspected_first": 77,
+      "pct": 66.95652173913044,
+      "se": 4.386219894277985
+    }
+  },
+  "recall": {
+    "recall_tasks": [
+      "legacy-freightcore-binary-parity",
+      "legacy-matchcore-order-book-parity",
+      "legacy-qlite-store-parity",
+      "legacy-quotacore-binary-parity",
+      "legacy-settlecore-binary-parity"
+    ],
+    "recall_answers_saying_not_remembered": 5,
+    "blind_fix_task": "legacy-quotacore-binary-parity"
+  },
+  "fable52_runs": 115
+}

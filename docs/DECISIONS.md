@@ -92,6 +92,42 @@ software update, notifications and Siri, and relabel the
   (`tart suspend`) and resuming clones of it.
 - If Apple's license terms or Tart's change.
 
+## 2026-11-11: Fable 5.2 Code quality: Muse alone for Max (v3.30.1), then GPT-6.1 Sol in Grok's seat on every level (v3.30.2, v3.30.3)
+
+### Decision
+
+- Max is judged by Muse Spark 1.3 alone under its v3.30 verdict, as Low to
+  Extra high were (v3.30.1). Owner choice in chat, 2026-11-11 ("Muse alone").
+- Once that finishes, GPT-6.1 Sol fills the seat Grok 4.6 left, on all five
+  levels: it takes the exam on the v3.30 freeze (v3.30.2) and, if it passes,
+  judges Max under that verdict (v3.30.3). Owner request in chat, 2026-11-11.
+  Precedent: GPT-5.6 Sol filled Grok's seat after the v3.9 exam (v3.10).
+- If Sol fails its exam, Muse alone stands for every level and the failure is
+  disclosed. Grok does not retake an exam it failed (v3.11 practice).
+- Fable 5.2's published Code quality is then a Muse and Sol mean, while the
+  Claude Opus 5.5 column is a Muse and Grok mean. Cards against it carry a
+  panel note; Muse's own per-panel column is the like-for-like comparison.
+- The rounds run one after another from one run worktree; no sweep overlaps
+  the judging window.
+
+### Evidence
+
+- Grok 4.6 failed the v3.30 exam on 2026-11-10 at gate `g14_pair_2_1` (pair
+  2-1 scored 100, pair 1-2 scored 50; a boolean gate the one-gate allowance
+  cannot excuse). Muse passed and published Low to Extra high alone: 92 of 92
+  submissions, Code quality Low 78.13, Medium 78.18, High 79.23, Extra high
+  80.85, with one operator excerpt recovery on probe `submission-088`.
+- Fable 5.2's Max sweep finished on 2026-11-11 at 13:28 PST: 23 of 23 solved,
+  37.1 minutes per task on average, no timeouts, every run on Claude Code
+  2.1.321 from the clean tag.
+- Dry runs of all three freezes on 2026-11-11 (outputs discarded): v3.30.1
+  froze 23 Max submissions, largest prompt 57,223 characters; v3.30.2 copied
+  the v3.30 freeze and every hash matched; a v3.30.2 summary with no Sol
+  verdict reproduced Muse's v3.30 scores exactly from the sibling directory;
+  the v3.30.1 freeze copied cleanly for v3.30.3.
+- The Codex CLI 0.159.0 launcher and native binary and the Muse binary still
+  match their pinned sha256 values.
+
 ## 2026-11-10: VulcanBench Frontier v5 release 1 closes with GPT-6 Astra as its sole confirmation reference
 
 ### Decision

@@ -1531,6 +1531,114 @@ Everything is as in v3.26.3, for the Max level. Protocol id
 - Publication merges this directory with v3.26 to v3.26.3; no earlier record
   is rewritten.
 
+## Amendment v3.30.1, November 11, 2026: Claude Fable 5.2 at Max, judged by Muse Spark 1.3
+
+Everything is as in v3.30, for the Max level, with Muse Spark 1.3 alone.
+Protocol id `code-quality-maintenance-v3.30.1`; run directory
+`runs-code-quality-maintenance-v3.30.1`; runner
+`harness/maintenance_review_v3301.py`. Population record:
+`docs/results/swe-v4-fable52-2026-11/comparison-max.json`, built by
+`build_fable52_population.py --level max`.
+
+- Population: Fable 5.2's 23 Max runs through Claude Code 2.1.321 from
+  `bench/2026-11-09-fable52-frontier-v4`, run on November 10 and 11 after the
+  weekly Fable limit reset. Every run solved; none timed out, ended with an
+  empty patch or drew a fallback reply. Prepare refuses any run v3.30 judged.
+- Judge: Muse Spark 1.3 on the v3.30 settings and binary, with no new exam:
+  its v3.30 verdict gates this level, as v3.26.5 did for Muse Wonder Full.
+  Grok 4.6 failed the v3.30 exam (gate `g14_pair_2_1`, an order-inconsistent
+  pair) and takes no part. The owner chose Muse alone for Max on November 11.
+- Diagnostics: one repeat for the cell; one level, so no pairwise check.
+  Submission ids are `max-NNN`.
+- Publication merges this directory with v3.30; no earlier record is
+  rewritten.
+
+## Amendment v3.30.2, November 11, 2026: GPT-6.1 Sol takes Grok's seat on Claude Fable 5.2, Low to Extra high
+
+Protocol id `code-quality-maintenance-v3.30.2`; run directory
+`runs-code-quality-maintenance-v3.30.2`; runner
+`harness/maintenance_review_v3302.py`.
+
+- Why: Grok 4.6 failed the v3.30 exam, leaving Muse Spark 1.3 as the only
+  judge. The owner chose GPT-6.1 Sol for the empty seat across every level on
+  November 11, as GPT-5.6 Sol filled Grok's seat after the v3.9 exam (v3.10).
+  Sol is neutral for an Anthropic submission.
+- Population: the v3.30 freeze, byte for byte. Manifest, signals, diagnostic
+  selection, evidence and quirk keys are copied from the v3.30 directory and
+  must hash to what the v3.30 protocol recorded; controls and the calibration
+  order are rebuilt and must match too.
+- Judges: Sol takes the exam under v3.30.2 before any counted call, at medium
+  through Codex CLI 0.159.0 on the v3.20 transport, with the launcher and
+  native binary pinned by sha256 as in v3.27 and re-checked before every
+  stage. Muse's v3.30 calibration, reviews and probes are scored from the
+  v3.30 directory as a scored sibling.
+- If Sol fails its exam it makes no counted call, and Muse alone stands as
+  v3.30 published it.
+- Comparability: a Fable 5.2 score becomes a Muse Spark 1.3 and GPT-6.1 Sol
+  mean. The Claude Opus 5.5, GPT-6.1 Sol and GPT-6.1 Terra columns are Muse
+  Spark 1.3 and Grok 4.6 means, so cards against them carry a panel note;
+  Muse's own column is the like-for-like comparison.
+
+## Amendment v3.30.3, November 11, 2026: GPT-6.1 Sol's seat on Claude Fable 5.2 at Max
+
+Protocol id `code-quality-maintenance-v3.30.3`; run directory
+`runs-code-quality-maintenance-v3.30.3`; runner
+`harness/maintenance_review_v3303.py`.
+
+- Population: the v3.30.1 freeze, byte for byte, copied and checked as
+  v3.30.2 copies v3.30.
+- Judges: no new exam. Sol is gated by its v3.30.2 verdict and must use the
+  settings and Codex pins v3.30.2 examined; Muse's v3.30.1 reviews and probes
+  are scored from that directory, gated by its v3.30 verdict. Prepare refuses
+  to run until v3.30.1 is final and Sol has passed.
+- Publication merges v3.30.2 (Low to Extra high) and v3.30.3 (Max); no earlier
+  record is rewritten.
+
+## Amendment v3.30.4, November 12, 2026: GPT-6.1 Sol reviews Claude Fable 5.1, for a matched panel
+
+Protocol id `code-quality-maintenance-v3.30.4`; run directory
+`runs-code-quality-maintenance-v3.30.4`; runner
+`harness/maintenance_review_v3304.py`.
+
+- Why: Claude Fable 5.2 is published from Muse Spark 1.3 and GPT-6.1 Sol
+  (v3.30.2, v3.30.3); Claude Fable 5.1 from Muse Spark 1.3 and Grok 4.6 (v3.4).
+  Sol scores higher than Grok, so the columns did not share a panel. The owner
+  asked for Sol on the earlier columns on November 12.
+- A comparison record only: v3.4 is not amended, and Fable 5.1's published
+  board scores stay the Muse and Grok means.
+- Population: the Claude Fable 5.1 rows of the v3.4 freeze, byte for byte.
+  GPT-6 Astra's rows are dropped because Sol is an OpenAI model, and so is
+  every v3.4 diagnostic pair, since each sets an Astra submission against a
+  Fable one; the repeats keep the Fable cells. The v3.4 manifest, signals and
+  selection are checked against the v3.4 protocol before the subset is
+  derived, and each copied evidence file against its recorded hash.
+- Judges: no new exam. Every frozen field Sol was examined under in v3.30.2
+  equals v3.4's, so Sol is gated by its v3.30.2 verdict with the same settings
+  and Codex pins; Muse's v3.4 reviews and probes are scored from the v3.4
+  directory, gated by its v3.4 verdict.
+- Source runs: v3.4 was frozen on the earlier host, and Fable 5.1's source runs
+  did not survive the move. The frozen check's re-read of each source run is
+  skipped for this round; the evidence every judge reads is still checked
+  against its frozen hash before every stage.
+- Astra keeps its published Muse and Grok means; cards footnote it.
+
+## Amendment v3.30.5, November 12, 2026: GPT-6.1 Sol reviews Claude Opus 5.5, for a matched panel
+
+Protocol id `code-quality-maintenance-v3.30.5`; run directory
+`runs-code-quality-maintenance-v3.30.5`; runner
+`harness/maintenance_review_v3305.py`.
+
+- The second half of the owner's request: Claude Opus 5.5 is published from
+  Muse Spark 1.3 and Grok 4.6 (v3.15). A comparison record only; v3.15 is not
+  amended.
+- Population: the v3.15 freeze, byte for byte, copied and checked as v3.30.2
+  copies v3.30.
+- Judges: as v3.30.4, with Muse's v3.15 reviews and probes as the scored
+  sibling, gated by its v3.15 verdict.
+- Source runs: restored from the private backup (`runs-effort-opus55`) and
+  re-read before every stage, with the earlier host's recorded prefix moved
+  to the repository root.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

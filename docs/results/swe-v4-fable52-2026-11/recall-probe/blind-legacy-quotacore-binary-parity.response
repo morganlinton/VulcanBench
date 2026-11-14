@@ -1,0 +1,22 @@
+I can't write this diff from what I know: I have never seen `quotacore.py`, `docs/SPEC.md`, or the engine's output, and QuotaCore is not something I have prior knowledge of. Any diff I produced would have invented context lines and invented constants, and it would fail the byte-for-byte requirement.
+
+What I can offer is a reading of the symptom list. The mechanisms below are all guesses inferred from your wording, and every constant is unknown.
+
+| Symptom | Likely mechanism (guess) | What must be measured on the binary |
+|---|---|---|
+| Invoices diverge mid-cycle and stay wrong | Accumulated state differs: a counter that wraps or saturates, consumption counted for rejected events, or a tier boundary compared with `>` instead of `>=` | The exact cumulative value where divergence starts, and whether rejected events advance the counter |
+| Remaining quota drifts from a key's first event | Different starting quota for some plan or region, or remaining computed before rather than after the deduction, or a different clamp at zero | Which keys are affected, and the first-event value for each plan and region |
+| One event per busy key billed far higher, then agreement | A one-time effect on the event that crosses a threshold, such as the whole event (or whole cumulative usage) priced at the overage rate, or a one-off fee | The threshold, whether it is inclusive, and the exact amount |
+| Premium cheaper in a couple of regions | The engine's rate table differs from the spec for certain premium and region pairs | Which regions, and the actual rate or multiplier |
+| Overage blocks one short | Floor instead of ceiling division, or an off-by-one at exact multiples | Block size, and behavior at N−1, N, and N+1 units over |
+| Mid-cycle upgrades rejected by the rewrite | The engine accepts a plan change for a key within a batch | Whether downgrades are also accepted, and whether quota or consumption resets or carries over |
+| Zero-call heartbeats vanish | The engine drops zero-call events with no result line | Which trailer counters, if any, still count them, and whether they touch state |
+| Lowercase regions rejected by the rewrite | The engine matches region codes case-insensitively | Whether output echoes the original case or uppercases it; mixed case and whitespace handling |
+| Differently capitalized keys merged | The rewrite normalizes key case and the engine does not | Likely just removing the normalization, but confirm the output echoes the key verbatim |
+
+Your task statement also mentions rounding without giving a symptom for it. I can't tell whether the engine rounds half-up, half-even, or truncates, or at which step.
+
+To produce the real diff I need one of these:
+
+- **Tool access:** a session where I can read the repo and run `legacy/run`. I would probe each row above with boundary-value batches, diff against the rewrite, and fix one quirk at a time.
+- **Pasted material:** `quotacore.py`, `docs/SPEC.md`, and a few batches with the engine's output that exercise each symptom.

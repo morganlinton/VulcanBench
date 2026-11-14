@@ -284,6 +284,16 @@ for re-screening, at most 32 for admission.
 
   That is 28 trials on the two rows. The other 4 stay spare for
   infrastructure re-runs. Terra runs the same lines, outside the 56.
+- **Terra's colour on the results cards (for the owner's review).** The
+  cards gain a third column, "Codex Terra", with the Codex Sol column now
+  labelled "Codex Sol". OpenAI's green (`#10A37F`) stays with Sol, the row
+  that came first, so Terra needs a second OpenAI colour. It is a mid blue,
+  `#2F6DB5`, chosen to stay apart from both the green and Anthropic's clay
+  (`#D97757`) under the colour-vision checks. Lab colours elsewhere are
+  unchanged. Revisit trigger: the owner prefers a shade of the OpenAI green
+  for every OpenAI row.
+- **preview-redline stays parked.** It is not in the admission set, and v1
+  is expected to freeze without it.
 
 ### Revisit triggers
 

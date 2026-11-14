@@ -1,0 +1,11 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "mixed-hotel-bill-claimed-in-full", "solution": "gold", "env": {"VB_SPLIT": "full"}, "expect": {"reward": 0, "mixed_split": 0}},
+    {"name": "euros-claimed-at-face-value", "solution": "gold", "env": {"VB_FX": "face"}, "expect": {"reward": 0, "euros_converted": 0}},
+    {"name": "gift-not-capped", "solution": "gold", "env": {"VB_GIFT": "full"}, "expect": {"reward": 0, "gift_capped": 0}},
+    {"name": "duplicate-receipt-listed-twice", "solution": "gold", "env": {"VB_DUP": "1"}, "expect": {"reward": 0, "listed_once": 0}},
+    {"name": "line-without-receipt-kept", "solution": "gold", "env": {"VB_UNBACKED": "1"}, "expect": {"reward": 0, "unbacked_out": 0}},
+    {"name": "personal-receipts-not-filed", "solution": "gold", "env": {"VB_NOMOVE": "1"}, "expect": {"reward": 0, "receipts_filed": 0}}
+  ]
+}

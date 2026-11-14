@@ -1,0 +1,1 @@
+Clean up my contacts. Some people are in there twice under slightly different names: merge the cards that share an email address into one, keeping all of their phone numbers and email addresses. Then apply the job changes from my note "Contact updates". Finally, make four groups, Northwind, Brightwave, Cobalt and Lumen, each with everyone who works at that company now.

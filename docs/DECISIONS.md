@@ -294,6 +294,20 @@ for re-screening, at most 32 for admission.
   for every OpenAI row.
 - **preview-redline stays parked.** It is not in the admission set, and v1
   is expected to freeze without it.
+- **Two trials at once, and a missing-tool guard.** Overnight on
+  2026-11-14 a second lane runs Terra's milestone 3 trials next to the
+  round's lane, so two agent trials (two VMs) run at once, within the
+  two-VM limit. Terra's first trial there, `finder-installer-cleanup`
+  attempt 1, scored 0 with no input at all: its tool list held only the
+  clock and MCP-resource tools, the computer MCP server never loaded, and
+  Terra said it could not reach the Mac. That is infrastructure, not a
+  result. `run_gate.sh` caught extra tools but not missing ones, so it now
+  marks such a trial `infra_failed` (`no-computer-tools:<trial>`) and the
+  admission runner retries it. The pinned run worktree predates the guard,
+  so a scratch auditor applies the same check to this round's lanes and
+  re-queues such trials (at most three tries). Revisit trigger: if missing
+  tools recur only while two trials overlap, go back to one trial at a
+  time.
 
 ### Revisit triggers
 

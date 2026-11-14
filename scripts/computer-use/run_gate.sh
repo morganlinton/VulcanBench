@@ -63,6 +63,10 @@
 # bring-up failure in a trial's agent logs, trial log or the job log stops
 # the whole run; such trials are not gate results.
 #
+# Missing-tool guard: a finished trial whose agent never had the computer
+# tools (the MCP server did not load) is infra_failed with stop_reason
+# no-computer-tools:<trial>, not a gate result.
+#
 # Tool-surface guard (codex): an event in a trial's codex.txt for a tool the
 # row must not have (a shell command, a file change, a web search, a
 # subagent, an image generation) stops the run with stop_reason
@@ -415,6 +419,23 @@ infra_hit() { # job dir -> prints the first trial (or "job-log") with an infrast
   if grep -qE "$INFRA_RE" "$OUT/$job.log" 2>/dev/null; then echo "job-log"; fi
 }
 
+tools_missing_hit() { # job dir -> prints the first trial whose agent never had the computer tools
+  # The MCP server can fail to load without an error the agent logs show (a
+  # Terra trial on 2026-11-14 got only the clock and MCP-resource tools, said
+  # it could not reach the Mac, and scored 0). codex prints its tool list into
+  # the session rollout; Claude Code lists its tools in the init event.
+  local tr ok
+  for tr in "$1"/*__*; do
+    [ -d "$tr/agent" ] || continue
+    case "$agent" in
+      codex) grep -qs 'computer__screenshot' $(find "$tr/agent/sessions" -name 'rollout*.jsonl' 2>/dev/null) /dev/null; ok=$? ;;
+      claude-code) grep -qs 'mcp__computer__screenshot' "$tr/agent/claude-code.txt"; ok=$? ;;
+      *) continue ;;
+    esac
+    [ "$ok" = 0 ] || { basename "$tr"; return; }
+  done
+}
+
 stop_harbor() { # SIGINT harbor (its cancel path runs `docker compose down`), escalate, reap, sweep
   local i
   trap '' INT TERM
@@ -555,6 +576,8 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
   [ -n "$bad" ] && { echo "!!! $t: tool-surface breach in $bad; not a gate result"; write_status infra_failed "$hcode" "tool-surface:$bad"; exit 1; }
   bad=$(infra_hit "$OUT/jobs/$job")
   [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; write_status infra_failed "$hcode" "infra:$bad"; exit 1; }
+  bad=$(tools_missing_hit "$OUT/jobs/$job")
+  [ -n "$bad" ] && { echo "!!! $t: the agent in $bad never had the computer tools; not a gate result"; write_status infra_failed "$hcode" "no-computer-tools:$bad"; exit 1; }
   print_trials "$OUT/jobs/$job"
   echo "--- $t: $(solves "$OUT/jobs/$job") solve(s) of $attempts $(date '+%F %H:%M:%S')"
   write_status done "$hcode"

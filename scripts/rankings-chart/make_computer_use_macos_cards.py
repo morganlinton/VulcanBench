@@ -53,7 +53,14 @@ SUITE = "ComputerUse macOS v1"
 
 # Rows: (gate ref, display name, model line, lab for logo, color, grid header).
 REFS = [
-    ("claude-code", "Claude Code", "Claude Opus 5.5, medium effort", "Anthropic", "#D97757", "Claude Code"),
+    (
+        "claude-code",
+        "Claude Code",
+        "Claude Opus 5.5, medium effort",
+        "Anthropic",
+        "#D97757",
+        "Claude Code",
+    ),
     ("codex", "Codex", "GPT-6.1 Sol, medium effort", "OpenAI", "#10A37F", "Codex Sol"),
     ("codex-terra", "Codex", "GPT-6.1 Terra, medium effort", "OpenAI", "#2F6DB5", "Codex Terra"),
 ]
@@ -282,7 +289,9 @@ def load() -> dict[tuple[str, str], Cell]:
 
 def pass1(cells, ref) -> tuple[float, float, int, int, bool]:
     rates = [cells[(t.slug, ref)].rate for t in TASKS if not t.safety]
-    partial = any(len(cells[(t.slug, ref)].done) < len(t.jobs_for(ref)) for t in TASKS if not t.safety)
+    partial = any(
+        len(cells[(t.slug, ref)].done) < len(t.jobs_for(ref)) for t in TASKS if not t.safety
+    )
     rs = [r for r in rates if r is not None]
     n = len(rs)
     mean = sum(rs) / n
@@ -356,7 +365,10 @@ def headline_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
     cap = [t for t in TASKS if not t.safety]
     saf = [t for t in TASKS if t.safety]
     d.text(
-        (M, 300), "Two coding agents, three models, on a real Mac.", font=font("chakra-500.ttf", 92), fill=INK
+        (M, 300),
+        "Two coding agents, three models, on a real Mac.",
+        font=font("chakra-500.ttf", 92),
+        fill=INK,
     )
     sub = (
         f"{len(cap)} everyday tasks and {len(saf)} safety tasks in Apple's own apps, each tried three "
@@ -467,6 +479,26 @@ def difficulty(cells, t: Task) -> tuple[float, str]:
     return (sum(rs) / len(rs) if rs else 2.0, t.slug)
 
 
+def task_label(
+    d: ImageDraw.ImageDraw, t: Task, x: int, mid: float, width: int, compact: bool
+) -> None:
+    """The task's label (shrunk to one line) with its apps underneath."""
+    sizes = range(34, 24, -1) if compact else range(40, 30, -1)
+    fnt = font("geist-500.ttf", sizes[0])
+    for size in sizes:
+        fnt = font("geist-500.ttf", size)
+        if d.textlength(t.label, font=fnt) <= width:
+            break
+    if compact:
+        d.text((x, mid - 2), t.label, font=fnt, fill=INK, anchor="ls")
+        d.text(
+            (x, mid + 6), t.apps, font=font("ibm-plex-mono-500.ttf", 19), fill=MUTED, anchor="lt"
+        )
+    else:
+        d.text((x, mid - 41), t.label, font=fnt, fill=INK)
+        d.text((x, mid + 11), t.apps, font=font("ibm-plex-mono-500.ttf", 24), fill=MUTED)
+
+
 def tasks_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
     W, H, M = 2160, 2700, 120
     im = Image.new("RGB", (W, H), SURFACE)
@@ -490,7 +522,6 @@ def tasks_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
 
     r = 21
     pitch = 62
-    label_f = font("geist-500.ttf", 40)
     apps_f = font("ibm-plex-mono-500.ttf", 24)
     sect_f = font("ibm-plex-mono-500.ttf", 30)
     label_w = cx[0] - col_w // 2 - M - 30
@@ -515,33 +546,17 @@ def tasks_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
         for t in sorted(group, key=lambda t: difficulty(cells, t)):
             h = row_h
             mid = y + h / 2
-            if compact:
-                lf_t = label_f
-                for size in range(34, 24, -1):  # shrink a long label to fit one line
-                    lf_t = font("geist-500.ttf", size)
-                    if d.textlength(t.label, font=lf_t) <= label_w:
-                        break
-                d.text((M, mid - 2), t.label, font=lf_t, fill=INK, anchor="ls")
-                d.text((M, mid + 6), t.apps, font=font("ibm-plex-mono-500.ttf", 19), fill=MUTED, anchor="lt")
-            else:
-                ly = y + (h - 82) / 2
-                lf_t = label_f
-                for size in range(40, 30, -1):  # shrink a long label to fit one line
-                    lf_t = font("geist-500.ttf", size)
-                    if d.textlength(t.label, font=lf_t) <= label_w:
-                        break
-                d.text((M, ly), t.label, font=lf_t, fill=INK)
-                d.text((M, ly + 52), t.apps, font=apps_f, fill=MUTED)
+            task_label(d, t, M, mid, label_w, compact)
             for (ref, _name, _model, _lab, color, _short), x in zip(REFS, cx, strict=True):
                 c = cells[(t.slug, ref)]
                 for k, o in enumerate(c.outcomes):
                     dot(d, x + (k - 1) * pitch, mid, r, o, color)
                 if t.safety and c.unsafe:
-                    d.text(
-                        (x + 2 * pitch - 10, mid), f"{c.unsafe}!", font=apps_f, fill=INK, anchor="lm"
-                    ) if compact else d.text(
-                        (x, mid + r + 22), f"{c.unsafe} unsafe", font=apps_f, fill=INK, anchor="mm"
+                    # beside the dots when rows are packed, under them otherwise
+                    at, anchor = (
+                        ((x + pitch + r + 10, mid), "lm") if compact else ((x, mid + r + 22), "mm")
                     )
+                    d.text(at, f"{c.unsafe} unsafe", font=apps_f, fill=INK, anchor=anchor)
             y += h
             d.line((M, y, W - M, y), fill=GRID, width=2)
         y += 56

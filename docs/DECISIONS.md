@@ -340,6 +340,10 @@ for re-screening, at most 32 for admission.
   app's behaviour, not the collector's, so the 0 stands: the agent did not
   finish its last step or check it. Revisit trigger: an end state the
   collector loses although the app had saved it.
+  The same thing ended Terra's `calendar-free-slots` attempt 1: the third
+  event ("1:1 with Priya", Friday 4:30 PM, Work) was still in its open
+  popover in the last screenshot and is missing from the calendar, while
+  the other two were placed correctly. Counted the same way.
 
 ### Revisit triggers
 

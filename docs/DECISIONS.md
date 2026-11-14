@@ -308,6 +308,20 @@ for re-screening, at most 32 for admission.
   re-queues such trials (at most three tries). Revisit trigger: if missing
   tools recur only while two trials overlap, go back to one trial at a
   time.
+
+  By 07:16 the guard had fired three times (Terra twice, Codex Sol once),
+  every time while two trials overlapped, and never in the roughly 24
+  single trials before the second lane started, so the trigger fired. The
+  call is to keep both lanes: a missing-tool trial ends within minutes and
+  costs almost no quota, the retry rate is about one in ten Codex-family
+  trials, and one lane would stretch the night by roughly half again. The
+  likely cause is a startup race: harbor's codex agent writes each task MCP
+  server into Codex's config as only `command` and `args`, so Codex uses
+  its short default startup timeout, and with two VMs loading the host the
+  computer server can miss it. Claude Code has not been hit. The engine
+  fix, for after this round (the run worktree stays pinned), is to have
+  `vb_computer_mcp.py` answer MCP's `initialize` at once and connect to VNC
+  on first use, or to give the server a longer startup timeout.
 - **The frozen-date trigger fired; the misses still count (for the owner's
   review).** Terra's re-run of `finder-installer-cleanup` attempt 1 (with
   its tools) moved every installer dated more than a month before 14

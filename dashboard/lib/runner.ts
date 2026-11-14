@@ -110,12 +110,38 @@ export interface RunnerStatus {
   supervisor: string;
 }
 
+// A refusal from the runner. ``detail`` keeps the structured body when the
+// backend sent one (``{code, message, ...}``, as the Suites routes do), so a
+// page can react to ``code`` (``builder_locked``, ``gh_auth``) and not the text.
 export class RunnerError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  code: string | null;
+  detail: Record<string, unknown> | null;
+  constructor(status: number, message: string, detail: Record<string, unknown> | null = null) {
     super(message);
     this.status = status;
+    this.detail = detail;
+    this.code = detail && typeof detail.code === "string" ? detail.code : null;
   }
+}
+
+async function errorFrom(res: Response): Promise<RunnerError> {
+  let message = res.statusText;
+  let detail: Record<string, unknown> | null = null;
+  try {
+    const body = (await res.json()) as { detail?: unknown };
+    if (typeof body.detail === "string") {
+      message = body.detail;
+    } else if (body.detail && typeof body.detail === "object" && !Array.isArray(body.detail)) {
+      detail = body.detail as Record<string, unknown>;
+      message = typeof detail.message === "string" ? detail.message : JSON.stringify(detail);
+    } else if (body.detail) {
+      message = JSON.stringify(body.detail);
+    }
+  } catch {
+    // keep statusText
+  }
+  return new RunnerError(res.status, message, detail);
 }
 
 export async function runnerGet<T>(path: string): Promise<T> {
@@ -125,16 +151,7 @@ export async function runnerGet<T>(path: string): Promise<T> {
   } catch {
     throw new RunnerError(0, `backend unreachable at ${API_BASE}`);
   }
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const body = (await res.json()) as { detail?: string };
-      if (body.detail) detail = body.detail;
-    } catch {
-      // keep statusText
-    }
-    throw new RunnerError(res.status, detail);
-  }
+  if (!res.ok) throw await errorFrom(res);
   return (await res.json()) as T;
 }
 
@@ -179,6 +196,30 @@ const SUITE_NAMES: Record<string, string> = {
 export function publicSuiteName(id: string | null): string | null {
   if (!id) return null;
   return SUITE_NAMES[id] ?? null;
+}
+
+// The suite's readable name: the public name of a VulcanBench suite, else the
+// display name a custom suite's job recorded, else null (show the id).
+export function suiteLabel(run: RunBase): string | null {
+  const pub = publicSuiteName(run.suite_or_task);
+  if (pub) return pub;
+  const spec = (run.job?.spec ?? {}) as Record<string, unknown>;
+  const name = typeof spec.suite_name === "string" ? spec.suite_name : "";
+  return name && spec.suite === run.suite_or_task && name !== run.suite_or_task ? name : null;
+}
+
+// Author and validate jobs work on one task of a custom suite: their spec
+// carries both ids, and the row names the suite as well as the task.
+export function builderTarget(run: RunBase): { suite: string; suiteName: string; task: string } | null {
+  if (!run.id.startsWith("job:") || !run.job) return null;
+  const kind = String(run.kind);
+  if (kind !== "author" && kind !== "validate") return null;
+  const spec = (run.job.spec ?? {}) as Record<string, unknown>;
+  const suite = typeof spec.suite === "string" ? spec.suite : "";
+  const task = typeof spec.task === "string" ? spec.task : "";
+  if (!suite || !task) return null;
+  const suiteName = typeof spec.suite_name === "string" && spec.suite_name ? spec.suite_name : suite;
+  return { suite, suiteName, task };
 }
 
 export function statusLabel(status: string): string {
@@ -258,6 +299,12 @@ export interface JobSpecSummary {
   out_dir: string | null;
   resume_at: string | null;
   quota_continue: { max: number; wait_s: number; used?: number } | null;
+  // Suite builder jobs (kind author or validate).
+  task?: string | null;
+  task_dir?: string | null;
+  pr?: number | null;
+  batch_id?: string | null;
+  billing?: string | null;
 }
 
 export interface JobSummary {
@@ -316,6 +363,12 @@ export interface SuiteInfo {
   frozen_at: string | null;
   task_ids: string[];
   n_tasks: number;
+  /** True for a suite in the suites home, outside the checkout. */
+  custom: boolean;
+  path?: string;
+  suites_home?: string;
+  lock_digest?: string;
+  repo?: { host?: string; owner?: string; name?: string; url?: string } | null;
 }
 
 export interface LaunchOptions {
@@ -325,6 +378,7 @@ export interface LaunchOptions {
   worktree: WorktreeInfo | null;
   run_worktrees: string;
   suites: SuiteInfo[];
+  suites_home: string;
   harnesses: string[];
   efforts: string[];
   billing: string[];
@@ -353,6 +407,8 @@ export interface SweepEstimate {
   confidence: string | null;
   notes: string[];
   per_level_usd: number | null;
+  per_level_mid_usd?: number | null;
+  total_mid_usd?: number | null;
   per_level_low_usd: number | null;
   per_level_high_usd: number | null;
   total_usd: number | null;
@@ -388,6 +444,10 @@ export interface SweepPlanSpec {
   billing: string;
   suite: string;
   suite_name: string;
+  suite_custom?: boolean;
+  suites_home?: string | null;
+  suite_lock_digest?: string | null;
+  suite_path?: string | null;
   n_tasks: number;
   efforts: string[];
   repeat: number;
@@ -545,17 +605,7 @@ async function runnerSend<T>(method: string, path: string, body?: unknown): Prom
   } catch {
     throw new RunnerError(0, `backend unreachable at ${API_BASE}`);
   }
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const data = (await res.json()) as { detail?: unknown };
-      if (typeof data.detail === "string") detail = data.detail;
-      else if (data.detail) detail = JSON.stringify(data.detail);
-    } catch {
-      // keep statusText
-    }
-    throw new RunnerError(res.status, detail);
-  }
+  if (!res.ok) throw await errorFrom(res);
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }
@@ -580,6 +630,21 @@ export function commandLine(env: Record<string, string> | null | undefined, argv
 export function fmtDuration(s: number): string {
   const h = Math.floor(s / 3600);
   const m = Math.round((s % 3600) / 60);
+  if (h === 0 && s < 60) return `${Math.max(0, Math.round(s))} s`;
   if (h === 0) return `${m} min`;
   return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
+export interface ReadinessCheck {
+  id: string;
+  label: string;
+  status: "ok" | "warn" | "fail";
+  detail: string;
+  fix: string | null;
+  needed_for: string;
+}
+
+export interface Readiness {
+  status: "ok" | "warn" | "fail";
+  checks: ReadinessCheck[];
 }

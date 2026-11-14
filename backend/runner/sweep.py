@@ -50,6 +50,7 @@ from backend.runner.launch import (
     worktree_status,
 )
 from harness.settings import blocked_efforts
+from harness.suite_lock import lock_digest
 
 # ``harness.agent.cli_agents.CLI_AGENT_PROVIDERS`` plus Vulcan's own API loop.
 # Listed here rather than imported so the backend never imports the agent
@@ -92,6 +93,8 @@ AUTH_RE = re.compile(
 )
 STALE_S = 15 * 60
 _LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+# ``harness.suite_cli.ID_RE``: the ids ``vulcanbench suite init`` accepts.
+_SUITE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,63}$")
 _MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$")
 _RUN_ID_RE = re.compile(r"^(?P<task>.+)-[0-9a-f]{8}$")
 
@@ -144,10 +147,55 @@ def _suite_entry(
         "frozen_at": lock.get("frozen_at"),
         "task_ids": [str(t) for t in ids],
         "n_tasks": len(ids),
+        "custom": False,
     }
 
 
+def custom_suites(cfg: RunnerConfig) -> list[dict[str, Any]]:
+    """Frozen suites in the suites home (``<suites_home>/<id>/suite.lock.json``).
+
+    Read as JSON only (no harness import beyond the lock digest, no task
+    hashing): whether the tasks still match the lock is the engine's check at
+    run start. A draft suite (no lock yet) is not listed.
+    """
+    home = cfg.suites_home
+    out: list[dict[str, Any]] = []
+    if not home.is_dir():
+        return out
+    for d in sorted(home.iterdir()):
+        if not d.is_dir() or not _SUITE_ID_RE.match(d.name):
+            continue
+        lock = read_json(d / "suite.lock.json")
+        if lock is None:
+            continue
+        manifest = read_json(d / "suite.json")
+        entry = _suite_entry(d.name, lock, manifest)
+        repo = (manifest or {}).get("repo")
+        entry.update(
+            {
+                "custom": True,
+                "path": str(d),
+                "suites_home": str(home),
+                "lock_digest": lock_digest(lock),
+                "repo": repo if isinstance(repo, dict) else None,
+            }
+        )
+        out.append(entry)
+    return out
+
+
 def suites_at(cfg: RunnerConfig, tag: str) -> list[dict[str, Any]]:
+    """Built-in frozen suites at this tag, then the custom suites in the suites home.
+
+    A custom suite whose id names a built-in suite at the tag is left out: the
+    engine resolves in-tree names first, so it could never run.
+    """
+    builtin = builtin_suites_at(cfg, tag)
+    names = {s["id"] for s in builtin}
+    return builtin + [s for s in custom_suites(cfg) if s["id"] not in names]
+
+
+def builtin_suites_at(cfg: RunnerConfig, tag: str) -> list[dict[str, Any]]:
     """Frozen suites (``tasks/<suite>/suite.lock.json``) at this tag: from the worktree, else git."""
     out: list[dict[str, Any]] = []
     wt = worktree_dir(cfg, tag)
@@ -187,11 +235,13 @@ def harness_features(worktree: Path) -> dict[str, bool]:
     try:
         text = (worktree / "harness" / "cli.py").read_text(encoding="utf-8", errors="replace")
     except OSError:
-        return {"present": False, "max_infra_retries": False, "doctor": False}
+        return {"present": False, "max_infra_retries": False, "doctor": False, "suites_home": False}
     return {
         "present": True,
         "max_infra_retries": "--max-infra-retries" in text,
         "doctor": "def harness_doctor" in text,
+        # Runs suites outside the checkout (``run --suite <id> --suites-home <dir>``).
+        "suites_home": "--suites-home" in text,
     }
 
 
@@ -207,6 +257,7 @@ def suite_options(cfg: RunnerConfig, tag: str | None) -> dict[str, Any]:
         "quota_continue_max": QUOTA_CONTINUE_MAX,
         "max_repeat": MAX_REPEAT,
         "harness_runs_dir": str(cfg.harness_runs_dir),
+        "suites_home": str(cfg.suites_home),
     }
 
 
@@ -218,8 +269,19 @@ def _venv_cli(worktree: Path) -> Path:
 
 
 def _run_cli(
-    worktree: Path, args: list[str], *, path_prepend: str = "", timeout: float = 90
+    worktree: Path,
+    args: list[str],
+    *,
+    path_prepend: str = "",
+    timeout: float = 90,
+    input_text: str | None = None,
 ) -> tuple[int | None, str, str]:
+    """Run the worktree's ``vulcanbench`` with the allowlisted env; ``(exit, stdout, stderr)``.
+
+    ``input_text`` is written to the child's stdin and then closed (the only way
+    a secret such as the suite builder password reaches a child: never argv,
+    never the environment). ``None`` leaves stdin as it was for older callers.
+    """
     cli = _venv_cli(worktree)
     if not cli.is_file():
         return None, "", f"{cli} is missing (run_worktree.sh did not finish)"
@@ -232,6 +294,7 @@ def _run_cli(
             check=False,
             cwd=str(worktree),
             env=child_env(path_prepend=path_prepend),
+            input=input_text,
         )
     except subprocess.TimeoutExpired:
         return None, "", f"{cli.name} {args[0]} timed out after {timeout:.0f} s"
@@ -283,9 +346,16 @@ def run_doctor(worktree: Path, harness: str, *, path_prepend: str = "") -> dict[
 
 
 def run_estimate(
-    worktree: Path, suite: str, model_spec: str, repeat: int, *, path_prepend: str = ""
+    worktree: Path,
+    suite: str,
+    model_spec: str,
+    repeat: int,
+    *,
+    path_prepend: str = "",
+    suites_home: Path | None = None,
 ) -> dict[str, Any]:
     """``vulcanbench estimate --json`` for one model and suite (list prices, bundled priors)."""
+    home = ["--suites-home", str(suites_home)] if suites_home is not None else []
     code, out, err = _run_cli(
         worktree,
         [
@@ -293,6 +363,7 @@ def run_estimate(
             "--json",
             "--suite",
             suite,
+            *home,
             "--model",
             model_spec,
             "--repeat",
@@ -383,13 +454,22 @@ def _check_form(form: SuiteForm) -> None:  # noqa: PLR0912
 
 
 def _level_argv(
-    form: SuiteForm, *, cli: Path, level: str, out_dir: Path, sandbox: str, retries_flag: bool
+    form: SuiteForm,
+    *,
+    cli: Path,
+    level: str,
+    out_dir: Path,
+    sandbox: str,
+    retries_flag: bool,
+    suites_home: Path | None = None,
 ) -> list[str]:
+    home = ["--suites-home", str(suites_home)] if suites_home is not None else []
     argv = [
         str(cli),
         "run",
         "--suite",
         form.suite,
+        *home,
         "--model",
         form.model,
         "--harness",
@@ -414,7 +494,7 @@ def _level_argv(
     return argv
 
 
-def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[str, Any]:  # noqa: PLR0912
+def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[str, Any]:  # noqa: PLR0912, PLR0915
     _check_form(form)
     wt_info = worktree_status(cfg, form.tag)
     wt = Path(wt_info["path"])
@@ -432,16 +512,37 @@ def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[
             422, f"{form.tag} has no frozen suite {form.suite!r} (tasks/<suite>/suite.lock.json)"
         )
     suite = suites[form.suite]
+    features = harness_features(wt)
+    custom = bool(suite.get("custom"))
+    if custom and not features["suites_home"]:
+        raise LaunchError(
+            422,
+            f"{form.tag} predates suites outside the checkout (its harness has no "
+            "--suites-home); pick a newer bench tag to run a custom suite",
+        )
+    suites_home = cfg.suites_home if custom else None
     name = sweep_name(form, today)
     out_root = cfg.harness_runs_dir / name
     sandbox = form.sandbox or SANDBOX_DEFAULTS[form.harness]
-    features = harness_features(wt)
     spec_model = model_spec(form.model, form.harness)
     path_prepend = str(Path(form.cli_bin_dir).expanduser()) if form.cli_bin_dir else ""
     doctor = run_doctor(wt, form.harness, path_prepend=path_prepend)
-    estimate = run_estimate(wt, form.suite, spec_model, form.repeat, path_prepend=path_prepend)
+    estimate = run_estimate(
+        wt, form.suite, spec_model, form.repeat, path_prepend=path_prepend, suites_home=suites_home
+    )
+    custom_fields: dict[str, Any] = {
+        "suite_custom": custom,
+        "suites_home": str(suites_home) if suites_home is not None else None,
+        "suite_lock_digest": suite.get("lock_digest"),
+        "suite_path": suite.get("path"),
+    }
 
     warnings: list[str] = []
+    if custom:
+        warnings.append(
+            f"custom suite from {suite['path']}: each level's run checks the suite against its "
+            "lock before any model call and refuses if a task changed since it was frozen"
+        )
     if estimate["status"] == "no_pricing":
         warnings.append(
             f"{form.tag} has no list price for {spec_model}: the model is not onboarded at this tag "
@@ -488,6 +589,7 @@ def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[
             out_dir=out_dir,
             sandbox=sandbox,
             retries_flag=features["max_infra_retries"],
+            suites_home=suites_home,
         )
         jobs.append(
             {
@@ -502,6 +604,7 @@ def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[
                 "billing": form.billing,
                 "suite": form.suite,
                 "suite_name": suite["name"],
+                **custom_fields,
                 "task_ids": list(suite["task_ids"]),
                 "n_tasks": suite["n_tasks"],
                 "effort": level,
@@ -537,6 +640,7 @@ def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[
         "billing": form.billing,
         "suite": form.suite,
         "suite_name": suite["name"],
+        **custom_fields,
         "n_tasks": suite["n_tasks"],
         "efforts": list(form.efforts),
         "repeat": form.repeat,
@@ -560,7 +664,15 @@ def build_suite_plan(cfg: RunnerConfig, form: SuiteForm, *, today: str) -> dict[
             "note": estimate.get("note"),
             "confidence": estimate.get("confidence"),
             "notes": estimate.get("notes") or [],
+            # per_level_usd is the estimate's recommended credit buffer (above
+            # the high end on purpose); the expected list-price cost is the mid.
             "per_level_usd": per_level_usd,
+            "per_level_mid_usd": estimate.get("mid_usd"),
+            "total_mid_usd": (
+                round(estimate["mid_usd"] * n_levels, 2)
+                if isinstance(estimate.get("mid_usd"), (int, float))
+                else None
+            ),
             "per_level_low_usd": estimate.get("low_usd"),
             "per_level_high_usd": estimate.get("high_usd"),
             "total_usd": round(per_level_usd * n_levels, 2) if per_level_usd is not None else None,
@@ -607,6 +719,10 @@ def validate_any(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
         return validate_suite_launch(cfg, spec)
     if kind == "prepare":
         return launch.validate_before_launch(cfg, spec)
+    if kind in ("author", "validate"):
+        from backend.runner import suites  # noqa: PLC0415 (suites imports this module)
+
+        return suites.validate_build_launch(cfg, spec)
     return ["unsupported kind"]
 
 
@@ -641,11 +757,42 @@ def validate_suite_launch(cfg: RunnerConfig, spec: dict[str, Any]) -> list[str]:
         problems.append("argv has no -o")
     if "--judges" in argv:
         problems.append("argv enables the judge ensemble")
+    problems.extend(_custom_suite_problems(cfg, spec, argv))
     for name in spec.get("env") or {}:
         problems.append(f"unexpected env override {name}")
     prepend = str(spec.get("path_prepend") or "")
     if prepend and not Path(prepend).is_dir():
         problems.append(f"CLI bin dir {prepend} is gone")
+    return problems
+
+
+def _custom_suite_problems(cfg: RunnerConfig, spec: dict[str, Any], argv: list[str]) -> list[str]:
+    """``--suites-home`` only for a custom suite, pointing at the configured home, lock unchanged."""
+    problems: list[str] = []
+    custom = bool(spec.get("suite_custom"))
+    if "--suites-home" in argv:
+        i = argv.index("--suites-home")
+        value = argv[i + 1] if i + 1 < len(argv) else ""
+        if not custom:
+            problems.append("argv has --suites-home for a built-in suite")
+        elif Path(value) != cfg.suites_home:
+            problems.append(f"--suites-home {value} is not the configured suites home")
+    elif custom:
+        problems.append("argv has no --suites-home for a custom suite")
+    if not custom:
+        return problems
+    suite_id = str(spec.get("suite") or "")
+    if not _SUITE_ID_RE.match(suite_id):
+        problems.append(f"custom suite id {suite_id!r} is not a suites-home id")
+        return problems
+    lock = read_json(cfg.suites_home / suite_id / "suite.lock.json")
+    if lock is None:
+        problems.append(f"custom suite {suite_id} has no suite.lock.json in {cfg.suites_home}")
+    elif lock_digest(lock) != spec.get("suite_lock_digest"):
+        problems.append(
+            f"custom suite {suite_id} was re-frozen or edited since this plan was built; "
+            "build a new plan"
+        )
     return problems
 
 

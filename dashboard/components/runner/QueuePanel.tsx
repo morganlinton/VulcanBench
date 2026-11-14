@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ConfirmBar } from "@/components/suites/ConfirmBar";
 import {
   fmtTime,
   runHref,
@@ -53,20 +54,22 @@ export function StopButton({
   label?: string;
 }) {
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queued = job.status === "queued";
+  const what = queued
+    ? `Remove ${job.name} from the queue?`
+    : job.status === "waiting"
+      ? `Stop ${job.name}? It is waiting out a quota window; nothing will continue.`
+      : `Stop ${job.name}? The running attempt is cancelled and its sandboxes are removed.`;
+  // Asks in the page (no native dialog), like the suite builder's steps.
   const act = async () => {
-    const what = queued
-      ? `Remove ${job.name} from the queue?`
-      : job.status === "waiting"
-        ? `Stop ${job.name}? It is waiting out a quota window; nothing will continue.`
-        : `Stop ${job.name}? The running attempt is cancelled and its sandboxes are removed.`;
-    if (!window.confirm(what)) return;
     setBusy(true);
     setError(null);
     try {
       if (queued) await runnerDelete(`/api/runner/jobs/${job.id}`);
       else await runnerPost(`/api/runner/jobs/${job.id}/stop`, { reason: "stopped from the GUI" });
+      setAsking(false);
       onDone?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -76,15 +79,25 @@ export function StopButton({
   };
   if (!["queued", "waiting", "preparing", "running"].includes(job.status)) return null;
   return (
-    <span className="inline-flex items-center gap-2">
-      <button
-        type="button"
-        onClick={act}
-        disabled={busy}
-        className="rounded-md border border-rose-500/40 px-2.5 py-1 text-xs text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
-      >
-        {queued ? "Remove" : label}
-      </button>
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {asking ? (
+        <ConfirmBar
+          message={what}
+          confirmLabel={queued ? "Remove" : "Stop"}
+          busy={busy}
+          onConfirm={act}
+          onCancel={() => { setAsking(false); setError(null); }}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setAsking(true)}
+          disabled={busy}
+          className="rounded-md border border-rose-500/40 px-2.5 py-1 text-xs text-rose-300 hover:bg-rose-500/10 disabled:opacity-50"
+        >
+          {queued ? "Remove" : label}
+        </button>
+      )}
       {error && <span className="text-xs text-rose-300">{error}</span>}
     </span>
   );

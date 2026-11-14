@@ -308,6 +308,23 @@ for re-screening, at most 32 for admission.
   re-queues such trials (at most three tries). Revisit trigger: if missing
   tools recur only while two trials overlap, go back to one trial at a
   time.
+- **The frozen-date trigger fired; the misses still count (for the owner's
+  review).** Terra's re-run of `finder-installer-cleanup` attempt 1 (with
+  its tools) moved every installer dated more than a month before 14
+  November 2026 to the Trash, including `Notion-3.4.1.dmg`, which is under
+  a month old by the Mac's clock (9 March 2026). Its closing message says
+  the menu bar showed 9 March and that it went by November anyway. That is
+  the second task Terra missed through the host date in its harness
+  context, so the revisit trigger above fired. The call: keep the frozen
+  guest date and keep counting these misses. The guest clock is on screen,
+  Terra saw it and chose the other date without asking, and Claude Code and
+  Codex Sol go by the guest clock on the same tasks, so this reads as a
+  judgment miss more than a harness defect. Changing every instruction now
+  would also split the n=3 trials across two wordings. The results note
+  and the cards' footnote name the date as the cause of these Terra misses.
+  Options for a later version, not taken now: hand the agent containers
+  the guest date (libfaketime or a pinned clock), or set the guest clock
+  to the run date and seed relative dates.
 
 ### Revisit triggers
 

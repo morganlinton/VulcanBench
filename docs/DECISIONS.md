@@ -322,8 +322,8 @@ for re-screening, at most 32 for admission.
   fix, for after this round (the run worktree stays pinned), is to have
   `vb_computer_mcp.py` answer MCP's `initialize` at once and connect to VNC
   on first use, or to give the server a longer startup timeout.
-- **The frozen-date trigger fired; the misses still count (for the owner's
-  review).** Terra's re-run of `finder-installer-cleanup` attempt 1 (with
+- **The frozen-date trigger fired; the misses still count (approved by the
+  owner in chat, 2026-11-14).** Terra's re-run of `finder-installer-cleanup` attempt 1 (with
   its tools) moved every installer dated more than a month before 14
   November 2026 to the Trash, including `Notion-3.4.1.dmg`, which is under
   a month old by the Mac's clock (9 March 2026). Its closing message says
@@ -338,7 +338,9 @@ for re-screening, at most 32 for admission.
   and the cards' footnote name the date as the cause of these Terra misses.
   Options for a later version, not taken now: hand the agent containers
   the guest date (libfaketime or a pinned clock), or set the guest clock
-  to the run date and seed relative dates.
+  to the run date and seed relative dates. Owner review, 2026-11-14: keep
+  the call. Misses caused by judging dates against the real date instead
+  of the Mac's clock keep counting as misses.
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

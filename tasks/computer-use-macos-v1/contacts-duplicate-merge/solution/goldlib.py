@@ -55,11 +55,22 @@ def start() -> None:
     B.start(None)
 
 
+def reveal_dock() -> None:
+    """Bring up an auto-hidden Dock (settings-it-checklist seeds auto-hide on):
+    touch the screen's bottom edge, then rest on the Dock row."""
+    B.move(TERMINAL_DOCK[0], 799)
+    time.sleep(1.5)
+    B.move(*TERMINAL_DOCK)
+    time.sleep(0.5)
+
+
 def open_terminal() -> None:
+    reveal_dock()
     B.click(*TERMINAL_DOCK, "left", 1)
     time.sleep(6)
     # Click again once it is running: a slow first launch left Finder in
     # front, and the Command-N meant for Terminal opened a Finder window.
+    reveal_dock()
     B.click(*TERMINAL_DOCK, "left", 1)
     time.sleep(3)
     B.key("cmd+n")  # a fresh window even if Terminal restored one

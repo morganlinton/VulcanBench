@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ComputerUse v1 reference-model gate runner (docs/COMPUTER_USE_CHARTER.md).
 #
-# usage: scripts/computer-use/run_gate.sh <claude-code|codex|claude> <task> [<task> ...]
+# usage: scripts/computer-use/run_gate.sh <claude-code|codex|codex-terra|claude> <task> [<task> ...]
 #        scripts/computer-use/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/computer-use/run_gate.sh <ref> [<task>]
 #
@@ -98,11 +98,12 @@ set -u
 if [ "${1:-}" = --refs ]; then
   echo '{"name": "claude-code", "agent": "claude-code", "auth": "subscription", "model": "pins.references[claude-code].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
   echo '{"name": "codex", "agent": "codex", "auth": "subscription", "model": "pins.references[codex].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
+  echo '{"name": "codex-terra", "agent": "codex", "auth": "subscription", "model": "pins.references[codex-terra].model in the suite.json (CU_GATE_MODEL overrides); same config and catalog rules as codex"}'
   echo '{"name": "claude", "agent": "computer-1", "auth": "api-key", "model": "pins.references[claude].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
-ref="${1:?usage: run_gate.sh <claude-code|codex|claude> <task> [<task> ...]}"; shift
+ref="${1:?usage: run_gate.sh <claude-code|codex|codex-terra|claude> <task> [<task> ...]}"; shift
 [ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "cu-gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 export PATH="$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -152,12 +153,14 @@ case "$ref" in
     [ -f "$envf" ] || { echo "cu-gate: $envf missing (one line CLAUDE_CODE_OAUTH_TOKEN=... from \`claude setup-token\`)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
-  codex)
+  codex|codex-terra)
+    # codex-terra: a second Codex row (GPT-6.1 Terra) with everything else as
+    # the codex row; its own ref keeps its job names and status files apart.
     agent=codex
-    model="${CU_GATE_MODEL:-$(pin codex model)}"
-    version="${CU_GATE_CODEX_VERSION:-$(pin codex version)}"
-    [ -n "$model" ] || { echo "cu-gate: no model: set CU_GATE_MODEL or pins.references[codex].model in $suite_json" >&2; exit 2; }
-    [ -n "$version" ] || { echo "cu-gate: no Codex version: pins.references[codex].version in $suite_json" >&2; exit 2; }
+    model="${CU_GATE_MODEL:-$(pin "$ref" model)}"
+    version="${CU_GATE_CODEX_VERSION:-$(pin "$ref" version)}"
+    [ -n "$model" ] || { echo "cu-gate: no model: set CU_GATE_MODEL or pins.references[$ref].model in $suite_json" >&2; exit 2; }
+    [ -n "$version" ] || { echo "cu-gate: no Codex version: pins.references[$ref].version in $suite_json" >&2; exit 2; }
     codex_cfg="$here/scripts/computer-use/codex-gate.toml"
     [ -f "$codex_cfg" ] || { echo "cu-gate: $codex_cfg missing" >&2; exit 2; }
     effort_label="${CU_GATE_EFFORT:-medium}"
@@ -184,7 +187,7 @@ case "$ref" in
     [ -f "$envf" ] || { echo "cu-gate: $envf missing (one line ANTHROPIC_API_KEY=...)" >&2; exit 2; }
     grep -q '^ANTHROPIC_API_KEY=.' "$envf" || { echo "cu-gate: $envf has no ANTHROPIC_API_KEY= line" >&2; exit 2; }
     set -a; . "$envf"; set +a ;;
-  *) echo "cu-gate: reference must be claude-code, codex or claude" >&2; exit 2 ;;
+  *) echo "cu-gate: reference must be claude-code, codex, codex-terra or claude" >&2; exit 2 ;;
 esac
 
 if [ "$condition" != pixels+zoom ] && [ "$agent" = computer-1 ]; then

@@ -64,6 +64,17 @@
     "tools": "mcp__computer__* only, called from Codex code mode's exec",
     "config": "scripts/computer-use/codex-gate.toml plus a one-model catalog built per gate invocation by scripts/computer-use/codex_catalog.py (apply_patch and subagent tools cleared)",
     "note": "Same subscription reference, config and locked catalog as the Linux suite; the MCP computer tools run with --backend vnc against the trial's macOS VM."
+   },
+   {
+    "name": "codex-terra",
+    "agent": "codex",
+    "model": "gpt-6.1-terra",
+    "version": "0.159.0",
+    "effort": "medium",
+    "auth": "subscription: the ChatGPT login's auth.json named by CODEX_AUTH_JSON_PATH in harbor's environment (CU_GATE_CODEX_AUTH, else ~/.config/vulcanbench/codex-gate/auth.json, else ~/.codex/auth.json), as scripts/frontier-v5/run_gate.sh",
+    "tools": "mcp__computer__* only, called from Codex code mode's exec",
+    "config": "scripts/computer-use/codex-gate.toml plus a one-model catalog built per gate invocation by scripts/computer-use/codex_catalog.py (apply_patch and subagent tools cleared)",
+    "note": "Third reference (owner request, 2026-11-13): the codex row with GPT-6.1 Terra in place of Sol; same Codex version, subscription login, config, locked catalog and MCP tools, on the same tasks and trial counts."
    }
   ]
  },

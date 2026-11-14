@@ -134,7 +134,7 @@ def summarise(
             if (trial / "result.json").is_file()
             else {}
         )
-        if ref == "codex":
+        if ref in ("codex", "codex-terra"):
             numbers = codex_numbers(trial, status.get("model"))
         else:
             res = last_result(trial / "agent" / "claude-code.txt")
@@ -176,12 +176,14 @@ REFERENCES = {
         "web, subagent and image tools off: scripts/computer-use/codex-gate.toml and the locked catalog)",
     },
 }
+REFERENCES["codex-terra"] = {**REFERENCES["codex"], "name": "codex-terra"}
 COST_NOTES = {
     "claude-code": "cost_usd is Claude Code's list-price estimate from its result record; "
     "subscription runs are not billed per call",
     "codex": "cost_usd is computed from the trajectory's token counts at harness/pricing.py list prices "
     "(cached input at the cached rate); subscription runs are not billed per call",
 }
+COST_NOTES["codex-terra"] = COST_NOTES["codex"]
 
 
 def fmt(values: list, key: str) -> str:
@@ -210,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     ap.add_argument("tasks", nargs="+")
     ap.add_argument("--suffix", default="", help="GATE_JOB_SUFFIX the jobs were launched with")
-    ap.add_argument("--ref", default="claude-code", choices=["claude-code", "codex"])
+    ap.add_argument("--ref", default="claude-code", choices=["claude-code", "codex", "codex-terra"])
     ap.add_argument("--jobs", default=str(Path.home() / "vulcanbench-gate" / "jobs"))
     ap.add_argument("--out", help="write trials.json here")
     ap.add_argument("--suite", default="tasks/computer-use-v1/suite.json")

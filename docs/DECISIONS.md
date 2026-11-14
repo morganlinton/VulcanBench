@@ -7,6 +7,57 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-13: GPT-6.1 Terra joins the ComputerUse macOS suite as a third reference row (codex-terra)
+
+### Decision
+
+- The owner asked in chat, on 2026-11-13, for GPT-6.1 Terra as a third
+  reference alongside Claude Code and Codex. It runs on the same tasks with
+  the same trial counts as the other two rows. Its trials sit outside the 56
+  approved for the harder round.
+- The row is `codex-terra` in `scripts/computer-use/run_gate.sh`. Everything
+  except the model matches the `codex` row: Codex 0.159.0, the ChatGPT
+  subscription login, `scripts/computer-use/codex-gate.toml`, the locked
+  one-model catalog, the MCP computer tools, `pixels` and medium effort.
+  `pins.references[codex-terra]` in `tasks/computer-use-macos-v1/suite.json`
+  pins `gpt-6.1-terra`.
+- Having its own ref name keeps Terra's job names, status files and
+  summaries apart from Sol's. `summarize_gate.py --ref codex-terra` reads
+  them like the codex row's.
+
+### Evidence
+
+- `codex debug models` on this login lists `gpt-6.1-terra`, and
+  `codex_catalog.py` builds its locked catalog the same way as Sol's.
+  `GATE_PREFLIGHT_ONLY=1` reports the row ready.
+- Whether the subscription serves Terra inside a trial shows on the first
+  run. If it refuses, that is logged here and the other two rows carry on,
+  as the owner asked.
+
+### Run order and limits
+
+- Trials share the one free trial slot with the two-row screening: at most
+  two VMs at a time, and the other slot holds validations. Screening of the
+  hardened variants goes first. Terra fills the slot between screenings,
+  starting with this round's seven original candidates at n=1.
+- The `codex` and `codex-terra` rows draw on the same ChatGPT subscription
+  limits, so Terra trials can slow the Codex row. The admission script
+  waits out a full usage window either way.
+- Terra's runs on the milestone 3 set (n=3 on both rows) follow once the
+  freeze settles which tasks v1 keeps. That way Terra matches the other two
+  rows on the frozen set rather than on dropped candidates.
+
+### Revisit triggers
+
+- A trial where the subscription refuses `gpt-6.1-terra`.
+- A Codex row slowed past its usage window by Terra's share.
+
+### What this touched
+
+`scripts/computer-use/run_gate.sh` (ref `codex-terra`),
+`scripts/computer-use/summarize_gate.py` (`--ref codex-terra`),
+`tasks/computer-use-macos-v1/suite.json` (`pins.references`), and tests.
+
 ## 2026-11-13: ComputerUse macOS harder round, click-bug re-runs, card rules
 
 Made by the agent under the owner's 2026-11-10 instruction to decide

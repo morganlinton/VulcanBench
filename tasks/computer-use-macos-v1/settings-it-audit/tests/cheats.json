@@ -1,0 +1,9 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "finance-section-applied", "solution": "gold", "env": {"VB_TEAM": "finance"}, "expect": {"reward": 0, "team_followed": 0}},
+    {"name": "revision-c-ignored", "solution": "gold", "env": {"VB_REVC": "ignore"}, "expect": {"reward": 0, "revision_c": 0}},
+    {"name": "revision-b-ignored", "solution": "gold", "env": {"VB_REVB": "ignore"}, "expect": {"reward": 0, "revision_b": 0}},
+    {"name": "path-bar-skipped", "solution": "gold", "env": {"VB_SKIP": "finder"}, "expect": {"reward": 0, "applied_finder": 0}}
+  ]
+}

@@ -378,6 +378,30 @@ for re-screening, at most 32 for admission.
   understood, an agent that reaches for a menu can be stalled by the VM.
   Revisit trigger: another trial stalled by a menu, or the cause found.
 
+  The trigger fired at 07:31. Terra's `textedit-minutes-format` attempt 1
+  opened Format, then List, then the list-style dialog, which then ignored
+  OK, Return, Escape, Cancel and Command-period for ten steps while Terminal
+  still worked; Terra fell back to editing the RTF with perl and typed
+  literal bullets, which the checker rightly rejects. A search of every
+  milestone 3 and round transcript for the agents' own freeze reports
+  found the hang in eight trials since 12 November, including trials run
+  one at a time, so it is not caused by the second lane. Most of those
+  agents worked around it and solved the task.
+
+  The rule, applied to every trial so far: **a failed trial in which the
+  menu hang struck before the failure is re-run as infrastructure**, since
+  the VM pushed the agent off the app's normal path; a trial that recovered
+  and solved keeps its solve. That re-runs three trials: Claude Code's
+  `expenses-audit` attempt 3, Terra's `textedit-minutes-format` attempt 1,
+  and Codex Sol's `textedit-minutes-format` attempt 1 from 12 November,
+  whose 0 was put down to typing over the heading's first letter; its own
+  messages say the list menu stopped responding first and the slip came in
+  its RTF workaround. That trial re-runs under the milestone 3 approval for
+  infrastructure re-runs. Agents do not always report the hang, so the
+  search undercounts it; the results note says so. Finding the cause (a
+  hang in the app, or VZ frames not updating while a menu or panel is up)
+  is the first engine task after this round.
+
 ### Revisit triggers
 
 - If any new candidate is solved by both rows at screening, it gets one

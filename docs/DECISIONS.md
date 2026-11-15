@@ -402,6 +402,29 @@ for re-screening, at most 32 for admission.
   saved; the cause is inferred from the final state, not confirmed from
   screenshots), and `calendar-free-slots` attempt 3 (the date mismatch:
   Terra asked which week to use and scheduled nothing).
+- **The TextEdit save failure is a coin flip in the task, not a clean
+  hang; re-runs are capped (for the owner's review).** Terra's
+  `textedit-minutes-format` attempt 3 failed the same way on its re-run
+  (2026-11-14, 23:56), so the evidence was checked again. Two corrections
+  to the bullets above. First, the "TextEdit failed to quit and is not
+  responding" shutdown screenshot is present in every run of this task on
+  all three rows, solved runs included, so it does not show that a given
+  run hung. Second, the failed and solved Terra runs make the same actions
+  in the same order (format through the toolbar, pick a list style from
+  the pop-up, press Command-S within 3 to 6 seconds). In the solved runs
+  the save lands; in the failed runs it does not, and the last screenshot
+  Terra saw still read "Edited" in the title bar while it reported the
+  file saved. So two things are true at once: TextEdit ends up not
+  responding in this task's path on every run, and whether the save beats
+  that is not in the agent's control; and Terra did not notice a visibly
+  unsaved document. Because the outcome turns on the environment, the
+  failed runs stay set aside as infrastructure, but re-running until a
+  pass would bias the cell upward, so this is the last re-run: if it fails
+  the same way, attempt 3 is recorded as no valid trial and the cell is
+  reported at n=2. The task is flagged for the freeze decision (keep with a
+  caveat, or hold out until the pop-up hang is fixed in the engine), and
+  the results note reports the count of set-aside runs per row for this
+  task (Terra 4, Codex 1, Claude Code 0 so far).
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

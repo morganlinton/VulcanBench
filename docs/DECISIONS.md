@@ -341,6 +341,19 @@ for re-screening, at most 32 for admission.
   to the run date and seed relative dates. Owner review, 2026-11-14: keep
   the call. Misses caused by judging dates against the real date instead
   of the Mac's clock keep counting as misses.
+- **The host disk filled on 2026-11-14 and stopped both lanes for ten
+  hours (for the owner's review).** At 08:21 the disk had no free space,
+  Docker's internal disk took write errors, and Docker went down. Both
+  lanes hung until 18:10. Local Time Machine snapshots were holding the
+  blocks of every deleted trial VM, so deleting five unused task images
+  freed nothing until the owner approved deleting the three snapshots
+  (168 GB came back). No finished trial is affected: the last four to end
+  before 08:21 all solved, Codex's `settings-it-audit` attempt 3 failed on
+  the outage and is set aside as infrastructure, and Terra's
+  `settings-workday-setup` attempt 2 hung in it and is set aside the same
+  way. Both re-run. Docker restarted clean with its images intact. The
+  scratch lane scripts now wait when the disk has under 60 GB free.
+  Follow-up for the engine: a free-space preflight in `run_gate.sh`.
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

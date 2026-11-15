@@ -373,6 +373,17 @@ for re-screening, at most 32 for admission.
   gave up without saving a packet. The hang came before the failure, so
   under the menu-hang rule the trial is set aside as infrastructure and
   re-run.
+- **A fifth hang re-run, and more counted Terra misses (for the owner's
+  review).** Terra's `textedit-minutes-format` attempt 2 formatted the
+  document correctly on screen, but TextEdit had stopped responding: the
+  save never landed, the window still read "Edited", and shutdown showed
+  "TextEdit failed to quit and is not responding". Terra reported nothing
+  wrong. The hang came before the failure, so the trial is set aside as
+  infrastructure and re-run. Counted the same evening: Terra's
+  `calendar-trip-timezones` attempt 3 and `calendar-free-slots` attempt 2
+  (both the date mismatch, now on three tasks), `calendar-workshop-update`
+  attempt 3 (the fourth session never saved, the open-popover pattern),
+  and `contacts-crm-audit` attempt 2 (job changes not all applied).
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

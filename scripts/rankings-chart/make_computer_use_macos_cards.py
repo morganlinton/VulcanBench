@@ -102,9 +102,8 @@ TASKS = [
     ),
     Task("preview-contract-packet", "Assemble a contract packet from three PDFs", "PREVIEW", A3),
     Task("finder-receipts-rename", "Rename and file ten scanned receipts", "FINDER + PDFS", A3),
-    Task(
-        "textedit-minutes-format", "Format meeting minutes: heading, bold, bullets", "TEXTEDIT", A3
-    ),
+    # textedit-minutes-format is held out of the scored set (owner, 2026-11-15):
+    # the save outcome turns on a TextEdit pop-up hang. See docs/DECISIONS.md.
     Task(
         "invoices-to-reminders",
         "Turn unpaid invoice PDFs into dated reminders",

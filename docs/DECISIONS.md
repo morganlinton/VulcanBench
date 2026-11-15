@@ -428,6 +428,18 @@ for re-screening, at most 32 for admission.
   (2026-11-15, 00:09) saved and solved, so Terra's attempt 3 is recorded
   as a solve and the cell stays at n=3, with the set-aside count above
   reported beside it.
+- **`textedit-minutes-format` is held out of the scored set (decided by
+  the owner in chat, 2026-11-15).** The save outcome in this task turns on
+  the TextEdit pop-up hang, not on the agent, and the runs set aside for
+  it are uneven across rows (Terra 4, Codex 1, Claude Code 0), so scoring
+  it would favour whichever row happened to dodge the hang. The task is
+  removed from `suite.json` (25 tasks) and from the cards' task list, and
+  its trials do not count toward any row's score. The task directory and
+  all of its trial results stay. The results note keeps it as a known
+  flaky task, with the per-row set-aside counts and the observation that
+  Terra reported the file saved while the title bar still read "Edited".
+  The hang is to be fixed in the engine before the next round, and the
+  task can return to the scored set once it is.
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

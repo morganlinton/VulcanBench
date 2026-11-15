@@ -354,6 +354,19 @@ for re-screening, at most 32 for admission.
   way. Both re-run. Docker restarted clean with its images intact. The
   scratch lane scripts now wait when the disk has under 60 GB free.
   Follow-up for the engine: a free-space preflight in `run_gate.sh`.
+- **Two more misses after the outage, both counted (for the owner's
+  review).** Terra's `notes-calls-to-calendar` attempt 2 left the last
+  event in Calendar's open popover again, so it was never saved; that
+  falls under the popover call below. Codex's `settings-it-audit` attempt
+  3 set the clock with `defaults write com.apple.menuextra.clock
+  Show24Hour` in Terminal, which is not the setting the 24-hour switch in
+  System Settings writes (`AppleICUForce24HourTime` stayed false), and
+  then reported the clock as done. The shutdown was forced, but nothing
+  in the session shows the menu hang before the miss, so it is not an
+  infrastructure re-run. Space freed the same evening with the owner's
+  approval: the Tart download cache, the Docker build cache (41.6 GB),
+  dangling images and five finished-trial images. Images from the
+  Frontier v5 work were left alone.
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

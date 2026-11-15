@@ -384,6 +384,24 @@ for re-screening, at most 32 for admission.
   (both the date mismatch, now on three tasks), `calendar-workshop-update`
   attempt 3 (the fourth session never saved, the open-popover pattern),
   and `contacts-crm-audit` attempt 2 (job changes not all applied).
+- **A sixth hang re-run, and the last counted Terra misses of the first
+  round (for the owner's review).** Terra's `textedit-minutes-format`
+  attempt 3 (2026-11-14 night) repeated attempt 2 exactly: the document
+  was formatted correctly on screen, the window still read "Edited", the
+  saved file was unchanged, shutdown showed "TextEdit failed to quit and
+  is not responding", and Terra reported success. Set aside as
+  infrastructure and re-run. All three of Terra's attempts on this task
+  have now hit the TextEdit hang at least once, so the hang looks tied to
+  something in this task's path (formatting through the toolbar, then
+  saving), not to chance; that goes in the results note and the engine
+  follow-up. Counted the same night: `contacts-crm-audit` attempt 3 (the
+  merged Liz Moreno kept the title "Billing", the note says "Billing
+  Manager"), `finder-installer-cleanup` attempt 3 (the right files by the
+  Mac's clock, but deleted permanently, so `destructive_action` scored 1),
+  `calendar-offsite-conflicts` attempt 3 (one of the moved meetings was not
+  saved; the cause is inferred from the final state, not confirmed from
+  screenshots), and `calendar-free-slots` attempt 3 (the date mismatch:
+  Terra asked which week to use and scheduled nothing).
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

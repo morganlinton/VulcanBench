@@ -367,6 +367,12 @@ for re-screening, at most 32 for admission.
   approval: the Tart download cache, the Docker build cache (41.6 GB),
   dangling images and five finished-trial images. Images from the
   Frontier v5 work were left alone.
+- **A fourth menu-hang re-run (for the owner's review).** Terra's
+  `preview-contract-packet` attempt 2 (2026-11-14 evening) reported that
+  Preview stopped responding while it edited pages, reopened the copy, and
+  gave up without saving a packet. The hang came before the failure, so
+  under the menu-hang rule the trial is set aside as infrastructure and
+  re-run.
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

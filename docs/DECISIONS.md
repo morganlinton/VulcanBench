@@ -424,7 +424,10 @@ for re-screening, at most 32 for admission.
   reported at n=2. The task is flagged for the freeze decision (keep with a
   caveat, or hold out until the pop-up hang is fixed in the engine), and
   the results note reports the count of set-aside runs per row for this
-  task (Terra 4, Codex 1, Claude Code 0 so far).
+  task (Terra 4, Codex 1, Claude Code 0 so far). Outcome: the last re-run
+  (2026-11-15, 00:09) saved and solved, so Terra's attempt 3 is recorded
+  as a solve and the cell stays at n=3, with the set-aside count above
+  reported beside it.
 - **An event left in Calendar's open popover is not saved, and the miss
   counts.** Terra's `notes-calls-to-calendar` attempt 1 converted all five
   calls correctly but scored 0: the last one (Marcus Reed, 16 March) was on

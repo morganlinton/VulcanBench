@@ -86,9 +86,13 @@ quota was used; the replays below run through the oracle path.
   been slowed by it, which the results note says. (2) The held-out
   TextEdit image was fixed in place (backup kept as
   `vbmac-task-textedit-minutes-format-prefix`) because no scored trial
-  uses it. Whether to bring `textedit-minutes-format` back is a scoring
-  change and stays with the owner; the base and all task images are
-  rebuilt before the next round.
+  uses it. The base and all task images are rebuilt before the next
+  round.
+- **`textedit-minutes-format` returns to the scored set in the next round
+  (decided by the owner in chat, 2026-11-16).** It stays held out of v1's
+  current round, whose trials ran on the unfixed images. From the next
+  round it is scored again on images rebuilt with the keychain fix, with
+  fresh trials on every row; the held-out trials are not reused.
 
 ## 2026-11-13: GPT-6.1 Terra joins the ComputerUse macOS suite as a third reference row (codex-terra)
 

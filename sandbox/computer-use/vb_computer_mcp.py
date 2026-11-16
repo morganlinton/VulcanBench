@@ -37,18 +37,21 @@ VB_INPUT_LOG (default /var/lib/vbmac/input.log) as the ui_path evidence.
 from __future__ import annotations
 
 import argparse
-import io
-import json
-import os
-import subprocess
-import sys
-import threading
 import time
-import urllib.request
-from pathlib import Path
-from typing import ClassVar
 
-from mcp.server.mcpserver import Image, MCPServer
+T_START = time.time()  # before the heavy imports, so the startup log shows their cost
+
+import io  # noqa: E402
+import json  # noqa: E402
+import os  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+import threading  # noqa: E402
+import urllib.request  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import ClassVar  # noqa: E402
+
+from mcp.server.mcpserver import Image, MCPServer  # noqa: E402
 
 DISPLAY = ":1"
 CONDITIONS = ("pixels+zoom", "pixels", "pixels-lowres")
@@ -116,8 +119,23 @@ server = MCPServer(
 )
 
 
+# Agent CLIs do not keep an MCP server's stderr, so with the vnc backend the
+# diagnostics also go to a file under /var/lib/vbmac, which harbor collects
+# into the trial's artifacts. A trial whose agent never saw the computer
+# tools then shows whether the server started, and how long it took.
+MCP_LOG = os.environ.get("VB_MCP_LOG", "/var/lib/vbmac/mcp.log" if BACKEND_NAME == "vnc" else "")
+
+
 def log(msg: str) -> None:
-    print(f"vb_computer_mcp: {msg}", file=sys.stderr, flush=True)
+    line = f"vb_computer_mcp: {msg}"
+    print(line, file=sys.stderr, flush=True)
+    if MCP_LOG:
+        try:
+            Path(MCP_LOG).parent.mkdir(parents=True, exist_ok=True)
+            with open(MCP_LOG, "a") as f:
+                f.write(f"{time.time():.3f} pid={os.getpid()} {msg}\n")
+        except OSError:
+            pass
 
 
 def run(argv: list[str], *, timeout: float = 30.0) -> subprocess.CompletedProcess[bytes]:
@@ -651,7 +669,7 @@ def main() -> None:
     args = ap.parse_args()
     log(
         f"backend {BACKEND_NAME}, condition {CONDITION}: screenshots {IMG_W}x{IMG_H}, "
-        f"zoom {'on' if ZOOM_ENABLED else 'off'}"
+        f"zoom {'on' if ZOOM_ENABLED else 'off'}; imports took {time.time() - T_START:.2f} s"
     )
     if BACKEND_NAME == "vnc":
         # Answer MCP at once and reach the VM in the background: an agent CLI
@@ -660,7 +678,11 @@ def main() -> None:
         threading.Thread(target=BACKEND.start, args=(args.start_url,), daemon=True).start()
     else:
         BACKEND.start(args.start_url)
-    server.run(transport="stdio")
+    log("serving MCP on stdio")
+    try:
+        server.run(transport="stdio")
+    finally:
+        log("MCP stdio closed")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,89 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-15: ComputerUse macOS engine fixes while both subscriptions reset
+
+Made by the agent under the owner's 2026-11-10 instruction to decide
+reversible calls and log them; marked for the owner's review. The owner
+asked for the engine fixes on 2026-11-15 while the Claude and ChatGPT
+weekly windows reset (Wednesday 18 November). No trial ran and no model
+quota was used; the replays below run through the oracle path.
+
+### Decision
+
+- **A free-space check before a macOS trial.** `run_gate.sh` refuses to
+  start below `GATE_MIN_FREE_GB` (default 60) free on the volume that
+  holds Tart's VMs. The 2026-11-14 disk-full outage took Docker down
+  mid-trial and hung both lanes for ten hours; the lanes' own guard was a
+  scratch script. Tested in `tests/test_computer_use_gate_script.py`.
+- **The MCP computer server logs its startup to a collected file.** The
+  planned fix for Codex trials that lost their computer tools (answer MCP
+  at once and connect to the VM in the background) was already in place
+  at the run pin (8feecf5e), so it did not prevent the three missing-tool
+  trials on 2026-11-14. The server's imports take 0.4 to 0.7 s in the
+  agent image, well inside Codex's startup timeout when idle, and no log
+  in those trials says why the server was missing: agent CLIs drop an MCP
+  server's stderr. With the vnc backend the server now also writes its
+  diagnostics, with import time and when it starts serving, to
+  `/var/lib/vbmac/mcp.log`, which harbor already collects into each
+  trial's artifacts. The next missing-tool trial will show whether the
+  server started at all. A per-server startup timeout is not settable
+  through harbor 0.24 (its codex agent rewrites each task MCP server as
+  only `command` and `args`). The gate's missing-tool guard stays the
+  safety net. Revisit trigger: the next missing-tool trial's `mcp.log`.
+- **Shutdown quits only apps that are running.** The shutdown step quit
+  each scriptable app with `tell application "<app>" to quit` guarded by
+  an AppleScript `is running` test. That still launched apps the agent
+  never opened: in Terra's `calendar-workshop-update` attempt 1 the
+  shutdown screenshot shows "TextEdit failed to quit and is not
+  responding" with no TextEdit window on screen. The check is now a shell
+  `pgrep -x` before each `osascript`. This changes nothing the agent did;
+  it removes a spurious stuck shutdown in trials where the agent never
+  opened the app. Where the app was open, as in every
+  `textedit-minutes-format` run, the hang was real (see the TextEdit
+  bullet below).
+- **`ui_path` on settings tasks is unchanged in v1 (for the owner's
+  decision).** `ui_path` is 1 when the MCP server logged any click or
+  drag; it does not detect Terminal. Two solved, scored trials set some
+  preferences with `defaults write` in Terminal: Claude Code's
+  `settings-workday-setup` (pilot attempt) and Codex Sol's
+  `settings-it-audit` attempt 2. The charter treats writing an app's store
+  from Terminal as a cheat probe because it usually leaves app-inconsistent
+  state, but a preference written with `defaults` is what System Settings
+  writes, and both trials' end states passed every other check. Making
+  `ui_path` fail on Terminal use (for example from the shell history in
+  the export) would turn those two solves into misses on two rows, which
+  changes v1's scoring, so it is left to the owner: keep `defaults` as an
+  allowed route and rename the sub-metric to what it measures, or forbid
+  it from the next round with a detector and rescore.
+- **The TextEdit hang is fixed in the base config; the current round's
+  images are left as they are.** Root cause: `base-config.sh` changed the
+  guest password and deleted `login.keychain-db`, but left the
+  data-protection keychain (the per-host UUID folder under
+  `~/Library/Keychains`), still sealed with the old password. From every
+  boot the guest's `ScopedBookmarkAgent` spins in `_migrateAgentKey`, and
+  anything that needs a security-scoped bookmark blocks on it. In a
+  sampled hung TextEdit the main thread waits in `NSPersistentUIManager
+  flushAllChanges` on a queue blocked in `syncMessageToScopedBookmarksAgent`;
+  on a throwaway clone, `open -a TextEdit <file>` blocked for three hours in
+  a LaunchServices remote open. After removing the folder and rebooting
+  (macOS recreates it under the current password), the agent was idle,
+  `open` returned, and the task's UI-driven gold passed 5 of 5 runs, up from
+  0 of 6 replays on the unfixed image. This corrects the 2026-11-14 and
+  2026-11-15 TextEdit bullets: the hang is an environment fault present in
+  every boot of every image built from this base, not a coin flip in the
+  task. `base-config.sh` now removes the UUID folder as well. Two calls,
+  both reversible: (1) the scored task images are not rebuilt before
+  Claude Code's remaining 9 trials, so all three rows finish the round on
+  the same environment; the fault was present for every row's trials, and
+  apps other than TextEdit that open documents (Preview, Notes) may have
+  been slowed by it, which the results note says. (2) The held-out
+  TextEdit image was fixed in place (backup kept as
+  `vbmac-task-textedit-minutes-format-prefix`) because no scored trial
+  uses it. Whether to bring `textedit-minutes-format` back is a scoring
+  change and stays with the owner; the base and all task images are
+  rebuilt before the next round.
+
 ## 2026-11-13: GPT-6.1 Terra joins the ComputerUse macOS suite as a third reference row (codex-terra)
 
 ### Decision

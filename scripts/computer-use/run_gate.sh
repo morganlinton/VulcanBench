@@ -230,6 +230,14 @@ preflight() { # host checks; prints one problem per line, returns 1 on any
   docker image inspect "$IMAGE" >/dev/null 2>&1 || { echo "cu-gate: $IMAGE not built (make sandbox-image-computer-use$( [ "$macos" = 1 ] && echo -macos))" >&2; rc=1; }
   if [ "$macos" = 1 ]; then
     command -v tart >/dev/null || { echo "cu-gate: tart not found (brew install openai/tools/tart)" >&2; rc=1; }
+    # A trial clones a VM and grows it as the agent works, and a full disk
+    # (2026-11-14) took Docker down mid-trial and hung every lane. Refuse to
+    # start below GATE_MIN_FREE_GB on the volume that holds Tart's VMs.
+    local free_gb min_gb="${GATE_MIN_FREE_GB:-60}"
+    free_gb=$(df -Pk "${TART_HOME:-$HOME/.tart}" 2>/dev/null | awk 'NR==2{printf "%d", $4/1048576}')
+    if [ -n "$free_gb" ] && [ "$free_gb" -lt "$min_gb" ]; then
+      echo "cu-gate: ${free_gb} GB free for Tart VMs, under GATE_MIN_FREE_GB=${min_gb}" >&2; rc=1
+    fi
   fi
   if [ "$agent" = codex ] && [ -z "${CU_GATE_CODEX_CATALOG_SOURCE:-}" ]; then
     command -v codex >/dev/null || { echo "cu-gate: no codex CLI on PATH (needed for \`codex debug models\`; or set CU_GATE_CODEX_CATALOG_SOURCE)" >&2; rc=1; }

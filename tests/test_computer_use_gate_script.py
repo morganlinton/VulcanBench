@@ -75,12 +75,23 @@ def trial(i, reward, log='{"turn": 1}\n', logname="computer-1.txt"):
         json.dump({"reward": reward, "guards": 1}, fh)
     with open(os.path.join(td, "agent", logname), "w") as fh:
         fh.write(log)
+    if mode != "no-tools":
+        # The gate's missing-tool guard looks for the computer tools in the
+        # agent's tool list: Claude Code's init event, Codex's session rollout.
+        with open(os.path.join(td, "agent", "claude-code.txt"), "a") as fh:
+            fh.write('{"type":"system","subtype":"init","tools":["mcp__computer__screenshot"]}\n')
+        sess = os.path.join(td, "agent", "sessions", "2026", "11", "06")
+        os.makedirs(sess, exist_ok=True)
+        with open(os.path.join(sess, "rollout-2026-11-06T12-00-00-x.jsonl"), "w") as fh:
+            fh.write('{"type":"session_meta","tools":["mcp__computer__screenshot"]}\n')
     with open(os.path.join(td, "result.json"), "w") as fh:
         json.dump({"started_at": "2026-11-06T12:00:00", "finished_at": "2026-11-06T12:01:00"}, fh)
 
 if mode == "solve3":
     for i in range(int(args[args.index("-k") + 1])):
         trial(i, 1)
+elif mode == "no-tools":
+    trial(0, 0)
 elif mode == "infra":
     trial(0, 0, log='{"error": {"type": "authentication_error"}}\n')
 elif mode == "codex-mcp":
@@ -331,6 +342,14 @@ def test_infrastructure_failure_stops_the_run(gate: Gate) -> None:
     assert st["phase"] == "infra_failed" and str(st["stop_reason"]).startswith("infra:")
 
 
+def test_trial_without_the_computer_tools_is_an_infrastructure_stop(gate: Gate) -> None:
+    r = gate.run("claude-code", gate.task, FAKE_HARBOR_MODE="no-tools")
+    assert r.returncode != 0, r.stdout + r.stderr
+    st = gate.status(f"cu-claude-code-{gate.task}")
+    assert st["phase"] == "infra_failed"
+    assert str(st["stop_reason"]).startswith("no-computer-tools:")
+
+
 def test_claude_code_run_uses_subscription_auth_and_mcp_only(gate: Gate) -> None:
     r = gate.run("claude-code", gate.task)
     assert r.returncode == 0, r.stdout + r.stderr
@@ -477,3 +496,37 @@ def test_codex_unknown_model_and_missing_auth_are_refused(gate: Gate) -> None:
     r = gate.run("codex", gate.task)
     assert r.returncode == 2 and "codex login" in r.stderr
     assert not (gate.out / "jobs").exists() or not list((gate.out / "jobs").iterdir())
+
+
+def _macos_suite(gate: Gate) -> None:
+    src = gate.root / "tasks" / "computer-use-v1"
+    shutil.copytree(src, gate.root / "tasks" / "computer-use-macos-v1")
+    tart = gate.bin / "tart"
+    tart.write_text("#!/bin/sh\nexit 0\n")
+    tart.chmod(0o755)
+    (gate.home / ".tart").mkdir()
+
+
+def test_macos_preflight_refuses_when_the_tart_volume_is_low(gate: Gate) -> None:
+    _macos_suite(gate)
+    r = gate.run(
+        "claude",
+        gate.task,
+        CU_GATE_SUITE="computer-use-macos-v1",
+        GATE_PREFLIGHT_ONLY="1",
+        GATE_MIN_FREE_GB="100000000",
+    )
+    assert r.returncode == 2 and "GATE_MIN_FREE_GB=100000000" in r.stderr, r.stderr
+    assert not (gate.out / "jobs").exists() or not list((gate.out / "jobs").iterdir())
+
+
+def test_macos_preflight_passes_with_room_on_the_tart_volume(gate: Gate) -> None:
+    _macos_suite(gate)
+    r = gate.run(
+        "claude",
+        gate.task,
+        CU_GATE_SUITE="computer-use-macos-v1",
+        GATE_PREFLIGHT_ONLY="1",
+        GATE_MIN_FREE_GB="0",
+    )
+    assert "GATE_MIN_FREE_GB" not in r.stderr, r.stderr

@@ -7,6 +7,44 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-17: ComputerUse macOS, Claude Code's last nine trials after the folder move
+
+Made by the agent under the owner's 2026-11-10 instruction to decide
+reversible calls and log them; marked for the owner's review. The owner
+approved the nine trials in chat on 2026-11-17.
+
+### Decision
+
+- **Run pin: a local tag of 7f5af899,
+  `bench/2026-11-17-cu-macos-claude-final`.** Between Terra's main pin
+  (ea05428d) and 7f5af899 nothing changed in `harness/`, `suite.json` or
+  the seven tasks still to run. The newer commit adds the free-space
+  check, the missing-tool guard and the `pgrep` shutdown fix, none of
+  which touches what an agent sees or how a trial is graded. The task VMs
+  and the `cu-mac` image (built 2026-11-13) are the ones every other trial
+  used; nothing was rebuilt. The tag stays local.
+- **Job names carry the attempt number.** Each trial is its own job with
+  `GATE_ATTEMPTS=1` and `GATE_JOB_SUFFIX=-a<N>`, for example
+  `cu-claude-code-contacts-crm-audit-pixels-a2`. The nine are expenses-audit
+  3, settings-it-audit 3, contacts-crm-audit 2 and 3,
+  calendar-trip-timezones 3, calendar-workshop-update 3,
+  invoices-bank-notice 2 and 3, reminders-clear-completed 3.
+- **The trials wait for the weekly reset.** The first probe, at 13:44 on
+  2026-11-17, read the seven-day window at 0.81 with status
+  `allowed_warning`, and the gate refused. No trial started. The queue
+  starts at 07:10 on 2026-11-18, after the 07:00 reset, without
+  `GATE_USAGE_OVERRIDE`.
+- **Gate bug, for the next round (not in the pin).** `usage_preflight`
+  refuses any status other than `allowed`, so `allowed_warning` under
+  `GATE_USAGE_MAX` is refused with a message that says the window is
+  above the cap. It should start below the cap and warn. Left as is in
+  the pinned run; fix on the engine branch.
+- **The earlier trial records are gone.** `~/vulcanbench-gate` (status
+  files, harbor job directories, logs) did not survive the move off
+  iCloud and the reboot, and the owner has no copy. The draft results
+  note's tables are the only record of the other trials. The new trials
+  write to a fresh `~/vulcanbench-gate`.
+
 ## 2026-11-15: ComputerUse macOS engine fixes while both subscriptions reset
 
 Made by the agent under the owner's 2026-11-10 instruction to decide

@@ -1639,6 +1639,43 @@ Protocol id `code-quality-maintenance-v3.30.5`; run directory
   re-read before every stage, with the earlier host's recorded prefix moved
   to the repository root.
 
+## Amendment v3.31, November 18, 2026: GPT-6.2 Sol, judged by Muse Spark 1.3 and Grok 4.6
+
+The v3.30 protocol on a new population. Nothing in the rubric, controls,
+quirk keys, gates, repeats, seed, weights, judge settings or Cursor pin
+changes. Protocol id `code-quality-maintenance-v3.31`; run directory
+`runs-code-quality-maintenance-v3.31`; runner
+`harness/maintenance_review_v331.py`, derived from the v3.30 runner.
+Population record: `docs/results/swe-v4-gpt62-sol-2026-11/comparison.json`,
+built by `scripts/cii-v4-board/build_gpt62sol_population.py`.
+
+- Population: the November 2026 GPT-6.2 Sol sweep of Frontier v4
+  (`gpt-6.2-sol`) through Codex CLI 0.166.0 on the ChatGPT subscription
+  (solver `codex:gpt-6.2-sol`), Low to Max (Extra high is Codex's `xhigh`),
+  one attempt per task and level, 115 runs, from
+  `bench/2026-11-17-gpt62-sol-frontier-v4`, so task hashes match the suite
+  lock and no bridge is used. No run timed out and none ended with an empty
+  patch, so every cell freezes at 23.
+- Judges: Muse Spark 1.3 and Grok 4.6, the pair behind the Claude Opus 5.5
+  (v3.15), GPT-6.1 Sol (v3.18) and GPT-6.1 Terra (v3.29) columns. Both are
+  neutral for an OpenAI submission (owner choice in chat, November 18) and
+  retake the exam under v3.31 before any counted call. GPT-6.1 Sol, the
+  second seat in v3.27, v3.28 and v3.30.2 onward, is from the submission's
+  own lab and does not sit.
+- Grok 4.6 failed the v3.30 exam (gate `g14_pair_2_1`). v3.31 is a new
+  freeze, so Grok sits its exam afresh. If it fails again, Muse alone
+  publishes under the single-panel rule and the failure is disclosed; a
+  replacement seat is the owner's call.
+- Cursor: pinned to `2026.10.01-e373342` and the digest v3.24 recorded, as in
+  v3.29 and v3.30. Cursor has since updated its shared launcher to
+  `2026.11.05-86047df`; the round judges through the pinned version's own
+  launcher and re-checks its digest before every stage.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the level two steps up (wrapping), as in v3.29.
+- Comparability: a GPT-6.2 Sol score is a Muse Spark 1.3 and Grok 4.6 mean,
+  the same panel as the GPT-6.1 Sol, GPT-6.1 Terra and Claude Opus 5.5
+  columns.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,

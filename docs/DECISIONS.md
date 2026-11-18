@@ -7,6 +7,35 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-18: GPT-6.2 Sol's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.31)
+
+### Decision
+
+GPT-6.2 Sol's 115 Frontier v4 runs are judged for Code quality under
+protocol v3.31 (the v3.30 protocol on a new population) by Muse Spark 1.3
+and Grok 4.6. Owner choice in chat, 2026-11-18, over Muse and GPT-6.1 Sol:
+it is the panel behind the GPT-6.1 Sol, GPT-6.1 Terra and Claude Opus 5.5
+columns, and it keeps an OpenAI model from grading an OpenAI submission.
+
+Both judges retake the exam before any counted call. Grok failed the v3.30
+exam on 2026-11-10; if it fails v3.31 too, Muse alone publishes under the
+single-panel rule, the failure is disclosed, and any replacement seat is
+the owner's call. The round runs from a run worktree pinned to its own
+bench tag; no sweep overlaps the judging window.
+
+### Evidence
+
+- The GPT-6.2 Sol sweep finished on 2026-11-18 at 04:44 PST: 115 of 115
+  runs at functional 1.0, no timeouts, no empty patches, every run from
+  `bench/2026-11-17-gpt62-sol-frontier-v4` with a clean tree.
+- Dry run of the population build and freeze on 2026-11-18 (outputs
+  discarded): 115 rows, 0 excluded, 0 missing, 23 per cell, 23 quirk keys,
+  largest prompt 51,214 characters.
+- Pins checked the same day: the Cursor `2026.10.01-e373342` digest and the
+  Muse binary match their pins, and Muse Spark 1.3 answered a one-line
+  probe. The Cursor login had expired ("Authentication required"); the
+  owner signs in again before the chain starts.
+
 ## 2026-11-17: GPT-6.2 Sol runs on Frontier v4 on its release day, on a pinned Codex 0.166.0
 
 ### Decision

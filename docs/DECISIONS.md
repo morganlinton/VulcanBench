@@ -7,6 +7,73 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-18: VulcanBench DailyWork v1 is the next public coding suite; Frontier v5 is paused
+
+### Decision
+
+The owner, in chat on 2026-11-18, set a new direction: rather than a suite
+that stumps frontier models, build one that tells an engineering team which
+model and effort level it needs for everyday work, measured on how the
+model finds the solution, time, tokens and cost. The suite is **VulcanBench
+DailyWork v1** (suite id `dailywork-v1`), planned in
+[dailywork-v1/PLAN.md](dailywork-v1/PLAN.md). The owner adopted all nine of
+the plan's decisions as recommended:
+
+- D1: Routine becomes DailyWork's private holdout (Routine v2 if its tasks
+  fit the plan's principles, otherwise a rebuilt holdout).
+- D2: the headline is cost versus solve rate views (cost-efficient
+  frontier, per-category recommendation table, effort curves), with no
+  single accuracy rank; process metrics are diagnostics until a pilot
+  validates them.
+- D3: about 36 tasks in six categories (bug fix, feature, refactor, tests,
+  upgrade or migration, build and CI) across six languages.
+- D4: one attempt per task at every effort level, three at medium and at
+  the model's highest unblocked level.
+- D5: runs go through the `vulcanbench` harness, with container execution
+  extended to every adapter.
+- D6: change quality is static scores plus diff size; the Code quality
+  judging panel is added later.
+- D7: admission references are Claude Sonnet 5.5 and GPT-6.1 Terra at
+  medium; a task is admitted when one of them solves it in two of three
+  attempts.
+- D8: reference solutions and held-out tests live in a private repository,
+  with only their hashes in the public lock.
+- D9: VulcanBench Frontier v5 stays published (release 1) and is paused;
+  VulcanBench Frontier v4 keeps its board until DailyWork launches, then is
+  archived with a dated note.
+
+The plan is adopted but not frozen; it is frozen when its three pilots
+report. The Frontier v5 rollout plan (PR #302) was closed unmerged.
+
+### Evidence
+
+- Frontier v5 release 1 is built to be failed: GPT-6 Astra scored 0 of 21
+  (docs/results/frontier-v5-r1-astra-2026-11.md), so as a headline it would
+  rank most models at or near zero.
+- Frontier v4's 23 tasks are synthetic micro-repository Python parity
+  tasks, and GPT-6 Astra solves 23 of 23, so neither suite answers which
+  configuration a team needs for ordinary work.
+- The harness already records most of what DailyWork measures in every
+  run's `summary.json` (tokens by kind, cost on several bases, duration,
+  turns, per-check verifier results, static quality and security,
+  integrity audits) and `tool-calls.jsonl` (timed per call).
+- Routine v1 is 12 hand-authored Python tasks with ticket-style
+  instructions on micro-scale repositories; Routine v2 is not on GitHub.
+
+### Revisit triggers
+
+- The pilots show a category cannot be graded fairly (most likely tests,
+  refactor or upgrades): revise the categories before freezing.
+- Routine v2's tasks do not fit the plan's principles: build the holdout
+  instead.
+- Calibration shows the difficulty spread is far from a third easy, a third
+  medium and a third hard.
+
+### What this touched
+
+This entry, [dailywork-v1/PLAN.md](dailywork-v1/PLAN.md) and the suite names
+section of CLAUDE.md. No run conditions changed.
+
 ## 2026-11-17: GPT-6.2 Sol runs on Frontier v4 on its release day, on a pinned Codex 0.166.0
 
 ### Decision

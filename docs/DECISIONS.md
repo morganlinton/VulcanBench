@@ -7,6 +7,44 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-17: GPT-6.2 Sol runs on Frontier v4 on its release day, on a pinned Codex 0.166.0
+
+### Decision
+
+GPT-6.2 Sol (`gpt-6.2-sol`, released in Codex and the API on 2026-11-17) is
+swept on VulcanBench Frontier v4 at Low, Medium, High, Extra-high and Max
+through Codex on the ChatGPT subscription (`scripts/run_gpt62_sol_v4.sh`,
+outputs `runs-effort-gpt62-sol/`). Owner request in chat, 2026-11-17. It
+runs one task at a time from a run worktree pinned to a bench tag, like
+every sweep, under the flat 3-hour task timeout.
+
+The column runs on Codex CLI 0.166.0 from its own prefix
+(`~/.local/share/vulcanbench/codex-0.166.0/`), the earliest release that
+runs the model. GPT-6.1 Sol and Terra stay on 0.159.0; every other Codex
+column keeps its version. The Codex version differs from the GPT-6.1
+columns and is disclosed on this column.
+
+### Evidence
+
+- OpenAI's Codex models page lists `gpt-6.2-sol` (500K default context in
+  Codex) but names no minimum CLI version. One-line probes on the ChatGPT
+  login on 2026-11-17 ("Reply with the single word OK."): 0.159.0, 0.164.0
+  and 0.165.0 are refused ("not supported when using Codex with a ChatGPT
+  account", no model metadata); 0.166.0, 0.167.0 to 0.167.2, 0.168.0 and
+  0.169.0 answer. On 0.166.0 the model answered at `low` and at `max` with
+  its metadata present.
+- The Codex login on this host had lapsed to a ChatGPT Free account (every
+  model refused, GPT-6.1 Sol included). The owner signed in again on
+  2026-11-17; the login now reports plan `prolite` with an active
+  subscription. Earlier GPT columns ran on ChatGPT Pro. The plan sets usage
+  windows, not the model, so it can add quota waits between attempts (the
+  sweep waits them out); disclose it.
+- List prices, checked 2026-11-17 at developers.openai.com/api/docs/pricing
+  (USD per 1M tokens, standard, short context): $2.00 input, $0.10 cached
+  input, $10.00 output, the same as GPT-6.1 Sol. Prompts over 272K input
+  tokens bill at 2x input and cache, 1.5x output; that tier is not inferred
+  by `harness/pricing.py`. Ultra stays blocked (`vulcanbench.toml`).
+
 ## 2026-11-11: A macOS computer-use suite runs in Tart macOS VMs, is driven through the VM's own VNC server, and is graded from the stopped VM's disk
 
 The owner asked on 2026-11-11 for a computer-use suite focused on macOS and

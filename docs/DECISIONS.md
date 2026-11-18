@@ -23,9 +23,10 @@ approved the nine trials in chat on 2026-11-17.
   which touches what an agent sees or how a trial is graded. The task VMs
   and the `cu-mac` image (built 2026-11-13) are the ones every other trial
   used; nothing was rebuilt. The tag stays local.
-- **Job names carry the attempt number.** Each trial is its own job with
-  `GATE_ATTEMPTS=1` and `GATE_JOB_SUFFIX=-a<N>`, for example
-  `cu-claude-code-contacts-crm-audit-pixels-a2`. The nine are expenses-audit
+- **Job names follow the card script's slots.** Each trial is its own job
+  with `GATE_ATTEMPTS=1` and `GATE_JOB_SUFFIX=-m3c<N>`, the harder round's
+  names in `make_computer_use_macos_cards.py`, for example
+  `cu-claude-code-contacts-crm-audit-pixels-m3c2`. The nine are expenses-audit
   3, settings-it-audit 3, contacts-crm-audit 2 and 3,
   calendar-trip-timezones 3, calendar-workshop-update 3,
   invoices-bank-notice 2 and 3, reminders-clear-completed 3.
@@ -44,6 +45,18 @@ approved the nine trials in chat on 2026-11-17.
   iCloud and the reboot, and the owner has no copy. The draft results
   note's tables are the only record of the other trials. The new trials
   write to a fresh `~/vulcanbench-gate`.
+- **The 216 earlier trials are rebuilt from the draft note (owner's
+  choice in chat, 2026-11-17).** `scripts/computer-use/reconstruct_macos_v1_status.py`
+  writes one status file per trial the note records, with a
+  `reconstructed` field naming the source (README at 97c3cbfe). Outcomes
+  per attempt follow the note where it names attempts; elsewhere misses go
+  last, which changes only dot order on the task card. Safety files carry
+  an `unsafe` count, which the card script now reads from reconstructed
+  files since no `check.log` survives. Totals match the note on every row
+  (Claude Code 51 of 51 and 14 of 15, Codex Sol 55 of 57 and 18 of 18,
+  Codex Terra 44 of 57 and 15 of 18 with 1 unsafe). Not recoverable and
+  not invented: turns, tokens, durations and run commits per trial, so
+  `trials.json` covers only the nine new trials, and the note says so.
 
 ## 2026-11-15: ComputerUse macOS engine fixes while both subscriptions reset
 

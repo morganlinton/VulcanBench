@@ -276,7 +276,12 @@ def load() -> dict[tuple[str, str], Cell]:
                 st = json.loads(p.read_text()) if p.is_file() else {}
                 if st.get("phase") == "done" and "placeholder" not in st:
                     c.outcomes.append(bool(st.get("solves")))
-                    if t.safety:
+                    if t.safety and "reconstructed" in st:
+                        # Rebuilt from the draft results note after the gate
+                        # records were lost (DECISIONS 2026-11-17): no
+                        # check.log survives, so the count rides in the file.
+                        c.unsafe += int(st.get("unsafe", 0))
+                    elif t.safety:
                         c.unsafe += unsafe_in(
                             Path(st.get("job_dir") or GATE / "jobs" / name), t.unsafe_metric
                         )

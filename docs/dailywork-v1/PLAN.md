@@ -1,9 +1,11 @@
 # VulcanBench DailyWork v1: plan
 
-Status: **draft, 2026-11-18, not adopted.** Owner decisions in section 8 are
-open. Once adopted, this plan is frozen the way Frontier v5's plans are (a
-`FREEZE.json` beside it), and each decision is recorded as a dated entry in
-[docs/DECISIONS.md](../DECISIONS.md).
+Status: **adopted by the owner in chat on 2026-11-18, not yet frozen.** All
+nine decisions in section 8 were decided as recommended and are recorded in
+[docs/DECISIONS.md](../DECISIONS.md) (2026-11-18). The plan is frozen (a
+`FREEZE.json` beside it, as for Frontier v5's plans) once the three pilots in
+section 9 report, because they may change the categories or their grading.
+Changes after the freeze need a new plan version with its own freeze.
 
 ## 1. The question this suite answers
 
@@ -115,9 +117,12 @@ under the charts for readers who want to rank.
   everyday difficulty. All of them are bug-fix shaped, so they cover one
   category. PLAN.md for Frontier v5 earmarked solved candidates for Routine
   v1; using them here needs the owner's call under D1.
-- **Routine v1 and v2** (private, VulcanRoutine repo; Routine v1 has 504
-  recorded runs, Routine v2 has not been swept). Screen their tasks against
-  the principles in section 2 once D1 is decided.
+- **Routine v1 and v2** (private). Under D1 they become DailyWork's private
+  holdout, not a source of public tasks. Routine v1 (VulcanRoutine repo, 504
+  recorded runs) is 12 hand-authored Python tasks with ticket-style
+  instructions on micro-scale synthetic repositories; its instructions are
+  the model for DailyWork's. Routine v2 (`tasks/routine-v2`, not swept) is
+  not on GitHub and has to be read on the host that holds it.
 - **Not Frontier v4.** All 23 of its tasks are synthetic micro-repository
   Python parity puzzles; they measure something real but not daily work.
 
@@ -157,6 +162,21 @@ economics and audits around Harbor's records.
 
 ## 8. Owner decisions
 
+All nine were decided by the owner in chat on 2026-11-18, each as
+recommended below:
+
+| Decision | Outcome |
+| --- | --- |
+| D1 Routine | Routine is DailyWork's private holdout |
+| D2 Headline | Cost versus solve rate views; no single rank; process metrics diagnostic |
+| D3 Size and mix | About 36 tasks, six categories, six languages |
+| D4 Attempts | One attempt at every effort level, three at medium and the top unblocked level |
+| D5 Runner | The harness, with container execution for every adapter |
+| D6 Change quality | Static scores and diff size; judging panel later |
+| D7 Admission references | Claude Sonnet 5.5 and GPT-6.1 Terra at medium |
+| D8 Gold | Private repository, hashes in the public lock |
+| D9 Other suites | Frontier v5 published and paused; Frontier v4 archived at DailyWork's launch |
+
 **D1. Routine.** DailyWork and Routine ask nearly the same question.
 1. DailyWork replaces Routine: Routine's tasks are screened as sources and
    Routine is retired.
@@ -165,9 +185,11 @@ economics and audits around Harbor's records.
    seen.
 3. Keep them separate.
 
-Recommendation: option 2 if Routine v2's tasks fit section 2 (to be checked
-by reading them), otherwise option 1. A private holdout is the best defence a
-public suite has against overfitting and contamination.
+Recommendation (adopted): option 2. A private holdout is the best defence a
+public suite has against overfitting and contamination. Routine v2 serves
+as the holdout if its tasks fit section 2 once read; otherwise a holdout of
+about a quarter of DailyWork's size is built to the same rules and kept
+private. Routine v1 alone is too small and too synthetic to be the holdout.
 
 **D2. The headline.** Recommendation: no single accuracy rank; the views in
 section 5, with process metrics as diagnostics until a pilot validates them.
@@ -210,13 +232,15 @@ v1".
 
 ## 9. Phases
 
-1. **Decide and freeze.** D1 to D9 decided, this plan frozen.
+1. **Decide.** D1 to D9 decided (done, 2026-11-18). Read Routine v2's tasks
+   to settle the holdout under D1.
 2. **Engine (separate PRs from results):** container execution for every
    adapter; progress, reliability and process metrics; the cost-frontier and
    recommendation aggregation.
 3. **Pilots.** One task in each of three categories (bug fix, tests,
    upgrade) built end to end and run by two configurations, to prove
-   grading, metrics and process diagnostics before sourcing at scale.
+   grading, metrics and process diagnostics before sourcing at scale. Freeze
+   this plan (or a revised version) when the pilots report.
 4. **Sourcing and building** in pre-registered waves of about six tasks, one
    category per language. Calibration runs with the D7 references after each
    wave measure the difficulty spread.

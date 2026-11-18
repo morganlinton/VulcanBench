@@ -28,12 +28,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from harness.agent.agent_images import ensure_agent_image
 from harness.agent.cli_agents import (
     AgentContainerSpec,
     CliAgentAdapter,
     CliAgentOutcome,
     build_cli_prompt,
-    default_agent_image,
     get_cli_agent_adapter,
     is_cli_agent_spec,
 )
@@ -208,6 +208,20 @@ def run_agent(  # noqa: PLR0915
     agent_tmp_root, workspace = _resolve_workspace(cli_adapter, run_id, run_dir)
     prepare_workspace(task, workspace)
     _git_init(workspace)
+    # The containerized agent runs on the task's own sandbox image plus an
+    # agent layer, built (or found in the cache) before the clock starts and
+    # before any environment comes up, so a failed build leaves nothing
+    # running. The layer pins the host CLI's release (read by the preflight).
+    agent_container_spec: AgentContainerSpec | None = None
+    if agent_container and cli_adapter is not None:
+        agent_image = ensure_agent_image(
+            cli_adapter.harness_id,
+            cli_adapter.preflight().version,
+            resolve_sandbox_image(task, image),
+        )
+        collector.record("agent_image", agent_image.provenance())
+        agent_container_spec = AgentContainerSpec(image=agent_image.image, resources=resources)
+
     executor = _make_executor(sandbox, workspace, image, network, task, collector, resources)
 
     # Run setup commands BEFORE the agent's wall-clock budget starts.
@@ -254,14 +268,7 @@ def run_agent(  # noqa: PLR0915
                 network=network,
                 max_run_cost=max_run_cost,
                 routing=routing,
-                agent_container_spec=(
-                    AgentContainerSpec(
-                        image=default_agent_image(cli_adapter.harness_id),
-                        resources=resources,
-                    )
-                    if agent_container and cli_adapter is not None
-                    else None
-                ),
+                agent_container_spec=agent_container_spec,
             )
         )
         patch = _git_diff(workspace)

@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Per-task agent images** (`harness/agent/agent_images.py`): with
+  `--agent-container`, the agent now runs on the task's own sandbox image plus
+  an agent layer under `/opt/vb-agent` (a pinned Node runtime and the CLI at
+  the host installation's version), built on first use and cached by harness,
+  CLI version, base image id and recipe hash. Before this, every
+  containerized agent ran on `sandbox:base`, so Rust, JVM and C-family tasks
+  verified with toolchains their agent lacked. The run trace records the
+  image's provenance (`agent_image` event). The fixed
+  `sandbox/Dockerfile.agent-codex` and `Dockerfile.agent-claude-code` are
+  removed; `make agent-image-codex BASE=<image>` builds through the new module.
 - **Local run GUI** (`backend/runner/`, dashboard `/runs` and `/launch`,
   `make gui`): a localhost page that lists every gate job and harness run
   with its bench tag, attempts, rewards, containers, a live log tail and a

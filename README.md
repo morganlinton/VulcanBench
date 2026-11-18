@@ -253,9 +253,11 @@ the host and is meant for the mock model and trusted development loops. `auto`
 uses Docker when available and refuses host execution unless
 `VULCANBENCH_ALLOW_HOST_EXEC=1` is set. Resource floors and ceilings
 (`--mem-floor`, `--cpu-ceiling`, `--pids-limit`) are recorded with the run.
-`--agent-container` runs a subscription CLI itself inside a container built
-from the sandbox image (`make agent-image-codex`) so the resource band bounds
-the agent phase too. `make sandbox-image-all` builds the Rust and Go images the
+`--agent-container` runs a subscription CLI itself (codex or claude-code)
+inside a container so the resource band bounds the agent phase too. The
+container is the task's own sandbox image plus a thin agent layer (a private
+Node runtime and the CLI at the host's version), built on first use and
+cached, so the agent has the same toolchains as the verifier. `make sandbox-image-all` builds the Rust and Go images the
 security suite needs.
 
 ## Dashboard and API

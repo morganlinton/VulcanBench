@@ -29,7 +29,6 @@ from harness.agent.cli_agents import (
     _sync_codex_auth_back,
     _zcode_preflight,
     _zcode_session_limit_error,
-    default_agent_image,
     is_cli_agent_spec,
     run_claude_code_task,
     run_codex_task,
@@ -285,6 +284,34 @@ def test_claude_code_requires_local_sandbox(tmp_path: Path, fake_claude: Path) -
             judges=False,
             sandbox="docker",
         )
+
+
+def test_agent_container_builds_on_the_task_image_before_the_clock(
+    tmp_path: Path, fake_claude: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[str, str | None, str]] = []
+
+    def fake_ensure(harness_id: str, version: str | None, base_image: str) -> None:
+        calls.append((harness_id, version, base_image))
+        raise ProviderError("stop before docker")
+
+    monkeypatch.setattr("harness.agent.loop.ensure_agent_image", fake_ensure)
+    with pytest.raises(ProviderError, match="stop before docker"):
+        run_agent(
+            task_id="hello-world",
+            model="claude-code:claude-opus-4-8",
+            output_dir=tmp_path,
+            tasks_root=Path("tasks/v1"),
+            judges=False,
+            sandbox="docker",
+            agent_container=True,
+        )
+    # The task's own sandbox image is the base, and the host CLI's version
+    # line is what the layer pins.
+    ((harness_id, version, base_image),) = calls
+    assert harness_id == "claude-code"
+    assert base_image == "vulcanbench/sandbox:base"
+    assert version
 
 
 def test_usage_limit_raises_provider_error(
@@ -1140,10 +1167,10 @@ def test_agent_container_argv_wraps_command_with_band() -> None:
     assert argv[-1] == "vulcanbench/agent-codex:latest"
 
 
-def test_agent_container_rejected_by_non_codex_harnesses(tmp_path: Path) -> None:
-    spec = AgentContainerSpec()
+def test_agent_container_rejected_by_harnesses_without_a_recipe(tmp_path: Path) -> None:
+    spec = AgentContainerSpec(image="vulcanbench/agent-codex:test")
     for runner in (run_cursor_task, run_grok_build_task, run_zcode_task):
-        with pytest.raises(ProviderError, match="only the codex harness"):
+        with pytest.raises(ProviderError, match="only the codex and claude-code harnesses"):
             runner(
                 workspace=tmp_path,
                 prompt="p",
@@ -1194,16 +1221,6 @@ def test_stage_claude_code_auth_from_credentials_file(
     assert staged.is_absolute()
     assert (staged / ".credentials.json").read_text() == '{"claudeAiOauth": {"a": 1}}'
     assert json.loads((staged / ".claude.json").read_text())["hasCompletedOnboarding"] is True
-
-
-def test_default_agent_image_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("VULCANBENCH_AGENT_IMAGE", raising=False)
-    assert default_agent_image("codex") == "vulcanbench/agent-codex:latest"
-    assert default_agent_image("claude-code") == "vulcanbench/agent-claude-code:latest"
-    with pytest.raises(ProviderError, match="no image for harness"):
-        default_agent_image("cursor")
-    monkeypatch.setenv("VULCANBENCH_AGENT_IMAGE", "custom:tag")
-    assert default_agent_image("cursor") == "custom:tag"
 
 
 def test_sync_codex_auth_back_copies_changed_tokens(

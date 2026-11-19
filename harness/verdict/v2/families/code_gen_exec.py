@@ -1,11 +1,12 @@
 """Sandboxed, cached execution for the generated Software families.
 
 Everything the code-generation builders execute goes through here: a fresh
-temp directory per run, a subprocess with a timeout, a scrubbed environment
-with proxies pointed at a dead port, and (for Python) a guard that disables
-socket connects and DNS before the target runs. Results are cached as JSON
-under ``<repo>/verdict-v2-items/cache/<namespace>`` keyed by a content hash of
-everything that can change the outcome, so rebuilds are fast and identical.
+temp directory per run, a subprocess with a timeout and a memory cap, a
+scrubbed environment with proxies pointed at a dead port, and (for Python) a
+guard that disables socket connects and DNS before the target runs. Results
+are cached as JSON under ``<repo>/verdict-v2-items/cache/<namespace>`` keyed by
+a content hash of everything that can change the outcome, so rebuilds are fast
+and identical.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -27,6 +29,18 @@ from harness.verdict.v2.registry import BuildContext
 DEFAULT_TIMEOUT = 5.0
 DEFAULT_WORKERS = 4
 CACHE_VERSION = "1"
+
+# A run whose resident memory passes this is killed and reported exactly like
+# a timeout. Mutants can turn a bounded loop into an unbounded one (for
+# example ``out.append(v)`` -> ``values.append(v)`` inside ``for v in
+# values``), which reached 6 GB in the 5 seconds before the timeout fired;
+# with four workers that can exhaust a 16 GB CI runner, which then shut down
+# mid-suite. Normal runs stay well under 200 MB. Timed-out runs were
+# already dropped by every builder, so the cap only stops them sooner; a run
+# that finishes under it is untouched, which is why the cap is not part of the
+# cache key.
+MEMORY_LIMIT_BYTES = 1024 * 1024 * 1024
+_POLL_S = 0.05 if sys.platform.startswith("linux") else 0.25
 
 # Placed next to every Python target. It blocks outbound connections and name
 # lookups, then runs the target as __main__ (or a module, for pytest).
@@ -147,6 +161,62 @@ def _decode(data: bytes | str | None) -> str:
     return data.decode("utf-8", errors="replace")
 
 
+def _rss_bytes(pid: int) -> int | None:
+    """Resident memory of a live process, or None when it cannot be read."""
+    try:
+        with open(f"/proc/{pid}/statm") as statm:
+            return int(statm.read().split()[1]) * os.sysconf("SC_PAGE_SIZE")
+    except (OSError, ValueError, IndexError):
+        if sys.platform.startswith("linux"):
+            return None
+    try:
+        out = subprocess.run(
+            ["ps", "-o", "rss=", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=False,
+        ).stdout.strip()
+        return int(out) * 1024 if out else None
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+
+
+def _run_capped(
+    argv: list[str], cwd: Path, env: dict[str, str], timeout: float
+) -> tuple[bytes, bytes, int, bool]:
+    """``(stdout, stderr, returncode, timed_out)`` under the time and memory caps.
+
+    Like ``subprocess.run(timeout=...)``: on either cap the child is killed,
+    its remaining output is collected and the run reports ``-9, True``.
+    """
+    with subprocess.Popen(
+        argv,
+        cwd=cwd,
+        env=env,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as proc:
+        deadline = time.monotonic() + timeout
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining > 0:
+                try:
+                    stdout, stderr = proc.communicate(timeout=min(_POLL_S, remaining))
+                    return stdout, stderr, proc.returncode, False
+                except subprocess.TimeoutExpired:
+                    rss = _rss_bytes(proc.pid)
+                    if rss is None or rss <= MEMORY_LIMIT_BYTES:
+                        continue
+                    note = f"\n[killed: resident memory {rss >> 20} MB over the cap]\n"
+            else:
+                note = ""
+            proc.kill()
+            stdout, stderr = proc.communicate()
+            return stdout, stderr + note.encode(), -9, True
+
+
 def execute(job: Job) -> RunResult:
     """Run one job uncached."""
     with tempfile.TemporaryDirectory(prefix="verdict-v2-") as tmp:
@@ -166,21 +236,7 @@ def execute(job: Job) -> RunResult:
             target.write_text(text)
         if job.argv[0].startswith("python"):
             (work / GUARD_NAME).write_text(PY_GUARD)
-        stdout: bytes | str | None
-        stderr: bytes | str | None
-        try:
-            proc = subprocess.run(
-                _argv(job),
-                cwd=work,
-                env=_env(home),
-                capture_output=True,
-                timeout=job.timeout,
-                stdin=subprocess.DEVNULL,
-                check=False,
-            )
-            stdout, stderr, code, timed_out = proc.stdout, proc.stderr, proc.returncode, False
-        except subprocess.TimeoutExpired as error:
-            stdout, stderr, code, timed_out = error.stdout, error.stderr, -9, True
+        stdout, stderr, code, timed_out = _run_capped(_argv(job), work, _env(home), job.timeout)
         collected = {}
         for rel in job.collect:
             path = work / rel

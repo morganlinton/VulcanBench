@@ -67,7 +67,10 @@ jobs:
     # audioop-lts marker dep landed -- a class of bug 3.12-only CI can't see.
     # No LFS, no Go/Node/Rust/Java, no ruff/mypy (enforced on 3.12 already),
     # no coverage gate (same number as the main job), no task validation.
+    # It normally takes about 10 minutes; fail a stuck run well before the
+    # 6-hour default.
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.14

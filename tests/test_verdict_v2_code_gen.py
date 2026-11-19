@@ -8,11 +8,12 @@ import re
 import subprocess
 import sys
 import textwrap
+import time
 from pathlib import Path
 
 import pytest
 
-from harness.verdict.v2.families import code_gen, code_gen_bugs
+from harness.verdict.v2.families import code_gen, code_gen_bugs, code_gen_exec
 from harness.verdict.v2.families.code_gen_exec import Job, Runner
 from harness.verdict.v2.families.code_gen_libs import (
     LibUnit,
@@ -143,6 +144,30 @@ def test_runner_timeout_and_network_guard(tmp_path):
     )
     assert loop.timed_out and not loop.ok
     assert not net.ok and "network disabled" in net.stderr
+
+
+def test_runner_kills_a_runaway_allocation_like_a_timeout(tmp_path, monkeypatch):
+    # The mutant that took down CI: a loop appending to the list it iterates.
+    # Throttled to ~200 MB/s so the test itself stays small between polls.
+    monkeypatch.setattr(code_gen_exec, "MEMORY_LIMIT_BYTES", 200 * 1024 * 1024)
+    runaway = (
+        "import time\n"
+        "values = [1]\n"
+        "for v in values:\n"
+        '    values.append(b"x" * 1_000_000)\n'
+        "    time.sleep(0.005)\n"
+    )
+    started = time.monotonic()
+    grow, fine = Runner(tmp_path / "cache", workers=2).run_many(
+        [
+            Job(files={"main.py": runaway}, argv=("python", "main.py"), timeout=60),
+            Job(files={"main.py": "print(sum(range(10)))\n"}, argv=("python", "main.py")),
+        ]
+    )
+    assert grow.timed_out and grow.returncode == -9
+    assert "over the cap" in grow.stderr
+    assert time.monotonic() - started < 30  # stopped by the cap, not the 60 s timeout
+    assert fine.ok and fine.stdout.strip() == "45"
 
 
 # ----------------------------------------------------------------- balancing

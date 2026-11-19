@@ -231,13 +231,54 @@ def test_refs_prints_one_json_line_per_reference(gate: Gate) -> None:
     r = gate.run("--refs")
     assert r.returncode == 0, r.stderr
     refs = [json.loads(line) for line in r.stdout.splitlines()]
-    assert [x["name"] for x in refs] == ["astra", "fable", "opus"]
+    assert [x["name"] for x in refs] == ["astra", "fable", "opus", "sol62"]
     assert refs[2] == {
         "name": "opus",
         "agent": "claude-code",
         "model": "claude-opus-5-5",
         "version": "2.1.302",
     }
+    assert refs[3] == {
+        "name": "sol62",
+        "agent": "codex",
+        "model": "gpt-6.2-sol",
+        "version": "0.166.0",
+    }
+
+
+def test_sol62_at_max_effort_is_a_named_measurement(gate: Gate) -> None:
+    # Release 1 top-effort measurement (decision R3): Codex 0.166.0, the gate's
+    # Codex config and web tools off, and the level in the job name.
+    r = gate.run("sol62", gate.task, GATE_EFFORT="max", GATE_EARLY_EXIT="0")
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = f"sol62-max-{gate.task}"
+    st = gate.status(job)
+    assert st["phase"] == "done" and st["effort"] == "max"
+    assert st["agent"] == "codex" and st["model"] == "gpt-6.2-sol"
+    assert "effort=max" in r.stdout.splitlines()[0]
+    argv = json.loads((gate.out / "jobs" / job / "argv.json").read_text())["argv"]
+    assert argv[argv.index("--effort") + 1] == "max"
+    assert argv[argv.index("-m") + 1] == "gpt-6.2-sol"
+    aks = [argv[i + 1] for i, a in enumerate(argv) if a == "--ak"]
+    assert "version=0.166.0" in aks and "disable_web_search=true" in aks
+    assert any(a.startswith("config=") and a.endswith("codex-gate.toml") for a in aks)
+
+
+def test_medium_effort_keeps_the_gate_job_name(gate: Gate) -> None:
+    r = gate.run("astra", gate.task, GATE_EFFORT="medium")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert gate.status(f"astra-{gate.task}")["effort"] == "medium"
+
+
+def test_blocked_and_unknown_efforts_are_refused(gate: Gate) -> None:
+    r = gate.run("sol62", gate.task, GATE_EFFORT="ultra")
+    assert r.returncode == 2 and "blocked" in r.stderr
+    assert gate.run("sol62", gate.task, GATE_EFFORT="extreme").returncode == 2
+    # The blocked list is read from vulcanbench.toml.
+    (gate.root / "vulcanbench.toml").write_text('[effort]\nblocked = ["ultra", "xhigh"]\n')
+    r = gate.run("sol62", gate.task, GATE_EFFORT="xhigh")
+    assert r.returncode == 2 and "blocked" in r.stderr
+    assert not (gate.out / "jobs" / f"sol62-xhigh-{gate.task}").exists()
 
 
 def test_normal_run_writes_phases_and_keeps_stdout_shape(gate: Gate) -> None:

@@ -26,7 +26,12 @@ Run settings (owner decisions 2026-11-19, docs/DECISIONS.md):
   voids the run.
 - Print mode runs with ``--dangerously-skip-permissions`` (agy's always-proceed
   mode). The outer sandbox is the boundary; agy's own ``--sandbox`` stays off
-  because sandbox-exec cannot nest. Auto-update is off.
+  because sandbox-exec cannot nest. agy's updater cannot replace the pinned
+  binary during a run: the outer sandbox gives no write access to its
+  directory, and agy skips the update when that directory is not writable.
+  ``AGY_CLI_DISABLE_AUTO_UPDATE`` alone does not stop the updater (agy 1.5.12
+  still checks at every start), so the operator keeps the pin directory
+  read-only for agy calls made outside a run.
 
 The private ``HOME`` holds the custom agent and agy's per-run state, so no prior
 conversation, summary or setting is visible to the run. macOS finds the login
@@ -321,6 +326,8 @@ class AntigravityAdapter:
         env.update(
             {
                 "HOME": str(home),
+                # agy 1.5.12 ignores this; the sandbox is what blocks updates.
+                # Kept in case a later agy honors it.
                 "AGY_CLI_DISABLE_AUTO_UPDATE": "1",
                 "TMPDIR": str(scratch / "tmp"),
                 "TMP": str(scratch / "tmp"),
@@ -378,7 +385,7 @@ class AntigravityAdapter:
                 "custom main agent with the default file and shell tools; agy always-proceed "
                 "permissions; URL, browser and MCP denied; web search absent; workspace/session "
                 "writes; shared-temp/checkout/~/.gemini read deny; explicit TMPDIR context; "
-                "auto-update off; shell network not isolated"
+                "updater blocked (pin directory not writable); shell network not isolated"
             ),
         )
         proc = subprocess.Popen(

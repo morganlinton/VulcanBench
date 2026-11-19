@@ -1,6 +1,6 @@
 # VulcanBench Frontier v5: plan to replace Frontier v4 as the headline coding suite
 
-Status: **draft for the owner, 2026-11-19; R1 to R3 and the fast path (section 4a) adopted 2026-11-19, R4 to R9 open.** It replaces the
+Status: **draft for the owner, 2026-11-19; R1 to R9 and the fast path (section 4a) adopted 2026-11-19; composition frozen in PLAN-v5.md.** It replaces the
 rollout draft of 2026-11-17 (PR #302, closed unmerged) and updates its gaps
 and decisions for the owner's new emphasis: a real spread of task shapes and
 languages, and not another suite that mostly measures reverse-engineering.
@@ -236,6 +236,8 @@ measurement's model, conditions and run need their own go-ahead.
 fails produces a board of zeros; a band keeps the hardest tasks reachable,
 and DailyWork already covers the work below it.
 
+**Adopted 2026-11-19: as recommended** (DECISIONS.md, 2026-11-19; PLAN-v5.md).
+
 ### R5. Gate references for release 2
 
 1. **GPT-6.2 Sol (Codex) and Claude Fable 5.2 (Claude Code),** the two
@@ -248,6 +250,8 @@ and DailyWork already covers the work below it.
 
 **Recommendation: option 1, else option 2.** References from two labs keep
 the gate honest; the release 1 references are a generation behind.
+
+**Adopted 2026-11-19: as recommended** (DECISIONS.md, 2026-11-19; PLAN-v5.md).
 
 ### R6. Sweep path for any model
 
@@ -267,6 +271,8 @@ Harbor's agents lag the pinned CLIs and lack three adapters. The cost is
 comparability with the release 1 gate record, which the base, gold and probe
 check and a re-gate of release 2 under the harness answer.
 
+**Adopted 2026-11-19: as recommended** (DECISIONS.md, 2026-11-19; PLAN-v5.md).
+
 ### R7. Published score, judging and publishing channel (open decision (d))
 
 1. **Launch with pass rate, progress score and speed** (speed from serial
@@ -283,6 +289,8 @@ check and a re-gate of release 2 under the harness answer.
 patches; add it once a column has enough solves to judge. A public hub
 listing invites contamination of a 20-task suite.
 
+**Adopted 2026-11-19: as recommended** (DECISIONS.md, 2026-11-19; PLAN-v5.md).
+
 ### R8. Gold location for release 2 (open decision (f))
 
 Decided for private material on 2026-10-31; this question is about the rest.
@@ -297,6 +305,8 @@ Decided for private material on 2026-10-31; this question is about the rest.
 held-out cases and guards are ours and are what holds a task; at 20 tasks a
 scraped held-out case moves the headline by five points.
 
+**Adopted 2026-11-19: as recommended** (DECISIONS.md, 2026-11-19; PLAN-v5.md).
+
 ### R9. Launch lineup, effort levels and Frontier v4 retirement
 
 1. **Launch with four to six models** each in its native harness (for
@@ -310,6 +320,8 @@ scraped held-out case moves the headline by five points.
 
 **Recommendation: option 1.** It gets a board up with separation before the
 long tail of effort levels.
+
+**Adopted 2026-11-19: as recommended** (DECISIONS.md, 2026-11-19; PLAN-v5.md).
 
 ## 4a. Fast path (adopted 2026-11-19)
 

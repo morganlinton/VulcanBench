@@ -7,6 +7,145 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: Frontier v5 composition v5: release 1.1 board and release 2 shapes, frozen (R4)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R4.
+
+- **Release 1.1** is the first board: the six public F5 tasks of release 1 at 1/6 each, ferrycore removed; a task whose verifier lacks per-check results gets a verifier change and a version bump.
+- **Release 2** is twelve tasks: the six F5 tasks plus one new task per language (F3 feature work in TypeScript and Java, F1 property oracles in Python and Rust, F6 performance in C++, F7 diagnosis in C). A slot with no admitted task ships empty, disclosed, never filled with an easier task.
+- **Admission band:** GPT-6.2 Sol at max solves 1 to 3 of 5; the second reference at most 1 of 3 at medium.
+
+Frozen in [frontier-v5/PLAN-v5.md](frontier-v5/PLAN-v5.md) with `plan-v5.json` and `FREEZE-v5.json`, which verifies the v4 freeze files unchanged.
+
+### Evidence
+
+- GPT-6 Astra 0 of 21 on release 1: a gate that admits only what the frontier fails yields a board of zeros.
+- One new task per language puts every language in two shapes.
+
+### Revisit triggers
+
+- The release 1 measurement shows no spread: no release 1.1 board (fast path).
+- A shape's pilot collapses: that slot ships empty at release 2.
+
+### What this touched
+
+This entry and the plan files named above. No task or lock changed.
+
+## 2026-11-19: Frontier v5 release 2 gate references: GPT-6.2 Sol at max first, Claude Fable 5.2 second (R5)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R5: the first prong is GPT-6.2 Sol on Codex 0.166.0 at max effort, five attempts; the second prong, run only when the first lands in the band, is Claude Fable 5.2 at medium, at most 1 of 3. DeepSeek V4.1 Flash at medium is the fallback if Claude runs are unavailable. Provider-side web tools, connected apps and plugins stay off.
+
+### Evidence
+
+- The release 1 references (GPT-6 Astra, Claude Opus 5.5) are a generation behind; GPT-6.2 Sol and Fable 5.2 are the strongest models measured on Frontier v4.
+- Gating Sol first ends most rejects after two or three runs.
+
+### Revisit triggers
+
+- Claude subscription limits block the second prong: use the fallback and disclose it.
+
+### What this touched
+
+This entry. `run_gate.sh` gained `sol62` in PR #316; `fable52` is in progress.
+
+## 2026-11-19: Frontier v5 runs through Harbor via run_gate.sh (R6)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R6: Frontier v5 sweeps, gates and confirmations run through Harbor with `scripts/frontier-v5/run_gate.sh`, extended to the launch lineup's native harnesses (a custom Harbor agent for dsh). A Harbor job importer writes per-run records with `tool-calls.jsonl`. This amends R1's ordering: Frontier v5 does not wait for DailyWork's container engine.
+
+### Evidence
+
+- Release 1's admission and confirmation ran under Harbor, so results stay comparable with the gate record.
+- `run_gate.sh` already carries the infrastructure guard and fail-closed usage pre-flight (PR #288) and any unblocked effort (PR #316).
+
+### Revisit triggers
+
+- DailyWork's container engine lands and can load Harbor tasks: consider moving Frontier v5 onto the harness in a later version.
+
+### What this touched
+
+This entry. Engine work follows in its own PRs.
+
+## 2026-11-19: Frontier v5 publishing: pass rate, progress score and speed on a vulcanbench.com board (R7, decision (d))
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R7 and resolves open decision (d): the board shows pass rate, progress score and speed (serial runs only), `n=` and ±1 stderr on every column, and a per-task table, with public traces for public tasks only. No Code quality panel at launch. The channel is a Frontier v5 board on vulcanbench.com; datasets go to labs on request from the stripped tree; no Harbor hub listing.
+
+### Evidence
+
+- With few solves, a judging panel would mostly grade failed patches.
+- A public hub listing invites contamination of a small suite.
+
+### Revisit triggers
+
+- Columns accumulate enough solves to judge: add the panel as a later version.
+
+### What this touched
+
+This entry.
+
+## 2026-11-19: Frontier v5 release 2 gold and held-out tests are private (R8, decision (f))
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R8 and completes open decision (f): every release 2 task's reference solution and held-out tests live in `morganlinton/vulcanbench-frontier-private`, with only names, versions and hashes in the public lock. Release 1.1's golds stay public as published.
+
+### Evidence
+
+- Held-out checks and guards are what hold a task; at twelve tasks one scraped case moves the headline by about eight points.
+- DailyWork D8 made the same choice.
+
+### Revisit triggers
+
+- None planned.
+
+### What this touched
+
+This entry. Release 2 authoring sessions write their task directories in the private repo.
+
+## 2026-11-19: Frontier v5 launch lineup, effort and Frontier v4 retirement (R9)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R9: the board launches with GPT-6.2 Sol, Claude Fable 5.2, GPT-6.1 Terra and DeepSeek V4.1 Flash, each in its native harness at its highest unblocked effort, three attempts per task. Full effort curves follow after launch. The Frontier v4 board is archived with a dated note the day the Frontier v5 board launches; after that Frontier v4 runs only on the owner's request.
+
+### Evidence
+
+- Four labs' strongest available models at their top level give the board a spread before the long tail of effort levels.
+
+### Revisit triggers
+
+- A lineup model's native harness cannot run under Harbor in time: launch without it and add it later, disclosed.
+
+### What this touched
+
+This entry.
+
+## 2026-11-19: Claude spend resumes for Fable 5.2 on the Frontier v5 board
+
+### Decision
+
+The owner, in chat on 2026-11-19, funded Claude Fable 5.2 runs for the Frontier v5 launch board (18 attempts at Max on release 1.1, on the Claude subscription) and as release 2's second gate reference (R5). This narrows the 2026-11-10 stop on Claude spend to these runs; every run still needs the owner's go-ahead.
+
+### Evidence
+
+- A board without an Anthropic model would be weaker.
+- Fable 5.2 has hit its weekly subscription limit before (DECISIONS.md 2026-11-10); `run_gate.sh`'s usage pre-flight refuses to start above GATE_USAGE_MAX.
+
+### Revisit triggers
+
+- The weekly limit stops a sweep: resume after the reset, never on usage credits without the owner.
+
+### What this touched
+
+This entry.
+
 ## 2026-11-19: Frontier v5 fast path, a release 1 board first and new shapes next
 
 ### Decision

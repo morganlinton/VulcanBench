@@ -1,6 +1,6 @@
 # VulcanBench Frontier v5: plan to replace Frontier v4 as the headline coding suite
 
-Status: **draft for the owner, 2026-11-19, not adopted.** It replaces the
+Status: **draft for the owner, 2026-11-19; R1 adopted 2026-11-19, R2 to R9 open.** It replaces the
 rollout draft of 2026-11-17 (PR #302, closed unmerged) and updates its gaps
 and decisions for the owner's new emphasis: a real spread of task shapes and
 languages, and not another suite that mostly measures reverse-engineering.
@@ -181,6 +181,8 @@ merges R6 and R7, R5 updates R8; R1, R2 and R4 are new.
 **Recommendation: option 1.** The two suites answer different questions
 (which model is strongest; which configuration a team needs), they share one
 engine, and Frontier v5's gate wait times leave room for DailyWork work.
+
+**Adopted 2026-11-19: option 1** (DECISIONS.md, 2026-11-19).
 
 ### R2. What happens to F4 opaque-component parity?
 

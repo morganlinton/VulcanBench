@@ -28,11 +28,13 @@ suite in the VulcanConduct repo (suite id `conduct-v1`) is VulcanBench Safety v1
 (renamed from VulcanConduct v1 on 2026-09-18). Use the public names in
 anything user-facing; never write "SWE v4" for new material.
 
-`tasks/frontier-v5` is **VulcanBench Frontier v5** (release 1 published,
-paused since 2026-11-18). The next public coding suite is **VulcanBench
-DailyWork v1** (suite id `dailywork-v1`, in planning:
-[docs/dailywork-v1/PLAN.md](docs/dailywork-v1/PLAN.md)); Routine becomes its
-private holdout.
+`tasks/frontier-v5` is **VulcanBench Frontier v5** (release 1 published;
+resumed 2026-11-19 as the ceiling suite, release 2 in planning:
+[docs/frontier-v5/ROLLOUT.md](docs/frontier-v5/ROLLOUT.md)). The other
+public coding suite in progress is **VulcanBench DailyWork v1** (suite id
+`dailywork-v1`, in planning:
+[docs/dailywork-v1/PLAN.md](docs/dailywork-v1/PLAN.md)), the everyday-work
+suite; its engine work comes first. Routine becomes its private holdout.
 
 ## Operating decisions
 

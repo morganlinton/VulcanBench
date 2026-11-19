@@ -7,6 +7,51 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: VulcanBench Frontier v5 resumes alongside DailyWork v1 as the ceiling suite (amends D9)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted decision R1 of the Frontier v5
+rollout plan ([frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md)) as
+recommended. VulcanBench Frontier v5 resumes now, alongside VulcanBench
+DailyWork v1, and is the public ceiling suite: a single accuracy rank
+across a spread of task shapes and languages, the role Frontier v4 had.
+DailyWork stays the everyday-work suite with its cost and solve-rate views.
+
+- DailyWork's engine work (D5, container execution for every adapter in
+  the `vulcanbench` harness) comes first, because Frontier v5's sweep path
+  is planned to reuse it (R6, not yet decided).
+- Frontier v5 planning, sourcing and validation run in parallel with no
+  paid model calls. Gate runs are approved by the owner per wave. No heavy
+  Docker validation runs on a Mac while a sweep runs there without asking.
+- This amends D9 of the 2026-11-18 entry in one respect: Frontier v5 is no
+  longer paused. Release 1 stays frozen and published as it is. What
+  happens to Frontier v4's board is decided under R9.
+
+R2 to R9 stay open and are recorded as their own entries when decided.
+
+### Evidence
+
+- [frontier-v5/STATUS-2026-11-19.md](frontier-v5/STATUS-2026-11-19.md): 6
+  of 20 target tasks admitted, all F5; GPT-6 Astra 0 of 21 on release 1.
+- Frontier v4 now measures reverse-engineering: GPT-6.2 Sol disassembled
+  the binary in all 115 of its runs and solved 115; Fable 5.2 solved 115
+  and disassembled in 114.
+- The two suites answer different questions (which model is strongest;
+  which configuration a team needs) and share one engine.
+
+### Revisit triggers
+
+- Frontier v5 authoring or gate work delays DailyWork's pilots, freeze or
+  launch: the owner reorders the two.
+- The release 2 pilots (ROLLOUT.md section 5, step 4) find no new shape
+  that holds: revisit whether Frontier v5 can be the headline.
+
+### What this touched
+
+This entry, the R1 status in [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md)
+and the suite names section of CLAUDE.md. No run conditions changed.
+
 ## 2026-11-18: GPT-6.2 Sol's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.31)
 
 ### Decision

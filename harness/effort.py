@@ -197,6 +197,9 @@ _PROVIDER_EFFORT_MAPS = {
     "dsh": {"low": "low", "high": "high", "max": "max"},
     # Kimi Code sends K3.1 Pro's thinking effort: low, high, max (no medium; thinking stays on).
     "kimi-code": {"low": "low", "high": "high", "max": "max"},
+    # Antigravity CLI puts the effort in the model slug; Gemini 4 Neon offers
+    # low, medium, high and xhigh (no minimal or max).
+    "agy": {"low": "low", "medium": "medium", "high": "high", "extra-high": "xhigh"},
     # Mirror sends Beam's reasoning_effort: low, medium, high, xhigh, max (no none or minimal).
     "mirror": {
         "low": "low",

@@ -68,6 +68,7 @@ def test_harness_list_json() -> None:
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert {row["harness"] for row in data} == {
+        "agy",
         "claude-code",
         "codex",
         "cursor",

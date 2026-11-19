@@ -1,6 +1,6 @@
 # VulcanBench Frontier v5: plan to replace Frontier v4 as the headline coding suite
 
-Status: **draft for the owner, 2026-11-19; R1 to R3 adopted 2026-11-19, R4 to R9 open.** It replaces the
+Status: **draft for the owner, 2026-11-19; R1 to R3 and the fast path (section 4a) adopted 2026-11-19, R4 to R9 open.** It replaces the
 rollout draft of 2026-11-17 (PR #302, closed unmerged) and updates its gaps
 and decisions for the owner's new emphasis: a real spread of task shapes and
 languages, and not another suite that mostly measures reverse-engineering.
@@ -310,6 +310,27 @@ scraped held-out case moves the headline by five points.
 
 **Recommendation: option 1.** It gets a board up with separation before the
 long tail of effort levels.
+
+## 4a. Fast path (adopted 2026-11-19)
+
+The owner found the one-to-two-month estimate too slow and chose, on
+2026-11-19, to put a board up first and add shapes next:
+
+1. **Board first, about one week.** If the release 1 measurement (R3)
+   shows the progress score separates models, Frontier v5 launches a
+   public board on release 1's six public F5 tasks (one shape, six
+   languages, no reverse-engineering), scored on pass rate plus the
+   progress score, and says plainly that it is one shape. If the
+   measurement shows no spread, this step is skipped.
+2. **Shapes next, about three weeks.** Six new tasks in four shapes (F3
+   feature work x2, F1 property oracles x2, F6 performance x1, F7
+   diagnosis x1) are built in parallel from now and join the board as
+   release 2.
+3. **How the time is cut:** parallel authoring sessions (no paid calls),
+   sweeps through Harbor with `run_gate.sh` extended to more models instead
+   of waiting for DailyWork's container engine, gating on GPT-6.2 Sol at max
+   first (the second reference only when Sol lands in the band), R4 to R9
+   decided in one pass, and a second host for runs if available.
 
 ## 5. Work order
 

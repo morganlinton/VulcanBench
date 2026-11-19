@@ -7,6 +7,49 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: Frontier v5 fast path, a release 1 board first and new shapes next
+
+### Decision
+
+The owner, in chat on 2026-11-19, found the one-to-two-month estimate for
+release 2 too slow and chose the fast path in
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) section 4a:
+
+- **Board first.** If the release 1 measurement (R3) shows the progress
+  score separates models, Frontier v5 launches a public board in about a
+  week on release 1's six public F5 tasks, scored on pass rate plus the
+  progress score, disclosed as one task shape. ferrycore is not on the
+  board (R2). If the measurement shows no spread, the board waits for
+  release 2.
+- **Shapes next.** Six new tasks in four shapes (F3 feature work, F1
+  property oracles, F6 performance, F7 diagnosis) are built in parallel
+  and join as release 2, in about three weeks.
+- **Speed levers:** parallel authoring sessions; sweeps through Harbor
+  (`run_gate.sh` extended to more models) rather than waiting for
+  DailyWork's container engine, which amends the ordering in R1; gating on
+  GPT-6.2 Sol at max first; R4 to R9 decided in one pass.
+
+### Evidence
+
+- ROLLOUT.md section 6: the long pole is authoring and gating about 14
+  tasks serially on one host.
+- Release 1's six public tasks are real upstream bug fixes in six
+  languages, none reverse-engineering shaped
+  ([frontier-v5/STATUS-2026-11-19.md](frontier-v5/STATUS-2026-11-19.md)).
+- `run_gate.sh` already runs any Harbor reference at any unblocked effort
+  (PR #316).
+
+### Revisit triggers
+
+- The measurement shows no spread on either score: no release 1 board.
+- Parallel authoring contends with a sweep for Docker on the same host:
+  the owner decides which waits.
+
+### What this touched
+
+This entry and ROLLOUT.md section 4a. No task, lock or run condition
+changed.
+
 ## 2026-11-19: Frontier v5 headline is pass rate plus a progress score, measured on release 1 first
 
 ### Decision

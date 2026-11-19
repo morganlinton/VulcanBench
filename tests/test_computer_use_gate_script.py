@@ -256,12 +256,18 @@ def gate(tmp_path: Path) -> Gate:
     return Gate(tmp_path)
 
 
-def test_refs_prints_the_four_references(gate: Gate) -> None:
+def test_refs_prints_the_five_references(gate: Gate) -> None:
     r = gate.run("--refs")
     assert r.returncode == 0, r.stderr
     refs = [json.loads(line) for line in r.stdout.splitlines()]
-    assert [x["name"] for x in refs] == ["claude-code", "codex", "codex-terra", "claude"]
-    assert [x["agent"] for x in refs] == ["claude-code", "codex", "codex", "computer-1"]
+    assert [x["name"] for x in refs] == [
+        "claude-code",
+        "codex",
+        "codex-terra",
+        "codex-sol-6.2",
+        "claude",
+    ]
+    assert [x["agent"] for x in refs] == ["claude-code", "codex", "codex", "codex", "computer-1"]
 
 
 def test_preflight_only_reports_and_launches_nothing(gate: Gate) -> None:

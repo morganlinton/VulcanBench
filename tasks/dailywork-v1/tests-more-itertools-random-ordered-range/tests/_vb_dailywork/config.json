@@ -1,0 +1,13 @@
+{
+  "package": "more_itertools",
+  "module": "more_itertools/more.py",
+  "shift_before": "def _full_period_lcg",
+  "timeout_s": 60,
+  "pytest_args": [
+    "tests",
+    "--deselect", "tests/test_recipes.py::PrimeFunctionTests::test_primes",
+    "--deselect", "tests/test_more.py::TestSerialize::test_concurrent_calls",
+    "--deselect", "tests/test_more.py::TestConcurrentTee::test_concurrent_consumers"
+  ],
+  "note": "The three deselected tests take about 25 of the suite's 30 seconds and never call the code under test; every check runs the agent's whole tests/ directory otherwise."
+}

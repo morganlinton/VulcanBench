@@ -929,3 +929,43 @@ operational notes live here.
   92.69; Opus 5.5 87.85, 92.16, 91.96, 91.65, 91.24. The Muse halves equal
   `muse-like-for-like.csv`. Sol reviewed Fable 5.1 3.1 to 5.5 points above
   Muse and Opus 5.5 5.8 to 10.1 points above, against 6.7 to 8.1 for Fable 5.2.
+
+## v3.31, November 18 to 19, 2026: GPT-6.2 Sol on Frontier v4
+
+- From `bench/2026-11-18-gpt62-sol-judging-v331` (f3ee1b3c7), judged by
+  Muse Spark 1.3 and Grok 4.6 (Cursor pinned to 2026.10.01-e373342), the
+  owner's choice on November 18. The GPT-6.2 Sol sweep finished on November
+  18 at 04:44 PST, so no sweep overlaps the window. Population frozen 16:04
+  PST on November 18: 115 rows, none excluded or missing. Judging window
+  16:04 PST on November 18 to 05:39 PST on November 19, one window, no stops.
+- Before launch, a real Grok probe returned "Authentication required" although
+  `cursor-agent status` reported a login; the owner signed in again and the
+  probe answered, with the Cursor digest unchanged.
+- Calibration: Muse passed with the one-gate allowance (g11 repeatability,
+  shortfall 0.1); Grok passed all 20 gates, after failing g14 under v3.30.
+- Grok's calibration call control-7-r2 (16:52 PST) failed on a Cursor usage
+  limit ("You've hit your usage limit"): the account signed in for the
+  probe was on Cursor's free plan. The wrapper treated it as a quota stop,
+  archived each stopped attempt in the call's `quota-stops` folder and
+  retried the identical call after backoffs of 3, 6, 12, 24 and 30 minutes
+  (five stops). The owner signed in to the paid account at about 18:00 PST;
+  the 18:08 retry answered and calibration finished at 18:37 PST. No answer
+  was discarded and no input changed.
+- The wrapper accepted 439 display renames (Cursor reports "Grok 4.6 Medium"
+  for the pinned `cursor-grok-4.6-medium`); three of those responses then
+  failed the frozen validator and were re-filed as that failure, so the
+  protocol's retry applied. Second attempts under the frozen rule: Muse 8 (six
+  JSON syntax errors, two unsupported excerpts), Grok 4 (the usage-limit call,
+  one unsupported excerpt, one JSON syntax error, one answer-key matching
+  error).
+- Grok primary submission-069 (gpt62sol low granarycore, November 19, 00:32
+  PST): both attempts quoted code the submission does not contain (one
+  excerpt with a misplaced closing bracket, one with a renamed variable), so
+  `invalidate_unrecoverable_primary` (owner precedent 2026-09-23, v3.14)
+  marked the call invalid, and the review stage then finished without calling
+  it again (repeats and pairwise in full). The summary publishes the submission from Muse alone, as v3.18 did for
+  GPT-6.1 Sol medium paddockcore: combined 85.62, Code quality 65.50.
+- Summary (05:38:59 PST, November 19): both panels passing, 115 of 115
+  published, `ready_for_publication` true, no reviewer fallback. Combined
+  88.44, 88.94, 88.86, 89.01 and 88.74 from low to max; Code quality 70.31
+  to 71.91.

@@ -102,6 +102,9 @@ PRICES: dict[str, dict[str, float]] = {
     # 5-minute cache writes bill at the input rate ($2.00), so only cache reads
     # take the cached price; 1-hour writes ($4.00) are never requested.
     "kimi:kimi-k3.1-pro": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
+    # Gemini 4 Neon standard paid tier, checked 2026-11-19 at aistudio.google.com/docs/pricing:
+    # flat across the context, output includes thinking, cached = implicit-cache reads.
+    "gemini:gemini-4-neon": {"input": 3.00, "cached_input": 0.15, "output": 15.00},
     # OpenRouter, pinned to AkashML bf16 (see harness.agent.providers pins).
     "openrouter:qwen/qwen3.8-27b": {"input": 0.45, "cached_input": 0.05, "output": 3.20},
     # DashScope international list prices (≤256K / ≤32K tier as applicable).
@@ -173,6 +176,8 @@ _SPEC_ALIASES = {
     "dsh:": "deepseek:",
     # Kimi Code CLI runs Moonshot's own API models.
     "kimi-code:": "kimi:",
+    # Antigravity CLI runs Google's own Gemini models.
+    "agy:": "gemini:",
 }
 
 # Provider price multipliers by UTC time. DeepSeek bills 2x during peak hours,

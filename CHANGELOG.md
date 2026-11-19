@@ -58,6 +58,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   frozen suites only. Gate jobs under `~/vulcanbench-gate` stay on the Runs
   page read-only (docs/DECISIONS.md 2026-11-01).
 
+### Fixed
+
+- **Verdict v2 code-gen runs have a memory cap.** A mutant can turn a bounded
+  loop into an unbounded one (`out.append(v)` became `values.append(v)` inside
+  `for v in values`), which reached 6 GB in the 5 seconds before its timeout.
+  Four of those at once ran CI out of memory, and the Python 3.14 smoke job was
+  shut down mid-suite. A run over 1 GB resident is now killed and reported as a
+  timeout, which every builder already drops. The smoke job also gets a
+  25-minute timeout.
+
 ## [0.10.0] - 2026-10-30
 
 ### Added

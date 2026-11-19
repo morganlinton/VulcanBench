@@ -7,6 +7,49 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: Frontier v5 headline is pass rate plus a progress score, measured on release 1 first
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted decision R3 of
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) as recommended (option 3).
+
+- **Headline: pass rate**, complete passes over attempts.
+- **Secondary: a progress score**, the fraction of held-out checks passed,
+  counted only when the tamper scan is clean and the guard wall holds (an
+  attempt that breaks existing tests scores 0). It needs per-check verifier
+  output for every task; a verifier that lacks it changes in a new task
+  version, never by editing a frozen one. The exact rule is frozen before
+  any model is scored on it.
+- **Measurement first:** before engine work, the strongest available model
+  runs at its highest unblocked effort on release 1, to learn whether
+  release 1 separates the top at high effort or only reads zero at medium.
+  Its result sets the band in R4. Which model, its run conditions and the
+  run itself are a separate owner go-ahead (quota).
+
+### Evidence
+
+- GPT-6 Astra 0 of 21 at medium on release 1
+  ([results](results/frontier-v5-r1-astra-2026-11.md)); no model has run
+  release 1 above medium.
+- Partial progress is already visible in the verifiers: CLI11 attempts
+  passed all 11 defect checks and failed two held-out guards; prettier
+  attempt 2 missed one case; pulldown-cmark's verifier writes no per-check
+  result today.
+
+### Revisit triggers
+
+- The measurement shows release 1 already separates the top models: R4's
+  band is set from it.
+- A per-check extractor cannot be made deterministic for a task: that task
+  is reported on pass rate only, disclosed.
+
+### What this touched
+
+This entry and the R3 status in
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md). No task, lock or run
+condition changed.
+
 ## 2026-11-19: Frontier v5 release 2 drops F4 opaque-component parity
 
 ### Decision

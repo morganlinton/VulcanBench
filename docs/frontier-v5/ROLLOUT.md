@@ -1,6 +1,6 @@
 # VulcanBench Frontier v5: plan to replace Frontier v4 as the headline coding suite
 
-Status: **draft for the owner, 2026-11-19; R1 and R2 adopted 2026-11-19, R3 to R9 open.** It replaces the
+Status: **draft for the owner, 2026-11-19; R1 to R3 adopted 2026-11-19, R4 to R9 open.** It replaces the
 rollout draft of 2026-11-17 (PR #302, closed unmerged) and updates its gaps
 and decisions for the owner's new emphasis: a real spread of task shapes and
 languages, and not another suite that mostly measures reverse-engineering.
@@ -216,6 +216,9 @@ Release 1 gave GPT-6 Astra 0 of 21, so on its own it cannot separate models.
 **Recommendation: option 3.** The progress score uses data the verifiers
 already produce, and one top-effort run says whether the wall is a wall or
 an artifact of medium effort. Its result decides R4's band.
+
+**Adopted 2026-11-19: option 3** (DECISIONS.md, 2026-11-19). The
+measurement's model, conditions and run need their own go-ahead.
 
 ### R4. Release 2 composition and admission band
 

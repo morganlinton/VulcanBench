@@ -1,0 +1,117 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""Conflict fields enum"""
+enum FruitColorConflictFields {
+  id
+}
+
+"""Identifier input"""
+input FruitColorIdFieldsInput {
+  id: UUID!
+}
+
+"""Add a new or existing object"""
+input FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneInput {
+  set: FruitColorIdFieldsInput
+  create: FruitColorInput
+  upsert: FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneUpsertInput
+}
+
+"""Add new object or update if existing"""
+input FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneUpsertInput {
+  create: FruitColorInput!
+  conflictFields: FruitColorConflictFields
+  updateFields: [FruitColorUpdateFields!]
+}
+
+"""Filter update input"""
+input FruitColorInput {
+  name: String
+  id: UUID
+}
+
+"""Update fields enum"""
+enum FruitColorUpdateFields {
+  name
+  id
+}
+
+enum FruitConflictFields {
+  id
+  nameAndColorId
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""Filter update input"""
+input FruitPartial {
+  color: FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneInput
+  name: String
+  sweetness: Int
+  id: UUID
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+enum FruitUpdateFieldsInput {
+  name
+  colorId
+  sweetness
+  id
+}
+
+type Mutation {
+  """Upsert object in the FruitType collection"""
+  upsertFruit(updateFields: [FruitUpdateFieldsInput!] = null, conflictFields: FruitConflictFields = null, data: FruitPartial!): FruitType!
+}
+
+type Query {
+  hello: String!
+}
+
+scalar UUID
+'''

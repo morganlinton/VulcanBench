@@ -1,0 +1,1351 @@
+# serializer version: 1
+# name: test_and[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > ?
+     AND fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_and[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > %s
+     AND fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_and[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > %(sweetness_1)s::INTEGER
+     AND fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_and_same_to_many[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE EXISTS (
+          SELECT 1
+            FROM department AS department_1
+            JOIN user_department_join_table AS user_department_join_table_1
+              ON department_1.id = user_department_join_table_1.department_id
+           WHERE user.id = user_department_join_table_1.user_id
+             AND department_1.name = ?
+             AND (EXISTS (SELECT 1 FROM department AS department_2 JOIN user_department_join_table AS user_department_join_table_2 ON department_2.id = user_department_join_table_2.department_id WHERE user.id = user_department_join_table_2.user_id AND department_2.name = ?))
+         )
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_and_same_to_many[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE EXISTS (
+          SELECT 1
+            FROM department AS department_1
+           INNER JOIN user_department_join_table AS user_department_join_table_1
+              ON department_1.id = user_department_join_table_1.department_id
+           WHERE user.id = user_department_join_table_1.user_id
+             AND department_1.name = %s
+             AND (EXISTS (SELECT 1 FROM department AS department_2 INNER JOIN user_department_join_table AS user_department_join_table_2 ON department_2.id = user_department_join_table_2.department_id WHERE user.id = user_department_join_table_2.user_id AND department_2.name = %s))
+         )
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_and_same_to_many[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   WHERE EXISTS (
+          SELECT 1
+            FROM department AS department_1
+            JOIN user_department_join_table AS user_department_join_table_1
+              ON department_1.id = user_department_join_table_1.department_id
+           WHERE "user".id = user_department_join_table_1.user_id
+             AND department_1.name = %(name_1)s::VARCHAR
+             AND (EXISTS (SELECT 1 FROM department AS department_2 JOIN user_department_join_table AS user_department_join_table_2 ON department_2.id = user_department_join_table_2.department_id WHERE "user".id = user_department_join_table_2.user_id AND department_2.name = %(name_2)s::VARCHAR))
+         )
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_complex_logical_operators[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE (fruit.sweetness > ? AND fruit.name REGEXP ?)
+      OR (fruit.water_percent > ? AND fruit.sweetness < ?)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_complex_logical_operators[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE (fruit.sweetness > %s AND fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\')
+      OR (fruit.water_percent > %s AND fruit.sweetness < %s)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_complex_logical_operators[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE (fruit.sweetness > %(sweetness_1)s::INTEGER AND fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\')
+      OR (fruit.water_percent > %(water_percent_1)s AND fruit.sweetness < %(sweetness_2)s::INTEGER)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_empty_list_comparison[session-async-tracked-in-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE 0 = 1
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_list_comparison[session-async-tracked-in-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE FALSE = 1
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_list_comparison[session-async-tracked-in-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   WHERE FALSE
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_empty_list_comparison[session-async-tracked-nin-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE 1 = 1
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_list_comparison[session-async-tracked-nin-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE TRUE = 1
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_list_comparison[session-async-tracked-nin-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   WHERE TRUE
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-not-to-many-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-not-to-many-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-not-to-many-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-to-many-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-to-many-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-to-many-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-to-one-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-to-one-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_empty_relation_filter[session-async-tracked-to-one-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_eq[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name = ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_eq[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name = %s
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_eq[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name = %(name_1)s::VARCHAR
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_filter_on_paginated_query[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM (
+          SELECT fruit.id AS id,
+                 fruit.sweetness AS sweetness
+            FROM fruit AS fruit
+           WHERE NOT (fruit.sweetness > ? AND fruit.sweetness IS NOT NULL)
+           ORDER BY fruit.id ASC
+           LIMIT ?
+          OFFSET ?
+         ) AS fruit
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_filter_on_paginated_query[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM (
+          SELECT fruit.id AS id,
+                 fruit.sweetness AS sweetness
+            FROM fruit AS fruit
+           WHERE NOT (fruit.sweetness > %s AND fruit.sweetness IS NOT NULL)
+           ORDER BY fruit.id ASC
+           LIMIT %s,
+                 %s
+         ) AS fruit
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_filter_on_paginated_query[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM (
+          SELECT fruit.id AS id,
+                 fruit.sweetness AS sweetness
+            FROM fruit AS fruit
+           WHERE NOT (fruit.sweetness > %(sweetness_1)s::INTEGER AND fruit.sweetness IS NOT NULL)
+           ORDER BY fruit.id ASC
+           LIMIT %(param_1)s::INTEGER
+          OFFSET %(param_2)s::INTEGER
+         ) AS fruit
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_gt[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_gt[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > %s
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_gt[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > %(sweetness_1)s::INTEGER
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_gte[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness >= ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_gte[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness >= %s
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_gte[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness >= %(sweetness_1)s::INTEGER
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_in[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness IN (__[POSTCOMPILE_sweetness_1])
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_in[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness IN (__[POSTCOMPILE_sweetness_1])
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_in[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness IN (__[POSTCOMPILE_sweetness_1])
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_isnull[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.bio,
+         user.id
+    FROM USER AS USER
+   WHERE user.bio IS NULL
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_isnull[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.bio,
+         user.id
+    FROM USER AS USER
+   WHERE user.bio IS NULL
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_isnull[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".bio,
+         "user".id
+    FROM "user" AS "user"
+   WHERE "user".bio IS NULL
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_lt[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness < ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_lt[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness < %s
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_lt[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness < %(sweetness_1)s::INTEGER
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_lte[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness <= ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_lte[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness <= %s
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_lte[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness <= %(sweetness_1)s::INTEGER
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_neq[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name != ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_neq[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name != %s
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_neq[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name != %(name_1)s::VARCHAR
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_nin[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE (fruit.sweetness NOT IN (__[POSTCOMPILE_sweetness_1]))
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_nin[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE (fruit.sweetness NOT IN (__[POSTCOMPILE_sweetness_1]))
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_nin[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE (fruit.sweetness NOT IN (__[POSTCOMPILE_sweetness_1]))
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_no_filtering[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_no_filtering[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_no_filtering[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_not[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE NOT (fruit.sweetness < ? AND fruit.sweetness IS NOT NULL)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_not[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE NOT (fruit.sweetness < %s AND fruit.sweetness IS NOT NULL)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_not[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE NOT (fruit.sweetness < %(sweetness_1)s::INTEGER AND fruit.sweetness IS NOT NULL)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_not_empty_comparison[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_not_empty_comparison[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_not_empty_comparison[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_not_isnull[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE user.bio IS NOT NULL
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_not_isnull[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE user.bio IS NOT NULL
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_not_isnull[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   WHERE "user".bio IS NOT NULL
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_not_to_many[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE NOT (EXISTS (SELECT 1 FROM department AS department_1 JOIN user_department_join_table AS user_department_join_table_1 ON department_1.id = user_department_join_table_1.department_id WHERE user.id = user_department_join_table_1.user_id AND department_1.name = ?))
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_not_to_many[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   WHERE NOT (EXISTS (SELECT 1 FROM department AS department_1 INNER JOIN user_department_join_table AS user_department_join_table_1 ON department_1.id = user_department_join_table_1.department_id WHERE user.id = user_department_join_table_1.user_id AND department_1.name = %s))
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_not_to_many[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+   WHERE NOT (EXISTS (SELECT 1 FROM department AS department_1 JOIN user_department_join_table AS user_department_join_table_1 ON department_1.id = user_department_join_table_1.department_id WHERE "user".id = user_department_join_table_1.user_id AND department_1.name = %(name_1)s::VARCHAR))
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_or[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > ?
+      OR fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_or[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > %s
+      OR fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_or[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.sweetness,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.sweetness > %(sweetness_1)s::INTEGER
+      OR fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-contains-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-contains-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-contains-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-endswith-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-endswith-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-endswith-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-icontains-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-icontains-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE lower(fruit.name) LIKE lower((%s COLLATE utf8mb4_bin)) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-icontains-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name ILIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-iendswith-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-iendswith-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE lower(fruit.name) LIKE lower((%s COLLATE utf8mb4_bin)) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-iendswith-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name ILIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-ilike-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-ilike-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE lower(fruit.name) LIKE lower((%s COLLATE utf8mb4_bin)) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-ilike-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name ILIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-inregexp-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-inregexp-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE NOT regexp_like(fruit.name, %s, %s)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-inregexp-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name !~ * %(name_1)s::VARCHAR
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-iregexp-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-iregexp-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE regexp_like(fruit.name, %s, %s)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-iregexp-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name ~ * %(name_1)s::VARCHAR
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-istartswith-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-istartswith-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE lower(fruit.name) LIKE lower((%s COLLATE utf8mb4_bin)) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-istartswith-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name ILIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-like-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-like-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-like-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nilike-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nilike-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE lower(fruit.name) NOT LIKE lower((%s COLLATE utf8mb4_bin)) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nilike-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT ILIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nlike-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nlike-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nlike-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nregexp-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name NOT REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nregexp-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE NOT regexp_like(fruit.name, %s, %s)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-nregexp-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name !~ %(name_1)s::VARCHAR
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-regexp-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-regexp-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE regexp_like(fruit.name, %s, %s)
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-regexp-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name ~ %(name_1)s::VARCHAR
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-startswith-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name REGEXP ?
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-startswith-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE (%s COLLATE utf8mb4_bin) ESCAPE '\\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_string_filters[session-async-tracked-startswith-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.name LIKE %(name_1)s::VARCHAR ESCAPE '\'
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_to_many_filter_and_column_filter[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   WHERE color.name != ?
+     AND (EXISTS (SELECT 1 FROM fruit AS fruit_2 WHERE color.id = fruit_2.color_id AND fruit_2.sweetness <= ?))
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_and_column_filter[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   WHERE color.name != %s
+     AND (EXISTS (SELECT 1 FROM fruit AS fruit_2 WHERE color.id = fruit_2.color_id AND fruit_2.sweetness <= %s))
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_and_column_filter[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   WHERE color.name != %(name_2)s::VARCHAR
+     AND (EXISTS (SELECT 1 FROM fruit AS fruit_2 WHERE color.id = fruit_2.color_id AND fruit_2.sweetness <= %(sweetness_1)s::INTEGER))
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_and_to_one_filter[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+    JOIN "group" AS group_1
+      ON group_1.id = user.group_id
+   WHERE group_1.name = ?
+     AND (EXISTS (SELECT 1 FROM department AS department_1 JOIN user_department_join_table AS user_department_join_table_1 ON department_1.id = user_department_join_table_1.department_id WHERE user.id = user_department_join_table_1.user_id AND department_1.name = ?))
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_to_many_filter_and_to_one_filter[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.name,
+         user.id
+    FROM USER AS USER
+   INNER JOIN `group` AS group_1
+      ON group_1.id = user.group_id
+   WHERE group_1.name = %s
+     AND (EXISTS (SELECT 1 FROM department AS department_1 INNER JOIN user_department_join_table AS user_department_join_table_1 ON department_1.id = user_department_join_table_1.department_id WHERE user.id = user_department_join_table_1.user_id AND department_1.name = %s))
+   ORDER BY user.id ASC
+  '''
+# ---
+# name: test_to_many_filter_and_to_one_filter[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".name,
+         "user".id
+    FROM "user" AS "user"
+    JOIN "group" AS group_1
+      ON group_1.id = "user".group_id
+   WHERE group_1.name = %(name_1)s::VARCHAR
+     AND (EXISTS (SELECT 1 FROM department AS department_1 JOIN user_department_join_table AS user_department_join_table_1 ON department_1.id = user_department_join_table_1.department_id WHERE "user".id = user_department_join_table_1.user_id AND department_1.name = %(name_2)s::VARCHAR))
+   ORDER BY "user".id ASC
+  '''
+# ---
+# name: test_to_many_filter_behind_to_one_keeps_every_selected_related_row[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id,
+         color_1.name AS name_1,
+         color_1.id AS id_1,
+         fruit_1.name AS name_2,
+         fruit_1.id AS id_2
+    FROM fruit AS fruit
+    LEFT OUTER JOIN color AS color_1
+      ON color_1.id = fruit.color_id
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color_1.id = fruit_1.color_id
+   WHERE EXISTS (
+          SELECT 1
+            FROM color AS color_2
+            JOIN fruit AS fruit_2
+              ON color_2.id = fruit_2.color_id
+           WHERE color_2.id = fruit.color_id
+             AND fruit_2.name = ?
+         )
+   ORDER BY fruit.id ASC,
+            color_1.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_behind_to_one_keeps_every_selected_related_row[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id,
+         color_1.name AS name_1,
+         color_1.id AS id_1,
+         fruit_1.name AS name_2,
+         fruit_1.id AS id_2
+    FROM fruit AS fruit
+    LEFT OUTER JOIN color AS color_1
+      ON color_1.id = fruit.color_id
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color_1.id = fruit_1.color_id
+   WHERE EXISTS (
+          SELECT 1
+            FROM color AS color_2
+           INNER JOIN fruit AS fruit_2
+              ON color_2.id = fruit_2.color_id
+           WHERE color_2.id = fruit.color_id
+             AND fruit_2.name = %s
+         )
+   ORDER BY fruit.id ASC,
+            color_1.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_behind_to_one_keeps_every_selected_related_row[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.name,
+         fruit.id,
+         color_1.name AS name_1,
+         color_1.id AS id_1,
+         fruit_1.name AS name_2,
+         fruit_1.id AS id_2
+    FROM fruit AS fruit
+    LEFT OUTER JOIN color AS color_1
+      ON color_1.id = fruit.color_id
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color_1.id = fruit_1.color_id
+   WHERE EXISTS (
+          SELECT 1
+            FROM color AS color_2
+            JOIN fruit AS fruit_2
+              ON color_2.id = fruit_2.color_id
+           WHERE color_2.id = fruit.color_id
+             AND fruit_2.name = %(name_3)s::VARCHAR
+         )
+   ORDER BY fruit.id ASC,
+            color_1.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_keeps_every_selected_related_row[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   WHERE EXISTS (
+          SELECT 1
+            FROM fruit AS fruit_2
+           WHERE color.id = fruit_2.color_id
+             AND fruit_2.sweetness <= ?
+         )
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_keeps_every_selected_related_row[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   WHERE EXISTS (
+          SELECT 1
+            FROM fruit AS fruit_2
+           WHERE color.id = fruit_2.color_id
+             AND fruit_2.sweetness <= %s
+         )
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_keeps_every_selected_related_row[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   WHERE EXISTS (
+          SELECT 1
+            FROM fruit AS fruit_2
+           WHERE color.id = fruit_2.color_id
+             AND fruit_2.sweetness <= %(sweetness_1)s::INTEGER
+         )
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_to_many_filter_paginates_distinct_parents[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM (
+          SELECT color.name AS name,
+                 color.id AS id
+            FROM color AS color
+           WHERE EXISTS (
+                  SELECT 1
+                    FROM fruit AS fruit_1
+                   WHERE color.id = fruit_1.color_id
+                     AND fruit_1.sweetness <= ?
+                 )
+           ORDER BY color.name ASC
+           LIMIT ?
+          OFFSET ?
+         ) AS color
+   ORDER BY color.name ASC
+  '''
+# ---
+# name: test_to_many_filter_paginates_distinct_parents[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM (
+          SELECT color.name AS name,
+                 color.id AS id
+            FROM color AS color
+           WHERE EXISTS (
+                  SELECT 1
+                    FROM fruit AS fruit_1
+                   WHERE color.id = fruit_1.color_id
+                     AND fruit_1.sweetness <= %s
+                 )
+           ORDER BY color.name ASC
+           LIMIT %s,
+                 %s
+         ) AS color
+   ORDER BY color.name ASC
+  '''
+# ---
+# name: test_to_many_filter_paginates_distinct_parents[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM (
+          SELECT color.name AS name,
+                 color.id AS id
+            FROM color AS color
+           WHERE EXISTS (
+                  SELECT 1
+                    FROM fruit AS fruit_1
+                   WHERE color.id = fruit_1.color_id
+                     AND fruit_1.sweetness <= %(sweetness_1)s::INTEGER
+                 )
+           ORDER BY color.name ASC
+           LIMIT %(param_1)s::INTEGER
+          OFFSET %(param_2)s::INTEGER
+         ) AS color
+   ORDER BY color.name ASC
+  '''
+# ---

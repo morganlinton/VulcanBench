@@ -1,0 +1,611 @@
+# serializer version: 1
+# name: test_json_extract_inner_path[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> ?, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_inner_path[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> %s, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_inner_path[session-async-tracked-asyncpg_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST($1 AS JSONPATH)), CAST($2::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_inner_path[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST(%(param_1)s AS JSONPATH)), CAST(%(param_2)s::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key1-aiosqlite_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> ?, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key1-asyncmy_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> %s, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key1-asyncpg_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST($1 AS JSONPATH)), CAST($2::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key1-psycopg_async_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST(%(param_1)s AS JSONPATH)), CAST(%(param_2)s::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key3-aiosqlite_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> ?, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key3-asyncmy_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> %s, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key3-asyncpg_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST($1 AS JSONPATH)), CAST($2::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key3-psycopg_async_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST(%(param_1)s AS JSONPATH)), CAST(%(param_2)s::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key4-aiosqlite_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> ?, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key4-asyncmy_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> %s, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key4-asyncpg_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST($1 AS JSONPATH)), CAST($2::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-key4-psycopg_async_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST(%(param_1)s AS JSONPATH)), CAST(%(param_2)s::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-nested-aiosqlite_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> ?, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-nested-asyncmy_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(json_model.dict_col -> %s, json_object()) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-nested-asyncpg_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST($1 AS JSONPATH)), CAST($2::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_extract_path[session-async-tracked-nested-psycopg_async_engine]
+  '''
+  SELECT json_model.id,
+         coalesce(jsonb_path_query_first(json_model.dict_col, CAST(%(param_1)s AS JSONPATH)), CAST(%(param_2)s::JSONB AS JSONB)) AS coalesce_1
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-containedIn-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains(CAST(%s AS JSON), json_model.dict_col)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-containedIn-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_model.dict_col <@ $1::
+   JSONB
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-containedIn-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_model.dict_col <@ %(param_1)s::
+   JSONB
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-contains-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains(json_model.dict_col, CAST(%s AS JSON))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-contains-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_model.dict_col @> $1::
+   JSONB
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-contains-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_model.dict_col @> %(param_1)s::
+   JSONB
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NOT NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains_path(json_model.dict_col, %s, %s)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = $1::VARCHAR
+     AND (json_model.dict_col ? $2::VARCHAR)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-json-null-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NOT NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-json-null-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains_path(json_model.dict_col, %s, %s)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-json-null-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = $1::VARCHAR
+     AND (json_model.dict_col ? $2::VARCHAR)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-json-null-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR
+     AND (json_model.dict_col ? %(param_1)s::VARCHAR)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKey-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR
+     AND (json_model.dict_col ? %(param_1)s::VARCHAR)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NOT NULL
+     AND json_type(json_model.dict_col, ?) IS NOT NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains_path(json_model.dict_col, %s, %s, %s)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = $1::VARCHAR
+     AND (json_model.dict_col ? & CAST($2::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-json-null-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NOT NULL
+     AND json_type(json_model.dict_col, ?) IS NOT NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-json-null-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains_path(json_model.dict_col, %s, %s, %s)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-json-null-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = $1::VARCHAR
+     AND (json_model.dict_col ? & CAST($2::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-json-null-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR
+     AND (json_model.dict_col ? & CAST(%(param_1)s::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAll-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR
+     AND (json_model.dict_col ? & CAST(%(param_1)s::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NOT NULL
+      OR json_type(json_model.dict_col, ?) IS NOT NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains_path(json_model.dict_col, %s, %s, %s)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = $1::VARCHAR
+     AND (json_model.dict_col ? | CAST($2::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-json-null-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NOT NULL
+      OR json_type(json_model.dict_col, ?) IS NOT NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-json-null-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE json_contains_path(json_model.dict_col, %s, %s, %s)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-json-null-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = $1::VARCHAR
+     AND (json_model.dict_col ? | CAST($2::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-json-null-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR
+     AND (json_model.dict_col ? | CAST(%(param_1)s::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_filters[session-async-tracked-hasKeyAny-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   WHERE jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR
+     AND (json_model.dict_col ? | CAST(%(param_1)s::TEXT[] AS TEXT[]))
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-aiosqlite_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-asyncmy_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (json_contains_path(json_model.dict_col, %s, %s) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-asyncpg_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = $1::VARCHAR AND (json_model.dict_col ? $2::VARCHAR) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-json-null-aiosqlite_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE json_type(json_model.dict_col, ?) IS NULL
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-json-null-asyncmy_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (json_contains_path(json_model.dict_col, %s, %s) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-json-null-asyncpg_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = $1::VARCHAR AND (json_model.dict_col ? $2::VARCHAR) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-json-null-psycopg_async_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR AND (json_model.dict_col ? %(param_1)s::VARCHAR) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKey-psycopg_async_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR AND (json_model.dict_col ? %(param_1)s::VARCHAR) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAll-json-null-aiosqlite_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (json_type(json_model.dict_col, ?) IS NOT NULL AND json_type(json_model.dict_col, ?) IS NOT NULL AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAll-json-null-asyncmy_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (json_contains_path(json_model.dict_col, %s, %s, %s) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAll-json-null-asyncpg_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = $1::VARCHAR AND (json_model.dict_col ? & CAST($2::TEXT[] AS TEXT[])) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAll-json-null-psycopg_async_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR AND (json_model.dict_col ? & CAST(%(param_1)s::TEXT[] AS TEXT[])) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAny-json-null-aiosqlite_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT ((json_type(json_model.dict_col, ?) IS NOT NULL OR json_type(json_model.dict_col, ?) IS NOT NULL) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAny-json-null-asyncmy_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (json_contains_path(json_model.dict_col, %s, %s, %s) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAny-json-null-asyncpg_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = $1::VARCHAR AND (json_model.dict_col ? | CAST($2::TEXT[] AS TEXT[])) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_not_filters[session-async-tracked-hasKeyAny-json-null-psycopg_async_engine]
+  '''
+  SELECT json_model.id
+    FROM json_model AS json_model
+   WHERE NOT (jsonb_typeof(json_model.dict_col) = %(jsonb_typeof_1)s::VARCHAR AND (json_model.dict_col ? | CAST(%(param_1)s::TEXT[] AS TEXT[])) AND json_model.dict_col IS NOT NULL)
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_output[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_output[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_output[session-async-tracked-asyncpg_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---
+# name: test_json_output[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT json_model.dict_col,
+         json_model.id
+    FROM json_model AS json_model
+   ORDER BY json_model.id ASC
+  '''
+# ---

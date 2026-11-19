@@ -1,0 +1,55 @@
+# serializer version: 1
+# name: test_postgres_array_filters[session-async-tracked-containedIn-asyncpg_engine]
+  '''
+  SELECT array_model.array_str_col,
+         array_model.id
+    FROM array_model AS array_model
+   WHERE array_model.array_str_col <@ $1::TEXT[]
+   ORDER BY array_model.id ASC
+  '''
+# ---
+# name: test_postgres_array_filters[session-async-tracked-containedIn-psycopg_async_engine]
+  '''
+  SELECT array_model.array_str_col,
+         array_model.id
+    FROM array_model AS array_model
+   WHERE array_model.array_str_col <@ %(param_1)s::TEXT[]
+   ORDER BY array_model.id ASC
+  '''
+# ---
+# name: test_postgres_array_filters[session-async-tracked-contains-asyncpg_engine]
+  '''
+  SELECT array_model.array_str_col,
+         array_model.id
+    FROM array_model AS array_model
+   WHERE array_model.array_str_col @> $1::TEXT[]
+   ORDER BY array_model.id ASC
+  '''
+# ---
+# name: test_postgres_array_filters[session-async-tracked-contains-psycopg_async_engine]
+  '''
+  SELECT array_model.array_str_col,
+         array_model.id
+    FROM array_model AS array_model
+   WHERE array_model.array_str_col @> %(param_1)s::TEXT[]
+   ORDER BY array_model.id ASC
+  '''
+# ---
+# name: test_postgres_array_filters[session-async-tracked-overlap-asyncpg_engine]
+  '''
+  SELECT array_model.array_str_col,
+         array_model.id
+    FROM array_model AS array_model
+   WHERE array_model.array_str_col && $1::TEXT[]
+   ORDER BY array_model.id ASC
+  '''
+# ---
+# name: test_postgres_array_filters[session-async-tracked-overlap-psycopg_async_engine]
+  '''
+  SELECT array_model.array_str_col,
+         array_model.id
+    FROM array_model AS array_model
+   WHERE array_model.array_str_col && %(param_1)s::TEXT[]
+   ORDER BY array_model.id ASC
+  '''
+# ---

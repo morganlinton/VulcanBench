@@ -1,0 +1,63 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  name: Int!
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: Int!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type FruitTypeCustomName {
+  name: Int!
+  color: ColorType!
+}
+
+type Query {
+  """Fetch object from the FruitTypeCustomName collection by id"""
+  customFruit(id: UUID!): FruitTypeCustomName!
+}
+
+scalar UUID
+'''

@@ -1,0 +1,146 @@
+'''
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""
+Boolean expression to compare DateTime fields. All fields are combined with logical 'AND'
+"""
+input DateTimeComparison {
+  eq: DateTime
+  neq: DateTime
+  isNull: Boolean
+  in: [DateTime!]
+  nin: [DateTime!]
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+  year: IntOrderComparison
+  month: IntOrderComparison
+  day: IntOrderComparison
+  weekDay: IntOrderComparison
+  week: IntOrderComparison
+  quarter: IntOrderComparison
+  isoYear: IntOrderComparison
+  isoWeekDay: IntOrderComparison
+  hour: IntOrderComparison
+  minute: IntOrderComparison
+  second: IntOrderComparison
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input IntOrderComparison {
+  eq: Int
+  neq: Int
+  isNull: Boolean
+  in: [Int!]
+  nin: [Int!]
+  gt: Int
+  gte: Int
+  lt: Int
+  lte: Int
+}
+
+"""OrderComparison restricted to eq, gt"""
+input OrderComparisonIntEqGt {
+  eq: Int
+  gt: Int
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input ProjectFilter {
+  _and: [ProjectFilter!]! = []
+  _or: [ProjectFilter!]! = []
+  _not: ProjectFilter
+  ticketsAggregate: TicketAggregateFilter
+  tickets: _TicketBoolExp
+  name: TextComparison
+}
+
+"""GraphQL type"""
+type ProjectType {
+  name: String!
+}
+
+type Query {
+  """Fetch objects from the ProjectType collection"""
+  projects(filter: ProjectFilter = null): [ProjectType!]!
+}
+
+"""
+Boolean expression to compare String fields. All fields are combined with logical 'AND'
+"""
+input TextComparison {
+  eq: String
+  neq: String
+  isNull: Boolean
+  in: [String!]
+  nin: [String!]
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+  like: String
+  nlike: String
+  ilike: String
+  nilike: String
+  regexp: String
+  iregexp: String
+  nregexp: String
+  inregexp: String
+  startswith: String
+  endswith: String
+  contains: String
+  istartswith: String
+  iendswith: String
+  icontains: String
+}
+
+"""
+Boolean expression to compare aggregated fields. All fields are combined with logical 'AND'.
+"""
+input TicketAggregateFilter {
+  count: TicketAggregateFilterCount
+  maxDatetime: TicketAggregateFilterMaxdatetime
+}
+
+"""Boolean expression to compare count aggregation."""
+input TicketAggregateFilterCount {
+  arguments: [TicketAggregateFilterCountFieldsEnum!] = []
+  predicate: OrderComparisonIntEqGt!
+  distinct: Boolean = false
+}
+
+enum TicketAggregateFilterCountFieldsEnum {
+  id
+}
+
+"""Boolean expression to compare max aggregation."""
+input TicketAggregateFilterMaxdatetime {
+  arguments: [_TicketMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input _TicketBoolExp {
+  _and: [_TicketBoolExp!]! = []
+  _or: [_TicketBoolExp!]! = []
+  _not: _TicketBoolExp
+  project: ProjectFilter
+  id: IntOrderComparison
+  name: TextComparison
+  publishedAt: DateTimeComparison
+  projectId: IntOrderComparison
+}
+
+enum _TicketMinMaxDateTimeFieldsEnum {
+  publishedAt
+}
+'''

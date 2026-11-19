@@ -1,0 +1,62 @@
+'''
+"""Date (isoformat)"""
+scalar Date
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""Decimal (fixed-point)"""
+scalar Decimal
+
+"""
+The `Interval` scalar type represents a duration of time as specified by [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#Durations).
+"""
+scalar Interval @specifiedBy(url: "https://en.wikipedia.org/wiki/ISO_8601#Durations")
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+enum OrderByEnum {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+type Query {
+  """Fetch objects from the SQLDataTypesType collection"""
+  sqlDataTypes(orderBy: [SQLDataTypesOrderBy!] = null): [SQLDataTypesType!]!
+}
+
+"""Ordering input."""
+input SQLDataTypesOrderBy {
+  strCol: OrderByEnum
+  intCol: OrderByEnum
+}
+
+"""GraphQL type"""
+type SQLDataTypesType {
+  dateCol: Date!
+  timeCol: Time!
+  timeDeltaCol: Interval!
+  datetimeCol: DateTime!
+  strCol: String!
+  intCol: Int!
+  floatCol: Float!
+  decimalCol: Decimal!
+  boolCol: Boolean!
+  uuidCol: UUID!
+  dictCol(path: String): JSON
+  arrayStrCol: [String!]!
+  id: UUID!
+}
+
+"""Time (isoformat)"""
+scalar Time
+
+scalar UUID
+'''

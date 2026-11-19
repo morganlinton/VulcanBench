@@ -1,0 +1,14 @@
+'''
+"""GraphQL type"""
+type FruitType {
+  name: String!
+  sweetness: Int!
+  id: UUID!
+}
+
+type Query {
+  fruit: FruitType!
+}
+
+scalar UUID
+'''

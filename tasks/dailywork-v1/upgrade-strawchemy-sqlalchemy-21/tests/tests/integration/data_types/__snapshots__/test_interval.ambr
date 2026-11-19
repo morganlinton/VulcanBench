@@ -1,0 +1,177 @@
+# serializer version: 1
+# name: test_timedelta_components[session-async-tracked-days-aiosqlite_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE CAST(strftime(?, interval_model.time_delta_col) AS INTEGER) / (? + 0.0) = ?
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-days-asyncmy_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE unix_timestamp(interval_model.time_delta_col) / %s = %s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-days-asyncpg_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) / CAST($1::INTEGER AS NUMERIC) = $2::NUMERIC
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-days-psycopg_async_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) / CAST(%(param_1)s::INTEGER AS NUMERIC) = %(param_2)s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-hours-aiosqlite_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE CAST(strftime(?, interval_model.time_delta_col) AS INTEGER) / (? + 0.0) = ?
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-hours-asyncmy_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE unix_timestamp(interval_model.time_delta_col) / %s = %s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-hours-asyncpg_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) / CAST($1::INTEGER AS NUMERIC) = $2::NUMERIC
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-hours-psycopg_async_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) / CAST(%(param_1)s::INTEGER AS NUMERIC) = %(param_2)s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-minutes-aiosqlite_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE CAST(strftime(?, interval_model.time_delta_col) AS INTEGER) / (? + 0.0) = ?
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-minutes-asyncmy_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE unix_timestamp(interval_model.time_delta_col) / %s = %s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-minutes-asyncpg_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) / CAST($1::INTEGER AS NUMERIC) = $2::NUMERIC
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-minutes-psycopg_async_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) / CAST(%(param_1)s::INTEGER AS NUMERIC) = %(param_2)s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-totalSeconds-aiosqlite_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE CAST(strftime(?, interval_model.time_delta_col) AS INTEGER) = ?
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-totalSeconds-asyncmy_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE unix_timestamp(interval_model.time_delta_col) = %s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-totalSeconds-asyncpg_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) = $1::FLOAT
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_components[session-async-tracked-totalSeconds-psycopg_async_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   WHERE EXTRACT(EPOCH FROM interval_model.time_delta_col) = %(param_1)s
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_output[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_output[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_output[session-async-tracked-asyncpg_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   ORDER BY interval_model.id ASC
+  '''
+# ---
+# name: test_timedelta_output[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT interval_model.time_delta_col,
+         interval_model.id
+    FROM interval_model AS interval_model
+   ORDER BY interval_model.id ASC
+  '''
+# ---

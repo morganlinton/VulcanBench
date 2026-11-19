@@ -1,0 +1,25 @@
+'''
+union ChildUnion = GroupNode | TagNode
+
+"""GraphQL type"""
+type GroupNode {
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ParentNode {
+  id: UUID!
+  parent: ChildUnion
+}
+
+type Query {
+  parent: ParentNode
+}
+
+"""GraphQL type"""
+type TagNode {
+  id: UUID!
+}
+
+scalar UUID
+'''

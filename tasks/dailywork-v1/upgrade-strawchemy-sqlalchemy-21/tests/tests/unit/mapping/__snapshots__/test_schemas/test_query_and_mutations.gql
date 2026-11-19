@@ -1,0 +1,172 @@
+'''
+"""Create input"""
+input ColorFruitInput {
+  name: String!
+  sweetness: Int!
+  id: UUID
+}
+
+"""Conflict fields enum"""
+enum ColorFruitsConflictFields {
+  id
+  nameAndColorId
+}
+
+"""Identifier input"""
+input ColorFruitsIdFieldsInput {
+  id: UUID!
+}
+
+"""Add new or existing objects"""
+input ColorFruitsIdFieldsInputColorFruitInputColorFruitsUpdateFieldsColorFruitsConflictFieldsToManyCreateInput {
+  set: [ColorFruitsIdFieldsInput!]
+  add: [ColorFruitsIdFieldsInput!]
+  create: [ColorFruitInput!]
+  upsert: ColorFruitsIdFieldsInputColorFruitInputColorFruitsUpdateFieldsColorFruitsConflictFieldsToManyUpsertInput
+}
+
+"""Add new objects or update if existing"""
+input ColorFruitsIdFieldsInputColorFruitInputColorFruitsUpdateFieldsColorFruitsConflictFieldsToManyUpsertInput {
+  create: [ColorFruitInput!]!
+  conflictFields: ColorFruitsConflictFields!
+  updateFields: [ColorFruitsUpdateFields!]
+}
+
+"""Update fields enum"""
+enum ColorFruitsUpdateFields {
+  name
+  colorId
+  sweetness
+  id
+}
+
+"""Create input"""
+input ColorInput {
+  fruits: ColorFruitsIdFieldsInputColorFruitInputColorFruitsUpdateFieldsColorFruitsConflictFieldsToManyCreateInput
+  name: String!
+  id: UUID
+}
+
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""Conflict fields enum"""
+enum FruitColorConflictFields {
+  id
+}
+
+"""Identifier input"""
+input FruitColorIdFieldsInput {
+  id: UUID!
+}
+
+"""Add a new or existing object"""
+input FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneInput {
+  set: FruitColorIdFieldsInput
+  create: FruitColorInput
+  upsert: FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneUpsertInput
+}
+
+"""Add new object or update if existing"""
+input FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneUpsertInput {
+  create: FruitColorInput!
+  conflictFields: FruitColorConflictFields
+  updateFields: [FruitColorUpdateFields!]
+}
+
+"""Create input"""
+input FruitColorInput {
+  name: String!
+  id: UUID
+}
+
+"""Update fields enum"""
+enum FruitColorUpdateFields {
+  name
+  id
+}
+
+"""Create input"""
+input FruitInput {
+  color: FruitColorIdFieldsInputFruitColorInputFruitColorUpdateFieldsFruitColorConflictFieldsToOneInput = null
+  name: String!
+  sweetness: Int!
+  id: UUID
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+type Mutation {
+  """Create object in the FruitType collection"""
+  createFruit(data: FruitInput!): FruitType!
+
+  """Create objects in the FruitType collection"""
+  createFruits(data: [FruitInput!]!): [FruitType!]!
+
+  """Create object in the ColorType collection"""
+  createColor(data: ColorInput!): ColorType!
+
+  """Create objects in the ColorType collection"""
+  createColors(data: [ColorInput!]!): [ColorType!]!
+}
+
+type Query {
+  """Fetch object from the FruitType collection by id"""
+  fruit(id: UUID!): FruitType!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+
+  """Fetch object from the ColorType collection by id"""
+  color(id: UUID!): ColorType!
+
+  """Fetch objects from the ColorType collection"""
+  colors: [ColorType!]!
+}
+
+scalar UUID
+'''

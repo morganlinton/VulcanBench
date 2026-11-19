@@ -1,0 +1,26 @@
+# DailyWork v1 pilot image for upgrade-strawchemy-sqlalchemy-21: strawchemy's
+# locked test dependencies at the base commit (uv.lock, exported to
+# dailywork-strawchemy-requirements.txt) with SQLAlchemy 2.1.7, the upgrade
+# target. SQLAlchemy 2.0.54 (the version the base commit locks) is kept in
+# /opt/sqlalchemy-2.0 so the grader can check 2.0 compatibility:
+#   PYTHONPATH=/opt/sqlalchemy-2.0:... python -m pytest ...
+# strawchemy and its example apps come from the workspace via a .pth file;
+# the metadata-only dist-info lets importlib.metadata find the project.
+#
+# Build: docker build -t vulcanbench/sandbox:dailywork-strawchemy -f sandbox/Dockerfile.dailywork-strawchemy sandbox
+FROM vulcanbench/sandbox:base
+
+COPY dailywork-strawchemy-requirements.txt /opt/vb-requirements.txt
+RUN pip install --no-cache-dir -r /opt/vb-requirements.txt "sqlalchemy==2.1.7"
+RUN pip install --no-cache-dir --no-deps --target /opt/sqlalchemy-2.0 "sqlalchemy==2.0.54"
+
+ARG STRAWCHEMY_VERSION=0.24.0
+RUN set -eux; \
+    site="$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"; \
+    printf '/workspace/src\n/workspace/examples/testapp\n/workspace/examples/quickstart\n' > "$site/vulcanbench-workspace-src.pth"; \
+    dist="$site/strawchemy-${STRAWCHEMY_VERSION}.dist-info"; \
+    mkdir -p "$dist"; \
+    printf 'Metadata-Version: 2.1\nName: strawchemy\nVersion: %s\n' "$STRAWCHEMY_VERSION" > "$dist/METADATA"; \
+    : > "$dist/RECORD"; \
+    python -c 'import sqlalchemy; assert sqlalchemy.__version__ == "2.1.7"'; \
+    PYTHONPATH=/opt/sqlalchemy-2.0 python -c 'import sqlalchemy; assert sqlalchemy.__version__ == "2.0.54"'

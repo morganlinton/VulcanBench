@@ -1,0 +1,91 @@
+'''
+input GeoComparison {
+  containsGeometry: GeoJSON
+  withinGeometry: GeoJSON
+  isNull: Boolean
+}
+
+"""
+The `GeoJSON` type represents GeoJSON values as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSON @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+The `GeoJSONLineString` type represents GeoJSON LineString object as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSONLineString @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+The `GeoJSONMultiLineString` type represents GeoJSON MultiLineString object as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSONMultiLineString @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+The `GeoJSONMultiPoint` type represents GeoJSON MultiPoint object as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSONMultiPoint @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+The `GeoJSONMultiPolygon` type represents GeoJSON MultiPolygon object as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSONMultiPolygon @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+The `GeoJSONPoint` type represents GeoJSON Point object as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSONPoint @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+The `GeoJSONPolygon` type represents GeoJSON Polygon object as specified by [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+"""
+scalar GeoJSONPolygon @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc7946")
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input GeosFieldsFilter {
+  _and: [GeosFieldsFilter!]! = []
+  _or: [GeosFieldsFilter!]! = []
+  _not: GeosFieldsFilter
+  pointRequired: GeoComparison
+  point: GeoComparison
+  lineString: GeoComparison
+  polygon: GeoComparison
+  multiPoint: GeoComparison
+  multiLineString: GeoComparison
+  multiPolygon: GeoComparison
+  geometry: GeoComparison
+  id: UUIDGenericComparison
+}
+
+"""GraphQL type"""
+type GeosFieldsType {
+  pointRequired: GeoJSONPoint!
+  point: GeoJSONPoint
+  lineString: GeoJSONLineString
+  polygon: GeoJSONPolygon
+  multiPoint: GeoJSONMultiPoint
+  multiLineString: GeoJSONMultiLineString
+  multiPolygon: GeoJSONMultiPolygon
+  geometry: GeoJSON
+  id: UUID!
+}
+
+type Query {
+  """Fetch objects from the GeosFieldsType collection"""
+  geo(filter: GeosFieldsFilter = null): [GeosFieldsType!]!
+}
+
+scalar UUID
+
+"""
+Boolean expression to compare fields supporting equality comparisons. All fields are combined with logical 'AND'
+"""
+input UUIDGenericComparison {
+  eq: UUID
+  neq: UUID
+  isNull: Boolean
+  in: [UUID!]
+  nin: [UUID!]
+}
+'''

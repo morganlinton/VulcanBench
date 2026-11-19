@@ -1,0 +1,1035 @@
+'''
+"""Aggregation fields"""
+type CustomerAggregate {
+  count: Int
+  max: CustomerMinMaxFields!
+  min: CustomerMinMaxFields!
+  sum: CustomerSumFields!
+}
+
+"""
+Boolean expression to compare aggregated fields. All fields are combined with logical 'AND'.
+"""
+input CustomerAggregateBoolExp {
+  count: CustomerAggregateBoolExpCount
+  maxDatetime: CustomerAggregateBoolExpMaxdatetime
+  maxString: CustomerAggregateBoolExpMaxstring
+  minDatetime: CustomerAggregateBoolExpMindatetime
+  minString: CustomerAggregateBoolExpMinstring
+  sum: CustomerAggregateBoolExpSum
+}
+
+"""Boolean expression to compare count aggregation."""
+input CustomerAggregateBoolExpCount {
+  arguments: [CustomerCountFields!] = []
+  predicate: IntOrderComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input CustomerAggregateBoolExpMaxdatetime {
+  arguments: [CustomerMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input CustomerAggregateBoolExpMaxstring {
+  arguments: [CustomerMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input CustomerAggregateBoolExpMindatetime {
+  arguments: [CustomerMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input CustomerAggregateBoolExpMinstring {
+  arguments: [CustomerMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare sum aggregation."""
+input CustomerAggregateBoolExpSum {
+  arguments: [CustomerSumFieldsEnum!]!
+  predicate: FloatOrderComparison!
+  distinct: Boolean = false
+}
+
+"""GraphQL type"""
+input CustomerAggregateMinMaxDatetimeFieldsOrderBy {
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""GraphQL type"""
+input CustomerAggregateMinMaxStringFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input CustomerAggregateNumericFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input CustomerAggregateOrderBy {
+  count: OrderByEnum
+  maxDatetime: CustomerAggregateMinMaxDatetimeFieldsOrderBy
+  maxString: CustomerAggregateMinMaxStringFieldsOrderBy
+  minDatetime: CustomerAggregateMinMaxDatetimeFieldsOrderBy
+  minString: CustomerAggregateMinMaxStringFieldsOrderBy
+  sum: CustomerAggregateNumericFieldsOrderBy
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input CustomerBoolExp {
+  _and: [CustomerBoolExp!]! = []
+  _or: [CustomerBoolExp!]! = []
+  _not: CustomerBoolExp
+  projectsAggregate: ProjectAggregateBoolExp
+  projects: ProjectBoolExp
+  name: TextComparison
+  id: UUIDGenericComparison
+  createdAt: DateTimeComparison
+  updatedAt: DateTimeComparison
+}
+
+enum CustomerCountFields {
+  name
+  id
+  createdAt
+  updatedAt
+}
+
+"""Create input"""
+input CustomerCreate {
+  projects: CustomerProjectsIdFieldsInputProjectCreateCustomerProjectsUpdateFieldsCustomerProjectsConflictFieldsToManyCreateInput
+  name: String!
+  id: UUID
+}
+
+enum CustomerMinMaxDateTimeFieldsEnum {
+  createdAt
+  updatedAt
+}
+
+"""GraphQL type"""
+type CustomerMinMaxFields {
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum CustomerMinMaxStringFieldsEnum {
+  name
+}
+
+"""Ordering input."""
+input CustomerOrderBy {
+  projectsAggregate: ProjectAggregateOrderBy
+  projects: ProjectOrderBy
+  name: OrderByEnum
+  id: OrderByEnum
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""Conflict fields enum"""
+enum CustomerProjectsConflictFields {
+  id
+}
+
+"""Identifier input"""
+input CustomerProjectsIdFieldsInput {
+  id: UUID!
+}
+
+"""Add new or existing objects"""
+input CustomerProjectsIdFieldsInputProjectCreateCustomerProjectsUpdateFieldsCustomerProjectsConflictFieldsToManyCreateInput {
+  set: [CustomerProjectsIdFieldsInput!]
+  add: [CustomerProjectsIdFieldsInput!]
+  create: [ProjectCreate!]
+  upsert: CustomerProjectsIdFieldsInputProjectCreateCustomerProjectsUpdateFieldsCustomerProjectsConflictFieldsToManyUpsertInput
+}
+
+"""Add new objects or update if existing"""
+input CustomerProjectsIdFieldsInputProjectCreateCustomerProjectsUpdateFieldsCustomerProjectsConflictFieldsToManyUpsertInput {
+  create: [ProjectCreate!]!
+  conflictFields: CustomerProjectsConflictFields!
+  updateFields: [CustomerProjectsUpdateFields!]
+}
+
+"""Update fields enum"""
+enum CustomerProjectsUpdateFields {
+  tagId
+  name
+  id
+}
+
+"""GraphQL type"""
+type CustomerSumFields {
+  name: String
+}
+
+enum CustomerSumFieldsEnum {
+  name
+}
+
+"""GraphQL type"""
+type CustomerType {
+  projectsAggregate: ProjectAggregate!
+
+  """Fetch objects from the ProjectType collection"""
+  projects(filter: ProjectFilter = null, orderBy: [ProjectOrder!] = null): [ProjectType!]!
+  name: String!
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""
+Boolean expression to compare DateTime fields. All fields are combined with logical 'AND'
+"""
+input DateTimeComparison {
+  eq: DateTime
+  neq: DateTime
+  isNull: Boolean
+  in: [DateTime!]
+  nin: [DateTime!]
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+  year: IntOrderComparison
+  month: IntOrderComparison
+  day: IntOrderComparison
+  weekDay: IntOrderComparison
+  week: IntOrderComparison
+  quarter: IntOrderComparison
+  isoYear: IntOrderComparison
+  isoWeekDay: IntOrderComparison
+  hour: IntOrderComparison
+  minute: IntOrderComparison
+  second: IntOrderComparison
+}
+
+"""Base interface for expected errors"""
+interface ErrorType {
+  id: String!
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input FloatOrderComparison {
+  eq: Float
+  neq: Float
+  isNull: Boolean
+  in: [Float!]
+  nin: [Float!]
+  gt: Float
+  gte: Float
+  lt: Float
+  lte: Float
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input IntOrderComparison {
+  eq: Int
+  neq: Int
+  isNull: Boolean
+  in: [Int!]
+  nin: [Int!]
+  gt: Int
+  gte: Int
+  lt: Int
+  lte: Int
+}
+
+"""Indicate validation error type and location."""
+type LocalizedErrorType implements ErrorType {
+  id: String!
+  loc: [String!]!
+  message: String!
+  type: String!
+}
+
+"""Aggregation fields"""
+type MilestoneAggregate {
+  count: Int
+  max: MilestoneMinMaxFields!
+  min: MilestoneMinMaxFields!
+  sum: MilestoneSumFields!
+}
+
+"""
+Boolean expression to compare aggregated fields. All fields are combined with logical 'AND'.
+"""
+input MilestoneAggregateBoolExp {
+  count: MilestoneAggregateBoolExpCount
+  maxDatetime: MilestoneAggregateBoolExpMaxdatetime
+  maxString: MilestoneAggregateBoolExpMaxstring
+  minDatetime: MilestoneAggregateBoolExpMindatetime
+  minString: MilestoneAggregateBoolExpMinstring
+  sum: MilestoneAggregateBoolExpSum
+}
+
+"""Boolean expression to compare count aggregation."""
+input MilestoneAggregateBoolExpCount {
+  arguments: [MilestoneCountFields!] = []
+  predicate: IntOrderComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input MilestoneAggregateBoolExpMaxdatetime {
+  arguments: [MilestoneMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input MilestoneAggregateBoolExpMaxstring {
+  arguments: [MilestoneMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input MilestoneAggregateBoolExpMindatetime {
+  arguments: [MilestoneMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input MilestoneAggregateBoolExpMinstring {
+  arguments: [MilestoneMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare sum aggregation."""
+input MilestoneAggregateBoolExpSum {
+  arguments: [MilestoneSumFieldsEnum!]!
+  predicate: FloatOrderComparison!
+  distinct: Boolean = false
+}
+
+"""GraphQL type"""
+input MilestoneAggregateMinMaxDatetimeFieldsOrderBy {
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""GraphQL type"""
+input MilestoneAggregateMinMaxStringFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input MilestoneAggregateNumericFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input MilestoneAggregateOrderBy {
+  count: OrderByEnum
+  maxDatetime: MilestoneAggregateMinMaxDatetimeFieldsOrderBy
+  maxString: MilestoneAggregateMinMaxStringFieldsOrderBy
+  minDatetime: MilestoneAggregateMinMaxDatetimeFieldsOrderBy
+  minString: MilestoneAggregateMinMaxStringFieldsOrderBy
+  sum: MilestoneAggregateNumericFieldsOrderBy
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input MilestoneBoolExp {
+  _and: [MilestoneBoolExp!]! = []
+  _or: [MilestoneBoolExp!]! = []
+  _not: MilestoneBoolExp
+  project: ProjectBoolExp
+  name: TextComparison
+  projectId: UUIDGenericComparison
+  id: UUIDGenericComparison
+  createdAt: DateTimeComparison
+  updatedAt: DateTimeComparison
+}
+
+enum MilestoneCountFields {
+  name
+  projectId
+  id
+  createdAt
+  updatedAt
+}
+
+"""Create input"""
+input MilestoneCreate {
+  project: MilestoneProjectIdFieldsInputProjectCreateMilestoneProjectUpdateFieldsMilestoneProjectConflictFieldsToOneInput = null
+  name: String!
+  id: UUID
+}
+
+enum MilestoneMinMaxDateTimeFieldsEnum {
+  createdAt
+  updatedAt
+}
+
+"""GraphQL type"""
+type MilestoneMinMaxFields {
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum MilestoneMinMaxStringFieldsEnum {
+  name
+}
+
+"""Ordering input."""
+input MilestoneOrderBy {
+  project: ProjectOrderBy
+  name: OrderByEnum
+  projectId: OrderByEnum
+  id: OrderByEnum
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""Conflict fields enum"""
+enum MilestoneProjectConflictFields {
+  id
+}
+
+"""Identifier input"""
+input MilestoneProjectIdFieldsInput {
+  id: UUID!
+}
+
+"""Add a new or existing object"""
+input MilestoneProjectIdFieldsInputProjectCreateMilestoneProjectUpdateFieldsMilestoneProjectConflictFieldsToOneInput {
+  set: MilestoneProjectIdFieldsInput
+  create: ProjectCreate
+  upsert: MilestoneProjectIdFieldsInputProjectCreateMilestoneProjectUpdateFieldsMilestoneProjectConflictFieldsToOneUpsertInput
+}
+
+"""Add new object or update if existing"""
+input MilestoneProjectIdFieldsInputProjectCreateMilestoneProjectUpdateFieldsMilestoneProjectConflictFieldsToOneUpsertInput {
+  create: ProjectCreate!
+  conflictFields: MilestoneProjectConflictFields
+  updateFields: [MilestoneProjectUpdateFields!]
+}
+
+"""Update fields enum"""
+enum MilestoneProjectUpdateFields {
+  tagId
+  name
+  id
+}
+
+"""GraphQL type"""
+type MilestoneSumFields {
+  name: String
+}
+
+enum MilestoneSumFieldsEnum {
+  name
+}
+
+"""GraphQL type"""
+type MilestoneType {
+  name: String!
+}
+
+type Mutation {
+  """Create object in the TicketType collection"""
+  createTicket(data: TicketCreate!): TicketTypeValidationErrorType!
+
+  """Create objects in the TicketType collection"""
+  createTickets(data: [TicketCreate!]!): [TicketType!]!
+
+  """Upsert object in the TicketType collection"""
+  upsertTicket(updateFields: [TicketUpsertFields!] = null, conflictFields: TicketUpsertConflictFields = null, data: TicketCreate!): TicketType!
+
+  """Create object in the ProjectType collection"""
+  createProject(data: ProjectCreate!): ProjectType!
+
+  """Create objects in the ProjectType collection"""
+  createProjects(data: [ProjectCreate!]!): [ProjectType!]!
+
+  """Create object in the MilestoneType collection"""
+  createMilestone(data: MilestoneCreate!): MilestoneType!
+
+  """Update object in the TicketType collection"""
+  updateTicketsByIds(data: TicketUpdate!, filter: TicketFilter = null): TicketType!
+
+  """Update objects in the TicketType collection"""
+  updateTickets(data: TicketPartial!, filter: TicketFilter = null): [TicketType!]!
+
+  """Delete objects in the TicketType collection"""
+  deleteTicket(filter: TicketFilter!): [TicketType!]!
+
+  """Create object in the CustomerType collection"""
+  createCustomer(data: CustomerCreate!): CustomerType!
+}
+
+enum OrderByEnum {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+"""Aggregation fields"""
+type ProjectAggregate {
+  count: Int
+  max: ProjectMinMaxFields!
+  min: ProjectMinMaxFields!
+  sum: ProjectSumFields!
+}
+
+"""
+Boolean expression to compare aggregated fields. All fields are combined with logical 'AND'.
+"""
+input ProjectAggregateBoolExp {
+  count: ProjectAggregateBoolExpCount
+  maxDatetime: ProjectAggregateBoolExpMaxdatetime
+  maxString: ProjectAggregateBoolExpMaxstring
+  minDatetime: ProjectAggregateBoolExpMindatetime
+  minString: ProjectAggregateBoolExpMinstring
+  sum: ProjectAggregateBoolExpSum
+}
+
+"""Boolean expression to compare count aggregation."""
+input ProjectAggregateBoolExpCount {
+  arguments: [ProjectCountFields!] = []
+  predicate: IntOrderComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input ProjectAggregateBoolExpMaxdatetime {
+  arguments: [ProjectMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input ProjectAggregateBoolExpMaxstring {
+  arguments: [ProjectMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input ProjectAggregateBoolExpMindatetime {
+  arguments: [ProjectMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input ProjectAggregateBoolExpMinstring {
+  arguments: [ProjectMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare sum aggregation."""
+input ProjectAggregateBoolExpSum {
+  arguments: [ProjectSumFieldsEnum!]!
+  predicate: FloatOrderComparison!
+  distinct: Boolean = false
+}
+
+"""GraphQL type"""
+input ProjectAggregateMinMaxDatetimeFieldsOrderBy {
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""GraphQL type"""
+input ProjectAggregateMinMaxStringFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input ProjectAggregateNumericFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input ProjectAggregateOrderBy {
+  count: OrderByEnum
+  maxDatetime: ProjectAggregateMinMaxDatetimeFieldsOrderBy
+  maxString: ProjectAggregateMinMaxStringFieldsOrderBy
+  minDatetime: ProjectAggregateMinMaxDatetimeFieldsOrderBy
+  minString: ProjectAggregateMinMaxStringFieldsOrderBy
+  sum: ProjectAggregateNumericFieldsOrderBy
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input ProjectBoolExp {
+  _and: [ProjectBoolExp!]! = []
+  _or: [ProjectBoolExp!]! = []
+  _not: ProjectBoolExp
+  ticketsAggregate: TicketAggregateBoolExp
+  tickets: TicketFilter
+  milestonesAggregate: MilestoneAggregateBoolExp
+  milestones: MilestoneBoolExp
+  tag: TagBoolExp
+  customersAggregate: CustomerAggregateBoolExp
+  customers: CustomerBoolExp
+  tagId: UUIDGenericComparison
+  name: TextComparison
+  id: UUIDGenericComparison
+  createdAt: DateTimeComparison
+  updatedAt: DateTimeComparison
+}
+
+enum ProjectCountFields {
+  tagId
+  name
+  id
+  createdAt
+  updatedAt
+}
+
+"""Create input"""
+input ProjectCreate {
+  name: String!
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input ProjectFilter {
+  _and: [ProjectFilter!]! = []
+  _or: [ProjectFilter!]! = []
+  not_: ProjectFilter
+  ticketsAggregate: TicketAggregateBoolExp
+  tickets: TicketFilter
+  milestonesAggregate: MilestoneAggregateBoolExp
+  milestones: MilestoneBoolExp
+  tag: TagBoolExp
+  customersAggregate: CustomerAggregateBoolExp
+  customers: CustomerBoolExp
+  tagId: UUIDGenericComparison
+  name: TextComparison
+  id: UUIDGenericComparison
+  createdAt: DateTimeComparison
+  updatedAt: DateTimeComparison
+}
+
+enum ProjectMinMaxDateTimeFieldsEnum {
+  createdAt
+  updatedAt
+}
+
+"""GraphQL type"""
+type ProjectMinMaxFields {
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum ProjectMinMaxStringFieldsEnum {
+  name
+}
+
+"""Ordering input."""
+input ProjectOrder {
+  ticketsAggregate: TicketAggregateOrderBy
+  tickets: TicketOrder
+  milestonesAggregate: MilestoneAggregateOrderBy
+  milestones: MilestoneOrderBy
+  tag: TagOrderBy
+  customersAggregate: CustomerAggregateOrderBy
+  customers: CustomerOrderBy
+  tagId: OrderByEnum
+  name: OrderByEnum
+  id: OrderByEnum
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""Ordering input."""
+input ProjectOrderBy {
+  ticketsAggregate: TicketAggregateOrderBy
+  tickets: TicketOrder
+  milestonesAggregate: MilestoneAggregateOrderBy
+  milestones: MilestoneOrderBy
+  tag: TagOrderBy
+  customersAggregate: CustomerAggregateOrderBy
+  customers: CustomerOrderBy
+  tagId: OrderByEnum
+  name: OrderByEnum
+  id: OrderByEnum
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""GraphQL type"""
+type ProjectSumFields {
+  name: String
+}
+
+enum ProjectSumFieldsEnum {
+  name
+}
+
+"""GraphQL type"""
+type ProjectType {
+  ticketsAggregate: TicketAggregate!
+
+  """Fetch objects from the TicketType collection"""
+  tickets(filter: TicketFilter = null, orderBy: [TicketOrder!] = null): [TicketType!]!
+  milestonesAggregate: MilestoneAggregate!
+
+  """Fetch objects from the MilestoneType collection"""
+  milestones: [MilestoneType!]!
+  tag: TagType
+  customersAggregate: CustomerAggregate!
+
+  """Fetch objects from the CustomerType collection"""
+  customers: [CustomerType!]!
+  tagId: UUID
+  name: String!
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  """Fetch object from the TicketType collection by id"""
+  ticket(id: UUID!): TicketType!
+
+  """Fetch objects from the TicketType collection"""
+  tickets(filter: TicketFilter = null, orderBy: [TicketOrder!] = null): [TicketType!]!
+
+  """Fetch object from the ProjectType collection by id"""
+  project(id: UUID!): ProjectType!
+
+  """Fetch objects from the ProjectType collection"""
+  projects(filter: ProjectFilter = null, orderBy: [ProjectOrder!] = null): [ProjectType!]!
+
+  """Fetch objects from the MilestoneType collection"""
+  milestones: [MilestoneType!]!
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input TagBoolExp {
+  _and: [TagBoolExp!]! = []
+  _or: [TagBoolExp!]! = []
+  _not: TagBoolExp
+  name: TextComparison
+  id: UUIDGenericComparison
+  createdAt: DateTimeComparison
+  updatedAt: DateTimeComparison
+}
+
+"""Ordering input."""
+input TagOrderBy {
+  name: OrderByEnum
+  id: OrderByEnum
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""GraphQL type"""
+type TagType {
+  name: String!
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Boolean expression to compare String fields. All fields are combined with logical 'AND'
+"""
+input TextComparison {
+  eq: String
+  neq: String
+  isNull: Boolean
+  in: [String!]
+  nin: [String!]
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+  like: String
+  nlike: String
+  ilike: String
+  nilike: String
+  regexp: String
+  iregexp: String
+  nregexp: String
+  inregexp: String
+  startswith: String
+  endswith: String
+  contains: String
+  istartswith: String
+  iendswith: String
+  icontains: String
+}
+
+"""Aggregation fields"""
+type TicketAggregate {
+  count: Int
+  max: TicketMinMaxFields!
+  min: TicketMinMaxFields!
+  sum: TicketSumFields!
+}
+
+"""
+Boolean expression to compare aggregated fields. All fields are combined with logical 'AND'.
+"""
+input TicketAggregateBoolExp {
+  count: TicketAggregateBoolExpCount
+  maxDatetime: TicketAggregateBoolExpMaxdatetime
+  maxString: TicketAggregateBoolExpMaxstring
+  minDatetime: TicketAggregateBoolExpMindatetime
+  minString: TicketAggregateBoolExpMinstring
+  sum: TicketAggregateBoolExpSum
+}
+
+"""Boolean expression to compare count aggregation."""
+input TicketAggregateBoolExpCount {
+  arguments: [TicketCountFields!] = []
+  predicate: IntOrderComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input TicketAggregateBoolExpMaxdatetime {
+  arguments: [TicketMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input TicketAggregateBoolExpMaxstring {
+  arguments: [TicketMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input TicketAggregateBoolExpMindatetime {
+  arguments: [TicketMinMaxDateTimeFieldsEnum!]!
+  predicate: DateTimeComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input TicketAggregateBoolExpMinstring {
+  arguments: [TicketMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare sum aggregation."""
+input TicketAggregateBoolExpSum {
+  arguments: [TicketSumFieldsEnum!]!
+  predicate: FloatOrderComparison!
+  distinct: Boolean = false
+}
+
+"""GraphQL type"""
+input TicketAggregateMinMaxDatetimeFieldsOrderBy {
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""GraphQL type"""
+input TicketAggregateMinMaxStringFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input TicketAggregateNumericFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input TicketAggregateOrderBy {
+  count: OrderByEnum
+  maxDatetime: TicketAggregateMinMaxDatetimeFieldsOrderBy
+  maxString: TicketAggregateMinMaxStringFieldsOrderBy
+  minDatetime: TicketAggregateMinMaxDatetimeFieldsOrderBy
+  minString: TicketAggregateMinMaxStringFieldsOrderBy
+  sum: TicketAggregateNumericFieldsOrderBy
+}
+
+enum TicketCountFields {
+  name
+  projectId
+  id
+  createdAt
+  updatedAt
+}
+
+"""Create input"""
+input TicketCreate {
+  project: TicketProjectIdFieldsInputTicketProjectInputTicketProjectUpdateFieldsTicketProjectConflictFieldsToOneInput = null
+  name: String!
+  id: UUID
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input TicketFilter {
+  _and: [TicketFilter!]! = []
+  _or: [TicketFilter!]! = []
+  _not: TicketFilter
+  project: ProjectBoolExp
+  name: TextComparison
+  projectId: UUIDGenericComparison
+  id: UUIDGenericComparison
+  createdAt: DateTimeComparison
+  updatedAt: DateTimeComparison
+}
+
+enum TicketMinMaxDateTimeFieldsEnum {
+  createdAt
+  updatedAt
+}
+
+"""GraphQL type"""
+type TicketMinMaxFields {
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum TicketMinMaxStringFieldsEnum {
+  name
+}
+
+"""Ordering input."""
+input TicketOrder {
+  project: ProjectOrderBy
+  name: OrderByEnum
+  projectId: OrderByEnum
+  id: OrderByEnum
+  createdAt: OrderByEnum
+  updatedAt: OrderByEnum
+}
+
+"""Filter update input"""
+input TicketPartial {
+  project: TicketProjectIdFieldsInputTicketProjectInputTicketProjectUpdateFieldsTicketProjectConflictFieldsToOneInput
+  name: String
+  id: UUID
+}
+
+"""Conflict fields enum"""
+enum TicketProjectConflictFields {
+  id
+}
+
+"""Identifier input"""
+input TicketProjectIdFieldsInput {
+  id: UUID!
+}
+
+"""Add a new or existing object"""
+input TicketProjectIdFieldsInputTicketProjectInputTicketProjectUpdateFieldsTicketProjectConflictFieldsToOneInput {
+  set: TicketProjectIdFieldsInput
+  create: ProjectCreate
+  upsert: TicketProjectIdFieldsInputTicketProjectInputTicketProjectUpdateFieldsTicketProjectConflictFieldsToOneUpsertInput
+}
+
+"""Add new object or update if existing"""
+input TicketProjectIdFieldsInputTicketProjectInputTicketProjectUpdateFieldsTicketProjectConflictFieldsToOneUpsertInput {
+  create: ProjectCreate!
+  conflictFields: TicketProjectConflictFields
+  updateFields: [TicketProjectUpdateFields!]
+}
+
+"""Update fields enum"""
+enum TicketProjectUpdateFields {
+  tagId
+  name
+  id
+}
+
+"""GraphQL type"""
+type TicketSumFields {
+  name: String
+}
+
+enum TicketSumFieldsEnum {
+  name
+}
+
+"""GraphQL type"""
+type TicketType {
+  project: ProjectType
+  name: String!
+  projectId: UUID
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+union TicketTypeValidationErrorType = TicketType | ValidationErrorType
+
+"""Identifier update input"""
+input TicketUpdate {
+  project: TicketProjectIdFieldsInputTicketProjectInputTicketProjectUpdateFieldsTicketProjectConflictFieldsToOneInput
+  name: String
+  id: UUID!
+}
+
+enum TicketUpsertConflictFields {
+  id
+}
+
+enum TicketUpsertFields {
+  name
+  projectId
+  id
+}
+
+scalar UUID
+
+"""
+Boolean expression to compare fields supporting equality comparisons. All fields are combined with logical 'AND'
+"""
+input UUIDGenericComparison {
+  eq: UUID
+  neq: UUID
+  isNull: Boolean
+  in: [UUID!]
+  nin: [UUID!]
+}
+
+"""Input is malformed or invalid."""
+type ValidationErrorType implements ErrorType {
+  id: String!
+  errors: [LocalizedErrorType!]!
+}
+'''

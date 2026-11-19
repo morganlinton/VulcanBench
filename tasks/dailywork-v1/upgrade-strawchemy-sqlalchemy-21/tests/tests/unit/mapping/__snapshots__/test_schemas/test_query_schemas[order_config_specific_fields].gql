@@ -1,0 +1,78 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits(orderBy: [FruitOrderBy4!] = null): [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""Ordering input."""
+input FruitOrderBy2 {
+  name: OrderByEnum
+  sweetness: OrderByEnum
+}
+
+"""Ordering input."""
+input FruitOrderBy4 {
+  name: OrderByEnum
+  sweetness: OrderByEnum
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+enum OrderByEnum {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+type Query {
+  """Fetch objects from the FruitType collection"""
+  fruits(orderBy: [FruitOrderBy2!] = null): [FruitType!]!
+}
+
+scalar UUID
+'''

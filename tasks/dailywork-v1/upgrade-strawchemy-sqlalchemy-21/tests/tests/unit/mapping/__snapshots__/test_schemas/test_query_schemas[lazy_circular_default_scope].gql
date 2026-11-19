@@ -1,0 +1,25 @@
+'''
+"""GraphQL type"""
+type ANode {
+  name: String!
+  id: UUID!
+  b: BNode!
+}
+
+"""GraphQL type"""
+type BNode {
+  name: String!
+  id: UUID!
+  a: ANode!
+}
+
+type Query {
+  """Fetch object from the ANode collection by id"""
+  a(id: UUID!): ANode!
+
+  """Fetch object from the BNode collection by id"""
+  b(id: UUID!): BNode!
+}
+
+scalar UUID
+'''

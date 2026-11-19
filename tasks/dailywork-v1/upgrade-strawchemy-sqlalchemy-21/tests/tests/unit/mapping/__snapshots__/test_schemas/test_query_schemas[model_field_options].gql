@@ -1,0 +1,116 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  """Plain relation field."""
+  fruits: [ShadedFruitType!]!
+  fruitsAggregate: FruitAggregate!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""Ordering input."""
+input FruitOrderBy1 {
+  name: OrderByEnum
+  id: OrderByEnum
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  name: String!
+  id: UUID!
+}
+
+enum OrderByEnum {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+"""GraphQL type"""
+type PaginatedColorType {
+  """Inherits type-level pagination."""
+  fruits(limit: Int = 100, offset: Int! = 0): [FruitType!]!
+  fruitsAggregate: FruitAggregate!
+  id: UUID!
+}
+
+type Query {
+  """Fetch objects from the ColorType collection"""
+  colors: [ColorType!]!
+
+  """Fetch objects from the RenamedColorType collection"""
+  renamedColors: [RenamedColorType!]!
+
+  """Fetch objects from the PaginatedColorType collection"""
+  paginatedColors: [PaginatedColorType!]!
+
+  """Fetch objects from the UnpaginatedColorType collection"""
+  unpaginatedColors: [UnpaginatedColorType!]!
+}
+
+"""GraphQL type"""
+type RenamedColorType {
+  """Renamed relation field."""
+  items(limit: Int = 100, offset: Int! = 0, orderBy: [FruitOrderBy1!] = null): [FruitType!]!
+  itemsAggregate: FruitAggregate!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ShadeType {
+  name: String!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ShadedFruitType {
+  """Fruit name."""
+  name: String! @deprecated(reason: "Use id.")
+
+  """To-one relation."""
+  shade: ShadeType!
+  id: UUID!
+}
+
+scalar UUID
+
+"""GraphQL type"""
+type UnpaginatedColorType {
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  fruitsAggregate: FruitAggregate!
+  id: UUID!
+}
+'''

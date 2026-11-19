@@ -1,0 +1,162 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: Int!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type DepartmentAggregate {
+  count: Int
+  max: DepartmentMinMaxFields!
+  min: DepartmentMinMaxFields!
+  sum: DepartmentSumFields!
+}
+
+"""GraphQL type"""
+type DepartmentMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type DepartmentSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type DepartmentType {
+  usersAggregate: UserAggregate!
+
+  """Fetch objects from the UserType collection"""
+  users: [UserType!]!
+  name: Int!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: Int!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type GroupAggregate {
+  count: Int
+  max: GroupMinMaxFields!
+  min: GroupMinMaxFields!
+  sum: GroupSumFields!
+}
+
+"""GraphQL type"""
+type GroupMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type GroupSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type GroupType {
+  name: Int!
+  tag: TagType!
+  usersAggregate: UserAggregate!
+
+  """Fetch objects from the UserType collection"""
+  users: [UserType!]!
+  color: ColorType!
+  tagId: UUID!
+  colorId: UUID!
+  id: UUID!
+}
+
+type Query {
+  """Fetch object from the UserType collection by id"""
+  user(id: UUID!): UserType!
+
+  """Fetch object from the TagType collection by id"""
+  tag(id: UUID!): TagType!
+}
+
+"""GraphQL type"""
+type TagType {
+  name: Int!
+  groupsAggregate: GroupAggregate!
+
+  """Fetch objects from the GroupType collection"""
+  groups: [GroupType!]!
+  id: UUID!
+}
+
+scalar UUID
+
+"""Aggregation fields"""
+type UserAggregate {
+  count: Int
+  max: UserMinMaxFields!
+  min: UserMinMaxFields!
+  sum: UserSumFields!
+}
+
+"""GraphQL type"""
+type UserMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type UserSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type UserType {
+  name: Int!
+  group: GroupType!
+  tag: TagType!
+  departmentsAggregate: DepartmentAggregate!
+
+  """Fetch objects from the DepartmentType collection"""
+  departments: [DepartmentType!]!
+  groupId: UUID
+  tagId: UUID
+  id: UUID!
+}
+'''

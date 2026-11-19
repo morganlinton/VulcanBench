@@ -1,0 +1,168 @@
+# serializer version: 1
+# name: test_custom_apply_filter_in_strategy[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.id IN (
+          SELECT custom_filter.id
+            FROM fruit AS custom_filter
+           WHERE custom_filter.sweetness >= ?
+         )
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_custom_apply_filter_in_strategy[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.id IN (
+          SELECT custom_filter.id
+            FROM fruit AS custom_filter
+           WHERE custom_filter.sweetness >= %s
+         )
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_custom_apply_filter_in_strategy[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   WHERE fruit.id IN (
+          SELECT custom_filter.id
+            FROM fruit AS custom_filter
+           WHERE custom_filter.sweetness >= %(sweetness_1)s::INTEGER
+         )
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_custom_apply_filter_sweeter_than[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   WHERE EXISTS (
+          SELECT custom_filter.id
+            FROM fruit AS custom_filter
+           WHERE custom_filter.sweetness >= ?
+             AND custom_filter.id = fruit.id
+         )
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_custom_apply_filter_sweeter_than[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   WHERE EXISTS (
+          SELECT custom_filter.id
+            FROM fruit AS custom_filter
+           WHERE custom_filter.sweetness >= %s
+             AND custom_filter.id = fruit.id
+         )
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_custom_apply_filter_sweeter_than[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT fruit.id
+    FROM fruit AS fruit
+   WHERE EXISTS (
+          SELECT custom_filter.id
+            FROM fruit AS custom_filter
+           WHERE custom_filter.sweetness >= %(sweetness_1)s::INTEGER
+             AND custom_filter.id = fruit.id
+         )
+   ORDER BY fruit.id ASC
+  '''
+# ---
+# name: test_declared_aggregate_count_filter[session-async-tracked-aiosqlite_engine]
+  '''
+  WITH anon_1 AS (
+          SELECT count(fruit_1.id) AS count_1,
+                 fruit_1.color_id AS color_id
+            FROM fruit AS fruit_1
+           WHERE fruit_1.color_id IS NOT NULL
+           GROUP BY fruit_1.color_id
+         ) SELECT color.id
+    FROM color AS color
+    LEFT OUTER JOIN anon_1
+      ON color.id = anon_1.color_id
+   WHERE coalesce(anon_1.count_1, ?) > ?
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_declared_aggregate_count_filter[session-async-tracked-asyncmy_engine]
+  '''
+  WITH anon_1 AS (
+          SELECT count(fruit_1.id) AS count_1,
+                 fruit_1.color_id AS color_id
+            FROM fruit AS fruit_1
+           WHERE fruit_1.color_id IS NOT NULL
+           GROUP BY fruit_1.color_id
+         ) SELECT color.id
+    FROM color AS color
+    LEFT OUTER JOIN anon_1
+      ON color.id = anon_1.color_id
+   WHERE coalesce(anon_1.count_1, %s) > %s
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_declared_aggregate_count_filter[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.id
+    FROM color AS color
+    JOIN LATERAL (
+          SELECT count(fruit_1.id) AS count_1
+            FROM fruit AS fruit_1
+           WHERE color.id = fruit_1.color_id
+         ) AS anon_1
+      ON TRUE
+   WHERE anon_1.count_1 > %(param_1)s::INTEGER
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_declared_aggregate_sum_filter[session-async-tracked-aiosqlite_engine]
+  '''
+  WITH anon_1 AS (
+          SELECT sum(fruit_1.sweetness) AS sum_1,
+                 fruit_1.color_id AS color_id
+            FROM fruit AS fruit_1
+           WHERE fruit_1.color_id IS NOT NULL
+           GROUP BY fruit_1.color_id
+         ) SELECT color.id
+    FROM color AS color
+    LEFT OUTER JOIN anon_1
+      ON color.id = anon_1.color_id
+   WHERE anon_1.sum_1 >= ?
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_declared_aggregate_sum_filter[session-async-tracked-asyncmy_engine]
+  '''
+  WITH anon_1 AS (
+          SELECT sum(fruit_1.sweetness) AS sum_1,
+                 fruit_1.color_id AS color_id
+            FROM fruit AS fruit_1
+           WHERE fruit_1.color_id IS NOT NULL
+           GROUP BY fruit_1.color_id
+         ) SELECT color.id
+    FROM color AS color
+    LEFT OUTER JOIN anon_1
+      ON color.id = anon_1.color_id
+   WHERE anon_1.sum_1 >= %s
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_declared_aggregate_sum_filter[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.id
+    FROM color AS color
+    JOIN LATERAL (
+          SELECT sum(fruit_1.sweetness) AS sum_1
+            FROM fruit AS fruit_1
+           WHERE color.id = fruit_1.color_id
+         ) AS anon_1
+      ON TRUE
+   WHERE anon_1.sum_1 >= %(param_1)s
+   ORDER BY color.id ASC
+  '''
+# ---

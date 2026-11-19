@@ -1,0 +1,129 @@
+'''
+"""Aggregation fields"""
+type ColorAggregate {
+  count: Int
+  max: ColorMinMaxFields!
+  min: ColorMinMaxFields!
+  sum: ColorSumFields!
+}
+
+"""GraphQL type"""
+type ColorMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type ColorSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ContainerType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits(limit: Int = 100, offset: Int! = 0): [FruitType!]!
+  vegetablesAggregate: VegetableAggregate!
+
+  """Fetch objects from the VegetableType collection"""
+  vegetables: [VegetableType!]!
+  colorsAggregate: ColorAggregate!
+
+  """Fetch objects from the ColorType collection"""
+  colors: [ColorType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+type Query {
+  """Fetch objects from the ContainerType collection"""
+  container: [ContainerType!]!
+}
+
+scalar UUID
+
+"""Aggregation fields"""
+type VegetableAggregate {
+  count: Int
+  max: VegetableMinMaxFields!
+  min: VegetableMinMaxFields!
+  sum: VegetableSumFields!
+}
+
+enum VegetableFamily {
+  MUSHROOM
+  GOURD
+  CABBAGE
+  ONION
+  SEEDS
+}
+
+"""GraphQL type"""
+type VegetableMinMaxFields {
+  name: String
+  description: String
+}
+
+"""GraphQL type"""
+type VegetableSumFields {
+  name: String
+  description: String
+}
+
+"""GraphQL type"""
+type VegetableType {
+  family: VegetableFamily!
+  id: UUID!
+  name: String!
+  description: String!
+}
+'''

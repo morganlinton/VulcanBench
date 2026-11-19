@@ -1,0 +1,327 @@
+[
+ {
+  "id": "m000",
+  "kind": "binop",
+  "line": 5612,
+  "start": 5611,
+  "old": [
+   "    m = 1 << n.bit_length()\n"
+  ],
+  "new": [
+   "    m = 1 >> n.bit_length()\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m001",
+  "kind": "binop",
+  "line": 5613,
+  "start": 5612,
+  "old": [
+   "    mask = m - 1\n"
+  ],
+  "new": [
+   "    mask = m + 1\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m002",
+  "kind": "negate-if",
+  "line": 5621,
+  "start": 5620,
+  "old": [
+   "        if index < n:\n"
+  ],
+  "new": [
+   "        if not (index < n):\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m005",
+  "kind": "delete",
+  "line": 5633,
+  "start": 5632,
+  "old": [
+   "        shuffle(batch)\n"
+  ],
+  "new": [
+   "        pass\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m006",
+  "kind": "delete",
+  "line": 5634,
+  "start": 5633,
+  "old": [
+   "        yield from batch\n"
+  ],
+  "new": [
+   "        pass\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m007",
+  "kind": "delete",
+  "line": 5642,
+  "start": 5641,
+  "old": [
+   "        yield range_object[index]\n"
+  ],
+  "new": [
+   "        pass\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m009",
+  "kind": "constant",
+  "line": 5612,
+  "start": 5611,
+  "old": [
+   "    m = 1 << n.bit_length()\n"
+  ],
+  "new": [
+   "    m = 0 << n.bit_length()\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m010",
+  "kind": "constant",
+  "line": 5613,
+  "start": 5612,
+  "old": [
+   "    mask = m - 1\n"
+  ],
+  "new": [
+   "    mask = m - 2\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m011",
+  "kind": "constant",
+  "line": 5613,
+  "start": 5612,
+  "old": [
+   "    mask = m - 1\n"
+  ],
+  "new": [
+   "    mask = m - 0\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m020",
+  "kind": "binop",
+  "line": 5620,
+  "start": 5619,
+  "old": [
+   "        index = x ^ flux\n"
+  ],
+  "new": [
+   "        index = x | flux\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m021",
+  "kind": "compare",
+  "line": 5621,
+  "start": 5620,
+  "old": [
+   "        if index < n:\n"
+  ],
+  "new": [
+   "        if index <= n:\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m022",
+  "kind": "compare",
+  "line": 5621,
+  "start": 5620,
+  "old": [
+   "        if index < n:\n"
+  ],
+  "new": [
+   "        if index > n:\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m023",
+  "kind": "delete",
+  "line": 5622,
+  "start": 5621,
+  "old": [
+   "            yield index\n"
+  ],
+  "new": [
+   "            pass\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m024",
+  "kind": "binop",
+  "line": 5623,
+  "start": 5622,
+  "old": [
+   "        x = (a * x + c) & mask\n"
+  ],
+  "new": [
+   "        x = (a * x + c) | mask\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m027",
+  "kind": "range",
+  "line": 5631,
+  "start": 5630,
+  "old": [
+   "    iterable = range(n) if n <= batch_size else _full_period_lcg(n)\n"
+  ],
+  "new": [
+   "    iterable = range(n + 1) if n <= batch_size else _full_period_lcg(n)\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m028",
+  "kind": "range",
+  "line": 5631,
+  "start": 5630,
+  "old": [
+   "    iterable = range(n) if n <= batch_size else _full_period_lcg(n)\n"
+  ],
+  "new": [
+   "    iterable = range(n - 1) if n <= batch_size else _full_period_lcg(n)\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m031",
+  "kind": "constant",
+  "line": 5614,
+  "start": 5613,
+  "old": [
+   "    a = randrange(5, m, 4) if m > 4 else 1\n"
+  ],
+  "new": [
+   "    a = randrange(6, m, 4) if m > 4 else 1\n"
+  ],
+  "timed_out_upstream": true
+ },
+ {
+  "id": "m032",
+  "kind": "constant",
+  "line": 5614,
+  "start": 5613,
+  "old": [
+   "    a = randrange(5, m, 4) if m > 4 else 1\n"
+  ],
+  "new": [
+   "    a = randrange(4, m, 4) if m > 4 else 1\n"
+  ],
+  "timed_out_upstream": true
+ },
+ {
+  "id": "m033",
+  "kind": "constant",
+  "line": 5614,
+  "start": 5613,
+  "old": [
+   "    a = randrange(5, m, 4) if m > 4 else 1\n"
+  ],
+  "new": [
+   "    a = randrange(5, m, 5) if m > 4 else 1\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m034",
+  "kind": "constant",
+  "line": 5614,
+  "start": 5613,
+  "old": [
+   "    a = randrange(5, m, 4) if m > 4 else 1\n"
+  ],
+  "new": [
+   "    a = randrange(5, m, 3) if m > 4 else 1\n"
+  ],
+  "timed_out_upstream": true
+ },
+ {
+  "id": "m037",
+  "kind": "constant",
+  "line": 5615,
+  "start": 5614,
+  "old": [
+   "    c = randrange(1, m, 2) if m > 1 else 1\n"
+  ],
+  "new": [
+   "    c = randrange(2, m, 2) if m > 1 else 1\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m038",
+  "kind": "constant",
+  "line": 5615,
+  "start": 5614,
+  "old": [
+   "    c = randrange(1, m, 2) if m > 1 else 1\n"
+  ],
+  "new": [
+   "    c = randrange(0, m, 2) if m > 1 else 1\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m040",
+  "kind": "constant",
+  "line": 5615,
+  "start": 5614,
+  "old": [
+   "    c = randrange(1, m, 2) if m > 1 else 1\n"
+  ],
+  "new": [
+   "    c = randrange(1, m, 1) if m > 1 else 1\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m042",
+  "kind": "binop",
+  "line": 5623,
+  "start": 5622,
+  "old": [
+   "        x = (a * x + c) & mask\n"
+  ],
+  "new": [
+   "        x = (a + x + c) & mask\n"
+  ],
+  "timed_out_upstream": false
+ },
+ {
+  "id": "m043",
+  "kind": "binop",
+  "line": 5623,
+  "start": 5622,
+  "old": [
+   "        x = (a * x + c) & mask\n"
+  ],
+  "new": [
+   "        x = (a // x + c) & mask\n"
+  ],
+  "timed_out_upstream": true
+ }
+]

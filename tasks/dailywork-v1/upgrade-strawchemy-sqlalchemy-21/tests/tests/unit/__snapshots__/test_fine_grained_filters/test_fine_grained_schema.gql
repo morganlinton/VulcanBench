@@ -1,0 +1,75 @@
+'''
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""
+Boolean expression to compare DateTime fields. All fields are combined with logical 'AND'
+"""
+input DateTimeComparison {
+  eq: DateTime
+  neq: DateTime
+  isNull: Boolean
+  in: [DateTime!]
+  nin: [DateTime!]
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+  year: IntOrderComparison
+  month: IntOrderComparison
+  day: IntOrderComparison
+  weekDay: IntOrderComparison
+  week: IntOrderComparison
+  quarter: IntOrderComparison
+  isoYear: IntOrderComparison
+  isoWeekDay: IntOrderComparison
+  hour: IntOrderComparison
+  minute: IntOrderComparison
+  second: IntOrderComparison
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input IntOrderComparison {
+  eq: Int
+  neq: Int
+  isNull: Boolean
+  in: [Int!]
+  nin: [Int!]
+  gt: Int
+  gte: Int
+  lt: Int
+  lte: Int
+}
+
+type Query {
+  """Fetch objects from the TicketType collection"""
+  tickets(filter: TicketFilter = null): [TicketType!]!
+}
+
+"""TextComparison restricted to eq, in, like"""
+input TextComparisonStrEqInLike {
+  eq: String
+  in: [String!]
+  like: String
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input TicketFilter {
+  _and: [TicketFilter!]! = []
+  _or: [TicketFilter!]! = []
+  _not: TicketFilter
+  name: TextComparisonStrEqInLike
+  publishedAt: DateTimeComparison
+  publishedAfter: DateTime
+}
+
+"""GraphQL type"""
+type TicketType {
+  name: String!
+  publishedAt: DateTime!
+}
+'''

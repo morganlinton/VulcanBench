@@ -1,0 +1,21 @@
+'''
+type Query {
+  """Fetch object from the VegetableType collection by id"""
+  vegetable(id: UUID!): VegetableType!
+}
+
+scalar UUID
+
+enum VegetableFamily {
+  MUSHROOM
+  GOURD
+  CABBAGE
+  ONION
+  SEEDS
+}
+
+"""GraphQL type"""
+type VegetableType {
+  family: VegetableFamily!
+}
+'''

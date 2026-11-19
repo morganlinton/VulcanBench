@@ -1,0 +1,172 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type DepartmentAggregate {
+  count: Int
+  max: DepartmentMinMaxFields!
+  min: DepartmentMinMaxFields!
+  sum: DepartmentSumFields!
+}
+
+"""GraphQL type"""
+type DepartmentMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type DepartmentSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type DepartmentType {
+  usersAggregate: UserAggregate!
+
+  """Fetch objects from the GraphQLUser collection"""
+  users: [GraphQLUser!]!
+  name: String
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type GraphQLGroup {
+  tag: TagType!
+  usersAggregate: UserAggregate!
+
+  """Fetch objects from the GraphQLUser collection"""
+  users: [GraphQLUser!]!
+  color: ColorType!
+  name: String!
+  tagId: UUID!
+  colorId: UUID!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type GraphQLTag {
+  groupsAggregate: GroupAggregate!
+
+  """Fetch objects from the GraphQLGroup collection"""
+  groups: [GraphQLGroup!]!
+  name: String!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type GraphQLUser {
+  group: GraphQLGroup!
+  tag: TagType!
+  departmentsAggregate: DepartmentAggregate!
+
+  """Fetch objects from the DepartmentType collection"""
+  departments: [DepartmentType!]!
+  name: String!
+  groupId: UUID
+  tagId: UUID
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type GroupAggregate {
+  count: Int
+  max: GroupMinMaxFields!
+  min: GroupMinMaxFields!
+  sum: GroupSumFields!
+}
+
+"""GraphQL type"""
+type GroupMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type GroupSumFields {
+  name: String
+}
+
+type Query {
+  """Fetch object from the GraphQLUser collection by id"""
+  user(id: UUID!): GraphQLUser!
+
+  """Fetch object from the GraphQLTag collection by id"""
+  tag(id: UUID!): GraphQLTag!
+}
+
+"""GraphQL type"""
+type TagType {
+  groupsAggregate: GroupAggregate!
+
+  """Fetch objects from the GraphQLGroup collection"""
+  groups: [GraphQLGroup!]!
+  name: String!
+  id: UUID!
+}
+
+scalar UUID
+
+"""Aggregation fields"""
+type UserAggregate {
+  count: Int
+  max: UserMinMaxFields!
+  min: UserMinMaxFields!
+  sum: UserSumFields!
+}
+
+"""GraphQL type"""
+type UserMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type UserSumFields {
+  name: String
+}
+'''

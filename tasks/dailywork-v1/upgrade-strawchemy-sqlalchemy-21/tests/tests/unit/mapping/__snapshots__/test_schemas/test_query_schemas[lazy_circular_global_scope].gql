@@ -1,0 +1,28 @@
+'''
+"""GraphQL type"""
+type ColorNode {
+  name: String!
+  id: UUID!
+  featuredFruit: FruitNode!
+}
+
+"""GraphQL type"""
+type FruitNode {
+  color: ColorNode!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+  primaryColor: ColorNode!
+}
+
+type Query {
+  """Fetch object from the FruitNode collection by id"""
+  fruit(id: UUID!): FruitNode!
+
+  """Fetch object from the ColorNode collection by id"""
+  color(id: UUID!): ColorNode!
+}
+
+scalar UUID
+'''

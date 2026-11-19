@@ -1,0 +1,20 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  name: String!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type FruitType {
+  name: String!
+  color: ColorType!
+}
+
+type Query {
+  """Fetch object from the FruitType collection by id"""
+  fruit(id: UUID!): FruitType!
+}
+
+scalar UUID
+'''

@@ -672,6 +672,46 @@ def _kimi_code(run_dir: Path) -> list[dict[str, Any]]:
     return calls.order
 
 
+def _agy(run_dir: Path) -> list[dict[str, Any]]:
+    """Antigravity CLI's stream-json: one tool step per call, ACTIVE then a final state.
+
+    The step index is the call id. agy's events carry no clock, so the adapter's
+    receive time (``vb_received_at``) dates each call; run_command's exit code is
+    read from its output text.
+    """
+    calls = _Calls()
+    for event in _jsonl(run_dir / STREAM):
+        step = _dict(event.get("step_update"))
+        if event.get("event") != "step_update" or step.get("step_type") != "tool":
+            continue
+        info = _dict(step.get("tool_info"))
+        call = calls.get(
+            step.get("step_index"),
+            step.get("tool_name") or info.get("name"),
+            input=info.get("parameters"),
+        )
+        stamp = _epoch(event.get("vb_received_at"))
+        if step.get("state") == "ACTIVE":
+            call["started_at"] = call["started_at"] or stamp
+            continue
+        output = info.get("output")
+        match = _EXIT_CODE.search(output) if isinstance(output, str) else None
+        exit_code = int(match.group(1)) if match else None
+        seconds = step.get("duration_seconds")
+        calls.get(
+            step.get("step_index"),
+            ended_at=stamp,
+            exit_code=exit_code,
+            status=_exit_status(exit_code, failed=step.get("state") != "DONE"),
+            output_chars=_chars(output),
+            duration_ms=round(seconds * 1000) if isinstance(seconds, (int, float)) else None,
+        )
+    return calls.order
+
+
+_EXIT_CODE = re.compile(r"Command exited with code (-?\d+)")
+
+
 EXTRACTORS: dict[str, Callable[[Path], list[dict[str, Any]]]] = {
     "native": _native,
     "claude-code": _claude_code,
@@ -685,6 +725,7 @@ EXTRACTORS: dict[str, Callable[[Path], list[dict[str, Any]]]] = {
     "pi": _pi,
     "mirror": _mirror,
     "kimi-code": _kimi_code,
+    "agy": _agy,
 }
 
 

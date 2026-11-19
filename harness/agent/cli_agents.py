@@ -70,6 +70,7 @@ CLI_AGENT_PROVIDERS = frozenset(
         "dsh",
         "mirror",
         "kimi-code",
+        "agy",
     }
 )
 
@@ -2943,6 +2944,11 @@ def get_cli_agent_adapter(spec_or_name: str) -> CliAgentAdapter:  # noqa: PLR091
         from harness.agent.kimi_code import KimiCodeAdapter  # noqa: PLC0415
 
         return KimiCodeAdapter()
+    if name == "agy":
+        # Same lazy import: antigravity_cli builds on this module's helpers.
+        from harness.agent.antigravity_cli import AntigravityAdapter  # noqa: PLC0415
+
+        return AntigravityAdapter()
     if name == "devin":
         # Same lazy import: devin_cli builds on this module's helpers.
         from harness.agent.devin_cli import DevinAdapter  # noqa: PLC0415

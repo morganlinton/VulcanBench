@@ -61,6 +61,10 @@ _WEB_MARKERS = (
     '"web_search"',
     '"web_fetch"',
     '"webfetch"',
+    # Antigravity CLI step events (the init event lists every tool name, so
+    # only an actual call, keyed by tool_name, counts).
+    '"tool_name": "search_web"',
+    '"tool_name": "read_url_content"',
 )
 _URL_RE = re.compile(r"https?://[^\s\"'\\]+")
 
@@ -123,7 +127,11 @@ def _web_calls(stream_path: Path) -> dict[str, dict[str, Any]]:
             call = calls.setdefault(cid, {"urls": set(), "searches": 0, "rejected": False})
             if '"rejected"' in line:
                 call["rejected"] = True
-            if "webSearchToolCall" in line or '"WebSearch"' in line:
+            if (
+                "webSearchToolCall" in line
+                or '"WebSearch"' in line
+                or '"tool_name": "search_web"' in line
+            ):
                 call["searches"] = max(call["searches"], line.count("searchTerm"), 1)
             for url in _URL_RE.findall(line):
                 call["urls"].add(url)

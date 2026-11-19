@@ -66,6 +66,7 @@ CLI_HARNESSES = (
     "dsh",
     "mirror",
     "kimi-code",
+    "agy",
 )
 HARNESSES = (*CLI_HARNESSES, "vulcan")
 EFFORT_ORDER = ("minimal", "low", "medium", "high", "extra-high", "max", "ultra")

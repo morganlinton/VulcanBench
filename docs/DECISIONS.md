@@ -7,6 +7,49 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: Frontier v5 release 2 drops F4 opaque-component parity
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted decision R2 of
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) as recommended: F4
+opaque-component parity has no slot in VulcanBench Frontier v5 release 2,
+and no task of that shape (an opaque or hidden reference engine matched by
+experiment or by reading a binary) is in its headline.
+
+- ferrycore-crossing-opaque-parity 0.2.0 stays in release 1 (`frontier-v5`
+  1.0.0) unchanged: the lock, the confirmation and its record are not
+  edited. It is not carried into release 2.
+- bothycore-booking-opaque-parity (rejected) stays in the private repo and
+  is not a release 2 candidate.
+- The two F4 slots in PLAN.md and PLAN-v2.md to PLAN-v4.md are not edited;
+  release 2's composition, without F4, goes into a new PLAN-v5 with its own
+  freeze when R4 is decided.
+
+### Evidence
+
+- F4 is the Frontier v4 lineage, which now measures reverse-engineering:
+  GPT-6.2 Sol disassembled the binary in all 115 of its Frontier v4 runs and
+  solved 115.
+- Gate record ([frontier-v5/GATE-LOG.md](frontier-v5/GATE-LOG.md)):
+  ferrycore 0.1.0 was solved by disassembly with a hand-written x86-64
+  decoder; bothycore fell 2 of 3 to targeted experiments through the
+  query-only service; ferrycore 0.2.0 held only after a redesign against its
+  own gate result.
+- A private F4 task needs the private repo on every sweep host and its
+  traces can never be published.
+
+### Revisit triggers
+
+- None planned. Bringing an opaque-component task back into a Frontier
+  headline needs a new owner decision.
+
+### What this touched
+
+This entry and the R2 status in
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md). No task, lock or run
+condition changed.
+
 ## 2026-11-19: VulcanBench Frontier v5 resumes alongside DailyWork v1 as the ceiling suite (amends D9)
 
 ### Decision

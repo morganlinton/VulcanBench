@@ -1,6 +1,6 @@
 # VulcanBench Frontier v5: plan to replace Frontier v4 as the headline coding suite
 
-Status: **draft for the owner, 2026-11-19; R1 adopted 2026-11-19, R2 to R9 open.** It replaces the
+Status: **draft for the owner, 2026-11-19; R1 and R2 adopted 2026-11-19, R3 to R9 open.** It replaces the
 rollout draft of 2026-11-17 (PR #302, closed unmerged) and updates its gaps
 and decisions for the owner's new emphasis: a real spread of task shapes and
 languages, and not another suite that mostly measures reverse-engineering.
@@ -194,6 +194,8 @@ engine, and Frontier v5's gate wait times leave room for DailyWork work.
 **Recommendation: option 1.** It is the Frontier v4 lineage; all three F4
 candidates fell or held only after a redesign against the gate; it needs a
 private repo on every sweep host; and its traces can never be published.
+
+**Adopted 2026-11-19: option 1** (DECISIONS.md, 2026-11-19).
 
 ### R3. How does the headline separate models?
 

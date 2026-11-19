@@ -48,7 +48,7 @@ MUTED = "#8a897f"
 GRID = "#e7e6e1"
 RING = "#b9b8b0"
 
-DATE = "2026-11-14"
+DATE = "2026-11-18"
 SUITE = "ComputerUse macOS v1"
 
 # Rows: (gate ref, display name, model line, lab for logo, color, grid header).

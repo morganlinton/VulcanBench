@@ -426,6 +426,19 @@ def _stage_claude_code_auth(run_scratch: Path) -> Path:
     return auth_dir
 
 
+def _remove_staged_auth(auth_dir: Path) -> None:
+    """Delete a run-scoped credential copy once it has been synced back.
+
+    The staged directory holds the subscription's OAuth tokens and, after a
+    run, whatever account state the CLI wrote beside them (Claude Code adds
+    the signed-in account to ``.claude.json``). Nothing in it is run evidence:
+    the stream log and trace already carry the session. Leaving it in the run
+    directory put live credentials into anything that copies run directories.
+    Best-effort: cleanup must never fail a finished run.
+    """
+    shutil.rmtree(auth_dir, ignore_errors=True)
+
+
 def _sync_codex_auth_back(auth_dir: Path) -> None:
     """Persist refreshed tokens from the run-scoped copy back to the host.
 
@@ -506,6 +519,22 @@ def _fold_usage_totals(usages: Iterable[dict[str, Any]]) -> tuple[int, int]:
         prompt += p
         completion += c
     return prompt, completion
+
+
+def _anthropic_raw_usage(usages: Iterable[dict[str, Any]]) -> dict[str, int]:
+    """Unweighted token counts from Anthropic usage blocks.
+
+    ``_fold_usage`` weights cache reads and writes by their price, which is
+    right for cost but not a token count; this keeps the raw counts so runs
+    from different harnesses can be compared (see ``raw_usage``).
+    """
+    raw = {"input_uncached": 0, "cache_read": 0, "cache_write": 0, "output": 0}
+    for usage in usages:
+        raw["input_uncached"] += int(usage.get("input_tokens", 0) or 0)
+        raw["cache_read"] += int(usage.get("cache_read_input_tokens", 0) or 0)
+        raw["cache_write"] += int(usage.get("cache_creation_input_tokens", 0) or 0)
+        raw["output"] += int(usage.get("output_tokens", 0) or 0)
+    return raw
 
 
 def _version(executable: str) -> str | None:
@@ -2064,6 +2093,12 @@ class CliAgentOutcome:
     # Build's trace `_meta.totalTokens`); no prompt/completion split exists,
     # so it never feeds pricing, it is provenance, not a bill.
     cli_total_tokens: int | None = None
+    # Unweighted token counts (input_uncached, cache_read, cache_write,
+    # output) for harnesses that report them. ``prompt_tokens`` is not
+    # comparable across harnesses: Claude Code's is price-weighted
+    # (``_fold_usage``) while Codex's is a raw count including cached input.
+    # Provenance only; pricing and published efficiency use the fields above.
+    raw_usage: dict[str, int] | None = None
     reported_effort: str | None = None
     sandbox_profile: str | None = None
     # Per-message model names the CLI streamed (Claude Code ``message.model``),
@@ -2093,6 +2128,7 @@ class CliAgentOutcome:
             "reasoning_output_tokens": self.reasoning_output_tokens,
             "cli_reported_cost_usd": self.cli_reported_cost_usd,
             "cli_total_tokens": self.cli_total_tokens,
+            "raw_usage": self.raw_usage,
             "reported_effort": self.reported_effort,
             "sandbox_profile": self.sandbox_profile,
             "served_models": self.served_models,
@@ -2382,6 +2418,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
             _kill_agent_container(container_name)
         if auth_dir is not None:
             _sync_claude_code_auth_back(auth_dir, staged_original)
+            _remove_staged_auth(auth_dir)
 
     proc.wait()
     stderr_thread.join(timeout=5)
@@ -2401,6 +2438,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
         # Killed by the budget/cost watchdog (partial work still counts), or
         # the CLI died without reporting, approximate usage from the stream.
         outcome.prompt_tokens, outcome.completion_tokens = _fold_usage_totals(usage_by_msg.values())
+        outcome.raw_usage = _anthropic_raw_usage(usage_by_msg.values())
         outcome.num_turns = len(usage_by_msg)
         if not (killed["timeout"] or killed["cost"]):
             tail = "".join(stderr_chunks)[-500:].strip()
@@ -2411,6 +2449,7 @@ def run_claude_code_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
 
     usage = result_msg.get("usage") or {}
     outcome.prompt_tokens, outcome.completion_tokens = _fold_usage(usage)
+    outcome.raw_usage = _anthropic_raw_usage([usage])
     outcome.subtype = result_msg.get("subtype")
     outcome.num_turns = result_msg.get("num_turns")
     outcome.session_id = result_msg.get("session_id") or outcome.session_id
@@ -2479,6 +2518,26 @@ def _codex_item_trace_data(item: dict[str, Any]) -> tuple[str, dict[str, Any]] |
 
 _CODEX_TOOL_ITEMS = frozenset({"command_execution", "file_change", "mcp_tool_call", "web_search"})
 
+#: Codex config that removes the tools served from OpenAI's side, which no
+#: sandbox network rule can block: the built-in web tool and the account's
+#: connected apps, plugins and browser/computer tools (``codex_apps`` exposed
+#: a search service plus the account's Gmail and Calendar connectors). All
+#: are on by default even with ``--ignore-user-config`` (checked on 0.166.0).
+#: Same set as Frontier v5's ``scripts/frontier-v5/codex-gate.toml``
+#: (docs/DECISIONS.md 2026-10-31); the Claude Code counterpart is
+#: ``--disallowedTools WebSearch,WebFetch``. Unknown feature names are
+#: ignored by Codex, so a pinned older CLI accepts the whole list.
+_CODEX_NO_WEB_CONFIG = (
+    'web_search="disabled"',
+    "features.apps=false",
+    "features.plugins=false",
+    "features.remote_plugin=false",
+    "features.browser_use=false",
+    "features.browser_use_external=false",
+    "features.in_app_browser=false",
+    "features.computer_use=false",
+)
+
 
 def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
     *,
@@ -2539,6 +2598,9 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
         cmd += ["--config", f'model_reasoning_effort="{effort}"']
     if network and agent_container is None:
         cmd += ["--config", "sandbox_workspace_write.network_access=true"]
+    if not network:
+        for setting in _CODEX_NO_WEB_CONFIG:
+            cmd += ["--config", setting]
     cmd.append("-")
 
     container_name: str | None = None
@@ -2677,6 +2739,13 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
                 outcome.cached_input_tokens = int(usage.get("cached_input_tokens", 0) or 0)
                 outcome.completion_tokens = int(usage.get("output_tokens", 0) or 0)
                 outcome.reasoning_output_tokens = int(usage.get("reasoning_output_tokens", 0) or 0)
+                # OpenAI's input_tokens already includes the cached part.
+                outcome.raw_usage = {
+                    "input_uncached": max(outcome.prompt_tokens - outcome.cached_input_tokens, 0),
+                    "cache_read": outcome.cached_input_tokens,
+                    "cache_write": 0,
+                    "output": outcome.completion_tokens,
+                }
                 outcome.subtype = "success"
                 outcome.finished = True
             elif event_type in {"turn.failed", "error"}:
@@ -2691,6 +2760,7 @@ def run_codex_task(  # noqa: PLR0912, PLR0915, linear process/stream adapter
             _kill_agent_container(container_name)
         if auth_dir is not None:
             _sync_codex_auth_back(auth_dir)
+            _remove_staged_auth(auth_dir)
 
     proc.wait()
     stderr_thread.join(timeout=5)

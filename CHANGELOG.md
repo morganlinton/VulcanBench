@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Raw token counts for Claude Code and Codex** (`cli_agent.raw_usage` in
+  the run summary: uncached input, cache reads, cache writes, output).
+  `tokens.prompt` is not comparable across these harnesses: Claude Code's is
+  weighted by cache pricing, Codex's is a raw count that includes cached
+  input. Pricing and published efficiency keep using the existing fields.
 - **Per-task agent images** (`harness/agent/agent_images.py`): with
   `--agent-container`, the agent now runs on the task's own sandbox image plus
   an agent layer under `/opt/vb-agent` (a pinned Node runtime and the CLI at
@@ -54,12 +59,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Codex runs turn off web search and connected apps** unless `--network`
+  is passed: `web_search="disabled"` plus the apps, plugins and browser
+  features, as Frontier v5's gate already did (docs/DECISIONS.md
+  2026-11-19). Claude Code already ran without its web tools.
 - The GUI's Launch page no longer plans Frontier v5 gate runs; it launches
   frozen suites only. Gate jobs under `~/vulcanbench-gate` stay on the Runs
   page read-only (docs/DECISIONS.md 2026-11-01).
 
 ### Fixed
 
+- **Staged credentials are deleted after containerized runs.** The
+  run-scoped `codex-auth/` and `claude-code-auth/` copies stayed in every
+  run directory with live OAuth tokens; they are now removed once refreshed
+  tokens are synced back.
+- **Quality and security no longer go null without an activated venv.**
+  ruff and bandit are looked up beside the running interpreter when they are
+  not on `PATH` (`harness/tool_paths.py`), so `.venv/bin/vulcanbench` works
+  from a launcher that does not activate the venv.
 - **Verdict v2 code-gen runs have a memory cap.** A mutant can turn a bounded
   loop into an unbounded one (`out.append(v)` became `values.append(v)` inside
   `for v in values`), which reached 6 GB in the 5 seconds before its timeout.

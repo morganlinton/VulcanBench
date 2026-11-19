@@ -1,0 +1,151 @@
+# serializer version: 1
+# name: test_filter_statement_pagination_sql[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM (
+          SELECT color.name AS name,
+                 color.id AS id
+            FROM color AS color
+           WHERE color.name IN (__[POSTCOMPILE_name_1])
+           ORDER BY color.id ASC
+           LIMIT ?
+          OFFSET ?
+         ) AS color
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_filter_statement_pagination_sql[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM (
+          SELECT color.name AS name,
+                 color.id AS id
+            FROM color AS color
+           WHERE color.name IN (__[POSTCOMPILE_name_1])
+           ORDER BY color.id ASC
+           LIMIT %s,
+                 %s
+         ) AS color
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_filter_statement_pagination_sql[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM (
+          SELECT color.name AS name,
+                 color.id AS id
+            FROM color AS color
+           WHERE color.name IN (__[POSTCOMPILE_name_1])
+           ORDER BY color.id ASC
+           LIMIT %(param_1)s::INTEGER
+          OFFSET %(param_2)s::INTEGER
+         ) AS color
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_filtered_statement[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM color AS color
+   WHERE color.name = ?
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_filtered_statement[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM color AS color
+   WHERE color.name = %s
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_filtered_statement[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.name,
+         color.id
+    FROM color AS color
+   WHERE color.name = %(name_1)s::VARCHAR
+   ORDER BY color.id ASC
+  '''
+# ---
+# name: test_only_queried_columns_included_in_select[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_only_queried_columns_included_in_select[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_only_queried_columns_included_in_select[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT color.name,
+         color.id,
+         fruit_1.name AS name_1,
+         fruit_1.id AS id_1
+    FROM color AS color
+    LEFT OUTER JOIN fruit AS fruit_1
+      ON color.id = fruit_1.color_id
+   ORDER BY color.id ASC,
+            fruit_1.id ASC
+  '''
+# ---
+# name: test_secondary_table_relationships[session-async-tracked-aiosqlite_engine]
+  '''
+  SELECT user.id,
+         department_1.name,
+         department_1.id AS id_1
+    FROM USER AS USER
+    LEFT OUTER JOIN (user_department_join_table AS user_department_join_table_1 JOIN department AS department_1 ON department_1.id = user_department_join_table_1.department_id)
+      ON user.id = user_department_join_table_1.user_id
+   ORDER BY user.id ASC,
+            department_1.id ASC
+  '''
+# ---
+# name: test_secondary_table_relationships[session-async-tracked-asyncmy_engine]
+  '''
+  SELECT user.id,
+         department_1.name,
+         department_1.id AS id_1
+    FROM USER AS USER
+    LEFT OUTER JOIN (user_department_join_table AS user_department_join_table_1 INNER JOIN department AS department_1 ON department_1.id = user_department_join_table_1.department_id)
+      ON user.id = user_department_join_table_1.user_id
+   ORDER BY user.id ASC,
+            department_1.id ASC
+  '''
+# ---
+# name: test_secondary_table_relationships[session-async-tracked-psycopg_async_engine]
+  '''
+  SELECT "user".id,
+         department_1.name,
+         department_1.id AS id_1
+    FROM "user" AS "user"
+    LEFT OUTER JOIN (user_department_join_table AS user_department_join_table_1 JOIN department AS department_1 ON department_1.id = user_department_join_table_1.department_id)
+      ON "user".id = user_department_join_table_1.user_id
+   ORDER BY "user".id ASC,
+            department_1.id ASC
+  '''
+# ---

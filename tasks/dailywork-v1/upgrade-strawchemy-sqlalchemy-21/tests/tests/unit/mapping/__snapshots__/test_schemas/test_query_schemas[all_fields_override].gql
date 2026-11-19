@@ -1,0 +1,55 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  fruitsAggregate: FruitAggregate!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  name: Int!
+  color: ColorType!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+type Query {
+  fruit: FruitType!
+}
+
+scalar UUID
+'''

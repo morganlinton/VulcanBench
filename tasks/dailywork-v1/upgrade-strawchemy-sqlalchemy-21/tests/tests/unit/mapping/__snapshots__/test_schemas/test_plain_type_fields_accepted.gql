@@ -1,0 +1,74 @@
+'''
+"""Create input"""
+input ColorCreate {
+  name: String!
+}
+
+"""GraphQL type"""
+type ColorType {
+  name: String!
+  plain: [Plain!]!
+}
+
+union ColorTypePlain = ColorType | Plain
+
+union ColorTypeValidationErrorType = ColorType | ValidationErrorType
+
+type CustomError implements ErrorType {
+  id: String!
+  message: String!
+}
+
+union CustomErrorColorType = CustomError | ColorType
+
+"""Base interface for expected errors"""
+interface ErrorType {
+  id: String!
+}
+
+"""Indicate validation error type and location."""
+type LocalizedErrorType implements ErrorType {
+  id: String!
+  loc: [String!]!
+  message: String!
+  type: String!
+}
+
+type Mutation {
+  """Create object in the ColorType collection"""
+  createColor(data: ColorCreate!): ColorTypeValidationErrorType!
+
+  """Create object in the ColorType collection"""
+  createColorCustomError(data: ColorCreate!): CustomErrorColorType!
+
+  """Create objects in the ColorType collection"""
+  createColors(data: [ColorCreate!]!): [ColorTypePlain!]!
+  createPlain: Plain!
+}
+
+type Plain {
+  name: String!
+}
+
+type Query {
+  """Fetch objects from the ColorType collection"""
+  colors: [ColorType!]!
+
+  """Fetch object from the ColorType collection by id"""
+  colorOrPlain(id: UUID!): ColorTypePlain!
+
+  """Fetch objects from the ColorType collection"""
+  orderedColors: [ColorTypePlain!]!
+  plain: [Plain!]!
+  plainById: Plain!
+  count: Int!
+}
+
+scalar UUID
+
+"""Input is malformed or invalid."""
+type ValidationErrorType implements ErrorType {
+  id: String!
+  errors: [LocalizedErrorType!]!
+}
+'''

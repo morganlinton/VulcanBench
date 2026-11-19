@@ -1,0 +1,190 @@
+'''
+"""GraphQL type"""
+type AliasedFruitType {
+  """Fetch object from the ShadeType collection by id"""
+  shade: ShadeType!
+  name: String!
+  id: UUID!
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input ColorBoolExp {
+  _and: [ColorBoolExp!]! = []
+  _or: [ColorBoolExp!]! = []
+  _not: ColorBoolExp
+  fruitsAggregate: FruitAggregateBoolExp
+  fruits: FruitBoolExp
+  name: TextComparison
+  id: UUIDGenericComparison
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input FloatOrderComparison {
+  eq: Float
+  neq: Float
+  isNull: Boolean
+  in: [Float!]
+  nin: [Float!]
+  gt: Float
+  gte: Float
+  lt: Float
+  lte: Float
+}
+
+"""
+Boolean expression to compare aggregated fields. All fields are combined with logical 'AND'.
+"""
+input FruitAggregateBoolExp {
+  count: FruitAggregateBoolExpCount
+  maxString: FruitAggregateBoolExpMaxstring
+  minString: FruitAggregateBoolExpMinstring
+  sum: FruitAggregateBoolExpSum
+}
+
+"""Boolean expression to compare count aggregation."""
+input FruitAggregateBoolExpCount {
+  arguments: [FruitCountFields!] = []
+  predicate: IntOrderComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare max aggregation."""
+input FruitAggregateBoolExpMaxstring {
+  arguments: [FruitMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare min aggregation."""
+input FruitAggregateBoolExpMinstring {
+  arguments: [FruitMinMaxStringFieldsEnum!]!
+  predicate: TextComparison!
+  distinct: Boolean = false
+}
+
+"""Boolean expression to compare sum aggregation."""
+input FruitAggregateBoolExpSum {
+  arguments: [FruitSumFieldsEnum!]!
+  predicate: FloatOrderComparison!
+  distinct: Boolean = false
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input FruitBoolExp {
+  _and: [FruitBoolExp!]! = []
+  _or: [FruitBoolExp!]! = []
+  _not: FruitBoolExp
+  color: ColorBoolExp
+  name: TextComparison
+  id: UUIDGenericComparison
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input FruitBoolExp1 {
+  _and: [FruitBoolExp1!]! = []
+  _or: [FruitBoolExp1!]! = []
+  _not: FruitBoolExp1
+  shade: ColorBoolExp
+  name: TextComparison
+  id: UUIDGenericComparison
+}
+
+enum FruitCountFields {
+  name
+  id
+}
+
+enum FruitMinMaxStringFieldsEnum {
+  name
+}
+
+enum FruitSumFieldsEnum {
+  name
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ShadeType!
+  name: String!
+  id: UUID!
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input IntOrderComparison {
+  eq: Int
+  neq: Int
+  isNull: Boolean
+  in: [Int!]
+  nin: [Int!]
+  gt: Int
+  gte: Int
+  lt: Int
+  lte: Int
+}
+
+type Query {
+  """Fetch objects from the FruitType collection"""
+  fruits(filter: FruitBoolExp = null): [FruitType!]!
+
+  """Fetch objects from the AliasedFruitType collection"""
+  aliasedFruits(filter: FruitBoolExp1 = null): [AliasedFruitType!]!
+}
+
+"""GraphQL type"""
+type ShadeType {
+  name: String!
+  id: UUID!
+}
+
+"""
+Boolean expression to compare String fields. All fields are combined with logical 'AND'
+"""
+input TextComparison {
+  eq: String
+  neq: String
+  isNull: Boolean
+  in: [String!]
+  nin: [String!]
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+  like: String
+  nlike: String
+  ilike: String
+  nilike: String
+  regexp: String
+  iregexp: String
+  nregexp: String
+  inregexp: String
+  startswith: String
+  endswith: String
+  contains: String
+  istartswith: String
+  iendswith: String
+  icontains: String
+}
+
+scalar UUID
+
+"""
+Boolean expression to compare fields supporting equality comparisons. All fields are combined with logical 'AND'
+"""
+input UUIDGenericComparison {
+  eq: UUID
+  neq: UUID
+  isNull: Boolean
+  in: [UUID!]
+  nin: [UUID!]
+}
+'''

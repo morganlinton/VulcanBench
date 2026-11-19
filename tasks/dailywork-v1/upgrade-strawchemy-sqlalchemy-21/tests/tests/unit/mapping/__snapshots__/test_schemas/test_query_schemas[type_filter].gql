@@ -1,0 +1,281 @@
+'''
+"""
+Boolean expression to compare fields supporting equality comparisons. All fields are combined with logical 'AND'
+"""
+input BoolGenericComparison {
+  eq: Boolean
+  neq: Boolean
+  isNull: Boolean
+  in: [Boolean!]
+  nin: [Boolean!]
+}
+
+"""Date (isoformat)"""
+scalar Date
+
+"""
+Boolean expression to compare Date fields. All fields are combined with logical 'AND'
+"""
+input DateComparison {
+  eq: Date
+  neq: Date
+  isNull: Boolean
+  in: [Date!]
+  nin: [Date!]
+  gt: Date
+  gte: Date
+  lt: Date
+  lte: Date
+  year: IntOrderComparison
+  month: IntOrderComparison
+  day: IntOrderComparison
+  weekDay: IntOrderComparison
+  week: IntOrderComparison
+  quarter: IntOrderComparison
+  isoYear: IntOrderComparison
+  isoWeekDay: IntOrderComparison
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""
+Boolean expression to compare DateTime fields. All fields are combined with logical 'AND'
+"""
+input DateTimeComparison {
+  eq: DateTime
+  neq: DateTime
+  isNull: Boolean
+  in: [DateTime!]
+  nin: [DateTime!]
+  gt: DateTime
+  gte: DateTime
+  lt: DateTime
+  lte: DateTime
+  year: IntOrderComparison
+  month: IntOrderComparison
+  day: IntOrderComparison
+  weekDay: IntOrderComparison
+  week: IntOrderComparison
+  quarter: IntOrderComparison
+  isoYear: IntOrderComparison
+  isoWeekDay: IntOrderComparison
+  hour: IntOrderComparison
+  minute: IntOrderComparison
+  second: IntOrderComparison
+}
+
+"""Decimal (fixed-point)"""
+scalar Decimal
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input DecimalOrderComparison {
+  eq: Decimal
+  neq: Decimal
+  isNull: Boolean
+  in: [Decimal!]
+  nin: [Decimal!]
+  gt: Decimal
+  gte: Decimal
+  lt: Decimal
+  lte: Decimal
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input FloatOrderComparison {
+  eq: Float
+  neq: Float
+  isNull: Boolean
+  in: [Float!]
+  nin: [Float!]
+  gt: Float
+  gte: Float
+  lt: Float
+  lte: Float
+}
+
+"""
+Boolean expression to compare fields supporting order comparisons. All fields are combined with logical 'AND'
+"""
+input IntOrderComparison {
+  eq: Int
+  neq: Int
+  isNull: Boolean
+  in: [Int!]
+  nin: [Int!]
+  gt: Int
+  gte: Int
+  lt: Int
+  lte: Int
+}
+
+"""
+The `Interval` scalar type represents a duration of time as specified by [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#Durations).
+"""
+scalar Interval @specifiedBy(url: "https://en.wikipedia.org/wiki/ISO_8601#Durations")
+
+"""
+Boolean expression to compare Interval fields. All fields are combined with logical 'AND'
+"""
+input IntervalComparison {
+  eq: Interval
+  neq: Interval
+  isNull: Boolean
+  in: [Interval!]
+  nin: [Interval!]
+  gt: Interval
+  gte: Interval
+  lt: Interval
+  lte: Interval
+  days: FloatOrderComparison
+  hours: FloatOrderComparison
+  minutes: FloatOrderComparison
+  seconds: FloatOrderComparison
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+"""
+Boolean expression to compare JSON fields. All fields are combined with logical 'AND'
+"""
+input JSONComparison {
+  eq: JSON
+  neq: JSON
+  isNull: Boolean
+  in: [JSON!]
+  nin: [JSON!]
+  contains: JSON
+  containedIn: JSON
+  hasKey: String
+  hasKeyAll: [String!]
+  hasKeyAny: [String!]
+}
+
+type Query {
+  """Fetch objects from the SQLDataTypesType collection"""
+  sqlDataTypes(filter: SQLDataTypesFilter = null): [SQLDataTypesType!]!
+}
+
+"""
+Boolean expression to compare fields. All fields are combined with logical 'AND'.
+"""
+input SQLDataTypesFilter {
+  _and: [SQLDataTypesFilter!]! = []
+  _or: [SQLDataTypesFilter!]! = []
+  _not: SQLDataTypesFilter
+  dateCol: DateComparison
+  timeCol: TimeComparison
+  timeDeltaCol: IntervalComparison
+  datetimeCol: DateTimeComparison
+  strCol: TextComparison
+  intCol: IntOrderComparison
+  floatCol: FloatOrderComparison
+  decimalCol: DecimalOrderComparison
+  boolCol: BoolGenericComparison
+  uuidCol: UUIDGenericComparison
+  dictCol: JSONComparison
+  arrayStrCol: StrArrayComparison
+  id: UUIDGenericComparison
+}
+
+"""GraphQL type"""
+type SQLDataTypesType {
+  dateCol: Date!
+  timeCol: Time!
+  timeDeltaCol: Interval!
+  datetimeCol: DateTime!
+  strCol: String!
+  intCol: Int!
+  floatCol: Float!
+  decimalCol: Decimal!
+  boolCol: Boolean!
+  uuidCol: UUID!
+  dictCol(path: String): JSON
+  arrayStrCol: [String!]!
+  id: UUID!
+}
+
+"""
+Boolean expression to compare List fields. All fields are combined with logical 'AND'
+"""
+input StrArrayComparison {
+  eq: String
+  neq: String
+  isNull: Boolean
+  in: [String!]
+  nin: [String!]
+  contains: [String!]
+  containedIn: [String!]
+  overlap: [String!]
+}
+
+"""
+Boolean expression to compare String fields. All fields are combined with logical 'AND'
+"""
+input TextComparison {
+  eq: String
+  neq: String
+  isNull: Boolean
+  in: [String!]
+  nin: [String!]
+  gt: String
+  gte: String
+  lt: String
+  lte: String
+  like: String
+  nlike: String
+  ilike: String
+  nilike: String
+  regexp: String
+  iregexp: String
+  nregexp: String
+  inregexp: String
+  startswith: String
+  endswith: String
+  contains: String
+  istartswith: String
+  iendswith: String
+  icontains: String
+}
+
+"""Time (isoformat)"""
+scalar Time
+
+"""
+Boolean expression to compare Time fields. All fields are combined with logical 'AND'
+"""
+input TimeComparison {
+  eq: Time
+  neq: Time
+  isNull: Boolean
+  in: [Time!]
+  nin: [Time!]
+  gt: Time
+  gte: Time
+  lt: Time
+  lte: Time
+  hour: IntOrderComparison
+  minute: IntOrderComparison
+  second: IntOrderComparison
+}
+
+scalar UUID
+
+"""
+Boolean expression to compare fields supporting equality comparisons. All fields are combined with logical 'AND'
+"""
+input UUIDGenericComparison {
+  eq: UUID
+  neq: UUID
+  isNull: Boolean
+  in: [UUID!]
+  nin: [UUID!]
+}
+'''

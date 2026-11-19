@@ -1,0 +1,793 @@
+# serializer version: 1
+# name: test_date_components[session-async-tracked-day-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.date_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-day-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DAY FROM date_time_model.date_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-day-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DAY FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-day-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DAY FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoWeekDay-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE (CAST(strftime(?, date_time_model.date_col) AS INTEGER) + ?) % ? + ? = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoWeekDay-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE weekday(date_time_model.date_col) + %s = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoWeekDay-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISODOW FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoWeekDay-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISODOW FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoYear-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date(date_time_model.date_col, CAST(? - ((CAST(strftime(?, date_time_model.date_col) AS INTEGER) + ?) % ? + ?) AS TEXT) || ?, ?)) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoYear-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE date_format(date_time_model.date_col, %s) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoYear-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISOYEAR FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-isoYear-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISOYEAR FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-month-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.date_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-month-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MONTH FROM date_time_model.date_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-month-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MONTH FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-month-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MONTH FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-quarter-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST((CAST(strftime(?, date_time_model.date_col) AS INTEGER) + ?) / (? + 0.0) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-quarter-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(QUARTER FROM date_time_model.date_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-quarter-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(QUARTER FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-quarter-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(QUARTER FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-week-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST((CAST(strftime(?, date(date_time_model.date_col, CAST(? - ((CAST(strftime(?, date_time_model.date_col) AS INTEGER) + ?) % ? + ?) AS TEXT) || ?, ?)) AS INTEGER) - ?) / (? + 0.0) AS INTEGER) + ? = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-week-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE week(date_time_model.date_col, %s) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-week-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(WEEK FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-week-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(WEEK FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-weekDay-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.date_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-weekDay-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE date_format(date_time_model.date_col, %s) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-weekDay-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DOW FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-weekDay-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DOW FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-year-aiosqlite_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.date_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-year-asyncmy_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(YEAR FROM date_time_model.date_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-year-asyncpg_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(YEAR FROM date_time_model.date_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_date_components[session-async-tracked-year-psycopg_async_engine]
+  '''
+  SELECT date_time_model.date_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(YEAR FROM date_time_model.date_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-day-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-day-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DAY FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-day-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DAY FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-day-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DAY FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-hour-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-hour-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(HOUR FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-hour-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(HOUR FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-hour-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(HOUR FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoWeekDay-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE (CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) + ?) % ? + ? = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoWeekDay-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE weekday(date_time_model.datetime_col) + %s = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoWeekDay-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISODOW FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoWeekDay-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISODOW FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoYear-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date(date_time_model.datetime_col, CAST(? - ((CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) + ?) % ? + ?) AS TEXT) || ?, ?)) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoYear-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE date_format(date_time_model.datetime_col, %s) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoYear-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISOYEAR FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-isoYear-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(ISOYEAR FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-minute-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-minute-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MINUTE FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-minute-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MINUTE FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-minute-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MINUTE FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-month-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-month-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MONTH FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-month-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MONTH FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-month-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MONTH FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-quarter-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST((CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) + ?) / (? + 0.0) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-quarter-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(QUARTER FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-quarter-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(QUARTER FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-quarter-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(QUARTER FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-second-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-second-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(SECOND FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-second-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(SECOND FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-second-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(SECOND FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-week-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST((CAST(strftime(?, date(date_time_model.datetime_col, CAST(? - ((CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) + ?) % ? + ?) AS TEXT) || ?, ?)) AS INTEGER) - ?) / (? + 0.0) AS INTEGER) + ? = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-week-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE week(date_time_model.datetime_col, %s) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-week-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(WEEK FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-week-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(WEEK FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-weekDay-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-weekDay-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE date_format(date_time_model.datetime_col, %s) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-weekDay-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DOW FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-weekDay-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(DOW FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-year-aiosqlite_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.datetime_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-year-asyncmy_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(YEAR FROM date_time_model.datetime_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-year-asyncpg_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(YEAR FROM date_time_model.datetime_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_datetime_components[session-async-tracked-year-psycopg_async_engine]
+  '''
+  SELECT date_time_model.datetime_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(YEAR FROM date_time_model.datetime_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-hour-aiosqlite_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.time_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-hour-asyncmy_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(HOUR FROM date_time_model.time_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-hour-asyncpg_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(HOUR FROM date_time_model.time_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-hour-psycopg_async_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(HOUR FROM date_time_model.time_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-minute-aiosqlite_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.time_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-minute-asyncmy_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MINUTE FROM date_time_model.time_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-minute-asyncpg_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MINUTE FROM date_time_model.time_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-minute-psycopg_async_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(MINUTE FROM date_time_model.time_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-second-aiosqlite_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE CAST(strftime(?, date_time_model.time_col) AS INTEGER) = ?
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-second-asyncmy_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(SECOND FROM date_time_model.time_col) = %s
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-second-asyncpg_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(SECOND FROM date_time_model.time_col) = $1::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---
+# name: test_time_components[session-async-tracked-second-psycopg_async_engine]
+  '''
+  SELECT date_time_model.time_col,
+         date_time_model.id
+    FROM date_time_model AS date_time_model
+   WHERE EXTRACT(SECOND FROM date_time_model.time_col) = %(param_1)s::INTEGER
+   ORDER BY date_time_model.id ASC
+  '''
+# ---

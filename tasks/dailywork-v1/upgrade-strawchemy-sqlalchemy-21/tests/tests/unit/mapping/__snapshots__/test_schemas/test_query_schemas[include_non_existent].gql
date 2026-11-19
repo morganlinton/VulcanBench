@@ -1,0 +1,10 @@
+'''
+"""GraphQL type"""
+type FruitType {
+  name: String!
+}
+
+type Query {
+  fruit: FruitType!
+}
+'''

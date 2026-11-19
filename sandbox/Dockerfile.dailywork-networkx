@@ -1,0 +1,11 @@
+# DailyWork v1 pilot image for bugfix-networkx-digraph-node-connectivity:
+# base + NetworkX's numeric dependencies at the versions Frontier v5's
+# verifier pinned for the same task. NetworkX itself comes from the workspace
+# (PYTHONPATH=.), never from site-packages.
+#
+# Build: docker build -t vulcanbench/sandbox:dailywork-networkx -f sandbox/Dockerfile.dailywork-networkx .
+FROM vulcanbench/sandbox:base
+
+RUN pip install --no-cache-dir "numpy==2.5.3" "scipy==1.18.1" "pytest==8.4.1"
+
+RUN python -c "import numpy, scipy" && ! python -c "import networkx" 2>/dev/null

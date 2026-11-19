@@ -1,0 +1,25 @@
+'''
+"""Date with time (isoformat)"""
+scalar DateTime
+
+type Mutation {
+  """Create object in the TimestampedRecordType collection"""
+  createRecord(data: TimestampedRecordCreateInput!): TimestampedRecordType!
+}
+
+type Query {
+  hello: String!
+}
+
+"""Create input"""
+input TimestampedRecordCreateInput {
+  id: Int!
+  createdAt: DateTime
+}
+
+"""GraphQL type"""
+type TimestampedRecordType {
+  id: Int!
+  createdAt: DateTime!
+}
+'''

@@ -1,0 +1,253 @@
+'''
+"""Aggregation fields"""
+type ColorAggregate {
+  count: Int
+  max: ColorMinMaxFields!
+  min: ColorMinMaxFields!
+  sum: ColorSumFields!
+}
+
+"""GraphQL type"""
+type ColorMinMaxFields {
+  name: String
+}
+
+"""Ordering input."""
+input ColorOrderBy {
+  fruitsAggregate: FruitAggregateOrderBy
+  fruits: FruitOrderBy
+  name: OrderByEnum
+  id: OrderByEnum
+}
+
+"""GraphQL type"""
+type ColorSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Ordering input."""
+input ContainerOrderBy {
+  vegetablesAggregate: VegetableAggregateOrderBy
+  vegetables: VegetableOrderBy
+}
+
+"""Ordering input."""
+input ContainerOrderBy1 {
+  fruitsAggregate: FruitAggregateOrderBy
+  fruits: FruitOrderBy
+}
+
+"""Ordering input."""
+input ContainerOrderBy2 {
+  fruitsAggregate: FruitAggregateOrderBy
+  fruits: FruitOrderBy
+}
+
+"""GraphQL type"""
+type ContainerType1 {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits(limit: Int = 100, offset: Int! = 0): [FruitType!]!
+  vegetablesAggregate: VegetableAggregate!
+
+  """Fetch objects from the VegetableType collection"""
+  vegetables(orderBy: [VegetableOrderBy!] = null): [VegetableType!]!
+  colorsAggregate: ColorAggregate!
+
+  """Fetch objects from the ColorType collection"""
+  colors: [ColorType!]!
+  name: String!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ContainerType2 {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits(limit: Int = 100, offset: Int! = 0, orderBy: [FruitOrderBy!] = null): [FruitType!]!
+  vegetablesAggregate: VegetableAggregate!
+
+  """Fetch objects from the VegetableType collection"""
+  vegetables(limit: Int = 100, offset: Int! = 0): [VegetableType!]!
+  colorsAggregate: ColorAggregate!
+
+  """Fetch objects from the ColorType collection"""
+  colors: [ColorType!]!
+  name: String!
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ContainerType3 {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits(limit: Int = 100, offset: Int! = 0, orderBy: [FruitOrderBy!] = null): [FruitType!]!
+  vegetablesAggregate: VegetableAggregate!
+
+  """Fetch objects from the VegetableType collection"""
+  vegetables(limit: Int = 100, offset: Int! = 0): [VegetableType!]!
+  colorsAggregate: ColorAggregate!
+
+  """Fetch objects from the ColorType collection"""
+  colors(limit: Int = 100, offset: Int! = 0): [ColorType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+input FruitAggregateMinMaxStringFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input FruitAggregateNumericFieldsOrderBy {
+  sweetness: OrderByEnum
+}
+
+"""GraphQL type"""
+input FruitAggregateOrderBy {
+  avg: FruitAggregateNumericFieldsOrderBy
+  count: OrderByEnum
+  max: FruitAggregateNumericFieldsOrderBy
+  maxString: FruitAggregateMinMaxStringFieldsOrderBy
+  min: FruitAggregateNumericFieldsOrderBy
+  minString: FruitAggregateMinMaxStringFieldsOrderBy
+  stddevPop: FruitAggregateNumericFieldsOrderBy
+  stddevSamp: FruitAggregateNumericFieldsOrderBy
+  sum: FruitAggregateNumericFieldsOrderBy
+  varPop: FruitAggregateNumericFieldsOrderBy
+  varSamp: FruitAggregateNumericFieldsOrderBy
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""Ordering input."""
+input FruitOrderBy {
+  color: ColorOrderBy
+  name: OrderByEnum
+  colorId: OrderByEnum
+  sweetness: OrderByEnum
+  id: OrderByEnum
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+enum OrderByEnum {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+type Query {
+  """Fetch objects from the ContainerType1 collection"""
+  container1(orderBy: [ContainerOrderBy!] = null): [ContainerType1!]!
+
+  """Fetch objects from the ContainerType2 collection"""
+  container2(orderBy: [ContainerOrderBy1!] = null): [ContainerType2!]!
+
+  """Fetch objects from the ContainerType3 collection"""
+  container3(orderBy: [ContainerOrderBy2!] = null): [ContainerType3!]!
+}
+
+scalar UUID
+
+"""Aggregation fields"""
+type VegetableAggregate {
+  count: Int
+  max: VegetableMinMaxFields!
+  min: VegetableMinMaxFields!
+  sum: VegetableSumFields!
+}
+
+"""GraphQL type"""
+input VegetableAggregateOrderBy {
+  count: OrderByEnum
+}
+
+enum VegetableFamily {
+  MUSHROOM
+  GOURD
+  CABBAGE
+  ONION
+  SEEDS
+}
+
+"""GraphQL type"""
+type VegetableMinMaxFields {
+  name: String
+  description: String
+}
+
+"""Ordering input."""
+input VegetableOrderBy {
+  family: OrderByEnum
+  id: OrderByEnum
+  name: OrderByEnum
+  description: OrderByEnum
+}
+
+"""GraphQL type"""
+type VegetableSumFields {
+  name: String
+  description: String
+}
+
+"""GraphQL type"""
+type VegetableType {
+  family: VegetableFamily!
+  id: UUID!
+  name: String!
+  description: String!
+}
+'''

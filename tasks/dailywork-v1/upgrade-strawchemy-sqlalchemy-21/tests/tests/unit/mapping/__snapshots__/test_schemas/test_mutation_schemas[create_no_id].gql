@@ -1,0 +1,371 @@
+'''
+"""GraphQL type"""
+type ColorType {
+  fruitsAggregate: FruitAggregate!
+
+  """Fetch objects from the FruitType collection"""
+  fruits: [FruitType!]!
+  name: String!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type DepartmentAggregate {
+  count: Int
+  max: DepartmentMinMaxFields!
+  min: DepartmentMinMaxFields!
+  sum: DepartmentSumFields!
+}
+
+"""GraphQL type"""
+type DepartmentMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type DepartmentSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type DepartmentType {
+  usersAggregate: UserAggregate!
+
+  """Fetch objects from the UserType collection"""
+  users: [UserType!]!
+  name: String
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ColorType!
+  name: String!
+  colorId: UUID
+  sweetness: Int!
+  id: UUID!
+}
+
+"""Aggregation fields"""
+type GroupAggregate {
+  count: Int
+  max: GroupMinMaxFields!
+  min: GroupMinMaxFields!
+  sum: GroupSumFields!
+}
+
+"""Conflict fields enum"""
+enum GroupColorConflictFields {
+  id
+}
+
+"""Identifier input"""
+input GroupColorIdFieldsInput {
+  id: UUID!
+}
+
+"""Add a new or existing object"""
+input GroupColorIdFieldsInputGroupColorInputGroupColorUpdateFieldsGroupColorConflictFieldsRequiredToOneInput {
+  set: GroupColorIdFieldsInput
+  create: GroupColorInput
+  upsert: GroupColorIdFieldsInputGroupColorInputGroupColorUpdateFieldsGroupColorConflictFieldsToOneUpsertInput
+}
+
+"""Add new object or update if existing"""
+input GroupColorIdFieldsInputGroupColorInputGroupColorUpdateFieldsGroupColorConflictFieldsToOneUpsertInput {
+  create: GroupColorInput!
+  conflictFields: GroupColorConflictFields
+  updateFields: [GroupColorUpdateFields!]
+}
+
+"""Create input"""
+input GroupColorInput {
+  fruits: GroupFruitsIdFieldsInputGroupFruitInputGroupFruitsUpdateFieldsGroupFruitsConflictFieldsToManyCreateInput
+  name: String!
+  id: UUID
+}
+
+"""Update fields enum"""
+enum GroupColorUpdateFields {
+  name
+  id
+}
+
+"""Create input"""
+input GroupDepartmentInput {
+  name: String = null
+  id: UUID
+}
+
+"""Conflict fields enum"""
+enum GroupDepartmentsConflictFields {
+  id
+}
+
+"""Identifier input"""
+input GroupDepartmentsIdFieldsInput {
+  id: UUID!
+}
+
+"""Add new or existing objects"""
+input GroupDepartmentsIdFieldsInputGroupDepartmentInputGroupDepartmentsUpdateFieldsGroupDepartmentsConflictFieldsToManyCreateInput {
+  set: [GroupDepartmentsIdFieldsInput!]
+  add: [GroupDepartmentsIdFieldsInput!]
+  create: [GroupDepartmentInput!]
+  upsert: GroupDepartmentsIdFieldsInputGroupDepartmentInputGroupDepartmentsUpdateFieldsGroupDepartmentsConflictFieldsToManyUpsertInput
+}
+
+"""Add new objects or update if existing"""
+input GroupDepartmentsIdFieldsInputGroupDepartmentInputGroupDepartmentsUpdateFieldsGroupDepartmentsConflictFieldsToManyUpsertInput {
+  create: [GroupDepartmentInput!]!
+  conflictFields: GroupDepartmentsConflictFields!
+  updateFields: [GroupDepartmentsUpdateFields!]
+}
+
+"""Update fields enum"""
+enum GroupDepartmentsUpdateFields {
+  name
+  id
+}
+
+"""Create input"""
+input GroupFruitInput {
+  name: String!
+  sweetness: Int!
+  id: UUID
+}
+
+"""Conflict fields enum"""
+enum GroupFruitsConflictFields {
+  id
+  nameAndColorId
+}
+
+"""Identifier input"""
+input GroupFruitsIdFieldsInput {
+  id: UUID!
+}
+
+"""Add new or existing objects"""
+input GroupFruitsIdFieldsInputGroupFruitInputGroupFruitsUpdateFieldsGroupFruitsConflictFieldsToManyCreateInput {
+  set: [GroupFruitsIdFieldsInput!]
+  add: [GroupFruitsIdFieldsInput!]
+  create: [GroupFruitInput!]
+  upsert: GroupFruitsIdFieldsInputGroupFruitInputGroupFruitsUpdateFieldsGroupFruitsConflictFieldsToManyUpsertInput
+}
+
+"""Add new objects or update if existing"""
+input GroupFruitsIdFieldsInputGroupFruitInputGroupFruitsUpdateFieldsGroupFruitsConflictFieldsToManyUpsertInput {
+  create: [GroupFruitInput!]!
+  conflictFields: GroupFruitsConflictFields!
+  updateFields: [GroupFruitsUpdateFields!]
+}
+
+"""Update fields enum"""
+enum GroupFruitsUpdateFields {
+  name
+  colorId
+  sweetness
+  id
+}
+
+"""Create input"""
+input GroupInput {
+  tag: GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsRequiredToOneInput!
+  users: GroupUsersIdFieldsInputGroupUserInputGroupUsersUpdateFieldsGroupUsersConflictFieldsToManyCreateInput
+  color: GroupColorIdFieldsInputGroupColorInputGroupColorUpdateFieldsGroupColorConflictFieldsRequiredToOneInput!
+  name: String!
+  id: UUID
+}
+
+"""GraphQL type"""
+type GroupMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type GroupSumFields {
+  name: String
+}
+
+"""Conflict fields enum"""
+enum GroupTagConflictFields {
+  id
+}
+
+"""Identifier input"""
+input GroupTagIdFieldsInput {
+  id: UUID!
+}
+
+"""Add a new or existing object"""
+input GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsRequiredToOneInput {
+  set: GroupTagIdFieldsInput
+  create: GroupTagInput
+  upsert: GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsToOneUpsertInput
+}
+
+"""Add a new or existing object"""
+input GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsToOneInput {
+  set: GroupTagIdFieldsInput
+  create: GroupTagInput
+  upsert: GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsToOneUpsertInput
+}
+
+"""Add new object or update if existing"""
+input GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsToOneUpsertInput {
+  create: GroupTagInput!
+  conflictFields: GroupTagConflictFields
+  updateFields: [GroupTagUpdateFields!]
+}
+
+"""Create input"""
+input GroupTagInput {
+  name: String!
+  id: UUID
+}
+
+"""Update fields enum"""
+enum GroupTagUpdateFields {
+  name
+  id
+}
+
+"""GraphQL type"""
+type GroupType {
+  tag: TagType!
+  usersAggregate: UserAggregate!
+
+  """Fetch objects from the UserType collection"""
+  users: [UserType!]!
+  color: ColorType!
+  name: String!
+  tagId: UUID!
+  colorId: UUID!
+  id: UUID!
+}
+
+"""Create input"""
+input GroupUserInput {
+  tag: GroupTagIdFieldsInputGroupTagInputGroupTagUpdateFieldsGroupTagConflictFieldsToOneInput = null
+  departments: GroupDepartmentsIdFieldsInputGroupDepartmentInputGroupDepartmentsUpdateFieldsGroupDepartmentsConflictFieldsToManyCreateInput
+  name: String!
+  id: UUID
+}
+
+"""Conflict fields enum"""
+enum GroupUsersConflictFields {
+  id
+}
+
+"""Identifier input"""
+input GroupUsersIdFieldsInput {
+  id: UUID!
+}
+
+"""Add new or existing objects"""
+input GroupUsersIdFieldsInputGroupUserInputGroupUsersUpdateFieldsGroupUsersConflictFieldsToManyCreateInput {
+  set: [GroupUsersIdFieldsInput!]
+  add: [GroupUsersIdFieldsInput!]
+  create: [GroupUserInput!]
+  upsert: GroupUsersIdFieldsInputGroupUserInputGroupUsersUpdateFieldsGroupUsersConflictFieldsToManyUpsertInput
+}
+
+"""Add new objects or update if existing"""
+input GroupUsersIdFieldsInputGroupUserInputGroupUsersUpdateFieldsGroupUsersConflictFieldsToManyUpsertInput {
+  create: [GroupUserInput!]!
+  conflictFields: GroupUsersConflictFields!
+  updateFields: [GroupUsersUpdateFields!]
+}
+
+"""Update fields enum"""
+enum GroupUsersUpdateFields {
+  name
+  groupId
+  tagId
+  id
+}
+
+type Mutation {
+  """Create object in the GroupType collection"""
+  createGroup(data: GroupInput!): GroupType!
+}
+
+type Query {
+  hello: String!
+}
+
+"""GraphQL type"""
+type TagType {
+  groupsAggregate: GroupAggregate!
+
+  """Fetch objects from the GroupType collection"""
+  groups: [GroupType!]!
+  name: String!
+  id: UUID!
+}
+
+scalar UUID
+
+"""Aggregation fields"""
+type UserAggregate {
+  count: Int
+  max: UserMinMaxFields!
+  min: UserMinMaxFields!
+  sum: UserSumFields!
+}
+
+"""GraphQL type"""
+type UserMinMaxFields {
+  name: String
+}
+
+"""GraphQL type"""
+type UserSumFields {
+  name: String
+}
+
+"""GraphQL type"""
+type UserType {
+  group: GroupType!
+  tag: TagType!
+  departmentsAggregate: DepartmentAggregate!
+
+  """Fetch objects from the DepartmentType collection"""
+  departments: [DepartmentType!]!
+  name: String!
+  groupId: UUID
+  tagId: UUID
+  id: UUID!
+}
+'''

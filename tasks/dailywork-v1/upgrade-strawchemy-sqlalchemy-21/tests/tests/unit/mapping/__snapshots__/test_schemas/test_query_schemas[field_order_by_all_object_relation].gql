@@ -1,0 +1,95 @@
+'''
+"""GraphQL type"""
+type AliasedFruitType {
+  """Fetch object from the ShadeType collection by id"""
+  shade: ShadeType!
+  name: String!
+  id: UUID!
+}
+
+"""Ordering input."""
+input ColorOrderBy {
+  fruitsAggregate: FruitAggregateOrderBy
+  fruits: FruitOrderBy
+  name: OrderByEnum
+  id: OrderByEnum
+}
+
+"""GraphQL type"""
+input FruitAggregateMinMaxStringFieldsOrderBy {
+  name: OrderByEnum
+}
+
+"""GraphQL type"""
+input FruitAggregateNumericFieldsOrderBy {
+  sweetness: OrderByEnum
+}
+
+"""GraphQL type"""
+input FruitAggregateOrderBy {
+  avg: FruitAggregateNumericFieldsOrderBy
+  count: OrderByEnum
+  max: FruitAggregateNumericFieldsOrderBy
+  maxString: FruitAggregateMinMaxStringFieldsOrderBy
+  min: FruitAggregateNumericFieldsOrderBy
+  minString: FruitAggregateMinMaxStringFieldsOrderBy
+  stddevPop: FruitAggregateNumericFieldsOrderBy
+  stddevSamp: FruitAggregateNumericFieldsOrderBy
+  sum: FruitAggregateNumericFieldsOrderBy
+  varPop: FruitAggregateNumericFieldsOrderBy
+  varSamp: FruitAggregateNumericFieldsOrderBy
+}
+
+"""Ordering input."""
+input FruitOrderBy {
+  color: ColorOrderBy
+  name: OrderByEnum
+  id: OrderByEnum
+}
+
+"""Ordering input."""
+input FruitOrderBy1 {
+  color: ColorOrderBy
+  name: OrderByEnum
+  id: OrderByEnum
+}
+
+"""Ordering input."""
+input FruitOrderBy3 {
+  shade: ColorOrderBy
+  name: OrderByEnum
+  id: OrderByEnum
+}
+
+"""GraphQL type"""
+type FruitType {
+  color: ShadeType!
+  name: String!
+  id: UUID!
+}
+
+enum OrderByEnum {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+type Query {
+  """Fetch objects from the FruitType collection"""
+  fruits(orderBy: [FruitOrderBy1!] = null): [FruitType!]!
+
+  """Fetch objects from the AliasedFruitType collection"""
+  aliasedFruits(orderBy: [FruitOrderBy3!] = null): [AliasedFruitType!]!
+}
+
+"""GraphQL type"""
+type ShadeType {
+  name: String!
+  id: UUID!
+}
+
+scalar UUID
+'''

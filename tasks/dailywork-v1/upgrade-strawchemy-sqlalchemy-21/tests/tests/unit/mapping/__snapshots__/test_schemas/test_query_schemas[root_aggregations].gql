@@ -1,0 +1,93 @@
+'''
+"""Date (isoformat)"""
+scalar Date
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""Decimal (fixed-point)"""
+scalar Decimal
+
+"""
+The `Interval` scalar type represents a duration of time as specified by [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#Durations).
+"""
+scalar Interval @specifiedBy(url: "https://en.wikipedia.org/wiki/ISO_8601#Durations")
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+type Query {
+  """Fetch aggregation data from the SQLDataTypesType collection"""
+  sqlDataTypes: [SQLDataTypesAggregationType!]!
+}
+
+"""Aggregation fields"""
+type SQLDataTypesAggregate {
+  avg: SQLDataTypesNumericFields!
+  count: Int
+  max: SQLDataTypesMinMaxFields!
+  min: SQLDataTypesMinMaxFields!
+  stddevPop: SQLDataTypesNumericFields!
+  stddevSamp: SQLDataTypesNumericFields!
+  sum: SQLDataTypesSumFields!
+  varPop: SQLDataTypesNumericFields!
+  varSamp: SQLDataTypesNumericFields!
+}
+
+"""GraphQL type"""
+type SQLDataTypesAggregationType {
+  nodes: [SQLDataTypesType!]!
+  aggregations: SQLDataTypesAggregate!
+}
+
+"""GraphQL type"""
+type SQLDataTypesMinMaxFields {
+  dateCol: Date
+  timeCol: Time
+  datetimeCol: DateTime
+  strCol: String
+  intCol: Int
+  floatCol: Float
+  decimalCol: Decimal
+}
+
+"""GraphQL type"""
+type SQLDataTypesNumericFields {
+  intCol: Float
+  floatCol: Float
+  decimalCol: Decimal
+}
+
+"""GraphQL type"""
+type SQLDataTypesSumFields {
+  timeDeltaCol: Interval
+  strCol: String
+  intCol: Int
+  floatCol: Float
+  decimalCol: Decimal
+}
+
+"""GraphQL type"""
+type SQLDataTypesType {
+  dateCol: Date!
+  timeCol: Time!
+  timeDeltaCol: Interval!
+  datetimeCol: DateTime!
+  strCol: String!
+  intCol: Int!
+  floatCol: Float!
+  decimalCol: Decimal!
+  boolCol: Boolean!
+  uuidCol: UUID!
+  dictCol(path: String): JSON
+  arrayStrCol: [String!]!
+  id: UUID!
+}
+
+"""Time (isoformat)"""
+scalar Time
+
+scalar UUID
+'''

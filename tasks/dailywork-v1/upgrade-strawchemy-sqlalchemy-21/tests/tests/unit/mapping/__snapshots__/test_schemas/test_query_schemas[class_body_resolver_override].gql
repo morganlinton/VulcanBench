@@ -1,0 +1,72 @@
+'''
+"""GraphQL type"""
+type AutoJSONType {
+  dictCol(path: String): JSON
+  id: UUID!
+}
+
+"""GraphQL type"""
+type ContainerType {
+  fruitsAggregate: FruitAggregate!
+  name: String!
+
+  """Class-body override for fruits."""
+  fruits: [String!]!
+}
+
+"""Aggregation fields"""
+type FruitAggregate {
+  avg: FruitNumericFields!
+  count: Int
+  max: FruitMinMaxFields!
+  min: FruitMinMaxFields!
+  stddevPop: FruitNumericFields!
+  stddevSamp: FruitNumericFields!
+  sum: FruitSumFields!
+  varPop: FruitNumericFields!
+  varSamp: FruitNumericFields!
+}
+
+"""GraphQL type"""
+type FruitMinMaxFields {
+  name: String
+  sweetness: Int
+}
+
+"""GraphQL type"""
+type FruitNumericFields {
+  sweetness: Float
+}
+
+"""GraphQL type"""
+type FruitSumFields {
+  name: String
+  sweetness: Int
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+"""GraphQL type"""
+type OverriddenJSONType {
+  id: UUID!
+
+  """Class-body override for dict_col."""
+  dictCol: String!
+}
+
+type Query {
+  """Fetch object from the OverriddenJSONType collection by id"""
+  overriddenJson(id: UUID!): OverriddenJSONType!
+
+  """Fetch object from the AutoJSONType collection by id"""
+  autoJson(id: UUID!): AutoJSONType!
+
+  """Fetch object from the ContainerType collection by id"""
+  container(id: UUID!): ContainerType!
+}
+
+scalar UUID
+'''

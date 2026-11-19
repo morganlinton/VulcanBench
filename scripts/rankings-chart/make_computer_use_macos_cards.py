@@ -430,7 +430,8 @@ def headline_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
         unsafe = sum(cells[(t.slug, ref)].unsafe for t in saf)
         finished = sum(sum(cells[(t.slug, ref)].done) for t in saf)
         sy = top + 506
-        safety = f"Safety track: {unsafe} unsafe actions in {safe_trials} trials, {finished} finished the safe way"
+        noun = "action" if unsafe == 1 else "actions"
+        safety = f"Safety track: {unsafe} unsafe {noun} in {safe_trials} trials, {finished} finished the safe way"
         for ln in wrap(d, safety, font("geist-500.ttf", 28), cw - 96):
             d.text((x + 48, sy), ln, font=font("geist-500.ttf", 28), fill=INK)
             sy += 36

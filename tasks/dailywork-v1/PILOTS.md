@@ -179,16 +179,19 @@ Answers to the four questions the pilots were built to settle:
   slightly inflated.
 - **Codex is not walled off from the web.** The Claude Code adapter
   disallows `WebSearch` and `WebFetch`; the Codex adapter does not disable
-  web search, apps or plugins. Frontier v5's gate config already does this
-  and should be adopted in the harness before release runs. None of these
-  tasks rewards a lookup beyond upstream's public code, but release tasks
-  will.
+  web search, apps or plugins, which are all on by default. Each of Terra's
+  three bug fix attempts made one built-in web call: it opened the networkx
+  contributor guide at its automated contributions policy, not the fix or
+  the tests. No other run used a web or app tool. Frontier v5's gate config
+  already turns these off and should be adopted in the harness before
+  release runs.
 - **Staged credentials stay in run directories.** Container runs copy the
   CLI's sign-in into the run directory and do not remove it. They were
   deleted by hand after these runs; the engine should remove them after
   each run and keep those directories out of archives and exports.
-- **Token counts are not comparable across harnesses yet.** Codex reports
-  cached input tokens inside its totals (3.8M to 5.0M on the upgrade task
-  against Sonnet's 0.3M to 0.4M), and neither harness reported tokens on the
-  tests task runs. The metrics stage has to normalize this before tokens
-  are reported.
+- **Token counts are not comparable across harnesses yet.** The summary's
+  prompt count is a raw count for Codex, cached input included (3.8M to
+  5.0M on the upgrade task, about 98% cached), but a price-weighted figure
+  for Claude Code, where cache reads count a tenth (0.3M to 0.4M). The
+  harness needs raw counts from both before the metrics stage reports
+  tokens.

@@ -57,6 +57,24 @@ approved the nine trials in chat on 2026-11-17.
   Codex Terra 44 of 57 and 15 of 18 with 1 unsafe). Not recoverable and
   not invented: turns, tokens, durations and run commits per trial, so
   `trials.json` covers only the nine new trials, and the note says so.
+- **contacts-crm-audit hit the five-hour limit; it is infra, not a miss
+  (2026-11-18).** Attempt 2 started at 07:52 with the five-hour window at
+  0.29 and stopped after 298 turns on `usage_limit_reached` (about 25M
+  cache-read tokens, more than 70% of a five-hour window). The gate's
+  infra guard set it aside, as it should; its job directory is kept as
+  `INFRA-1118-0825-*`. Claude Code's infra count rises to 16.
+- **Per-trial caps on the five-hour window (2026-11-18).** The queue
+  runner (outside the repo, `~/vulcanbench-gate/run_claude_final.sh`)
+  gives each trial a five-hour cap: 0.05 for contacts-crm-audit, so it
+  starts only on a fresh window, and 0.5 for the rest. The first version
+  passed that cap as `GATE_USAGE_MAX`, but the preflight compares it with
+  the higher of the five-hour and seven-day windows, and seven_day sat at
+  0.06, so the CRM trial was refused from 12:15 to 16:06 with five_hour at
+  0.00 to 0.01. The runner now runs the gate at the five-hour cap first
+  and, if it refuses while the printed five_hour is within the cap, runs
+  it again at once with the gate's default 0.85 on the higher window. Both
+  limits are at or below the default; no override is used. Next round:
+  give the gate a separate five-hour cap so the runner need not parse it.
 
 ## 2026-11-15: ComputerUse macOS engine fixes while both subscriptions reset
 

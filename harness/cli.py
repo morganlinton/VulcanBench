@@ -1408,7 +1408,7 @@ def build_parser() -> argparse.ArgumentParser:  # noqa: PLR0915, one add_argumen
         dest="agent_container",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="Run the subscription CLI agent inside a container (codex only for now): Harbor-style execution with the resource band applied to the agent phase too. Requires the vulcanbench/agent-codex image.",
+        help="Run the subscription CLI agent inside a container (codex and claude-code): Harbor-style execution with the resource band applied to the agent phase too. The container is the task's own sandbox image plus an agent layer, built on first use and cached.",
     )
     p.add_argument(
         "--repeat",

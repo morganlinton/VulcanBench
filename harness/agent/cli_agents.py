@@ -283,49 +283,22 @@ def _subscription_env(extra: dict[str, str] | None = None) -> dict[str, str]:
     return env
 
 
-#: Default image for containerized agent execution (Harbor-style: the CLI is
-#: installed inside the container). Built by ``make agent-image-codex``.
-DEFAULT_AGENT_IMAGE = os.environ.get("VULCANBENCH_AGENT_IMAGE", "vulcanbench/agent-codex:latest")
-
-#: Per-harness agent images (``make agent-image-<harness>``). The
-#: VULCANBENCH_AGENT_IMAGE env override wins for every harness.
-_AGENT_IMAGES = {
-    "codex": "vulcanbench/agent-codex:latest",
-    "claude-code": "vulcanbench/agent-claude-code:latest",
-}
-
-
-def default_agent_image(harness_id: str) -> str:
-    """The containerized-agent image for ``harness_id``.
-
-    Raises for harnesses without a container image so the failure is a clear
-    configuration error instead of a docker pull of a nonexistent tag.
-    """
-    override = os.environ.get("VULCANBENCH_AGENT_IMAGE")
-    if override:
-        return override
-    image = _AGENT_IMAGES.get(harness_id)
-    if image is None:
-        raise ProviderError(
-            f"agent-in-container mode has no image for harness {harness_id!r}; "
-            f"supported: {', '.join(sorted(_AGENT_IMAGES))}"
-        )
-    return image
-
-
 @dataclass(frozen=True)
 class AgentContainerSpec:
     """How to run a subscription CLI inside a container instead of the host.
 
-    The workspace is bind-mounted at its host path so the CLI's ``--cd`` and
-    every path in the event stream stay identical to a host run. Subscription
+    ``image`` is the task's sandbox image with the agent layer on top
+    (:func:`harness.agent.agent_images.ensure_agent_image`), so the agent sees
+    the same toolchains as the verifier. The workspace is bind-mounted at its
+    host path so the CLI's ``--cd`` and every path in the event stream stay
+    identical to a host run. Subscription
     auth is a run-scoped copy of the CLI's credential file, mounted read-write
     (CLIs refresh tokens); the copy keeps a misbehaving run from corrupting
     the host credentials. The agent phase needs the provider API, so the
     container runs on the default network, unlike the network-off verifier.
     """
 
-    image: str = DEFAULT_AGENT_IMAGE
+    image: str
     resources: ResourceSpec | None = None
 
 
@@ -729,7 +702,7 @@ def run_cursor_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     """
     if agent_container is not None:
         raise ProviderError(
-            "agent-in-container mode currently supports only the codex harness, not cursor"
+            "agent-in-container mode supports only the codex and claude-code harnesses, not cursor"
         )
     del priced_spec, max_turns
     workspace = workspace.resolve()
@@ -1102,7 +1075,7 @@ def run_grok_build_task(  # noqa: PLR0912, PLR0915, linear stream-parse loop
     """
     if agent_container is not None:
         raise ProviderError(
-            "agent-in-container mode currently supports only the codex harness, not grok-build"
+            "agent-in-container mode supports only the codex and claude-code harnesses, not grok-build"
         )
     workspace = workspace.resolve()
     if timeout_s is not None and timeout_s <= 0:
@@ -1859,7 +1832,7 @@ def run_zcode_task(  # noqa: PLR0912, PLR0915, linear process + harvest
     """
     if agent_container is not None:
         raise ProviderError(
-            "agent-in-container mode currently supports only the codex harness, not zcode"
+            "agent-in-container mode supports only the codex and claude-code harnesses, not zcode"
         )
     del priced_spec, max_turns
     workspace = workspace.resolve()

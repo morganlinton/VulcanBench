@@ -670,7 +670,7 @@ def run_devin_task(  # noqa: PLR0912, PLR0915, linear process + harvest
     """Run one task through ``devin -p`` billed to the signed-in Devin account."""
     if agent_container is not None:
         raise ProviderError(
-            "agent-in-container mode currently supports only the codex harness, not devin"
+            "agent-in-container mode supports only the codex and claude-code harnesses, not devin"
         )
     del priced_spec, max_turns  # max_turns: no step cap in print mode; the wall clock bounds a run
     workspace = Path(workspace).resolve()

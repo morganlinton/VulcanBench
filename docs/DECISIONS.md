@@ -26,6 +26,22 @@ entries here record the measurements behind those rules.
   freeze, then a new bench tag and run worktree.
 - **No change to the Codex lockdown.** The same gate config and locked
   catalog apply (evidence below).
+- **Suite version 0.3.0.** The pin is in `suite.json` and the suite is
+  re-frozen. Tasks and task images are unchanged from 0.2.0.
+- **Same task images as this round (my call).** The keychain fix needs
+  rebuilt images, which would make the 6.2 Sol row run on a different
+  environment from the three rows it sits next to. The rebuild waits for
+  the next round, as planned.
+- **The catalog comes from Codex 0.170.0.** The gate builds the locked
+  catalog with `codex debug models` on the host, and the host's Codex
+  (0.163.0) does not list `gpt-6.2-sol`. The queue sets `CODEX_BIN` to a
+  Codex 0.170.0 install in the gate folder; the trial itself installs the
+  pinned 0.170.0 in the agent container as before.
+- **Capability tasks only for now (19 x 3 = 57 trials, the scope the owner
+  approved).** The six safety tasks would be 18 more trials and need the
+  owner's word. Jobs run attempt by attempt (every task's attempt 1, then
+  2, then 3), so a partial run still covers every task. Job suffix
+  `-s62a<N>`.
 
 ### Evidence
 - Probed with no quota spent, on the host (not the task image), with Codex

@@ -1,0 +1,16 @@
+{
+  "rule": "frontier-v5 progress score",
+  "rule_version": 1,
+  "adopted": "docs/DECISIONS.md 2026-11-19 (decision R3); docs/frontier-v5/PLAN-v5.md",
+  "definition": "progress = held-out checks passed / held-out checks, if the tamper scan is clean and every guard check holds; else 0. pass = the verifier's reward.",
+  "held_out": "fail_to_pass",
+  "guards": "tamper_clean and the build, import and sentinel flags in reward.json when present; every pass_to_pass id passes; for tasks with min_total_tests, no failure outside fail_to_pass, must_fail and known_env_failures, and at least min_total_tests tests seen",
+  "tasks": {
+    "treesitter-query-anchor-matching": {"format": "libtest"},
+    "black-fmt-skip-region-handling": {"format": "pytest"},
+    "prettier-comment-attachment-stability": {"format": "jest"},
+    "javaparser-member-resolution-scope": {"format": "surefire"},
+    "cli11-toml-config-round-trip": {"format": "catch2"},
+    "pulldown-cmark-html-block-scanning": {"format": "libtest"}
+  }
+}

@@ -187,3 +187,15 @@ nested types against declared members only and loses inherited ones; and
 the incomplete-hierarchy case where an assignability question must still
 raise the unsolved-symbol error (the one `Issue4985Test` check the blanket
 shortcut leaves failing).
+
+## Version 0.2.0 (2026-11-19): per-check record
+
+The release 1 board scores a progress score (decision R3, docs/DECISIONS.md
+2026-11-19), which needs each check's result on record. Version 0.1.0 kept
+its surefire reports inside the verifier container, so only the failing ids
+(in `check.err`) reached the trial's verifier output. Version 0.2.0 copies
+the two testing modules' `TEST-*.xml` reports to
+`/logs/verifier/surefire/<module>/` after the test run. Nothing else
+changes: the prompt, images, tests, families and the reward rule are those
+of 0.1.0. Validation of 0.2.0 (base 0, gold 1, every probe 0) is recorded
+here when it has run.

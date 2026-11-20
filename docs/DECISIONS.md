@@ -7,6 +7,41 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: Frontier v5 progress score groups held-out guards per fixture (amends the held-out entry)
+
+### Decision
+
+The owner, in chat on 2026-11-19, replaced option B of the entry below
+("Frontier v5 progress score counts every held-out case") with option C.
+The progress score counts units: each fail-to-pass check is one unit, and
+the held-out guards are grouped per fixture, each group one unit that passes
+only when every variant id in it passes. Progress is units passed over total
+units, and it is 0 when a visible existing test, the sentinel or a
+whole-suite check fails, or the tamper scan flags the attempt. Each task's
+unit-to-id grouping sits in its scoring file, pinned by sha256 in
+`tasks/frontier-v5/suite.json`.
+
+### Evidence
+
+- Under B, prettier would add 131 held-out guard ids (BOM, line-ending and
+  AST-compare variants of the same fixtures) against 18 defect checks, so
+  guards would swamp its score; CLI11 adds 6, javaparser 7, pulldown-cmark
+  10, black 0 (board engine session, 2026-11-19).
+- The release 1 DESIGN.md files pre-register "held-out checks" as the
+  fail-to-pass ids only (option A). C departs from that wording on the
+  owner's decision, keeping guard progress visible (CLI11's attempts that
+  clear all 11 defect checks are not flattened to 0) without the swamping.
+
+### Revisit triggers
+
+- Per-task unit counts in the release 1.1 lock PR show a task still
+  dominated by guard units: regroup before any model is scored.
+
+### What this touched
+
+This entry. It supersedes the decision part of the held-out entry below,
+which stays as the record of the earlier choice.
+
 ## 2026-11-19: Frontier v5 progress score counts every held-out case
 
 ### Decision

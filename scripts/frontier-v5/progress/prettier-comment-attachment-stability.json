@@ -1,0 +1,361 @@
+{
+ "task": "prettier-comment-attachment-stability",
+ "task_version": "0.1.0",
+ "rule": "C (docs/DECISIONS.md 2026-11-19)",
+ "counts": {
+  "units": 26,
+  "fail_to_pass_units": 18,
+  "held_out_guard_units": 8,
+  "held_out_guard_ids": 174
+ },
+ "units": [
+  {
+   "unit": "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format#0"
+   ]
+  },
+  {
+   "unit": "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > second format [babel]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > second format [babel]#0"
+   ]
+  },
+  {
+   "unit": "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format#0"
+   ]
+  },
+  {
+   "unit": "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > second format [babel]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > second format [babel]#0"
+   ]
+  },
+  {
+   "unit": "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format#0"
+   ]
+  },
+  {
+   "unit": "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > second format [babel]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > second format [babel]#0"
+   ]
+  },
+  {
+   "unit": "format/js/sequence-expression/format.test.js::parenthesized.js > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format#0"
+   ]
+  },
+  {
+   "unit": "format/js/sequence-expression/format.test.js::parenthesized.js > second format [babel]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/js/sequence-expression/format.test.js::parenthesized.js > second format [babel]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/class-comment/format.test.js::class-implements.ts > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/class-comment/format.test.js::class-implements.ts > format#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/class-comment/format.test.js::issue-16228.ts > second format [typescript]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > second format [typescript]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[flow]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[flow]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[hermes]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[hermes]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[flow]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[flow]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[hermes]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[hermes]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[flow]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[flow]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[hermes]#0",
+   "kind": "fail_to_pass",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[hermes]#0"
+   ]
+  },
+  {
+   "unit": "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > BOM [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [__babel_estree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [acorn]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [babel-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [espree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [meriyah]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [oxc-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [oxc]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [typescript]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [yuku-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > ast compare [yuku]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > end of line (CR) [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > end of line (CRLF) [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[__babel_estree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[acorn]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[babel-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[espree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[meriyah]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[oxc-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[oxc]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[typescript]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[yuku-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"always\"} > format[yuku]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > BOM [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [__babel_estree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [acorn]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [babel-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [espree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [meriyah]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [oxc-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [oxc]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [typescript]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [yuku-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > ast compare [yuku]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > end of line (CR) [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > end of line (CRLF) [babel]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[__babel_estree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[acorn]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[babel-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[espree]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[meriyah]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[oxc-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[oxc]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[typescript]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[yuku-ts]#0",
+    "format/js/arrows/format.test.js::arrow-chain-with-trailing-comments.js - {\"arrowParens\":\"avoid\"} > format[yuku]#0"
+   ]
+  },
+  {
+   "unit": "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > BOM [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [__babel_estree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [acorn]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [babel-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [espree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [flow]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [hermes]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [meriyah]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [oxc-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [oxc]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [typescript]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [yuku-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > ast compare [yuku]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > end of line (CR) [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > end of line (CRLF) [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[__babel_estree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[acorn]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[babel-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[espree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[flow]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[hermes]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[meriyah]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[oxc-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[oxc]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[typescript]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[yuku-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized-trailing-comment.js > format[yuku]#0"
+   ]
+  },
+  {
+   "unit": "format/js/sequence-expression/format.test.js::parenthesized.js",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/js/sequence-expression/format.test.js::parenthesized.js > BOM [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [__babel_estree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [acorn]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [babel-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [espree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [flow]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [hermes]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [meriyah]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [oxc-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [oxc]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [typescript]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [yuku-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > ast compare [yuku]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > end of line (CR) [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > end of line (CRLF) [babel]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[__babel_estree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[acorn]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[babel-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[espree]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[flow]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[hermes]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[meriyah]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[oxc-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[oxc]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[typescript]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[yuku-ts]#0",
+    "format/js/sequence-expression/format.test.js::parenthesized.js > format[yuku]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/class-comment/format.test.js::class-implements.ts",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/typescript/class-comment/format.test.js::class-implements.ts > BOM [typescript]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > ast compare [babel-ts]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > ast compare [flow]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > ast compare [hermes]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > ast compare [oxc-ts]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > ast compare [typescript]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > ast compare [yuku-ts]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > end of line (CR) [typescript]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > end of line (CRLF) [typescript]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > format[babel-ts]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > format[flow]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > format[hermes]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > format[oxc-ts]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > format[yuku-ts]#0",
+    "format/typescript/class-comment/format.test.js::class-implements.ts > second format [typescript]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/class-comment/format.test.js::issue-16228.ts",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > BOM [typescript]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > ast compare [babel-ts]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > ast compare [flow]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > ast compare [hermes]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > ast compare [oxc-ts]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > ast compare [typescript]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > ast compare [yuku-ts]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > end of line (CR) [typescript]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > end of line (CRLF) [typescript]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > format#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > format[babel-ts]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > format[flow]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > format[hermes]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > format[oxc-ts]#0",
+    "format/typescript/class-comment/format.test.js::issue-16228.ts > format[yuku-ts]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > BOM [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > ast compare [babel-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > ast compare [flow]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > ast compare [hermes]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > ast compare [oxc-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > ast compare [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > ast compare [yuku-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > end of line (CR) [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > end of line (CRLF) [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[babel-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[oxc-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > format[yuku-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::11639.ts > second format [typescript]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > BOM [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > ast compare [babel-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > ast compare [flow]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > ast compare [hermes]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > ast compare [oxc-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > ast compare [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > ast compare [yuku-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > end of line (CR) [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > end of line (CRLF) [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[babel-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[oxc-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > format[yuku-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::15707.ts > second format [typescript]#0"
+   ]
+  },
+  {
+   "unit": "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts",
+   "kind": "held_out_guard",
+   "ids": [
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > BOM [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > ast compare [babel-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > ast compare [flow]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > ast compare [hermes]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > ast compare [oxc-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > ast compare [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > ast compare [yuku-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > end of line (CR) [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > end of line (CRLF) [typescript]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[babel-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[oxc-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > format[yuku-ts]#0",
+    "format/typescript/comments/consistent-with-flow/format.test.js::19903.ts > second format [typescript]#0"
+   ]
+  }
+ ]
+}

@@ -34,6 +34,26 @@ def families(task: str) -> dict:
     return json.loads((SUITE / task / "tests" / "families.json").read_text())
 
 
+def units(task: str) -> list[dict]:
+    return ps.load_units(task)
+
+
+def visible_guard(task: str) -> str:
+    held = {i for u in units(task) for i in u["ids"]}
+    return next(i for i in families(task)["pass_to_pass"] if i not in held)
+
+
+#: Units per task under rule C: fail_to_pass checks plus held-out guard groups.
+UNIT_COUNTS = {
+    "treesitter-query-anchor-matching": (11, 2),
+    "black-fmt-skip-region-handling": (7, 0),
+    "prettier-comment-attachment-stability": (18, 8),
+    "javaparser-member-resolution-scope": (12, 7),
+    "cli11-toml-config-round-trip": (11, 6),
+    "pulldown-cmark-html-block-scanning": (24, 10),
+}
+
+
 # --- writers, one per verifier format ------------------------------------
 
 
@@ -228,6 +248,10 @@ def test_rule_sha_is_pinned_in_the_suite_manifest_and_lock() -> None:
     pin = json.loads((SUITE / "suite.json").read_text())["pins"]["progress_rule"]
     assert pin["path"] == "scripts/frontier-v5/progress_rule.json"
     assert pin["sha256"] == hashlib.sha256((REPO / pin["path"]).read_bytes()).hexdigest()
+    rule = ps.load_rule()
+    for task, entry in rule["tasks"].items():
+        data = (REPO / "scripts" / "frontier-v5" / entry["units"]).read_bytes()
+        assert hashlib.sha256(data).hexdigest() == entry["sha256"] == pin["units"][task]
     lock = json.loads((SUITE / "suite.lock.json").read_text())
     assert lock["pins"]["progress_rule"] == pin
 
@@ -235,7 +259,7 @@ def test_rule_sha_is_pinned_in_the_suite_manifest_and_lock() -> None:
 def test_rule_covers_exactly_the_board_tasks() -> None:
     rule = ps.load_rule()
     assert sorted(rule["tasks"]) == sorted(TASKS)
-    assert rule["held_out"] == "fail_to_pass"
+    assert "held_out" not in rule  # no A/B switch: rule C only
     assert all(t["format"] in ps.READERS for t in rule["tasks"].values())
 
 
@@ -249,14 +273,40 @@ def test_suite_1_1_0_has_no_private_task() -> None:
 # --- every task, every format ---------------------------------------------
 
 
+def test_unit_files_are_derived_from_the_task_sources() -> None:
+    gen = REPO / "scripts" / "frontier-v5" / "make_progress_units.py"
+    spec = importlib.util.spec_from_file_location("make_progress_units", gen)
+    assert spec and spec.loader
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.main(["--check"]) == 0
+
+
+@pytest.mark.parametrize("task", TASKS)
+def test_unit_counts(task: str) -> None:
+    us = units(task)
+    f2p, groups = UNIT_COUNTS[task]
+    assert (
+        sum(u["kind"] == "fail_to_pass" for u in us) == f2p == len(families(task)["fail_to_pass"])
+    )
+    assert sum(u["kind"] == "held_out_guard" for u in us) == groups
+    guards = [i for u in us if u["kind"] == "held_out_guard" for i in u["ids"]]
+    assert set(guards) <= set(families(task)["pass_to_pass"])
+
+
+def test_a_tampered_unit_file_is_refused(tmp_path: Path) -> None:
+    rule = ps.load_rule()
+    rule["tasks"]["black-fmt-skip-region-handling"]["sha256"] = "0" * 64
+    with pytest.raises(ValueError, match="does not match"):
+        ps.load_units("black-fmt-skip-region-handling", rule)
+
+
 @pytest.mark.parametrize("task", TASKS)
 def test_clean_pass_scores_one_and_agrees_with_reward(tmp_path: Path, task: str) -> None:
     s = ps.score_trial(make_trial(tmp_path, task), REPO)
     assert s.reward == 1 and s.passed and s.guard_ok, s.guard_failures[:5]
-    assert s.progress == 1.0 and s.held_out_passed == s.held_out_total == len(
-        families(task)["fail_to_pass"]
-    )
-    assert s.consistent
+    assert s.progress == 1.0 and s.units_passed == s.units_total == sum(UNIT_COUNTS[task])
+    assert s.consistent and s.failed_units == []
 
 
 @pytest.mark.parametrize("task", TASKS)
@@ -264,9 +314,9 @@ def test_partial_progress_counts_held_out_checks(tmp_path: Path, task: str) -> N
     fam = families(task)
     miss = set(fam["fail_to_pass"][:2])
     s = ps.score_trial(make_trial(tmp_path, task, failing=miss), REPO)
-    n = len(fam["fail_to_pass"])
+    n = sum(UNIT_COUNTS[task])
     assert s.reward == 0 and s.guard_ok, s.guard_failures[:5]
-    assert s.held_out_passed == n - 2
+    assert s.units_passed == n - 2 and sorted(s.failed_units) == sorted(miss)
     assert s.progress == pytest.approx((n - 2) / n, abs=1e-6)
     assert s.consistent
     assert sum(1 for t in miss if s.checks[t] == "failed") == 2
@@ -274,11 +324,11 @@ def test_partial_progress_counts_held_out_checks(tmp_path: Path, task: str) -> N
 
 @pytest.mark.parametrize("task", TASKS)
 def test_a_broken_guard_scores_zero(tmp_path: Path, task: str) -> None:
-    fam = families(task)
-    s = ps.score_trial(make_trial(tmp_path, task, failing={fam["pass_to_pass"][0]}), REPO)
+    g = visible_guard(task)
+    s = ps.score_trial(make_trial(tmp_path, task, failing={g}), REPO)
     assert s.reward == 0 and not s.guard_ok and s.progress == 0.0
-    assert s.held_out_passed == len(fam["fail_to_pass"])  # still reported
-    assert any(fam["pass_to_pass"][0] in f for f in s.guard_failures)
+    assert s.units_passed == s.units_total  # still reported
+    assert any(g in f for f in s.guard_failures)
     assert s.consistent
 
 
@@ -300,8 +350,8 @@ def test_no_record_scores_zero(tmp_path: Path, task: str) -> None:
     flags.update(artifact_present=1, tamper_clean=1)
     (trial / "verifier" / "reward.json").write_text(json.dumps({"reward": 0, **flags}))
     s = ps.score_trial(trial, REPO)
-    assert s.progress == 0.0 and not s.guard_ok and s.held_out_passed == 0
-    assert s.held_out_total == len(fam["fail_to_pass"]) and s.consistent
+    assert s.progress == 0.0 and not s.guard_ok and s.units_passed == 0
+    assert s.units_total == len(units(task)) and s.consistent and fam
 
 
 def test_disagreement_with_the_reward_is_flagged(tmp_path: Path) -> None:
@@ -347,7 +397,7 @@ def test_catch2_program_without_its_sentinel_does_not_count(tmp_path: Path) -> N
     )
     (trial / "verifier" / "runs.tsv").write_text(runs)
     s = ps.score_trial(trial, REPO)
-    assert not s.guard_ok and s.held_out_passed == 0
+    assert not s.guard_ok and s.units_passed == 0
     assert "record: ConfigFileTest: exit status 0" in s.guard_failures
 
 
@@ -415,7 +465,7 @@ def test_javaparser_0_1_0_falls_back_to_check_err(tmp_path: Path) -> None:
     )
     s = ps.score_trial(trial, REPO)
     assert s.source == "check.err" and s.guard_ok and s.consistent
-    assert s.held_out_passed == len(fam["fail_to_pass"]) - 1
+    assert s.units_passed == s.units_total - 1 and s.failed_units == [miss]
 
     # A check.py that never finished (tests_seen 0) proves nothing.
     (vdir / "reward.json").write_text(json.dumps({"reward": 0, "tamper_clean": 1, "tests_seen": 0}))
@@ -447,3 +497,38 @@ def test_cli_prints_one_line_per_trial_and_fails_on_disagreement(tmp_path: Path,
     make_trial(job, "black-fmt-skip-region-handling", reward=0)
     assert ps.main([str(job)]) == 1
     assert "INCONSISTENT" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "task", [t for t in TASKS if UNIT_COUNTS[t][1]], ids=lambda t: t.split("-")[0]
+)
+def test_a_failed_held_out_guard_is_a_lost_unit_not_a_broken_guard(
+    tmp_path: Path, task: str
+) -> None:
+    group = next(u for u in units(task) if u["kind"] == "held_out_guard")
+    s = ps.score_trial(make_trial(tmp_path, task, failing={group["ids"][-1]}), REPO)
+    n = sum(UNIT_COUNTS[task])
+    assert s.guard_ok, s.guard_failures[:5]
+    assert s.reward == 0 and s.failed_units == [group["unit"]]
+    assert s.progress == pytest.approx((n - 1) / n, abs=1e-6) and s.consistent
+
+
+def test_one_failed_variant_fails_its_whole_prettier_fixture_group(tmp_path: Path) -> None:
+    task = "prettier-comment-attachment-stability"
+    group = next(u for u in units(task) if u["kind"] == "held_out_guard" and len(u["ids"]) > 10)
+    variant = next(i for i in group["ids"] if "BOM" in i)
+    s = ps.score_trial(make_trial(tmp_path, task, failing={variant}), REPO)
+    assert s.guard_ok and s.units_passed == s.units_total - 1 == 25
+    assert s.failed_units == [group["unit"]]
+
+
+def test_cli_skips_trials_still_running(tmp_path: Path, capsys) -> None:
+    job = tmp_path / "job"
+    job.mkdir()
+    make_trial(job, "black-fmt-skip-region-handling")
+    running = job / "black-fmt-skip-region-handling__running"
+    (running / "agent").mkdir(parents=True)
+    (running / "config.json").write_text("{}")
+    assert ps.main([str(job)]) == 0
+    out = capsys.readouterr()
+    assert "not graded" in out.err and len(out.out.strip().splitlines()) == 1

@@ -1,0 +1,146 @@
+{
+ "task": "javaparser-member-resolution-scope",
+ "task_version": "0.2.0",
+ "rule": "C (docs/DECISIONS.md 2026-11-19)",
+ "counts": {
+  "units": 19,
+  "fail_to_pass_units": 12,
+  "held_out_guard_units": 7,
+  "held_out_guard_ids": 7
+ },
+ "units": [
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::aMethodDeclaredInTheSubclassIsSolved",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::aMethodDeclaredInTheSubclassIsSolved"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::aMethodInheritedFromObjectIsSolved",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::aMethodInheritedFromObjectIsSolved"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::aMethodInheritedFromTheClassWithTheUnresolvableAncestorIsSolved",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::aMethodInheritedFromTheClassWithTheUnresolvableAncestorIsSolved"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::theFieldsOfTheClassWithTheUnresolvableAncestorAreVisibleToInheritors",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::theFieldsOfTheClassWithTheUnresolvableAncestorAreVisibleToInheritors"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::theSubclassIsAssignableToTheClassWithTheUnresolvableAncestor",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::theSubclassIsAssignableToTheClassWithTheUnresolvableAncestor"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::aCallQualifiedByATypeDoesNotSeeThatFilesStaticImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::aCallQualifiedByATypeDoesNotSeeThatFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::aCallQualifiedByAnInstanceDoesNotSeeThatFilesStaticImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::aCallQualifiedByAnInstanceDoesNotSeeThatFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::aCallThroughATypeParameterBoundDoesNotSeeThatFilesStaticImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::aCallThroughATypeParameterBoundDoesNotSeeThatFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::aMethodReferenceDoesNotSeeThatFilesStaticImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::aMethodReferenceDoesNotSeeThatFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeIsNotReachedThroughThatFilesOrdinaryImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeIsNotReachedThroughThatFilesOrdinaryImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeIsNotReachedThroughThatFilesStaticImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeIsNotReachedThroughThatFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5140Test::aTypeUseIsNotReachedThroughThatFilesStaticImports",
+   "kind": "fail_to_pass",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5140Test::aTypeUseIsNotReachedThroughThatFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::aMemberOfTheUnresolvableAncestorStaysUnsolved",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::aMemberOfTheUnresolvableAncestorStaysUnsolved"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue4985Test::anAssignabilityThatTheResolvableAncestorsCannotProveStillReportsTheUnresolvableAncestor",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue4985Test::anAssignabilityThatTheResolvableAncestorsCannotProveStillReportsTheUnresolvableAncestor"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::aStaticMethodOfTheReceiverTypeStillResolves",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::aStaticMethodOfTheReceiverTypeStillResolves"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::anInstanceMethodOfTheReceiverTypeStillResolves",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::anInstanceMethodOfTheReceiverTypeStillResolves"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5105Test::anUnqualifiedCallStillSeesItsOwnFilesStaticImports",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5105Test::anUnqualifiedCallStillSeesItsOwnFilesStaticImports"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeInheritedFromAnAncestorStillResolves",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeInheritedFromAnAncestorStillResolves"
+   ]
+  },
+  {
+   "unit": "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeOfTheTypeItselfStillResolves",
+   "kind": "held_out_guard",
+   "ids": [
+    "com.github.javaparser.symbolsolver.Issue5140Test::aNestedTypeOfTheTypeItselfStillResolves"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,251 @@
+{
+ "task": "pulldown-cmark-html-block-scanning",
+ "task_version": "0.1.0",
+ "rule": "C (docs/DECISIONS.md 2026-11-19)",
+ "counts": {
+  "units": 34,
+  "fail_to_pass_units": 24,
+  "held_out_guard_units": 10,
+  "held_out_guard_ids": 10
+ },
+ "units": [
+  {
+   "unit": "html::unclosed_fence_keeps_last_blank_line",
+   "kind": "fail_to_pass",
+   "ids": [
+    "html::unclosed_fence_keeps_last_blank_line"
+   ]
+  },
+  {
+   "unit": "html::unclosed_html_block_keeps_last_blank_line",
+   "kind": "fail_to_pass",
+   "ids": [
+    "html::unclosed_html_block_keeps_last_blank_line"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_250",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_250"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_251",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_251"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_252",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_252"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_253",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_253"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_254",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_254"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_255",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_255"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_258",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_258"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_259",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_259"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_260",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_260"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_261",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_261"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_263",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_263"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_264",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_264"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_265",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_265"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_266",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_266"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_268",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_268"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_269",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_269"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_273",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_273"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_274",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_274"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_277",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_277"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_278",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_278"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_279",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_279"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_280",
+   "kind": "fail_to_pass",
+   "ids": [
+    "lib::suite::regression::regression_test_280"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_256",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_256"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_257",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_257"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_262",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_262"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_267",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_267"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_270",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_270"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_271",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_271"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_272",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_272"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_275",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_275"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_276",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_276"
+   ]
+  },
+  {
+   "unit": "lib::suite::regression::regression_test_281",
+   "kind": "held_out_guard",
+   "ids": [
+    "lib::suite::regression::regression_test_281"
+   ]
+  }
+ ]
+}

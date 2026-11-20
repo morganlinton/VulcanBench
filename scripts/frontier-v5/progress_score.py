@@ -7,11 +7,17 @@ The Frontier v5 release 1 board (docs/frontier-v5/PLAN-v5.md, decision R3 in
 docs/DECISIONS.md 2026-11-19) scores two numbers per attempt:
 
 - **pass**: the verifier's own reward (1 or 0).
-- **progress**: the fraction of held-out checks the attempt passes, counted
-  only when the tamper scan is clean and every guard check holds; otherwise 0.
+- **progress**: held-out units passed over held-out units, counted only when
+  the tamper scan is clean and every visible guard holds; otherwise 0.
 
-Which checks are held-out and which are guards is the rule in
-``progress_rule.json`` next to this script. Its sha256 is pinned in
+The rule is the owner's option C (docs/DECISIONS.md 2026-11-19, PR #314). A
+**unit** is one ``fail_to_pass`` check, or one group of held-out guards: the
+``pass_to_pass`` ids the agent's copy of the repository does not contain,
+grouped per held-out fixture (prettier's BOM, line-ending and AST-compare
+variants of one fixture are one group), and passing only if every id in it
+passes. Each task's units are in ``progress/<task>.json``, derived from the
+task's own files by ``make_progress_units.py``. ``progress_rule.json`` holds
+the definition and each units file's sha256, and its own sha256 is pinned in
 ``tasks/frontier-v5/suite.json`` (``pins.progress_rule``), so the suite lock
 freezes the rule with the tasks: changing it is a suite version bump.
 
@@ -31,13 +37,13 @@ ones the reward was computed from:
 
 Guard checks are: the tamper scan (``tamper_clean`` in reward.json), the
 build or import step, the must-fail sentinels where the task has them, every
-guard id passing, and, for tasks that grade the whole suite
-(``min_total_tests`` in families.json), no failure outside the held-out ids
-and at least ``min_total_tests`` tests seen. A held-out check that fails is
-progress lost, never a broken guard.
+visible guard (``pass_to_pass`` minus the held-out guard ids) passing, and,
+for tasks that grade the whole suite (``min_total_tests`` in families.json),
+no failure outside the held-out ids and at least ``min_total_tests`` tests
+seen. A held-out unit that fails is progress lost, never a broken guard.
 
 Each scored trial is also checked against its reward: an attempt that passes
-every held-out check with every guard holding must have reward 1, and any
+every unit with every guard holding must have reward 1, and any
 other attempt reward 0. A disagreement is reported (``consistent: false``)
 and is a bug in this module or a verifier, never a score to publish.
 """
@@ -350,8 +356,9 @@ class TrialScore:
     reward: int | None
     passed: bool
     progress: float
-    held_out_total: int
-    held_out_passed: int
+    units_total: int
+    units_passed: int
+    failed_units: list[str]
     guard_ok: bool
     guard_failures: list[str]
     consistent: bool
@@ -362,15 +369,21 @@ class TrialScore:
         d = asdict(self)
         d.pop("checks")
         d["guard_failures"] = self.guard_failures[:10]
+        d["failed_units"] = self.failed_units[:20]
         d["guard_failure_count"] = len(self.guard_failures)
         return d
 
 
-def held_out_ids(task_rule: dict[str, Any], fam: dict[str, Any], mode: str) -> list[str]:
-    ids = list(fam["fail_to_pass"])
-    if mode == "fail_to_pass+held_out_guards":
-        ids += [i for i in task_rule.get("held_out_guards", []) if i not in ids]
-    return ids
+def load_units(task: str, rule: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    """A task's held-out units (progress/<task>.json), checked against the rule's sha256."""
+    rule = rule if rule is not None else load_rule()
+    entry = rule["tasks"][task]
+    path = HERE / entry["units"]
+    data = path.read_bytes()
+    if hashlib.sha256(data).hexdigest() != entry["sha256"]:
+        raise ValueError(f"{path.name} does not match the sha256 in progress_rule.json")
+    units: list[dict[str, Any]] = json.loads(data)["units"]
+    return units
 
 
 def score_trial(
@@ -388,7 +401,8 @@ def score_trial(
     rint = int(rv) if isinstance(rv, (int, float)) else None
 
     checks = READERS[task_rule["format"]](vdir, fam)
-    held = held_out_ids(task_rule, fam, rule["held_out"])
+    units = load_units(task, rule)
+    held = [i for u in units for i in u["ids"]]
     held_set = set(held)
     guard_ids = [i for i in fam["pass_to_pass"] if i not in held_set]
     guard_set = set(guard_ids)
@@ -412,9 +426,12 @@ def score_trial(
         if checks.total < int(fam["min_total_tests"]):
             failures.append(f"tests seen {checks.total} < {fam['min_total_tests']}")
 
-    n_held = sum(1 for h in held if checks.status.get(h) == PASSED)
+    failed_units = [
+        u["unit"] for u in units if any(checks.status.get(i) != PASSED for i in u["ids"])
+    ]
+    n_units = len(units) - len(failed_units)
     guard_ok = not failures
-    progress = n_held / len(held) if guard_ok and held else 0.0
+    progress = n_units / len(units) if guard_ok and units else 0.0
     # Every fail_to_pass and pass_to_pass id passing, guards holding, is what
     # reward 1 means for every release 1 verifier.
     full = guard_ok and all(
@@ -428,8 +445,9 @@ def score_trial(
         reward=rint,
         passed=rint == 1,
         progress=round(progress, 6),
-        held_out_total=len(held),
-        held_out_passed=n_held,
+        units_total=len(units),
+        units_passed=n_units,
+        failed_units=failed_units,
         guard_ok=guard_ok,
         guard_failures=failures,
         consistent=consistent,
@@ -459,6 +477,9 @@ def main(argv: list[str] | None = None) -> int:
     rule = load_rule()
     bad = 0
     for tr in trial_dirs(args.paths):
+        if not (tr / "verifier" / "reward.json").is_file():
+            print(f"skip: {tr.name}: not graded (no verifier/reward.json)", file=sys.stderr)
+            continue
         try:
             s = score_trial(tr, args.repo, rule)
         except ValueError as e:
@@ -473,7 +494,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(
                 f"{s.trial}: reward={s.reward} progress={s.progress:.3f} "
-                f"({s.held_out_passed}/{s.held_out_total}) guard={'ok' if s.guard_ok else 'broken'}"
+                f"({s.units_passed}/{s.units_total} units) guard={'ok' if s.guard_ok else 'broken'}"
                 f"{'' if s.consistent else ' INCONSISTENT'} [{s.source}]"
             )
             for f in s.guard_failures[:5]:

@@ -1,0 +1,62 @@
+{
+ "task": "black-fmt-skip-region-handling",
+ "task_version": "0.1.0",
+ "rule": "C (docs/DECISIONS.md 2026-11-19)",
+ "counts": {
+  "units": 7,
+  "fail_to_pass_units": 7,
+  "held_out_guard_units": 0,
+  "held_out_guard_ids": 0
+ },
+ "units": [
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtskip_after_multiline_call]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtskip_after_multiline_call]"
+   ]
+  },
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtskip_opening_bracket_split]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtskip_opening_bracket_split]"
+   ]
+  },
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtonoff_comments_before_fmt_on]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtonoff_comments_before_fmt_on]"
+   ]
+  },
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtskip_after_multiline_import]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtskip_after_multiline_import]"
+   ]
+  },
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtskip_opening_bracket_conditional]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtskip_opening_bracket_conditional]"
+   ]
+  },
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtskip_one_liner_bare_name]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtskip_one_liner_bare_name]"
+   ]
+  },
+  {
+   "unit": "tests/test_format.py::test_simple_format[fmtskip_paired_header]",
+   "kind": "fail_to_pass",
+   "ids": [
+    "tests/test_format.py::test_simple_format[fmtskip_paired_header]"
+   ]
+  }
+ ]
+}

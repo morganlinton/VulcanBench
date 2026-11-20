@@ -59,8 +59,11 @@ def trial(i, reward, infra=False, agent_log=None, log_name="codex.txt"):
         json.dump({"reward": reward}, fh)
     with open(os.path.join(td, "agent", log_name), "w") as fh:
         fh.write(agent_log or ("hit your usage limit\n" if infra else '{"type":"item.completed"}\n'))
+    res = {"started_at": "2026-10-29T12:00:00", "finished_at": "2026-10-29T12:01:00"}
+    if i == 0 and os.environ.get("FAKE_EXCEPTION"):
+        res["exception_info"] = {"exception_type": os.environ["FAKE_EXCEPTION"]}
     with open(os.path.join(td, "result.json"), "w") as fh:
-        json.dump({"started_at": "2026-10-29T12:00:00", "finished_at": "2026-10-29T12:01:00"}, fh)
+        json.dump(res, fh)
 
 if mode == "finish":
     for i in range(3):
@@ -687,3 +690,53 @@ def test_marker_text_inside_a_json_line_is_not_infrastructure(gate: Gate) -> Non
         "dsflash", gate.task, GATE_EFFORT="max", FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log
     )
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+CODEX_CYBER_FLAG = (
+    '{"type":"item.completed","item":{"type":"command_execution"}}\n'
+    '{"type":"error","message":"This content was flagged for possible cybersecurity risk. If'
+    ' this seems wrong, try rephrasing your request."}\n'
+    '{"type":"turn.failed","error":{"message":"This content was flagged for possible'
+    ' cybersecurity risk."}}\n'
+)
+CLAUDE_FALLBACK = (
+    '{"type":"system","subtype":"model_refusal_fallback","fallback_model":"claude-opus-4-8"}\n'
+    '{"type":"result","is_error":false,"num_turns":40}\n'
+)
+
+
+@pytest.mark.parametrize(
+    "ref,log",
+    [("terra", CODEX_CYBER_FLAG), ("fable52", CLAUDE_FALLBACK)],
+    ids=["codex-cyber-flag", "claude-refusal-fallback"],
+)
+def test_safety_refusal_is_recorded_not_infrastructure(gate: Gate, ref: str, log: str) -> None:
+    r = gate.run(
+        ref, gate.task, GATE_EFFORT="max", FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+    st = gate.status(f"{ref}-max-{gate.task}")
+    assert st["phase"] == "done" and st["stop_reason"] is None
+    assert st["safety_refusals"] == 1
+    assert st["safety_refusal_trials"] == ["demo-task-with-a-fairly-long-nam__t0"]
+    assert "demo-task-with-a-fairly-long-nam__t0: safety refusal" in r.stdout
+    assert "infrastructure failure" not in r.stdout
+
+
+def test_safety_refusal_from_harbors_exception(gate: Gate) -> None:
+    r = gate.run("sol62", gate.task, FAKE_EXCEPTION="AgentSafetyRefusalError")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert gate.status(f"sol62-{gate.task}")["safety_refusals"] == 1
+
+
+def test_no_safety_refusal_by_default_or_in_tool_output(gate: Gate) -> None:
+    r = gate.run("astra", gate.task)
+    assert gate.status(f"astra-{gate.task}")["safety_refusals"] == 0
+    assert "safety refusal" not in r.stdout
+    # Code the agent reads that mentions the flag is not a refusal.
+    log = (
+        '{"type":"item.completed","item":{"type":"command_execution","aggregated_output":'
+        '"msg = \\"flagged for possible cybersecurity risk\\"; subtype=model_refusal_fallback"}}\n'
+    )
+    r = gate.run("terra", gate.task, FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log)
+    assert r.returncode == 0 and gate.status(f"terra-{gate.task}")["safety_refusals"] == 0

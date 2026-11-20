@@ -62,6 +62,9 @@
 # They run on the provider's side, so the task's network allowlist never sees
 # them; on 2026-10-30 an Astra attempt downloaded the upstream source of the
 # code an F2 task had removed through Codex's `web__run` (docs/DECISIONS.md).
+# Safety refusals (Codex's cybersecurity flag, Claude Code's refusal fallback)
+# are recorded, not infrastructure: a note per trial on stdout and
+# safety_refusals in the status file (SAFETY_RE below).
 # Infrastructure guard: a finished trial whose agent log shows an auth
 # (including an organization policy that disables subscription access),
 # model-id, usage-credit or usage-limit failure stops the whole run; such
@@ -241,17 +244,41 @@ agent_arg="${agent_arg:-$agent}"
 # no other record starts with the marker.
 INFRA_RE='"error":"(authentication_failed|billing_error|rate_limit|oauth_org_not_allowed)"|"api_error_status":40[13][,}]|disabled Claude subscription access|Invalid API key[^"]{1,8}Please run /login|OAuth token has expired[.] Please obtain a new token|OAuth token revoked|Credit balance is too low|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]|^VULCANBENCH_INFRA: '
 
+# A provider safety classifier stopping the session is NOT infrastructure:
+# such an attempt counts, graded on what the agent wrote, and the stop is
+# disclosed (docs/DECISIONS.md 2026-09-24, the Claude refusal-fallback
+# convention, applied again for Haiku v3.24). It is recorded, never matched by
+# INFRA_RE: Codex's top-level error event "flagged for possible cybersecurity
+# risk" (Harbor raises AgentSafetyRefusalError for it, kept in the trial's
+# result.json), and Claude Code's refusal-fallback events (subtype
+# model_refusal_fallback, or model_refusal_no_fallback with the fallback off)
+# and its "safeguards flagged this session" stop. The same text inside a tool
+# result is JSON-escaped or mid-line and does not match.
+SAFETY_RE='^[{]"type": ?"(error|turn[.]failed)".*flagged for possible cybersecurity risk|"subtype": ?"model_refusal_(no_)?fallback"|^[{]"type": ?"result".*safeguards flagged this session'
+
 # Per-task state the helpers below read; set in the task loop.
 job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
 stop_flag=""; spid=""
 
+safety_trials() { # job dir -> one line per trial a provider safety classifier stopped
+  local tr
+  for tr in "$1"/*__*; do
+    [ -d "$tr" ] || continue
+    if grep -qs '"exception_type": *"AgentSafetyRefusalError"' "$tr/result.json" \
+      || { [ -d "$tr/agent" ] && grep -rqE "$SAFETY_RE" "$tr/agent" 2>/dev/null; }; then
+      basename "$tr"
+    fi
+  done
+}
+
 write_status() { # phase [exit_code] [stop_reason] -> atomic rewrite of $status_file
   [ -n "$status_file" ] || return 0
   python3 - "$status_file" "$1" "${2:-}" "${3:-}" "$job" "$t" "$ref" "$agent" "$model" \
-    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" <<'PY'
+    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" \
+    "$( [ -n "$job" ] && safety_trials "$OUT/jobs/$job" | tr '\n' ' ')" <<'PY'
 import glob, json, os, sys, time
 (path, phase, code, reason, job, task, ref, agent, model,
- pid, hpid, started, repo, job_dir, effort) = sys.argv[1:16]
+ pid, hpid, started, repo, job_dir, effort, safety) = sys.argv[1:17]
 solves = 0
 for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
     try:
@@ -265,6 +292,7 @@ d = {
     "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     "exit_code": int(code) if code else None, "stop_reason": reason or None,
     "repo": repo or None, "job_dir": job_dir,
+    "safety_refusals": len(safety.split()), "safety_refusal_trials": safety.split(),
 }
 tmp = path + ".tmp"
 with open(tmp, "w") as fh:
@@ -423,6 +451,9 @@ print_trials() { # job dir -> one summary line per trial
   for tr in "$1"/*__*; do
     [ -d "$tr" ] || continue
     echo "  $(basename "$tr"): $(cat "$tr/verifier/reward.json" 2>/dev/null || echo 'stopped, no reward')"
+  done
+  for tr in $(safety_trials "$1"); do
+    echo "  $tr: safety refusal: a provider safety classifier stopped the session; the attempt counts as graded and the stop is disclosed"
   done
 }
 

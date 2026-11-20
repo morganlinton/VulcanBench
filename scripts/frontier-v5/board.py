@@ -211,7 +211,11 @@ def aggregate(
                         )
                     },
                     "task_checksums": sorted(
-                        {str(r.get("task_checksum")) for r in group if r.get("task") == t}
+                        {
+                            str(r["task_checksum"])
+                            for r in group
+                            if r.get("task") == t and r.get("task_checksum")
+                        }
                     ),
                 }
             )

@@ -171,3 +171,9 @@ def test_cli_without_runs_fails(tmp_path: Path) -> None:
 @pytest.mark.parametrize("vals,expected", [([], None), ([0.5], None), ([0.0, 1.0], 0.5)])
 def test_se(vals: list[float], expected: float | None) -> None:
     assert board._se(vals) == expected
+
+
+def test_a_missing_checksum_is_not_a_task_version() -> None:
+    runs = [rec(TASKS[0], 1), rec(TASKS[0], 2, checksum=None, scored=False)]
+    _, tasks = board.aggregate(runs, TASKS, 3)
+    assert tasks[0]["task_checksums"] == ["c1"]

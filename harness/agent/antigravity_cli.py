@@ -332,6 +332,10 @@ class AntigravityAdapter:
                 "TMPDIR": str(scratch / "tmp"),
                 "TMP": str(scratch / "tmp"),
                 "TEMP": str(scratch / "tmp"),
+                # agy runs commands in zsh, which puts here-document temp
+                # files under TMPPREFIX (default /tmp/zsh), not TMPDIR. The
+                # sandbox denies /tmp, so without this every heredoc fails.
+                "TMPPREFIX": str(scratch / "tmp" / "zsh"),
             }
         )
         profile = run_profile(workspace, scratch)
@@ -384,7 +388,7 @@ class AntigravityAdapter:
                 "macOS outer sandbox; private HOME (login keychain linked for the sign-in); "
                 "custom main agent with the default file and shell tools; agy always-proceed "
                 "permissions; URL, browser and MCP denied; web search absent; workspace/session "
-                "writes; shared-temp/checkout/~/.gemini read deny; explicit TMPDIR context; "
+                "writes; shared-temp/checkout/~/.gemini read deny; explicit TMPDIR and zsh TMPPREFIX context; "
                 "updater blocked (pin directory not writable); shell network not isolated"
             ),
         )

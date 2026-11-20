@@ -203,6 +203,7 @@ def test_run_settings_home_usage_and_archive(tmp_path, monkeypatch):
     assert launched["keychain_target"] == Path.home() / "Library/Keychains"
     assert launched["agent"] == agent_file()
     assert "GEMINI_API_KEY" not in env
+    assert env["TMPPREFIX"] == str(Path(env["TMPDIR"]) / "zsh")
     profile = (stream.parent / "agy-session/boundary.sb").read_text()
     assert str((Path.home() / ".gemini").resolve()) in profile
     assert "(allow pseudo-tty)" in profile and "/dev/ptmx" in profile

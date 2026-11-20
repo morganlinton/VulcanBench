@@ -60,7 +60,8 @@ Settings that follow the board's existing rules, not new choices: agy's
 always-proceed permissions (`--dangerously-skip-permissions`) inside the macOS
 outer sandbox Kimi Code and Mirror use, with agy's own `--sandbox` off because
 sandbox-exec cannot nest; the real `~/.gemini` is denied to the run;
-pseudo-terminals are allowed because agy runs every command in a PTY. No other
+pseudo-terminals are allowed because agy runs every command in a PTY; zsh's
+`TMPPREFIX` points into the run's private temp directory, like `TMPDIR`. No other
 agy default changes.
 
 Prices (checked 2026-11-19 at aistudio.google.com/docs/pricing, standard paid
@@ -108,6 +109,17 @@ Probes on 2026-11-19, on the AI Pro sign-in, at `gemini-4-neon-low`:
   directory made read-only; agy then logs "is not fully accessible
   (readable: true, writable: false), skipping update". The two sandboxed
   smoke runs logged the same skip, so no run was exposed.
+- Here-documents (2026-11-19, 23:30 PST, first Low task of the sweep):
+  `python3 - <<'EOF'` failed with "can't create temp file for here document:
+  operation not permitted". agy runs commands in zsh, which writes heredoc
+  temp files under `TMPPREFIX` (default `/tmp/zsh`), not `TMPDIR`, and the
+  outer sandbox denies `/tmp`. No earlier sweep has the error (Kimi Code,
+  Mirror and dsh shells use `TMPDIR`). Reproduced with the adapter's own
+  sandbox profile and plain zsh: the heredoc fails without `TMPPREFIX` and
+  works with it set to the run's temp directory. The sweep was paused after
+  that one task, which was moved aside as void (not board data). The
+  `xcrun_db` cache warnings in the same run also appear in the Kimi Code,
+  Mirror and dsh sweeps and are left as they are.
 
 ### Limits
 

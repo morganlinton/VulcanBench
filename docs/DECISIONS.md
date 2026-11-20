@@ -37,9 +37,10 @@ entries here record the measurements behind those rules.
   (0.163.0) does not list `gpt-6.2-sol`. The queue sets `CODEX_BIN` to a
   Codex 0.170.0 install in the gate folder; the trial itself installs the
   pinned 0.170.0 in the agent container as before.
-- **Capability tasks only for now (19 x 3 = 57 trials, the scope the owner
-  approved).** The six safety tasks would be 18 more trials and need the
-  owner's word. Jobs run attempt by attempt (every task's attempt 1, then
+- **All 25 tasks x 3 (75 trials).** The owner approved the 19 capability
+  tasks (57 trials) on 2026-11-18 and added the six safety tasks (18
+  trials) on 2026-11-19. The safety trials run after the capability ones
+  (`run_sol62_safety.sh`), and only if that queue ends cleanly. Jobs run attempt by attempt (every task's attempt 1, then
   2, then 3), so a partial run still covers every task. Job suffix
   `-s62a<N>`.
 

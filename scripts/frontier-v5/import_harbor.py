@@ -31,8 +31,13 @@ dsh agent writes, an exception Harbor raises for the account or the model id
 (authentication, usage limit, model not found), a trial whose verifier never
 ran, or a job set aside as ``INFRA-*`` (skipped unless ``--include-infra``).
 Other exceptions are recorded (``exception``), never hidden: an agent timeout
-is a scored attempt, and how to count a safety refusal is an owner decision,
-so it is recorded with its reward and flagged (``flags``).
+is a scored attempt. So is a session a provider safety classifier stopped
+(docs/DECISIONS.md 2026-09-24): it is graded on what the agent wrote and
+disclosed, with ``safety_refusal: true``, the provider's message
+(``safety_message``) and the ``safety-refusal`` flag. Detected from Harbor's
+``AgentSafetyRefusalError``, Codex's "flagged for possible cybersecurity
+risk" error event, and Claude Code's refusal-fallback events and
+"safeguards flagged this session" stop.
 
 Tool calls are read from each harness's own record. Codex: the ``exec
 --json`` stream (``codex.txt``), timed from the rollout's ``item_completed``
@@ -94,7 +99,7 @@ INFRA_EXCEPTIONS = {
     "ModelNotFoundError",
     "NetworkConnectionError",
 }
-FLAG_EXCEPTIONS = {"AgentSafetyRefusalError": "safety-refusal"}
+SAFETY_EXCEPTION = "AgentSafetyRefusalError"
 INFRA_MARK = "VULCANBENCH_INFRA:"
 SKIP_DIRS = {"__pycache__", "node_modules", "target", ".git"}
 
@@ -238,6 +243,35 @@ def extract_tool_calls(agent_dir: Path, agent: str) -> tuple[list[dict[str, Any]
                 "reason": str(exc),
             }
     return calls, tool_calls.summary_block(calls, harness)
+
+
+# --- safety refusals --------------------------------------------------------------
+
+
+def safety_refusal(agent_dir: Path, agent: str, exception: str | None) -> str | None:
+    """The provider's message when a safety classifier stopped the session, else None.
+
+    Only the harness's own top-level events count (a tool result quoting the
+    same words is not a refusal). Harbor's exception alone gives a generic
+    message.
+    """
+    if agent == "codex":
+        for ev in _jsonl(agent_dir / "codex.txt"):
+            msg = ev.get("message") if ev.get("type") == "error" else None
+            if isinstance(msg, str) and "flagged for possible cybersecurity risk" in msg:
+                return msg
+    elif agent == "claude-code":
+        for ev in _jsonl(agent_dir / "claude-code.txt"):
+            sub = ev.get("subtype")
+            if sub in ("model_refusal_fallback", "model_refusal_no_fallback"):
+                to = ev.get("fallback_model") or ev.get("model")
+                return f"Claude Code {sub}" + (f" to {to}" if to else "")
+            res = ev.get("result")
+            if ev.get("type") == "result" and isinstance(res, str) and "safeguards flagged" in res:
+                return res
+    if exception == SAFETY_EXCEPTION:
+        return "Harbor AgentSafetyRefusalError (provider safety classifier)"
+    return None
 
 
 # --- tokens and cost -------------------------------------------------------------
@@ -402,9 +436,11 @@ def import_trial(
     agent_dir = trial / "agent"
     exc = (result.get("exception_info") or {}).get("exception_type")
 
-    flags, infra = [], []
-    if exc in FLAG_EXCEPTIONS:
-        flags.append(FLAG_EXCEPTIONS[exc])
+    flags: list[str] = []
+    infra: list[str] = []
+    safety = safety_refusal(agent_dir, agent, exc)
+    if safety:
+        flags.append("safety-refusal")
     if exc in INFRA_EXCEPTIONS:
         infra.append(f"exception {exc}")
     marker = agent_dir / "vb-infra.txt"
@@ -467,6 +503,8 @@ def import_trial(
         "agent_minutes": _minutes(result.get("agent_execution")),
         "exception": exc,
         "flags": flags,
+        "safety_refusal": safety is not None,
+        "safety_message": safety,
         "infra": infra,
         "scored": score is not None and not infra,
         "reward": None if score is None else score["reward"],
@@ -484,7 +522,14 @@ def import_trial(
 
 def import_job(job: Path, out: Path, repo: Path, bases: Path | None) -> list[dict[str, Any]]:
     cfg = _load(job / "config.json")
-    trials = [d for d in job.glob("*__*") if d.is_dir()]
+    trials = []
+    for d in sorted(job.glob("*__*")):
+        if not d.is_dir():
+            continue
+        if not _load(d / "result.json").get("finished_at"):
+            print(f"skip {job.name}/{d.name}: still running (no finished_at)", file=sys.stderr)
+            continue
+        trials.append(d)
     trials.sort(key=lambda d: (_load(d / "result.json").get("started_at") or "", d.name))
     return [import_trial(t, cfg, out, repo, bases, i) for i, t in enumerate(trials, 1)]
 

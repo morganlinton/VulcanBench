@@ -438,7 +438,7 @@ def test_exceptions_partial_progress_and_attempt_order(tmp_path: Path) -> None:
         and r0["flags"] == ["safety-refusal"]
         and r0["exception"] == "AgentSafetyRefusalError"
     )
-    n = len(FAM["fail_to_pass"])
+    n = len(FAM["fail_to_pass"]) + 2  # rule C: 11 fail_to_pass units + 2 held-out guards
     assert r0["reward"] == 0 and r0["progress"] == pytest.approx((n - 1) / n, abs=1e-6)
 
 
@@ -472,3 +472,68 @@ def test_ref_of() -> None:
     assert ih.ref_of(f"sol62-max-{TASK}", TASK, "max") == "sol62"
     assert ih.ref_of(f"astra-{TASK}", TASK, None) == "astra"
     assert ih.ref_of(f"terra-max-{TASK}-topup", TASK, "max") == "terra"
+
+
+def test_codex_cyber_flag_is_a_recorded_safety_refusal(tmp_path: Path) -> None:
+    job = make_job(
+        tmp_path / "jobs",
+        f"sol62-max-{TASK}",
+        "codex",
+        "gpt-6.2-sol",
+        exception="AgentSafetyRefusalError",
+    )
+    log = job / f"{TASK[:32]}__T0" / "agent" / "codex.txt"
+    msg = "This content was flagged for possible cybersecurity risk. If this seems wrong, try rephrasing."
+    log.write_text(log.read_text() + json.dumps({"type": "error", "message": msg}) + "\n")
+    out = tmp_path / "out"
+    ih.main([str(job), "--out", str(out), "--repo", str(REPO)])
+    r = run_json(out, job)
+    assert r["scored"] and r["reward"] == 1 and r["infra"] == []
+    assert r["safety_refusal"] and r["safety_message"] == msg
+
+
+def test_claude_refusal_fallback_is_a_recorded_safety_refusal(tmp_path: Path) -> None:
+    job = make_job(tmp_path / "jobs", f"fable52-max-{TASK}", "claude-code", "claude-fable-5-2")
+    log = job / f"{TASK[:32]}__T0" / "agent" / "claude-code.txt"
+    ev = {
+        "type": "system",
+        "subtype": "model_refusal_fallback",
+        "fallback_model": "claude-opus-4-8",
+    }
+    log.write_text(json.dumps(ev) + "\n" + log.read_text())
+    out = tmp_path / "out"
+    ih.main([str(job), "--out", str(out), "--repo", str(REPO)])
+    r = run_json(out, job)
+    assert r["scored"] and r["flags"] == ["safety-refusal"]
+    assert r["safety_message"] == "Claude Code model_refusal_fallback to claude-opus-4-8"
+
+
+def test_refusal_text_in_tool_output_is_not_a_refusal(tmp_path: Path) -> None:
+    job = make_job(tmp_path / "jobs", f"terra-max-{TASK}", "codex", "gpt-6.1-terra")
+    log = job / f"{TASK[:32]}__T0" / "agent" / "codex.txt"
+    item = {
+        "type": "item.completed",
+        "item": {
+            "id": "item_9",
+            "type": "agent_message",
+            "text": "flagged for possible cybersecurity risk",
+        },
+    }
+    log.write_text(log.read_text() + json.dumps(item) + "\n")
+    out = tmp_path / "out"
+    ih.main([str(job), "--out", str(out), "--repo", str(REPO)])
+    r = run_json(out, job)
+    assert not r["safety_refusal"] and r["flags"] == []
+
+
+def test_running_trials_are_skipped(tmp_path: Path, capsys) -> None:
+    job = make_job(tmp_path / "jobs", f"sol62-max-{TASK}", "codex", "gpt-6.2-sol", trials=2)
+    res = job / f"{TASK[:32]}__T1" / "result.json"
+    d = json.loads(res.read_text())
+    d.pop("finished_at")
+    res.write_text(json.dumps(d))
+    out = tmp_path / "out"
+    ih.main([str(job), "--out", str(out), "--repo", str(REPO)])
+    assert (out / job.name / f"{TASK[:32]}__T0" / "run.json").is_file()
+    assert not (out / job.name / f"{TASK[:32]}__T1").exists()
+    assert "still running" in capsys.readouterr().err

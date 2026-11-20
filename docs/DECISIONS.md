@@ -7,6 +7,44 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-19: Frontier v5 progress score counts every held-out case
+
+### Decision
+
+The owner, in chat on 2026-11-19, chose option B for the progress score of
+R3: a held-out case is every case the agent cannot see, both the
+fail-to-pass checks and the held-out guards (cases that pass at base and
+that a careless fix breaks). The progress score is held-out cases passed
+over the task's held-out total. It is 0 when a visible existing test, the
+sentinel or a whole-suite check fails, or the tamper scan flags the attempt.
+Each task's held-out case ids go in a scoring file whose sha256 is pinned
+in `tasks/frontier-v5/suite.json`, so the suite lock freezes the rule.
+Pass rate is unchanged: an attempt that fails any check is not a pass.
+
+### Evidence
+
+- CLI11 holds out 17 cases (11 fail-to-pass, 6 held-out guards); javaparser
+  holds out 12 fail-to-pass and 7 pass-to-pass cases in its held-out
+  classes.
+- Under option A (fail-to-pass only, any guard failure zeroes), GPT-6
+  Astra's CLI11 attempts (11 of 11 defect checks, 2 held-out guards failed)
+  would score 0; under B they score 15/17 = 0.88, the partial progress the
+  R3 entry relies on to separate models.
+- The board engine session found javaparser's verifier keeps no per-check
+  record (its surefire reports stay in `/work`), so javaparser goes to task
+  version 0.2.0 to copy them; pulldown-cmark already copies its libtest
+  logs and is unchanged.
+
+### Revisit triggers
+
+- Progress scores cluster near 1 for attempts that fail held-out guards:
+  revisit weighting guards above fail-to-pass checks in a later version.
+
+### What this touched
+
+This entry. The scoring files and the release 1.1 lock follow in the
+board engine PR.
+
 ## 2026-11-19: Frontier v5 composition v5: release 1.1 board and release 2 shapes, frozen (R4)
 
 ### Decision

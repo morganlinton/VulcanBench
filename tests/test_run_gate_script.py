@@ -38,7 +38,7 @@ mode = os.environ.get("FAKE_HARBOR_MODE", "finish")
 jd = os.path.join(out, job)
 os.makedirs(jd)
 with open(os.path.join(jd, "argv.json"), "w") as fh:
-    json.dump({"argv": args, "env": {k: v for k, v in os.environ.items() if k.startswith(("CODEX_", "CLAUDE_"))}}, fh)
+    json.dump({"argv": args, "env": {k: v for k, v in os.environ.items() if k.startswith(("CODEX_", "CLAUDE_")) or k == "PYTHONPATH"}}, fh)
 with open(os.path.join(jd, "config.json"), "w") as fh:
     json.dump({"job_name": job, "n_attempts": int(args[args.index("-k") + 1]),
                "agents": [{"name": args[args.index("-a") + 1], "model_name": args[args.index("-m") + 1]}],
@@ -146,6 +146,9 @@ class Gate:
         self.script = self.root / "scripts" / "frontier-v5" / "run_gate.sh"
         shutil.copy(SCRIPT, self.script)
         shutil.copy(SCRIPT.parent / "codex-gate.toml", self.script.parent / "codex-gate.toml")
+        shutil.copy(
+            SCRIPT.parent / "harbor_dsh_agent.py", self.script.parent / "harbor_dsh_agent.py"
+        )
         self.task = "demo-task-with-a-fairly-long-name-indeed"
         task_dir = self.root / "tasks" / "frontier-v5" / self.task
         task_dir.mkdir(parents=True)
@@ -167,6 +170,7 @@ class Gate:
         envd = self.home / ".config" / "vulcanbench"
         envd.mkdir(parents=True)
         (envd / "claude-gate.env").write_text("CLAUDE_CODE_OAUTH_TOKEN=not-a-real-token\n")
+        (envd / "deepseek.env").write_text("DEEPSEEK_API_KEY=not-a-real-key\n")
 
     def env(self, **extra: str) -> dict[str, str]:
         py_dir = str(Path(sys.executable).parent)
@@ -231,7 +235,15 @@ def test_refs_prints_one_json_line_per_reference(gate: Gate) -> None:
     r = gate.run("--refs")
     assert r.returncode == 0, r.stderr
     refs = [json.loads(line) for line in r.stdout.splitlines()]
-    assert [x["name"] for x in refs] == ["astra", "fable", "opus", "sol62"]
+    assert [x["name"] for x in refs] == [
+        "astra",
+        "fable",
+        "opus",
+        "sol62",
+        "fable52",
+        "terra",
+        "dsflash",
+    ]
     assert refs[2] == {
         "name": "opus",
         "agent": "claude-code",
@@ -244,6 +256,17 @@ def test_refs_prints_one_json_line_per_reference(gate: Gate) -> None:
         "model": "gpt-6.2-sol",
         "version": "0.166.0",
     }
+    # The release 1 board lineup, each on its Frontier v4 CLI pin.
+    assert refs[4:] == [
+        {
+            "name": "fable52",
+            "agent": "claude-code",
+            "model": "claude-fable-5-2",
+            "version": "2.1.321",
+        },
+        {"name": "terra", "agent": "codex", "model": "gpt-6.1-terra", "version": "0.159.0"},
+        {"name": "dsflash", "agent": "dsh", "model": "deepseek-flash", "version": "0.2.1-rc.2"},
+    ]
 
 
 def test_sol62_at_max_effort_is_a_named_measurement(gate: Gate) -> None:
@@ -544,3 +567,123 @@ def test_auth_error_text_inside_a_tool_result_is_not_infrastructure(gate: Gate) 
     r = gate.run("opus", gate.task, FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log)
     assert r.returncode == 0, r.stdout + r.stderr
     assert gate.status(f"opus-{gate.task}")["phase"] == "done"
+
+
+def _argv(gate: Gate, job: str) -> tuple[list[str], dict[str, str]]:
+    d = json.loads((gate.out / "jobs" / job / "argv.json").read_text())
+    return d["argv"], d["env"]
+
+
+def _aks(argv: list[str]) -> list[str]:
+    return [argv[i + 1] for i, a in enumerate(argv) if a == "--ak"]
+
+
+def test_fable52_runs_claude_code_2_1_321_after_the_usage_preflight(gate: Gate) -> None:
+    r = gate.run("fable52", gate.task, GATE_EFFORT="max", GATE_EARLY_EXIT="0")
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = f"fable52-max-{gate.task}"
+    assert "=== usage preflight claude-fable-5-2: allowed" in r.stdout
+    argv, env = _argv(gate, job)
+    assert argv[argv.index("-a") + 1] == "claude-code"
+    assert argv[argv.index("-m") + 1] == "claude-fable-5-2"
+    assert argv[argv.index("--effort") + 1] == "max"
+    assert "version=2.1.321" in _aks(argv) and "disable_web_search=true" in _aks(argv)
+    assert argv[argv.index("--env-file") + 1].endswith("claude-gate.env")
+    assert env == {"CLAUDE_FORCE_OAUTH": "1"}
+    st = gate.status(job)
+    assert st["agent"] == "claude-code" and st["model"] == "claude-fable-5-2"
+
+
+def test_fable52_is_refused_when_the_usage_window_is_full(gate: Gate) -> None:
+    r = gate.run("fable52", gate.task, GATE_EFFORT="max", FAKE_UTIL="0.95")
+    assert r.returncode == 2
+    assert gate.status(f"fable52-max-{gate.task}")["stop_reason"] == "usage"
+    r = gate.run("fable52", GATE_PREFLIGHT_ONLY="1", FAKE_PROBE="no-event")
+    assert r.returncode == 2 and json.loads(r.stdout.strip())["model"] == "claude-fable-5-2"
+
+
+def test_terra_runs_codex_0_159_0_with_the_gate_config(gate: Gate) -> None:
+    r = gate.run("terra", gate.task, GATE_EFFORT="max", GATE_EARLY_EXIT="0")
+    assert r.returncode == 0, r.stdout + r.stderr
+    argv, env = _argv(gate, f"terra-max-{gate.task}")
+    assert argv[argv.index("-a") + 1] == "codex"
+    assert argv[argv.index("-m") + 1] == "gpt-6.1-terra"
+    aks = _aks(argv)
+    assert "version=0.159.0" in aks and "disable_web_search=true" in aks
+    assert any(a.startswith("config=") and a.endswith("codex-gate.toml") for a in aks)
+    assert env == {"CODEX_AUTH_JSON_PATH": str(gate.home / ".codex" / "auth.json")}
+
+
+def test_dsflash_runs_the_custom_dsh_agent(gate: Gate) -> None:
+    r = gate.run("dsflash", gate.task, GATE_EFFORT="max", GATE_EARLY_EXIT="0")
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = f"dsflash-max-{gate.task}"
+    argv, env = _argv(gate, job)
+    assert argv[argv.index("-a") + 1] == "harbor_dsh_agent:DeepSeekHarness"
+    assert argv[argv.index("-m") + 1] == "deepseek-flash"
+    assert argv[argv.index("--effort") + 1] == "max"
+    aks = _aks(argv)
+    assert "version=0.2.1-rc.2" in aks and "disable_web_search=true" in aks
+    assert argv[argv.index("--env-file") + 1] == str(
+        gate.home / ".config" / "vulcanbench" / "deepseek.env"
+    )
+    assert argv[argv.index("--allow-agent-host") + 1] == "api.deepseek.com"
+    # harbor imports the agent from scripts/frontier-v5.
+    assert env["PYTHONPATH"].split(os.pathsep)[0] == str(gate.root / "scripts" / "frontier-v5")
+    st = gate.status(job)
+    assert st["agent"] == "dsh" and st["model"] == "deepseek-flash" and st["phase"] == "done"
+    assert "version=0.2.1-rc.2" in r.stdout.splitlines()[0]
+
+
+@pytest.mark.parametrize("effort", ["medium", "xhigh"])
+def test_dsflash_refuses_levels_dsh_does_not_take(gate: Gate, effort: str) -> None:
+    r = gate.run("dsflash", gate.task, GATE_EFFORT=effort)
+    assert r.returncode == 2 and "low, high or max" in r.stderr
+    assert not (gate.out / "jobs").exists() or not list((gate.out / "jobs").iterdir())
+
+
+def test_dsflash_needs_its_key_file(gate: Gate) -> None:
+    (gate.home / ".config" / "vulcanbench" / "deepseek.env").unlink()
+    r = gate.run("dsflash", gate.task, GATE_EFFORT="max")
+    assert r.returncode == 2 and "deepseek.env missing" in r.stderr
+    r = gate.run(
+        "dsflash",
+        GATE_PREFLIGHT_ONLY="1",
+        GATE_EFFORT="max",
+        DSH_GATE_ENV=str(gate.home / "other.env"),
+    )
+    assert r.returncode == 2
+
+
+def test_dsflash_preflight_only_is_not_applicable(gate: Gate) -> None:
+    r = gate.run("dsflash", GATE_PREFLIGHT_ONLY="1", GATE_EFFORT="high")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert json.loads(r.stdout.strip())["status"] == "not_applicable"
+
+
+def test_dsh_infra_marker_stops_the_run(gate: Gate) -> None:
+    log = "VULCANBENCH_INFRA: dsh error event QUOTA\n"
+    r = gate.run(
+        "dsflash", gate.task, GATE_EFFORT="max", FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log
+    )
+    assert r.returncode == 1, r.stdout + r.stderr
+    st = gate.status(f"dsflash-max-{gate.task}")
+    assert st["phase"] == "infra_failed"
+    assert str(st["stop_reason"]).startswith("infra:demo-task-with-a-fairly-long-nam__t0")
+
+
+def test_a_codex_error_event_is_not_infrastructure(gate: Gate) -> None:
+    # The dsh guard matches only the agent's own marker line, never an
+    # "error" event, which Codex also emits for transient stream errors.
+    log = '{"type":"error","message":"stream error: SERVER: retrying"}\n'
+    r = gate.run("terra", gate.task, FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert gate.status(f"terra-{gate.task}")["phase"] == "done"
+
+
+def test_marker_text_inside_a_json_line_is_not_infrastructure(gate: Gate) -> None:
+    log = '{"type":"tool/result","text":"VULCANBENCH_INFRA: planted"}\n'
+    r = gate.run(
+        "dsflash", gate.task, GATE_EFFORT="max", FAKE_HARBOR_MODE="agent-log", FAKE_AGENT_LOG=log
+    )
+    assert r.returncode == 0, r.stdout + r.stderr

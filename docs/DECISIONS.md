@@ -23,8 +23,12 @@ tagged run worktree under the flat 3-hour task timeout, like every sweep.
   own README says not to use it to benchmark Gemini models. Pinned to agy
   1.5.12 by the sha256 of the darwin-arm64 binary from Google's release
   tarball (manifest sha512 checked), kept in
-  `~/.local/share/vulcanbench/agy-1.5.12/`. Auto-update is off
-  (`AGY_CLI_DISABLE_AUTO_UPDATE`).
+  `~/.local/share/vulcanbench/agy-1.5.12/`. agy's updater skips the update
+  when the binary's directory is not writable, which is how the pin holds:
+  the run sandbox gives no write access there, and the operator keeps the
+  directory read-only (`chmod 555`) for agy calls made outside a run, such
+  as `agy models` or the launcher's quota probe. `AGY_CLI_DISABLE_AUTO_UPDATE`
+  does not turn the updater off (see Evidence); the adapter still sets it.
 - Billing (owner decision 2026-11-19): the owner's Google AI Pro plan through
   agy's Google sign-in, not an API key. Cost is reported as the API-equivalent
   at list price. `useG1Credits` is off, so a run never spends paid AI credits
@@ -92,6 +96,18 @@ Probes on 2026-11-19, on the AI Pro sign-in, at `gemini-4-neon-low`:
   operation not permitted"). Smoke runs on `hello-world` at Low, from the
   working checkout (not board data): solved before and after the fix; after it,
   `ls` and `python hello.py` ran with exit code 0, $0.036 API-equivalent.
+- Self-update (2026-11-19, 14:46 PST): agy 1.6.1 was released, and an
+  operator `agy models` call outside the sandbox, with
+  `AGY_CLI_DISABLE_AUTO_UPDATE=1` set, replaced the pinned binary in place
+  (the old one kept beside it as `agy.<n>.old`). agy's own log shows the
+  updater starting at every unsandboxed start since the first probe
+  ("Spawned background update process", then "Last check was less than 15
+  minutes ago"); it only had nothing newer to install before. The
+  launcher's pin check stopped the sweep before any task ran. The 1.5.12
+  binary was restored from the `.old` copy (sha256 matches the pin) and the
+  directory made read-only; agy then logs "is not fully accessible
+  (readable: true, writable: false), skipping update". The two sandboxed
+  smoke runs logged the same skip, so no run was exposed.
 
 ### Limits
 
@@ -108,6 +124,9 @@ model id, so identity is `harness-recorded`.
 - A newer agy, or a setting that turns off `search_web` in the default agent:
   re-probe, and drop the custom agent if web search can be removed without it.
 - Any run voided for calling a tool outside the allowlist: stop and look.
+- Re-pinning agy (1.6.1 is kept at `~/.local/share/vulcanbench/agy-1.6.1/`):
+  a new adapter pin, bench tag and smoke run, and the new directory made
+  read-only before its first unsandboxed call.
 - AI Pro quota waits that stretch the sweep past several days: ask the owner
   about Ultra or the API key.
 

@@ -2,6 +2,7 @@
 # Frontier v5 admission gate runner (docs/frontier-v5/GATE-LOG.md).
 #
 # usage: scripts/frontier-v5/run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]
+#        scripts/frontier-v5/run_gate.sh --grid <ref> [<batch> ...]
 #        scripts/frontier-v5/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/frontier-v5/run_gate.sh <ref> [<task>]
 #
@@ -111,6 +112,30 @@
 # Output: $GATE_OUT (default ~/vulcanbench-gate, outside the repo)/jobs/<ref>-<task><suffix>,
 # plus one summary line per trial on stdout. Record results in GATE-LOG.md
 # after diff-reviewing every solve.
+#
+# Grid runs (PLAN-v6 section 4, docs/frontier-v5/GRID-ENGINE.md):
+# `--grid <ref> [<batch> ...]` runs one budgeted agent session per grid
+# environment, a batch of up to four environments at a time as one Harbor
+# job (`-p <tasks dir> -i <env> ...`, one attempt each, all four
+# concurrent), batches in the order and grouping of the grid file
+# (GATE_GRID_FILE, default <tasks dir>/grid.json; GATE_TASKS_DIR, default
+# tasks/frontier-v5), so every model meets the same contention. Batch
+# numbers are 1-based; no number runs every batch. scripts/frontier-v5/
+# grid_plan.py validates the file first (exit 2 on any problem).
+# The budget is the grid file's budget_min (GATE_BUDGET_MIN overrides it
+# for calibration runs; the === line and status file say which), applied
+# as Harbor's --agent-timeout-multiplier over the environments' [agent]
+# timeout_sec. At the budget Harbor cancels the agent, records
+# AgentTimeoutError, collects the tree and still runs the verifier; each
+# environment's freeze hook (a [[verifier.collect]] kill as root, checked by
+# grid_plan.py) stops the agent's processes in the container before the
+# tree is collected. The grid file's budget_instruction, when set, is
+# appended to every instruction with --extra-instruction. A grid job is
+# <ref>-<effort>-grid-b<n><suffix>; no early exit; the infrastructure guard
+# stops the whole batch (rerun the whole batch, so contention stays equal),
+# and the status file adds the batch, its environments, the budget, items
+# done and total (from each reward.json) and budget_reached (trials Harbor
+# stopped at the budget).
 set -u
 if [ "${1:-}" = --refs ]; then
   echo '{"name": "astra", "agent": "codex", "model": "gpt-6-astra", "version": "0.159.0"}'
@@ -120,9 +145,12 @@ if [ "${1:-}" = --refs ]; then
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
-ref="${1:?usage: run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]}"; shift
-[ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
+grid=0
+[ "${1:-}" = --grid ] && { grid=1; shift; }
+ref="${1:?usage: run_gate.sh [--grid] <astra|sol62|fable|opus> <task|batch> [...]}"; shift
+[ $# -gt 0 ] || [ "$preflight_only" = 1 ] || [ "$grid" = 1 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
+tasks_dir="${GATE_TASKS_DIR:-$here/tasks/frontier-v5}"
 export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
 # Outside the repo by default: logs/ is not git-ignored here, and gate
 # artifacts must never be committed.
@@ -184,21 +212,33 @@ esac
 # a trial is not a gate result either (docs/DECISIONS.md 2026-10-31).
 INFRA_RE='"error":"(authentication_failed|billing_error|rate_limit|oauth_org_not_allowed)"|"api_error_status":40[13][,}]|disabled Claude subscription access|Invalid API key[^"]{1,8}Please run /login|OAuth token has expired[.] Please obtain a new token|OAuth token revoked|Credit balance is too low|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]'
 
-# Per-task state the helpers below read; set in the task loop.
+# Per-task state the helpers below read; set in the task loop. In grid mode
+# t is the batch label (grid-b<n>), job_tasks its environments.
 job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
-stop_flag=""; spid=""
+stop_flag=""; spid=""; grid_meta=""; job_tasks=()
 
 write_status() { # phase [exit_code] [stop_reason] -> atomic rewrite of $status_file
   [ -n "$status_file" ] || return 0
   python3 - "$status_file" "$1" "${2:-}" "${3:-}" "$job" "$t" "$ref" "$agent" "$model" \
-    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" <<'PY'
+    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" \
+    "$grid_meta" <<'PY'
 import glob, json, os, sys, time
 (path, phase, code, reason, job, task, ref, agent, model,
- pid, hpid, started, repo, job_dir, effort) = sys.argv[1:16]
+ pid, hpid, started, repo, job_dir, effort, grid_meta) = sys.argv[1:17]
 solves = 0
+items_done = items_total = budget_reached = 0
 for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
     try:
-        solves += json.load(open(p)).get("reward") == 1
+        r = json.load(open(p))
+        solves += r.get("reward") == 1
+        items_done += int(r.get("items_done") or 0)
+        items_total += int(r.get("items_total") or 0)
+    except Exception:
+        pass
+for p in glob.glob(job_dir + "/*__*/result.json"):
+    try:
+        e = json.load(open(p)).get("exception_info") or {}
+        budget_reached += e.get("exception_type") == "AgentTimeoutError"
     except Exception:
         pass
 d = {
@@ -209,6 +249,10 @@ d = {
     "exit_code": int(code) if code else None, "stop_reason": reason or None,
     "repo": repo or None, "job_dir": job_dir,
 }
+if grid_meta:
+    d.update(json.loads(grid_meta))
+    d.update(items_done=items_done, items_total=items_total, budget_reached=budget_reached)
+    del d["solves"]
 tmp = path + ".tmp"
 with open(tmp, "w") as fh:
     json.dump(d, fh, indent=1)
@@ -345,6 +389,11 @@ infra_hit() { # job dir -> prints the first trial with an infrastructure failure
   done
 }
 
+stop_job_sandboxes() { # every task of the current job
+  local x
+  for x in "${job_tasks[@]}"; do stop_sandboxes "$x"; done
+}
+
 stop_harbor() { # SIGINT harbor (its cancel path runs `docker compose down`), escalate, reap, sweep
   local i
   trap '' INT TERM
@@ -358,7 +407,7 @@ stop_harbor() { # SIGINT harbor (its cancel path runs `docker compose down`), es
   fi
   kill -0 "$hpid" 2>/dev/null && { echo "!!! $t: harbor did not stop; sending SIGKILL"; kill -KILL "$hpid" 2>/dev/null; }
   wait "$hpid" 2>/dev/null; hcode=$?
-  stop_sandboxes "$t"
+  stop_job_sandboxes
 }
 
 print_trials() { # job dir -> one summary line per trial
@@ -377,32 +426,14 @@ on_signal() { # record the signal; the monitor loop acts on it after its current
 trap 'on_signal INT' INT
 trap 'on_signal TERM' TERM
 
-for t in "$@"; do
-  task="$here/tasks/frontier-v5/$t"
-  [ -f "$task/task.toml" ] || { echo "run_gate: no task $t" >&2; exit 2; }
-  lang=$(sed -n 's/^vulcanbench_language = "\(.*\)"/\1/p' "$task/task.toml")
-  case "$lang" in python|javascript) n=2 ;; *) n=1 ;; esac
-  case "${GATE_CONCURRENCY:-}" in "") ;; 1|2) n=$GATE_CONCURRENCY ;; *) echo "run_gate: GATE_CONCURRENCY must be 1 or 2" >&2; exit 2 ;; esac
-  if [ "$effort" = medium ]; then job="$ref-$t$suffix"; else job="$ref-$effort-$t$suffix"; fi
-  [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
-  status_file="$OUT/$job.status.json"; hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  write_status preflight
-  [ "$agent" = claude-code ] && usage_preflight
-  if [ -n "$stop_flag" ]; then
-    echo "!!! $t: stop requested (SIG$stop_flag) before harbor started"
-    write_status stopped 130 "signal-$stop_flag"; exit 130
-  fi
-  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=$effort attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
-  [ "$early_exit" = 0 ] && echo "=== early exit off (GATE_EARLY_EXIT=0): every attempt runs to the end"
+run_job() { # start harbor with harbor_cmd, monitor it; sets hcode and stopped; exits on a signal or infra
   # A background list runs with SIGINT ignored (bash 3.2 has no `trap - INT`
   # that survives the fork), so harbor is exec'd through a python one-liner
   # that restores the default disposition. $! is then harbor's own pid.
   (cd "$here" && exec python3 -c 'import os, signal, sys
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
-     env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort "$effort" \
-     --ak version="$version" --ak disable_web_search=true -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
-     -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
+     env "${auth_env[@]+"${auth_env[@]}"}" "${harbor_cmd[@]}") > "$OUT/$job.log" 2>&1 &
   hpid=$!
   write_status running
   stopped=""
@@ -427,7 +458,7 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
       write_status infra_failed "$hcode" "infra:$bad"
       echo "!!! move $OUT/jobs/$job aside as INFRA-..., fix the cause, and rerun"; exit 1
     fi
-    if [ "$early_exit" = 1 ] && [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
+    if [ "$job_early_exit" = 1 ] && [ "$(solves "$OUT/jobs/$job")" -ge 2 ]; then
       echo "--- $t: two solves, early reject; stopping the remaining attempt"
       write_status stopping "" early-reject
       stop_harbor; stopped=1
@@ -435,11 +466,93 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
     fi
   done
   if [ -z "$hcode" ]; then wait "$hpid" 2>/dev/null; hcode=$?; fi
-  stop_sandboxes "$t"
+  stop_job_sandboxes
   if [ -z "$stopped" ]; then
     bad=$(infra_hit "$OUT/jobs/$job")
-    [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; write_status infra_failed "$hcode" "infra:$bad"; exit 1; }
+    if [ -n "$bad" ]; then
+      echo "!!! $t: infrastructure failure in $bad; not a ${grid_word} result"
+      write_status infra_failed "$hcode" "infra:$bad"; exit 1
+    fi
   fi
+}
+
+begin_job() { # after job, status_file, grid_meta: refuse an existing job dir, preflight, honour a pending stop
+  [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
+  hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  write_status preflight
+  [ "$agent" = claude-code ] && usage_preflight
+  if [ -n "$stop_flag" ]; then
+    echo "!!! $t: stop requested (SIG$stop_flag) before harbor started"
+    write_status stopped 130 "signal-$stop_flag"; exit 130
+  fi
+}
+
+if [ "$grid" = 1 ]; then
+  grid_word=grid
+  grid_file="${GATE_GRID_FILE:-$tasks_dir/grid.json}"
+  for b in "$@"; do
+    case "$b" in *[!0-9]*|"") echo "run_gate: grid batches are numbers (got $b)" >&2; exit 2 ;; esac
+  done
+  budget_args=()
+  [ -n "${GATE_BUDGET_MIN:-}" ] && budget_args=(--budget-min "$GATE_BUDGET_MIN")
+  plan=$(python3 "$here/scripts/frontier-v5/grid_plan.py" "$grid_file" "$tasks_dir" \
+    "${budget_args[@]+"${budget_args[@]}"}" "$@") || exit 2
+  note=$(python3 "$here/scripts/frontier-v5/grid_plan.py" "$grid_file" "$tasks_dir" \
+    "${budget_args[@]+"${budget_args[@]}"}" --instruction) || exit 2
+  note_args=()
+  [ -n "$note" ] && note_args=(--extra-instruction "$note")
+  job_early_exit=0
+  # The plan is read on fd 3 so nothing in the loop (the claude probe,
+  # harbor) can consume it from stdin.
+  while IFS="$(printf '\t')" read -r idx budget_sec budget_source mult envs_line <&3; do
+    [ -n "$idx" ] || continue
+    envs_line=$(printf '%s' "$envs_line" | tr '\t' ' ')
+    job_tasks=($envs_line)
+    t="grid-b$idx"
+    job="$ref-$effort-grid-b$idx$suffix"
+    status_file="$OUT/$job.status.json"
+    grid_meta=$(python3 -c 'import json, sys
+print(json.dumps({"mode": "grid", "batch": int(sys.argv[1]), "environments": sys.argv[2].split(),
+                  "budget_sec": float(sys.argv[3]), "budget_source": sys.argv[4],
+                  "agent_timeout_multiplier": float(sys.argv[5]), "grid_file": sys.argv[6],
+                  "budget_instruction": bool(sys.argv[7])}))' \
+      "$idx" "$envs_line" "$budget_sec" "$budget_source" "$mult" "$grid_file" "$note")
+    begin_job
+    echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=$effort environments=$envs_line budget=${budget_sec}s ($budget_source) multiplier=$mult concurrency=${#job_tasks[@]} harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+    include=()
+    for e in "${job_tasks[@]}"; do include+=(-i "$e"); done
+    harbor_cmd=(harbor run -p "$tasks_dir" "${include[@]}" -a "$agent" -m "$model" --effort "$effort"
+      --ak version="$version" --ak disable_web_search=true -k 1 -n "${#job_tasks[@]}"
+      --agent-timeout-multiplier "$mult" "${note_args[@]+"${note_args[@]}"}"
+      "${auth_args[@]+"${auth_args[@]}"}" -o "$OUT/jobs" --job-name "$job" -y -q)
+    run_job
+    print_trials "$OUT/jobs/$job"
+    write_status done "$hcode"
+    echo "--- $t: $(python3 -c 'import json, sys; d = json.load(open(sys.argv[1])); print("%d of %d items, %d at the budget" % (d["items_done"], d["items_total"], d["budget_reached"]))' "$status_file" 2>/dev/null) $(date '+%F %H:%M:%S')"
+  done 3<<EOF
+$plan
+EOF
+  echo "=== DONE $(date '+%F %H:%M:%S')"
+  exit 0
+fi
+
+grid_word=gate
+for t in "$@"; do
+  task="$tasks_dir/$t"
+  [ -f "$task/task.toml" ] || { echo "run_gate: no task $t" >&2; exit 2; }
+  lang=$(sed -n 's/^vulcanbench_language = "\(.*\)"/\1/p' "$task/task.toml")
+  case "$lang" in python|javascript) n=2 ;; *) n=1 ;; esac
+  case "${GATE_CONCURRENCY:-}" in "") ;; 1|2) n=$GATE_CONCURRENCY ;; *) echo "run_gate: GATE_CONCURRENCY must be 1 or 2" >&2; exit 2 ;; esac
+  if [ "$effort" = medium ]; then job="$ref-$t$suffix"; else job="$ref-$effort-$t$suffix"; fi
+  status_file="$OUT/$job.status.json"; job_tasks=("$t")
+  begin_job
+  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=$effort attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+  [ "$early_exit" = 0 ] && echo "=== early exit off (GATE_EARLY_EXIT=0): every attempt runs to the end"
+  job_early_exit=$early_exit
+  harbor_cmd=(harbor run -p "$task" -a "$agent" -m "$model" --effort "$effort"
+    --ak version="$version" --ak disable_web_search=true -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}"
+    -o "$OUT/jobs" --job-name "$job" -y -q)
+  run_job
   print_trials "$OUT/jobs/$job"
   echo "--- $t: $(solves "$OUT/jobs/$job") solve(s) $(date '+%F %H:%M:%S')"
   write_status done "$hcode" "${stopped:+early-reject}"

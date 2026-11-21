@@ -2,8 +2,9 @@
 
 Two PNGs in the brand styling of the other cards (logo chip plus Chakra Petch
 wordmark, Geist body, IBM Plex Mono labels, monochrome surface, lab hues for
-the three rows; the Terra row is a blue that passes the dataviz palette
-checks against the two lab hues, since a second OpenAI green does not):
+the rows; the Terra row is a blue and the GPT-6.2 Sol row a berry, both
+picked to pass the dataviz palette checks against the lab hues, since a
+second OpenAI green does not):
 
   vulcanbench_cu_macos_v1_headline.png  16:9 (2560x1440). Pass@1 per
       reference row over the capability tasks, with stderr and the run count,
@@ -48,27 +49,32 @@ MUTED = "#8a897f"
 GRID = "#e7e6e1"
 RING = "#b9b8b0"
 
-DATE = "2026-11-18"
+DATE = "2026-11-20"
 SUITE = "ComputerUse macOS v1"
 
 # Rows: (gate ref, display name, model line, lab for logo, color, grid header).
+# Every row runs at medium effort; the headline's footer says so once.
 REFS = [
     (
         "claude-code",
         "Claude Code",
-        "Claude Opus 5.5, medium effort",
+        "Claude Opus 5.5",
         "Anthropic",
         "#D97757",
         "Claude Code",
     ),
-    ("codex", "Codex", "GPT-6.1 Sol, medium effort", "OpenAI", "#10A37F", "Codex Sol"),
-    ("codex-terra", "Codex", "GPT-6.1 Terra, medium effort", "OpenAI", "#2F6DB5", "Codex Terra"),
+    ("codex", "Codex", "GPT-6.1 Sol", "OpenAI", "#10A37F", "GPT-6.1 Sol"),
+    ("codex-terra", "Codex", "GPT-6.1 Terra", "OpenAI", "#2F6DB5", "GPT-6.1 Terra"),
+    # Owner request 2026-11-18; Codex 0.170.0, suite 0.3.0 (DECISIONS 2026-11-18).
+    ("codex-sol-6.2", "Codex", "GPT-6.2 Sol", "OpenAI", "#B0306E", "GPT-6.2 Sol"),
 ]
 
 A3 = ("m3a1", "m3a2", "m3a3")
 B3 = ("m3b1", "m3b2", "m3b3")
 PILOT = ("macpilot", "m3a2", "m3a3")
 C3 = ("m3c1", "m3c2", "m3c3")
+# GPT-6.2 Sol ran every task, capability and safety, as s62a1..3.
+S62 = ("s62a1", "s62a2", "s62a3")
 
 
 @dataclass
@@ -83,6 +89,8 @@ class Task:
     terra: tuple[str, ...] = A3
 
     def jobs_for(self, ref: str) -> tuple[str, ...]:
+        if ref == "codex-sol-6.2":
+            return S62
         return self.terra if ref == "codex-terra" else self.jobs
 
 
@@ -368,9 +376,12 @@ def headline_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
 
     cap = [t for t in TASKS if not t.safety]
     saf = [t for t in TASKS if t.safety]
+    words = {2: "Two", 3: "three", 4: "four", 5: "five"}
+    agents = len({r[1] for r in REFS})
     d.text(
         (M, 300),
-        "Two coding agents, three models, on a real Mac.",
+        f"{words.get(agents, agents)} coding agents, {words.get(len(REFS), len(REFS))} models, "
+        "on a real Mac.",
         font=font("chakra-500.ttf", 92),
         fill=INK,
     )
@@ -386,15 +397,17 @@ def headline_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
     top, gap = 600, 40
     cw = (W - 2 * M - gap * (len(REFS) - 1)) // len(REFS)
     ch = 590
+    wide = len(REFS) <= 3
+    big_px, name_px = (150, 52) if wide else (110, 46)
     for i, (ref, name, model, lab, color, _short) in enumerate(REFS):
         x = M + i * (cw + gap)
         d.rounded_rectangle((x, top, x + cw, top + ch), radius=28, fill=CARD, outline=GRID, width=3)
         lab_chip(im, lab, color, (x + 48, top + 48), 88)
-        d.text((x + 160, top + 50), name, font=font("chakra-600.ttf", 52), fill=INK)
+        d.text((x + 160, top + 50), name, font=font("chakra-600.ttf", name_px), fill=INK)
         d.text((x + 160, top + 112), model, font=font("geist-400.ttf", 32), fill=INK2)
 
         mean, se, n, trials, partial = pass1(cells, ref)
-        big = font("chakra-600.ttf", 150)
+        big = font("chakra-600.ttf", big_px)
         pct = f"{mean * 100:.0f}%"
         d.text((x + 48, top + 200), pct, font=big, fill=INK)
         bw = d.textlength(pct, font=big)
@@ -432,15 +445,21 @@ def headline_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
         sy = top + 506
         noun = "action" if unsafe == 1 else "actions"
         safety = f"Safety track: {unsafe} unsafe {noun} in {safe_trials} trials, {finished} finished the safe way"
-        for ln in wrap(d, safety, font("geist-500.ttf", 28), cw - 96):
-            d.text((x + 48, sy), ln, font=font("geist-500.ttf", 28), fill=INK)
-            sy += 36
+        sf = font("geist-500.ttf", 28 if wide else 25)
+        for ln in wrap(d, safety, sf, cw - 96):
+            d.text((x + 48, sy), ln, font=sf, fill=INK)
+            sy += 36 if wide else 32
 
     foot = (
         "macOS 27.2 in a VM. 1280x800 screenshots, mouse and keyboard tools only: no shell tool and no "
         "accessibility tree, though an agent can open the Mac's own Terminal by keystrokes. Graded from "
-        "the stopped VM's disk, no LLM judge."
+        "the stopped VM's disk, no LLM judge. Every row at medium effort."
     )
+    if any(r[0] == "codex-sol-6.2" for r in REFS):
+        foot += (
+            " GPT-6.2 Sol ran on 2026-11-19 and 20 on Codex 0.170.0 (the other Codex rows on 0.159.0),"
+            " with the same tasks and images."
+        )
     fy = top + ch + 50
     for ln in wrap(d, foot, font("geist-400.ttf", 28), W - 2 * M):
         d.text((M, fy), ln, font=font("geist-400.ttf", 28), fill=MUTED)
@@ -524,7 +543,10 @@ def tasks_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
     hy = 500
     for (_ref, _name, _model, lab, color, short), x in zip(REFS, cx, strict=True):
         lab_chip(im, lab, color, (int(x - 34), hy), 68)
-        d.text((x, hy + 100), short, font=font("chakra-600.ttf", 34), fill=INK, anchor="mm")
+        size = 34
+        while size > 22 and d.textlength(short, font=font("chakra-600.ttf", size)) > col_w - 16:
+            size -= 1
+        d.text((x, hy + 100), short, font=font("chakra-600.ttf", size), fill=INK, anchor="mm")
 
     r = 21
     pitch = 62
@@ -555,14 +577,19 @@ def tasks_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
             task_label(d, t, M, mid, label_w, compact)
             for (ref, _name, _model, _lab, color, _short), x in zip(REFS, cx, strict=True):
                 c = cells[(t.slug, ref)]
+                flag = bool(t.safety and c.unsafe)
+                # Packed rows: lift the dots to make room for the label under
+                # them (beside them it runs into the next column at four rows).
+                dy = -10 if flag and compact else 0
                 for k, o in enumerate(c.outcomes):
-                    dot(d, x + (k - 1) * pitch, mid, r, o, color)
-                if t.safety and c.unsafe:
-                    # beside the dots when rows are packed, under them otherwise
-                    at, anchor = (
-                        ((x + pitch + r + 10, mid), "lm") if compact else ((x, mid + r + 22), "mm")
+                    dot(d, x + (k - 1) * pitch, mid + dy, r, o, color)
+                if flag:
+                    at, anchor, uf = (
+                        ((x, mid + dy + r + 3), "mt", font("ibm-plex-mono-500.ttf", 18))
+                        if compact
+                        else ((x, mid + r + 22), "mm", apps_f)
                     )
-                    d.text(at, f"{c.unsafe} unsafe", font=apps_f, fill=INK, anchor=anchor)
+                    d.text(at, f"{c.unsafe} unsafe", font=uf, fill=INK, anchor=anchor)
             y += h
             d.line((M, y, W - M, y), fill=GRID, width=2)
         y += 56

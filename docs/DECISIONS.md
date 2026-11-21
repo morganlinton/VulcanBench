@@ -7,6 +7,61 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-18: ComputerUse macOS, a GPT-6.2 Sol row on Codex 0.170.0
+
+### Decision
+- **Owner request (2026-11-18): GPT-6.2 Sol on ComputerUse macOS v1, all
+  19 tasks x 3 attempts (57 trials), one at a time, after Claude Code's
+  last trials finish.** Its results go in a later results PR; this round is
+  frozen and published first.
+- **A new reference, `codex-sol-6.2`, next to `codex` (GPT-6.1 Sol).** The
+  6.1 Sol row keeps its pin and numbers. The new row has its own job names
+  and status files, like `codex-terra`.
+- **Codex 0.170.0 for that row only.** `codex debug models` on Codex
+  0.159.0 (the pin) and 0.163.0 (this host) does not list `gpt-6.2-sol`;
+  0.170.0 does. So the row pins 0.170.0, and the two Sol rows differ in
+  Codex version as well as model.
+- **The suite pins are part of the lock**, so adding the reference bumps
+  the suite version and re-freezes it, in an engine PR after this round's
+  freeze, then a new bench tag and run worktree.
+- **No change to the Codex lockdown.** The same gate config and locked
+  catalog apply (evidence below).
+- **Suite version 0.3.0.** The pin is in `suite.json` and the suite is
+  re-frozen. Tasks and task images are unchanged from 0.2.0.
+- **Same task images as this round (my call).** The keychain fix needs
+  rebuilt images, which would make the 6.2 Sol row run on a different
+  environment from the three rows it sits next to. The rebuild waits for
+  the next round, as planned.
+- **The catalog comes from Codex 0.170.0.** The gate builds the locked
+  catalog with `codex debug models` on the host, and the host's Codex
+  (0.163.0) does not list `gpt-6.2-sol`. The queue sets `CODEX_BIN` to a
+  Codex 0.170.0 install in the gate folder; the trial itself installs the
+  pinned 0.170.0 in the agent container as before.
+- **All 25 tasks x 3 (75 trials).** The owner approved the 19 capability
+  tasks (57 trials) on 2026-11-18 and added the six safety tasks (18
+  trials) on 2026-11-19. The safety trials run after the capability ones
+  (`run_sol62_safety.sh`), and only if that queue ends cleanly. Jobs run attempt by attempt (every task's attempt 1, then
+  2, then 3), so a partial run still covers every task. Job suffix
+  `-s62a<N>`.
+
+### Evidence
+- Probed with no quota spent, on the host (not the task image), with Codex
+  0.170.0 against a local stand-in for the Responses API that logs each
+  request. With `codex-gate.toml` and the locked catalog, GPT-6.2 Sol is
+  offered `exec`, `wait`, `request_user_input`, `request_user_input_async`
+  and `send_message_to_user_async`, and inside `exec` only the clock and
+  MCP resource tools (plus the task's computer tools in a real trial). The
+  6.1 Sol entry on 0.170.0 gets the same minus `send_message_to_user_async`.
+  The two new tools only send text to the user; a headless trial has no
+  one to answer.
+- The 6.2 Sol entry lists `literature_search_query` and
+  `multi_agent_v2_in_code_mode` among its experimental tools. Neither is
+  offered with the gate settings. The control (no gate settings, unlocked
+  catalog) offers the shell, `view_image`, goal and subagent tools, so the
+  probe does see tools when they are on; it never showed a literature
+  search tool, which may be gated server side. The tool-surface guard stays
+  the backstop.
+
 ## 2026-11-17: ComputerUse macOS, Claude Code's last nine trials after the folder move
 
 Made by the agent under the owner's 2026-11-10 instruction to decide

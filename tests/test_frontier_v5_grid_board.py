@@ -46,6 +46,7 @@ def rec(
     kinds: dict[str, list[int]] | None = None,
     checksum: str = "c1",
     trial: str | None = None,
+    budget_sec: float | None = None,
 ) -> dict[str, Any]:
     return {
         "schema": "vulcanbench-frontier-v5-run/2",
@@ -63,6 +64,7 @@ def rec(
         "items_total": total if scored else None,
         "items_by_kind": kinds or ({"defect": [done, total]} if scored else None),
         "budget_reached": budget,
+        "budget_sec": budget_sec,
         "tamper_clean": tamper,
         "guards_failed": 0,
         "agent_minutes": 20.0,
@@ -117,6 +119,19 @@ def test_two_scored_runs_on_one_environment_are_refused() -> None:
     runs = [*full(), rec("cli11-grid", 8, trial="cli11-grid__rerun")]
     with pytest.raises(gb.BoardError, match="two scored runs on cli11-grid"):
         gb.aggregate(runs, GRID)
+
+
+def test_each_budget_is_its_own_row() -> None:
+    # The pilot's calibration: one model on one environment at 15 and 30 minutes.
+    runs = [
+        rec("cli11-grid", 5, budget_sec=900.0, trial="a"),
+        rec("cli11-grid", 7, budget_sec=1800.0, trial="b"),
+    ]
+    rows, cells = gb.aggregate(runs, GRID)
+    assert [(r["budget_min"], r["items_done"]) for r in rows] == [(30.0, 7), (15.0, 5)]
+    assert [c["budget_min"] for c in cells if c["task"] == "cli11-grid"] == [30.0, 15.0]
+    with pytest.raises(gb.BoardError, match=r"budget 15\.0 min: two scored runs"):
+        gb.aggregate([*runs, rec("cli11-grid", 6, budget_sec=900.0, trial="c")], GRID)
 
 
 def test_rows_sort_by_rate_and_count_flags() -> None:
@@ -180,7 +195,7 @@ def test_cli_writes_json_and_csv(tmp_path: Path, capsys) -> None:
     assert rows[1]["partial"] == "True"
     with (out / "grid-cells.csv").open() as fh:
         assert len(list(csv.DictReader(fh))) == 8
-    assert "gpt-6.2-sol max: 12/34 items" in capsys.readouterr().out
+    assert "gpt-6.2-sol max None min: 12/34 items" in capsys.readouterr().out
 
 
 def test_cli_errors(tmp_path: Path, capsys) -> None:

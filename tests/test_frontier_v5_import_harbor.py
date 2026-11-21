@@ -491,6 +491,23 @@ def test_verifier_problems_are_unscored_and_fail_the_import(tmp_path: Path, caps
     assert "verifier problems" in capsys.readouterr().err
 
 
+def test_budget_comes_from_the_task_toml_and_the_multiplier(tmp_path: Path) -> None:
+    job = make_job(tmp_path / "jobs", JOB, "codex", "gpt-6.2-sol")
+    task_dir = tmp_path / "grid" / TASK
+    task_dir.mkdir(parents=True)
+    (task_dir / "task.toml").write_text("[agent]\ntimeout_sec = 1200.0\n")
+    cfg_path = job / f"{TASK[:32]}__T0" / "config.json"
+    cfg = json.loads(cfg_path.read_text())
+    cfg["task"]["path"] = str(task_dir)
+    cfg["agent_timeout_multiplier"] = 0.75
+    cfg_path.write_text(json.dumps(cfg))
+    out = tmp_path / "out"
+    ih.main([str(job), "--out", str(out)])
+    assert run_json(out, job)["budget_sec"] == 900.0
+    # A task directory that is not on this host gives no budget.
+    assert ih.budget_sec({"task": {"path": "/nowhere"}}) is None
+
+
 def test_a_verifier_output_harbor_rejected_is_unscored(tmp_path: Path) -> None:
     job = make_job(
         tmp_path / "jobs", JOB, "codex", "gpt-6.2-sol", exception="VerifierOutputParseError"

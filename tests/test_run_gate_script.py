@@ -231,7 +231,7 @@ def test_refs_prints_one_json_line_per_reference(gate: Gate) -> None:
     r = gate.run("--refs")
     assert r.returncode == 0, r.stderr
     refs = [json.loads(line) for line in r.stdout.splitlines()]
-    assert [x["name"] for x in refs] == ["astra", "fable", "opus", "sol62"]
+    assert [x["name"] for x in refs] == ["astra", "fable", "opus", "sol62", "terra"]
     assert refs[2] == {
         "name": "opus",
         "agent": "claude-code",
@@ -262,6 +262,31 @@ def test_sol62_at_max_effort_is_a_named_measurement(gate: Gate) -> None:
     aks = [argv[i + 1] for i, a in enumerate(argv) if a == "--ak"]
     assert "version=0.166.0" in aks and "disable_web_search=true" in aks
     assert any(a.startswith("config=") and a.endswith("codex-gate.toml") for a in aks)
+
+
+def test_terra_runs_codex_0_159_0_with_the_gate_config(gate: Gate) -> None:
+    # The launch lineup's Terra (R9) on its Frontier v4 pin, at its top level.
+    r = gate.run("--refs")
+    assert json.loads(r.stdout.splitlines()[4]) == {
+        "name": "terra",
+        "agent": "codex",
+        "model": "gpt-6.1-terra",
+        "version": "0.159.0",
+    }
+    r = gate.run("terra", gate.task, GATE_EFFORT="max", GATE_EARLY_EXIT="0")
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = f"terra-max-{gate.task}"
+    st = gate.status(job)
+    assert st["phase"] == "done" and st["effort"] == "max" and st["model"] == "gpt-6.1-terra"
+    data = json.loads((gate.out / "jobs" / job / "argv.json").read_text())
+    argv = data["argv"]
+    assert argv[argv.index("-a") + 1] == "codex"
+    assert argv[argv.index("-m") + 1] == "gpt-6.1-terra"
+    assert argv[argv.index("--effort") + 1] == "max"
+    aks = [argv[i + 1] for i, a in enumerate(argv) if a == "--ak"]
+    assert "version=0.159.0" in aks and "disable_web_search=true" in aks
+    assert any(a.startswith("config=") and a.endswith("codex-gate.toml") for a in aks)
+    assert data["env"] == {"CODEX_AUTH_JSON_PATH": str(gate.home / ".codex" / "auth.json")}
 
 
 def test_medium_effort_keeps_the_gate_job_name(gate: Gate) -> None:

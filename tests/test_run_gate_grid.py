@@ -155,6 +155,26 @@ def test_budget_override_and_batch_selection(gg: GridGate) -> None:
     assert "30 minutes" in argv[argv.index("--extra-instruction") + 1]
 
 
+def test_terra_grid_run_at_max_with_a_budget_suffix(gg: GridGate) -> None:
+    # The pilot's calibration shape: one batch, Terra at its top effort, a
+    # 15-minute budget, and a job suffix so a second budget gets its own job.
+    r = gg.run(
+        "--grid", "terra", "2", GATE_EFFORT="max", GATE_BUDGET_MIN="15", GATE_JOB_SUFFIX="-15m"
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+    job = "terra-max-grid-b2-15m"
+    argv = gg.argv(job)
+    assert argv[argv.index("-m") + 1] == "gpt-6.1-terra"
+    assert argv[argv.index("--effort") + 1] == "max"
+    assert float(argv[argv.index("--agent-timeout-multiplier") + 1]) * 3600 == pytest.approx(900)
+    st = gg.status(job)
+    assert st["budget_sec"] == 900 and st["budget_source"] == "override"
+    r = gg.run(
+        "--grid", "terra", "2", GATE_EFFORT="max", GATE_BUDGET_MIN="30", GATE_JOB_SUFFIX="-30m"
+    )
+    assert r.returncode == 0 and gg.status("terra-max-grid-b2-30m")["budget_sec"] == 1800
+
+
 def test_no_budget_instruction_appends_nothing(gg: GridGate) -> None:
     gg.grid["budget_instruction"] = None
     gg.write_grid()

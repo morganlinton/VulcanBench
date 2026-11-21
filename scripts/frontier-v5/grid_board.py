@@ -12,7 +12,9 @@ size tier), and writes in ``--out``:
   grid-board.csv    one row per model and effort
   grid-cells.csv    one row per model, effort and environment
 
-One row per (reference, model, agent, effort), PLAN-v6 section 5:
+One row per (reference, model, agent, effort, budget), PLAN-v6 section 5;
+the budget (``budget_sec`` in the run record) splits a model's calibration
+runs at different budgets into separate rows:
 
 - **items**: items done over all items of the scored runs, with ``n=`` (the
   item count, and the number of environments it covers) and ±1 binomial
@@ -64,6 +66,7 @@ ROW_FIELDS = [
     "agent",
     "agent_version",
     "effort",
+    "budget_min",
     "items_done",
     "items_total",
     "rate",
@@ -90,6 +93,7 @@ CELL_FIELDS = [
     "model",
     "agent",
     "effort",
+    "budget_min",
     "task",
     "language",
     "tier",
@@ -158,18 +162,19 @@ def _sum(values: Iterable[Any]) -> int | None:
 def aggregate(
     runs: list[dict[str, Any]], grid: dict[str, dict[str, str]]
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    groups: dict[tuple[str, str, str, str, float | None], list[dict[str, Any]]] = defaultdict(list)
     for r in runs:
         if r.get("task") in grid:
-            groups[(r["ref"], r["model"], r["agent"], r["effort"])].append(r)
+            groups[(r["ref"], r["model"], r["agent"], r["effort"], r.get("budget_sec"))].append(r)
     rows, cells = [], []
-    for (ref, model, agent, effort), group in groups.items():
+    for (ref, model, agent, effort, budget), group in groups.items():
+        budget_min = None if budget is None else round(float(budget) / 60, 2)
         scored = [r for r in group if r.get("scored")]
         by_env: dict[str, dict[str, Any]] = {}
         for r in scored:
             if r["task"] in by_env:
                 raise BoardError(
-                    f"{model} {effort}: two scored runs on {r['task']} "
+                    f"{model} {effort} budget {budget_min} min: two scored runs on {r['task']} "
                     f"({by_env[r['task']]['trial']}, {r['trial']}); keep one"
                 )
             by_env[r["task"]] = r
@@ -208,6 +213,7 @@ def aggregate(
                 "agent": agent,
                 "agent_version": ",".join(versions),
                 "effort": effort,
+                "budget_min": budget_min,
                 "items_done": done,
                 "items_total": total,
                 "rate": head["rate"],
@@ -240,6 +246,7 @@ def aggregate(
                     "model": model,
                     "agent": agent,
                     "effort": effort,
+                    "budget_min": budget_min,
                     "task": env,
                     "language": grid[env]["language"],
                     "tier": grid[env]["tier"],
@@ -259,15 +266,18 @@ def aggregate(
                 }
             )
 
-    def key(row: dict[str, Any]) -> tuple[float, str, str]:
-        return (-(row["rate"] or 0.0), row["model"], row["effort"])
+    def key(row: dict[str, Any]) -> tuple[float, str, str, float]:
+        return (-(row["rate"] or 0.0), row["model"], row["effort"], row["budget_min"] or 0.0)
+
+    def ident(x: dict[str, Any]) -> tuple[Any, ...]:
+        return (x["ref"], x["model"], x["agent"], x["effort"], x["budget_min"])
 
     rows.sort(key=key)
-    order = {(r["ref"], r["model"], r["agent"], r["effort"]): i for i, r in enumerate(rows)}
+    order = {ident(r): i for i, r in enumerate(rows)}
     envs = list(grid)
     cells.sort(
         key=lambda c: (
-            order[(c["ref"], c["model"], c["agent"], c["effort"])],
+            order[ident(c)],
             envs.index(str(c["task"])),
         )
     )
@@ -345,7 +355,8 @@ def main(argv: list[str] | None = None) -> int:
     for r in rows:
         se = "" if r["rate_se"] is None else f" ±{r['rate_se']}"
         print(
-            f"{r['model']} {r['effort']}{'*' if r['partial'] else ''}: {r['items_done']}/"
+            f"{r['model']} {r['effort']} {r['budget_min']} min{'*' if r['partial'] else ''}: "
+            f"{r['items_done']}/"
             f"{r['items_total']} items = {r['rate']}{se} ({r['n_envs']} environments), "
             f"budget reached {r['budget_reached']}, ${r['cost_total_usd']}"
         )

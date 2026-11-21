@@ -2,8 +2,9 @@
 
 How a grid run (PLAN-v6 sections 4 and 5) goes through Harbor: one budgeted
 agent session per environment, four environments at a time in fixed batches,
-per-item scoring, and the board. Draft, built 2026-11-21 before the pilot
-cell exists; the pilot fixes the numbers.
+per-item scoring, and the board. Built 2026-11-21 and smoke-tested on the
+CLI11 pilot cell (C++, smaller tier) with Harbor's oracle and nop agents;
+the pilot's calibration runs set the budget.
 
 | Piece | File |
 | --- | --- |
@@ -108,7 +109,10 @@ GATE_EFFORT=max GATE_BUDGET_MIN=30 scripts/frontier-v5/run_gate.sh --grid sol62 
 
 The first runs every batch in order; the second is a calibration run of
 batch 1 at a 30-minute budget (the status file records `budget_source:
-override`). Each batch is one Harbor job, `<ref>-<effort>-grid-b<n>`, with
+override`). Give each calibration budget its own `GATE_JOB_SUFFIX` (for
+example `-30m`) so its job directory does not collide with another
+budget's. References: astra, sol62 and terra (Codex), fable and opus
+(Claude Code); `--refs` lists them with their CLI pins. Each batch is one Harbor job, `<ref>-<effort>-grid-b<n>`, with
 one attempt per environment and all of them concurrent. Authentication, the
 web-tools-off settings, the Claude usage pre-flight, signals and the
 infrastructure guard are the gate runner's; an infrastructure failure in
@@ -139,7 +143,10 @@ A trial that disagrees is not scored and the import exits 1. How a broken
 guard is charged is the verifier's to apply (by clearing `done`); the
 engine reports the failed guards beside the count.
 
-The board gives, per model and effort: items done over items with `n=` and
+The importer records each run's budget (`budget_sec`: the environment's
+`[agent] timeout_sec` times Harbor's multiplier), and the board gives one
+row per model, effort and budget, so calibration runs at different budgets
+sit side by side. Per row: items done over items with `n=` and
 ±1 binomial stderr; the same per size tier, per language and per item kind;
 the six-by-two cells as counts; tokens and API-equivalent cost. No speed
 column (R13). Unscored runs are excluded, never zeros, and mark the row

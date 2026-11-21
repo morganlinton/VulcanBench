@@ -21,8 +21,9 @@ environment, and becomes one run directory, ``<out>/<job>/<trial>/``, holding:
 The record carries: the job, trial, environment, reference, agent and CLI
 version, model and effort; the job's concurrency; agent minutes (Harbor's
 agent-execution phase) and whether the session reached its wall-clock
-budget (``budget_reached``: Harbor's ``AgentTimeoutError``, PLAN-v6 section
-4); tokens and the API-equivalent cost at list price; the items done, the
+budget (``budget_sec``, from the environment's ``[agent] timeout_sec`` and
+Harbor's multiplier, and ``budget_reached``: Harbor's ``AgentTimeoutError``,
+PLAN-v6 section 4); tokens and the API-equivalent cost at list price; the items done, the
 item total, per-kind counts, the tamper flag and failed guards; the patch
 summary; the tool-call summary; and whether the run is scored.
 
@@ -84,6 +85,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO))
 
 import grid_items  # noqa: E402
+import grid_plan  # noqa: E402
 
 from harness.agent import tool_calls  # noqa: E402
 from harness.pricing import cost_usd  # noqa: E402
@@ -513,6 +515,24 @@ def ref_and_effort(job: str, effort: str | None) -> tuple[str, str]:
     return name, effort or "medium"
 
 
+def budget_sec(cfg: dict[str, Any]) -> float | None:
+    """The session's wall-clock budget: the task's [agent] timeout_sec times Harbor's multiplier.
+
+    Read from the task directory the trial ran (its config.json path), so a
+    run is placed under the budget it actually had; None if that task.toml is
+    not on this host.
+    """
+    path = (cfg.get("task") or {}).get("path")
+    if not path:
+        return None
+    try:
+        timeout, _ = grid_plan.task_facts(Path(str(path)) / "task.toml")
+    except (OSError, grid_plan.GridError, ValueError):
+        return None
+    mult = cfg.get("agent_timeout_multiplier") or cfg.get("timeout_multiplier") or 1.0
+    return round(timeout * float(mult), 1)
+
+
 def batch_of(job: str) -> int | None:
     m = re.search(r"-grid-b(\d+)", job)
     return int(m.group(1)) if m else None
@@ -610,6 +630,7 @@ def import_trial(
         "finished_at": result.get("finished_at"),
         "agent_minutes": _minutes(result.get("agent_execution")),
         "agent_timeout_multiplier": cfg.get("agent_timeout_multiplier"),
+        "budget_sec": budget_sec(cfg),
         "budget_reached": exc == BUDGET_EXCEPTION,
         "exception": exc,
         "flags": flags,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Frontier v5 admission gate runner (docs/frontier-v5/GATE-LOG.md).
 #
-# usage: scripts/frontier-v5/run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]
+# usage: scripts/frontier-v5/run_gate.sh <astra|sol62|terra|fable|opus> <task> [<task> ...]
 #        scripts/frontier-v5/run_gate.sh --grid <ref> [<batch> ...]
 #        scripts/frontier-v5/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/frontier-v5/run_gate.sh <ref> [<task>]
@@ -19,6 +19,10 @@
 #          (not a gate reference: the release 1 top-effort measurement of
 #          decision R3, docs/DECISIONS.md 2026-11-19; Codex 0.159.0 refuses
 #          gpt-6.2-sol, 0.166.0 is its Frontier v4 pin)
+#   terra  harbor -a codex       -m gpt-6.1-terra     Codex CLI 0.159.0
+#          (not a gate reference: the launch lineup's Terra, R9, on its
+#          Frontier v4 pin, docs/DECISIONS.md 2026-10-26; first used for the
+#          grid pilot's calibration runs)
 #
 # GATE_EFFORT (default medium) sets the reasoning effort: low, medium, high,
 # xhigh or max. Levels in vulcanbench.toml's [effort].blocked ("ultra") are
@@ -66,7 +70,7 @@
 # harbor's result.json, which has no finished_at on a cancelled job.
 #
 # Authentication (never read or printed by this script):
-#   astra, sol62  a dedicated ChatGPT login for gate runs, with no connected apps,
+#   astra, sol62, terra  a dedicated ChatGPT login for gate runs, with no connected apps,
 #          in ~/.config/vulcanbench/codex-gate/auth.json
 #          (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`), or the
 #          file GATE_CODEX_AUTH names; without one, the personal login in
@@ -142,12 +146,13 @@ if [ "${1:-}" = --refs ]; then
   echo '{"name": "fable", "agent": "claude-code", "model": "claude-fable-5-1", "version": "2.1.302"}'
   echo '{"name": "opus", "agent": "claude-code", "model": "claude-opus-5-5", "version": "2.1.302"}'
   echo '{"name": "sol62", "agent": "codex", "model": "gpt-6.2-sol", "version": "0.166.0"}'
+  echo '{"name": "terra", "agent": "codex", "model": "gpt-6.1-terra", "version": "0.159.0"}'
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
 grid=0
 [ "${1:-}" = --grid ] && { grid=1; shift; }
-ref="${1:?usage: run_gate.sh [--grid] <astra|sol62|fable|opus> <task|batch> [...]}"; shift
+ref="${1:?usage: run_gate.sh [--grid] <astra|sol62|terra|fable|opus> <task|batch> [...]}"; shift
 [ $# -gt 0 ] || [ "$preflight_only" = 1 ] || [ "$grid" = 1 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 tasks_dir="${GATE_TASKS_DIR:-$here/tasks/frontier-v5}"
@@ -171,9 +176,13 @@ mkdir -p "$OUT/jobs"
 command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/frontier-v5/setup-host.sh installs it)" >&2; exit 2; }
 
 case "$ref" in
-  astra|sol62)
+  astra|sol62|terra)
     agent=codex
-    case "$ref" in astra) model=gpt-6-astra; version=0.159.0 ;; sol62) model=gpt-6.2-sol; version=0.166.0 ;; esac
+    case "$ref" in
+      astra) model=gpt-6-astra; version=0.159.0 ;;
+      sol62) model=gpt-6.2-sol; version=0.166.0 ;;
+      terra) model=gpt-6.1-terra; version=0.159.0 ;;
+    esac
     # A dedicated gate login (no connected apps) when it exists, else the
     # personal one; Harbor reads the file named by CODEX_AUTH_JSON_PATH.
     codex_auth="${GATE_CODEX_AUTH:-$HOME/.config/vulcanbench/codex-gate/auth.json}"
@@ -195,7 +204,7 @@ case "$ref" in
     [ -f "$envf" ] || { echo "run_gate: $envf missing (see the header for how to create it)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
-  *) echo "run_gate: reference must be astra, sol62, fable or opus" >&2; exit 2 ;;
+  *) echo "run_gate: reference must be astra, sol62, terra, fable or opus" >&2; exit 2 ;;
 esac
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit

@@ -7,8 +7,9 @@ Date: trials ran from 2026-11-12 to 2026-11-18. Suite
 frozen in `tasks/computer-use-macos-v1/suite.lock.json`, 25 scored tasks: 19 capability tasks and a safety track of 6. Each trial
 boots a fresh macOS 27.2 virtual machine (Tart 2.41.1, display 1280 by 800
 points) from a task image, the agent works through the task's MCP computer
-tools only (screenshots, clicks, keys, drags; no shell, file or web tools),
-and grading reads the stopped machine's disk. The guest clock is frozen at
+tools only (screenshots, clicks, keys, drags; no shell, file or web tools,
+though keystrokes can open the Mac's own Terminal, and agents on every row
+sometimes did), and grading reads the stopped machine's disk. The guest clock is frozen at
 Monday 9 March 2026 and shows in the menu bar. Harness: harbor 0.24.0.
 
 Three reference rows ran, all at medium reasoning effort, under the

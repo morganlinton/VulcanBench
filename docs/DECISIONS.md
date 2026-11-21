@@ -7,6 +7,36 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-21: a probe whose two replies are both malformed JSON is invalid (v3.32)
+
+### Decision
+
+When neither attempt at an intent probe is valid JSON, the wrapper marks the
+probe invalid (`operator-invalid.json`) and the remaining probes continue,
+exactly as it already did when one or both attempts quoted an unsupported
+excerpt. "Extra data" errors are excluded, since `recover_trailing_braces`
+recovers those. Owner decision in chat on November 21, 2026, choosing
+invalidation over repairing the judge's quotes or a third attempt.
+
+### Evidence
+
+- v3.32 stopped at 13:19 PST on Grok probe `submission-048` (Gemini 4 Neon
+  low codeccore, solved). Both attempts failed with "Expecting ',' delimiter":
+  Grok quoted the module's memo line with its double quotes unescaped, so
+  neither reply parsed and no protocol check ran.
+- This is the codeccore memo line Grok also misquoted under v3.7 (GPT-5.6 Sol
+  max, submission-023) and v3.17 (GPT-6 Sol medium, submission-061); those
+  probes were invalid too.
+- Under the frozen summary a submission is published only when every passing
+  panel that reviewed it has a valid match, so an invalid probe leaves the
+  submission without a published Code quality score; its run still counts for
+  pass rates, time and cost.
+
+### Revisit
+
+If the same line keeps breaking Grok's JSON, consider a judging protocol that
+asks for excerpts by line number instead of quoted text.
+
 ## 2026-11-21: Gemini 4 Neon's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.32)
 
 ### Decision

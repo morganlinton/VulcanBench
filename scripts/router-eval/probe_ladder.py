@@ -81,6 +81,7 @@ class RouterSpec:
     base_url: str
     model: str
     api_key_env: str
+    api: str = "chat"  # "chat" (/chat/completions) or "responses" (/responses)
 
     @classmethod
     def parse(cls, text: str) -> RouterSpec:
@@ -97,7 +98,10 @@ class RouterSpec:
         else:
             raise SystemExit(f"router spec must be name=BASE_URL=MODEL, got {text!r}")
         key_env = "OPENROUTER_API_KEY" if name == "openrouter" else f"ROUTER_{_slug(name)}_API_KEY"
-        return cls(name=name, base_url=base.rstrip("/"), model=model, api_key_env=key_env)
+        api = os.environ.get(f"ROUTER_{_slug(name)}_API", "chat").strip().lower() or "chat"
+        if api not in {"chat", "responses"}:
+            raise SystemExit(f"ROUTER_{_slug(name)}_API must be 'chat' or 'responses', got {api!r}")
+        return cls(name=name, base_url=base.rstrip("/"), model=model, api_key_env=key_env, api=api)
 
 
 def _slug(name: str) -> str:
@@ -280,17 +284,28 @@ def call_router(router: RouterSpec, prompt: Prompt, timeout: float = 180.0) -> d
     key = os.environ.get(router.api_key_env)
     if not key:
         raise SystemExit(f"{router.api_key_env} is not set")
-    payload = {
-        "model": router.model,
-        "messages": [
-            {"role": "system", "content": SYSTEM},
-            {"role": "user", "content": prompt.text},
-        ],
-        "max_tokens": 400,
-        "usage": {"include": True},
-    }
+    if router.api == "responses":
+        # Ramp Router bills (``usage.cost``) only on this surface.
+        payload: dict[str, Any] = {
+            "model": router.model,
+            "instructions": SYSTEM,
+            "input": prompt.text,
+            "max_output_tokens": 400,
+        }
+        path = "/responses"
+    else:
+        payload = {
+            "model": router.model,
+            "messages": [
+                {"role": "system", "content": SYSTEM},
+                {"role": "user", "content": prompt.text},
+            ],
+            "max_tokens": 400,
+            "usage": {"include": True},
+        }
+        path = "/chat/completions"
     req = urllib.request.Request(
-        f"{router.base_url}/chat/completions",
+        f"{router.base_url}{path}",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
         method="POST",
@@ -307,18 +322,42 @@ def call_router(router: RouterSpec, prompt: Prompt, timeout: float = 180.0) -> d
         }
     except (urllib.error.URLError, TimeoutError) as e:
         return {"error": str(e), "latency_s": round(time.monotonic() - started, 3)}
-    latency = round(time.monotonic() - started, 3)
+    row = parse_body(router.api, body)
+    row["latency_s"] = round(time.monotonic() - started, 3)
+    return row
+
+
+def parse_body(api: str, body: dict[str, Any]) -> dict[str, Any]:
+    """The ladder row fields from a chat-completions or Responses body."""
     usage = body.get("usage") or {}
-    choice = (body.get("choices") or [{}])[0]
-    return {
+    common = {
         "served_model": body.get("model"),
         "response_id": body.get("id"),
         "provider": body.get("provider"),
+        "reported_cost_usd": usage.get("cost"),
+    }
+    if api == "responses":
+        text = "".join(
+            block.get("text", "")
+            for item in body.get("output") or []
+            if item.get("type") == "message"
+            for block in item.get("content") or []
+            if block.get("type") in {"output_text", "text"}
+        ) or str(body.get("output_text") or "")
+        incomplete = body.get("incomplete_details") or {}
+        return {
+            **common,
+            "prompt_tokens": usage.get("input_tokens"),
+            "completion_tokens": usage.get("output_tokens"),
+            "finish_reason": incomplete.get("reason") or body.get("status"),
+            "answer_chars": len(text),
+        }
+    choice = (body.get("choices") or [{}])[0]
+    return {
+        **common,
         "prompt_tokens": usage.get("prompt_tokens"),
         "completion_tokens": usage.get("completion_tokens"),
-        "reported_cost_usd": usage.get("cost"),
         "finish_reason": choice.get("finish_reason"),
-        "latency_s": latency,
         "answer_chars": len((choice.get("message") or {}).get("content") or ""),
     }
 

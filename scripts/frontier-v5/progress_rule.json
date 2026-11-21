@@ -1,0 +1,40 @@
+{
+  "rule": "frontier-v5 progress score",
+  "rule_version": 2,
+  "adopted": "Option C, the owner's decision of 2026-11-19 (docs/DECISIONS.md on PR #314); plan docs/frontier-v5/PLAN-v5.md",
+  "definition": "progress = held-out units passed / held-out units, if the tamper scan is clean and every visible guard holds; else 0. A unit is one fail_to_pass check, or one group of held-out guards (the variants of one held-out fixture, or a single held-out guard test) that passes only if every id in it passes. pass = the verifier's reward.",
+  "guards": "tamper_clean and the build, import and sentinel flags in reward.json when present; every visible pass_to_pass id (pass_to_pass minus the held-out guard ids) passes; for tasks with min_total_tests, no failure outside the held-out ids, must_fail and known_env_failures, and at least min_total_tests tests seen",
+  "tasks": {
+    "treesitter-query-anchor-matching": {
+      "format": "libtest",
+      "units": "progress/treesitter-query-anchor-matching.json",
+      "sha256": "edef79882fc43f14ac22d356e57327faaef37aea085364ade6b408dc2df9a6aa"
+    },
+    "black-fmt-skip-region-handling": {
+      "format": "pytest",
+      "units": "progress/black-fmt-skip-region-handling.json",
+      "sha256": "8416f150607cb672a3ad126827cd396ac8ad2405364db0a7516605a4bbb5063c"
+    },
+    "prettier-comment-attachment-stability": {
+      "format": "jest",
+      "units": "progress/prettier-comment-attachment-stability.json",
+      "sha256": "d7e3500dddde1e94f8477d367406d836f71525ef4699a7f7eea35ae4e0caefee"
+    },
+    "javaparser-member-resolution-scope": {
+      "format": "surefire",
+      "units": "progress/javaparser-member-resolution-scope.json",
+      "sha256": "d6f0457348cb5bb3faa21b531e4ee874a40fbcbd973bc915bba83e4591b7e4c9"
+    },
+    "cli11-toml-config-round-trip": {
+      "format": "catch2",
+      "units": "progress/cli11-toml-config-round-trip.json",
+      "sha256": "fe16da3b2f5929cf613f419c66e605ecd765db4268ead35036ab28404a818383"
+    },
+    "pulldown-cmark-html-block-scanning": {
+      "format": "libtest",
+      "units": "progress/pulldown-cmark-html-block-scanning.json",
+      "sha256": "a763aa900304cae2ce3d99e9f6eac327119bfe9a237cfb4d58247bdcbd3a491b"
+    }
+  },
+  "departs_from": "The release 1 DESIGN.md files pre-registered 'held-out checks' as the fail_to_pass ids; the owner chose units with held-out guard groups on 2026-11-19 so held-out guards count as progress, grouped so that one fixture's variants cannot swamp a task."
+}

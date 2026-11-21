@@ -15,6 +15,8 @@
 # offline with the pristine tests, Maven config and repository.
 # reward = 1 iff the tamper scan is clean, everything compiles, every
 # fail_to_pass and pass_to_pass id passes and no other test fails.
+# The surefire reports are copied to /logs/verifier/surefire/<module>/ so each
+# check's result is on record (0.2.0, docs/frontier-v5/PLAN-v5.md).
 set -uo pipefail
 OUT=/logs/verifier; mkdir -p "$OUT"
 declare -A M; M[artifact_present]=0; M[tamper_clean]=0; M[compile_ok]=0; M[fail_to_pass]=0; M[pass_to_pass]=0; M[guard_suite]=0; M[tests_seen]=0
@@ -55,6 +57,14 @@ M[compile_ok]=1
 # Every module's tests run even when an earlier module has failures.
 timeout -k 30 1200 mvn -B $SEL -Dmaven.test.failure.ignore=true test > "$OUT/test.log" 2>&1 || true
 grep -E "^\[(INFO|WARNING|ERROR)\] Tests run:.*Fail" "$OUT/test.log" | grep -v ' -- in ' | sed 's/^/  /' >&2 || true
+
+# Per-check record for the progress score (task 0.2.0): the surefire reports
+# check.py grades are kept in the verifier output. Nothing reads them back
+# here; the reward is unchanged.
+for m in javaparser-core-testing javaparser-symbol-solver-testing; do
+  mkdir -p "$OUT/surefire/$m"
+  cp /work/$m/target/surefire-reports/TEST-*.xml "$OUT/surefire/$m/" 2>/dev/null || true
+done
 
 while read -r k v; do M[$k]=$v; done < <(python3 /check.py /families.json \
   /work/javaparser-core-testing/target/surefire-reports \

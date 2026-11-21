@@ -12,7 +12,7 @@ artifacts = [
 
 [task]
 name = "vulcanbench/javaparser-member-resolution-scope"
-version = "0.1.0"
+version = "0.2.0"
 description = "VulcanBench Frontier v5 Java task: fix three interacting defects in JavaParser's symbol solver member resolution (qualified method calls and qualified nested type names escaping into the receiver's file imports, and unresolvable ancestors above the direct ones failing every member lookup) without changing anything that resolves correctly today."
 authors = [{ name = "VulcanBench", email = "morgan@vulcanbench.com" }]
 keywords = ["java", "symbol-solver", "name-resolution", "jls", "bugfix", "multi-bug"]

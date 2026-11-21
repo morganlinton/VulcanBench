@@ -1,7 +1,7 @@
 {
-  "display_name": "VulcanBench Frontier v5 (frontier-v5), release 1",
-  "version": "1.0.0",
-  "plan": "docs/frontier-v5/PLAN-v4.md (frozen by docs/frontier-v5/FREEZE-v4.json); ferrycore joins under decision (l), docs/DECISIONS.md 2026-10-31",
+  "display_name": "VulcanBench Frontier v5 (frontier-v5), release 1 board",
+  "version": "1.1.0",
+  "plan": "docs/frontier-v5/PLAN-v5.md. 1.1.0 is release 1's six public tasks for the board: ferrycore leaves under decision R2, javaparser-member-resolution-scope 0.2.0 keeps its per-check record, and the progress rule is pinned (docs/DECISIONS.md 2026-11-19). 1.0.0 was frozen from docs/frontier-v5/PLAN-v4.md (FREEZE-v4.json) with ferrycore under decision (l).",
   "tasks": [
     "treesitter-query-anchor-matching",
     "black-fmt-skip-region-handling",
@@ -10,13 +10,6 @@
     "cli11-toml-config-round-trip",
     "pulldown-cmark-html-block-scanning"
   ],
-  "private_tasks": {
-    "ferrycore-crossing-opaque-parity": {
-      "repo": "morganlinton/vulcanbench-frontier-private",
-      "commit": "49c72d42dbdba3b23ec76c435f402dab2aeaa22f",
-      "family": "F4-python"
-    }
-  },
   "pins": {
     "harness": "harbor 0.24.0",
     "effort": "medium",
@@ -40,10 +33,9 @@
       "vulcanbench/sandbox:v5-base": "sha256:042e225b360b064a92818d94d39d5f7533d54f79125e3d4082eb4df5da498184",
       "vulcanbench/sandbox:v5-cfamily": "sha256:914f9c54154778ee5b5fdc4e92eb5427f24f991f3acce18202fa869d11204156",
       "vulcanbench/sandbox:v5-jvm": "sha256:ec1b76e610eb8b2496fa5254e2d31a3fc4940229dfb8368763d75752bad3d3e3",
-      "vulcanbench/sandbox:v5-rust": "sha256:b07979bcc2967d51b5a6873e5d8b0e7976f158013c7584c2f901bc72d7fe3b4c",
-      "vulcanbench/frontier-v5-ferrycore-oracle:0.2.0": "sha256:de80bbe30bb3e5798f80c1cc0b9fd48fada8117e23d5c494967cbed89b8965b3",
-      "vulcanbench/frontier-v5-ferrycore-env:0.2.0": "sha256:66f8416f8571a9b039ec06a9f32873f4aaccc468d35dea11f7ae3474e34784a3"
+      "vulcanbench/sandbox:v5-rust": "sha256:b07979bcc2967d51b5a6873e5d8b0e7976f158013c7584c2f901bc72d7fe3b4c"
     },
+    "progress_rule": {"path": "scripts/frontier-v5/progress_rule.json", "sha256": "b7a9c1fd7d539e934f588f27f4724ce2ad4a3204eb24226091fdc5b6c8067e67", "units": {"treesitter-query-anchor-matching": "edef79882fc43f14ac22d356e57327faaef37aea085364ade6b408dc2df9a6aa", "black-fmt-skip-region-handling": "8416f150607cb672a3ad126827cd396ac8ad2405364db0a7516605a4bbb5063c", "prettier-comment-attachment-stability": "d7e3500dddde1e94f8477d367406d836f71525ef4699a7f7eea35ae4e0caefee", "javaparser-member-resolution-scope": "d6f0457348cb5bb3faa21b531e4ee874a40fbcbd973bc915bba83e4591b7e4c9", "cli11-toml-config-round-trip": "fe16da3b2f5929cf613f419c66e605ecd765db4268ead35036ab28404a818383", "pulldown-cmark-html-block-scanning": "a763aa900304cae2ce3d99e9f6eac327119bfe9a237cfb4d58247bdcbd3a491b"}},
     "images_note": "Local image ids on the gate machine at freeze (docker image inspect). The four v5 sandbox images were built 2026-10-22 between 08:36 and 08:40 UTC; the tree-sitter Astra gate half (2026-10-18) ran on an earlier build of them."
   }
 }

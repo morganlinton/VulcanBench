@@ -1,0 +1,132 @@
+{
+ "task": "cli11-toml-config-round-trip",
+ "task_version": "0.1.0",
+ "rule": "C (docs/DECISIONS.md 2026-11-19)",
+ "counts": {
+  "units": 17,
+  "fail_to_pass_units": 11,
+  "held_out_guard_units": 6,
+  "held_out_guard_ids": 6
+ },
+ "units": [
+  {
+   "unit": "ConfigFileTest::IniJoinEmbeddedDelimiterRoundTrip",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::IniJoinEmbeddedDelimiterRoundTrip"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::StringBased: TomlMultiLineStringExtraQuotes",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::StringBased: TomlMultiLineStringExtraQuotes"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::StringBased: TomlMultiLineStringIndented",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::StringBased: TomlMultiLineStringIndented"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::StringBased: TomlMultiLineStringTrailingText",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::StringBased: TomlMultiLineStringTrailingText"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlDocStringCommentOneLine",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlDocStringCommentOneLine"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlMultiLineStringPreservesContent",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlMultiLineStringPreservesContent"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlOutputFallthroughNoDuplication",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlOutputFallthroughNoDuplication"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlOutputMultilineStringWithQuotes",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlOutputMultilineStringWithQuotes"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlOutputPlusGroupNoDuplication",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlOutputPlusGroupNoDuplication"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlQuotedSectionTrailingComment",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlQuotedSectionTrailingComment"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlSectionTrailingComment",
+   "kind": "fail_to_pass",
+   "ids": [
+    "ConfigFileTest::TomlSectionTrailingComment"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::StringBased: TomlMultiLineCommentShortLine",
+   "kind": "held_out_guard",
+   "ids": [
+    "ConfigFileTest::StringBased: TomlMultiLineCommentShortLine"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::StringBased: TomlMultiLineStringBinary",
+   "kind": "held_out_guard",
+   "ids": [
+    "ConfigFileTest::StringBased: TomlMultiLineStringBinary"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::StringBased: TomlMultiLineStringTextAfterQuotes",
+   "kind": "held_out_guard",
+   "ids": [
+    "ConfigFileTest::StringBased: TomlMultiLineStringTextAfterQuotes"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlOutputPlusGroupCustomOptionGroup",
+   "kind": "held_out_guard",
+   "ids": [
+    "ConfigFileTest::TomlOutputPlusGroupCustomOptionGroup"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlOutputPlusGroupNamedSubcommand",
+   "kind": "held_out_guard",
+   "ids": [
+    "ConfigFileTest::TomlOutputPlusGroupNamedSubcommand"
+   ]
+  },
+  {
+   "unit": "ConfigFileTest::TomlOutputPlusGroupNestedGroup",
+   "kind": "held_out_guard",
+   "ids": [
+    "ConfigFileTest::TomlOutputPlusGroupNestedGroup"
+   ]
+  }
+ ]
+}

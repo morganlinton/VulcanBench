@@ -1,0 +1,104 @@
+{
+ "task": "treesitter-query-anchor-matching",
+ "task_version": "0.1.0",
+ "rule": "C (docs/DECISIONS.md 2026-11-19)",
+ "counts": {
+  "units": 13,
+  "fail_to_pass_units": 11,
+  "held_out_guard_units": 2,
+  "held_out_guard_ids": 2
+ },
+ "units": [
+  {
+   "unit": "cli::tests::query_test::test_last_child_anchor_looks_past_hidden_node",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_last_child_anchor_looks_past_hidden_node"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_last_child_anchor_looks_past_hidden_repeat",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_last_child_anchor_looks_past_hidden_repeat"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_matches_anchored_quantified_sibling_inside_parent",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_matches_anchored_quantified_sibling_inside_parent"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_matches_with_anchor_sibling_inside_parent",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_matches_with_anchor_sibling_inside_parent"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_matches_with_anchor_sibling_with_quantifier_captured_inside_parent",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_matches_with_anchor_sibling_with_quantifier_captured_inside_parent"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_matches_with_anchor_sibling_with_quantifier_inside_parent",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_matches_with_anchor_sibling_with_quantifier_inside_parent"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_errors_on_anchor_at_group_edge",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_query_errors_on_anchor_at_group_edge"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_errors_on_invalid_symbols",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_query_errors_on_invalid_symbols"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_matches_with_anchor_after_zero_quantifier",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_query_matches_with_anchor_after_zero_quantifier"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_matches_with_last_child_anchor_after_optional",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_query_matches_with_last_child_anchor_after_optional"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_matches_with_leading_anchor_before_zero_quantifier",
+   "kind": "fail_to_pass",
+   "ids": [
+    "cli::tests::query_test::test_query_matches_with_leading_anchor_before_zero_quantifier"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_matches_with_anchor_after_nested_zero_quantifier",
+   "kind": "held_out_guard",
+   "ids": [
+    "cli::tests::query_test::test_query_matches_with_anchor_after_nested_zero_quantifier"
+   ]
+  },
+  {
+   "unit": "cli::tests::query_test::test_query_matches_with_anchors_on_both_sides_of_zero_quantifier",
+   "kind": "held_out_guard",
+   "ids": [
+    "cli::tests::query_test::test_query_matches_with_anchors_on_both_sides_of_zero_quantifier"
+   ]
+  }
+ ]
+}

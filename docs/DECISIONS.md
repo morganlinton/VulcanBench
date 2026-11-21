@@ -7,6 +7,40 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-21: Gemini 4 Neon's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.32)
+
+### Decision
+
+Gemini 4 Neon's 92 Frontier v4 runs are judged for Code quality under
+protocol v3.32 (the v3.31 protocol on a new population) by Muse Spark 1.3
+and Grok 4.6. Owner choice in chat, 2026-11-21, over Muse and GPT-6.1 Sol:
+it is the panel behind the GPT-6.2 Sol, GPT-6.1 Sol, GPT-6.1 Terra and
+Claude Opus 5.5 columns, and neither judge is from Google.
+
+Both judges retake the exam before any counted call. If one fails, the
+other publishes alone under the single-panel rule and the failure is
+disclosed. The round runs from a run worktree pinned to its own bench tag;
+no sweep overlaps the judging window.
+
+### Evidence
+
+- The Gemini 4 Neon sweep finished on 2026-11-21 at 01:58 PST: 92 of 92
+  runs finished (23 per level, Low to Extra high), no timeouts, no empty
+  patches, every run from `bench/2026-11-20-gemini4-neon-frontier-v4`, web
+  audit `no_web` and filesystem audit clean on all 92. Functional: Low 17
+  of 23 fully solved, Medium, High and Extra high 23 of 23.
+- 40 attempts were refused by the AI Pro quota ("Individual quota
+  reached", `RESOURCE_EXHAUSTED`, exit 3): 10 at Medium, 8 at High, 22 at
+  Extra high. Each was recorded as an infrastructure failure with no
+  summary, moved to `runs-effort-gemini4-neon-agy/infra-aborted/`, and the
+  task rerun fresh after the launcher's quota wait. Four Extra high attempts
+  had made tool calls before the refusal; their reruns started from a clean
+  workspace.
+- Dry run of the population build and freeze on 2026-11-21 (outputs
+  discarded): 92 rows, 0 excluded, 0 missing, 23 per cell, 23 quirk keys,
+  largest prompt 51,417 characters. The Muse binary and the Cursor
+  `2026.10.01-e373342` digest matched their pins.
+
 ## 2026-11-19: Gemini 4 Neon on Frontier v4 through Antigravity CLI, with a custom agent for web-off
 
 ### Decision

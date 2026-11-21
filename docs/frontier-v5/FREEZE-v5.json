@@ -1,0 +1,37 @@
+{
+  "id": "frontier-v5-freeze-v5",
+  "date": "2026-11-19",
+  "timezone": "America/Los_Angeles",
+  "scope": "Composition v5: release 1.1 (the six public F5 tasks, ferrycore dropped) as the first board, release 2 (twelve tasks in five shapes), and the admission band (PLAN-v5.md, plan-v5.json). A blueprint, not the runnable suite lock.",
+  "confirmed_decisions": {
+    "R1": "resume alongside DailyWork v1",
+    "R2": "drop F4",
+    "R3": "pass rate plus progress score, measure release 1 first",
+    "fast_path": "release 1 board first, new shapes next",
+    "R4": "composition and band as in PLAN-v5.md",
+    "R5": "GPT-6.2 Sol at max first prong, Fable 5.2 second",
+    "R6": "Harbor via run_gate.sh",
+    "R7": "pass rate, progress, speed; no judging; vulcanbench.com board",
+    "R8": "release 2 gold private",
+    "R9": "four-model lineup; Frontier v4 board archived at launch"
+  },
+  "previous_freeze": {
+    "id": "frontier-v5-freeze-v4",
+    "file": "docs/frontier-v5/FREEZE-v4.json",
+    "files_sha256_verified_unchanged": {
+      "docs/frontier-v5/PLAN-v4.md": "c38c08a2a662222f5f36ba860efc717337997ed7fedfdf55c9fb2db3a7d6c085",
+      "docs/frontier-v5/plan-v4.json": "5b031681384ac850d9421b9c96e1a1aeccdbfe22e10f1d111923275ad322d52d"
+    }
+  },
+  "open_decisions_policy": "Resolved through dated docs/DECISIONS.md entries citing this freeze, never by editing frozen files. Further composition or band changes require a new plan with its own freeze.",
+  "known_outcomes_available": "Release 1 confirmation: GPT-6 Astra 0 of 21 at medium. A GPT-6.2 Sol max-effort measurement on release 1 is running at freeze time (bench/2026-11-19-frontier-v5-r1-sol62-max).",
+  "files_sha256": {
+    "docs/frontier-v5/PLAN-v5.md": "2ca4ddc28e51d2bc4a07c1d9321d6ab0475cddb32162843d7bd0e1a5d279701c",
+    "docs/frontier-v5/plan-v5.json": "8f7c35d5fdede4891bf748e1ddb42036cfcb9e1226da9f08419b1354dc1660b8"
+  },
+  "related": {
+    "rollout": "docs/frontier-v5/ROLLOUT.md",
+    "status": "docs/frontier-v5/STATUS-2026-11-19.md",
+    "decisions_log": "docs/DECISIONS.md entries dated 2026-11-19"
+  }
+}

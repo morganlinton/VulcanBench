@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Frontier v5 admission gate runner (docs/frontier-v5/GATE-LOG.md).
 #
-# usage: scripts/frontier-v5/run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]
+# usage: scripts/frontier-v5/run_gate.sh <ref> <task> [<task> ...]
 #        scripts/frontier-v5/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/frontier-v5/run_gate.sh <ref> [<task>]
 #
@@ -18,6 +18,24 @@
 #          (not a gate reference: the release 1 top-effort measurement of
 #          decision R3, docs/DECISIONS.md 2026-11-19; Codex 0.159.0 refuses
 #          gpt-6.2-sol, 0.166.0 is its Frontier v4 pin)
+#
+# Release 1 board lineup (decision R9 plus the owner's Claude funding,
+# docs/DECISIONS.md 2026-11-19; each on its lab's native harness and its
+# Frontier v4 CLI pin, at its highest unblocked effort via GATE_EFFORT):
+#
+#   sol62    as above
+#   fable52  harbor -a claude-code -m claude-fable-5-2  Claude Code 2.1.321
+#            (its Frontier v4 pin, DECISIONS.md 2026-11-09)
+#   terra    harbor -a codex       -m gpt-6.1-terra     Codex CLI 0.159.0
+#            (its Frontier v4 pin, DECISIONS.md 2026-10-26)
+#   dsflash  harbor -a harbor_dsh_agent:DeepSeekHarness -m deepseek-flash
+#            DeepSeek Harness (dsh) 0.2.1-rc.2 (its Frontier v4 pin,
+#            DECISIONS.md 2026-10-19). Harbor 0.24.0 has no dsh agent, so
+#            scripts/frontier-v5/harbor_dsh_agent.py is loaded from harbor's
+#            PYTHONPATH. dsh takes only low, high or max, so GATE_EFFORT must
+#            name one; the agent phase may also reach api.deepseek.com
+#            (--allow-agent-host). Web tools, session-log upload and
+#            telemetry are off, as on Frontier v4.
 #
 # GATE_EFFORT (default medium) sets the reasoning effort: low, medium, high,
 # xhigh or max. Levels in vulcanbench.toml's [effort].blocked ("ultra") are
@@ -44,6 +62,9 @@
 # They run on the provider's side, so the task's network allowlist never sees
 # them; on 2026-10-30 an Astra attempt downloaded the upstream source of the
 # code an F2 task had removed through Codex's `web__run` (docs/DECISIONS.md).
+# Safety refusals (Codex's cybersecurity flag, Claude Code's refusal fallback)
+# are recorded, not infrastructure: a note per trial on stdout and
+# safety_refusals in the status file (SAFETY_RE below).
 # Infrastructure guard: a finished trial whose agent log shows an auth
 # (including an organization policy that disables subscription access),
 # model-id, usage-credit or usage-limit failure stops the whole run; such
@@ -65,13 +86,13 @@
 # harbor's result.json, which has no finished_at on a cancelled job.
 #
 # Authentication (never read or printed by this script):
-#   astra, sol62  a dedicated ChatGPT login for gate runs, with no connected apps,
+#   astra, sol62, terra  a dedicated ChatGPT login for gate runs, with no connected apps,
 #          in ~/.config/vulcanbench/codex-gate/auth.json
 #          (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`), or the
 #          file GATE_CODEX_AUTH names; without one, the personal login in
 #          ~/.codex/auth.json. Harbor injects the file CODEX_AUTH_JSON_PATH
 #          names, set in its own environment.
-#   fable, opus  either a Claude subscription token in a private env file
+#   fable, fable52, opus  either a Claude subscription token in a private env file
 #          (CLAUDE_GATE_ENV, default ~/.config/vulcanbench/claude-gate.env,
 #          one line CLAUDE_CODE_OAUTH_TOKEN=..., from `claude setup-token`),
 #          used with CLAUDE_FORCE_OAUTH=1; or, with FABLE_AUTH=api, an
@@ -89,6 +110,11 @@
 #          usage limit) refuses even with it. On 2026-11-03 an organization
 #          that had disabled subscription access produced no event, the old
 #          check let the run start, and 21 attempts scored fake zeros.
+#   dsflash  a DeepSeek API key: one line DEEPSEEK_API_KEY=... in a private
+#          env file (DSH_GATE_ENV, default ~/.config/vulcanbench/deepseek.env),
+#          passed to harbor with --env-file; runs are metered API spend. No
+#          usage pre-flight (the API has no subscription windows); an account
+#          failure stops the run through the infrastructure guard.
 #          GATE_PREFLIGHT_ONLY=1 runs just that check and prints one JSON
 #          line (model, status, max_utilization, windows, would_start; status
 #          "unknown" or "probe_error" with a note when it could not read the
@@ -117,10 +143,13 @@ if [ "${1:-}" = --refs ]; then
   echo '{"name": "fable", "agent": "claude-code", "model": "claude-fable-5-1", "version": "2.1.302"}'
   echo '{"name": "opus", "agent": "claude-code", "model": "claude-opus-5-5", "version": "2.1.302"}'
   echo '{"name": "sol62", "agent": "codex", "model": "gpt-6.2-sol", "version": "0.166.0"}'
+  echo '{"name": "fable52", "agent": "claude-code", "model": "claude-fable-5-2", "version": "2.1.321"}'
+  echo '{"name": "terra", "agent": "codex", "model": "gpt-6.1-terra", "version": "0.159.0"}'
+  echo '{"name": "dsflash", "agent": "dsh", "model": "deepseek-flash", "version": "0.2.1-rc.2"}'
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
-ref="${1:?usage: run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]}"; shift
+ref="${1:?usage: run_gate.sh <astra|sol62|fable|opus|fable52|terra|dsflash> <task> [<task> ...]}"; shift
 [ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -142,10 +171,16 @@ case "$effort" in low|medium|high|xhigh|max) ;; *) echo "run_gate: GATE_EFFORT m
 mkdir -p "$OUT/jobs"
 command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/frontier-v5/setup-host.sh installs it)" >&2; exit 2; }
 
+# What harbor's -a gets: the agent name, or an import path for a custom agent.
+agent_arg=""; harbor_env=(); extra_args=()
 case "$ref" in
-  astra|sol62)
+  astra|sol62|terra)
     agent=codex
-    case "$ref" in astra) model=gpt-6-astra; version=0.159.0 ;; sol62) model=gpt-6.2-sol; version=0.166.0 ;; esac
+    case "$ref" in
+      astra) model=gpt-6-astra; version=0.159.0 ;;
+      sol62) model=gpt-6.2-sol; version=0.166.0 ;;
+      terra) model=gpt-6.1-terra; version=0.159.0 ;;
+    esac
     # A dedicated gate login (no connected apps) when it exists, else the
     # personal one; Harbor reads the file named by CODEX_AUTH_JSON_PATH.
     codex_auth="${GATE_CODEX_AUTH:-$HOME/.config/vulcanbench/codex-gate/auth.json}"
@@ -160,15 +195,32 @@ case "$ref" in
     codex_cfg="$here/scripts/frontier-v5/codex-gate.toml"
     [ -f "$codex_cfg" ] || { echo "run_gate: $codex_cfg missing" >&2; exit 2; }
     auth_args=(--ak "config=$codex_cfg") ;;
-  fable|opus)
+  fable|opus|fable52)
     agent=claude-code; version=2.1.302
-    case "$ref" in fable) model=claude-fable-5-1 ;; opus) model=claude-opus-5-5 ;; esac
+    case "$ref" in
+      fable) model=claude-fable-5-1 ;;
+      opus) model=claude-opus-5-5 ;;
+      fable52) model=claude-fable-5-2; version=2.1.321 ;;
+    esac
     envf="${CLAUDE_GATE_ENV:-$HOME/.config/vulcanbench/claude-gate.env}"
     [ -f "$envf" ] || { echo "run_gate: $envf missing (see the header for how to create it)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
-  *) echo "run_gate: reference must be astra, sol62, fable or opus" >&2; exit 2 ;;
+  dsflash)
+    agent=dsh; model=deepseek-flash; version=0.2.1-rc.2
+    # dsh's DeepSeek route takes low, high or max only (no medium, no xhigh).
+    case "$effort" in low|high|max) ;; *) echo "run_gate: dsh takes GATE_EFFORT low, high or max (got $effort)" >&2; exit 2 ;; esac
+    agent_arg="harbor_dsh_agent:DeepSeekHarness"
+    [ -f "$here/scripts/frontier-v5/harbor_dsh_agent.py" ] || { echo "run_gate: scripts/frontier-v5/harbor_dsh_agent.py missing" >&2; exit 2; }
+    harbor_env=(PYTHONPATH="$here/scripts/frontier-v5${PYTHONPATH:+:$PYTHONPATH}")
+    envf="${DSH_GATE_ENV:-$HOME/.config/vulcanbench/deepseek.env}"
+    [ -f "$envf" ] || { echo "run_gate: $envf missing (one line DEEPSEEK_API_KEY=...)" >&2; exit 2; }
+    auth_args=(--env-file "$envf")
+    auth_env=()
+    extra_args=(--allow-agent-host api.deepseek.com) ;;
+  *) echo "run_gate: reference must be astra, sol62, fable, opus, fable52, terra or dsflash" >&2; exit 2 ;;
 esac
+agent_arg="${agent_arg:-$agent}"
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit
 # message; kept narrow so ordinary output (code the agent reads) never matches.
@@ -179,22 +231,54 @@ esac
 # oauth_org_not_allowed, the organization-disabled subscription of
 # 2026-11-03) and the result line's api_error_status 401 or 403; plus the
 # literal texts Claude Code prints for those cases.
-# The last three alternatives are a reference reaching a provider-side tool
+# The next three alternatives are a reference reaching a provider-side tool
 # (web search, the account's connected apps) that run_gate.sh turns off; such
 # a trial is not a gate result either (docs/DECISIONS.md 2026-10-31).
-INFRA_RE='"error":"(authentication_failed|billing_error|rate_limit|oauth_org_not_allowed)"|"api_error_status":40[13][,}]|disabled Claude subscription access|Invalid API key[^"]{1,8}Please run /login|OAuth token has expired[.] Please obtain a new token|OAuth token revoked|Credit balance is too low|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]'
+# The last alternative is dsh: harbor_dsh_agent.py reads dsh's own records
+# after the run and writes a VULCANBENCH_INFRA: line to vb-infra.txt for an
+# error event with an account or API code (AUTH, QUOTA, RATE_LIMIT, SERVER,
+# TRANSPORT, MISSING_CREDENTIAL, the codes the harness adapter treats as
+# infrastructure), a plugin that did not activate, or a finished run with no
+# usage receipt. Matching the marker rather than dsh's error line keeps the
+# pattern off Codex's own "error" events. Every agent log line is JSON, so
+# no other record starts with the marker.
+INFRA_RE='"error":"(authentication_failed|billing_error|rate_limit|oauth_org_not_allowed)"|"api_error_status":40[13][,}]|disabled Claude subscription access|Invalid API key[^"]{1,8}Please run /login|OAuth token has expired[.] Please obtain a new token|OAuth token revoked|Credit balance is too low|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|"server": ?"codex_apps"|tools[.]mcp__codex_apps__|tools[.]web__run[(]|^VULCANBENCH_INFRA: '
+
+# A provider safety classifier stopping the session is NOT infrastructure:
+# such an attempt counts, graded on what the agent wrote, and the stop is
+# disclosed (docs/DECISIONS.md 2026-09-24, the Claude refusal-fallback
+# convention, applied again for Haiku v3.24). It is recorded, never matched by
+# INFRA_RE: Codex's top-level error event "flagged for possible cybersecurity
+# risk" (Harbor raises AgentSafetyRefusalError for it, kept in the trial's
+# result.json), and Claude Code's refusal-fallback events (subtype
+# model_refusal_fallback, or model_refusal_no_fallback with the fallback off)
+# and its "safeguards flagged this session" stop. The same text inside a tool
+# result is JSON-escaped or mid-line and does not match.
+SAFETY_RE='^[{]"type": ?"(error|turn[.]failed)".*flagged for possible cybersecurity risk|"subtype": ?"model_refusal_(no_)?fallback"|^[{]"type": ?"result".*safeguards flagged this session'
 
 # Per-task state the helpers below read; set in the task loop.
 job=""; t=""; status_file=""; hpid=""; hcode=""; started_at=""
 stop_flag=""; spid=""
 
+safety_trials() { # job dir -> one line per trial a provider safety classifier stopped
+  local tr
+  for tr in "$1"/*__*; do
+    [ -d "$tr" ] || continue
+    if grep -qs '"exception_type": *"AgentSafetyRefusalError"' "$tr/result.json" \
+      || { [ -d "$tr/agent" ] && grep -rqE "$SAFETY_RE" "$tr/agent" 2>/dev/null; }; then
+      basename "$tr"
+    fi
+  done
+}
+
 write_status() { # phase [exit_code] [stop_reason] -> atomic rewrite of $status_file
   [ -n "$status_file" ] || return 0
   python3 - "$status_file" "$1" "${2:-}" "${3:-}" "$job" "$t" "$ref" "$agent" "$model" \
-    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" <<'PY'
+    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" \
+    "$( [ -n "$job" ] && safety_trials "$OUT/jobs/$job" | tr '\n' ' ')" <<'PY'
 import glob, json, os, sys, time
 (path, phase, code, reason, job, task, ref, agent, model,
- pid, hpid, started, repo, job_dir, effort) = sys.argv[1:16]
+ pid, hpid, started, repo, job_dir, effort, safety) = sys.argv[1:17]
 solves = 0
 for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
     try:
@@ -208,6 +292,7 @@ d = {
     "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     "exit_code": int(code) if code else None, "stop_reason": reason or None,
     "repo": repo or None, "job_dir": job_dir,
+    "safety_refusals": len(safety.split()), "safety_refusal_trials": safety.split(),
 }
 tmp = path + ".tmp"
 with open(tmp, "w") as fh:
@@ -367,6 +452,9 @@ print_trials() { # job dir -> one summary line per trial
     [ -d "$tr" ] || continue
     echo "  $(basename "$tr"): $(cat "$tr/verifier/reward.json" 2>/dev/null || echo 'stopped, no reward')"
   done
+  for tr in $(safety_trials "$1"); do
+    echo "  $tr: safety refusal: a provider safety classifier stopped the session; the attempt counts as graded and the stop is disclosed"
+  done
 }
 
 on_signal() { # record the signal; the monitor loop acts on it after its current step
@@ -400,8 +488,9 @@ for t in "$@"; do
   (cd "$here" && exec python3 -c 'import os, signal, sys
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
-     env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort "$effort" \
+     env "${harbor_env[@]+"${harbor_env[@]}"}" "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent_arg" -m "$model" --effort "$effort" \
      --ak version="$version" --ak disable_web_search=true -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
+     "${extra_args[@]+"${extra_args[@]}"}" \
      -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!
   write_status running

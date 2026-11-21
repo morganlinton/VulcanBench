@@ -437,8 +437,9 @@ def headline_card(cells, out: Path, draft: bool) -> None:  # noqa: PLR0915
             sy += 36
 
     foot = (
-        "macOS 27.2 in a VM. 1280x800 screenshots, mouse and keyboard tools only: no shell, no accessibility "
-        "tree. Graded from the stopped VM's disk, no LLM judge."
+        "macOS 27.2 in a VM. 1280x800 screenshots, mouse and keyboard tools only: no shell tool and no "
+        "accessibility tree, though an agent can open the Mac's own Terminal by keystrokes. Graded from "
+        "the stopped VM's disk, no LLM judge."
     )
     fy = top + ch + 50
     for ln in wrap(d, foot, font("geist-400.ttf", 28), W - 2 * M):

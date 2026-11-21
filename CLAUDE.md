@@ -29,8 +29,9 @@ suite in the VulcanConduct repo (suite id `conduct-v1`) is VulcanBench Safety v1
 anything user-facing; never write "SWE v4" for new material.
 
 `tasks/frontier-v5` is **VulcanBench Frontier v5** (release 1 published;
-resumed 2026-11-19 as the ceiling suite, release 2 in planning:
-[docs/frontier-v5/ROLLOUT.md](docs/frontier-v5/ROLLOUT.md)). The other
+resumed 2026-11-19 as the ceiling suite; pivoted 2026-11-21 to a grid of
+worklist environments, six languages by two repo sizes, draft:
+[docs/frontier-v5/PLAN-v6.md](docs/frontier-v5/PLAN-v6.md)). The other
 public coding suite in progress is **VulcanBench DailyWork v1** (suite id
 `dailywork-v1`, in planning:
 [docs/dailywork-v1/PLAN.md](docs/dailywork-v1/PLAN.md)), the everyday-work

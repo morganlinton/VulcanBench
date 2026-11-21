@@ -7,6 +7,151 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-21: Frontier v5 pivots to a grid of worklist environments (R10)
+
+### Decision
+
+The owner, in chat on 2026-11-21, pivoted VulcanBench Frontier v5 from
+single pass-or-fail tasks to a grid: a small number of pinned repos, each
+with a worklist of about 8 independently graded items (defects, a small
+feature, and where it fits a performance target and a diagnosis item), one
+agent session per repo under a fixed budget, and a headline of items done
+over all items. The draft composition is
+[docs/frontier-v5/PLAN-v6.md](frontier-v5/PLAN-v6.md); it is frozen after
+the pilot (R14). Release 1.0.0 and its results stay published.
+
+### Evidence
+
+- The R3 measurement: GPT-6.2 Sol at max, 18 attempts, 8.5 hours, 5 passes,
+  95% interval 9.7% to 53.5%
+  ([results](results/frontier-v5-r1-sol62-max-2026-11.md)). One pass or fail
+  per 25 agent minutes forces repeats, effort ladders and serial runs.
+- Four of six release 1 tasks read 0 of 3 for the strongest model because
+  of one held-out check each, while the progress score bunched at 0.77 to
+  1.0.
+- The owner's aim: a benchmark that is faster and easier to run, across
+  several languages and repo sizes, learning from fixed-session designs
+  with many graded items per run without copying one.
+
+### Revisit triggers
+
+- The pilot cell shows no spread between the strongest model and a cheaper
+  one, or item scores that depend on the order items are attempted.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` (draft), `docs/frontier-v5/ROLLOUT.md`
+section 4b, `CLAUDE.md`. PLAN-v5 and FREEZE-v5 are not edited.
+
+## 2026-11-21: Frontier v5 grid is six languages by two repo sizes (R11)
+
+### Decision
+
+The owner chose a first grid of six languages (C, C++, Java, JavaScript or
+TypeScript, Python, Rust) by two repo sizes (smaller, larger): twelve
+environments and about 100 graded items. The alternatives were four
+languages by three sizes and three by three.
+
+### Evidence
+
+- Six languages keeps every release 1 language. The six release 1 repos and
+  the six release 2 candidate repos give twelve seed repos, two per
+  language, to be placed by measured size.
+- Two sizes gives a smaller-versus-larger comparison per language; a middle
+  tier can be added in a later release.
+
+### Revisit triggers
+
+- Measured sizes of the seed repos do not give a clear smaller and larger
+  repo for a language: source a new repo for that cell.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` section 2.
+
+## 2026-11-21: Frontier v5 skips the release 1.1 board (R12, amends the fast path)
+
+### Decision
+
+The owner chose to skip the release 1.1 board (the six release 1 tasks
+scored on pass rate plus the progress score) and go straight to the grid.
+The six repos seed the grid. Engine PRs #318 to #321 are not merged as they
+are; pieces the grid can use are carried into the grid's engine work.
+
+### Evidence
+
+- A model run on the six tasks takes about 8.5 hours, and the strongest
+  model reads 0 of 3 on four of them (R3 measurement).
+- The board would need Docker validation and four sweeps on a format the
+  suite is leaving.
+
+### Revisit triggers
+
+- The grid pilot fails and the suite returns to single tasks.
+
+### What this touched
+
+Step 1 of the fast path entry (2026-11-19) and PLAN-v5 section 1 no longer
+apply. The progress score rule (option C) applies to the R3 measurement
+only.
+
+## 2026-11-21: Frontier v5 grid runs in parallel under a fixed time budget; speed leaves the headline (R13)
+
+### Decision
+
+For the Frontier v5 grid only: one run per model at its highest unblocked
+effort, four environments at a time in the same fixed batches for every
+model, and the same fixed wall-clock budget per environment for every
+model. The board reports items done, tokens and list-price cost, not
+wall-clock speed. Every other suite keeps one task at a time.
+
+### Evidence
+
+- Serial runs exist to keep wall-clock speed publishable. With speed off
+  the board, a model run drops from about 4 to 6 hours to about 1 to 1.5.
+- About 100 graded items in one run give binomial error bars without
+  repeats.
+- Equal batches keep contention the same for every model.
+
+### Revisit triggers
+
+- Pilot repeats show an environment's score moving with machine load or
+  provider latency by more than its stderr: lengthen the budget, budget on
+  tokens, or return to serial runs.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` sections 4 and 5. R7's speed column does not
+apply to the grid. The flat 3-hour task timeout and one-task-at-a-time rule
+are unchanged for Frontier v4, Routine and Safety.
+
+## 2026-11-21: Frontier v5 grid starts with one pilot cell (R14)
+
+### Decision
+
+One environment is built first and run on GPT-6.2 Sol and one cheaper model
+to set the budget, the worklist size and the guard rule, and to confirm the
+scores spread. The other sessions measure and source repos meanwhile and
+build nothing until the pilot fixes the format. The pilot cell is C++,
+smaller tier, on CLI11, whose six release 1 defects already carry references
+and held-out checks. The pilot's paid runs need their own go-ahead.
+
+### Evidence
+
+- A format change after twelve environments exist costs twelve reworks.
+- CLI11 builds and tests in about 30 seconds, so the format can be iterated
+  quickly. Sol at max fixed all six defects in 17 to 23 minutes, so the
+  pilot must add items to stay under the ceiling.
+
+### Revisit triggers
+
+- The pilot's budget does not carry to the first larger-tier environment:
+  set the budget per size tier.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` section 8.
+
 ## 2026-11-19: Frontier v5 progress score groups held-out guards per fixture (amends the held-out entry)
 
 ### Decision

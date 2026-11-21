@@ -1,6 +1,6 @@
 # VulcanBench Frontier v5: plan to replace Frontier v4 as the headline coding suite
 
-Status: **draft for the owner, 2026-11-19; R1 to R9 and the fast path (section 4a) adopted 2026-11-19; composition frozen in PLAN-v5.md.** It replaces the
+Status: **draft for the owner, 2026-11-19; R1 to R9 and the fast path (section 4a) adopted 2026-11-19; composition frozen in PLAN-v5.md. On 2026-11-21 the owner pivoted the suite to a grid of worklist environments (section 4b, R10 to R14, draft [PLAN-v6.md](PLAN-v6.md)), which supersedes the release 1.1 board and the release 2 composition below.** It replaces the
 rollout draft of 2026-11-17 (PR #302, closed unmerged) and updates its gaps
 and decisions for the owner's new emphasis: a real spread of task shapes and
 languages, and not another suite that mostly measures reverse-engineering.
@@ -343,6 +343,26 @@ The owner found the one-to-two-month estimate too slow and chose, on
    of waiting for DailyWork's container engine, gating on GPT-6.2 Sol at max
    first (the second reference only when Sol lands in the band), R4 to R9
    decided in one pass, and a second host for runs if available.
+
+## 4b. Pivot to the grid (adopted 2026-11-21)
+
+The R3 measurement finished on 2026-11-19: GPT-6.2 Sol at max passed 5 of 18
+in 8.5 hours ([results](../results/frontier-v5-r1-sol62-max-2026-11.md)).
+The owner then asked for a benchmark that is faster and easier to run and
+adopted, on 2026-11-21:
+
+- **R10:** Frontier v5 becomes a grid of worklist environments: pinned
+  repos, about 8 independently graded items each, one budgeted agent session
+  per repo, headline items done over all items.
+- **R11:** six languages by two repo sizes, twelve environments.
+- **R12:** the release 1.1 board is skipped; release 1.0.0 stays published.
+- **R13:** one run per model at its top effort, four environments at a
+  time, a fixed time budget, speed off the board (Frontier v5 only).
+- **R14:** one pilot cell first (C++, smaller tier, CLI11).
+
+The draft composition is [PLAN-v6.md](PLAN-v6.md), frozen after the pilot.
+Sections 2, 4a, 5 and 6 describe the plan before the pivot and are kept as
+the record.
 
 ## 5. Work order
 

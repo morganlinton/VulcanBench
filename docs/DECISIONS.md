@@ -7,6 +7,571 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-21: Gemini 4 Neon's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.32)
+
+### Decision
+
+Gemini 4 Neon's 92 Frontier v4 runs are judged for Code quality under
+protocol v3.32 (the v3.31 protocol on a new population) by Muse Spark 1.3
+and Grok 4.6. Owner choice in chat, 2026-11-21, over Muse and GPT-6.1 Sol:
+it is the panel behind the GPT-6.2 Sol, GPT-6.1 Sol, GPT-6.1 Terra and
+Claude Opus 5.5 columns, and neither judge is from Google.
+
+Both judges retake the exam before any counted call. If one fails, the
+other publishes alone under the single-panel rule and the failure is
+disclosed. The round runs from a run worktree pinned to its own bench tag;
+no sweep overlaps the judging window.
+
+### Evidence
+
+- The Gemini 4 Neon sweep finished on 2026-11-21 at 01:58 PST: 92 of 92
+  runs finished (23 per level, Low to Extra high), no timeouts, no empty
+  patches, every run from `bench/2026-11-20-gemini4-neon-frontier-v4`, web
+  audit `no_web` and filesystem audit clean on all 92. Functional: Low 17
+  of 23 fully solved, Medium, High and Extra high 23 of 23.
+- 40 attempts were refused by the AI Pro quota ("Individual quota
+  reached", `RESOURCE_EXHAUSTED`, exit 3): 10 at Medium, 8 at High, 22 at
+  Extra high. Each was recorded as an infrastructure failure with no
+  summary, moved to `runs-effort-gemini4-neon-agy/infra-aborted/`, and the
+  task rerun fresh after the launcher's quota wait. Four Extra high attempts
+  had made tool calls before the refusal; their reruns started from a clean
+  workspace.
+- Dry run of the population build and freeze on 2026-11-21 (outputs
+  discarded): 92 rows, 0 excluded, 0 missing, 23 per cell, 23 quirk keys,
+  largest prompt 51,417 characters. The Muse binary and the Cursor
+  `2026.10.01-e373342` digest matched their pins.
+
+## 2026-11-21: Frontier v5 pivots to a grid of worklist environments (R10)
+
+### Decision
+
+The owner, in chat on 2026-11-21, pivoted VulcanBench Frontier v5 from
+single pass-or-fail tasks to a grid: a small number of pinned repos, each
+with a worklist of about 8 independently graded items (defects, a small
+feature, and where it fits a performance target and a diagnosis item), one
+agent session per repo under a fixed budget, and a headline of items done
+over all items. The draft composition is
+[docs/frontier-v5/PLAN-v6.md](frontier-v5/PLAN-v6.md); it is frozen after
+the pilot (R14). Release 1.0.0 and its results stay published.
+
+### Evidence
+
+- The R3 measurement: GPT-6.2 Sol at max, 18 attempts, 8.5 hours, 5 passes,
+  95% interval 9.7% to 53.5%
+  ([results](results/frontier-v5-r1-sol62-max-2026-11.md)). One pass or fail
+  per 25 agent minutes forces repeats, effort ladders and serial runs.
+- Four of six release 1 tasks read 0 of 3 for the strongest model because
+  of one held-out check each, while the progress score bunched at 0.77 to
+  1.0.
+- The owner's aim: a benchmark that is faster and easier to run, across
+  several languages and repo sizes, learning from fixed-session designs
+  with many graded items per run without copying one.
+
+### Revisit triggers
+
+- The pilot cell shows no spread between the strongest model and a cheaper
+  one, or item scores that depend on the order items are attempted.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` (draft), `docs/frontier-v5/ROLLOUT.md`
+section 4b, `CLAUDE.md`. PLAN-v5 and FREEZE-v5 are not edited.
+
+## 2026-11-21: Frontier v5 grid is six languages by two repo sizes (R11)
+
+### Decision
+
+The owner chose a first grid of six languages (C, C++, Java, JavaScript or
+TypeScript, Python, Rust) by two repo sizes (smaller, larger): twelve
+environments and about 100 graded items. The alternatives were four
+languages by three sizes and three by three.
+
+### Evidence
+
+- Six languages keeps every release 1 language. The six release 1 repos and
+  the six release 2 candidate repos give twelve seed repos, two per
+  language, to be placed by measured size.
+- Two sizes gives a smaller-versus-larger comparison per language; a middle
+  tier can be added in a later release.
+
+### Revisit triggers
+
+- Measured sizes of the seed repos do not give a clear smaller and larger
+  repo for a language: source a new repo for that cell.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` section 2.
+
+## 2026-11-21: Frontier v5 skips the release 1.1 board (R12, amends the fast path)
+
+### Decision
+
+The owner chose to skip the release 1.1 board (the six release 1 tasks
+scored on pass rate plus the progress score) and go straight to the grid.
+The six repos seed the grid. Engine PRs #318 to #321 are not merged as they
+are; pieces the grid can use are carried into the grid's engine work.
+
+### Evidence
+
+- A model run on the six tasks takes about 8.5 hours, and the strongest
+  model reads 0 of 3 on four of them (R3 measurement).
+- The board would need Docker validation and four sweeps on a format the
+  suite is leaving.
+
+### Revisit triggers
+
+- The grid pilot fails and the suite returns to single tasks.
+
+### What this touched
+
+Step 1 of the fast path entry (2026-11-19) and PLAN-v5 section 1 no longer
+apply. The progress score rule (option C) applies to the R3 measurement
+only.
+
+## 2026-11-21: Frontier v5 grid runs in parallel under a fixed time budget; speed leaves the headline (R13)
+
+### Decision
+
+For the Frontier v5 grid only: one run per model at its highest unblocked
+effort, four environments at a time in the same fixed batches for every
+model, and the same fixed wall-clock budget per environment for every
+model. The board reports items done, tokens and list-price cost, not
+wall-clock speed. Every other suite keeps one task at a time.
+
+### Evidence
+
+- Serial runs exist to keep wall-clock speed publishable. With speed off
+  the board, a model run drops from about 4 to 6 hours to about 1 to 1.5.
+- About 100 graded items in one run give binomial error bars without
+  repeats.
+- Equal batches keep contention the same for every model.
+
+### Revisit triggers
+
+- Pilot repeats show an environment's score moving with machine load or
+  provider latency by more than its stderr: lengthen the budget, budget on
+  tokens, or return to serial runs.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` sections 4 and 5. R7's speed column does not
+apply to the grid. The flat 3-hour task timeout and one-task-at-a-time rule
+are unchanged for Frontier v4, Routine and Safety.
+
+## 2026-11-21: Frontier v5 grid starts with one pilot cell (R14)
+
+### Decision
+
+One environment is built first and run on GPT-6.2 Sol and one cheaper model
+to set the budget, the worklist size and the guard rule, and to confirm the
+scores spread. The other sessions measure and source repos meanwhile and
+build nothing until the pilot fixes the format. The pilot cell is C++,
+smaller tier, on CLI11, whose six release 1 defects already carry references
+and held-out checks. The pilot's paid runs need their own go-ahead.
+
+### Evidence
+
+- A format change after twelve environments exist costs twelve reworks.
+- CLI11 builds and tests in about 30 seconds, so the format can be iterated
+  quickly. Sol at max fixed all six defects in 17 to 23 minutes, so the
+  pilot must add items to stay under the ceiling.
+
+### Revisit triggers
+
+- The pilot's budget does not carry to the first larger-tier environment:
+  set the budget per size tier.
+
+### What this touched
+
+`docs/frontier-v5/PLAN-v6.md` section 8.
+
+## 2026-11-19: Frontier v5 progress score groups held-out guards per fixture (amends the held-out entry)
+
+### Decision
+
+The owner, in chat on 2026-11-19, replaced option B of the entry below
+("Frontier v5 progress score counts every held-out case") with option C.
+The progress score counts units: each fail-to-pass check is one unit, and
+the held-out guards are grouped per fixture, each group one unit that passes
+only when every variant id in it passes. Progress is units passed over total
+units, and it is 0 when a visible existing test, the sentinel or a
+whole-suite check fails, or the tamper scan flags the attempt. Each task's
+unit-to-id grouping sits in its scoring file, pinned by sha256 in
+`tasks/frontier-v5/suite.json`.
+
+### Evidence
+
+- Under B, prettier would add 131 held-out guard ids (BOM, line-ending and
+  AST-compare variants of the same fixtures) against 18 defect checks, so
+  guards would swamp its score; CLI11 adds 6, javaparser 7, pulldown-cmark
+  10, black 0 (board engine session, 2026-11-19).
+- The release 1 DESIGN.md files pre-register "held-out checks" as the
+  fail-to-pass ids only (option A). C departs from that wording on the
+  owner's decision, keeping guard progress visible (CLI11's attempts that
+  clear all 11 defect checks are not flattened to 0) without the swamping.
+
+### Revisit triggers
+
+- Per-task unit counts in the release 1.1 lock PR show a task still
+  dominated by guard units: regroup before any model is scored.
+
+### What this touched
+
+This entry. It supersedes the decision part of the held-out entry below,
+which stays as the record of the earlier choice.
+
+## 2026-11-19: Frontier v5 progress score counts every held-out case
+
+### Decision
+
+The owner, in chat on 2026-11-19, chose option B for the progress score of
+R3: a held-out case is every case the agent cannot see, both the
+fail-to-pass checks and the held-out guards (cases that pass at base and
+that a careless fix breaks). The progress score is held-out cases passed
+over the task's held-out total. It is 0 when a visible existing test, the
+sentinel or a whole-suite check fails, or the tamper scan flags the attempt.
+Each task's held-out case ids go in a scoring file whose sha256 is pinned
+in `tasks/frontier-v5/suite.json`, so the suite lock freezes the rule.
+Pass rate is unchanged: an attempt that fails any check is not a pass.
+
+### Evidence
+
+- CLI11 holds out 17 cases (11 fail-to-pass, 6 held-out guards); javaparser
+  holds out 12 fail-to-pass and 7 pass-to-pass cases in its held-out
+  classes.
+- Under option A (fail-to-pass only, any guard failure zeroes), GPT-6
+  Astra's CLI11 attempts (11 of 11 defect checks, 2 held-out guards failed)
+  would score 0; under B they score 15/17 = 0.88, the partial progress the
+  R3 entry relies on to separate models.
+- The board engine session found javaparser's verifier keeps no per-check
+  record (its surefire reports stay in `/work`), so javaparser goes to task
+  version 0.2.0 to copy them; pulldown-cmark already copies its libtest
+  logs and is unchanged.
+
+### Revisit triggers
+
+- Progress scores cluster near 1 for attempts that fail held-out guards:
+  revisit weighting guards above fail-to-pass checks in a later version.
+
+### What this touched
+
+This entry. The scoring files and the release 1.1 lock follow in the
+board engine PR.
+
+## 2026-11-19: Frontier v5 composition v5: release 1.1 board and release 2 shapes, frozen (R4)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R4.
+
+- **Release 1.1** is the first board: the six public F5 tasks of release 1 at 1/6 each, ferrycore removed; a task whose verifier lacks per-check results gets a verifier change and a version bump.
+- **Release 2** is twelve tasks: the six F5 tasks plus one new task per language (F3 feature work in TypeScript and Java, F1 property oracles in Python and Rust, F6 performance in C++, F7 diagnosis in C). A slot with no admitted task ships empty, disclosed, never filled with an easier task.
+- **Admission band:** GPT-6.2 Sol at max solves 1 to 3 of 5; the second reference at most 1 of 3 at medium.
+
+Frozen in [frontier-v5/PLAN-v5.md](frontier-v5/PLAN-v5.md) with `plan-v5.json` and `FREEZE-v5.json`, which verifies the v4 freeze files unchanged.
+
+### Evidence
+
+- GPT-6 Astra 0 of 21 on release 1: a gate that admits only what the frontier fails yields a board of zeros.
+- One new task per language puts every language in two shapes.
+
+### Revisit triggers
+
+- The release 1 measurement shows no spread: no release 1.1 board (fast path).
+- A shape's pilot collapses: that slot ships empty at release 2.
+
+### What this touched
+
+This entry and the plan files named above. No task or lock changed.
+
+## 2026-11-19: Frontier v5 release 2 gate references: GPT-6.2 Sol at max first, Claude Fable 5.2 second (R5)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R5: the first prong is GPT-6.2 Sol on Codex 0.166.0 at max effort, five attempts; the second prong, run only when the first lands in the band, is Claude Fable 5.2 at medium, at most 1 of 3. DeepSeek V4.1 Flash at medium is the fallback if Claude runs are unavailable. Provider-side web tools, connected apps and plugins stay off.
+
+### Evidence
+
+- The release 1 references (GPT-6 Astra, Claude Opus 5.5) are a generation behind; GPT-6.2 Sol and Fable 5.2 are the strongest models measured on Frontier v4.
+- Gating Sol first ends most rejects after two or three runs.
+
+### Revisit triggers
+
+- Claude subscription limits block the second prong: use the fallback and disclose it.
+
+### What this touched
+
+This entry. `run_gate.sh` gained `sol62` in PR #316; `fable52` is in progress.
+
+## 2026-11-19: Frontier v5 runs through Harbor via run_gate.sh (R6)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R6: Frontier v5 sweeps, gates and confirmations run through Harbor with `scripts/frontier-v5/run_gate.sh`, extended to the launch lineup's native harnesses (a custom Harbor agent for dsh). A Harbor job importer writes per-run records with `tool-calls.jsonl`. This amends R1's ordering: Frontier v5 does not wait for DailyWork's container engine.
+
+### Evidence
+
+- Release 1's admission and confirmation ran under Harbor, so results stay comparable with the gate record.
+- `run_gate.sh` already carries the infrastructure guard and fail-closed usage pre-flight (PR #288) and any unblocked effort (PR #316).
+
+### Revisit triggers
+
+- DailyWork's container engine lands and can load Harbor tasks: consider moving Frontier v5 onto the harness in a later version.
+
+### What this touched
+
+This entry. Engine work follows in its own PRs.
+
+## 2026-11-19: Frontier v5 publishing: pass rate, progress score and speed on a vulcanbench.com board (R7, decision (d))
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R7 and resolves open decision (d): the board shows pass rate, progress score and speed (serial runs only), `n=` and ±1 stderr on every column, and a per-task table, with public traces for public tasks only. No Code quality panel at launch. The channel is a Frontier v5 board on vulcanbench.com; datasets go to labs on request from the stripped tree; no Harbor hub listing.
+
+### Evidence
+
+- With few solves, a judging panel would mostly grade failed patches.
+- A public hub listing invites contamination of a small suite.
+
+### Revisit triggers
+
+- Columns accumulate enough solves to judge: add the panel as a later version.
+
+### What this touched
+
+This entry.
+
+## 2026-11-19: Frontier v5 release 2 gold and held-out tests are private (R8, decision (f))
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R8 and completes open decision (f): every release 2 task's reference solution and held-out tests live in `morganlinton/vulcanbench-frontier-private`, with only names, versions and hashes in the public lock. Release 1.1's golds stay public as published.
+
+### Evidence
+
+- Held-out checks and guards are what hold a task; at twelve tasks one scraped case moves the headline by about eight points.
+- DailyWork D8 made the same choice.
+
+### Revisit triggers
+
+- None planned.
+
+### What this touched
+
+This entry. Release 2 authoring sessions write their task directories in the private repo.
+
+## 2026-11-19: Frontier v5 launch lineup, effort and Frontier v4 retirement (R9)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted R4 to R9 of [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) in one pass as recommended for the fast path, and funded Claude Fable 5.2 for the board. This entry records R9: the board launches with GPT-6.2 Sol, Claude Fable 5.2, GPT-6.1 Terra and DeepSeek V4.1 Flash, each in its native harness at its highest unblocked effort, three attempts per task. Full effort curves follow after launch. The Frontier v4 board is archived with a dated note the day the Frontier v5 board launches; after that Frontier v4 runs only on the owner's request.
+
+### Evidence
+
+- Four labs' strongest available models at their top level give the board a spread before the long tail of effort levels.
+
+### Revisit triggers
+
+- A lineup model's native harness cannot run under Harbor in time: launch without it and add it later, disclosed.
+
+### What this touched
+
+This entry.
+
+## 2026-11-19: Claude spend resumes for Fable 5.2 on the Frontier v5 board
+
+### Decision
+
+The owner, in chat on 2026-11-19, funded Claude Fable 5.2 runs for the Frontier v5 launch board (18 attempts at Max on release 1.1, on the Claude subscription) and as release 2's second gate reference (R5). This narrows the 2026-11-10 stop on Claude spend to these runs; every run still needs the owner's go-ahead.
+
+### Evidence
+
+- A board without an Anthropic model would be weaker.
+- Fable 5.2 has hit its weekly subscription limit before (DECISIONS.md 2026-11-10); `run_gate.sh`'s usage pre-flight refuses to start above GATE_USAGE_MAX.
+
+### Revisit triggers
+
+- The weekly limit stops a sweep: resume after the reset, never on usage credits without the owner.
+
+### What this touched
+
+This entry.
+
+## 2026-11-19: Frontier v5 fast path, a release 1 board first and new shapes next
+
+### Decision
+
+The owner, in chat on 2026-11-19, found the one-to-two-month estimate for
+release 2 too slow and chose the fast path in
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) section 4a:
+
+- **Board first.** If the release 1 measurement (R3) shows the progress
+  score separates models, Frontier v5 launches a public board in about a
+  week on release 1's six public F5 tasks, scored on pass rate plus the
+  progress score, disclosed as one task shape. ferrycore is not on the
+  board (R2). If the measurement shows no spread, the board waits for
+  release 2.
+- **Shapes next.** Six new tasks in four shapes (F3 feature work, F1
+  property oracles, F6 performance, F7 diagnosis) are built in parallel
+  and join as release 2, in about three weeks.
+- **Speed levers:** parallel authoring sessions; sweeps through Harbor
+  (`run_gate.sh` extended to more models) rather than waiting for
+  DailyWork's container engine, which amends the ordering in R1; gating on
+  GPT-6.2 Sol at max first; R4 to R9 decided in one pass.
+
+### Evidence
+
+- ROLLOUT.md section 6: the long pole is authoring and gating about 14
+  tasks serially on one host.
+- Release 1's six public tasks are real upstream bug fixes in six
+  languages, none reverse-engineering shaped
+  ([frontier-v5/STATUS-2026-11-19.md](frontier-v5/STATUS-2026-11-19.md)).
+- `run_gate.sh` already runs any Harbor reference at any unblocked effort
+  (PR #316).
+
+### Revisit triggers
+
+- The measurement shows no spread on either score: no release 1 board.
+- Parallel authoring contends with a sweep for Docker on the same host:
+  the owner decides which waits.
+
+### What this touched
+
+This entry and ROLLOUT.md section 4a. No task, lock or run condition
+changed.
+
+## 2026-11-19: Frontier v5 headline is pass rate plus a progress score, measured on release 1 first
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted decision R3 of
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) as recommended (option 3).
+
+- **Headline: pass rate**, complete passes over attempts.
+- **Secondary: a progress score**, the fraction of held-out checks passed,
+  counted only when the tamper scan is clean and the guard wall holds (an
+  attempt that breaks existing tests scores 0). It needs per-check verifier
+  output for every task; a verifier that lacks it changes in a new task
+  version, never by editing a frozen one. The exact rule is frozen before
+  any model is scored on it.
+- **Measurement first:** before engine work, the strongest available model
+  runs at its highest unblocked effort on release 1, to learn whether
+  release 1 separates the top at high effort or only reads zero at medium.
+  Its result sets the band in R4. Which model, its run conditions and the
+  run itself are a separate owner go-ahead (quota).
+
+### Evidence
+
+- GPT-6 Astra 0 of 21 at medium on release 1
+  ([results](results/frontier-v5-r1-astra-2026-11.md)); no model has run
+  release 1 above medium.
+- Partial progress is already visible in the verifiers: CLI11 attempts
+  passed all 11 defect checks and failed two held-out guards; prettier
+  attempt 2 missed one case; pulldown-cmark's verifier writes no per-check
+  result today.
+
+### Revisit triggers
+
+- The measurement shows release 1 already separates the top models: R4's
+  band is set from it.
+- A per-check extractor cannot be made deterministic for a task: that task
+  is reported on pass rate only, disclosed.
+
+### What this touched
+
+This entry and the R3 status in
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md). No task, lock or run
+condition changed.
+
+## 2026-11-19: Frontier v5 release 2 drops F4 opaque-component parity
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted decision R2 of
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md) as recommended: F4
+opaque-component parity has no slot in VulcanBench Frontier v5 release 2,
+and no task of that shape (an opaque or hidden reference engine matched by
+experiment or by reading a binary) is in its headline.
+
+- ferrycore-crossing-opaque-parity 0.2.0 stays in release 1 (`frontier-v5`
+  1.0.0) unchanged: the lock, the confirmation and its record are not
+  edited. It is not carried into release 2.
+- bothycore-booking-opaque-parity (rejected) stays in the private repo and
+  is not a release 2 candidate.
+- The two F4 slots in PLAN.md and PLAN-v2.md to PLAN-v4.md are not edited;
+  release 2's composition, without F4, goes into a new PLAN-v5 with its own
+  freeze when R4 is decided.
+
+### Evidence
+
+- F4 is the Frontier v4 lineage, which now measures reverse-engineering:
+  GPT-6.2 Sol disassembled the binary in all 115 of its Frontier v4 runs and
+  solved 115.
+- Gate record ([frontier-v5/GATE-LOG.md](frontier-v5/GATE-LOG.md)):
+  ferrycore 0.1.0 was solved by disassembly with a hand-written x86-64
+  decoder; bothycore fell 2 of 3 to targeted experiments through the
+  query-only service; ferrycore 0.2.0 held only after a redesign against its
+  own gate result.
+- A private F4 task needs the private repo on every sweep host and its
+  traces can never be published.
+
+### Revisit triggers
+
+- None planned. Bringing an opaque-component task back into a Frontier
+  headline needs a new owner decision.
+
+### What this touched
+
+This entry and the R2 status in
+[frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md). No task, lock or run
+condition changed.
+
+## 2026-11-19: VulcanBench Frontier v5 resumes alongside DailyWork v1 as the ceiling suite (amends D9)
+
+### Decision
+
+The owner, in chat on 2026-11-19, adopted decision R1 of the Frontier v5
+rollout plan ([frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md)) as
+recommended. VulcanBench Frontier v5 resumes now, alongside VulcanBench
+DailyWork v1, and is the public ceiling suite: a single accuracy rank
+across a spread of task shapes and languages, the role Frontier v4 had.
+DailyWork stays the everyday-work suite with its cost and solve-rate views.
+
+- DailyWork's engine work (D5, container execution for every adapter in
+  the `vulcanbench` harness) comes first, because Frontier v5's sweep path
+  is planned to reuse it (R6, not yet decided).
+- Frontier v5 planning, sourcing and validation run in parallel with no
+  paid model calls. Gate runs are approved by the owner per wave. No heavy
+  Docker validation runs on a Mac while a sweep runs there without asking.
+- This amends D9 of the 2026-11-18 entry in one respect: Frontier v5 is no
+  longer paused. Release 1 stays frozen and published as it is. What
+  happens to Frontier v4's board is decided under R9.
+
+R2 to R9 stay open and are recorded as their own entries when decided.
+
+### Evidence
+
+- [frontier-v5/STATUS-2026-11-19.md](frontier-v5/STATUS-2026-11-19.md): 6
+  of 20 target tasks admitted, all F5; GPT-6 Astra 0 of 21 on release 1.
+- Frontier v4 now measures reverse-engineering: GPT-6.2 Sol disassembled
+  the binary in all 115 of its runs and solved 115; Fable 5.2 solved 115
+  and disassembled in 114.
+- The two suites answer different questions (which model is strongest;
+  which configuration a team needs) and share one engine.
+
+### Revisit triggers
+
+- Frontier v5 authoring or gate work delays DailyWork's pilots, freeze or
+  launch: the owner reorders the two.
+- The release 2 pilots (ROLLOUT.md section 5, step 4) find no new shape
+  that holds: revisit whether Frontier v5 can be the headline.
+
+### What this touched
+
+This entry, the R1 status in [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md)
+and the suite names section of CLAUDE.md. No run conditions changed.
+
 ## 2026-11-19: Codex runs turn off web search and connected apps in every suite
 
 ### Decision
@@ -66,8 +631,12 @@ tagged run worktree under the flat 3-hour task timeout, like every sweep.
   own README says not to use it to benchmark Gemini models. Pinned to agy
   1.5.12 by the sha256 of the darwin-arm64 binary from Google's release
   tarball (manifest sha512 checked), kept in
-  `~/.local/share/vulcanbench/agy-1.5.12/`. Auto-update is off
-  (`AGY_CLI_DISABLE_AUTO_UPDATE`).
+  `~/.local/share/vulcanbench/agy-1.5.12/`. agy's updater skips the update
+  when the binary's directory is not writable, which is how the pin holds:
+  the run sandbox gives no write access there, and the operator keeps the
+  directory read-only (`chmod 555`) for agy calls made outside a run, such
+  as `agy models` or the launcher's quota probe. `AGY_CLI_DISABLE_AUTO_UPDATE`
+  does not turn the updater off (see Evidence); the adapter still sets it.
 - Billing (owner decision 2026-11-19): the owner's Google AI Pro plan through
   agy's Google sign-in, not an API key. Cost is reported as the API-equivalent
   at list price. `useG1Credits` is off, so a run never spends paid AI credits
@@ -99,7 +668,8 @@ Settings that follow the board's existing rules, not new choices: agy's
 always-proceed permissions (`--dangerously-skip-permissions`) inside the macOS
 outer sandbox Kimi Code and Mirror use, with agy's own `--sandbox` off because
 sandbox-exec cannot nest; the real `~/.gemini` is denied to the run;
-pseudo-terminals are allowed because agy runs every command in a PTY. No other
+pseudo-terminals are allowed because agy runs every command in a PTY; zsh's
+`TMPPREFIX` points into the run's private temp directory, like `TMPDIR`. No other
 agy default changes.
 
 Prices (checked 2026-11-19 at aistudio.google.com/docs/pricing, standard paid
@@ -135,6 +705,29 @@ Probes on 2026-11-19, on the AI Pro sign-in, at `gemini-4-neon-low`:
   operation not permitted"). Smoke runs on `hello-world` at Low, from the
   working checkout (not board data): solved before and after the fix; after it,
   `ls` and `python hello.py` ran with exit code 0, $0.036 API-equivalent.
+- Self-update (2026-11-19, 14:46 PST): agy 1.6.1 was released, and an
+  operator `agy models` call outside the sandbox, with
+  `AGY_CLI_DISABLE_AUTO_UPDATE=1` set, replaced the pinned binary in place
+  (the old one kept beside it as `agy.<n>.old`). agy's own log shows the
+  updater starting at every unsandboxed start since the first probe
+  ("Spawned background update process", then "Last check was less than 15
+  minutes ago"); it only had nothing newer to install before. The
+  launcher's pin check stopped the sweep before any task ran. The 1.5.12
+  binary was restored from the `.old` copy (sha256 matches the pin) and the
+  directory made read-only; agy then logs "is not fully accessible
+  (readable: true, writable: false), skipping update". The two sandboxed
+  smoke runs logged the same skip, so no run was exposed.
+- Here-documents (2026-11-19, 23:30 PST, first Low task of the sweep):
+  `python3 - <<'EOF'` failed with "can't create temp file for here document:
+  operation not permitted". agy runs commands in zsh, which writes heredoc
+  temp files under `TMPPREFIX` (default `/tmp/zsh`), not `TMPDIR`, and the
+  outer sandbox denies `/tmp`. No earlier sweep has the error (Kimi Code,
+  Mirror and dsh shells use `TMPDIR`). Reproduced with the adapter's own
+  sandbox profile and plain zsh: the heredoc fails without `TMPPREFIX` and
+  works with it set to the run's temp directory. The sweep was paused after
+  that one task, which was moved aside as void (not board data). The
+  `xcrun_db` cache warnings in the same run also appear in the Kimi Code,
+  Mirror and dsh sweeps and are left as they are.
 
 ### Limits
 
@@ -151,6 +744,9 @@ model id, so identity is `harness-recorded`.
 - A newer agy, or a setting that turns off `search_web` in the default agent:
   re-probe, and drop the custom agent if web search can be removed without it.
 - Any run voided for calling a tool outside the allowlist: stop and look.
+- Re-pinning agy (1.6.1 is kept at `~/.local/share/vulcanbench/agy-1.6.1/`):
+  a new adapter pin, bench tag and smoke run, and the new directory made
+  read-only before its first unsandboxed call.
 - AI Pro quota waits that stretch the sweep past several days: ask the owner
   about Ultra or the API key.
 

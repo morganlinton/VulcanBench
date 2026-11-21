@@ -1,0 +1,105 @@
+{
+  "id": "frontier-v5-plan-v5",
+  "date": "2026-11-19",
+  "timezone": "America/Los_Angeles",
+  "supersedes": {
+    "plan": "frontier-v5-plan-v4",
+    "scope": "composition and admission band only; earlier plans and freezes are not edited"
+  },
+  "public_name": "VulcanBench Frontier v5",
+  "suite_id": "frontier-v5",
+  "tasks_root": "tasks/frontier-v5",
+  "releases": {
+    "1.1": {
+      "task_count": 6,
+      "task_weight": 0.166667,
+      "tasks": [
+        "treesitter-query-anchor-matching",
+        "black-fmt-skip-region-handling",
+        "prettier-comment-attachment-stability",
+        "javaparser-member-resolution-scope",
+        "cli11-toml-config-round-trip",
+        "pulldown-cmark-html-block-scanning"
+      ],
+      "dropped": [
+        "ferrycore-crossing-opaque-parity"
+      ],
+      "publish_condition": "the release 1 measurement shows the progress score separates models"
+    },
+    "2": {
+      "task_count": 12,
+      "carried": "the six release 1.1 tasks",
+      "new_slots": [
+        {
+          "slot": "F3-ts",
+          "shape": "long-horizon feature work",
+          "language": "typescript"
+        },
+        {
+          "slot": "F3-java",
+          "shape": "long-horizon feature work",
+          "language": "java"
+        },
+        {
+          "slot": "F1-python",
+          "shape": "property oracle, stored counterexamples",
+          "language": "python"
+        },
+        {
+          "slot": "F1-rust",
+          "shape": "property oracle, stored counterexamples",
+          "language": "rust"
+        },
+        {
+          "slot": "F6-cpp",
+          "shape": "performance under a deterministic cost oracle",
+          "language": "cpp"
+        },
+        {
+          "slot": "F7-c",
+          "shape": "diagnosis from field evidence",
+          "language": "c"
+        }
+      ],
+      "empty_slot_rule": "ships empty and disclosed; never filled with an easier task"
+    }
+  },
+  "scoring": {
+    "headline": "pass rate = complete passes / attempts",
+    "secondary": "progress score = fraction of held-out checks passed; 0 unless the tamper scan is clean and every guard check passes"
+  },
+  "admission": {
+    "first_prong": {
+      "model": "gpt-6.2-sol",
+      "agent": "codex",
+      "cli_version": "0.166.0",
+      "effort": "max",
+      "attempts": 5,
+      "admit_solves": [
+        1,
+        2,
+        3
+      ]
+    },
+    "second_prong": {
+      "model": "claude-fable-5-2",
+      "agent": "claude-code",
+      "effort": "medium",
+      "max_solves_of_3": 1,
+      "fallback": "DeepSeek V4.1 Flash at medium"
+    },
+    "provider_side_tools": "off"
+  },
+  "gold": {
+    "release_2": "private repo morganlinton/vulcanbench-frontier-private, hashes in the public lock",
+    "release_1_1": "public as published"
+  },
+  "runner": "harbor via scripts/frontier-v5/run_gate.sh",
+  "launch_lineup": [
+    "GPT-6.2 Sol",
+    "Claude Fable 5.2",
+    "GPT-6.1 Terra",
+    "DeepSeek V4.1 Flash"
+  ],
+  "launch_effort": "each model's highest unblocked level, three attempts per task"
+}

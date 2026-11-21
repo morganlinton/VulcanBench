@@ -1676,6 +1676,41 @@ built by `scripts/cii-v4-board/build_gpt62sol_population.py`.
   the same panel as the GPT-6.1 Sol, GPT-6.1 Terra and Claude Opus 5.5
   columns.
 
+## Amendment v3.32, November 21, 2026: Gemini 4 Neon, judged by Muse Spark 1.3 and Grok 4.6
+
+The v3.31 protocol on a new population. Nothing in the rubric, controls,
+quirk keys, gates, repeats, seed, weights, judge settings or Cursor pin
+changes. Protocol id `code-quality-maintenance-v3.32`; run directory
+`runs-code-quality-maintenance-v3.32`; runner
+`harness/maintenance_review_v332.py`, derived from the v3.31 runner.
+Population record: `docs/results/swe-v4-gemini4-neon-2026-11/comparison.json`,
+built by `scripts/cii-v4-board/build_neon_population.py`.
+
+- Population: the November 2026 Gemini 4 Neon sweep of Frontier v4
+  (`gemini-4-neon`) through Antigravity CLI 1.5.12 on the Google AI Pro
+  subscription (solver `agy:gemini-4-neon`), Low to Extra high (Extra high
+  is agy's `xhigh`; Neon has no Max), one attempt per task and level, 92
+  runs, from `bench/2026-11-20-gemini4-neon-frontier-v4`, so task hashes
+  match the suite lock and no bridge is used. No run timed out and none
+  ended with an empty patch, so every cell freezes at 23. Attempts the AI
+  Pro quota refused were infrastructure failures, discarded and rerun
+  fresh; they are not in the population.
+- Judges: Muse Spark 1.3 and Grok 4.6, the pair behind the Claude Opus 5.5
+  (v3.15), GPT-6.1 Sol (v3.18), GPT-6.1 Terra (v3.29) and GPT-6.2 Sol
+  (v3.31) columns. Both are neutral for a Google submission (owner choice in
+  chat, November 21) and retake the exam under v3.32 before any counted
+  call. If either fails, the other publishes alone under the single-panel
+  rule and the failure is disclosed.
+- Cursor: pinned to `2026.10.01-e373342` and the digest v3.24 recorded, as in
+  v3.29 to v3.31. Cursor's shared launcher now points at
+  `2026.11.19-f005e9d`; the round judges through the pinned version's own
+  launcher and re-checks its digest before every stage.
+- Diagnostics: one repeat per cell and one pair per level, each task set
+  against the level two steps up (wrapping over four levels), as in v3.30.
+- Comparability: a Gemini 4 Neon score is a Muse Spark 1.3 and Grok 4.6
+  mean, the same panel as the GPT-6.2 Sol, GPT-6.1 Sol, GPT-6.1 Terra and
+  Claude Opus 5.5 columns.
+
 ## Not yet done
 
 - v3.4 calibration results for Muse Spark 1.3, v3.3 results for Grok 4.6,
